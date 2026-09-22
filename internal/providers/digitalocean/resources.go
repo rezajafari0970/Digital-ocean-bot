@@ -27,5 +27,13 @@ func (c *Client) ListDroplets(ctx context.Context) ([]Resource, error) { return 
 func (c *Client) ListDropletModels(ctx context.Context) ([]Droplet, error) {
 	var out []Droplet
 	err := c.listAll(ctx, "/droplets", "droplets", &out)
+	for i := range out {
+		for _, n := range out[i].Networks.V4 {
+			if n.Type == "public" {
+				out[i].PublicIPv4 = n.IPAddress
+				break
+			}
+		}
+	}
 	return out, err
 }

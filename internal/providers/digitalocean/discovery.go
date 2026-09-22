@@ -23,11 +23,18 @@ type Image struct {
 	Status       string
 }
 type Droplet struct {
-	ID        int
-	Name      string
-	Status    string
-	Region    Region
-	CreatedAt string
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Status    string `json:"status"`
+	Region    Region `json:"region"`
+	CreatedAt string `json:"created_at"`
+	Networks  struct {
+		V4 []struct {
+			IPAddress string `json:"ip_address"`
+			Type      string `json:"type"`
+		} `json:"v4"`
+	} `json:"networks"`
+	PublicIPv4 string `json:"-"`
 }
 type Project struct {
 	ID          string
