@@ -36,3 +36,9 @@ func (s SQLStore) Event(ctx context.Context, id, step string, state State, messa
 	_, err := s.DB.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,$2,$3,NULLIF($4,''))`, id, step, state, message)
 	return err
 }
+
+func (s SQLStore) Get(ctx context.Context, id, accountID string) (Deployment, error) {
+	var d Deployment
+	err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),state,current_step,attempt,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, id, accountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.State, &d.CurrentStep, &d.Attempt, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
+	return d, err
+}
