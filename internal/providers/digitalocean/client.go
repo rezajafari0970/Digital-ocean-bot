@@ -61,7 +61,7 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("%w: status %d", ErrProviderRequest, resp.StatusCode)
+		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After"))}
 	}
 	if out == nil {
 		return nil
