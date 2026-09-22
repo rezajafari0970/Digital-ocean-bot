@@ -1,0 +1,5 @@
+ALTER TABLE proxies ADD COLUMN IF NOT EXISTS consecutive_successes INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE proxies ADD COLUMN IF NOT EXISTS latency_ms BIGINT;
+ALTER TABLE proxies ADD COLUMN IF NOT EXISTS health_error TEXT;
+ALTER TABLE proxies ADD COLUMN IF NOT EXISTS expected_exit_ip INET;
+CREATE INDEX IF NOT EXISTS proxies_status_idx ON proxies(status);
