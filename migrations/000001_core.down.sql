@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS network_profiles;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS proxies;
