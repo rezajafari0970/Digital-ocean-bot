@@ -10,10 +10,11 @@ type Handler interface {
 	RecoverDeployment(context.Context, RecoveryItem) error
 }
 type Worker struct {
-	Store    RecoveryStore
-	Handler  Handler
-	Interval time.Duration
-	Batch    int
+	Store     RecoveryStore
+	Handler   Handler
+	Lifecycle *LifecycleWorker
+	Interval  time.Duration
+	Batch     int
 }
 
 func (w Worker) Run(ctx context.Context) error {
@@ -43,6 +44,9 @@ func (w Worker) Once(ctx context.Context) error {
 		if err := w.Handler.RecoverOperation(ctx, x); err != nil {
 			continue
 		}
+	}
+	if w.Lifecycle != nil {
+		_ = w.Lifecycle.Once(ctx)
 	}
 	deployments, err := w.Store.Deployments(ctx, w.Batch)
 	if err != nil {

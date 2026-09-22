@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
@@ -22,7 +23,8 @@ func main() {
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Interval: 10 * time.Second, Batch: 100}
+	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Batch: 100}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Lifecycle: lw, Interval: 10 * time.Second, Batch: 100}
 	log.Printf("worker started")
 	if err := w.Run(ctx); err != nil && ctx.Err() == nil {
 		log.Fatal(err)
