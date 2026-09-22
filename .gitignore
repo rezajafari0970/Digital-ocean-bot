@@ -7,4 +7,4 @@ node_modules/
 *.log
 *.pid
 coverage.out
-secrets/
+/secrets/
