@@ -47,10 +47,9 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		_ = e.Store.Event(ctx, d.ID, step.name, d.State, "")
 		d, err = step.fn(ctx, d)
 		if err != nil {
-			d.State = Failed
 			d.LastError = err.Error()
 			_ = e.Store.Update(ctx, d)
-			_ = e.Store.Event(ctx, d.ID, step.name, Failed, "step failed")
+			_ = e.Store.Event(ctx, d.ID, step.name, d.State, "step failed")
 			return d, err
 		}
 		d.CurrentStep = next(step.name)
