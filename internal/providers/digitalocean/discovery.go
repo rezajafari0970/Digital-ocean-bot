@@ -2,16 +2,88 @@ package digitalocean
 
 import "context"
 
+type Region struct {
+	Slug      string
+	Name      string
+	Available bool
+}
+type Size struct {
+	Slug      string
+	Memory    int
+	VCPUs     int
+	Disk      int
+	Available bool
+}
+type Image struct {
+	ID           int
+	Name         string
+	Distribution string
+	Slug         string
+	Public       bool
+	Status       string
+}
+type Droplet struct {
+	ID        int
+	Name      string
+	Status    string
+	Region    Region
+	CreatedAt string
+}
+type Project struct {
+	ID          string
+	Name        string
+	Purpose     string
+	Environment string
+}
+type SSHKey struct {
+	ID          int
+	Name        string
+	Fingerprint string
+}
+type Firewall struct {
+	ID     string
+	Name   string
+	Status string
+}
+
+type DiscoveryResult struct {
+	Account   AccountInfo
+	Limits    Limits
+	Regions   []Region
+	Sizes     []Size
+	Images    []Image
+	Droplets  []Droplet
+	Projects  []Project
+	SSHKeys   []SSHKey
+	Firewalls []Firewall
+}
+
 func (c *Client) Discover(ctx context.Context) (DiscoveryResult, error) {
-	if err := c.Validate(c.Account.AccountID); err != nil {
+	account, err := c.GetAccount(ctx)
+	if err != nil {
 		return DiscoveryResult{}, err
 	}
-	return DiscoveryResult{
-		Account:   map[string]any{},
-		Limits:    map[string]any{},
-		Regions:   []map[string]any{},
-		Sizes:     []map[string]any{},
-		Images:    []map[string]any{},
-		Resources: []map[string]any{},
-	}, nil
+	result := DiscoveryResult{Account: *account, Limits: Limits{DropletLimit: account.DropletLimit, VolumeLimit: account.VolumeLimit, ReservedIPLimit: account.ReservedIPLimit}}
+	if err := c.listAll(ctx, "/regions", "regions", &result.Regions); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/sizes", "sizes", &result.Sizes); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/images?type=distribution", "images", &result.Images); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/droplets", "droplets", &result.Droplets); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/projects", "projects", &result.Projects); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/account/keys", "ssh_keys", &result.SSHKeys); err != nil {
+		return DiscoveryResult{}, err
+	}
+	if err := c.listAll(ctx, "/firewalls", "firewalls", &result.Firewalls); err != nil {
+		return DiscoveryResult{}, err
+	}
+	return result, nil
 }
