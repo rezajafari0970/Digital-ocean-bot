@@ -1,0 +1,56 @@
+package provisioning
+
+import (
+	"context"
+	"testing"
+)
+
+type memStore struct {
+	r      Run
+	exists bool
+}
+
+func (s *memStore) Reserve(_ context.Context, r Run) (Run, bool, error) {
+	if s.exists {
+		return s.r, false, nil
+	}
+	r.ID = "1"
+	s.r = r
+	s.exists = true
+	return r, true, nil
+}
+func (s *memStore) Update(_ context.Context, r Run) error { s.r = r; return nil }
+
+type secretStub struct{}
+
+func (secretStub) Get(context.Context, string, string) ([]byte, error) { return []byte("key"), nil }
+
+type sshStub struct{ waits, runs int }
+
+func (s *sshStub) Wait(context.Context, Target, []byte) error { s.waits++; return nil }
+func (s *sshStub) Run(context.Context, Target, []byte, string) (string, error) {
+	s.runs++
+	return "", nil
+}
+
+func TestProvisionEngineCompletesAndDoesNotRepeat(t *testing.T) {
+	store := &memStore{}
+	ssh := &sshStub{}
+	e := Engine{Store: store, Secrets: secretStub{}, SSH: ssh}
+	target := Target{AccountID: "a", DropletID: "d", KeySecretRef: "ssh"}
+	plan := Plan{Bootstrap: "a", InstallPanel: "b", Verify: "c"}
+	r, err := e.Execute(context.Background(), target, plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.State != Completed || ssh.waits != 1 || ssh.runs != 3 {
+		t.Fatalf("bad result %#v waits=%d runs=%d", r, ssh.waits, ssh.runs)
+	}
+	_, err = e.Execute(context.Background(), target, plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ssh.waits != 1 || ssh.runs != 3 {
+		t.Fatal("completed provisioning repeated")
+	}
+}
