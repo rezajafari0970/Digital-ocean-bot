@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strings"
 )
 
 func (c *Client) listAll(ctx context.Context, path, field string, target any) error {
@@ -28,7 +29,6 @@ func (c *Client) listAll(ctx context.Context, path, field string, target any) er
 	}
 	return nil
 }
-
 func extractNext(raw json.RawMessage) string {
 	if len(raw) == 0 {
 		return ""
@@ -41,8 +41,10 @@ func extractNext(raw json.RawMessage) string {
 	if err != nil {
 		return ""
 	}
+	p := strings.TrimPrefix(u.Path, "/v2/")
+	p = strings.TrimPrefix(p, "/")
 	if u.RawQuery != "" {
-		return u.Path + "?" + u.RawQuery
+		return p + "?" + u.RawQuery
 	}
-	return u.Path
+	return p
 }
