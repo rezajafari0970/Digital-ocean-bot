@@ -88,6 +88,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
+		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
+		return
+	}
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -97,10 +101,6 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 500, map[string]string{"error": "token_update_failed", "detail": err.Error()})
 			return
 		}
-	}
-	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
-		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
-		return
 	}
 	w.WriteHeader(204)
 }
