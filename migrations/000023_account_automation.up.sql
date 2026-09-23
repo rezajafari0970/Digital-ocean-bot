@@ -1,0 +1,4 @@
+ALTER TABLE accounts ADD COLUMN preferred_region TEXT;
+ALTER TABLE accounts ADD COLUMN auto_interval_seconds INTEGER NOT NULL DEFAULT 300;
+ALTER TABLE accounts ADD COLUMN auto_batch_size INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE accounts ADD COLUMN auto_max_concurrent INTEGER NOT NULL DEFAULT 1;
