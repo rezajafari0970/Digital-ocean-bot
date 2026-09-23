@@ -39,7 +39,7 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		}
 		password := []byte(nil)
 		if cfg.ProxySecretRef != "" {
-			password, err = c.Secrets.Get(ctx, accountID, cfg.ProxySecretRef)
+			password, err = c.Secrets.GetProxy(ctx, cfg.Proxy.ID, cfg.ProxySecretRef)
 			if err != nil {
 				return AccountRuntime{}, err
 			}

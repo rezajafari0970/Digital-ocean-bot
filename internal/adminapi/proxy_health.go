@@ -16,7 +16,7 @@ func (s *Server) testAccountProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	password := []byte(nil)
 	if cfg.ProxySecretRef != "" {
-		password, err = s.Container.Secrets.Get(r.Context(), id, cfg.ProxySecretRef)
+		password, err = s.Container.Secrets.GetProxy(r.Context(), cfg.Proxy.ID, cfg.ProxySecretRef)
 		if err != nil {
 			writeJSON(w, 409, map[string]string{"error": "proxy_secret_unavailable"})
 			return
