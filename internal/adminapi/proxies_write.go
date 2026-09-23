@@ -7,7 +7,6 @@ import (
 
 type proxyWrite struct {
 	Name     string `json:"name"`
-	Type     string `json:"type"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	Username string `json:"username"`
@@ -25,17 +24,25 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
-	if x.Type != "http" && x.Type != "https" && x.Type != "socks5" {
-		writeJSON(w, 400, map[string]string{"error": "invalid_proxy_type"})
+	typ, err := detectProxy(r.Context(), x)
+	if err != nil {
+		writeJSON(w, 422, map[string]string{"error": "proxy_detection_failed"})
 		return
 	}
 	var id string
-	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL) RETURNING id::text`, x.Name, x.Type, x.Host, x.Port, x.Username).Scan(&id)
+	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),'proxy-password') RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username).Scan(&id)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
 	}
-	writeJSON(w, 201, map[string]string{"id": id})
+	if x.Password != "" {
+		if err := s.Container.Secrets.Put(r.Context(), id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
+			_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM proxies WHERE id=$1`, id)
+			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	writeJSON(w, 201, map[string]string{"id": id, "type": string(typ)})
 }
 
 type assignProxy struct {
