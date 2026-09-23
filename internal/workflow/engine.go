@@ -17,11 +17,19 @@ type Steps interface {
 	RegisterTraffic(context.Context, Deployment) (Deployment, error)
 }
 type Engine struct {
-	Store Store
-	Steps Steps
+	Store   Store
+	Steps   Steps
+	RunLock interface {
+		Lock()
+		Unlock()
+	}
 }
 
 func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
+	if e.RunLock != nil {
+		e.RunLock.Lock()
+		defer e.RunLock.Unlock()
+	}
 	d, _, err := e.Store.Reserve(ctx, req)
 	if err != nil {
 		return d, err

@@ -11,6 +11,7 @@ type Store struct {
 	D      workflow.Deployment
 	Exists bool
 	Events []string
+	runMu  sync.Mutex
 }
 
 func (s *Store) Reserve(_ context.Context, r workflow.Request) (workflow.Deployment, bool, error) {

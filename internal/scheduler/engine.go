@@ -12,11 +12,12 @@ type Starter interface {
 type Engine struct {
 	DB      *sql.DB
 	Store   SQLStore
+	Leases  LeaseStore
 	Starter Starter
 }
 
 func (e Engine) RunDue(ctx context.Context, now time.Time) error {
-	items, err := e.Store.Due(ctx, now, 100)
+	items, err := e.Leases.ClaimDue(ctx, now, 100, time.Minute)
 	if err != nil {
 		return err
 	}
@@ -37,7 +38,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		for i := 0; i < allowed; i++ {
 			_ = e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID)
 		}
-		_ = e.Store.Advance(ctx, x, now)
+		_ = e.Leases.Complete(ctx, x, now)
 	}
 	return nil
 }

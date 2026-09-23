@@ -51,7 +51,7 @@ func (s SQLStore) Get(ctx context.Context, accountID, key string) (Operation, er
 }
 
 func (s SQLStore) Update(ctx context.Context, o Operation) error {
-	res, err := s.DB.ExecContext(ctx, `UPDATE operations SET state=$3,provider_action_id=NULLIF($4,''),resource_id=NULLIF($5,''),attempt=$6,updated_at=now() WHERE id=$1 AND account_id=$2`, o.ID, o.AccountID, o.State, o.ProviderActionID, o.ResourceID, o.Attempt)
+	res, err := s.DB.ExecContext(ctx, `UPDATE operations SET state=$3,provider_action_id=NULLIF($4,''),resource_id=NULLIF($5,''),attempt=$6,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2`, o.ID, o.AccountID, o.State, o.ProviderActionID, o.ResourceID, o.Attempt)
 	if err != nil {
 		return err
 	}
