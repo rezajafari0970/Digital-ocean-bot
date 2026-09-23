@@ -8,21 +8,22 @@ import (
 )
 
 type accountWrite struct {
-	Email           string   `json:"email"`
-	ExternalID      string   `json:"external_id"`
-	Image           string   `json:"image"`
-	Size            string   `json:"size"`
-	Region          string   `json:"region"`
-	Regions         []string `json:"regions"`
-	NetworkMode     string   `json:"network_mode"`
-	ProxyID         string   `json:"proxy_id"`
-	IntervalSeconds int      `json:"interval_seconds"`
-	BatchSize       int      `json:"batch_size"`
-	MaxConcurrent   int      `json:"max_concurrent"`
-	LifetimeSeconds int      `json:"lifetime_seconds"`
-	Name            string   `json:"name"`
-	Token           string   `json:"token"`
-	Enabled         *bool    `json:"enabled"`
+	Email              string   `json:"email"`
+	ExternalID         string   `json:"external_id"`
+	Image              string   `json:"image"`
+	Size               string   `json:"size"`
+	Region             string   `json:"region"`
+	Regions            []string `json:"regions"`
+	NetworkMode        string   `json:"network_mode"`
+	ProxyID            string   `json:"proxy_id"`
+	IntervalSeconds    int      `json:"interval_seconds"`
+	BatchSize          int      `json:"batch_size"`
+	MaxConcurrent      int      `json:"max_concurrent"`
+	LifetimeSeconds    int      `json:"lifetime_seconds"`
+	DesiredServerCount int      `json:"desired_server_count"`
+	Name               string   `json:"name"`
+	Token              string   `json:"token"`
+	Enabled            *bool    `json:"enabled"`
 }
 
 func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
@@ -63,17 +64,23 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if x.MaxConcurrent < 1 {
 		x.MaxConcurrent = 1
 	}
+	if x.DesiredServerCount < 0 {
+		x.DesiredServerCount = 0
+	}
+	if x.DesiredServerCount == 0 {
+		x.DesiredServerCount = 1
+	}
 	if x.LifetimeSeconds < 1800 {
 		x.LifetimeSeconds = 7200
 	}
 	var id string
-	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds)
-VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7,$8)
+	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count)
+VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7,$8,$9)
 ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO UPDATE SET
 name=EXCLUDED.name,email=EXCLUDED.email,preferred_region=EXCLUDED.preferred_region,
 auto_interval_seconds=EXCLUDED.auto_interval_seconds,auto_batch_size=EXCLUDED.auto_batch_size,
-auto_max_concurrent=EXCLUDED.auto_max_concurrent,server_lifetime_seconds=EXCLUDED.server_lifetime_seconds,updated_at=now()
-RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds).Scan(&id)
+auto_max_concurrent=EXCLUDED.auto_max_concurrent,server_lifetime_seconds=EXCLUDED.server_lifetime_seconds,desired_server_count=EXCLUDED.desired_server_count,updated_at=now()
+RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount).Scan(&id)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return

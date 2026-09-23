@@ -6,17 +6,18 @@ import (
 )
 
 type accountUpdate struct {
-	Name            string   `json:"name"`
-	Token           string   `json:"token"`
-	Regions         []string `json:"regions"`
-	Sizes           []string `json:"sizes"`
-	Image           string   `json:"image"`
-	LifetimeSeconds int      `json:"lifetime_seconds"`
-	IntervalSeconds int      `json:"interval_seconds"`
-	BatchSize       int      `json:"batch_size"`
-	MaxConcurrent   int      `json:"max_concurrent"`
-	NetworkMode     string   `json:"network_mode"`
-	ProxyID         string   `json:"proxy_id"`
+	Name               string   `json:"name"`
+	Token              string   `json:"token"`
+	Regions            []string `json:"regions"`
+	Sizes              []string `json:"sizes"`
+	Image              string   `json:"image"`
+	LifetimeSeconds    int      `json:"lifetime_seconds"`
+	IntervalSeconds    int      `json:"interval_seconds"`
+	BatchSize          int      `json:"batch_size"`
+	MaxConcurrent      int      `json:"max_concurrent"`
+	DesiredServerCount int      `json:"desired_server_count"`
+	NetworkMode        string   `json:"network_mode"`
+	ProxyID            string   `json:"proxy_id"`
 }
 
 func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
@@ -40,12 +41,15 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	if x.BatchSize < 1 {
 		x.BatchSize = 1
 	}
+	if x.DesiredServerCount < 1 {
+		x.DesiredServerCount = 1
+	}
 	if x.MaxConcurrent < 1 {
 		x.MaxConcurrent = 1
 	}
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
-	res, err := s.DB.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_sizes=$4,preferred_image=NULLIF($5,''),server_lifetime_seconds=$6,auto_interval_seconds=$7,auto_batch_size=$8,auto_max_concurrent=$9,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, x.Image, x.LifetimeSeconds, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent)
+	res, err := s.DB.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_sizes=$4,preferred_image=NULLIF($5,''),server_lifetime_seconds=$6,auto_interval_seconds=$7,auto_batch_size=$8,auto_max_concurrent=$9,desired_server_count=$10,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, x.Image, x.LifetimeSeconds, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.DesiredServerCount)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return

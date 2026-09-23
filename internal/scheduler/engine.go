@@ -29,7 +29,19 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM droplets WHERE account_id=$1 AND state='EXPIRING' AND replacement_deployment_id IS NULL`, x.AccountID).Scan(&reservedReplacement)
 		var concurrent int
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED')`, x.AccountID, x.ProfileID).Scan(&concurrent)
+		var desired, managed, pendingManaged int
+		_ = e.DB.QueryRowContext(ctx, `SELECT desired_server_count FROM accounts WHERE id=$1`, x.AccountID).Scan(&desired)
+		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')`, x.AccountID).Scan(&managed)
+		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED')`, x.AccountID, x.ProfileID).Scan(&pendingManaged)
+		needed := desired - managed - pendingManaged
+		if needed <= 0 {
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
 		allowed := x.BatchSize
+		if allowed > needed {
+			allowed = needed
+		}
 		if x.MaxConcurrent > 0 && allowed > x.MaxConcurrent-concurrent {
 			allowed = x.MaxConcurrent - concurrent
 		}
