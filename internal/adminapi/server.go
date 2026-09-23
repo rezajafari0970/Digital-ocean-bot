@@ -10,6 +10,7 @@ import (
 )
 
 type Server struct {
+	WebPath      string
 	Auth         auth.Service
 	DB           *sql.DB
 	Container    app.Container
@@ -18,12 +19,22 @@ type Server struct {
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter()}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter()}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
 	m.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
-	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "web/static/index.html") })
+	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" && r.URL.Path != s.WebPath && r.URL.Path != s.WebPath+"/" {
+			http.NotFound(w, r)
+			return
+		}
+		if r.URL.Path == "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, "web/static/index.html")
+	})
 	m.HandleFunc("GET /healthz", s.health)
 	m.HandleFunc("GET /readyz", s.ready)
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
@@ -49,6 +60,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/deployments", s.require(s.deployments, false))
 	m.HandleFunc("GET /api/v1/audit", s.require(s.audit, false))
 	m.HandleFunc("GET /api/v1/system", s.require(s.system, false))
+	m.HandleFunc("GET /api/v1/panel-settings", s.require(s.getPanelSettings, false))
+	m.HandleFunc("PUT /api/v1/panel-settings", s.require(s.updatePanelSettings, true))
 	return m
 }
 func writeJSON(w http.ResponseWriter, status int, v any) {

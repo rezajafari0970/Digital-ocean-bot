@@ -20,8 +20,13 @@ func main() {
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
+	settings, err := application.PanelSettings(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 	api := adminapi.New(application.DB, application.Container)
-	server := &http.Server{Addr: application.Config.HTTPAddr, Handler: adminapi.Secure(api.Routes()), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
+	api.WebPath = settings.WebPath
+	server := &http.Server{Addr: settings.Addr(), Handler: adminapi.Secure(api.Routes()), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
 	log.Printf("api listening on %s", application.Config.HTTPAddr)
 	log.Fatal(server.ListenAndServe())
 }
