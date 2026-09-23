@@ -26,3 +26,12 @@ func (s *Store) GetProxy(ctx context.Context, proxyID, id string) ([]byte, error
 	}
 	return pt, nil
 }
+
+func (s *Store) DeleteProxy(ctx context.Context, proxyID, id string) error {
+	repo, ok := s.repo.(SQLRepository)
+	if !ok {
+		return ErrSecretNotFound
+	}
+	_, err := repo.DB.ExecContext(ctx, `DELETE FROM secrets WHERE proxy_id=$1 AND id=$2`, proxyID, id)
+	return err
+}
