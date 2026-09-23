@@ -21,6 +21,8 @@ func New(db *sql.DB, c app.Container) *Server {
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
+	m.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
+	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "web/static/index.html") })
 	m.HandleFunc("GET /healthz", s.health)
 	m.HandleFunc("GET /readyz", s.ready)
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
