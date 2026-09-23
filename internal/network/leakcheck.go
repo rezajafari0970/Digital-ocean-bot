@@ -20,11 +20,16 @@ type LeakObservation struct {
 
 func ValidateLeakObservation(o LeakObservation) error {
 	observed := net.ParseIP(o.ObservedIP)
-	expected := net.ParseIP(o.ExpectedExitIP)
-	server := net.ParseIP(o.ServerPublicIP)
-	if observed == nil || expected == nil || !observed.Equal(expected) {
+	if observed == nil {
 		return ErrUnexpectedExitIP
 	}
+	if o.ExpectedExitIP != "" {
+		expected := net.ParseIP(o.ExpectedExitIP)
+		if expected == nil || !observed.Equal(expected) {
+			return ErrUnexpectedExitIP
+		}
+	}
+	server := net.ParseIP(o.ServerPublicIP)
 	if server != nil && observed.Equal(server) {
 		return ErrServerIPLeak
 	}
