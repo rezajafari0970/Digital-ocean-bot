@@ -47,6 +47,10 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	checks["provider_identity"] = err == nil
+	providerError := ""
+	if err != nil {
+		providerError = err.Error()
+	}
 	ready := true
 	for _, ok := range checks {
 		if !ok {
@@ -57,11 +61,11 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	if ready {
 		status = "READY"
 	}
-	detail, _ := json.Marshal(checks)
+	detail, _ := json.Marshal(map[string]any{"checks": checks, "provider_error": providerError})
 	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, status, string(detail))
 	code := 200
 	if !ready {
 		code = 409
 	}
-	writeJSON(w, code, map[string]any{"ready": ready, "status": status, "checks": checks})
+	writeJSON(w, code, map[string]any{"ready": ready, "status": status, "checks": checks, "provider_error": providerError})
 }
