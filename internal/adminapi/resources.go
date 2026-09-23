@@ -1,12 +1,13 @@
 package adminapi
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 )
 
 func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.enabled,a.created_at,n.mode,COALESCE(p.name,'') FROM accounts a LEFT JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id ORDER BY a.created_at DESC`)
+	rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.enabled,a.created_at,n.mode,COALESCE(p.name,''),COALESCE(a.preferred_regions,'[]'::jsonb),COALESCE(a.preferred_sizes,'[]'::jsonb),COALESCE(a.preferred_image,''),a.auto_interval_seconds,a.auto_batch_size,a.auto_max_concurrent,a.server_lifetime_seconds,COALESCE(n.proxy_id::text,'') FROM accounts a LEFT JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id ORDER BY a.created_at DESC`)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -14,13 +15,15 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	var out []map[string]any
 	for rows.Next() {
-		var id, name, email, region, mode, proxy string
+		var id, name, email, region, mode, proxy, image, proxyID string
+		var regions, sizes []byte
+		var interval, batch, concurrent, lifetime int
 		var enabled bool
 		var created time.Time
-		if rows.Scan(&id, &name, &email, &region, &enabled, &created, &mode, &proxy) != nil {
+		if rows.Scan(&id, &name, &email, &region, &enabled, &created, &mode, &proxy, &regions, &sizes, &image, &interval, &batch, &concurrent, &lifetime, &proxyID) != nil {
 			continue
 		}
-		out = append(out, map[string]any{"id": id, "name": name, "email": email, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05")})
+		out = append(out, map[string]any{"id": id, "name": name, "email": email, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "sizes": json.RawMessage(sizes), "image": image, "interval_seconds": interval, "batch_size": batch, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID})
 	}
 	writeJSON(w, 200, out)
 }

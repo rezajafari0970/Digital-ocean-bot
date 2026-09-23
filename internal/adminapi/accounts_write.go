@@ -8,19 +8,21 @@ import (
 )
 
 type accountWrite struct {
-	Email           string `json:"email"`
-	ExternalID      string `json:"external_id"`
-	Image           string `json:"image"`
-	Size            string `json:"size"`
-	Region          string `json:"region"`
-	NetworkMode     string `json:"network_mode"`
-	ProxyID         string `json:"proxy_id"`
-	IntervalSeconds int    `json:"interval_seconds"`
-	BatchSize       int    `json:"batch_size"`
-	MaxConcurrent   int    `json:"max_concurrent"`
-	Name            string `json:"name"`
-	Token           string `json:"token"`
-	Enabled         *bool  `json:"enabled"`
+	Email           string   `json:"email"`
+	ExternalID      string   `json:"external_id"`
+	Image           string   `json:"image"`
+	Size            string   `json:"size"`
+	Region          string   `json:"region"`
+	Regions         []string `json:"regions"`
+	NetworkMode     string   `json:"network_mode"`
+	ProxyID         string   `json:"proxy_id"`
+	IntervalSeconds int      `json:"interval_seconds"`
+	BatchSize       int      `json:"batch_size"`
+	MaxConcurrent   int      `json:"max_concurrent"`
+	LifetimeSeconds int      `json:"lifetime_seconds"`
+	Name            string   `json:"name"`
+	Token           string   `json:"token"`
+	Enabled         *bool    `json:"enabled"`
 }
 
 func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +36,10 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
 		return
 	}
+	if len(x.Regions) == 0 {
+		x.Regions = []string{x.Region}
+	}
+	x.Region = x.Regions[0]
 	if x.NetworkMode == "" {
 		x.NetworkMode = "direct"
 	}
@@ -57,19 +63,22 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if x.MaxConcurrent < 1 {
 		x.MaxConcurrent = 1
 	}
+	if x.LifetimeSeconds < 1800 {
+		x.LifetimeSeconds = 7200
+	}
 	var id string
-	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent)
-VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7)
+	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds)
+VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7,$8)
 ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO UPDATE SET
 name=EXCLUDED.name,email=EXCLUDED.email,preferred_region=EXCLUDED.preferred_region,
 auto_interval_seconds=EXCLUDED.auto_interval_seconds,auto_batch_size=EXCLUDED.auto_batch_size,
-auto_max_concurrent=EXCLUDED.auto_max_concurrent,updated_at=now()
-RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent).Scan(&id)
+auto_max_concurrent=EXCLUDED.auto_max_concurrent,server_lifetime_seconds=EXCLUDED.server_lifetime_seconds,updated_at=now()
+RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds).Scan(&id)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
 	}
-	if _, err = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=jsonb_build_array($2::text),preferred_sizes=jsonb_build_array($3::text),preferred_image=$4 WHERE id=$1`, id, x.Region, x.Size, x.Image); err != nil {
+	if _, err = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=$2::jsonb,preferred_sizes=jsonb_build_array($3::text),preferred_image=$4 WHERE id=$1`, id, mustJSON(x.Regions), x.Size, x.Image); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
 		return
@@ -86,5 +95,7 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
+
+func mustJSON(v any) string { b, _ := json.Marshal(v); return string(b) }
 
 func requireAdmin(p auth.Principal) bool { return p.CanAdmin() }
