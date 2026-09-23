@@ -79,6 +79,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
+		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
+		return
+	}
 	w.WriteHeader(204)
 }
 func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {

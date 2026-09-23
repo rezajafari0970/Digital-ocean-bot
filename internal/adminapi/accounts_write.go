@@ -93,6 +93,10 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "network_profile_failed", "detail": err.Error()})
 		return
 	}
+	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
+		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
+		return
+	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 
