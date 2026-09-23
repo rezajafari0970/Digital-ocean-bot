@@ -49,7 +49,7 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	if err != nil {
 		return ErrProviderRequest
 	}
-	rel, err := url.Parse(strings.TrimLeft(path, "/"))
+	rel, err := url.Parse("./" + strings.TrimLeft(path, "/"))
 	if err != nil {
 		return ErrProviderRequest
 	}

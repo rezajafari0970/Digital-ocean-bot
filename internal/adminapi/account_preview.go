@@ -75,7 +75,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	d, err := provider.Catalog(r.Context())
 	if err != nil {
-		writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed"})
+		writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed", "detail": err.Error()})
 		return
 	}
 	regions := d.Regions
