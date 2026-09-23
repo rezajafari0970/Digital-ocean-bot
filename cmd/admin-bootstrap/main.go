@@ -1,24 +1,32 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
-	username := os.Getenv("ADMIN_USERNAME")
-	password := os.Getenv("ADMIN_PASSWORD")
-	if username == "" || password == "" {
-		log.Fatal("ADMIN_USERNAME and ADMIN_PASSWORD required")
+	username := strings.TrimSpace(os.Getenv("ADMIN_USERNAME"))
+	if username == "" {
+		log.Fatal("ADMIN_USERNAME required")
 	}
+	reader := bufio.NewReader(os.Stdin)
+	password, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatal("password must be supplied on stdin")
+	}
+	password = strings.TrimSpace(password)
 	hash, err := auth.HashPassword(password)
 	if err != nil {
 		log.Fatal(err)
 	}
+	password = ""
 	ctx := context.Background()
 	a, err := app.Bootstrap(ctx)
 	if err != nil {
