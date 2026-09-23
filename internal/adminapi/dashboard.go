@@ -2,16 +2,22 @@ package adminapi
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 )
 
 type accountDashboard struct {
-	Account     map[string]any `json:"account"`
-	Capacity    map[string]any `json:"capacity"`
-	Resources   map[string]any `json:"resources"`
-	Network     map[string]any `json:"network"`
-	Runtime     map[string]any `json:"runtime"`
-	Deployments map[string]any `json:"deployments"`
+	Account     map[string]any   `json:"account"`
+	Capacity    map[string]any   `json:"capacity"`
+	Resources   map[string]any   `json:"resources"`
+	Network     map[string]any   `json:"network"`
+	Runtime     map[string]any   `json:"runtime"`
+	Deployments map[string]any   `json:"deployments"`
+	Droplets    []map[string]any `json:"droplets"`
 }
 
 func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
@@ -59,5 +65,40 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	var running, ready, failed int
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED')),count(*) FILTER(WHERE state='READY'),count(*) FILTER(WHERE state='FAILED') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready, &failed)
 	d.Deployments = map[string]any{"running": running, "ready": ready, "failed": failed}
+	var snap []byte
+	if s.DB.QueryRowContext(r.Context(), `SELECT data FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
+		var disc digitalocean.DiscoveryResult
+		if json.Unmarshal(snap, &disc) == nil {
+			managedIDs := map[string]bool{}
+			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_id FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
+			if rows != nil {
+				defer rows.Close()
+				for rows.Next() {
+					var pid string
+					if rows.Scan(&pid) == nil {
+						managedIDs[pid] = true
+					}
+				}
+			}
+			for _, x := range disc.Droplets {
+				ip := x.PublicIPv4
+				if ip == "" {
+					for _, n := range x.Networks.V4 {
+						if n.Type == "public" {
+							ip = n.IPAddress
+							break
+						}
+					}
+				}
+				created, _ := time.Parse(time.RFC3339, x.CreatedAt)
+				age := int64(0)
+				if !created.IsZero() {
+					age = int64(time.Since(created).Seconds())
+				}
+				managed := managedIDs[strconv.Itoa(x.ID)]
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "ip": ip, "region": x.Region.Slug, "status": x.Status, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+			}
+		}
+	}
 	writeJSON(w, 200, d)
 }
