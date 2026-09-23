@@ -12,13 +12,16 @@ const (
 )
 
 type Capacity struct {
-	Limit        int
-	Active       int
-	Creating     int
-	Provisioning int
+	Limit               int
+	Active              int
+	Creating            int
+	Provisioning        int
+	ReservedReplacement int
 }
 
-func (c Capacity) Available() int { return c.Limit - c.Active - c.Creating - c.Provisioning }
+func (c Capacity) Available() int {
+	return c.Limit - c.Active - c.Creating - c.Provisioning - c.ReservedReplacement
+}
 
 type Policy struct {
 	MaxServers int

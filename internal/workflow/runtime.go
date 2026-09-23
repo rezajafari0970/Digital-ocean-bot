@@ -106,7 +106,7 @@ func (r RuntimeSteps) WaitResource(ctx context.Context, d Deployment) (Deploymen
 	r.Target.Host = info.Host
 	if r.DB != nil && d.DropletID == "" {
 		profileRaw, _ := json.Marshal(r.Profile)
-		err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,'READY',$3,now(),now()+($4 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
+		err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,$3,'READY',$4,now(),now()+($5 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProfileID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
 		if err != nil {
 			return d, err
 		}

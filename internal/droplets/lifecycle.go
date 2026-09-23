@@ -7,13 +7,15 @@ import (
 )
 
 type LifecycleItem struct {
-	ID         string
-	AccountID  string
-	ProviderID string
-	State      State
-	ReadyAt    time.Time
-	ExpiresAt  time.Time
-	UpdatedAt  time.Time
+	ID                      string
+	AccountID               string
+	ProviderID              string
+	ProfileID               string
+	ReplacementDeploymentID string
+	State                   State
+	ReadyAt                 time.Time
+	ExpiresAt               time.Time
+	UpdatedAt               time.Time
 }
 type LifecycleStore struct{ DB *sql.DB }
 
@@ -21,7 +23,7 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 	if limit < 1 {
 		limit = 100
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),state,COALESCE(ready_at,created_at),expires_at,updated_at FROM droplets WHERE state IN ('READY','EXPIRING','RETIRING','DELETING') AND expires_at IS NOT NULL AND expires_at<=$1 ORDER BY expires_at LIMIT $2`, now, limit)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),expires_at,updated_at FROM droplets WHERE state IN ('READY','EXPIRING','RETIRING','DELETING') AND expires_at IS NOT NULL AND expires_at<=$1 ORDER BY expires_at LIMIT $2`, now, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +31,7 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 	var out []LifecycleItem
 	for rows.Next() {
 		var x LifecycleItem
-		if err := rows.Scan(&x.ID, &x.AccountID, &x.ProviderID, &x.State, &x.ReadyAt, &x.ExpiresAt, &x.UpdatedAt); err != nil {
+		if err := rows.Scan(&x.ID, &x.AccountID, &x.ProviderID, &x.ProfileID, &x.ReplacementDeploymentID, &x.State, &x.ReadyAt, &x.ExpiresAt, &x.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, x)
