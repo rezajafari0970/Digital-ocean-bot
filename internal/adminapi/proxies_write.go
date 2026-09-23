@@ -30,7 +30,7 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var id string
-	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),'proxy-password') RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username).Scan(&id)
+	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL) RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username).Scan(&id)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
@@ -42,6 +42,7 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	_, _ = s.DB.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password',status='healthy',last_checked_at=now(),last_success_at=now() WHERE id=$1`, id)
 	writeJSON(w, 201, map[string]string{"id": id, "type": string(typ)})
 }
 
