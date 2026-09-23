@@ -2,9 +2,7 @@ package adminapi
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"time"
 )
 
 type accountUpdate struct {
@@ -24,8 +22,6 @@ type accountUpdate struct {
 
 func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	started := time.Now()
-	defer func() { log.Printf("account_edit id=%s duration_ms=%d", id, time.Since(started).Milliseconds()) }()
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
@@ -53,7 +49,6 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
-	log.Printf("account_edit_payload id=%s name=%q regions=%v sizes=%v image=%q network=%q proxy_set=%t lifetime=%d interval=%d desired=%d batch=%d concurrent=%d token_replaced=%t", id, x.Name, x.Regions, x.Sizes, x.Image, x.NetworkMode, x.ProxyID != "", x.LifetimeSeconds, x.IntervalSeconds, x.DesiredServerCount, x.BatchSize, x.MaxConcurrent, x.Token != "")
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
@@ -84,30 +79,23 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	log.Printf("account_edit_stage id=%s stage=accounts_update ok=true", id)
 	n, _ := res.RowsAffected()
 	if n == 0 {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
 		return
 	}
-	log.Printf("account_edit_stage id=%s stage=accounts_rows affected=%d", id, n)
 	if _, err = tx.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT(account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	log.Printf("account_edit_stage id=%s stage=network_profile ok=true", id)
 	if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
-		log.Printf("account_edit_stage id=%s stage=automation_sync ok=false err=%q", id, err.Error())
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return
 	}
-	log.Printf("account_edit_stage id=%s stage=automation_sync ok=true", id)
 	if err = tx.Commit(); err != nil {
-		log.Printf("account_edit_stage id=%s stage=commit ok=false err=%q", id, err.Error())
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	log.Printf("account_edit_stage id=%s stage=commit ok=true", id)
 	if x.Token != "" {
 		if err := s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
 			writeJSON(w, 500, map[string]string{"error": "token_update_failed", "detail": err.Error()})
