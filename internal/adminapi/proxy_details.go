@@ -53,5 +53,11 @@ func (s *Server) testProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 502, map[string]string{"status": "down", "error": "proxy_test_failed"})
 		return
 	}
-	writeJSON(w, 200, map[string]any{"status": "healthy", "type": detected})
+	obs, err := observeProxy(r.Context(), x, detected)
+	if err != nil {
+		writeJSON(w, 502, map[string]string{"status": "down", "error": "proxy_observation_failed"})
+		return
+	}
+	_, _ = s.DB.ExecContext(r.Context(), `UPDATE proxies SET status='healthy',exit_ip=$2,country=$3,asn=$4,latency_ms=$5,last_checked_at=now(),last_success_at=now(),failure_count=0 WHERE id=$1`, id, obs.IP, obs.Country, obs.ASN, obs.LatencyMS)
+	writeJSON(w, 200, map[string]any{"status": "healthy", "type": detected, "exit_ip": obs.IP, "country": obs.Country, "country_code": obs.CountryCode, "asn": obs.ASN, "latency_ms": obs.LatencyMS})
 }
