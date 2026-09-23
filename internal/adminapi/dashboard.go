@@ -52,7 +52,18 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if providerAvailable < 0 {
 		providerAvailable = 0
 	}
-	d.Capacity = map[string]any{"droplet_limit": limit, "provider_droplets": providerDroplets, "managed_droplets": active, "available": providerAvailable, "last_refresh": lastRefresh.Time, "last_managed_server_created": lastCreated.Time}
+	d.Capacity = map[string]any{"managed_droplets": active, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": map[bool]string{true: "fresh", false: "unavailable"}[lastRefresh.Valid]}
+	if lastRefresh.Valid {
+		d.Capacity["droplet_limit"] = limit
+		d.Capacity["provider_droplets"] = providerDroplets
+		d.Capacity["available"] = providerAvailable
+		d.Capacity["last_refresh"] = lastRefresh.Time
+	} else {
+		d.Capacity["droplet_limit"] = nil
+		d.Capacity["provider_droplets"] = nil
+		d.Capacity["available"] = nil
+		d.Capacity["last_refresh"] = nil
+	}
 	var mode, status string
 	var proxyID sql.NullString
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT n.mode,n.proxy_id::text,COALESCE(p.status,'') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&mode, &proxyID, &status)
