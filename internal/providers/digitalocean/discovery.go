@@ -3,9 +3,9 @@ package digitalocean
 import "context"
 
 type Region struct {
-	Slug         string
-	Name         string
-	Available    bool
+	Slug         string   `json:"slug"`
+	Name         string   `json:"name"`
+	Available    bool     `json:"available"`
 	PriceMonthly float64  `json:"price_monthly"`
 	PriceHourly  float64  `json:"price_hourly"`
 	Transfer     float64  `json:"transfer"`
