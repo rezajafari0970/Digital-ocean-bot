@@ -73,8 +73,10 @@ func (m Monitor) runOnce(ctx context.Context) {
 		if endpoint == "" {
 			endpoint = "https://api.ipify.org?format=json"
 		}
+		probe := x.p
+		probe.Status = StatusHealthy
 		scheduler := HealthScheduler{Store: SQLHealthStore{DB: m.DB}, Policy: m.Policy, Timeout: m.Timeout}
-		_, err = scheduler.Check(ctx, "proxy-monitor:"+x.p.ID, HealthTarget{Proxy: x.p, Credentials: ProxyCredentials{Username: x.user, Password: string(password)}, ExpectedExitIP: x.p.ExitIP, Endpoint: endpoint, State: state})
+		_, err = scheduler.Check(ctx, "proxy-monitor:"+x.p.ID, HealthTarget{Proxy: probe, Credentials: ProxyCredentials{Username: x.user, Password: string(password)}, ExpectedExitIP: x.p.ExitIP, Endpoint: endpoint, State: state})
 		wipeBytes(password)
 		if err != nil {
 			log.Printf("proxy monitor %s: %v", x.p.Name, err)
