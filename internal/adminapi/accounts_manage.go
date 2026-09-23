@@ -49,6 +49,15 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
+	var candidateEmail, candidateExternalID string
+	if x.Token != "" {
+		d, validateErr := s.validateReplacementToken(r.Context(), id, x.Token, x.NetworkMode, x.ProxyID)
+		if validateErr != nil {
+			writeJSON(w, 422, map[string]string{"error": "replacement_token_validation_failed", "detail": validateErr.Error()})
+			return
+		}
+		candidateEmail, candidateExternalID = d.Account.Email, d.Account.UUID
+	}
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
@@ -91,6 +100,12 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return
+	}
+	if x.Token != "" {
+		if _, err = tx.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, candidateExternalID, candidateEmail); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
