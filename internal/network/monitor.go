@@ -34,7 +34,7 @@ func (m Monitor) Run(ctx context.Context) error {
 	}
 }
 func (m Monitor) runOnce(ctx context.Context) {
-	rows, err := m.DB.QueryContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(exit_ip::text,''),failure_count,last_checked_at,last_success_at FROM proxies`)
+	rows, err := m.DB.QueryContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(exit_ip::text,''),failure_count,consecutive_successes,last_checked_at,last_success_at FROM proxies`)
 	if err != nil {
 		log.Printf("proxy monitor query: %v", err)
 		return
@@ -44,11 +44,12 @@ func (m Monitor) runOnce(ctx context.Context) {
 		p                Proxy
 		user, ref        string
 		checked, success sql.NullTime
+		successes        int
 	}
 	var list []item
 	for rows.Next() {
 		var x item
-		if rows.Scan(&x.p.ID, &x.p.Name, &x.p.Type, &x.p.Host, &x.p.Port, &x.user, &x.ref, &x.p.Status, &x.p.ExitIP, &x.p.FailureCount, &x.checked, &x.success) == nil {
+		if rows.Scan(&x.p.ID, &x.p.Name, &x.p.Type, &x.p.Host, &x.p.Port, &x.user, &x.ref, &x.p.Status, &x.p.ExitIP, &x.p.FailureCount, &x.successes, &x.checked, &x.success) == nil {
 			list = append(list, x)
 		}
 	}
@@ -62,7 +63,7 @@ func (m Monitor) runOnce(ctx context.Context) {
 				continue
 			}
 		}
-		state := HealthState{Status: x.p.Status, ConsecutiveFailures: x.p.FailureCount, LastExitIP: x.p.ExitIP}
+		state := HealthState{Status: x.p.Status, ConsecutiveFailures: x.p.FailureCount, ConsecutiveSuccesses: x.successes, LastExitIP: x.p.ExitIP}
 		if x.checked.Valid {
 			state.LastCheckedAt = x.checked.Time
 		}
@@ -87,8 +88,9 @@ func (m Monitor) markFailure(ctx context.Context, x struct {
 	p                Proxy
 	user, ref        string
 	checked, success sql.NullTime
+	successes        int
 }) {
-	state := HealthState{Status: x.p.Status, ConsecutiveFailures: x.p.FailureCount, LastExitIP: x.p.ExitIP, LastCheckedAt: time.Now().UTC()}
+	state := HealthState{Status: x.p.Status, ConsecutiveFailures: x.p.FailureCount, ConsecutiveSuccesses: x.successes, LastExitIP: x.p.ExitIP, LastCheckedAt: time.Now().UTC()}
 	state = state.Apply(HealthResult{Status: StatusDown, CheckedAt: time.Now().UTC(), Error: "secret unavailable"}, m.Policy)
 	_ = (SQLHealthStore{DB: m.DB}).Save(ctx, x.p.ID, state)
 }

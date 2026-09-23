@@ -18,7 +18,7 @@ func (s SQLHealthStore) Save(ctx context.Context, proxyID string, state HealthSt
 	if s.DB == nil || proxyID == "" {
 		return ErrHealthStore
 	}
-	_, err := s.DB.ExecContext(ctx, `UPDATE proxies SET status=$2, exit_ip=NULLIF($3,'')::inet, failure_count=$4, last_checked_at=$5, last_success_at=NULLIF($6, '0001-01-01 00:00:00+00')::timestamptz, updated_at=now() WHERE id=$1`, proxyID, state.Status, state.LastExitIP, state.ConsecutiveFailures, state.LastCheckedAt, state.LastSuccessAt)
+	_, err := s.DB.ExecContext(ctx, `UPDATE proxies SET status=$2, exit_ip=NULLIF($3,'')::inet, failure_count=$4, consecutive_successes=$5, last_checked_at=$6, last_success_at=NULLIF($7, '0001-01-01 00:00:00+00')::timestamptz, updated_at=now() WHERE id=$1`, proxyID, state.Status, state.LastExitIP, state.ConsecutiveFailures, state.ConsecutiveSuccesses, state.LastCheckedAt, state.LastSuccessAt)
 	if err != nil {
 		return ErrHealthStore
 	}

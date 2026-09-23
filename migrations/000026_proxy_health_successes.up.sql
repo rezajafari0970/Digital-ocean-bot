@@ -1,0 +1,1 @@
+ALTER TABLE proxies ADD COLUMN consecutive_successes INTEGER NOT NULL DEFAULT 0;
