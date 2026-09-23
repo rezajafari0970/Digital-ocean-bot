@@ -6,12 +6,14 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type principalKey struct{}
 type loginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Remember bool   `json:"remember"`
 }
 
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +26,11 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
-	token, p, err := s.Auth.Login(r.Context(), req.Username, req.Password)
+	authSvc := s.Auth
+	if req.Remember {
+		authSvc.TTL = 30 * 24 * time.Hour
+	}
+	token, p, err := authSvc.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		writeJSON(w, 401, map[string]string{"error": "invalid_credentials"})
 		return
