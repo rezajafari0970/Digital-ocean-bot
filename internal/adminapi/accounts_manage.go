@@ -53,6 +53,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
+	log.Printf("account_edit_payload id=%s name=%q regions=%v sizes=%v image=%q network=%q proxy_set=%t lifetime=%d interval=%d desired=%d batch=%d concurrent=%d token_replaced=%t", id, x.Name, x.Regions, x.Sizes, x.Image, x.NetworkMode, x.ProxyID != "", x.LifetimeSeconds, x.IntervalSeconds, x.DesiredServerCount, x.BatchSize, x.MaxConcurrent, x.Token != "")
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
