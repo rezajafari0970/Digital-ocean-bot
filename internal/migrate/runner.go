@@ -16,10 +16,19 @@ type Runner struct {
 }
 
 func (r Runner) Up(ctx context.Context) error {
+	conn, err := r.DB.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	if _, err = conn.ExecContext(ctx, `SELECT pg_advisory_lock(728391447221)`); err != nil {
+		return err
+	}
+	defer conn.ExecContext(context.Background(), `SELECT pg_advisory_unlock(728391447221)`)
 	if r.Dir == "" {
 		r.Dir = "migrations"
 	}
-	if _, err := r.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY,applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`); err != nil {
+	if _, err := conn.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY,applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`); err != nil {
 		return err
 	}
 	files, err := filepath.Glob(filepath.Join(r.Dir, "*.up.sql"))
@@ -30,7 +39,7 @@ func (r Runner) Up(ctx context.Context) error {
 	for _, path := range files {
 		version := strings.TrimSuffix(filepath.Base(path), ".up.sql")
 		var exists bool
-		if err := r.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)`, version).Scan(&exists); err != nil {
+		if err := conn.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)`, version).Scan(&exists); err != nil {
 			return err
 		}
 		if exists {
@@ -40,7 +49,7 @@ func (r Runner) Up(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		tx, err := r.DB.BeginTx(ctx, nil)
+		tx, err := conn.BeginTx(ctx, nil)
 		if err != nil {
 			return err
 		}
