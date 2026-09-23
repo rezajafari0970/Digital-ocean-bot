@@ -47,6 +47,6 @@ RETURNING id::text`, accountID, raw).Scan(&profileID)
 
 	_, err = s.DB.ExecContext(ctx, `INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at)
 VALUES(gen_random_uuid(),$1,$2,true,$3,$4,$5,now()+($3 * interval '1 second'))
-ON CONFLICT(account_id,profile_id) DO UPDATE SET enabled=true,interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=LEAST(schedules.next_run_at,now()+($3 * interval '1 second')),updated_at=now()`, accountID, profileID, interval, batch, concurrent)
+ON CONFLICT(account_id,profile_id) DO UPDATE SET enabled=true,interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=CASE WHEN schedules.interval_seconds IS DISTINCT FROM EXCLUDED.interval_seconds THEN now()+($3 * interval '1 second') ELSE schedules.next_run_at END,updated_at=now()`, accountID, profileID, interval, batch, concurrent)
 	return err
 }
