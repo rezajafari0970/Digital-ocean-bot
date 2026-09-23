@@ -36,7 +36,7 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if x.Password != "" {
-		if err := s.Container.Secrets.Put(r.Context(), id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
+		if err := s.Container.Secrets.PutProxy(r.Context(), id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
 			_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM proxies WHERE id=$1`, id)
 			writeJSON(w, 500, errorBody())
 			return
