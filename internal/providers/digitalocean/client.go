@@ -45,10 +45,15 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 		return err
 	}
 	defer zero(token)
-	u, err := url.JoinPath(strings.TrimRight(c.BaseURL, "/"), path)
+	base, err := url.Parse(strings.TrimRight(c.BaseURL, "/") + "/")
 	if err != nil {
 		return ErrProviderRequest
 	}
+	rel, err := url.Parse(strings.TrimLeft(path, "/"))
+	if err != nil {
+		return ErrProviderRequest
+	}
+	u := base.ResolveReference(rel).String()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return ErrProviderRequest
