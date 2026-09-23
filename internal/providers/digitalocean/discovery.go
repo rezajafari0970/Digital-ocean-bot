@@ -12,11 +12,11 @@ type Region struct {
 	Regions      []string `json:"regions"`
 }
 type Size struct {
-	Slug         string
-	Memory       int
-	VCPUs        int
-	Disk         int
-	Available    bool
+	Slug         string   `json:"slug"`
+	Memory       int      `json:"memory"`
+	VCPUs        int      `json:"vcpus"`
+	Disk         int      `json:"disk"`
+	Available    bool     `json:"available"`
 	PriceMonthly float64  `json:"price_monthly"`
 	PriceHourly  float64  `json:"price_hourly"`
 	Transfer     float64  `json:"transfer"`
