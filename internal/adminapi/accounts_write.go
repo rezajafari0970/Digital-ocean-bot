@@ -9,6 +9,7 @@ import (
 
 type accountWrite struct {
 	Email           string `json:"email"`
+	ExternalID      string `json:"external_id"`
 	Image           string `json:"image"`
 	Size            string `json:"size"`
 	Region          string `json:"region"`
@@ -29,7 +30,7 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var x accountWrite
-	if json.NewDecoder(r.Body).Decode(&x) != nil || x.Name == "" || x.Token == "" || x.Region == "" || x.Size == "" || x.Image == "" {
+	if json.NewDecoder(r.Body).Decode(&x) != nil || x.Name == "" || x.Token == "" || x.ExternalID == "" || x.Region == "" || x.Size == "" || x.Image == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
 		return
 	}
@@ -57,7 +58,13 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		x.MaxConcurrent = 1
 	}
 	var id string
-	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent) VALUES(gen_random_uuid(),'digitalocean',$1,NULLIF($2,''),$3,'do-token',$4,$5,$6) RETURNING id::text`, x.Name, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent).Scan(&id)
+	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent)
+VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7)
+ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO UPDATE SET
+name=EXCLUDED.name,email=EXCLUDED.email,preferred_region=EXCLUDED.preferred_region,
+auto_interval_seconds=EXCLUDED.auto_interval_seconds,auto_batch_size=EXCLUDED.auto_batch_size,
+auto_max_concurrent=EXCLUDED.auto_max_concurrent,updated_at=now()
+RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent).Scan(&id)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
@@ -72,7 +79,7 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "secret_store_failed", "detail": err.Error()})
 		return
 	}
-	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END)`, id, x.NetworkMode, x.ProxyID); err != nil {
+	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT (account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "network_profile_failed", "detail": err.Error()})
 		return
