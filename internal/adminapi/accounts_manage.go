@@ -2,7 +2,9 @@ package adminapi
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 )
 
 type accountUpdate struct {
@@ -21,12 +23,14 @@ type accountUpdate struct {
 }
 
 func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	started := time.Now()
+	defer func() { log.Printf("account_edit id=%s duration_ms=%d", id, time.Since(started).Milliseconds()) }()
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
 		return
 	}
-	id := r.PathValue("id")
 	var x accountUpdate
 	if json.NewDecoder(r.Body).Decode(&x) != nil || x.Name == "" {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
