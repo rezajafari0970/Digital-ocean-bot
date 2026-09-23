@@ -73,7 +73,12 @@ func (c *Client) request(ctx context.Context, method, path string, body any, out
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After"))}
+		var body struct {
+			ID      string `json:"id"`
+			Message string `json:"message"`
+		}
+		_ = json.NewDecoder(resp.Body).Decode(&body)
+		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After")), Path: req.URL.String(), Code: body.ID, Message: body.Message}
 	}
 	if out != nil && resp.StatusCode != http.StatusNoContent {
 		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {

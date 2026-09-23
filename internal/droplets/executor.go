@@ -32,6 +32,11 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		return op, err
 	}
 	if !fresh {
+		if reserved.State == jobs.OperationUnknown && reserved.ResourceID == "" {
+			if lookup, ok := e.Provider.(LookupProvider); ok {
+				return (Reconciler{Operations: e.Operations, Provider: lookup}).AdoptUnknownCreate(ctx, reserved, profile.IdentityTag, profile.Name, profile.Region)
+			}
+		}
 		return reserved, nil
 	}
 	reserved.State = jobs.OperationRunning
@@ -39,7 +44,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if err := e.Operations.Update(ctx, reserved); err != nil {
 		return reserved, err
 	}
-	d, err := e.Provider.CreateDroplet(ctx, digitalocean.CreateDropletRequest{Name: profile.Name, Region: profile.Region, Size: profile.Size, Image: profile.Image, Tags: []string{"managed-by-digital-ocean-bot"}})
+	d, err := e.Provider.CreateDroplet(ctx, digitalocean.CreateDropletRequest{Name: profile.Name, Region: profile.Region, Size: profile.Size, Image: profile.Image, Tags: []string{"managed-by-digital-ocean-bot", profile.IdentityTag}})
 	if err != nil {
 		reserved.State = jobs.OperationUnknown
 		_ = e.Operations.Update(ctx, reserved)

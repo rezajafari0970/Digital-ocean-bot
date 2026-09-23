@@ -5,6 +5,7 @@ import "time"
 type ProfileSnapshot struct {
 	Name               string        `json:"name"`
 	Region             string        `json:"region"`
+	Regions            []string      `json:"regions,omitempty"`
 	Size               string        `json:"size"`
 	Image              string        `json:"image"`
 	Lifetime           time.Duration `json:"lifetime"`

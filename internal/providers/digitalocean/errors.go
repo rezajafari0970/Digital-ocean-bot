@@ -12,9 +12,29 @@ import (
 type HTTPError struct {
 	Status     int
 	RetryAfter time.Duration
+	Path       string
+	Code       string
+	Message    string
 }
 
-func (e HTTPError) Error() string { return fmt.Sprintf("digitalocean api status %d", e.Status) }
+func (e HTTPError) Error() string {
+	return fmt.Sprintf("digitalocean api status %d code %s path %s", e.Status, e.Code, e.Path)
+}
+func IsCapacityError(err error) bool {
+	var h HTTPError
+	if !errors.As(err, &h) {
+		return false
+	}
+	code := strings.ToLower(h.Code)
+	msg := strings.ToLower(h.Message)
+	for _, needle := range []string{"region", "size", "capacity", "availability", "not available", "unavailable"} {
+		if strings.Contains(code, needle) || strings.Contains(msg, needle) {
+			return h.Status == 400 || h.Status == 422
+		}
+	}
+	return false
+}
+
 func ClassifyError(err error) resilience.ErrorClass {
 	var h HTTPError
 	if errors.As(err, &h) {

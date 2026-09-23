@@ -42,7 +42,8 @@ type Droplet struct {
 			Type      string `json:"type"`
 		} `json:"v4"`
 	} `json:"networks"`
-	PublicIPv4 string `json:"-"`
+	Tags       []string `json:"tags"`
+	PublicIPv4 string   `json:"-"`
 }
 type Project struct {
 	ID          string

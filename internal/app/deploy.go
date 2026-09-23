@@ -2,8 +2,10 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
+	"time"
 )
 
 var ErrProfileDisabled = errors.New("deployment profile disabled")
@@ -22,7 +24,30 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if err != nil {
 		return d, err
 	}
-	if err := profiles.AttachSnapshot(ctx, d.ID, profile.Config); err != nil {
+	effective := profile.Config
+	var regionsRaw, sizesRaw []byte
+	var image string
+	var lifetimeSeconds int
+	if err := c.DB.QueryRowContext(ctx, `SELECT preferred_regions,preferred_sizes,COALESCE(preferred_image,''),server_lifetime_seconds FROM accounts WHERE id=$1`, accountID).Scan(&regionsRaw, &sizesRaw, &image, &lifetimeSeconds); err != nil {
+		return d, err
+	}
+	var regions, sizes []string
+	_ = json.Unmarshal(regionsRaw, &regions)
+	_ = json.Unmarshal(sizesRaw, &sizes)
+	if len(regions) > 0 {
+		effective.Region = regions[0]
+		effective.Regions = regions
+	}
+	if len(sizes) > 0 {
+		effective.Size = sizes[0]
+	}
+	if image != "" {
+		effective.Image = image
+	}
+	if lifetimeSeconds > 0 {
+		effective.Lifetime = time.Duration(lifetimeSeconds) * time.Second
+	}
+	if err := profiles.AttachSnapshot(ctx, d.ID, effective); err != nil {
 		return d, err
 	}
 	cfg, _, err := c.DeploymentConfigFromSnapshot(ctx, d.ID)

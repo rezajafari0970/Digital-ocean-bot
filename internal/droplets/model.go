@@ -18,12 +18,14 @@ const (
 )
 
 type Profile struct {
-	Name      string
-	Region    string
-	Size      string
-	Image     string
-	Lifetime  time.Duration
-	Provision string
+	Name        string
+	Region      string
+	Regions     []string
+	Size        string
+	Image       string
+	Lifetime    time.Duration
+	Provision   string
+	IdentityTag string
 }
 
 type Droplet struct {

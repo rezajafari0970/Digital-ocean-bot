@@ -2,11 +2,15 @@ package workflow
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"strconv"
 	"time"
 )
@@ -41,6 +45,7 @@ type ResourceInfo struct {
 }
 
 type RuntimeSteps struct {
+	DB            *sql.DB
 	Droplets      DropletCreator
 	Waiter        ResourceWaiter
 	Provisioner   Provisioner
@@ -59,11 +64,32 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 	if r.Droplets == nil {
 		return d, ErrRuntimeConfig
 	}
+	r.Profile.IdentityTag = "dob-deployment-" + d.ID
 	op := droplets.BuildCreateOperation(d.AccountID, r.Profile)
 	op.IdempotencyKey = "deploy:" + d.ID + ":create"
-	result, err := r.Droplets.Create(ctx, op, r.Profile)
-	if err != nil {
-		return d, err
+	regions := append([]string(nil), r.Profile.Regions...)
+	if len(regions) == 0 {
+		regions = []string{r.Profile.Region}
+	}
+	var result jobs.Operation
+	var err error
+	for i, region := range regions {
+		p := r.Profile
+		p.Region = region
+		regionOp := op
+		regionOp.IdempotencyKey = op.IdempotencyKey + ":region:" + region
+		result, err = r.Droplets.Create(ctx, regionOp, p)
+		if err == nil && result.ResourceID != "" {
+			r.Profile.Region = region
+			break
+		}
+		if err == nil {
+			return d, droplets.ErrOutcomeStillUnknown
+		}
+		class := digitalocean.ClassifyError(err)
+		if class != resilience.Permanent || !digitalocean.IsCapacityError(err) || i == len(regions)-1 {
+			return d, err
+		}
 	}
 	d.ProviderID = result.ResourceID
 	return d, nil
@@ -78,6 +104,13 @@ func (r RuntimeSteps) WaitResource(ctx context.Context, d Deployment) (Deploymen
 	}
 	d.ProviderID = info.ProviderID
 	r.Target.Host = info.Host
+	if r.DB != nil && d.DropletID == "" {
+		profileRaw, _ := json.Marshal(r.Profile)
+		err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,'READY',$3,now(),now()+($4 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
+		if err != nil {
+			return d, err
+		}
+	}
 	return d, nil
 }
 func (r RuntimeSteps) Provision(ctx context.Context, d Deployment) (Deployment, error) {
