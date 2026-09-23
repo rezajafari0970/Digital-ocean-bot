@@ -62,11 +62,11 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	req.Header.Set("Accept", "application/json")
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return fmt.Errorf("%w: transport", ErrProviderRequest)
+		return fmt.Errorf("%w: transport: %v", ErrProviderRequest, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After"))}
+		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After")), Path: u}
 	}
 	if out == nil {
 		return nil
