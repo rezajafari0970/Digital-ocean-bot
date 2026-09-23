@@ -14,7 +14,7 @@ func (r SQLRepository) Put(ctx context.Context, s Record) error {
 	if r.DB == nil {
 		return ErrSecretNotFound
 	}
-	_, err := r.DB.ExecContext(ctx, `INSERT INTO secrets (id,account_id,kind,ciphertext,nonce,key_version) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (account_id,id) DO UPDATE SET kind=EXCLUDED.kind,ciphertext=EXCLUDED.ciphertext,nonce=EXCLUDED.nonce,key_version=EXCLUDED.key_version,updated_at=now()`, s.ID, s.AccountID, s.Kind, s.Ciphertext, s.Nonce, s.KeyVersion)
+	_, err := r.DB.ExecContext(ctx, `INSERT INTO secrets (id,account_id,kind,ciphertext,nonce,key_version) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (owner_key,id) DO UPDATE SET kind=EXCLUDED.kind,ciphertext=EXCLUDED.ciphertext,nonce=EXCLUDED.nonce,key_version=EXCLUDED.key_version,updated_at=now()`, s.ID, s.AccountID, s.Kind, s.Ciphertext, s.Nonce, s.KeyVersion)
 	return err
 }
 
