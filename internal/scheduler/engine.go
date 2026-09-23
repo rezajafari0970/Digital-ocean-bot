@@ -22,6 +22,12 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		return err
 	}
 	for _, x := range items {
+		var enabled bool
+		var runtimeStatus string
+		if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus); err != nil || !enabled || runtimeStatus != "READY" {
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
 		var limit, active, creating, provisioning int
 		_ = e.DB.QueryRowContext(ctx, `SELECT COALESCE((data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, x.AccountID).Scan(&limit)
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state IN ('new','creating')),count(*) FILTER(WHERE state='provisioning') FROM resources WHERE account_id=$1 AND type='droplet'`, x.AccountID).Scan(&active, &creating, &provisioning)
