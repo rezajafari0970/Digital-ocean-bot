@@ -4,30 +4,34 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"net/http"
 )
 
 type Server struct {
+	Auth      auth.Service
 	DB        *sql.DB
 	Container app.Container
 	Health    observability.Health
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{DB: db, Container: c, Health: observability.Health{DB: db}}
+	return &Server{DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
 	m.HandleFunc("GET /healthz", s.health)
 	m.HandleFunc("GET /readyz", s.ready)
-	m.HandleFunc("GET /api/v1/accounts", s.accounts)
-	m.HandleFunc("GET /api/v1/proxies", s.proxies)
-	m.HandleFunc("GET /api/v1/profiles", s.profiles)
-	m.HandleFunc("POST /api/v1/deployments", s.createDeployment)
-	m.HandleFunc("GET /api/v1/deployments", s.deployments)
-	m.HandleFunc("GET /api/v1/audit", s.audit)
-	m.HandleFunc("GET /api/v1/system", s.system)
+	m.HandleFunc("POST /api/v1/auth/login", s.login)
+	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
+	m.HandleFunc("GET /api/v1/accounts", s.require(s.accounts, false))
+	m.HandleFunc("GET /api/v1/proxies", s.require(s.proxies, false))
+	m.HandleFunc("GET /api/v1/profiles", s.require(s.profiles, false))
+	m.HandleFunc("POST /api/v1/deployments", s.require(s.createDeployment, true))
+	m.HandleFunc("GET /api/v1/deployments", s.require(s.deployments, false))
+	m.HandleFunc("GET /api/v1/audit", s.require(s.audit, false))
+	m.HandleFunc("GET /api/v1/system", s.require(s.system, false))
 	return m
 }
 func writeJSON(w http.ResponseWriter, status int, v any) {
