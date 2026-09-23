@@ -29,7 +29,7 @@ func (s SQLStore) Reserve(ctx context.Context, r Request) (Deployment, bool, err
 }
 
 func (s SQLStore) Update(ctx context.Context, d Deployment) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE deployments SET droplet_id=NULLIF($3,'')::uuid,provider_id=NULLIF($4,''),state=$5,current_step=$6,attempt=$7,last_error=NULLIF($8,''),updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, d.AccountID, d.DropletID, d.ProviderID, d.State, d.CurrentStep, d.Attempt, d.LastError)
+	_, err := s.DB.ExecContext(ctx, `UPDATE deployments SET droplet_id=NULLIF($3,'')::uuid,provider_id=NULLIF($4,''),state=$5,current_step=$6,attempt=$7,last_error=NULLIF($8,''),lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, d.AccountID, d.DropletID, d.ProviderID, d.State, d.CurrentStep, d.Attempt, d.LastError)
 	return err
 }
 func (s SQLStore) Event(ctx context.Context, id, step string, state State, message string) error {

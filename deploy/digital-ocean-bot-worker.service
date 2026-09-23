@@ -1,0 +1,23 @@
+[Unit]
+Description=Digital Ocean Bot Worker
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=digitaloceanbot
+Group=digitaloceanbot
+WorkingDirectory=/opt/digital-ocean-bot
+EnvironmentFile=/etc/digital-ocean-bot/env
+ExecStart=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/digital-ocean-bot
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
