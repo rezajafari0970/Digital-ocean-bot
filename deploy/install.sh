@@ -17,7 +17,7 @@ go build -trimpath -ldflags='-s -w' -o "$APP/bin/digital-ocean-bot-api" ./cmd/ap
 go build -trimpath -ldflags='-s -w' -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
-if [ ! -f "$ETC/master.key" ]; then umask 077; head -c 32 /dev/urandom > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
+if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
 if [ ! -f "$ETC/env" ]; then
   DB_PASS=$(openssl rand -hex 24)
   sudo -u postgres psql -v ON_ERROR_STOP=1 <<SQL
