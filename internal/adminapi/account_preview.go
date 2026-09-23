@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/accounts"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
@@ -37,7 +38,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	if x.ProxyID != "" {
 		var px network.Proxy
 		var user, ref string
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil || px.Status != network.StatusHealthy {
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil || (px.Status != network.StatusHealthy && px.Status != network.StatusDegraded) {
 			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
 			return
 		}
@@ -75,6 +76,24 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	d, err := provider.Catalog(r.Context())
 	if err != nil {
+		var h digitalocean.HTTPError
+		if errors.As(err, &h) {
+			switch h.Status {
+			case 401:
+				writeJSON(w, 401, map[string]string{"error": "digitalocean_token_invalid", "detail": "DigitalOcean rejected this API token."})
+			case 403:
+				writeJSON(w, 403, map[string]string{"error": "digitalocean_permission_denied", "detail": "The token does not have the required DigitalOcean permissions."})
+			case 429:
+				writeJSON(w, 429, map[string]string{"error": "digitalocean_rate_limited", "detail": "DigitalOcean rate limit reached. Try again later."})
+			default:
+				writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed", "detail": err.Error()})
+			}
+			return
+		}
+		if errors.Is(err, digitalocean.ErrProviderRequest) {
+			writeJSON(w, 503, map[string]string{"error": "digitalocean_transport_failed", "detail": "Could not reach DigitalOcean through the selected connection."})
+			return
+		}
 		writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed", "detail": err.Error()})
 		return
 	}

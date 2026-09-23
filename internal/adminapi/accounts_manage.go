@@ -49,16 +49,12 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
-	res, err := s.DB.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_sizes=$4,preferred_image=NULLIF($5,''),server_lifetime_seconds=$6,auto_interval_seconds=$7,auto_batch_size=$8,auto_max_concurrent=$9,desired_server_count=$10,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, x.Image, x.LifetimeSeconds, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.DesiredServerCount)
+	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	n, _ := res.RowsAffected()
-	if n == 0 {
-		writeJSON(w, 404, map[string]string{"error": "not_found"})
-		return
-	}
+	defer tx.Rollback()
 	if x.NetworkMode == "" {
 		x.NetworkMode = "direct"
 	}
@@ -68,18 +64,37 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if x.NetworkMode == "proxy_required" {
 		var status string
-		if x.ProxyID == "" || s.DB.QueryRowContext(r.Context(), `SELECT status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&status) != nil || status != "healthy" {
-			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
+		if x.ProxyID == "" || tx.QueryRowContext(r.Context(), `SELECT status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&status) != nil || (status != "healthy" && status != "degraded") {
+			writeJSON(w, 409, map[string]string{"error": "proxy_unavailable", "detail": "Selected proxy is not currently usable"})
 			return
 		}
 	}
-	if _, err := s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT(account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_region=COALESCE(NULLIF($11,''),preferred_region),preferred_sizes=$4,preferred_image=COALESCE(NULLIF($5,''),preferred_image),server_lifetime_seconds=$6,auto_interval_seconds=$7,auto_batch_size=$8,auto_max_concurrent=$9,desired_server_count=$10,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, x.Image, x.LifetimeSeconds, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.DesiredServerCount, func() string {
+		if len(x.Regions) > 0 {
+			return x.Regions[0]
+		}
+		return ""
+	}())
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		writeJSON(w, 404, map[string]string{"error": "not_found"})
+		return
+	}
+	if _, err = tx.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT(account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	if x.Token != "" {
 		if err := s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
-			writeJSON(w, 500, errorBody())
+			writeJSON(w, 500, map[string]string{"error": "token_update_failed", "detail": err.Error()})
 			return
 		}
 	}
@@ -96,10 +111,17 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
-	var active int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED')`, id).Scan(&active)
-	if active > 0 {
-		writeJSON(w, 409, map[string]string{"error": "account_has_active_deployments"})
+	var deployments, droplets int
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE account_id=$1 AND state <> 'FAILED'`, id).Scan(&deployments); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id).Scan(&droplets); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if deployments > 0 || droplets > 0 {
+		writeJSON(w, 409, map[string]any{"error": "account_has_managed_resources", "deployments": deployments, "droplets": droplets})
 		return
 	}
 	res, err := s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
