@@ -49,11 +49,11 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	if err != nil {
 		return ErrProviderRequest
 	}
-	rel, err := url.Parse("./" + strings.TrimLeft(path, "/"))
+	rel, err := url.Parse(strings.TrimLeft(path, "/"))
 	if err != nil {
 		return ErrProviderRequest
 	}
-	u := base.ResolveReference(rel).String()
+	u := base.String() + rel.String()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return ErrProviderRequest
