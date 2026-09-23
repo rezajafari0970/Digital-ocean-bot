@@ -15,6 +15,10 @@ type loginRequest struct {
 }
 
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
+	if s.LoginLimiter != nil && !s.LoginLimiter.Allow(r.RemoteAddr) {
+		writeJSON(w, http.StatusTooManyRequests, map[string]string{"error": "too_many_attempts"})
+		return
+	}
 	var req loginRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})

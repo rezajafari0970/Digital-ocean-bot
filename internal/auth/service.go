@@ -37,7 +37,7 @@ func (s Service) Login(ctx context.Context, username, password string) (string, 
 	h := sha256.Sum256([]byte(token))
 	ttl := s.TTL
 	if ttl <= 0 {
-		ttl = 12 * time.Hour
+		ttl = 4 * time.Hour
 	}
 	session := Session{UserID: u.ID, TokenHash: h[:], ExpiresAt: time.Now().UTC().Add(ttl)}
 	if err := s.Store.CreateSession(ctx, session); err != nil {

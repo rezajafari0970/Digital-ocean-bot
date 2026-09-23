@@ -10,14 +10,15 @@ import (
 )
 
 type Server struct {
-	Auth      auth.Service
-	DB        *sql.DB
-	Container app.Container
-	Health    observability.Health
+	Auth         auth.Service
+	DB           *sql.DB
+	Container    app.Container
+	Health       observability.Health
+	LoginLimiter *LoginLimiter
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}}
+	return &Server{DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter()}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
