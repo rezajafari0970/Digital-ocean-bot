@@ -35,7 +35,13 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	}
 	rt, err := s.Container.Runtime(r.Context(), id)
 	if err == nil {
-		_, err = rt.Provider.GetAccount(r.Context())
+		discovery, discoverErr := rt.Provider.Discover(r.Context())
+		if discoverErr == nil {
+			raw, _ := json.Marshal(discovery)
+			_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO provider_snapshots(id,account_id,provider,version,data) VALUES(gen_random_uuid(),$1,'digitalocean',1,$2)`, id, raw)
+			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, discovery.Account.UUID, discovery.Account.Email)
+		}
+		err = discoverErr
 		if rt.Gateway != nil {
 			rt.Gateway.CloseIdleConnections()
 		}
