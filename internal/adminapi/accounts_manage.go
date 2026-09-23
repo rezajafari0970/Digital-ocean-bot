@@ -56,7 +56,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 422, map[string]string{"error": "replacement_token_validation_failed", "detail": validateErr.Error()})
 			return
 		}
-		candidateEmail, candidateExternalID = d.Account.Email, d.Account.UUID
+		candidateEmail, candidateExternalID = d.Email, d.UUID
 	}
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
