@@ -37,6 +37,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/accounts/{id}/resources", s.require(s.accountResources, false))
 	m.HandleFunc("GET /api/v1/accounts/{id}/capacity", s.require(s.accountCapacity, false))
 	m.HandleFunc("GET /api/v1/accounts/{id}/runtime", s.require(s.accountRuntime, false))
+	m.HandleFunc("GET /api/v1/schedules", s.require(s.listSchedules, false))
+	m.HandleFunc("PUT /api/v1/schedules", s.require(s.upsertSchedule, true))
 	m.HandleFunc("GET /api/v1/accounts", s.require(s.accounts, false))
 	m.HandleFunc("GET /api/v1/proxies", s.require(s.proxies, false))
 	m.HandleFunc("GET /api/v1/profiles", s.require(s.profiles, false))
