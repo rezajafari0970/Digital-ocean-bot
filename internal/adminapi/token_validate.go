@@ -7,9 +7,12 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"net/http"
+	"time"
 )
 
 func (s *Server) validateReplacementToken(ctx context.Context, accountID, token, mode, proxyID string) (digitalocean.DiscoveryResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
 	cell := accounts.NewCellManager().Register("replace-" + accountID)
 	var client *http.Client
 	var closeFn func()
