@@ -26,7 +26,7 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) proxies(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.DB.QueryContext(r.Context(), `SELECT id::text,name,type,host,port,status,COALESCE(exit_ip::text,''),COALESCE(country,''),failure_count,last_checked_at FROM proxies ORDER BY name`)
+	rows, err := s.DB.QueryContext(r.Context(), `SELECT id::text,name,type,host,port,status,COALESCE(host(exit_ip),''),COALESCE(country,''),COALESCE(asn,''),COALESCE(latency_ms,0),failure_count,last_checked_at FROM proxies ORDER BY name`)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -34,13 +34,14 @@ func (s *Server) proxies(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	var out []map[string]any
 	for rows.Next() {
-		var id, name, typ, host, status, ip, country string
+		var id, name, typ, host, status, ip, country, asn string
 		var port, fail int
+		var latency int64
 		var checked any
-		if rows.Scan(&id, &name, &typ, &host, &port, &status, &ip, &country, &fail, &checked) != nil {
+		if rows.Scan(&id, &name, &typ, &host, &port, &status, &ip, &country, &asn, &latency, &fail, &checked) != nil {
 			continue
 		}
-		out = append(out, map[string]any{"id": id, "name": name, "type": typ, "host": host, "port": port, "status": status, "exit_ip": ip, "country": country, "failure_count": fail, "last_checked_at": checked})
+		out = append(out, map[string]any{"id": id, "name": name, "type": typ, "host": host, "port": port, "status": status, "exit_ip": ip, "country": country, "asn": asn, "latency_ms": latency, "failure_count": fail, "last_checked_at": checked})
 	}
 	writeJSON(w, 200, out)
 }
