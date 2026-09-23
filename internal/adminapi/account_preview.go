@@ -73,7 +73,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	d, err := provider.Discover(r.Context())
+	d, err := provider.Catalog(r.Context())
 	if err != nil {
 		writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed"})
 		return
