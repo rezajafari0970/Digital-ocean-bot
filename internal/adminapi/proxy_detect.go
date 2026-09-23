@@ -12,7 +12,9 @@ import (
 var errProxyUndetected = errors.New("proxy protocol could not be detected")
 
 func detectProxy(ctx context.Context, x proxyWrite) (network.ProxyType, error) {
-	types := []network.ProxyType{network.ProxyHTTP, network.ProxyHTTPS, network.ProxySOCKS5}
+	return detectProxyTypes(ctx, x, []network.ProxyType{network.ProxyHTTP, network.ProxyHTTPS, network.ProxySOCKS5})
+}
+func detectProxyTypes(ctx context.Context, x proxyWrite, types []network.ProxyType) (network.ProxyType, error) {
 	for _, typ := range types {
 		p := network.Proxy{Name: x.Name, Type: typ, Host: x.Host, Port: x.Port, Status: network.StatusHealthy}
 		g, err := network.NewProxyGateway("detect", p, network.ProxyCredentials{Username: x.Username, Password: x.Password})

@@ -2,6 +2,7 @@ package adminapi
 
 import (
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"net/http"
 )
 
@@ -11,6 +12,7 @@ type proxyWrite struct {
 	Port     int    `json:"port"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Type     string `json:"type"`
 }
 
 func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +26,13 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
-	typ, err := detectProxy(r.Context(), x)
+	var typ network.ProxyType
+	var err error
+	if x.Type == "" || x.Type == "auto" {
+		typ, err = detectProxy(r.Context(), x)
+	} else {
+		typ, err = detectProxyTypes(r.Context(), x, []network.ProxyType{network.ProxyType(x.Type)})
+	}
 	if err != nil {
 		writeJSON(w, 422, map[string]string{"error": "proxy_detection_failed"})
 		return
