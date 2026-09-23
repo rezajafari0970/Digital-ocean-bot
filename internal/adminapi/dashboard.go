@@ -52,7 +52,17 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if providerAvailable < 0 {
 		providerAvailable = 0
 	}
-	d.Capacity = map[string]any{"managed_droplets": active, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": map[bool]string{true: "fresh", false: "unavailable"}[lastRefresh.Valid]}
+	freshnessStatus := "unavailable"
+	ageSeconds := int64(0)
+	if lastRefresh.Valid {
+		ageSeconds = int64(time.Since(lastRefresh.Time).Seconds())
+		if ageSeconds <= 120 {
+			freshnessStatus = "fresh"
+		} else {
+			freshnessStatus = "stale"
+		}
+	}
+	d.Capacity = map[string]any{"managed_droplets": active, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
 	if lastRefresh.Valid {
 		d.Capacity["droplet_limit"] = limit
 		d.Capacity["provider_droplets"] = providerDroplets
