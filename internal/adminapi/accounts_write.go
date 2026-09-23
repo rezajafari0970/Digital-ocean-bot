@@ -51,13 +51,13 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	var id string
 	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent) VALUES(gen_random_uuid(),'digitalocean',$1,NULLIF($2,''),NULLIF($3,''),'do-token',$4,$5,$6) RETURNING id::text`, x.Name, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent).Scan(&id)
 	if err != nil {
-		writeJSON(w, 409, errorBody())
+		writeJSON(w, 409, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
 	}
 	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=jsonb_build_array($2::text),preferred_sizes=jsonb_build_array($3::text),preferred_image=NULLIF($4,'') WHERE id=$1`, id, x.Region, x.Size, x.Image)
 	if err := s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
-		writeJSON(w, 500, errorBody())
+		writeJSON(w, 500, map[string]string{"error": "secret_store_failed", "detail": err.Error()})
 		return
 	}
 	_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END)`, id, x.NetworkMode, x.ProxyID)
