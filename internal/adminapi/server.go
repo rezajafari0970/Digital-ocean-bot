@@ -40,6 +40,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
 	m.HandleFunc("POST /api/v1/accounts", s.require(s.createAccount, true))
+	m.HandleFunc("POST /api/v1/accounts/preview", s.require(s.accountPreview, true))
 	m.HandleFunc("PUT /api/v1/accounts/{id}", s.require(s.updateAccount, true))
 	m.HandleFunc("DELETE /api/v1/accounts/{id}", s.require(s.deleteAccount, true))
 	m.HandleFunc("GET /api/v1/accounts/{id}/options", s.require(s.accountOptions, false))

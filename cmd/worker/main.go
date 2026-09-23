@@ -25,6 +25,7 @@ func main() {
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
+	go application.Container.RunDailyCatalogSync(ctx)
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 30 * time.Second, Timeout: 12 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {

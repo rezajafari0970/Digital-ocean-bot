@@ -8,6 +8,8 @@ import (
 
 type accountWrite struct {
 	Email           string `json:"email"`
+	Image           string `json:"image"`
+	Size            string `json:"size"`
 	Region          string `json:"region"`
 	NetworkMode     string `json:"network_mode"`
 	ProxyID         string `json:"proxy_id"`
@@ -30,6 +32,10 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
+	if x.Email == "" {
+		writeJSON(w, 400, map[string]string{"error": "account_preview_required"})
+		return
+	}
 	if x.NetworkMode == "" {
 		x.NetworkMode = "direct"
 	}
@@ -48,6 +54,7 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 409, errorBody())
 		return
 	}
+	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=jsonb_build_array($2::text),preferred_sizes=jsonb_build_array($3::text),preferred_image=NULLIF($4,'') WHERE id=$1`, id, x.Region, x.Size, x.Image)
 	if err := s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, 500, errorBody())

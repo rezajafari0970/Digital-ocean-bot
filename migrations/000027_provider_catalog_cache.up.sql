@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS provider_catalog_cache(account_id UUID PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE, catalog JSONB NOT NULL, refreshed_at TIMESTAMPTZ NOT NULL DEFAULT now());

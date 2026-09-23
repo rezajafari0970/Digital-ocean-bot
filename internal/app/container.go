@@ -56,7 +56,17 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		}
 		return AccountRuntime{Config: cfg, Cell: cell, Gateway: gateway, Provider: provider, Operations: jobs.SQLStore{DB: c.DB}, Gate: gate}, nil
 	}
-	return AccountRuntime{}, ErrNetworkNotReady
+	bundle, err := network.NewIsolatedDirectClient(accountID)
+	if err != nil {
+		return AccountRuntime{}, err
+	}
+	provider, err := digitalocean.NewClient(cell.Context, cfg.SecretRef, c.Secrets, bundle.Client)
+	if err != nil {
+		bundle.CloseIdleConnections()
+		return AccountRuntime{}, err
+	}
+	gate := network.AccountGate{Profile: cfg.Network}
+	return AccountRuntime{Config: cfg, Cell: cell, Provider: provider, Operations: jobs.SQLStore{DB: c.DB}, Gate: gate}, nil
 }
 func wipe(b []byte) {
 	for i := range b {

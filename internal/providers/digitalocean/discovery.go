@@ -3,16 +3,24 @@ package digitalocean
 import "context"
 
 type Region struct {
-	Slug      string
-	Name      string
-	Available bool
+	Slug         string
+	Name         string
+	Available    bool
+	PriceMonthly float64  `json:"price_monthly"`
+	PriceHourly  float64  `json:"price_hourly"`
+	Transfer     float64  `json:"transfer"`
+	Regions      []string `json:"regions"`
 }
 type Size struct {
-	Slug      string
-	Memory    int
-	VCPUs     int
-	Disk      int
-	Available bool
+	Slug         string
+	Memory       int
+	VCPUs        int
+	Disk         int
+	Available    bool
+	PriceMonthly float64  `json:"price_monthly"`
+	PriceHourly  float64  `json:"price_hourly"`
+	Transfer     float64  `json:"transfer"`
+	Regions      []string `json:"regions"`
 }
 type Image struct {
 	ID           int
