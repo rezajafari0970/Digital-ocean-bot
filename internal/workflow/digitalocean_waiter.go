@@ -11,7 +11,7 @@ import (
 var ErrResourceNotReady = errors.New("provider resource not ready")
 
 type DropletLookup interface {
-	ListDropletModels(context.Context) ([]digitalocean.Droplet, error)
+	GetDroplet(context.Context, int) (digitalocean.Droplet, error)
 }
 type DigitalOceanWaiter struct {
 	Provider DropletLookup
@@ -32,15 +32,11 @@ func (w DigitalOceanWaiter) Wait(ctx context.Context, providerID string) (Resour
 	attempt := 0
 	for {
 		attempt++
-		items, err := w.Provider.ListDropletModels(ctx)
-		if err == nil {
-			for _, x := range items {
-				if x.ID == id && x.Status == "active" {
-					host := dropletIPv4(x)
-					if host != "" {
-						return ResourceInfo{ProviderID: providerID, Host: host}, nil
-					}
-				}
+		x, err := w.Provider.GetDroplet(ctx, id)
+		if err == nil && x.Status == "active" {
+			host := dropletIPv4(x)
+			if host != "" {
+				return ResourceInfo{ProviderID: providerID, Host: host}, nil
 			}
 		}
 		select {

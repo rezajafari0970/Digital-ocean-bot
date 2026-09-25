@@ -26,6 +26,7 @@ type Profile struct {
 	Lifetime    time.Duration
 	Provision   string
 	IdentityTag string
+	SSHKeyID    int
 }
 
 type Droplet struct {

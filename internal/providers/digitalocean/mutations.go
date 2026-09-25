@@ -22,6 +22,26 @@ type CreateDropletRequest struct {
 	IPv6       bool     `json:"ipv6,omitempty"`
 }
 
+type SSHKeyCreateRequest struct {
+	Name      string `json:"name"`
+	PublicKey string `json:"public_key"`
+}
+type SSHKeyCreated struct {
+	ID                           int `json:"id"`
+	Name, Fingerprint, PublicKey string
+}
+
+func (c *Client) CreateSSHKey(ctx context.Context, name, publicKey string) (SSHKeyCreated, error) {
+	var e struct {
+		SSHKey SSHKeyCreated `json:"ssh_key"`
+	}
+	err := c.request(ctx, http.MethodPost, "/account/keys", SSHKeyCreateRequest{Name: name, PublicKey: publicKey}, &e)
+	return e.SSHKey, err
+}
+func (c *Client) DeleteSSHKey(ctx context.Context, id int) error {
+	return c.request(ctx, http.MethodDelete, "/account/keys/"+strconv.Itoa(id), nil, nil)
+}
+
 type Action struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`

@@ -3,6 +3,8 @@ package provisioning
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 )
 
 var ErrInvalidPlan = errors.New("invalid provision plan")
@@ -36,6 +38,18 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 	if !fresh && run.State == Completed {
 		return run, nil
 	}
+	if !fresh && run.NextRetryAt != nil && time.Now().Before(*run.NextRetryAt) {
+		return run, fmt.Errorf("provision retry deferred until %s", run.NextRetryAt.UTC().Format(time.RFC3339))
+	}
+	const maxAttempts = 8
+	if !fresh && run.Attempt >= maxAttempts {
+		run.State = Failed
+		if run.LastError == "" {
+			run.LastError = "provision retry limit reached"
+		}
+		_ = e.Store.Update(ctx, run)
+		return run, fmt.Errorf("provision retry limit reached: %s", run.LastError)
+	}
 	key, err := e.Secrets.Get(ctx, target.AccountID, target.KeySecretRef)
 	if err != nil {
 		return run, err
@@ -62,14 +76,40 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			_, err = e.SSH.Run(ctx, target, key, step.command)
 		}
 		if err != nil {
-			run.State = Failed
+			run.LastError = err.Error()
+			backoff := time.Duration(1<<min(run.Attempt, 6)) * time.Minute
+			next := time.Now().Add(backoff)
+			run.NextRetryAt = &next
+			// Context cancellation/timeout is an interrupted attempt, not a
+			// permanent provisioning failure. Persist the current resumable step.
+			if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
+				run.State = Failed
+			}
 			_ = e.Store.Update(ctx, run)
+			return run, err
+		}
+		// Persist the checkpoint immediately. A killed worker can then resume
+		// at the next step instead of repeating an already successful command.
+		run.CurrentStep = provisionNext(step.name)
+		run.LastError = ""
+		run.NextRetryAt = nil
+		if err := e.Store.Update(ctx, run); err != nil {
 			return run, err
 		}
 	}
 	run.State = Completed
 	run.CurrentStep = "done"
 	return run, e.Store.Update(ctx, run)
+}
+
+func provisionNext(s string) string {
+	m := map[string]string{
+		"ssh":       "bootstrap",
+		"bootstrap": "panel",
+		"panel":     "verify",
+		"verify":    "done",
+	}
+	return m[s]
 }
 
 func completed(current, target string) bool {
@@ -80,4 +120,11 @@ func wipe(b []byte) {
 	for i := range b {
 		b[i] = 0
 	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

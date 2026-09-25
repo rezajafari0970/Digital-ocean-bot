@@ -23,7 +23,7 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 	if limit < 1 {
 		limit = 100
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),expires_at,updated_at FROM droplets WHERE state IN ('READY','EXPIRING','RETIRING','DELETING') AND expires_at IS NOT NULL AND expires_at<=$1 ORDER BY expires_at LIMIT $2`, now, limit)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),expires_at,updated_at FROM droplets WHERE state IN ('READY','EXPIRING','RETIRING','DELETING') AND expires_at IS NOT NULL AND expires_at <= $1 + make_interval(secs => GREATEST(300, LEAST(1800, COALESCE((SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (done.created_at - d2.created_at))) FROM deployments d2 JOIN LATERAL (SELECT de.created_at FROM deployment_events de WHERE de.deployment_id=d2.id AND de.step='done' AND de.state='READY' ORDER BY de.created_at DESC LIMIT 1) done ON true WHERE d2.account_id=droplets.account_id AND d2.state='READY' AND done.created_at>d2.created_at),600)::int + 120))) ORDER BY expires_at LIMIT $2`, now, limit)
 	if err != nil {
 		return nil, err
 	}

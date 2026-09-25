@@ -31,17 +31,17 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 		"image":    image != "",
 		"lifetime": lifetime >= 1800,
 		"schedule": interval >= 60 && batch >= 1 && maxConcurrent >= 1 && desired >= 1,
-		"network":  mode == "direct" || (mode == "proxy_required" && (proxyStatus == "healthy" || proxyStatus == "degraded")),
+		"network":  mode == "direct" || (mode == "proxy_required" && (proxyStatus == "healthy")),
 	}
+	// Preflight validates identity with one lightweight provider request. Full
+	// discovery belongs to explicit Refresh and must not be repeated here.
 	rt, err := s.Container.Runtime(r.Context(), id)
 	if err == nil {
-		discovery, discoverErr := rt.Provider.Discover(r.Context())
-		if discoverErr == nil {
-			raw, _ := json.Marshal(discovery)
-			_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO provider_snapshots(id,account_id,provider,version,data) VALUES(gen_random_uuid(),$1,'digitalocean',1,$2)`, id, raw)
-			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, discovery.Account.UUID, discovery.Account.Email)
+		account, identityErr := rt.Provider.GetAccount(r.Context())
+		if identityErr == nil {
+			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.UUID, account.Email)
 		}
-		err = discoverErr
+		err = identityErr
 		if rt.Gateway != nil {
 			rt.Gateway.CloseIdleConnections()
 		}

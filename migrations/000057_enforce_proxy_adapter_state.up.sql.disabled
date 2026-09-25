@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION enforce_proxy_adapter_identity_state() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE a text;
+BEGIN
+ SELECT COALESCE(p.adapter,'generic') INTO a FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=NEW.account_id;
+ IF COALESCE(a,'generic')='generic' THEN NEW.sticky_session:=NULL; NEW.fallback_active:=false; NEW.rotation_started_at:=NULL; END IF;
+ RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS trg_enforce_proxy_adapter_identity_state ON account_network_identities;
+CREATE TRIGGER trg_enforce_proxy_adapter_identity_state BEFORE INSERT OR UPDATE ON account_network_identities FOR EACH ROW EXECUTE FUNCTION enforce_proxy_adapter_identity_state();
+UPDATE account_network_identities i SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=i.account_id AND COALESCE(p.adapter,'generic')='generic';

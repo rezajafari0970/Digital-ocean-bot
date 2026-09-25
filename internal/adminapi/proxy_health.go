@@ -32,6 +32,13 @@ func (s *Server) testAccountProxy(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 	result := network.CheckProxy(ctx, gateway, "https://api.ipify.org?format=json", cfg.Proxy.ExitIP, "")
+	// Account-level proxy tests also refresh the persisted network identity.
+	x := proxyWrite{Name: cfg.Proxy.Name, Host: cfg.Proxy.Host, Port: cfg.Proxy.Port, Username: cfg.ProxyUsername, Password: string(password)}
+	if obs, obsErr := observeProxy(ctx, x, cfg.Proxy.Type); obsErr == nil {
+		locale := localeForCountry(obs.CountryCode)
+		_, _ = s.DB.ExecContext(ctx, `UPDATE proxies SET status='healthy',exit_ip=$2,country=$3,asn=$4,latency_ms=$5,last_checked_at=now(),last_success_at=now(),failure_count=0 WHERE id=$1`, cfg.Proxy.ID, obs.IP, obs.Country, obs.ASN, obs.LatencyMS)
+		_, _ = s.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country) VALUES($1,COALESCE(NULLIF($2,''),'UTC'),$3,$4::inet,CASE WHEN family($4::inet)=4 THEN host(network(set_masklen($4::inet,24)))||'/24' ELSE host(network(set_masklen($4::inet,48)))||'/48' END,$5,$6) ON CONFLICT(account_id) DO UPDATE SET timezone=EXCLUDED.timezone,locale=EXCLUDED.locale,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,asn=EXCLUDED.asn,country=EXCLUDED.country,updated_at=now()`, id, obs.Timezone, locale, obs.IP, obs.ASN, obs.Country)
+	}
 	writeJSON(w, 200, result)
 }
 

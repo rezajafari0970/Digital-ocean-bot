@@ -14,6 +14,7 @@ type proxyObservation struct {
 	IP          string `json:"ip"`
 	Country     string `json:"country"`
 	CountryCode string `json:"country_code"`
+	Timezone    string `json:"timezone"`
 	ASN         string `json:"asn"`
 	LatencyMS   int64  `json:"latency_ms"`
 }
@@ -39,7 +40,10 @@ func observeProxy(ctx context.Context, x proxyWrite, typ network.ProxyType) (pro
 		IP          string `json:"ip"`
 		Country     string `json:"country"`
 		CountryCode string `json:"country_code"`
-		Connection  struct {
+		Timezone    struct {
+			ID string `json:"id"`
+		} `json:"timezone"`
+		Connection struct {
 			ASN int    `json:"asn"`
 			Org string `json:"org"`
 		} `json:"connection"`
@@ -51,5 +55,5 @@ func observeProxy(ctx context.Context, x proxyWrite, typ network.ProxyType) (pro
 	if v.Connection.ASN > 0 {
 		asn = "AS" + fmt.Sprint(v.Connection.ASN) + " " + asn
 	}
-	return proxyObservation{IP: v.IP, Country: v.Country, CountryCode: v.CountryCode, ASN: asn, LatencyMS: time.Since(start).Milliseconds()}, nil
+	return proxyObservation{IP: v.IP, Country: v.Country, CountryCode: v.CountryCode, Timezone: v.Timezone.ID, ASN: asn, LatencyMS: time.Since(start).Milliseconds()}, nil
 }

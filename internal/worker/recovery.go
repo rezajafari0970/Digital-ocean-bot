@@ -19,7 +19,7 @@ func (s RecoveryStore) Operations(ctx context.Context, limit int) ([]RecoveryIte
 	if limit < 1 {
 		limit = 100
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,kind,state,updated_at FROM operations WHERE state IN ('running','verifying','unknown') ORDER BY updated_at LIMIT $1`, limit)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,kind,state,updated_at FROM operations WHERE (state IN ('running','verifying') AND updated_at <= now()-interval '15 seconds') OR (state='unknown' AND updated_at <= now()-interval '30 seconds') ORDER BY updated_at LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
 	}

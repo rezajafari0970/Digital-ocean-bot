@@ -21,6 +21,13 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 	}
 	rows.Close()
 	for _, id := range ids {
+		// A recent full provider snapshot already contains the catalog. Do not
+		// spend seven discovery requests again merely because the worker started.
+		var recent bool
+		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-interval '23 hours')`, id).Scan(&recent)
+		if recent {
+			continue
+		}
 		rt, err := c.Runtime(ctx, id)
 		if err != nil {
 			log.Printf("catalog sync %s runtime: %v", id, err)

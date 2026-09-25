@@ -1,0 +1,2 @@
+ALTER TABLE provision_runs ADD COLUMN IF NOT EXISTS last_error TEXT;
+ALTER TABLE provision_runs ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMPTZ;

@@ -31,9 +31,10 @@ type Deployment struct {
 	UpdatedAt   time.Time
 }
 type Request struct {
-	AccountID   string
-	ProfileID   string
-	ClientCount int
-	InboundID   int
-	EmailPrefix string
+	DeploymentID string
+	AccountID    string
+	ProfileID    string
+	ClientCount  int
+	InboundID    int
+	EmailPrefix  string
 }

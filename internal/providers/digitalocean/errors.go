@@ -18,7 +18,7 @@ type HTTPError struct {
 }
 
 func (e HTTPError) Error() string {
-	return fmt.Sprintf("digitalocean api status %d code %s path %s", e.Status, e.Code, e.Path)
+	return fmt.Sprintf("digitalocean api status %d code %s message %q path %s", e.Status, e.Code, e.Message, e.Path)
 }
 func IsCapacityError(err error) bool {
 	var h HTTPError

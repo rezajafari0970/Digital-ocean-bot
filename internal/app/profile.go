@@ -22,6 +22,6 @@ func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentI
 			return DeploymentConfig{}, snap, err
 		}
 	}
-	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei"}, Provision: provisioning.Plan{Bootstrap: "set -euo pipefail; apt-get update -y", InstallPanel: "true", Verify: sanaei.VerifyCommand()}, Target: provisioning.Target{User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}, Template: template, DatabasePaths: sanaei.DefaultDatabasePaths()}
+	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei", SSHKeyID: snap.SSHProviderKeyID}, Provision: provisioning.Plan{Bootstrap: "set -euo pipefail; apt-get update -y", InstallPanel: "true", Verify: sanaei.VerifyCommand()}, Target: provisioning.Target{User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}, Template: template, DatabasePaths: sanaei.DefaultDatabasePaths()}
 	return cfg, snap, nil
 }

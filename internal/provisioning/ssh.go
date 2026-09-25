@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -64,7 +65,12 @@ func (s SSHClient) Run(ctx context.Context, target Target, privateKey []byte, co
 	session.Stdout = &out
 	session.Stderr = &out
 	if err := session.Run(command); err != nil {
-		return out.String(), fmt.Errorf("%w", ErrSSHCommand)
+		detail := out.String()
+		if len(detail) > 2048 {
+			detail = detail[len(detail)-2048:]
+		}
+		detail = strings.ReplaceAll(detail, "\x00", "")
+		return out.String(), fmt.Errorf("%w: %v: %s", ErrSSHCommand, err, detail)
 	}
 	return out.String(), nil
 }

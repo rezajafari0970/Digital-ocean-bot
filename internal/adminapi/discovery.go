@@ -3,10 +3,28 @@ package adminapi
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+	// Collapse accidental double taps/reloads: a successful snapshot younger
+	// than 15 seconds is already fresh enough for an explicit UI refresh.
+	var recentRaw []byte
+	var recentAt time.Time
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT data,created_at FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-interval '15 seconds' ORDER BY created_at DESC LIMIT 1`, id).Scan(&recentRaw, &recentAt); err == nil {
+		var recent struct {
+			Account struct {
+				Email, UUID  string
+				DropletLimit int `json:"droplet_limit"`
+			} `json:"Account"`
+			Droplets []json.RawMessage `json:"Droplets"`
+		}
+		if json.Unmarshal(recentRaw, &recent) == nil {
+			writeJSON(w, 200, map[string]any{"refreshed": false, "cached": true, "email": recent.Account.Email, "external_id": recent.Account.UUID, "droplet_limit": recent.Account.DropletLimit, "provider_droplets": len(recent.Droplets), "snapshot_at": recentAt})
+			return
+		}
+	}
 	runtime, err := s.Container.Runtime(r.Context(), id)
 	if err != nil {
 		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "detail": err.Error()})

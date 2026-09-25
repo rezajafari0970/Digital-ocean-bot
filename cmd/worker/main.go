@@ -25,7 +25,72 @@ func main() {
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
+	// Repair only locally provable state links before any scheduler/lifecycle work.
+	application.Container.ReconcileLocalState(ctx)
 	go application.Container.RunDailyCatalogSync(ctx)
+	// Sticky proxy identity keeper: preserve each account's current exit IP while
+	// healthy. On failure, retry the preferred country every 30s; after five
+	// minutes the resolver may accept a healthy unique fallback country.
+	go func() {
+		t := time.NewTicker(30 * time.Second)
+		defer t.Stop()
+		run := func() {
+			rows, err := application.DB.QueryContext(ctx, `SELECT a.id::text FROM accounts a JOIN network_profiles np ON np.account_id=a.id WHERE a.enabled=true AND np.mode='proxy_required'`)
+			if err != nil {
+				return
+			}
+			var ids []string
+			for rows.Next() {
+				var id string
+				if rows.Scan(&id) == nil {
+					ids = append(ids, id)
+				}
+			}
+			rows.Close()
+			for _, id := range ids {
+				_ = application.Container.MaintainStickyIdentity(ctx, id)
+			}
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+	// Browser audit queue is independent from the sticky health loop.
+	go func() {
+		t := time.NewTicker(10 * time.Second)
+		defer t.Stop()
+		application.Container.RunBrowserAuditQueue(ctx)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				application.Container.RunBrowserAuditQueue(ctx)
+			}
+		}
+	}()
+
+	// Capacity refresh coordinator: one full provider refresh per account only
+	// when the shared snapshot is older than 90s. Runs before the 2m safety gate.
+	go func() {
+		t := time.NewTicker(30 * time.Second)
+		defer t.Stop()
+		application.Container.RefreshProviderSnapshots(ctx, 90*time.Second)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				application.Container.RefreshProviderSnapshots(ctx, 90*time.Second)
+			}
+		}
+	}()
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 30 * time.Second, Timeout: 12 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {

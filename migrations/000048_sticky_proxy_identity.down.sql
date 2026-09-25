@@ -1,0 +1,1 @@
+ALTER TABLE account_network_identities DROP COLUMN IF EXISTS last_health_ok, DROP COLUMN IF EXISTS last_health_at, DROP COLUMN IF EXISTS fallback_active, DROP COLUMN IF EXISTS rotation_started_at, DROP COLUMN IF EXISTS preferred_country, DROP COLUMN IF EXISTS preferred_country_code, DROP COLUMN IF EXISTS sticky_session;

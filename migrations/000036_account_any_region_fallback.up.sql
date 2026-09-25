@@ -1,0 +1,1 @@
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS fallback_any_region BOOLEAN NOT NULL DEFAULT true;

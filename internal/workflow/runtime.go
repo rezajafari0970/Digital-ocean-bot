@@ -105,8 +105,14 @@ func (r RuntimeSteps) WaitResource(ctx context.Context, d Deployment) (Deploymen
 	d.ProviderID = info.ProviderID
 	r.Target.Host = info.Host
 	if r.DB != nil && d.DropletID == "" {
-		profileRaw, _ := json.Marshal(r.Profile)
-		err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,$3,'READY',$4,now(),now()+($5 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProfileID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
+		// Recovery may reach wait_resource after the droplet row was already
+		// persisted. Reuse it by provider identity instead of attempting a
+		// duplicate INSERT on every recovery cycle.
+		err = r.DB.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 AND state<>'DELETED' ORDER BY created_at DESC LIMIT 1`, d.AccountID, d.ProviderID).Scan(&d.DropletID)
+		if errors.Is(err, sql.ErrNoRows) {
+			profileRaw, _ := json.Marshal(r.Profile)
+			err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,$3,'READY',$4,now(),now()+($5 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProfileID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
+		}
 		if err != nil {
 			return d, err
 		}
@@ -118,6 +124,18 @@ func (r RuntimeSteps) Provision(ctx context.Context, d Deployment) (Deployment, 
 		return d, ErrRuntimeConfig
 	}
 	t := r.target(d)
+	// On recovery wait_resource may already be checkpointed, so the in-memory
+	// Host from that step no longer exists. Rehydrate it from the provider.
+	if t.Host == "" && r.Waiter != nil && d.ProviderID != "" {
+		info, err := r.Waiter.Wait(ctx, d.ProviderID)
+		if err != nil {
+			return d, err
+		}
+		t.Host = info.Host
+	}
+	if t.Host == "" {
+		return d, ErrRuntimeConfig
+	}
 	_, err := r.Provisioner.Execute(ctx, t, r.ProvisionPlan)
 	return d, err
 }
@@ -125,7 +143,18 @@ func (r RuntimeSteps) ImportDatabase(ctx context.Context, d Deployment) (Deploym
 	if r.Database == nil {
 		return d, ErrRuntimeConfig
 	}
-	return d, r.Database.Import(ctx, r.target(d), r.Template, r.DatabasePaths)
+	t := r.target(d)
+	if t.Host == "" && r.Waiter != nil && d.ProviderID != "" {
+		info, err := r.Waiter.Wait(ctx, d.ProviderID)
+		if err != nil {
+			return d, err
+		}
+		t.Host = info.Host
+	}
+	if t.Host == "" {
+		return d, ErrRuntimeConfig
+	}
+	return d, r.Database.Import(ctx, t, r.Template, r.DatabasePaths)
 }
 func (r RuntimeSteps) ConfigurePanel(ctx context.Context, d Deployment) (Deployment, error) {
 	if r.Panel == nil {
@@ -176,12 +205,17 @@ func (c *clientCache) Load(k string) (any, bool) { v, ok := c.m[k]; return v, ok
 
 func ProviderID(id int) string { return strconv.Itoa(id) }
 func waitDelay(attempt int) time.Duration {
+	// Provider polling budget: 2s, 4s, 8s, then at most once every 15s.
+	// This keeps activation responsive without hammering the provider API.
 	if attempt < 1 {
 		attempt = 1
 	}
-	d := time.Duration(attempt) * time.Second
-	if d > 10*time.Second {
-		return 10 * time.Second
+	d := 2 * time.Second
+	for i := 1; i < attempt && d < 15*time.Second; i++ {
+		d *= 2
+	}
+	if d > 15*time.Second {
+		d = 15 * time.Second
 	}
 	return d
 }

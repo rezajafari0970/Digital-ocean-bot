@@ -38,6 +38,8 @@ type Run struct {
 	State       State
 	CurrentStep string
 	Attempt     int
+	LastError   string
+	NextRetryAt *time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

@@ -11,6 +11,7 @@ type ProfileSnapshot struct {
 	Lifetime           time.Duration `json:"lifetime"`
 	SSHUser            string        `json:"ssh_user"`
 	SSHKeySecretRef    string        `json:"ssh_key_secret_ref"`
+	SSHProviderKeyID   int           `json:"ssh_provider_key_id,omitempty"`
 	InstallerURL       string        `json:"installer_url"`
 	DatabaseTemplateID string        `json:"database_template_id"`
 	InboundID          int           `json:"inbound_id"`

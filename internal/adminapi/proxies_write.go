@@ -14,12 +14,13 @@ type proxyWrite struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Type     string `json:"type"`
+	Adapter  string `json:"adapter"`
 }
 
 func validProxyWrite(x proxyWrite) bool {
 	x.Name = strings.TrimSpace(x.Name)
 	x.Host = strings.TrimSpace(x.Host)
-	return x.Name != "" && x.Host != "" && x.Port > 0 && x.Port <= 65535
+	return x.Name != "" && x.Host != "" && x.Port > 0 && x.Port <= 65535 && (x.Adapter == "" || x.Adapter == "generic" || x.Adapter == "suffix-session")
 }
 func resolveProxyType(r *http.Request, x proxyWrite) (network.ProxyType, error) {
 	if x.Type == "" || x.Type == "auto" {
@@ -43,8 +44,11 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 422, map[string]string{"error": "proxy_detection_failed"})
 		return
 	}
+	if x.Adapter == "" {
+		x.Adapter = "generic"
+	}
 	var id string
-	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref,status) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL,'unknown') RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username).Scan(&id)
+	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref,status,adapter) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL,'unknown',$6) RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter).Scan(&id)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return

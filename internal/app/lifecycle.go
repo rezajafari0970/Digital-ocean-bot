@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"time"
 )
 
 func (c Container) ProcessLifecycle(ctx context.Context, item droplets.LifecycleItem) error {
@@ -12,12 +14,17 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			return nil
 		}
 		if item.ReplacementDeploymentID == "" {
-			var limit int
-			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, item.AccountID).Scan(&limit)
-			var inUse int
-			_ = c.DB.QueryRowContext(ctx, `SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')`, item.AccountID).Scan(&inUse)
-			var pending int
-			_ = c.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED')`, item.AccountID).Scan(&pending)
+			var limit, inUse, pending int
+			var snapshotAt time.Time
+			_ = c.DB.QueryRowContext(ctx, `SELECT
+				COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
+				COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
+				(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
+				COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz)`, item.AccountID).Scan(&limit, &inUse, &pending, &snapshotAt)
+			if snapshotAt.Equal(time.Unix(0, 0)) || time.Since(snapshotAt) > 2*time.Minute {
+				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail='provider snapshot stale; refresh required',runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID)
+				return nil
+			}
 			if limit <= 0 || inUse+pending >= limit {
 				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID, fmt.Sprintf("droplet limit %d, in use %d, pending %d", limit, inUse, pending))
 				return nil
@@ -43,6 +50,18 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		return err
 	}
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: runtime.Provider, Gate: runtime.Gate}
+	if runtime.Gateway != nil &&
+		!proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
+
+		eg := &network.EgressGuard{
+			Client: runtime.Gateway.Client,
+		}
+
+		executor.EgressCheck = func(ctx context.Context) error {
+			_, err := eg.Observe(ctx)
+			return err
+		}
+	}
 	engine := droplets.LifecycleEngine{Store: droplets.LifecycleStore{DB: c.DB}, Executor: executor}
 	return engine.Process(ctx, item)
 }
