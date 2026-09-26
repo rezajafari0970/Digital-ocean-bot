@@ -29,6 +29,20 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 			verifying = true
 		}
 		name := installerStepName(resolved.Manifest, step.Name)
+		interrupted, ierr := e.Store.StepInterrupted(ctx, ir.ProvisionRunID, name)
+		if ierr != nil {
+			return ierr
+		}
+		if interrupted && step.Execute != "" && step.Precheck == "" {
+			err := ErrInterruptedUnsafe
+			_ = e.Store.FinishStep(ctx, ir.ProvisionRunID, name, err, true)
+			state := "FAILED"
+			if len(resolved.Rollback) > 0 {
+				state = "ROLLBACK_REQUIRED"
+			}
+			_ = e.States.SetState(ctx, ir.ID, state, err.Error())
+			return err
+		}
 		if cs, ok := e.Store.(StepCompletionStore); ok {
 			done, derr := cs.StepCompleted(ctx, ir.ProvisionRunID, name)
 			if derr != nil {
