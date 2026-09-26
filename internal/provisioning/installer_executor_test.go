@@ -81,3 +81,27 @@ func TestInstallerPrecheckMissIsNotFailure(t *testing.T) {
 		t.Fatalf("%+v", events.events)
 	}
 }
+
+type retryableDNSScripts struct{}
+
+func (retryableDNSScripts) RunScript(_ context.Context, _ Target, _ []byte, _ ScriptStep, observe func(ScriptPhaseResult), _ StageObserver) error {
+	code := 1
+	err := errors.Join(ErrSSHCommand, errors.New("temporary failure resolving host"))
+	r := CommandResult{Stderr: "temporary failure resolving host", ExitCode: &code}
+	if observe != nil {
+		observe(ScriptPhaseResult{Phase: "verify", Result: r, Err: err})
+	}
+	return err
+}
+func TestInstallerRetryableFailureStaysInstalling(t *testing.T) {
+	store := &memStore{}
+	states := &installerStateStub{}
+	e := InstallerExecutor{Store: store, Scripts: retryableDNSScripts{}, States: states}
+	r := ResolvedInstaller{Manifest: InstallerManifest{Name: "demo", Version: 1}, Steps: []ScriptStep{{Name: "verify", Category: "verify", Verify: "x", MaxAttempts: 2}}}
+	if err := e.Execute(context.Background(), InstallerRun{ID: "ir", ProvisionRunID: "pr"}, r, Target{}, nil); err == nil {
+		t.Fatal("expected retryable error")
+	}
+	if got := states.states[len(states.states)-1]; got != "INSTALLING" {
+		t.Fatalf("state=%s", got)
+	}
+}

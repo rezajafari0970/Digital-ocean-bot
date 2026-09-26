@@ -20,6 +20,13 @@ func (c Container) deploymentInstallerRef(ctx context.Context, deploymentID stri
 	}
 	return ref, err == nil, err
 }
+func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.Deployment, state workflow.State, step, msg string) error {
+	_, err := c.DB.ExecContext(ctx, `UPDATE deployments SET state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)
+	if err == nil {
+		_ = (workflow.SQLStore{DB: c.DB}).Event(ctx, d.ID, "installer", state, msg)
+	}
+	return err
+}
 func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) error {
 	ref, ok, err := c.deploymentInstallerRef(ctx, d.ID, snap)
 	if err != nil || !ok {
@@ -42,9 +49,17 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	if err != nil {
 		return err
 	}
-	if ir.State == "INSTALL_COMPLETE" {
-		_, err = c.DB.ExecContext(ctx, `UPDATE deployments SET state='INSTALL_COMPLETE',current_step='installer_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID)
-		return err
+	switch ir.State {
+	case "INSTALL_COMPLETE":
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallComplete, "installer_complete", "")
+	case "ROLLED_BACK":
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallRolledBack, "installer_rolled_back", ir.LastError)
+	case "FAILED":
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", ir.LastError)
+	case "ROLLBACK_REQUIRED":
+		if !resolved.Manifest.AutoRollback {
+			return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", "rollback required")
+		}
 	}
 	runtime, err := c.Runtime(ctx, d.AccountID)
 	if err != nil {
@@ -62,12 +77,25 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	store := provisioning.SQLStore{DB: c.DB}
 	exec := provisioning.InstallerExecutor{Store: store, Events: store, Scripts: provisioning.SSHScriptRunner{SSH: ssh}, States: orch}
+	if ir.State == "ROLLBACK_REQUIRED" {
+		if err = exec.Rollback(ctx, ir, resolved, target, key); err != nil {
+			return err
+		}
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallRolledBack, "installer_rolled_back", "installer rolled back")
+	}
 	if err = exec.Execute(ctx, ir, resolved, target, key); err != nil {
+		var state string
+		_ = c.DB.QueryRowContext(ctx, `SELECT state FROM installer_runs WHERE id=$1`, ir.ID).Scan(&state)
+		if state == "ROLLBACK_REQUIRED" && resolved.Manifest.AutoRollback {
+			if rbErr := exec.Rollback(ctx, ir, resolved, target, key); rbErr != nil {
+				return rbErr
+			}
+			return c.setInstallerDeploymentState(ctx, d, workflow.InstallRolledBack, "installer_rolled_back", "installer rolled back")
+		}
+		if state == "FAILED" {
+			return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", err.Error())
+		}
 		return err
 	}
-	_, err = c.DB.ExecContext(ctx, `UPDATE deployments SET state='INSTALL_COMPLETE',current_step='installer_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID)
-	if err == nil {
-		_ = (workflow.SQLStore{DB: c.DB}).Event(ctx, d.ID, "installer", workflow.InstallComplete, "installer complete")
-	}
-	return err
+	return c.setInstallerDeploymentState(ctx, d, workflow.InstallComplete, "installer_complete", "")
 }

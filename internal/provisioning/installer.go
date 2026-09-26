@@ -40,6 +40,7 @@ type InstallerManifest struct {
 	VerifyScripts   []ScriptRef         `json:"verify_scripts,omitempty"`
 	RollbackScripts []ScriptRef         `json:"rollback_scripts,omitempty"`
 	Services        []string            `json:"services,omitempty"`
+	AutoRollback    bool                `json:"auto_rollback,omitempty"`
 }
 type ResolvedInstaller struct {
 	RegistryID string            `json:"registry_id"`
@@ -104,13 +105,28 @@ func (r InstallerRegistry) Resolve(ctx context.Context, ref InstallerRef, ready 
 	if err != nil {
 		return out, err
 	}
+	for _, s := range install {
+		if s.Execute != "" && (s.Precheck == "" || s.Verify == "") {
+			return out, fmt.Errorf("%w: install step %s requires precheck and verify", ErrInvalidPlan, s.Name)
+		}
+	}
 	verify, err := r.Scripts.Resolve(ctx, out.Manifest.VerifyScripts)
 	if err != nil {
 		return out, err
 	}
+	for _, s := range verify {
+		if s.Execute != "" || s.Verify == "" {
+			return out, fmt.Errorf("%w: verify step %s must be verify-only", ErrInvalidPlan, s.Name)
+		}
+	}
 	rollback, err := r.Scripts.Resolve(ctx, out.Manifest.RollbackScripts)
 	if err != nil {
 		return out, err
+	}
+	for _, s := range rollback {
+		if s.Execute != "" && (s.Precheck == "" || s.Verify == "") {
+			return out, fmt.Errorf("%w: rollback step %s requires precheck and verify", ErrInvalidPlan, s.Name)
+		}
 	}
 	artifactSteps, err := ArtifactSteps(out.Manifest.Artifacts)
 	if err != nil {

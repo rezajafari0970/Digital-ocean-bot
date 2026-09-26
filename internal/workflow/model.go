@@ -11,6 +11,8 @@ const (
 	Provisioning       State = "PROVISIONING"
 	WaitingInstaller   State = "WAITING_INSTALLER"
 	InstallComplete    State = "INSTALL_COMPLETE"
+	InstallFailed      State = "INSTALL_FAILED"
+	InstallRolledBack  State = "INSTALL_ROLLED_BACK"
 	ImportingDatabase  State = "IMPORTING_DATABASE"
 	ConfiguringPanel   State = "CONFIGURING_PANEL"
 	RegisteringClients State = "REGISTERING_CLIENTS"
