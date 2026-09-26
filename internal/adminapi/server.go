@@ -75,6 +75,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/build-activity", s.require(s.buildActivity, false))
 	m.HandleFunc("GET /api/v1/build-activity/{id}/provision", s.require(s.provisionActivity, false))
 	m.HandleFunc("GET /api/v1/provision-errors", s.require(s.provisionErrors, false))
+	m.HandleFunc("POST /api/v1/installers/sanaei/preview", s.require(s.previewSanaeiInstaller, true))
+	m.HandleFunc("POST /api/v1/installers/sanaei", s.require(s.createSanaeiInstaller, true))
 	m.HandleFunc("GET /api/v1/installers", s.require(s.listInstallers, false))
 	m.HandleFunc("POST /api/v1/installers", s.require(s.createInstaller, true))
 	m.HandleFunc("GET /api/v1/install-scripts", s.require(s.listInstallScripts, false))

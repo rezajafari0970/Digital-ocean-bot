@@ -203,7 +203,7 @@ func artifactStep(a InstallerArtifact) (ScriptStep, error) {
 	url := shellQuote(a.URL)
 	hash := strings.ToLower(a.SHA256)
 	check := fmt.Sprintf("test -f %s && printf '%%s  %%s\\n' %s %s | sha256sum -c - >/dev/null 2>&1", dest, shellQuote(hash), dest)
-	exec := fmt.Sprintf("set -e; tmp=%s; curl -fL --retry 3 --connect-timeout 10 --max-time 300 %s -o \"$tmp\"; printf '%%s  %%s\\n' %s \"$tmp\" | sha256sum -c -; mv \"$tmp\" %s", shellQuote(a.Destination+".part"), url, shellQuote(hash), dest)
+	exec := fmt.Sprintf("set -e; tmp=%s; install -d -m 0755 \"$(dirname \"$tmp\")\"; curl -fL --retry 3 --connect-timeout 10 --max-time 300 %s -o \"$tmp\"; printf '%%s  %%s\\n' %s \"$tmp\" | sha256sum -c -; mv \"$tmp\" %s", shellQuote(a.Destination+".part"), url, shellQuote(hash), dest)
 	return ScriptStep{Name: "artifact-" + a.Name, Category: "artifact", Precheck: check, Execute: exec, Verify: check, Timeout: 7 * time.Minute, MaxAttempts: 3}, nil
 }
 func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'" }
