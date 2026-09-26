@@ -73,9 +73,9 @@ WHERE d.id=$1`, deploymentID).Scan(&runID, &state, &step, &attempt, &lastErr, &n
 	}
 	installer := map[string]any{}
 	var iname, istate, ihash, ierr string
-	var iver int
-	if s.DB.QueryRowContext(r.Context(), `SELECT i.name,i.version,ir.state,ir.manifest_sha256,ir.last_error FROM installer_runs ir JOIN installers i ON i.id=ir.installer_id WHERE ir.provision_run_id=$1 ORDER BY ir.created_at DESC LIMIT 1`, runID).Scan(&iname, &iver, &istate, &ihash, &ierr) == nil {
-		installer = map[string]any{"name": iname, "version": iver, "state": istate, "sha256": ihash, "last_error": ierr}
+	var iver, igeneration int
+	if s.DB.QueryRowContext(r.Context(), `SELECT i.name,i.version,ir.state,ir.manifest_sha256,ir.last_error,ir.generation FROM installer_runs ir JOIN installers i ON i.id=ir.installer_id WHERE ir.provision_run_id=$1 ORDER BY ir.created_at DESC LIMIT 1`, runID).Scan(&iname, &iver, &istate, &ihash, &ierr, &igeneration) == nil {
+		installer = map[string]any{"name": iname, "version": iver, "generation": igeneration, "state": istate, "sha256": ihash, "last_error": ierr}
 	}
 	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events, "readiness": readiness, "installer": installer})
 }

@@ -22,7 +22,7 @@ func (s *Server) selectDeploymentInstaller(w http.ResponseWriter, r *http.Reques
 		writeJSON(w, 404, map[string]string{"error": "installer_not_found"})
 		return
 	}
-	res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,installer_name,installer_version,source) SELECT id,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id) DO NOTHING`, id, x.Name, x.Version)
+	res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,generation,installer_name,installer_version,source) SELECT id,installer_generation,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id,generation) DO NOTHING`, id, x.Name, x.Version)
 	if err != nil {
 		writeJSON(w, 409, map[string]string{"error": "installer_selection_failed"})
 		return

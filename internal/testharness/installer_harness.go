@@ -181,7 +181,7 @@ func InstallerFixture(f InstallerFault) (provisioning.InstallerExecutor, *Instal
 	states := &InstallerStates{}
 	scripts := NewInstallerScripts(f)
 	resolved := provisioning.ResolvedInstaller{Manifest: provisioning.InstallerManifest{Name: "harness", Version: 1}, Steps: []provisioning.ScriptStep{{Name: "install", Category: "install", Precheck: "check", Execute: "install", Verify: "verify", MaxAttempts: 3}, {Name: "verify", Category: "verify", Verify: "verify", MaxAttempts: 2}}, Rollback: []provisioning.ScriptStep{{Name: "rollback", Category: "rollback", Precheck: "check", Execute: "undo", Verify: "verify", MaxAttempts: 2}}}
-	run := provisioning.InstallerRun{ID: "installer-run", ProvisionRunID: "provision-run"}
+	run := provisioning.InstallerRun{ID: "installer-run", ProvisionRunID: "provision-run", Generation: 1}
 	exec := provisioning.InstallerExecutor{Store: store, Events: store, Scripts: scripts, States: states}
 	return exec, store, states, scripts, resolved, run
 }

@@ -9,16 +9,23 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 )
 
-func (c Container) deploymentInstallerRef(ctx context.Context, deploymentID string, snap workflow.ProfileSnapshot) (provisioning.InstallerRef, bool, error) {
-	if snap.InstallerRef != nil && snap.InstallerRef.Name != "" && snap.InstallerRef.Version > 0 {
-		return *snap.InstallerRef, true, nil
-	}
+func (c Container) deploymentInstallerRef(ctx context.Context, deploymentID string, snap workflow.ProfileSnapshot) (provisioning.InstallerRef, int, bool, error) {
 	var ref provisioning.InstallerRef
-	err := c.DB.QueryRowContext(ctx, `SELECT installer_name,installer_version FROM deployment_installer_selections WHERE deployment_id=$1`, deploymentID).Scan(&ref.Name, &ref.Version)
-	if errors.Is(err, sql.ErrNoRows) {
-		return ref, false, nil
+	var generation int
+	if err := c.DB.QueryRowContext(ctx, `SELECT installer_generation FROM deployments WHERE id=$1`, deploymentID).Scan(&generation); err != nil {
+		return ref, 0, false, err
 	}
-	return ref, err == nil, err
+	err := c.DB.QueryRowContext(ctx, `SELECT installer_name,installer_version FROM deployment_installer_selections WHERE deployment_id=$1 AND generation=$2`, deploymentID, generation).Scan(&ref.Name, &ref.Version)
+	if err == nil {
+		return ref, generation, true, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return ref, generation, false, err
+	}
+	if generation == 1 && snap.InstallerRef != nil && snap.InstallerRef.Name != "" && snap.InstallerRef.Version > 0 {
+		return *snap.InstallerRef, generation, true, nil
+	}
+	return ref, generation, false, nil
 }
 func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.Deployment, state workflow.State, step, msg string) error {
 	_, err := c.DB.ExecContext(ctx, `UPDATE deployments SET state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)
@@ -55,7 +62,7 @@ func (c Container) installerReadiness(ctx context.Context, d workflow.Deployment
 	return (provisioning.ReadinessCollector{SSH: ssh, Recorder: store}).Collect(ctx, runID, target, key, nil)
 }
 func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) error {
-	ref, ok, err := c.deploymentInstallerRef(ctx, d.ID, snap)
+	ref, generation, ok, err := c.deploymentInstallerRef(ctx, d.ID, snap)
 	if err != nil || !ok {
 		return err
 	}
@@ -74,7 +81,7 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	}
 	registry := provisioning.InstallerRegistry{DB: c.DB, Scripts: provisioning.ScriptRegistry{DB: c.DB}}
 	orch := provisioning.InstallerOrchestrator{DB: c.DB, Registry: registry}
-	resolved, ir, err := orch.Prepare(ctx, d.ID, runID, ref, ready)
+	resolved, ir, err := orch.Prepare(ctx, d.ID, runID, generation, ref, ready)
 	if err != nil {
 		return err
 	}

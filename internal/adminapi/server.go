@@ -85,6 +85,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/deployments", s.require(s.createDeployment, true))
 	m.HandleFunc("GET /api/v1/deployments", s.require(s.deployments, false))
 	m.HandleFunc("POST /api/v1/deployments/{id}/installer", s.require(s.selectDeploymentInstaller, true))
+	m.HandleFunc("POST /api/v1/deployments/{id}/installer/rearm", s.require(s.rearmDeploymentInstaller, true))
 	m.HandleFunc("GET /api/v1/audit", s.require(s.audit, false))
 	m.HandleFunc("GET /api/v1/system", s.require(s.system, false))
 	m.HandleFunc("GET /api/v1/browser-runtimes", s.require(s.browserRuntimes, false))

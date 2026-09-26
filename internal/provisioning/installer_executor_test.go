@@ -107,13 +107,13 @@ func TestInstallerRetryableFailureStaysInstalling(t *testing.T) {
 }
 
 func TestInstallerInterruptedUnsafeNeverReexecutes(t *testing.T) {
-	step := "installer-demo-v1-install"
+	step := "installer-g1-demo-v1-install"
 	store := &memStore{interrupted: map[string]bool{step: true}}
 	scripts := &scriptExecStub{}
 	states := &installerStateStub{}
 	e := InstallerExecutor{Store: store, Scripts: scripts, States: states}
 	r := ResolvedInstaller{Manifest: InstallerManifest{Name: "demo", Version: 1}, Steps: []ScriptStep{{Name: "install", Execute: "dangerous", MaxAttempts: 2}}}
-	err := e.Execute(context.Background(), InstallerRun{ID: "ir", ProvisionRunID: "pr"}, r, Target{}, nil)
+	err := e.Execute(context.Background(), InstallerRun{ID: "ir", ProvisionRunID: "pr", Generation: 1}, r, Target{}, nil)
 	if !errors.Is(err, ErrInterruptedUnsafe) {
 		t.Fatalf("err=%v", err)
 	}

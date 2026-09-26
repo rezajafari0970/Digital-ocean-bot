@@ -16,7 +16,7 @@ func TestInstallerFailureMatrix(t *testing.T) {
 		if states.Last() != "INSTALL_COMPLETE" || scripts.Writes != 1 {
 			t.Fatalf("state=%s writes=%d", states.Last(), scripts.Writes)
 		}
-		if st.Attempts["installer-harness-v1-install"] != 1 {
+		if st.Attempts["installer-g1-harness-v1-install"] != 1 {
 			t.Fatal(st.Attempts)
 		}
 	})
@@ -31,7 +31,7 @@ func TestInstallerFailureMatrix(t *testing.T) {
 		if err := e.Execute(context.Background(), run, r, provisioning.Target{}, nil); err != nil {
 			t.Fatal(err)
 		}
-		if states.Last() != "INSTALL_COMPLETE" || st.Attempts["installer-harness-v1-install"] != 2 || scripts.Writes != 1 {
+		if states.Last() != "INSTALL_COMPLETE" || st.Attempts["installer-g1-harness-v1-install"] != 2 || scripts.Writes != 1 {
 			t.Fatalf("state=%s attempts=%v writes=%d", states.Last(), st.Attempts, scripts.Writes)
 		}
 	})
@@ -80,7 +80,7 @@ func TestInstallerFailureMatrix(t *testing.T) {
 }
 
 func TestInstallerCrashRecoveryMatrix(t *testing.T) {
-	const install = "installer-harness-v1-install"
+	const install = "installer-g1-harness-v1-install"
 	t.Run("crash_after_start_retries_latest_attempt", func(t *testing.T) {
 		e, st, states, scripts, r, run := InstallerFixture(InstallerSuccess)
 		if _, err := st.BeginStep(context.Background(), run.ProvisionRunID, install, 3); err != nil {
@@ -124,4 +124,22 @@ func TestInstallerCrashRecoveryMatrix(t *testing.T) {
 			t.Fatalf("attempts=%v calls=%v writes=%d", st.Attempts, scripts.Calls, scripts.Writes)
 		}
 	})
+}
+
+func TestInstallerGenerationsHaveIndependentAttempts(t *testing.T) {
+	e, st, _, scripts, r, run := InstallerFixture(InstallerSuccess)
+	if err := e.Execute(context.Background(), run, r, provisioning.Target{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	run.ID = "installer-run-2"
+	run.Generation = 2
+	if err := e.Execute(context.Background(), run, r, provisioning.Target{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if st.Attempts["installer-g1-harness-v1-install"] != 1 || st.Attempts["installer-g2-harness-v1-install"] != 1 {
+		t.Fatalf("attempts=%v", st.Attempts)
+	}
+	if scripts.Writes != 1 {
+		t.Fatalf("idempotent precheck should prevent duplicate side effect, writes=%d", scripts.Writes)
+	}
 }

@@ -28,7 +28,7 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 			}
 			verifying = true
 		}
-		name := installerStepName(resolved.Manifest, step.Name)
+		name := installerStepName(resolved.Manifest, ir.Generation, step.Name)
 		interrupted, ierr := e.Store.StepInterrupted(ctx, ir.ProvisionRunID, name)
 		if ierr != nil {
 			return ierr
@@ -116,7 +116,7 @@ func (e InstallerExecutor) Rollback(ctx context.Context, ir InstallerRun, resolv
 		return ErrInvalidPlan
 	}
 	for _, step := range resolved.Rollback {
-		name := installerStepName(resolved.Manifest, "rollback-"+step.Name)
+		name := installerStepName(resolved.Manifest, ir.Generation, "rollback-"+step.Name)
 		if cs, ok := e.Store.(StepCompletionStore); ok {
 			done, derr := cs.StepCompleted(ctx, ir.ProvisionRunID, name)
 			if derr != nil {
@@ -150,6 +150,6 @@ func (e InstallerExecutor) Rollback(ctx context.Context, ir InstallerRun, resolv
 	}
 	return e.States.SetState(ctx, ir.ID, "ROLLED_BACK", "")
 }
-func installerStepName(m InstallerManifest, step string) string {
-	return fmt.Sprintf("installer-%s-v%d-%s", m.Name, m.Version, step)
+func installerStepName(m InstallerManifest, generation int, step string) string {
+	return fmt.Sprintf("installer-g%d-%s-v%d-%s", generation, m.Name, m.Version, step)
 }

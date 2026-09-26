@@ -12,6 +12,7 @@ var ErrInstallerRunConflict = errors.New("installer run manifest conflict")
 type InstallerRun struct {
 	ID, DeploymentID, ProvisionRunID, InstallerID, ManifestSHA256, State, LastError string
 	Manifest                                                                        InstallerManifest
+	Generation                                                                      int
 }
 
 type InstallerOrchestrator struct {
@@ -19,17 +20,20 @@ type InstallerOrchestrator struct {
 	Registry InstallerRegistry
 }
 
-func (o InstallerOrchestrator) Prepare(ctx context.Context, deploymentID, provisionRunID string, ref InstallerRef, ready ReadinessSnapshot) (ResolvedInstaller, InstallerRun, error) {
+func (o InstallerOrchestrator) Prepare(ctx context.Context, deploymentID, provisionRunID string, generation int, ref InstallerRef, ready ReadinessSnapshot) (ResolvedInstaller, InstallerRun, error) {
 	resolved, err := o.Registry.Resolve(ctx, ref, ready)
 	if err != nil {
 		return resolved, InstallerRun{}, err
 	}
 	raw, _ := json.Marshal(resolved.Manifest)
-	run := InstallerRun{DeploymentID: deploymentID, ProvisionRunID: provisionRunID, InstallerID: resolved.RegistryID, ManifestSHA256: resolved.SHA256, Manifest: resolved.Manifest, State: "PREPARING"}
-	err = o.DB.QueryRowContext(ctx, `INSERT INTO installer_runs(deployment_id,provision_run_id,installer_id,manifest_snapshot,manifest_sha256,state) VALUES($1,$2,$3,$4,$5,'PREPARING') ON CONFLICT(deployment_id) DO NOTHING RETURNING id::text`, deploymentID, provisionRunID, resolved.RegistryID, raw, resolved.SHA256).Scan(&run.ID)
+	if generation < 1 {
+		return resolved, InstallerRun{}, ErrInvalidPlan
+	}
+	run := InstallerRun{DeploymentID: deploymentID, ProvisionRunID: provisionRunID, InstallerID: resolved.RegistryID, ManifestSHA256: resolved.SHA256, Manifest: resolved.Manifest, State: "PREPARING", Generation: generation}
+	err = o.DB.QueryRowContext(ctx, `INSERT INTO installer_runs(deployment_id,provision_run_id,installer_id,manifest_snapshot,manifest_sha256,state,generation) VALUES($1,$2,$3,$4,$5,'PREPARING',$6) ON CONFLICT(deployment_id,generation) DO NOTHING RETURNING id::text`, deploymentID, provisionRunID, resolved.RegistryID, raw, resolved.SHA256, generation).Scan(&run.ID)
 	if errors.Is(err, sql.ErrNoRows) {
 		var existingHash string
-		err = o.DB.QueryRowContext(ctx, `SELECT id::text,manifest_sha256,state,last_error FROM installer_runs WHERE deployment_id=$1`, deploymentID).Scan(&run.ID, &existingHash, &run.State, &run.LastError)
+		err = o.DB.QueryRowContext(ctx, `SELECT id::text,manifest_sha256,state,last_error FROM installer_runs WHERE deployment_id=$1 AND generation=$2`, deploymentID, generation).Scan(&run.ID, &existingHash, &run.State, &run.LastError)
 		if err != nil {
 			return resolved, run, err
 		}
