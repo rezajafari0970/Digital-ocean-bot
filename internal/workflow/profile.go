@@ -6,22 +6,23 @@ import (
 )
 
 type ProfileSnapshot struct {
-	Name               string                    `json:"name"`
-	Region             string                    `json:"region"`
-	Regions            []string                  `json:"regions,omitempty"`
-	Size               string                    `json:"size"`
-	Image              string                    `json:"image"`
-	Lifetime           time.Duration             `json:"lifetime"`
-	SSHUser            string                    `json:"ssh_user"`
-	SSHKeySecretRef    string                    `json:"ssh_key_secret_ref"`
-	SSHProviderKeyID   int                       `json:"ssh_provider_key_id,omitempty"`
-	InstallerURL       string                    `json:"installer_url"`
-	InstallScriptRefs  []provisioning.ScriptRef  `json:"install_script_refs,omitempty"`
-	InstallSteps       []provisioning.ScriptStep `json:"install_steps,omitempty"`
-	DatabaseTemplateID string                    `json:"database_template_id"`
-	InboundID          int                       `json:"inbound_id"`
-	ClientCount        int                       `json:"client_count"`
-	EmailPrefix        string                    `json:"email_prefix"`
+	Name               string                     `json:"name"`
+	Region             string                     `json:"region"`
+	Regions            []string                   `json:"regions,omitempty"`
+	Size               string                     `json:"size"`
+	Image              string                     `json:"image"`
+	Lifetime           time.Duration              `json:"lifetime"`
+	SSHUser            string                     `json:"ssh_user"`
+	SSHKeySecretRef    string                     `json:"ssh_key_secret_ref"`
+	SSHProviderKeyID   int                        `json:"ssh_provider_key_id,omitempty"`
+	InstallerURL       string                     `json:"installer_url"`
+	InstallerRef       *provisioning.InstallerRef `json:"installer_ref,omitempty"`
+	InstallScriptRefs  []provisioning.ScriptRef   `json:"install_script_refs,omitempty"`
+	InstallSteps       []provisioning.ScriptStep  `json:"install_steps,omitempty"`
+	DatabaseTemplateID string                     `json:"database_template_id"`
+	InboundID          int                        `json:"inbound_id"`
+	ClientCount        int                        `json:"client_count"`
+	EmailPrefix        string                     `json:"email_prefix"`
 }
 
 type PersistentProfile struct {
