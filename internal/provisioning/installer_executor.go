@@ -20,11 +20,34 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 	if err := e.States.SetState(ctx, ir.ID, "INSTALLING", ""); err != nil {
 		return err
 	}
+	verifying := false
 	for _, step := range resolved.Steps {
+		if !verifying && (step.Category == "verify" || step.Category == "health") {
+			if err := e.States.SetState(ctx, ir.ID, "VERIFYING", ""); err != nil {
+				return err
+			}
+			verifying = true
+		}
 		name := installerStepName(resolved.Manifest, step.Name)
+		if cs, ok := e.Store.(StepCompletionStore); ok {
+			done, derr := cs.StepCompleted(ctx, ir.ProvisionRunID, name)
+			if derr != nil {
+				return derr
+			}
+			if done {
+				continue
+			}
+		}
 		attempt, err := e.Store.BeginStep(ctx, ir.ProvisionRunID, name, step.MaxAttempts)
 		if err != nil {
-			_ = e.States.SetState(ctx, ir.ID, "FAILED", err.Error())
+			if errors.Is(err, ErrStepRetryDeferred) {
+				return err
+			}
+			state := "FAILED"
+			if len(resolved.Rollback) > 0 {
+				state = "ROLLBACK_REQUIRED"
+			}
+			_ = e.States.SetState(ctx, ir.ID, state, err.Error())
 			return err
 		}
 		var last CommandResult

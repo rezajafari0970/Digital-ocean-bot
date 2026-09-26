@@ -68,3 +68,16 @@ func (s SQLStore) StepInterrupted(ctx context.Context, runID, step string) (bool
 	}
 	return interrupted, err
 }
+
+type StepCompletionStore interface {
+	StepCompleted(context.Context, string, string) (bool, error)
+}
+
+func (s SQLStore) StepCompleted(ctx context.Context, runID, step string) (bool, error) {
+	var done bool
+	err := s.DB.QueryRowContext(ctx, `SELECT last_finished_at IS NOT NULL AND last_error IS NULL AND terminal=false FROM provision_step_attempts WHERE run_id=$1 AND step=$2`, runID, step).Scan(&done)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return done, err
+}
