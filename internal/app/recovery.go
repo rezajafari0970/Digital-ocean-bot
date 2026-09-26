@@ -151,6 +151,21 @@ func (h RecoveryHandler) BypassDeploymentBackoff(ctx context.Context, item worke
 	if err := h.Container.DB.QueryRowContext(ctx, `SELECT current_step FROM deployments WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&current); err != nil || current != "provision" {
 		return false
 	}
+	var state string
+	_ = h.Container.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&state)
+	if state == string(workflow.WaitingInstaller) {
+		var exists bool
+		_ = h.Container.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM installer_runs WHERE deployment_id=$1)`, item.ID).Scan(&exists)
+		if exists {
+			return false
+		}
+		var selected bool
+		_ = h.Container.DB.QueryRowContext(ctx, `SELECT (profile_snapshot->'installer_ref' IS NOT NULL) OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=deployments.id) FROM deployments WHERE id=$1`, item.ID).Scan(&selected)
+		if selected {
+			return true
+		}
+		return false
+	}
 	cfg, _, err := h.Container.DeploymentConfigFromSnapshot(ctx, item.ID)
 	return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)
 }
