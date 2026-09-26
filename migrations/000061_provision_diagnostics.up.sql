@@ -1,0 +1,15 @@
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS substep TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS attempt INTEGER;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS error_class TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS error_message TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS error_fingerprint TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS exit_code INTEGER;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS signal TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS stdout_tail TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS stderr_tail TEXT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS duration_ms BIGINT;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS retryable BOOLEAN;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMPTZ;
+ALTER TABLE provision_events ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
+CREATE INDEX IF NOT EXISTS provision_events_error_idx ON provision_events(error_class,error_code,created_at DESC);
+CREATE INDEX IF NOT EXISTS provision_events_fingerprint_idx ON provision_events(error_fingerprint,created_at DESC) WHERE error_fingerprint IS NOT NULL;

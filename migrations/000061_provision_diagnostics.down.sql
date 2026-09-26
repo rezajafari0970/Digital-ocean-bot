@@ -1,0 +1,15 @@
+DROP INDEX IF EXISTS provision_events_fingerprint_idx;
+DROP INDEX IF EXISTS provision_events_error_idx;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS metadata;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS next_retry_at;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS retryable;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS duration_ms;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS stderr_tail;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS stdout_tail;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS signal;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS exit_code;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS error_fingerprint;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS error_message;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS error_class;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS attempt;
+ALTER TABLE provision_events DROP COLUMN IF EXISTS substep;

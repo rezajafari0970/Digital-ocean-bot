@@ -13,6 +13,7 @@ type Store interface {
 	Update(context.Context, Run) error
 	BeginStep(context.Context, string, string, int) (int, error)
 	FinishStep(context.Context, string, string, error, bool) error
+	StepInterrupted(context.Context, string, string) (bool, error)
 }
 type SQLStore struct{ DB *sql.DB }
 

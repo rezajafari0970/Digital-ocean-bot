@@ -9,6 +9,10 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 )
 
+func defaultProvisionPlan() provisioning.Plan {
+	return provisioning.Plan{Bootstrap: "set -euo pipefail; apt-get update -y", InstallPanel: "true", Verify: sanaei.VerifyCommand()}
+}
+
 func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentID string) (DeploymentConfig, workflow.ProfileSnapshot, error) {
 	store := workflow.ProfileStore{DB: c.DB}
 	snap, err := store.SnapshotForDeployment(ctx, deploymentID)
@@ -22,6 +26,12 @@ func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentI
 			return DeploymentConfig{}, snap, err
 		}
 	}
-	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei", SSHKeyID: snap.SSHProviderKeyID}, Provision: provisioning.Plan{Bootstrap: "set -euo pipefail; apt-get update -y", InstallPanel: "true", Verify: sanaei.VerifyCommand()}, Target: provisioning.Target{User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}, Template: template, DatabasePaths: sanaei.DefaultDatabasePaths()}
+	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei", SSHKeyID: snap.SSHProviderKeyID}, Provision: func() provisioning.Plan {
+		p := defaultProvisionPlan()
+		if len(snap.InstallSteps) > 0 {
+			p.Scripts = snap.InstallSteps
+		}
+		return p
+	}(), Target: provisioning.Target{User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}, Template: template, DatabasePaths: sanaei.DefaultDatabasePaths()}
 	return cfg, snap, nil
 }

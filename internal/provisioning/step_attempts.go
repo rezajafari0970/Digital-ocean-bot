@@ -59,3 +59,12 @@ func (s SQLStore) FinishStep(ctx context.Context, runID, step string, stepErr er
 	_, err := s.DB.ExecContext(ctx, `UPDATE provision_step_attempts SET last_finished_at=now(),last_error=NULLIF($3,''),next_retry_at=$4,terminal=$5 WHERE run_id=$1 AND step=$2`, runID, step, msg, next, terminal)
 	return err
 }
+
+func (s SQLStore) StepInterrupted(ctx context.Context, runID, step string) (bool, error) {
+	var interrupted bool
+	err := s.DB.QueryRowContext(ctx, `SELECT last_started_at IS NOT NULL AND (last_finished_at IS NULL OR last_started_at>last_finished_at) FROM provision_step_attempts WHERE run_id=$1 AND step=$2`, runID, step).Scan(&interrupted)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return interrupted, err
+}

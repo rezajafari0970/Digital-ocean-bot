@@ -9,6 +9,7 @@ const (
 	WaitingSSH        State = "WAITING_SSH"
 	Bootstrapping     State = "BOOTSTRAPPING"
 	InstallingPanel   State = "INSTALLING_PANEL"
+	RunningScript     State = "RUNNING_SCRIPT"
 	ImportingDatabase State = "IMPORTING_DATABASE"
 	Verifying         State = "VERIFYING"
 	Completed         State = "COMPLETED"

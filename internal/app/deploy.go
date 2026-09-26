@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"math/rand"
 	"time"
@@ -108,6 +109,17 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 			seconds += rand.Intn(lifetimeMax - lifetimeMin + 1)
 		}
 		effective.Lifetime = time.Duration(seconds) * time.Second
+	}
+	if len(effective.InstallSteps) == 0 {
+		if len(effective.InstallScriptRefs) > 0 {
+			resolved, resolveErr := (provisioning.ScriptRegistry{DB: c.DB}).Resolve(ctx, effective.InstallScriptRefs)
+			if resolveErr != nil {
+				return d, resolveErr
+			}
+			effective.InstallSteps = resolved
+		} else {
+			effective.InstallSteps = provisioning.LegacyScriptPlan(defaultProvisionPlan()).Steps
+		}
 	}
 	if err := profiles.AttachSnapshot(ctx, d.ID, effective); err != nil {
 		return d, err

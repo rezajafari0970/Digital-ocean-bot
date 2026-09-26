@@ -6,9 +6,10 @@ import (
 )
 
 type memStore struct {
-	r        Run
-	exists   bool
-	attempts map[string]int
+	r           Run
+	exists      bool
+	attempts    map[string]int
+	interrupted map[string]bool
 }
 
 func (s *memStore) Reserve(_ context.Context, r Run) (Run, bool, error) {
@@ -32,6 +33,9 @@ func (s *memStore) BeginStep(_ context.Context, _ string, step string, max int) 
 	return s.attempts[step], nil
 }
 func (s *memStore) FinishStep(context.Context, string, string, error, bool) error { return nil }
+func (s *memStore) StepInterrupted(_ context.Context, _ string, step string) (bool, error) {
+	return s.interrupted != nil && s.interrupted[step], nil
+}
 
 type secretStub struct{}
 
