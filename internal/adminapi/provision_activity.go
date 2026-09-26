@@ -72,10 +72,21 @@ WHERE d.id=$1`, deploymentID).Scan(&runID, &state, &step, &attempt, &lastErr, &n
 		readiness["issues"] = issues
 	}
 	installer := map[string]any{}
-	var iname, istate, ihash, ierr string
-	var iver, igeneration int
-	if s.DB.QueryRowContext(r.Context(), `SELECT i.name,i.version,ir.state,ir.manifest_sha256,ir.last_error,ir.generation FROM installer_runs ir JOIN installers i ON i.id=ir.installer_id WHERE ir.provision_run_id=$1 ORDER BY ir.created_at DESC LIMIT 1`, runID).Scan(&iname, &iver, &istate, &ihash, &ierr, &igeneration) == nil {
-		installer = map[string]any{"name": iname, "version": iver, "generation": igeneration, "state": istate, "sha256": ihash, "last_error": ierr}
+	installerHistory := []map[string]any{}
+	if rows, err := s.DB.QueryContext(r.Context(), `SELECT i.name,i.version,ir.state,ir.manifest_sha256,ir.last_error,ir.generation,ir.created_at,ir.updated_at FROM installer_runs ir JOIN installers i ON i.id=ir.installer_id WHERE ir.provision_run_id=$1 ORDER BY ir.generation DESC`, runID); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var iname, istate, ihash, ierr string
+			var iver, igen int
+			var created, updated any
+			if rows.Scan(&iname, &iver, &istate, &ihash, &ierr, &igen, &created, &updated) == nil {
+				x := map[string]any{"name": iname, "version": iver, "generation": igen, "state": istate, "sha256": ihash, "last_error": ierr, "created_at": created, "updated_at": updated}
+				installerHistory = append(installerHistory, x)
+				if len(installer) == 0 {
+					installer = x
+				}
+			}
+		}
 	}
-	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events, "readiness": readiness, "installer": installer})
+	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events, "readiness": readiness, "installer": installer, "installer_history": installerHistory})
 }
