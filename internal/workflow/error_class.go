@@ -6,6 +6,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 	"strings"
 )
 
@@ -42,6 +43,9 @@ func ClassifyStepError(step string, err error) ErrorClass {
 		case resilience.Permanent:
 			return ErrorPermanent
 		}
+	}
+	if errors.Is(err, secrets.ErrSecretNotFound) {
+		return ErrorDependency
 	}
 	if errors.Is(err, provisioning.ErrSSHNotReady) || errors.Is(err, provisioning.ErrStepRetryDeferred) {
 		return ErrorRetryable
