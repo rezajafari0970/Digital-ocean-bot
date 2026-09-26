@@ -40,6 +40,10 @@ type InstallerManifest struct {
 	VerifyScripts   []ScriptRef         `json:"verify_scripts,omitempty"`
 	RollbackScripts []ScriptRef         `json:"rollback_scripts,omitempty"`
 	Services        []string            `json:"services,omitempty"`
+	RequireRoot     bool                `json:"require_root,omitempty"`
+	RequireDNS      bool                `json:"require_dns,omitempty"`
+	RequireHTTPS    bool                `json:"require_https,omitempty"`
+	RequireNoReboot bool                `json:"require_no_reboot,omitempty"`
 	AutoRollback    bool                `json:"auto_rollback,omitempty"`
 }
 type ResolvedInstaller struct {
@@ -155,6 +159,18 @@ func CheckInstallerCompatibility(m InstallerManifest, s ReadinessSnapshot) error
 	}
 	if m.MinMemoryMB > 0 && s.MemoryMB < m.MinMemoryMB {
 		return fmt.Errorf("%w: memory %d<%d", ErrInstallerIncompatible, s.MemoryMB, m.MinMemoryMB)
+	}
+	if m.RequireRoot && !s.IsRoot {
+		return fmt.Errorf("%w: root required", ErrInstallerIncompatible)
+	}
+	if m.RequireDNS && !s.DNSOK {
+		return fmt.Errorf("%w: dns required", ErrInstallerIncompatible)
+	}
+	if m.RequireHTTPS && !s.OutboundHTTPSOK {
+		return fmt.Errorf("%w: outbound https required", ErrInstallerIncompatible)
+	}
+	if m.RequireNoReboot && s.RebootRequired {
+		return fmt.Errorf("%w: reboot required", ErrInstallerIncompatible)
 	}
 	if m.MinDiskMB > 0 && s.DiskFreeMB < m.MinDiskMB {
 		return fmt.Errorf("%w: disk %d<%d", ErrInstallerIncompatible, s.DiskFreeMB, m.MinDiskMB)

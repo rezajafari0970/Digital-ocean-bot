@@ -42,10 +42,14 @@ func TestInstallerAdapterCompatibilityDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := provisioning.CheckInstallerCompatibility(m, provisioning.ReadinessSnapshot{Status: "READY", OSID: "ubuntu", Architecture: "x86_64", MemoryMB: 512, DiskFreeMB: 2048}); err != nil {
+	if err := provisioning.CheckInstallerCompatibility(m, provisioning.ReadinessSnapshot{Status: "READY", OSID: "ubuntu", Architecture: "x86_64", MemoryMB: 512, DiskFreeMB: 2048, IsRoot: true, DNSOK: true, OutboundHTTPSOK: true}); err != nil {
 		t.Fatal(err)
 	}
-	if err := provisioning.CheckInstallerCompatibility(m, provisioning.ReadinessSnapshot{Status: "READY", OSID: "alpine", Architecture: "x86_64", MemoryMB: 512, DiskFreeMB: 2048}); err == nil {
+	reboot := provisioning.ReadinessSnapshot{Status: "DEGRADED", OSID: "ubuntu", Architecture: "x86_64", MemoryMB: 512, DiskFreeMB: 2048, IsRoot: true, DNSOK: true, OutboundHTTPSOK: true, RebootRequired: true}
+	if err := provisioning.CheckInstallerCompatibility(m, reboot); err == nil {
+		t.Fatal("expected reboot-required incompatibility")
+	}
+	if err := provisioning.CheckInstallerCompatibility(m, provisioning.ReadinessSnapshot{Status: "READY", OSID: "alpine", Architecture: "x86_64", MemoryMB: 512, DiskFreeMB: 2048, IsRoot: true, DNSOK: true, OutboundHTTPSOK: true}); err == nil {
 		t.Fatal("expected incompatible OS")
 	}
 }
