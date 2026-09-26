@@ -53,7 +53,7 @@ func (d InstallerDefinition) Build() (provisioning.InstallerManifest, []provisio
 	dest := "/var/lib/digital-ocean-bot/installers/" + artifactName + ".sh"
 	installName := "sanaei-install-" + d.Release
 	verifyName := "sanaei-verify-" + d.Release
-	install := provisioning.ScriptStep{Name: installName, Version: 1, Category: "install", Precheck: VerifyCommand(), Execute: fmt.Sprintf("set -euo pipefail; export DEBIAN_FRONTEND=noninteractive; bash %s", quote(dest)), Verify: VerifyCommand(), Timeout: 15 * time.Minute, MaxAttempts: 3}
+	install := provisioning.ScriptStep{Name: installName, Version: 1, Category: "install", Precheck: VerifyCommand(), Execute: fmt.Sprintf("set -euo pipefail; export DEBIAN_FRONTEND=noninteractive; export XUI_NONINTERACTIVE=1; bash %s %s", quote(dest), quote(d.Release)), Verify: VerifyCommand(), Timeout: 15 * time.Minute, MaxAttempts: 3}
 	verify := provisioning.ScriptStep{Name: verifyName, Version: 1, Category: "verify", Verify: VerifyCommand(), Timeout: 2 * time.Minute, MaxAttempts: 3}
 	manifest := provisioning.InstallerManifest{Name: "sanaei-xui", Version: d.Version, SupportedOS: d.SupportedOS, SupportedArch: d.SupportedArch, MinMemoryMB: d.MinMemoryMB, MinDiskMB: d.MinDiskMB, Artifacts: []provisioning.InstallerArtifact{{Name: artifactName, URL: d.ScriptURL, SHA256: d.ScriptSHA256, Destination: dest}}, InstallScripts: []provisioning.ScriptRef{{Name: installName, Version: 1}}, VerifyScripts: []provisioning.ScriptRef{{Name: verifyName, Version: 1}}, Services: []string{"x-ui"}, AutoRollback: d.AutoRollback}
 	return manifest, []provisioning.ScriptStep{install, verify}, nil

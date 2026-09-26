@@ -55,6 +55,9 @@ func TestLegacyInstallerCommandDoesNotBecomeAdapterSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if !strings.Contains(scripts[0].Execute, "XUI_NONINTERACTIVE=1") || !strings.Contains(scripts[0].Execute, "'v1'") {
+		t.Fatal("release must be explicit and noninteractive")
+	}
 	if strings.Contains(scripts[0].Execute, "curl ") {
 		t.Fatal("adapter install must execute verified artifact, not fetch network content")
 	}
