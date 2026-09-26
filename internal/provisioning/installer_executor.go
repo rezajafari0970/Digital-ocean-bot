@@ -58,9 +58,14 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 				diag := Diagnostic{}
 				retryable := false
 				if p.Err != nil {
-					state = "PHASE_FAILED"
-					diag = ClassifyCommandFailure(p.Err, p.Result)
-					retryable = DiagnosticRetryable(diag)
+					d := ClassifyCommandFailure(p.Err, p.Result)
+					if p.Phase == "precheck" && (d.Code == "SSH_COMMAND_FAILED" || d.Code == "SSH_COMMAND_EXIT") {
+						state = "PRECHECK_MISS"
+					} else {
+						state = "PHASE_FAILED"
+						diag = d
+						retryable = DiagnosticRetryable(diag)
+					}
 				}
 				_ = e.Events.Event(ctx, Event{RunID: ir.ProvisionRunID, Step: name, Substep: p.Phase, State: state, Attempt: attempt, Diagnostic: diag, Duration: p.Duration, Retryable: retryable, Metadata: map[string]any{"installer": resolved.Manifest.Name, "installer_version": resolved.Manifest.Version}})
 			}

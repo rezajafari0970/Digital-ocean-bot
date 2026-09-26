@@ -50,3 +50,34 @@ func TestInstallerTerminalFailureRequiresRollback(t *testing.T) {
 		t.Fatalf("state=%s", got)
 	}
 }
+
+type eventRecorderStub struct{ events []Event }
+
+func (s *eventRecorderStub) Event(_ context.Context, e Event) error {
+	s.events = append(s.events, e)
+	return nil
+}
+
+type precheckMissScripts struct{}
+
+func (precheckMissScripts) RunScript(_ context.Context, _ Target, _ []byte, _ ScriptStep, observe func(ScriptPhaseResult), _ StageObserver) error {
+	code := 1
+	if observe != nil {
+		observe(ScriptPhaseResult{Phase: "precheck", Result: CommandResult{ExitCode: &code}, Err: ErrSSHCommand})
+		observe(ScriptPhaseResult{Phase: "execute", Result: CommandResult{}})
+	}
+	return nil
+}
+func TestInstallerPrecheckMissIsNotFailure(t *testing.T) {
+	store := &memStore{}
+	states := &installerStateStub{}
+	events := &eventRecorderStub{}
+	e := InstallerExecutor{Store: store, Scripts: precheckMissScripts{}, States: states, Events: events}
+	r := ResolvedInstaller{Manifest: InstallerManifest{Name: "demo", Version: 1}, Steps: []ScriptStep{{Name: "install", Execute: "do", Precheck: "test", MaxAttempts: 1}}}
+	if err := e.Execute(context.Background(), InstallerRun{ID: "ir", ProvisionRunID: "pr"}, r, Target{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if len(events.events) < 1 || events.events[0].State != "PRECHECK_MISS" || events.events[0].Diagnostic.Code != "" {
+		t.Fatalf("%+v", events.events)
+	}
+}

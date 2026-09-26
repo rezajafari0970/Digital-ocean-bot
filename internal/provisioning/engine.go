@@ -221,6 +221,14 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 				diag := Diagnostic{}
 				if p.Skipped {
 					state = "PHASE_SKIPPED"
+				} else if p.Phase == "precheck" && p.Err != nil {
+					d := ClassifyCommandFailure(p.Err, p.Result)
+					if d.Code == "SSH_COMMAND_FAILED" || d.Code == "SSH_COMMAND_EXIT" {
+						state = "PRECHECK_MISS"
+					} else {
+						state = "PHASE_FAILED"
+						diag = d
+					}
 				} else if p.Err != nil {
 					state = "PHASE_FAILED"
 					diag = ClassifyCommandFailure(p.Err, p.Result)
@@ -229,7 +237,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 				diag.StderrTail = p.Result.Stderr
 				diag.ExitCode = p.Result.ExitCode
 				diag.Signal = p.Result.Signal
-				phaseRetryable := p.Err != nil && DiagnosticRetryable(diag)
+				phaseRetryable := p.Err != nil && (p.Phase != "precheck" || diag.Code != "") && DiagnosticRetryable(diag)
 				if diag.Code == "COMMAND_OUTCOME_UNKNOWN" && script.Precheck != "" {
 					phaseRetryable = true
 				}
