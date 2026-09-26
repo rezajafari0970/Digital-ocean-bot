@@ -10,7 +10,7 @@ import (
 )
 
 func defaultProvisionPlan() provisioning.Plan {
-	return provisioning.Plan{Bootstrap: "set -euo pipefail; apt-get update -y", InstallPanel: "true", Verify: sanaei.VerifyCommand()}
+	return provisioning.Plan{Scripts: provisioning.DefaultPreInstallerSteps()}
 }
 
 func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentID string) (DeploymentConfig, workflow.ProfileSnapshot, error) {

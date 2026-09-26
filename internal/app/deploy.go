@@ -118,7 +118,7 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 			}
 			effective.InstallSteps = resolved
 		} else {
-			effective.InstallSteps = provisioning.LegacyScriptPlan(defaultProvisionPlan()).Steps
+			effective.InstallSteps = append([]provisioning.ScriptStep(nil), defaultProvisionPlan().Scripts...)
 		}
 	}
 	if err := profiles.AttachSnapshot(ctx, d.ID, effective); err != nil {
