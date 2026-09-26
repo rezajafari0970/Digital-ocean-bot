@@ -58,6 +58,18 @@ WHERE d.id=$1`, deploymentID).Scan(&runID, &state, &step, &attempt, &lastErr, &n
 	var checks, created any
 	if s.DB.QueryRowContext(r.Context(), `SELECT status,os_id,os_version,architecture,cpu_count,memory_mb,disk_free_mb,is_root,package_manager,package_health,dns_ok,outbound_https_ok,time_sync,reboot_required,checks,created_at FROM server_readiness_snapshots WHERE run_id=$1 ORDER BY created_at DESC LIMIT 1`, runID).Scan(&rs, &osid, &osv, &arch, &cpu, &mem, &disk, &root, &pm, &ph, &dns, &https, &ts, &reboot, &checks, &created) == nil {
 		readiness = map[string]any{"status": rs, "os_id": osid, "os_version": osv, "architecture": arch, "cpu_count": cpu, "memory_mb": mem, "disk_free_mb": disk, "is_root": root, "package_manager": pm, "package_health": ph, "dns_ok": dns, "outbound_https_ok": https, "time_sync": ts, "reboot_required": reboot, "checks": checks, "created_at": created}
+		ir, _ := s.DB.QueryContext(r.Context(), `SELECT code,severity,action,remediation,state,detail FROM server_readiness_issues WHERE readiness_id=(SELECT id FROM server_readiness_snapshots WHERE run_id=$1 ORDER BY created_at DESC LIMIT 1) ORDER BY created_at`, runID)
+		issues := []map[string]any{}
+		if ir != nil {
+			defer ir.Close()
+			for ir.Next() {
+				var c, se, a, rm, st, de string
+				if ir.Scan(&c, &se, &a, &rm, &st, &de) == nil {
+					issues = append(issues, map[string]any{"code": c, "severity": se, "action": a, "remediation": rm, "state": st, "detail": de})
+				}
+			}
+		}
+		readiness["issues"] = issues
 	}
 	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events, "readiness": readiness})
 }

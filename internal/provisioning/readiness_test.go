@@ -2,6 +2,7 @@ package provisioning
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -59,7 +60,7 @@ func TestReadinessReady(t *testing.T) {
 func TestReadinessDNSBlocked(t *testing.T) {
 	c := ReadinessCollector{SSH: readinessSSHStub{dnsFail: true}}
 	s, err := c.Collect(context.Background(), "r", Target{}, nil, nil)
-	if err != ErrServerReadinessBlocked {
+	if !errors.Is(err, ErrServerReadinessBlocked) {
 		t.Fatalf("err=%v", err)
 	}
 	if s.Status != "BLOCKED" || s.DNSOK {

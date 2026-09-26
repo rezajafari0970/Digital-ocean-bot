@@ -261,6 +261,10 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			run.LastError = err.Error()
 			diag := ClassifyCommandFailure(err, result)
 			retryable := DiagnosticRetryable(diag)
+			var readinessErr *ReadinessError
+			if errors.As(err, &readinessErr) {
+				retryable = readinessErr.Retryable
+			}
 			// A state-changing command interrupted after start has unknown outcome.
 			// Automatic retry is allowed only when the immutable script defines an
 			// idempotent precheck that can reconcile desired state first.
