@@ -27,25 +27,54 @@ func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.D
 	}
 	return err
 }
+func (c Container) installerTarget(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) (provisioning.Target, []byte, error) {
+	runtime, err := c.Runtime(ctx, d.AccountID)
+	if err != nil {
+		return provisioning.Target{}, nil, err
+	}
+	info, err := (workflow.DigitalOceanWaiter{Provider: runtime.Provider}).Wait(ctx, d.ProviderID)
+	if err != nil {
+		return provisioning.Target{}, nil, err
+	}
+	t := provisioning.Target{AccountID: d.AccountID, DropletID: d.DropletID, Host: info.Host, User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}
+	key, err := c.Secrets.Get(ctx, d.AccountID, snap.SSHKeySecretRef)
+	return t, key, err
+}
+func (c Container) installerReadiness(ctx context.Context, d workflow.Deployment, runID string, target provisioning.Target, key []byte, ssh provisioning.SSHClient) (provisioning.ReadinessSnapshot, error) {
+	var ready provisioning.ReadinessSnapshot
+	var checks []byte
+	err := c.DB.QueryRowContext(ctx, `SELECT status,os_id,os_version,architecture,cpu_count,memory_mb,disk_free_mb,is_root,package_manager,package_health,dns_ok,outbound_https_ok,time_sync,reboot_required,checks FROM server_readiness_snapshots WHERE run_id=$1 ORDER BY created_at DESC LIMIT 1`, runID).Scan(&ready.Status, &ready.OSID, &ready.OSVersion, &ready.Architecture, &ready.CPUCount, &ready.MemoryMB, &ready.DiskFreeMB, &ready.IsRoot, &ready.PackageManager, &ready.PackageHealth, &ready.DNSOK, &ready.OutboundHTTPSOK, &ready.TimeSync, &ready.RebootRequired, &checks)
+	if err == nil {
+		_ = json.Unmarshal(checks, &ready.Checks)
+		return ready, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return ready, err
+	}
+	store := provisioning.SQLStore{DB: c.DB}
+	return (provisioning.ReadinessCollector{SSH: ssh, Recorder: store}).Collect(ctx, runID, target, key, nil)
+}
 func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) error {
 	ref, ok, err := c.deploymentInstallerRef(ctx, d.ID, snap)
 	if err != nil || !ok {
 		return err
 	}
-	var ready provisioning.ReadinessSnapshot
-	var checks []byte
-	err = c.DB.QueryRowContext(ctx, `SELECT status,os_id,os_version,architecture,cpu_count,memory_mb,disk_free_mb,is_root,package_manager,package_health,dns_ok,outbound_https_ok,time_sync,reboot_required,checks FROM server_readiness_snapshots s JOIN provision_runs pr ON pr.id=s.run_id WHERE pr.account_id=$1 AND pr.droplet_id=$2 ORDER BY s.created_at DESC LIMIT 1`, d.AccountID, d.DropletID).Scan(&ready.Status, &ready.OSID, &ready.OSVersion, &ready.Architecture, &ready.CPUCount, &ready.MemoryMB, &ready.DiskFreeMB, &ready.IsRoot, &ready.PackageManager, &ready.PackageHealth, &ready.DNSOK, &ready.OutboundHTTPSOK, &ready.TimeSync, &ready.RebootRequired, &checks)
+	var runID string
+	if err = c.DB.QueryRowContext(ctx, `SELECT id::text FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, d.AccountID, d.DropletID).Scan(&runID); err != nil {
+		return err
+	}
+	target, key, err := c.installerTarget(ctx, d, snap)
 	if err != nil {
 		return err
 	}
-	_ = json.Unmarshal(checks, &ready.Checks)
-	var provisionRunID string
-	if err = c.DB.QueryRowContext(ctx, `SELECT id::text FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, d.AccountID, d.DropletID).Scan(&provisionRunID); err != nil {
+	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
+	ready, err := c.installerReadiness(ctx, d, runID, target, key, ssh)
+	if err != nil {
 		return err
 	}
 	registry := provisioning.InstallerRegistry{DB: c.DB, Scripts: provisioning.ScriptRegistry{DB: c.DB}}
 	orch := provisioning.InstallerOrchestrator{DB: c.DB, Registry: registry}
-	resolved, ir, err := orch.Prepare(ctx, d.ID, provisionRunID, ref, ready)
+	resolved, ir, err := orch.Prepare(ctx, d.ID, runID, ref, ready)
 	if err != nil {
 		return err
 	}
@@ -61,20 +90,6 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 			return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", "rollback required")
 		}
 	}
-	runtime, err := c.Runtime(ctx, d.AccountID)
-	if err != nil {
-		return err
-	}
-	info, err := (workflow.DigitalOceanWaiter{Provider: runtime.Provider}).Wait(ctx, d.ProviderID)
-	if err != nil {
-		return err
-	}
-	target := provisioning.Target{AccountID: d.AccountID, DropletID: d.DropletID, Host: info.Host, User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}
-	key, err := c.Secrets.Get(ctx, d.AccountID, snap.SSHKeySecretRef)
-	if err != nil {
-		return err
-	}
-	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	store := provisioning.SQLStore{DB: c.DB}
 	exec := provisioning.InstallerExecutor{Store: store, Events: store, Scripts: provisioning.SSHScriptRunner{SSH: ssh}, States: orch}
 	if ir.State == "ROLLBACK_REQUIRED" {
