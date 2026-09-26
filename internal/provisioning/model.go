@@ -10,6 +10,7 @@ const (
 	Bootstrapping     State = "BOOTSTRAPPING"
 	InstallingPanel   State = "INSTALLING_PANEL"
 	RunningScript     State = "RUNNING_SCRIPT"
+	WaitingInstaller  State = "WAITING_INSTALLER"
 	ImportingDatabase State = "IMPORTING_DATABASE"
 	Verifying         State = "VERIFYING"
 	Completed         State = "COMPLETED"

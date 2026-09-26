@@ -39,7 +39,7 @@ func (s RecoveryStore) Deployments(ctx context.Context, limit int) ([]RecoveryIt
 	if limit < 1 {
 		limit = 100
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,'deployment',state,updated_at FROM deployments WHERE state NOT IN ('READY','FAILED') ORDER BY updated_at LIMIT $1`, limit)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,'deployment',state,updated_at FROM deployments WHERE state NOT IN ('READY','FAILED','WAITING_INSTALLER') ORDER BY updated_at LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
 	}

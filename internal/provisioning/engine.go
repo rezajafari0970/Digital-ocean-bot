@@ -8,6 +8,7 @@ import (
 
 var ErrInvalidPlan = errors.New("invalid provision plan")
 var ErrInterruptedUnsafe = errors.New("previous worker stopped during non-reconcilable script")
+var ErrInstallerNotConfigured = errors.New("installer not configured")
 
 type SecretReader interface {
 	Get(context.Context, string, string) ([]byte, error)
@@ -79,9 +80,37 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 	for i := 1; i < len(steps); i++ {
 		order[steps[i].name] = i
 	}
+	// Historical runs may already be past a placeholder installer and stuck in
+	// verify. Reconcile them back to an explicit paused installer state.
+	for i := 1; i < len(steps); i++ {
+		if steps[i].script != nil && IsInstallerPlaceholder(*steps[i].script) && order[run.CurrentStep] > i {
+			run.State = WaitingInstaller
+			run.CurrentStep = steps[i].name
+			run.LastError = ErrInstallerNotConfigured.Error()
+			run.NextRetryAt = nil
+			_ = e.Store.Update(ctx, run)
+			if e.Events != nil {
+				diag := ClassifyError(ErrInstallerNotConfigured)
+				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: steps[i].name, State: "WAITING_INSTALLER", Diagnostic: diag, Retryable: false})
+			}
+			return run, ErrInstallerNotConfigured
+		}
+	}
 	for idx, step := range steps {
 		if order[run.CurrentStep] > order[step.name] {
 			continue
+		}
+		if step.script != nil && IsInstallerPlaceholder(*step.script) {
+			run.State = WaitingInstaller
+			run.CurrentStep = step.name
+			run.LastError = ErrInstallerNotConfigured.Error()
+			run.NextRetryAt = nil
+			_ = e.Store.Update(ctx, run)
+			if e.Events != nil {
+				diag := ClassifyError(ErrInstallerNotConfigured)
+				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: "WAITING_INSTALLER", Diagnostic: diag, Retryable: false})
+			}
+			return run, ErrInstallerNotConfigured
 		}
 		maxAttempts := DefaultStepPolicies["ssh"].MaxAttempts
 		if step.script != nil {

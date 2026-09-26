@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 )
 
 var ErrStepUnavailable = errors.New("workflow step unavailable")
@@ -103,6 +104,15 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		}
 		d, err = step.fn(stepCtx, d)
 		cancel()
+		if errors.Is(err, provisioning.ErrInstallerNotConfigured) {
+			_ = e.Store.FinishStep(ctx, d.ID, step.name, nil, ErrorClass(""))
+			d.State = WaitingInstaller
+			d.CurrentStep = "provision"
+			d.LastError = "INSTALLER_NOT_CONFIGURED"
+			_ = e.Store.Update(ctx, d)
+			_ = e.Store.Event(ctx, d.ID, "provision", WaitingInstaller, "installer not configured")
+			return d, nil
+		}
 		class := ClassifyStepError(step.name, err)
 		_ = e.Store.FinishStep(ctx, d.ID, step.name, err, class)
 		if err != nil {

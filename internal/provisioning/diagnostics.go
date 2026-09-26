@@ -48,7 +48,10 @@ func ClassifyError(err error) Diagnostic {
 		return Diagnostic{}
 	}
 	d := Diagnostic{Class: ClassUnknown, Code: "SSH_UNKNOWN", Message: redact.Text(err.Error())}
-	if errors.Is(err, ErrHostKeyMismatch) {
+	if errors.Is(err, ErrInstallerNotConfigured) {
+		d.Class = ClassConfiguration
+		d.Code = "INSTALLER_NOT_CONFIGURED"
+	} else if errors.Is(err, ErrHostKeyMismatch) {
 		d.Class = ClassHostKey
 		d.Code = "SSH_HOST_KEY_MISMATCH"
 	} else if errors.Is(err, ErrHostKeyVerifierMissing) {

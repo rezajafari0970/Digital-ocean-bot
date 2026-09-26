@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"strconv"
@@ -94,6 +95,16 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	if err != nil {
 		return err
 	}
+	cfg, snap, err := h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)
+	if err != nil {
+		return err
+	}
+	if placeholder := provisioning.InstallerPlaceholderName(cfg.Provision); d.CurrentStep == "provision" && placeholder != "" {
+		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
+		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)
+		_ = store.Event(ctx, d.ID, "provision", workflow.WaitingInstaller, "installer not configured")
+		return nil
+	}
 	if d.CurrentStep == "provision" && d.DropletID != "" {
 		var ps, innerStep, pe string
 		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &innerStep, &pe); qerr == nil {
@@ -124,10 +135,6 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 			// droplet executor performs tag-based adoption instead of issuing a
 			// second provider create.
 		}
-	}
-	cfg, snap, err := h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)
-	if err != nil {
-		return err
 	}
 	engine, err := h.Container.Workflow(ctx, item.AccountID, cfg)
 	if err != nil {

@@ -9,6 +9,7 @@ const (
 	Creating           State = "CREATING"
 	WaitingResource    State = "WAITING_RESOURCE"
 	Provisioning       State = "PROVISIONING"
+	WaitingInstaller   State = "WAITING_INSTALLER"
 	ImportingDatabase  State = "IMPORTING_DATABASE"
 	ConfiguringPanel   State = "CONFIGURING_PANEL"
 	RegisteringClients State = "REGISTERING_CLIENTS"

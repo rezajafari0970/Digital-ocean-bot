@@ -1,6 +1,9 @@
 package provisioning
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type ScriptStep struct {
 	RegistryID  string        `json:"registry_id,omitempty"`
@@ -55,3 +58,22 @@ func LegacyScriptPlan(p Plan) ScriptPlan {
 		{Name: "verify", Category: "verify", Execute: p.Verify, MaxAttempts: 8, Timeout: 5 * time.Minute},
 	}}
 }
+
+func IsInstallerPlaceholder(s ScriptStep) bool {
+	cmd := strings.TrimSpace(strings.ToLower(s.Execute))
+	return (s.Category == "install" || s.Category == "panel" || s.Name == "panel") && (cmd == "" || cmd == "true" || cmd == ":" || cmd == "exit 0")
+}
+
+func InstallerPlaceholderName(p Plan) string {
+	steps := p.Scripts
+	if len(steps) == 0 {
+		steps = LegacyScriptPlan(p).Steps
+	}
+	for _, s := range steps {
+		if IsInstallerPlaceholder(s) {
+			return s.Name
+		}
+	}
+	return ""
+}
+func PlanHasInstallerPlaceholder(p Plan) bool { return InstallerPlaceholderName(p) != "" }
