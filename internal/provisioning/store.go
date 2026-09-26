@@ -11,6 +11,8 @@ var ErrRunNotFound = errors.New("provision run not found")
 type Store interface {
 	Reserve(context.Context, Run) (Run, bool, error)
 	Update(context.Context, Run) error
+	BeginStep(context.Context, string, string, int) (int, error)
+	FinishStep(context.Context, string, string, error, bool) error
 }
 type SQLStore struct{ DB *sql.DB }
 

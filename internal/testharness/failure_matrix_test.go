@@ -7,7 +7,7 @@ import (
 )
 
 func TestFailureInjectionEveryWorkflowStage(t *testing.T) {
-	for _, stage := range []string{"wait_resource", "provision", "database", "panel", "clients", "traffic"} {
+	for _, stage := range []string{"create", "wait_resource", "provision", "database", "panel", "clients", "traffic"} {
 		t.Run(stage, func(t *testing.T) {
 			store := &Store{}
 			steps := NewSteps(FailurePlan{Step: stage, Times: 1})
@@ -16,6 +16,9 @@ func TestFailureInjectionEveryWorkflowStage(t *testing.T) {
 			if _, err := engine.Run(context.Background(), req); err != ErrInjected {
 				t.Fatalf("expected failure got %v", err)
 			}
+			// Simulate a worker restart: construct a fresh engine against the same
+			// durable store and step side effects.
+			engine = workflow.Engine{Store: store, Steps: steps}
 			d, err := engine.Run(context.Background(), req)
 			if err != nil {
 				t.Fatal(err)

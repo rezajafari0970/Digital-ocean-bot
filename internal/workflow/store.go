@@ -4,14 +4,20 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 )
 
 var ErrDeploymentNotFound = errors.New("deployment not found")
+var ErrStepRetryDeferred = errors.New("workflow step retry deferred")
+var ErrStepRetryLimit = errors.New("workflow step retry limit reached")
+var ErrStepTerminal = errors.New("workflow step has terminal failure")
 
 type Store interface {
 	Reserve(context.Context, Request) (Deployment, bool, error)
 	Update(context.Context, Deployment) error
 	Event(context.Context, string, string, State, string) error
+	BeginStep(context.Context, string, string, int) (int, error)
+	FinishStep(context.Context, string, string, error, ErrorClass) error
 }
 type SQLStore struct{ DB *sql.DB }
 
@@ -38,4 +44,52 @@ func (s SQLStore) Get(ctx context.Context, id, accountID string) (Deployment, er
 	var d Deployment
 	err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),state,current_step,attempt,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, id, accountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.State, &d.CurrentStep, &d.Attempt, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
 	return d, err
+}
+
+func (s SQLStore) BeginStep(ctx context.Context, deploymentID, step string, maxAttempts int) (int, error) {
+	var attempts int
+	var class sql.NullString
+	var next sql.NullTime
+	err := s.DB.QueryRowContext(ctx, `SELECT attempts,last_error_class,next_retry_at FROM deployment_step_attempts WHERE deployment_id=$1 AND step=$2`, deploymentID, step).Scan(&attempts, &class, &next)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+	if err == nil {
+		if class.Valid && !RetryableClass(ErrorClass(class.String)) {
+			return attempts, ErrStepTerminal
+		}
+		if next.Valid && time.Now().Before(next.Time) {
+			return attempts, ErrStepRetryDeferred
+		}
+		if maxAttempts > 0 && attempts >= maxAttempts {
+			return attempts, ErrStepRetryLimit
+		}
+	}
+	var n int
+	err = s.DB.QueryRowContext(ctx, `INSERT INTO deployment_step_attempts(deployment_id,step,attempts,last_started_at,last_error,last_error_class,next_retry_at) VALUES($1,$2,1,now(),NULL,NULL,NULL) ON CONFLICT(deployment_id,step) DO UPDATE SET attempts=deployment_step_attempts.attempts+1,last_started_at=now(),last_error=NULL,last_error_class=NULL,next_retry_at=NULL RETURNING attempts`, deploymentID, step).Scan(&n)
+	return n, err
+}
+func (s SQLStore) FinishStep(ctx context.Context, deploymentID, step string, stepErr error, class ErrorClass) error {
+	msg := ""
+	if stepErr != nil {
+		msg = stepErr.Error()
+	}
+	var next any
+	if stepErr != nil && RetryableClass(class) {
+		var attempts int
+		_ = s.DB.QueryRowContext(ctx, `SELECT attempts FROM deployment_step_attempts WHERE deployment_id=$1 AND step=$2`, deploymentID, step).Scan(&attempts)
+		if attempts < 1 {
+			attempts = 1
+		}
+		backoff := time.Duration(1<<minInt(attempts, 6)) * time.Second
+		next = time.Now().Add(backoff)
+	}
+	_, err := s.DB.ExecContext(ctx, `UPDATE deployment_step_attempts SET last_finished_at=now(),last_error=NULLIF($3,''),last_error_class=NULLIF($4,''),next_retry_at=$5 WHERE deployment_id=$1 AND step=$2`, deploymentID, step, msg, string(class), next)
+	return err
+}
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

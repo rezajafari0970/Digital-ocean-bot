@@ -6,8 +6,9 @@ import (
 )
 
 type memStore struct {
-	r      Run
-	exists bool
+	r        Run
+	exists   bool
+	attempts map[string]int
 }
 
 func (s *memStore) Reserve(_ context.Context, r Run) (Run, bool, error) {
@@ -20,6 +21,17 @@ func (s *memStore) Reserve(_ context.Context, r Run) (Run, bool, error) {
 	return r, true, nil
 }
 func (s *memStore) Update(_ context.Context, r Run) error { s.r = r; return nil }
+func (s *memStore) BeginStep(_ context.Context, _ string, step string, max int) (int, error) {
+	if s.attempts == nil {
+		s.attempts = map[string]int{}
+	}
+	if max > 0 && s.attempts[step] >= max {
+		return s.attempts[step], ErrStepRetryLimit
+	}
+	s.attempts[step]++
+	return s.attempts[step], nil
+}
+func (s *memStore) FinishStep(context.Context, string, string, error, bool) error { return nil }
 
 type secretStub struct{}
 

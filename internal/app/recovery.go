@@ -86,16 +86,16 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		return err
 	}
 	if d.CurrentStep == "provision" && d.DropletID != "" {
-		var ps string
-		var pa int
-		var pn sql.NullTime
-		var pe string
-		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,attempt,next_retry_at,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &pa, &pn, &pe); qerr == nil {
-			if ps == "FAILED" || pa >= 8 {
+		var ps, innerStep, pe string
+		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &innerStep, &pe); qerr == nil {
+			if ps == "FAILED" {
 				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, "provision failed: "+pe)
 				_ = store.Event(ctx, d.ID, "provision", workflow.Failed, "PROVISION_TERMINAL_FREEZE_V1")
+				_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
 				return nil
 			}
+			var pn sql.NullTime
+			_ = h.Container.DB.QueryRowContext(ctx, `SELECT next_retry_at FROM provision_step_attempts psa JOIN provision_runs pr ON pr.id=psa.run_id WHERE pr.account_id=$1 AND pr.droplet_id=$2 AND psa.step=$3`, item.AccountID, d.DropletID, innerStep).Scan(&pn)
 			if pn.Valid && time.Now().Before(pn.Time) {
 				return nil
 			}
@@ -110,9 +110,10 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 				_ = store.Event(ctx, d.ID, "create", workflow.Failed, "CREATE_TERMINAL_FREEZE_V2")
 				return nil
 			}
-			if opState == "unknown" && resourceID == "" {
-				return nil
-			}
+			// Unknown create outcomes with no resource_id must re-enter the create
+			// step. The operation ledger returns the existing reservation and the
+			// droplet executor performs tag-based adoption instead of issuing a
+			// second provider create.
 		}
 	}
 	cfg, snap, err := h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"log"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type Worker struct {
 	Store     RecoveryStore
 	Handler   Handler
 	Lifecycle *LifecycleWorker
+	Failures  FailureStore
 	Interval  time.Duration
 	Batch     int
 }
@@ -41,9 +43,15 @@ func (w Worker) Once(ctx context.Context) error {
 		return err
 	}
 	for _, x := range ops {
-		if err := w.Handler.RecoverOperation(ctx, x); err != nil {
+		if !w.Failures.Due(ctx, "operation", x.ID) {
 			continue
 		}
+		if err := w.Handler.RecoverOperation(ctx, x); err != nil {
+			w.Failures.Fail(ctx, "operation", x.ID, x.AccountID, err)
+			log.Printf("recovery operation %s account=%s: %v", x.ID, x.AccountID, err)
+			continue
+		}
+		w.Failures.Clear(ctx, "operation", x.ID)
 	}
 	if w.Lifecycle != nil {
 		_ = w.Lifecycle.Once(ctx)
@@ -53,9 +61,15 @@ func (w Worker) Once(ctx context.Context) error {
 		return err
 	}
 	for _, x := range deployments {
-		if err := w.Handler.RecoverDeployment(ctx, x); err != nil {
+		if !w.Failures.Due(ctx, "deployment", x.ID) {
 			continue
 		}
+		if err := w.Handler.RecoverDeployment(ctx, x); err != nil {
+			w.Failures.Fail(ctx, "deployment", x.ID, x.AccountID, err)
+			log.Printf("recovery deployment %s account=%s: %v", x.ID, x.AccountID, err)
+			continue
+		}
+		w.Failures.Clear(ctx, "deployment", x.ID)
 	}
 	return nil
 }

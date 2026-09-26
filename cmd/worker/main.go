@@ -97,8 +97,9 @@ func main() {
 			log.Printf("proxy monitor stopped: %v", err)
 		}
 	}()
-	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Batch: 100}
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Lifecycle: lw, Interval: 10 * time.Second, Batch: 100}
+	failures := worker.FailureStore{DB: application.DB}
+	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Lifecycle: lw, Failures: failures, Interval: 10 * time.Second, Batch: 100}
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()

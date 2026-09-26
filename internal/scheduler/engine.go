@@ -11,6 +11,11 @@ type Starter interface {
 	PrepareScheduledAccount(context.Context, string) error
 	StartScheduledDeployment(context.Context, string, string) error
 }
+
+func providerAllowsCreate(enabled bool, runtimeStatus string) bool {
+	return enabled && runtimeStatus == "READY"
+}
+
 type Engine struct {
 	DB      *sql.DB
 	Store   SQLStore

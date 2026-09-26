@@ -39,5 +39,5 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	provisioner := provisioning.Engine{Store: provisioning.SQLStore{DB: c.DB}, Secrets: c.Secrets, SSH: sshClient}
 	database := sanaei.DatabaseManager{Secrets: c.Secrets, Runner: sshClient, Uploader: sshClient}
 	steps := workflow.RuntimeSteps{DB: c.DB, Droplets: executor, Waiter: workflow.DigitalOceanWaiter{Provider: runtime.Provider}, Provisioner: provisioner, Database: database, Profile: cfg.Profile, ProvisionPlan: cfg.Provision, Target: cfg.Target, Template: cfg.Template, DatabasePaths: cfg.DatabasePaths}
-	return workflow.Engine{Store: workflow.SQLStore{DB: c.DB}, Steps: steps}, nil
+	return workflow.Engine{Store: workflow.SQLStore{DB: c.DB}, Steps: steps, Finalizer: deploymentReadyFinalizer{DB: c.DB, Lifetime: cfg.Profile.Lifetime}, FailureFinalizer: deploymentFailureFinalizer{DB: c.DB}, RunLease: workflow.PostgresRunLease{DB: c.DB}}, nil
 }

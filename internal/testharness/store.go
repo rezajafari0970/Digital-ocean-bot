@@ -7,11 +7,12 @@ import (
 )
 
 type Store struct {
-	mu     sync.Mutex
-	D      workflow.Deployment
-	Exists bool
-	Events []string
-	runMu  sync.Mutex
+	mu           sync.Mutex
+	D            workflow.Deployment
+	Exists       bool
+	Events       []string
+	runMu        sync.Mutex
+	StepAttempts map[string]int
 }
 
 func (s *Store) Reserve(_ context.Context, r workflow.Request) (workflow.Deployment, bool, error) {
@@ -34,5 +35,21 @@ func (s *Store) Event(_ context.Context, _ string, step string, state workflow.S
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.Events = append(s.Events, step+":"+string(state))
+	return nil
+}
+
+func (s *Store) BeginStep(_ context.Context, _ string, step string, max int) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.StepAttempts == nil {
+		s.StepAttempts = map[string]int{}
+	}
+	if max > 0 && s.StepAttempts[step] >= max {
+		return s.StepAttempts[step], workflow.ErrStepRetryLimit
+	}
+	s.StepAttempts[step]++
+	return s.StepAttempts[step], nil
+}
+func (s *Store) FinishStep(context.Context, string, string, error, workflow.ErrorClass) error {
 	return nil
 }

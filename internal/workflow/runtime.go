@@ -111,7 +111,7 @@ func (r RuntimeSteps) WaitResource(ctx context.Context, d Deployment) (Deploymen
 		err = r.DB.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 AND state<>'DELETED' ORDER BY created_at DESC LIMIT 1`, d.AccountID, d.ProviderID).Scan(&d.DropletID)
 		if errors.Is(err, sql.ErrNoRows) {
 			profileRaw, _ := json.Marshal(r.Profile)
-			err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile,ready_at,expires_at) VALUES(gen_random_uuid(),$1,$2,$3,'READY',$4,now(),now()+($5 * interval '1 second')) RETURNING id::text`, d.AccountID, d.ProfileID, d.ProviderID, profileRaw, int64(r.Profile.Lifetime/time.Second)).Scan(&d.DropletID)
+			err = r.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile) VALUES(gen_random_uuid(),$1,$2,$3,'PROVISIONING',$4) RETURNING id::text`, d.AccountID, d.ProfileID, d.ProviderID, profileRaw).Scan(&d.DropletID)
 		}
 		if err != nil {
 			return d, err

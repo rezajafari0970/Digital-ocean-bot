@@ -16,13 +16,23 @@ type Steps interface {
 	RegisterClients(context.Context, Deployment, Request) (Deployment, error)
 	RegisterTraffic(context.Context, Deployment) (Deployment, error)
 }
+type ReadyFinalizer interface {
+	MarkReady(context.Context, Deployment) error
+}
+type FailureFinalizer interface {
+	MarkFailed(context.Context, Deployment) error
+}
+
 type Engine struct {
-	Store   Store
-	Steps   Steps
-	RunLock interface {
+	Store            Store
+	Steps            Steps
+	Finalizer        ReadyFinalizer
+	FailureFinalizer FailureFinalizer
+	RunLock          interface {
 		Lock()
 		Unlock()
 	}
+	RunLease RunLease
 }
 
 func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
@@ -33,6 +43,19 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 	d, _, err := e.Store.Reserve(ctx, req)
 	if err != nil {
 		return d, err
+	}
+	if e.RunLease != nil {
+		release, lockErr := e.RunLease.Acquire(ctx, d.ID)
+		if lockErr != nil {
+			return d, lockErr
+		}
+		defer release()
+		// Another runner may have completed or advanced the deployment before
+		// this lease was acquired. Re-read persisted state under the lease.
+		d, _, err = e.Store.Reserve(ctx, Request{DeploymentID: d.ID, AccountID: d.AccountID, ProfileID: d.ProfileID})
+		if err != nil {
+			return d, err
+		}
 	}
 	if d.State == Ready {
 		return d, nil
@@ -46,6 +69,26 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		if done(d.CurrentStep, step.name) {
 			continue
 		}
+		policy := DefaultStepPolicies[step.name]
+		_, beginErr := e.Store.BeginStep(ctx, d.ID, step.name, policy.MaxAttempts)
+		if beginErr != nil {
+			if errors.Is(beginErr, ErrStepRetryDeferred) {
+				return d, beginErr
+			}
+			d.State = Failed
+			d.CurrentStep = "done"
+			d.LastError = beginErr.Error()
+			_ = e.Store.Update(ctx, d)
+			if e.FailureFinalizer != nil {
+				_ = e.FailureFinalizer.MarkFailed(ctx, d)
+			}
+			code := "STEP_TERMINAL_FAILURE"
+			if errors.Is(beginErr, ErrStepRetryLimit) {
+				code = "STEP_RETRY_LIMIT"
+			}
+			_ = e.Store.Event(ctx, d.ID, step.name, Failed, code)
+			return d, beginErr
+		}
 		d.State = step.state
 		d.CurrentStep = step.name
 		d.Attempt++
@@ -53,15 +96,36 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			return d, err
 		}
 		_ = e.Store.Event(ctx, d.ID, step.name, d.State, "")
-		d, err = step.fn(ctx, d)
+		stepCtx := ctx
+		cancel := func() {}
+		if policy.Timeout > 0 {
+			stepCtx, cancel = context.WithTimeout(ctx, policy.Timeout)
+		}
+		d, err = step.fn(stepCtx, d)
+		cancel()
+		class := ClassifyStepError(step.name, err)
+		_ = e.Store.FinishStep(ctx, d.ID, step.name, err, class)
 		if err != nil {
 			d.LastError = err.Error()
+			if !RetryableClass(class) {
+				d.State = Failed
+				d.CurrentStep = "done"
+			}
 			_ = e.Store.Update(ctx, d)
-			_ = e.Store.Event(ctx, d.ID, step.name, d.State, "step failed")
+			if d.State == Failed && e.FailureFinalizer != nil {
+				_ = e.FailureFinalizer.MarkFailed(ctx, d)
+			}
+			_ = e.Store.Event(ctx, d.ID, step.name, d.State, "step failed class="+string(class))
 			return d, err
 		}
 		d.CurrentStep = next(step.name)
 		if err := e.Store.Update(ctx, d); err != nil {
+			return d, err
+		}
+	}
+
+	if e.Finalizer != nil {
+		if err := e.Finalizer.MarkReady(ctx, d); err != nil {
 			return d, err
 		}
 	}

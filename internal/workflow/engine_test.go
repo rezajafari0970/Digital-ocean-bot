@@ -18,8 +18,10 @@ func (s *memStore) Reserve(_ context.Context, r Request) (Deployment, bool, erro
 	s.exists = true
 	return s.d, true, nil
 }
-func (s *memStore) Update(_ context.Context, d Deployment) error               { s.d = d; return nil }
-func (s *memStore) Event(context.Context, string, string, State, string) error { return nil }
+func (s *memStore) Update(_ context.Context, d Deployment) error                        { s.d = d; return nil }
+func (s *memStore) Event(context.Context, string, string, State, string) error          { return nil }
+func (s *memStore) BeginStep(context.Context, string, string, int) (int, error)         { return 1, nil }
+func (s *memStore) FinishStep(context.Context, string, string, error, ErrorClass) error { return nil }
 
 type stepStub struct{ calls int }
 
