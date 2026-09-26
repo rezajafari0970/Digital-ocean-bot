@@ -23,7 +23,8 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		return nil
 	}
 	var providerID string
-	err = h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,'') FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID)
+	var operationCreated time.Time
+	err = h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,''),created_at FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID, &operationCreated)
 	if err != nil {
 		return err
 	}
@@ -34,9 +35,10 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 	// mutation outcome. Prefer the latest provider snapshot when it is fresh;
 	// only fall back to a live provider request when local evidence is stale.
 	exists := false
+	snapshotAuthoritative := false
 	var snap []byte
 	var snapAt time.Time
-	if err := h.Container.DB.QueryRowContext(ctx, `SELECT data,created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, item.AccountID).Scan(&snap, &snapAt); err == nil && time.Since(snapAt) <= 2*time.Minute {
+	if err := h.Container.DB.QueryRowContext(ctx, `SELECT data,created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, item.AccountID).Scan(&snap, &snapAt); err == nil && time.Since(snapAt) <= 2*time.Minute && snapAt.After(operationCreated) {
 		var disc digitalocean.DiscoveryResult
 		if json.Unmarshal(snap, &disc) == nil {
 			for _, d := range disc.Droplets {
@@ -45,11 +47,18 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 					break
 				}
 			}
-		} else {
-			snapAt = time.Time{}
+			// Presence is authoritative for CREATE. Absence is authoritative for
+			// DELETE. The opposite direction requires a live provider check: a
+			// snapshot may have been captured while the mutation was still settling.
+			if item.Kind == "CREATE_DROPLET" && exists {
+				snapshotAuthoritative = true
+			}
+			if item.Kind == "DELETE_DROPLET" && !exists {
+				snapshotAuthoritative = true
+			}
 		}
 	}
-	if snapAt.IsZero() || time.Since(snapAt) > 2*time.Minute {
+	if !snapshotAuthoritative {
 		pid, convErr := strconv.Atoi(providerID)
 		if convErr != nil {
 			return convErr

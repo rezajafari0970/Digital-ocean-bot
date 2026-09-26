@@ -38,6 +38,7 @@ func (w Worker) Run(ctx context.Context) error {
 	}
 }
 func (w Worker) Once(ctx context.Context) error {
+	w.Failures.ClearResolved(ctx)
 	ops, err := w.Store.Operations(ctx, w.Batch)
 	if err != nil {
 		return err
