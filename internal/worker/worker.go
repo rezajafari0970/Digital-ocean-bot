@@ -10,6 +10,9 @@ type Handler interface {
 	RecoverOperation(context.Context, RecoveryItem) error
 	RecoverDeployment(context.Context, RecoveryItem) error
 }
+type BackoffBypasser interface {
+	BypassDeploymentBackoff(context.Context, RecoveryItem) bool
+}
 type Worker struct {
 	Store     RecoveryStore
 	Handler   Handler
@@ -62,8 +65,11 @@ func (w Worker) Once(ctx context.Context) error {
 		return err
 	}
 	for _, x := range deployments {
-		if !w.Failures.Due(ctx, "deployment", x.ID) {
-			continue
+		due := w.Failures.Due(ctx, "deployment", x.ID)
+		if !due {
+			if b, ok := w.Handler.(BackoffBypasser); !ok || !b.BypassDeploymentBackoff(ctx, x) {
+				continue
+			}
 		}
 		if err := w.Handler.RecoverDeployment(ctx, x); err != nil {
 			w.Failures.Fail(ctx, "deployment", x.ID, x.AccountID, err)

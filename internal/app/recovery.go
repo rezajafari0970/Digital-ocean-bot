@@ -143,3 +143,11 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	_, err = engine.Run(ctx, workflow.Request{DeploymentID: d.ID, AccountID: item.AccountID, ProfileID: d.ProfileID, ClientCount: snap.ClientCount, InboundID: snap.InboundID, EmailPrefix: snap.EmailPrefix})
 	return err
 }
+func (h RecoveryHandler) BypassDeploymentBackoff(ctx context.Context, item worker.RecoveryItem) bool {
+	var current string
+	if err := h.Container.DB.QueryRowContext(ctx, `SELECT current_step FROM deployments WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&current); err != nil || current != "provision" {
+		return false
+	}
+	cfg, _, err := h.Container.DeploymentConfigFromSnapshot(ctx, item.ID)
+	return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)
+}
