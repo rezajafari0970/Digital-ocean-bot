@@ -48,7 +48,10 @@ func ClassifyError(err error) Diagnostic {
 		return Diagnostic{}
 	}
 	d := Diagnostic{Class: ClassUnknown, Code: "SSH_UNKNOWN", Message: redact.Text(err.Error())}
-	if errors.Is(err, ErrInstallerNotConfigured) {
+	if errors.Is(err, ErrServerReadinessBlocked) {
+		d.Class = ClassConfiguration
+		d.Code = "SERVER_READINESS_BLOCKED"
+	} else if errors.Is(err, ErrInstallerNotConfigured) {
 		d.Class = ClassConfiguration
 		d.Code = "INSTALLER_NOT_CONFIGURED"
 	} else if errors.Is(err, ErrHostKeyMismatch) {
@@ -183,7 +186,7 @@ func ClassifyCommandFailure(err error, res CommandResult) Diagnostic {
 
 func DiagnosticRetryable(d Diagnostic) bool {
 	switch d.Code {
-	case "PKG_LOCK_BUSY", "DNS_RESOLUTION_FAILED", "DPKG_INTERRUPTED", "SERVICE_START_FAILED", "SSH_DISCONNECTED", "SSH_CONNECTION_REFUSED", "SSH_CONNECT_TIMEOUT", "SSH_NO_ROUTE", "SSH_CONNECTION_RESET", "SSH_NOT_READY", "SSH_CONTEXT_TIMEOUT", "PROCESS_KILLED":
+	case "SERVER_READINESS_BLOCKED", "PKG_LOCK_BUSY", "DNS_RESOLUTION_FAILED", "DPKG_INTERRUPTED", "SERVICE_START_FAILED", "SSH_DISCONNECTED", "SSH_CONNECTION_REFUSED", "SSH_CONNECT_TIMEOUT", "SSH_NO_ROUTE", "SSH_CONNECTION_RESET", "SSH_NOT_READY", "SSH_CONTEXT_TIMEOUT", "PROCESS_KILLED":
 		return true
 	case "DISK_FULL", "PERMISSION_DENIED", "SSH_HOST_KEY_FAILED", "COMMAND_OUTCOME_UNKNOWN":
 		return false

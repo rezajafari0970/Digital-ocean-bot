@@ -7,6 +7,7 @@ type State string
 const (
 	Pending           State = "PENDING"
 	WaitingSSH        State = "WAITING_SSH"
+	CheckingReadiness State = "CHECKING_READINESS"
 	Bootstrapping     State = "BOOTSTRAPPING"
 	InstallingPanel   State = "INSTALLING_PANEL"
 	RunningScript     State = "RUNNING_SCRIPT"

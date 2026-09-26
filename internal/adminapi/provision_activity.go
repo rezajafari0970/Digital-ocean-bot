@@ -50,5 +50,14 @@ WHERE d.id=$1`, deploymentID).Scan(&runID, &state, &step, &attempt, &lastErr, &n
 			events = append(events, map[string]any{"step": st, "substep": sub, "state": statev, "attempt": a, "error_class": ec, "error_code": code, "error": msg, "fingerprint": fp, "exit_code": exit, "signal": signal, "stdout_tail": stdout, "stderr_tail": stderr, "duration_ms": dur, "retryable": retryable, "next_retry_at": retryAt, "metadata": meta, "created_at": created})
 		}
 	}
-	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events})
+	readiness := map[string]any{}
+	var rs, osid, osv, arch, pm, ph, ts string
+	var cpu int
+	var mem, disk int64
+	var root, dns, https, reboot bool
+	var checks, created any
+	if s.DB.QueryRowContext(r.Context(), `SELECT status,os_id,os_version,architecture,cpu_count,memory_mb,disk_free_mb,is_root,package_manager,package_health,dns_ok,outbound_https_ok,time_sync,reboot_required,checks,created_at FROM server_readiness_snapshots WHERE run_id=$1 ORDER BY created_at DESC LIMIT 1`, runID).Scan(&rs, &osid, &osv, &arch, &cpu, &mem, &disk, &root, &pm, &ph, &dns, &https, &ts, &reboot, &checks, &created) == nil {
+		readiness = map[string]any{"status": rs, "os_id": osid, "os_version": osv, "architecture": arch, "cpu_count": cpu, "memory_mb": mem, "disk_free_mb": disk, "is_root": root, "package_manager": pm, "package_health": ph, "dns_ok": dns, "outbound_https_ok": https, "time_sync": ts, "reboot_required": reboot, "checks": checks, "created_at": created}
+	}
+	writeJSON(w, 200, map[string]any{"run_id": runID, "state": state, "current_step": step, "attempt": attempt, "last_error": lastErr, "next_retry_at": next, "steps": attempts, "events": events, "readiness": readiness})
 }

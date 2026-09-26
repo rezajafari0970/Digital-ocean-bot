@@ -20,6 +20,9 @@ type CommandRunner interface {
 type DetailedCommandRunner interface {
 	RunDetailed(context.Context, Target, []byte, string) (CommandResult, error)
 }
+type ReadinessChecker interface {
+	Collect(context.Context, string, Target, []byte, StageObserver) (ReadinessSnapshot, error)
+}
 type ObservableWaiter interface {
 	WaitObserved(context.Context, Target, []byte, ProbeObserver) error
 }
@@ -36,11 +39,12 @@ type Plan struct {
 	Scripts      []ScriptStep `json:"scripts,omitempty"`
 }
 type Engine struct {
-	Store   Store
-	Secrets SecretReader
-	SSH     CommandRunner
-	Events  EventRecorder
-	Scripts ScriptExecutor
+	Store     Store
+	Secrets   SecretReader
+	SSH       CommandRunner
+	Events    EventRecorder
+	Scripts   ScriptExecutor
+	Readiness ReadinessChecker
 }
 
 func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, error) {
@@ -68,11 +72,15 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 	}
 	defer wipe(key)
 	type runtimeStep struct {
-		name   string
-		state  State
-		script *ScriptStep
+		name      string
+		state     State
+		script    *ScriptStep
+		readiness bool
 	}
 	steps := []runtimeStep{{name: "ssh", state: WaitingSSH}}
+	if e.Readiness != nil {
+		steps = append(steps, runtimeStep{name: "readiness", state: CheckingReadiness, readiness: true})
+	}
 	for i := range scripts {
 		steps = append(steps, runtimeStep{name: scripts[i].Name, state: stateForScript(scripts[i]), script: &scripts[i]})
 	}
@@ -113,6 +121,9 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			return run, ErrInstallerNotConfigured
 		}
 		maxAttempts := DefaultStepPolicies["ssh"].MaxAttempts
+		if step.readiness {
+			maxAttempts = DefaultStepPolicies["readiness"].MaxAttempts
+		}
 		if step.script != nil {
 			maxAttempts = step.script.MaxAttempts
 		}
@@ -164,7 +175,9 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			}
 			_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, Substep: string(o.Stage), State: state, Attempt: stepAttempt, Diagnostic: diag, Duration: o.Duration, Retryable: o.Err != nil})
 		}
-		if step.name == "ssh" {
+		if step.readiness {
+			_, err = e.Readiness.Collect(ctx, run.ID, target, key, stageObserver)
+		} else if step.name == "ssh" {
 			if staged, ok := e.SSH.(StagedWaiter); ok {
 				probe := 0
 				err = staged.WaitStages(ctx, target, key, func(probeErr error, dur time.Duration) {

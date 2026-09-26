@@ -14,7 +14,7 @@ var ErrStepTerminal = errors.New("provision step terminal failure")
 type StepPolicy struct{ MaxAttempts int }
 
 var DefaultStepPolicies = map[string]StepPolicy{
-	"ssh": {MaxAttempts: 12}, "bootstrap": {MaxAttempts: 5},
+	"ssh": {MaxAttempts: 12}, "readiness": {MaxAttempts: 3}, "bootstrap": {MaxAttempts: 5},
 	"panel": {MaxAttempts: 5}, "verify": {MaxAttempts: 8},
 }
 
