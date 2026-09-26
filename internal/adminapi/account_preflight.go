@@ -68,7 +68,12 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 		status = app.ProviderStateRuntimeStatus(providerState)
 	}
 	detail, _ := json.Marshal(map[string]any{"checks": checks, "provider_state": providerState, "provider_error": providerError, "can_create": ready})
-	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, status, string(detail))
+	// Preflight's lightweight GetAccount success is not enough evidence to clear
+	// a provider lock (other provider endpoints can still return 422). Only a
+	// full Discover refresh can transition LOCKED -> ACTIVE.
+	if err != nil {
+		s.Container.RecordProviderObservation(r.Context(), id, providerState, err, string(detail))
+	}
 	code := 200
 	if !ready {
 		code = 409

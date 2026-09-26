@@ -15,12 +15,17 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 		if item.ReplacementDeploymentID == "" {
 			var limit, inUse, pending int
+			var providerState, providerError string
 			var snapshotAt time.Time
 			_ = c.DB.QueryRowContext(ctx, `SELECT
 				COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
 				COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
 				(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
-				COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz)`, item.AccountID).Scan(&limit, &inUse, &pending, &snapshotAt)
+				COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz),
+				COALESCE((SELECT provider_state FROM accounts WHERE id=$1),'UNKNOWN'),COALESCE((SELECT provider_error_state FROM accounts WHERE id=$1),'')`, item.AccountID).Scan(&limit, &inUse, &pending, &snapshotAt, &providerState, &providerError)
+			if providerState != "ACTIVE" || providerError != "" {
+				return nil
+			}
 			if snapshotAt.Equal(time.Unix(0, 0)) || time.Since(snapshotAt) > 2*time.Minute {
 				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail='provider snapshot stale; refresh required',runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID)
 				return nil

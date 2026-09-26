@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
@@ -30,5 +31,16 @@ func TestClassifyAccountProviderError(t *testing.T) {
 				t.Fatalf("got %q want %q", got, tc.want)
 			}
 		})
+	}
+}
+func TestProviderStateRecoveryPolicy(t *testing.T) {
+	if ProviderProbeInterval(ProviderStateLocked) > time.Minute {
+		t.Fatal("locked accounts must be reprobed quickly")
+	}
+	if IsProviderObservationError(ProviderStateLocked) {
+		t.Fatal("lock is semantic provider state")
+	}
+	if !IsProviderObservationError(ProviderStateTransportError) || !IsProviderObservationError(ProviderStateProxyError) {
+		t.Fatal("transport/proxy must stay separate")
 	}
 }

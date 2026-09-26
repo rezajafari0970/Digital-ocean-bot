@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
@@ -48,4 +49,20 @@ func ProviderStateRuntimeStatus(state string) string {
 		return "READY"
 	}
 	return "PROVIDER_" + state
+}
+
+func IsProviderObservationError(state string) bool {
+	return state == ProviderStateTransportError || state == ProviderStateProxyError
+}
+func ProviderProbeInterval(state string) time.Duration {
+	switch state {
+	case ProviderStateLocked:
+		return 45 * time.Second
+	case ProviderStateTokenInvalid, ProviderStatePermissionDenied:
+		return 5 * time.Minute
+	case ProviderStateRateLimited:
+		return 2 * time.Minute
+	default:
+		return 0
+	}
 }

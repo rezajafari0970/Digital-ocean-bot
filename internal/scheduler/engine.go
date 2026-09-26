@@ -12,8 +12,8 @@ type Starter interface {
 	StartScheduledDeployment(context.Context, string, string) error
 }
 
-func providerAllowsCreate(enabled bool, runtimeStatus string) bool {
-	return enabled && runtimeStatus == "READY"
+func providerAllowsCreate(enabled bool, runtimeStatus, providerState, providerError string) bool {
+	return enabled && runtimeStatus == "READY" && providerState == "ACTIVE" && providerError == ""
 }
 
 type Engine struct {
@@ -33,8 +33,8 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// ISOLATION_WAIT accounts recover automatically on the next scheduler tick.
 		_ = e.Starter.PrepareScheduledAccount(ctx, x.AccountID)
 		var enabled bool
-		var runtimeStatus string
-		if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus); err != nil || !enabled || runtimeStatus != "READY" {
+		var runtimeStatus, providerState, providerError string
+		if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !providerAllowsCreate(enabled, runtimeStatus, providerState, providerError) {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}

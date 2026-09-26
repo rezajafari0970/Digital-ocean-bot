@@ -4,21 +4,21 @@ import "testing"
 
 func TestProviderGateNegativeStates(t *testing.T) {
 	cases := []struct {
-		name    string
-		enabled bool
-		status  string
-		want    bool
+		name                        string
+		enabled                     bool
+		runtime, state, providerErr string
+		want                        bool
 	}{
-		{"ready", true, "READY", true},
-		{"disabled_panel", false, "READY", false},
-		{"provider_disabled", true, "PROVIDER_BLOCKED", false},
-		{"invalid_or_revoked_token", true, "PROVIDER_UNAVAILABLE", false},
-		{"provider_unavailable", true, "PROVIDER_UNAVAILABLE", false},
-		{"droplet_limit_reached", true, "PROVIDER_BLOCKED", false},
+		{"ready", true, "READY", "ACTIVE", "", true},
+		{"locked", true, "READY", "LOCKED", "", false},
+		{"transport", true, "READY", "ACTIVE", "TRANSPORT_ERROR", false},
+		{"proxy", true, "READY", "ACTIVE", "PROXY_ERROR", false},
+		{"runtime_blocked", true, "PROVIDER_BLOCKED", "ACTIVE", "", false},
+		{"disabled", false, "READY", "ACTIVE", "", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := providerAllowsCreate(tc.enabled, tc.status); got != tc.want {
+			if got := providerAllowsCreate(tc.enabled, tc.runtime, tc.state, tc.providerErr); got != tc.want {
 				t.Fatalf("got %v want %v", got, tc.want)
 			}
 		})
