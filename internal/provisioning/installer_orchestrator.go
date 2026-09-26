@@ -43,7 +43,7 @@ func (o InstallerOrchestrator) Prepare(ctx context.Context, deploymentID, provis
 }
 func (o InstallerOrchestrator) SetState(ctx context.Context, runID, state, lastError string) error {
 	switch state {
-	case "PREPARING", "INSTALLING", "VERIFYING", "INSTALL_COMPLETE", "ROLLBACK_REQUIRED", "FAILED":
+	case "PREPARING", "INSTALLING", "VERIFYING", "INSTALL_COMPLETE", "ROLLBACK_REQUIRED", "ROLLED_BACK", "FAILED":
 	default:
 		return ErrInvalidPlan
 	}
