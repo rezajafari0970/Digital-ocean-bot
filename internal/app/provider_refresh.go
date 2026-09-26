@@ -26,6 +26,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 	}
 	rows.Close()
 	for _, id := range ids {
+		var runtimeStatus string
+		var runtimeStatusAt time.Time
+		_ = c.DB.QueryRowContext(ctx, `SELECT runtime_status,runtime_status_at FROM accounts WHERE id=$1`, id).Scan(&runtimeStatus, &runtimeStatusAt)
+		if (runtimeStatus == "PROVIDER_LOCKED" || runtimeStatus == "PROVIDER_TOKEN_INVALID" || runtimeStatus == "PROVIDER_PERMISSION_DENIED") && time.Since(runtimeStatusAt) < 15*time.Minute {
+			continue
+		}
 		var fresh bool
 		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
 		if fresh {
@@ -44,6 +50,9 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			}
 			rt, err := c.Runtime(ctx, id)
 			if err != nil {
+				providerState := ClassifyAccountProviderError(err, true)
+				detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
+				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, ProviderStateRuntimeStatus(providerState), string(detail))
 				return
 			}
 			d, err := rt.Provider.Discover(ctx)
@@ -52,7 +61,18 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			}
 			if err != nil {
 				log.Printf("provider refresh %s: %v", id, err)
+				proxyRequired := rt.Config.Network.Mode == "proxy_required"
+				providerState := ClassifyAccountProviderError(err, proxyRequired)
+				detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
+				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, ProviderStateRuntimeStatus(providerState), string(detail))
 				return
+			}
+			providerState := "active"
+			canCreate := d.Account.Status == "active" && d.Account.DropletLimit > len(d.Droplets)
+			if d.Account.Status != "active" {
+				providerState = "disabled"
+			} else if d.Account.DropletLimit <= len(d.Droplets) {
+				providerState = "cannot_create"
 			}
 			b, _ := json.Marshal(d)
 			var oldLimit int
@@ -66,7 +86,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				_, _ = c.DB.ExecContext(ctx, `INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)`, id, oldLimit, newLimit, newLimit-oldLimit, snapshotID)
 				log.Printf("capacity change %s: %d -> %d (%+d)", id, oldLimit, newLimit, newLimit-oldLimit)
 			}
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),updated_at=now() WHERE id=$1`, id, d.Account.UUID, d.Account.Email)
+			detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_account_status": d.Account.Status, "can_create": canCreate, "droplet_limit": d.Account.DropletLimit, "provider_droplets": len(d.Droplets)})
+			runtimeStatus := "READY"
+			if !canCreate {
+				runtimeStatus = "PROVIDER_BLOCKED"
+			}
+			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, d.Account.UUID, d.Account.Email, runtimeStatus, string(detail))
 			c.ReconcileOwnedOrphans(ctx, id)
 		}()
 	}

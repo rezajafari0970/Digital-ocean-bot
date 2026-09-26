@@ -108,8 +108,19 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
 			return
 		}
+		collision, _ := networkIdentityCollision(r.Context(), s.DB, accountID, x.ProxyID)
+		if collision {
+			writeJSON(w, 409, map[string]string{"error": "network_identity_collision", "detail": "Selected proxy shares an exit IP or subnet with another account"})
+			return
+		}
 	}
-	res, err := s.DB.ExecContext(r.Context(), `UPDATE network_profiles SET mode=$2,proxy_id=CASE WHEN $2='direct' THEN NULL ELSE $3::uuid END,updated_at=now() WHERE account_id=$1`, accountID, x.Mode, x.ProxyID)
+	tx, err := s.DB.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	defer tx.Rollback()
+	res, err := tx.ExecContext(r.Context(), `UPDATE network_profiles SET mode=$2,proxy_id=CASE WHEN $2='direct' THEN NULL ELSE $3::uuid END,updated_at=now() WHERE account_id=$1`, accountID, x.Mode, x.ProxyID)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
@@ -117,6 +128,11 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 	n, _ := res.RowsAffected()
 	if n == 0 {
 		writeJSON(w, 404, map[string]string{"error": "account_not_found"})
+		return
+	}
+	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, accountID)
+	if err := tx.Commit(); err != nil {
+		writeJSON(w, 500, errorBody())
 		return
 	}
 	w.WriteHeader(204)

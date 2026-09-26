@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 )
 
 func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +29,10 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 	}
 	runtime, err := s.Container.Runtime(r.Context(), id)
 	if err != nil {
-		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "detail": err.Error()})
+		providerState := app.ClassifyAccountProviderError(err, true)
+		detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
+		_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, app.ProviderStateRuntimeStatus(providerState), string(detail))
+		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "state": providerState, "detail": err.Error()})
 		return
 	}
 	result, err := runtime.Provider.Discover(r.Context())
@@ -35,7 +40,12 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		runtime.Gateway.CloseIdleConnections()
 	}
 	if err != nil {
-		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "detail": err.Error()})
+		var mode string
+		_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(mode,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&mode)
+		providerState := app.ClassifyAccountProviderError(err, mode == "proxy_required")
+		detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
+		_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, app.ProviderStateRuntimeStatus(providerState), string(detail))
+		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "state": providerState, "detail": err.Error()})
 		return
 	}
 	raw, _ := json.Marshal(result)
@@ -43,6 +53,7 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, map[string]string{"error": "snapshot_store_failed"})
 		return
 	}
-	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),updated_at=now() WHERE id=$1`, id, result.Account.UUID, result.Account.Email)
+	detail, _ := json.Marshal(map[string]any{"provider_state": "ACTIVE", "provider_error": "", "can_create": true})
+	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),runtime_status='READY',runtime_status_detail=$4,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, result.Account.UUID, result.Account.Email, string(detail))
 	writeJSON(w, 200, map[string]any{"refreshed": true, "email": result.Account.Email, "external_id": result.Account.UUID, "droplet_limit": result.Account.DropletLimit, "provider_droplets": len(result.Droplets)})
 }

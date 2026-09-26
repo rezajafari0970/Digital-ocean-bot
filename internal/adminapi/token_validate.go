@@ -22,7 +22,7 @@ func (s *Server) validateReplacementToken(ctx context.Context, accountID, token,
 		if err := s.DB.QueryRowContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil {
 			return digitalocean.AccountInfo{}, err
 		}
-		if px.Status != network.StatusHealthy && px.Status != network.StatusDegraded {
+		if px.Status != network.StatusHealthy {
 			return digitalocean.AccountInfo{}, errors.New("proxy_not_healthy")
 		}
 		var pass []byte

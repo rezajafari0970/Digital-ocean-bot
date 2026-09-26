@@ -3,6 +3,8 @@ package adminapi
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 )
 
 func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +60,14 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	status := "PREFLIGHT_FAILED"
+	providerState := app.ProviderStateActive
 	if ready {
 		status = "READY"
+	} else if err != nil {
+		providerState = app.ClassifyAccountProviderError(err, mode == "proxy_required")
+		status = app.ProviderStateRuntimeStatus(providerState)
 	}
-	detail, _ := json.Marshal(map[string]any{"checks": checks, "provider_error": providerError})
+	detail, _ := json.Marshal(map[string]any{"checks": checks, "provider_state": providerState, "provider_error": providerError, "can_create": ready})
 	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET runtime_status=$2,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, status, string(detail))
 	code := 200
 	if !ready {

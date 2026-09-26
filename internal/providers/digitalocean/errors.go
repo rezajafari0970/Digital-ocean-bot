@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
@@ -20,6 +21,22 @@ type HTTPError struct {
 func (e HTTPError) Error() string {
 	return fmt.Sprintf("digitalocean api status %d code %s message %q path %s", e.Status, e.Code, e.Message, e.Path)
 }
+func parseAPIError(body []byte) (string, string) {
+	var v struct {
+		ID      string `json:"id"`
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	}
+	if len(body) == 0 || json.Unmarshal(body, &v) != nil {
+		return "", ""
+	}
+	code := strings.TrimSpace(v.Code)
+	if code == "" {
+		code = strings.TrimSpace(v.ID)
+	}
+	return code, strings.TrimSpace(v.Message)
+}
+
 func IsCapacityError(err error) bool {
 	var h HTTPError
 	if !errors.As(err, &h) {

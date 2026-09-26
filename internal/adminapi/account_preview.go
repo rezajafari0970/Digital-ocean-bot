@@ -38,7 +38,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	if x.ProxyID != "" {
 		var px network.Proxy
 		var user, ref string
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil || (px.Status != network.StatusHealthy && px.Status != network.StatusDegraded) {
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil || px.Status != network.StatusHealthy {
 			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
 			return
 		}

@@ -28,13 +28,19 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 422, map[string]string{"error": "proxy_detection_failed"})
 		return
 	}
+	if x.Adapter == "" {
+		_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(adapter,'generic') FROM proxies WHERE id=$1`, id).Scan(&x.Adapter)
+		if x.Adapter == "" {
+			x.Adapter = "generic"
+		}
+	}
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(r.Context(), `UPDATE proxies SET name=$2,type=$3,host=$4,port=$5,username=NULLIF($6,''),status='healthy',failure_count=0,consecutive_successes=0,last_checked_at=now(),last_success_at=now(),updated_at=now() WHERE id=$1`, id, x.Name, string(typ), x.Host, x.Port, x.Username)
+	res, err := tx.ExecContext(r.Context(), `UPDATE proxies SET name=$2,type=$3,host=$4,port=$5,username=NULLIF($6,''),adapter=$7,status='healthy',failure_count=0,consecutive_successes=0,last_checked_at=now(),last_success_at=now(),updated_at=now() WHERE id=$1`, id, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
@@ -44,6 +50,7 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
 		return
 	}
+	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id IN (SELECT account_id FROM network_profiles WHERE proxy_id=$1)`, id)
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -70,7 +77,7 @@ func (s *Server) deleteProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if used > 0 {
-		writeJSON(w, 409, map[string]string{"error": "proxy_in_use"})
+		writeJSON(w, 409, map[string]any{"error": "proxy_in_use", "accounts": used, "detail": "Unassign this proxy from all accounts before deleting it."})
 		return
 	}
 	res, err := s.DB.ExecContext(r.Context(), `DELETE FROM proxies WHERE id=$1`, id)

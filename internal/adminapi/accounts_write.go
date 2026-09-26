@@ -49,6 +49,10 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if len(x.Regions) == 0 {
 		x.Regions = []string{x.Region}
 	}
+	if code := validateAccountSettings(x, 0); code != "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": code})
+		return
+	}
 	if len(x.Regions) > 5 {
 		x.Regions = x.Regions[:5]
 	}
@@ -110,15 +114,22 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	var id string
 	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
 VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7,$8,$9,$10,$11,$12)
-ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO UPDATE SET
-name=EXCLUDED.name,email=EXCLUDED.email,preferred_region=EXCLUDED.preferred_region,
-auto_interval_seconds=EXCLUDED.auto_interval_seconds,auto_batch_size=EXCLUDED.auto_batch_size,
-auto_max_concurrent=EXCLUDED.auto_max_concurrent,server_lifetime_seconds=EXCLUDED.server_lifetime_seconds,desired_server_count=EXCLUDED.desired_server_count,fallback_any_region=EXCLUDED.fallback_any_region,updated_at=now()
+ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO NOTHING
 RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes).Scan(&id)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
 	}
+	created := true
+	cleanup := func() {
+		if !created {
+			return
+		}
+		// Account-scoped secrets are removed by the secrets.account_id
+		// ON DELETE CASCADE foreign key when the account is deleted.
+		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+	}
+	defer cleanup()
 	if _, err = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=$2::jsonb,preferred_sizes=$3::jsonb,preferred_images=$4::jsonb,preferred_image=$5,server_lifetime_min_seconds=$6,server_lifetime_max_seconds=$7,build_spacing_minutes=$8,build_spacing_max_minutes=$9,next_build_at=NULL WHERE id=$1`, id, mustJSON(x.Regions), mustJSON(x.Sizes), mustJSON(x.Images), x.Images[0], x.LifetimeMinSeconds, x.LifetimeMaxSeconds, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
@@ -140,8 +151,7 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 		return
 	}
 	if x.NetworkMode == "proxy_required" {
-		var collision bool
-		_ = s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM network_profiles other_np JOIN proxies chosen ON chosen.id=$2 LEFT JOIN account_network_identities other ON other.account_id=other_np.account_id WHERE other_np.account_id<>$1 AND other_np.mode='proxy_required' AND ((COALESCE(chosen.adapter,'generic')<>'generic' AND other_np.proxy_id=$2) OR (chosen.exit_ip IS NOT NULL AND other.exit_ip=chosen.exit_ip) OR (chosen.exit_ip IS NOT NULL AND other.subnet_key=(CASE WHEN family(chosen.exit_ip)=4 THEN host(network(set_masklen(chosen.exit_ip,24)))||'/24' ELSE host(network(set_masklen(chosen.exit_ip,48)))||'/48' END))))`, id, x.ProxyID).Scan(&collision)
+		collision, _ := networkIdentityCollision(r.Context(), s.DB, id, x.ProxyID)
 		if collision {
 			writeJSON(w, 409, map[string]string{"error": "network_identity_collision", "detail": "Selected proxy shares an exit IP or subnet with another account"})
 			return
@@ -156,6 +166,7 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return
 	}
+	created = false
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 

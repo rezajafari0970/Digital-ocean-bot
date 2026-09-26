@@ -30,9 +30,9 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 		s.refreshNetworkIdentityIfDue(ctx, accountID)
 	}(id)
-	var name, provider, email, externalID string
+	var name, provider, email, externalID, runtimeStatus, runtimeDetail string
 	var enabled bool
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT name,provider,enabled,COALESCE(email,''),COALESCE(external_id,'') FROM accounts WHERE id=$1`, id).Scan(&name, &provider, &enabled, &email, &externalID); err != nil {
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT name,provider,enabled,COALESCE(email,''),COALESCE(external_id,''),runtime_status,COALESCE(runtime_status_detail,'') FROM accounts WHERE id=$1`, id).Scan(&name, &provider, &enabled, &email, &externalID, &runtimeStatus, &runtimeDetail); err != nil {
 		if err == sql.ErrNoRows {
 			writeJSON(w, 404, map[string]string{"error": "not_found"})
 		} else {
@@ -52,7 +52,21 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		id,
 	).Scan(&latestAuditedBrowser)
 
-	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
+	var runtimeMeta map[string]any
+	_ = json.Unmarshal([]byte(runtimeDetail), &runtimeMeta)
+	providerState := "ACTIVE"
+	providerReason := "Ready"
+	canCreate := runtimeStatus == "READY"
+	if v, ok := runtimeMeta["provider_state"].(string); ok && v != "" {
+		providerState = v
+	}
+	if v, ok := runtimeMeta["provider_error"].(string); ok && v != "" {
+		providerReason = v
+	}
+	if v, ok := runtimeMeta["can_create"].(bool); ok {
+		canCreate = v && runtimeStatus == "READY"
+	}
+	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": providerState, "provider_reason": providerReason, "can_create": canCreate}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	var total, managed, active int
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*),count(*) FILTER(WHERE managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
