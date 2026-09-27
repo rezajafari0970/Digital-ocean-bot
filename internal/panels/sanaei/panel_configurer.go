@@ -116,3 +116,192 @@ func (p PanelConfigurer) Configure(ctx context.Context, accountID, dropletID str
 func panelConfigureCommand(remote string) string {
 	return fmt.Sprintf("set -euo pipefail; f=%s; trap 'rm -f -- \"$f\"' EXIT; . \"$f\"; /usr/local/x-ui/x-ui setting -username \"$XUI_USER\" -password \"$XUI_PASS\" -port \"$XUI_PORT\" -webBasePath \"$XUI_PATH\" >/dev/null; systemctl restart x-ui; systemctl is-active x-ui >/dev/null", shellQuote(remote))
 }
+
+func (p PanelConfigurer) RepairCompleted(
+	ctx context.Context,
+	accountID string,
+	dropletID string,
+	target provisioning.Target,
+) error {
+
+	if p.DB == nil ||
+		p.Secrets == nil ||
+		p.Runner == nil ||
+		p.Uploader == nil ||
+		accountID == "" ||
+		dropletID == "" ||
+		target.Host == "" {
+
+		return errors.New(
+			"panel repair missing",
+		)
+	}
+
+	var (
+		generation int
+
+		username  string
+		secretRef string
+		port      int
+		webPath   string
+		state     string
+	)
+
+	err := p.DB.QueryRowContext(
+		ctx,
+		`
+SELECT
+d.postinstall_generation,
+p.username,
+p.password_secret_ref,
+p.port,
+p.web_path,
+p.state
+FROM deployments d
+JOIN xui_panel_deployments p
+  ON p.droplet_id=d.droplet_id
+ AND p.generation=d.postinstall_generation
+WHERE d.account_id=$1
+  AND d.droplet_id=$2
+ORDER BY d.created_at DESC
+LIMIT 1
+`,
+		accountID,
+		dropletID,
+	).Scan(
+		&generation,
+		&username,
+		&secretRef,
+		&port,
+		&webPath,
+		&state,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_ = generation
+
+	if state != "COMPLETED" {
+		return errors.New(
+			"panel repair requires completed ledger",
+		)
+	}
+
+	password, err := p.Secrets.Get(
+		ctx,
+		accountID,
+		secretRef,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer wipe(password)
+
+	privateKey, err := p.Secrets.Get(
+		ctx,
+		accountID,
+		target.KeySecretRef,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer wipe(privateKey)
+
+	payload := []byte(
+		"XUI_USER=" +
+			shellQuote(username) +
+			"\n" +
+
+			"XUI_PASS=" +
+			shellQuote(
+				string(password),
+			) +
+			"\n" +
+
+			"XUI_PORT=" +
+			fmt.Sprint(port) +
+			"\n" +
+
+			"XUI_PATH=" +
+			shellQuote(webPath) +
+			"\n",
+	)
+
+	local, err := os.CreateTemp(
+		"",
+		"dob-panel-repair-*",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	localPath := local.Name()
+
+	defer os.Remove(
+		localPath,
+	)
+
+	if err = os.Chmod(
+		localPath,
+		0600,
+	); err != nil {
+
+		local.Close()
+		return err
+	}
+
+	if _, err = local.Write(
+		payload,
+	); err != nil {
+
+		local.Close()
+		return err
+	}
+
+	if err = local.Close(); err != nil {
+		return err
+	}
+
+	remote :=
+		"/root/.dob-xui-panel-repair-" +
+			dropletID +
+			".env"
+
+	// Clean up a stale staging file left by
+	// an interrupted previous repair.
+	_, _ = p.Runner.Run(
+		ctx,
+		target,
+		privateKey,
+		"rm -f -- "+shellQuote(remote),
+	)
+
+	if err = p.Uploader.Upload(
+		ctx,
+		target,
+		privateKey,
+		localPath,
+		remote,
+		0600,
+	); err != nil {
+		return err
+	}
+
+	_, err = p.Runner.Run(
+		ctx,
+		target,
+		privateKey,
+		panelConfigureCommand(
+			remote,
+		),
+	)
+
+	return err
+}

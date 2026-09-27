@@ -31,6 +31,7 @@ type SSHSessionExecutor struct {
 
 	Port     int
 	BasePath string
+	DialHost string
 
 	Secrets SSHSecretReader
 }
@@ -151,10 +152,18 @@ func (e SSHSessionExecutor) Do(
 
 			`PORT=` + strconv.Itoa(e.Port),
 			`BASE=` + shellQuoteSession(basePath),
+			`DIAL=` + shellQuoteSession(
+				func() string {
+					if e.DialHost != "" {
+						return e.DialHost
+					}
+					return "127.0.0.1"
+				}(),
+			),
 
 			`curl -fsS --max-time 8 ` +
 				`-c "$COOKIE" -b "$COOKIE" ` +
-				`"http://127.0.0.1:${PORT}${BASE}csrf-token" ` +
+				`"http://${DIAL}:${PORT}${BASE}csrf-token" ` +
 				`-o "$TOKEN_JSON"`,
 
 			`CSRF="$(python3 -c '` +
@@ -174,7 +183,7 @@ func (e SSHSessionExecutor) Do(
 				`-H 'Content-Type: application/json' ` +
 				`-H "X-CSRF-Token: $CSRF" ` +
 				`--data "$LOGIN" ` +
-				`"http://127.0.0.1:${PORT}${BASE}login" ` +
+				`"http://${DIAL}:${PORT}${BASE}login" ` +
 				`>/dev/null`,
 
 			`BODY_B64=` +
@@ -188,7 +197,7 @@ func (e SSHSessionExecutor) Do(
 				`-c "$COOKIE" -b "$COOKIE" ` +
 				`-X ` + shellQuoteSession(method) + ` ` +
 				bodyArgument + ` ` +
-				`"http://127.0.0.1:${PORT}${BASE}` +
+				`"http://${DIAL}:${PORT}${BASE}` +
 				path +
 				`")"`,
 
@@ -208,8 +217,7 @@ func (e SSHSessionExecutor) Do(
 	)
 
 	if err != nil {
-		return SessionResponse{},
-			ErrSessionRequest
+		return SessionResponse{}, ErrSessionRequest
 	}
 
 	parts := strings.SplitN(
@@ -219,8 +227,7 @@ func (e SSHSessionExecutor) Do(
 	)
 
 	if len(parts) != 2 {
-		return SessionResponse{},
-			ErrSessionRequest
+		return SessionResponse{}, ErrSessionRequest
 	}
 
 	statusCode, err := strconv.Atoi(
