@@ -80,6 +80,16 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 }
 
 func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID string) error {
-	_, err := c.DB.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state='DELETING'`, accountID, providerID)
-	return err
+	tx, err := c.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
