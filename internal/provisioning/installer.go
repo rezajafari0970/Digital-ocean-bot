@@ -150,6 +150,10 @@ func (r InstallerRegistry) Resolve(ctx context.Context, ref InstallerRef, ready 
 }
 func CheckInstallerCompatibility(m InstallerManifest, s ReadinessSnapshot) error {
 	if s.Status == "BLOCKED" {
+		issues := DecideReadiness(s)
+		if re := readinessError(issues); len(re.Codes) > 0 {
+			return re
+		}
 		return fmt.Errorf("%w: readiness blocked", ErrInstallerIncompatible)
 	}
 	if len(m.SupportedOS) > 0 && !containsFold(m.SupportedOS, s.OSID) {
