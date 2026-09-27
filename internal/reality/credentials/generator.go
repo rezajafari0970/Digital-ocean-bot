@@ -31,6 +31,7 @@ func ParseX25519(
 		output,
 		"\n",
 	) {
+
 		line = strings.TrimSpace(
 			line,
 		)
@@ -52,6 +53,19 @@ func ParseX25519(
 
 		case strings.HasPrefix(
 			line,
+			"Password (PublicKey):",
+		):
+
+			publicKey =
+				strings.TrimSpace(
+					strings.TrimPrefix(
+						line,
+						"Password (PublicKey):",
+					),
+				)
+
+		case strings.HasPrefix(
+			line,
 			"Password:",
 		):
 
@@ -60,6 +74,19 @@ func ParseX25519(
 					strings.TrimPrefix(
 						line,
 						"Password:",
+					),
+				)
+
+		case strings.HasPrefix(
+			line,
+			"PublicKey:",
+		):
+
+			publicKey =
+				strings.TrimSpace(
+					strings.TrimPrefix(
+						line,
+						"PublicKey:",
 					),
 				)
 		}

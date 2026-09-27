@@ -106,3 +106,34 @@ func TestWipe(
 		}
 	}
 }
+
+func TestParseXrayPublicKeyLabel(
+	t *testing.T,
+) {
+
+	keyPair, err := ParseX25519(
+		"PrivateKey: private-value\n" +
+			"Password (PublicKey): public-value\n" +
+			"Hash32: ignored\n",
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(keyPair.Private) !=
+		"private-value" {
+
+		t.Fatal(
+			"private key mismatch",
+		)
+	}
+
+	if keyPair.Public !=
+		"public-value" {
+
+		t.Fatal(
+			"public key mismatch",
+		)
+	}
+}
