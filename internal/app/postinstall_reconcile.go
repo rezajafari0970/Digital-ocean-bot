@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 )
 
@@ -16,11 +17,15 @@ func (c Container) ReconcileCompletedPostInstall(ctx context.Context, deployment
 	if err != nil {
 		return err
 	}
+	var generation int
+	if err = c.DB.QueryRowContext(ctx, "SELECT postinstall_generation FROM deployments WHERE id=$1 AND account_id=$2", deploymentID, accountID).Scan(&generation); err != nil {
+		return err
+	}
 	var ok bool
 	err = c.DB.QueryRowContext(ctx, `SELECT
- EXISTS(SELECT 1 FROM xui_database_deployments x WHERE x.droplet_id=$1 AND x.generation=$2 AND x.state='COMPLETED')
- AND
- EXISTS(SELECT 1 FROM xui_panel_deployments p WHERE p.droplet_id=$1 AND p.generation=$2 AND p.state='COMPLETED')`, d.DropletID, d.PostInstallGeneration).Scan(&ok)
+EXISTS(SELECT 1 FROM xui_database_deployments x WHERE x.droplet_id=$1 AND x.generation=$2 AND x.state='COMPLETED')
+AND
+EXISTS(SELECT 1 FROM xui_panel_deployments p WHERE p.droplet_id=$1 AND p.generation=$2 AND p.state='COMPLETED')`, d.DropletID, generation).Scan(&ok)
 	if err != nil {
 		return err
 	}
@@ -39,7 +44,7 @@ func (c Container) ReconcileCompletedPostInstall(ctx context.Context, deployment
 		return err
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(ctx, `UPDATE deployments SET state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, d.PostInstallGeneration)
+	res, err := tx.ExecContext(ctx, `UPDATE deployments SET state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)
 	if err != nil {
 		return err
 	}
