@@ -107,7 +107,7 @@ func (e SSHSessionExecutor) Do(
 	)
 
 	switch method {
-	case "GET":
+	case "GET", "POST":
 	default:
 		return SessionResponse{},
 			ErrSessionRequest
@@ -195,6 +195,8 @@ func (e SSHSessionExecutor) Do(
 				`-o "$OUTPUT" ` +
 				`-w '%{http_code}' ` +
 				`-c "$COOKIE" -b "$COOKIE" ` +
+				`-H 'Content-Type: application/json' ` +
+				`-H "X-CSRF-Token: $CSRF" ` +
 				`-X ` + shellQuoteSession(method) + ` ` +
 				bodyArgument + ` ` +
 				`"http://${DIAL}:${PORT}${BASE}` +
