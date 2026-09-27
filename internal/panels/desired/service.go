@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/listeners"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/realitycontract"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/realityconfig"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
@@ -204,29 +205,19 @@ func (d *panelDeps) Build(
 		privateKey,
 	)
 
-	return realityconfig.Build(
-		realityconfig.Input{
-			Remark: d.managedKey,
-
-			Port: d.port,
-
-			UUID: string(uuid),
-
-			Email: "managed",
-
-			Target: d.targetHost,
-
-			TargetPort: d.targetPort,
-
-			ServerName: d.sni,
-
-			ServerNames: d.serverNames,
-
-			PrivateKey: string(privateKey),
-
-			ShortID: d.shortID,
-		},
-	)
+	managed := realitycontract.Managed{
+		Remark:      d.managedKey,
+		Port:        d.port,
+		UUID:        string(uuid),
+		Email:       "managed",
+		Target:      d.targetHost,
+		TargetPort:  d.targetPort,
+		SNI:         d.sni,
+		ServerNames: d.serverNames,
+		PrivateKey:  string(privateKey),
+		ShortID:     d.shortID,
+	}
+	return managed.Payload()
 }
 
 func (d *panelDeps) Add(
@@ -422,31 +413,18 @@ WHERE pi.id=$1
 			privateKey,
 		)
 
-		_, err =
-			realityconfig.Build(
-				realityconfig.Input{
-					Remark: s.ManagedKey,
-
-					Port: s.Port,
-
-					UUID: string(uuid),
-
-					Email: "managed",
-
-					Target: targetHost,
-
-					TargetPort: targetPort,
-
-					ServerName: sni,
-
-					ServerNames: serverNames,
-
-					PrivateKey: string(privateKey),
-
-					ShortID: shortID,
-				},
-			)
-
+		_, err = (realitycontract.Managed{
+			Remark:      s.ManagedKey,
+			Port:        s.Port,
+			UUID:        string(uuid),
+			Email:       "managed",
+			Target:      targetHost,
+			TargetPort:  targetPort,
+			SNI:         sni,
+			ServerNames: serverNames,
+			PrivateKey:  string(privateKey),
+			ShortID:     shortID,
+		}).Payload()
 		return err
 	}
 
