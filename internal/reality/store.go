@@ -226,3 +226,156 @@ now()
 
 	return err
 }
+
+func (s SQLStore) Recent(
+	ctx context.Context,
+	panelID string,
+	limitPerCandidate int,
+) ([]Observation, error) {
+
+	if s.DB == nil ||
+		panelID == "" ||
+		limitPerCandidate < 1 ||
+		limitPerCandidate > 100 {
+
+		return nil,
+			ErrObservationStore
+	}
+
+	rows, err := s.DB.QueryContext(
+		ctx,
+		`
+SELECT
+target,
+server_name,
+port,
+
+reachable,
+
+tls_version,
+
+cert_valid,
+http2,
+
+samples,
+successes,
+
+median_latency_ms,
+
+observed_at
+
+FROM (
+SELECT
+target,
+server_name,
+port,
+
+reachable,
+
+tls_version,
+
+cert_valid,
+http2,
+
+samples,
+successes,
+
+median_latency_ms,
+
+observed_at,
+
+row_number() OVER(
+PARTITION BY
+target,
+server_name,
+port
+
+ORDER BY
+observed_at DESC
+) AS rn
+
+FROM reality_target_observations
+
+WHERE panel_id=$1
+) history
+
+WHERE rn <= $2
+
+ORDER BY observed_at DESC
+`,
+		panelID,
+		limitPerCandidate,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	observations :=
+		make(
+			[]Observation,
+			0,
+		)
+
+	for rows.Next() {
+		var (
+			observation Observation
+
+			medianLatency int64
+		)
+
+		err = rows.Scan(
+			&observation.Candidate.Target,
+
+			&observation.Candidate.ServerName,
+
+			&observation.Candidate.Port,
+
+			&observation.Reachable,
+
+			&observation.TLSVersion,
+
+			&observation.CertValid,
+
+			&observation.HTTP2,
+
+			&observation.Samples,
+
+			&observation.Successes,
+
+			&medianLatency,
+
+			&observation.ObservedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Raw latency samples are intentionally
+		// not persisted.
+		//
+		// The historical stability engine only
+		// requires the stored per-observation
+		// median.
+		if observation.Successes > 0 {
+			observation.LatencyMS = make([]int64, observation.Successes)
+			for i := range observation.LatencyMS {
+				observation.LatencyMS[i] = medianLatency
+			}
+		}
+
+		observations = append(
+			observations,
+			observation,
+		)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return observations, nil
+}
