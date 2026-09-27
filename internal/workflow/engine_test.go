@@ -64,7 +64,7 @@ func TestWorkflowTerminalStatesDoNotResume(t *testing.T) {
 		t.Run(string(state), func(t *testing.T) {
 			store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: state, CurrentStep: "done"}, exists: true}
 			steps := &stepStub{}
-			d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+			d, err := (Engine{Store: store, Steps: steps, PostInstallOnly: true}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -81,7 +81,7 @@ func TestWorkflowTerminalStatesDoNotResume(t *testing.T) {
 func TestInstallCompleteContinuesThroughDatabaseAndPanelThenStopsSafely(t *testing.T) {
 	store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: InstallComplete, CurrentStep: "installer_complete"}, exists: true}
 	steps := &stepStub{}
-	d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+	d, err := (Engine{Store: store, Steps: steps, PostInstallOnly: true}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
 	if err != nil {
 		t.Fatal(err)
 	}

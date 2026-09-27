@@ -33,7 +33,8 @@ type Engine struct {
 		Lock()
 		Unlock()
 	}
-	RunLease RunLease
+	RunLease        RunLease
+	PostInstallOnly bool
 }
 
 func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
@@ -61,7 +62,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 	if terminalDeploymentState(d.State) {
 		return d, nil
 	}
-	postInstallContinuation := d.State == InstallComplete || d.State == DatabaseComplete
+	postInstallContinuation := e.PostInstallOnly
 	if d.State == DatabaseComplete {
 		d.State = ConfiguringPanel
 		d.CurrentStep = "panel"
