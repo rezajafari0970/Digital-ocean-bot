@@ -91,6 +91,34 @@ func AddInbound(
 	return envelope.Obj, nil
 }
 
+func DeleteInbound(
+	ctx context.Context,
+	exec SessionExecutor,
+	remoteID int64,
+) error {
+	if exec == nil || remoteID <= 0 {
+		return ErrMutationRequest
+	}
+	response, err := exec.Do(ctx, SessionRequest{
+		Method: http.MethodPost,
+		Path:   fmt.Sprintf("panel/api/inbounds/del/%d", remoteID),
+	})
+	if err != nil {
+		return err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return ErrMutationRequest
+	}
+	var envelope mutationEnvelope
+	if json.Unmarshal(response.Body, &envelope) != nil {
+		return ErrMutationRequest
+	}
+	if !envelope.Success {
+		return ErrMutationRejected
+	}
+	return nil
+}
+
 func UpdateInbound(
 	ctx context.Context,
 	exec SessionExecutor,
