@@ -3,6 +3,7 @@ package desired
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 
 	createflow "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/create"
@@ -67,6 +68,8 @@ type panelDeps struct {
 	targetHost string
 
 	sni string
+
+	serverNames []string
 
 	uuidRef string
 
@@ -217,6 +220,8 @@ func (d *panelDeps) Build(
 
 			ServerName: d.sni,
 
+			ServerNames: d.serverNames,
+
 			PrivateKey: string(privateKey),
 
 			ShortID: d.shortID,
@@ -289,6 +294,8 @@ func (s Service) ReconcilePanel(
 		panelPort int
 
 		targetPort int
+
+		serverNamesRaw []byte
 	)
 
 	err := s.DB.QueryRowContext(
@@ -313,6 +320,7 @@ r.state,
 rs.target,
 rs.server_name,
 rs.port,
+rs.server_names,
 
 rc.uuid_secret_ref,
 rc.private_key_secret_ref,
@@ -356,6 +364,7 @@ WHERE pi.id=$1
 		&targetHost,
 		&sni,
 		&targetPort,
+		&serverNamesRaw,
 		&uuidRef,
 		&privateRef,
 		&shortID,
@@ -363,6 +372,16 @@ WHERE pi.id=$1
 
 	if err != nil {
 		return err
+	}
+
+	var serverNames []string
+	if len(serverNamesRaw) > 0 {
+		if err := json.Unmarshal(serverNamesRaw, &serverNames); err != nil {
+			return err
+		}
+	}
+	if len(serverNames) == 0 {
+		serverNames = []string{sni}
 	}
 
 	if lifecycleState != "READY" {
@@ -419,6 +438,8 @@ WHERE pi.id=$1
 					TargetPort: targetPort,
 
 					ServerName: sni,
+
+					ServerNames: serverNames,
 
 					PrivateKey: string(privateKey),
 
@@ -511,6 +532,8 @@ WHERE pi.id=$1
 			targetHost: targetHost,
 
 			sni: sni,
+
+			serverNames: serverNames,
 
 			uuidRef: uuidRef,
 

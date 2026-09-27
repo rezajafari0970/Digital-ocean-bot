@@ -21,9 +21,10 @@ type Input struct {
 	Email string
 	Flow  string
 
-	Target     string
-	TargetPort int
-	ServerName string
+	Target      string
+	TargetPort  int
+	ServerName  string
+	ServerNames []string
 
 	PrivateKey string
 	ShortID    string
@@ -62,7 +63,7 @@ func Build(
 		input.Port > 65535 ||
 		input.UUID == "" ||
 		input.Target == "" ||
-		input.ServerName == "" ||
+		(input.ServerName == "" && len(input.ServerNames) == 0) ||
 		input.PrivateKey == "" ||
 		input.ShortID == "" {
 
@@ -70,13 +71,19 @@ func Build(
 			ErrInvalidConfig
 	}
 
-	if strings.ContainsAny(
-		input.Target+
-			input.ServerName,
-		"/\\ \t\r\n",
-	) {
-		return Payload{},
-			ErrInvalidConfig
+	if len(input.ServerNames) == 0 {
+		input.ServerNames = []string{input.ServerName}
+	}
+	if input.ServerName == "" {
+		input.ServerName = input.ServerNames[0]
+	}
+	if strings.ContainsAny(input.Target, "/\\ \t\r\n") {
+		return Payload{}, ErrInvalidConfig
+	}
+	for _, name := range input.ServerNames {
+		if name == "" || strings.ContainsAny(name, "/\\ \t\r\n") {
+			return Payload{}, ErrInvalidConfig
+		}
 	}
 
 	if input.TargetPort == 0 {
@@ -119,15 +126,14 @@ func Build(
 			"show": false,
 
 			"dest": fmt.Sprintf(
-				"%s:443",
+				"%s:%d",
 				input.Target,
+				input.TargetPort,
 			),
 
 			"xver": 0,
 
-			"serverNames": []string{
-				input.ServerName,
-			},
+			"serverNames": input.ServerNames,
 
 			"privateKey": input.PrivateKey,
 

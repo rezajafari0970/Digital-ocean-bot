@@ -26,3 +26,15 @@ type Score struct {
 	Value           float64
 	Reason          string
 }
+
+type ScanSelection struct {
+	PanelID        string
+	ServerNames    []string
+	TLSVersion     string
+	ALPN           string
+	CurveID        string
+	CertValid      bool
+	CertChainValid bool
+	LatencyMS      int64
+	ScannedAt      time.Time
+}

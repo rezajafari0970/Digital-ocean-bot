@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/realityconfig"
@@ -87,5 +88,39 @@ func AddInbound(
 			ErrMutationRejected
 	}
 
+	return envelope.Obj, nil
+}
+
+func UpdateInbound(
+	ctx context.Context,
+	exec SessionExecutor,
+	remoteID int64,
+	payload realityconfig.Payload,
+) (json.RawMessage, error) {
+	if exec == nil || remoteID <= 0 {
+		return nil, ErrMutationRequest
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	response, err := exec.Do(ctx, SessionRequest{
+		Method: http.MethodPost,
+		Path:   fmt.Sprintf("panel/api/inbounds/update/%d", remoteID),
+		Body:   body,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, ErrMutationRequest
+	}
+	var envelope mutationEnvelope
+	if json.Unmarshal(response.Body, &envelope) != nil {
+		return nil, ErrMutationRequest
+	}
+	if !envelope.Success {
+		return nil, ErrMutationRejected
+	}
 	return envelope.Obj, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
@@ -73,14 +74,50 @@ WHERE pi.id=$1 AND pi.enabled=true
 	}
 	defer credentials.Wipe(key)
 	run := func(ctx context.Context, cmd string) (string, error) { return s.SSH.Run(ctx, target, key, cmd) }
-	candidates := []reality.Candidate{{Target: "www.cloudflare.com", ServerName: "www.cloudflare.com", Port: 443}, {Target: "www.google.com", ServerName: "www.google.com", Port: 443}, {Target: "www.microsoft.com", ServerName: "www.microsoft.com", Port: 443}, {Target: "www.apple.com", ServerName: "www.apple.com", Port: 443}}
-	policy := reality.StabilityPolicy{MinObservations: 3, MinEligibleRatio: .8, SwitchMargin: 5}
-	result, err := reality.RunPanel(ctx, p.ID, reality.SSHProber{Run: run}, candidates, 3, 5, policy, reality.SQLStore{DB: s.DB}, nil)
+	scanned, err := sanaei.ScanRealityTargets(ctx, exec, "")
 	if err != nil {
 		return err
 	}
-	if !result.Stable {
+	store := reality.SQLStore{DB: s.DB}
+	now := time.Now().UTC()
+	byTarget := map[string]sanaei.RealityScanResult{}
+	for _, x := range scanned {
+		if !x.Feasible || x.Host == "" || x.Port < 1 {
+			continue
+		}
+		byTarget[x.Host] = x
+		o := reality.Observation{
+			Candidate: reality.Candidate{Target: x.Host, ServerName: x.Host, Port: x.Port},
+			Reachable: true, TLSVersion: x.TLSVersion, CertValid: x.CertValid,
+			HTTP2: x.ALPN == "h2", Samples: 1, Successes: 1,
+			LatencyMS: []int64{x.LatencyMS}, ObservedAt: now,
+		}
+		if err = store.Save(ctx, p.ID, o); err != nil {
+			return err
+		}
+	}
+	history, err := store.Recent(ctx, p.ID, 5)
+	if err != nil {
+		return err
+	}
+	stable := reality.Aggregate(history, reality.StabilityPolicy{MinObservations: 3, MinEligibleRatio: .8, SwitchMargin: 5})
+	choice, _, err := reality.ChooseStable(nil, stable, reality.StabilityPolicy{MinObservations: 3, MinEligibleRatio: .8, SwitchMargin: 5})
+	if errors.Is(err, reality.ErrInsufficientHistory) {
 		return ErrRealityWarming
+	}
+	if err != nil {
+		return err
+	}
+	selected, ok := byTarget[choice.Candidate.Target]
+	if !ok {
+		return ErrRealityWarming
+	}
+	score := reality.Score{Candidate: choice.Candidate, Eligible: true, MedianLatencyMS: choice.MedianLatencyMS, SuccessRatio: choice.SuccessRatio, Value: choice.Score, Reason: "sanaei-scan-stable"}
+	if err = store.Select(ctx, p.ID, score, now); err != nil {
+		return err
+	}
+	if err = store.SaveScanSelection(ctx, reality.ScanSelection{PanelID: p.ID, ServerNames: selected.ServerNames, TLSVersion: selected.TLSVersion, ALPN: selected.ALPN, CurveID: selected.CurveID, CertValid: selected.CertValid, CertChainValid: selected.CertChainValid, LatencyMS: selected.LatencyMS, ScannedAt: now}); err != nil {
+		return err
 	}
 	xrayPath, err := (runtimecap.XrayResolver{Run: run}).Resolve(ctx)
 	if err != nil {

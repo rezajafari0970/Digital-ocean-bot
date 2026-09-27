@@ -260,37 +260,20 @@ func (e SSHSessionExecutor) Do(
 			)
 	}
 
-	parts := strings.SplitN(output, "\n", 2)
-	if len(parts) == 0 || strings.TrimSpace(parts[0]) == "" {
-		return SessionResponse{}, fmt.Errorf("%w: missing HTTP status", ErrSessionRequest)
+	trimmed := strings.TrimSpace(output)
+	cut := strings.LastIndex(trimmed, "\n")
+	if cut < 0 {
+		return SessionResponse{}, fmt.Errorf("%w: missing response trailer", ErrSessionRequest)
 	}
-	if len(parts) == 1 {
-		parts = append(parts, "")
-	}
-
-	statusCode, err := strconv.Atoi(
-		strings.TrimSpace(parts[0]),
-	)
-
+	payload64 := strings.TrimSpace(trimmed[:cut])
+	statusText := strings.TrimSpace(trimmed[cut+1:])
+	statusCode, err := strconv.Atoi(statusText)
 	if err != nil {
-		return SessionResponse{},
-			fmt.Errorf(
-				"%w: invalid HTTP status %q",
-				ErrSessionRequest,
-				parts[0],
-			)
+		return SessionResponse{}, fmt.Errorf("%w: invalid HTTP status %q", ErrSessionRequest, statusText)
 	}
-
-	body, err := base64.StdEncoding.DecodeString(
-		strings.TrimSpace(parts[1]),
-	)
-
+	body, err := base64.StdEncoding.DecodeString(payload64)
 	if err != nil {
-		return SessionResponse{},
-			fmt.Errorf(
-				"%w: invalid response encoding",
-				ErrSessionRequest,
-			)
+		return SessionResponse{}, fmt.Errorf("%w: invalid response encoding", ErrSessionRequest)
 	}
 
 	return SessionResponse{

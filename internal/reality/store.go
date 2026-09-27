@@ -3,6 +3,7 @@ package reality
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 )
@@ -378,4 +379,28 @@ ORDER BY observed_at DESC
 	}
 
 	return observations, nil
+}
+
+func (s SQLStore) SaveScanSelection(ctx context.Context, m ScanSelection) error {
+	if s.DB == nil || m.PanelID == "" || m.ScannedAt.IsZero() {
+		return ErrObservationStore
+	}
+	names, err := json.Marshal(m.ServerNames)
+	if err != nil {
+		return err
+	}
+	_, err = s.DB.ExecContext(ctx, `
+UPDATE reality_target_selections SET
+server_names=$2::jsonb,
+tls_version=$3,
+alpn=$4,
+curve_id=$5,
+cert_valid=$6,
+cert_chain_valid=$7,
+latency_ms=$8,
+scanned_at=$9,
+updated_at=now()
+WHERE panel_id=$1
+`, m.PanelID, string(names), m.TLSVersion, m.ALPN, m.CurveID, m.CertValid, m.CertChainValid, m.LatencyMS, m.ScannedAt)
+	return err
 }

@@ -93,3 +93,12 @@ func ScanRealityTargets(
 
 	return envelope.Obj, nil
 }
+
+func BestRealityTarget(xs []RealityScanResult)(RealityScanResult,string,error){
+	for _,x:=range xs{
+		if !x.Feasible||x.Host==""||x.Port<1||x.TLSVersion!="1.3"||x.ALPN!="h2"||!x.CertValid||!x.CertChainValid||len(x.ServerNames)==0{continue}
+		sni:=x.Host
+		return x,sni,nil
+	}
+	return RealityScanResult{},"",ErrRealityScan
+}
