@@ -33,3 +33,14 @@ func TestDriverDiscoveryClassifiesRuntimeCapabilities(t *testing.T) {
 		t.Fatalf("unexpected capabilities: %+v", got.Capabilities)
 	}
 }
+
+func TestDiscoverWithExecutorIsReadOnly(t *testing.T) {
+	f := fakeExecutor{resp: SessionResponse{StatusCode: 200}}
+	d, err := DiscoverWithExecutor(context.Background(), f, "3.8.5")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !d.Capabilities.InventorySlim || !d.Capabilities.InventoryFull || !d.Capabilities.ServerStatus {
+		t.Fatalf("unexpected: %+v", d.Capabilities)
+	}
+}

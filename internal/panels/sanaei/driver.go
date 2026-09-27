@@ -88,3 +88,29 @@ func (d Driver) Health(ctx context.Context, in panels.Instance) error {
 	}
 	return nil
 }
+
+func DiscoverWithExecutor(ctx context.Context, exec SessionExecutor, version string) (panels.Discovery, error) {
+	if exec == nil {
+		return panels.Discovery{}, ErrSessionRequest
+	}
+	ev := map[string]int{}
+	probes := []struct{ k, p string }{
+		{"inventory_slim", "panel/api/inbounds/list/slim"},
+		{"inventory_full", "panel/api/inbounds/list"},
+		{"server_status", "panel/api/server/status"},
+	}
+	for _, p := range probes {
+		r, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: p.p})
+		if err != nil {
+			return panels.Discovery{}, err
+		}
+		ev[p.k] = r.StatusCode
+	}
+	c := panels.Capabilities{
+		InventorySlim: supported(ev["inventory_slim"]),
+		InventoryFull: supported(ev["inventory_full"]),
+		InboundRead:   supported(ev["inventory_slim"]) || supported(ev["inventory_full"]),
+		ServerStatus:  supported(ev["server_status"]),
+	}
+	return panels.Discovery{Driver: "sanaei-3x-ui", Version: version, Capabilities: c, ObservedAt: time.Now().UTC(), Evidence: ev}, nil
+}
