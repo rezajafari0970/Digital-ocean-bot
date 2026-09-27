@@ -96,7 +96,11 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID int)
 		return op, err
 	}
 	if !fresh {
-		return reserved, nil
+		// DELETE is safely retryable for the same known provider resource after an
+		// ambiguous outcome. The persisted ResourceID prevents deleting anything else.
+		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != strconv.Itoa(providerID) {
+			return reserved, nil
+		}
 	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
