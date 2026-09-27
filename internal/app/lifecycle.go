@@ -20,6 +20,15 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			return nil
 		}
 		if !terminalFailed && item.ReplacementDeploymentID == "" {
+			// Rotation must share the same concurrency budget as the scheduler.
+			// Otherwise overlapping expiry windows can create a replacement burst.
+			var active int
+			if err := c.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))`, item.AccountID).Scan(&active); err != nil {
+				return err
+			}
+			if active >= 1 {
+				return nil
+			}
 			var limit, inUse, pending int
 			var providerState, providerError string
 			var snapshotAt time.Time
@@ -49,11 +58,14 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			return err
 		}
 		if !terminalFailed {
-			var state string
-			if err := c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE id=$1`, item.ReplacementDeploymentID).Scan(&state); err != nil {
+			var replacementReady bool
+			if err := c.DB.QueryRowContext(ctx, `SELECT EXISTS(
+				SELECT 1 FROM deployments d JOIN droplets r ON r.id=d.droplet_id
+				WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'
+			)`, item.ReplacementDeploymentID).Scan(&replacementReady); err != nil {
 				return err
 			}
-			if state != "READY" {
+			if !replacementReady {
 				return nil
 			}
 		}
