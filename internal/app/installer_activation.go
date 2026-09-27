@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
@@ -53,16 +52,9 @@ func (c Container) installerTarget(ctx context.Context, d workflow.Deployment, s
 	return t, key, err
 }
 func (c Container) installerReadiness(ctx context.Context, d workflow.Deployment, runID string, target provisioning.Target, key []byte, ssh provisioning.SSHClient) (provisioning.ReadinessSnapshot, error) {
-	var ready provisioning.ReadinessSnapshot
-	var checks []byte
-	err := c.DB.QueryRowContext(ctx, `SELECT status,os_id,os_version,architecture,cpu_count,memory_mb,disk_free_mb,is_root,package_manager,package_health,dns_ok,outbound_https_ok,time_sync,reboot_required,checks FROM server_readiness_snapshots WHERE run_id=$1 ORDER BY created_at DESC LIMIT 1`, runID).Scan(&ready.Status, &ready.OSID, &ready.OSVersion, &ready.Architecture, &ready.CPUCount, &ready.MemoryMB, &ready.DiskFreeMB, &ready.IsRoot, &ready.PackageManager, &ready.PackageHealth, &ready.DNSOK, &ready.OutboundHTTPSOK, &ready.TimeSync, &ready.RebootRequired, &checks)
-	if err == nil {
-		_ = json.Unmarshal(checks, &ready.Checks)
-		return ready, nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return ready, err
-	}
+	// Readiness is volatile (package locks, DNS, HTTPS, reboot state). Always
+	// collect a fresh observation for installer activation/retry; the recorder
+	// keeps prior snapshots as history for diagnostics.
 	store := provisioning.SQLStore{DB: c.DB}
 	return (provisioning.ReadinessCollector{SSH: ssh, Recorder: store}).Collect(ctx, runID, target, key, nil)
 }
