@@ -35,6 +35,11 @@ func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.D
 	return err
 }
 func (c Container) installerTarget(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) (provisioning.Target, []byte, error) {
+	if d.Host != "" {
+		t := provisioning.Target{AccountID: d.AccountID, DropletID: d.DropletID, Host: d.Host, User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}
+		key, err := c.Secrets.Get(ctx, d.AccountID, snap.SSHKeySecretRef)
+		return t, key, err
+	}
 	runtime, err := c.Runtime(ctx, d.AccountID)
 	if err != nil {
 		return provisioning.Target{}, nil, err

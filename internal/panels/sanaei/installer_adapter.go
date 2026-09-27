@@ -18,6 +18,7 @@ var installerSHA256RE = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
 
 type InstallerDefinition struct {
 	Version       int
+	ScriptVersion int
 	Release       string
 	ScriptURL     string
 	ScriptSHA256  string
@@ -33,7 +34,10 @@ func DefaultInstallerDefinition() InstallerDefinition {
 }
 
 func (d InstallerDefinition) Build() (provisioning.InstallerManifest, []provisioning.ScriptStep, error) {
-	if d.Version < 1 || d.Release == "" || !versionRE.MatchString(d.Release) || !strings.HasPrefix(d.ScriptURL, "https://") || !installerSHA256RE.MatchString(d.ScriptSHA256) {
+	if d.ScriptVersion == 0 {
+		d.ScriptVersion = 1
+	}
+	if d.Version < 1 || d.ScriptVersion < 1 || d.Release == "" || !versionRE.MatchString(d.Release) || !strings.HasPrefix(d.ScriptURL, "https://") || !installerSHA256RE.MatchString(d.ScriptSHA256) {
 		return provisioning.InstallerManifest{}, nil, ErrInvalidInstallerDefinition
 	}
 	defaults := DefaultInstallerDefinition()
@@ -53,9 +57,9 @@ func (d InstallerDefinition) Build() (provisioning.InstallerManifest, []provisio
 	dest := "/var/lib/digital-ocean-bot/installers/" + artifactName + ".sh"
 	installName := "sanaei-install-" + d.Release
 	verifyName := "sanaei-verify-" + d.Release
-	install := provisioning.ScriptStep{Name: installName, Version: 1, Category: "install", Precheck: VerifyCommand(), Execute: fmt.Sprintf("set -euo pipefail; export DEBIAN_FRONTEND=noninteractive; export XUI_NONINTERACTIVE=1; bash %s %s", quote(dest), quote(d.Release)), Verify: VerifyCommand(), Timeout: 15 * time.Minute, MaxAttempts: 3}
-	verify := provisioning.ScriptStep{Name: verifyName, Version: 1, Category: "verify", Verify: VerifyCommand(), Timeout: 2 * time.Minute, MaxAttempts: 3}
-	manifest := provisioning.InstallerManifest{Name: "sanaei-xui", Version: d.Version, SupportedOS: d.SupportedOS, SupportedArch: d.SupportedArch, MinMemoryMB: d.MinMemoryMB, MinDiskMB: d.MinDiskMB, Artifacts: []provisioning.InstallerArtifact{{Name: artifactName, URL: d.ScriptURL, SHA256: d.ScriptSHA256, Destination: dest}}, InstallScripts: []provisioning.ScriptRef{{Name: installName, Version: 1}}, VerifyScripts: []provisioning.ScriptRef{{Name: verifyName, Version: 1}}, Services: []string{"x-ui"}, RequireRoot: true, RequireDNS: true, RequireHTTPS: true, RequireNoReboot: true, AutoRollback: d.AutoRollback}
+	install := provisioning.ScriptStep{Name: installName, Version: d.ScriptVersion, Category: "install", Precheck: VerifyCommand(), Execute: fmt.Sprintf("set -euo pipefail; export DEBIAN_FRONTEND=noninteractive; export XUI_NONINTERACTIVE=1; bash %s %s", quote(dest), quote(d.Release)), Verify: VerifyCommand(), Timeout: 15 * time.Minute, MaxAttempts: 3}
+	verify := provisioning.ScriptStep{Name: verifyName, Version: d.ScriptVersion, Category: "verify", Verify: VerifyCommand(), Timeout: 2 * time.Minute, MaxAttempts: 3}
+	manifest := provisioning.InstallerManifest{Name: "sanaei-xui", Version: d.Version, SupportedOS: d.SupportedOS, SupportedArch: d.SupportedArch, MinMemoryMB: d.MinMemoryMB, MinDiskMB: d.MinDiskMB, Artifacts: []provisioning.InstallerArtifact{{Name: artifactName, URL: d.ScriptURL, SHA256: d.ScriptSHA256, Destination: dest}}, InstallScripts: []provisioning.ScriptRef{{Name: installName, Version: d.ScriptVersion}}, VerifyScripts: []provisioning.ScriptRef{{Name: verifyName, Version: d.ScriptVersion}}, Services: []string{"x-ui"}, RequireRoot: true, RequireDNS: true, RequireHTTPS: true, RequireNoReboot: true, AutoRollback: d.AutoRollback, Capabilities: []string{"xui_database", "xui_panel"}}
 	return manifest, []provisioning.ScriptStep{install, verify}, nil
 }
 func quote(s string) string { return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'" }

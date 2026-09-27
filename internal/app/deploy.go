@@ -11,9 +11,14 @@ import (
 )
 
 var ErrProfileDisabled = errors.New("deployment profile disabled")
+var ErrDatabaseTemplateNotConfigured = errors.New("database template not configured")
+var ErrDatabaseTemplateUnavailable = errors.New("database template unavailable")
 
 func (c Container) StartDeployment(ctx context.Context, accountID, profileID string) (workflow.Deployment, error) {
 	if err := c.MaintainStickyIdentity(ctx, accountID); err != nil {
+		return workflow.Deployment{}, err
+	}
+	if _, err := c.RequireCreateCapacity(ctx, accountID, 2*time.Minute); err != nil {
 		return workflow.Deployment{}, err
 	}
 	profiles := workflow.ProfileStore{DB: c.DB}
@@ -23,6 +28,14 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	}
 	if profile.AccountID != accountID || !profile.Enabled {
 		return workflow.Deployment{}, ErrProfileDisabled
+	}
+	if profile.Config.DatabaseTemplateID == "" {
+		return workflow.Deployment{}, ErrDatabaseTemplateNotConfigured
+	}
+	var templateActive bool
+	var templatePath string
+	if err := c.DB.QueryRowContext(ctx, `SELECT active,storage_path FROM xui_database_templates WHERE id=$1`, profile.Config.DatabaseTemplateID).Scan(&templateActive, &templatePath); err != nil || !templateActive || templatePath == "" || templatePath == "pending" {
+		return workflow.Deployment{}, ErrDatabaseTemplateUnavailable
 	}
 	store := workflow.SQLStore{DB: c.DB}
 	d, _, err := store.Reserve(ctx, workflow.Request{AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})

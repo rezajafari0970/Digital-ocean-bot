@@ -45,6 +45,7 @@ type InstallerManifest struct {
 	RequireHTTPS    bool                `json:"require_https,omitempty"`
 	RequireNoReboot bool                `json:"require_no_reboot,omitempty"`
 	AutoRollback    bool                `json:"auto_rollback,omitempty"`
+	Capabilities    []string            `json:"capabilities,omitempty"`
 }
 type ResolvedInstaller struct {
 	RegistryID string            `json:"registry_id"`
@@ -185,6 +186,14 @@ func validateInstallerManifest(m InstallerManifest) error {
 		if _, err := artifactStep(a); err != nil {
 			return err
 		}
+	}
+	allowed := map[string]bool{"xui_database": true, "xui_panel": true}
+	seen := map[string]bool{}
+	for _, capability := range m.Capabilities {
+		if !allowed[capability] || seen[capability] {
+			return ErrInvalidPlan
+		}
+		seen[capability] = true
 	}
 	return nil
 }

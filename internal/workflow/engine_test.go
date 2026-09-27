@@ -58,3 +58,49 @@ func TestWorkflowRunsOnceAndResumesCompleted(t *testing.T) {
 		t.Fatal("ready deployment repeated")
 	}
 }
+
+func TestWorkflowTerminalStatesDoNotResume(t *testing.T) {
+	for _, state := range []State{Ready, Failed, InstallFailed, InstallRolledBack, PanelComplete} {
+		t.Run(string(state), func(t *testing.T) {
+			store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: state, CurrentStep: "done"}, exists: true}
+			steps := &stepStub{}
+			d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if d.State != state {
+				t.Fatalf("state changed: got %s want %s", d.State, state)
+			}
+			if steps.calls != 0 {
+				t.Fatalf("terminal deployment executed %d steps", steps.calls)
+			}
+		})
+	}
+}
+
+func TestInstallCompleteContinuesThroughDatabaseAndPanelThenStopsSafely(t *testing.T) {
+	store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: InstallComplete, CurrentStep: "installer_complete"}, exists: true}
+	steps := &stepStub{}
+	d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.State != PanelComplete || d.CurrentStep != "panel_complete" {
+		t.Fatalf("got state=%s step=%s", d.State, d.CurrentStep)
+	}
+	if steps.calls != 2 {
+		t.Fatalf("post-installer continuation executed %d steps, want database+panel", steps.calls)
+	}
+}
+
+func TestDatabaseCompleteResumesAtPanelOnly(t *testing.T) {
+	store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: DatabaseComplete, CurrentStep: "database_complete"}, exists: true}
+	steps := &stepStub{}
+	d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.State != PanelComplete || steps.calls != 1 {
+		t.Fatalf("got state=%s calls=%d", d.State, steps.calls)
+	}
+}

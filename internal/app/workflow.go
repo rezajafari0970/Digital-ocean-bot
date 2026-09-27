@@ -39,6 +39,19 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	provisionStore := provisioning.SQLStore{DB: c.DB}
 	provisioner := provisioning.Engine{Store: provisionStore, Secrets: c.Secrets, SSH: sshClient, Events: provisionStore, Scripts: provisioning.SSHScriptRunner{SSH: sshClient}, Readiness: provisioning.ReadinessCollector{SSH: sshClient, Recorder: provisionStore}}
 	database := sanaei.DatabaseManager{Secrets: c.Secrets, Runner: sshClient, Uploader: sshClient}
-	steps := workflow.RuntimeSteps{DB: c.DB, Droplets: executor, Waiter: workflow.DigitalOceanWaiter{Provider: runtime.Provider}, Provisioner: provisioner, Database: database, Profile: cfg.Profile, ProvisionPlan: cfg.Provision, Target: cfg.Target, Template: cfg.Template, DatabasePaths: cfg.DatabasePaths}
+	panel := sanaei.PanelConfigurer{DB: c.DB, Secrets: c.Secrets, Runner: sshClient, Uploader: sshClient}
+	steps := workflow.RuntimeSteps{DB: c.DB, Droplets: executor, Waiter: workflow.DigitalOceanWaiter{Provider: runtime.Provider}, Provisioner: provisioner, Database: database, Panel: workflow.PanelConfigureFunc(func(ctx context.Context, d workflow.Deployment) error {
+		t := cfg.Target
+		t.AccountID = d.AccountID
+		t.DropletID = d.DropletID
+		if t.Host == "" && d.ProviderID != "" {
+			info, e := workflow.DigitalOceanWaiter{Provider: runtime.Provider}.Wait(ctx, d.ProviderID)
+			if e != nil {
+				return e
+			}
+			t.Host = info.Host
+		}
+		return panel.Configure(ctx, d.AccountID, d.DropletID, t)
+	}), Profile: cfg.Profile, ProvisionPlan: cfg.Provision, Target: cfg.Target, Template: cfg.Template, DatabasePaths: cfg.DatabasePaths}
 	return workflow.Engine{Store: workflow.SQLStore{DB: c.DB}, Steps: steps, Finalizer: deploymentReadyFinalizer{DB: c.DB, Lifetime: cfg.Profile.Lifetime}, FailureFinalizer: deploymentFailureFinalizer{DB: c.DB}, RunLease: workflow.PostgresRunLease{DB: c.DB}}, nil
 }

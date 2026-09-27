@@ -11,6 +11,29 @@ import (
 
 const maxTemplateSize = 64 << 20
 
+func (s *Server) listTemplates(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.DB.QueryContext(r.Context(), `SELECT id::text,name,version,sha256,size_bytes,active,created_at FROM xui_database_templates ORDER BY name,version DESC`)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	defer rows.Close()
+	out := []map[string]any{}
+	for rows.Next() {
+		var id, name, sha string
+		var version int
+		var size int64
+		var active bool
+		var created any
+		if err := rows.Scan(&id, &name, &version, &sha, &size, &active, &created); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		out = append(out, map[string]any{"id": id, "name": name, "version": version, "sha256": sha, "size_bytes": size, "active": active, "created_at": created})
+	}
+	writeJSON(w, 200, out)
+}
+
 func (s *Server) uploadTemplate(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
 	if !p.CanWrite() {

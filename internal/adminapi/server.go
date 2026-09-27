@@ -57,6 +57,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/accounts/{id}/discovery", s.require(s.accountDiscovery, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/refresh", s.require(s.accountDiscovery, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/proxy-test", s.require(s.testAccountProxy, true))
+	m.HandleFunc("GET /api/v1/templates", s.require(s.listTemplates, false))
 	m.HandleFunc("POST /api/v1/templates", s.require(s.uploadTemplate, true))
 	m.HandleFunc("GET /api/v1/accounts/{id}/dashboard", s.require(s.accountDashboard, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/browser-identity", s.require(s.browserIdentity, true))

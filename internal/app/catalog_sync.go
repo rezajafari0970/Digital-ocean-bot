@@ -21,6 +21,12 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 	}
 	rows.Close()
 	for _, id := range ids {
+		// Catalog discovery is optional metadata work. Never hammer accounts that
+		// the provider state machine already classified as blocked/locked/error.
+		var providerState, providerError string
+		if err := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError); err != nil || providerState != ProviderStateActive || providerError != "" {
+			continue
+		}
 		// A recent full provider snapshot already contains the catalog. Do not
 		// spend seven discovery requests again merely because the worker started.
 		var recent bool

@@ -32,6 +32,10 @@ type DatabaseImporter interface {
 type PanelConfigurer interface {
 	Configure(context.Context, Deployment) error
 }
+type PanelConfigureFunc func(context.Context, Deployment) error
+
+func (f PanelConfigureFunc) Configure(ctx context.Context, d Deployment) error { return f(ctx, d) }
+
 type ClientRegistrar interface {
 	CreateMany(context.Context, string, string, int, int, string) ([]sanaei.ClientRecord, error)
 }
@@ -103,6 +107,7 @@ func (r RuntimeSteps) WaitResource(ctx context.Context, d Deployment) (Deploymen
 		return d, err
 	}
 	d.ProviderID = info.ProviderID
+	d.Host = info.Host
 	r.Target.Host = info.Host
 	if r.DB != nil && d.DropletID == "" {
 		// Recovery may reach wait_resource after the droplet row was already
@@ -151,10 +156,27 @@ func (r RuntimeSteps) ImportDatabase(ctx context.Context, d Deployment) (Deploym
 		}
 		t.Host = info.Host
 	}
-	if t.Host == "" {
+	if t.Host == "" || r.DB == nil || r.Template.ID == "" || r.Template.Path == "" || r.Template.SHA256 == "" {
 		return d, ErrRuntimeConfig
 	}
-	return d, r.Database.Import(ctx, t, r.Template, r.DatabasePaths)
+	var state string
+	var generation int
+	if err := r.DB.QueryRowContext(ctx, `SELECT postinstall_generation FROM deployments WHERE id=$1`, d.ID).Scan(&generation); err != nil {
+		return d, err
+	}
+	err := r.DB.QueryRowContext(ctx, `INSERT INTO xui_database_deployments(id,account_id,droplet_id,template_id,state,generation) VALUES(gen_random_uuid(),$1,$2,$3,'IMPORTING',$4) ON CONFLICT(droplet_id,generation) DO UPDATE SET template_id=EXCLUDED.template_id,updated_at=now() RETURNING state`, d.AccountID, d.DropletID, r.Template.ID, generation).Scan(&state)
+	if err != nil {
+		return d, err
+	}
+	if state == "COMPLETED" {
+		return d, nil
+	}
+	if err := r.Database.Import(ctx, t, r.Template, r.DatabasePaths); err != nil {
+		_, _ = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='FAILED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)
+		return d, err
+	}
+	_, err = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='COMPLETED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)
+	return d, err
 }
 func (r RuntimeSteps) ConfigurePanel(ctx context.Context, d Deployment) (Deployment, error) {
 	if r.Panel == nil {
@@ -184,6 +206,9 @@ func (r RuntimeSteps) RegisterTraffic(ctx context.Context, d Deployment) (Deploy
 }
 func (r RuntimeSteps) target(d Deployment) provisioning.Target {
 	t := r.Target
+	if t.Host == "" {
+		t.Host = d.Host
+	}
 	t.AccountID = d.AccountID
 	t.DropletID = d.DropletID
 	return t

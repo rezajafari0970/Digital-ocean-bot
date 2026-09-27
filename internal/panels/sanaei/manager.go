@@ -3,8 +3,10 @@ package sanaei
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"os"
+	"strings"
 )
 
 var ErrTemplateMismatch = errors.New("database template checksum mismatch")
@@ -40,8 +42,11 @@ func (m DatabaseManager) Import(ctx context.Context, target provisioning.Target,
 	if err := m.Uploader.Upload(ctx, target, key, t.Path, paths.Incoming, 0600); err != nil {
 		return err
 	}
-	_, err = m.Runner.Run(ctx, target, key, ImportCommand(paths, checked.SHA256))
-	return err
+	out, err := m.Runner.Run(ctx, target, key, ImportCommand(paths, checked.SHA256))
+	if err != nil {
+		return fmt.Errorf("database import command: %w; diagnostic=%s", err, strings.TrimSpace(out))
+	}
+	return nil
 }
 
 func wipe(b []byte) {

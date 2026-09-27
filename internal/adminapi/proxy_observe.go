@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type proxyObservation struct {
+type ProxyObservation struct {
 	IP          string `json:"ip"`
 	Country     string `json:"country"`
 	CountryCode string `json:"country_code"`
@@ -19,22 +19,26 @@ type proxyObservation struct {
 	LatencyMS   int64  `json:"latency_ms"`
 }
 
-func observeProxy(ctx context.Context, x proxyWrite, typ network.ProxyType) (proxyObservation, error) {
-	p := network.Proxy{Name: x.Name, Type: typ, Host: x.Host, Port: x.Port, Status: network.StatusHealthy}
-	g, err := network.NewProxyGateway("observe", p, network.ProxyCredentials{Username: x.Username, Password: x.Password})
+func observeProxy(ctx context.Context, x proxyWrite, typ network.ProxyType) (ProxyObservation, error) {
+	return ObserveProxy(ctx, x.Name, x.Host, x.Port, x.Username, x.Password, typ)
+}
+
+func ObserveProxy(ctx context.Context, name, host string, port int, username, password string, typ network.ProxyType) (ProxyObservation, error) {
+	p := network.Proxy{Name: name, Type: typ, Host: host, Port: port, Status: network.StatusHealthy}
+	g, err := network.NewProxyGateway("observe", p, network.ProxyCredentials{Username: username, Password: password})
 	if err != nil {
-		return proxyObservation{}, err
+		return ProxyObservation{}, err
 	}
 	defer g.CloseIdleConnections()
 	start := time.Now()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "https://ipwho.is/", nil)
 	resp, err := g.Client.Do(req)
 	if err != nil {
-		return proxyObservation{}, err
+		return ProxyObservation{}, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return proxyObservation{}, errors.New("geo lookup failed")
+		return ProxyObservation{}, errors.New("geo lookup failed")
 	}
 	var v struct {
 		IP          string `json:"ip"`
@@ -49,11 +53,11 @@ func observeProxy(ctx context.Context, x proxyWrite, typ network.ProxyType) (pro
 		} `json:"connection"`
 	}
 	if json.NewDecoder(resp.Body).Decode(&v) != nil || v.IP == "" {
-		return proxyObservation{}, errors.New("invalid geo response")
+		return ProxyObservation{}, errors.New("invalid geo response")
 	}
 	asn := v.Connection.Org
 	if v.Connection.ASN > 0 {
 		asn = "AS" + fmt.Sprint(v.Connection.ASN) + " " + asn
 	}
-	return proxyObservation{IP: v.IP, Country: v.Country, CountryCode: v.CountryCode, Timezone: v.Timezone.ID, ASN: asn, LatencyMS: time.Since(start).Milliseconds()}, nil
+	return ProxyObservation{IP: v.IP, Country: v.Country, CountryCode: v.CountryCode, Timezone: v.Timezone.ID, ASN: asn, LatencyMS: time.Since(start).Milliseconds()}, nil
 }

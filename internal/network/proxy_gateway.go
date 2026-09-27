@@ -28,7 +28,20 @@ type Gateway struct {
 }
 
 func NewProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
-	if accountID == "" || p.Host == "" || p.Port < 1 || p.Status != StatusHealthy {
+	if p.Status != StatusHealthy {
+		return nil, ErrProxyConfigInvalid
+	}
+	return newProxyGateway(accountID, p, creds)
+}
+
+// NewProxyProbeGateway is only for health/recovery probes. It validates the
+// proxy endpoint and type but deliberately does not require HEALTHY status.
+func NewProxyProbeGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
+	return newProxyGateway(accountID, p, creds)
+}
+
+func newProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
+	if accountID == "" || p.Host == "" || p.Port < 1 {
 		return nil, ErrProxyConfigInvalid
 	}
 	tr := &http.Transport{ForceAttemptHTTP2: true, MaxIdleConns: 20, IdleConnTimeout: 60 * time.Second, TLSHandshakeTimeout: 10 * time.Second}

@@ -99,6 +99,17 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	if err != nil {
 		return err
 	}
+	if d.State == workflow.InstallComplete || d.State == workflow.ImportingDatabase || d.State == workflow.DatabaseComplete || d.State == workflow.ConfiguringPanel {
+		if err := h.Container.RequirePostInstallCapabilities(ctx, d.ID); err != nil {
+			return err
+		}
+		engine, err := h.Container.PostInstallWorkflow(ctx, cfg)
+		if err != nil {
+			return err
+		}
+		_, err = engine.Run(ctx, workflow.Request{DeploymentID: d.ID, AccountID: item.AccountID, ProfileID: d.ProfileID, ClientCount: snap.ClientCount, InboundID: snap.InboundID, EmailPrefix: snap.EmailPrefix})
+		return err
+	}
 	if d.State == workflow.WaitingInstaller {
 		return h.Container.activateInstaller(ctx, d, snap)
 	}

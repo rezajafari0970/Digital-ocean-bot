@@ -58,8 +58,27 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			return d, err
 		}
 	}
-	if d.State == Ready {
+	if terminalDeploymentState(d.State) {
 		return d, nil
+	}
+	postInstallContinuation := d.State == InstallComplete || d.State == DatabaseComplete
+	if d.State == DatabaseComplete {
+		d.State = ConfiguringPanel
+		d.CurrentStep = "panel"
+		d.LastError = ""
+		if err := e.Store.Update(ctx, d); err != nil {
+			return d, err
+		}
+		_ = e.Store.Event(ctx, d.ID, "panel", ConfiguringPanel, "post-database continuation")
+	}
+	if d.State == InstallComplete {
+		d.State = ImportingDatabase
+		d.CurrentStep = "database"
+		d.LastError = ""
+		if err := e.Store.Update(ctx, d); err != nil {
+			return d, err
+		}
+		_ = e.Store.Event(ctx, d.ID, "database", ImportingDatabase, "post-installer continuation")
 	}
 	steps := []struct {
 		name  string
@@ -128,6 +147,27 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			_ = e.Store.Event(ctx, d.ID, step.name, d.State, "step failed class="+string(class))
 			return d, err
 		}
+		if postInstallContinuation && step.name == "database" {
+			d.State = DatabaseComplete
+			d.CurrentStep = "database_complete"
+			d.LastError = ""
+			if err := e.Store.Update(ctx, d); err != nil {
+				return d, err
+			}
+			_ = e.Store.Event(ctx, d.ID, "database", DatabaseComplete, "post-install database complete")
+			// Continue immediately into panel configuration; recovery can also resume from DATABASE_COMPLETE.
+			continue
+		}
+		if postInstallContinuation && step.name == "panel" {
+			d.State = PanelComplete
+			d.CurrentStep = "panel_complete"
+			d.LastError = ""
+			if err := e.Store.Update(ctx, d); err != nil {
+				return d, err
+			}
+			_ = e.Store.Event(ctx, d.ID, "panel", PanelComplete, "post-install panel complete")
+			return d, nil
+		}
 		d.CurrentStep = next(step.name)
 		if err := e.Store.Update(ctx, d); err != nil {
 			return d, err
@@ -157,4 +197,13 @@ func rank(s string) int {
 func next(s string) string {
 	m := map[string]string{"create": "wait_resource", "wait_resource": "provision", "provision": "database", "database": "panel", "panel": "clients", "clients": "traffic", "traffic": "done"}
 	return m[s]
+}
+
+func terminalDeploymentState(s State) bool {
+	switch s {
+	case Ready, Failed, InstallFailed, InstallRolledBack, PanelComplete:
+		return true
+	default:
+		return false
+	}
 }

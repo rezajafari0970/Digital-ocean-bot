@@ -1,0 +1,10 @@
+ALTER TABLE xui_panel_deployments DROP CONSTRAINT IF EXISTS xui_panel_deployments_droplet_id_generation_key;
+ALTER TABLE xui_panel_deployments ADD UNIQUE(droplet_id);
+DROP INDEX IF EXISTS xui_database_deployments_droplet_generation_uidx;
+CREATE UNIQUE INDEX xui_database_deployments_droplet_uidx ON xui_database_deployments(droplet_id);
+ALTER TABLE xui_panel_deployments DROP COLUMN IF EXISTS generation;
+ALTER TABLE xui_database_deployments DROP COLUMN IF EXISTS generation;
+ALTER TABLE deployment_step_attempts DROP CONSTRAINT deployment_step_attempts_pkey;
+ALTER TABLE deployment_step_attempts ADD PRIMARY KEY(deployment_id,step);
+ALTER TABLE deployment_step_attempts DROP COLUMN IF EXISTS generation;
+ALTER TABLE deployments DROP COLUMN IF EXISTS postinstall_generation;

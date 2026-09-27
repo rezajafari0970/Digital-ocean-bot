@@ -23,7 +23,7 @@ func (s *Server) testAccountProxy(w http.ResponseWriter, r *http.Request) {
 		}
 		defer zeroBytes(password)
 	}
-	gateway, err := network.NewProxyGateway(id, *cfg.Proxy, network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)})
+	gateway, err := network.NewProxyProbeGateway(id, *cfg.Proxy, network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)})
 	if err != nil {
 		writeJSON(w, 400, map[string]string{"error": "proxy_invalid"})
 		return

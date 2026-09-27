@@ -1,0 +1,2 @@
+DROP TRIGGER IF EXISTS trg_normalize_provider_snapshot_droplets ON provider_snapshots;
+DROP FUNCTION IF EXISTS normalize_provider_snapshot_droplets();

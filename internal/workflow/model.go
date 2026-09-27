@@ -11,6 +11,8 @@ const (
 	Provisioning       State = "PROVISIONING"
 	WaitingInstaller   State = "WAITING_INSTALLER"
 	InstallComplete    State = "INSTALL_COMPLETE"
+	DatabaseComplete   State = "DATABASE_COMPLETE"
+	PanelComplete      State = "PANEL_COMPLETE"
 	InstallFailed      State = "INSTALL_FAILED"
 	InstallRolledBack  State = "INSTALL_ROLLED_BACK"
 	ImportingDatabase  State = "IMPORTING_DATABASE"
@@ -27,6 +29,7 @@ type Deployment struct {
 	ProfileID   string
 	DropletID   string
 	ProviderID  string
+	Host        string
 	State       State
 	CurrentStep string
 	Attempt     int

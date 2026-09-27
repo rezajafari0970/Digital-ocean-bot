@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS xui_database_deployments_droplet_uidx;
+ALTER TABLE xui_database_deployments
+ DROP CONSTRAINT IF EXISTS xui_database_deployments_state_check;
