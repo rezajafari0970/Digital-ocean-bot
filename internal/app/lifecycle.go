@@ -10,10 +10,16 @@ import (
 
 func (c Container) ProcessLifecycle(ctx context.Context, item droplets.LifecycleItem) error {
 	if item.State == droplets.Expiring {
-		if item.ProfileID == "" {
+		// A failed deployment is not serving traffic, so requiring a replacement
+		// before deletion creates a capacity deadlock (especially at the limit).
+		// Only healthy/nonterminal service resources require replacement-first.
+		var deploymentState string
+		_ = c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE droplet_id=$1 ORDER BY updated_at DESC LIMIT 1`, item.ID).Scan(&deploymentState)
+		terminalFailed := deploymentState == "FAILED" || deploymentState == "INSTALL_FAILED" || deploymentState == "INSTALL_ROLLED_BACK"
+		if !terminalFailed && item.ProfileID == "" {
 			return nil
 		}
-		if item.ReplacementDeploymentID == "" {
+		if !terminalFailed && item.ReplacementDeploymentID == "" {
 			var limit, inUse, pending int
 			var providerState, providerError string
 			var snapshotAt time.Time
@@ -42,12 +48,14 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			_, err = c.DB.ExecContext(ctx, `UPDATE droplets SET replacement_deployment_id=$2,updated_at=now() WHERE id=$1 AND replacement_deployment_id IS NULL`, item.ID, d.ID)
 			return err
 		}
-		var state string
-		if err := c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE id=$1`, item.ReplacementDeploymentID).Scan(&state); err != nil {
-			return err
-		}
-		if state != "READY" {
-			return nil
+		if !terminalFailed {
+			var state string
+			if err := c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE id=$1`, item.ReplacementDeploymentID).Scan(&state); err != nil {
+				return err
+			}
+			if state != "READY" {
+				return nil
+			}
 		}
 	}
 	runtime, err := c.Runtime(ctx, item.AccountID)
