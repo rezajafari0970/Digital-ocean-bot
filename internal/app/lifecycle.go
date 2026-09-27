@@ -22,11 +22,13 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		if !terminalFailed && item.ReplacementDeploymentID == "" {
 			// Rotation must share the same concurrency budget as the scheduler.
 			// Otherwise overlapping expiry windows can create a replacement burst.
-			var active int
-			if err := c.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))`, item.AccountID).Scan(&active); err != nil {
+			var active, maxConcurrent int
+			if err := c.DB.QueryRowContext(ctx, `SELECT
+				(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
+				COALESCE((SELECT NULLIF(max_concurrent,0) FROM schedules WHERE account_id=$1 AND profile_id=$2 ORDER BY created_at DESC LIMIT 1),1)`, item.AccountID, item.ProfileID).Scan(&active, &maxConcurrent); err != nil {
 				return err
 			}
-			if active >= 1 {
+			if active >= maxConcurrent {
 				return nil
 			}
 			var limit, inUse, pending int
