@@ -1,0 +1,95 @@
+package sanaei
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+)
+
+var ErrRealityScan = errors.New("reality target scan failed")
+
+type RealityScanResult struct {
+	Target         string   `json:"target"`
+	Host           string   `json:"host"`
+	Port           int      `json:"port"`
+	IP             string   `json:"ip"`
+	ServerNames    []string `json:"serverNames"`
+	TLSVersion     string   `json:"tlsVersion"`
+	ALPN           string   `json:"alpn"`
+	CurveID        string   `json:"curveID"`
+	CertValid      bool     `json:"certValid"`
+	CertChainValid bool     `json:"certChainValid"`
+	Feasible       bool     `json:"feasible"`
+	PrivateTarget  bool     `json:"privateTarget"`
+	LatencyMS      int64    `json:"latencyMs"`
+	Reason         string   `json:"reason"`
+}
+
+func ScanRealityTargets(
+	ctx context.Context,
+	exec SessionExecutor,
+	targets string,
+) ([]RealityScanResult, error) {
+	if exec == nil {
+		return nil, ErrRealityScan
+	}
+
+	form := url.Values{}
+	if targets != "" {
+		form.Set("targets", targets)
+	}
+
+	resp, err := exec.Do(ctx, SessionRequest{
+		Method:         http.MethodPost,
+		Path:           "panel/api/server/scanRealityTargets",
+		Body:           []byte(form.Encode()),
+		ContentType:    "application/x-www-form-urlencoded",
+		TimeoutSeconds: 45,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil,
+			fmt.Errorf(
+				"%w: HTTP %d",
+				ErrRealityScan,
+				resp.StatusCode,
+			)
+	}
+
+	var envelope struct {
+		Success bool                `json:"success"`
+		Obj     []RealityScanResult `json:"obj"`
+	}
+
+	if err := json.Unmarshal(resp.Body, &envelope); err != nil {
+		body := resp.Body
+		if len(body) > 512 {
+			body = body[:512]
+		}
+		return nil,
+			fmt.Errorf(
+				"%w: invalid JSON: %q",
+				ErrRealityScan,
+				string(body),
+			)
+	}
+	if !envelope.Success {
+		body := resp.Body
+		if len(body) > 512 {
+			body = body[:512]
+		}
+		return nil,
+			fmt.Errorf(
+				"%w: rejected: %q",
+				ErrRealityScan,
+				string(body),
+			)
+	}
+
+	return envelope.Obj, nil
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -106,6 +107,24 @@ func (e SSHSessionExecutor) Do(
 		strings.TrimSpace(req.Method),
 	)
 
+	timeoutSeconds := req.TimeoutSeconds
+	if timeoutSeconds == 0 {
+		timeoutSeconds = 8
+	}
+	if timeoutSeconds < 1 || timeoutSeconds > 60 {
+		return SessionResponse{}, ErrSessionRequest
+	}
+
+	contentType := strings.TrimSpace(req.ContentType)
+	if contentType == "" {
+		contentType = "application/json"
+	}
+	switch contentType {
+	case "application/json", "application/x-www-form-urlencoded":
+	default:
+		return SessionResponse{}, ErrSessionRequest
+	}
+
 	switch method {
 	case "GET", "POST":
 	default:
@@ -139,6 +158,15 @@ func (e SSHSessionExecutor) Do(
 	if len(req.Body) > 0 {
 		bodyArgument =
 			`--data-binary "$BODY"`
+	}
+
+	var responseFilter string
+	if path == "panel/api/server/scanRealityTargets" {
+		compact := `import json,sys;p=sys.argv[1];d=json.load(open(p));xs=d.get("obj") or [];keep=("target","host","port","feasible","tls13","tlsVersion","h2","alpn","x25519","curveID","certValid","certChainValid","certSubject","serverNames","latencyMs","reason");d["obj"]=[{k:(v[:2] if k=="serverNames" and isinstance(v,list) else v) for k,v in x.items() if k in keep} for x in xs[:6]];open(p,"w").write(json.dumps(d,separators=(",",":")))`
+		responseFilter =
+			"python3 -c " +
+				shellQuoteSession(compact) +
+				` "$OUTPUT"`
 	}
 
 	command := strings.Join(
@@ -191,11 +219,11 @@ func (e SSHSessionExecutor) Do(
 
 			`BODY="$(printf '%s' "$BODY_B64" | base64 -d)"`,
 
-			`CODE="$(curl -sS --max-time 8 ` +
+			`CODE="$(curl -sS --max-time ` + strconv.Itoa(timeoutSeconds) + ` ` +
 				`-o "$OUTPUT" ` +
 				`-w '%{http_code}' ` +
 				`-c "$COOKIE" -b "$COOKIE" ` +
-				`-H 'Content-Type: application/json' ` +
+				`-H ` + shellQuoteSession("Content-Type: "+contentType) + ` ` +
 				`-H "X-CSRF-Token: $CSRF" ` +
 				`-X ` + shellQuoteSession(method) + ` ` +
 				bodyArgument + ` ` +
@@ -203,33 +231,41 @@ func (e SSHSessionExecutor) Do(
 				path +
 				`")"`,
 
-			`echo "$CODE"`,
+			responseFilter,
 
-			// hard response ceiling = 1 MiB
+			// Put the payload first and status last. SSH diagnostics retain the
+			// tail, so the framing remains parseable even for large responses.
 			`head -c 1048576 "$OUTPUT" | base64 -w0`,
+			`printf '\n%s\n' "$CODE"`,
 		},
 		"\n",
 	)
 
-	output, err := e.SSH.Run(
+	result, err := e.SSH.RunDetailed(
 		ctx,
 		e.Target,
 		privateKey,
 		command,
 	)
 
+	output := result.Stdout + result.Stderr
+
 	if err != nil {
-		return SessionResponse{}, ErrSessionRequest
+		return SessionResponse{},
+			fmt.Errorf(
+				"%w: ssh command: %v; diagnostic=%q",
+				ErrSessionRequest,
+				err,
+				result.Stderr,
+			)
 	}
 
-	parts := strings.SplitN(
-		strings.TrimSpace(output),
-		"\n",
-		2,
-	)
-
-	if len(parts) != 2 {
-		return SessionResponse{}, ErrSessionRequest
+	parts := strings.SplitN(output, "\n", 2)
+	if len(parts) == 0 || strings.TrimSpace(parts[0]) == "" {
+		return SessionResponse{}, fmt.Errorf("%w: missing HTTP status", ErrSessionRequest)
+	}
+	if len(parts) == 1 {
+		parts = append(parts, "")
 	}
 
 	statusCode, err := strconv.Atoi(
@@ -238,7 +274,11 @@ func (e SSHSessionExecutor) Do(
 
 	if err != nil {
 		return SessionResponse{},
-			ErrSessionRequest
+			fmt.Errorf(
+				"%w: invalid HTTP status %q",
+				ErrSessionRequest,
+				parts[0],
+			)
 	}
 
 	body, err := base64.StdEncoding.DecodeString(
@@ -247,7 +287,10 @@ func (e SSHSessionExecutor) Do(
 
 	if err != nil {
 		return SessionResponse{},
-			ErrSessionRequest
+			fmt.Errorf(
+				"%w: invalid response encoding",
+				ErrSessionRequest,
+			)
 	}
 
 	return SessionResponse{

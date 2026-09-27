@@ -9,9 +9,11 @@ import (
 var ErrSessionRequest = errors.New("sanaei session request failed")
 
 type SessionRequest struct {
-	Method string
-	Path   string
-	Body   []byte
+	Method         string
+	Path           string
+	Body           []byte
+	ContentType    string
+	TimeoutSeconds int
 }
 
 type SessionResponse struct {
