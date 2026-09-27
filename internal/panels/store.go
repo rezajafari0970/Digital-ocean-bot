@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 )
 
 type SQLStore struct {
@@ -87,4 +88,41 @@ $6
 	}
 
 	return tx.Commit()
+}
+
+func (s SQLStore) ReconcileEnabled(
+	ctx context.Context,
+) (int64, error) {
+
+	if s.DB == nil {
+		return 0,
+			errors.New(
+				"panel store unavailable",
+			)
+	}
+
+	result, err := s.DB.ExecContext(
+		ctx,
+		`
+UPDATE panel_instances pi
+
+SET
+enabled=false,
+updated_at=now()
+
+FROM droplets d
+
+WHERE d.id=pi.droplet_id
+
+  AND pi.enabled=true
+
+  AND d.state='DELETED'
+`,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
 }
