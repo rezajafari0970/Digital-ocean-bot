@@ -73,5 +73,5 @@ func (r Reconciler) AdoptUnknownCreate(ctx context.Context, op jobs.Operation, i
 }
 
 func BuildDeleteOperation(accountID string, providerID int) jobs.Operation {
-	return jobs.Operation{AccountID: accountID, Kind: "DELETE_DROPLET", IdempotencyKey: "delete:" + accountID + ":" + strconv.Itoa(providerID), State: jobs.OperationPlanned}
+	return jobs.Operation{AccountID: accountID, Kind: "DELETE_DROPLET", IdempotencyKey: "delete:" + accountID + ":" + strconv.Itoa(providerID), ResourceID: strconv.Itoa(providerID), State: jobs.OperationPlanned}
 }
