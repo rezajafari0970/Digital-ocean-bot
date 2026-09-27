@@ -159,6 +159,11 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			continue
 		}
 		if postInstallContinuation && step.name == "panel" {
+			if e.Finalizer != nil {
+				if err := e.Finalizer.MarkReady(ctx, d); err != nil {
+					return d, err
+				}
+			}
 			d.State = PanelComplete
 			d.CurrentStep = "panel_complete"
 			d.LastError = ""
