@@ -96,7 +96,7 @@ func TestInstallCompleteContinuesThroughDatabaseAndPanelThenStopsSafely(t *testi
 func TestDatabaseCompleteResumesAtPanelOnly(t *testing.T) {
 	store := &memStore{d: Deployment{ID: "1", AccountID: "a", ProfileID: "p", State: DatabaseComplete, CurrentStep: "database_complete"}, exists: true}
 	steps := &stepStub{}
-	d, err := (Engine{Store: store, Steps: steps}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
+	d, err := (Engine{Store: store, Steps: steps, PostInstallOnly: true}).Run(context.Background(), Request{DeploymentID: "1", AccountID: "a", ProfileID: "p"})
 	if err != nil {
 		t.Fatal(err)
 	}
