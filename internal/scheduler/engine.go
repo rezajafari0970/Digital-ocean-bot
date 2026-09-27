@@ -38,6 +38,13 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
+		// Scheduled automation is allowed only for a fully pinned, capable installer.
+		var automationReady bool
+		_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady)
+		if !automationReady {
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
 		var limit, providerDroplets, pendingCreates, concurrent, desired, managed, spacingMin, spacingMax int
 		var snapshotAt time.Time
 		var nextBuild sql.NullTime
@@ -68,6 +75,10 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)
 		needed := desired - managed - preCreate
 		if needed <= 0 {
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
+		if x.MaxConcurrent > 0 && concurrent >= x.MaxConcurrent {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
