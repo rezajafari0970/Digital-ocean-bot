@@ -66,14 +66,20 @@ func Validate(in Inbound, w Expected) error {
 		return fmt.Errorf("%w: vless crypto", ErrMismatch)
 	}
 	clients, ok := s["clients"].([]any)
-	if !ok || len(clients) != 1 {
+	if !ok || len(clients) == 0 {
 		return fmt.Errorf("%w: clients", ErrMismatch)
 	}
-	c, e := object(clients[0])
-	if e != nil {
-		return e
+	matched := 0
+	for _, rawClient := range clients {
+		c, err := object(rawClient)
+		if err != nil {
+			continue
+		}
+		if c["id"] == w.UUID && c["flow"] == w.Flow {
+			matched++
+		}
 	}
-	if c["id"] != w.UUID || c["flow"] != w.Flow {
+	if matched != 1 {
 		return fmt.Errorf("%w: client contract", ErrMismatch)
 	}
 	st, e := object(in.StreamSettings)

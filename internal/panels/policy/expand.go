@@ -6,6 +6,7 @@ import (
 )
 
 func Expand(p InboundPolicy, occupied []int) ([]planner.DesiredInbound, error) {
+	p = Normalize(p)
 	if err := Validate(p); err != nil {
 		return nil, err
 	}

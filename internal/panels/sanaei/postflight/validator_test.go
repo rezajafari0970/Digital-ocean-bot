@@ -18,3 +18,31 @@ func TestRejectsCryptoDrift(t *testing.T) {
 		t.Fatal("expected mismatch")
 	}
 }
+
+func TestValidateRealityWithManagedClientAmongCapacityUsers(t *testing.T) {
+	clients := []any{
+		map[string]any{"id": "other-1", "flow": "xtls-rprx-vision"},
+		map[string]any{"id": "u", "flow": "xtls-rprx-vision"},
+		map[string]any{"id": "other-2", "flow": "xtls-rprx-vision"},
+	}
+	in := Inbound{ID: 3, Remark: "dob:global-reality:01212", Port: 1212, Protocol: "vless", Enable: true,
+		Settings: map[string]any{"decryption": "none", "encryption": "none", "clients": clients},
+		StreamSettings: map[string]any{"network": "tcp", "security": "reality", "realitySettings": map[string]any{
+			"dest": "aws.amazon.com:443", "serverNames": []any{"aws.amazon.com"}, "privateKey": "secret", "shortIds": []any{"dad58810"},
+		}},
+	}
+	if err := Validate(in, Expected{RemoteID: 3, Remark: "dob:global-reality:01212", Port: 1212, UUID: "u", Flow: "xtls-rprx-vision", Target: "aws.amazon.com:443", ServerNames: []string{"aws.amazon.com"}, PrivateKey: "secret", ShortID: "dad58810"}); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestValidateRealityRejectsMissingManagedClientAmongCapacityUsers(t *testing.T) {
+	in := Inbound{ID: 3, Remark: "k", Port: 1212, Protocol: "vless", Enable: true,
+		Settings: map[string]any{"decryption": "none", "encryption": "none", "clients": []any{map[string]any{"id": "other", "flow": "xtls-rprx-vision"}}},
+		StreamSettings: map[string]any{"network": "tcp", "security": "reality", "realitySettings": map[string]any{
+			"dest": "aws.amazon.com:443", "serverNames": []any{"aws.amazon.com"}, "privateKey": "secret", "shortIds": []any{"sid"},
+		}},
+	}
+	if Validate(in, Expected{RemoteID: 3, Remark: "k", Port: 1212, UUID: "u", Flow: "xtls-rprx-vision", Target: "aws.amazon.com:443", ServerNames: []string{"aws.amazon.com"}, PrivateKey: "secret", ShortID: "sid"}) == nil {
+		t.Fatal("expected managed client mismatch")
+	}
+}

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strconv"
 
 	createflow "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/create"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
@@ -78,6 +80,8 @@ type panelDeps struct {
 	privateRef string
 
 	shortID string
+
+	publicKey string
 
 	targetPort int
 }
@@ -210,7 +214,7 @@ func (d *panelDeps) Build(
 		Remark:      d.managedKey,
 		Port:        d.port,
 		UUID:        string(uuid),
-		Email:       "managed",
+		Email:       "managed-" + strconv.Itoa(d.port),
 		Target:      d.targetHost,
 		TargetPort:  d.targetPort,
 		SNI:         d.sni,
@@ -250,11 +254,14 @@ func (d *panelDeps) Verify(
 		return err
 	}
 
-	return postflight.ValidatePayload(
-		inbound,
-		remoteID,
-		payload,
-	)
+	if err := postflight.ValidatePayload(inbound, remoteID, payload); err != nil {
+		return err
+	}
+	if d.publicKey == "" {
+		return errors.New("reality public key unavailable")
+	}
+	_, err = d.db.ExecContext(ctx, `INSERT INTO inbound_export_metadata(panel_id,remote_id,public_key) VALUES($1,$2,$3) ON CONFLICT(panel_id,remote_id) DO UPDATE SET public_key=excluded.public_key,updated_at=now()`, d.panelID, remoteID, d.publicKey)
+	return err
 }
 
 func (s Service) ReconcilePanel(
@@ -304,6 +311,8 @@ func (s Service) ReconcilePanel(
 
 		shortID string
 
+		publicKey string
+
 		panelPort int
 
 		targetPort int
@@ -337,7 +346,8 @@ rs.server_names,
 
 rc.uuid_secret_ref,
 rc.private_key_secret_ref,
-rc.short_id
+rc.short_id,
+rc.public_key
 
 FROM panel_instances pi
 
@@ -381,6 +391,7 @@ WHERE pi.id=$1
 		&uuidRef,
 		&privateRef,
 		&shortID,
+		&publicKey,
 	)
 
 	if err != nil {
@@ -439,7 +450,7 @@ WHERE pi.id=$1
 			Remark:      s.ManagedKey,
 			Port:        s.Port,
 			UUID:        string(uuid),
-			Email:       "managed",
+			Email:       "managed-" + strconv.Itoa(s.Port),
 			Target:      targetHost,
 			TargetPort:  targetPort,
 			SNI:         sni,
@@ -484,28 +495,20 @@ WHERE pi.id=$1
 			KeySecretRef: sshKeyRef,
 		}
 
-	executor :=
-		sanaei.SSHSessionExecutor{
-			SSH: s.SSH,
-
-			Target: target,
-
-			PrivateKeySecretRef: sshKeyRef,
-
-			PanelPasswordSecretRef: panelPasswordRef,
-
-			AccountID: accountID,
-
-			Username: panelUser,
-
-			Port: panelPort,
-
-			BasePath: panelPath,
-
-			DialHost: "127.0.0.1",
-
-			Secrets: s.Secrets,
-		}
+	panelPassword, err := s.Secrets.Get(ctx, accountID, panelPasswordRef)
+	if err != nil {
+		return err
+	}
+	baseURL := fmt.Sprintf("http://%s:%d%s", host, panelPort, panelPath)
+	apiClient, err := sanaei.NewAPIClient(baseURL, sanaei.Credentials{Username: panelUser, Password: string(panelPassword)}, nil)
+	credentials.Wipe(panelPassword)
+	if err != nil {
+		return err
+	}
+	if err = apiClient.Login(ctx); err != nil {
+		return err
+	}
+	executor := sanaei.DirectSessionExecutor{Client: apiClient}
 
 	dependencies :=
 		&panelDeps{
@@ -540,6 +543,8 @@ WHERE pi.id=$1
 			privateRef: privateRef,
 
 			shortID: shortID,
+
+			publicKey: publicKey,
 
 			targetPort: targetPort,
 		}

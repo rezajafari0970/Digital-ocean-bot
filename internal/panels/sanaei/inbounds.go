@@ -37,7 +37,14 @@ func (c *APIClient) ListInbounds(ctx context.Context) ([]Inbound, error) {
 }
 
 func (c *APIClient) AddClient(ctx context.Context, inboundID int, client Client) error {
-	payload, err := json.Marshal(map[string]any{"clients": []Client{client}})
+	return c.AddClients(ctx, inboundID, []Client{client})
+}
+
+func (c *APIClient) AddClients(ctx context.Context, inboundID int, clients []Client) error {
+	if len(clients) == 0 {
+		return nil
+	}
+	payload, err := json.Marshal(map[string]any{"clients": clients})
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package sanaei
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,6 +22,7 @@ type APIClient struct {
 	BaseURL     string
 	HTTP        *http.Client
 	Credentials Credentials
+	CSRF        string
 }
 
 func NewAPIClient(baseURL string, credentials Credentials, transport http.RoundTripper) (*APIClient, error) {
@@ -35,13 +37,34 @@ func NewAPIClient(baseURL string, credentials Credentials, transport http.RoundT
 }
 
 func (c *APIClient) Login(ctx context.Context) error {
-	form := url.Values{"username": {c.Credentials.Username}, "password": {c.Credentials.Password}}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/login", strings.NewReader(form.Encode()))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/csrf-token", nil)
 	if err != nil {
 		return ErrAPIRequest
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return ErrAPIRequest
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("%w: csrf status %d", ErrAPIRequest, resp.StatusCode)
+	}
+	var token struct {
+		Success bool   `json:"success"`
+		Obj     string `json:"obj"`
+	}
+	if json.NewDecoder(resp.Body).Decode(&token) != nil || !token.Success || token.Obj == "" {
+		return ErrAPIRequest
+	}
+	c.CSRF = token.Obj
+	payload, _ := json.Marshal(map[string]string{"username": c.Credentials.Username, "password": c.Credentials.Password})
+	req, err = http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/login", bytes.NewReader(payload))
+	if err != nil {
+		return ErrAPIRequest
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-CSRF-Token", c.CSRF)
+	resp, err = c.HTTP.Do(req)
 	if err != nil {
 		return ErrAPIRequest
 	}
@@ -65,6 +88,9 @@ func (c *APIClient) json(ctx context.Context, method, path string, body url.Valu
 	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+	if c.CSRF != "" {
+		req.Header.Set("X-CSRF-Token", c.CSRF)
 	}
 	resp, err := c.HTTP.Do(req)
 	if err != nil {

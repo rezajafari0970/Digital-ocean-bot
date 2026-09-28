@@ -58,12 +58,28 @@ func ReadInventory(
 		ctx,
 		SessionRequest{
 			Method: http.MethodGet,
-			Path:   "panel/api/inbounds/list",
+			Path:   "panel/api/inbounds/list/slim",
 		},
 	)
 
 	if err != nil {
 		return inventory.Snapshot{}, err
+	}
+
+	if resp.StatusCode == http.StatusNotFound ||
+		resp.StatusCode == http.StatusMethodNotAllowed {
+
+		resp, err = exec.Do(
+			ctx,
+			SessionRequest{
+				Method: http.MethodGet,
+				Path:   "panel/api/inbounds/list",
+			},
+		)
+
+		if err != nil {
+			return inventory.Snapshot{}, err
+		}
 	}
 
 	if resp.StatusCode < 200 ||

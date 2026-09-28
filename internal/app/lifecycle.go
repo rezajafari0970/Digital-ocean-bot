@@ -48,10 +48,24 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				return nil
 			}
 			if limit <= 0 || inUse+pending >= limit {
-				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID, fmt.Sprintf("droplet limit %d, in use %d, pending %d", limit, inUse, pending))
-				return nil
+				var runtimeStatus, oldestExpiring string
+				_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(runtime_status,''),(SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY created_at,id LIMIT 1) FROM accounts WHERE id=$1`, item.AccountID).Scan(&runtimeStatus, &oldestExpiring)
+				if limit > 0 && inUse >= limit && pending == 0 && oldestExpiring == item.ID && runtimeStatus != "ROTATION_CAPACITY_BREAKING" {
+					_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_CAPACITY_BREAKING',runtime_status_detail='deleting one oldest expiring server to free one replacement slot',runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID)
+					// Continue to LifecycleEngine below: exactly one oldest EXPIRING resource may be removed.
+				} else {
+					_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status=CASE WHEN runtime_status='ROTATION_CAPACITY_BREAKING' THEN runtime_status ELSE 'ROTATION_BLOCKED_CAPACITY' END,runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID, fmt.Sprintf("droplet limit %d, in use %d, pending %d", limit, inUse, pending))
+					return nil
+				}
+			} else {
+				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND runtime_status IN ('ROTATION_BLOCKED_CAPACITY','ROTATION_CAPACITY_BREAKING')`, item.AccountID)
 			}
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND runtime_status='ROTATION_BLOCKED_CAPACITY'`, item.AccountID)
+			if inUse+pending < limit {
+				// Capacity is available; proceed with the normal replacement-first path.
+			} else {
+				// Capacity-breaker path: skip replacement creation and delete only this oldest EXPIRING item.
+				goto processLifecycle
+			}
 			d, err := c.StartDeployment(ctx, item.AccountID, item.ProfileID)
 			if err != nil {
 				return err
@@ -72,6 +86,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			}
 		}
 	}
+processLifecycle:
 	runtime, err := c.Runtime(ctx, item.AccountID)
 	if err != nil {
 		return err

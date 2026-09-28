@@ -1,10 +1,15 @@
 package reality
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 func Evaluate(o Observation) Score {
 	s := Score{Candidate: o.Candidate, Reason: "ineligible"}
-	if !o.Reachable || !o.CertValid || o.TLSVersion != "TLSv1.3" || o.Samples <= 0 || o.Successes <= 0 {
+	tls := strings.ToLower(strings.TrimSpace(o.TLSVersion))
+	tls13 := tls == "1.3" || tls == "tls1.3" || tls == "tlsv1.3"
+	if !o.Reachable || !o.CertValid || !tls13 || o.Samples <= 0 || o.Successes <= 0 {
 		return s
 	}
 	x := append([]int64(nil), o.LatencyMS...)

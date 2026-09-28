@@ -18,7 +18,6 @@ type Node struct {
 	Host            string
 	Port            int
 	SSHUser         string
-	AccountID       string
 	SSHKeySecretRef string
 	Status          string
 }
@@ -38,11 +37,11 @@ func (s SQLStore) Select(ctx context.Context, targetHost string) (Node, error) {
 	}
 	var n Node
 	e := s.DB.QueryRowContext(ctx, `
-SELECT id::text,name,host::text,port,ssh_user,account_id::text,ssh_key_secret_ref,status
+SELECT id::text,name,host(host),port,ssh_user,ssh_key_secret_ref,status
 FROM reality_probe_nodes
 WHERE enabled=true AND status='HEALTHY' AND host<>$1::inet
 ORDER BY last_checked_at NULLS FIRST,name
-LIMIT 1`, targetHost).Scan(&n.ID, &n.Name, &n.Host, &n.Port, &n.SSHUser, &n.AccountID, &n.SSHKeySecretRef, &n.Status)
+LIMIT 1`, targetHost).Scan(&n.ID, &n.Name, &n.Host, &n.Port, &n.SSHUser, &n.SSHKeySecretRef, &n.Status)
 	if errors.Is(e, sql.ErrNoRows) {
 		return Node{}, ErrNoProbe
 	}

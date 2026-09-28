@@ -19,10 +19,15 @@ type DesiredReconciler interface {
 	ReconcilePanel(context.Context, Panel, bool) error
 }
 
+type PostReconciler interface {
+	ReconcilePanel(context.Context, Panel, bool) error
+}
+
 type ProductionAdapter struct {
 	Eligibility  EligibilitySource
 	Bootstrapper Bootstrapper
 	Desired      DesiredReconciler
+	Post         PostReconciler
 }
 
 func (a ProductionAdapter) Eligible(ctx context.Context) ([]Panel, error) {
@@ -43,5 +48,11 @@ func (a ProductionAdapter) Reconcile(ctx context.Context, panel Panel, dryRun bo
 	if a.Desired == nil {
 		return ErrAdapterConfig
 	}
-	return a.Desired.ReconcilePanel(ctx, panel, dryRun)
+	if err := a.Desired.ReconcilePanel(ctx, panel, dryRun); err != nil {
+		return err
+	}
+	if a.Post != nil {
+		return a.Post.ReconcilePanel(ctx, panel, dryRun)
+	}
+	return nil
 }

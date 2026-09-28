@@ -18,6 +18,7 @@ func (s SQLStore) Put(
 	p InboundPolicy,
 ) (InboundPolicy, error) {
 
+	p = Normalize(p)
 	if s.DB == nil {
 		return InboundPolicy{}, ErrInvalidPolicy
 	}
@@ -166,6 +167,15 @@ updated_at=now()
 		p.AllowDelete,
 	)
 
+	if err != nil {
+		return InboundPolicy{}, err
+	}
+
+	manualSNIs, err := json.Marshal(p.ManualSNIs)
+	if err != nil {
+		return InboundPolicy{}, err
+	}
+	_, err = s.DB.ExecContext(ctx, "UPDATE panel_inbound_policies SET user_quota_bytes=$3,user_lifetime_seconds=$4,device_limit=$5,bulk_user_count=$6,users_per_second=$7,sni_selection_mode=$8,manual_snis=$9,updated_at=now() WHERE panel_id=$1 AND policy_key=$2", p.PanelID, p.ID, p.UserQuotaBytes, p.UserLifetimeSeconds, p.DeviceLimit, p.BulkUserCount, p.UsersPerSecond, p.SNISelectionMode, manualSNIs)
 	if err != nil {
 		return InboundPolicy{}, err
 	}

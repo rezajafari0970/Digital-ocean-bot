@@ -6,10 +6,17 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -91,6 +98,132 @@ func main() {
 			}
 		}
 	}()
+	// Panel registry: materialize every completed READY Sanaei deployment into panel_instances.
+	go func() {
+		t := time.NewTicker(5 * time.Second)
+		defer t.Stop()
+		store := panels.SQLStore{DB: application.DB}
+		run := func() {
+			if _, err := store.ReconcileInstances(ctx); err != nil {
+				log.Printf("panel instance reconcile: %v", err)
+			}
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+
+	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
+	go func() {
+		t := time.NewTicker(10 * time.Second)
+		defer t.Stop()
+		source := readyworker.SQLSource{DB: application.DB}
+		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
+		reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh}
+		run := func() {
+			panels, err := source.EligibleReadyPanels(ctx)
+			if err != nil {
+				log.Printf("global reality discovery: %v", err)
+				return
+			}
+			for _, panel := range panels {
+				if err := reconciler.ReconcilePanel(ctx, panel, false); err != nil {
+					log.Printf("global reality panel %s: %v", panel.ID, err)
+				}
+			}
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+
+	// User capacity: keep every configured Reality inbound at its global active-user target.
+	go func() {
+		t := time.NewTicker(time.Second)
+		defer t.Stop()
+		source := readyworker.SQLSource{DB: application.DB}
+		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
+		run := func() {
+			panels, err := source.EligibleReadyPanels(ctx)
+			if err != nil {
+				log.Printf("user capacity discovery: %v", err)
+				return
+			}
+			sem := make(chan struct{}, 8)
+			var wg sync.WaitGroup
+			for _, panel := range panels {
+				panel := panel
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					select {
+					case sem <- struct{}{}:
+						defer func() { <-sem }()
+					case <-ctx.Done():
+						return
+					}
+					cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+					defer cancel()
+					if err := capacity.ReconcilePanel(cctx, panel); err != nil && cctx.Err() == nil {
+						log.Printf("user capacity panel %s: %v", panel.ID, err)
+					}
+				}()
+			}
+			wg.Wait()
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+
+	// Residential Ads sync: fan out active residential proxies to every ready Sanaei panel.
+	go func() {
+		t := time.NewTicker(10 * time.Second)
+		defer t.Stop()
+		source := readyworker.SQLSource{DB: application.DB}
+		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
+		syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh}
+		run := func() {
+			panels, err := source.EligibleReadyPanels(ctx)
+			if err != nil {
+				log.Printf("residential sync discovery: %v", err)
+				return
+			}
+			for _, panel := range panels {
+				if err := syncer.ReconcilePanel(ctx, panel, false); err != nil {
+					log.Printf("residential sync panel %s: %v", panel.ID, err)
+				}
+			}
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 30 * time.Second, Timeout: 12 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {

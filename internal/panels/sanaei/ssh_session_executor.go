@@ -168,7 +168,7 @@ func (e SSHSessionExecutor) Do(
 	if path == "panel/api/server/scanRealityTargets" {
 		compressResponse = true
 		specific := strings.Contains(string(req.Body), "targets=")
-		compact := `import json,sys;p=sys.argv[1];d=json.load(open(p));xs=d.get("obj") or [];keep=("target","host","port","feasible","privateTarget","tls13","tlsVersion","h2","alpn","x25519","curveID","certValid","certChainValid","certSubject","serverNames","latencyMs","reason");specific=sys.argv[2]=="1";limit=1 if specific else 6;out=[];[(out.append({k:(v if specific or k!="serverNames" or not isinstance(v,list) else v[:2]) for k,v in x.items() if k in keep})) for x in xs[:limit]];d["obj"]=out;open(p,"w").write(json.dumps(d,separators=(",",":")))`
+		compact := `import json,sys;p=sys.argv[1];d=json.load(open(p));xs=d.get("obj") or [];keep=("target","host","port","feasible","privateTarget","tls13","tlsVersion","h2","alpn","x25519","curveID","certValid","certChainValid","certSubject","serverNames","latencyMs","reason");specific=sys.argv[2]=="1";limit=1 if specific else 20;out=[];[(out.append({k:(v if specific or k!="serverNames" or not isinstance(v,list) else v[:2]) for k,v in x.items() if k in keep})) for x in xs[:limit]];d["obj"]=out;open(p,"w").write(json.dumps(d,separators=(",",":")))`
 		flag := "0"
 		if specific {
 			flag = "1"
@@ -258,7 +258,9 @@ func (e SSHSessionExecutor) Do(
 		command,
 	)
 
-	output := result.Stdout + result.Stderr
+	// Stdout is the framed protocol payload. Stderr is diagnostic-only and
+	// must never be concatenated into the base64 response on a successful run.
+	output := result.Stdout
 
 	if err != nil {
 		return SessionResponse{},
