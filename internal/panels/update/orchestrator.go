@@ -31,6 +31,7 @@ type Dependencies interface {
 	RefreshInventory(context.Context) ([]inventory.InboundRecord, error)
 	Build(context.Context, Request) (realityconfig.Payload, error)
 	Update(context.Context, int64, realityconfig.Payload) error
+	Verify(context.Context, int64, realityconfig.Payload) error
 }
 
 func Run(ctx context.Context, d Dependencies, r Request) (Result, error) {
@@ -70,6 +71,9 @@ func Run(ctx context.Context, d Dependencies, r Request) (Result, error) {
 	}
 	now := ownedRecords(after, r.ManagedKey)
 	if len(now) == 1 && now[0].RemoteID == old.RemoteID && now[0].RawHash != "" && now[0].RawHash != old.RawHash {
+		if err := d.Verify(ctx, old.RemoteID, payload); err != nil {
+			return Result{}, err
+		}
 		return Result{Updated: true, Confirmed: true, RemoteID: old.RemoteID}, nil
 	}
 	if updateErr != nil {

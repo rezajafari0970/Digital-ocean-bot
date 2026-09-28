@@ -12,6 +12,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/realitycontract"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/postflight"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/realityconfig"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
@@ -233,6 +234,27 @@ func (d *panelDeps) Add(
 		)
 
 	return err
+}
+
+func (d *panelDeps) Verify(
+	ctx context.Context,
+	remoteID int64,
+	payload realityconfig.Payload,
+) error {
+	inbound, err := sanaei.GetInbound(
+		ctx,
+		d.exec,
+		remoteID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return postflight.ValidatePayload(
+		inbound,
+		remoteID,
+		payload,
+	)
 }
 
 func (s Service) ReconcilePanel(

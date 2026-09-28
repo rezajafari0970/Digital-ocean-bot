@@ -31,9 +31,10 @@ func (f *fake) OccupiedPorts(context.Context) ([]int, error) { return f.ports, n
 func (f *fake) Build(context.Context, Request) (realityconfig.Payload, error) {
 	return realityconfig.Payload{Remark: "built"}, nil
 }
-func (f *fake) Add(context.Context, realityconfig.Payload) error { f.adds++; return f.addErr }
+func (f *fake) Add(context.Context, realityconfig.Payload) error           { f.adds++; return f.addErr }
+func (f *fake) Verify(context.Context, int64, realityconfig.Payload) error { return nil }
 func TestNoopExisting(t *testing.T) {
-	f := &fake{ready: true, inv: [][]inventory.InboundRecord{{{Remark: "k"}}}}
+	f := &fake{ready: true, inv: [][]inventory.InboundRecord{{{RemoteID: 7, Remark: "k"}}}}
 	r, e := Run(context.Background(), f, Request{ManagedKey: "k", Port: 443})
 	if e != nil || !r.Noop || f.adds != 0 {
 		t.Fatalf("%+v %v adds=%d", r, e, f.adds)
@@ -47,7 +48,7 @@ func TestPortCollisionFailsClosed(t *testing.T) {
 	}
 }
 func TestUnknownOutcomeRecoveredByPostflight(t *testing.T) {
-	f := &fake{ready: true, inv: [][]inventory.InboundRecord{nil, {{Remark: "k"}}}, addErr: errors.New("timeout")}
+	f := &fake{ready: true, inv: [][]inventory.InboundRecord{nil, {{RemoteID: 7, Remark: "k"}}}, addErr: errors.New("timeout")}
 	r, e := Run(context.Background(), f, Request{ManagedKey: "k", Port: 443})
 	if e != nil || !r.Confirmed || !r.Created || f.adds != 1 {
 		t.Fatalf("%+v %v", r, e)

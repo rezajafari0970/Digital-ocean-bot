@@ -31,6 +31,7 @@ func (f *fake) Update(context.Context, int64, realityconfig.Payload) error {
 	f.updated = true
 	return f.updateErr
 }
+func (f *fake) Verify(context.Context, int64, realityconfig.Payload) error { return nil }
 
 func TestConfirmedUpdate(t *testing.T) {
 	f := &fake{ready: true, before: []inventory.InboundRecord{{RemoteID: 7, Remark: "k", Port: 443, RawHash: "a"}}, after: []inventory.InboundRecord{{RemoteID: 7, Remark: "k", Port: 443, RawHash: "b"}}}

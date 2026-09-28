@@ -31,6 +31,7 @@ type Dependencies interface {
 	OccupiedPorts(context.Context) ([]int, error)
 	Build(context.Context, Request) (realityconfig.Payload, error)
 	Add(context.Context, realityconfig.Payload) error
+	Verify(context.Context, int64, realityconfig.Payload) error
 }
 
 func Run(ctx context.Context, d Dependencies, r Request) (Result, error) {
@@ -48,7 +49,17 @@ func Run(ctx context.Context, d Dependencies, r Request) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	if contains(before, r.ManagedKey) {
+	if existing, ok := findManaged(before, r.ManagedKey); ok {
+		payload, err := d.Build(ctx, r)
+		if err != nil {
+			return Result{}, err
+		}
+		if existing.RemoteID <= 0 {
+			return Result{}, ErrUnconfirmed
+		}
+		if err := d.Verify(ctx, existing.RemoteID, payload); err != nil {
+			return Result{}, err
+		}
 		return Result{Noop: true, Confirmed: true}, nil
 	}
 	for _, x := range before {
@@ -77,8 +88,14 @@ func Run(ctx context.Context, d Dependencies, r Request) (Result, error) {
 		}
 		return Result{}, ErrUnconfirmed
 	}
-	if contains(after, r.ManagedKey) {
-		return Result{Created: !contains(before, r.ManagedKey), Confirmed: true}, nil
+	if created, ok := findManaged(after, r.ManagedKey); ok {
+		if created.RemoteID <= 0 {
+			return Result{}, ErrUnconfirmed
+		}
+		if err := d.Verify(ctx, created.RemoteID, payload); err != nil {
+			return Result{}, err
+		}
+		return Result{Created: true, Confirmed: true}, nil
 	}
 	if addErr != nil {
 		return Result{}, addErr
@@ -93,4 +110,16 @@ func contains(xs []inventory.InboundRecord, key string) bool {
 		}
 	}
 	return false
+}
+
+func findManaged(xs []inventory.InboundRecord, key string) (inventory.InboundRecord, bool) {
+	var found inventory.InboundRecord
+	count := 0
+	for _, x := range xs {
+		if x.Remark == key {
+			found = x
+			count++
+		}
+	}
+	return found, count == 1
 }
