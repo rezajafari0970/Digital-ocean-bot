@@ -18,6 +18,9 @@ func TestPayloadAndURIStaySymmetric(t *testing.T) {
 		t.Fatal("payload json")
 	}
 	settings := x["settings"].(map[string]any)
+	if settings["decryption"] != "none" || settings["encryption"] != "none" {
+		t.Fatalf("vless crypto contract=%v/%v", settings["decryption"], settings["encryption"])
+	}
 	client := settings["clients"].([]any)[0].(map[string]any)
 	if client["flow"] != "xtls-rprx-vision" {
 		t.Fatalf("server flow=%v", client["flow"])

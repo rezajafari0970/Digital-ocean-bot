@@ -1,10 +1,13 @@
 package sanaei
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -161,12 +164,16 @@ func (e SSHSessionExecutor) Do(
 	}
 
 	var responseFilter string
+	compressResponse := false
 	if path == "panel/api/server/scanRealityTargets" {
-		compact := `import json,sys;p=sys.argv[1];d=json.load(open(p));xs=d.get("obj") or [];keep=("target","host","port","feasible","tls13","tlsVersion","h2","alpn","x25519","curveID","certValid","certChainValid","certSubject","serverNames","latencyMs","reason");d["obj"]=[{k:(v[:2] if k=="serverNames" and isinstance(v,list) else v) for k,v in x.items() if k in keep} for x in xs[:6]];open(p,"w").write(json.dumps(d,separators=(",",":")))`
-		responseFilter =
-			"python3 -c " +
-				shellQuoteSession(compact) +
-				` "$OUTPUT"`
+		compressResponse = true
+		specific := strings.Contains(string(req.Body), "targets=")
+		compact := `import json,sys;p=sys.argv[1];d=json.load(open(p));xs=d.get("obj") or [];keep=("target","host","port","feasible","privateTarget","tls13","tlsVersion","h2","alpn","x25519","curveID","certValid","certChainValid","certSubject","serverNames","latencyMs","reason");specific=sys.argv[2]=="1";limit=1 if specific else 6;out=[];[(out.append({k:(v if specific or k!="serverNames" or not isinstance(v,list) else v[:2]) for k,v in x.items() if k in keep})) for x in xs[:limit]];d["obj"]=out;open(p,"w").write(json.dumps(d,separators=(",",":")))`
+		flag := "0"
+		if specific {
+			flag = "1"
+		}
+		responseFilter = "python3 -c " + shellQuoteSession(compact) + ` "$OUTPUT" ` + flag
 	}
 
 	command := strings.Join(
@@ -233,9 +240,12 @@ func (e SSHSessionExecutor) Do(
 
 			responseFilter,
 
-			// Put the payload first and status last. SSH diagnostics retain the
-			// tail, so the framing remains parseable even for large responses.
-			`head -c 1048576 "$OUTPUT" | base64 -w0`,
+			func() string {
+				if compressResponse {
+					return `gzip -c "$OUTPUT" | base64 -w0`
+				}
+				return `head -c 1048576 "$OUTPUT" | base64 -w0`
+			}(),
 			`printf '\n%s\n' "$CODE"`,
 		},
 		"\n",
@@ -274,6 +284,18 @@ func (e SSHSessionExecutor) Do(
 	body, err := base64.StdEncoding.DecodeString(payload64)
 	if err != nil {
 		return SessionResponse{}, fmt.Errorf("%w: invalid response encoding", ErrSessionRequest)
+	}
+	if compressResponse {
+		zr, zerr := gzip.NewReader(bytes.NewReader(body))
+		if zerr != nil {
+			return SessionResponse{}, fmt.Errorf("%w: invalid compressed response", ErrSessionRequest)
+		}
+		decoded, zerr := io.ReadAll(zr)
+		_ = zr.Close()
+		if zerr != nil {
+			return SessionResponse{}, fmt.Errorf("%w: invalid compressed response", ErrSessionRequest)
+		}
+		body = decoded
 	}
 
 	return SessionResponse{

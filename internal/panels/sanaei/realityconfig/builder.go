@@ -118,6 +118,8 @@ func Build(
 
 			"decryption": "none",
 
+			"encryption": "none",
+
 			"fallbacks": []any{},
 		}
 

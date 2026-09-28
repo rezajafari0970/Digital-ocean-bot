@@ -112,7 +112,20 @@ WHERE pi.id=$1 AND pi.enabled=true
 	if !ok {
 		return ErrRealityWarming
 	}
-	score := reality.Score{Candidate: choice.Candidate, Eligible: true, MedianLatencyMS: choice.MedianLatencyMS, SuccessRatio: choice.SuccessRatio, Value: choice.Score, Reason: "sanaei-scan-stable"}
+	full, err := sanaei.ScanRealityTargets(ctx, exec, selected.Target)
+	if err != nil || len(full) != 1 || !full[0].Feasible || len(full[0].ServerNames) == 0 {
+		return ErrRealityWarming
+	}
+	selected = full[0]
+	sni := selected.ServerNames[0]
+	for _, name := range selected.ServerNames {
+		if name == selected.Host {
+			sni = selected.Host
+			break
+		}
+	}
+	choice.Candidate.ServerName = sni
+	score := reality.Score{Candidate: choice.Candidate, Eligible: true, MedianLatencyMS: choice.MedianLatencyMS, SuccessRatio: choice.SuccessRatio, Value: choice.Score, Reason: "sanaei-find-targets-use"}
 	if err = store.Select(ctx, p.ID, score, now); err != nil {
 		return err
 	}

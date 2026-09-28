@@ -94,11 +94,46 @@ func ScanRealityTargets(
 	return envelope.Obj, nil
 }
 
-func BestRealityTarget(xs []RealityScanResult)(RealityScanResult,string,error){
-	for _,x:=range xs{
-		if !x.Feasible||x.Host==""||x.Port<1||x.TLSVersion!="1.3"||x.ALPN!="h2"||!x.CertValid||!x.CertChainValid||len(x.ServerNames)==0{continue}
-		sni:=x.Host
-		return x,sni,nil
+func BestRealityTarget(xs []RealityScanResult) (RealityScanResult, string, error) {
+	for _, x := range xs {
+		if !x.Feasible || x.Host == "" || x.Port < 1 || x.TLSVersion != "1.3" || x.ALPN != "h2" || !x.CertValid || !x.CertChainValid || len(x.ServerNames) == 0 {
+			continue
+		}
+		sni := x.Host
+		return x, sni, nil
 	}
-	return RealityScanResult{},"",ErrRealityScan
+	return RealityScanResult{}, "", ErrRealityScan
+}
+
+func FindAndUseRealityTarget(
+	ctx context.Context,
+	exec SessionExecutor,
+) (RealityScanResult, string, error) {
+	ranked, err := ScanRealityTargets(ctx, exec, "")
+	if err != nil {
+		return RealityScanResult{}, "", err
+	}
+	best, _, err := BestRealityTarget(ranked)
+	if err != nil {
+		return RealityScanResult{}, "", err
+	}
+	full, err := ScanRealityTargets(ctx, exec, best.Target)
+	if err != nil {
+		return RealityScanResult{}, "", err
+	}
+	if len(full) != 1 {
+		return RealityScanResult{}, "", ErrRealityScan
+	}
+	x := full[0]
+	if !x.Feasible || len(x.ServerNames) == 0 {
+		return RealityScanResult{}, "", ErrRealityScan
+	}
+	sni := x.ServerNames[0]
+	for _, name := range x.ServerNames {
+		if name == x.Host {
+			sni = x.Host
+			break
+		}
+	}
+	return x, sni, nil
 }
