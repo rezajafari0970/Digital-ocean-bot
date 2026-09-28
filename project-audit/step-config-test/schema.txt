@@ -1,0 +1,75 @@
+deployment_profiles|id|uuid
+deployment_profiles|account_id|uuid
+deployment_profiles|name|text
+deployment_profiles|version|integer
+deployment_profiles|config|jsonb
+deployment_profiles|enabled|boolean
+deployment_profiles|created_at|timestamp with time zone
+deployment_profiles|updated_at|timestamp with time zone
+deployments|id|uuid
+deployments|account_id|uuid
+deployments|profile_id|uuid
+deployments|droplet_id|uuid
+deployments|provider_id|text
+deployments|state|text
+deployments|current_step|text
+deployments|attempt|integer
+deployments|last_error|text
+deployments|created_at|timestamp with time zone
+deployments|updated_at|timestamp with time zone
+deployments|profile_snapshot|jsonb
+deployments|lock_version|bigint
+deployments|installer_generation|integer
+deployments|host|text
+deployments|postinstall_generation|integer
+droplets|id|uuid
+droplets|account_id|uuid
+droplets|provider_resource_id|text
+droplets|state|text
+droplets|profile|jsonb
+droplets|created_at|timestamp with time zone
+droplets|updated_at|timestamp with time zone
+droplets|ready_at|timestamp with time zone
+droplets|expires_at|timestamp with time zone
+droplets|profile_id|uuid
+droplets|replacement_deployment_id|uuid
+panel_inbound_inventory|panel_id|uuid
+panel_inbound_inventory|remote_id|bigint
+panel_inbound_inventory|remark|text
+panel_inbound_inventory|protocol|text
+panel_inbound_inventory|port|integer
+panel_inbound_inventory|listen|text
+panel_inbound_inventory|enabled|boolean
+panel_inbound_inventory|transport|text
+panel_inbound_inventory|security|text
+panel_inbound_inventory|client_count|integer
+panel_inbound_inventory|upload_bytes|bigint
+panel_inbound_inventory|download_bytes|bigint
+panel_inbound_inventory|total_bytes|bigint
+panel_inbound_inventory|raw_hash|text
+panel_inbound_inventory|present|boolean
+panel_inbound_inventory|first_seen_at|timestamp with time zone
+panel_inbound_inventory|last_seen_at|timestamp with time zone
+panel_inbound_inventory|missing_since|timestamp with time zone
+provision_runs|id|uuid
+provision_runs|account_id|uuid
+provision_runs|droplet_id|uuid
+provision_runs|state|text
+provision_runs|current_step|text
+provision_runs|attempt|integer
+provision_runs|created_at|timestamp with time zone
+provision_runs|updated_at|timestamp with time zone
+provision_runs|last_error|text
+provision_runs|next_retry_at|timestamp with time zone
+provision_runs|ssh_host_key_sha256|text
+xui_panel_deployments|id|uuid
+xui_panel_deployments|account_id|uuid
+xui_panel_deployments|droplet_id|uuid
+xui_panel_deployments|username|text
+xui_panel_deployments|password_secret_ref|text
+xui_panel_deployments|port|integer
+xui_panel_deployments|web_path|text
+xui_panel_deployments|state|text
+xui_panel_deployments|created_at|timestamp with time zone
+xui_panel_deployments|updated_at|timestamp with time zone
+xui_panel_deployments|generation|integer
