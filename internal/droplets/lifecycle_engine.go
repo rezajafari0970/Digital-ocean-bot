@@ -3,14 +3,14 @@ package droplets
 import (
 	"context"
 	"errors"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
-	"strconv"
 )
 
 var ErrLifecycleProviderID = errors.New("invalid lifecycle provider id")
 
 type LifecycleExecutor interface {
-	Delete(context.Context, jobs.Operation, int) (jobs.Operation, error)
+	Delete(context.Context, jobs.Operation, string) (jobs.Operation, error)
 }
 type LifecycleEngine struct {
 	Store    LifecycleStore
@@ -34,13 +34,12 @@ func (e LifecycleEngine) Process(ctx context.Context, item LifecycleItem) error 
 		item.State = Retiring
 		return e.Store.Event(ctx, item, Retiring)
 	case Retiring:
-		id, err := strconv.Atoi(item.ProviderID)
-		if err != nil {
+		if item.ProviderID == "" {
 			return ErrLifecycleProviderID
 		}
-		op := BuildDeleteOperation(item.AccountID, id)
+		op := BuildDeleteOperation(item.AccountID, item.ProviderID)
 		op.IdempotencyKey = "lifecycle-delete:" + item.ID
-		result, err := e.Executor.Delete(ctx, op, id)
+		result, err := e.Executor.Delete(ctx, op, item.ProviderID)
 		if err != nil {
 			return err
 		}

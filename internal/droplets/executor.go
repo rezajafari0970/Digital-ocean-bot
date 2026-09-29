@@ -7,27 +7,22 @@ import (
 	"strconv"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
 var ErrMutationBlocked = errors.New("droplet mutation blocked")
 
 type MutationGate interface{ AllowMutation() error }
-type Provider interface {
-	CreateDroplet(context.Context, digitalocean.CreateDropletRequest) (digitalocean.Droplet, error)
-	DeleteDroplet(context.Context, int) error
-}
 
 type Executor struct {
 	Operations  jobs.Store
-	Provider    Provider
+	Provider    providers.ComputeDriver
 	Gate        MutationGate
 	EgressCheck func(context.Context) error
 }
 
 func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile) (jobs.Operation, error) {
-	if e.Gate == nil {
+	if e.Gate == nil || e.Provider == nil {
 		return op, ErrMutationBlocked
 	}
 	if err := e.Gate.AllowMutation(); err != nil {
@@ -39,9 +34,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	}
 	if !fresh {
 		if reserved.State == jobs.OperationUnknown && reserved.ResourceID == "" {
-			if lookup, ok := e.Provider.(LookupProvider); ok {
-				return (Reconciler{Operations: e.Operations, Provider: lookup}).AdoptUnknownCreate(ctx, reserved, profile.IdentityTag, profile.Name, profile.Region)
-			}
+			return (Reconciler{Operations: e.Operations, Provider: e.Provider}).AdoptUnknownCreate(ctx, reserved, profile.IdentityTag, profile.Name, profile.Region)
 		}
 		return reserved, nil
 	}
@@ -57,17 +50,14 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if err := e.Operations.Update(ctx, reserved); err != nil {
 		return reserved, err
 	}
-	d, err := e.Provider.CreateDroplet(ctx, digitalocean.CreateDropletRequest{Name: profile.Name, Region: profile.Region, Size: profile.Size, Image: profile.Image, SSHKeys: func() []any {
-		if profile.SSHKeyID > 0 {
-			return []any{profile.SSHKeyID}
-		}
-		return nil
-	}(), Tags: []string{"managed-by-digital-ocean-bot", profile.IdentityTag}})
+	ssh := []string(nil)
+	if profile.SSHKeyID > 0 {
+		ssh = []string{strconv.Itoa(profile.SSHKeyID)}
+	}
+	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {
-		// A deterministic provider rejection means no resource was created.
-		// Only ambiguous/retryable outcomes are eligible for reconciliation.
-		class := digitalocean.ClassifyError(err)
-		if class == resilience.Permanent || errors.Is(err, ErrMutationBlocked) {
+		class := providers.Class(err)
+		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {
 			reserved.State = jobs.OperationFailed
 		} else {
 			reserved.State = jobs.OperationUnknown
@@ -75,7 +65,17 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, err
 	}
-	reserved.ResourceID = strconv.Itoa(d.ID)
+	if result.Outcome == providers.OutcomeRejected || result.ServerID == "" {
+		reserved.State = jobs.OperationFailed
+		_ = e.Operations.Update(ctx, reserved)
+		return reserved, errors.New("provider rejected create without server id")
+	}
+	if result.Outcome == providers.OutcomeAmbiguous {
+		reserved.State = jobs.OperationUnknown
+		_ = e.Operations.Update(ctx, reserved)
+		return reserved, ErrOutcomeStillUnknown
+	}
+	reserved.ResourceID = result.ServerID
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
@@ -87,24 +87,20 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	return reserved, e.Operations.Update(ctx, reserved)
 }
 
-func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID int) (jobs.Operation, error) {
-	if e.Gate == nil || e.Gate.AllowMutation() != nil {
+func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID string) (jobs.Operation, error) {
+	if e.Gate == nil || e.Provider == nil || e.Gate.AllowMutation() != nil {
 		return op, ErrMutationBlocked
 	}
 	reserved, fresh, err := e.Operations.Reserve(ctx, op)
 	if err != nil {
 		return op, err
 	}
-	wantResourceID := strconv.Itoa(providerID)
 	if !fresh {
-		// DELETE is safely retryable only for the exact persisted provider resource.
-		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != wantResourceID {
+		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != providerID {
 			return reserved, nil
 		}
 	} else {
-		// Persist the known deletion target before the provider mutation. If the
-		// outcome becomes ambiguous, a later retry is pinned to this exact resource.
-		reserved.ResourceID = wantResourceID
+		reserved.ResourceID = providerID
 		if err := e.Operations.Update(ctx, reserved); err != nil {
 			return reserved, err
 		}
@@ -121,7 +117,11 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID int)
 	if err := e.Operations.Update(ctx, reserved); err != nil {
 		return reserved, err
 	}
-	if err := e.Provider.DeleteDroplet(ctx, providerID); err != nil {
+	if err := e.Provider.DeleteServer(ctx, providerID); err != nil {
+		if providers.IsClass(err, providers.ErrorNotFound) {
+			reserved.State = jobs.OperationVerifying
+			return reserved, e.Operations.Update(ctx, reserved)
+		}
 		reserved.State = jobs.OperationUnknown
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, err

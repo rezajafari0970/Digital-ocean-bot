@@ -22,7 +22,11 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	if err != nil {
 		return workflow.Engine{}, err
 	}
-	executor := droplets.Executor{Operations: runtime.Operations, Provider: runtime.Provider, Gate: runtime.Gate}
+	compute, err := computeDriver(runtime)
+	if err != nil {
+		return workflow.Engine{}, err
+	}
+	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
 	if runtime.Gateway != nil &&
 		!proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
 

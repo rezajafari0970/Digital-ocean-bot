@@ -5,25 +5,14 @@ import (
 	"testing"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
-
-type lookupStub struct{ droplets []digitalocean.Droplet }
-
-func (p lookupStub) ListDroplets(context.Context) ([]digitalocean.Resource, error) { return nil, nil }
-func (p lookupStub) ListDropletModels(context.Context) ([]digitalocean.Droplet, error) {
-	return p.droplets, nil
-}
-
-func taggedDroplet(id int, name, region string, tags ...string) digitalocean.Droplet {
-	return digitalocean.Droplet{ID: id, Name: name, Region: digitalocean.Region{Slug: region}, Tags: tags}
-}
 
 func TestAdoptUnknownCreateUsesUniqueTag(t *testing.T) {
 	store := &opStore{exists: true, saved: jobs.Operation{ID: "op", AccountID: "a", State: jobs.OperationUnknown}}
-	r := Reconciler{Operations: store, Provider: lookupStub{droplets: []digitalocean.Droplet{
-		taggedDroplet(1, "same", "fra1", "managed-by-digital-ocean-bot", "other"),
-		taggedDroplet(42, "same", "fra1", "managed-by-digital-ocean-bot", "dob-deployment-x"),
+	r := Reconciler{Operations: store, Provider: &computeStub{servers: []providers.Server{
+		taggedServer("1", "same", "fra1", "managed-by-digital-ocean-bot", "other"),
+		taggedServer("42", "same", "fra1", "managed-by-digital-ocean-bot", "dob-deployment-x"),
 	}}}
 	got, err := r.AdoptUnknownCreate(context.Background(), store.saved, "dob-deployment-x", "same", "fra1")
 	if err != nil {
@@ -36,9 +25,9 @@ func TestAdoptUnknownCreateUsesUniqueTag(t *testing.T) {
 
 func TestAdoptUnknownCreateAmbiguousTagStaysUnknown(t *testing.T) {
 	store := &opStore{exists: true, saved: jobs.Operation{ID: "op", AccountID: "a", State: jobs.OperationUnknown}}
-	r := Reconciler{Operations: store, Provider: lookupStub{droplets: []digitalocean.Droplet{
-		taggedDroplet(1, "a", "fra1", "dob-deployment-x"),
-		taggedDroplet(2, "b", "fra1", "dob-deployment-x"),
+	r := Reconciler{Operations: store, Provider: &computeStub{servers: []providers.Server{
+		taggedServer("1", "a", "fra1", "dob-deployment-x"),
+		taggedServer("2", "b", "fra1", "dob-deployment-x"),
 	}}}
 	got, err := r.AdoptUnknownCreate(context.Background(), store.saved, "dob-deployment-x", "", "fra1")
 	if err != ErrOutcomeStillUnknown {

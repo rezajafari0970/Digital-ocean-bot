@@ -3,28 +3,23 @@ package droplets
 import (
 	"context"
 	"errors"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
-	"strconv"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
 var ErrOutcomeStillUnknown = errors.New("provider outcome still unknown")
 
-type LookupProvider interface {
-	ListDroplets(context.Context) ([]digitalocean.Resource, error)
-	ListDropletModels(context.Context) ([]digitalocean.Droplet, error)
-}
-
 type Reconciler struct {
 	Operations jobs.Store
-	Provider   LookupProvider
+	Provider   providers.ComputeDriver
 }
 
 func (r Reconciler) VerifyCreate(ctx context.Context, op jobs.Operation) (jobs.Operation, error) {
 	if op.State != jobs.OperationVerifying && op.State != jobs.OperationUnknown {
 		return op, nil
 	}
-	items, err := r.Provider.ListDroplets(ctx)
+	items, err := r.Provider.ListServers(ctx)
 	if err != nil {
 		return op, err
 	}
@@ -38,26 +33,24 @@ func (r Reconciler) VerifyCreate(ctx context.Context, op jobs.Operation) (jobs.O
 	}
 	return op, ErrOutcomeStillUnknown
 }
-
 func (r Reconciler) AdoptUnknownCreate(ctx context.Context, op jobs.Operation, identityTag, name, region string) (jobs.Operation, error) {
 	if op.State != jobs.OperationUnknown || op.ResourceID != "" {
 		return op, nil
 	}
-	items, err := r.Provider.ListDropletModels(ctx)
+	var items []providers.Server
+	var err error
+	if identityTag != "" {
+		items, err = r.Provider.FindServerByIdentity(ctx, identityTag)
+	} else {
+		items, err = r.Provider.ListServers(ctx)
+	}
 	if err != nil {
 		return op, err
 	}
-	var match *digitalocean.Droplet
+	var match *providers.Server
 	for i := range items {
 		x := &items[i]
-		tagged := false
-		for _, tag := range x.Tags {
-			if identityTag != "" && tag == identityTag {
-				tagged = true
-				break
-			}
-		}
-		if (tagged || (identityTag == "" && x.Name == name)) && (region == "" || x.Region.Slug == region) {
+		if (identityTag != "" || x.Name == name) && (region == "" || x.RegionID == region) {
 			if match != nil {
 				return op, ErrOutcomeStillUnknown
 			}
@@ -67,11 +60,10 @@ func (r Reconciler) AdoptUnknownCreate(ctx context.Context, op jobs.Operation, i
 	if match == nil {
 		return op, ErrOutcomeStillUnknown
 	}
-	op.ResourceID = strconv.Itoa(match.ID)
+	op.ResourceID = match.ID
 	op.State = jobs.OperationVerifying
 	return op, r.Operations.Update(ctx, op)
 }
-
-func BuildDeleteOperation(accountID string, providerID int) jobs.Operation {
-	return jobs.Operation{AccountID: accountID, Kind: "DELETE_DROPLET", IdempotencyKey: "delete:" + accountID + ":" + strconv.Itoa(providerID), ResourceID: strconv.Itoa(providerID), State: jobs.OperationPlanned}
+func BuildDeleteOperation(accountID, providerID string) jobs.Operation {
+	return jobs.Operation{AccountID: accountID, Kind: "DELETE_DROPLET", IdempotencyKey: "delete:" + accountID + ":" + providerID, ResourceID: providerID, State: jobs.OperationPlanned}
 }

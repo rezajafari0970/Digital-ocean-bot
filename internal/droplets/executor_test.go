@@ -3,7 +3,6 @@ package droplets
 import (
 	"context"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"testing"
 )
 
@@ -28,17 +27,9 @@ func (s *opStore) Reserve(_ context.Context, o jobs.Operation) (jobs.Operation, 
 func (s *opStore) Get(context.Context, string, string) (jobs.Operation, error) { return s.saved, nil }
 func (s *opStore) Update(_ context.Context, o jobs.Operation) error            { s.saved = o; return nil }
 
-type providerStub struct{ creates int }
-
-func (p *providerStub) CreateDroplet(context.Context, digitalocean.CreateDropletRequest) (digitalocean.Droplet, error) {
-	p.creates++
-	return digitalocean.Droplet{ID: 42, Status: "new"}, nil
-}
-func (p *providerStub) DeleteDroplet(context.Context, int) error { return nil }
-
 func TestCreateIsIdempotent(t *testing.T) {
 	store := &opStore{}
-	provider := &providerStub{}
+	provider := &computeStub{}
 	e := Executor{Operations: store, Provider: provider, Gate: gateStub{}}
 	profile := Profile{Name: "p", Region: "ams3", Size: "s", Image: "ubuntu"}
 	op := BuildCreateOperation("a", profile)

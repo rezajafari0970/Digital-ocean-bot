@@ -8,9 +8,8 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"strconv"
 	"time"
 )
@@ -90,8 +89,7 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 		if err == nil {
 			return d, droplets.ErrOutcomeStillUnknown
 		}
-		class := digitalocean.ClassifyError(err)
-		if class != resilience.Permanent || !digitalocean.IsCapacityError(err) || i == len(regions)-1 {
+		if !providers.IsClass(err, providers.ErrorRegionCapacity) || i == len(regions)-1 {
 			return d, err
 		}
 	}

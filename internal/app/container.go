@@ -14,6 +14,7 @@ import (
 )
 
 var ErrNetworkNotReady = errors.New("account network not ready")
+var ErrProviderComputeUnsupported = errors.New("provider compute capability unavailable")
 
 type Container struct {
 	DB        *sql.DB
@@ -57,6 +58,14 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		return nil, err
 	}
 	return r.Open(ctx, cfg.Provider, providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef}})
+}
+
+func computeDriver(rt AccountRuntime) (providers.ComputeDriver, error) {
+	d, ok := rt.Driver.(providers.ComputeDriver)
+	if !ok || d == nil {
+		return nil, ErrProviderComputeUnsupported
+	}
+	return d, nil
 }
 
 func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntime, error) {
