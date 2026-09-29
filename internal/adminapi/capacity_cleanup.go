@@ -116,6 +116,10 @@ func (s *Server) clearPanelClients(ctx context.Context, p readyworker.Panel) (in
 	if used, err := s.clearPanelClientsFast(ctx, p); used {
 		return 0, err
 	}
+	return 0, fmt.Errorf("structural_snapshot_missing")
+}
+
+func (s *Server) clearPanelClientsLegacy(ctx context.Context, p readyworker.Panel) (int, error) {
 	rt, e := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 90 * time.Second}).Open(ctx, p.ID)
 	if e != nil {
 		return 0, e
