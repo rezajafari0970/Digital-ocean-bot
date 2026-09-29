@@ -21,6 +21,9 @@ type testFactory struct {
 }
 
 func (f *testFactory) Name() string { return f.name }
+func (f *testFactory) Metadata() Metadata {
+	return Metadata{Name: normalizeName(f.name), DisplayName: f.name}
+}
 func (f *testFactory) Open(context.Context, OpenRequest) (Driver, error) {
 	f.mu.Lock()
 	f.opens++

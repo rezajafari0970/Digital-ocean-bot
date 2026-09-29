@@ -73,3 +73,14 @@ func TestDriverFindServerByIdentity(t *testing.T) {
 		t.Fatalf("servers=%+v", got)
 	}
 }
+
+func TestFactoryMetadataPolicy(t *testing.T) {
+	m := (Factory{}).Metadata()
+	if m.Name != "digitalocean" || m.DisplayName != "DigitalOcean" {
+		t.Fatalf("metadata=%+v", m)
+	}
+	d := m.Defaults
+	if len(d.Regions) != 5 || len(d.Plans) != 3 || d.Images.Family != "ubuntu" || len(d.Images.Versions) != 3 || d.LifetimeMinMinutes != 90 || d.LifetimeMaxMinutes != 120 || d.DesiredServers != 5 || d.BuildSpacingMinMinutes != 1 || d.BuildSpacingMaxMinutes != 3 || d.MaxConcurrent != 1 || !d.FallbackAnyRegion {
+		t.Fatalf("defaults=%+v", d)
+	}
+}

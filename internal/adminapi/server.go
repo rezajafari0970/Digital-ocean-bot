@@ -103,6 +103,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/deployments/{id}/installer/rearm", s.require(s.rearmDeploymentInstaller, true))
 	m.HandleFunc("GET /api/v1/audit", s.require(s.audit, false))
 	m.HandleFunc("GET /api/v1/system", s.require(s.system, false))
+	m.HandleFunc("GET /api/v1/providers", s.require(s.providersMetadata, false))
 	m.HandleFunc("GET /api/v1/panel-settings", s.require(s.getPanelSettings, false))
 	m.HandleFunc("PUT /api/v1/panel-settings", s.require(s.updatePanelSettings, true))
 	return m

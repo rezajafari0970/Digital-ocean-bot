@@ -51,6 +51,26 @@ func (r *Registry) Names() []string {
 	return out
 }
 
+func (r *Registry) Metadata(name string) (Metadata, bool) {
+	r.mu.RLock()
+	f := r.factories[normalizeName(name)]
+	r.mu.RUnlock()
+	if f == nil {
+		return Metadata{}, false
+	}
+	return f.Metadata(), true
+}
+func (r *Registry) MetadataAll() []Metadata {
+	names := r.Names()
+	out := make([]Metadata, 0, len(names))
+	for _, n := range names {
+		if m, ok := r.Metadata(n); ok {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
 func (r *Registry) Open(ctx context.Context, name string, req OpenRequest) (Driver, error) {
 	r.mu.RLock()
 	f := r.factories[normalizeName(name)]

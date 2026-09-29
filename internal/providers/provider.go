@@ -61,5 +61,6 @@ type OpenRequest struct {
 
 type Factory interface {
 	Name() string
+	Metadata() Metadata
 	Open(context.Context, OpenRequest) (Driver, error)
 }
