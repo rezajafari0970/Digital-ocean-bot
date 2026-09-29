@@ -74,7 +74,7 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 		return false, errors.New("user capacity config")
 	}
 	if _, unsupported := addClientUnsupportedPanels.Load(p.ID); unsupported {
-		return false, s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
+		return s.legacyFastFillFromPolicy(ctx, p, runtime)
 	}
 	var enabled bool
 	var portsRaw []byte
@@ -110,7 +110,7 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	})
 	if errors.Is(err, sanaei.ErrAddClientUnsupported) {
 		addClientUnsupportedPanels.Store(p.ID, true)
-		return false, s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
+		return false, nil
 	}
 	return mutated, err
 }
