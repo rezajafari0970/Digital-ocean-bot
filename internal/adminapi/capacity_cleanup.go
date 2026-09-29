@@ -105,9 +105,6 @@ func (s *Server) cleanupJobStatus(w http.ResponseWriter, r *http.Request) {
 func (s *Server) runCleanupJob(id string, panels []readyworker.Panel) {
 	ctx := context.Background()
 
-	s.OutputPauseMu.Lock()
-	defer s.OutputPauseMu.Unlock()
-
 	s.CleanupMu.Lock()
 	s.CleanupJobs[id].Status = "running"
 	s.CleanupMu.Unlock()
