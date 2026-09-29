@@ -5,10 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
 type accountDashboard struct {
@@ -61,14 +60,14 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
 	var limit int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&limit)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&limit)
 	available := limit - active
 	if available < 0 {
 		available = 0
 	}
 	var providerDroplets int
 	var lastRefresh sql.NullTime
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(jsonb_array_length(data->'Droplets'),0),created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&providerDroplets, &lastRefresh)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeInUse')::int,0),created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&providerDroplets, &lastRefresh)
 	var lastCreated sql.NullTime
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT max(created_at) FROM droplets WHERE account_id=$1`, id).Scan(&lastCreated)
 	var managedDroplets int
@@ -184,9 +183,9 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		d.Deployments["failure_history"] = history
 	}
 	var snap []byte
-	if s.DB.QueryRowContext(r.Context(), `SELECT data FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
-		var disc digitalocean.DiscoveryResult
-		if json.Unmarshal(snap, &disc) == nil {
+	if s.DB.QueryRowContext(r.Context(), `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
+		var obs providers.Observation
+		if json.Unmarshal(snap, &obs) == nil {
 			managedIDs := map[string]bool{}
 			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
 			if rows != nil {
@@ -198,23 +197,13 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-			for _, x := range disc.Droplets {
-				ip := x.PublicIPv4
-				if ip == "" {
-					for _, n := range x.Networks.V4 {
-						if n.Type == "public" {
-							ip = n.IPAddress
-							break
-						}
-					}
-				}
-				created, _ := time.Parse(time.RFC3339, x.CreatedAt)
+			for _, x := range obs.Inventory.Servers {
 				age := int64(0)
-				if !created.IsZero() {
-					age = int64(time.Since(created).Seconds())
+				if !x.CreatedAt.IsZero() {
+					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
-				managed := managedIDs[strconv.Itoa(x.ID)]
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "ip": ip, "region": x.Region.Slug, "status": x.Status, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+				managed := managedIDs[x.ID]
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
 			}
 		}
 	}

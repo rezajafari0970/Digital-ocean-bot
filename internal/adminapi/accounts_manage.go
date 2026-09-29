@@ -85,12 +85,14 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	images, _ := json.Marshal(x.Images)
 	var candidateEmail, candidateExternalID string
 	if x.Token != "" {
-		d, validateErr := s.validateReplacementToken(r.Context(), id, x.Token, x.NetworkMode, x.ProxyID)
+		var providerName string
+		_ = s.DB.QueryRowContext(r.Context(), `SELECT provider FROM accounts WHERE id=$1`, id).Scan(&providerName)
+		d, validateErr := s.validateReplacementToken(r.Context(), id, providerName, x.Token, x.NetworkMode, x.ProxyID)
 		if validateErr != nil {
 			writeJSON(w, 422, map[string]string{"error": "replacement_token_validation_failed", "detail": validateErr.Error()})
 			return
 		}
-		candidateEmail, candidateExternalID = d.Email, d.UUID
+		candidateEmail, candidateExternalID = d.Email, d.ID
 	}
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
@@ -159,9 +161,11 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	var previousToken []byte
+	var credentialRef, providerForCredential string
 	if x.Token != "" {
-		previousToken, _ = s.Container.Secrets.Get(r.Context(), id, "do-token")
-		if err := s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
+		_ = s.DB.QueryRowContext(r.Context(), `SELECT secret_ref,provider FROM accounts WHERE id=$1`, id).Scan(&credentialRef, &providerForCredential)
+		previousToken, _ = s.Container.Secrets.Get(r.Context(), id, credentialRef)
+		if err := s.Container.Secrets.Put(r.Context(), id, credentialRef, providerForCredential+"_credential", []byte(x.Token)); err != nil {
 			zeroBytes(previousToken)
 			writeJSON(w, 500, map[string]string{"error": "token_update_failed", "detail": err.Error()})
 			return
@@ -169,7 +173,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = tx.Commit(); err != nil {
 		if x.Token != "" && len(previousToken) > 0 {
-			_ = s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", previousToken)
+			_ = s.Container.Secrets.Put(r.Context(), id, credentialRef, providerForCredential+"_credential", previousToken)
 		}
 		zeroBytes(previousToken)
 		writeJSON(w, 500, errorBody())

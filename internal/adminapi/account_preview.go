@@ -3,24 +3,24 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/accounts"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"net/http"
 	"sort"
 	"strings"
 )
 
 type previewAccount struct {
-	Token   string `json:"token"`
-	ProxyID string `json:"proxy_id"`
+	Provider string `json:"provider"`
+	Token    string `json:"token"`
+	ProxyID  string `json:"proxy_id"`
 }
-type memorySecret struct{ token []byte }
+type previewCredential struct{ token []byte }
 
-func (m memorySecret) Get(context.Context, string, string) ([]byte, error) {
+func (m previewCredential) Get(context.Context) ([]byte, error) {
 	return append([]byte(nil), m.token...), nil
 }
+
 func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
@@ -32,7 +32,13 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "token_required"})
 		return
 	}
-	cell := accounts.NewCellManager().Register("preview")
+	if x.Provider == "" {
+		x.Provider = "digitalocean"
+	}
+	if s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) {
+		writeJSON(w, 400, map[string]string{"error": "provider_not_supported"})
+		return
+	}
 	var client *http.Client
 	var closeFn func()
 	if x.ProxyID != "" {
@@ -69,51 +75,37 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		closeFn = b.CloseIdleConnections
 	}
 	defer closeFn()
-	provider, err := digitalocean.NewClient(cell.Context, "preview-token", memorySecret{[]byte(x.Token)}, client)
+	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, providers.OpenRequest{AccountID: "preview", HTTPClient: client, Credentials: previewCredential{[]byte(x.Token)}})
 	if err != nil {
-		writeJSON(w, 500, errorBody())
+		writeJSON(w, 422, map[string]string{"error": "provider_validation_failed", "detail": err.Error()})
 		return
 	}
-	d, err := provider.Catalog(r.Context())
-	if err != nil {
-		var h digitalocean.HTTPError
-		if errors.As(err, &h) {
-			switch h.Status {
-			case 401:
-				writeJSON(w, 401, map[string]string{"error": "digitalocean_token_invalid", "detail": "DigitalOcean rejected this API token."})
-			case 403:
-				writeJSON(w, 403, map[string]string{"error": "digitalocean_permission_denied", "detail": "The token does not have the required DigitalOcean permissions."})
-			case 429:
-				writeJSON(w, 429, map[string]string{"error": "digitalocean_rate_limited", "detail": "DigitalOcean rate limit reached. Try again later."})
-			default:
-				writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed", "detail": err.Error()})
-			}
-			return
-		}
-		if errors.Is(err, digitalocean.ErrProviderRequest) {
-			writeJSON(w, 503, map[string]string{"error": "digitalocean_transport_failed", "detail": "Could not reach DigitalOcean through the selected connection."})
-			return
-		}
-		writeJSON(w, 422, map[string]string{"error": "digitalocean_validation_failed", "detail": err.Error()})
+	ar, aok := driver.(providers.AccountReader)
+	cr, cok := driver.(providers.CatalogReader)
+	if !aok || !cok {
+		writeJSON(w, 422, map[string]string{"error": "provider_capability_missing"})
 		return
 	}
-	regions := d.Regions
-	sort.SliceStable(regions, func(i, j int) bool {
-		fi := regions[i].Slug == "fra1"
-		fj := regions[j].Slug == "fra1"
-		if fi != fj {
-			return fi
-		}
-		return regions[i].Name < regions[j].Name
-	})
-	images := d.Images
+	account, err := ar.Account(r.Context())
+	if err != nil {
+		writeProviderPreviewError(w, err)
+		return
+	}
+	catalog, err := cr.Catalog(r.Context())
+	if err != nil {
+		writeProviderPreviewError(w, err)
+		return
+	}
+	regions := catalog.Regions
+	sort.SliceStable(regions, func(i, j int) bool { return regions[i].Name < regions[j].Name })
+	images := catalog.Images
 	sort.SliceStable(images, func(i, j int) bool {
-		ui := strings.EqualFold(images[i].Distribution, "Ubuntu")
-		uj := strings.EqualFold(images[j].Distribution, "Ubuntu")
+		ui := images[i].Family == "ubuntu"
+		uj := images[j].Family == "ubuntu"
 		if ui != uj {
 			return ui
 		}
-		return images[i].Name > images[j].Name
+		return images[i].Version > images[j].Version
 	})
 	proxies := []map[string]any{{"id": "", "name": "No proxy — Direct server IP", "status": "direct"}}
 	rows, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,name,status,COALESCE(country,'') FROM proxies WHERE status='healthy' ORDER BY name`)
@@ -126,5 +118,19 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	writeJSON(w, 200, map[string]any{"account": d.Account, "regions": regions, "sizes": d.Sizes, "images": images, "proxies": proxies, "defaults": map[string]any{"region": "fra1", "interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
+	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "account": account, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
+}
+func writeProviderPreviewError(w http.ResponseWriter, err error) {
+	switch providers.Class(err) {
+	case providers.ErrorAuthentication:
+		writeJSON(w, 401, map[string]string{"error": "provider_credential_invalid", "detail": "Provider rejected these credentials."})
+	case providers.ErrorPermissionDenied, providers.ErrorAccountLocked:
+		writeJSON(w, 403, map[string]string{"error": "provider_permission_denied", "detail": err.Error()})
+	case providers.ErrorRateLimited:
+		writeJSON(w, 429, map[string]string{"error": "provider_rate_limited", "detail": "Provider rate limit reached. Try again later."})
+	case providers.ErrorTransport, providers.ErrorUnavailable:
+		writeJSON(w, 503, map[string]string{"error": "provider_transport_failed", "detail": "Could not reach provider through the selected connection."})
+	default:
+		writeJSON(w, 422, map[string]string{"error": "provider_validation_failed", "detail": err.Error()})
+	}
 }

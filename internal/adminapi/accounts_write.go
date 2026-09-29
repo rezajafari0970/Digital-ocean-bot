@@ -8,6 +8,7 @@ import (
 )
 
 type accountWrite struct {
+	Provider               string   `json:"provider"`
 	Email                  string   `json:"email"`
 	ExternalID             string   `json:"external_id"`
 	Image                  string   `json:"image"`
@@ -40,7 +41,14 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var x accountWrite
-	if json.NewDecoder(r.Body).Decode(&x) != nil || x.Name == "" || x.Token == "" || x.ExternalID == "" || len(x.Regions) == 0 || len(x.Sizes) == 0 || len(x.Images) == 0 {
+	if json.NewDecoder(r.Body).Decode(&x) != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
+		return
+	}
+	if x.Provider == "" {
+		x.Provider = "digitalocean"
+	}
+	if s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) || x.Name == "" || x.Token == "" || x.ExternalID == "" || len(x.Regions) == 0 || len(x.Sizes) == 0 || len(x.Images) == 0 {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
 		return
 	}
@@ -107,9 +115,9 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	var id string
 	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
-VALUES(gen_random_uuid(),'digitalocean',$1,$2,NULLIF($3,''),$4,'do-token',$5,$6,$7,$8,$9,$10,$11,$12)
+VALUES(gen_random_uuid(),$1,$2,$3,NULLIF($4,''),$5,'provider-primary',$6,$7,$8,$9,$10,$11,$12,$13)
 ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO NOTHING
-RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes).Scan(&id)
+RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes).Scan(&id)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
@@ -129,7 +137,7 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
 		return
 	}
-	if err = s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
+	if err = s.Container.Secrets.Put(r.Context(), id, "provider-primary", x.Provider+"_credential", []byte(x.Token)); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "secret_store_failed", "detail": err.Error()})
 		return
