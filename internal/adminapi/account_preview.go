@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"net/http"
@@ -43,8 +44,8 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	var closeFn func()
 	if x.ProxyID != "" {
 		var px network.Proxy
-		var user, ref string
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil || px.Status != network.StatusHealthy {
+		var user, ref, adapter string
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(adapter,'generic') FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &adapter); err != nil || px.Status != network.StatusHealthy {
 			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
 			return
 		}
@@ -57,6 +58,10 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer zeroBytes(pass)
+		}
+		cap := app.ProxyAdapterCapabilities(adapter)
+		if cap.StickySession {
+			user = app.ProxySessionUsername(adapter, user, "", "preview-vultr", false)
 		}
 		g, err := network.NewProxyGateway("preview", px, network.ProxyCredentials{Username: user, Password: string(pass)})
 		if err != nil {

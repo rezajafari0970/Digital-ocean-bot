@@ -59,3 +59,12 @@ func proxyAdapterByName(name string) ProxyProviderAdapter {
 func proxySessionUsername(adapter, base, country, session string, targeted bool) string {
 	return proxyAdapterByName(adapter).Username(ProxySessionRequest{BaseUsername: base, CountryCode: country, SessionID: session, TargetCountry: targeted})
 }
+
+// ProxySessionUsername exposes the canonical adapter rewrite for preview/validation paths.
+func ProxySessionUsername(adapter, base, country, session string, targeted bool) string {
+	return proxySessionUsername(adapter, base, country, session, targeted)
+}
+
+func ProxyAdapterCapabilities(adapter string) ProxyCapabilities {
+	return proxyAdapterByName(adapter).Capabilities()
+}
