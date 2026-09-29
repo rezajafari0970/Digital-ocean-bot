@@ -28,11 +28,19 @@ func AddClientsSession(ctx context.Context, exec SessionExecutor, inboundID int,
 		return err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return ErrMutationRequest
+		body := resp.Body
+		if len(body) > 512 {
+			body = body[:512]
+		}
+		return fmt.Errorf("%w: addClient http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(body))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
-		return ErrMutationRequest
+		body := resp.Body
+		if len(body) > 512 {
+			body = body[:512]
+		}
+		return fmt.Errorf("%w: addClient invalid json body=%q", ErrMutationRequest, string(body))
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)

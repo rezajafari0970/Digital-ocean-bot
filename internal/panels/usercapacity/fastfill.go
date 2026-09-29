@@ -43,10 +43,17 @@ func (s Service) FastFill(ctx context.Context, p readyworker.Panel, runtime *san
 			}
 			clients = append(clients, sanaei.Client{ID: id, Email: "dob-" + id[:8], Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"})
 		}
-		if err = sanaei.AddClientsSession(ctx, runtime.Session.Exec, int(in.RemoteID), clients); err != nil {
-			return mutated, fmt.Errorf("inbound %d fast fill: %w", in.RemoteID, err)
+		const chunkSize = 250
+		for start := 0; start < len(clients); start += chunkSize {
+			end := start + chunkSize
+			if end > len(clients) {
+				end = len(clients)
+			}
+			if err = sanaei.AddClientsSession(ctx, runtime.Session.Exec, int(in.RemoteID), clients[start:end]); err != nil {
+				return mutated, fmt.Errorf("inbound %d fast fill chunk %d-%d: %w", in.RemoteID, start, end, err)
+			}
+			mutated = true
 		}
-		mutated = true
 	}
 	if mutated {
 		runtime.Session.Invalidate()
