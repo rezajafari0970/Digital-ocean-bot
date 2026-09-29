@@ -68,6 +68,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/configs", s.require(s.getGlobalConfigs, false))
 	m.HandleFunc("GET /api/v1/config-capacity", s.require(s.configCapacity, false))
 	m.HandleFunc("GET /api/v1/output", s.require(s.outputConfigs, false))
+	m.HandleFunc("POST /api/v1/output/share", s.require(s.createOutputShare, true))
+	m.HandleFunc("GET /share/output/{token}", s.sharedOutput)
 	m.HandleFunc("GET /api/v1/config-panels", s.require(s.getConfigPanels, false))
 	m.HandleFunc("PUT /api/v1/configs", s.require(s.putGlobalConfig, true))
 	m.HandleFunc("POST /api/v1/proxies/{id}/test", s.require(s.testProxy, true))

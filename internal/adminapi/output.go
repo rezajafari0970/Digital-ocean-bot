@@ -75,6 +75,7 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 	out := s.collectRuntimeOutput(ctx, p, runtime)
 	if out != "" {
 		s.storePanelOutput(p.ID, out)
+		s.persistOutputSnapshot(ctx, p.ID, out)
 		return out
 	}
 	return s.cachedPanelOutput(p.ID, 2*time.Minute)
