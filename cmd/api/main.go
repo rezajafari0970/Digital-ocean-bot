@@ -26,7 +26,7 @@ func main() {
 	}
 	api := adminapi.New(application.DB, application.Container)
 	api.WebPath = settings.WebPath
-	api.WarmOutputCache(ctx)
+	go api.WarmOutputCache(ctx)
 	go func() {
 		ticker := time.NewTicker(60 * time.Second)
 		defer ticker.Stop()
