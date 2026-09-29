@@ -58,7 +58,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			_ = c.DB.QueryRowContext(ctx, `SELECT
 				COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
 				COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
-				(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
+				(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND (state IN ('planned','running','verifying') OR (state='unknown' AND updated_at > now()-interval '2 minutes'))),
 				COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz),
 				COALESCE((SELECT provider_state FROM accounts WHERE id=$1),'UNKNOWN'),COALESCE((SELECT provider_error_state FROM accounts WHERE id=$1),'')`, item.AccountID).Scan(&limit, &inUse, &pending, &snapshotAt, &providerState, &providerError)
 			if providerState != "ACTIVE" || providerError != "" {

@@ -30,6 +30,12 @@ func validateAccountSettings(x accountWrite, dropletLimit int) string {
 	if hasDup(x.Images) {
 		return "duplicate_images"
 	}
+	allowedImages := map[string]bool{"ubuntu-22-04-x64": true, "ubuntu-24-04-x64": true, "ubuntu-26-04-x64": true}
+	for _, image := range x.Images {
+		if !allowedImages[strings.TrimSpace(image)] {
+			return "unsupported_os_image"
+		}
+	}
 	return ""
 }
 func hasDup(v []string) bool {

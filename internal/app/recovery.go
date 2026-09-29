@@ -16,21 +16,25 @@ import (
 type RecoveryHandler struct{ Container Container }
 
 func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.RecoveryItem) error {
-	runtime, err := h.Container.Runtime(ctx, item.AccountID)
-	if err != nil {
-		return err
-	}
 	if item.Kind != "CREATE_DROPLET" && item.Kind != "DELETE_DROPLET" {
 		return nil
 	}
 	var providerID string
 	var operationCreated time.Time
-	err = h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,''),created_at FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID, &operationCreated)
+	err := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,''),created_at FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID, &operationCreated)
 	if err != nil {
 		return err
 	}
 	if providerID == "" {
+		if item.Kind == "CREATE_DROPLET" {
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)
+			return err
+		}
 		return nil
+	}
+	runtime, err := h.Container.Runtime(ctx, item.AccountID)
+	if err != nil {
+		return err
 	}
 	// Recovery is the only path allowed to query the provider for an uncertain
 	// mutation outcome. Prefer the latest provider snapshot when it is fresh;
