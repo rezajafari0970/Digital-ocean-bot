@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -252,9 +253,30 @@ func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
 		}(i, p)
 	}
 	wg.Wait()
-	var out strings.Builder
+	// Randomized round-robin across servers: configs from one server are not
+	// emitted as one large consecutive block.
+	rand.Shuffle(len(results), func(i, j int) { results[i], results[j] = results[j], results[i] })
+	queues := make([][]string, 0, len(results))
 	for _, v := range results {
-		out.WriteString(v)
+		lines := strings.FieldsFunc(v, func(r rune) bool { return r == '\n' || r == '\r' })
+		if len(lines) > 0 {
+			rand.Shuffle(len(lines), func(i, j int) { lines[i], lines[j] = lines[j], lines[i] })
+			queues = append(queues, lines)
+		}
+	}
+	var out strings.Builder
+	for remaining := true; remaining; {
+		remaining = false
+		rand.Shuffle(len(queues), func(i, j int) { queues[i], queues[j] = queues[j], queues[i] })
+		for i := range queues {
+			if len(queues[i]) == 0 {
+				continue
+			}
+			remaining = true
+			out.WriteString(queues[i][0])
+			out.WriteByte('\n')
+			queues[i] = queues[i][1:]
+		}
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
