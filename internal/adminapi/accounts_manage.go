@@ -201,31 +201,20 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
-	var deployments, droplets, snapshots, resources, lifecycleEvents int
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT
-		(SELECT count(*) FROM deployments WHERE account_id=$1),
-		(SELECT count(*) FROM droplets WHERE account_id=$1),
-		(SELECT count(*) FROM provider_snapshots WHERE account_id=$1),
-		(SELECT count(*) FROM resources WHERE account_id=$1),
-		(SELECT count(*) FROM lifecycle_events WHERE account_id=$1)`, id).Scan(&deployments, &droplets, &snapshots, &resources, &lifecycleEvents); err != nil {
+	tx, err := s.DB.BeginTx(r.Context(), nil)
+	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	if droplets > 0 || snapshots > 0 || resources > 0 || lifecycleEvents > 0 {
-		writeJSON(w, 409, map[string]any{
-			"error":              "account_has_provider_history",
-			"droplets":           droplets,
-			"provider_snapshots": snapshots,
-			"resources":          resources,
-			"lifecycle_events":   lifecycleEvents,
-			"deployments":        deployments,
-			"detail":             "Provider/resource history must be retained; remove or archive it explicitly before deleting the account.",
-		})
+	defer tx.Rollback()
+	var live int
+	if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {
+		writeJSON(w, 500, errorBody())
 		return
 	}
-	res, err := s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status=CASE WHEN $2>0 THEN 'DELETE_PENDING' ELSE 'DELETED' END,runtime_status_detail=CASE WHEN $2>0 THEN 'waiting for managed provider resources to be deleted' ELSE 'history retained by soft delete' END,deleted_at=CASE WHEN $2=0 THEN now() ELSE deleted_at END,updated_at=now() WHERE id=$1 AND deleted_at IS NULL`, id, live)
 	if err != nil {
-		writeJSON(w, 409, errorBody())
+		writeJSON(w, 500, errorBody())
 		return
 	}
 	n, _ := res.RowsAffected()
@@ -233,5 +222,19 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
 		return
 	}
-	w.WriteHeader(204)
+	if live > 0 {
+		if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if live == 0 {
+		w.WriteHeader(204)
+		return
+	}
+	writeJSON(w, 202, map[string]any{"status": "deletion_pending", "live_resources": live})
 }
