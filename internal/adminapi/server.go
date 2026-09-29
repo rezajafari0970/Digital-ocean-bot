@@ -67,6 +67,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/residential-proxies/{id}/test", s.require(s.testResidentialProxy, true))
 	m.HandleFunc("GET /api/v1/configs", s.require(s.getGlobalConfigs, false))
 	m.HandleFunc("GET /api/v1/config-capacity", s.require(s.configCapacity, false))
+	m.HandleFunc("POST /api/v1/config-capacity/delete-all-clients", s.require(s.deleteAllCapacityClients, true))
 	m.HandleFunc("GET /api/v1/output", s.require(s.outputConfigs, false))
 	m.HandleFunc("POST /api/v1/output/share", s.require(s.createOutputShare, true))
 	m.HandleFunc("GET /share/output/{token}", s.sharedOutput)
