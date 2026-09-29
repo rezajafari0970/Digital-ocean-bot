@@ -3,7 +3,9 @@ package panelbootstrap
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
@@ -49,8 +51,8 @@ WHERE pi.id=$1 AND pi.enabled=true
 	if err != nil {
 		return err
 	}
-	if state != "READY" {
-		return errors.New("panel not ready")
+	if state != "READY" && state != "EXPIRING" && state != "RETIRING" {
+		return errors.New("panel not operational")
 	}
 	target := provisioning.Target{AccountID: acc, DropletID: did, Host: host, User: user, KeySecretRef: keyref}
 	exec := sanaei.SSHSessionExecutor{SSH: s.SSH, Target: target, PrivateKeySecretRef: keyref, PanelPasswordSecretRef: pref, AccountID: acc, Username: puser, Port: pport, BasePath: path, DialHost: "127.0.0.1", Secrets: s.Secrets}
@@ -74,7 +76,30 @@ WHERE pi.id=$1 AND pi.enabled=true
 	}
 	defer credentials.Wipe(key)
 	run := func(ctx context.Context, cmd string) (string, error) { return s.SSH.Run(ctx, target, key, cmd) }
-	scanned, err := sanaei.ScanRealityTargets(ctx, exec, "")
+	var mode string
+	var manualRaw []byte
+	if err = s.DB.QueryRowContext(ctx, "SELECT sni_selection_mode,manual_snis FROM global_config_policies WHERE policy_key='reality'").Scan(&mode, &manualRaw); err != nil {
+		return err
+	}
+	targets := ""
+	if mode == "manual" {
+		var names []string
+		if json.Unmarshal(manualRaw, &names) != nil || len(names) == 0 {
+			return errors.New("manual reality SNI policy empty")
+		}
+		clean := names[:0]
+		for _, name := range names {
+			name = strings.TrimSpace(name)
+			if name == "" || strings.ContainsAny(name, "/\\ \t\r\n") {
+				return errors.New("invalid manual reality SNI")
+			}
+			clean = append(clean, name)
+		}
+		targets = strings.Join(clean, ",")
+	} else if mode != "scored" {
+		return errors.New("invalid reality SNI selection mode")
+	}
+	scanned, err := sanaei.ScanRealityTargets(ctx, exec, targets)
 	if err != nil {
 		return err
 	}

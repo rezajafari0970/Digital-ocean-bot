@@ -45,6 +45,65 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel) error 
 	return s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
 }
 
+func (s Service) PolicyPorts(ctx context.Context) ([]int, error) {
+	if s.DB == nil {
+		return nil, errors.New("user capacity config")
+	}
+	var enabled bool
+	var raw []byte
+	err := s.DB.QueryRowContext(ctx, "SELECT enabled,ports FROM global_config_policies WHERE policy_key='reality'").Scan(&enabled, &raw)
+	if errors.Is(err, sql.ErrNoRows) || !enabled {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var ports []int
+	if json.Unmarshal(raw, &ports) != nil || len(ports) == 0 {
+		return nil, errors.New("user capacity ports")
+	}
+	return ports, nil
+}
+
+func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) (bool, error) {
+	if s.DB == nil || s.Secrets == nil {
+		return false, errors.New("user capacity config")
+	}
+	var enabled bool
+	var portsRaw []byte
+	var target, life, limit, rate int
+	var quota int64
+	err := s.DB.QueryRowContext(ctx, "SELECT enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second FROM global_config_policies WHERE policy_key='reality'").Scan(&enabled, &portsRaw, &target, &quota, &life, &limit, &rate)
+	if errors.Is(err, sql.ErrNoRows) || !enabled || target <= 0 {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	var ports []int
+	if json.Unmarshal(portsRaw, &ports) != nil {
+		return false, errors.New("user capacity ports")
+	}
+	wanted := map[int]bool{}
+	for _, port := range ports {
+		wanted[port] = true
+	}
+	mutated := false
+	err = runtime.WithMutation(ctx, func(runCtx context.Context) error {
+		var lifecycle string
+		if e := s.DB.QueryRowContext(runCtx, "SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1", runtime.PanelID).Scan(&lifecycle); e != nil {
+			return e
+		}
+		if lifecycle != "READY" && lifecycle != "EXPIRING" && lifecycle != "RETIRING" {
+			return nil
+		}
+		var e error
+		mutated, e = s.FastFill(runCtx, p, runtime, wanted, target, quota, life, limit, rate)
+		return e
+	})
+	return mutated, err
+}
+
 func (s Service) ReconcileRuntimeFromPolicy(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) error {
 	if s.DB == nil || s.Secrets == nil {
 		return errors.New("user capacity config")
@@ -75,6 +134,23 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 	if runtime == nil || runtime.Session == nil {
 		return errors.New("user capacity runtime")
 	}
+	return runtime.WithMutation(ctx, func(runCtx context.Context) error {
+		return s.reconcileRuntimeLocked(runCtx, p, runtime, wanted, target, quota, life, limit, rate)
+	})
+}
+
+func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime, wanted map[int]bool, target int, quota int64, life, limit, rate int) error {
+	if runtime == nil || runtime.Session == nil {
+		return errors.New("user capacity runtime")
+	}
+	var lifecycle string
+	if e := s.DB.QueryRowContext(ctx, "SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1", runtime.PanelID).Scan(&lifecycle); e != nil {
+		return e
+	}
+	if lifecycle != "READY" && lifecycle != "EXPIRING" && lifecycle != "RETIRING" {
+		return nil
+	}
+	runtime.Session.Invalidate()
 	raws, e := runtime.Session.Snapshot(ctx)
 	if e != nil {
 		return e
@@ -104,6 +180,7 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 		}
 		active, expiredCount, quotaCount := 0, 0, 0
 		kept := make([]any, 0, len(arr))
+		deleteIDs := make([]string, 0)
 		deleted := 0
 		for _, v := range arr {
 			b, _ := json.Marshal(v)
@@ -116,6 +193,7 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 			isQuota := c.TotalGB > 0 && (stat.Up+stat.Down) >= c.TotalGB
 			if !c.Enable || isExpired || isQuota {
 				deleted++
+				deleteIDs = append(deleteIDs, c.ID)
 				if isQuota {
 					quotaCount++
 				} else {
@@ -134,6 +212,7 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 				n = deficit
 			}
 		}
+		newClients := make([]sanaei.Client, 0, n)
 		if n > 0 {
 			expiry := int64(0)
 			if life > 0 {
@@ -144,10 +223,29 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 				if e != nil {
 					return e
 				}
-				kept = append(kept, sanaei.Client{ID: id, Email: "dob-" + id[:8], Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"})
+				c := sanaei.Client{ID: id, Email: "dob-" + id[:8], Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"}
+				newClients = append(newClients, c)
+				kept = append(kept, c)
 			}
 		}
-		if n > 0 || deleted > 0 {
+		if deleted > 0 && deleted <= 32 {
+			for _, clientID := range deleteIDs {
+				if e = sanaei.DeleteClientSession(ctx, runtime.Session.Exec, in.ID, clientID); e != nil {
+					return fmt.Errorf("inbound %d delete client %s: %w", in.ID, clientID, e)
+				}
+			}
+			if len(newClients) > 0 {
+				if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
+					return fmt.Errorf("inbound %d add clients: %w", in.ID, e)
+				}
+			}
+			mutated = true
+		} else if deleted == 0 && len(newClients) > 0 {
+			if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
+				return fmt.Errorf("inbound %d add clients: %w", in.ID, e)
+			}
+			mutated = true
+		} else if n > 0 || deleted > 0 {
 			st["clients"] = kept
 			var sniff any = map[string]any{"enabled": false}
 			if len(in.Sniffing) > 0 {
@@ -162,9 +260,9 @@ func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runt
 		activeAfter := active + n
 		deficitAfter := maxInt(target-activeAfter, 0)
 		_, _ = s.DB.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,expired_users,quota_exhausted_users,deficit,created_last_cycle,deleted_last_cycle,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET port=excluded.port,target_users=excluded.target_users,active_users=excluded.active_users,expired_users=excluded.expired_users,quota_exhausted_users=excluded.quota_exhausted_users,deficit=excluded.deficit,created_last_cycle=excluded.created_last_cycle,deleted_last_cycle=excluded.deleted_last_cycle,last_error='',observed_at=now()`, p.ID, in.ID, in.Port, target, activeAfter, expiredCount, quotaCount, deficitAfter, n, deleted)
-		if mutated {
-			runtime.Session.Invalidate()
-		}
+	}
+	if mutated {
+		runtime.Session.Invalidate()
 	}
 	return nil
 }

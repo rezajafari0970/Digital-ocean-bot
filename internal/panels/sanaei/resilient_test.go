@@ -301,3 +301,34 @@ func TestRetryableErrorWithContextClientTimeout(t *testing.T) {
 		t.Fatal("parent cancellation must stop retries")
 	}
 }
+
+func TestResilientDoesNotBlindRetryMutation(t *testing.T) {
+	var calls atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+	session := &ResilientSession{Client: &APIClient{BaseURL: server.URL, HTTP: server.Client()}, Policy: fastPolicy()}
+	_, _ = session.Do(context.Background(), SessionRequest{Method: http.MethodPost, Path: "panel/api/inbounds/add"})
+	if calls.Load() != 1 {
+		t.Fatalf("mutation calls=%d want=1", calls.Load())
+	}
+}
+
+func TestResilientStillRetriesSafeRead(t *testing.T) {
+	var calls atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) < 2 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	session := &ResilientSession{Client: &APIClient{BaseURL: server.URL, HTTP: server.Client()}, Policy: fastPolicy()}
+	resp, err := session.Do(context.Background(), SessionRequest{Method: http.MethodGet, Path: "panel/api/inbounds/list"})
+	if err != nil || resp.StatusCode != http.StatusOK || calls.Load() != 2 {
+		t.Fatalf("status=%d calls=%d err=%v", resp.StatusCode, calls.Load(), err)
+	}
+}

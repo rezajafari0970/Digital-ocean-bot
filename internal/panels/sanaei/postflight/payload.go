@@ -40,5 +40,5 @@ func ValidatePayload(in Inbound, remoteID int64, p realityconfig.Payload) error 
 	if json.Unmarshal(b, &ids) != nil || len(ids) != 1 {
 		return ErrMismatch
 	}
-	return Validate(in, Expected{RemoteID: remoteID, Remark: p.Remark, Port: p.Port, UUID: fmt.Sprint(c["id"]), Flow: fmt.Sprint(c["flow"]), Target: fmt.Sprint(rs["dest"]), ServerNames: names, PrivateKey: fmt.Sprint(rs["privateKey"]), ShortID: ids[0]})
+	return Validate(in, Expected{RemoteID: remoteID, Remark: p.Remark, Port: p.Port, UUID: fmt.Sprint(c["id"]), Flow: fmt.Sprint(c["flow"]), Target: fmt.Sprint(rs["dest"]), ServerNames: names, PrivateKey: fmt.Sprint(rs["privateKey"]), ShortID: ids[0], Fingerprint: fmt.Sprint(rs["fingerprint"]), Sniffing: p.Sniffing})
 }

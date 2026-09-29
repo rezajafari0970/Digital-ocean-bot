@@ -12,7 +12,6 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/runtimecap"
 )
 
 type Secrets interface {
@@ -60,23 +59,12 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 			return e
 		}
 	}
-	var acc, did, host, user, keyref string
-	e = s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true`, p.ID).Scan(&acc, &did, &host, &user, &keyref)
+	var acc string
+	e = s.DB.QueryRowContext(ctx, "SELECT account_id::text FROM panel_instances WHERE id=$1 AND enabled=true", p.ID).Scan(&acc)
 	if e != nil {
 		return e
 	}
-	key, e := s.Secrets.Get(ctx, acc, keyref)
-	if e != nil {
-		return e
-	}
-	defer credentials.Wipe(key)
-	target := provisioning.Target{AccountID: acc, DropletID: did, Host: host, Port: 22, User: user, KeySecretRef: keyref}
-	run := func(ctx context.Context, cmd string) (string, error) { return s.SSH.Run(ctx, target, key, cmd) }
-	xray, e := (runtimecap.XrayResolver{Run: run}).Resolve(ctx)
-	if e != nil {
-		return e
-	}
-	reg := credentials.Registry{DB: s.DB, Secrets: s.Secrets, Keys: credentials.XrayGenerator{Run: run, Binary: xray}}
+	reg := credentials.Registry{DB: s.DB, Secrets: s.Secrets, Keys: credentials.LocalX25519Generator{}}
 	for _, port := range ports {
 		if port < 1 || port > 65535 {
 			return fmt.Errorf("invalid reality port %d", port)

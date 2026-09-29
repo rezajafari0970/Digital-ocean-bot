@@ -26,6 +26,11 @@ func (s *PanelSession) Snapshot(ctx context.Context) ([]json.RawMessage, error) 
 		return s.raws, s.loadErr
 	}
 	s.raws, s.loadErr = ReadRawInboundList(ctx, s.Exec)
+	if s.loadErr == nil {
+		s.index = buildSnapshotIndex(s.raws)
+	} else {
+		s.index = nil
+	}
 	s.loaded = true
 	return s.raws, s.loadErr
 }
@@ -35,6 +40,7 @@ func (s *PanelSession) Invalidate() {
 	s.loaded = false
 	s.raws = nil
 	s.loadErr = nil
+	s.index = nil
 	s.mu.Unlock()
 }
 

@@ -10,12 +10,12 @@ import (
 
 	createflow "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/create"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/listeners"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/realitycontract"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/postflight"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/realityconfig"
+	updateflow "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/update"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
 )
@@ -28,6 +28,12 @@ type Secrets interface {
 		string,
 		string,
 	) ([]byte, error)
+}
+
+type updateDeps struct{ *panelDeps }
+
+func (d updateDeps) Build(ctx context.Context, _ updateflow.Request) (realityconfig.Payload, error) {
+	return d.panelDeps.Build(ctx, createflow.Request{})
 }
 
 type Service struct {
@@ -170,34 +176,20 @@ func (d *panelDeps) RefreshInventory(
 	return snapshot.Records, nil
 }
 
-func (d *panelDeps) OccupiedPorts(
-	ctx context.Context,
-) ([]int, error) {
-
-	sshKey, err := d.secrets.Get(ctx, d.accountID, d.target.KeySecretRef)
+func (d *panelDeps) OccupiedPorts(ctx context.Context) ([]int, error) {
+	records, err := d.RefreshInventory(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer credentials.Wipe(sshKey)
-
-	run := func(
-		ctx context.Context,
-		command string,
-	) (string, error) {
-
-		return d.ssh.Run(
-			ctx,
-			d.target,
-			sshKey,
-			command,
-		)
+	ports := make([]int, 0, len(records))
+	seen := make(map[int]bool, len(records))
+	for _, r := range records {
+		if r.Port > 0 && !seen[r.Port] {
+			seen[r.Port] = true
+			ports = append(ports, r.Port)
+		}
 	}
-
-	return (listeners.SSHCollector{
-		Run: run,
-	}).Ports(
-		ctx,
-	)
+	return ports, nil
 }
 
 func (d *panelDeps) Build(
@@ -265,6 +257,14 @@ func (d *panelDeps) Add(
 		d.runtime.Session.Invalidate()
 	}
 
+	return err
+}
+
+func (d *panelDeps) Update(ctx context.Context, remoteID int64, payload realityconfig.Payload) error {
+	_, err := sanaei.UpdateInbound(ctx, d.exec, remoteID, payload)
+	if err == nil && d.runtime != nil && d.runtime.Session != nil {
+		d.runtime.Session.Invalidate()
+	}
 	return err
 }
 
@@ -584,17 +584,34 @@ WHERE pi.id=$1
 			targetPort: targetPort,
 		}
 
-	_, err =
-		createflow.Run(
-			ctx,
-			dependencies,
+	run := func(runCtx context.Context) error {
+		records, err := dependencies.RefreshInventory(runCtx)
+		if err != nil {
+			return err
+		}
+		owned := make([]inventory.InboundRecord, 0, 1)
+		for _, rec := range records {
+			if rec.Remark == s.ManagedKey {
+				owned = append(owned, rec)
+			}
+		}
+		if len(owned) == 1 && owned[0].RemoteID > 0 && owned[0].Port == s.Port {
+			payload, err := dependencies.Build(runCtx, createflow.Request{ManagedKey: s.ManagedKey, Port: s.Port})
+			if err != nil {
+				return err
+			}
+			if err = dependencies.Verify(runCtx, owned[0].RemoteID, payload); err == nil {
+				return nil
+			}
+			_, err = updateflow.Run(runCtx, updateDeps{dependencies}, updateflow.Request{ManagedKey: s.ManagedKey, Port: s.Port})
+			return err
+		}
+		_, err = createflow.Run(runCtx, dependencies, createflow.Request{ManagedKey: s.ManagedKey, Port: s.Port})
+		return err
+	}
+	if s.Runtime != nil {
+		return s.Runtime.WithMutation(ctx, run)
+	}
+	return run(ctx)
 
-			createflow.Request{
-				ManagedKey: s.ManagedKey,
-
-				Port: s.Port,
-			},
-		)
-
-	return err
 }

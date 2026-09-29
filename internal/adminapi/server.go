@@ -1,6 +1,7 @@
 package adminapi
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
@@ -13,19 +14,22 @@ import (
 )
 
 type Server struct {
-	WebPath        string
-	Auth           auth.Service
-	DB             *sql.DB
-	Container      app.Container
-	Health         observability.Health
-	LoginLimiter   *LoginLimiter
-	OutputRuntimes *sanaei.RuntimeManager
-	OutputCacheMu  sync.RWMutex
-	OutputCache    map[string]outputCacheEntry
+	WebPath          string
+	Auth             auth.Service
+	DB               *sql.DB
+	Container        app.Container
+	Health           observability.Health
+	LoginLimiter     *LoginLimiter
+	OutputRuntimes   *sanaei.RuntimeManager
+	OutputCacheMu    sync.RWMutex
+	OutputCache      map[string]outputCacheEntry
+	OutputRefreshMu  sync.Mutex
+	OutputRefreshing map[string]bool
+	OutputContext    context.Context
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 5 * time.Second}, TTL: 15 * time.Second}, OutputCache: map[string]outputCacheEntry{}}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 5 * time.Second}, TTL: 15 * time.Second}, OutputCache: map[string]outputCacheEntry{}, OutputRefreshing: map[string]bool{}, OutputContext: context.Background()}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()

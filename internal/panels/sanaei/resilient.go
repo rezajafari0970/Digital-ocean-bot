@@ -27,8 +27,9 @@ func DefaultRetryPolicy() RetryPolicy {
 }
 
 type ResilientSession struct {
-	Client *APIClient
-	Policy RetryPolicy
+	Client  *APIClient
+	Policy  RetryPolicy
+	Observe func(success bool, transient bool)
 
 	loginMu sync.Mutex
 }
@@ -164,6 +165,17 @@ func (s *ResilientSession) Do(
 	if policy.MaxAttempts < 1 {
 		policy = DefaultRetryPolicy()
 	}
+	// Mutations are not blindly retry-safe. A lost response after a successful
+	// POST is an ambiguous outcome and must be resolved by read-after-write
+	// verification in the owning orchestrator.
+	if req.Method != http.MethodGet && req.Method != http.MethodHead && req.Method != http.MethodOptions {
+		policy.MaxAttempts = 1
+	}
+	// Large full-list reads are expensive; one retry is enough. Repeating a
+	// multi-megabyte snapshot four times amplifies load when a panel is sick.
+	if req.Method == http.MethodGet && strings.Contains(req.Path, "inbounds/list") && policy.MaxAttempts > 2 {
+		policy.MaxAttempts = 2
+	}
 
 	var lastErr error
 
@@ -183,6 +195,9 @@ func (s *ResilientSession) Do(
 			resp.StatusCode >= 200 &&
 			resp.StatusCode < 300 {
 
+			if s.Observe != nil {
+				s.Observe(true, false)
+			}
 			return resp, nil
 		}
 
@@ -219,6 +234,9 @@ func (s *ResilientSession) Do(
 
 			   Do not waste time retrying it.
 			*/
+			if s.Observe != nil {
+				s.Observe(false, false)
+			}
 			return resp, nil
 
 		} else if err != nil {
@@ -254,8 +272,10 @@ func (s *ResilientSession) Do(
 		lastErr = ErrSessionRequest
 	}
 
-	return SessionResponse{},
-		lastErr
+	if s.Observe != nil {
+		s.Observe(false, true)
+	}
+	return SessionResponse{}, lastErr
 }
 
 func ReadAllBounded(

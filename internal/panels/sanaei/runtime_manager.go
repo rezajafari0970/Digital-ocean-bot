@@ -27,9 +27,10 @@ type RuntimeManager struct {
 	Factory RuntimeFactory
 	TTL     time.Duration
 
-	mu       sync.Mutex
-	entries  map[string]*runtimeEntry
-	circuits map[string]circuitState
+	mu            sync.Mutex
+	entries       map[string]*runtimeEntry
+	circuits      map[string]circuitState
+	mutationGates map[string]*sync.Mutex
 }
 
 func (m *RuntimeManager) ttl() time.Duration {
@@ -48,6 +49,30 @@ func circuitDelay(failures int) time.Duration {
 		return 0
 	}
 }
+func (m *RuntimeManager) observe(panelID string, success, transient bool) {
+	if panelID == "" {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if success {
+		delete(m.circuits, panelID)
+		return
+	}
+	if !transient {
+		return
+	}
+	if m.circuits == nil {
+		m.circuits = map[string]circuitState{}
+	}
+	c := m.circuits[panelID]
+	c.failures++
+	if delay := circuitDelay(c.failures); delay > 0 {
+		c.until = time.Now().Add(delay)
+	}
+	m.circuits[panelID] = c
+}
+
 func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRuntime, error) {
 	if panelID == "" {
 		return nil, errors.New("sanaei runtime panel id")
@@ -89,6 +114,20 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		r, err := m.Factory.Open(ctx, panelID)
 
 		m.mu.Lock()
+		if m.mutationGates == nil {
+			m.mutationGates = map[string]*sync.Mutex{}
+		}
+		gate := m.mutationGates[panelID]
+		if gate == nil {
+			gate = &sync.Mutex{}
+			m.mutationGates[panelID] = gate
+		}
+		if r != nil {
+			r.mutationMu = gate
+			if r.Session != nil && r.Session.Exec != nil {
+				r.Session.Exec.Observe = func(success, transient bool) { m.observe(panelID, success, transient) }
+			}
+		}
 		e.runtime = r
 		e.err = err
 		e.opened = time.Now()
@@ -110,13 +149,18 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 	}
 }
 func (m *RuntimeManager) Invalidate(panelID string) {
+	var session *PanelSession
 	m.mu.Lock()
-	defer m.mu.Unlock()
-	if e := m.entries[panelID]; e != nil && e.runtime != nil && e.runtime.Session != nil {
-		e.runtime.Session.Invalidate()
+	if e := m.entries[panelID]; e != nil && e.runtime != nil {
+		session = e.runtime.Session
 	}
 	delete(m.entries, panelID)
+	m.mu.Unlock()
+	if session != nil {
+		session.Invalidate()
+	}
 }
+
 func (m *RuntimeManager) PurgeExpired() {
 	now := time.Now()
 	ttl := m.ttl()

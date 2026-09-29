@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
+	"sort"
 )
 
 var ErrMismatch = errors.New("sanaei inbound semantic mismatch")
@@ -19,6 +19,8 @@ type Expected struct {
 	ServerNames []string
 	PrivateKey  string
 	ShortID     string
+	Fingerprint string
+	Sniffing    map[string]any
 }
 
 type Inbound struct {
@@ -29,6 +31,7 @@ type Inbound struct {
 	Enable         bool   `json:"enable"`
 	Settings       any    `json:"settings"`
 	StreamSettings any    `json:"streamSettings"`
+	Sniffing       any    `json:"sniffing"`
 }
 
 func object(v any) (map[string]any, error) {
@@ -98,8 +101,25 @@ func Validate(in Inbound, w Expected) error {
 	}
 	var names []string
 	b, _ := json.Marshal(rs["serverNames"])
-	if json.Unmarshal(b, &names) != nil || !reflect.DeepEqual(names, w.ServerNames) {
+	if json.Unmarshal(b, &names) != nil {
 		return fmt.Errorf("%w: server names", ErrMismatch)
+	}
+	wantNames := append([]string(nil), w.ServerNames...)
+	sort.Strings(names)
+	sort.Strings(wantNames)
+	if len(names) != len(wantNames) {
+		return fmt.Errorf("%w: server names", ErrMismatch)
+	}
+	for i := range names {
+		if names[i] != wantNames[i] {
+			return fmt.Errorf("%w: server names", ErrMismatch)
+		}
+	}
+	if w.Fingerprint != "" && fmt.Sprint(rs["fingerprint"]) != w.Fingerprint {
+		return fmt.Errorf("%w: fingerprint", ErrMismatch)
+	}
+	if err := validateSniffing(in.Sniffing, w.Sniffing); err != nil {
+		return err
 	}
 	var ids []string
 	b, _ = json.Marshal(rs["shortIds"])

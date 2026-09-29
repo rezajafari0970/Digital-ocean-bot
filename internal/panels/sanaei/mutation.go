@@ -204,7 +204,7 @@ func UpdateInboundRaw(
 
 				ContentType: "application/json",
 
-				TimeoutSeconds: 45,
+				TimeoutSeconds: 30,
 			},
 		)
 

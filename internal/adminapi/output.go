@@ -79,8 +79,23 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 }
 
 func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
+	s.OutputRefreshMu.Lock()
+	if s.OutputRefreshing == nil {
+		s.OutputRefreshing = map[string]bool{}
+	}
+	if s.OutputRefreshing[p.ID] {
+		s.OutputRefreshMu.Unlock()
+		return
+	}
+	s.OutputRefreshing[p.ID] = true
+	s.OutputRefreshMu.Unlock()
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+		defer func() { s.OutputRefreshMu.Lock(); delete(s.OutputRefreshing, p.ID); s.OutputRefreshMu.Unlock() }()
+		parent := s.OutputContext
+		if parent == nil {
+			parent = context.Background()
+		}
+		ctx, cancel := context.WithTimeout(parent, 6*time.Second)
 		defer cancel()
 		_ = s.refreshPanelOutput(ctx, p)
 	}()
@@ -199,6 +214,17 @@ func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	active := make(map[string]bool, len(panels))
+	for _, p := range panels {
+		active[p.ID] = true
+	}
+	s.OutputCacheMu.Lock()
+	for id := range s.OutputCache {
+		if !active[id] {
+			delete(s.OutputCache, id)
+		}
+	}
+	s.OutputCacheMu.Unlock()
 	results := make([]string, len(panels))
 	sem := make(chan struct{}, 8)
 	var wg sync.WaitGroup

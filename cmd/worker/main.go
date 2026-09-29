@@ -184,7 +184,7 @@ func main() {
 		}
 	}()
 
-	// User capacity: keep every configured Reality inbound at its global active-user target.
+	// User capacity fast fill: lightweight slim inventory + batch add.
 	go func() {
 		t := time.NewTicker(2 * time.Second)
 		defer t.Stop()
@@ -209,27 +209,56 @@ func main() {
 					case <-ctx.Done():
 						return
 					}
-					cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 					defer cancel()
-					needs, err := capacity.NeedsReconcile(cctx, panel.ID, []int{443, 7231, 1212}, 45*time.Second)
-					if err != nil {
-						log.Printf("user capacity schedule %s: %v", panel.ID, err)
-					} else if !needs {
-						return
-					}
 					runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
 					if err != nil {
 						if cctx.Err() == nil {
-							log.Printf("user capacity runtime %s: %v", panel.ID, err)
+							log.Printf("user capacity fast runtime %s: %v", panel.ID, err)
 						}
 						return
 					}
-					if err := capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime); err != nil && cctx.Err() == nil {
-						log.Printf("user capacity panel %s: %v", panel.ID, err)
+					if _, err = capacity.FastFillFromPolicy(cctx, panel, runtime); err != nil && cctx.Err() == nil {
+						log.Printf("user capacity fast fill %s: %v", panel.ID, err)
 					}
 				}()
 			}
 			wg.Wait()
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
+
+	// User capacity cleanup: expensive full snapshot on a slower cadence.
+	go func() {
+		t := time.NewTicker(60 * time.Second)
+		defer t.Stop()
+		source := readyworker.SQLSource{DB: application.DB}
+		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
+		run := func() {
+			panels, err := source.EligibleReadyPanels(ctx)
+			if err != nil {
+				log.Printf("user capacity cleanup discovery: %v", err)
+				return
+			}
+			for _, panel := range panels {
+				cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+				runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
+				if err == nil {
+					err = capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime)
+				}
+				cancel()
+				if err != nil && ctx.Err() == nil {
+					log.Printf("user capacity cleanup %s: %v", panel.ID, err)
+				}
+			}
 		}
 		run()
 		for {

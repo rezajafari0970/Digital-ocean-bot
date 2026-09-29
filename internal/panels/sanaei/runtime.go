@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sync"
 	"time"
 )
 
@@ -12,11 +13,24 @@ type RuntimeSecrets interface {
 }
 
 type PanelRuntime struct {
-	PanelID   string
-	AccountID string
-	BaseURL   string
-	Client    *APIClient
-	Session   *PanelSession
+	PanelID    string
+	AccountID  string
+	BaseURL    string
+	Client     *APIClient
+	Session    *PanelSession
+	mutationMu *sync.Mutex
+}
+
+func (r *PanelRuntime) WithMutation(ctx context.Context, fn func(context.Context) error) error {
+	if r == nil || r.mutationMu == nil || fn == nil {
+		return errors.New("sanaei runtime mutation config")
+	}
+	r.mutationMu.Lock()
+	defer r.mutationMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return fn(ctx)
 }
 
 type RuntimeFactory struct {

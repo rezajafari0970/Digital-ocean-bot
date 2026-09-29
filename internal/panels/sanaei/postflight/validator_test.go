@@ -46,3 +46,17 @@ func TestValidateRealityRejectsMissingManagedClientAmongCapacityUsers(t *testing
 		t.Fatal("expected managed client mismatch")
 	}
 }
+
+func TestValidateServerNamesOrderIsSemantic(t *testing.T) {
+	in := Inbound{
+		ID: 1, Remark: "r", Port: 443, Protocol: "vless", Enable: true,
+		Settings: map[string]any{"decryption": "none", "encryption": "none", "clients": []any{map[string]any{"id": "u", "flow": "xtls-rprx-vision"}}},
+		StreamSettings: map[string]any{"network": "tcp", "security": "reality", "realitySettings": map[string]any{
+			"dest": "example.com:443", "serverNames": []any{"b.example", "a.example"}, "privateKey": "p", "shortIds": []any{"s"},
+		}},
+	}
+	err := Validate(in, Expected{RemoteID: 1, Remark: "r", Port: 443, UUID: "u", Flow: "xtls-rprx-vision", Target: "example.com:443", ServerNames: []string{"a.example", "b.example"}, PrivateKey: "p", ShortID: "s"})
+	if err != nil {
+		t.Fatalf("semantic serverNames order should pass: %v", err)
+	}
+}
