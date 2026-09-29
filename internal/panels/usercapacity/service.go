@@ -9,12 +9,16 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"sync"
 	"time"
 )
 
 type Secrets interface {
 	Get(context.Context, string, string) ([]byte, error)
 }
+
+var addClientUnsupportedPanels sync.Map
+
 type Service struct {
 	DB      *sql.DB
 	Secrets Secrets
@@ -69,6 +73,9 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	if s.DB == nil || s.Secrets == nil {
 		return false, errors.New("user capacity config")
 	}
+	if _, unsupported := addClientUnsupportedPanels.Load(p.ID); unsupported {
+		return false, s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
+	}
 	var enabled bool
 	var portsRaw []byte
 	var target, life, limit, rate int
@@ -101,6 +108,10 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 		mutated, e = s.FastFill(runCtx, p, runtime, wanted, target, quota, life, limit, rate)
 		return e
 	})
+	if errors.Is(err, sanaei.ErrAddClientUnsupported) {
+		addClientUnsupportedPanels.Store(p.ID, true)
+		return false, s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
+	}
 	return mutated, err
 }
 

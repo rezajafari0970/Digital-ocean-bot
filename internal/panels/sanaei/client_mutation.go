@@ -3,10 +3,13 @@ package sanaei
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 )
+
+var ErrAddClientUnsupported = errors.New("sanaei addClient unsupported")
 
 func AddClientsSession(ctx context.Context, exec SessionExecutor, inboundID int, clients []Client) error {
 	if exec == nil || inboundID <= 0 || len(clients) == 0 {
@@ -26,6 +29,9 @@ func AddClientsSession(ctx context.Context, exec SessionExecutor, inboundID int,
 	})
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusMethodNotAllowed {
+		return fmt.Errorf("%w: http=%d", ErrAddClientUnsupported, resp.StatusCode)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body := resp.Body
