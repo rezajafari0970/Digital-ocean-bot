@@ -21,9 +21,6 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if err := c.MaintainStickyIdentity(ctx, accountID); err != nil {
 		return workflow.Deployment{}, err
 	}
-	if _, err := c.RequireCreateCapacity(ctx, accountID, 2*time.Minute); err != nil {
-		return workflow.Deployment{}, err
-	}
 	profiles := workflow.ProfileStore{DB: c.DB}
 	profile, err := profiles.Get(ctx, profileID)
 	if err != nil {
@@ -40,9 +37,35 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if err := c.DB.QueryRowContext(ctx, `SELECT active,storage_path FROM xui_database_templates WHERE id=$1`, profile.Config.DatabaseTemplateID).Scan(&templateActive, &templatePath); err != nil || !templateActive || templatePath == "" || templatePath == "pending" {
 		return workflow.Deployment{}, ErrDatabaseTemplateUnavailable
 	}
-	store := workflow.SQLStore{DB: c.DB}
+	// Serialize capacity admission per account. The capacity check and PLANNED
+	// deployment reservation share one transaction, so the next caller observes
+	// this reservation before it can consume the same provider slot.
+	tx, err := c.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return workflow.Deployment{}, err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, "deployment-admission:"+accountID); err != nil {
+		return workflow.Deployment{}, err
+	}
+	var enabled bool
+	var runtimeStatus, providerState, providerError string
+	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
+		return workflow.Deployment{}, ErrCapacityUnavailable
+	}
+	var cap CreateCapacity
+	if err = tx.QueryRowContext(ctx, `SELECT COALESCE((ps.data->'Limits'->>'DropletLimit')::int,0),jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)),(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1`, accountID).Scan(&cap.Limit, &cap.ProviderDroplets, &cap.PendingCreates, &cap.SnapshotAt); err != nil || time.Since(cap.SnapshotAt) > 2*time.Minute {
+		return workflow.Deployment{}, ErrCapacitySnapshotStale
+	}
+	if cap.Limit < 1 || cap.Available() < 1 {
+		return workflow.Deployment{}, ErrCapacityUnavailable
+	}
+	store := workflow.SQLStore{DB: tx}
 	d, _, err := store.Reserve(ctx, workflow.Request{AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})
 	if err != nil {
+		return d, err
+	}
+	if err = tx.Commit(); err != nil {
 		return d, err
 	}
 	effective := profile.Config

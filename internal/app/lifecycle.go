@@ -87,12 +87,37 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				// Capacity-breaker path: skip replacement creation and delete only this oldest EXPIRING item.
 				goto processLifecycle
 			}
-			d, err := c.StartDeployment(ctx, item.AccountID, item.ProfileID)
+			// Claim replacement ownership before any provider mutation. The advisory
+			// transaction lock serializes contenders for this exact lifecycle item.
+			claimTx, err := c.DB.BeginTx(ctx, nil)
 			if err != nil {
 				return err
 			}
-			_, err = c.DB.ExecContext(ctx, `UPDATE droplets SET replacement_deployment_id=$2,updated_at=now() WHERE id=$1 AND replacement_deployment_id IS NULL`, item.ID, d.ID)
-			return err
+			if _, err = claimTx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, "replacement-claim:"+item.ID); err != nil {
+				claimTx.Rollback()
+				return err
+			}
+			var existing string
+			if err = claimTx.QueryRowContext(ctx, `SELECT COALESCE(replacement_deployment_id::text,'') FROM droplets WHERE id=$1 FOR UPDATE`, item.ID).Scan(&existing); err != nil {
+				claimTx.Rollback()
+				return err
+			}
+			if existing != "" {
+				return claimTx.Commit()
+			}
+			// Keep the claim transaction open while StartDeployment performs its short
+			// account admission/reservation. No provider mutation occurs before that
+			// reservation is durable; contenders block on this droplet claim.
+			d, err := c.StartDeployment(ctx, item.AccountID, item.ProfileID)
+			if err != nil {
+				claimTx.Rollback()
+				return err
+			}
+			if _, err = claimTx.ExecContext(ctx, `UPDATE droplets SET replacement_deployment_id=$2,updated_at=now() WHERE id=$1 AND replacement_deployment_id IS NULL`, item.ID, d.ID); err != nil {
+				claimTx.Rollback()
+				return err
+			}
+			return claimTx.Commit()
 		}
 		if !terminalFailed {
 			var replacementReady bool

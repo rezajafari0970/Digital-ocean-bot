@@ -19,7 +19,13 @@ type Store interface {
 	BeginStep(context.Context, string, string, int) (int, error)
 	FinishStep(context.Context, string, string, error, ErrorClass) error
 }
-type SQLStore struct{ DB *sql.DB }
+type DBTX interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+type SQLStore struct{ DB DBTX }
 
 func (s SQLStore) Reserve(ctx context.Context, r Request) (Deployment, bool, error) {
 	var d Deployment
