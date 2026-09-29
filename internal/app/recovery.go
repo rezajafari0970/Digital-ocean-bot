@@ -3,13 +3,11 @@ package app
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
-	"strconv"
 	"time"
 )
 
@@ -36,41 +34,30 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 	if err != nil {
 		return err
 	}
-	// Recovery is the only path allowed to query the provider for an uncertain
-	// mutation outcome. Prefer the latest provider snapshot when it is fresh;
-	// only fall back to a live provider request when local evidence is stale.
+	// Prefer canonical inventory evidence when a fresh provider observation exists.
 	exists := false
 	snapshotAuthoritative := false
-	var snap []byte
 	var snapAt time.Time
-	if err := h.Container.DB.QueryRowContext(ctx, `SELECT data,created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, item.AccountID).Scan(&snap, &snapAt); err == nil && time.Since(snapAt) <= 2*time.Minute && snapAt.After(operationCreated) {
-		var disc digitalocean.DiscoveryResult
-		if json.Unmarshal(snap, &disc) == nil {
-			for _, d := range disc.Droplets {
-				if strconv.Itoa(d.ID) == providerID {
-					exists = true
-					break
-				}
-			}
-			// Presence is authoritative for CREATE. Absence is authoritative for
-			// DELETE. The opposite direction requires a live provider check: a
-			// snapshot may have been captured while the mutation was still settling.
-			if item.Kind == "CREATE_DROPLET" && exists {
-				snapshotAuthoritative = true
-			}
-			if item.Kind == "DELETE_DROPLET" && !exists {
-				snapshotAuthoritative = true
-			}
+	if err := h.Container.DB.QueryRowContext(ctx, `SELECT created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, item.AccountID).Scan(&snapAt); err == nil && time.Since(snapAt) <= 2*time.Minute && snapAt.After(operationCreated) {
+		var registryExists bool
+		_ = h.Container.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM resources WHERE account_id=$1 AND provider_resource_id=$2 AND state<>'deleted')`, item.AccountID, providerID).Scan(&registryExists)
+		exists = registryExists
+		if item.Kind == "CREATE_DROPLET" && exists {
+			snapshotAuthoritative = true
 		}
 	}
 	if !snapshotAuthoritative {
-		pid, convErr := strconv.Atoi(providerID)
-		if convErr != nil {
-			return convErr
+		compute, cerr := computeDriver(runtime)
+		if cerr != nil {
+			return cerr
 		}
-		exists, err = runtime.Provider.DropletExists(ctx, pid)
-		if err != nil {
-			return err
+		_, gerr := compute.GetServer(ctx, providerID)
+		if gerr == nil {
+			exists = true
+		} else if providers.IsClass(gerr, providers.ErrorNotFound) {
+			exists = false
+		} else {
+			return gerr
 		}
 	}
 	state := "unknown"
