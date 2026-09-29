@@ -60,7 +60,7 @@ func (s *Server) storePanelOutput(panelID, value string) {
 
 func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel) string {
 
-	ctx, cancel := context.WithTimeout(parent, 45*time.Second)
+	ctx, cancel := context.WithTimeout(parent, 90*time.Second)
 	defer cancel()
 
 	var runtime *sanaei.PanelRuntime
@@ -103,7 +103,7 @@ func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
 		if parent == nil {
 			parent = context.Background()
 		}
-		ctx, cancel := context.WithTimeout(parent, 45*time.Second)
+		ctx, cancel := context.WithTimeout(parent, 90*time.Second)
 		defer cancel()
 		_ = s.refreshPanelOutput(ctx, p)
 	}()
