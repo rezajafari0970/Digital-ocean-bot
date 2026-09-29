@@ -3,9 +3,12 @@ package sanaei
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
+
+var ErrRuntimeCircuitOpen = errors.New("sanaei runtime circuit open")
 
 type runtimeEntry struct {
 	runtime *PanelRuntime
@@ -15,11 +18,18 @@ type runtimeEntry struct {
 	err     error
 }
 
+type circuitState struct {
+	failures int
+	until    time.Time
+}
+
 type RuntimeManager struct {
 	Factory RuntimeFactory
 	TTL     time.Duration
-	mu      sync.Mutex
-	entries map[string]*runtimeEntry
+
+	mu       sync.Mutex
+	entries  map[string]*runtimeEntry
+	circuits map[string]circuitState
 }
 
 func (m *RuntimeManager) ttl() time.Duration {
@@ -28,7 +38,16 @@ func (m *RuntimeManager) ttl() time.Duration {
 	}
 	return m.TTL
 }
-
+func circuitDelay(failures int) time.Duration {
+	switch {
+	case failures >= 5:
+		return 2 * time.Minute
+	case failures >= 3:
+		return 30 * time.Second
+	default:
+		return 0
+	}
+}
 func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRuntime, error) {
 	if panelID == "" {
 		return nil, errors.New("sanaei runtime panel id")
@@ -37,6 +56,14 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		m.mu.Lock()
 		if m.entries == nil {
 			m.entries = map[string]*runtimeEntry{}
+		}
+		if m.circuits == nil {
+			m.circuits = map[string]circuitState{}
+		}
+		if c := m.circuits[panelID]; !c.until.IsZero() && time.Now().Before(c.until) {
+			remain := time.Until(c.until).Round(time.Second)
+			m.mu.Unlock()
+			return nil, fmt.Errorf("%w: retry in %s", ErrRuntimeCircuitOpen, remain)
 		}
 		if e := m.entries[panelID]; e != nil {
 			if e.opening {
@@ -69,12 +96,19 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		close(e.wait)
 		if err != nil {
 			delete(m.entries, panelID)
+			c := m.circuits[panelID]
+			c.failures++
+			if delay := circuitDelay(c.failures); delay > 0 {
+				c.until = time.Now().Add(delay)
+			}
+			m.circuits[panelID] = c
+		} else {
+			delete(m.circuits, panelID)
 		}
 		m.mu.Unlock()
 		return r, err
 	}
 }
-
 func (m *RuntimeManager) Invalidate(panelID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -83,7 +117,6 @@ func (m *RuntimeManager) Invalidate(panelID string) {
 	}
 	delete(m.entries, panelID)
 }
-
 func (m *RuntimeManager) PurgeExpired() {
 	now := time.Now()
 	ttl := m.ttl()
@@ -94,6 +127,10 @@ func (m *RuntimeManager) PurgeExpired() {
 			delete(m.entries, id)
 		}
 	}
+	for id, c := range m.circuits {
+		if !c.until.IsZero() && now.After(c.until.Add(10*time.Minute)) {
+			delete(m.circuits, id)
+		}
+	}
 }
-
 func (m *RuntimeManager) Size() int { m.mu.Lock(); defer m.mu.Unlock(); return len(m.entries) }

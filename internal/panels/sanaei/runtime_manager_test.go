@@ -2,6 +2,7 @@ package sanaei
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -44,4 +45,23 @@ func TestRuntimeManagerConcurrentCacheRead(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+func TestCircuitDelay(t *testing.T) {
+	if circuitDelay(1) != 0 || circuitDelay(2) != 0 {
+		t.Fatal("early failures must retry normally")
+	}
+	if circuitDelay(3) != 30*time.Second {
+		t.Fatal("third failure cooldown")
+	}
+	if circuitDelay(5) != 2*time.Minute {
+		t.Fatal("fifth failure cooldown")
+	}
+}
+func TestRuntimeManagerCircuitOpen(t *testing.T) {
+	m := &RuntimeManager{circuits: map[string]circuitState{"p": {failures: 3, until: time.Now().Add(time.Minute)}}}
+	_, err := m.Acquire(context.Background(), "p")
+	if !errors.Is(err, ErrRuntimeCircuitOpen) {
+		t.Fatalf("err=%v", err)
+	}
 }
