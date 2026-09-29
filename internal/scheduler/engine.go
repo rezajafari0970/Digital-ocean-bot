@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"database/sql"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"math/rand"
 	"time"
 )
@@ -45,28 +46,21 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		var limit, providerDroplets, pendingCreates, concurrent, desired, managed, spacingMin, spacingMax int
-		var snapshotAt time.Time
+		var concurrent, desired, managed, spacingMin, spacingMax int
 		var nextBuild sql.NullTime
 		err := e.DB.QueryRowContext(ctx, `SELECT
-			COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
-			COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
-			(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
 			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
 			(SELECT desired_server_count FROM accounts WHERE id=$1),
 			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
 			(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
 			(SELECT build_spacing_max_minutes FROM accounts WHERE id=$1),
-			(SELECT next_build_at FROM accounts WHERE id=$1),
-			COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz)`, x.AccountID, x.ProfileID).Scan(&limit, &providerDroplets, &pendingCreates, &concurrent, &desired, &managed, &spacingMin, &spacingMax, &nextBuild, &snapshotAt)
+			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &nextBuild)
 		if err != nil {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		// Never make a CREATE capacity decision from stale provider state.
-		// Refresh is deliberately not triggered here: scheduler must fail closed,
-		// leaving provider I/O to the explicit refresh/sync paths.
-		if snapshotAt.Equal(time.Unix(0, 0)) || now.Sub(snapshotAt) > 2*time.Minute {
+		cap, capErr := capacity.Read(ctx, e.DB, x.AccountID, 2*time.Minute)
+		if capErr != nil {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
@@ -95,10 +89,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// Provider snapshot is the source of truth for occupied capacity. Only
 		// create operations without a provider resource consume additional slots;
 		// this avoids double-counting droplets already visible at DigitalOcean.
-		available := limit - providerDroplets - pendingCreates
-		if available < 0 {
-			available = 0
-		}
+		available := cap.Available()
 		if allowed > available {
 			allowed = available
 		}

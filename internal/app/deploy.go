@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"math/rand"
@@ -53,8 +54,8 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
-	var cap CreateCapacity
-	if err = tx.QueryRowContext(ctx, `SELECT COALESCE((ps.data->'Limits'->>'DropletLimit')::int,0),jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)),(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1`, accountID).Scan(&cap.Limit, &cap.ProviderDroplets, &cap.PendingCreates, &cap.SnapshotAt); err != nil || time.Since(cap.SnapshotAt) > 2*time.Minute {
+	cap, capErr := capacity.Read(ctx, tx, accountID, 2*time.Minute)
+	if capErr != nil {
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
 	}
 	if cap.Limit < 1 || cap.Available() < 1 {

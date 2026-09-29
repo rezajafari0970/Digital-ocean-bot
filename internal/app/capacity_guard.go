@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"time"
 )
 
@@ -24,29 +25,19 @@ func (x CreateCapacity) Available() int {
 	return n
 }
 func (c Container) RequireCreateCapacity(ctx context.Context, accountID string, maxAge time.Duration) (CreateCapacity, error) {
-	if maxAge <= 0 {
-		maxAge = 2 * time.Minute
-	}
-	var x CreateCapacity
+	var out CreateCapacity
 	var enabled bool
 	var runtimeStatus, providerState, providerError string
 	if err := c.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
-		return x, ErrCapacityUnavailable
+		return out, ErrCapacityUnavailable
 	}
-	err := c.DB.QueryRowContext(ctx, `SELECT
- COALESCE((ps.data->'Limits'->>'DropletLimit')::int,0),
- jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)),
- (SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
- ps.created_at
- FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1`, accountID).Scan(&x.Limit, &x.ProviderDroplets, &x.PendingCreates, &x.SnapshotAt)
+	x, err := capacity.Read(ctx, c.DB, accountID, maxAge)
 	if err != nil {
-		return x, ErrCapacitySnapshotStale
+		return out, ErrCapacitySnapshotStale
 	}
-	if time.Since(x.SnapshotAt) > maxAge {
-		return x, ErrCapacitySnapshotStale
+	out = CreateCapacity{Limit: x.Limit, ProviderDroplets: x.InUse, PendingCreates: x.Pending, SnapshotAt: x.ObservedAt}
+	if out.Limit < 1 || out.Available() < 1 {
+		return out, ErrCapacityUnavailable
 	}
-	if x.Limit < 1 || x.Available() < 1 {
-		return x, ErrCapacityUnavailable
-	}
-	return x, nil
+	return out, nil
 }

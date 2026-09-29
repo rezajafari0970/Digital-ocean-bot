@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"time"
@@ -91,19 +92,14 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			if active >= maxConcurrent {
 				return nil
 			}
-			var limit, inUse, pending int
 			var providerState, providerError string
-			var snapshotAt time.Time
-			_ = c.DB.QueryRowContext(ctx, `SELECT
-				COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
-				COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
-				(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND (state IN ('planned','running','verifying') OR (state='unknown' AND updated_at > now()-interval '2 minutes'))),
-				COALESCE((SELECT ps.created_at FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),'epoch'::timestamptz),
-				COALESCE((SELECT provider_state FROM accounts WHERE id=$1),'UNKNOWN'),COALESCE((SELECT provider_error_state FROM accounts WHERE id=$1),'')`, item.AccountID).Scan(&limit, &inUse, &pending, &snapshotAt, &providerState, &providerError)
+			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'UNKNOWN'),COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState, &providerError)
+			cap, capErr := capacity.Read(ctx, c.DB, item.AccountID, 2*time.Minute)
+			limit, inUse, pending := cap.Limit, cap.InUse, cap.Pending
 			if providerState != "ACTIVE" || providerError != "" {
 				return nil
 			}
-			if snapshotAt.Equal(time.Unix(0, 0)) || time.Since(snapshotAt) > 2*time.Minute {
+			if capErr != nil {
 				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail='provider snapshot stale; refresh required',runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID)
 				return nil
 			}
