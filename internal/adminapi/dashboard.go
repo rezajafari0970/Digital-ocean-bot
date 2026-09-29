@@ -110,7 +110,14 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	var opKind, opState, opResource string
 	var opAt sql.NullTime
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT kind,state,COALESCE(resource_id,''),updated_at FROM operations WHERE account_id=$1 AND kind IN ('CREATE_DROPLET','DELETE_DROPLET') ORDER BY updated_at DESC LIMIT 1`, id).Scan(&opKind, &opState, &opResource, &opAt); err == nil {
-		d.Network["last_operation_kind"] = opKind
+		displayKind := opKind
+		if opKind == "CREATE_DROPLET" {
+			displayKind = "CREATE_SERVER"
+		}
+		if opKind == "DELETE_DROPLET" {
+			displayKind = "DELETE_SERVER"
+		}
+		d.Network["last_operation_kind"] = displayKind
 		d.Network["last_operation_state"] = opState
 		d.Network["last_operation_resource"] = opResource
 		d.Network["last_operation_at"] = opAt.Time

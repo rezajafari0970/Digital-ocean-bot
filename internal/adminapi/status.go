@@ -2,27 +2,6 @@ package adminapi
 
 import "net/http"
 
-func (s *Server) profiles(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.DB.QueryContext(r.Context(), `SELECT id::text,account_id::text,name,version,enabled,created_at,updated_at FROM deployment_profiles ORDER BY created_at DESC`)
-	if err != nil {
-		writeJSON(w, 500, errorBody())
-		return
-	}
-	defer rows.Close()
-	var out []map[string]any
-	for rows.Next() {
-		var id, account, name string
-		var version int
-		var enabled bool
-		var created, updated any
-		if rows.Scan(&id, &account, &name, &version, &enabled, &created, &updated) != nil {
-			continue
-		}
-		out = append(out, map[string]any{"id": id, "account_id": account, "name": name, "version": version, "enabled": enabled, "created_at": created, "updated_at": updated})
-	}
-	writeJSON(w, 200, out)
-}
-
 func (s *Server) audit(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.DB.QueryContext(r.Context(), `SELECT id,COALESCE(account_id::text,''),actor,action,resource_type,COALESCE(resource_id,''),result,message,created_at FROM audit_events ORDER BY created_at DESC LIMIT 500`)
 	if err != nil {
