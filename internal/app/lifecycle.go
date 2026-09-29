@@ -31,15 +31,42 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 	}
 	if item.State == droplets.Expiring {
-		// Converge oversupply back to the account desired count. Expired droplets
-		// above desired capacity are excess and do not need a replacement.
+		// Converge oversupply back to desired capacity. Claim excess retirement
+		// under an account-scoped advisory lock so concurrent lifecycle workers
+		// cannot retire more resources than the current excess.
 		if item.ReplacementDeploymentID == "" {
-			var desired, managed, rank int
-			_ = c.DB.QueryRowContext(ctx, `SELECT a.desired_server_count,
+			tx, err := c.DB.BeginTx(ctx, nil)
+			if err != nil {
+				return err
+			}
+			if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "lifecycle-excess:"+item.AccountID); err != nil {
+				tx.Rollback()
+				return err
+			}
+			var desired, managed, retiring int
+			if err = tx.QueryRowContext(ctx, `SELECT a.desired_server_count,
 				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED'),
-				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state='EXPIRING' AND (d.expires_at,d.id) <= ((SELECT expires_at FROM droplets WHERE id=$2),$2::uuid))
-				FROM accounts a WHERE a.id=$1`, item.AccountID, item.ID).Scan(&desired, &managed, &rank)
-			if desired > 0 && managed > desired && rank <= managed-desired {
+				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state IN ('RETIRING','DELETING'))
+				FROM accounts a WHERE a.id=$1`, item.AccountID).Scan(&desired, &managed, &retiring); err != nil {
+				tx.Rollback()
+				return err
+			}
+			claimed := false
+			if desired > 0 && managed > desired && retiring < managed-desired {
+				res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)
+				if qerr != nil {
+					tx.Rollback()
+					return qerr
+				}
+				n, _ := res.RowsAffected()
+				claimed = n == 1
+			}
+			if err = tx.Commit(); err != nil {
+				return err
+			}
+			if claimed {
+				item.State = droplets.Retiring
+				_ = (droplets.LifecycleStore{DB: c.DB}).Event(ctx, item, droplets.Retiring)
 				goto processLifecycle
 			}
 		}
