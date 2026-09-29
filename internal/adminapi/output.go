@@ -8,6 +8,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -209,7 +210,16 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
-	panels, e := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
+	source := readyworker.SQLSource{DB: s.DB}
+	panels, e := source.EligibleReadyPanels(ctx)
+	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
+		minutes, err := strconv.Atoi(raw)
+		if err != nil || minutes < 1 || minutes > 1440 {
+			http.Error(w, "invalid expiry window", http.StatusBadRequest)
+			return
+		}
+		panels, e = source.EligibleExpiringPanels(ctx, minutes)
+	}
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
