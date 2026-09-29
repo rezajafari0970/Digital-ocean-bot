@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -39,20 +40,35 @@ func (s *Server) deleteAllCapacityClients(w http.ResponseWriter, r *http.Request
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	results := make([]cleanupResult, 0, len(panels))
+	s.OutputPauseMu.Lock()
+	defer s.OutputPauseMu.Unlock()
+	results := make([]cleanupResult, len(panels))
+	sem := make(chan struct{}, 3)
+	var wg sync.WaitGroup
+	for i, p := range panels {
+		wg.Add(1)
+		go func(i int, p readyworker.Panel) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			rr := cleanupResult{PanelID: p.ID}
+			c, cancel := context.WithTimeout(ctx, 90*time.Second)
+			rr.Deleted, e = s.clearPanelClients(c, p)
+			cancel()
+			if e != nil {
+				rr.Error = e.Error()
+			}
+			results[i] = rr
+		}(i, p)
+	}
+	wg.Wait()
 	ok, failed := 0, 0
-	for _, p := range panels {
-		rr := cleanupResult{PanelID: p.ID}
-		c, cancel := context.WithTimeout(ctx, 3*time.Minute)
-		rr.Deleted, e = s.clearPanelClients(c, p)
-		cancel()
-		if e != nil {
-			rr.Error = e.Error()
-			failed++
-		} else {
+	for _, rr := range results {
+		if rr.Error == "" {
 			ok++
+		} else {
+			failed++
 		}
-		results = append(results, rr)
 	}
 	_, _ = s.DB.ExecContext(ctx, "DELETE FROM user_capacity_snapshots")
 	writeJSON(w, 200, map[string]any{"succeeded": ok, "failed": failed, "policy_enabled": false, "results": results})

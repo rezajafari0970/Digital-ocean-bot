@@ -112,6 +112,8 @@ func (s *Server) collectPanelOutput(_ context.Context, p readyworker.Panel) stri
 }
 
 func (s *Server) WarmOutputCache(ctx context.Context) {
+	s.OutputPauseMu.RLock()
+	defer s.OutputPauseMu.RUnlock()
 	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
 	if err != nil {
 		return

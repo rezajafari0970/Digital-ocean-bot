@@ -26,6 +26,7 @@ type Server struct {
 	OutputRefreshMu  sync.Mutex
 	OutputRefreshing map[string]bool
 	OutputContext    context.Context
+	OutputPauseMu    sync.RWMutex
 }
 
 func New(db *sql.DB, c app.Container) *Server {
