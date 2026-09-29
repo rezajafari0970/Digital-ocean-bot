@@ -7,6 +7,9 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"math/rand"
+	"strings"
+
+	"github.com/lib/pq"
 	"time"
 )
 
@@ -111,7 +114,40 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 		}
 	}
 	if len(images) > 0 {
-		effective.Image = images[rand.Intn(len(images))]
+		good := make(map[string]bool, len(images))
+		bad := make(map[string]bool, len(images))
+		rows, qerr := c.DB.QueryContext(ctx, "SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200", accountID, pq.Array(images))
+		if qerr == nil {
+			for rows.Next() {
+				var image, state, lastError string
+				if rows.Scan(&image, &state, &lastError) != nil {
+					continue
+				}
+				if state == "PANEL_COMPLETE" || state == "READY" {
+					good[image] = true
+				}
+				if strings.Contains(strings.ToLower(lastError), "image you selected is no longer available") {
+					bad[image] = true
+				}
+			}
+			rows.Close()
+		}
+		proven := make([]string, 0, len(images))
+		neutral := make([]string, 0, len(images))
+		for _, image := range images {
+			if good[image] {
+				proven = append(proven, image)
+			} else if !bad[image] {
+				neutral = append(neutral, image)
+			}
+		}
+		if len(proven) > 0 {
+			effective.Image = proven[rand.Intn(len(proven))]
+		} else if len(neutral) > 0 {
+			effective.Image = neutral[rand.Intn(len(neutral))]
+		} else {
+			effective.Image = images[rand.Intn(len(images))]
+		}
 	}
 	if lifetimeMin > 0 {
 		if lifetimeMax < lifetimeMin {
