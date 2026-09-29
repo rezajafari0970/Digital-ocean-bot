@@ -286,7 +286,6 @@ WHERE account_id=$1
 		newLocale := geoctx.LocaleForCountry(preferredGeo.CountryCode)
 		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=CASE WHEN family($3::inet)=4 THEN host(network(set_masklen($3::inet,24)))||'/24' ELSE host(network(set_masklen($3::inet,48)))||'/48' END,country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.Timezone, newLocale)
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
-			c.queueBrowserAudit(ctx, accountID, "geo_changed")
 		}
 		if pgErr == nil {
 			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
@@ -336,7 +335,6 @@ WHERE account_id=$1
 	newLocale := geoctx.LocaleForCountry(geo.CountryCode)
 	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=CASE WHEN family($3::inet)=4 THEN host(network(set_masklen($3::inet,24)))||'/24' ELSE host(network(set_masklen($3::inet,48)))||'/48' END,country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$7,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.Timezone, newLocale, allowFallback)
 	if err == nil && (priorCountry != geo.Country || priorTZ != geo.Timezone || priorLocale != newLocale) {
-		c.queueBrowserAudit(ctx, accountID, "geo_changed")
 	}
 	if err != nil {
 		return err
@@ -347,8 +345,4 @@ WHERE account_id=$1
 	}
 	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, detail)
 	return nil
-}
-
-func (c Container) queueBrowserAudit(ctx context.Context, accountID, reason string) {
-	_, _ = c.DB.ExecContext(ctx, `INSERT INTO browser_audit_queue(account_id,requested_at,not_before,reason,attempts,last_error) VALUES($1,now(),now()+interval '5 seconds',$2,0,NULL) ON CONFLICT(account_id) DO UPDATE SET requested_at=now(),not_before=now()+interval '5 seconds',reason=EXCLUDED.reason,attempts=0,last_error=NULL`, accountID, reason)
 }

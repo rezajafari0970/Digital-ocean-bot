@@ -30,8 +30,6 @@ type accountWrite struct {
 	FallbackAnyRegion      *bool    `json:"fallback_any_region"`
 	Name                   string   `json:"name"`
 	Token                  string   `json:"token"`
-	LoginEmail             string   `json:"login_email"`
-	LoginPassword          string   `json:"login_password"`
 	Enabled                *bool    `json:"enabled"`
 }
 
@@ -61,10 +59,6 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(x.Images) > 3 {
 		x.Images = x.Images[:3]
-	}
-	if (x.LoginEmail == "") != (x.LoginPassword == "") {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "login_credentials_must_be_provided_together"})
-		return
 	}
 	x.Region = x.Regions[0]
 	if x.NetworkMode == "" {
@@ -134,16 +128,6 @@ RETURNING id::text`, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds,
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
 		return
-	}
-	if x.LoginEmail != "" {
-		if _, err = s.DB.ExecContext(r.Context(), `UPDATE accounts SET login_email=$2,login_password_secret_ref='do-login-password',password_rotation_status='pending',password_rotation_detail='credentials supplied',updated_at=now() WHERE id=$1`, id, x.LoginEmail); err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "login_credentials_save_failed", "detail": err.Error()})
-			return
-		}
-		if err = s.Container.Secrets.Put(r.Context(), id, "do-login-password", "digitalocean_login_password", []byte(x.LoginPassword)); err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "login_password_store_failed", "detail": err.Error()})
-			return
-		}
 	}
 	if err = s.Container.Secrets.Put(r.Context(), id, "do-token", "digitalocean_token", []byte(x.Token)); err != nil {
 		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)

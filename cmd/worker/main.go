@@ -69,20 +69,6 @@ func main() {
 			}
 		}
 	}()
-	// Browser audit queue is independent from the sticky health loop.
-	go func() {
-		t := time.NewTicker(10 * time.Second)
-		defer t.Stop()
-		application.Container.RunBrowserAuditQueue(ctx)
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				application.Container.RunBrowserAuditQueue(ctx)
-			}
-		}
-	}()
 
 	// Capacity refresh coordinator: one full provider refresh per account only
 	// when the shared snapshot is older than 90s. Runs before the 2m safety gate.

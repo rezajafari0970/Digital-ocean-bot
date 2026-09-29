@@ -8,8 +8,6 @@ import (
 type accountUpdate struct {
 	Name                   string   `json:"name"`
 	Token                  string   `json:"token"`
-	LoginEmail             string   `json:"login_email"`
-	LoginPassword          string   `json:"login_password"`
 	Regions                []string `json:"regions"`
 	Sizes                  []string `json:"sizes"`
 	Image                  string   `json:"image"`
@@ -44,10 +42,6 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
 	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit); code != "" {
 		writeJSON(w, 400, map[string]string{"error": code})
-		return
-	}
-	if (x.LoginEmail == "") != (x.LoginPassword == "") {
-		writeJSON(w, 400, map[string]string{"error": "login_credentials_must_be_provided_together"})
 		return
 	}
 	if x.LifetimeMinSeconds < 1800 {
@@ -182,17 +176,6 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	zeroBytes(previousToken)
-	if x.LoginEmail != "" {
-		if err := s.Container.Secrets.Put(r.Context(), id, "do-login-password", "digitalocean_login_password", []byte(x.LoginPassword)); err != nil {
-			writeJSON(w, 500, map[string]string{"error": "login_password_store_failed", "detail": err.Error()})
-			return
-		}
-		if _, err := s.DB.ExecContext(r.Context(), `UPDATE accounts SET login_email=$2,login_password_secret_ref='do-login-password',password_rotation_status='pending',password_rotation_detail='credentials supplied',updated_at=now() WHERE id=$1`, id, x.LoginEmail); err != nil {
-			writeJSON(w, 500, map[string]string{"error": "login_credentials_save_failed", "detail": err.Error()})
-			return
-		}
-	}
-	w.WriteHeader(204)
 }
 func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
