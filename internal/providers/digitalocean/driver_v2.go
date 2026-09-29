@@ -162,6 +162,25 @@ func (d *Driver) Inventory(ctx context.Context) (providers.Inventory, error) {
 	return providers.Inventory{Servers: servers, ObservedAt: time.Now().UTC()}, nil
 }
 
+func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
+	raw, err := d.client.Discover(ctx)
+	if err != nil {
+		return providers.Observation{}, normalizeError("observe", err)
+	}
+	now := time.Now().UTC()
+	servers := make([]providers.Server, 0, len(raw.Droplets))
+	for _, x := range raw.Droplets {
+		servers = append(servers, normalizeServer(x))
+	}
+	return providers.Observation{
+		Account:    providers.Account{ID: raw.Account.UUID, Email: raw.Account.Email, Status: raw.Account.Status},
+		Capacity:   providers.Capacity{ComputeLimit: raw.Account.DropletLimit, ComputeInUse: len(raw.Droplets), ObservedAt: now},
+		Catalog:    normalizeCatalog(raw),
+		Inventory:  providers.Inventory{Servers: servers, ObservedAt: now},
+		ObservedAt: now,
+	}, nil
+}
+
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {
 	out := providers.Catalog{Regions: make([]providers.Region, 0, len(raw.Regions)), Plans: make([]providers.Plan, 0, len(raw.Sizes)), Images: make([]providers.Image, 0, len(raw.Images))}
 	for _, r := range raw.Regions {
@@ -248,4 +267,5 @@ var _ providers.CatalogReader = (*Driver)(nil)
 var _ providers.ComputeDriver = (*Driver)(nil)
 var _ providers.SSHKeyDriver = (*Driver)(nil)
 var _ providers.InventoryReader = (*Driver)(nil)
+var _ providers.Observer = (*Driver)(nil)
 var _ providers.Factory = Factory{}

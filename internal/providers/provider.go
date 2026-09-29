@@ -45,6 +45,10 @@ type InventoryReader interface {
 	Inventory(context.Context) (Inventory, error)
 }
 
+type Observer interface {
+	Observe(context.Context) (Observation, error)
+}
+
 type CredentialSource interface {
 	Get(context.Context) ([]byte, error)
 }
