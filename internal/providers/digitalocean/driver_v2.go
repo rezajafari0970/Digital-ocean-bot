@@ -24,7 +24,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "digitalocean" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "digitalocean", DisplayName: "DigitalOcean", CredentialLabel: "API token", Defaults: providers.Defaults{Regions: []string{"fra1", "nyc1", "sfo2", "sgp1", "nyc3"}, Plans: []string{"s-1vcpu-512mb-10gb", "s-1vcpu-2gb", "s-1vcpu-1gb"}, Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "22.04", "24.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5, BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
+	return providers.Metadata{Name: "digitalocean", DisplayName: "DigitalOcean", CredentialLabel: "API token", Status: "ready", Defaults: providers.Defaults{Regions: []string{"fra1", "nyc1", "sfo2", "sgp1", "nyc3"}, Plans: []string{"s-1vcpu-512mb-10gb", "s-1vcpu-2gb", "s-1vcpu-1gb"}, Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "22.04", "24.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5, BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
 }
 func (Factory) Open(_ context.Context, req providers.OpenRequest) (providers.Driver, error) {
 	if strings.TrimSpace(req.AccountID) == "" || req.HTTPClient == nil || req.Credentials == nil {

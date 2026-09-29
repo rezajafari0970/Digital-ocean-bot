@@ -22,5 +22,6 @@ type Metadata struct {
 	Name            string   `json:"name"`
 	DisplayName     string   `json:"display_name"`
 	CredentialLabel string   `json:"credential_label"`
+	Status          string   `json:"status"`
 	Defaults        Defaults `json:"defaults"`
 }

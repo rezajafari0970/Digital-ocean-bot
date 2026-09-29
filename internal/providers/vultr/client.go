@@ -1,0 +1,80 @@
+package vultr
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+)
+
+const defaultBaseURL = "https://api.vultr.com/v2"
+
+type HTTPError struct {
+	Status  int
+	Message string
+}
+
+func (e HTTPError) Error() string { return fmt.Sprintf("vultr http %d: %s", e.Status, e.Message) }
+
+type Client struct {
+	http  *http.Client
+	token string
+	base  string
+}
+
+func NewClient(h *http.Client, token string) *Client {
+	return &Client{http: h, token: strings.TrimSpace(token), base: defaultBaseURL}
+}
+func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
+	var rd io.Reader
+	if body != nil {
+		b, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+		rd = bytes.NewReader(b)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, c.base+path, rd)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var x struct {
+			Error string `json:"error"`
+		}
+		_ = json.Unmarshal(b, &x)
+		if x.Error == "" {
+			x.Error = strings.TrimSpace(string(b))
+		}
+		return HTTPError{Status: resp.StatusCode, Message: x.Error}
+	}
+	if out != nil && len(b) > 0 {
+		return json.Unmarshal(b, out)
+	}
+	return nil
+}
+func pagePath(path string, perPage int) string {
+	u, _ := url.Parse(path)
+	q := u.Query()
+	q.Set("per_page", fmt.Sprint(perPage))
+	u.RawQuery = q.Encode()
+	return u.String()
+}
