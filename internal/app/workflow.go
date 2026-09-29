@@ -27,17 +27,19 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		return workflow.Engine{}, err
 	}
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
-	if runtime.Gateway != nil &&
-		!proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
-
-		eg := &network.EgressGuard{
-			Client: runtime.Gateway.Client,
+	var eg *network.EgressGuard
+	if runtime.Gateway != nil && !proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
+		eg = &network.EgressGuard{Client: runtime.Gateway.Client}
+	}
+	executor.EgressCheck = func(ctx context.Context) error {
+		if err := c.EnsureFreshNetworkIdentity(ctx, accountID); err != nil {
+			return err
 		}
-
-		executor.EgressCheck = func(ctx context.Context) error {
+		if eg != nil {
 			_, err := eg.Observe(ctx)
 			return err
 		}
+		return nil
 	}
 	sshClient := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	provisionStore := provisioning.SQLStore{DB: c.DB}

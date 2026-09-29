@@ -177,17 +177,19 @@ processLifecycle:
 		return err
 	}
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
-	if runtime.Gateway != nil &&
-		!proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
-
-		eg := &network.EgressGuard{
-			Client: runtime.Gateway.Client,
+	var eg *network.EgressGuard
+	if runtime.Gateway != nil && !proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
+		eg = &network.EgressGuard{Client: runtime.Gateway.Client}
+	}
+	executor.EgressCheck = func(ctx context.Context) error {
+		if err := c.EnsureFreshNetworkIdentity(ctx, item.AccountID); err != nil {
+			return err
 		}
-
-		executor.EgressCheck = func(ctx context.Context) error {
+		if eg != nil {
 			_, err := eg.Observe(ctx)
 			return err
 		}
+		return nil
 	}
 	engine := droplets.LifecycleEngine{Store: droplets.LifecycleStore{DB: c.DB}, Executor: executor}
 	return engine.Process(ctx, item)

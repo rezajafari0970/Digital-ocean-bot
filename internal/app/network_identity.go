@@ -63,17 +63,26 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 	}
 	// A stale collision is allowed to reach the resolver so rotating proxies can recover.
 	if errors.Is(err, ErrNetworkIdentityCollision) {
-		var mode, proxyID, typ, host, user, ref, status string
+		var mode, proxyID, typ, host, user, ref, status, adapter, session, cc string
+		var fallback bool
 		var port int
-		err = c.DB.QueryRowContext(ctx, `SELECT np.mode,p.id::text,p.type,p.host,p.port,COALESCE(p.username,''),COALESCE(p.secret_ref,''),p.status FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1`, accountID).Scan(&mode, &proxyID, &typ, &host, &port, &user, &ref, &status)
+		err = c.DB.QueryRowContext(ctx, `SELECT np.mode,p.id::text,p.type,p.host,p.port,COALESCE(p.username,''),COALESCE(p.secret_ref,''),p.status,COALESCE(p.adapter,'generic'),COALESCE(ani.sticky_session,''),COALESCE(ani.preferred_country_code,''),COALESCE(ani.fallback_active,false) FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id LEFT JOIN account_network_identities ani ON ani.account_id=np.account_id WHERE np.account_id=$1`, accountID).Scan(&mode, &proxyID, &typ, &host, &port, &user, &ref, &status, &adapter, &session, &cc, &fallback)
 		if err != nil {
 			return err
+		}
+		cap := proxyAdapterByName(adapter).Capabilities()
+		if cap.StickySession && session == "" {
+			return ErrIsolationWait
+		}
+		if cap.StickySession {
+			user = proxySessionUsername(adapter, user, cc, session, cap.CountryTargeting && !fallback && cc != "")
 		}
 		pid := proxyID
 		cfg.ID = accountID
 		cfg.Network = network.Profile{AccountID: accountID, Mode: network.RouteMode(mode), ProxyID: &pid}
 		cfg.Proxy = &network.Proxy{ID: proxyID, Type: network.ProxyType(typ), Host: host, Port: port, Status: network.ProxyStatus(status)}
 		cfg.ProxyUsername = user
+		cfg.ProxyAdapter = adapter
 		cfg.ProxySecretRef = ref
 	}
 	if cfg.Network.Mode != network.RouteProxyRequired {
