@@ -309,7 +309,23 @@ func main() {
 	}()
 	failures := worker.FailureStore{DB: application.DB}
 	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100}
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Lifecycle: lw, Failures: failures, Interval: 10 * time.Second, Batch: 100}
+	// Lifecycle runs independently from provider/deployment recovery so slow or
+	// unknown provider operations cannot starve expiry and deletion processing.
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			if err := lw.Once(ctx); err != nil && ctx.Err() == nil {
+				log.Printf("lifecycle worker: %v", err)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Failures: failures, Interval: 10 * time.Second, Batch: 100}
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
