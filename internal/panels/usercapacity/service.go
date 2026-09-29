@@ -168,6 +168,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 	}
 	now := time.Now().UnixMilli()
 	mutated := false
+	_, addUnsupported := addClientUnsupportedPanels.Load(p.ID)
 	for _, raw := range raws {
 		var in rawInbound
 		if json.Unmarshal(raw, &in) != nil || !in.Enable || in.Protocol != "vless" || !wanted[in.Port] {
@@ -239,7 +240,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				kept = append(kept, c)
 			}
 		}
-		if deleted > 0 && deleted <= 32 {
+		if !addUnsupported && deleted > 0 && deleted <= 32 {
 			for _, clientID := range deleteIDs {
 				if e = sanaei.DeleteClientSession(ctx, runtime.Session.Exec, in.ID, clientID); e != nil {
 					return fmt.Errorf("inbound %d delete client %s: %w", in.ID, clientID, e)
@@ -251,7 +252,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				}
 			}
 			mutated = true
-		} else if deleted == 0 && len(newClients) > 0 {
+		} else if !addUnsupported && deleted == 0 && len(newClients) > 0 {
 			if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
 				return fmt.Errorf("inbound %d add clients: %w", in.ID, e)
 			}
