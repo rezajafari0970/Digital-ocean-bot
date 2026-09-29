@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -70,7 +71,8 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		runtime, err = (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 5 * time.Second}).Open(ctx, p.ID)
 	}
 	if err != nil {
-		return s.cachedPanelOutput(p.ID, 2*time.Minute)
+		log.Printf("output refresh panel=%s acquire_error=%v", p.ID, err)
+		return s.cachedPanelOutput(p.ID, 24*time.Hour)
 	}
 	out := s.collectRuntimeOutput(ctx, p, runtime)
 	if out != "" {
@@ -78,7 +80,10 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		s.persistOutputSnapshot(ctx, p.ID, out)
 		return out
 	}
-	return s.cachedPanelOutput(p.ID, 2*time.Minute)
+	if out == "" {
+		log.Printf("output refresh panel=%s empty_output", p.ID)
+	}
+	return s.cachedPanelOutput(p.ID, 24*time.Hour)
 }
 
 func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
@@ -105,7 +110,7 @@ func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
 }
 
 func (s *Server) collectPanelOutput(_ context.Context, p readyworker.Panel) string {
-	cached := s.cachedPanelOutput(p.ID, 2*time.Minute)
+	cached := s.cachedPanelOutput(p.ID, 24*time.Hour)
 	s.refreshPanelOutputAsync(p)
 	return cached
 }
