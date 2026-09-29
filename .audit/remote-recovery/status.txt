@@ -1,0 +1,5 @@
+time=2026-09-29T22:39:25Z
+head=3da60ea3de07d7c10bfa8ed74780ccfe0e121091
+branch=checkpoint/final-e2e-20260929
+api=active
+worker=active
