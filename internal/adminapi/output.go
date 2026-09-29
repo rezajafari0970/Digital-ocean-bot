@@ -156,13 +156,24 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		return ""
 	}
 	var out strings.Builder
+	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {
 		var in outputInbound
-		if json.Unmarshal(raw, &in) != nil || !in.Enable || in.Protocol != "vless" {
+		if json.Unmarshal(raw, &in) != nil {
+			invalidJSON++
+			continue
+		}
+		if !in.Enable {
+			disabled++
+			continue
+		}
+		if in.Protocol != "vless" {
+			nonVLESS++
 			continue
 		}
 		publicKey := keys[in.ID]
 		if publicKey == "" {
+			missingKey++
 			continue
 		}
 		settings, e := outputMap(in.Settings)
@@ -171,10 +182,12 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 		clients, _ := settings["clients"].([]any)
 		if len(clients) == 0 {
+			noClients++
 			continue
 		}
 		stream, e := outputMap(in.StreamSettings)
 		if e != nil || fmt.Sprint(stream["network"]) != "tcp" || fmt.Sprint(stream["security"]) != "reality" {
+			notReality++
 			continue
 		}
 		rb, _ := json.Marshal(stream["realitySettings"])
@@ -187,7 +200,12 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		_ = json.Unmarshal(b, &names)
 		b, _ = json.Marshal(reality["shortIds"])
 		_ = json.Unmarshal(b, &shorts)
-		if len(names) == 0 || len(shorts) == 0 {
+		if len(names) == 0 {
+			noNames++
+			continue
+		}
+		if len(shorts) == 0 {
+			noShorts++
 			continue
 		}
 		for _, v := range clients {
@@ -208,9 +226,13 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			if e == nil {
 				out.WriteString(link)
 				out.WriteByte('\n')
+				generated++
+			} else {
+				exportErrors++
 			}
 		}
 	}
+	log.Printf("output collect panel=%s host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", p.ID, host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
 	return out.String()
 }
 
