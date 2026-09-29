@@ -74,10 +74,10 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			providerState := "active"
-			canCreate := obs.Account.Status == "active" && obs.Capacity.ComputeLimit > obs.Capacity.ComputeInUse
+			canCreate := obs.Account.Status == "active" && providers.CanCreateCapacity(obs.Capacity)
 			if obs.Account.Status != "active" {
 				providerState = "disabled"
-			} else if obs.Capacity.ComputeLimit <= obs.Capacity.ComputeInUse {
+			} else if !providers.CanCreateCapacity(obs.Capacity) {
 				providerState = "cannot_create"
 			}
 			canonical, _ := json.Marshal(obs)

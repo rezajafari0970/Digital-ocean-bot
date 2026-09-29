@@ -21,6 +21,7 @@ type Account struct {
 
 type Capacity struct {
 	ComputeLimit int
+	LimitKnown   bool
 	ComputeInUse int
 	ObservedAt   time.Time
 }

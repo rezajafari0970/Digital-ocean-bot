@@ -68,7 +68,7 @@ func (d *Driver) Capacity(ctx context.Context) (providers.Capacity, error) {
 	if err != nil {
 		return providers.Capacity{}, normalizeError("capacity", err)
 	}
-	return providers.Capacity{ComputeLimit: a.DropletLimit, ComputeInUse: len(ds), ObservedAt: time.Now().UTC()}, nil
+	return providers.Capacity{ComputeLimit: a.DropletLimit, LimitKnown: true, ComputeInUse: len(ds), ObservedAt: time.Now().UTC()}, nil
 }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	raw, err := d.client.Catalog(ctx)
@@ -183,7 +183,7 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 	for _, x := range droplets {
 		servers = append(servers, normalizeServer(x))
 	}
-	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
+	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
 }
 
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {

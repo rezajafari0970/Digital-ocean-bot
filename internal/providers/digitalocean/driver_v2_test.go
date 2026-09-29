@@ -84,3 +84,22 @@ func TestFactoryMetadataPolicy(t *testing.T) {
 		t.Fatalf("defaults=%+v", d)
 	}
 }
+
+func TestDigitalOceanCapacityLimitIsKnown(t *testing.T) {
+	c := fixtureClient(t, func(r *http.Request) (int, string) {
+		switch r.URL.Path {
+		case "/v2/account":
+			return 200, `{"account":{"uuid":"u","status":"active","droplet_limit":10}}`
+		case "/v2/droplets":
+			return 200, `{"droplets":[]}`
+		default:
+			t.Fatalf("unexpected %s", r.URL.Path)
+			return 500, ""
+		}
+	})
+	d, _ := NewDriver(c)
+	x, err := d.Capacity(context.Background())
+	if err != nil || !x.LimitKnown || x.ComputeLimit != 10 {
+		t.Fatalf("capacity=%+v err=%v", x, err)
+	}
+}

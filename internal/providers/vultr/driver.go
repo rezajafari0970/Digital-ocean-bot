@@ -34,7 +34,7 @@ type Driver struct{ client *Client }
 
 func (d *Driver) Name() string { return "vultr" }
 func (d *Driver) Capabilities() providers.Capabilities {
-	return providers.Capabilities{}
+	return providers.Capabilities{Account: true, Catalog: true, Inventory: true}
 }
 func (d *Driver) Health(ctx context.Context) error {
 	var x accountResponse

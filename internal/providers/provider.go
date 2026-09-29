@@ -64,3 +64,5 @@ type Factory interface {
 	Metadata() Metadata
 	Open(context.Context, OpenRequest) (Driver, error)
 }
+
+func CanCreateCapacity(c Capacity) bool { return !c.LimitKnown || c.ComputeLimit > c.ComputeInUse }
