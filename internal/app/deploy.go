@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"math/rand"
@@ -89,55 +90,57 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if len(sizes) > 0 {
 		effective.Size = sizes[rand.Intn(len(sizes))]
 	}
+	var catalog providers.Catalog
+	var catalogRaw []byte
+	if err := c.DB.QueryRowContext(ctx, `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&catalogRaw); err == nil {
+		var obs providers.Observation
+		if json.Unmarshal(catalogRaw, &obs) == nil {
+			catalog = obs.Catalog
+		}
+	}
 	if fallbackAnyRegion {
-		var catalogRaw []byte
-		if err := c.DB.QueryRowContext(ctx, `SELECT data FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&catalogRaw); err == nil {
-			var catalog struct {
-				Regions []struct {
-					Slug      string `json:"slug"`
-					Available bool   `json:"available"`
-				} `json:"Regions"`
-				Sizes []struct {
-					Slug      string   `json:"slug"`
-					Available bool     `json:"available"`
-					Regions   []string `json:"regions"`
-				} `json:"Sizes"`
+		allowed := map[string]bool{}
+		for _, plan := range catalog.Plans {
+			if plan.ID == effective.Size && plan.Available {
+				for _, rg := range plan.AvailableRegions {
+					allowed[rg] = true
+				}
+				break
 			}
-			if json.Unmarshal(catalogRaw, &catalog) == nil {
-				allowed := map[string]bool{}
-				for _, sz := range catalog.Sizes {
-					if sz.Slug == effective.Size && sz.Available {
-						for _, rg := range sz.Regions {
-							allowed[rg] = true
-						}
-						break
-					}
-				}
-				// Keep only selected regions where the randomly selected plan is offered.
-				compatible := effective.Regions[:0]
-				for _, rg := range effective.Regions {
-					if allowed[rg] {
-						compatible = append(compatible, rg)
-					}
-				}
-				effective.Regions = compatible
-				if len(effective.Regions) > 0 {
-					effective.Region = effective.Regions[0]
-				}
-				seen := map[string]bool{}
-				for _, rg := range effective.Regions {
-					seen[rg] = true
-				}
-				for _, rg := range catalog.Regions {
-					if rg.Available && allowed[rg.Slug] && !seen[rg.Slug] {
-						effective.Regions = append(effective.Regions, rg.Slug)
-						seen[rg.Slug] = true
-					}
-				}
+		}
+		compatible := make([]string, 0, len(effective.Regions))
+		seen := map[string]bool{}
+		for _, rg := range effective.Regions {
+			if allowed[rg] {
+				compatible = append(compatible, rg)
+				seen[rg] = true
 			}
+		}
+		for _, rg := range catalog.Regions {
+			if rg.Available && allowed[rg.ID] && !seen[rg.ID] {
+				compatible = append(compatible, rg.ID)
+				seen[rg.ID] = true
+			}
+		}
+		effective.Regions = compatible
+		if len(compatible) > 0 {
+			effective.Region = compatible[0]
 		}
 	}
 	if len(images) > 0 {
+		available := map[string]bool{}
+		for _, im := range catalog.Images {
+			if im.Available && im.Family == "ubuntu" && (im.Version == "22.04" || im.Version == "24.04" || im.Version == "26.04") {
+				available[im.ID] = true
+			}
+		}
+		filtered := make([]string, 0, len(images))
+		for _, im := range images {
+			if available[im] {
+				filtered = append(filtered, im)
+			}
+		}
+		images = filtered
 		good := make(map[string]bool, len(images))
 		bad := make(map[string]bool, len(images))
 		rows, qerr := c.DB.QueryContext(ctx, "SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200", accountID, pq.Array(images))
@@ -170,7 +173,7 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 		} else if len(neutral) > 0 {
 			effective.Image = neutral[rand.Intn(len(neutral))]
 		} else {
-			effective.Image = images[rand.Intn(len(images))]
+			return d, &providers.Error{Class: providers.ErrorImageUnavailable, Operation: "select_image", Message: "all configured available images are quarantined"}
 		}
 	}
 	if lifetimeMin > 0 {
