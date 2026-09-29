@@ -27,10 +27,12 @@ type Server struct {
 	OutputRefreshing map[string]bool
 	OutputContext    context.Context
 	OutputPauseMu    sync.RWMutex
+	CleanupMu        sync.RWMutex
+	CleanupJobs      map[string]*cleanupJob
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputCache: map[string]outputCacheEntry{}, OutputRefreshing: map[string]bool{}, OutputContext: context.Background()}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputCache: map[string]outputCacheEntry{}, OutputRefreshing: map[string]bool{}, OutputContext: context.Background(), CleanupJobs: map[string]*cleanupJob{}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
@@ -69,6 +71,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/configs", s.require(s.getGlobalConfigs, false))
 	m.HandleFunc("GET /api/v1/config-capacity", s.require(s.configCapacity, false))
 	m.HandleFunc("POST /api/v1/config-capacity/delete-all-clients", s.require(s.deleteAllCapacityClients, true))
+	m.HandleFunc("GET /api/v1/config-capacity/cleanup/{id}", s.require(s.cleanupJobStatus, false))
 	m.HandleFunc("GET /api/v1/output", s.require(s.outputConfigs, false))
 	m.HandleFunc("POST /api/v1/output/share", s.require(s.createOutputShare, true))
 	m.HandleFunc("GET /share/output/{token}", s.sharedOutput)

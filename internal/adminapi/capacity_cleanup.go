@@ -23,6 +23,18 @@ type cleanupInbound struct {
 	Total                              int64  `json:"total"`
 	Settings, StreamSettings, Sniffing json.RawMessage
 }
+type cleanupJob struct {
+	ID         string          `json:"id"`
+	Status     string          `json:"status"`
+	Total      int             `json:"total"`
+	Completed  int             `json:"completed"`
+	Succeeded  int             `json:"succeeded"`
+	Failed     int             `json:"failed"`
+	Results    []cleanupResult `json:"results"`
+	StartedAt  time.Time       `json:"started_at"`
+	FinishedAt *time.Time      `json:"finished_at,omitempty"`
+}
+
 type cleanupResult struct {
 	PanelID string `json:"panel_id"`
 	Deleted int    `json:"deleted"`
@@ -31,49 +43,127 @@ type cleanupResult struct {
 
 func (s *Server) deleteAllCapacityClients(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	_, e := s.DB.ExecContext(ctx, "UPDATE global_config_policies SET enabled=false,updated_at=now() WHERE policy_key='reality'")
-	if e != nil {
+
+	if _, err := s.DB.ExecContext(
+		ctx,
+		"UPDATE global_config_policies SET enabled=false,updated_at=now() WHERE policy_key='reality'",
+	); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	panels, e := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
-	if e != nil {
+
+	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
+	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+
+	id := fmt.Sprintf("%d", time.Now().UnixNano())
+
+	job := &cleanupJob{
+		ID:        id,
+		Status:    "queued",
+		Total:     len(panels),
+		Results:   make([]cleanupResult, len(panels)),
+		StartedAt: time.Now(),
+	}
+
+	s.CleanupMu.Lock()
+	s.CleanupJobs[id] = job
+	s.CleanupMu.Unlock()
+
+	go s.runCleanupJob(id, panels)
+
+	writeJSON(w, http.StatusAccepted, map[string]any{
+		"job_id": id,
+		"status": "queued",
+		"total":  len(panels),
+	})
+}
+
+func (s *Server) cleanupJobStatus(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	s.CleanupMu.RLock()
+	job, ok := s.CleanupJobs[id]
+
+	if !ok {
+		s.CleanupMu.RUnlock()
+		writeJSON(w, 404, map[string]any{"error": "not_found"})
+		return
+	}
+
+	raw, _ := json.Marshal(job)
+	s.CleanupMu.RUnlock()
+
+	var result any
+	_ = json.Unmarshal(raw, &result)
+
+	writeJSON(w, 200, result)
+}
+
+func (s *Server) runCleanupJob(id string, panels []readyworker.Panel) {
+	ctx := context.Background()
+
 	s.OutputPauseMu.Lock()
 	defer s.OutputPauseMu.Unlock()
-	results := make([]cleanupResult, len(panels))
+
+	s.CleanupMu.Lock()
+	s.CleanupJobs[id].Status = "running"
+	s.CleanupMu.Unlock()
+
 	sem := make(chan struct{}, 3)
 	var wg sync.WaitGroup
-	for i, p := range panels {
+
+	for i, panel := range panels {
 		wg.Add(1)
-		go func(i int, p readyworker.Panel) {
+
+		go func(i int, panel readyworker.Panel) {
 			defer wg.Done()
+
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			rr := cleanupResult{PanelID: p.ID}
-			c, cancel := context.WithTimeout(ctx, 90*time.Second)
-			rr.Deleted, e = s.clearPanelClients(c, p)
+
+			result := cleanupResult{PanelID: panel.ID}
+
+			panelCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+			var err error
+			result.Deleted, err = s.clearPanelClients(panelCtx, panel)
 			cancel()
-			if e != nil {
-				rr.Error = e.Error()
+
+			if err != nil {
+				result.Error = err.Error()
 			}
-			results[i] = rr
-		}(i, p)
+
+			s.CleanupMu.Lock()
+
+			job := s.CleanupJobs[id]
+			job.Results[i] = result
+			job.Completed++
+
+			if result.Error == "" {
+				job.Succeeded++
+			} else {
+				job.Failed++
+			}
+
+			s.CleanupMu.Unlock()
+		}(i, panel)
 	}
+
 	wg.Wait()
-	ok, failed := 0, 0
-	for _, rr := range results {
-		if rr.Error == "" {
-			ok++
-		} else {
-			failed++
-		}
-	}
+
 	_, _ = s.DB.ExecContext(ctx, "DELETE FROM user_capacity_snapshots")
-	writeJSON(w, 200, map[string]any{"succeeded": ok, "failed": failed, "policy_enabled": false, "results": results})
+
+	now := time.Now()
+
+	s.CleanupMu.Lock()
+	job := s.CleanupJobs[id]
+	job.Status = "done"
+	job.FinishedAt = &now
+	s.CleanupMu.Unlock()
 }
+
 func (s *Server) clearPanelClientsFast(ctx context.Context, p readyworker.Panel) (bool, error) {
 	rows, err := s.DB.QueryContext(ctx, `SELECT remote_id,payload FROM inbound_structural_snapshots WHERE panel_id=$1 AND port = ANY($2) ORDER BY remote_id`, p.ID, pq.Array([]int{443, 7231, 1212}))
 	if err != nil {
