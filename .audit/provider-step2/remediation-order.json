@@ -1,0 +1,160 @@
+[
+  {
+    "order": 1,
+    "id": "P0-identity",
+    "class": "BLOCKER",
+    "goal": "Give Vultr a stable canonical Account.ID/external_id",
+    "depends": [],
+    "files": [
+      "internal/providers/vultr/read_driver.go",
+      "internal/providers/vultr/read.go",
+      "internal/adminapi/account_preview.go",
+      "internal/adminapi/accounts_write.go"
+    ]
+  },
+  {
+    "order": 2,
+    "id": "P0-validation",
+    "class": "BLOCKER",
+    "goal": "Make image/options validation provider-catalog driven",
+    "depends": [
+      "P0-identity"
+    ],
+    "files": [
+      "internal/adminapi/account_validation.go",
+      "internal/adminapi/account_options.go",
+      "internal/adminapi/accounts_write.go"
+    ]
+  },
+  {
+    "order": 3,
+    "id": "P0-capacity",
+    "class": "BLOCKER",
+    "goal": "Honor LimitKnown=false across admission and lifecycle",
+    "depends": [
+      "P0-identity"
+    ],
+    "files": [
+      "internal/app/deploy.go",
+      "internal/app/lifecycle.go",
+      "internal/capacity/service.go"
+    ]
+  },
+  {
+    "order": 4,
+    "id": "P0-resource-provider",
+    "class": "BLOCKER",
+    "goal": "Mirror resources using owning account provider, not digitalocean literal",
+    "depends": [],
+    "files": [
+      "internal/app/consistency.go"
+    ]
+  },
+  {
+    "order": 5,
+    "id": "P0-ui-canonical",
+    "class": "BLOCKER",
+    "goal": "Make wizard provider metadata/canonical ID driven and allow Vultr when promoted",
+    "depends": [
+      "P0-identity",
+      "P0-validation"
+    ],
+    "files": [
+      "web/static/app.js",
+      "internal/adminapi/providers.go"
+    ]
+  },
+  {
+    "order": 6,
+    "id": "P1-pagination",
+    "class": "HARDENING",
+    "goal": "Implement Vultr pagination for instances/catalog collections",
+    "depends": [],
+    "files": [
+      "internal/providers/vultr/client.go",
+      "internal/providers/vultr/read.go"
+    ]
+  },
+  {
+    "order": 7,
+    "id": "P1-secret-lifetime",
+    "class": "HARDENING",
+    "goal": "Align Vultr credential retrieval/wipe/rotation with DO",
+    "depends": [],
+    "files": [
+      "internal/providers/vultr/driver.go",
+      "internal/providers/vultr/client.go"
+    ]
+  },
+  {
+    "order": 8,
+    "id": "P1-errors",
+    "class": "HARDENING",
+    "goal": "Expand Vultr canonical error taxonomy and provider-neutral UI messages",
+    "depends": [],
+    "files": [
+      "internal/providers/vultr/driver.go",
+      "web/static/app.js",
+      "internal/adminapi/resources.go"
+    ]
+  },
+  {
+    "order": 9,
+    "id": "P1-observation",
+    "class": "HARDENING",
+    "goal": "Re-certify Observe/snapshot after identity/capacity/pagination changes",
+    "depends": [
+      "P0-identity",
+      "P0-capacity",
+      "P1-pagination"
+    ],
+    "files": [
+      "internal/providers/vultr/read_driver.go",
+      "internal/app/provider_refresh.go"
+    ]
+  },
+  {
+    "order": 10,
+    "id": "P2-contract-tests",
+    "class": "CERTIFICATION",
+    "goal": "Bring Vultr contract/regression coverage to DO-equivalent behaviors",
+    "depends": [
+      "P0-validation",
+      "P0-capacity",
+      "P0-resource-provider",
+      "P1-pagination",
+      "P1-secret-lifetime",
+      "P1-errors"
+    ],
+    "files": [
+      "internal/providers/vultr/*_test.go",
+      "internal/app/*_test.go",
+      "internal/adminapi/*_test.go"
+    ]
+  },
+  {
+    "order": 11,
+    "id": "P2-promote",
+    "class": "CERTIFICATION",
+    "goal": "Promote metadata development -> ready only after all offline certification passes",
+    "depends": [
+      "P2-contract-tests",
+      "P1-observation"
+    ],
+    "files": [
+      "internal/providers/vultr/driver.go"
+    ]
+  },
+  {
+    "order": 12,
+    "id": "P3-live-cert",
+    "class": "LIVE",
+    "goal": "Run real Vultr account create/adopt/get/delete/SSH/provision/panel/output E2E",
+    "depends": [
+      "P2-promote"
+    ],
+    "files": [
+      "internal/testharness/provider_live_cert_test.go"
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "parity-matrix.json",
+    "bytes": 8927,
+    "lines": 326,
+    "sha256": "6759650e4716ce4971f8fffca0706e1a63f4262cd841a98d187ace49d248eb3d"
+  },
+  {
+    "file": "PARITY_MATRIX.md",
+    "bytes": 2472,
+    "lines": 42,
+    "sha256": "f90b32278708d926cf7856d344cfea56c4c48d7c8834534f1d663f80c61f135b"
+  },
+  {
+    "file": "remediation-order.json",
+    "bytes": 3904,
+    "lines": 160,
+    "sha256": "65c268d20962314d08dca2632fa8edc0be6d5d465361f1fe28cce463bfcc1b29"
+  },
+  {
+    "file": "REMEDIATION_ORDER.md",
+    "bytes": 1686,
+    "lines": 14,
+    "sha256": "7d99f93b1effb9e21c441289891a7023c74523869ffe2fb4ca784d17802e56f2"
+  }
+]

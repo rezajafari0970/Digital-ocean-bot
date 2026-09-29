@@ -1,0 +1,326 @@
+[
+  {
+    "id": 1,
+    "area": "registration",
+    "criterion": "Provider registered in bootstrap",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "internal/app/bootstrap.go",
+    "gap": "none"
+  },
+  {
+    "id": 2,
+    "area": "metadata",
+    "criterion": "Selectable production metadata",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "internal/providers/*/driver*.go; web/static/app.js",
+    "gap": "Vultr status=development; UI only status=ready"
+  },
+  {
+    "id": 3,
+    "area": "credential_transport",
+    "criterion": "Account-scoped provider HTTP path",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "internal/app/proxy_provider.go; internal/providers/*",
+    "gap": "shared core proxy isolation"
+  },
+  {
+    "id": 4,
+    "area": "secret_lifetime",
+    "criterion": "Credential read/wipe/rotation semantics",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "digitalocean/client.go; vultr/driver.go",
+    "gap": "Vultr materializes token string in Client"
+  },
+  {
+    "id": 5,
+    "area": "health",
+    "criterion": "Credential/API health check",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* client/driver",
+    "gap": "contract tests exist"
+  },
+  {
+    "id": 6,
+    "area": "account_identity",
+    "criterion": "Stable provider account external ID",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "digitalocean/driver_v2.go; vultr/read_driver.go; adminapi/accounts_write.go",
+    "gap": "Vultr Account.ID empty; create requires external_id"
+  },
+  {
+    "id": 7,
+    "area": "capacity",
+    "criterion": "Capacity observation",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "providers/*/driver; capacity/service.go",
+    "gap": "Vultr LimitKnown=false"
+  },
+  {
+    "id": 8,
+    "area": "capacity_admission",
+    "criterion": "Unknown capacity accepted end-to-end",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "app/deploy.go; app/lifecycle.go; capacity/service.go",
+    "gap": "legacy guards reject unknown limit"
+  },
+  {
+    "id": 9,
+    "area": "catalog_regions",
+    "criterion": "Canonical regions",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* catalog/read_driver",
+    "gap": "implemented"
+  },
+  {
+    "id": 10,
+    "area": "catalog_plans",
+    "criterion": "Canonical plans/availability",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* catalog/read_driver",
+    "gap": "implemented"
+  },
+  {
+    "id": 11,
+    "area": "catalog_images",
+    "criterion": "Ubuntu image normalization",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* catalog/read_driver",
+    "gap": "implemented"
+  },
+  {
+    "id": 12,
+    "area": "image_validation",
+    "criterion": "Provider-neutral image acceptance",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "adminapi/account_validation.go",
+    "gap": "hard-coded DO Ubuntu slugs reject Vultr numeric OS IDs"
+  },
+  {
+    "id": 13,
+    "area": "option_fallback",
+    "criterion": "Provider-neutral account option fallback",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "adminapi/account_options.go",
+    "gap": "hard-coded DO images"
+  },
+  {
+    "id": 14,
+    "area": "pagination",
+    "criterion": "Complete provider collection traversal",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "digitalocean/pagination.go; vultr/read.go",
+    "gap": "Vultr per_page=500 without traversal"
+  },
+  {
+    "id": 15,
+    "area": "create_server",
+    "criterion": "Create canonical server",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* mutation driver",
+    "gap": "implemented + contract tests"
+  },
+  {
+    "id": 16,
+    "area": "ambiguous_create",
+    "criterion": "Unknown create outcome safety",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "droplets/executor.go; reconciler; provider driver",
+    "gap": "identity adoption shared; Vultr mutation test covers ambiguity"
+  },
+  {
+    "id": 17,
+    "area": "identity_recovery",
+    "criterion": "Find server by operation identity",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/* FindServerByIdentity",
+    "gap": "implemented"
+  },
+  {
+    "id": 18,
+    "area": "get_server",
+    "criterion": "Read one server",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/*",
+    "gap": "implemented"
+  },
+  {
+    "id": 19,
+    "area": "list_servers",
+    "criterion": "Inventory servers",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "providers/*",
+    "gap": "Vultr pagination limitation"
+  },
+  {
+    "id": 20,
+    "area": "delete_server",
+    "criterion": "Idempotent delete semantics",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/*; droplets/executor.go",
+    "gap": "Vultr 404 idempotence tested"
+  },
+  {
+    "id": 21,
+    "area": "ssh_key_create",
+    "criterion": "Create SSH key",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/*",
+    "gap": "implemented"
+  },
+  {
+    "id": 22,
+    "area": "ssh_key_delete",
+    "criterion": "Delete SSH key",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "providers/*",
+    "gap": "implemented"
+  },
+  {
+    "id": 23,
+    "area": "error_taxonomy",
+    "criterion": "Canonical provider errors",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "providers/* errors",
+    "gap": "Vultr taxonomy smaller; no explicit account-locked/capacity/image-unavailable mapping"
+  },
+  {
+    "id": 24,
+    "area": "observe",
+    "criterion": "Atomic canonical observation",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "providers/* Observe",
+    "gap": "Vultr identity/capacity/pagination gaps propagate"
+  },
+  {
+    "id": 25,
+    "area": "snapshot",
+    "criterion": "Canonical provider snapshot persistence",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "app/provider_refresh.go",
+    "gap": "shared"
+  },
+  {
+    "id": 26,
+    "area": "resource_mirror",
+    "criterion": "Correct provider in resources registry",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "app/consistency.go",
+    "gap": "provider hard-coded digitalocean"
+  },
+  {
+    "id": 27,
+    "area": "operation_ledger",
+    "criterion": "Mutation operation safety",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "jobs; droplets/executor.go",
+    "gap": "provider-neutral despite legacy names"
+  },
+  {
+    "id": 28,
+    "area": "scheduler",
+    "criterion": "Scheduled create path",
+    "digitalocean": "READY",
+    "vultr": "PARTIAL",
+    "evidence": "scheduler/engine.go; app/deploy.go",
+    "gap": "shared scheduler supports unknown; StartDeployment guard blocks Vultr"
+  },
+  {
+    "id": 29,
+    "area": "lifecycle_rotation",
+    "criterion": "Replacement before expiry",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "app/lifecycle.go",
+    "gap": "unknown capacity treated as blocked"
+  },
+  {
+    "id": 30,
+    "area": "provisioning",
+    "criterion": "SSH/readiness/install pipeline",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "workflow; provisioning",
+    "gap": "provider-neutral after server IP"
+  },
+  {
+    "id": 31,
+    "area": "panel_registration",
+    "criterion": "Sanaei panel pipeline",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "panels/*",
+    "gap": "depends on internal droplet_id not provider name"
+  },
+  {
+    "id": 32,
+    "area": "output",
+    "criterion": "Config/output pipeline",
+    "digitalocean": "READY",
+    "vultr": "READY",
+    "evidence": "adminapi/output*.go; panels",
+    "gap": "provider-neutral downstream"
+  },
+  {
+    "id": 33,
+    "area": "ui_provider_select",
+    "criterion": "Provider appears in account wizard",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "web/static/app.js",
+    "gap": "filters status=ready"
+  },
+  {
+    "id": 34,
+    "area": "ui_region",
+    "criterion": "Canonical region default",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "web/static/app.js",
+    "gap": "fallback uses regs[0].slug instead of ID"
+  },
+  {
+    "id": 35,
+    "area": "ui_errors",
+    "criterion": "Provider-neutral error UX",
+    "digitalocean": "PARTIAL",
+    "vultr": "PARTIAL",
+    "evidence": "web/static/app.js; adminapi/resources.go",
+    "gap": "DO-specific error names/text remain"
+  },
+  {
+    "id": 36,
+    "area": "live_certification",
+    "criterion": "Real provider E2E certification",
+    "digitalocean": "READY",
+    "vultr": "BLOCKED",
+    "evidence": "testharness/provider_live_cert_test.go",
+    "gap": "DO certified/runtime evidence; no Vultr account/credential yet"
+  }
+]
