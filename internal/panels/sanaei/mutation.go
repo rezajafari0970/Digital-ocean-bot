@@ -58,6 +58,8 @@ func AddInbound(
 				Path: "panel/api/inbounds/add",
 
 				Body: body,
+
+				ContentType: "application/json",
 			},
 		)
 
@@ -133,9 +135,10 @@ func UpdateInbound(
 		return nil, err
 	}
 	response, err := exec.Do(ctx, SessionRequest{
-		Method: http.MethodPost,
-		Path:   fmt.Sprintf("panel/api/inbounds/update/%d", remoteID),
-		Body:   body,
+		Method:      http.MethodPost,
+		Path:        fmt.Sprintf("panel/api/inbounds/update/%d", remoteID),
+		Body:        body,
+		ContentType: "application/json",
 	})
 	if err != nil {
 		return nil, err
@@ -200,6 +203,8 @@ func UpdateInboundRaw(
 				Body: body,
 
 				ContentType: "application/json",
+
+				TimeoutSeconds: 45,
 			},
 		)
 

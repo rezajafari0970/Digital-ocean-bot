@@ -7,7 +7,7 @@ import (
 )
 
 func ReadRawInboundList(ctx context.Context, exec SessionExecutor) ([]json.RawMessage, error) {
-	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "panel/api/inbounds/list", TimeoutSeconds: 8})
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "panel/api/inbounds/list", TimeoutSeconds: 16})
 	if err != nil {
 		return nil, err
 	}

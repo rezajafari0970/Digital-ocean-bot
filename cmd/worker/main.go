@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
@@ -119,24 +120,58 @@ func main() {
 		}
 	}()
 
+	// Shared fast Sanaei runtime cache for high-frequency panel work.
+	sanaeiRuntimes := &sanaei.RuntimeManager{
+		Factory: sanaei.RuntimeFactory{DB: application.DB, Secrets: application.Container.Secrets, Timeout: 8 * time.Second},
+		TTL:     5 * time.Second,
+	}
+	go func() {
+		t := time.NewTicker(5 * time.Second)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				sanaeiRuntimes.PurgeExpired()
+			}
+		}
+	}()
+
 	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
 	go func() {
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
 		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
-		reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh}
+		reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, Runtimes: sanaeiRuntimes}
 		run := func() {
 			panels, err := source.EligibleReadyPanels(ctx)
 			if err != nil {
 				log.Printf("global reality discovery: %v", err)
 				return
 			}
+			sem := make(chan struct{}, 8)
+			var wg sync.WaitGroup
 			for _, panel := range panels {
-				if err := reconciler.ReconcilePanel(ctx, panel, false); err != nil {
-					log.Printf("global reality panel %s: %v", panel.ID, err)
-				}
+				panel := panel
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					select {
+					case sem <- struct{}{}:
+						defer func() { <-sem }()
+					case <-ctx.Done():
+						return
+					}
+					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+					defer cancel()
+					if err := reconciler.ReconcilePanel(cctx, panel, false); err != nil && cctx.Err() == nil {
+						log.Printf("global reality panel %s: %v", panel.ID, err)
+					}
+				}()
 			}
+			wg.Wait()
 		}
 		run()
 		for {
@@ -151,7 +186,7 @@ func main() {
 
 	// User capacity: keep every configured Reality inbound at its global active-user target.
 	go func() {
-		t := time.NewTicker(time.Second)
+		t := time.NewTicker(2 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
@@ -174,9 +209,22 @@ func main() {
 					case <-ctx.Done():
 						return
 					}
-					cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+					cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 					defer cancel()
-					if err := capacity.ReconcilePanel(cctx, panel); err != nil && cctx.Err() == nil {
+					needs, err := capacity.NeedsReconcile(cctx, panel.ID, []int{443, 7231, 1212}, 45*time.Second)
+					if err != nil {
+						log.Printf("user capacity schedule %s: %v", panel.ID, err)
+					} else if !needs {
+						return
+					}
+					runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
+					if err != nil {
+						if cctx.Err() == nil {
+							log.Printf("user capacity runtime %s: %v", panel.ID, err)
+						}
+						return
+					}
+					if err := capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime); err != nil && cctx.Err() == nil {
 						log.Printf("user capacity panel %s: %v", panel.ID, err)
 					}
 				}()

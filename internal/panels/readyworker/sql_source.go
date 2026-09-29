@@ -20,7 +20,7 @@ JOIN xui_panel_deployments x
   ON x.droplet_id=pi.droplet_id
  AND x.generation=d.postinstall_generation
 WHERE pi.enabled=true
-  AND r.state='READY'
+  AND r.state IN ('READY','EXPIRING','RETIRING')
   AND d.state='PANEL_COMPLETE'
   AND x.state='COMPLETED'
 ORDER BY pi.id

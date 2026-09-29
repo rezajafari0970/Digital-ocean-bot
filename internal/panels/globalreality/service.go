@@ -9,6 +9,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/runtimecap"
@@ -19,9 +20,10 @@ type Secrets interface {
 	Put(context.Context, string, string, string, []byte) error
 }
 type Service struct {
-	DB      *sql.DB
-	Secrets Secrets
-	SSH     provisioning.SSHClient
+	DB       *sql.DB
+	Secrets  Secrets
+	SSH      provisioning.SSHClient
+	Runtimes *sanaei.RuntimeManager
 }
 
 func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bool) error {
@@ -51,6 +53,13 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	if !selectionExists {
 		return (panelbootstrap.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: "dob:reality-primary:000001"}).BootstrapPanel(ctx, p)
 	}
+	var runtime *sanaei.PanelRuntime
+	if s.Runtimes != nil {
+		runtime, e = s.Runtimes.Acquire(ctx, p.ID)
+		if e != nil {
+			return e
+		}
+	}
 	var acc, did, host, user, keyref string
 	e = s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true`, p.ID).Scan(&acc, &did, &host, &user, &keyref)
 	if e != nil {
@@ -77,6 +86,11 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 		err := s.DB.QueryRowContext(ctx, `SELECT protocol,transport,security,enabled FROM panel_inbound_inventory WHERE panel_id=$1 AND port=$2 AND present=true ORDER BY remote_id LIMIT 1`, p.ID, port).Scan(&existingProtocol, &existingTransport, &existingSecurity, &existingEnabled)
 		if err == nil {
 			if existingEnabled && existingProtocol == "vless" && existingTransport == "tcp" && existingSecurity == "reality" {
+				managed := fmt.Sprintf("dob:global-reality:%05d", port)
+				d := desired.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: managed, Port: port, MutationPanels: map[string]bool{p.ID: true}, Runtime: runtime}
+				if e = d.ReconcilePanel(ctx, p, false); e != nil {
+					return fmt.Errorf("port %d: %w", port, e)
+				}
 				continue
 			}
 			return fmt.Errorf("port %d occupied by incompatible inbound", port)
@@ -88,7 +102,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 		if _, e = reg.Ensure(ctx, acc, p.ID, managed); e != nil {
 			return e
 		}
-		d := desired.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: managed, Port: port, MutationPanels: map[string]bool{p.ID: true}}
+		d := desired.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: managed, Port: port, MutationPanels: map[string]bool{p.ID: true}, Runtime: runtime}
 		if e = d.ReconcilePanel(ctx, p, false); e != nil {
 			return fmt.Errorf("port %d: %w", port, e)
 		}

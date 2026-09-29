@@ -229,3 +229,42 @@ func streamSummary(
 	return summary.Network,
 		summary.Security
 }
+
+func InventoryFromRaw(panelID string, raws []json.RawMessage) (inventory.Snapshot, error) {
+	if panelID == "" {
+		return inventory.Snapshot{}, ErrSessionRequest
+	}
+	now := time.Now().UTC()
+	snapshot := inventory.Snapshot{PanelID: panelID, ObservedAt: now, Records: make([]inventory.InboundRecord, 0, len(raws))}
+	for _, raw := range raws {
+		var inbound inboundSummary
+		if err := json.Unmarshal(raw, &inbound); err != nil {
+			return inventory.Snapshot{}, err
+		}
+		hash := sha256.Sum256(raw)
+		transport, security := streamSummary(inbound.StreamSettings)
+		clientCount := len(inbound.ClientStats)
+		if clientCount == 0 && len(inbound.Settings) > 0 {
+			var settingsRaw []byte
+			var encoded string
+			if json.Unmarshal(inbound.Settings, &encoded) == nil {
+				settingsRaw = []byte(encoded)
+			} else {
+				settingsRaw = inbound.Settings
+			}
+			var st struct {
+				Clients []json.RawMessage `json:"clients"`
+			}
+			if json.Unmarshal(settingsRaw, &st) == nil {
+				clientCount = len(st.Clients)
+			}
+		}
+		snapshot.Records = append(snapshot.Records, inventory.InboundRecord{
+			PanelID: panelID, RemoteID: inbound.ID, Remark: inbound.Remark, Protocol: inbound.Protocol,
+			Port: inbound.Port, Listen: inbound.Listen, Enabled: inbound.Enable, Transport: transport,
+			Security: security, ClientCount: clientCount, Upload: inbound.Up, Download: inbound.Down,
+			Total: inbound.Total, RawHash: hex.EncodeToString(hash[:]), ObservedAt: now,
+		})
+	}
+	return snapshot, nil
+}

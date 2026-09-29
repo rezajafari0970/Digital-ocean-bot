@@ -46,6 +46,18 @@ type Service struct {
 	// DryRun=false is still unable to mutate a panel
 	// unless its exact panel ID exists here with true.
 	MutationPanels map[string]bool
+
+	// Optional shared authenticated runtime for fast API-only reconciliation.
+	Runtime *sanaei.PanelRuntime
+}
+
+func operationalLifecycle(state string) bool {
+	switch state {
+	case "READY", "EXPIRING", "RETIRING":
+		return true
+	default:
+		return false
+	}
 }
 
 type panelDeps struct {
@@ -56,6 +68,8 @@ type panelDeps struct {
 	ssh provisioning.SSHClient
 
 	exec sanaei.SessionExecutor
+
+	runtime *sanaei.PanelRuntime
 
 	target provisioning.Target
 
@@ -116,7 +130,7 @@ WHERE pi.id=$1
 		return false, err
 	}
 
-	return state == "READY" &&
+	return operationalLifecycle(state) &&
 			enabled,
 		nil
 }
@@ -125,12 +139,17 @@ func (d *panelDeps) RefreshInventory(
 	ctx context.Context,
 ) ([]inventory.InboundRecord, error) {
 
-	snapshot, err :=
-		sanaei.ReadInventory(
-			ctx,
-			d.exec,
-			d.panelID,
-		)
+	var snapshot inventory.Snapshot
+	var err error
+	if d.runtime != nil && d.runtime.Session != nil {
+		var raws []json.RawMessage
+		raws, err = d.runtime.Session.Snapshot(ctx)
+		if err == nil {
+			snapshot, err = sanaei.InventoryFromRaw(d.panelID, raws)
+		}
+	} else {
+		snapshot, err = sanaei.ReadInventory(ctx, d.exec, d.panelID)
+	}
 
 	if err != nil {
 		return nil, err
@@ -155,6 +174,12 @@ func (d *panelDeps) OccupiedPorts(
 	ctx context.Context,
 ) ([]int, error) {
 
+	sshKey, err := d.secrets.Get(ctx, d.accountID, d.target.KeySecretRef)
+	if err != nil {
+		return nil, err
+	}
+	defer credentials.Wipe(sshKey)
+
 	run := func(
 		ctx context.Context,
 		command string,
@@ -163,7 +188,7 @@ func (d *panelDeps) OccupiedPorts(
 		return d.ssh.Run(
 			ctx,
 			d.target,
-			d.sshKey,
+			sshKey,
 			command,
 		)
 	}
@@ -236,6 +261,9 @@ func (d *panelDeps) Add(
 			d.exec,
 			payload,
 		)
+	if err == nil && d.runtime != nil && d.runtime.Session != nil {
+		d.runtime.Session.Invalidate()
+	}
 
 	return err
 }
@@ -245,11 +273,28 @@ func (d *panelDeps) Verify(
 	remoteID int64,
 	payload realityconfig.Payload,
 ) error {
-	inbound, err := sanaei.GetInbound(
-		ctx,
-		d.exec,
-		remoteID,
-	)
+	var inbound postflight.Inbound
+	var err error
+	if d.runtime != nil && d.runtime.Session != nil {
+		var raw json.RawMessage
+		var ok bool
+		raw, ok, err = d.runtime.Session.RawInbound(ctx, remoteID)
+		if err == nil && !ok {
+			// Cached snapshot may be stale after a concurrent panel mutation.
+			d.runtime.Session.Invalidate()
+			raw, ok, err = d.runtime.Session.RawInbound(ctx, remoteID)
+		}
+		if err == nil && ok {
+			err = json.Unmarshal(raw, &inbound)
+		}
+		if err == nil && !ok {
+			// Last-resort authoritative lookup. ResilientSession handles
+			// transient network/5xx/session failures.
+			inbound, err = sanaei.GetInbound(ctx, d.runtime.Session.Exec, remoteID)
+		}
+	} else {
+		inbound, err = sanaei.GetInbound(ctx, d.exec, remoteID)
+	}
 	if err != nil {
 		return err
 	}
@@ -408,7 +453,7 @@ WHERE pi.id=$1
 		serverNames = []string{sni}
 	}
 
-	if lifecycleState != "READY" {
+	if !operationalLifecycle(lifecycleState) {
 		return createflow.ErrNotReady
 	}
 
@@ -467,21 +512,6 @@ WHERE pi.id=$1
 		return ErrMutationDisabled
 	}
 
-	sshKey, err :=
-		s.Secrets.Get(
-			ctx,
-			accountID,
-			sshKeyRef,
-		)
-
-	if err != nil {
-		return err
-	}
-
-	defer credentials.Wipe(
-		sshKey,
-	)
-
 	target :=
 		provisioning.Target{
 			AccountID: accountID,
@@ -495,20 +525,25 @@ WHERE pi.id=$1
 			KeySecretRef: sshKeyRef,
 		}
 
-	panelPassword, err := s.Secrets.Get(ctx, accountID, panelPasswordRef)
-	if err != nil {
-		return err
+	var executor sanaei.SessionExecutor
+	if s.Runtime != nil && s.Runtime.Session != nil {
+		executor = s.Runtime.Session.Exec
+	} else {
+		panelPassword, err := s.Secrets.Get(ctx, accountID, panelPasswordRef)
+		if err != nil {
+			return err
+		}
+		baseURL := fmt.Sprintf("http://%s:%d%s", host, panelPort, panelPath)
+		apiClient, err := sanaei.NewAPIClient(baseURL, sanaei.Credentials{Username: panelUser, Password: string(panelPassword)}, nil)
+		credentials.Wipe(panelPassword)
+		if err != nil {
+			return err
+		}
+		if err = apiClient.Login(ctx); err != nil {
+			return err
+		}
+		executor = (&sanaei.ResilientSession{Client: apiClient, Policy: sanaei.DefaultRetryPolicy()})
 	}
-	baseURL := fmt.Sprintf("http://%s:%d%s", host, panelPort, panelPath)
-	apiClient, err := sanaei.NewAPIClient(baseURL, sanaei.Credentials{Username: panelUser, Password: string(panelPassword)}, nil)
-	credentials.Wipe(panelPassword)
-	if err != nil {
-		return err
-	}
-	if err = apiClient.Login(ctx); err != nil {
-		return err
-	}
-	executor := sanaei.DirectSessionExecutor{Client: apiClient}
 
 	dependencies :=
 		&panelDeps{
@@ -520,9 +555,9 @@ WHERE pi.id=$1
 
 			exec: executor,
 
-			target: target,
+			runtime: s.Runtime,
 
-			sshKey: sshKey,
+			target: target,
 
 			panelID: panel.ID,
 

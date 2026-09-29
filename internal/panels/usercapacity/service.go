@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"time"
@@ -37,6 +38,17 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel) error 
 	if s.DB == nil || s.Secrets == nil {
 		return errors.New("user capacity config")
 	}
+	runtime, e := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Secrets, Timeout: 8 * time.Second}).Open(ctx, p.ID)
+	if e != nil {
+		return e
+	}
+	return s.ReconcileRuntimeFromPolicy(ctx, p, runtime)
+}
+
+func (s Service) ReconcileRuntimeFromPolicy(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) error {
+	if s.DB == nil || s.Secrets == nil {
+		return errors.New("user capacity config")
+	}
 	var enabled bool
 	var portsRaw []byte
 	var target, life, limit, rate int
@@ -56,31 +68,19 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel) error 
 	for _, v := range ports {
 		wanted[v] = true
 	}
-	var acc, base, user, pref string
-	e = s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.base_url,x.username,x.password_secret_ref FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation WHERE pi.id=$1 AND pi.enabled=true`, p.ID).Scan(&acc, &base, &user, &pref)
-	if e != nil {
-		return e
+	return s.ReconcileRuntime(ctx, p, runtime, wanted, target, quota, life, limit, rate)
+}
+
+func (s Service) ReconcileRuntime(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime, wanted map[int]bool, target int, quota int64, life, limit, rate int) error {
+	if runtime == nil || runtime.Session == nil {
+		return errors.New("user capacity runtime")
 	}
-	pw, e := s.Secrets.Get(ctx, acc, pref)
-	if e != nil {
-		return e
-	}
-	client, e := sanaei.NewAPIClient(base, sanaei.Credentials{Username: user, Password: string(pw)}, nil)
-	for i := range pw {
-		pw[i] = 0
-	}
-	if e != nil {
-		return e
-	}
-	client.HTTP.Timeout = 8 * time.Second
-	if e = client.Login(ctx); e != nil {
-		return e
-	}
-	raws, e := sanaei.ReadRawInboundList(ctx, sanaei.DirectSessionExecutor{Client: client})
+	raws, e := runtime.Session.Snapshot(ctx)
 	if e != nil {
 		return e
 	}
 	now := time.Now().UnixMilli()
+	mutated := false
 	for _, raw := range raws {
 		var in rawInbound
 		if json.Unmarshal(raw, &in) != nil || !in.Enable || in.Protocol != "vless" || !wanted[in.Port] {
@@ -154,15 +154,42 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel) error 
 				_ = json.Unmarshal(in.Sniffing, &sniff)
 			}
 			payload := map[string]any{"enable": in.Enable, "remark": in.Remark, "listen": in.Listen, "port": in.Port, "protocol": in.Protocol, "expiryTime": in.ExpiryTime, "total": in.Total, "settings": st, "streamSettings": stream, "sniffing": sniff}
-			if _, e = sanaei.UpdateInboundRaw(ctx, sanaei.DirectSessionExecutor{Client: client}, int64(in.ID), payload); e != nil {
+			if _, e = sanaei.UpdateInboundRaw(ctx, runtime.Session.Exec, int64(in.ID), payload); e != nil {
 				return fmt.Errorf("inbound %d update clients: %w", in.ID, e)
 			}
+			mutated = true
 		}
 		activeAfter := active + n
 		deficitAfter := maxInt(target-activeAfter, 0)
 		_, _ = s.DB.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,expired_users,quota_exhausted_users,deficit,created_last_cycle,deleted_last_cycle,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET port=excluded.port,target_users=excluded.target_users,active_users=excluded.active_users,expired_users=excluded.expired_users,quota_exhausted_users=excluded.quota_exhausted_users,deficit=excluded.deficit,created_last_cycle=excluded.created_last_cycle,deleted_last_cycle=excluded.deleted_last_cycle,last_error='',observed_at=now()`, p.ID, in.ID, in.Port, target, activeAfter, expiredCount, quotaCount, deficitAfter, n, deleted)
+		if mutated {
+			runtime.Session.Invalidate()
+		}
 	}
 	return nil
+}
+
+func (s Service) NeedsReconcile(ctx context.Context, panelID string, ports []int, cooldown time.Duration) (bool, error) {
+	if s.DB == nil || panelID == "" {
+		return true, nil
+	}
+	if cooldown <= 0 {
+		cooldown = 45 * time.Second
+	}
+	var count, deficient int
+	var newest sql.NullTime
+	err := s.DB.QueryRowContext(ctx, `
+SELECT count(*), count(*) FILTER (WHERE deficit > 0), max(observed_at)
+FROM user_capacity_snapshots
+WHERE panel_id=$1 AND port = ANY($2)
+`, panelID, pq.Array(ports)).Scan(&count, &deficient, &newest)
+	if err != nil {
+		return true, err
+	}
+	if count < len(ports) || deficient > 0 || !newest.Valid {
+		return true, nil
+	}
+	return time.Since(newest.Time) >= cooldown, nil
 }
 
 func maxInt(a, b int) int {

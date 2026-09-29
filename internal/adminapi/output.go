@@ -32,13 +32,33 @@ func outputMap(raw json.RawMessage) (map[string]any, error) {
 func (s *Server) collectPanelOutput(parent context.Context, p readyworker.Panel) string {
 	ctx, cancel := context.WithTimeout(parent, 10*time.Second)
 	defer cancel()
-	var acc, host, base, user, pref string
-	if s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,d.host,pi.base_url,x.username,x.password_secret_ref FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation WHERE pi.id=$1 AND pi.enabled=true`, p.ID).Scan(&acc, &host, &base, &user, &pref) != nil {
+
+	runtime, err := (sanaei.RuntimeFactory{
+		DB: s.DB, Secrets: s.Container.Secrets, Timeout: 7 * time.Second,
+	}).Open(ctx, p.ID)
+	if err != nil {
+		return ""
+	}
+	return s.collectRuntimeOutput(ctx, p, runtime)
+}
+
+func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) string {
+	if runtime == nil || runtime.Session == nil {
+		return ""
+	}
+	var host string
+	if s.DB.QueryRowContext(ctx,
+		"SELECT d.host FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true",
+		p.ID,
+	).Scan(&host) != nil {
 		return ""
 	}
 	keys := map[int64]string{}
-	rows, e := s.DB.QueryContext(ctx, `SELECT remote_id,public_key FROM inbound_export_metadata WHERE panel_id=$1`, p.ID)
-	if e == nil {
+	rows, err := s.DB.QueryContext(ctx,
+		"SELECT remote_id,public_key FROM inbound_export_metadata WHERE panel_id=$1",
+		p.ID,
+	)
+	if err == nil {
 		for rows.Next() {
 			var id int64
 			var key string
@@ -48,23 +68,8 @@ func (s *Server) collectPanelOutput(parent context.Context, p readyworker.Panel)
 		}
 		rows.Close()
 	}
-	password, e := s.Container.Secrets.Get(ctx, acc, pref)
-	if e != nil {
-		return ""
-	}
-	client, e := sanaei.NewAPIClient(base, sanaei.Credentials{Username: user, Password: string(password)}, nil)
-	for i := range password {
-		password[i] = 0
-	}
-	if e != nil {
-		return ""
-	}
-	client.HTTP.Timeout = 7 * time.Second
-	if client.Login(ctx) != nil {
-		return ""
-	}
-	raws, e := sanaei.ReadRawInboundList(ctx, sanaei.DirectSessionExecutor{Client: client})
-	if e != nil {
+	raws, err := runtime.Session.Snapshot(ctx)
+	if err != nil {
 		return ""
 	}
 	var out strings.Builder

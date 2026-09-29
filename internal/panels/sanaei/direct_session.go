@@ -39,7 +39,7 @@ func (d DirectSessionExecutor) Do(ctx context.Context, x SessionRequest) (Sessio
 		return SessionResponse{}, err
 	}
 	defer resp.Body.Close()
-	b, err := io.ReadAll(resp.Body)
+	b, err := ReadAllBounded(resp.Body, 64<<20)
 	if err != nil {
 		return SessionResponse{}, err
 	}
