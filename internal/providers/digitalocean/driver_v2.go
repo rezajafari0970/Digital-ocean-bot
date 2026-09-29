@@ -163,22 +163,24 @@ func (d *Driver) Inventory(ctx context.Context) (providers.Inventory, error) {
 }
 
 func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
-	raw, err := d.client.Discover(ctx)
+	account, err := d.client.GetAccount(ctx)
 	if err != nil {
-		return providers.Observation{}, normalizeError("observe", err)
+		return providers.Observation{}, normalizeError("observe_account", err)
+	}
+	raw, err := d.client.Catalog(ctx)
+	if err != nil {
+		return providers.Observation{}, normalizeError("observe_catalog", err)
+	}
+	droplets, err := d.client.ListDropletModels(ctx)
+	if err != nil {
+		return providers.Observation{}, normalizeError("observe_inventory", err)
 	}
 	now := time.Now().UTC()
-	servers := make([]providers.Server, 0, len(raw.Droplets))
-	for _, x := range raw.Droplets {
+	servers := make([]providers.Server, 0, len(droplets))
+	for _, x := range droplets {
 		servers = append(servers, normalizeServer(x))
 	}
-	return providers.Observation{
-		Account:    providers.Account{ID: raw.Account.UUID, Email: raw.Account.Email, Status: raw.Account.Status},
-		Capacity:   providers.Capacity{ComputeLimit: raw.Account.DropletLimit, ComputeInUse: len(raw.Droplets), ObservedAt: now},
-		Catalog:    normalizeCatalog(raw),
-		Inventory:  providers.Inventory{Servers: servers, ObservedAt: now},
-		ObservedAt: now,
-	}, nil
+	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
 }
 
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {
@@ -240,6 +242,10 @@ func normalizeError(op string, err error) error {
 			class = providers.ErrorRateLimited
 		case IsCapacityError(err):
 			class = providers.ErrorRegionCapacity
+		case h.Status == 422 && strings.Contains(strings.ToLower(h.Message), "image") && strings.Contains(strings.ToLower(h.Message), "not available"):
+			class = providers.ErrorImageUnavailable
+		case h.Status == 422 && strings.Contains(strings.ToLower(h.Message), "image") && strings.Contains(strings.ToLower(h.Message), "no longer available"):
+			class = providers.ErrorImageUnavailable
 		case h.Status == 400 || h.Status == 422:
 			class = providers.ErrorInvalidRequest
 		case h.Status == 408 || h.Status == 409 || h.Status >= 500:

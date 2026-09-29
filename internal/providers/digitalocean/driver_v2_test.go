@@ -46,6 +46,7 @@ func TestNormalizeProviderErrors(t *testing.T) {
 		{HTTPError{Status: 404, Message: "missing"}, providers.ErrorNotFound},
 		{HTTPError{Status: 429, Message: "slow down"}, providers.ErrorRateLimited},
 		{HTTPError{Status: 422, Code: "region_unavailable", Message: "region unavailable"}, providers.ErrorRegionCapacity},
+		{HTTPError{Status: 422, Message: "The image you selected is no longer available"}, providers.ErrorImageUnavailable},
 		{HTTPError{Status: 422, Message: "invalid request"}, providers.ErrorInvalidRequest},
 		{HTTPError{Status: 503, Message: "down"}, providers.ErrorUnavailable},
 		{errors.New("plain"), providers.ErrorUnknown},
