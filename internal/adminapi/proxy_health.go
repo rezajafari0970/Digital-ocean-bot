@@ -2,7 +2,9 @@ package adminapi
 
 import (
 	"context"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"net/http"
 	"time"
 )
@@ -45,7 +47,13 @@ func (s *Server) testAccountProxy(w http.ResponseWriter, r *http.Request) {
 	providerUsable := false
 	providerError := ""
 	if rt, rtErr := s.Container.Runtime(ctx, id); rtErr == nil {
-		_, providerErr := rt.Provider.Catalog(ctx)
+		cr, ok := rt.Driver.(providers.CatalogReader)
+		var providerErr error
+		if !ok {
+			providerErr = app.ErrProviderComputeUnsupported
+		} else {
+			_, providerErr = cr.Catalog(ctx)
+		}
 		if rt.Gateway != nil {
 			rt.Gateway.CloseIdleConnections()
 		}

@@ -11,11 +11,10 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"golang.org/x/crypto/ssh"
-	"strconv"
 )
 
 func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID string, d workflow.Deployment, snap *workflow.ProfileSnapshot) error {
-	if snap.SSHKeySecretRef != "" && snap.SSHProviderKeyID > 0 {
+	if snap.SSHKeySecretRef != "" && snap.SSHProviderKeyID != "" {
 		return nil
 	}
 	_, priv, err := ed25519.GenerateKey(rand.Reader)
@@ -50,12 +49,7 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 		return err
 	}
 	snap.SSHKeySecretRef = ref
-	n, convErr := strconv.Atoi(created.ID)
-	if convErr != nil {
-		_ = sshDriver.DeleteSSHKey(ctx, created.ID)
-		return convErr
-	}
-	snap.SSHProviderKeyID = n
+	snap.SSHProviderKeyID = workflow.ProviderKeyRef(created.ID)
 	snap.SSHUser = "root"
 	raw, err := json.Marshal(snap)
 	if err != nil {

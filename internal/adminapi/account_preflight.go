@@ -2,6 +2,7 @@ package adminapi
 
 import (
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"net/http"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
@@ -39,9 +40,16 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	// discovery belongs to explicit Refresh and must not be repeated here.
 	rt, err := s.Container.Runtime(r.Context(), id)
 	if err == nil {
-		account, identityErr := rt.Provider.GetAccount(r.Context())
+		ar, ok := rt.Driver.(providers.AccountReader)
+		var account providers.Account
+		identityErr := error(nil)
+		if !ok {
+			identityErr = app.ErrProviderComputeUnsupported
+		} else {
+			account, identityErr = ar.Account(r.Context())
+		}
 		if identityErr == nil {
-			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.UUID, account.Email)
+			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.ID, account.Email)
 		}
 		err = identityErr
 		if rt.Gateway != nil {

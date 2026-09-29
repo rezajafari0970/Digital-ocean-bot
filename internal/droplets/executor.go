@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -51,8 +50,8 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		return reserved, err
 	}
 	ssh := []string(nil)
-	if profile.SSHKeyID > 0 {
-		ssh = []string{strconv.Itoa(profile.SSHKeyID)}
+	if profile.SSHKeyID != "" {
+		ssh = []string{profile.SSHKeyID}
 	}
 	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {

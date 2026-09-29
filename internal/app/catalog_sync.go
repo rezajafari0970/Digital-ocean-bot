@@ -3,12 +3,13 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"log"
 	"time"
 )
 
 func (c Container) SyncCatalogs(ctx context.Context) {
-	rows, err := c.DB.QueryContext(ctx, `SELECT id::text FROM accounts WHERE enabled=true AND provider='digitalocean'`)
+	rows, err := c.DB.QueryContext(ctx, `SELECT id::text FROM accounts WHERE enabled=true AND deleted_at IS NULL`)
 	if err != nil {
 		return
 	}
@@ -39,7 +40,11 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 			log.Printf("catalog sync %s runtime: %v", id, err)
 			continue
 		}
-		d, err := rt.Provider.Discover(ctx)
+		cr, ok := rt.Driver.(providers.CatalogReader)
+		if !ok {
+			continue
+		}
+		d, err := cr.Catalog(ctx)
 		if rt.Gateway != nil {
 			rt.Gateway.CloseIdleConnections()
 		}

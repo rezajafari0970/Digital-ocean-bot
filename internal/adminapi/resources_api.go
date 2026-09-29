@@ -1,6 +1,10 @@
 package adminapi
 
-import "net/http"
+import (
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
+	"net/http"
+	"time"
+)
 
 func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
@@ -26,22 +30,10 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) accountCapacity(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	runtime, err := s.Container.Runtime(r.Context(), id)
+	x, err := capacity.Read(r.Context(), s.DB, id, 2*time.Minute)
 	if err != nil {
-		writeJSON(w, 409, map[string]string{"error": "account_not_ready"})
+		writeJSON(w, 409, map[string]string{"error": "account_capacity_unavailable"})
 		return
 	}
-	limits, err := runtime.Provider.GetLimits(r.Context())
-	if err != nil {
-		writeJSON(w, 502, map[string]string{"error": "provider_limits_failed"})
-		return
-	}
-	var active, pending int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM resources WHERE account_id=$1 AND type='droplet' AND state='active'`, id).Scan(&active)
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown')`, id).Scan(&pending)
-	available := limits.DropletLimit - active - pending
-	if available < 0 {
-		available = 0
-	}
-	writeJSON(w, 200, map[string]any{"droplet_limit": limits.DropletLimit, "active": active, "pending": pending, "available": available})
+	writeJSON(w, 200, map[string]any{"server_limit": x.Limit, "provider_servers": x.InUse, "pending": x.Pending, "available": x.Available(), "droplet_limit": x.Limit, "active": x.InUse})
 }

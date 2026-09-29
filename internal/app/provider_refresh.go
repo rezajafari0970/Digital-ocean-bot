@@ -56,12 +56,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
 				return
 			}
-			snapshotReader, ok := rt.Driver.(providers.SnapshotReader)
+			snapshotReader, ok := rt.Driver.(providers.ObservationReader)
 			if !ok {
-				c.RecordProviderObservation(ctx, id, ProviderStatePermissionDenied, ErrProviderComputeUnsupported, "provider snapshot capability unavailable")
+				c.RecordProviderObservation(ctx, id, ProviderStatePermissionDenied, ErrProviderComputeUnsupported, "provider observation capability unavailable")
 				return
 			}
-			obs, raw, err := snapshotReader.ObserveSnapshot(ctx)
+			obs, err := snapshotReader.Observe(ctx)
 			if rt.Gateway != nil {
 				rt.Gateway.CloseIdleConnections()
 			}
@@ -84,7 +84,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			var oldLimit int
 			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,(data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&oldLimit)
 			var snapshotID string
-			if err = c.DB.QueryRowContext(ctx, `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4) RETURNING id::text`, id, rt.Config.Provider, raw, canonical).Scan(&snapshotID); err != nil {
+			if err = c.DB.QueryRowContext(ctx, `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4) RETURNING id::text`, id, rt.Config.Provider, []byte(`{}`), canonical).Scan(&snapshotID); err != nil {
 				return
 			}
 			newLimit := obs.Capacity.ComputeLimit
