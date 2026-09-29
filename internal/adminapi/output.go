@@ -23,13 +23,40 @@ type outputInbound struct {
 	StreamSettings json.RawMessage `json:"streamSettings"`
 }
 
+type outputCacheEntry struct {
+	Value string
+	At    time.Time
+}
+
 func outputMap(raw json.RawMessage) (map[string]any, error) {
 	var m map[string]any
 	e := json.Unmarshal(raw, &m)
 	return m, e
 }
 
-func (s *Server) collectPanelOutput(parent context.Context, p readyworker.Panel) string {
+func (s *Server) cachedPanelOutput(panelID string, maxAge time.Duration) string {
+	s.OutputCacheMu.RLock()
+	e, ok := s.OutputCache[panelID]
+	s.OutputCacheMu.RUnlock()
+	if !ok || e.Value == "" || time.Since(e.At) > maxAge {
+		return ""
+	}
+	return e.Value
+}
+func (s *Server) storePanelOutput(panelID, value string) {
+	if value == "" {
+		return
+	}
+	s.OutputCacheMu.Lock()
+	if s.OutputCache == nil {
+		s.OutputCache = map[string]outputCacheEntry{}
+	}
+	s.OutputCache[panelID] = outputCacheEntry{Value: value, At: time.Now()}
+	s.OutputCacheMu.Unlock()
+}
+
+func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel) string {
+
 	ctx, cancel := context.WithTimeout(parent, 6*time.Second)
 	defer cancel()
 
@@ -41,9 +68,38 @@ func (s *Server) collectPanelOutput(parent context.Context, p readyworker.Panel)
 		runtime, err = (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 5 * time.Second}).Open(ctx, p.ID)
 	}
 	if err != nil {
-		return ""
+		return s.cachedPanelOutput(p.ID, 2*time.Minute)
 	}
-	return s.collectRuntimeOutput(ctx, p, runtime)
+	out := s.collectRuntimeOutput(ctx, p, runtime)
+	if out != "" {
+		s.storePanelOutput(p.ID, out)
+		return out
+	}
+	return s.cachedPanelOutput(p.ID, 2*time.Minute)
+}
+
+func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+		defer cancel()
+		_ = s.refreshPanelOutput(ctx, p)
+	}()
+}
+
+func (s *Server) collectPanelOutput(_ context.Context, p readyworker.Panel) string {
+	cached := s.cachedPanelOutput(p.ID, 2*time.Minute)
+	s.refreshPanelOutputAsync(p)
+	return cached
+}
+
+func (s *Server) WarmOutputCache(ctx context.Context) {
+	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
+	if err != nil {
+		return
+	}
+	for _, p := range panels {
+		s.refreshPanelOutputAsync(p)
+	}
 }
 
 func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) string {

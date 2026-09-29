@@ -26,6 +26,7 @@ func main() {
 	}
 	api := adminapi.New(application.DB, application.Container)
 	api.WebPath = settings.WebPath
+	api.WarmOutputCache(ctx)
 	server := &http.Server{Addr: settings.Addr(), Handler: adminapi.Secure(api.Routes()), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
 	log.Printf("api listening on %s", application.Config.HTTPAddr)
 	log.Fatal(server.ListenAndServe())

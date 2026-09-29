@@ -8,6 +8,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -19,10 +20,12 @@ type Server struct {
 	Health         observability.Health
 	LoginLimiter   *LoginLimiter
 	OutputRuntimes *sanaei.RuntimeManager
+	OutputCacheMu  sync.RWMutex
+	OutputCache    map[string]outputCacheEntry
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 5 * time.Second}, TTL: 15 * time.Second}}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 5 * time.Second}, TTL: 15 * time.Second}, OutputCache: map[string]outputCacheEntry{}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
