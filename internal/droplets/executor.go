@@ -95,11 +95,18 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID int)
 	if err != nil {
 		return op, err
 	}
+	wantResourceID := strconv.Itoa(providerID)
 	if !fresh {
-		// DELETE is safely retryable for the same known provider resource after an
-		// ambiguous outcome. The persisted ResourceID prevents deleting anything else.
-		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != strconv.Itoa(providerID) {
+		// DELETE is safely retryable only for the exact persisted provider resource.
+		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != wantResourceID {
 			return reserved, nil
+		}
+	} else {
+		// Persist the known deletion target before the provider mutation. If the
+		// outcome becomes ambiguous, a later retry is pinned to this exact resource.
+		reserved.ResourceID = wantResourceID
+		if err := e.Operations.Update(ctx, reserved); err != nil {
+			return reserved, err
 		}
 	}
 	if e.EgressCheck != nil {
@@ -119,7 +126,6 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID int)
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, err
 	}
-	reserved.ResourceID = strconv.Itoa(providerID)
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
