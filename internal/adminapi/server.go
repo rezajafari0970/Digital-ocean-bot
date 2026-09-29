@@ -79,7 +79,6 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("PUT /api/v1/configs", s.require(s.putGlobalConfig, true))
 	m.HandleFunc("POST /api/v1/proxies/{id}/test", s.require(s.testProxy, true))
 	m.HandleFunc("PUT /api/v1/accounts/{id}/network", s.require(s.assignProxy, true))
-	m.HandleFunc("PUT /api/v1/traffic-policy", s.require(s.upsertTrafficPolicy, true))
 	m.HandleFunc("GET /api/v1/accounts/{id}/discovery", s.require(s.accountDiscovery, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/refresh", s.require(s.accountDiscovery, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/proxy-test", s.require(s.testAccountProxy, true))
