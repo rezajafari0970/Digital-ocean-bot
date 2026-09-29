@@ -85,13 +85,13 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		log.Printf("output refresh panel=%s acquire_error=%v", p.ID, err)
 		return s.cachedPanelOutput(p.ID, 24*time.Hour)
 	}
-	records := s.collectRuntimeOutput(ctx, p, runtime)
-	if len(records) > 0 {
+	records, ok := s.collectRuntimeOutput(ctx, p, runtime)
+	if ok {
 		s.persistOutputSnapshot(ctx, p.ID, records)
+		if len(records) == 0 {
+			log.Printf("output refresh panel=%s empty_output", p.ID)
+		}
 		return ""
-	}
-	if len(records) == 0 {
-		log.Printf("output refresh panel=%s empty_output", p.ID)
 	}
 	return s.cachedPanelOutput(p.ID, 24*time.Hour)
 }
@@ -132,6 +132,16 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 	if err != nil {
 		return
 	}
+	// Snapshots are a materialized view of currently eligible Sanaei panels only.
+	// Purge rows for panels that have become disabled, locked, non-terminal, or retired.
+	_, _ = s.DB.ExecContext(ctx, `DELETE FROM output_config_snapshots o WHERE NOT EXISTS (
+		SELECT 1 FROM panel_instances p
+		JOIN droplets dr ON dr.id=p.droplet_id
+		JOIN accounts a ON a.id=dr.account_id
+		JOIN deployments d ON d.droplet_id=dr.id
+		WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'
+		AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING')
+	)`)
 	for _, p := range panels {
 		if ctx.Err() != nil {
 			return
@@ -140,16 +150,16 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 	}
 }
 
-func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) []outputRecord {
+func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) ([]outputRecord, bool) {
 	if runtime == nil || runtime.Session == nil {
-		return nil
+		return nil, false
 	}
 	var host string
 	if s.DB.QueryRowContext(ctx,
 		"SELECT d.host FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true",
 		p.ID,
 	).Scan(&host) != nil {
-		return nil
+		return nil, false
 	}
 	keys := map[int64]string{}
 	rows, err := s.DB.QueryContext(ctx,
@@ -172,7 +182,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	raws, err := runtime.Session.Snapshot(ctx)
 	if err != nil {
 		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
-		return nil
+		return nil, false
 	}
 	var out strings.Builder
 	records := make([]outputRecord, 0)
@@ -247,6 +257,9 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			if id == "" {
 				continue
 			}
+			if enabled, ok := cl["enable"].(bool); ok && !enabled {
+				continue
+			}
 			remark := in.Remark
 			if email := fmt.Sprint(cl["email"]); email != "" {
 				remark += "-" + email
@@ -265,7 +278,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	}
 	log.Printf("output collect panel=%s host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", p.ID, host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
 	s.storePanelOutput(p.ID, out.String())
-	return records
+	return records, true
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
