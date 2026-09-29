@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -103,6 +104,8 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 					minutes += rand.Intn(spacingMax - spacingMin + 1)
 				}
 				_, _ = e.DB.ExecContext(ctx, `UPDATE accounts SET next_build_at=$2 WHERE id=$1`, x.AccountID, now.Add(time.Duration(minutes)*time.Minute))
+			} else {
+				log.Printf("scheduler start deployment failed account=%s profile=%s err=%v", x.AccountID, x.ProfileID, err)
 			}
 		}
 		_ = e.Leases.Complete(ctx, x, now)
