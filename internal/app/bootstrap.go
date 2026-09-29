@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 )
 
@@ -37,7 +39,12 @@ func Bootstrap(ctx context.Context) (*Application, error) {
 		db.Close()
 		return nil, err
 	}
-	container := Container{DB: db, Secrets: secretStore, Accounts: Repository{DB: db}}
+	registry := providers.NewRegistry()
+	if err := registry.Register(digitalocean.Factory{}); err != nil {
+		db.Close()
+		return nil, err
+	}
+	container := Container{DB: db, Secrets: secretStore, Accounts: Repository{DB: db}, Providers: registry}
 	return &Application{Config: cfg, DB: db, Container: container}, nil
 }
 
