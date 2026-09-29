@@ -30,12 +30,16 @@ func outputMap(raw json.RawMessage) (map[string]any, error) {
 }
 
 func (s *Server) collectPanelOutput(parent context.Context, p readyworker.Panel) string {
-	ctx, cancel := context.WithTimeout(parent, 10*time.Second)
+	ctx, cancel := context.WithTimeout(parent, 6*time.Second)
 	defer cancel()
 
-	runtime, err := (sanaei.RuntimeFactory{
-		DB: s.DB, Secrets: s.Container.Secrets, Timeout: 7 * time.Second,
-	}).Open(ctx, p.ID)
+	var runtime *sanaei.PanelRuntime
+	var err error
+	if s.OutputRuntimes != nil {
+		runtime, err = s.OutputRuntimes.Acquire(ctx, p.ID)
+	} else {
+		runtime, err = (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 5 * time.Second}).Open(ctx, p.ID)
+	}
 	if err != nil {
 		return ""
 	}

@@ -6,20 +6,23 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
+	"time"
 )
 
 type Server struct {
-	WebPath      string
-	Auth         auth.Service
-	DB           *sql.DB
-	Container    app.Container
-	Health       observability.Health
-	LoginLimiter *LoginLimiter
+	WebPath        string
+	Auth           auth.Service
+	DB             *sql.DB
+	Container      app.Container
+	Health         observability.Health
+	LoginLimiter   *LoginLimiter
+	OutputRuntimes *sanaei.RuntimeManager
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter()}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 5 * time.Second}, TTL: 15 * time.Second}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
