@@ -43,7 +43,11 @@ func (c Container) installerTarget(ctx context.Context, d workflow.Deployment, s
 	if err != nil {
 		return provisioning.Target{}, nil, err
 	}
-	info, err := (workflow.DigitalOceanWaiter{Provider: runtime.Provider}).Wait(ctx, d.ProviderID)
+	compute, err := computeDriver(runtime)
+	if err != nil {
+		return provisioning.Target{}, nil, err
+	}
+	info, err := (workflow.ServerWaiter{Provider: compute}).Wait(ctx, d.ProviderID)
 	if err != nil {
 		return provisioning.Target{}, nil, err
 	}

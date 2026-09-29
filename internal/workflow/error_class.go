@@ -3,9 +3,8 @@ package workflow
 import (
 	"context"
 	"errors"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 	"strings"
 )
@@ -29,20 +28,15 @@ func ClassifyStepError(step string, err error) ErrorClass {
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return ErrorTimeout
 	}
-	if digitalocean.IsCapacityError(err) {
+	switch providers.Class(err) {
+	case providers.ErrorCapacity, providers.ErrorRegionCapacity:
 		return ErrorCapacity
-	}
-	var h digitalocean.HTTPError
-	if errors.As(err, &h) {
-		if h.Status == 401 || h.Status == 403 {
-			return ErrorAuth
-		}
-		switch digitalocean.ClassifyError(err) {
-		case resilience.Retryable, resilience.RateLimited:
-			return ErrorRetryable
-		case resilience.Permanent:
-			return ErrorPermanent
-		}
+	case providers.ErrorAuthentication, providers.ErrorPermissionDenied, providers.ErrorAccountLocked:
+		return ErrorAuth
+	case providers.ErrorRateLimited, providers.ErrorTransport, providers.ErrorUnavailable, providers.ErrorAmbiguousOutcome:
+		return ErrorRetryable
+	case providers.ErrorInvalidRequest, providers.ErrorNotFound, providers.ErrorImageUnavailable:
+		return ErrorPermanent
 	}
 	if errors.Is(err, secrets.ErrSecretNotFound) {
 		return ErrorDependency

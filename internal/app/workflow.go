@@ -44,12 +44,12 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	provisioner := provisioning.Engine{Store: provisionStore, Secrets: c.Secrets, SSH: sshClient, Events: provisionStore, Scripts: provisioning.SSHScriptRunner{SSH: sshClient}, Readiness: provisioning.ReadinessCollector{SSH: sshClient, Recorder: provisionStore}}
 	database := sanaei.DatabaseManager{Secrets: c.Secrets, Runner: sshClient, Uploader: sshClient}
 	panel := sanaei.PanelConfigurer{DB: c.DB, Secrets: c.Secrets, Runner: sshClient, Uploader: sshClient}
-	steps := workflow.RuntimeSteps{DB: c.DB, Droplets: executor, Waiter: workflow.DigitalOceanWaiter{Provider: runtime.Provider}, Provisioner: provisioner, Database: database, Panel: workflow.PanelConfigureFunc(func(ctx context.Context, d workflow.Deployment) error {
+	steps := workflow.RuntimeSteps{DB: c.DB, Droplets: executor, Waiter: workflow.ServerWaiter{Provider: compute}, Provisioner: provisioner, Database: database, Panel: workflow.PanelConfigureFunc(func(ctx context.Context, d workflow.Deployment) error {
 		t := cfg.Target
 		t.AccountID = d.AccountID
 		t.DropletID = d.DropletID
 		if t.Host == "" && d.ProviderID != "" {
-			info, e := workflow.DigitalOceanWaiter{Provider: runtime.Provider}.Wait(ctx, d.ProviderID)
+			info, e := workflow.ServerWaiter{Provider: compute}.Wait(ctx, d.ProviderID)
 			if e != nil {
 				return e
 			}

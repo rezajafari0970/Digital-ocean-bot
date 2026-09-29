@@ -8,8 +8,10 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 	"golang.org/x/crypto/ssh"
+	"strconv"
 )
 
 func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID string, d workflow.Deployment, snap *workflow.ProfileSnapshot) error {
@@ -34,17 +36,26 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	if err != nil {
 		return err
 	}
-	created, err := runtime.Provider.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), string(ssh.MarshalAuthorizedKey(pub)))
+	sshDriver, ok := runtime.Driver.(providers.SSHKeyDriver)
+	if !ok {
+		return ErrProviderComputeUnsupported
+	}
+	created, err := sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), string(ssh.MarshalAuthorizedKey(pub)))
 	if err != nil {
 		return err
 	}
 	ref := "ssh-deploy-" + d.ID
 	if err = c.Secrets.Put(ctx, accountID, ref, "ssh_private_key", privatePEM); err != nil {
-		_ = runtime.Provider.DeleteSSHKey(ctx, created.ID)
+		_ = sshDriver.DeleteSSHKey(ctx, created.ID)
 		return err
 	}
 	snap.SSHKeySecretRef = ref
-	snap.SSHProviderKeyID = created.ID
+	n, convErr := strconv.Atoi(created.ID)
+	if convErr != nil {
+		_ = sshDriver.DeleteSSHKey(ctx, created.ID)
+		return convErr
+	}
+	snap.SSHProviderKeyID = n
 	snap.SSHUser = "root"
 	raw, err := json.Marshal(snap)
 	if err != nil {
