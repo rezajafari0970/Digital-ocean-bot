@@ -8,7 +8,7 @@ import (
 
 func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	rows, err := s.DB.QueryContext(r.Context(), `SELECT id::text,provider_resource_id,type,state,managed,metadata,created_at,updated_at FROM resources WHERE account_id=$1 ORDER BY updated_at DESC LIMIT 1000`, id)
+	rows, err := s.DB.QueryContext(r.Context(), `SELECT r.id::text,r.provider_resource_id,r.type,r.state,r.managed,r.metadata,r.created_at,r.updated_at,a.provider FROM resources r JOIN accounts a ON a.id=r.account_id WHERE r.account_id=$1 ORDER BY updated_at DESC LIMIT 1000`, id)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -16,14 +16,22 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	var out []map[string]any
 	for rows.Next() {
-		var rid, pid, typ, state string
+		var rid, pid, typ, state, provider string
 		var managed bool
 		var metadata []byte
 		var created, updated any
-		if rows.Scan(&rid, &pid, &typ, &state, &managed, &metadata, &created, &updated) != nil {
+		if rows.Scan(&rid, &pid, &typ, &state, &managed, &metadata, &created, &updated, &provider) != nil {
 			continue
 		}
-		out = append(out, map[string]any{"id": rid, "provider_id": pid, "type": typ, "state": state, "managed": managed, "metadata": string(metadata), "created_at": created, "updated_at": updated})
+		out = append(out, map[string]any{"id": rid, "provider_id": pid, "provider": provider, "provider_label": func() string {
+			if provider == "vultr" {
+				return "Vultr"
+			}
+			if provider == "digitalocean" {
+				return "DigitalOcean"
+			}
+			return provider
+		}(), "type": typ, "state": state, "managed": managed, "metadata": string(metadata), "created_at": created, "updated_at": updated})
 	}
 	writeJSON(w, 200, out)
 }
