@@ -153,6 +153,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	}
 	raws, err := runtime.Session.Snapshot(ctx)
 	if err != nil {
+		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
 		return ""
 	}
 	var out strings.Builder
