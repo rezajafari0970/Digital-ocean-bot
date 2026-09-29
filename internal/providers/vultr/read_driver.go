@@ -2,6 +2,8 @@ package vultr
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"strconv"
@@ -16,7 +18,12 @@ func (d *Driver) Account(ctx context.Context) (providers.Account, error) {
 	if err != nil {
 		return providers.Account{}, normalizeError("account", err)
 	}
-	return providers.Account{Email: x.Account.Email, Status: "active"}, nil
+	email := strings.ToLower(strings.TrimSpace(x.Account.Email))
+	if email == "" {
+		return providers.Account{}, &providers.Error{Class: providers.ErrorUnavailable, Message: "vultr account email missing"}
+	}
+	sum := sha256.Sum256([]byte("vultr-account:" + email))
+	return providers.Account{ID: "vultr-" + hex.EncodeToString(sum[:16]), Email: x.Account.Email, Status: "active"}, nil
 }
 func (d *Driver) Capacity(ctx context.Context) (providers.Capacity, error) {
 	xs, err := d.client.Instances(ctx)

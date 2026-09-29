@@ -1,5 +1,11 @@
 package vultr
 
+type paginationMeta struct {
+	Links struct {
+		Next string `json:"next"`
+	} `json:"links"`
+}
+
 type accountResponse struct {
 	Account struct {
 		Name           string  `json:"name"`
@@ -16,7 +22,8 @@ type region struct {
 	Options   []string `json:"options"`
 }
 type regionsResponse struct {
-	Regions []region `json:"regions"`
+	Regions []region       `json:"regions"`
+	Meta    paginationMeta `json:"meta"`
 }
 type plan struct {
 	ID          string   `json:"id"`
@@ -29,7 +36,8 @@ type plan struct {
 	Locations   []string `json:"locations"`
 }
 type plansResponse struct {
-	Plans []plan `json:"plans"`
+	Plans []plan         `json:"plans"`
+	Meta  paginationMeta `json:"meta"`
 }
 type osItem struct {
 	ID     int    `json:"id"`
@@ -38,7 +46,8 @@ type osItem struct {
 	Family string `json:"family"`
 }
 type osResponse struct {
-	OS []osItem `json:"os"`
+	OS   []osItem       `json:"os"`
+	Meta paginationMeta `json:"meta"`
 }
 type instance struct {
 	ID           string   `json:"id"`
@@ -57,7 +66,8 @@ type instance struct {
 	Tags         []string `json:"tags"`
 }
 type instancesResponse struct {
-	Instances []instance `json:"instances"`
+	Instances []instance     `json:"instances"`
+	Meta      paginationMeta `json:"meta"`
 }
 type sshKey struct {
 	ID          string `json:"id"`
@@ -66,5 +76,6 @@ type sshKey struct {
 	DateCreated string `json:"date_created"`
 }
 type sshKeysResponse struct {
-	SSHKeys []sshKey `json:"ssh_keys"`
+	SSHKeys []sshKey       `json:"ssh_keys"`
+	Meta    paginationMeta `json:"meta"`
 }

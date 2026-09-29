@@ -59,7 +59,7 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if capErr != nil {
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
 	}
-	if cap.Limit < 1 || cap.Available() < 1 {
+	if (cap.LimitKnown && cap.Limit < 1) || cap.Available() < 1 {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
 	store := workflow.SQLStore{DB: tx}

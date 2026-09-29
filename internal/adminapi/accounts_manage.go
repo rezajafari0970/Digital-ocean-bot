@@ -44,8 +44,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		x.ProxyID = x.ProxyIDs[0]
 	}
 	var currentLimit int
+	var accountProvider string
+	_ = s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", id).Scan(&accountProvider)
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
-	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit); code != "" {
+	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit, accountProvider); code != "" {
 		writeJSON(w, 400, map[string]string{"error": code})
 		return
 	}

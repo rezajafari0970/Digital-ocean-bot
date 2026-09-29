@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 func (c *Client) Account(ctx context.Context) (accountResponse, error) {
@@ -12,24 +14,80 @@ func (c *Client) Account(ctx context.Context) (accountResponse, error) {
 	return x, err
 }
 func (c *Client) Regions(ctx context.Context) ([]region, error) {
-	var x regionsResponse
-	err := c.do(ctx, http.MethodGet, pagePath("/regions", 500), nil, &x)
-	return x.Regions, err
+	path := pagePath("/regions", 500)
+	var out []region
+	for {
+		var x regionsResponse
+		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
+			return nil, err
+		}
+		out = append(out, x.Regions...)
+		if strings.TrimSpace(x.Meta.Links.Next) == "" {
+			return out, nil
+		}
+		u, err := url.Parse(x.Meta.Links.Next)
+		if err != nil {
+			return nil, err
+		}
+		path = u.RequestURI()
+	}
 }
 func (c *Client) Plans(ctx context.Context) ([]plan, error) {
-	var x plansResponse
-	err := c.do(ctx, http.MethodGet, pagePath("/plans", 500), nil, &x)
-	return x.Plans, err
+	path := pagePath("/plans", 500)
+	var out []plan
+	for {
+		var x plansResponse
+		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
+			return nil, err
+		}
+		out = append(out, x.Plans...)
+		if strings.TrimSpace(x.Meta.Links.Next) == "" {
+			return out, nil
+		}
+		u, err := url.Parse(x.Meta.Links.Next)
+		if err != nil {
+			return nil, err
+		}
+		path = u.RequestURI()
+	}
 }
 func (c *Client) OS(ctx context.Context) ([]osItem, error) {
-	var x osResponse
-	err := c.do(ctx, http.MethodGet, pagePath("/os", 500), nil, &x)
-	return x.OS, err
+	path := pagePath("/os", 500)
+	var out []osItem
+	for {
+		var x osResponse
+		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
+			return nil, err
+		}
+		out = append(out, x.OS...)
+		if strings.TrimSpace(x.Meta.Links.Next) == "" {
+			return out, nil
+		}
+		u, err := url.Parse(x.Meta.Links.Next)
+		if err != nil {
+			return nil, err
+		}
+		path = u.RequestURI()
+	}
 }
 func (c *Client) Instances(ctx context.Context) ([]instance, error) {
-	var x instancesResponse
-	err := c.do(ctx, http.MethodGet, pagePath("/instances", 500), nil, &x)
-	return x.Instances, err
+	path := pagePath("/instances", 500)
+	var out []instance
+	for {
+		var x instancesResponse
+		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
+			return nil, err
+		}
+		out = append(out, x.Instances...)
+		if strings.TrimSpace(x.Meta.Links.Next) == "" {
+			return out, nil
+		}
+		u, err := url.Parse(x.Meta.Links.Next)
+		if err != nil {
+			return nil, err
+		}
+		path = u.RequestURI()
+	}
 }
 func (c *Client) Instance(ctx context.Context, id string) (instance, error) {
 	var x struct {

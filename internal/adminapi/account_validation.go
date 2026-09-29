@@ -2,7 +2,7 @@ package adminapi
 
 import "strings"
 
-func validateAccountSettings(x accountWrite, dropletLimit int) string {
+func validateAccountSettings(x accountWrite, dropletLimit int, provider string) string {
 	if x.LifetimeMinSeconds <= 0 || x.LifetimeMaxSeconds <= 0 {
 		return "lifetime_must_be_positive"
 	}
@@ -30,10 +30,18 @@ func validateAccountSettings(x accountWrite, dropletLimit int) string {
 	if hasDup(x.Images) {
 		return "duplicate_images"
 	}
-	allowedImages := map[string]bool{"ubuntu-22-04-x64": true, "ubuntu-24-04-x64": true, "ubuntu-26-04-x64": true}
-	for _, image := range x.Images {
-		if !allowedImages[strings.TrimSpace(image)] {
-			return "unsupported_os_image"
+	if strings.EqualFold(strings.TrimSpace(provider), "digitalocean") {
+		allowedImages := map[string]bool{"ubuntu-22-04-x64": true, "ubuntu-24-04-x64": true, "ubuntu-26-04-x64": true}
+		for _, image := range x.Images {
+			if !allowedImages[strings.TrimSpace(image)] {
+				return "unsupported_os_image"
+			}
+		}
+	} else {
+		for _, image := range x.Images {
+			if strings.TrimSpace(image) == "" {
+				return "unsupported_os_image"
+			}
 		}
 	}
 	return ""

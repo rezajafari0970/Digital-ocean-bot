@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
 const defaultBaseURL = "https://api.vultr.com/v2"
@@ -25,13 +27,17 @@ type HTTPError struct {
 func (e HTTPError) Error() string { return fmt.Sprintf("vultr http %d: %s", e.Status, e.Message) }
 
 type Client struct {
-	http  *http.Client
-	token string
-	base  string
+	http        *http.Client
+	token       string
+	credentials providers.CredentialSource
+	base        string
 }
 
 func NewClient(h *http.Client, token string) *Client {
 	return &Client{http: h, token: strings.TrimSpace(token), base: defaultBaseURL}
+}
+func NewClientFromSource(h *http.Client, source providers.CredentialSource) *Client {
+	return &Client{http: h, credentials: source, base: defaultBaseURL}
 }
 func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
 	if method != http.MethodGet {
@@ -77,7 +83,19 @@ func (c *Client) doOnce(ctx context.Context, method, path string, body any, out 
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	token := c.token
+	if c.credentials != nil {
+		b, getErr := c.credentials.Get(ctx)
+		if getErr != nil {
+			return getErr
+		}
+		defer zeroCredential(b)
+		token = strings.TrimSpace(string(b))
+	}
+	if token == "" {
+		return errors.New("vultr: empty credential")
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -118,4 +136,10 @@ func pagePath(path string, perPage int) string {
 	q.Set("per_page", fmt.Sprint(perPage))
 	u.RawQuery = q.Encode()
 	return u.String()
+}
+
+func zeroCredential(b []byte) {
+	for i := range b {
+		b[i] = 0
+	}
 }

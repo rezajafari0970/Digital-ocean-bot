@@ -60,7 +60,7 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if len(x.Regions) == 0 {
 		x.Regions = []string{x.Region}
 	}
-	if code := validateAccountSettings(x, 0); code != "" {
+	if code := validateAccountSettings(x, 0, x.Provider); code != "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": code})
 		return
 	}

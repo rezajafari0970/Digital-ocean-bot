@@ -103,7 +103,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ROTATION_BLOCKED_CAPACITY',runtime_status_detail='provider snapshot stale; refresh required',runtime_status_at=now(),updated_at=now() WHERE id=$1`, item.AccountID)
 				return nil
 			}
-			if limit <= 0 || inUse+pending >= limit {
+			if cap.LimitKnown && (limit <= 0 || inUse+pending >= limit) {
 				var runtimeStatus, oldestExpiring string
 				_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(runtime_status,''),(SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY created_at,id LIMIT 1) FROM accounts WHERE id=$1`, item.AccountID).Scan(&runtimeStatus, &oldestExpiring)
 				if limit > 0 && inUse >= limit && pending == 0 && oldestExpiring == item.ID && runtimeStatus != "ROTATION_CAPACITY_BREAKING" {
@@ -116,8 +116,8 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			} else {
 				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND runtime_status IN ('ROTATION_BLOCKED_CAPACITY','ROTATION_CAPACITY_BREAKING')`, item.AccountID)
 			}
-			if inUse+pending < limit {
-				// Capacity is available; proceed with the normal replacement-first path.
+			if !cap.LimitKnown || inUse+pending < limit {
+				// Capacity is available, or the provider does not publish a hard limit.
 			} else {
 				// Capacity-breaker path: skip replacement creation and delete only this oldest EXPIRING item.
 				goto processLifecycle

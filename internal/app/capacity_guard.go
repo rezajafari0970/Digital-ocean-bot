@@ -11,6 +11,7 @@ var ErrCapacityUnavailable = errors.New("account droplet capacity unavailable")
 var ErrCapacitySnapshotStale = errors.New("account capacity snapshot stale")
 
 type CreateCapacity struct {
+	LimitKnown       bool
 	Limit            int
 	ProviderDroplets int
 	PendingCreates   int
@@ -18,6 +19,9 @@ type CreateCapacity struct {
 }
 
 func (x CreateCapacity) Available() int {
+	if !x.LimitKnown {
+		return int(^uint(0)>>1) - x.ProviderDroplets - x.PendingCreates
+	}
 	n := x.Limit - x.ProviderDroplets - x.PendingCreates
 	if n < 0 {
 		return 0
@@ -35,8 +39,8 @@ func (c Container) RequireCreateCapacity(ctx context.Context, accountID string, 
 	if err != nil {
 		return out, ErrCapacitySnapshotStale
 	}
-	out = CreateCapacity{Limit: x.Limit, ProviderDroplets: x.InUse, PendingCreates: x.Pending, SnapshotAt: x.ObservedAt}
-	if out.Limit < 1 || out.Available() < 1 {
+	out = CreateCapacity{LimitKnown: x.LimitKnown, Limit: x.Limit, ProviderDroplets: x.InUse, PendingCreates: x.Pending, SnapshotAt: x.ObservedAt}
+	if (out.LimitKnown && out.Limit < 1) || out.Available() < 1 {
 		return out, ErrCapacityUnavailable
 	}
 	return out, nil

@@ -39,7 +39,7 @@ func TestReadContracts(t *testing.T) {
 	d := fixtureReadDriver(t)
 	ctx := context.Background()
 	a, e := d.Account(ctx)
-	if e != nil || a.Email != "owner@example.test" || a.Status != "active" {
+	if e != nil || a.ID == "" || a.Email != "owner@example.test" || a.Status != "active" {
 		t.Fatalf("account=%+v err=%v", a, e)
 	}
 	cap, e := d.Capacity(ctx)

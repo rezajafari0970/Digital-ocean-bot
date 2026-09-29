@@ -57,3 +57,23 @@ func TestGET429RetriesButMutationDoesNot(t *testing.T) {
 		t.Fatalf("post err=%v count=%d", err, posts)
 	}
 }
+
+func TestInstancesFollowsPaginationNext(t *testing.T) {
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Query().Get("cursor") == "next" {
+			_, _ = w.Write([]byte(`{"instances":[{"id":"i2"}],"meta":{"links":{"next":""}}}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"instances":[{"id":"i1"}],"meta":{"links":{"next":"/v2/instances?cursor=next"}}}`))
+	}))
+	defer srv.Close()
+	c := NewClient(srv.Client(), "x")
+	c.base = srv.URL
+	xs, err := c.Instances(context.Background())
+	if err != nil || len(xs) != 2 || calls != 2 {
+		t.Fatalf("instances=%v calls=%d err=%v", xs, calls, err)
+	}
+}
