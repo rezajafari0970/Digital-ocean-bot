@@ -192,6 +192,15 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			notReality++
 			continue
 		}
+		structSettings := make(map[string]any, len(settings))
+		for k, v := range settings {
+			structSettings[k] = v
+		}
+		structSettings["clients"] = []any{}
+		structPayload := map[string]any{"enable": in.Enable, "remark": in.Remark, "port": in.Port, "protocol": in.Protocol, "settings": structSettings, "streamSettings": stream}
+		if sb, err := json.Marshal(structPayload); err == nil {
+			_, _ = s.DB.ExecContext(ctx, `INSERT INTO inbound_structural_snapshots(panel_id,remote_id,port,payload,updated_at) VALUES($1,$2,$3,$4,now()) ON CONFLICT(panel_id,remote_id) DO UPDATE SET port=excluded.port,payload=excluded.payload,updated_at=now()`, p.ID, in.ID, in.Port, sb)
+		}
 		rb, _ := json.Marshal(stream["realitySettings"])
 		reality, e := outputMap(rb)
 		if e != nil {

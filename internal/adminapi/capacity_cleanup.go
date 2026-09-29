@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
@@ -73,7 +74,48 @@ func (s *Server) deleteAllCapacityClients(w http.ResponseWriter, r *http.Request
 	_, _ = s.DB.ExecContext(ctx, "DELETE FROM user_capacity_snapshots")
 	writeJSON(w, 200, map[string]any{"succeeded": ok, "failed": failed, "policy_enabled": false, "results": results})
 }
+func (s *Server) clearPanelClientsFast(ctx context.Context, p readyworker.Panel) (bool, error) {
+	rows, err := s.DB.QueryContext(ctx, `SELECT remote_id,payload FROM inbound_structural_snapshots WHERE panel_id=$1 AND port = ANY($2) ORDER BY remote_id`, p.ID, pq.Array([]int{443, 7231, 1212}))
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	type item struct {
+		id      int64
+		payload []byte
+	}
+	items := []item{}
+	for rows.Next() {
+		var x item
+		if err = rows.Scan(&x.id, &x.payload); err != nil {
+			return false, err
+		}
+		items = append(items, x)
+	}
+	if len(items) != 3 {
+		return false, nil
+	}
+	rt, err := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 20 * time.Second}).Open(ctx, p.ID)
+	if err != nil {
+		return true, err
+	}
+	for _, x := range items {
+		var payload map[string]any
+		if json.Unmarshal(x.payload, &payload) != nil {
+			return true, fmt.Errorf("structural payload %d", x.id)
+		}
+		if _, err = sanaei.UpdateInboundRaw(ctx, rt.Session.Exec, x.id, payload); err != nil {
+			return true, err
+		}
+	}
+	rt.Session.Invalidate()
+	return true, nil
+}
+
 func (s *Server) clearPanelClients(ctx context.Context, p readyworker.Panel) (int, error) {
+	if used, err := s.clearPanelClientsFast(ctx, p); used {
+		return 0, err
+	}
 	rt, e := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Container.Secrets, Timeout: 90 * time.Second}).Open(ctx, p.ID)
 	if e != nil {
 		return 0, e
