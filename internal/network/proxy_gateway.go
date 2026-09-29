@@ -56,13 +56,18 @@ func newProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gatewa
 			u.User = url.UserPassword(creds.Username, creds.Password)
 		}
 		tr.Proxy = http.ProxyURL(u)
-		tr.DialContext = (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext
+		tr.DialContext = DialContextIPv4
 	case ProxySOCKS5:
 		var auth *xproxy.Auth
 		if creds.Username != "" {
 			auth = &xproxy.Auth{User: creds.Username, Password: creds.Password}
 		}
-		dialer, err := xproxy.SOCKS5("tcp", net.JoinHostPort(p.Host, fmt.Sprintf("%d", p.Port)), auth, xproxy.Direct)
+		proxyEndpoint, err := IPv4Endpoint(context.Background(), p.Host, p.Port)
+		if err != nil {
+			return nil, err
+		}
+		base := &ipv4ProxyDialer{}
+		dialer, err := xproxy.SOCKS5("tcp4", proxyEndpoint, auth, base)
 		if err != nil {
 			return nil, err
 		}

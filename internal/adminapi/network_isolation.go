@@ -12,9 +12,9 @@ func networkIdentityCollision(ctx context.Context, q interface {
 	err := q.QueryRowContext(ctx, `
 WITH candidate AS (
  SELECT p.exit_ip AS exit_ip,
-   CASE WHEN p.exit_ip IS NULL THEN NULL WHEN family(p.exit_ip)=4 THEN host(network(set_masklen(p.exit_ip,24)))||'/24' ELSE host(network(set_masklen(p.exit_ip,48)))||'/48' END AS subnet_key
+   CASE WHEN p.exit_ip IS NOT NULL AND family(p.exit_ip)=4 THEN host(network(set_masklen(p.exit_ip,24)))||'/24' ELSE NULL END AS subnet_key
  FROM proxies p
- WHERE p.id=$2
+ WHERE p.id=$2 AND (p.exit_ip IS NULL OR family(p.exit_ip)=4)
 )
 SELECT EXISTS(
  SELECT 1 FROM candidate c

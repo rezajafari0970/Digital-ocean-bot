@@ -1,7 +1,6 @@
 package network
 
 import (
-	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"time"
@@ -21,7 +20,7 @@ func NewIsolatedDirectClient(accountID string) (*ClientBundle, error) {
 	}
 	tr := &http.Transport{
 		Proxy:               nil,
-		DialContext:         (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
+		DialContext:         DialContextIPv4,
 		ForceAttemptHTTP2:   true,
 		MaxIdleConns:        20,
 		IdleConnTimeout:     60 * time.Second,

@@ -35,7 +35,7 @@ func fastGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) 
 			var v struct {
 				IP string `json:"ip"`
 			}
-			if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&v) != nil || net.ParseIP(strings.TrimSpace(v.IP)) == nil {
+			if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&v) != nil || func() bool { ip := net.ParseIP(strings.TrimSpace(v.IP)); return ip == nil || ip.To4() == nil }() {
 				ch <- result{err: errors.New("invalid exit ip")}
 				return
 			}

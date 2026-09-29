@@ -147,6 +147,9 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	if x.NetworkMode == "proxy_required" {
+		_, _ = tx.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,0,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET enabled=true,updated_at=now()`, id, x.ProxyID)
+	}
 	if oldMode != x.NetworkMode || oldProxyID != x.ProxyID {
 		_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)
 	}

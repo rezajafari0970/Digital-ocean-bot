@@ -154,6 +154,12 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "network_profile_failed", "detail": err.Error()})
 		return
 	}
+	if x.NetworkMode == "proxy_required" {
+		if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,0,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET enabled=true,updated_at=now()`, id, x.ProxyID); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "proxy_pool_sync_failed", "detail": err.Error()})
+			return
+		}
+	}
 	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return

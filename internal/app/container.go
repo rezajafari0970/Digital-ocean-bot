@@ -63,6 +63,9 @@ func computeDriver(rt AccountRuntime) (providers.ComputeDriver, error) {
 }
 
 func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntime, error) {
+	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
+		return AccountRuntime{}, err
+	}
 	cfg, err := c.Accounts.Account(ctx, accountID)
 	if err != nil {
 		return AccountRuntime{}, err

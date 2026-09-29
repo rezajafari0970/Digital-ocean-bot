@@ -37,7 +37,7 @@ func observeStickyGeo(ctx context.Context, g *network.Gateway) (stickyGeo, error
 			Org string `json:"org"`
 		} `json:"connection"`
 	}
-	if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&raw) != nil || net.ParseIP(strings.TrimSpace(raw.IP)) == nil {
+	if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&raw) != nil || func() bool { ip := net.ParseIP(strings.TrimSpace(raw.IP)); return ip == nil || ip.To4() == nil }() {
 		return stickyGeo{}, errors.New("invalid geo response")
 	}
 	asn := strings.TrimSpace(raw.Connection.Org)
