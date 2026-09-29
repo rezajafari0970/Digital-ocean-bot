@@ -140,8 +140,10 @@ func (s *Server) runCleanupJob(id string, panels []readyworker.Panel) {
 
 			if result.Error == "" {
 				job.Succeeded++
+				_, _ = s.DB.ExecContext(ctx, "UPDATE user_capacity_snapshots SET active_users=0,expired_users=0,quota_exhausted_users=0,deficit=target_users,created_last_cycle=0,deleted_last_cycle=0,last_error='rebuilding_after_cleanup',observed_at=now() WHERE panel_id=$1", panel.ID)
 			} else {
 				job.Failed++
+				_, _ = s.DB.ExecContext(ctx, "UPDATE user_capacity_snapshots SET last_error=$2,observed_at=now() WHERE panel_id=$1", panel.ID, "cleanup_failed: "+result.Error)
 			}
 
 			s.CleanupMu.Unlock()
@@ -149,8 +151,6 @@ func (s *Server) runCleanupJob(id string, panels []readyworker.Panel) {
 	}
 
 	wg.Wait()
-
-	_, _ = s.DB.ExecContext(ctx, "DELETE FROM user_capacity_snapshots")
 
 	now := time.Now()
 
