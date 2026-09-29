@@ -31,6 +31,18 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 	}
 	if item.State == droplets.Expiring {
+		// Converge oversupply back to the account desired count. Expired droplets
+		// above desired capacity are excess and do not need a replacement.
+		if item.ReplacementDeploymentID == "" {
+			var desired, managed, rank int
+			_ = c.DB.QueryRowContext(ctx, `SELECT a.desired_server_count,
+				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED'),
+				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state='EXPIRING' AND (d.expires_at,d.id) <= ((SELECT expires_at FROM droplets WHERE id=$2),$2::uuid))
+				FROM accounts a WHERE a.id=$1`, item.AccountID, item.ID).Scan(&desired, &managed, &rank)
+			if desired > 0 && managed > desired && rank <= managed-desired {
+				goto processLifecycle
+			}
+		}
 		// A failed deployment is not serving traffic, so requiring a replacement
 		// before deletion creates a capacity deadlock (especially at the limit).
 		// Only healthy/nonterminal service resources require replacement-first.
