@@ -15,12 +15,14 @@ func (s SQLSource) EligibleReadyPanels(ctx context.Context) ([]Panel, error) {
 SELECT pi.id::text
 FROM panel_instances pi
 JOIN droplets r ON r.id=pi.droplet_id
+JOIN accounts a ON a.id=r.account_id
 JOIN deployments d ON d.droplet_id=pi.droplet_id
 JOIN xui_panel_deployments x
   ON x.droplet_id=pi.droplet_id
  AND x.generation=d.postinstall_generation
 WHERE pi.enabled=true
   AND r.state IN ('READY','EXPIRING','RETIRING')
+  AND a.provider_state <> 'LOCKED'
   AND d.state='PANEL_COMPLETE'
   AND x.state='COMPLETED'
 ORDER BY pi.id

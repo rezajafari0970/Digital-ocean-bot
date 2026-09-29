@@ -9,6 +9,27 @@ import (
 )
 
 func (c Container) ProcessLifecycle(ctx context.Context, item droplets.LifecycleItem) error {
+	var providerState string
+	_ = c.DB.QueryRowContext(ctx, "SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1", item.AccountID).Scan(&providerState)
+	providerLocked := providerState == ProviderStateLocked
+	if providerLocked {
+		// A locked provider account is never eligible for replacement or serving.
+		// Move READY/EXPIRING resources toward retirement locally; physical DELETE
+		// still uses the normal account network/gate and requires provider confirmation.
+		_, _ = c.DB.ExecContext(ctx, "UPDATE resources SET state='retiring',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true AND state<>'deleted'", item.AccountID, item.ProviderID)
+		if item.State == droplets.Ready || item.State == droplets.Expiring {
+			ok, err := (droplets.LifecycleStore{DB: c.DB}).Transition(ctx, item.ID, item.State, droplets.Retiring)
+			if err != nil {
+				return err
+			}
+			if ok {
+				item.State = droplets.Retiring
+				if err = (droplets.LifecycleStore{DB: c.DB}).Event(ctx, item, droplets.Retiring); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	if item.State == droplets.Expiring {
 		// A failed deployment is not serving traffic, so requiring a replacement
 		// before deletion creates a capacity deadlock (especially at the limit).

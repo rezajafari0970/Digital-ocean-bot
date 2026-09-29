@@ -111,8 +111,9 @@ func (d *panelDeps) Ready(
 ) (bool, error) {
 
 	var (
-		state   string
-		enabled bool
+		state         string
+		enabled       bool
+		providerState string
 	)
 
 	err := d.db.QueryRowContext(
@@ -120,16 +121,20 @@ func (d *panelDeps) Ready(
 		`
 SELECT
 r.state,
-pi.enabled
+pi.enabled,
+a.provider_state
 FROM panel_instances pi
 JOIN droplets r
   ON r.id=pi.droplet_id
+JOIN accounts a
+  ON a.id=r.account_id
 WHERE pi.id=$1
 `,
 		d.panelID,
 	).Scan(
 		&state,
 		&enabled,
+		&providerState,
 	)
 
 	if err != nil {
@@ -137,7 +142,8 @@ WHERE pi.id=$1
 	}
 
 	return operationalLifecycle(state) &&
-			enabled,
+			enabled &&
+			providerState != "LOCKED",
 		nil
 }
 

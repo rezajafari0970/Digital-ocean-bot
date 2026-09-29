@@ -16,21 +16,24 @@ func (c Container) ReconcileLocalState(ctx context.Context) {
 
 	// Mirror lifecycle droplets into inventory. This is an upsert and therefore
 	// safe to run repeatedly.
-	rows, err := c.DB.QueryContext(ctx, `SELECT id::text,account_id::text,provider_resource_id,state,profile FROM droplets WHERE provider_resource_id IS NOT NULL AND state<>'DELETED'`)
+	rows, err := c.DB.QueryContext(ctx, `SELECT r.id::text,r.account_id::text,r.provider_resource_id,r.state,r.profile,a.provider_state FROM droplets r JOIN accounts a ON a.id=r.account_id WHERE r.provider_resource_id IS NOT NULL AND r.state<>'DELETED'`)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var did, aid, pid, state string
+		var did, aid, pid, state, providerState string
 		var profile []byte
-		if rows.Scan(&did, &aid, &pid, &state, &profile) != nil {
+		if rows.Scan(&did, &aid, &pid, &state, &profile, &providerState) != nil {
 			continue
 		}
 		meta, _ := json.Marshal(map[string]any{"droplet_id": did, "profile": json.RawMessage(profile)})
 		resourceState := "provisioning"
-		if state == "READY" || state == "EXPIRING" || state == "RETIRING" {
+		if providerState != ProviderStateLocked && (state == "READY" || state == "EXPIRING" || state == "RETIRING") {
 			resourceState = "active"
+		}
+		if providerState == ProviderStateLocked {
+			resourceState = "retiring"
 		}
 		_, err = c.DB.ExecContext(ctx, `INSERT INTO resources(id,account_id,provider,provider_resource_id,type,state,managed,metadata)
             VALUES(gen_random_uuid(),$1,'digitalocean',$2,'droplet',$3,true,$4)
