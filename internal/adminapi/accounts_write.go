@@ -2,7 +2,9 @@ package adminapi
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 )
@@ -36,6 +38,9 @@ type accountWrite struct {
 }
 
 func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
+	started := time.Now()
+	log.Printf("account create start remote=%s", r.RemoteAddr)
+	defer func() { log.Printf("account create end duration_ms=%d", time.Since(started).Milliseconds()) }()
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "forbidden"})
@@ -46,6 +51,7 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
 		return
 	}
+	log.Printf("account create decoded provider=%s name=%q proxies=%d regions=%d sizes=%d images=%d token_present=%t", x.Provider, x.Name, len(x.ProxyIDs), len(x.Regions), len(x.Sizes), len(x.Images), x.Token != "")
 	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)
 	if x.NetworkMode == "proxy_required" && len(x.ProxyIDs) > 0 {
 		x.ProxyID = x.ProxyIDs[0]
@@ -172,6 +178,7 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		return
 	}
 	created = false
+	log.Printf("account create committed id=%s provider=%s", id, x.Provider)
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 
