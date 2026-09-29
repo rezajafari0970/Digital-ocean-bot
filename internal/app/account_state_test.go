@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
 func TestClassifyAccountProviderError(t *testing.T) {
@@ -18,10 +18,10 @@ func TestClassifyAccountProviderError(t *testing.T) {
 		want  string
 	}{
 		{"active", nil, false, ProviderStateActive},
-		{"locked", digitalocean.HTTPError{Status: 422, Code: "unprocessable_entity", Message: "There is currently a lock on the account, please log in to the control panel and contact support."}, true, ProviderStateLocked},
-		{"token", digitalocean.HTTPError{Status: 401}, false, ProviderStateTokenInvalid},
-		{"permission", digitalocean.HTTPError{Status: 403}, false, ProviderStatePermissionDenied},
-		{"rate", digitalocean.HTTPError{Status: 429}, false, ProviderStateRateLimited},
+		{"locked", &providers.Error{Class: providers.ErrorAccountLocked}, true, ProviderStateLocked},
+		{"token", &providers.Error{Class: providers.ErrorAuthentication}, false, ProviderStateTokenInvalid},
+		{"permission", &providers.Error{Class: providers.ErrorPermissionDenied}, false, ProviderStatePermissionDenied},
+		{"rate", &providers.Error{Class: providers.ErrorRateLimited}, false, ProviderStateRateLimited},
 		{"proxy", fmt.Errorf("wrapped: %w", network.ErrProxyRequired), true, ProviderStateProxyError},
 		{"transport", errors.New("connection reset"), false, ProviderStateTransportError},
 	}

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"log"
 	"time"
 )
@@ -13,7 +14,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 	if maxAge <= 0 {
 		maxAge = 90 * time.Second
 	}
-	rows, err := c.DB.QueryContext(ctx, `SELECT id::text FROM accounts WHERE enabled=true AND provider='digitalocean'`)
+	rows, err := c.DB.QueryContext(ctx, `SELECT id::text FROM accounts WHERE enabled=true AND deleted_at IS NULL`)
 	if err != nil {
 		return
 	}
@@ -33,7 +34,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			continue
 		}
 		var fresh bool
-		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
+		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
 		if fresh && providerState == ProviderStateActive && providerError == "" {
 			continue
 		}
@@ -44,7 +45,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		func() {
 			defer c.DB.ExecContext(context.Background(), `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "provider-refresh:"+id)
 			// Re-check after acquiring the lock: another coordinator may just have refreshed.
-			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
+			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
 			if fresh && providerState == ProviderStateActive && providerError == "" {
 				return
 			}
@@ -55,7 +56,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
 				return
 			}
-			d, err := rt.Provider.Discover(ctx)
+			snapshotReader, ok := rt.Driver.(providers.SnapshotReader)
+			if !ok {
+				c.RecordProviderObservation(ctx, id, ProviderStatePermissionDenied, ErrProviderComputeUnsupported, "provider snapshot capability unavailable")
+				return
+			}
+			obs, raw, err := snapshotReader.ObserveSnapshot(ctx)
 			if rt.Gateway != nil {
 				rt.Gateway.CloseIdleConnections()
 			}
@@ -68,30 +74,30 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			providerState := "active"
-			canCreate := d.Account.Status == "active" && d.Account.DropletLimit > len(d.Droplets)
-			if d.Account.Status != "active" {
+			canCreate := obs.Account.Status == "active" && obs.Capacity.ComputeLimit > obs.Capacity.ComputeInUse
+			if obs.Account.Status != "active" {
 				providerState = "disabled"
-			} else if d.Account.DropletLimit <= len(d.Droplets) {
+			} else if obs.Capacity.ComputeLimit <= obs.Capacity.ComputeInUse {
 				providerState = "cannot_create"
 			}
-			b, _ := json.Marshal(d)
+			canonical, _ := json.Marshal(obs)
 			var oldLimit int
-			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&oldLimit)
+			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,(data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&oldLimit)
 			var snapshotID string
-			if err = c.DB.QueryRowContext(ctx, `INSERT INTO provider_snapshots(id,account_id,provider,version,data) VALUES(gen_random_uuid(),$1,'digitalocean',1,$2) RETURNING id::text`, id, b).Scan(&snapshotID); err != nil {
+			if err = c.DB.QueryRowContext(ctx, `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4) RETURNING id::text`, id, rt.Config.Provider, raw, canonical).Scan(&snapshotID); err != nil {
 				return
 			}
-			newLimit := d.Account.DropletLimit
+			newLimit := obs.Capacity.ComputeLimit
 			if oldLimit > 0 && newLimit > 0 && oldLimit != newLimit {
 				_, _ = c.DB.ExecContext(ctx, `INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)`, id, oldLimit, newLimit, newLimit-oldLimit, snapshotID)
 				log.Printf("capacity change %s: %d -> %d (%+d)", id, oldLimit, newLimit, newLimit-oldLimit)
 			}
-			detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_account_status": d.Account.Status, "can_create": canCreate, "droplet_limit": d.Account.DropletLimit, "provider_droplets": len(d.Droplets)})
+			detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_account_status": obs.Account.Status, "can_create": canCreate, "droplet_limit": obs.Capacity.ComputeLimit, "provider_droplets": obs.Capacity.ComputeInUse})
 			runtimeStatus := "READY"
 			if !canCreate {
 				runtimeStatus = "PROVIDER_BLOCKED"
 			}
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, d.Account.UUID, d.Account.Email, runtimeStatus, string(detail))
+			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, runtimeStatus, string(detail))
 			c.ReconcileOwnedOrphans(ctx, id)
 		}()
 	}

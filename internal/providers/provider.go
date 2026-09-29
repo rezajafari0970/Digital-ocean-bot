@@ -45,6 +45,15 @@ type InventoryReader interface {
 	Inventory(context.Context) (Inventory, error)
 }
 
+type ObservationReader interface {
+	Observe(context.Context) (Observation, error)
+}
+
+// SnapshotReader is a temporary compatibility bridge while legacy admin views still consume provider-shaped JSON.
+type SnapshotReader interface {
+	ObserveSnapshot(context.Context) (Observation, []byte, error)
+}
+
 type Observer interface {
 	Observe(context.Context) (Observation, error)
 }

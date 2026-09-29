@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"strings"
 	"time"
 )
@@ -14,19 +15,14 @@ import (
 func (c Container) ReconcileOwnedOrphans(ctx context.Context, accountID string) {
 	var raw []byte
 	var at time.Time
-	if err := c.DB.QueryRowContext(ctx, `SELECT data,created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&raw, &at); err != nil || time.Since(at) > 2*time.Minute {
+	if err := c.DB.QueryRowContext(ctx, `SELECT canonical,created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&raw, &at); err != nil || time.Since(at) > 2*time.Minute {
 		return
 	}
-	var snap struct {
-		Droplets []struct {
-			ID   int      `json:"id"`
-			Tags []string `json:"tags"`
-		} `json:"Droplets"`
-	}
+	var snap providers.Observation
 	if json.Unmarshal(raw, &snap) != nil {
 		return
 	}
-	for _, x := range snap.Droplets {
+	for _, x := range snap.Inventory.Servers {
 		owned := false
 		depID := ""
 		for _, t := range x.Tags {
