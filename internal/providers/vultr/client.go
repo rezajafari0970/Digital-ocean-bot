@@ -4,18 +4,22 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const defaultBaseURL = "https://api.vultr.com/v2"
 
 type HTTPError struct {
-	Status  int
-	Message string
+	Status     int
+	Message    string
+	RetryAfter time.Duration
 }
 
 func (e HTTPError) Error() string { return fmt.Sprintf("vultr http %d: %s", e.Status, e.Message) }
@@ -30,6 +34,37 @@ func NewClient(h *http.Client, token string) *Client {
 	return &Client{http: h, token: strings.TrimSpace(token), base: defaultBaseURL}
 }
 func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
+	if method != http.MethodGet {
+		return c.doOnce(ctx, method, path, body, out)
+	}
+	for attempt := 0; attempt < 3; attempt++ {
+		err := c.doOnce(ctx, method, path, body, out)
+		if err == nil {
+			return nil
+		}
+		var h HTTPError
+		if !errors.As(err, &h) || h.Status != 429 || attempt == 2 {
+			return err
+		}
+		d := h.RetryAfter
+		if d <= 0 {
+			d = time.Duration(250*(1<<attempt)) * time.Millisecond
+		}
+		if d > 5*time.Second {
+			d = 5 * time.Second
+		}
+		t := time.NewTimer(d)
+		select {
+		case <-ctx.Done():
+			t.Stop()
+			return ctx.Err()
+		case <-t.C:
+		}
+	}
+	return nil
+}
+
+func (c *Client) doOnce(ctx context.Context, method, path string, body any, out any) error {
 	var rd io.Reader
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -64,7 +99,13 @@ func (c *Client) do(ctx context.Context, method, path string, body any, out any)
 		if x.Error == "" {
 			x.Error = strings.TrimSpace(string(b))
 		}
-		return HTTPError{Status: resp.StatusCode, Message: x.Error}
+		var retry time.Duration
+		if v := strings.TrimSpace(resp.Header.Get("Retry-After")); v != "" {
+			if n, e := strconv.Atoi(v); e == nil && n >= 0 {
+				retry = time.Duration(n) * time.Second
+			}
+		}
+		return HTTPError{Status: resp.StatusCode, Message: x.Error, RetryAfter: retry}
 	}
 	if out != nil && len(b) > 0 {
 		return json.Unmarshal(b, out)

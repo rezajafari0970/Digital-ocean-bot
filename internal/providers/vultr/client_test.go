@@ -26,3 +26,34 @@ func TestClientAuthorizationAndHealth(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGET429RetriesButMutationDoesNot(t *testing.T) {
+	gets := 0
+	posts := 0
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			gets++
+			if gets < 2 {
+				w.Header().Set("Retry-After", "0")
+				w.WriteHeader(429)
+				_, _ = w.Write([]byte(`{"error":"slow"}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{"account":{"email":"e"}}`))
+			return
+		}
+		posts++
+		w.WriteHeader(429)
+		_, _ = w.Write([]byte(`{"error":"slow"}`))
+	}))
+	defer s.Close()
+	c := NewClient(s.Client(), "x")
+	c.base = s.URL
+	var a accountResponse
+	if err := c.do(context.Background(), http.MethodGet, "/account", nil, &a); err != nil || gets != 2 {
+		t.Fatalf("get err=%v count=%d", err, gets)
+	}
+	if err := c.do(context.Background(), http.MethodPost, "/instances", map[string]string{}, nil); err == nil || posts != 1 {
+		t.Fatalf("post err=%v count=%d", err, posts)
+	}
+}

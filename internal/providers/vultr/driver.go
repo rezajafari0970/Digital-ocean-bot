@@ -34,7 +34,7 @@ type Driver struct{ client *Client }
 
 func (d *Driver) Name() string { return "vultr" }
 func (d *Driver) Capabilities() providers.Capabilities {
-	return providers.Capabilities{Account: true, Catalog: true, Inventory: true}
+	return providers.Capabilities{Account: true, Catalog: true, Compute: true, SSHKeys: true, Inventory: true}
 }
 func (d *Driver) Health(ctx context.Context) error {
 	var x accountResponse
@@ -67,5 +67,17 @@ func normalizeError(op string, err error) error {
 			}
 		}
 	}
-	return &providers.Error{Class: class, Operation: op, Message: err.Error(), Cause: err}
+	pe := &providers.Error{Class: class, Operation: op, Message: err.Error(), Cause: err}
+	if errors.As(err, &h) {
+		pe.StatusCode = h.Status
+		pe.RetryAfter = h.RetryAfter
+	}
+	return pe
 }
+
+var _ providers.Driver = (*Driver)(nil)
+var _ providers.AccountReader = (*Driver)(nil)
+var _ providers.CatalogReader = (*Driver)(nil)
+var _ providers.ComputeDriver = (*Driver)(nil)
+var _ providers.SSHKeyDriver = (*Driver)(nil)
+var _ providers.ObservationReader = (*Driver)(nil)

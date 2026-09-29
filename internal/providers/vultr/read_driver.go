@@ -84,8 +84,14 @@ func normalizeServer(x instance) providers.Server {
 	case "pending", "installing":
 		state = providers.ServerStateProvisioning
 	case "active":
-		state = providers.ServerStateReady
-		ready = strings.TrimSpace(x.MainIP) != "" && x.MainIP != "0.0.0.0"
+		serverOK := x.ServerStatus == "" || strings.EqualFold(x.ServerStatus, "ok")
+		powerOK := x.PowerStatus == "" || strings.EqualFold(x.PowerStatus, "running")
+		ready = strings.TrimSpace(x.MainIP) != "" && x.MainIP != "0.0.0.0" && serverOK && powerOK
+		if ready {
+			state = providers.ServerStateReady
+		} else {
+			state = providers.ServerStateProvisioning
+		}
 	case "suspended", "stopped":
 		state = providers.ServerStateStopped
 	}
