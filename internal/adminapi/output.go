@@ -8,11 +8,8 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -76,9 +73,8 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 	}
 	out := s.collectRuntimeOutput(ctx, p, runtime)
 	if out != "" {
-		s.storePanelOutput(p.ID, out)
 		s.persistOutputSnapshot(ctx, p.ID, out)
-		return out
+		return ""
 	}
 	if out == "" {
 		log.Printf("output refresh panel=%s empty_output", p.ID)
@@ -121,7 +117,10 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 		return
 	}
 	for _, p := range panels {
-		s.refreshPanelOutputAsync(p)
+		if ctx.Err() != nil {
+			return
+		}
+		_ = s.refreshPanelOutput(ctx, p)
 	}
 }
 
@@ -238,77 +237,5 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
-	defer cancel()
-	source := readyworker.SQLSource{DB: s.DB}
-	panels, e := source.EligibleReadyPanels(ctx)
-	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
-		minutes, err := strconv.Atoi(raw)
-		if err != nil || minutes < 1 || minutes > 1440 {
-			http.Error(w, "invalid expiry window", http.StatusBadRequest)
-			return
-		}
-		panels, e = source.EligibleExpiringPanels(ctx, minutes)
-	}
-	if e != nil {
-		writeJSON(w, 500, errorBody())
-		return
-	}
-	active := make(map[string]bool, len(panels))
-	for _, p := range panels {
-		active[p.ID] = true
-	}
-	s.OutputCacheMu.Lock()
-	for id := range s.OutputCache {
-		if !active[id] {
-			delete(s.OutputCache, id)
-		}
-	}
-	s.OutputCacheMu.Unlock()
-	results := make([]string, len(panels))
-	sem := make(chan struct{}, 8)
-	var wg sync.WaitGroup
-	for i, p := range panels {
-		wg.Add(1)
-		go func(i int, p readyworker.Panel) {
-			defer wg.Done()
-			select {
-			case sem <- struct{}{}:
-				defer func() { <-sem }()
-			case <-ctx.Done():
-				return
-			}
-			results[i] = s.collectPanelOutput(ctx, p)
-		}(i, p)
-	}
-	wg.Wait()
-	// Randomized round-robin across servers: configs from one server are not
-	// emitted as one large consecutive block.
-	rand.Shuffle(len(results), func(i, j int) { results[i], results[j] = results[j], results[i] })
-	queues := make([][]string, 0, len(results))
-	for _, v := range results {
-		lines := strings.FieldsFunc(v, func(r rune) bool { return r == '\n' || r == '\r' })
-		if len(lines) > 0 {
-			rand.Shuffle(len(lines), func(i, j int) { lines[i], lines[j] = lines[j], lines[i] })
-			queues = append(queues, lines)
-		}
-	}
-	var out strings.Builder
-	for remaining := true; remaining; {
-		remaining = false
-		rand.Shuffle(len(queues), func(i, j int) { queues[i], queues[j] = queues[j], queues[i] })
-		for i := range queues {
-			if len(queues[i]) == 0 {
-				continue
-			}
-			remaining = true
-			out.WriteString(queues[i][0])
-			out.WriteByte('\n')
-			queues[i] = queues[i][1:]
-		}
-	}
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
-	w.Header().Set("Pragma", "no-cache")
-	_, _ = w.Write([]byte(out.String()))
+	s.outputSnapshotResponse(w, r)
 }
