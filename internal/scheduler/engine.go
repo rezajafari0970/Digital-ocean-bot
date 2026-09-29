@@ -52,7 +52,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
 			COALESCE((SELECT jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0),
 			(SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state IN ('planned','running','verifying','unknown') AND COALESCE(resource_id,'')=''),
-			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
+			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
 			(SELECT desired_server_count FROM accounts WHERE id=$1),
 			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
 			(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
@@ -72,7 +72,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		}
 		// Active deployments that already own a droplet count in managed. Only pre-create deployments are pending capacity.
 		var preCreate int
-		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)
+		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)
 		needed := desired - managed - preCreate
 		if needed <= 0 {
 			_ = e.Leases.Complete(ctx, x, now)

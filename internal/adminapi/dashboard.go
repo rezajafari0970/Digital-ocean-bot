@@ -328,7 +328,7 @@ COALESCE(runtime,''),COALESCE(audit_status,'unknown'),COALESCE(expected_country,
 	d.Runtime["failures"] = failures
 	d.Runtime["retry_after"] = retry.Time
 	var running, ready, failed int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED')),count(*) FILTER(WHERE state='READY'),count(*) FILTER(WHERE state='FAILED') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready, &failed)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE state='READY'),count(*) FILTER(WHERE state='FAILED') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready, &failed)
 	d.Deployments = map[string]any{"active_now": running, "ready_now": ready, "historical_failures": failed}
 	rowsFail, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,current_step,attempt,COALESCE(last_error,''),updated_at FROM deployments WHERE account_id=$1 AND state='FAILED' ORDER BY updated_at DESC LIMIT 10`, id)
 	if rowsFail != nil {

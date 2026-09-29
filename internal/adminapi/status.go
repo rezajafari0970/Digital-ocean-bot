@@ -46,7 +46,7 @@ func (s *Server) audit(w http.ResponseWriter, r *http.Request) {
 func (s *Server) system(w http.ResponseWriter, r *http.Request) {
 	var accounts, deployments, workers int
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM accounts WHERE enabled=true`).Scan(&accounts)
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED')`).Scan(&deployments)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`).Scan(&deployments)
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'`).Scan(&workers)
 	writeJSON(w, 200, map[string]any{"enabled_accounts": accounts, "active_deployments": deployments, "live_workers": workers})
 }

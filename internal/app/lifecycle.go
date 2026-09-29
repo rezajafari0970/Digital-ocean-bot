@@ -45,7 +45,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			// Otherwise overlapping expiry windows can create a replacement burst.
 			var active, maxConcurrent int
 			if err := c.DB.QueryRowContext(ctx, `SELECT
-				(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
+				(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
 				COALESCE((SELECT NULLIF(max_concurrent,0) FROM schedules WHERE account_id=$1 AND profile_id=$2 ORDER BY created_at DESC LIMIT 1),1)`, item.AccountID, item.ProfileID).Scan(&active, &maxConcurrent); err != nil {
 				return err
 			}
@@ -166,7 +166,7 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 	if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {
 		return err
 	}
-	rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') RETURNING id::text`, accountID, providerID)
+	rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') RETURNING id::text`, accountID, providerID)
 	if err != nil {
 		return err
 	}
