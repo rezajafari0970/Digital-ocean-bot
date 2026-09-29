@@ -4,24 +4,51 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"github.com/lib/pq"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-func (s *Server) persistOutputSnapshot(ctx context.Context, panelID, value string) {
+func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, records []outputRecord) {
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return
 	}
 	defer tx.Rollback()
-	for _, uri := range strings.Fields(value) {
-		if !strings.HasPrefix(uri, "vless://") {
+	if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz) ON COMMIT DROP`); err != nil {
+		return
+	}
+	copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until"))
+	if err != nil {
+		return
+	}
+	for _, rec := range records {
+		if !strings.HasPrefix(rec.URI, "vless://") {
 			continue
 		}
-		_, _ = tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri) VALUES($1,$2) ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now()`, panelID, uri)
+		if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil); err != nil {
+			_ = copyStmt.Close()
+			return
+		}
 	}
-	_, _ = tx.ExecContext(ctx, `DELETE FROM output_config_snapshots WHERE panel_id=$1 AND last_seen_at < now()-interval '5 minutes'`, panelID)
+	if _, err = copyStmt.ExecContext(ctx); err != nil {
+		_ = copyStmt.Close()
+		return
+	}
+	if err = copyStmt.Close(); err != nil {
+		return
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until)
+SELECT $1,uri,visible_until FROM (SELECT DISTINCT ON(uri) uri,visible_until FROM current_output_uris ORDER BY uri) current_output_uris
+ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until
+WHERE output_config_snapshots.last_seen_at < now()-interval '10 seconds'
+   OR output_config_snapshots.visible_until IS DISTINCT FROM excluded.visible_until`, panelID); err != nil {
+		return
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM output_config_snapshots o WHERE o.panel_id=$1 AND NOT EXISTS (SELECT 1 FROM current_output_uris c WHERE c.uri=o.uri)`, panelID); err != nil {
+		return
+	}
 	_ = tx.Commit()
 }
 func newShareToken() string {
@@ -53,7 +80,7 @@ func (s *Server) sharedOutput(w http.ResponseWriter, r *http.Request) {
 	s.outputSnapshotResponse(w, r)
 }
 func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) {
-	where := ` WHERE p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') `
+	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	args := []any{}
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)

@@ -28,6 +28,20 @@ type outputCacheEntry struct {
 	At    time.Time
 }
 
+type outputRecord struct {
+	URI          string
+	VisibleUntil *time.Time
+}
+
+func outputVisibleUntil(raw any) *time.Time {
+	expiryMillis, ok := raw.(float64)
+	if !ok || expiryMillis <= 0 {
+		return nil
+	}
+	t := time.UnixMilli(int64(expiryMillis)).UTC().Add(-10 * time.Second)
+	return &t
+}
+
 func outputMap(raw json.RawMessage) (map[string]any, error) {
 	var m map[string]any
 	e := json.Unmarshal(raw, &m)
@@ -71,12 +85,12 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		log.Printf("output refresh panel=%s acquire_error=%v", p.ID, err)
 		return s.cachedPanelOutput(p.ID, 24*time.Hour)
 	}
-	out := s.collectRuntimeOutput(ctx, p, runtime)
-	if out != "" {
-		s.persistOutputSnapshot(ctx, p.ID, out)
+	records := s.collectRuntimeOutput(ctx, p, runtime)
+	if len(records) > 0 {
+		s.persistOutputSnapshot(ctx, p.ID, records)
 		return ""
 	}
-	if out == "" {
+	if len(records) == 0 {
 		log.Printf("output refresh panel=%s empty_output", p.ID)
 	}
 	return s.cachedPanelOutput(p.ID, 24*time.Hour)
@@ -126,16 +140,16 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 	}
 }
 
-func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) string {
+func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) []outputRecord {
 	if runtime == nil || runtime.Session == nil {
-		return ""
+		return nil
 	}
 	var host string
 	if s.DB.QueryRowContext(ctx,
 		"SELECT d.host FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true",
 		p.ID,
 	).Scan(&host) != nil {
-		return ""
+		return nil
 	}
 	keys := map[int64]string{}
 	rows, err := s.DB.QueryContext(ctx,
@@ -155,9 +169,10 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	raws, err := runtime.Session.Snapshot(ctx)
 	if err != nil {
 		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
-		return ""
+		return nil
 	}
 	var out strings.Builder
+	records := make([]outputRecord, 0)
 	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {
 		var in outputInbound
@@ -235,6 +250,8 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			}
 			link, e := export.VLESSRealityURI(export.VLESSReality{UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Flow: fmt.Sprint(cl["flow"]), Remark: remark})
 			if e == nil {
+				visibleUntil := outputVisibleUntil(cl["expiryTime"])
+				records = append(records, outputRecord{URI: link, VisibleUntil: visibleUntil})
 				out.WriteString(link)
 				out.WriteByte('\n')
 				generated++
@@ -244,7 +261,8 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 	}
 	log.Printf("output collect panel=%s host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", p.ID, host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
-	return out.String()
+	s.storePanelOutput(p.ID, out.String())
+	return records
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {

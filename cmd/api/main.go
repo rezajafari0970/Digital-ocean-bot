@@ -28,7 +28,7 @@ func main() {
 	api.WebPath = settings.WebPath
 	go api.WarmOutputCache(ctx)
 	go func() {
-		ticker := time.NewTicker(60 * time.Second)
+		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
