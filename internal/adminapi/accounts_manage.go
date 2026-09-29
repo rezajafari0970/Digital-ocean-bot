@@ -24,6 +24,7 @@ type accountUpdate struct {
 	FallbackAnyRegion      *bool    `json:"fallback_any_region"`
 	NetworkMode            string   `json:"network_mode"`
 	ProxyID                string   `json:"proxy_id"`
+	ProxyIDs               []string `json:"proxy_ids"`
 }
 
 func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
@@ -38,8 +39,12 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
+	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)
+	if x.NetworkMode == "proxy_required" && len(x.ProxyIDs) > 0 {
+		x.ProxyID = x.ProxyIDs[0]
+	}
 	var currentLimit int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT (ps.data->'Limits'->>'DropletLimit')::int FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
 	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit); code != "" {
 		writeJSON(w, 400, map[string]string{"error": code})
 		return
@@ -148,7 +153,12 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if x.NetworkMode == "proxy_required" {
-		_, _ = tx.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,0,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET enabled=true,updated_at=now()`, id, x.ProxyID)
+		if err = syncAccountProxyPool(r.Context(), tx, id, x.ProxyIDs); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "proxy_pool_sync_failed", "detail": err.Error()})
+			return
+		}
+	} else {
+		_, _ = tx.ExecContext(r.Context(), `UPDATE account_proxy_pool SET enabled=false,updated_at=now() WHERE account_id=$1`, id)
 	}
 	if oldMode != x.NetworkMode || oldProxyID != x.ProxyID {
 		_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)

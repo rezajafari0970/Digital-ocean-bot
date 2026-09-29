@@ -118,7 +118,18 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		if v, ok := providerMeta["provider_error"].(string); ok && v != "" && providerState != "ACTIVE" {
 			providerReason = v
 		}
-		out = append(out, map[string]any{"id": id, "name": name, "email": email, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_reason": providerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "provider_droplets": providerDroplets, "droplet_available": max(0, dropletLimit-providerDroplets), "last_droplet_created": ldc, "last_droplet_deleted": ldd, "next_droplet_delete": ndd, "capacity_old": co, "capacity_new": cn, "capacity_delta": cd, "capacity_changed_at": cca})
+		var proxyIDs []string
+		pr, _ := s.DB.QueryContext(r.Context(), `SELECT proxy_id::text FROM account_proxy_pool WHERE account_id=$1 AND enabled=true ORDER BY priority,proxy_id`, id)
+		if pr != nil {
+			for pr.Next() {
+				var pid string
+				if pr.Scan(&pid) == nil {
+					proxyIDs = append(proxyIDs, pid)
+				}
+			}
+			pr.Close()
+		}
+		out = append(out, map[string]any{"id": id, "name": name, "email": email, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "proxy_ids": proxyIDs, "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_reason": providerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "provider_droplets": providerDroplets, "droplet_available": max(0, dropletLimit-providerDroplets), "last_droplet_created": ldc, "last_droplet_deleted": ldd, "next_droplet_delete": ndd, "capacity_old": co, "capacity_new": cn, "capacity_delta": cd, "capacity_changed_at": cca})
 	}
 	writeJSON(w, 200, out)
 }

@@ -107,6 +107,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	var proxyAdapter string
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(p.adapter,'generic') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&proxyAdapter)
 	d.Network["egress_mode"] = proxyAdapter
+	var poolSize, healthyPool int
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE ap.enabled),count(*) FILTER(WHERE ap.enabled AND p.status='healthy') FROM account_proxy_pool ap JOIN proxies p ON p.id=ap.proxy_id WHERE ap.account_id=$1`, id).Scan(&poolSize, &healthyPool)
+	d.Network["proxy_pool_size"] = poolSize
+	d.Network["healthy_proxy_count"] = healthyPool
 	var opKind, opState, opResource string
 	var opAt sql.NullTime
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT kind,state,COALESCE(resource_id,''),updated_at FROM operations WHERE account_id=$1 AND kind IN ('CREATE_DROPLET','DELETE_DROPLET') ORDER BY updated_at DESC LIMIT 1`, id).Scan(&opKind, &opState, &opResource, &opAt); err == nil {
@@ -126,7 +130,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	// Backfill identity from already-observed proxy data so existing accounts do
 	// not stay unknown after this feature is introduced.
 	if proxyID.Valid {
-		_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country) SELECT $1,'UTC','en-US',p.exit_ip,CASE WHEN family(p.exit_ip)=4 THEN host(network(set_masklen(p.exit_ip,24)))||'/24' ELSE host(network(set_masklen(p.exit_ip,48)))||'/48' END,COALESCE(p.asn,''),COALESCE(p.country,'') FROM proxies p WHERE p.id=$2 AND p.exit_ip IS NOT NULL ON CONFLICT(account_id) DO NOTHING`, id, proxyID.String)
+		_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country) SELECT $1,'UTC','en-US',p.exit_ip,host(network(set_masklen(p.exit_ip,24)))||'/24',COALESCE(p.asn,''),COALESCE(p.country,'') FROM proxies p WHERE p.id=$2 AND p.exit_ip IS NOT NULL AND family(p.exit_ip)=4 ON CONFLICT(account_id) DO NOTHING`, id, proxyID.String)
 		// Mark fallback identity as needing an explicit proxy test; do not perform
 		// external geo requests merely because Details was opened.
 		var fallback bool

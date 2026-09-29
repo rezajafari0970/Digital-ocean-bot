@@ -185,13 +185,7 @@ WHERE account_id=$1
 				WHERE account_id<>$1
 				AND (
 					exit_ip=$2::inet
-					OR subnet_key=(
-						CASE
-						WHEN family($2::inet)=4
-						THEN host(network(set_masklen($2::inet,24)))||'/24'
-						ELSE host(network(set_masklen($2::inet,48)))||'/48'
-						END
-					)
+					OR subnet_key=host(network(set_masklen($2::inet,24)))||'/24'
 				)
 			)
 		`, accountID, geo.IP).Scan(&collision)
@@ -209,11 +203,7 @@ WHERE account_id=$1
 			UPDATE account_network_identities
 			SET sticky_session=NULL,
 			    exit_ip=$2::inet,
-			    subnet_key=CASE
-				    WHEN family($2::inet)=4
-				    THEN host(network(set_masklen($2::inet,24)))||'/24'
-				    ELSE host(network(set_masklen($2::inet,48)))||'/48'
-			    END,
+			    subnet_key=host(network(set_masklen($2::inet,24)))||'/24',
 			    country=$3,
 			    timezone=COALESCE(NULLIF($4,''),timezone),
 			    locale=$5,
@@ -278,13 +268,13 @@ WHERE account_id=$1
 			return nil
 		}
 		var preferredCollision bool
-		if c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(CASE WHEN family($2::inet)=4 THEN host(network(set_masklen($2::inet,24)))||'/24' ELSE host(network(set_masklen($2::inet,48)))||'/48' END)))`, accountID, preferredGeo.IP).Scan(&preferredCollision) != nil || preferredCollision {
+		if c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, preferredGeo.IP).Scan(&preferredCollision) != nil || preferredCollision {
 			return nil
 		}
 		var priorIP, priorCountry, priorTZ, priorLocale string
 		_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),''),COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorIP, &priorCountry, &priorTZ, &priorLocale)
 		newLocale := geoctx.LocaleForCountry(preferredGeo.CountryCode)
-		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=CASE WHEN family($3::inet)=4 THEN host(network(set_masklen($3::inet,24)))||'/24' ELSE host(network(set_masklen($3::inet,48)))||'/48' END,country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.Timezone, newLocale)
+		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.Timezone, newLocale)
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
 		if pgErr == nil {
@@ -322,7 +312,7 @@ WHERE account_id=$1
 		return ErrIsolationWait
 	}
 	var collision bool
-	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(CASE WHEN family($2::inet)=4 THEN host(network(set_masklen($2::inet,24)))||'/24' ELSE host(network(set_masklen($2::inet,48)))||'/48' END)))`, accountID, geo.IP).Scan(&collision)
+	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, geo.IP).Scan(&collision)
 	if err != nil {
 		return err
 	}
@@ -333,7 +323,7 @@ WHERE account_id=$1
 	var priorCountry, priorTZ, priorLocale string
 	_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorCountry, &priorTZ, &priorLocale)
 	newLocale := geoctx.LocaleForCountry(geo.CountryCode)
-	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=CASE WHEN family($3::inet)=4 THEN host(network(set_masklen($3::inet,24)))||'/24' ELSE host(network(set_masklen($3::inet,48)))||'/48' END,country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$7,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.Timezone, newLocale, allowFallback)
+	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$7,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.Timezone, newLocale, allowFallback)
 	if err == nil && (priorCountry != geo.Country || priorTZ != geo.Timezone || priorLocale != newLocale) {
 	}
 	if err != nil {

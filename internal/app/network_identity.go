@@ -111,7 +111,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 		return err
 	}
 	var collision bool
-	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(CASE WHEN family($2::inet)=4 THEN host(network(set_masklen($2::inet,24)))||'/24' ELSE host(network(set_masklen($2::inet,48)))||'/48' END)))`, accountID, ip).Scan(&collision)
+	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, ip).Scan(&collision)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, "proxy exit IP/subnet collision: "+ip)
 		return ErrIsolationWait
 	}
-	_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,exit_ip,subnet_key) VALUES($1,$2::inet,CASE WHEN family($2::inet)=4 THEN host(network(set_masklen($2::inet,24)))||'/24' ELSE host(network(set_masklen($2::inet,48)))||'/48' END) ON CONFLICT(account_id) DO UPDATE SET exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,updated_at=now()`, accountID, ip)
+	_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,exit_ip,subnet_key) VALUES($1,$2::inet,host(network(set_masklen($2::inet,24)))||'/24') ON CONFLICT(account_id) DO UPDATE SET exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,updated_at=now()`, accountID, ip)
 	if err != nil {
 		return err
 	}

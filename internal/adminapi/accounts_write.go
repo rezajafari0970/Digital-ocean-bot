@@ -19,6 +19,7 @@ type accountWrite struct {
 	Regions                []string `json:"regions"`
 	NetworkMode            string   `json:"network_mode"`
 	ProxyID                string   `json:"proxy_id"`
+	ProxyIDs               []string `json:"proxy_ids"`
 	IntervalSeconds        int      `json:"interval_seconds"`
 	BuildSpacingMinutes    int      `json:"build_spacing_minutes"`
 	BuildSpacingMaxMinutes int      `json:"build_spacing_max_minutes"`
@@ -44,6 +45,10 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if json.NewDecoder(r.Body).Decode(&x) != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
 		return
+	}
+	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)
+	if x.NetworkMode == "proxy_required" && len(x.ProxyIDs) > 0 {
+		x.ProxyID = x.ProxyIDs[0]
 	}
 	if x.Provider == "" {
 		x.Provider = "digitalocean"
@@ -155,9 +160,11 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		return
 	}
 	if x.NetworkMode == "proxy_required" {
-		if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,0,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET enabled=true,updated_at=now()`, id, x.ProxyID); err != nil {
-			writeJSON(w, 500, map[string]string{"error": "proxy_pool_sync_failed", "detail": err.Error()})
-			return
+		for i, pid := range x.ProxyIDs {
+			if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,$3,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET priority=EXCLUDED.priority,enabled=true,updated_at=now()`, id, pid, i); err != nil {
+				writeJSON(w, 500, map[string]string{"error": "proxy_pool_sync_failed", "detail": err.Error()})
+				return
+			}
 		}
 	}
 	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
