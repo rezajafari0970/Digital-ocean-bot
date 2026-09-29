@@ -6,9 +6,11 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"io"
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 )
 
 type previewAccount struct {
@@ -42,6 +44,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	var client *http.Client
 	var closeFn func()
+	previewExitIP := ""
 	if x.ProxyID != "" {
 		var px network.Proxy
 		var user, ref, adapter string
@@ -70,6 +73,16 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 		client = g.Client
 		closeFn = g.CloseIdleConnections
+		probeCtx, probeCancel := context.WithTimeout(r.Context(), 6*time.Second)
+		probeReq, _ := http.NewRequestWithContext(probeCtx, http.MethodGet, "https://api.ipify.org", nil)
+		if probeResp, probeErr := client.Do(probeReq); probeErr == nil && probeResp != nil {
+			b, _ := io.ReadAll(io.LimitReader(probeResp.Body, 128))
+			probeResp.Body.Close()
+			if probeResp.StatusCode >= 200 && probeResp.StatusCode < 300 {
+				previewExitIP = strings.TrimSpace(string(b))
+			}
+		}
+		probeCancel()
 	} else {
 		b, err := network.NewIsolatedDirectClient("preview")
 		if err != nil {
@@ -93,17 +106,17 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	account, err := ar.Account(r.Context())
 	if err != nil {
-		writeProviderPreviewError(w, err)
+		writeProviderPreviewError(w, err, previewExitIP)
 		return
 	}
 	capacity, capErr := ar.Capacity(r.Context())
 	if capErr != nil {
-		writeProviderPreviewError(w, capErr)
+		writeProviderPreviewError(w, capErr, previewExitIP)
 		return
 	}
 	catalog, err := cr.Catalog(r.Context())
 	if err != nil {
-		writeProviderPreviewError(w, err)
+		writeProviderPreviewError(w, err, previewExitIP)
 		return
 	}
 	regions := catalog.Regions
@@ -131,10 +144,14 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	meta, _ := s.Container.Providers.Metadata(driver.Name())
 	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "policy": meta, "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
 }
-func writeProviderPreviewError(w http.ResponseWriter, err error) {
+func writeProviderPreviewError(w http.ResponseWriter, err error, exitIP string) {
 	switch providers.Class(err) {
 	case providers.ErrorAuthentication:
-		writeJSON(w, 401, map[string]string{"error": "provider_credential_invalid", "detail": "Provider rejected these credentials."})
+		detail := "Provider rejected these credentials."
+		if exitIP != "" {
+			detail += " Proxy exit IP: " + exitIP
+		}
+		writeJSON(w, 401, map[string]string{"error": "provider_credential_invalid", "detail": detail, "exit_ip": exitIP})
 	case providers.ErrorPermissionDenied, providers.ErrorAccountLocked:
 		writeJSON(w, 403, map[string]string{"error": "provider_permission_denied", "detail": err.Error()})
 	case providers.ErrorRateLimited:
