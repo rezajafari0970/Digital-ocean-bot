@@ -91,6 +91,11 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeProviderPreviewError(w, err)
 		return
 	}
+	capacity, capErr := ar.Capacity(r.Context())
+	if capErr != nil {
+		writeProviderPreviewError(w, capErr)
+		return
+	}
 	catalog, err := cr.Catalog(r.Context())
 	if err != nil {
 		writeProviderPreviewError(w, err)
@@ -118,7 +123,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "account": account, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
+	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
 }
 func writeProviderPreviewError(w http.ResponseWriter, err error) {
 	switch providers.Class(err) {

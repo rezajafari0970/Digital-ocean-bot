@@ -56,7 +56,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": providerState, "provider_reason": providerReason, "can_create": canCreate}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	var total, managed, active int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*),count(*) FILTER(WHERE managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state='active' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
 	var limit int
@@ -86,8 +86,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 			freshnessStatus = "stale"
 		}
 	}
-	d.Capacity = map[string]any{"managed_droplets": managedDroplets, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
+	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
 	if lastRefresh.Valid {
+		d.Capacity["server_limit"] = limit
+		d.Capacity["provider_servers"] = providerDroplets
 		d.Capacity["droplet_limit"] = limit
 		d.Capacity["provider_droplets"] = providerDroplets
 		d.Capacity["available"] = providerAvailable
