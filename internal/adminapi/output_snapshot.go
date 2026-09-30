@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"github.com/lib/pq"
 	"net/http"
@@ -23,11 +24,18 @@ func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, reco
 	if err != nil {
 		return
 	}
+	var serverCutoff sql.NullTime
+	_ = tx.QueryRowContext(ctx, `SELECT dr.expires_at-interval '10 seconds' FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id WHERE p.id=$1`, panelID).Scan(&serverCutoff)
 	for _, rec := range records {
 		if !strings.HasPrefix(rec.URI, "vless://") {
 			continue
 		}
-		if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil); err != nil {
+		visibleUntil := rec.VisibleUntil
+		if serverCutoff.Valid && (visibleUntil == nil || serverCutoff.Time.Before(*visibleUntil)) {
+			cutoff := serverCutoff.Time.UTC()
+			visibleUntil = &cutoff
+		}
+		if _, err = copyStmt.ExecContext(ctx, rec.URI, visibleUntil); err != nil {
 			_ = copyStmt.Close()
 			return
 		}
@@ -80,7 +88,7 @@ func (s *Server) sharedOutput(w http.ResponseWriter, r *http.Request) {
 	s.outputSnapshotResponse(w, r)
 }
 func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) {
-	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (o.visible_until IS NULL OR o.visible_until>now()) `
+	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	args := []any{}
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)
