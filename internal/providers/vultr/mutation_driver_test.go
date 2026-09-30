@@ -22,7 +22,7 @@ func TestMutationContracts(t *testing.T) {
 			if json.NewDecoder(r.Body).Decode(&x) != nil {
 				t.Fatal("bad body")
 			}
-			if x.Region != "ewr" || x.Plan != "vc2" || x.OSID != 2284 || x.EnableIPv6 || len(x.SSHKeyIDs) != 1 || !containsString(x.Tags, "identity-1") {
+			if x.Region != "ewr" || x.Plan != "vc2" || x.OSID != 2284 || x.EnableIPv6 || x.SSHKeyID != "k1" || !containsString(x.Tags, "identity-1") {
 				t.Fatalf("create=%+v", x)
 			}
 			createSeen = true
