@@ -90,6 +90,18 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	if err != nil {
 		return err
 	}
+	// A deployment reservation may survive a preparation failure. Before any
+	// create-stage recovery, restore its per-deployment SSH identity so recovery
+	// can never create a server without the persisted private-key reference.
+	if d.CurrentStep == "create" && d.ProviderID == "" && (snap.SSHKeySecretRef == "" || snap.SSHProviderKeyID == "") {
+		if err := h.Container.ensureDeploymentSSHIdentity(ctx, item.AccountID, d, &snap); err != nil {
+			return err
+		}
+		cfg, snap, err = h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)
+		if err != nil {
+			return err
+		}
+	}
 	if d.State == workflow.InstallComplete || d.State == workflow.ImportingDatabase || d.State == workflow.DatabaseComplete || d.State == workflow.ConfiguringPanel {
 		if err := h.Container.RequirePostInstallCapabilities(ctx, d.ID); err != nil {
 			return err
