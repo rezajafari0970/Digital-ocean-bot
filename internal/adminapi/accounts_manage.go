@@ -229,6 +229,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	zeroBytes(previousToken)
+	writeJSON(w, 200, map[string]any{"ok": true})
 }
 func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
