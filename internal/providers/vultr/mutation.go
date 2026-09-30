@@ -15,6 +15,7 @@ type createInstanceRequest struct {
 	Tags            []string `json:"tags,omitempty"`
 	EnableIPv6      bool     `json:"enable_ipv6"`
 	ActivationEmail bool     `json:"activation_email"`
+	UserData        string   `json:"user_data,omitempty"`
 }
 
 func (c *Client) CreateInstance(ctx context.Context, x createInstanceRequest) (instance, error) {

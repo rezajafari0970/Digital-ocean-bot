@@ -2,7 +2,10 @@ package vultr
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -17,7 +20,20 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	if req.Identity != "" && !containsString(tags, req.Identity) {
 		tags = append(tags, req.Identity)
 	}
-	x, e := d.client.CreateInstance(ctx, createInstanceRequest{Region: req.RegionID, Plan: req.PlanID, OSID: osID, Label: req.Name, Hostname: req.Name, SSHKeyIDs: append([]string(nil), req.SSHKeyRefs...), Tags: tags, EnableIPv6: false, ActivationEmail: false})
+	userData := ""
+	if len(req.SSHKeyRefs) > 0 {
+		key, keyErr := d.client.SSHKey(ctx, req.SSHKeyRefs[0])
+		if keyErr != nil {
+			return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, normalizeError("get_ssh_key", keyErr)
+		}
+		pub := strings.TrimSpace(key.SSHKey)
+		if pub == "" || (!strings.HasPrefix(pub, "ssh-ed25519 ") && !strings.HasPrefix(pub, "ssh-rsa ") && !strings.HasPrefix(pub, "ecdsa-sha2-")) {
+			return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: "create_server", Message: "Vultr SSH public key is empty or unsupported"}
+		}
+		cloud := fmt.Sprintf("#cloud-config\ndisable_root: false\nssh_authorized_keys:\n  - %s\n", pub)
+		userData = base64.StdEncoding.EncodeToString([]byte(cloud))
+	}
+	x, e := d.client.CreateInstance(ctx, createInstanceRequest{Region: req.RegionID, Plan: req.PlanID, OSID: osID, Label: req.Name, Hostname: req.Name, SSHKeyIDs: append([]string(nil), req.SSHKeyRefs...), Tags: tags, EnableIPv6: false, ActivationEmail: false, UserData: userData})
 	if e != nil {
 		pe := normalizeError("create_server", e)
 		out := providers.OutcomeRejected

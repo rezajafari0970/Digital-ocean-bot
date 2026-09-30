@@ -22,7 +22,7 @@ func TestMutationContracts(t *testing.T) {
 			if json.NewDecoder(r.Body).Decode(&x) != nil {
 				t.Fatal("bad body")
 			}
-			if x.Region != "ewr" || x.Plan != "vc2" || x.OSID != 2284 || x.EnableIPv6 || len(x.SSHKeyIDs) != 1 || x.SSHKeyIDs[0] != "k1" || !containsString(x.Tags, "identity-1") {
+			if x.Region != "ewr" || x.Plan != "vc2" || x.OSID != 2284 || x.EnableIPv6 || x.UserData == "" || len(x.SSHKeyIDs) != 1 || x.SSHKeyIDs[0] != "k1" || !containsString(x.Tags, "identity-1") {
 				t.Fatalf("create=%+v", x)
 			}
 			createSeen = true
@@ -42,7 +42,7 @@ func TestMutationContracts(t *testing.T) {
 			w.WriteHeader(201)
 			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAA"}}`))
 		case r.Method == "GET" && r.URL.Path == "/ssh-keys/k1":
-			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k"}}`))
+			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAAATEST unit@test"}}`))
 		case r.Method == "DELETE" && r.URL.Path == "/ssh-keys/k1":
 			w.WriteHeader(204)
 		default:
