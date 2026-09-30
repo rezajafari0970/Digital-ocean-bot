@@ -148,6 +148,12 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		return r, err
 	}
 }
+func (m *RuntimeManager) ResetCircuit(panelID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.circuits, panelID)
+}
+
 func (m *RuntimeManager) Invalidate(panelID string) {
 	var session *PanelSession
 	m.mu.Lock()
