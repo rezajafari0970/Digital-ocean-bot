@@ -11,7 +11,9 @@ DB_USER=${DB_USER:-digitaloceanbot}
 id -u digitaloceanbot >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin digitaloceanbot
 install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$APP/bin" "$DATA" "$DATA/templates"
 install -d -o root -g digitaloceanbot -m 0750 "$ETC"
+install -d -o root -g digitaloceanbot -m 0755 "$APP/web/static"
 cp -a "$SRC/migrations" "$APP/"
+cp -a "$SRC/web/static/." "$APP/web/static/"
 cd "$SRC"
 go build -trimpath -ldflags='-s -w' -o "$APP/bin/digital-ocean-bot-api" ./cmd/api
 go build -trimpath -ldflags='-s -w' -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
