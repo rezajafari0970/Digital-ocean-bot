@@ -60,7 +60,8 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
 	var limit int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&limit)
+	var limitKnown bool
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0),COALESCE((canonical->'Capacity'->>'LimitKnown')::boolean,false) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&limit, &limitKnown)
 	available := limit - active
 	if available < 0 {
 		available = 0
@@ -86,13 +87,26 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 			freshnessStatus = "stale"
 		}
 	}
-	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
+	var desiredServers int
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT desired_server_count FROM accounts WHERE id=$1`, id).Scan(&desiredServers)
+	desiredRemaining := desiredServers - managedDroplets
+	if desiredRemaining < 0 {
+		desiredRemaining = 0
+	}
+	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
 	if lastRefresh.Valid {
-		d.Capacity["server_limit"] = limit
+		d.Capacity["limit_known"] = limitKnown
 		d.Capacity["provider_servers"] = providerDroplets
-		d.Capacity["droplet_limit"] = limit
 		d.Capacity["provider_droplets"] = providerDroplets
-		d.Capacity["available"] = providerAvailable
+		if limitKnown {
+			d.Capacity["server_limit"] = limit
+			d.Capacity["droplet_limit"] = limit
+			d.Capacity["available"] = providerAvailable
+		} else {
+			d.Capacity["server_limit"] = nil
+			d.Capacity["droplet_limit"] = nil
+			d.Capacity["available"] = nil
+		}
 		d.Capacity["last_refresh"] = lastRefresh.Time
 	} else {
 		d.Capacity["droplet_limit"] = nil
@@ -216,7 +230,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
 				managed := managedIDs[x.ID]
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
 			}
 		}
 	}
