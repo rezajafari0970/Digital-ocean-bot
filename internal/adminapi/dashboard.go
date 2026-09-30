@@ -213,14 +213,14 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if s.DB.QueryRowContext(r.Context(), `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
 		var obs providers.Observation
 		if json.Unmarshal(snap, &obs) == nil {
-			managedIDs := map[string]bool{}
-			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
+			managedIDs := map[string]string{}
+			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id,state FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
 			if rows != nil {
 				defer rows.Close()
 				for rows.Next() {
-					var pid string
-					if rows.Scan(&pid) == nil {
-						managedIDs[pid] = true
+					var pid, lifecycleState string
+					if rows.Scan(&pid, &lifecycleState) == nil {
+						managedIDs[pid] = lifecycleState
 					}
 				}
 			}
@@ -229,8 +229,8 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 				if !x.CreatedAt.IsZero() {
 					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
-				managed := managedIDs[x.ID]
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+				lifecycleState, managed := managedIDs[x.ID]
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": lifecycleState, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
 			}
 		}
 	}
