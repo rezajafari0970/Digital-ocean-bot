@@ -103,7 +103,11 @@ func normalizeServer(x instance) providers.Server {
 		state = providers.ServerStateStopped
 	}
 	created, _ := time.Parse(time.RFC3339, x.DateCreated)
-	return providers.Server{ID: x.ID, Name: x.Label, State: state, Ready: ready, RegionID: x.Region, PrimaryIPv4: x.MainIP, CreatedAt: created, Tags: append([]string(nil), x.Tags...), Metadata: map[string]any{"plan": x.Plan, "os": x.OS, "power_status": x.PowerStatus, "server_status": x.ServerStatus, "ssh_key_ids": append([]string(nil), x.SSHKeyIDs...)}}
+	sshKeys := append([]string(nil), x.SSHKeyIDs...)
+	if len(sshKeys) == 0 {
+		sshKeys = append(sshKeys, x.SSHKeyIDREST...)
+	}
+	return providers.Server{ID: x.ID, Name: x.Label, State: state, Ready: ready, RegionID: x.Region, PrimaryIPv4: x.MainIP, CreatedAt: created, Tags: append([]string(nil), x.Tags...), Metadata: map[string]any{"plan": x.Plan, "os": x.OS, "power_status": x.PowerStatus, "server_status": x.ServerStatus, "ssh_key_ids": sshKeys}}
 }
 func (d *Driver) GetServer(ctx context.Context, id string) (providers.Server, error) {
 	x, err := d.client.Instance(ctx, id)

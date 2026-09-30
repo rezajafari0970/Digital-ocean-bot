@@ -65,6 +65,7 @@ type instance struct {
 	Label        string   `json:"label"`
 	Tags         []string `json:"tags"`
 	SSHKeyIDs    []string `json:"ssh_key_ids"`
+	SSHKeyIDREST []string `json:"sshkey_id"`
 }
 type instancesResponse struct {
 	Instances []instance     `json:"instances"`
