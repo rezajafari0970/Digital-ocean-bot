@@ -73,6 +73,20 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
 				return
 			}
+			// Vultr's public API exposes current instances but not the account's
+			// Maximum Instances limit. Overlay the latest exact Console observation
+			// when present; current usage always remains API-derived.
+			if rt.Config.Provider == "vultr" {
+				var observedLimit int
+				var observedAt time.Time
+				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt); qerr == nil {
+					obs.Capacity.ComputeLimit = observedLimit
+					obs.Capacity.LimitKnown = true
+					if observedAt.After(obs.Capacity.ObservedAt) {
+						obs.Capacity.ObservedAt = observedAt
+					}
+				}
+			}
 			providerState := "active"
 			canCreate := obs.Account.Status == "active" && providers.CanCreateCapacity(obs.Capacity)
 			if obs.Account.Status != "active" {

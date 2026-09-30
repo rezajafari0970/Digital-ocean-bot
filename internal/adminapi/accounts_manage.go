@@ -21,6 +21,7 @@ type accountUpdate struct {
 	BatchSize              int      `json:"batch_size"`
 	MaxConcurrent          int      `json:"max_concurrent"`
 	DesiredServerCount     int      `json:"desired_server_count"`
+	ProviderComputeLimit   *int     `json:"provider_compute_limit"`
 	FallbackAnyRegion      *bool    `json:"fallback_any_region"`
 	NetworkMode            string   `json:"network_mode"`
 	ProxyID                string   `json:"proxy_id"`
@@ -47,6 +48,13 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	var accountProvider string
 	_ = s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", id).Scan(&accountProvider)
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
+	if x.ProviderComputeLimit != nil {
+		if accountProvider != "vultr" || *x.ProviderComputeLimit < 1 {
+			writeJSON(w, 400, map[string]string{"error": "invalid_provider_compute_limit"})
+			return
+		}
+		currentLimit = *x.ProviderComputeLimit
+	}
 	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit, accountProvider); code != "" {
 		writeJSON(w, 400, map[string]string{"error": code})
 		return
@@ -135,6 +143,13 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
+	}
+	if x.ProviderComputeLimit != nil && accountProvider == "vultr" {
+		if _, err = tx.ExecContext(r.Context(), `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at) VALUES($1,$2,'vultr_console',now(),now()) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now()`, id, *x.ProviderComputeLimit); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		_, _ = tx.ExecContext(r.Context(), `UPDATE accounts SET provider_checked_at='epoch'::timestamptz WHERE id=$1`, id)
 	}
 	n, _ := res.RowsAffected()
 	if n == 0 {
