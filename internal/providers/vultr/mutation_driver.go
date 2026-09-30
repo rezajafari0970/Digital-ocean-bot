@@ -3,6 +3,7 @@ package vultr
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
@@ -59,7 +60,27 @@ func (d *Driver) CreateSSHKey(ctx context.Context, name, publicKey string) (prov
 	if err != nil {
 		return providers.SSHKey{}, normalizeError("create_ssh_key", err)
 	}
-	return providers.SSHKey{ID: x.ID, Name: x.Name}, nil
+	for attempt := 0; attempt < 5; attempt++ {
+		seen, getErr := d.client.SSHKey(ctx, x.ID)
+		if getErr == nil && seen.ID == x.ID {
+			return providers.SSHKey{ID: x.ID, Name: x.Name}, nil
+		}
+		if attempt == 4 {
+			if getErr != nil {
+				return providers.SSHKey{}, normalizeError("verify_ssh_key", getErr)
+			}
+			break
+		}
+		t := time.NewTimer(time.Duration(attempt+1) * 250 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			t.Stop()
+			return providers.SSHKey{}, ctx.Err()
+		case <-t.C:
+		}
+	}
+	_ = d.client.DeleteSSHKey(context.Background(), x.ID)
+	return providers.SSHKey{}, &providers.Error{Class: providers.ErrorUnavailable, Operation: "verify_ssh_key", Message: "Vultr SSH key not visible after create"}
 }
 func (d *Driver) DeleteSSHKey(ctx context.Context, id string) error {
 	err := d.client.DeleteSSHKey(ctx, id)

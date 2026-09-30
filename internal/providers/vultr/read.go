@@ -96,6 +96,15 @@ func (c *Client) Instance(ctx context.Context, id string) (instance, error) {
 	err := c.do(ctx, http.MethodGet, "/instances/"+id, nil, &x)
 	return x.Instance, err
 }
+
+func (c *Client) SSHKey(ctx context.Context, id string) (sshKey, error) {
+	var x struct {
+		SSHKey sshKey `json:"ssh_key"`
+	}
+	err := c.do(ctx, http.MethodGet, "/ssh-keys/"+id, nil, &x)
+	return x.SSHKey, err
+}
+
 func (c *Client) RegionAvailability(ctx context.Context, id string) ([]string, error) {
 	var x struct {
 		AvailablePlans []string `json:"available_plans"`

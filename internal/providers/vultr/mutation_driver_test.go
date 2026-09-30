@@ -41,6 +41,8 @@ func TestMutationContracts(t *testing.T) {
 			keySeen = true
 			w.WriteHeader(201)
 			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAA"}}`))
+		case r.Method == "GET" && r.URL.Path == "/ssh-keys/k1":
+			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k"}}`))
 		case r.Method == "DELETE" && r.URL.Path == "/ssh-keys/k1":
 			w.WriteHeader(204)
 		default:
