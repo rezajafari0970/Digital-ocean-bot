@@ -17,11 +17,7 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	if req.Identity != "" && !containsString(tags, req.Identity) {
 		tags = append(tags, req.Identity)
 	}
-	sshKeyID := ""
-	if len(req.SSHKeyRefs) > 0 {
-		sshKeyID = req.SSHKeyRefs[0]
-	}
-	x, e := d.client.CreateInstance(ctx, createInstanceRequest{Region: req.RegionID, Plan: req.PlanID, OSID: osID, Label: req.Name, Hostname: req.Name, SSHKeyID: sshKeyID, Tags: tags, EnableIPv6: false, ActivationEmail: false})
+	x, e := d.client.CreateInstance(ctx, createInstanceRequest{Region: req.RegionID, Plan: req.PlanID, OSID: osID, Label: req.Name, Hostname: req.Name, SSHKeyIDs: append([]string(nil), req.SSHKeyRefs...), Tags: tags, EnableIPv6: false, ActivationEmail: false})
 	if e != nil {
 		pe := normalizeError("create_server", e)
 		out := providers.OutcomeRejected
