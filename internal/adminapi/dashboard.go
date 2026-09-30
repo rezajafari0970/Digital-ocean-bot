@@ -213,14 +213,19 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if s.DB.QueryRowContext(r.Context(), `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
 		var obs providers.Observation
 		if json.Unmarshal(snap, &obs) == nil {
-			managedIDs := map[string]string{}
-			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id,state FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
+			type managedServerInfo struct {
+				State     string
+				ExpiresAt sql.NullTime
+			}
+			managedIDs := map[string]managedServerInfo{}
+			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id,state,expires_at FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
 			if rows != nil {
 				defer rows.Close()
 				for rows.Next() {
 					var pid, lifecycleState string
-					if rows.Scan(&pid, &lifecycleState) == nil {
-						managedIDs[pid] = lifecycleState
+					var expiresAt sql.NullTime
+					if rows.Scan(&pid, &lifecycleState, &expiresAt) == nil {
+						managedIDs[pid] = managedServerInfo{State: lifecycleState, ExpiresAt: expiresAt}
 					}
 				}
 			}
@@ -229,8 +234,12 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 				if !x.CreatedAt.IsZero() {
 					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
-				lifecycleState, managed := managedIDs[x.ID]
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": lifecycleState, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+				info, managed := managedIDs[x.ID]
+				var expiresAt any
+				if info.ExpiresAt.Valid {
+					expiresAt = info.ExpiresAt.Time
+				}
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
 			}
 		}
 	}
