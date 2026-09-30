@@ -33,6 +33,12 @@ func (s SSHClient) WaitObserved(ctx context.Context, t Target, key []byte, obser
 	return s.WaitStages(ctx, t, key, observe, nil)
 }
 func (s SSHClient) WaitStages(ctx context.Context, t Target, key []byte, observe ProbeObserver, stages StageObserver) error {
+	waitTimeout := s.Timeout
+	if waitTimeout <= 0 {
+		waitTimeout = 3 * time.Minute
+	}
+	waitCtx, cancel := context.WithTimeout(ctx, waitTimeout)
+	defer cancel()
 	interval := time.Second
 	var last error
 	for {
@@ -44,10 +50,14 @@ func (s SSHClient) WaitStages(ctx context.Context, t Target, key []byte, observe
 		if err == nil {
 			return nil
 		}
+		diag := ClassifyError(err)
+		if diag.Class == ClassAuthentication || diag.Class == ClassHostKey || diag.Class == ClassConfiguration {
+			return err
+		}
 		last = err
 		select {
-		case <-ctx.Done():
-			return fmt.Errorf("%w: last=%v", ctx.Err(), last)
+		case <-waitCtx.Done():
+			return fmt.Errorf("%w: last=%v", waitCtx.Err(), last)
 		case <-time.After(interval):
 		}
 		if interval < 8*time.Second {
