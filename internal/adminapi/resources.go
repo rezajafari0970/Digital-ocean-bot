@@ -93,17 +93,23 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		} else if runtimeStatus != "READY" {
 			canCreate = false
 		}
-		providerReason := "Ready to create droplets"
+		providerName := provider
+		if provider == "digitalocean" {
+			providerName = "DigitalOcean"
+		} else if provider == "vultr" {
+			providerName = "Vultr"
+		}
+		providerReason := "Ready to create servers"
 		if !enabled {
 			providerReason = "Account disabled in panel"
 		} else if providerState == "LOCKED" {
-			providerReason = "DigitalOcean account is locked"
+			providerReason = providerName + " account is locked"
 		} else if providerState == "TOKEN_INVALID" {
-			providerReason = "DigitalOcean token is invalid"
+			providerReason = providerName + " credential is invalid"
 		} else if providerState == "PERMISSION_DENIED" {
-			providerReason = "DigitalOcean permission denied"
+			providerReason = providerName + " permission denied"
 		} else if providerState == "RATE_LIMITED" {
-			providerReason = "DigitalOcean rate limited"
+			providerReason = providerName + " rate limited"
 		} else if providerErrorState != "" {
 			providerReason = providerErrorState + ": " + providerErrorDetail
 		} else if providerFreshness != "fresh" {
@@ -129,7 +135,10 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 			}
 			pr.Close()
 		}
-		out = append(out, map[string]any{"id": id, "name": name, "email": email, "provider": provider, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "proxy_ids": proxyIDs, "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_reason": providerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "capacity_limit_known": limitKnown, "provider_droplets": providerDroplets, "droplet_available": func() any {
+		var managedActive int
+		_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'`, id).Scan(&managedActive)
+		desiredRemaining := max(0, desired-managedActive)
+		out = append(out, map[string]any{"id": id, "name": name, "email": email, "provider": provider, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "proxy_ids": proxyIDs, "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_reason": providerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "capacity_limit_known": limitKnown, "provider_droplets": providerDroplets, "managed_servers": managedActive, "desired_remaining": desiredRemaining, "droplet_available": func() any {
 			if !limitKnown {
 				return nil
 			}
