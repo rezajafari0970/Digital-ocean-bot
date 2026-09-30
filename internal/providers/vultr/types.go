@@ -53,7 +53,7 @@ type instance struct {
 	ID           string   `json:"id"`
 	OS           string   `json:"os"`
 	RAM          int      `json:"ram"`
-	Disk         string   `json:"disk"`
+	Disk         int      `json:"disk"`
 	MainIP       string   `json:"main_ip"`
 	VCPUCount    int      `json:"vcpu_count"`
 	Region       string   `json:"region"`
