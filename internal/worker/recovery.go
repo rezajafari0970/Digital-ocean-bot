@@ -39,7 +39,7 @@ func (s RecoveryStore) Deployments(ctx context.Context, limit int) ([]RecoveryIt
 	if limit < 1 {
 		limit = 100
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND EXISTS(SELECT 1 FROM installer_runs ir WHERE ir.deployment_id=d.id AND ir.generation=d.installer_generation AND ir.state='INSTALL_COMPLETE' AND ir.manifest_snapshot @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)) OR d.state IN ('RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING') ORDER BY d.updated_at LIMIT $1`, limit)
+	rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND EXISTS(SELECT 1 FROM installer_runs ir WHERE ir.deployment_id=d.id AND ir.generation=d.installer_generation AND ir.state='INSTALL_COMPLETE' AND ir.manifest_snapshot @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)) OR d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING') ORDER BY d.updated_at LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
 	}
