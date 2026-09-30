@@ -27,6 +27,11 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if err := e.Gate.AllowMutation(); err != nil {
 		return op, fmt.Errorf("%w: %v", ErrMutationBlocked, err)
 	}
+	if e.EgressCheck != nil {
+		if err := e.EgressCheck(ctx); err != nil {
+			return op, err
+		}
+	}
 	reserved, fresh, err := e.Operations.Reserve(ctx, op)
 	if err != nil {
 		return op, err
@@ -36,13 +41,6 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 			return (Reconciler{Operations: e.Operations, Provider: e.Provider}).AdoptUnknownCreate(ctx, reserved, profile.IdentityTag, profile.Name, profile.Region)
 		}
 		return reserved, nil
-	}
-	if e.EgressCheck != nil {
-		if err := e.EgressCheck(ctx); err != nil {
-			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, reserved)
-			return reserved, err
-		}
 	}
 	reserved.State = jobs.OperationRunning
 	reserved.Attempt++
@@ -75,6 +73,10 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		return reserved, ErrOutcomeStillUnknown
 	}
 	reserved.ResourceID = result.ServerID
+	reserved.State = jobs.OperationVerifying
+	if err := e.Operations.Update(ctx, reserved); err != nil {
+		return reserved, err
+	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
@@ -82,8 +84,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 			return reserved, err
 		}
 	}
-	reserved.State = jobs.OperationVerifying
-	return reserved, e.Operations.Update(ctx, reserved)
+	return reserved, nil
 }
 
 func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID string) (jobs.Operation, error) {
