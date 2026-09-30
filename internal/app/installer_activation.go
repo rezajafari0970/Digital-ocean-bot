@@ -78,6 +78,14 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	ready, err := c.installerReadiness(ctx, d, runID, target, key, ssh)
 	if err != nil {
+		var re *provisioning.ReadinessError
+		if errors.As(err, &re) && !re.Retryable {
+			_ = c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", err.Error())
+			d.State = workflow.InstallFailed
+			d.LastError = err.Error()
+			_ = (deploymentFailureFinalizer{DB: c.DB}).MarkFailed(ctx, d)
+			return nil
+		}
 		return err
 	}
 	registry := provisioning.InstallerRegistry{DB: c.DB, Scripts: provisioning.ScriptRegistry{DB: c.DB}}
