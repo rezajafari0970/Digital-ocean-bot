@@ -3,7 +3,6 @@ package adminapi
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"github.com/lib/pq"
 	"net/http"
@@ -24,18 +23,11 @@ func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, reco
 	if err != nil {
 		return
 	}
-	var serverCutoff sql.NullTime
-	_ = tx.QueryRowContext(ctx, `SELECT dr.expires_at-interval '10 seconds' FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id WHERE p.id=$1`, panelID).Scan(&serverCutoff)
 	for _, rec := range records {
 		if !strings.HasPrefix(rec.URI, "vless://") {
 			continue
 		}
-		visibleUntil := rec.VisibleUntil
-		if serverCutoff.Valid && (visibleUntil == nil || serverCutoff.Time.Before(*visibleUntil)) {
-			cutoff := serverCutoff.Time.UTC()
-			visibleUntil = &cutoff
-		}
-		if _, err = copyStmt.ExecContext(ctx, rec.URI, visibleUntil); err != nil {
+		if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil); err != nil {
 			_ = copyStmt.Close()
 			return
 		}
@@ -48,7 +40,9 @@ func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, reco
 		return
 	}
 	if _, err = tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until)
-SELECT $1,uri,visible_until FROM (SELECT DISTINCT ON(uri) uri,visible_until FROM current_output_uris ORDER BY uri) current_output_uris
+SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END
+FROM (SELECT DISTINCT ON(uri) uri,visible_until FROM current_output_uris ORDER BY uri) c
+JOIN panel_instances p ON p.id=$1 JOIN droplets dr ON dr.id=p.droplet_id
 ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until
 WHERE output_config_snapshots.last_seen_at < now()-interval '10 seconds'
    OR output_config_snapshots.visible_until IS DISTINCT FROM excluded.visible_until`, panelID); err != nil {
