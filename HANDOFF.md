@@ -15,3 +15,11 @@ Previous: 7126567 websocket path; af598d7 short session cookie; 7c9f335 interact
 
 ## Working tree warning
 Do not delete/reset .audit blindly. At checkpoint creation source matched origin at 6834d81; .audit had modified/untracked analysis artifacts. Treat them as audit evidence, not source changes.
+
+## Knowledge handoff status
+- Fresh-session acceptance gate: 100/100 READY at the latest generated knowledge snapshot.
+- Handoff readiness audit: 38/38 PASS.
+- Primary new-chat entrypoint: `docs/NEW_CHAT_ENTRYPOINT.md`.
+- Unified retrieval: `tools/project-brain-query.py`.
+- Exact source memory: `docs/FULL_SOURCE_KNOWLEDGE.json` + `tools/source-lookup.py`.
+- The new session must verify drift/current HEAD before treating snapshot line numbers as current.

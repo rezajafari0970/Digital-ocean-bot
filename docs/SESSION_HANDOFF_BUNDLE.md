@@ -2,9 +2,9 @@
 
 > Generated continuity entrypoint. Read this first; source/runtime remain authoritative.
 
-Generated UTC: 2026-10-01T04:15:52.274018+00:00
+Generated UTC: 2026-10-01T04:17:21.527229+00:00
 Branch: `checkpoint/final-e2e-20260929`
-HEAD at bundle generation: `03f810813368f1902cb85f42d8de0d9d8d48c198`
+HEAD at bundle generation: `f9d93694a5349b2cecd270080bf63cae2e379760`
 
 ## Mandatory startup procedure
 1. Read this bundle completely.
@@ -54,6 +54,14 @@ Previous: 7126567 websocket path; af598d7 short session cookie; 7c9f335 interact
 
 ## Working tree warning
 Do not delete/reset .audit blindly. At checkpoint creation source matched origin at 6834d81; .audit had modified/untracked analysis artifacts. Treat them as audit evidence, not source changes.
+
+## Knowledge handoff status
+- Fresh-session acceptance gate: 100/100 READY at the latest generated knowledge snapshot.
+- Handoff readiness audit: 38/38 PASS.
+- Primary new-chat entrypoint: `docs/NEW_CHAT_ENTRYPOINT.md`.
+- Unified retrieval: `tools/project-brain-query.py`.
+- Exact source memory: `docs/FULL_SOURCE_KNOWLEDGE.json` + `tools/source-lookup.py`.
+- The new session must verify drift/current HEAD before treating snapshot line numbers as current.
 
 ## Master Context
 # ChatGPT Master Context
@@ -290,7 +298,7 @@ A logical stage is not complete until code/tests are committed, pushed to the ca
 ```json
 {
   "branch": "checkpoint/final-e2e-20260929",
-  "head": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "head": "f9d93694a5349b2cecd270080bf63cae2e379760",
   "services": {
     "digital-ocean-bot-api": "active",
     "digital-ocean-bot-worker": "active"
