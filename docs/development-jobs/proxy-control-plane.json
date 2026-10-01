@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "goal": "Refactor proxy infrastructure into one provider-agnostic Proxy Control Plane shared by Vultr, DigitalOcean, and future provider drivers without weakening frozen Vultr invariants.",
+  "context": "Preserve fail-closed Gateway, account isolation, proxy pool, sticky/same-country recovery, Secret Store and shared provider HTTP transport.",
+  "commands": {
+    "implement": [
+      "python3 -m py_compile tools/openai-development-adapter.py tools/development-orchestrator.py"
+    ],
+    "test": [
+      "go test ./internal/network ./internal/app -count=1"
+    ],
+    "verify": [
+      "go test ./internal/providers/vultr ./internal/providers/digitalocean ./internal/network ./internal/app -count=1",
+      "go test ./..."
+    ]
+  },
+  "timeout_seconds": 180,
+  "allowed_paths": [
+    "tools/development-orchestrator.py",
+    "tools/openai-development-adapter.py",
+    "docs/development-jobs/proxy-control-plane.json"
+  ],
+  "commit_message": "chore(dev): add resumable scoped development orchestrator",
+  "push": true
+}
