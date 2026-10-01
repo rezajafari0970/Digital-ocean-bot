@@ -61,6 +61,22 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				}
 				n, _ := res.RowsAffected()
 				claimed = n == 1
+			} else if desired > 0 && managed >= desired && retiring == 0 {
+				// Hard Desired is a strict ceiling. At the ceiling, replacement-first
+				// would require a temporary (desired+1) server and deadlock against
+				// StartDeployment admission. Retire exactly one oldest EXPIRING
+				// server first; the scheduler then backfills the freed slot.
+				var oldest string
+				_ = tx.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY expires_at NULLS LAST,created_at,id LIMIT 1`, item.AccountID).Scan(&oldest)
+				if shouldDeleteFirstAtDesired(desired, managed, retiring, oldest == item.ID) {
+					res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)
+					if qerr != nil {
+						tx.Rollback()
+						return qerr
+					}
+					n, _ := res.RowsAffected()
+					claimed = n == 1
+				}
 			}
 			if err = tx.Commit(); err != nil {
 				return err
