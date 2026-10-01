@@ -73,6 +73,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/accounts/{id}/console-session", s.require(s.createVultrBrowserTicket, true))
 	m.HandleFunc("GET /vultr-browser/{path...}", s.vultrBrowserProxy)
 	m.HandleFunc("POST /vultr-browser/input/scroll", s.vultrBrowserProxy)
+	m.HandleFunc("POST /vultr-browser/input/tap", s.vultrBrowserProxy)
 	m.HandleFunc("GET /websockify", s.vultrBrowserProxy)
 	m.HandleFunc("POST /api/v1/proxies", s.require(s.createProxy, true))
 	m.HandleFunc("PUT /api/v1/proxies/{id}", s.require(s.updateProxy, true))
@@ -164,7 +165,7 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/vultr-browser/client.html" || r.URL.Path == "/vultr-browser/vnc.html" || r.URL.Path == "/vultr-browser/vnc_lite.html" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
-		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=7\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=9\"></script></body></html>"))
+		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=7\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=10\"></script></body></html>"))
 		return
 	}
 	upstream := "http://127.0.0.1:16080"
@@ -173,6 +174,9 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 	} else if r.URL.Path == "/vultr-browser/input/scroll" {
 		upstream = "http://127.0.0.1:16081"
 		r.URL.Path = "/scroll"
+	} else if r.URL.Path == "/vultr-browser/input/tap" {
+		upstream = "http://127.0.0.1:16081"
+		r.URL.Path = "/tap"
 	}
 	target, _ := url.Parse(upstream)
 	proxy := httputil.NewSingleHostReverseProxy(target)

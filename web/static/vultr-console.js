@@ -13,78 +13,104 @@ rfb.clipViewport = false;
 rfb.dragViewport = false;
 rfb.focusOnClick = true;
 
-function installMobileScrollBridge() {
+function point(canvas, touch) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: Math.max(0, Math.min(411, (touch.clientX - rect.left) * 412 / rect.width)),
+    y: Math.max(0, Math.min(914, (touch.clientY - rect.top) * 915 / rect.height)),
+  };
+}
+
+function send(path, payload) {
+  fetch('/vultr-browser/input/' + path, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
+function installMobileInputBridge() {
   const canvas = screen.querySelector('canvas');
-  if (!canvas || canvas.dataset.scrollBridge === '1') return;
-  canvas.dataset.scrollBridge = '1';
+  if (!canvas || canvas.dataset.inputBridge === '1') return;
+  canvas.dataset.inputBridge = '1';
 
-  let startX = 0;
-  let startY = 0;
-  let lastY = 0;
-  let pending = 0;
+  let start = null;
+  let last = null;
   let scrolling = false;
+  let pending = 0;
   let timer = null;
+  const threshold = 14;
 
-  const flush = (touch) => {
-    if (!pending) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.max(0, Math.min(411, (touch.clientX - rect.left) * 412 / rect.width));
-    const y = Math.max(0, Math.min(914, (touch.clientY - rect.top) * 915 / rect.height));
-    const deltaY = Math.max(-900, Math.min(900, pending * 2.2));
-    pending = 0;
-    fetch('/vultr-browser/input/scroll', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({x, y, delta_y: deltaY}),
-      keepalive: false,
-    }).catch(() => {});
+  const block = (e) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
   };
 
   canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1) return;
+    if (e.touches.length !== 1) { block(e); return; }
+    block(e);
     const t = e.touches[0];
-    startX = t.clientX;
-    startY = lastY = t.clientY;
-    pending = 0;
+    start = {clientX: t.clientX, clientY: t.clientY, at: performance.now()};
+    last = {clientX: t.clientX, clientY: t.clientY};
     scrolling = false;
+    pending = 0;
   }, {capture: true, passive: false});
 
   canvas.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 1) return;
+    block(e);
+    if (!start || e.touches.length !== 1) return;
     const t = e.touches[0];
-    if (!scrolling && Math.hypot(t.clientX - startX, t.clientY - startY) < 16) return;
+    const distance = Math.hypot(t.clientX - start.clientX, t.clientY - start.clientY);
+    if (!scrolling && distance < threshold) return;
     scrolling = true;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    pending += lastY - t.clientY;
-    lastY = t.clientY;
+    pending += last.clientY - t.clientY;
+    last = {clientX: t.clientX, clientY: t.clientY};
     if (!timer) {
-      const snapshot = {clientX: t.clientX, clientY: t.clientY};
       timer = setTimeout(() => {
         timer = null;
-        flush(snapshot);
-      }, 55);
+        if (!pending) return;
+        const p = point(canvas, last);
+        const deltaY = Math.max(-900, Math.min(900, pending * 2.2));
+        pending = 0;
+        send('scroll', {...p, delta_y: deltaY});
+      }, 45);
     }
   }, {capture: true, passive: false});
 
   canvas.addEventListener('touchend', (e) => {
-    if (!scrolling) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
+    block(e);
+    if (!start) return;
     const t = e.changedTouches[0];
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (scrolling) {
+      if (pending) {
+        const p = point(canvas, t);
+        send('scroll', {...p, delta_y: Math.max(-900, Math.min(900, pending * 2.2))});
+      }
+    } else if (performance.now() - start.at < 550) {
+      send('tap', point(canvas, t));
     }
-    flush(t);
+    start = null;
+    last = null;
     scrolling = false;
+    pending = 0;
   }, {capture: true, passive: false});
+
+  canvas.addEventListener('touchcancel', (e) => {
+    block(e);
+    if (timer) { clearTimeout(timer); timer = null; }
+    start = last = null;
+    scrolling = false;
+    pending = 0;
+  }, {capture: true, passive: false});
+
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault(), {capture: true});
 }
 
 rfb.addEventListener('connect', () => {
   status.textContent = 'Connected';
-  installMobileScrollBridge();
+  installMobileInputBridge();
   setTimeout(() => { status.hidden = true; }, 900);
 });
 rfb.addEventListener('disconnect', e => {
