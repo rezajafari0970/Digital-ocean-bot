@@ -24,3 +24,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 16. Read `docs/SESSION_HANDOFF_BUNDLE.md` as the single fast-entry context bundle; use its sections as navigation, then verify exact details against source/runtime.
 17. Run `python3 tools/audit-handoff-readiness.py` before a planned chat migration. Do not treat the handoff as self-sufficient if any readiness check fails.
 18. Use `docs/SYMBOL_NAVIGATION.md` / `docs/SYMBOL_INDEX.json` for route→handler and symbol→file:line navigation before broad grep; regenerate with `python3 tools/build-symbol-index.py` after structural code changes.
+19. Use `docs/SCHEMA_NAVIGATION.md` / `docs/SCHEMA_INDEX.json` for migration→table→code persistence navigation; regenerate with `python3 tools/build-schema-index.py` after migration/schema changes, and still verify the live DB migration level before mutation.
