@@ -29,7 +29,7 @@ def git_status():
     p=subprocess.run(["git","status","--porcelain=v1","-z"],cwd=ROOT,capture_output=True)
     if p.returncode: raise RuntimeError("git status failed")
     out={}
-    for raw in p.stdout.split(b"\\0"):
+    for raw in p.stdout.split(b"\0"):
         if not raw: continue
         s=raw.decode("utf-8","surrogateescape")
         status=s[:2]; path=s[3:]
@@ -41,6 +41,57 @@ def scope_ok(baseline,allowed):
     changed={p for p,v in current.items() if baseline.get(p)!=v} | {p for p in baseline if current.get(p)!=baseline.get(p)}
     bad=sorted(p for p in changed if not any(p==a or p.startswith(a.rstrip("/")+"/") for a in allowed))
     return bad
+def allowed_path(path,allowed):
+    return any(path==a or path.startswith(a.rstrip("/")+"/") for a in allowed)
+def clean_patch(text):
+    text=text.strip()
+    if text.startswith("```"):
+        lines=text.splitlines()
+        if lines and lines[0].startswith("```"): lines=lines[1:]
+        if lines and lines[-1].strip()=="```": lines=lines[:-1]
+        text="\n".join(lines)
+    return text.strip()+"\n"
+def patch_paths(patch):
+    paths=set()
+    for line in patch.splitlines():
+        if line.startswith("+++ b/") or line.startswith("--- a/"):
+            paths.add(line[6:])
+    return paths
+def api_implement(job,m,j):
+    allowed=m.get("allowed_paths",[])
+    if not allowed: return False
+    chunks=[]
+    budget=int(m.get("source_context_bytes",120000))
+    for rel in allowed:
+        p=ROOT/rel
+        if not p.is_file(): continue
+        body=p.read_text(errors="replace")
+        block=f"\n--- FILE: {rel} ---\n{body}\n"
+        if sum(len(x) for x in chunks)+len(block)>budget: break
+        chunks.append(block)
+    plan_path=BASE/(job+"-plan.json")
+    plan=plan_path.read_text(errors="replace") if plan_path.exists() else ""
+    prompt=("Return ONLY a git unified diff, no markdown fences. Implement the bounded goal using only ALLOWED_PATHS. "
+            "Do not modify files outside scope. Preserve existing behavior unless the goal requires change.\nGOAL:\n"+m["goal"]+
+            "\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(allowed)+"\nPLAN:\n"+plan+"\nSOURCE:\n"+"".join(chunks))
+    p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
+    if p.returncode!=0:
+        ev(event="api_implement_failure",job=job,returncode=p.returncode,stderr=p.stderr[-2000:]); return False
+    try: patch=clean_patch(json.loads(p.stdout)["text"])
+    except Exception as e:
+        ev(event="api_patch_parse_failure",job=job,error=str(e)); return False
+    paths=patch_paths(patch)
+    if not paths or any(not allowed_path(x,allowed) for x in paths):
+        ev(event="api_patch_scope_failure",job=job,paths=sorted(paths)); return False
+    patch_file=BASE/(job+"-implement.patch"); patch_file.write_text(patch)
+    check=subprocess.run(["git","apply","--check",str(patch_file)],cwd=ROOT,text=True,capture_output=True)
+    if check.returncode:
+        ev(event="api_patch_check_failure",job=job,stderr=check.stderr[-4000:]); return False
+    apply=subprocess.run(["git","apply",str(patch_file)],cwd=ROOT,text=True,capture_output=True)
+    if apply.returncode:
+        ev(event="api_patch_apply_failure",job=job,stderr=apply.stderr[-4000:]); return False
+    j["api_patch_saved"]=True
+    return True
 def scoped_checkpoint(job,m,j):
     allowed=m.get("allowed_paths",[])
     if not allowed:
@@ -85,7 +136,13 @@ def one(job):
             if p.returncode==0:
                 (BASE/(job+"-plan.json")).write_text(p.stdout); j["api_plan_saved"]=True
             else: ok=False; ev(event="api_failure",job=job,returncode=p.returncode)
-        elif phase in ("IMPLEMENT","TEST","VERIFY"):
+        elif phase=="IMPLEMENT":
+            if m.get("api_implement",False):
+                ok=api_implement(job,m,j)
+            if ok:
+                for c in m.get("commands",{}).get("implement",[]):
+                    if cmd(c,int(m.get("timeout_seconds",240)))!=0: ok=False; break
+        elif phase in ("TEST","VERIFY"):
             for c in m.get("commands",{}).get(phase.lower(),[]):
                 if cmd(c,int(m.get("timeout_seconds",240)))!=0: ok=False; break
         elif phase=="CHECKPOINT":
