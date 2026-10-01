@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "source_commit": "e81af0edb4b1b934a5a26957e86da87855b57570",
+  "files": [
+    "cmd/api/main.go",
+    "cmd/worker/main.go",
+    "internal/app/account_state.go",
+    "internal/app/account_state_test.go",
+    "internal/app/bootstrap.go",
+    "internal/app/capacity_guard.go",
+    "internal/app/capacity_guard_test.go",
+    "internal/app/catalog_sync.go",
+    "internal/app/config.go",
+    "internal/app/consistency.go",
+    "internal/app/container.go",
+    "internal/app/deploy.go",
+    "internal/app/deployment_ready.go",
+    "internal/app/installer_activation.go",
+    "internal/app/lifecycle.go",
+    "internal/app/network_identity.go",
+    "internal/app/orphan_reconcile.go",
+    "internal/app/panel.go",
+    "internal/app/postinstall.go",
+    "internal/app/postinstall_capabilities.go",
+    "internal/app/postinstall_rearm.go",
+    "internal/app/postinstall_reconcile.go",
+    "internal/app/profile.go",
+    "internal/app/provider_refresh.go",
+    "internal/app/proxy_pool.go",
+    "internal/app/proxy_provider.go",
+    "internal/app/proxy_provider_test.go",
+    "internal/app/recovery.go",
+    "internal/app/repository.go",
+    "internal/app/scheduler.go",
+    "internal/app/ssh_identity.go",
+    "internal/app/sticky_proxy.go",
+    "internal/app/workflow.go",
+    "internal/scheduler/engine.go",
+    "internal/scheduler/lease.go",
+    "internal/scheduler/model.go",
+    "internal/scheduler/planner.go",
+    "internal/scheduler/provider_gate_test.go",
+    "internal/scheduler/store.go",
+    "internal/worker/failures.go",
+    "internal/worker/heartbeat.go",
+    "internal/worker/lifecycle.go",
+    "internal/worker/recovery.go",
+    "internal/worker/worker.go"
+  ],
+  "runtime_events": [
+    {
+      "type": "goroutine_start",
+      "file": "cmd/api/main.go",
+      "line": 29,
+      "text": "go api.WarmOutputCache(ctx)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/api/main.go",
+      "line": 30,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/api/main.go",
+      "line": 31,
+      "text": "ticker := time.NewTicker(1 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 38,
+      "text": "go application.Container.RunDailyCatalogSync(ctx)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 42,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 43,
+      "text": "t := time.NewTicker(30 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 75,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 76,
+      "text": "t := time.NewTicker(30 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 89,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 90,
+      "text": "t := time.NewTicker(5 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 114,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 115,
+      "text": "t := time.NewTicker(5 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 128,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 129,
+      "text": "t := time.NewTicker(10 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 145,
+      "text": "go func() {"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 174,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 175,
+      "text": "t := time.NewTicker(2 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 190,
+      "text": "go func() {"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 226,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 227,
+      "text": "t := time.NewTicker(60 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 261,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 262,
+      "text": "t := time.NewTicker(10 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 291,
+      "text": "go func() {"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 300,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 301,
+      "text": "ticker := time.NewTicker(10 * time.Second)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "cmd/worker/main.go",
+      "line": 315,
+      "text": "go func() {"
+    },
+    {
+      "type": "ticker",
+      "file": "cmd/worker/main.go",
+      "line": 316,
+      "text": "ticker := time.NewTicker(30 * time.Second)"
+    },
+    {
+      "type": "ticker",
+      "file": "internal/app/catalog_sync.go",
+      "line": 64,
+      "text": "t := time.NewTicker(24 * time.Hour)"
+    },
+    {
+      "type": "goroutine_start",
+      "file": "internal/app/network_identity.go",
+      "line": 27,
+      "text": "go func(u string) {"
+    },
+    {
+      "type": "ticker",
+      "file": "internal/worker/worker.go",
+      "line": 30,
+      "text": "ticker := time.NewTicker(interval)"
+    }
+  ],
+  "services": {
+    "digital-ocean-bot-api": [
+      "ActiveState=active",
+      "SubState=running",
+      "MainPID=2542899"
+    ],
+    "digital-ocean-bot-worker": [
+      "ActiveState=active",
+      "SubState=running",
+      "MainPID=2542900"
+    ]
+  },
+  "note": "Static concurrency/cadence evidence plus live service state; exact ownership/control flow must be confirmed in source."
+}

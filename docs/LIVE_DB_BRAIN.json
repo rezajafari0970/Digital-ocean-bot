@@ -1,0 +1,5117 @@
+{
+  "schema_version": 1,
+  "scope": "production public schema metadata only; no application rows/secrets",
+  "table_count": 58,
+  "tables": [
+    {
+      "name": "account_capacity_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "old_limit",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "new_limit",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "delta",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "detected_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "snapshot_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "account_network_identities",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "nullable": false,
+          "default": "'UTC'::text"
+        },
+        {
+          "name": "locale",
+          "type": "text",
+          "nullable": false,
+          "default": "'en-US'::text"
+        },
+        {
+          "name": "exit_ip",
+          "type": "inet",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "subnet_key",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "asn",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "sticky_session",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "preferred_country_code",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "preferred_country",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "rotation_started_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "fallback_active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "last_health_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_health_ok",
+          "type": "boolean",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "account_proxy_pool",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "proxy_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "priority",
+          "type": "integer",
+          "nullable": false,
+          "default": "100"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "account_runtime_state",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "circuit_state",
+          "type": "text",
+          "nullable": false,
+          "default": "'closed'::text"
+        },
+        {
+          "name": "consecutive_failures",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "retry_after",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "rate_remaining",
+          "type": "integer",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "rate_reset_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "account_security_profiles",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "profile_version",
+          "type": "bigint",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "tls_policy",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "http_policy",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "browser_policy",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "browser_namespace",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "accounts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "external_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "preferred_region",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "auto_interval_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": "300"
+        },
+        {
+          "name": "auto_batch_size",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "auto_max_concurrent",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "preferred_regions",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "preferred_sizes",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "preferred_image",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "server_lifetime_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": "7200"
+        },
+        {
+          "name": "runtime_status",
+          "type": "text",
+          "nullable": false,
+          "default": "'READY'::text"
+        },
+        {
+          "name": "runtime_status_detail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "runtime_status_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "desired_server_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "fallback_any_region",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "preferred_images",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "server_lifetime_min_seconds",
+          "type": "integer",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "server_lifetime_max_seconds",
+          "type": "integer",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "build_spacing_minutes",
+          "type": "integer",
+          "nullable": false,
+          "default": "60"
+        },
+        {
+          "name": "build_spacing_max_minutes",
+          "type": "integer",
+          "nullable": false,
+          "default": "60"
+        },
+        {
+          "name": "next_build_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_state",
+          "type": "text",
+          "nullable": false,
+          "default": "'UNKNOWN'::text"
+        },
+        {
+          "name": "provider_state_detail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_error_state",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_error_detail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_state_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_checked_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "deletion_requested_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "console_email",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "console_password_secret_ref",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "console_capacity_status",
+          "type": "text",
+          "nullable": false,
+          "default": "'unconfigured'::text"
+        },
+        {
+          "name": "console_capacity_checked_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "console_capacity_detail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "admin_sessions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "bytea",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "admin_users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "username",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "password_hash",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "audit_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('audit_events_id_seq'::regclass)"
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "actor",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "resource_type",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "resource_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "result",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "deployment_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('deployment_events_id_seq'::regclass)"
+        },
+        {
+          "name": "deployment_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "deployment_installer_selections",
+      "columns": [
+        {
+          "name": "deployment_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "installer_name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "installer_version",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "nullable": false,
+          "default": "'operator'::text"
+        },
+        {
+          "name": "selected_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "deployment_profiles",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "config",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "deployment_step_attempts",
+      "columns": [
+        {
+          "name": "deployment_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_started_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_finished_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_error_class",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "next_retry_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "deployments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "profile_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "provider_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "current_step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "attempt",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "profile_snapshot",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "lock_version",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "installer_generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "host",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "postinstall_generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "droplets",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider_resource_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "profile",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "ready_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "profile_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "replacement_deployment_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "global_config_policies",
+      "columns": [
+        {
+          "name": "policy_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "ports",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "target_users_per_inbound",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "user_quota_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "user_lifetime_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "device_limit",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "users_per_second",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "sni_selection_mode",
+          "type": "text",
+          "nullable": false,
+          "default": "'scored'::text"
+        },
+        {
+          "name": "manual_snis",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "revision",
+          "type": "bigint",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "inbound_export_metadata",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "remote_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "public_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "inbound_structural_snapshots",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "remote_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "payload",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "install_scripts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "nullable": false,
+          "default": "'script'::text"
+        },
+        {
+          "name": "precheck",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "execute",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "verify",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": "600"
+        },
+        {
+          "name": "max_attempts",
+          "type": "integer",
+          "nullable": false,
+          "default": "3"
+        },
+        {
+          "name": "sha256",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "installer_runs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "deployment_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provision_run_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "installer_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "manifest_snapshot",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "manifest_sha256",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "installers",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "manifest",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "sha256",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "lifecycle_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "resource_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "network_profiles",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "mode",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "proxy_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "operations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "idempotency_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider_action_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "resource_id",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "attempt",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "error_code",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "error_message",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "lock_version",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "output_config_snapshots",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "uri",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "first_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "visible_until",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "output_share_tokens",
+      "columns": [
+        {
+          "name": "token",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "panel_ad_proxies",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "proxy_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "outbound_tag",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "priority",
+          "type": "integer",
+          "nullable": false,
+          "default": "100"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "panel_capability_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "driver",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "capabilities",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "evidence",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "observed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "panel_inbound_inventory",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "remote_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "remark",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "protocol",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "listen",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "transport",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "security",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "client_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "upload_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "download_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "total_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "raw_hash",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "present",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "first_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "missing_since",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "panel_inbound_policies",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "policy_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "revision",
+          "type": "bigint",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "desired_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "protocol",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "transport",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "security",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "listen",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "preferred_ports",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "dynamic_port_start",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "dynamic_port_end",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "reserved_ports",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "clients_per_inbound",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "allow_delete",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "user_quota_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "user_lifetime_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "device_limit",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "bulk_user_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "users_per_second",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "sni_selection_mode",
+          "type": "text",
+          "nullable": false,
+          "default": "'scored'::text"
+        },
+        {
+          "name": "manual_snis",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        }
+      ]
+    },
+    {
+      "name": "panel_instances",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "driver",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "base_url",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "auth_secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "panel_inventory_syncs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "observed_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "changed_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "missing_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "error_code",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        }
+      ]
+    },
+    {
+      "name": "panel_settings",
+      "columns": [
+        {
+          "name": "id",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "listen_host",
+          "type": "text",
+          "nullable": false,
+          "default": "'0.0.0.0'::text"
+        },
+        {
+          "name": "listen_port",
+          "type": "integer",
+          "nullable": false,
+          "default": "18080"
+        },
+        {
+          "name": "web_path",
+          "type": "text",
+          "nullable": false,
+          "default": "'/admin'::text"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "provider_capacity_observations",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "compute_limit",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "observed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "provider_catalog_cache",
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "catalog",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "refreshed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "provider_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "data",
+          "type": "jsonb",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "canonical",
+          "type": "jsonb",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "provision_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "run_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "error_code",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "substep",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "attempt",
+          "type": "integer",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "error_class",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "error_message",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "error_fingerprint",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "exit_code",
+          "type": "integer",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "signal",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "stdout_tail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "stderr_tail",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "duration_ms",
+          "type": "bigint",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "retryable",
+          "type": "boolean",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "next_retry_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        }
+      ]
+    },
+    {
+      "name": "provision_runs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "current_step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "attempt",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "next_retry_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "ssh_host_key_sha256",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "provision_step_attempts",
+      "columns": [
+        {
+          "name": "run_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "step",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_started_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_finished_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "next_retry_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "terminal",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "name": "proxies",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "type",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "host",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "username",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "secret_ref",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "default": "'unknown'::text"
+        },
+        {
+          "name": "exit_ip",
+          "type": "inet",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "asn",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "failure_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_checked_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_success_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "consecutive_successes",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "latency_ms",
+          "type": "bigint",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "health_error",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "expected_exit_ip",
+          "type": "inet",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "adapter",
+          "type": "text",
+          "nullable": false,
+          "default": "'generic'::text"
+        }
+      ]
+    },
+    {
+      "name": "reality_credentials",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "managed_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "uuid_secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "private_key_secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "public_key",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "short_id",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "reality_probe_nodes",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "host",
+          "type": "inet",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": "22"
+        },
+        {
+          "name": "ssh_user",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "ssh_key_secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "default": "'UNKNOWN'::text"
+        },
+        {
+          "name": "consecutive_successes",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "consecutive_failures",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_latency_ms",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_exit_ip",
+          "type": "inet",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_checked_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "last_success_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "ssh_host_key_sha256",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "reality_target_observations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "target",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "server_name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "reachable",
+          "type": "boolean",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "tls_version",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "cert_valid",
+          "type": "boolean",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "http2",
+          "type": "boolean",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "samples",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "successes",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "median_latency_ms",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "success_ratio",
+          "type": "double precision",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "eligible",
+          "type": "boolean",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "score",
+          "type": "double precision",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "observed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "reality_target_selections",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "target",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "server_name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "score",
+          "type": "double precision",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "selected_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "server_names",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "tls_version",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "alpn",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "curve_id",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "cert_valid",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "cert_chain_valid",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "latency_ms",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "scanned_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "residential_proxies",
+      "columns": [
+        {
+          "name": "proxy_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "outbound_tag",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "priority",
+          "type": "integer",
+          "nullable": false,
+          "default": "100"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "resources",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "provider_resource_id",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "type",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "managed",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "schedules",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "profile_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "interval_seconds",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "batch_size",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "max_concurrent",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        },
+        {
+          "name": "next_run_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "last_run_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "lease_until",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "schema_migrations",
+      "columns": [
+        {
+          "name": "version",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "applied_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "checksum",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "secrets",
+      "columns": [
+        {
+          "name": "id",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "ciphertext",
+          "type": "bytea",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "nonce",
+          "type": "bytea",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "key_version",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "proxy_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "probe_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "owner_key",
+          "type": "text",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "server_readiness_issues",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "readiness_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "run_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "severity",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "remediation",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": "'OPEN'::text"
+        },
+        {
+          "name": "detail",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "server_readiness_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "run_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "os_id",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "os_version",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "architecture",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "cpu_count",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "memory_mb",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "disk_free_mb",
+          "type": "bigint",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "is_root",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "package_manager",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "package_health",
+          "type": "text",
+          "nullable": false,
+          "default": "'unknown'::text"
+        },
+        {
+          "name": "dns_ok",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "outbound_https_ok",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "time_sync",
+          "type": "text",
+          "nullable": false,
+          "default": "'unknown'::text"
+        },
+        {
+          "name": "reboot_required",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "checks",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "user_capacity_snapshots",
+      "columns": [
+        {
+          "name": "panel_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "inbound_id",
+          "type": "bigint",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "target_users",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "active_users",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "expired_users",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "quota_exhausted_users",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "deficit",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "created_last_cycle",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "deleted_last_cycle",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "observed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "worker_heartbeats",
+      "columns": [
+        {
+          "name": "worker_id",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'{}'::jsonb"
+        }
+      ]
+    },
+    {
+      "name": "worker_item_failures",
+      "columns": [
+        {
+          "name": "kind",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "item_id",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": ""
+        },
+        {
+          "name": "failures",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "last_error",
+          "type": "text",
+          "nullable": false,
+          "default": "''::text"
+        },
+        {
+          "name": "first_failed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "last_failed_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "next_retry_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "xui_clients",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "inbound_id",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "xui_database_deployments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "template_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "xui_database_templates",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "storage_path",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "sha256",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "name": "xui_panel_deployments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "account_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "droplet_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "username",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "password_secret_ref",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "web_path",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "generation",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        }
+      ]
+    }
+  ],
+  "migration_count": 102,
+  "migrations": [
+    {
+      "version": "000001_core",
+      "checksum": "215b4c2d5effd18a13089be34d476fbee3c6db7b0f54132d7e2dda047a5c1bf5",
+      "applied_at": "2026-09-23 00:30:34.490224+00"
+    },
+    {
+      "version": "000002_operations",
+      "checksum": "857a2cbc4da727612a2e752fa2f8e6ff637741879d8e4b831436e8928d586c77",
+      "applied_at": "2026-09-23 00:30:34.506037+00"
+    },
+    {
+      "version": "000003_security_profiles",
+      "checksum": "97aaed3f61405fa1b0f9fdc765fda5dbad48106d427a820f6a068e673f3c5e6d",
+      "applied_at": "2026-09-23 00:30:34.51302+00"
+    },
+    {
+      "version": "000004_proxy_health",
+      "checksum": "5cf3d6c6b3dec17f0f1829a640be66c4a3c8683f2bb4bb2199352298d2418b75",
+      "applied_at": "2026-09-23 00:30:34.5176+00"
+    },
+    {
+      "version": "000005_secrets",
+      "checksum": "8cf3d013348cfbfd9dc5c30351582db8f70b49e797c09c9b4fe95f7fa983d308",
+      "applied_at": "2026-09-23 00:30:34.520392+00"
+    },
+    {
+      "version": "000006_provider_registry",
+      "checksum": "d4c7fced72372c51e3da9da2042755b4ff3e89c37d1847dd09418371eac6c616",
+      "applied_at": "2026-09-23 00:30:34.525276+00"
+    },
+    {
+      "version": "000007_droplet_lifecycle",
+      "checksum": "87a5f8d943276989fb8b96541feac47f447264cce9a8d5aa36f5b138fbf2e983",
+      "applied_at": "2026-09-23 00:30:34.529098+00"
+    },
+    {
+      "version": "000008_mutation_safety",
+      "checksum": "8ba31647c43020c0a9559218aeb92688de972c1872acbc62485c82cda68a0b30",
+      "applied_at": "2026-09-23 00:30:34.533088+00"
+    },
+    {
+      "version": "000009_provisioning",
+      "checksum": "b9834e290a4996c772239268ee01ae876fd29e34ca8d9c8f21cdc19c152f75f3",
+      "applied_at": "2026-09-23 00:30:34.536872+00"
+    },
+    {
+      "version": "000010_xui_templates",
+      "checksum": "ab85b947497610814b7710ac8960e256492450bf54edf1032f819fd062fb6b51",
+      "applied_at": "2026-09-23 00:30:34.544305+00"
+    },
+    {
+      "version": "000011_xui_clients",
+      "checksum": "9663015611e7196ded80e44b5047970b26fa4fabe6bc89c910c1f35e51fb40d4",
+      "applied_at": "2026-09-23 00:30:34.551001+00"
+    },
+    {
+      "version": "000012_traffic_guard",
+      "checksum": "6081ae86ef5a32dfa5ce5784fb4deb6447fd3daad806c9f8d08f820b723d216d",
+      "applied_at": "2026-09-23 00:30:34.555711+00"
+    },
+    {
+      "version": "000013_deployments",
+      "checksum": "bc2f04a08b51127c72c4dc3d103d0000b6fdb7287f693c4464a71b4cc1d54c9e",
+      "applied_at": "2026-09-23 00:30:34.56031+00"
+    },
+    {
+      "version": "000014_deployment_profiles",
+      "checksum": "42533354748bcc8b14827731012bfd2d1f607c33f80ae760a507e996d4df1e38",
+      "applied_at": "2026-09-23 00:30:34.568468+00"
+    },
+    {
+      "version": "000015_lifecycle_expiration",
+      "checksum": "19ae9a08244d4b682751dde15aafc686a1240c7a1e87b0acf602cb828b0d75ed",
+      "applied_at": "2026-09-23 00:30:34.574146+00"
+    },
+    {
+      "version": "000016_observability",
+      "checksum": "8fe20c9e201e57d2219f2aeb4fac4f62205534c55c019de842f8dc97ccbc7e10",
+      "applied_at": "2026-09-23 00:30:34.576404+00"
+    },
+    {
+      "version": "000017_admin_auth",
+      "checksum": "7560bd45974d132fbd8fce2c9e996875b32470ddfacb6ad04c7426790179062d",
+      "applied_at": "2026-09-23 00:30:34.581468+00"
+    },
+    {
+      "version": "000018_traffic_policies",
+      "checksum": "7deaa9061fe837ab60e4bbb720f70f4c61beefe7aaebc94fe9ff59cf229631c8",
+      "applied_at": "2026-09-23 00:30:34.5859+00"
+    },
+    {
+      "version": "000019_schedules",
+      "checksum": "4368d49e11ff5ffae7e39cde46820cf9cdf0fa1704fe479c76608cc7c1328d9f",
+      "applied_at": "2026-09-23 00:30:34.589869+00"
+    },
+    {
+      "version": "000020_concurrency_hardening",
+      "checksum": "adc07a62a7377225b642531aacc2b4d08f2773ed6a5db10eacd011338ffb1702",
+      "applied_at": "2026-09-23 00:30:34.593778+00"
+    },
+    {
+      "version": "000021_session_security",
+      "checksum": "414276be758bf953451209aa78d8082f08f0b62b55afc0297a1cd09a0cfa6034",
+      "applied_at": "2026-09-23 00:43:06.259884+00"
+    },
+    {
+      "version": "000022_panel_settings",
+      "checksum": "680c9c00f70a4d418ecaab611e493bee8aa54fb120d589a42bae9289519e65c2",
+      "applied_at": "2026-09-23 00:45:16.15854+00"
+    },
+    {
+      "version": "000023_account_automation",
+      "checksum": "d0de1824a368f40918a333ec241c62d7a18562d60adcba243a79808699141004",
+      "applied_at": "2026-09-23 01:03:08.487242+00"
+    },
+    {
+      "version": "000024_account_server_choices",
+      "checksum": "4fcd3bffdfe2c3a1a33bf797d213db3b7924e8808cb001ef9604a3c9a4d0bf3f",
+      "applied_at": "2026-09-23 01:09:26.768882+00"
+    },
+    {
+      "version": "000025_proxy_secrets",
+      "checksum": "0abe810cd7f654c092662c254aa621cd2474acb2b01a379550160cc7c794209a",
+      "applied_at": "2026-09-23 01:22:12.295139+00"
+    },
+    {
+      "version": "000026_proxy_health_successes",
+      "checksum": "44d9eb93700744d0347d2f5834eeec938034cdde0b09598f97498afc616e6b52",
+      "applied_at": "2026-09-23 01:50:15.397248+00"
+    },
+    {
+      "version": "000027_provider_catalog_cache",
+      "checksum": "12189087d5c92501aa8d64ad677c570cea2ff626c082fe926bb7c3b1edf83254",
+      "applied_at": "2026-09-23 02:06:44.657743+00"
+    },
+    {
+      "version": "000028_account_external_identity",
+      "checksum": "bff91a7e4cc097935c7c81072f5d2e6c0056481078dcc78e276fc34d5b7db410",
+      "applied_at": "2026-09-23 03:18:31.792002+00"
+    },
+    {
+      "version": "000029_account_lifecycle_policy",
+      "checksum": "657db5f612898923e15a1018ca5cb7cbb8d3f71d847d43e27e7b5921a31a9aa8",
+      "applied_at": "2026-09-23 03:44:46.487364+00"
+    },
+    {
+      "version": "000030_replacement_lifecycle",
+      "checksum": "d7d48f965e9ff44267618d1032fe513cf9f65da04d19f62b0e758722a2fa9779",
+      "applied_at": "2026-09-23 04:09:03.317862+00"
+    },
+    {
+      "version": "000031_account_runtime_status",
+      "checksum": "bf6f92de0201828f5716d3baf1b04e00235e5b88bfd0a546ef0a3909dc8a7222",
+      "applied_at": "2026-09-23 04:09:03.329315+00"
+    },
+    {
+      "version": "000032_account_automation_backfill",
+      "checksum": "74ab968a32661ab2569d5dc7b501d433837b69c9908f182cbd38eac341afaaa9",
+      "applied_at": "2026-09-23 04:13:57.286213+00"
+    },
+    {
+      "version": "000033_account_schedule_backfill_fix",
+      "checksum": "9aff3738476c1b4e049a69c7c336139471a5c892bc60457743804042d6702afd",
+      "applied_at": "2026-09-23 04:15:09.367082+00"
+    },
+    {
+      "version": "000034_account_desired_server_count",
+      "checksum": "8b1989d46ad1af9b002d8ef24f13950deabbd4f38d62d82f7025d55e810ef6e1",
+      "applied_at": "2026-09-23 04:20:23.483672+00"
+    },
+    {
+      "version": "000035_provider_snapshot_null_droplets",
+      "checksum": "23cdc5e9427530c3562ff7062acdfc5d509b9bf29ad0de6d76014a57a5259c38",
+      "applied_at": "2026-09-23 06:41:01.568729+00"
+    },
+    {
+      "version": "000036_account_any_region_fallback",
+      "checksum": "30cd7d1a293fef3b1b7c6dcd98dbb6b77360d17add9a09391ed8608a9f45efbe",
+      "applied_at": "2026-09-23 06:47:59.631091+00"
+    },
+    {
+      "version": "000037_account_mutation_guards",
+      "checksum": "f04fe0f8a82f902bbc2986c620740d579ff0462fbdca904283c79311bd7ad7b0",
+      "applied_at": "2026-09-23 07:11:01.225527+00"
+    },
+    {
+      "version": "000038_capacity_history",
+      "checksum": "13ecb599b07f33ade5915de3e51c75c98b236f3bce48c6c4fa6a8be89cd7395b",
+      "applied_at": "2026-09-23 07:16:55.174932+00"
+    },
+    {
+      "version": "000039_resources_identity",
+      "checksum": "27a8d3c8d6f4f6029497269e4166304337349305774de64f82b65e1b6e26c1c5",
+      "applied_at": "2026-09-23 07:23:06.600098+00"
+    },
+    {
+      "version": "000040_capacity_history_grants",
+      "checksum": "f126793d2cef15fe9420006088f38e6c078dc6290d7f03399eae88845826b098",
+      "applied_at": "2026-09-23 07:28:46.214262+00"
+    },
+    {
+      "version": "000041_account_network_identity",
+      "checksum": "303d295c7c8788af5918fed87863716e3a6edfdac4def0af1e0ae8d6d0f60a3c",
+      "applied_at": "2026-09-23 07:39:12.65164+00"
+    },
+    {
+      "version": "000042_randomized_deployment_choices",
+      "checksum": "2cfe9d132e9722c66606ba304e6b485520e69770c50f237586dd366db355a673",
+      "applied_at": "2026-09-23 07:57:59.507282+00"
+    },
+    {
+      "version": "000043_build_spacing",
+      "checksum": "2f74a66a0fd267c798d5ca46a24ef303dc76219ef382da0928a22c9576be675f",
+      "applied_at": "2026-09-23 08:08:27.006852+00"
+    },
+    {
+      "version": "000044_build_spacing_range",
+      "checksum": "38a70cf441a06aaef140c63786ff50fefa5b3932f62543cc29edfd0c49946255",
+      "applied_at": "2026-09-23 08:10:29.896062+00"
+    },
+    {
+      "version": "000045_internal_schedule_tick",
+      "checksum": "f67722ef4a687778c3c36dfb0d014a6ae1b914e05fcfc87bdd1f31cebe800e34",
+      "applied_at": "2026-09-23 08:15:34.383309+00"
+    },
+    {
+      "version": "000046_digitalocean_login_credentials",
+      "checksum": "ea92497a278390d14647a7ca654b64aa9ed19d1a855531c4efb7404e7913abfc",
+      "applied_at": "2026-09-23 22:20:35.05448+00"
+    },
+    {
+      "version": "000047_build_spacing_max_default",
+      "checksum": "499b480c0bf57f83c4c005a5491db78249df5aa5e77f504a49084166b8a0b781",
+      "applied_at": "2026-09-24 00:16:34.871433+00"
+    },
+    {
+      "version": "000048_sticky_proxy_identity",
+      "checksum": "55b60d06f45bc8b1ea1dafb6d6319095b1870d36fc5ae65c88733a01adc1bb56",
+      "applied_at": "2026-09-24 00:45:37.062949+00"
+    },
+    {
+      "version": "000049_provision_retry_diagnostics",
+      "checksum": "528ee35c0191b1a20dbc1379f584da2d13ab2ad327265939c5cc8891af89e9d2",
+      "applied_at": "2026-09-24 00:57:53.256994+00"
+    },
+    {
+      "version": "000050_browser_identity_audit",
+      "checksum": "5f65e18e545a55cd12033216822fd3fdd906522de622d0a46b2cedd515b4fd4d",
+      "applied_at": "2026-09-24 01:05:41.850374+00"
+    },
+    {
+      "version": "000051_account_browser_runtime",
+      "checksum": "b3df2b30402870cbf478668b4475e92ab02aa536282e4da0b7f2981ea1196d1d",
+      "applied_at": "2026-09-24 01:34:41.439219+00"
+    },
+    {
+      "version": "000052_browser_geo_consistency",
+      "checksum": "55e1a9d4562b04c7e3badabdac0cdfd4a2b96599ef7993ad2f998b8f0955cbcf",
+      "applied_at": "2026-09-24 01:49:42.262843+00"
+    },
+    {
+      "version": "000053_browser_audit_queue",
+      "checksum": "ded16b2c6c5b11574b29dd174371a4910b541e703e5089534031f6dfec29abfa",
+      "applied_at": "2026-09-24 02:41:49.384339+00"
+    },
+    {
+      "version": "000054_browser_login_state",
+      "checksum": "3eeb15a06d9437d9ad8f8419322bdb3e7c8e2f859746e46c821dd0d06dedc985",
+      "applied_at": "2026-09-24 02:45:44.356524+00"
+    },
+    {
+      "version": "000055_login_challenge_state",
+      "checksum": "755335a600e5b8fe34f0e9b9193c5dde0715297fc42c4eab77bc56854952a9d9",
+      "applied_at": "2026-09-24 02:57:23.318979+00"
+    },
+    {
+      "version": "000056_proxy_adapter",
+      "checksum": "0582bcd39f6e4399e84d11bac1cf7d0dc43376b02de2852447706d009bb0a4f7",
+      "applied_at": "2026-09-24 03:24:23.802757+00"
+    },
+    {
+      "version": "000057_multi_active_deployments",
+      "checksum": "deac5a771180851e88f64e1bb4708a46b8ecac8d3f0a92c2d70892192f697b3b",
+      "applied_at": "2026-09-24 04:24:54.606896+00"
+    },
+    {
+      "version": "000058_deployment_step_attempts",
+      "checksum": "7701c298798de00a03c7b2f9ec0a49ea0c21491a04c7229d3e96b2b0fcc5551f",
+      "applied_at": "2026-09-26 03:01:10.191691+00"
+    },
+    {
+      "version": "000059_provision_step_attempts",
+      "checksum": "f9cc765ac928e597ff8c15b8e5153423a9085c5e7ea48ef3e6316641ff11ee34",
+      "applied_at": "2026-09-26 03:01:10.198657+00"
+    },
+    {
+      "version": "000060_worker_failure_observability",
+      "checksum": "d33fc891ef1f9acafa2901edc454c19890c7b0b7fbee471c6631dcfa5009e444",
+      "applied_at": "2026-09-26 03:01:10.204576+00"
+    },
+    {
+      "version": "000061_provision_diagnostics",
+      "checksum": "d7960dedd93238f704ed745d5512d6e8a1e36ae7f8e811ca98d75b7351be8328",
+      "applied_at": "2026-09-26 03:48:05.288071+00"
+    },
+    {
+      "version": "000062_install_script_registry",
+      "checksum": "f0229f3d9a07d52bb5bd593040d41e4fbfc8bbb55dc213183a097c5e55e0f5e7",
+      "applied_at": "2026-09-26 03:48:05.300839+00"
+    },
+    {
+      "version": "000063_ssh_host_key_pin",
+      "checksum": "e29546378599779bab49a17817a350c022a3c497e1f4c561e5789fced3ec79a8",
+      "applied_at": "2026-09-26 03:48:05.308669+00"
+    },
+    {
+      "version": "000064_server_readiness",
+      "checksum": "c50aa1d7911484909211205003ad695be35bbee120bc23d3c05833d4c107d22b",
+      "applied_at": "2026-09-26 04:13:01.210528+00"
+    },
+    {
+      "version": "000065_readiness_decisions",
+      "checksum": "b0c2cf40b14af302e179b5987f7fb98e1509e2f379726a5b6a80acbc4a4e3cf9",
+      "applied_at": "2026-09-26 04:20:24.488084+00"
+    },
+    {
+      "version": "000066_account_provider_observation",
+      "checksum": "77b4d430b9396936047d193e15b7f64cba9e8268da0eaa8bedd56e1c3291c280",
+      "applied_at": "2026-09-26 04:47:40.369509+00"
+    },
+    {
+      "version": "000067_installer_orchestration",
+      "checksum": "b322523dc0a9a6fefcd2b11bbcd9357d56fee51c0acce21ff9d6d36566236077",
+      "applied_at": "2026-09-26 05:10:30.208629+00"
+    },
+    {
+      "version": "000068_installer_selection",
+      "checksum": "294615e2f43668deac0da29cbf50e799802e9b21644ac805abe37da85502ac2c",
+      "applied_at": "2026-09-26 05:15:33.978437+00"
+    },
+    {
+      "version": "000069_installer_generations",
+      "checksum": "1f457ba2bd9d733ed2e06576c9a87314387b2dedb787c027b36315a735333203",
+      "applied_at": "2026-09-26 06:49:10.199395+00"
+    },
+    {
+      "version": "000070_database_deployment_contract",
+      "checksum": "5a1cd2f04b392c6d581ec4356bd9ae966fea010dce9a11464413775ce7359432",
+      "applied_at": "2026-09-27 03:25:19.07287+00"
+    },
+    {
+      "version": "000071_xui_panel_deployments",
+      "checksum": "acd9268091d58ebf487d4554bfb82f0de4cfdceaafa475816cd4cbb69489e839",
+      "applied_at": "2026-09-27 03:25:19.07287+00"
+    },
+    {
+      "version": "000072_deployment_host",
+      "checksum": "7f8e0dee61af4fd5bf4405471237c90b7e1285a40cca1c41fe88bc628954673c",
+      "applied_at": "2026-09-27 03:25:19.07287+00"
+    },
+    {
+      "version": "000073_postinstall_generation",
+      "checksum": "1b232e2682e6d6ba226bc132fb90a2b15bdd004af65d5516a6983b6face5ba95",
+      "applied_at": "2026-09-27 03:25:19.07287+00"
+    },
+    {
+      "version": "000074_panel_driver_foundation",
+      "checksum": "cd0d41eee1270ee137567fc3b61156942d52f760e9e473cc662d8a07d9569f2a",
+      "applied_at": "2026-09-27 04:40:18.050696+00"
+    },
+    {
+      "version": "000075_panel_inbound_inventory",
+      "checksum": "b423ccbc9e9e6a4a6e33186ea664f03c5463a938dd3c8554071b9497264944fd",
+      "applied_at": "2026-09-27 05:09:08.519318+00"
+    },
+    {
+      "version": "000076_panel_inbound_policies",
+      "checksum": "097f21c715cb108282f851762d1303a841e013458e688435401ca373459de303",
+      "applied_at": "2026-09-27 05:13:14.676894+00"
+    },
+    {
+      "version": "000077_reality_target_observations",
+      "checksum": "a34a2a797cb506814eec7b2512fa9f8b1a9eb95f548002cfa8a659e5dc6f7f8e",
+      "applied_at": "2026-09-27 05:26:38.580821+00"
+    },
+    {
+      "version": "000078_reality_credentials",
+      "checksum": "079c0a8bf03cde0e44301d6bdebbf7d59616b735f004fe7e9aaabee83df67ffb",
+      "applied_at": "2026-09-27 05:44:29.852223+00"
+    },
+    {
+      "version": "000079_reality_scan_selection",
+      "checksum": "7a9ba64dbbd32cecf60c6372ef62dea1b4ba11f019db6742444e1e4acf453972",
+      "applied_at": "2026-09-27 07:51:57.690785+00"
+    },
+    {
+      "version": "000080_reality_probe_nodes",
+      "checksum": "2a880e08f04b46021e25e1b237f7f0533ae62819e34ed416774c10cf99fa259a",
+      "applied_at": "2026-09-28 11:01:58.517188+00"
+    },
+    {
+      "version": "000081_probe_secrets",
+      "checksum": "e369d4d1ebf41e96037fdf1f7b307b7867a9689b6cedb5781be2c0a3aec5f915",
+      "applied_at": "2026-09-28 11:05:44.110778+00"
+    },
+    {
+      "version": "000082_probe_host_key",
+      "checksum": "e30ec59479092a1ab99177025c0cdd379c86a63331ebb40a655969f9a8d57674",
+      "applied_at": "2026-09-28 11:14:34.086963+00"
+    },
+    {
+      "version": "000082_restore_secrets_owner_unique",
+      "checksum": "20757028d23596789a7a1ebe22dd7986933a34a12ad610e71355963580fa1d3a",
+      "applied_at": "2026-09-28 20:03:27.035949+00"
+    },
+    {
+      "version": "000083_panel_ad_proxies",
+      "checksum": "731296e3678110d25498db0a8cc88237b78211a31e0b09d111e90b92c1a215c7",
+      "applied_at": "2026-09-28 20:19:36.041745+00"
+    },
+    {
+      "version": "000084_config_policy_controls",
+      "checksum": "12efd4f157d4a0f7c1d01cc3e49010c5021f0e45c849643b7fbf47e0c657dd70",
+      "applied_at": "2026-09-28 20:50:35.836347+00"
+    },
+    {
+      "version": "000085_global_config_policy",
+      "checksum": "1695a26ee29228c0af3e4a8042908b7373dd491794c4bc43783c9b6f0c2dba37",
+      "applied_at": "2026-09-28 21:13:39.42115+00"
+    },
+    {
+      "version": "000086_residential_proxies",
+      "checksum": "42b0b0db8530372e96a1f3e54a0bc0fd86db642dcb9054076a855ecd82f59d5b",
+      "applied_at": "2026-09-28 21:24:38.737963+00"
+    },
+    {
+      "version": "000087_inbound_export_metadata",
+      "checksum": "8673dcb74f864b01e41ef482c2d627c1fc4fb3bf00b618834a38fb887cdecfe8",
+      "applied_at": "2026-09-28 21:47:21.963537+00"
+    },
+    {
+      "version": "000088_user_capacity_snapshots",
+      "checksum": "54e06af9eb93bdf072e0ae5a38ba68843d4d1b28c411dca5120d9a403fac2b8a",
+      "applied_at": "2026-09-28 22:07:07.957403+00"
+    },
+    {
+      "version": "000089_canonical_deployment_terminal_states",
+      "checksum": "5621f9d49e7817fdcb45ace27b1e22fac4d5edc8ff90b6b706c47e43ab497ec7",
+      "applied_at": "2026-09-29 02:57:32.738337+00"
+    },
+    {
+      "version": "000090_output_snapshots",
+      "checksum": "3a88d9185a645c016de8d1a017e0ca17149830315c3d81bb3f6f632e03b75e63",
+      "applied_at": "2026-09-29 03:23:34.139218+00"
+    },
+    {
+      "version": "000091_inbound_structural_snapshots",
+      "checksum": "79e5aebe88d18f1d47b394fdbda8797a422b43af240db394a2697b7598b00b4d",
+      "applied_at": "2026-09-29 07:34:31.402938+00"
+    },
+    {
+      "version": "000092_output_visibility",
+      "checksum": "155085c4561d8c93f6d9653444f71bed8d8d4ad7185ef79da81b3e7bbde9b9dd",
+      "applied_at": "2026-09-29 07:34:31.405782+00"
+    },
+    {
+      "version": "000093_ubuntu_images_only",
+      "checksum": "a583f7e4cafc5385df6b67c5e3dec23fa8ecf918cb1a1d10ba069beca9587855",
+      "applied_at": "2026-09-29 08:17:21.224485+00"
+    },
+    {
+      "version": "000094_account_soft_delete",
+      "checksum": "9f9c33f6d5354ac178e1535b401f013e4a251d2e62be083b7cedf837b52fb6a3",
+      "applied_at": "2026-09-29 08:31:04.878824+00"
+    },
+    {
+      "version": "000095_finalize_pending_account_archives",
+      "checksum": "00ba3ef6a387a19a371955fa550c5ff52edeeb15c8c34a4bfc87f44578e130e1",
+      "applied_at": "2026-09-29 08:33:47.914911+00"
+    },
+    {
+      "version": "000096_remove_account_login_browser_legacy",
+      "checksum": "38d136f4afc3bdbd2dbc49104bb484cb1dd8f741a907da497c125530b1262a80",
+      "applied_at": "2026-09-29 08:51:22.914283+00"
+    },
+    {
+      "version": "000097_provider_snapshot_canonical",
+      "checksum": "77d49ebc4ea86b80a106bc4071035c3cfa079a93143d2a250870d83b0879c986",
+      "applied_at": "2026-09-29 09:56:14.327045+00"
+    },
+    {
+      "version": "000098_remove_unused_trafficguard",
+      "checksum": "747d0b3c929e0f56fe331d8a0c5e265fdde98647c3da1cbb4fb0c8556396bcfb",
+      "applied_at": "2026-09-29 11:04:54.413538+00"
+    },
+    {
+      "version": "000099_account_proxy_pool",
+      "checksum": "953cf1fcf3a4e70065b7a7506717a361cd4082f3299cb43146a71b1be7dab6d8",
+      "applied_at": "2026-09-29 11:26:19.471425+00"
+    },
+    {
+      "version": "000100_provider_capacity_observations",
+      "checksum": "5d73c2ba730e2eabad60384a3a5e4caede52501eee13a40bc56650e817520238",
+      "applied_at": "2026-10-01 03:57:15.702791+00"
+    },
+    {
+      "version": "000101_vultr_console_capacity_credentials",
+      "checksum": "c07be3e8f1a1b5e28118919718166fc9149e218034129019278065e8a3eff5d6",
+      "applied_at": "2026-10-01 03:57:15.706502+00"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "account_capacity_events",
+      "name": "account_capacity_events_account_time_idx",
+      "definition": "CREATE INDEX account_capacity_events_account_time_idx ON public.account_capacity_events USING btree (account_id, detected_at DESC)"
+    },
+    {
+      "table": "account_capacity_events",
+      "name": "account_capacity_events_pkey",
+      "definition": "CREATE UNIQUE INDEX account_capacity_events_pkey ON public.account_capacity_events USING btree (id)"
+    },
+    {
+      "table": "account_network_identities",
+      "name": "account_network_identities_pkey",
+      "definition": "CREATE UNIQUE INDEX account_network_identities_pkey ON public.account_network_identities USING btree (account_id)"
+    },
+    {
+      "table": "account_proxy_pool",
+      "name": "account_proxy_pool_active_idx",
+      "definition": "CREATE INDEX account_proxy_pool_active_idx ON public.account_proxy_pool USING btree (account_id, priority, proxy_id) WHERE (enabled = true)"
+    },
+    {
+      "table": "account_proxy_pool",
+      "name": "account_proxy_pool_pkey",
+      "definition": "CREATE UNIQUE INDEX account_proxy_pool_pkey ON public.account_proxy_pool USING btree (account_id, proxy_id)"
+    },
+    {
+      "table": "account_runtime_state",
+      "name": "account_runtime_state_pkey",
+      "definition": "CREATE UNIQUE INDEX account_runtime_state_pkey ON public.account_runtime_state USING btree (account_id)"
+    },
+    {
+      "table": "account_security_profiles",
+      "name": "account_security_profiles_browser_namespace_key",
+      "definition": "CREATE UNIQUE INDEX account_security_profiles_browser_namespace_key ON public.account_security_profiles USING btree (browser_namespace)"
+    },
+    {
+      "table": "account_security_profiles",
+      "name": "account_security_profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX account_security_profiles_pkey ON public.account_security_profiles USING btree (account_id)"
+    },
+    {
+      "table": "account_security_profiles",
+      "name": "account_security_profiles_version_idx",
+      "definition": "CREATE INDEX account_security_profiles_version_idx ON public.account_security_profiles USING btree (profile_version)"
+    },
+    {
+      "table": "accounts",
+      "name": "accounts_active_idx",
+      "definition": "CREATE INDEX accounts_active_idx ON public.accounts USING btree (id) WHERE (deleted_at IS NULL)"
+    },
+    {
+      "table": "accounts",
+      "name": "accounts_pkey",
+      "definition": "CREATE UNIQUE INDEX accounts_pkey ON public.accounts USING btree (id)"
+    },
+    {
+      "table": "accounts",
+      "name": "accounts_provider_external_id_uidx",
+      "definition": "CREATE UNIQUE INDEX accounts_provider_external_id_uidx ON public.accounts USING btree (provider, external_id) WHERE (external_id IS NOT NULL)"
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_expiry_idx",
+      "definition": "CREATE INDEX admin_sessions_expiry_idx ON public.admin_sessions USING btree (expires_at)"
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX admin_sessions_pkey ON public.admin_sessions USING btree (id)"
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_token_hash_key",
+      "definition": "CREATE UNIQUE INDEX admin_sessions_token_hash_key ON public.admin_sessions USING btree (token_hash)"
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_user_seen_idx",
+      "definition": "CREATE INDEX admin_sessions_user_seen_idx ON public.admin_sessions USING btree (user_id, last_seen_at DESC)"
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_pkey",
+      "definition": "CREATE UNIQUE INDEX admin_users_pkey ON public.admin_users USING btree (id)"
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_username_key",
+      "definition": "CREATE UNIQUE INDEX admin_users_username_key ON public.admin_users USING btree (username)"
+    },
+    {
+      "table": "audit_events",
+      "name": "audit_events_account_time_idx",
+      "definition": "CREATE INDEX audit_events_account_time_idx ON public.audit_events USING btree (account_id, created_at DESC)"
+    },
+    {
+      "table": "audit_events",
+      "name": "audit_events_action_time_idx",
+      "definition": "CREATE INDEX audit_events_action_time_idx ON public.audit_events USING btree (action, created_at DESC)"
+    },
+    {
+      "table": "audit_events",
+      "name": "audit_events_pkey",
+      "definition": "CREATE UNIQUE INDEX audit_events_pkey ON public.audit_events USING btree (id)"
+    },
+    {
+      "table": "deployment_events",
+      "name": "deployment_events_deployment_time_idx",
+      "definition": "CREATE INDEX deployment_events_deployment_time_idx ON public.deployment_events USING btree (deployment_id, created_at)"
+    },
+    {
+      "table": "deployment_events",
+      "name": "deployment_events_pkey",
+      "definition": "CREATE UNIQUE INDEX deployment_events_pkey ON public.deployment_events USING btree (id)"
+    },
+    {
+      "table": "deployment_installer_selections",
+      "name": "deployment_installer_selections_pkey",
+      "definition": "CREATE UNIQUE INDEX deployment_installer_selections_pkey ON public.deployment_installer_selections USING btree (deployment_id, generation)"
+    },
+    {
+      "table": "deployment_installer_selections",
+      "name": "installer_selections_deployment_generation_idx",
+      "definition": "CREATE INDEX installer_selections_deployment_generation_idx ON public.deployment_installer_selections USING btree (deployment_id, generation DESC)"
+    },
+    {
+      "table": "deployment_profiles",
+      "name": "deployment_profiles_account_enabled_idx",
+      "definition": "CREATE INDEX deployment_profiles_account_enabled_idx ON public.deployment_profiles USING btree (account_id, enabled)"
+    },
+    {
+      "table": "deployment_profiles",
+      "name": "deployment_profiles_account_id_name_version_key",
+      "definition": "CREATE UNIQUE INDEX deployment_profiles_account_id_name_version_key ON public.deployment_profiles USING btree (account_id, name, version)"
+    },
+    {
+      "table": "deployment_profiles",
+      "name": "deployment_profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX deployment_profiles_pkey ON public.deployment_profiles USING btree (id)"
+    },
+    {
+      "table": "deployment_step_attempts",
+      "name": "deployment_step_attempts_pkey",
+      "definition": "CREATE UNIQUE INDEX deployment_step_attempts_pkey ON public.deployment_step_attempts USING btree (deployment_id, step, generation)"
+    },
+    {
+      "table": "deployment_step_attempts",
+      "name": "deployment_step_attempts_retry_idx",
+      "definition": "CREATE INDEX deployment_step_attempts_retry_idx ON public.deployment_step_attempts USING btree (next_retry_at) WHERE (next_retry_at IS NOT NULL)"
+    },
+    {
+      "table": "deployment_step_attempts",
+      "name": "deployment_step_attempts_step_idx",
+      "definition": "CREATE INDEX deployment_step_attempts_step_idx ON public.deployment_step_attempts USING btree (step, attempts)"
+    },
+    {
+      "table": "deployments",
+      "name": "deployments_active_account_profile_idx",
+      "definition": "CREATE INDEX deployments_active_account_profile_idx ON public.deployments USING btree (account_id, profile_id, created_at) WHERE (state <> ALL (ARRAY['READY'::text, 'FAILED'::text, 'INSTALL_FAILED'::text, 'INSTALL_ROLLED_BACK'::text, 'PANEL_COMPLETE'::text]))"
+    },
+    {
+      "table": "deployments",
+      "name": "deployments_pkey",
+      "definition": "CREATE UNIQUE INDEX deployments_pkey ON public.deployments USING btree (id)"
+    },
+    {
+      "table": "deployments",
+      "name": "deployments_recovery_idx",
+      "definition": "CREATE INDEX deployments_recovery_idx ON public.deployments USING btree (state, updated_at) WHERE (state <> ALL (ARRAY['READY'::text, 'FAILED'::text]))"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_expiration_idx",
+      "definition": "CREATE INDEX droplets_expiration_idx ON public.droplets USING btree (expires_at, state) WHERE ((expires_at IS NOT NULL) AND (state = ANY (ARRAY['READY'::text, 'EXPIRING'::text, 'RETIRING'::text, 'DELETING'::text])))"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_lifecycle_idx",
+      "definition": "CREATE INDEX droplets_lifecycle_idx ON public.droplets USING btree (account_id, state, updated_at)"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_live_provider_uidx",
+      "definition": "CREATE UNIQUE INDEX droplets_live_provider_uidx ON public.droplets USING btree (account_id, provider_resource_id) WHERE ((provider_resource_id IS NOT NULL) AND (state <> 'DELETED'::text))"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_pkey",
+      "definition": "CREATE UNIQUE INDEX droplets_pkey ON public.droplets USING btree (id)"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_provider_identity_idx",
+      "definition": "CREATE UNIQUE INDEX droplets_provider_identity_idx ON public.droplets USING btree (account_id, provider_resource_id) WHERE (provider_resource_id IS NOT NULL)"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_replacement_deployment_uidx",
+      "definition": "CREATE UNIQUE INDEX droplets_replacement_deployment_uidx ON public.droplets USING btree (replacement_deployment_id) WHERE ((replacement_deployment_id IS NOT NULL) AND (state <> 'DELETED'::text))"
+    },
+    {
+      "table": "droplets",
+      "name": "droplets_replacement_idx",
+      "definition": "CREATE INDEX droplets_replacement_idx ON public.droplets USING btree (account_id, state, expires_at)"
+    },
+    {
+      "table": "global_config_policies",
+      "name": "global_config_policies_pkey",
+      "definition": "CREATE UNIQUE INDEX global_config_policies_pkey ON public.global_config_policies USING btree (policy_key)"
+    },
+    {
+      "table": "inbound_export_metadata",
+      "name": "inbound_export_metadata_pkey",
+      "definition": "CREATE UNIQUE INDEX inbound_export_metadata_pkey ON public.inbound_export_metadata USING btree (panel_id, remote_id)"
+    },
+    {
+      "table": "inbound_structural_snapshots",
+      "name": "inbound_structural_snapshots_panel_idx",
+      "definition": "CREATE INDEX inbound_structural_snapshots_panel_idx ON public.inbound_structural_snapshots USING btree (panel_id, port)"
+    },
+    {
+      "table": "inbound_structural_snapshots",
+      "name": "inbound_structural_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX inbound_structural_snapshots_pkey ON public.inbound_structural_snapshots USING btree (panel_id, remote_id)"
+    },
+    {
+      "table": "install_scripts",
+      "name": "install_scripts_name_version_key",
+      "definition": "CREATE UNIQUE INDEX install_scripts_name_version_key ON public.install_scripts USING btree (name, version)"
+    },
+    {
+      "table": "install_scripts",
+      "name": "install_scripts_pkey",
+      "definition": "CREATE UNIQUE INDEX install_scripts_pkey ON public.install_scripts USING btree (id)"
+    },
+    {
+      "table": "install_scripts",
+      "name": "install_scripts_sha256_key",
+      "definition": "CREATE UNIQUE INDEX install_scripts_sha256_key ON public.install_scripts USING btree (sha256)"
+    },
+    {
+      "table": "installer_runs",
+      "name": "installer_runs_deployment_generation_idx",
+      "definition": "CREATE INDEX installer_runs_deployment_generation_idx ON public.installer_runs USING btree (deployment_id, generation DESC)"
+    },
+    {
+      "table": "installer_runs",
+      "name": "installer_runs_deployment_generation_key",
+      "definition": "CREATE UNIQUE INDEX installer_runs_deployment_generation_key ON public.installer_runs USING btree (deployment_id, generation)"
+    },
+    {
+      "table": "installer_runs",
+      "name": "installer_runs_pkey",
+      "definition": "CREATE UNIQUE INDEX installer_runs_pkey ON public.installer_runs USING btree (id)"
+    },
+    {
+      "table": "installer_runs",
+      "name": "installer_runs_state_idx",
+      "definition": "CREATE INDEX installer_runs_state_idx ON public.installer_runs USING btree (state, updated_at)"
+    },
+    {
+      "table": "installers",
+      "name": "installers_name_version_key",
+      "definition": "CREATE UNIQUE INDEX installers_name_version_key ON public.installers USING btree (name, version)"
+    },
+    {
+      "table": "installers",
+      "name": "installers_pkey",
+      "definition": "CREATE UNIQUE INDEX installers_pkey ON public.installers USING btree (id)"
+    },
+    {
+      "table": "installers",
+      "name": "installers_sha256_key",
+      "definition": "CREATE UNIQUE INDEX installers_sha256_key ON public.installers USING btree (sha256)"
+    },
+    {
+      "table": "lifecycle_events",
+      "name": "lifecycle_events_pkey",
+      "definition": "CREATE UNIQUE INDEX lifecycle_events_pkey ON public.lifecycle_events USING btree (id)"
+    },
+    {
+      "table": "network_profiles",
+      "name": "network_profiles_account_id_key",
+      "definition": "CREATE UNIQUE INDEX network_profiles_account_id_key ON public.network_profiles USING btree (account_id)"
+    },
+    {
+      "table": "network_profiles",
+      "name": "network_profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX network_profiles_pkey ON public.network_profiles USING btree (id)"
+    },
+    {
+      "table": "operations",
+      "name": "operations_account_id_idempotency_key_key",
+      "definition": "CREATE UNIQUE INDEX operations_account_id_idempotency_key_key ON public.operations USING btree (account_id, idempotency_key)"
+    },
+    {
+      "table": "operations",
+      "name": "operations_account_state_idx",
+      "definition": "CREATE INDEX operations_account_state_idx ON public.operations USING btree (account_id, state)"
+    },
+    {
+      "table": "operations",
+      "name": "operations_pkey",
+      "definition": "CREATE UNIQUE INDEX operations_pkey ON public.operations USING btree (id)"
+    },
+    {
+      "table": "operations",
+      "name": "operations_recovery_idx",
+      "definition": "CREATE INDEX operations_recovery_idx ON public.operations USING btree (state, updated_at) WHERE (state = ANY (ARRAY['running'::text, 'verifying'::text, 'unknown'::text]))"
+    },
+    {
+      "table": "output_config_snapshots",
+      "name": "output_config_snapshots_first_seen_idx",
+      "definition": "CREATE INDEX output_config_snapshots_first_seen_idx ON public.output_config_snapshots USING btree (first_seen_at DESC)"
+    },
+    {
+      "table": "output_config_snapshots",
+      "name": "output_config_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX output_config_snapshots_pkey ON public.output_config_snapshots USING btree (panel_id, uri)"
+    },
+    {
+      "table": "output_config_snapshots",
+      "name": "output_config_snapshots_visible_idx",
+      "definition": "CREATE INDEX output_config_snapshots_visible_idx ON public.output_config_snapshots USING btree (visible_until) WHERE (visible_until IS NOT NULL)"
+    },
+    {
+      "table": "output_share_tokens",
+      "name": "output_share_tokens_pkey",
+      "definition": "CREATE UNIQUE INDEX output_share_tokens_pkey ON public.output_share_tokens USING btree (token)"
+    },
+    {
+      "table": "panel_ad_proxies",
+      "name": "panel_ad_proxies_active_idx",
+      "definition": "CREATE INDEX panel_ad_proxies_active_idx ON public.panel_ad_proxies USING btree (panel_id, priority, id) WHERE (enabled = true)"
+    },
+    {
+      "table": "panel_ad_proxies",
+      "name": "panel_ad_proxies_panel_id_outbound_tag_key",
+      "definition": "CREATE UNIQUE INDEX panel_ad_proxies_panel_id_outbound_tag_key ON public.panel_ad_proxies USING btree (panel_id, outbound_tag)"
+    },
+    {
+      "table": "panel_ad_proxies",
+      "name": "panel_ad_proxies_panel_id_proxy_id_key",
+      "definition": "CREATE UNIQUE INDEX panel_ad_proxies_panel_id_proxy_id_key ON public.panel_ad_proxies USING btree (panel_id, proxy_id)"
+    },
+    {
+      "table": "panel_ad_proxies",
+      "name": "panel_ad_proxies_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_ad_proxies_pkey ON public.panel_ad_proxies USING btree (id)"
+    },
+    {
+      "table": "panel_capability_snapshots",
+      "name": "panel_capability_snapshots_panel_observed_idx",
+      "definition": "CREATE INDEX panel_capability_snapshots_panel_observed_idx ON public.panel_capability_snapshots USING btree (panel_id, observed_at DESC)"
+    },
+    {
+      "table": "panel_capability_snapshots",
+      "name": "panel_capability_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_capability_snapshots_pkey ON public.panel_capability_snapshots USING btree (id)"
+    },
+    {
+      "table": "panel_inbound_inventory",
+      "name": "panel_inbound_inventory_panel_present_idx",
+      "definition": "CREATE INDEX panel_inbound_inventory_panel_present_idx ON public.panel_inbound_inventory USING btree (panel_id, present)"
+    },
+    {
+      "table": "panel_inbound_inventory",
+      "name": "panel_inbound_inventory_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_inbound_inventory_pkey ON public.panel_inbound_inventory USING btree (panel_id, remote_id)"
+    },
+    {
+      "table": "panel_inbound_inventory",
+      "name": "panel_inbound_inventory_protocol_idx",
+      "definition": "CREATE INDEX panel_inbound_inventory_protocol_idx ON public.panel_inbound_inventory USING btree (protocol)"
+    },
+    {
+      "table": "panel_inbound_inventory",
+      "name": "panel_inbound_inventory_transport_security_idx",
+      "definition": "CREATE INDEX panel_inbound_inventory_transport_security_idx ON public.panel_inbound_inventory USING btree (transport, security)"
+    },
+    {
+      "table": "panel_inbound_policies",
+      "name": "panel_inbound_policies_panel_enabled_idx",
+      "definition": "CREATE INDEX panel_inbound_policies_panel_enabled_idx ON public.panel_inbound_policies USING btree (panel_id, enabled)"
+    },
+    {
+      "table": "panel_inbound_policies",
+      "name": "panel_inbound_policies_panel_id_policy_key_key",
+      "definition": "CREATE UNIQUE INDEX panel_inbound_policies_panel_id_policy_key_key ON public.panel_inbound_policies USING btree (panel_id, policy_key)"
+    },
+    {
+      "table": "panel_inbound_policies",
+      "name": "panel_inbound_policies_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_inbound_policies_pkey ON public.panel_inbound_policies USING btree (id)"
+    },
+    {
+      "table": "panel_instances",
+      "name": "panel_instances_droplet_id_driver_key",
+      "definition": "CREATE UNIQUE INDEX panel_instances_droplet_id_driver_key ON public.panel_instances USING btree (droplet_id, driver)"
+    },
+    {
+      "table": "panel_instances",
+      "name": "panel_instances_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_instances_pkey ON public.panel_instances USING btree (id)"
+    },
+    {
+      "table": "panel_inventory_syncs",
+      "name": "panel_inventory_syncs_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_inventory_syncs_pkey ON public.panel_inventory_syncs USING btree (id)"
+    },
+    {
+      "table": "panel_settings",
+      "name": "panel_settings_pkey",
+      "definition": "CREATE UNIQUE INDEX panel_settings_pkey ON public.panel_settings USING btree (id)"
+    },
+    {
+      "table": "provider_capacity_observations",
+      "name": "provider_capacity_observations_observed_idx",
+      "definition": "CREATE INDEX provider_capacity_observations_observed_idx ON public.provider_capacity_observations USING btree (observed_at DESC)"
+    },
+    {
+      "table": "provider_capacity_observations",
+      "name": "provider_capacity_observations_pkey",
+      "definition": "CREATE UNIQUE INDEX provider_capacity_observations_pkey ON public.provider_capacity_observations USING btree (account_id)"
+    },
+    {
+      "table": "provider_catalog_cache",
+      "name": "provider_catalog_cache_pkey",
+      "definition": "CREATE UNIQUE INDEX provider_catalog_cache_pkey ON public.provider_catalog_cache USING btree (account_id)"
+    },
+    {
+      "table": "provider_snapshots",
+      "name": "idx_provider_snapshots_account_canonical",
+      "definition": "CREATE INDEX idx_provider_snapshots_account_canonical ON public.provider_snapshots USING btree (account_id, created_at DESC) WHERE (canonical IS NOT NULL)"
+    },
+    {
+      "table": "provider_snapshots",
+      "name": "provider_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX provider_snapshots_pkey ON public.provider_snapshots USING btree (id)"
+    },
+    {
+      "table": "provision_events",
+      "name": "provision_events_error_idx",
+      "definition": "CREATE INDEX provision_events_error_idx ON public.provision_events USING btree (error_class, error_code, created_at DESC)"
+    },
+    {
+      "table": "provision_events",
+      "name": "provision_events_fingerprint_idx",
+      "definition": "CREATE INDEX provision_events_fingerprint_idx ON public.provision_events USING btree (error_fingerprint, created_at DESC) WHERE (error_fingerprint IS NOT NULL)"
+    },
+    {
+      "table": "provision_events",
+      "name": "provision_events_pkey",
+      "definition": "CREATE UNIQUE INDEX provision_events_pkey ON public.provision_events USING btree (id)"
+    },
+    {
+      "table": "provision_events",
+      "name": "provision_events_run_idx",
+      "definition": "CREATE INDEX provision_events_run_idx ON public.provision_events USING btree (run_id, created_at)"
+    },
+    {
+      "table": "provision_runs",
+      "name": "provision_runs_account_id_droplet_id_key",
+      "definition": "CREATE UNIQUE INDEX provision_runs_account_id_droplet_id_key ON public.provision_runs USING btree (account_id, droplet_id)"
+    },
+    {
+      "table": "provision_runs",
+      "name": "provision_runs_pkey",
+      "definition": "CREATE UNIQUE INDEX provision_runs_pkey ON public.provision_runs USING btree (id)"
+    },
+    {
+      "table": "provision_runs",
+      "name": "provision_runs_recovery_idx",
+      "definition": "CREATE INDEX provision_runs_recovery_idx ON public.provision_runs USING btree (state, updated_at) WHERE (state <> 'COMPLETED'::text)"
+    },
+    {
+      "table": "provision_step_attempts",
+      "name": "provision_step_attempts_pkey",
+      "definition": "CREATE UNIQUE INDEX provision_step_attempts_pkey ON public.provision_step_attempts USING btree (run_id, step)"
+    },
+    {
+      "table": "provision_step_attempts",
+      "name": "provision_step_attempts_retry_idx",
+      "definition": "CREATE INDEX provision_step_attempts_retry_idx ON public.provision_step_attempts USING btree (next_retry_at) WHERE (next_retry_at IS NOT NULL)"
+    },
+    {
+      "table": "proxies",
+      "name": "proxies_name_key",
+      "definition": "CREATE UNIQUE INDEX proxies_name_key ON public.proxies USING btree (name)"
+    },
+    {
+      "table": "proxies",
+      "name": "proxies_pkey",
+      "definition": "CREATE UNIQUE INDEX proxies_pkey ON public.proxies USING btree (id)"
+    },
+    {
+      "table": "proxies",
+      "name": "proxies_status_idx",
+      "definition": "CREATE INDEX proxies_status_idx ON public.proxies USING btree (status)"
+    },
+    {
+      "table": "reality_credentials",
+      "name": "reality_credentials_panel_id_managed_key_key",
+      "definition": "CREATE UNIQUE INDEX reality_credentials_panel_id_managed_key_key ON public.reality_credentials USING btree (panel_id, managed_key)"
+    },
+    {
+      "table": "reality_credentials",
+      "name": "reality_credentials_panel_idx",
+      "definition": "CREATE INDEX reality_credentials_panel_idx ON public.reality_credentials USING btree (panel_id)"
+    },
+    {
+      "table": "reality_credentials",
+      "name": "reality_credentials_pkey",
+      "definition": "CREATE UNIQUE INDEX reality_credentials_pkey ON public.reality_credentials USING btree (id)"
+    },
+    {
+      "table": "reality_probe_nodes",
+      "name": "reality_probe_nodes_host_key",
+      "definition": "CREATE UNIQUE INDEX reality_probe_nodes_host_key ON public.reality_probe_nodes USING btree (host)"
+    },
+    {
+      "table": "reality_probe_nodes",
+      "name": "reality_probe_nodes_name_key",
+      "definition": "CREATE UNIQUE INDEX reality_probe_nodes_name_key ON public.reality_probe_nodes USING btree (name)"
+    },
+    {
+      "table": "reality_probe_nodes",
+      "name": "reality_probe_nodes_pkey",
+      "definition": "CREATE UNIQUE INDEX reality_probe_nodes_pkey ON public.reality_probe_nodes USING btree (id)"
+    },
+    {
+      "table": "reality_probe_nodes",
+      "name": "reality_probe_nodes_select_idx",
+      "definition": "CREATE INDEX reality_probe_nodes_select_idx ON public.reality_probe_nodes USING btree (enabled, status, last_checked_at)"
+    },
+    {
+      "table": "reality_target_observations",
+      "name": "reality_target_observations_candidate_idx",
+      "definition": "CREATE INDEX reality_target_observations_candidate_idx ON public.reality_target_observations USING btree (panel_id, target, server_name, port, observed_at DESC)"
+    },
+    {
+      "table": "reality_target_observations",
+      "name": "reality_target_observations_panel_time_idx",
+      "definition": "CREATE INDEX reality_target_observations_panel_time_idx ON public.reality_target_observations USING btree (panel_id, observed_at DESC)"
+    },
+    {
+      "table": "reality_target_observations",
+      "name": "reality_target_observations_pkey",
+      "definition": "CREATE UNIQUE INDEX reality_target_observations_pkey ON public.reality_target_observations USING btree (id)"
+    },
+    {
+      "table": "reality_target_selections",
+      "name": "reality_target_selections_pkey",
+      "definition": "CREATE UNIQUE INDEX reality_target_selections_pkey ON public.reality_target_selections USING btree (panel_id)"
+    },
+    {
+      "table": "residential_proxies",
+      "name": "residential_proxies_active_priority_idx",
+      "definition": "CREATE INDEX residential_proxies_active_priority_idx ON public.residential_proxies USING btree (priority, proxy_id) WHERE (enabled = true)"
+    },
+    {
+      "table": "residential_proxies",
+      "name": "residential_proxies_outbound_tag_key",
+      "definition": "CREATE UNIQUE INDEX residential_proxies_outbound_tag_key ON public.residential_proxies USING btree (outbound_tag)"
+    },
+    {
+      "table": "residential_proxies",
+      "name": "residential_proxies_pkey",
+      "definition": "CREATE UNIQUE INDEX residential_proxies_pkey ON public.residential_proxies USING btree (proxy_id)"
+    },
+    {
+      "table": "resources",
+      "name": "resources_pkey",
+      "definition": "CREATE UNIQUE INDEX resources_pkey ON public.resources USING btree (id)"
+    },
+    {
+      "table": "resources",
+      "name": "resources_provider_identity_uidx",
+      "definition": "CREATE UNIQUE INDEX resources_provider_identity_uidx ON public.resources USING btree (account_id, provider, type, provider_resource_id)"
+    },
+    {
+      "table": "schedules",
+      "name": "schedules_account_id_profile_id_key",
+      "definition": "CREATE UNIQUE INDEX schedules_account_id_profile_id_key ON public.schedules USING btree (account_id, profile_id)"
+    },
+    {
+      "table": "schedules",
+      "name": "schedules_due_idx",
+      "definition": "CREATE INDEX schedules_due_idx ON public.schedules USING btree (next_run_at) WHERE (enabled = true)"
+    },
+    {
+      "table": "schedules",
+      "name": "schedules_lease_idx",
+      "definition": "CREATE INDEX schedules_lease_idx ON public.schedules USING btree (next_run_at, lease_until) WHERE (enabled = true)"
+    },
+    {
+      "table": "schedules",
+      "name": "schedules_pkey",
+      "definition": "CREATE UNIQUE INDEX schedules_pkey ON public.schedules USING btree (id)"
+    },
+    {
+      "table": "schema_migrations",
+      "name": "schema_migrations_pkey",
+      "definition": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (version)"
+    },
+    {
+      "table": "secrets",
+      "name": "secrets_account_kind_idx",
+      "definition": "CREATE INDEX secrets_account_kind_idx ON public.secrets USING btree (account_id, kind)"
+    },
+    {
+      "table": "secrets",
+      "name": "secrets_owner_key_id_idx",
+      "definition": "CREATE UNIQUE INDEX secrets_owner_key_id_idx ON public.secrets USING btree (owner_key, id)"
+    },
+    {
+      "table": "secrets",
+      "name": "secrets_probe_id_id_idx",
+      "definition": "CREATE UNIQUE INDEX secrets_probe_id_id_idx ON public.secrets USING btree (probe_id, id) WHERE (probe_id IS NOT NULL)"
+    },
+    {
+      "table": "secrets",
+      "name": "secrets_proxy_id_id_idx",
+      "definition": "CREATE UNIQUE INDEX secrets_proxy_id_id_idx ON public.secrets USING btree (proxy_id, id) WHERE (proxy_id IS NOT NULL)"
+    },
+    {
+      "table": "server_readiness_issues",
+      "name": "server_readiness_issues_code_idx",
+      "definition": "CREATE INDEX server_readiness_issues_code_idx ON public.server_readiness_issues USING btree (code, state, created_at DESC)"
+    },
+    {
+      "table": "server_readiness_issues",
+      "name": "server_readiness_issues_pkey",
+      "definition": "CREATE UNIQUE INDEX server_readiness_issues_pkey ON public.server_readiness_issues USING btree (id)"
+    },
+    {
+      "table": "server_readiness_issues",
+      "name": "server_readiness_issues_run_idx",
+      "definition": "CREATE INDEX server_readiness_issues_run_idx ON public.server_readiness_issues USING btree (run_id, created_at DESC)"
+    },
+    {
+      "table": "server_readiness_snapshots",
+      "name": "server_readiness_run_idx",
+      "definition": "CREATE INDEX server_readiness_run_idx ON public.server_readiness_snapshots USING btree (run_id, created_at DESC)"
+    },
+    {
+      "table": "server_readiness_snapshots",
+      "name": "server_readiness_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX server_readiness_snapshots_pkey ON public.server_readiness_snapshots USING btree (id)"
+    },
+    {
+      "table": "server_readiness_snapshots",
+      "name": "server_readiness_status_idx",
+      "definition": "CREATE INDEX server_readiness_status_idx ON public.server_readiness_snapshots USING btree (status, created_at DESC)"
+    },
+    {
+      "table": "user_capacity_snapshots",
+      "name": "user_capacity_snapshots_observed_idx",
+      "definition": "CREATE INDEX user_capacity_snapshots_observed_idx ON public.user_capacity_snapshots USING btree (observed_at DESC)"
+    },
+    {
+      "table": "user_capacity_snapshots",
+      "name": "user_capacity_snapshots_pkey",
+      "definition": "CREATE UNIQUE INDEX user_capacity_snapshots_pkey ON public.user_capacity_snapshots USING btree (panel_id, inbound_id)"
+    },
+    {
+      "table": "worker_heartbeats",
+      "name": "worker_heartbeats_pkey",
+      "definition": "CREATE UNIQUE INDEX worker_heartbeats_pkey ON public.worker_heartbeats USING btree (worker_id)"
+    },
+    {
+      "table": "worker_item_failures",
+      "name": "worker_item_failures_pkey",
+      "definition": "CREATE UNIQUE INDEX worker_item_failures_pkey ON public.worker_item_failures USING btree (kind, item_id)"
+    },
+    {
+      "table": "worker_item_failures",
+      "name": "worker_item_failures_retry_idx",
+      "definition": "CREATE INDEX worker_item_failures_retry_idx ON public.worker_item_failures USING btree (next_retry_at) WHERE (next_retry_at IS NOT NULL)"
+    },
+    {
+      "table": "xui_clients",
+      "name": "xui_clients_account_enabled_idx",
+      "definition": "CREATE INDEX xui_clients_account_enabled_idx ON public.xui_clients USING btree (account_id, enabled)"
+    },
+    {
+      "table": "xui_clients",
+      "name": "xui_clients_droplet_id_inbound_id_email_key",
+      "definition": "CREATE UNIQUE INDEX xui_clients_droplet_id_inbound_id_email_key ON public.xui_clients USING btree (droplet_id, inbound_id, email)"
+    },
+    {
+      "table": "xui_clients",
+      "name": "xui_clients_pkey",
+      "definition": "CREATE UNIQUE INDEX xui_clients_pkey ON public.xui_clients USING btree (id)"
+    },
+    {
+      "table": "xui_database_deployments",
+      "name": "xui_database_deployments_droplet_generation_uidx",
+      "definition": "CREATE UNIQUE INDEX xui_database_deployments_droplet_generation_uidx ON public.xui_database_deployments USING btree (droplet_id, generation)"
+    },
+    {
+      "table": "xui_database_deployments",
+      "name": "xui_database_deployments_pkey",
+      "definition": "CREATE UNIQUE INDEX xui_database_deployments_pkey ON public.xui_database_deployments USING btree (id)"
+    },
+    {
+      "table": "xui_database_deployments",
+      "name": "xui_database_deployments_recovery_idx",
+      "definition": "CREATE INDEX xui_database_deployments_recovery_idx ON public.xui_database_deployments USING btree (state, updated_at) WHERE (state <> 'COMPLETED'::text)"
+    },
+    {
+      "table": "xui_database_templates",
+      "name": "xui_database_templates_name_version_key",
+      "definition": "CREATE UNIQUE INDEX xui_database_templates_name_version_key ON public.xui_database_templates USING btree (name, version)"
+    },
+    {
+      "table": "xui_database_templates",
+      "name": "xui_database_templates_pkey",
+      "definition": "CREATE UNIQUE INDEX xui_database_templates_pkey ON public.xui_database_templates USING btree (id)"
+    },
+    {
+      "table": "xui_panel_deployments",
+      "name": "xui_panel_deployments_droplet_id_generation_key",
+      "definition": "CREATE UNIQUE INDEX xui_panel_deployments_droplet_id_generation_key ON public.xui_panel_deployments USING btree (droplet_id, generation)"
+    },
+    {
+      "table": "xui_panel_deployments",
+      "name": "xui_panel_deployments_pkey",
+      "definition": "CREATE UNIQUE INDEX xui_panel_deployments_pkey ON public.xui_panel_deployments USING btree (id)"
+    },
+    {
+      "table": "xui_panel_deployments",
+      "name": "xui_panel_deployments_recovery_idx",
+      "definition": "CREATE INDEX xui_panel_deployments_recovery_idx ON public.xui_panel_deployments USING btree (state, updated_at) WHERE (state <> 'COMPLETED'::text)"
+    }
+  ]
+}

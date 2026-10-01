@@ -35,3 +35,5 @@ The continuity documents summarize intent; Git source and production runtime rem
 26. Before changing behavior, identify the governing requirement(s) in `docs/INTENT_REQUIREMENTS_BRAIN.json` and inspect `docs/IMPACT_GRAPH.json` for affected code/schema/test neighborhoods; preserve the rationale unless the user explicitly changes the requirement.
 27. For UI changes, read `docs/FRONTEND_BRAIN.json`/`.md` first to map pages, API calls, actions and browser handlers before editing `web/static/*`.
 28. For scheduler/lifecycle/provisioning changes, read `docs/LIFECYCLE_STATE_BRAIN.json`/`.md`, then verify exact transition ownership and persistence in source before mutation.
+29. Before schema-sensitive work, regenerate/read `docs/LIVE_DB_BRAIN.json`; it contains production schema metadata only and must not contain application rows/secrets.
+30. Before worker/scheduler/runtime cadence changes, read `docs/RUNTIME_WORKER_BRAIN.json`, then verify exact ownership/control flow in source and live services.
