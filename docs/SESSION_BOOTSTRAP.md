@@ -1,0 +1,15 @@
+# Session Bootstrap Protocol
+
+A new ChatGPT session must perform this sequence before changing production code:
+
+1. Read `docs/CHATGPT_MASTER_CONTEXT.md`, `PROJECT_CONTEXT.md`, `PROJECT_STATE.md`, `HANDOFF.md`, and `docs/CODEBASE_MAP.md`.
+2. Run `git status --short --branch`, `git rev-parse HEAD`, and recent `git log` in the canonical repository.
+3. Compare local branch with its remote; do not silently switch to `main`.
+4. Check API/worker service state and, when relevant, deployed binary/source revision.
+5. Inspect the files named by HANDOFF and recent commits before editing.
+6. Inspect live migration level before schema-dependent work.
+7. Preserve untracked `.audit` evidence unless deliberately archived/committed/removed after review.
+8. Implement/test the exact current boundary, not a reconstructed older plan.
+9. After a successful logical stage: update PROJECT_STATE/HANDOFF, commit, push, and record deploy/test outcome.
+
+The continuity documents summarize intent; Git source and production runtime remain authoritative for exact implementation details. When they disagree, investigate and update the docs rather than forcing runtime to match stale prose.
