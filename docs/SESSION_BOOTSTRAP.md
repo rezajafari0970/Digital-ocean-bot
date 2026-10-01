@@ -16,3 +16,5 @@ The continuity documents summarize intent; Git source and production runtime rem
 
 10. Use `docs/FEATURE_FLOW_INDEX.md` to locate the vertical feature path before broad searching.
 11. Follow `docs/CHANGE_PROTOCOL.md` for implementation, verification, deploy and checkpoint discipline.
+12. Read `docs/HISTORICAL_DECISION_LEDGER.md` before architectural changes so rejected patterns and prior incidents are not reintroduced.
+13. Use `docs/REQUIREMENTS_MATRIX.md` as an invariant checklist when changing a subsystem.
