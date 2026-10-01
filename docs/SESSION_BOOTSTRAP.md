@@ -29,3 +29,5 @@ The continuity documents summarize intent; Git source and production runtime rem
 21. Use `docs/RUNTIME_NAVIGATION.md` / `docs/RUNTIME_MAP.json` for source→build→binary→systemd→health navigation; regenerate with `python3 tools/build-runtime-map.py` when deployment/runtime structure changes. Do not infer production commit identity from an active service alone.
 22. Run `python3 tools/verify-production-revision.py` before claiming production is on the current source revision. Require `verified: true`; service health alone is insufficient.
 23. For exact file/line questions, use `docs/FULL_SOURCE_KNOWLEDGE.json` or `python3 tools/source-lookup.py FILE LINE [END]` before reopening source. Always bind line answers to `source_commit`; regenerate with `python3 tools/build-source-knowledge.py` after source changes.
+
+24. Use `docs/SEMANTIC_KNOWLEDGE.json` as the semantic/navigation layer (roles, symbol ranges, candidate calls/callers, SQL tables, endpoint literals), then confirm exact behavior from the commit-pinned line snapshot. Regenerate after Go source changes.
