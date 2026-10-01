@@ -10,3 +10,4 @@ coverage.out
 /secrets/
 .local/spaced-rehearsal-progress.json
 .local/spaced-results/
+.local/spaced-mastery.json
