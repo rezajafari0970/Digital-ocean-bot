@@ -8,8 +8,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -28,22 +26,6 @@ func start(name string, args ...string) (*exec.Cmd, error) {
 	c.Stderr = os.Stderr
 	err := c.Start()
 	return c, err
-}
-
-func clearStaleDisplay99() {
-	raw, err := os.ReadFile("/tmp/.X99-lock")
-	if err != nil {
-		return
-	}
-	pid, err := strconv.Atoi(strings.TrimSpace(string(raw)))
-	if err != nil || pid <= 0 {
-		return
-	}
-	if err := syscall.Kill(pid, 0); err == nil {
-		return
-	}
-	_ = os.Remove("/tmp/.X99-lock")
-	_ = os.Remove("/tmp/.X11-unix/X99")
 }
 
 func main() {
@@ -77,17 +59,19 @@ func main() {
 	defer bridge.Close()
 
 	profile := filepath.Join("/var/lib/digital-ocean-bot/browser-sessions", accountID)
-	clearStaleDisplay99()
 	if err = os.MkdirAll(profile, 0700); err != nil {
 		panic(err)
 	}
-	xvfb, err := start("Xvfb", ":99", "-screen", "0", "1280x800x24", "-nolisten", "tcp")
+	for _, name := range []string{"SingletonLock", "SingletonSocket", "SingletonCookie"} {
+		_ = os.Remove(filepath.Join(profile, name))
+	}
+	xvfb, err := start("Xvfb", ":199", "-screen", "0", "1280x800x24", "-nolisten", "tcp")
 	if err != nil {
 		panic(err)
 	}
 	defer xvfb.Process.Kill()
 	time.Sleep(time.Second)
-	vnc, err := start("x11vnc", "-display", ":99", "-localhost", "-forever", "-shared", "-nopw", "-rfbport", "15900")
+	vnc, err := start("x11vnc", "-display", ":199", "-localhost", "-forever", "-shared", "-nopw", "-rfbport", "15900")
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +85,7 @@ func main() {
 		"--no-sandbox", "--disable-dev-shm-usage", "--no-first-run",
 		"--user-data-dir="+profile, "--proxy-server="+localProxy,
 		"--window-size=1280,800", "https://my.vultr.com/")
-	chrome.Env = append(os.Environ(), "DISPLAY=:99")
+	chrome.Env = append(os.Environ(), "DISPLAY=:199")
 	chrome.Stdout = os.Stdout
 	chrome.Stderr = os.Stderr
 	if err = chrome.Start(); err != nil {

@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -40,12 +41,14 @@ func (m *manager) start(account string) error {
 	}
 	cmd := exec.Command("/opt/digital-ocean-bot/bin/vultr-browser-session", account)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	if err := cmd.Start(); err != nil {
 		return err
 	}
 	m.cmd, m.account = cmd, account
 	go func() {
 		_ = cmd.Wait()
+		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 		m.mu.Lock()
 		if m.cmd == cmd {
 			m.cmd, m.account = nil, ""
@@ -62,7 +65,7 @@ func (m *manager) start(account string) error {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-	_ = cmd.Process.Kill()
+	_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 	return fmt.Errorf("readiness timeout")
 }
 
