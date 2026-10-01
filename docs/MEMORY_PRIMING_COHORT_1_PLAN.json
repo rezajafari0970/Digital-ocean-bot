@@ -1,0 +1,31 @@
+{
+  "order": [
+    "docs/source-memory-packs/topology-001.json",
+    "docs/source-memory-packs/topology-002.json",
+    "docs/source-memory-packs/topology-003.json",
+    "docs/source-memory-packs/topology-004.json",
+    "docs/source-memory-packs/topology-005.json",
+    "docs/source-memory-packs/topology-006.json",
+    "docs/source-memory-packs/topology-007.json",
+    "docs/source-memory-packs/topology-008.json",
+    "docs/source-memory-packs/concept-001.json",
+    "docs/source-memory-packs/concept-002.json",
+    "docs/source-memory-packs/concept-003.json",
+    "docs/source-memory-packs/concept-004.json",
+    "docs/source-memory-packs/concept-005.json",
+    "docs/source-memory-packs/concept-006.json",
+    "docs/source-memory-packs/concept-007.json",
+    "docs/source-memory-packs/concept-008.json",
+    "docs/source-memory-packs/concept-009.json",
+    "docs/source-memory-packs/concept-010.json",
+    "docs/source-memory-packs/concept-011.json",
+    "docs/source-memory-packs/concept-012.json",
+    "docs/source-memory-packs/concept-013.json",
+    "docs/source-memory-packs/verbatim-001.json",
+    "docs/source-memory-packs/verbatim-002.json",
+    "docs/source-memory-packs/verbatim-003.json",
+    "docs/source-memory-packs/verbatim-004.json",
+    "docs/source-memory-packs/verbatim-005.json"
+  ],
+  "closed_book_exam": "docs/MEMORY_PRIMING_COHORT_1_EXAM.json"
+}
