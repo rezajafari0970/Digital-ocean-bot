@@ -54,7 +54,7 @@ func (c Container) recordVultrSaturation(ctx context.Context, accountID string, 
 }
 
 func (c Container) handleVultrCreateError(ctx context.Context, accountID string, compute providers.ComputeDriver, createErr error) {
-	if providers.IsClass(createErr, providers.ErrorCapacity) {
+	if vultrErrorProvesSaturation(createErr) {
 		c.recordVultrSaturation(ctx, accountID, compute, createErr)
 		return
 	}
