@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "question_count": 80,
+  "answer_contract": {
+    "conceptual": [
+      "package",
+      "previous_symbol",
+      "next_symbol",
+      "calls",
+      "db_reads",
+      "db_writes",
+      "routes",
+      "side_effects"
+    ],
+    "topology": "exact symbols[] or handler",
+    "verbatim": "exact text"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `SessionExecutor` in file `internal/panels/sanaei/session_executor.go`."
+    },
+    {
+      "id": 2,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `start` in file `cmd/vultr-browser-session/main.go`."
+    },
+    {
+      "id": 3,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `RunDue` in file `internal/scheduler/engine.go`."
+    },
+    {
+      "id": 4,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestPrivacyTransportStripsLeakHeaders` in file `internal/network/privacy_test.go`."
+    },
+    {
+      "id": 5,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `Check` in file `internal/network/scheduler.go`."
+    },
+    {
+      "id": 6,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `ready` in file `internal/adminapi/server.go`."
+    },
+    {
+      "id": 7,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestCreateCapacityUnknownLimitAllowsCreate` in file `internal/app/capacity_guard_test.go`."
+    },
+    {
+      "id": 8,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `writeProviderPreviewError` in file `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 9,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestAllocatePreferredThenDynamic` in file `internal/panels/policy/allocator_test.go`."
+    },
+    {
+      "id": 10,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestAllocateDeterministic` in file `internal/panels/policy/allocator_test.go`."
+    },
+    {
+      "id": 11,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `Plan` in file `internal/panels/planner/planner.go`."
+    },
+    {
+      "id": 12,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `createSanaeiInstaller` in file `internal/adminapi/sanaei_installer.go`."
+    },
+    {
+      "id": 13,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestExpandStableKeys` in file `internal/panels/policy/expand_test.go`."
+    },
+    {
+      "id": 14,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestInstallerPrecheckMissIsNotFailure` in file `internal/provisioning/installer_executor_test.go`."
+    },
+    {
+      "id": 15,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `Do` in file `internal/panels/sanaei/resilient.go`."
+    },
+    {
+      "id": 16,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `normalizeError` in file `internal/providers/digitalocean/driver_v2.go`."
+    },
+    {
+      "id": 17,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `AllowMutation` in file `internal/network/gate.go`."
+    },
+    {
+      "id": 18,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `MarkFailed` in file `internal/app/deployment_ready.go`."
+    },
+    {
+      "id": 19,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `HostKeyPins` in file `internal/provisioning/hostkey.go`."
+    },
+    {
+      "id": 20,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestRetryableStatusClassification` in file `internal/panels/sanaei/runtime_test.go`."
+    },
+    {
+      "id": 21,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestCreateIsIdempotent` in file `internal/droplets/executor_test.go`."
+    },
+    {
+      "id": 22,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestProductionAdapterPropagatesDryRun` in file `internal/panels/readyworker/adapter_test.go`."
+    },
+    {
+      "id": 23,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `result` in file `internal/network/proxy_gateway.go`."
+    },
+    {
+      "id": 24,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestAccountContextsCannotCross` in file `internal/network/isolation_test.go`."
+    },
+    {
+      "id": 25,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `Provision` in file `internal/workflow/engine_test.go`."
+    },
+    {
+      "id": 26,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestAddInboundUsesRestrictedEndpoint` in file `internal/panels/sanaei/mutation_test.go`."
+    },
+    {
+      "id": 27,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `NeedsReconcile` in file `internal/panels/usercapacity/service.go`."
+    },
+    {
+      "id": 28,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `Complete` in file `internal/scheduler/lease.go`."
+    },
+    {
+      "id": 29,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestMutationContracts` in file `internal/providers/vultr/mutation_driver_test.go`."
+    },
+    {
+      "id": 30,
+      "metric": "conceptual",
+      "prompt": "Exact structured recall for symbol `TestInstallerAdapterRejectsUnpinnedOrInsecureArtifact` in file `internal/panels/sanaei/installer_adapter_test.go`."
+    },
+    {
+      "id": 31,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/providers/digitalocean/discovery.go`."
+    },
+    {
+      "id": 32,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/adminapi/installers.go`."
+    },
+    {
+      "id": 33,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/app/installer_activation.go`."
+    },
+    {
+      "id": 34,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/adminapi/proxies_manage.go`."
+    },
+    {
+      "id": 35,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/app/scheduler.go`."
+    },
+    {
+      "id": 36,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/redact/redact_test.go`."
+    },
+    {
+      "id": 37,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/resilience/store.go`."
+    },
+    {
+      "id": 38,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/adminapi/residential.go`."
+    },
+    {
+      "id": 39,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/adminapi/configs_global.go`."
+    },
+    {
+      "id": 40,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/panels/sanaei/auth_test.go`."
+    },
+    {
+      "id": 41,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/workflow/run_lease_test.go`."
+    },
+    {
+      "id": 42,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/droplets/executor.go`."
+    },
+    {
+      "id": 43,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/resilience/retry_test.go`."
+    },
+    {
+      "id": 44,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/providers/digitalocean/pagination.go`."
+    },
+    {
+      "id": 45,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/panels/policy/store.go`."
+    },
+    {
+      "id": 46,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/adminapi/config_expr.go`."
+    },
+    {
+      "id": 47,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/workflow/profile_store.go`."
+    },
+    {
+      "id": 48,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/worker/heartbeat.go`."
+    },
+    {
+      "id": 49,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/panels/sanaei/store.go`."
+    },
+    {
+      "id": 50,
+      "metric": "topology",
+      "prompt": "Exact ordered-symbol topology for file `internal/panels/sanaei/auth.go`."
+    },
+    {
+      "id": 51,
+      "metric": "topology",
+      "prompt": "Exact route handler for `GET /api/v1/templates`."
+    },
+    {
+      "id": 52,
+      "metric": "topology",
+      "prompt": "Exact route handler for `PUT /api/v1/accounts/{id}/network`."
+    },
+    {
+      "id": 53,
+      "metric": "topology",
+      "prompt": "Exact route handler for `GET /api/v1/proxies`."
+    },
+    {
+      "id": 54,
+      "metric": "topology",
+      "prompt": "Exact route handler for `PUT /api/v1/panel-settings`."
+    },
+    {
+      "id": 55,
+      "metric": "topology",
+      "prompt": "Exact route handler for `GET /api/v1/panel-settings`."
+    },
+    {
+      "id": 56,
+      "metric": "topology",
+      "prompt": "Exact route handler for `POST /api/v1/auth/login`."
+    },
+    {
+      "id": 57,
+      "metric": "topology",
+      "prompt": "Exact route handler for `POST /api/v1/accounts/{id}/refresh`."
+    },
+    {
+      "id": 58,
+      "metric": "topology",
+      "prompt": "Exact route handler for `GET /api/v1/accounts/{id}/dashboard`."
+    },
+    {
+      "id": 59,
+      "metric": "topology",
+      "prompt": "Exact route handler for `GET /api/v1/provision-errors`."
+    },
+    {
+      "id": 60,
+      "metric": "topology",
+      "prompt": "Exact route handler for `PUT /api/v1/configs`."
+    },
+    {
+      "id": 61,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_preflight.go:65-72`."
+    },
+    {
+      "id": 62,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/accounts_manage.go:17-24`."
+    },
+    {
+      "id": 63,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/accounts_write.go:121-128`."
+    },
+    {
+      "id": 64,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/accounts_write.go:17-24`."
+    },
+    {
+      "id": 65,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/admin-bootstrap/main.go:17-24`."
+    },
+    {
+      "id": 66,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/vultr-capacity-probe/main.go:57-64`."
+    },
+    {
+      "id": 67,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_preflight.go:9-16`."
+    },
+    {
+      "id": 68,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/worker/main.go:65-72`."
+    },
+    {
+      "id": 69,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_options.go:1-8`."
+    },
+    {
+      "id": 70,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/accounts_manage.go:129-136`."
+    },
+    {
+      "id": 71,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_preview.go:81-88`."
+    },
+    {
+      "id": 72,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/worker/main.go:265-272`."
+    },
+    {
+      "id": 73,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_preview.go:1-8`."
+    },
+    {
+      "id": 74,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/worker/main.go:313-320`."
+    },
+    {
+      "id": 75,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/cleanup-test-droplet/main.go:9-16`."
+    },
+    {
+      "id": 76,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/worker/main.go:1-8`."
+    },
+    {
+      "id": 77,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/account_automation.go:49-56`."
+    },
+    {
+      "id": 78,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/adminapi/accounts_manage.go:105-112`."
+    },
+    {
+      "id": 79,
+      "metric": "verbatim",
+      "prompt": "Exact source block `cmd/worker/main.go:41-48`."
+    },
+    {
+      "id": 80,
+      "metric": "verbatim",
+      "prompt": "Exact source block `internal/accounts/context.go:25-32`."
+    }
+  ]
+}
