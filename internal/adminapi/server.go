@@ -2,7 +2,9 @@ package adminapi
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
@@ -32,10 +34,12 @@ type Server struct {
 	OutputPauseMu    sync.RWMutex
 	CleanupMu        sync.RWMutex
 	CleanupJobs      map[string]*cleanupJob
+	BrowserMu        sync.Mutex
+	BrowserTickets   map[string]time.Time
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputCache: map[string]outputCacheEntry{}, OutputRefreshing: map[string]bool{}, OutputContext: context.Background(), CleanupJobs: map[string]*cleanupJob{}}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputCache: map[string]outputCacheEntry{}, OutputRefreshing: map[string]bool{}, OutputContext: context.Background(), CleanupJobs: map[string]*cleanupJob{}, BrowserTickets: map[string]time.Time{}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
@@ -62,7 +66,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/accounts/{id}/options", s.require(s.accountOptions, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/identity", s.require(s.accountIdentity, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/preflight", s.require(s.accountPreflight, true))
-	m.HandleFunc("GET /vultr-browser/{path...}", s.require(s.vultrBrowserProxy, false))
+	m.HandleFunc("POST /api/v1/accounts/{id}/console-session", s.require(s.createVultrBrowserTicket, true))
+	m.HandleFunc("GET /vultr-browser/{path...}", s.vultrBrowserProxy)
 	m.HandleFunc("POST /api/v1/proxies", s.require(s.createProxy, true))
 	m.HandleFunc("PUT /api/v1/proxies/{id}", s.require(s.updateProxy, true))
 	m.HandleFunc("DELETE /api/v1/proxies/{id}", s.require(s.deleteProxy, true))
@@ -130,6 +135,22 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("vultr_browser_session")
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	s.BrowserMu.Lock()
+	exp, ok := s.BrowserTickets[c.Value]
+	if !ok || time.Now().After(exp) {
+		delete(s.BrowserTickets, c.Value)
+		ok = false
+	}
+	s.BrowserMu.Unlock()
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 	target, _ := url.Parse("http://127.0.0.1:16080")
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
@@ -137,4 +158,28 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = "/vnc.html"
 	}
 	proxy.ServeHTTP(w, r)
+}
+
+func (s *Server) createVultrBrowserTicket(w http.ResponseWriter, r *http.Request) {
+	var provider string
+	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", r.PathValue("id")).Scan(&provider); err != nil || provider != "vultr" {
+		writeJSON(w, 404, map[string]string{"error": "vultr_account_not_found"})
+		return
+	}
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	token := hex.EncodeToString(raw)
+	s.BrowserMu.Lock()
+	for k, exp := range s.BrowserTickets {
+		if time.Now().After(exp) {
+			delete(s.BrowserTickets, k)
+		}
+	}
+	s.BrowserTickets[token] = time.Now().Add(5 * time.Minute)
+	s.BrowserMu.Unlock()
+	http.SetCookie(w, &http.Cookie{Name: "vultr_browser_session", Value: token, Path: "/vultr-browser/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 300})
+	writeJSON(w, 200, map[string]any{"ok": true, "expires_in": 300})
 }
