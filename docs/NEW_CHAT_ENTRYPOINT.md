@@ -19,3 +19,11 @@ Read `docs/FRESH_CHAT_MASTERY_PROTOCOL.md` and run `python3 tools/fresh-chat-mas
 
 ## Independent fresh-session proof
 When explicitly asked to prove fresh-session mastery, follow `docs/FRESH_SESSION_EXAM_INSTRUCTIONS.md`. Freeze all 40 answers before any grading and never inspect `.audit/fresh-session-exam/` or historical/deleted answer-key material.
+
+## Independent verification status
+
+`docs/FRESH_SESSION_MASTERY_PROOF.json` records the independently executed Fresh Session Exam v3 proof.
+
+Treat it as evidence of sampled cross-layer recoverability only when `verified: true`.
+
+The recorded proof is **40/40 across all eight exam categories**. Source/runtime drift gates must still be run after future product changes.
