@@ -1,0 +1,425 @@
+{
+  "schema_version": 2,
+  "source_commit": "4ff30a506cfd3b9d88118cdd02f035aaa33a49c7",
+  "overall_percent": 99.65,
+  "interpretation": "Direct evidence + explained evidence are distinguished. Explained means the absence itself is understood; confirmed-indirect/missing evidence still reduces mastery score. No product code/tests are added to inflate knowledge scores.",
+  "explained_gaps": [
+    {
+      "feature": "database",
+      "dimension": "migration-origin",
+      "severity": "medium",
+      "reason": "5 live columns lack parsed migration-origin evidence",
+      "evidence": {
+        "columns_with_reader_functions": 512,
+        "columns_with_writer_functions": 540,
+        "columns_with_function_mentions": 589,
+        "columns_with_migration_origin": 590
+      },
+      "closure_status": "explained"
+    },
+    {
+      "feature": "sanaei_panel",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 13,
+        "routes": 6,
+        "functions": 304,
+        "columns": 119,
+        "tests": 78,
+        "frontend_functions": 2,
+        "incidents": 0
+      },
+      "closure_status": "explained-direct-history"
+    },
+    {
+      "feature": "reality",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 5,
+        "routes": 0,
+        "functions": 64,
+        "columns": 65,
+        "tests": 25,
+        "frontend_functions": 0,
+        "incidents": 0
+      },
+      "closure_status": "explained-direct-history"
+    },
+    {
+      "feature": "admin_api",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 5,
+        "routes": 62,
+        "functions": 118,
+        "columns": 0,
+        "tests": 5,
+        "frontend_functions": 16,
+        "incidents": 0
+      },
+      "closure_status": "explained-direct-history"
+    },
+    {
+      "feature": "frontend",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 6,
+        "routes": 0,
+        "functions": 0,
+        "columns": 0,
+        "tests": 0,
+        "frontend_functions": 3,
+        "incidents": 0
+      },
+      "closure_status": "explained-direct-history"
+    }
+  ],
+  "remaining_gaps": [
+    {
+      "feature": "residential",
+      "dimension": "tests",
+      "severity": "high",
+      "reason": "no directly matched test evidence",
+      "evidence": {
+        "requirements": 5,
+        "routes": 5,
+        "functions": 7,
+        "columns": 6,
+        "tests": 0,
+        "frontend_functions": 4,
+        "incidents": 0
+      },
+      "closure_status": "confirmed-gap"
+    },
+    {
+      "feature": "database",
+      "dimension": "code-mentions",
+      "severity": "medium",
+      "reason": "6 live columns lack direct function mention evidence",
+      "evidence": {
+        "columns_with_reader_functions": 512,
+        "columns_with_writer_functions": 540,
+        "columns_with_function_mentions": 589,
+        "columns_with_migration_origin": 590
+      },
+      "closure_status": "confirmed-indirect"
+    },
+    {
+      "feature": "residential",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 5,
+        "routes": 5,
+        "functions": 7,
+        "columns": 6,
+        "tests": 0,
+        "frontend_functions": 4,
+        "incidents": 0
+      },
+      "closure_status": "unresolved"
+    }
+  ],
+  "domain_scores": {
+    "accounts": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 9,
+        "routes": 17,
+        "functions": 91,
+        "columns": 104,
+        "tests": 13,
+        "frontend_functions": 3,
+        "incidents": 1
+      }
+    },
+    "digitalocean": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 5,
+        "routes": 0,
+        "functions": 127,
+        "columns": 18,
+        "tests": 26,
+        "frontend_functions": 0,
+        "incidents": 1
+      }
+    },
+    "vultr": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 9,
+        "routes": 7,
+        "functions": 105,
+        "columns": 29,
+        "tests": 19,
+        "frontend_functions": 1,
+        "incidents": 2
+      }
+    },
+    "proxy_network": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 9,
+        "routes": 13,
+        "functions": 138,
+        "columns": 30,
+        "tests": 33,
+        "frontend_functions": 3,
+        "incidents": 2
+      }
+    },
+    "lifecycle": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 10,
+        "routes": 2,
+        "functions": 127,
+        "columns": 85,
+        "tests": 14,
+        "frontend_functions": 0,
+        "incidents": 2
+      }
+    },
+    "provisioning": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 7,
+        "routes": 8,
+        "functions": 195,
+        "columns": 66,
+        "tests": 48,
+        "frontend_functions": 2,
+        "incidents": 1
+      }
+    },
+    "sanaei_panel": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 13,
+        "routes": 6,
+        "functions": 304,
+        "columns": 119,
+        "tests": 78,
+        "frontend_functions": 2,
+        "incidents": 0
+      }
+    },
+    "reality": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 5,
+        "routes": 0,
+        "functions": 64,
+        "columns": 65,
+        "tests": 25,
+        "frontend_functions": 0,
+        "incidents": 0
+      }
+    },
+    "config_users": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 14,
+        "routes": 8,
+        "functions": 83,
+        "columns": 65,
+        "tests": 14,
+        "frontend_functions": 3,
+        "incidents": 1
+      }
+    },
+    "output": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 13,
+        "routes": 3,
+        "functions": 44,
+        "columns": 63,
+        "tests": 5,
+        "frontend_functions": 7,
+        "incidents": 3
+      }
+    },
+    "residential": {
+      "score": 95.0,
+      "remaining_gaps": [
+        {
+          "feature": "residential",
+          "dimension": "tests",
+          "severity": "high",
+          "reason": "no directly matched test evidence",
+          "evidence": {
+            "requirements": 5,
+            "routes": 5,
+            "functions": 7,
+            "columns": 6,
+            "tests": 0,
+            "frontend_functions": 4,
+            "incidents": 0
+          },
+          "closure_status": "confirmed-gap"
+        },
+        {
+          "feature": "residential",
+          "dimension": "history",
+          "severity": "low",
+          "reason": "no dedicated incident guardrail currently encoded",
+          "evidence": {
+            "requirements": 5,
+            "routes": 5,
+            "functions": 7,
+            "columns": 6,
+            "tests": 0,
+            "frontend_functions": 4,
+            "incidents": 0
+          },
+          "closure_status": "unresolved"
+        }
+      ],
+      "direct_counts": {
+        "requirements": 5,
+        "routes": 5,
+        "functions": 7,
+        "columns": 6,
+        "tests": 0,
+        "frontend_functions": 4,
+        "incidents": 0
+      }
+    },
+    "database": {
+      "score": 98.0,
+      "remaining_gaps": [
+        {
+          "feature": "database",
+          "dimension": "code-mentions",
+          "severity": "medium",
+          "reason": "6 live columns lack direct function mention evidence",
+          "evidence": {
+            "columns_with_reader_functions": 512,
+            "columns_with_writer_functions": 540,
+            "columns_with_function_mentions": 589,
+            "columns_with_migration_origin": 590
+          },
+          "closure_status": "confirmed-indirect"
+        }
+      ],
+      "direct_counts": {
+        "requirements": 5,
+        "routes": 0,
+        "functions": 16,
+        "columns": 19,
+        "tests": 3,
+        "frontend_functions": 0,
+        "incidents": 1
+      }
+    },
+    "admin_api": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 5,
+        "routes": 62,
+        "functions": 118,
+        "columns": 0,
+        "tests": 5,
+        "frontend_functions": 16,
+        "incidents": 0
+      }
+    },
+    "frontend": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 6,
+        "routes": 0,
+        "functions": 0,
+        "columns": 0,
+        "tests": 0,
+        "frontend_functions": 3,
+        "incidents": 0
+      }
+    },
+    "tests": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 8,
+        "routes": 3,
+        "functions": 375,
+        "columns": 0,
+        "tests": 251,
+        "frontend_functions": 2,
+        "incidents": 0
+      }
+    },
+    "deployment_runtime": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 12,
+        "routes": 6,
+        "functions": 157,
+        "columns": 105,
+        "tests": 33,
+        "frontend_functions": 0,
+        "incidents": 1
+      }
+    },
+    "architecture": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 15,
+        "routes": 1,
+        "functions": 212,
+        "columns": 27,
+        "tests": 42,
+        "frontend_functions": 1,
+        "incidents": 2
+      }
+    },
+    "continuity": {
+      "score": 100,
+      "remaining_gaps": [],
+      "direct_counts": {
+        "requirements": 7,
+        "routes": 0,
+        "functions": 0,
+        "columns": 0,
+        "tests": 0,
+        "frontend_functions": 0,
+        "incidents": 1
+      }
+    },
+    "history": {
+      "score": 100.0,
+      "remaining_gaps": [],
+      "direct_counts": {}
+    },
+    "source": {
+      "score": 100.0,
+      "remaining_gaps": [],
+      "direct_counts": {}
+    }
+  }
+}
