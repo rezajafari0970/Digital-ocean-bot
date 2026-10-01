@@ -32,11 +32,11 @@ func (s SQLStore) BeginStep(ctx context.Context, runID, step string, max int) (i
 		if terminal {
 			return attempts, ErrStepTerminal
 		}
-		if next.Valid && time.Now().Before(next.Time) {
-			return attempts, ErrStepRetryDeferred
-		}
 		if max > 0 && attempts >= max {
 			return attempts, stepRetryLimitError(step, attempts, lastErr.String)
+		}
+		if next.Valid && time.Now().Before(next.Time) {
+			return attempts, ErrStepRetryDeferred
 		}
 	}
 	var n int
