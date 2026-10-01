@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "purpose": "Stable project intent and requirement IDs for fresh-session continuity",
+  "requirements": [
+    {"id":"ARCH-001","area":"architecture","requirement":"Keep cloud-provider core provider-neutral; provider-specific behavior stays in drivers.","rationale":"DigitalOcean remains the mature baseline while Vultr and future providers integrate without branching generic lifecycle code.","code":["internal/providers","internal/app","internal/droplets"],"verification":["docs/HISTORICAL_DECISION_LEDGER.md","docs/REQUIREMENTS_MATRIX.md"]},
+    {"id":"ACC-001","area":"accounts","requirement":"Accounts retain independent provider, proxy, identity and lifecycle state.","rationale":"Avoid cross-account coupling and shared state regressions.","code":["internal/accounts","internal/app/account_state.go","internal/adminapi/accounts_manage.go"]},
+    {"id":"NET-001","area":"proxy_network","requirement":"Required account proxy egress is isolated and fail-closed.","rationale":"A failed required proxy must not silently leak direct provider traffic.","code":["internal/network","internal/app/sticky_proxy.go","internal/app/proxy_pool.go"]},
+    {"id":"LIFE-001","area":"lifecycle","requirement":"Server/deployment work is a reconciled observable state machine with one coherent execution owner.","rationale":"Avoid duplicate installers, competing workers and stale-state races.","code":["internal/droplets","internal/app/lifecycle.go","cmd/worker/main.go"]},
+    {"id":"DO-001","area":"digitalocean","requirement":"DigitalOcean behavior remains functional while generic/provider-neutral architecture evolves.","code":["internal/providers/digitalocean"]},
+    {"id":"VULTR-001","area":"vultr","requirement":"Vultr uses provider-specific read/mutation/catalog/capacity semantics behind common provider contracts.","code":["internal/providers/vultr"]},
+    {"id":"VULTR-002","area":"vultr_capacity","requirement":"Determine Vultr capacity accurately; browser-only interactive capacity observation stays isolated from generic provider core.","code":["internal/providers/vultrconsole","cmd/vultr-capacity-probe","internal/adminapi/server.go"]},
+    {"id":"VULTR-003","area":"vultr_console","requirement":"Cloudflare/CAPTCHA/2FA is solved manually through an interactive console/noVNC session; authorized state may then be reused.","code":["internal/providers/vultrconsole","internal/adminapi/server.go","web/static/app.js"]},
+    {"id":"PANEL-001","area":"sanaei","requirement":"Sanaei/x-ui is a modular panel integration; live reads/writes use Sanaei API where implemented.","code":["internal/panels/sanaei"]},
+    {"id":"OUT-001","area":"output","requirement":"Output is fast/live and does not use SSH scraping as its live data plane.","code":["internal/adminapi/output.go","internal/adminapi/output_snapshot.go","internal/panels/sanaei/runtime_manager.go"]},
+    {"id":"OUT-002","area":"output_expiry","requirement":"Direct Output and share links apply canonical exact visibility/expiry semantics so invalid configs disappear on time.","code":["internal/adminapi/output.go","internal/adminapi/output_snapshot.go"],"migrations":["000090_output_snapshots.up.sql","000092_output_visibility.up.sql"]},
+    {"id":"REAL-001","area":"reality","requirement":"Reality/VLESS ports, SNI, target users, quota, lifetime and device limit remain policy-driven.","code":["internal/panels/policy","internal/panels/realityconfig","internal/panels/globalreality"]},
+    {"id":"RES-001","area":"residential","requirement":"Residential routing is separate from account/provider control-plane proxy assignment.","code":["internal/adminapi/residential.go","internal/panels/residentialsync"]},
+    {"id":"UI-001","area":"frontend","requirement":"Admin modules remain operational/mobile-friendly and preserve working context; interactive challenges provide visible browser feedback.","code":["web/static/app.js","web/static/index.html","web/static/app.css"]},
+    {"id":"OPS-001","area":"production","requirement":"Never infer production revision from service health alone; verify Git/build/runtime/artifact hashes.","code":["internal/buildinfo","deploy","tools/verify-production-revision.py"]},
+    {"id":"KNOW-001","area":"continuity","requirement":"Fresh sessions recover intent, architecture, source lines, semantic relationships, schema, tests and runtime from commit-pinned project knowledge.","code":["docs","tools/project-brain-query.py"]}
+  ]
+}
