@@ -11,7 +11,6 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
-	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -140,7 +139,6 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
-	log.Printf("vultr browser proxy path=%s upgrade=%q connection=%q protocol=%q", r.URL.Path, r.Header.Get("Upgrade"), r.Header.Get("Connection"), r.Header.Get("Sec-WebSocket-Protocol"))
 	c, err := r.Cookie("vultr_browser_session")
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -163,6 +161,11 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
 		if r.URL.Path == "" || r.URL.Path == "/" {
 			r.URL.Path = "/vnc.html"
+			q := r.URL.Query()
+			q.Set("autoconnect", "1")
+			q.Set("resize", "scale")
+			q.Set("path", "websockify")
+			r.URL.RawQuery = q.Encode()
 		}
 	}
 	proxy.ServeHTTP(w, r)
