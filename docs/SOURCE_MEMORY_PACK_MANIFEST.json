@@ -1,0 +1,560 @@
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "conceptual_packs": [
+    {
+      "path": "docs/source-memory-packs/concept-001.json",
+      "sha256": "3fe6d56eb5925cd3a469258672862fca4d8b6719cbd5c4669096584ce40ef4e8",
+      "bytes": 57794
+    },
+    {
+      "path": "docs/source-memory-packs/concept-002.json",
+      "sha256": "ca198f961bef0e61d12e2dfbba7279341d38de012fa3b4819a8e70e37781d766",
+      "bytes": 56828
+    },
+    {
+      "path": "docs/source-memory-packs/concept-003.json",
+      "sha256": "ff8fc2af6cbd18dd0f0abdf1d842c5ae5fa32c8935efd39f90d5fc14035f8ddf",
+      "bytes": 49511
+    },
+    {
+      "path": "docs/source-memory-packs/concept-004.json",
+      "sha256": "b35fc1bd821a8705fbad5097ecf0e98117a99539730bef0ce0e105872d3269ad",
+      "bytes": 48443
+    },
+    {
+      "path": "docs/source-memory-packs/concept-005.json",
+      "sha256": "31343d54362568de95b70bfa69835217a57ab643e3e6e004f0b39172fe819f66",
+      "bytes": 47334
+    },
+    {
+      "path": "docs/source-memory-packs/concept-006.json",
+      "sha256": "dcc13a7d2aa5a74f50abbf0d73fc67d27aec81efdf72b169e958155f9f68b1d3",
+      "bytes": 49660
+    },
+    {
+      "path": "docs/source-memory-packs/concept-007.json",
+      "sha256": "c3056ae05f603915e6ffe11d58c162c4bd9bcb835752b6031ffbbc48f611176d",
+      "bytes": 51650
+    },
+    {
+      "path": "docs/source-memory-packs/concept-008.json",
+      "sha256": "0de445d0bb45c9f52428701dc755ab11005dfd3001714de098da6eb3ba6d2cf8",
+      "bytes": 49358
+    },
+    {
+      "path": "docs/source-memory-packs/concept-009.json",
+      "sha256": "c230d5d3a4cb3534733abd8971a17a0680d3c11879563e411118d28a6a70fead",
+      "bytes": 48670
+    },
+    {
+      "path": "docs/source-memory-packs/concept-010.json",
+      "sha256": "94625ce7ba5bfc97528a8013107d268b17141330ce0b2fb305d68a17d892953d",
+      "bytes": 50982
+    },
+    {
+      "path": "docs/source-memory-packs/concept-011.json",
+      "sha256": "2d3848979e4b17193c7bf5c1e4a2005671491dd67fdb1c2534faeaa006cfe633",
+      "bytes": 49165
+    },
+    {
+      "path": "docs/source-memory-packs/concept-012.json",
+      "sha256": "c6f2ab7e95f87bc011a7fef530a54f34cf13c7a170148bba37cda867e58a6f7f",
+      "bytes": 49284
+    },
+    {
+      "path": "docs/source-memory-packs/concept-013.json",
+      "sha256": "97cd7617a286de406cb13401b225e47e822f5e39ffe43ec977aec9f954fd265d",
+      "bytes": 40420
+    }
+  ],
+  "topology_packs": [
+    {
+      "path": "docs/source-memory-packs/topology-001.json",
+      "sha256": "de1097e2149c4640a75406e7a530ea56976fbbd0fb81159768a447fd9f1a04ba",
+      "bytes": 10470
+    },
+    {
+      "path": "docs/source-memory-packs/topology-002.json",
+      "sha256": "501b73f2945267b31d2c2c93e306a2d1ba1c5d78c8f404ae99cc334abf5d7182",
+      "bytes": 5998
+    },
+    {
+      "path": "docs/source-memory-packs/topology-003.json",
+      "sha256": "5d5d5fa0e737a43bbf412d847b1f8cb841f78dbd42637e542322dffd07bcad6d",
+      "bytes": 6179
+    },
+    {
+      "path": "docs/source-memory-packs/topology-004.json",
+      "sha256": "06cff9966b59c60f69d7febdc222c7b9c5ebd9a1abfd29e32c95fc2612971bc3",
+      "bytes": 6470
+    },
+    {
+      "path": "docs/source-memory-packs/topology-005.json",
+      "sha256": "04c7336bafc9ae3f3bc1cef5f53fef258bd764dd3ebbb9f39a08f7a6b874d282",
+      "bytes": 8563
+    },
+    {
+      "path": "docs/source-memory-packs/topology-006.json",
+      "sha256": "2440928dbe4219d03cd6f4bf03bdb4bd6b752c8b067d5b09b3fdf7619dd14577",
+      "bytes": 9258
+    },
+    {
+      "path": "docs/source-memory-packs/topology-007.json",
+      "sha256": "4baa0602065414f4afe12317667babb5cd4173e4768e3121928fd59139f640f0",
+      "bytes": 5755
+    },
+    {
+      "path": "docs/source-memory-packs/topology-008.json",
+      "sha256": "93c083942ad735c4295a5ed692c74aac4b732ab60b9b0a40e942edf0e18a9062",
+      "bytes": 2961
+    }
+  ],
+  "verbatim_packs": [
+    {
+      "path": "docs/source-memory-packs/verbatim-001.json",
+      "sha256": "6f925b4e26c0f9a0a0771fffec3a165721adf012be687b0ff571e4e203cd27e4",
+      "bytes": 19805
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-002.json",
+      "sha256": "0eb7fe93a91795e841f393fb89d1a35f2eb69c4736b7dc13f22530050fd11013",
+      "bytes": 20639
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-003.json",
+      "sha256": "d2fce9736e9d7e00c72da059137d0f52d5ea53669b2fa472e1c8963c58ab3741",
+      "bytes": 22155
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-004.json",
+      "sha256": "88950103ed30bb1bb4a0e2b235931f42d05de0a506022c3c92430bb00840d6e2",
+      "bytes": 23373
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-005.json",
+      "sha256": "3ca5ef068ae4c4c0a5caa8b320b291f2f0cbef30e438e2103cd00126414fc8b4",
+      "bytes": 26892
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-006.json",
+      "sha256": "e24ae1e066c11ed761f215a0def6fee10e757a36e280d475cf687118960296e5",
+      "bytes": 20416
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-007.json",
+      "sha256": "40920b3e7d88b6775d0fe36947a7f2ea15f6e827e322913ba9161afd93ac0596",
+      "bytes": 28249
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-008.json",
+      "sha256": "0c3cedd38b4ac3268062735a05c9aa5ba8e9f46faaaee5760ff90811315579e8",
+      "bytes": 25769
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-009.json",
+      "sha256": "28405c963a10a43bcec1f663a2c8d6ff7695c64a4046e8f8f4e80246de07acb8",
+      "bytes": 21561
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-010.json",
+      "sha256": "75fb70e0c122709fa9d8a179cce99c971a7a9f015f152eecbf2b798664bff21e",
+      "bytes": 25348
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-011.json",
+      "sha256": "3cc30787284cad76e464a9e4a9236834178733fbf7f6dc9e82914fc1a4ef09a6",
+      "bytes": 23618
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-012.json",
+      "sha256": "49572842c755a278f02dc5d2c98535d6d0e67e14610bcf7355c16d633638fce2",
+      "bytes": 28594
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-013.json",
+      "sha256": "219bf6da2ebc86a7a773cdb21a650107b0348bb7946b3abcfaa6276c77c304d1",
+      "bytes": 24446
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-014.json",
+      "sha256": "b9b30bfdfbe79a8171efe496c35a85e88250c822c06db3f40f448e924e0368ce",
+      "bytes": 20135
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-015.json",
+      "sha256": "b466ebb4bb8f5e8b53c432e261229c8536eb5b1371ba4c5c2c3016bc4d5aec83",
+      "bytes": 21952
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-016.json",
+      "sha256": "99153a0dec181379f1fc5156f5c96383ae6fb97ae955fbc556e3f0c89b76bdd5",
+      "bytes": 24615
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-017.json",
+      "sha256": "239344b91ec861a90983e602154d69e4ae468e44dad38ff5f0cfaeabc2ebeef8",
+      "bytes": 26178
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-018.json",
+      "sha256": "fdf788bc7e46a28572300d4bc6dece05f08f010253cdced89b27e320b5acf71a",
+      "bytes": 25208
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-019.json",
+      "sha256": "298a73204a0bb147932d32f3794a708c3c4b12b53ddc1e8404c7122b88e1ee52",
+      "bytes": 25379
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-020.json",
+      "sha256": "d82c9175fb22e950d175d7a6550618a07eb6ac64b665df308f2c71328e51927f",
+      "bytes": 25517
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-021.json",
+      "sha256": "f764f42b7bc7fd0df4f29688b2ffd42c9036f66956d0b88a041a694993a0697f",
+      "bytes": 20168
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-022.json",
+      "sha256": "40b3d34a6fef4eb1cea0c28cbc9b676c5132ea893e33919158a659b18891db22",
+      "bytes": 20559
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-023.json",
+      "sha256": "cdd92b6091c1051f0b4df2d00730b4ae478805aac1f606e1303f32e40ad614c9",
+      "bytes": 19445
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-024.json",
+      "sha256": "f7eff92687620d76e638f68125f9daafc783746cd00f2b4d6ab41973068d1501",
+      "bytes": 17949
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-025.json",
+      "sha256": "d781f33fa3396d4d7a2514ffb6220e32d9f03975d63d4727f501977fd979ffff",
+      "bytes": 17480
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-026.json",
+      "sha256": "605276ed1d424934025a3b7eadb7073ef575ef2fd9f604c3801cf71703f0b8b3",
+      "bytes": 18234
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-027.json",
+      "sha256": "84bc6afa126d636941352841cc50d17de624b95567c06f3b1de21acf19cdb7b2",
+      "bytes": 19517
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-028.json",
+      "sha256": "696a205ee93d792a10e748fb9298bfa964866630b4c8abd47c9263afcfea3777",
+      "bytes": 19086
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-029.json",
+      "sha256": "2c1c9ed71a1b4c685400601a61a7156a02c314305909924d0fb4a0fe48901be6",
+      "bytes": 17798
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-030.json",
+      "sha256": "b4606981cb86b276bd2cd2b5462de76d4e009c193564d280c18298fdd1303673",
+      "bytes": 16682
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-031.json",
+      "sha256": "c90fc01d10bb5a16dc445816b450afeaa29b95a28119b7e78c58519d24f6d4f5",
+      "bytes": 20875
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-032.json",
+      "sha256": "897e3be6f3c720f81ea3f742c11eb62ff27dd90a27d0b5483ea6d085aaac0400",
+      "bytes": 14132
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-033.json",
+      "sha256": "eab7f3458f98c39c4ad1d63d492535a4b29fb5fea1a1cca646b7ce5bbe425cd7",
+      "bytes": 20025
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-034.json",
+      "sha256": "9b4149f08d792b033ec0666898f7211df1f135e68c000dfdb9b702b6c8b739a1",
+      "bytes": 16442
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-035.json",
+      "sha256": "2d7e35e2e5dcf4971b2ac50726b199edfe02155073067fdb0e7ccdf61e667d9f",
+      "bytes": 18526
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-036.json",
+      "sha256": "c22cc2c837280c3681fb1e300435666c41cebf4cc22f0e00af4012ed07d908cb",
+      "bytes": 20594
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-037.json",
+      "sha256": "fd03803f534cfd23c0c62f34e7f5bb31132592347ee3ea0d0c09791de96b4f2f",
+      "bytes": 17012
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-038.json",
+      "sha256": "3ad0b9179ad3c1992f7dda1113a68c58b5425897b3b27dc252a400c593b6e797",
+      "bytes": 20100
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-039.json",
+      "sha256": "e6772b6342447d74cabec7c64d69e6e668025a261bc16fae28e34ed2423025df",
+      "bytes": 20502
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-040.json",
+      "sha256": "e2d6882d7a415bbd89918b40427b93ac2fde2bd0f494000a62ce114ea2a24014",
+      "bytes": 16840
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-041.json",
+      "sha256": "7363ded593139e05682875e30d41d2a1335b9093d785dd6ddbbe10b4b5054e11",
+      "bytes": 17301
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-042.json",
+      "sha256": "d37d090482c9f6f4d8eb356aea6a1b2d7e6f980868b12af2c577e63a2be79f34",
+      "bytes": 17743
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-043.json",
+      "sha256": "32a31bc3055e6ac13c166da42346730f653e3b38c8f2ae19d39e349d56ce03b4",
+      "bytes": 21430
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-044.json",
+      "sha256": "c8b1d5e32ecf6d3ffe3596bda356472b69f6f62d917ba3d2c03a1022db1037cb",
+      "bytes": 16052
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-045.json",
+      "sha256": "3c700298dd42295f73196ab8f10977e4f5e900095da12b49f1db37860be21bf4",
+      "bytes": 15523
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-046.json",
+      "sha256": "87c59c06eb1fad6778636957edbfa0948bd2acca77ae4132858d046fce642958",
+      "bytes": 16842
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-047.json",
+      "sha256": "dae6a588a8179cfe863eef78d55e73f1f449de6a88441c609622d556c034b5d0",
+      "bytes": 17592
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-048.json",
+      "sha256": "4113185acc2ce189fb8c206bdf7a4d1de3006ce426bfbdee0a58fe22935980f3",
+      "bytes": 17665
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-049.json",
+      "sha256": "29d923e85dfa230431d890be7029f29cbd0248603a19ee71df1cec2d99166767",
+      "bytes": 15873
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-050.json",
+      "sha256": "dbbbdd0915b815b0a3cbc738f522a820dd410fb9d041fe5b5f2182a9d6928b84",
+      "bytes": 17332
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-051.json",
+      "sha256": "d856ad22d080eb52bece87156a47833543754885be9fc221ee7e8353f5598aa1",
+      "bytes": 18529
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-052.json",
+      "sha256": "3473a4a7a08044a29550fa1113ee9c7c55102874bc3e199c420e36ca9c8b4b69",
+      "bytes": 23448
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-053.json",
+      "sha256": "1203d70f910b59adac71d79010e76b43d2e1ccb68c1e73745e98004b3ab124fa",
+      "bytes": 21750
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-054.json",
+      "sha256": "7e72ebc42306f57289d566a136a474e258b5f2e095e02ef04766885ca54d7802",
+      "bytes": 24449
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-055.json",
+      "sha256": "65df5d06a584772cb65c1ca4f19167e3a992b13b6a1d508ffe5d4fe045b03ee1",
+      "bytes": 21571
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-056.json",
+      "sha256": "8da989f8dcbcbcaec04b7cc3fe153b994d5881726902c6df22a060a3f246412b",
+      "bytes": 17846
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-057.json",
+      "sha256": "ad64125825e500c359f1476b89f49e3f929f6f2c3388230222f953f907332003",
+      "bytes": 16569
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-058.json",
+      "sha256": "a28ec65ada75cdf52ee438a2ff288943054bc00af60a820b9692de90140516ae",
+      "bytes": 22938
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-059.json",
+      "sha256": "a1bd671979f3b04e8677bc00c10b171e39feae24ef737161c930d3d5ef739b33",
+      "bytes": 22409
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-060.json",
+      "sha256": "b604306b76458a7005061bc0413b926038a649f69317940f0bb11a14c06acc04",
+      "bytes": 23467
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-061.json",
+      "sha256": "80a1f14c537f529ac95b1fee0cc745216bee0b9d7320afacf0b7b87e7de2c787",
+      "bytes": 22891
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-062.json",
+      "sha256": "05ceead068594020c770987a369c1c06c0ddc771410c4388b011a673f46d9201",
+      "bytes": 22898
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-063.json",
+      "sha256": "a58c98de655944c52e37120d79b0c118cb7536a0fe15730d67933a223ccb0b69",
+      "bytes": 22913
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-064.json",
+      "sha256": "1d4b3dd0ac00927e6b21baaa1aa5e01e6c5a2fcd0a39c2093f6731de40150a0b",
+      "bytes": 24573
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-065.json",
+      "sha256": "531fd6132ebb27d2e8ecf67c10b10b32054633cb1ec8f225672feeec9717e801",
+      "bytes": 23109
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-066.json",
+      "sha256": "00aaa47f79efe810d34f2cad1443e17853741bba29362d73059e77ee257bf322",
+      "bytes": 21671
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-067.json",
+      "sha256": "5c19800ced96446a7eebac6004d79dafaf04e34799e60d8f2d0cf216e749f383",
+      "bytes": 20925
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-068.json",
+      "sha256": "04e0d9caea74337796302fd62b9ed1a661a2aa2999f2cc4859e6a945be61ba89",
+      "bytes": 16727
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-069.json",
+      "sha256": "92f18f1272d6e62a0f737b227e406ad250c05c0c62c8283a5dc7104f4ea24e12",
+      "bytes": 14762
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-070.json",
+      "sha256": "e3155da96dd3c961565ede636c46dbba33edb114c6f710f6e7e26c5c741ce743",
+      "bytes": 16651
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-071.json",
+      "sha256": "52ec9dd74fd13b0b317e902d45a48ec8921cf6f813b637d6907927ad14f234f1",
+      "bytes": 15613
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-072.json",
+      "sha256": "dc83c8f6f9baea7beff283f82d0f09bc5745ba71b0ad0965e4aeca08504cab34",
+      "bytes": 13606
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-073.json",
+      "sha256": "2cb3c15b179eac6e878bdd6862ab64c8878eab616c68446f773935128cd91080",
+      "bytes": 17128
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-074.json",
+      "sha256": "6e7f92e71e6141181ddc454c3a43bd2aaa9e7a7b5701263e06de576b49d25046",
+      "bytes": 21645
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-075.json",
+      "sha256": "55659b3c21eba8ece0da314a2e0faf714710a1c2c3990c0e70329438bb17512d",
+      "bytes": 18725
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-076.json",
+      "sha256": "d16321f08f8048b802c470e3b3e6cbaf5949a857e66bfc2b06ba0b5ccdc79733",
+      "bytes": 21877
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-077.json",
+      "sha256": "4359fb9666dcd03e3b77d559d15f48f66a4315995c4ff9d036ddc87f86a49cc6",
+      "bytes": 20933
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-078.json",
+      "sha256": "27959609daffc67643aea35efce7a70103e00284e1f3830d7b100981e94aa12a",
+      "bytes": 19596
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-079.json",
+      "sha256": "201c6c577ddbb224502ceaf16a6c36c9eee52c01487c9d0dfb74a9e1dc5d4459",
+      "bytes": 22674
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-080.json",
+      "sha256": "6733233d38de0a466e15cddd7abb2c506ce026f9a1c28e217d0233cca4867032",
+      "bytes": 20012
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-081.json",
+      "sha256": "4d9a80ee63b9682c977a141e82a302b634b6076981da3c4dab5637cd7fa0f2ad",
+      "bytes": 23164
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-082.json",
+      "sha256": "7a41d70469e467b7c953b532f248bec1ff6de9571620bc8319f0f3cee49a7fb1",
+      "bytes": 20070
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-083.json",
+      "sha256": "43d15d24845a3fac84616343f9cb267a9fa67f70c441e06e4bc64c12f3ba1a97",
+      "bytes": 19738
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-084.json",
+      "sha256": "3b3730db80d0bcd98d3629769145f262e525e559a115c0d4f7de4f51b08c14e5",
+      "bytes": 19039
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-085.json",
+      "sha256": "62b1c2e801b511d5f90166ab47355d534fd1d75e606eb88ef5f345be8c86e14b",
+      "bytes": 21646
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-086.json",
+      "sha256": "7760ec78196582c3018ff0e66c04a084ef182f805f929faf3afe88b494a22bd8",
+      "bytes": 20876
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-087.json",
+      "sha256": "2174c41ee1190c6e32fc47baf1cc236ba44411d465a93b3fb5fe40c2311439ad",
+      "bytes": 17139
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-088.json",
+      "sha256": "f057439e8342dbaba3ccc6a0ab2a93595b9256beef585c2eb97b68dfb17eb247",
+      "bytes": 43717
+    },
+    {
+      "path": "docs/source-memory-packs/verbatim-089.json",
+      "sha256": "3f6a2199389c47cf5d1e68e6f3f1bf0b4f0d67193bd95c8bb8b0e25d848c75a1",
+      "bytes": 55178
+    }
+  ]
+}
