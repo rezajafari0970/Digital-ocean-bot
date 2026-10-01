@@ -1,0 +1,1 @@
+[{"type":"route","method":"GET","path":"/api/v1/providers","answer":{"handler":"providersMetadata"}},{"type":"route","method":"GET","path":"/api/v1/panel-settings","answer":{"handler":"getPanelSettings"}},{"type":"route","method":"PUT","path":"/api/v1/panel-settings","answer":{"handler":"updatePanelSettings"}}]
