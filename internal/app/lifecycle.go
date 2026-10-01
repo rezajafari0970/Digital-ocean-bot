@@ -86,6 +86,12 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				_ = (droplets.LifecycleStore{DB: c.DB}).Event(ctx, item, droplets.Retiring)
 				goto processLifecycle
 			}
+			// At/above the hard Desired ceiling, another retirement/deletion is
+			// already sufficient to free the next slot. Other EXPIRING items wait
+			// instead of attempting replacement deployments that admission must reject.
+			if desired > 0 && managed >= desired {
+				return nil
+			}
 		}
 		// A failed deployment is not serving traffic, so requiring a replacement
 		// before deletion creates a capacity deadlock (especially at the limit).
