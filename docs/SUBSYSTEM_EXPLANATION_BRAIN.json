@@ -1,0 +1,5734 @@
+{
+  "schema_version": 1,
+  "source_commit": "006b0916a6a654097ce3e850f2d198eb46b8f4c3",
+  "subsystem_count": 18,
+  "subsystems": [
+    {
+      "subsystem": "accounts",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-ACCOUNTS-01",
+          "text": "account CRUD and provider identity"
+        },
+        {
+          "id": "DEEP-ACCOUNTS-02",
+          "text": "independent account isolation cell"
+        },
+        {
+          "id": "DEEP-ACCOUNTS-03",
+          "text": "explicit account/provider states"
+        },
+        {
+          "id": "DEEP-ACCOUNTS-04",
+          "text": "optional browser credentials do not replace API token flow"
+        },
+        {
+          "id": "DEEP-ACCOUNTS-05",
+          "text": "automation settings remain account-scoped"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration"
+      ],
+      "owned_files": [
+        "internal/accounts/cell.go",
+        "internal/accounts/cell_test.go",
+        "internal/accounts/context.go",
+        "internal/accounts/context_test.go",
+        "internal/accounts/identity.go",
+        "internal/accounts/identity_test.go"
+      ],
+      "function_count": 10,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [
+        "Acquire",
+        "Authorize",
+        "NewCellManager",
+        "NewContext",
+        "NewRuntimeIdentity",
+        "Read",
+        "Register",
+        "SecureID"
+      ],
+      "test_count": 3,
+      "tests": [
+        {
+          "name": "TestCellManagerKeepsAccountsSeparate",
+          "file": "internal/accounts/cell_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestAccountNamespacesAreDistinct",
+          "file": "internal/accounts/context_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestRuntimeIdentitiesAreIndependent",
+          "file": "internal/accounts/identity_test.go",
+          "line": 5
+        }
+      ],
+      "failure_evidence": [
+        "return nil, ErrCellNotFound",
+        "return nil, err",
+        "return ErrTenantMismatch",
+        "return \"\", ErrIdentifierGeneration",
+        "return RuntimeIdentity{}, err"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "admin_api",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-ADMIN-API-01",
+          "text": "routes remain explicit and traceable to handlers"
+        },
+        {
+          "id": "DEEP-ADMIN-API-02",
+          "text": "auth protects mutating/admin operations"
+        },
+        {
+          "id": "DEEP-ADMIN-API-03",
+          "text": "account/provider/config/output/proxy/residential APIs preserve module boundaries"
+        },
+        {
+          "id": "DEEP-ADMIN-API-04",
+          "text": "errors should remain classifiable/actionable"
+        },
+        {
+          "id": "DEEP-ADMIN-API-05",
+          "text": "settings changes do not silently alter unrelated modules"
+        }
+      ],
+      "responsibility_evidence": [
+        "HTTP handler",
+        "HTTP handler; persists/mutates DB state",
+        "HTTP handler; persists/mutates DB state; reads DB state",
+        "HTTP handler; reads DB state",
+        "HTTP handler; reads DB state; performs HTTP/API call",
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/adminapi/account_automation.go",
+        "internal/adminapi/account_identity.go",
+        "internal/adminapi/account_options.go",
+        "internal/adminapi/account_preflight.go",
+        "internal/adminapi/account_preview.go",
+        "internal/adminapi/account_validation.go",
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/accounts_write.go",
+        "internal/adminapi/auth.go",
+        "internal/adminapi/build_activity.go",
+        "internal/adminapi/capacity_cleanup.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/config_expr.go",
+        "internal/adminapi/config_expr_test.go",
+        "internal/adminapi/configs.go",
+        "internal/adminapi/configs_global.go",
+        "internal/adminapi/dashboard.go",
+        "internal/adminapi/discovery.go",
+        "internal/adminapi/install_scripts.go",
+        "internal/adminapi/installer_rearm.go",
+        "internal/adminapi/installer_selection.go",
+        "internal/adminapi/installers.go",
+        "internal/adminapi/locale.go",
+        "internal/adminapi/network_identity_auto.go",
+        "internal/adminapi/network_isolation.go",
+        "internal/adminapi/output.go",
+        "internal/adminapi/output_expiry_test.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/panel_settings.go",
+        "internal/adminapi/providers.go",
+        "internal/adminapi/provision_activity.go",
+        "internal/adminapi/provision_errors.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/proxies_write.go",
+        "internal/adminapi/proxy_details.go",
+        "internal/adminapi/proxy_detect.go",
+        "internal/adminapi/proxy_health.go",
+        "internal/adminapi/proxy_observe.go",
+        "internal/adminapi/proxy_pool.go",
+        "internal/adminapi/residential.go",
+        "internal/adminapi/resources.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/runtime_api.go",
+        "internal/adminapi/sanaei_installer.go",
+        "internal/adminapi/security.go",
+        "internal/adminapi/server.go",
+        "internal/adminapi/server_test.go",
+        "internal/adminapi/status.go",
+        "internal/adminapi/templates.go",
+        "internal/adminapi/token_validate.go"
+      ],
+      "function_count": 118,
+      "api_surface": [
+        {
+          "method": "GET",
+          "path": "/healthz",
+          "handler": "health"
+        },
+        {
+          "method": "GET",
+          "path": "/readyz",
+          "handler": "ready"
+        },
+        {
+          "method": "GET",
+          "path": "/version",
+          "handler": "version"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "handler": "login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/logout",
+          "handler": "logout"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts",
+          "handler": "createAccount"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/preview",
+          "handler": "accountPreview"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "updateAccount"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "deleteAccount"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/options",
+          "handler": "accountOptions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/identity",
+          "handler": "accountIdentity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/preflight",
+          "handler": "accountPreflight"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/console-session",
+          "handler": "createVultrBrowserTicket"
+        },
+        {
+          "method": "GET",
+          "path": "/vultr-browser/{path...}",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/websockify",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies",
+          "handler": "createProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "updateProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "deleteProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "proxyDetails"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/residential-proxies",
+          "handler": "residentialProxies"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies",
+          "handler": "createResidentialProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "updateResidentialProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "deleteResidentialProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies/{id}/test",
+          "handler": "testResidentialProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/configs",
+          "handler": "getGlobalConfigs"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity",
+          "handler": "configCapacity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/config-capacity/delete-all-clients",
+          "handler": "deleteAllCapacityClients"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity/cleanup/{id}",
+          "handler": "cleanupJobStatus"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/output",
+          "handler": "outputConfigs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/output/share",
+          "handler": "createOutputShare"
+        },
+        {
+          "method": "GET",
+          "path": "/share/output/{token}",
+          "handler": "sharedOutput"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-panels",
+          "handler": "getConfigPanels"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/configs",
+          "handler": "putGlobalConfig"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies/{id}/test",
+          "handler": "testProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}/network",
+          "handler": "assignProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/discovery",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/refresh",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/proxy-test",
+          "handler": "testAccountProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/templates",
+          "handler": "listTemplates"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/templates",
+          "handler": "uploadTemplate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/dashboard",
+          "handler": "accountDashboard"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/resources",
+          "handler": "accountResources"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/capacity",
+          "handler": "accountCapacity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime",
+          "handler": "accountRuntime"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts",
+          "handler": "accounts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies",
+          "handler": "proxies"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity",
+          "handler": "buildActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity/{id}/provision",
+          "handler": "provisionActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/provision-errors",
+          "handler": "provisionErrors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei/preview",
+          "handler": "previewSanaeiInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei",
+          "handler": "createSanaeiInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/installers",
+          "handler": "listInstallers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers",
+          "handler": "createInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/install-scripts",
+          "handler": "listInstallScripts"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/install-scripts",
+          "handler": "createInstallScript"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer",
+          "handler": "selectDeploymentInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer/rearm",
+          "handler": "rearmDeploymentInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/audit",
+          "handler": "audit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/system",
+          "handler": "system"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/providers",
+          "handler": "providersMetadata"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/panel-settings",
+          "handler": "getPanelSettings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/panel-settings",
+          "handler": "updatePanelSettings"
+        }
+      ],
+      "db_tables": [
+        "EXCLUDED",
+        "LATERAL",
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "all",
+        "already",
+        "audit_events",
+        "candidate",
+        "current_output_uris",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "excluded",
+        "global_config_policies",
+        "inbound_export_metadata",
+        "inbound_structural_snapshots",
+        "install_scripts",
+        "installer_runs",
+        "installers",
+        "network_profiles",
+        "operations",
+        "output_config_snapshots",
+        "output_share_tokens",
+        "panel_inbound_policies",
+        "panel_instances",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_snapshots",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "residential_proxies",
+        "resources",
+        "schedules",
+        "server_readiness_issues",
+        "server_readiness_snapshots",
+        "user_capacity_snapshots",
+        "worker_heartbeats",
+        "worker_item_failures",
+        "xui_database_templates"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "Acquire",
+        "Add",
+        "Allow",
+        "Authenticate",
+        "Available",
+        "Build",
+        "CanAdmin",
+        "CanCreateCapacity",
+        "CanWrite",
+        "Capacity",
+        "Catalog",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Close",
+        "CloseIdleConnections",
+        "Context",
+        "Create",
+        "Current",
+        "DeleteProxy",
+        "DeleteSession",
+        "Do",
+        "EligibleReadyPanels",
+        "Error",
+        "Get",
+        "GetProxy",
+        "Has",
+        "Header",
+        "InspectTemplate",
+        "InstallerHash",
+        "Invalidate",
+        "LocaleForCountry",
+        "Login",
+        "Marshal",
+        "Metadata",
+        "MetadataAll",
+        "Name",
+        "New",
+        "NewIsolatedDirectClient",
+        "NewLoginLimiter",
+        "NewProxyGateway",
+        "NewProxyProbeGateway",
+        "Normalize",
+        "Observe",
+        "ObserveProxy",
+        "Open",
+        "ProviderStateRuntimeStatus",
+        "ProxyAdapterCapabilities",
+        "ProxySessionUsername",
+        "Put",
+        "PutProxy",
+        "Read",
+        "Readiness",
+        "RecordProviderObservation",
+        "RegisterInstaller",
+        "Rollback",
+        "Routes",
+        "Runtime",
+        "Set",
+        "Snapshot",
+        "String",
+        "UpdateInboundRaw",
+        "VLESSRealityURI",
+        "Wait",
+        "accounts",
+        "cachedPanelOutput",
+        "clearPanelClients",
+        "clearPanelClientsFast",
+        "collectRuntimeOutput",
+        "detectProxy",
+        "detectProxyTypes",
+        "errorBody",
+        "fastExitIP",
+        "hasDup",
+        "localeForCountry",
+        "min",
+        "mustJSON",
+        "networkIdentityCollision",
+        "newShareToken",
+        "next",
+        "normalizeProxyPool",
+        "observeProxy",
+        "outputMap",
+        "outputSnapshotResponse",
+        "outputVisibleUntil",
+        "parseLifetimeMinutes",
+        "parseProductExpr",
+        "parseQuotaMB",
+        "persistOutputSnapshot",
+        "principal",
+        "proxies",
+        "refreshNetworkIdentityIfDue",
+        "refreshPanelOutput",
+        "refreshPanelOutputAsync",
+        "require",
+        "resolveProxyType",
+        "runCleanupJob",
+        "securityHeaders",
+        "storePanelOutput",
+        "syncAccountAutomation",
+        "syncAccountAutomationTx",
+        "syncAccountProxyPool",
+        "testProxy",
+        "validProxyWrite",
+        "validateAccountSettings",
+        "validateReplacementToken",
+        "writeJSON",
+        "writeProviderPreviewError",
+        "zeroBytes"
+      ],
+      "test_count": 5,
+      "tests": [
+        {
+          "name": "TestConfigExpressions",
+          "file": "internal/adminapi/config_expr_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestOutputVisibleUntilNoExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestHealthEndpoint",
+          "file": "internal/adminapi/server_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestReadinessWithoutDatabase",
+          "file": "internal/adminapi/server_test.go",
+          "line": 17
+        }
+      ],
+      "failure_evidence": [
+        "return err",
+        "return false, err",
+        "return 0, err",
+        "return 0, fmt.Errorf(\"structural_snapshot_missing\")",
+        "return 0, errConfigExpr",
+        "return collision, err",
+        "return \"\", errProxyUndetected",
+        "return ProxyObservation{}, err",
+        "return ProxyObservation{}, errors.New(\"geo lookup failed\")",
+        "return ProxyObservation{}, errors.New(\"invalid geo response\")",
+        "func errorBody() map[string]string { return map[string]string{\"error\": \"internal_error\"} }",
+        "return providers.Account{}, err",
+        "return providers.Account{}, errors.New(\"proxy_not_healthy\")",
+        "return providers.Account{}, errors.New(\"provider_registry_unavailable\")",
+        "return providers.Account{}, errors.New(\"provider_account_capability_missing\")"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "architecture",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-ARCHITECTURE-01",
+          "text": "provider-neutral core"
+        },
+        {
+          "id": "DEEP-ARCHITECTURE-02",
+          "text": "provider-specific behavior remains in drivers"
+        },
+        {
+          "id": "DEEP-ARCHITECTURE-03",
+          "text": "modular independently testable subsystems"
+        },
+        {
+          "id": "DEEP-ARCHITECTURE-04",
+          "text": "source/runtime are authoritative over stale prose"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/app/account_state.go",
+        "internal/app/account_state_test.go",
+        "internal/app/bootstrap.go",
+        "internal/app/capacity_guard.go",
+        "internal/app/capacity_guard_test.go",
+        "internal/app/catalog_sync.go",
+        "internal/app/config.go",
+        "internal/app/consistency.go",
+        "internal/app/container.go",
+        "internal/app/deploy.go",
+        "internal/app/deployment_ready.go",
+        "internal/app/installer_activation.go",
+        "internal/app/lifecycle.go",
+        "internal/app/network_identity.go",
+        "internal/app/orphan_reconcile.go",
+        "internal/app/panel.go",
+        "internal/app/postinstall.go",
+        "internal/app/postinstall_capabilities.go",
+        "internal/app/postinstall_rearm.go",
+        "internal/app/postinstall_reconcile.go",
+        "internal/app/profile.go",
+        "internal/app/provider_refresh.go",
+        "internal/app/proxy_pool.go",
+        "internal/app/proxy_provider.go",
+        "internal/app/proxy_provider_test.go",
+        "internal/app/recovery.go",
+        "internal/app/repository.go",
+        "internal/app/scheduler.go",
+        "internal/app/ssh_identity.go",
+        "internal/app/sticky_proxy.go",
+        "internal/app/workflow.go",
+        "internal/providers/errors.go",
+        "internal/providers/provider.go",
+        "internal/providers/provider_v2_test.go",
+        "internal/providers/registry.go"
+      ],
+      "function_count": 97,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "accounts",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployments",
+        "droplets",
+        "installer_runs",
+        "lifecycle_events",
+        "network_profiles",
+        "operations",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_catalog_cache",
+        "provider_snapshots",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "resources",
+        "schedules",
+        "xui_database_deployments",
+        "xui_database_templates",
+        "xui_panel_deployments"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "AttachSnapshot",
+        "Available",
+        "CanCreateCapacity",
+        "Capabilities",
+        "Catalog",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Close",
+        "CloseIdleConnections",
+        "Collect",
+        "Configure",
+        "ConfirmDeleted",
+        "CreateSSHKey",
+        "DefaultDatabasePaths",
+        "DefaultPreInstallerSteps",
+        "DeleteSSHKey",
+        "DeploymentConfigFromSnapshot",
+        "Do",
+        "EnsureFreshNetworkIdentity",
+        "Error",
+        "Event",
+        "Execute",
+        "Get",
+        "GetProxy",
+        "GetServer",
+        "Has",
+        "Index",
+        "InstallerPlaceholderName",
+        "IsClass",
+        "IsProviderObservationError",
+        "IsRetryable",
+        "LoadConfig",
+        "LoadMasterKey",
+        "LocaleForCountry",
+        "MaintainStickyIdentity",
+        "MarkFailed",
+        "MarkReady",
+        "Marshal",
+        "Metadata",
+        "Name",
+        "Names",
+        "New",
+        "NewCellManager",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "NewRegistry",
+        "NewStore",
+        "Observe",
+        "Open",
+        "PlanHasInstallerPlaceholder",
+        "PostInstallWorkflow",
+        "Prepare",
+        "Process",
+        "ProviderProbeInterval",
+        "ProviderStateRuntimeStatus",
+        "Put",
+        "Read",
+        "ReconcileOwnedOrphans",
+        "RecordProviderObservation",
+        "Register",
+        "RequirePostInstallCapabilities",
+        "Reserve",
+        "Resolve",
+        "Rollback",
+        "Run",
+        "Runtime",
+        "ScriptStep",
+        "SnapshotForDeployment",
+        "StartDeployment",
+        "String",
+        "SyncCatalogs",
+        "Transition",
+        "Username",
+        "Wait",
+        "Workflow",
+        "activateInstaller",
+        "computeDriver",
+        "defaultProvisionPlan",
+        "deploymentInstallerRef",
+        "ensureActiveAccountProxy",
+        "ensureDeploymentSSHIdentity",
+        "fastGatewayExitIP",
+        "installerReadiness",
+        "installerTarget",
+        "normalizeName",
+        "observeStickyGeo",
+        "openDriver",
+        "providerRegistry",
+        "proxyAdapterByName",
+        "proxySessionUsername",
+        "setInstallerDeploymentState",
+        "sortStrings",
+        "stickyConfig",
+        "wipe"
+      ],
+      "test_count": 11,
+      "tests": [
+        {
+          "name": "TestClassifyAccountProviderError",
+          "file": "internal/app/account_state_test.go",
+          "line": 13
+        },
+        {
+          "name": "TestProviderStateRecoveryPolicy",
+          "file": "internal/app/account_state_test.go",
+          "line": 36
+        },
+        {
+          "name": "TestCreateCapacityAvailable",
+          "file": "internal/app/capacity_guard_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestCreateCapacityUnknownLimitAllowsCreate",
+          "file": "internal/app/capacity_guard_test.go",
+          "line": 19
+        },
+        {
+          "name": "TestGenericDoesNotRewrite",
+          "file": "internal/app/proxy_provider_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestSuffixAdapterPreservesPolicy",
+          "file": "internal/app/proxy_provider_test.go",
+          "line": 14
+        },
+        {
+          "name": "TestRegistryNormalizesAndOpens",
+          "file": "internal/providers/provider_v2_test.go",
+          "line": 34
+        },
+        {
+          "name": "TestRegistryRejectsDuplicate",
+          "file": "internal/providers/provider_v2_test.go",
+          "line": 55
+        },
+        {
+          "name": "TestRegistryNamesSorted",
+          "file": "internal/providers/provider_v2_test.go",
+          "line": 65
+        },
+        {
+          "name": "TestProviderErrorTaxonomy",
+          "file": "internal/providers/provider_v2_test.go",
+          "line": 81
+        },
+        {
+          "name": "TestCapabilityInterfacesRemainIndependent",
+          "file": "internal/providers/provider_v2_test.go",
+          "line": 101
+        }
+      ],
+      "failure_evidence": [
+        "return ProviderStateProxyError",
+        "return ProviderStateTransportError",
+        "return state == ProviderStateTransportError || state == ProviderStateProxyError",
+        "return nil, err",
+        "return out, ErrCapacityUnavailable",
+        "return out, ErrCapacitySnapshotStale",
+        "return Config{}, ErrConfig",
+        "return nil, errors.New(\"provider registry unavailable\")",
+        "return nil, ErrProviderComputeUnsupported",
+        "return AccountRuntime{}, err",
+        "return AccountRuntime{}, ErrNetworkNotReady",
+        "return workflow.Deployment{}, err",
+        "return workflow.Deployment{}, ErrProfileDisabled",
+        "return workflow.Deployment{}, ErrDatabaseTemplateNotConfigured",
+        "return workflow.Deployment{}, ErrDatabaseTemplateUnavailable",
+        "return workflow.Deployment{}, ErrCapacityUnavailable",
+        "return workflow.Deployment{}, ErrCapacitySnapshotStale",
+        "return d, err",
+        "return workflow.ErrRuntimeConfig",
+        "return err",
+        "return ref, 0, false, err",
+        "return ref, generation, false, err",
+        "return *snap.InstallerRef, generation, true, nil",
+        "return t, key, err",
+        "return provisioning.Target{}, nil, err",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallRolledBack, \"installer_rolled_back\", ir.LastError)",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, \"installer_failed\", ir.LastError)",
+        "return rbErr",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, \"installer_failed\", err.Error())",
+        "return qerr",
+        "return ErrIsolationWait",
+        "return ErrNetworkNotReady",
+        "return x, err",
+        "return ErrPostInstallHostMissing",
+        "return ErrPostInstallCapabilityMismatch",
+        "return ErrPostInstallRearmNotAllowed",
+        "return ErrPostInstallNotProvablyComplete",
+        "return DeploymentConfig{}, snap, err",
+        "return cerr",
+        "return gerr",
+        "return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)",
+        "return a, err",
+        "return a, ErrAccountDisabled",
+        "return a, ErrNetworkIdentityCollision",
+        "return ErrProviderComputeUnsupported",
+        "return stickyGeo{}, err",
+        "return stickyGeo{}, errors.New(\"invalid geo response\")",
+        "return cfg, \"\", \"\", \"\", false, nil, err",
+        "return cfg, \"\", cc, country, false, nil, err",
+        "return cfg, session, cc, country, fallback, started, err",
+        "return pgErr",
+        "return workflow.Engine{}, err",
+        "return ErrorUnknown",
+        "func IsClass(err error, class ErrorClass) bool { return Class(err) == class }",
+        "func (testDriver) Health(context.Context) error { return nil }",
+        "return fmt.Errorf(\"provider factory is nil\")",
+        "return fmt.Errorf(\"provider factory name is empty\")",
+        "return fmt.Errorf(\"provider factory %q already registered\", name)",
+        "return nil, fmt.Errorf(\"provider %q is not registered\", name)"
+      ],
+      "incident_guardrails": [
+        "INC-005"
+      ]
+    },
+    {
+      "subsystem": "config_users",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-CONFIG-USERS-01",
+          "text": "global config and port policies are configurable"
+        },
+        {
+          "id": "DEEP-CONFIG-USERS-02",
+          "text": "inbound allocation follows policy"
+        },
+        {
+          "id": "DEEP-CONFIG-USERS-03",
+          "text": "bulk user creation scales without changing semantics"
+        },
+        {
+          "id": "DEEP-CONFIG-USERS-04",
+          "text": "quota/lifetime/device limit remain independent controls"
+        },
+        {
+          "id": "DEEP-CONFIG-USERS-05",
+          "text": "slot/capacity handling reflects live panel state"
+        },
+        {
+          "id": "DEEP-CONFIG-USERS-06",
+          "text": "client deletion frees capacity"
+        }
+      ],
+      "responsibility_evidence": [
+        "HTTP handler",
+        "HTTP handler; persists/mutates DB state",
+        "HTTP handler; persists/mutates DB state; reads DB state",
+        "HTTP handler; reads DB state",
+        "HTTP handler; reads DB state; performs HTTP/API call",
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/adminapi/account_automation.go",
+        "internal/adminapi/account_identity.go",
+        "internal/adminapi/account_options.go",
+        "internal/adminapi/account_preflight.go",
+        "internal/adminapi/account_preview.go",
+        "internal/adminapi/account_validation.go",
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/accounts_write.go",
+        "internal/adminapi/auth.go",
+        "internal/adminapi/build_activity.go",
+        "internal/adminapi/capacity_cleanup.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/config_expr.go",
+        "internal/adminapi/config_expr_test.go",
+        "internal/adminapi/configs.go",
+        "internal/adminapi/configs_global.go",
+        "internal/adminapi/dashboard.go",
+        "internal/adminapi/discovery.go",
+        "internal/adminapi/install_scripts.go",
+        "internal/adminapi/installer_rearm.go",
+        "internal/adminapi/installer_selection.go",
+        "internal/adminapi/installers.go",
+        "internal/adminapi/locale.go",
+        "internal/adminapi/network_identity_auto.go",
+        "internal/adminapi/network_isolation.go",
+        "internal/adminapi/output.go",
+        "internal/adminapi/output_expiry_test.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/panel_settings.go",
+        "internal/adminapi/providers.go",
+        "internal/adminapi/provision_activity.go",
+        "internal/adminapi/provision_errors.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/proxies_write.go",
+        "internal/adminapi/proxy_details.go",
+        "internal/adminapi/proxy_detect.go",
+        "internal/adminapi/proxy_health.go",
+        "internal/adminapi/proxy_observe.go",
+        "internal/adminapi/proxy_pool.go",
+        "internal/adminapi/residential.go",
+        "internal/adminapi/resources.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/runtime_api.go",
+        "internal/adminapi/sanaei_installer.go",
+        "internal/adminapi/security.go",
+        "internal/adminapi/server.go",
+        "internal/adminapi/server_test.go",
+        "internal/adminapi/status.go",
+        "internal/adminapi/templates.go",
+        "internal/adminapi/token_validate.go",
+        "internal/panels/policy/allocator.go",
+        "internal/panels/policy/allocator_test.go",
+        "internal/panels/policy/expand.go",
+        "internal/panels/policy/expand_test.go",
+        "internal/panels/policy/normalize.go",
+        "internal/panels/policy/store.go",
+        "internal/panels/policy/validate.go",
+        "internal/panels/policy/validate_test.go",
+        "internal/panels/usercapacity/fastfill.go",
+        "internal/panels/usercapacity/legacy_fill.go",
+        "internal/panels/usercapacity/service.go"
+      ],
+      "function_count": 140,
+      "api_surface": [
+        {
+          "method": "GET",
+          "path": "/healthz",
+          "handler": "health"
+        },
+        {
+          "method": "GET",
+          "path": "/readyz",
+          "handler": "ready"
+        },
+        {
+          "method": "GET",
+          "path": "/version",
+          "handler": "version"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "handler": "login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/logout",
+          "handler": "logout"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts",
+          "handler": "createAccount"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/preview",
+          "handler": "accountPreview"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "updateAccount"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "deleteAccount"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/options",
+          "handler": "accountOptions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/identity",
+          "handler": "accountIdentity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/preflight",
+          "handler": "accountPreflight"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/console-session",
+          "handler": "createVultrBrowserTicket"
+        },
+        {
+          "method": "GET",
+          "path": "/vultr-browser/{path...}",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/websockify",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies",
+          "handler": "createProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "updateProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "deleteProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "proxyDetails"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/residential-proxies",
+          "handler": "residentialProxies"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies",
+          "handler": "createResidentialProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "updateResidentialProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "deleteResidentialProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies/{id}/test",
+          "handler": "testResidentialProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/configs",
+          "handler": "getGlobalConfigs"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity",
+          "handler": "configCapacity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/config-capacity/delete-all-clients",
+          "handler": "deleteAllCapacityClients"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity/cleanup/{id}",
+          "handler": "cleanupJobStatus"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/output",
+          "handler": "outputConfigs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/output/share",
+          "handler": "createOutputShare"
+        },
+        {
+          "method": "GET",
+          "path": "/share/output/{token}",
+          "handler": "sharedOutput"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-panels",
+          "handler": "getConfigPanels"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/configs",
+          "handler": "putGlobalConfig"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies/{id}/test",
+          "handler": "testProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}/network",
+          "handler": "assignProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/discovery",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/refresh",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/proxy-test",
+          "handler": "testAccountProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/templates",
+          "handler": "listTemplates"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/templates",
+          "handler": "uploadTemplate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/dashboard",
+          "handler": "accountDashboard"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/resources",
+          "handler": "accountResources"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/capacity",
+          "handler": "accountCapacity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime",
+          "handler": "accountRuntime"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts",
+          "handler": "accounts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies",
+          "handler": "proxies"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity",
+          "handler": "buildActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity/{id}/provision",
+          "handler": "provisionActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/provision-errors",
+          "handler": "provisionErrors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei/preview",
+          "handler": "previewSanaeiInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei",
+          "handler": "createSanaeiInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/installers",
+          "handler": "listInstallers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers",
+          "handler": "createInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/install-scripts",
+          "handler": "listInstallScripts"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/install-scripts",
+          "handler": "createInstallScript"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer",
+          "handler": "selectDeploymentInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer/rearm",
+          "handler": "rearmDeploymentInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/audit",
+          "handler": "audit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/system",
+          "handler": "system"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/providers",
+          "handler": "providersMetadata"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/panel-settings",
+          "handler": "getPanelSettings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/panel-settings",
+          "handler": "updatePanelSettings"
+        }
+      ],
+      "db_tables": [
+        "EXCLUDED",
+        "LATERAL",
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "all",
+        "already",
+        "audit_events",
+        "candidate",
+        "clients",
+        "current_output_uris",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "excluded",
+        "global_config_policies",
+        "inbound",
+        "inbound_export_metadata",
+        "inbound_structural_snapshots",
+        "install_scripts",
+        "installer_runs",
+        "installers",
+        "network_profiles",
+        "operations",
+        "output_config_snapshots",
+        "output_share_tokens",
+        "panel_inbound_policies",
+        "panel_instances",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_snapshots",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "residential_proxies",
+        "resources",
+        "schedules",
+        "server_readiness_issues",
+        "server_readiness_snapshots",
+        "user_capacity_snapshots",
+        "worker_heartbeats",
+        "worker_item_failures",
+        "xui_database_templates"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "Acquire",
+        "Add",
+        "AddClientsSession",
+        "AllocatePorts",
+        "Allow",
+        "Authenticate",
+        "Available",
+        "Build",
+        "CanAdmin",
+        "CanCreateCapacity",
+        "CanWrite",
+        "Capacity",
+        "Catalog",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Close",
+        "CloseIdleConnections",
+        "Context",
+        "Create",
+        "Current",
+        "DeleteClientSession",
+        "DeleteProxy",
+        "DeleteSession",
+        "Do",
+        "EligibleReadyPanels",
+        "Error",
+        "Expand",
+        "FastFill",
+        "Get",
+        "GetInbound",
+        "GetProxy",
+        "Has",
+        "Header",
+        "InspectTemplate",
+        "InstallerHash",
+        "Invalidate",
+        "LegacyFastFill",
+        "Load",
+        "LocaleForCountry",
+        "Login",
+        "Marshal",
+        "Metadata",
+        "MetadataAll",
+        "Name",
+        "New",
+        "NewIsolatedDirectClient",
+        "NewLoginLimiter",
+        "NewProxyGateway",
+        "NewProxyProbeGateway",
+        "Normalize",
+        "Observe",
+        "ObserveProxy",
+        "Open",
+        "ProviderStateRuntimeStatus",
+        "ProxyAdapterCapabilities",
+        "ProxySessionUsername",
+        "Put",
+        "PutProxy",
+        "Read",
+        "ReadInventory",
+        "Readiness",
+        "ReconcileRuntime",
+        "ReconcileRuntimeFromPolicy",
+        "RecordProviderObservation",
+        "RegisterInstaller",
+        "Rollback",
+        "Routes",
+        "Runtime",
+        "Set",
+        "Snapshot",
+        "Store",
+        "String",
+        "UUIDv4",
+        "UpdateInboundRaw",
+        "VLESSRealityURI",
+        "Validate",
+        "Wait",
+        "WithMutation",
+        "accounts",
+        "cachedPanelOutput",
+        "clearPanelClients",
+        "clearPanelClientsFast",
+        "collectRuntimeOutput",
+        "detectProxy",
+        "detectProxyTypes",
+        "errorBody",
+        "fastExitIP",
+        "hasDup",
+        "legacyFastFillFromPolicy",
+        "legacyObject",
+        "localeForCountry",
+        "maxInt",
+        "min",
+        "mustJSON",
+        "networkIdentityCollision",
+        "newShareToken",
+        "next",
+        "normalizeProxyPool",
+        "observeProxy",
+        "outputMap",
+        "outputSnapshotResponse",
+        "outputVisibleUntil",
+        "parseLifetimeMinutes",
+        "parseProductExpr",
+        "parseQuotaMB",
+        "persistOutputSnapshot",
+        "principal",
+        "proxies",
+        "reconcileRuntimeLocked",
+        "refreshNetworkIdentityIfDue",
+        "refreshPanelOutput",
+        "refreshPanelOutputAsync",
+        "require",
+        "resolveProxyType",
+        "runCleanupJob",
+        "securityHeaders",
+        "storePanelOutput",
+        "syncAccountAutomation",
+        "syncAccountAutomationTx",
+        "syncAccountProxyPool",
+        "testProxy",
+        "validProxyWrite",
+        "validateAccountSettings",
+        "validateReplacementToken",
+        "writeJSON",
+        "writeProviderPreviewError",
+        "zeroBytes"
+      ],
+      "test_count": 10,
+      "tests": [
+        {
+          "name": "TestConfigExpressions",
+          "file": "internal/adminapi/config_expr_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestOutputVisibleUntilNoExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestHealthEndpoint",
+          "file": "internal/adminapi/server_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestReadinessWithoutDatabase",
+          "file": "internal/adminapi/server_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestAllocatePreferredThenDynamic",
+          "file": "internal/panels/policy/allocator_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestAllocateDeterministic",
+          "file": "internal/panels/policy/allocator_test.go",
+          "line": 20
+        },
+        {
+          "name": "TestAllocateFailsClosed",
+          "file": "internal/panels/policy/allocator_test.go",
+          "line": 28
+        },
+        {
+          "name": "TestExpandStableKeys",
+          "file": "internal/panels/policy/expand_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestValidateRejectsDuplicatePortsAcrossLists",
+          "file": "internal/panels/policy/validate_test.go",
+          "line": 5
+        }
+      ],
+      "failure_evidence": [
+        "return err",
+        "return false, err",
+        "return 0, err",
+        "return 0, fmt.Errorf(\"structural_snapshot_missing\")",
+        "return 0, errConfigExpr",
+        "return collision, err",
+        "return \"\", errProxyUndetected",
+        "return ProxyObservation{}, err",
+        "return ProxyObservation{}, errors.New(\"geo lookup failed\")",
+        "return ProxyObservation{}, errors.New(\"invalid geo response\")",
+        "func errorBody() map[string]string { return map[string]string{\"error\": \"internal_error\"} }",
+        "return providers.Account{}, err",
+        "return providers.Account{}, errors.New(\"proxy_not_healthy\")",
+        "return providers.Account{}, errors.New(\"provider_registry_unavailable\")",
+        "return providers.Account{}, errors.New(\"provider_account_capability_missing\")",
+        "return nil, fmt.Errorf(\"invalid port policy\")",
+        "return nil, fmt.Errorf(\"%w: need=%d got=%d\", ErrInsufficientPorts, p.DesiredCount, len(out))",
+        "return nil, err",
+        "return InboundPolicy{}, ErrInvalidPolicy",
+        "return InboundPolicy{}, err",
+        "return ErrInvalidPolicy",
+        "return mutated, fmt.Errorf(\"inbound %d fast fill chunk %d-%d: %w\", in.RemoteID, start, end, err)",
+        "return mutated, fmt.Errorf(\"legacy get inbound %d: %w\", rec.RemoteID, err)",
+        "return mutated, err",
+        "return mutated, fmt.Errorf(\"legacy update inbound %d: %w\", rec.RemoteID, err)",
+        "return nil, fmt.Errorf(\"legacy inbound object\")",
+        "return false, fmt.Errorf(\"legacy capacity ports\")",
+        "return errors.New(\"user capacity config\")",
+        "return nil, errors.New(\"user capacity config\")",
+        "return nil, errors.New(\"user capacity ports\")",
+        "return false, errors.New(\"user capacity config\")",
+        "return false, errors.New(\"user capacity ports\")",
+        "return errors.New(\"user capacity ports\")",
+        "return errors.New(\"user capacity runtime\")",
+        "return runtime.WithMutation(ctx, func(runCtx context.Context) error {",
+        "return fmt.Errorf(\"inbound %d delete client %s: %w\", in.ID, clientID, e)",
+        "return fmt.Errorf(\"inbound %d add clients: %w\", in.ID, e)",
+        "return fmt.Errorf(\"inbound %d update clients: %w\", in.ID, e)",
+        "return true, err"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "continuity",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-CONTINUITY-01",
+          "text": "new chat starts from canonical repo not main assumptions"
+        },
+        {
+          "id": "DEEP-CONTINUITY-02",
+          "text": "knowledge artifacts are commit-pinned"
+        },
+        {
+          "id": "DEEP-CONTINUITY-03",
+          "text": "exact line questions use source snapshot not guesses"
+        },
+        {
+          "id": "DEEP-CONTINUITY-04",
+          "text": "intent/history/impact are read before behavioral changes"
+        },
+        {
+          "id": "DEEP-CONTINUITY-05",
+          "text": "audit evidence is preserved"
+        },
+        {
+          "id": "DEEP-CONTINUITY-06",
+          "text": "100/100 means tested recoverability/traceability not unaided token memorization"
+        }
+      ],
+      "responsibility_evidence": [],
+      "owned_files": [],
+      "function_count": 0,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [],
+      "test_count": 0,
+      "tests": [],
+      "failure_evidence": [],
+      "incident_guardrails": [
+        "INC-010"
+      ]
+    },
+    {
+      "subsystem": "database",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-DATABASE-01",
+          "text": "migrations are append-only ordered history"
+        },
+        {
+          "id": "DEEP-DATABASE-02",
+          "text": "migration checksum integrity is enforced"
+        },
+        {
+          "id": "DEEP-DATABASE-03",
+          "text": "live schema must be checked before schema-sensitive work"
+        },
+        {
+          "id": "DEEP-DATABASE-04",
+          "text": "continuity snapshots store metadata not user rows/secrets"
+        },
+        {
+          "id": "DEEP-DATABASE-05",
+          "text": "schema ownership is traceable to code and migrations"
+        }
+      ],
+      "responsibility_evidence": [],
+      "owned_files": [],
+      "function_count": 0,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [],
+      "test_count": 0,
+      "tests": [],
+      "failure_evidence": [],
+      "incident_guardrails": [
+        "INC-008"
+      ]
+    },
+    {
+      "subsystem": "deployment_runtime",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-01",
+          "text": "builds are stamped with commit/time"
+        },
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-02",
+          "text": "artifact hashes bind binaries to build manifest"
+        },
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-03",
+          "text": "health and readiness are checked after deploy"
+        },
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-04",
+          "text": "production revision claims require verifier success"
+        },
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-05",
+          "text": "Git HEAD may differ from production until deploy"
+        },
+        {
+          "id": "DEEP-DEPLOYMENT-RUNTIME-06",
+          "text": "secrets never enter continuity docs"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/app/account_state.go",
+        "internal/app/account_state_test.go",
+        "internal/app/bootstrap.go",
+        "internal/app/capacity_guard.go",
+        "internal/app/capacity_guard_test.go",
+        "internal/app/catalog_sync.go",
+        "internal/app/config.go",
+        "internal/app/consistency.go",
+        "internal/app/container.go",
+        "internal/app/deploy.go",
+        "internal/app/deployment_ready.go",
+        "internal/app/installer_activation.go",
+        "internal/app/lifecycle.go",
+        "internal/app/network_identity.go",
+        "internal/app/orphan_reconcile.go",
+        "internal/app/panel.go",
+        "internal/app/postinstall.go",
+        "internal/app/postinstall_capabilities.go",
+        "internal/app/postinstall_rearm.go",
+        "internal/app/postinstall_reconcile.go",
+        "internal/app/profile.go",
+        "internal/app/provider_refresh.go",
+        "internal/app/proxy_pool.go",
+        "internal/app/proxy_provider.go",
+        "internal/app/proxy_provider_test.go",
+        "internal/app/recovery.go",
+        "internal/app/repository.go",
+        "internal/app/scheduler.go",
+        "internal/app/ssh_identity.go",
+        "internal/app/sticky_proxy.go",
+        "internal/app/workflow.go",
+        "internal/worker/failures.go",
+        "internal/worker/heartbeat.go",
+        "internal/worker/lifecycle.go",
+        "internal/worker/recovery.go",
+        "internal/worker/worker.go"
+      ],
+      "function_count": 82,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "accounts",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployments",
+        "droplets",
+        "installer_runs",
+        "lifecycle_events",
+        "network_profiles",
+        "operations",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_catalog_cache",
+        "provider_snapshots",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "resources",
+        "schedules",
+        "worker_heartbeats",
+        "worker_item_failures",
+        "xui_database_deployments",
+        "xui_database_templates",
+        "xui_panel_deployments"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "AttachSnapshot",
+        "Available",
+        "BypassDeploymentBackoff",
+        "CanCreateCapacity",
+        "Capabilities",
+        "Catalog",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Clear",
+        "ClearResolved",
+        "Close",
+        "CloseIdleConnections",
+        "Collect",
+        "Configure",
+        "ConfirmDeleted",
+        "CreateSSHKey",
+        "DefaultDatabasePaths",
+        "DefaultPreInstallerSteps",
+        "DeleteSSHKey",
+        "DeploymentConfigFromSnapshot",
+        "Deployments",
+        "Do",
+        "Due",
+        "EnsureFreshNetworkIdentity",
+        "Error",
+        "Event",
+        "Execute",
+        "Fail",
+        "Get",
+        "GetProxy",
+        "GetServer",
+        "Index",
+        "InstallerPlaceholderName",
+        "IsClass",
+        "IsProviderObservationError",
+        "LoadConfig",
+        "LoadMasterKey",
+        "LocaleForCountry",
+        "MaintainStickyIdentity",
+        "MarkFailed",
+        "MarkReady",
+        "Marshal",
+        "Name",
+        "New",
+        "NewCellManager",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "NewRegistry",
+        "NewStore",
+        "Observe",
+        "Once",
+        "Open",
+        "Operations",
+        "PlanHasInstallerPlaceholder",
+        "PostInstallWorkflow",
+        "Prepare",
+        "Process",
+        "ProcessLifecycle",
+        "ProviderProbeInterval",
+        "ProviderStateRuntimeStatus",
+        "Put",
+        "Read",
+        "ReconcileOwnedOrphans",
+        "RecordProviderObservation",
+        "RecoverDeployment",
+        "RecoverOperation",
+        "Register",
+        "RequirePostInstallCapabilities",
+        "Reserve",
+        "Resolve",
+        "Rollback",
+        "Run",
+        "Runtime",
+        "ScriptStep",
+        "SnapshotForDeployment",
+        "StartDeployment",
+        "String",
+        "SyncCatalogs",
+        "Transition",
+        "Username",
+        "Wait",
+        "Workflow",
+        "activateInstaller",
+        "computeDriver",
+        "defaultProvisionPlan",
+        "deploymentInstallerRef",
+        "ensureActiveAccountProxy",
+        "ensureDeploymentSSHIdentity",
+        "fastGatewayExitIP",
+        "installerReadiness",
+        "installerTarget",
+        "minFailure",
+        "observeStickyGeo",
+        "openDriver",
+        "providerRegistry",
+        "proxyAdapterByName",
+        "proxySessionUsername",
+        "setInstallerDeploymentState",
+        "stickyConfig",
+        "wipe"
+      ],
+      "test_count": 6,
+      "tests": [
+        {
+          "name": "TestClassifyAccountProviderError",
+          "file": "internal/app/account_state_test.go",
+          "line": 13
+        },
+        {
+          "name": "TestProviderStateRecoveryPolicy",
+          "file": "internal/app/account_state_test.go",
+          "line": 36
+        },
+        {
+          "name": "TestCreateCapacityAvailable",
+          "file": "internal/app/capacity_guard_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestCreateCapacityUnknownLimitAllowsCreate",
+          "file": "internal/app/capacity_guard_test.go",
+          "line": 19
+        },
+        {
+          "name": "TestGenericDoesNotRewrite",
+          "file": "internal/app/proxy_provider_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestSuffixAdapterPreservesPolicy",
+          "file": "internal/app/proxy_provider_test.go",
+          "line": 14
+        }
+      ],
+      "failure_evidence": [
+        "return ProviderStateProxyError",
+        "return ProviderStateTransportError",
+        "return state == ProviderStateTransportError || state == ProviderStateProxyError",
+        "return nil, err",
+        "return out, ErrCapacityUnavailable",
+        "return out, ErrCapacitySnapshotStale",
+        "return Config{}, ErrConfig",
+        "return nil, errors.New(\"provider registry unavailable\")",
+        "return nil, ErrProviderComputeUnsupported",
+        "return AccountRuntime{}, err",
+        "return AccountRuntime{}, ErrNetworkNotReady",
+        "return workflow.Deployment{}, err",
+        "return workflow.Deployment{}, ErrProfileDisabled",
+        "return workflow.Deployment{}, ErrDatabaseTemplateNotConfigured",
+        "return workflow.Deployment{}, ErrDatabaseTemplateUnavailable",
+        "return workflow.Deployment{}, ErrCapacityUnavailable",
+        "return workflow.Deployment{}, ErrCapacitySnapshotStale",
+        "return d, err",
+        "return workflow.ErrRuntimeConfig",
+        "return err",
+        "return ref, 0, false, err",
+        "return ref, generation, false, err",
+        "return *snap.InstallerRef, generation, true, nil",
+        "return t, key, err",
+        "return provisioning.Target{}, nil, err",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallRolledBack, \"installer_rolled_back\", ir.LastError)",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, \"installer_failed\", ir.LastError)",
+        "return rbErr",
+        "return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, \"installer_failed\", err.Error())",
+        "return qerr",
+        "return ErrIsolationWait",
+        "return ErrNetworkNotReady",
+        "return x, err",
+        "return ErrPostInstallHostMissing",
+        "return ErrPostInstallCapabilityMismatch",
+        "return ErrPostInstallRearmNotAllowed",
+        "return ErrPostInstallNotProvablyComplete",
+        "return DeploymentConfig{}, snap, err",
+        "return cerr",
+        "return gerr",
+        "return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)",
+        "return a, err",
+        "return a, ErrAccountDisabled",
+        "return a, ErrNetworkIdentityCollision",
+        "return ErrProviderComputeUnsupported",
+        "return stickyGeo{}, err",
+        "return stickyGeo{}, errors.New(\"invalid geo response\")",
+        "return cfg, \"\", \"\", \"\", false, nil, err",
+        "return cfg, \"\", cc, country, false, nil, err",
+        "return cfg, session, cc, country, fallback, started, err",
+        "return pgErr",
+        "return workflow.Engine{}, err",
+        "return out, rows.Err()",
+        "return ctx.Err()"
+      ],
+      "incident_guardrails": [
+        "INC-009"
+      ]
+    },
+    {
+      "subsystem": "digitalocean",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-DIGITALOCEAN-01",
+          "text": "preserve mature DigitalOcean behavior"
+        },
+        {
+          "id": "DEEP-DIGITALOCEAN-02",
+          "text": "provider catalog drives region/size/image availability"
+        },
+        {
+          "id": "DEEP-DIGITALOCEAN-03",
+          "text": "classified provider errors"
+        },
+        {
+          "id": "DEEP-DIGITALOCEAN-04",
+          "text": "capacity/history/snapshots remain observable"
+        },
+        {
+          "id": "DEEP-DIGITALOCEAN-05",
+          "text": "catalog synchronization does not regress active lifecycle"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "performs HTTP/API call"
+      ],
+      "owned_files": [
+        "internal/providers/digitalocean/account.go",
+        "internal/providers/digitalocean/catalog.go",
+        "internal/providers/digitalocean/characterization_test.go",
+        "internal/providers/digitalocean/client.go",
+        "internal/providers/digitalocean/client_test.go",
+        "internal/providers/digitalocean/discovery.go",
+        "internal/providers/digitalocean/driver_v2.go",
+        "internal/providers/digitalocean/driver_v2_test.go",
+        "internal/providers/digitalocean/errors.go",
+        "internal/providers/digitalocean/errors_parse_test.go",
+        "internal/providers/digitalocean/errors_test.go",
+        "internal/providers/digitalocean/mutations.go",
+        "internal/providers/digitalocean/pagination.go",
+        "internal/providers/digitalocean/pagination_regression_test.go",
+        "internal/providers/digitalocean/resources.go"
+      ],
+      "function_count": 72,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [
+        "Authorize",
+        "Capacity",
+        "Catalog",
+        "Class",
+        "ClassifyError",
+        "Close",
+        "CreateDroplet",
+        "CreateSSHKey",
+        "DeleteDroplet",
+        "DeleteSSHKey",
+        "Discover",
+        "Do",
+        "FindServerByIdentity",
+        "Get",
+        "GetAccount",
+        "GetAction",
+        "GetDroplet",
+        "GetLimits",
+        "IsCapacityError",
+        "IsRetryable",
+        "ListDropletModels",
+        "ListResources",
+        "ListServers",
+        "Marshal",
+        "Metadata",
+        "New",
+        "NewClient",
+        "NewContext",
+        "NewDriver",
+        "Run",
+        "Set",
+        "String",
+        "Validate",
+        "contains",
+        "extractNext",
+        "fixtureClient",
+        "get",
+        "listAll",
+        "normalizeCatalog",
+        "normalizeError",
+        "normalizeImage",
+        "normalizeServer",
+        "parseAPIError",
+        "parseRetryAfter",
+        "request",
+        "zero"
+      ],
+      "test_count": 18,
+      "tests": [
+        {
+          "name": "TestGetLimitsMirrorsAccountLimits",
+          "file": "internal/providers/digitalocean/characterization_test.go",
+          "line": 31
+        },
+        {
+          "name": "TestCatalogFetchesAccountRegionsSizesImages",
+          "file": "internal/providers/digitalocean/characterization_test.go",
+          "line": 47
+        },
+        {
+          "name": "TestDiscoverIsFailFast",
+          "file": "internal/providers/digitalocean/characterization_test.go",
+          "line": 85
+        },
+        {
+          "name": "TestDropletMutationAndReadCharacterization",
+          "file": "internal/providers/digitalocean/characterization_test.go",
+          "line": 110
+        },
+        {
+          "name": "TestSSHKeyAndActionCharacterization",
+          "file": "internal/providers/digitalocean/characterization_test.go",
+          "line": 142
+        },
+        {
+          "name": "TestClientLoadsTokenAndDecodesAccount",
+          "file": "internal/providers/digitalocean/client_test.go",
+          "line": 22
+        },
+        {
+          "name": "TestNormalizeCatalogToCanonicalModels",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 12
+        },
+        {
+          "name": "TestNormalizeServerUsesStringIDAndReadiness",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 25
+        },
+        {
+          "name": "TestReadyRequiresPublicIPv4",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 32
+        },
+        {
+          "name": "TestNormalizeProviderErrors",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 38
+        },
+        {
+          "name": "TestDriverFindServerByIdentity",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 60
+        },
+        {
+          "name": "TestFactoryMetadataPolicy",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 77
+        },
+        {
+          "name": "TestDigitalOceanCapacityLimitIsKnown",
+          "file": "internal/providers/digitalocean/driver_v2_test.go",
+          "line": 88
+        },
+        {
+          "name": "TestParseAPIError",
+          "file": "internal/providers/digitalocean/errors_parse_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestParseAPIErrorUsesCode",
+          "file": "internal/providers/digitalocean/errors_parse_test.go",
+          "line": 12
+        },
+        {
+          "name": "TestParseAPIErrorRejectsNonJSON",
+          "file": "internal/providers/digitalocean/errors_parse_test.go",
+          "line": 19
+        },
+        {
+          "name": "TestCapacityClassification",
+          "file": "internal/providers/digitalocean/errors_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestExtractNextStripsAPIVersionPrefix",
+          "file": "internal/providers/digitalocean/pagination_regression_test.go",
+          "line": 8
+        }
+      ],
+      "failure_evidence": [
+        "return nil, err",
+        "return DiscoveryResult{}, err",
+        "return 500, `{\"id\":\"server_error\",\"message\":\"boom\"}`",
+        "return nil, ErrMissingContext",
+        "func (c *Client) Validate(accountID string) error { return c.Account.Authorize(accountID) }",
+        "return err",
+        "return ErrProviderRequest",
+        "return fmt.Errorf(\"%w: transport: %v\", ErrProviderRequest, err)",
+        "return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get(\"Retry-After\")), Path: u, Code: code, Message: message}",
+        "return fmt.Errorf(\"%w: decode\", ErrProviderRequest)",
+        "func (f rtFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }",
+        "return nil, fmt.Errorf(\"digitalocean driver: invalid open request\")",
+        "return nil, fmt.Errorf(\"digitalocean driver: nil client\")",
+        "return normalizeError(\"health\", err)",
+        "return providers.Account{}, normalizeError(\"account\", err)",
+        "return providers.Capacity{}, normalizeError(\"capacity\", err)",
+        "return providers.Catalog{}, normalizeError(\"catalog\", err)",
+        "return providers.CreateServerResult{Outcome: out}, pe",
+        "return providers.CreateServerResult{ServerID: strconv.Itoa(raw.ID), Outcome: providers.OutcomeAccepted}, nil",
+        "return providers.Server{}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: \"get_server\", Message: \"invalid digitalocean droplet id\", Cause: err}",
+        "return providers.Server{}, normalizeError(\"get_server\", err)",
+        "return nil, normalizeError(\"list_servers\", err)",
+        "return &providers.Error{Class: providers.ErrorInvalidRequest, Operation: \"delete_server\", Message: \"invalid digitalocean droplet id\", Cause: err}",
+        "return normalizeError(\"delete_server\", d.client.DeleteDroplet(ctx, n))",
+        "return providers.SSHKey{}, normalizeError(\"create_ssh_key\", err)",
+        "return &providers.Error{Class: providers.ErrorInvalidRequest, Operation: \"delete_ssh_key\", Message: \"invalid digitalocean ssh key id\", Cause: err}",
+        "return normalizeError(\"delete_ssh_key\", d.client.DeleteSSHKey(ctx, n))",
+        "return providers.Inventory{}, err",
+        "return providers.Observation{}, normalizeError(\"observe_account\", err)",
+        "return providers.Observation{}, normalizeError(\"observe_catalog\", err)",
+        "return providers.Observation{}, normalizeError(\"observe_inventory\", err)",
+        "return &providers.Error{Class: class, Operation: op, StatusCode: h.Status, RetryAfter: h.RetryAfter, Message: h.Message, Cause: err}",
+        "return &providers.Error{Class: providers.ErrorTransport, Operation: op, Cause: err}",
+        "return &providers.Error{Class: providers.ErrorUnknown, Operation: op, Cause: err}",
+        "return e.SSHKey, err",
+        "return fmt.Errorf(\"%w: transport\", ErrProviderRequest)",
+        "return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get(\"Retry-After\")), Path: req.URL.String(), Code: body.ID, Message: body.Message}",
+        "return e.Droplet, err",
+        "return e.Action, err",
+        "return fmt.Errorf(\"%w: list decode\", ErrProviderRequest)",
+        "func (c *Client) ListDroplets(ctx context.Context) ([]Resource, error) { return c.ListResources(ctx) }",
+        "return false, err",
+        "return Droplet{}, err",
+        "return out, err"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "frontend",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-FRONTEND-01",
+          "text": "seven operational module pages remain navigable"
+        },
+        {
+          "id": "DEEP-FRONTEND-02",
+          "text": "UI actions map to explicit APIs"
+        },
+        {
+          "id": "DEEP-FRONTEND-03",
+          "text": "mobile/operational usability is preserved"
+        },
+        {
+          "id": "DEEP-FRONTEND-04",
+          "text": "refresh/save should preserve working context where possible"
+        },
+        {
+          "id": "DEEP-FRONTEND-05",
+          "text": "interactive challenge flows provide visible browser feedback"
+        },
+        {
+          "id": "DEEP-FRONTEND-06",
+          "text": "frontend must not invent backend state"
+        }
+      ],
+      "responsibility_evidence": [],
+      "owned_files": [],
+      "function_count": 0,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [],
+      "test_count": 0,
+      "tests": [],
+      "failure_evidence": [],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "lifecycle",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-LIFECYCLE-01",
+          "text": "desired server count is reconciled state"
+        },
+        {
+          "id": "DEEP-LIFECYCLE-02",
+          "text": "build spacing and concurrency are controlled"
+        },
+        {
+          "id": "DEEP-LIFECYCLE-03",
+          "text": "one coherent lifecycle execution owner"
+        },
+        {
+          "id": "DEEP-LIFECYCLE-04",
+          "text": "creation/readiness/install/panel stages are observable"
+        },
+        {
+          "id": "DEEP-LIFECYCLE-05",
+          "text": "expiry/deletion/replacement are reconciled"
+        },
+        {
+          "id": "DEEP-LIFECYCLE-06",
+          "text": "recovery and retries remain idempotent where possible"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/droplets/compute_stub_test.go",
+        "internal/droplets/executor.go",
+        "internal/droplets/executor_test.go",
+        "internal/droplets/factory.go",
+        "internal/droplets/lifecycle.go",
+        "internal/droplets/lifecycle_engine.go",
+        "internal/droplets/postgres_e2e_test.go",
+        "internal/droplets/reconcile.go",
+        "internal/droplets/reconcile_test.go",
+        "internal/droplets/safety_characterization_test.go",
+        "internal/scheduler/engine.go",
+        "internal/scheduler/lease.go",
+        "internal/scheduler/model.go",
+        "internal/scheduler/planner.go",
+        "internal/scheduler/provider_gate_test.go",
+        "internal/scheduler/store.go",
+        "internal/worker/failures.go",
+        "internal/worker/heartbeat.go",
+        "internal/worker/lifecycle.go",
+        "internal/worker/recovery.go",
+        "internal/worker/worker.go"
+      ],
+      "function_count": 47,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "SKIP",
+        "accounts",
+        "deployment_installer_selections",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "installer_runs",
+        "installers",
+        "lifecycle_events",
+        "operations",
+        "schedules",
+        "the",
+        "worker_heartbeats",
+        "worker_item_failures"
+      ],
+      "dependency_call_symbols": [
+        "Add",
+        "AdoptUnknownCreate",
+        "AllowMutation",
+        "Available",
+        "BuildCreateOperation",
+        "BuildDeleteOperation",
+        "BypassDeploymentBackoff",
+        "ClaimDue",
+        "Class",
+        "Clear",
+        "ClearResolved",
+        "Close",
+        "Complete",
+        "Create",
+        "CreateServer",
+        "Delete",
+        "DeleteServer",
+        "Deployments",
+        "Due",
+        "Error",
+        "Event",
+        "Fail",
+        "FindServerByIdentity",
+        "IsClass",
+        "ListServers",
+        "Marshal",
+        "New",
+        "Once",
+        "Open",
+        "Operations",
+        "PrepareScheduledAccount",
+        "ProcessLifecycle",
+        "Read",
+        "RecoverDeployment",
+        "RecoverOperation",
+        "Reserve",
+        "Rollback",
+        "Run",
+        "StartScheduledDeployment",
+        "Transition",
+        "Update",
+        "accounts",
+        "minFailure",
+        "providerAllowsCreate",
+        "taggedServer"
+      ],
+      "test_count": 8,
+      "tests": [
+        {
+          "name": "TestCreateIsIdempotent",
+          "file": "internal/droplets/executor_test.go",
+          "line": 30
+        },
+        {
+          "name": "TestRetiringWithoutExpiryIsDueE2E",
+          "file": "internal/droplets/postgres_e2e_test.go",
+          "line": 12
+        },
+        {
+          "name": "TestAdoptUnknownCreateUsesUniqueTag",
+          "file": "internal/droplets/reconcile_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestAdoptUnknownCreateAmbiguousTagStaysUnknown",
+          "file": "internal/droplets/reconcile_test.go",
+          "line": 26
+        },
+        {
+          "name": "TestUnknownExistingCreateNeverIssuesSecondMutation",
+          "file": "internal/droplets/safety_characterization_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestDeleteSuccessRequiresLaterConfirmation",
+          "file": "internal/droplets/safety_characterization_test.go",
+          "line": 24
+        },
+        {
+          "name": "TestDeleteErrorIsAmbiguousUnknown",
+          "file": "internal/droplets/safety_characterization_test.go",
+          "line": 44
+        },
+        {
+          "name": "TestProviderGateNegativeStates",
+          "file": "internal/scheduler/provider_gate_test.go",
+          "line": 5
+        }
+      ],
+      "failure_evidence": [
+        "return providers.CreateServerResult{}, p.createErr",
+        "return providers.CreateServerResult{ServerID: \"42\", Outcome: providers.OutcomeAccepted}, nil",
+        "func (p *computeStub) ListServers(context.Context) ([]providers.Server, error) { return p.servers, nil }",
+        "func (p *computeStub) DeleteServer(context.Context, string) error              { p.deletes++; return p.deleteErr }",
+        "return op, ErrMutationBlocked",
+        "return op, fmt.Errorf(\"%w: %v\", ErrMutationBlocked, err)",
+        "return op, err",
+        "return reserved, err",
+        "return reserved, errors.New(\"provider rejected create without server id\")",
+        "return reserved, ErrOutcomeStillUnknown",
+        "func (g gateStub) AllowMutation() error { return g.err }",
+        "func (s *opStore) Get(context.Context, string, string) (jobs.Operation, error) { return s.saved, nil }",
+        "func (s *opStore) Update(_ context.Context, o jobs.Operation) error            { s.saved = o; return nil }",
+        "return nil, err",
+        "return out, rows.Err()",
+        "return false, err",
+        "return n == 1, err",
+        "return err",
+        "return ErrLifecycleProviderID",
+        "return op, ErrOutcomeStillUnknown",
+        "return enabled && runtimeStatus == \"READY\" && providerState == \"ACTIVE\" && providerError == \"\"",
+        "return ctx.Err()"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "output",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-OUTPUT-01",
+          "text": "Output uses Sanaei/API state rather than SSH scraping"
+        },
+        {
+          "id": "DEEP-OUTPUT-02",
+          "text": "Output is fast/live"
+        },
+        {
+          "id": "DEEP-OUTPUT-03",
+          "text": "snapshots support performance without stale validity"
+        },
+        {
+          "id": "DEEP-OUTPUT-04",
+          "text": "direct and share views use same canonical visibility rules"
+        },
+        {
+          "id": "DEEP-OUTPUT-05",
+          "text": "first_seen/last_seen are preserved"
+        },
+        {
+          "id": "DEEP-OUTPUT-06",
+          "text": "visible_until/exact expiry controls disappearance"
+        },
+        {
+          "id": "DEEP-OUTPUT-07",
+          "text": "configs may disappear shortly before scheduled invalidation"
+        },
+        {
+          "id": "DEEP-OUTPUT-08",
+          "text": "refresh must avoid OOM regressions"
+        },
+        {
+          "id": "DEEP-OUTPUT-09",
+          "text": "no-cache user expectation is preserved"
+        }
+      ],
+      "responsibility_evidence": [
+        "HTTP handler",
+        "HTTP handler; persists/mutates DB state",
+        "HTTP handler; persists/mutates DB state; reads DB state",
+        "HTTP handler; reads DB state",
+        "HTTP handler; reads DB state; performs HTTP/API call",
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/adminapi/account_automation.go",
+        "internal/adminapi/account_identity.go",
+        "internal/adminapi/account_options.go",
+        "internal/adminapi/account_preflight.go",
+        "internal/adminapi/account_preview.go",
+        "internal/adminapi/account_validation.go",
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/accounts_write.go",
+        "internal/adminapi/auth.go",
+        "internal/adminapi/build_activity.go",
+        "internal/adminapi/capacity_cleanup.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/config_expr.go",
+        "internal/adminapi/config_expr_test.go",
+        "internal/adminapi/configs.go",
+        "internal/adminapi/configs_global.go",
+        "internal/adminapi/dashboard.go",
+        "internal/adminapi/discovery.go",
+        "internal/adminapi/install_scripts.go",
+        "internal/adminapi/installer_rearm.go",
+        "internal/adminapi/installer_selection.go",
+        "internal/adminapi/installers.go",
+        "internal/adminapi/locale.go",
+        "internal/adminapi/network_identity_auto.go",
+        "internal/adminapi/network_isolation.go",
+        "internal/adminapi/output.go",
+        "internal/adminapi/output_expiry_test.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/panel_settings.go",
+        "internal/adminapi/providers.go",
+        "internal/adminapi/provision_activity.go",
+        "internal/adminapi/provision_errors.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/proxies_write.go",
+        "internal/adminapi/proxy_details.go",
+        "internal/adminapi/proxy_detect.go",
+        "internal/adminapi/proxy_health.go",
+        "internal/adminapi/proxy_observe.go",
+        "internal/adminapi/proxy_pool.go",
+        "internal/adminapi/residential.go",
+        "internal/adminapi/resources.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/runtime_api.go",
+        "internal/adminapi/sanaei_installer.go",
+        "internal/adminapi/security.go",
+        "internal/adminapi/server.go",
+        "internal/adminapi/server_test.go",
+        "internal/adminapi/status.go",
+        "internal/adminapi/templates.go",
+        "internal/adminapi/token_validate.go",
+        "internal/panels/sanaei/api.go",
+        "internal/panels/sanaei/api_error_test.go",
+        "internal/panels/sanaei/auth.go",
+        "internal/panels/sanaei/auth_test.go",
+        "internal/panels/sanaei/client_mutation.go",
+        "internal/panels/sanaei/clients.go",
+        "internal/panels/sanaei/clients_test.go",
+        "internal/panels/sanaei/database.go",
+        "internal/panels/sanaei/direct_session.go",
+        "internal/panels/sanaei/driver.go",
+        "internal/panels/sanaei/driver_test.go",
+        "internal/panels/sanaei/inbound_get.go",
+        "internal/panels/sanaei/inbounds.go",
+        "internal/panels/sanaei/installer.go",
+        "internal/panels/sanaei/installer_adapter.go",
+        "internal/panels/sanaei/installer_adapter_test.go",
+        "internal/panels/sanaei/inventory.go",
+        "internal/panels/sanaei/inventory_test.go",
+        "internal/panels/sanaei/manager.go",
+        "internal/panels/sanaei/mutation.go",
+        "internal/panels/sanaei/mutation_test.go",
+        "internal/panels/sanaei/panel_configurer.go",
+        "internal/panels/sanaei/panel_configurer_test.go",
+        "internal/panels/sanaei/panel_page.go",
+        "internal/panels/sanaei/panel_session.go",
+        "internal/panels/sanaei/panel_session_index_test.go",
+        "internal/panels/sanaei/panel_session_test.go",
+        "internal/panels/sanaei/raw_list.go",
+        "internal/panels/sanaei/reality_scan.go",
+        "internal/panels/sanaei/resilient.go",
+        "internal/panels/sanaei/resilient_test.go",
+        "internal/panels/sanaei/runtime.go",
+        "internal/panels/sanaei/runtime_manager.go",
+        "internal/panels/sanaei/runtime_manager_test.go",
+        "internal/panels/sanaei/runtime_test.go",
+        "internal/panels/sanaei/session_executor.go",
+        "internal/panels/sanaei/session_executor_test.go",
+        "internal/panels/sanaei/ssh_session_executor.go",
+        "internal/panels/sanaei/ssh_session_executor_v2.go",
+        "internal/panels/sanaei/ssh_session_executor_v2_post.go",
+        "internal/panels/sanaei/store.go",
+        "internal/panels/sanaei/template.go",
+        "internal/panels/sanaei/template_test.go",
+        "internal/panels/sanaei/traffic.go",
+        "internal/panels/sanaei/traffic_adapter.go"
+      ],
+      "function_count": 249,
+      "api_surface": [
+        {
+          "method": "GET",
+          "path": "/healthz",
+          "handler": "health"
+        },
+        {
+          "method": "GET",
+          "path": "/readyz",
+          "handler": "ready"
+        },
+        {
+          "method": "GET",
+          "path": "/version",
+          "handler": "version"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "handler": "login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/logout",
+          "handler": "logout"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts",
+          "handler": "createAccount"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/preview",
+          "handler": "accountPreview"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "updateAccount"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "deleteAccount"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/options",
+          "handler": "accountOptions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/identity",
+          "handler": "accountIdentity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/preflight",
+          "handler": "accountPreflight"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/console-session",
+          "handler": "createVultrBrowserTicket"
+        },
+        {
+          "method": "GET",
+          "path": "/vultr-browser/{path...}",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/websockify",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies",
+          "handler": "createProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "updateProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "deleteProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "proxyDetails"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/residential-proxies",
+          "handler": "residentialProxies"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies",
+          "handler": "createResidentialProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "updateResidentialProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "deleteResidentialProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies/{id}/test",
+          "handler": "testResidentialProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/configs",
+          "handler": "getGlobalConfigs"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity",
+          "handler": "configCapacity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/config-capacity/delete-all-clients",
+          "handler": "deleteAllCapacityClients"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity/cleanup/{id}",
+          "handler": "cleanupJobStatus"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/output",
+          "handler": "outputConfigs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/output/share",
+          "handler": "createOutputShare"
+        },
+        {
+          "method": "GET",
+          "path": "/share/output/{token}",
+          "handler": "sharedOutput"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-panels",
+          "handler": "getConfigPanels"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/configs",
+          "handler": "putGlobalConfig"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies/{id}/test",
+          "handler": "testProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}/network",
+          "handler": "assignProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/discovery",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/refresh",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/proxy-test",
+          "handler": "testAccountProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/templates",
+          "handler": "listTemplates"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/templates",
+          "handler": "uploadTemplate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/dashboard",
+          "handler": "accountDashboard"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/resources",
+          "handler": "accountResources"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/capacity",
+          "handler": "accountCapacity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime",
+          "handler": "accountRuntime"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts",
+          "handler": "accounts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies",
+          "handler": "proxies"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity",
+          "handler": "buildActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity/{id}/provision",
+          "handler": "provisionActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/provision-errors",
+          "handler": "provisionErrors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei/preview",
+          "handler": "previewSanaeiInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei",
+          "handler": "createSanaeiInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/installers",
+          "handler": "listInstallers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers",
+          "handler": "createInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/install-scripts",
+          "handler": "listInstallScripts"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/install-scripts",
+          "handler": "createInstallScript"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer",
+          "handler": "selectDeploymentInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer/rearm",
+          "handler": "rearmDeploymentInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/audit",
+          "handler": "audit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/system",
+          "handler": "system"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/providers",
+          "handler": "providersMetadata"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/panel-settings",
+          "handler": "getPanelSettings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/panel-settings",
+          "handler": "updatePanelSettings"
+        }
+      ],
+      "db_tables": [
+        "EXCLUDED",
+        "LATERAL",
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "all",
+        "already",
+        "audit_events",
+        "candidate",
+        "current_output_uris",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "excluded",
+        "global_config_policies",
+        "inbound_export_metadata",
+        "inbound_structural_snapshots",
+        "install_scripts",
+        "installer_runs",
+        "installers",
+        "network_profiles",
+        "operations",
+        "output_config_snapshots",
+        "output_share_tokens",
+        "panel_inbound_policies",
+        "panel_instances",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_snapshots",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "residential_proxies",
+        "resources",
+        "schedules",
+        "server_readiness_issues",
+        "server_readiness_snapshots",
+        "user_capacity_snapshots",
+        "worker_heartbeats",
+        "worker_item_failures",
+        "xui_clients",
+        "xui_database_templates",
+        "xui_panel_deployments"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "Acquire",
+        "Add",
+        "AddClient",
+        "AddClients",
+        "AddInbound",
+        "Allow",
+        "Authenticate",
+        "Authorize",
+        "Available",
+        "BestRealityTarget",
+        "Build",
+        "CanAdmin",
+        "CanCreateCapacity",
+        "CanWrite",
+        "Capacity",
+        "Catalog",
+        "CheckInstallerCompatibility",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Client",
+        "Close",
+        "CloseIdleConnections",
+        "Context",
+        "Create",
+        "Current",
+        "DefaultDatabasePaths",
+        "DefaultInstallerDefinition",
+        "DefaultRetryPolicy",
+        "DeleteClient",
+        "DeleteProxy",
+        "DeleteSession",
+        "Discover",
+        "DiscoverWithExecutor",
+        "Do",
+        "EligibleReadyPanels",
+        "Error",
+        "Get",
+        "GetClientTraffic",
+        "GetProxy",
+        "Has",
+        "Header",
+        "ImportCommand",
+        "Index",
+        "InspectTemplate",
+        "InstallerHash",
+        "Invalidate",
+        "Load",
+        "LocaleForCountry",
+        "Login",
+        "Marshal",
+        "Metadata",
+        "MetadataAll",
+        "Name",
+        "New",
+        "NewAPIClient",
+        "NewIsolatedDirectClient",
+        "NewLoginLimiter",
+        "NewPanelPassword",
+        "NewPanelSession",
+        "NewProxyGateway",
+        "NewProxyProbeGateway",
+        "Normalize",
+        "Observe",
+        "ObserveProxy",
+        "Open",
+        "ProviderStateRuntimeStatus",
+        "ProxyAdapterCapabilities",
+        "ProxySessionUsername",
+        "PurgeExpired",
+        "Put",
+        "PutProxy",
+        "Read",
+        "ReadAllBounded",
+        "ReadInventory",
+        "ReadRawInboundList",
+        "Readiness",
+        "RecordProviderObservation",
+        "RegisterInstaller",
+        "Rollback",
+        "Routes",
+        "Run",
+        "RunDetailed",
+        "Runtime",
+        "Save",
+        "ScanRealityTargets",
+        "Set",
+        "SetEnabled",
+        "Size",
+        "Snapshot",
+        "String",
+        "UUIDv4",
+        "UpdateInboundRaw",
+        "Upload",
+        "VLESSRealityURI",
+        "ValidateSessionTransport",
+        "VerifyCommand",
+        "Wait",
+        "accounts",
+        "buildSnapshotIndex",
+        "cachedPanelOutput",
+        "circuitDelay",
+        "clearPanelClients",
+        "clearPanelClientsFast",
+        "client",
+        "collectRuntimeOutput",
+        "decodeV2Body",
+        "delay",
+        "detectProxy",
+        "detectProxyTypes",
+        "doPOST",
+        "errorBody",
+        "errorsIs",
+        "exists",
+        "extractV2Wire",
+        "fastExitIP",
+        "fastPolicy",
+        "get",
+        "hasDup",
+        "json",
+        "localeForCountry",
+        "login",
+        "min",
+        "mustJSON",
+        "networkIdentityCollision",
+        "newShareToken",
+        "next",
+        "normalizeProxyPool",
+        "observe",
+        "observeProxy",
+        "outputMap",
+        "outputSnapshotResponse",
+        "outputVisibleUntil",
+        "panelConfigureCommand",
+        "panelDefaults",
+        "parseLifetimeMinutes",
+        "parseProductExpr",
+        "parseQuotaMB",
+        "persistOutputSnapshot",
+        "principal",
+        "probe",
+        "proxies",
+        "quote",
+        "refreshNetworkIdentityIfDue",
+        "refreshPanelOutput",
+        "refreshPanelOutputAsync",
+        "require",
+        "resolveProxyType",
+        "retryableError",
+        "retryableErrorWithContext",
+        "retryableStatus",
+        "runCleanupJob",
+        "securityHeaders",
+        "shellQuote",
+        "shellQuoteSession",
+        "storePanelOutput",
+        "streamSummary",
+        "supported",
+        "syncAccountAutomation",
+        "syncAccountAutomationTx",
+        "syncAccountProxyPool",
+        "testProxy",
+        "ttl",
+        "validProxyWrite",
+        "validateAccountSettings",
+        "validateReplacementToken",
+        "wipe",
+        "wipeAuth",
+        "writeJSON",
+        "writeProviderPreviewError",
+        "zeroBytes"
+      ],
+      "test_count": 42,
+      "tests": [
+        {
+          "name": "TestConfigExpressions",
+          "file": "internal/adminapi/config_expr_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestOutputVisibleUntilNoExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestHealthEndpoint",
+          "file": "internal/adminapi/server_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestReadinessWithoutDatabase",
+          "file": "internal/adminapi/server_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestLoginPreservesTransportCause",
+          "file": "internal/panels/sanaei/api_error_test.go",
+          "line": 14
+        },
+        {
+          "name": "TestBearerAuthReadsSecretAndSetsHeader",
+          "file": "internal/panels/sanaei/auth_test.go",
+          "line": 23
+        },
+        {
+          "name": "TestSessionCredentialsRefusePlainHTTP",
+          "file": "internal/panels/sanaei/auth_test.go",
+          "line": 60
+        },
+        {
+          "name": "TestUUIDv4",
+          "file": "internal/panels/sanaei/clients_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestDriverDiscoveryClassifiesRuntimeCapabilities",
+          "file": "internal/panels/sanaei/driver_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestDiscoverWithExecutorIsReadOnly",
+          "file": "internal/panels/sanaei/driver_test.go",
+          "line": 37
+        },
+        {
+          "name": "TestInstallerAdapterBuildsImmutableCoreDefinition",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestInstallerAdapterRejectsUnpinnedOrInsecureArtifact",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 31
+        },
+        {
+          "name": "TestInstallerAdapterCompatibilityDefaults",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 39
+        },
+        {
+          "name": "TestLegacyInstallerCommandDoesNotBecomeAdapterSource",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 56
+        },
+        {
+          "name": "TestReadInventoryNormalizesWithoutSecrets",
+          "file": "internal/panels/sanaei/inventory_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestAddInboundUsesRestrictedEndpoint",
+          "file": "internal/panels/sanaei/mutation_test.go",
+          "line": 28
+        },
+        {
+          "name": "TestAddInboundRejectsSuccessFalse",
+          "file": "internal/panels/sanaei/mutation_test.go",
+          "line": 112
+        },
+        {
+          "name": "TestPanelDefaultsDeterministicAndScoped",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestPanelPasswordsAreRandomURLSafeAndNotReused",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 24
+        },
+        {
+          "name": "TestPanelConfigureCommandDoesNotContainCredential",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 43
+        },
+        {
+          "name": "TestPanelSessionBuildsAndClearsIndex",
+          "file": "internal/panels/sanaei/panel_session_index_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestPanelSessionSnapshotLoadsOnce",
+          "file": "internal/panels/sanaei/panel_session_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestResilientRetries5xx",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 21
+        },
+        {
+          "name": "TestResilientRetries429",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 96
+        },
+        {
+          "name": "TestResilientFailsFast400",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 158
+        },
+        {
+          "name": "TestResilientHonorsCancellation",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 216
+        },
+        {
+          "name": "TestReadAllBounded",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 251
+        },
+        {
+          "name": "TestRetryableErrorWithContextClientTimeout",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 293
+        },
+        {
+          "name": "TestResilientDoesNotBlindRetryMutation",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 305
+        },
+        {
+          "name": "TestResilientStillRetriesSafeRead",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 319
+        },
+        {
+          "name": "TestRuntimeManagerRejectsEmptyPanel",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestRuntimeManagerInvalidateAndPurge",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 18
+        },
+        {
+          "name": "TestRuntimeManagerConcurrentCacheRead",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 33
+        },
+        {
+          "name": "TestCircuitDelay",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 50
+        },
+        {
+          "name": "TestRuntimeManagerCircuitOpen",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 61
+        },
+        {
+          "name": "TestRuntimeFactoryRejectsMissingDependencies",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestRetryableStatusClassification",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestRetryableErrorCancellationIsPermanent",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 27
+        },
+        {
+          "name": "TestSessionExecutorContract",
+          "file": "internal/panels/sanaei/session_executor_test.go",
+          "line": 16
+        },
+        {
+          "name": "TestInspectTemplateRequiresSQLite",
+          "file": "internal/panels/sanaei/template_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestImportCommandHasRollbackAndChecksum",
+          "file": "internal/panels/sanaei/template_test.go",
+          "line": 24
+        }
+      ],
+      "failure_evidence": [
+        "return err",
+        "return false, err",
+        "return 0, err",
+        "return 0, fmt.Errorf(\"structural_snapshot_missing\")",
+        "return 0, errConfigExpr",
+        "return collision, err",
+        "return \"\", errProxyUndetected",
+        "return ProxyObservation{}, err",
+        "return ProxyObservation{}, errors.New(\"geo lookup failed\")",
+        "return ProxyObservation{}, errors.New(\"invalid geo response\")",
+        "func errorBody() map[string]string { return map[string]string{\"error\": \"internal_error\"} }",
+        "return providers.Account{}, err",
+        "return providers.Account{}, errors.New(\"proxy_not_healthy\")",
+        "return providers.Account{}, errors.New(\"provider_registry_unavailable\")",
+        "return providers.Account{}, errors.New(\"provider_account_capability_missing\")",
+        "return nil, ErrAPIRequest",
+        "return fmt.Errorf(\"%w: csrf request: %v\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: csrf transport: %w\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: csrf status %d\", ErrAPIRequest, resp.StatusCode)",
+        "return ErrAPIRequest",
+        "return fmt.Errorf(\"%w: login request: %v\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: login transport: %w\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: status %d\", ErrAPIRequest, resp.StatusCode)",
+        "return fmt.Errorf(\"%w: api transport: %w\", ErrAPIRequest, err)",
+        "func (f failingTransport) RoundTrip(*http.Request) (*http.Response, error) { return nil, f.err }",
+        "return ErrInsecureCredentialTransport",
+        "return ErrMutationRequest",
+        "return fmt.Errorf(\"%w: http=%d\", ErrAddClientUnsupported, resp.StatusCode)",
+        "return fmt.Errorf(\"%w: addClient http=%d body=%q\", ErrMutationRequest, resp.StatusCode, string(body))",
+        "return fmt.Errorf(\"%w: addClient invalid json body=%q\", ErrMutationRequest, string(body))",
+        "return fmt.Errorf(\"%w: http=%d msg=%q\", ErrMutationRejected, resp.StatusCode, envelope.Msg)",
+        "return nil, ErrClientCount",
+        "return out, err",
+        "return \"\", err",
+        "return SessionResponse{}, ErrSessionRequest",
+        "return SessionResponse{}, err",
+        "return 0, fmt.Errorf(\"%w: %v\", panels.ErrUnavailable, err)",
+        "return panels.Discovery{}, err",
+        "return panels.ErrUnauthorized",
+        "return fmt.Errorf(\"%w: status %d\", panels.ErrUnavailable, code)",
+        "return panels.Discovery{}, ErrSessionRequest",
+        "return postflight.Inbound{}, ErrMutationRequest",
+        "return postflight.Inbound{}, ErrMutationRejected",
+        "return nil, err",
+        "return nil, fmt.Errorf(\"%w: api rejected\", ErrAPIRequest)",
+        "return fmt.Errorf(\"%w: api rejected\", ErrAPIRequest)",
+        "return provisioning.InstallerManifest{}, nil, ErrInvalidInstallerDefinition",
+        "return provisioning.ResolvedInstaller{}, err",
+        "return (provisioning.InstallerRegistry{DB: db, Scripts: sr}).Create(ctx, m)",
+        "return inventory.Snapshot{}, err",
+        "return inventory.Snapshot{}, ErrSessionRequest",
+        "return ErrTemplateMismatch",
+        "return fmt.Errorf(\"database import command: %w; diagnostic=%s\", err, strings.TrimSpace(out))",
+        "return ErrMutationRejected",
+        "return nil, ErrMutationRequest",
+        "return nil, ErrMutationRejected",
+        "return errors.New(\"panel config missing\")",
+        "return errors.New(",
+        "return nil, 0, ErrSessionRequest",
+        "return nil, 0, err",
+        "return nil, 0, fmt.Errorf(\"%w: page ssh: %v diagnostic=%q\", ErrSessionRequest, err, result.Stderr)",
+        "return s.raws, s.loadErr",
+        "return nil, false, err",
+        "return nil, ErrSessionRequest",
+        "return nil, ErrInventoryRejected",
+        "return nil, ErrRealityScan",
+        "return RealityScanResult{}, \"\", ErrRealityScan",
+        "return RealityScanResult{}, \"\", err",
+        "return retryableError(err)",
+        "return ctx.Err()",
+        "return resp, err",
+        "return SessionResponse{}, lastErr",
+        "return errors.New(\"sanaei runtime mutation config\")",
+        "return nil, errors.New(\"sanaei runtime config\")",
+        "return nil, errors.New(\"sanaei runtime panel id\")",
+        "return nil, fmt.Errorf(\"%w: retry in %s\", ErrRuntimeCircuitOpen, remain)",
+        "return nil, ctx.Err()",
+        "return r, err",
+        "return ErrSessionRequest",
+        "return f.resp, f.err"
+      ],
+      "incident_guardrails": [
+        "INC-003",
+        "INC-004"
+      ]
+    },
+    {
+      "subsystem": "provisioning",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-PROVISIONING-01",
+          "text": "provision run/steps are observable"
+        },
+        {
+          "id": "DEEP-PROVISIONING-02",
+          "text": "SSH readiness/host-key behavior is explicit"
+        },
+        {
+          "id": "DEEP-PROVISIONING-03",
+          "text": "installer registry and selection are modular"
+        },
+        {
+          "id": "DEEP-PROVISIONING-04",
+          "text": "retry/backoff and error classification are visible"
+        },
+        {
+          "id": "DEEP-PROVISIONING-05",
+          "text": "rearm/recovery does not duplicate ownership"
+        },
+        {
+          "id": "DEEP-PROVISIONING-06",
+          "text": "post-install completion is separate from provider create success"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/provisioning/bootstrap_plan.go",
+        "internal/provisioning/bootstrap_plan_test.go",
+        "internal/provisioning/diagnostics.go",
+        "internal/provisioning/diagnostics_test.go",
+        "internal/provisioning/dynamic_plan_test.go",
+        "internal/provisioning/engine.go",
+        "internal/provisioning/engine_test.go",
+        "internal/provisioning/events.go",
+        "internal/provisioning/hostkey.go",
+        "internal/provisioning/installer.go",
+        "internal/provisioning/installer_capability_test.go",
+        "internal/provisioning/installer_executor.go",
+        "internal/provisioning/installer_executor_test.go",
+        "internal/provisioning/installer_orchestrator.go",
+        "internal/provisioning/installer_test.go",
+        "internal/provisioning/readiness.go",
+        "internal/provisioning/readiness_policy.go",
+        "internal/provisioning/readiness_policy_test.go",
+        "internal/provisioning/readiness_test.go",
+        "internal/provisioning/script.go",
+        "internal/provisioning/script_registry.go",
+        "internal/provisioning/script_runner.go",
+        "internal/provisioning/script_runner_test.go",
+        "internal/provisioning/ssh.go",
+        "internal/provisioning/step_attempts.go",
+        "internal/provisioning/step_completion_test.go",
+        "internal/provisioning/store.go",
+        "internal/provisioning/unknown_outcome_test.go",
+        "internal/provisioning/upload.go",
+        "internal/provisioning/upload_test.go",
+        "internal/provisioning/waiting_installer_test.go",
+        "internal/provisioning/worker_restart_test.go"
+      ],
+      "function_count": 124,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "install_scripts",
+        "installer_runs",
+        "installers",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "server_readiness_issues",
+        "server_readiness_snapshots"
+      ],
+      "dependency_call_symbols": [
+        "Add",
+        "ArtifactSteps",
+        "BeginStep",
+        "CheckInstallerCompatibility",
+        "ClassifyCommandFailure",
+        "ClassifyError",
+        "Close",
+        "Collect",
+        "DecideReadiness",
+        "DefaultBootstrapSteps",
+        "DefaultPreInstallerSteps",
+        "DiagnosticRetryable",
+        "Error",
+        "Event",
+        "Execute",
+        "FinishStep",
+        "Get",
+        "InstallerHash",
+        "InstallerPlaceholderName",
+        "IsInstallerPlaceholder",
+        "LegacyScriptPlan",
+        "Marshal",
+        "New",
+        "NewClient",
+        "Open",
+        "Readiness",
+        "Reserve",
+        "Resolve",
+        "Rollback",
+        "Run",
+        "RunDetailed",
+        "RunDetailedObserved",
+        "RunScript",
+        "ScriptHash",
+        "SetState",
+        "Size",
+        "Start",
+        "StepCompleted",
+        "StepInterrupted",
+        "String",
+        "Text",
+        "VerifyOrPin",
+        "Wait",
+        "WaitObserved",
+        "WaitStages",
+        "artifactStep",
+        "connect",
+        "connectStages",
+        "containsFold",
+        "emitStage",
+        "installerStepName",
+        "issueByCode",
+        "min",
+        "normalizeDiagnostic",
+        "observe",
+        "probeStages",
+        "readSCPAck",
+        "readinessError",
+        "readinessStatus",
+        "runSessionContext",
+        "shellArg",
+        "shellQuote",
+        "stepAttemptCompleted",
+        "tailDiagnostic",
+        "validateInstallerManifest",
+        "validateScriptPlan",
+        "wipe"
+      ],
+      "test_count": 37,
+      "tests": [
+        {
+          "name": "TestDefaultBootstrapPlanIsIndependentAndReconcilable",
+          "file": "internal/provisioning/bootstrap_plan_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestDefaultPreInstallerStopsAtPlaceholder",
+          "file": "internal/provisioning/bootstrap_plan_test.go",
+          "line": 27
+        },
+        {
+          "name": "TestLinuxFailureTaxonomy",
+          "file": "internal/provisioning/diagnostics_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestUnknownFailureKeepsFingerprint",
+          "file": "internal/provisioning/diagnostics_test.go",
+          "line": 38
+        },
+        {
+          "name": "TestSSHFailureTaxonomy",
+          "file": "internal/provisioning/diagnostics_test.go",
+          "line": 47
+        },
+        {
+          "name": "TestFingerprintNormalizesDynamicValues",
+          "file": "internal/provisioning/diagnostics_test.go",
+          "line": 61
+        },
+        {
+          "name": "TestDynamicScriptPlanResumesAtFailedStep",
+          "file": "internal/provisioning/dynamic_plan_test.go",
+          "line": 22
+        },
+        {
+          "name": "TestProvisionEngineCompletesAndDoesNotRepeat",
+          "file": "internal/provisioning/engine_test.go",
+          "line": 52
+        },
+        {
+          "name": "TestInstallerCapabilitiesValidated",
+          "file": "internal/provisioning/installer_capability_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestInstallerExecutorCompletes",
+          "file": "internal/provisioning/installer_executor_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestInstallerTerminalFailureRequiresRollback",
+          "file": "internal/provisioning/installer_executor_test.go",
+          "line": 40
+        },
+        {
+          "name": "TestInstallerPrecheckMissIsNotFailure",
+          "file": "internal/provisioning/installer_executor_test.go",
+          "line": 71
+        },
+        {
+          "name": "TestInstallerRetryableFailureStaysInstalling",
+          "file": "internal/provisioning/installer_executor_test.go",
+          "line": 96
+        },
+        {
+          "name": "TestInstallerInterruptedUnsafeNeverReexecutes",
+          "file": "internal/provisioning/installer_executor_test.go",
+          "line": 109
+        },
+        {
+          "name": "TestInstallerCompatibility",
+          "file": "internal/provisioning/installer_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestArtifactStepIntegrityAndShellSyntax",
+          "file": "internal/provisioning/installer_test.go",
+          "line": 26
+        },
+        {
+          "name": "TestArtifactRejectsUnsafeDefinition",
+          "file": "internal/provisioning/installer_test.go",
+          "line": 41
+        },
+        {
+          "name": "TestInstallerHashDeterministic",
+          "file": "internal/provisioning/installer_test.go",
+          "line": 49
+        },
+        {
+          "name": "TestReadinessPolicyDecisions",
+          "file": "internal/provisioning/readiness_policy_test.go",
+          "line": 13
+        },
+        {
+          "name": "TestPackageIncompleteUsesSafeRemediation",
+          "file": "internal/provisioning/readiness_policy_test.go",
+          "line": 31
+        },
+        {
+          "name": "TestReadinessReady",
+          "file": "internal/provisioning/readiness_test.go",
+          "line": 50
+        },
+        {
+          "name": "TestReadinessDNSBlocked",
+          "file": "internal/provisioning/readiness_test.go",
+          "line": 60
+        },
+        {
+          "name": "TestScriptRunnerPrecheckSkipsExecuteAndVerifies",
+          "file": "internal/provisioning/script_runner_test.go",
+          "line": 23
+        },
+        {
+          "name": "TestScriptRunnerFailedPrecheckExecutesThenVerifies",
+          "file": "internal/provisioning/script_runner_test.go",
+          "line": 34
+        },
+        {
+          "name": "TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute",
+          "file": "internal/provisioning/script_runner_test.go",
+          "line": 45
+        },
+        {
+          "name": "TestStepAttemptCompletionUsesLatestAttempt",
+          "file": "internal/provisioning/step_completion_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestUnknownCommandOutcomeWithoutPrecheckFailsClosed",
+          "file": "internal/provisioning/unknown_outcome_test.go",
+          "line": 18
+        },
+        {
+          "name": "TestUnknownCommandOutcomeWithPrecheckRemainsRetryable",
+          "file": "internal/provisioning/unknown_outcome_test.go",
+          "line": 29
+        },
+        {
+          "name": "TestReadSCPAckOK",
+          "file": "internal/provisioning/upload_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestReadSCPAckRemoteError",
+          "file": "internal/provisioning/upload_test.go",
+          "line": 16
+        },
+        {
+          "name": "TestReadSCPAckUnexpectedCode",
+          "file": "internal/provisioning/upload_test.go",
+          "line": 27
+        },
+        {
+          "name": "TestReadSCPAckEOF",
+          "file": "internal/provisioning/upload_test.go",
+          "line": 33
+        },
+        {
+          "name": "TestShellArgEscapesQuote",
+          "file": "internal/provisioning/upload_test.go",
+          "line": 39
+        },
+        {
+          "name": "TestPlaceholderInstallerPausesBeforeExecute",
+          "file": "internal/provisioning/waiting_installer_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestHistoricalVerifyReconcilesToWaitingInstaller",
+          "file": "internal/provisioning/waiting_installer_test.go",
+          "line": 24
+        },
+        {
+          "name": "TestRestartAfterKilledWorkerFailsClosedWithoutPrecheck",
+          "file": "internal/provisioning/worker_restart_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestRestartAfterKilledWorkerReconcilesWhenPrecheckExists",
+          "file": "internal/provisioning/worker_restart_test.go",
+          "line": 21
+        }
+      ],
+      "failure_evidence": [
+        "return ErrSSHCommand",
+        "return Run{}, ErrInvalidPlan",
+        "return Run{}, err",
+        "return run, err",
+        "func (s *memStore) Update(_ context.Context, r Run) error { s.r = r; return nil }",
+        "return s.attempts[step], ErrStepRetryLimit",
+        "func (s *memStore) FinishStep(context.Context, string, string, error, bool) error { return nil }",
+        "return s.interrupted != nil && s.interrupted[step], nil",
+        "func (secretStub) Get(context.Context, string, string) ([]byte, error) { return []byte(\"key\"), nil }",
+        "func (s *sshStub) Wait(context.Context, Target, []byte) error { s.waits++; return nil }",
+        "return err",
+        "return ErrHostKeyMismatch",
+        "return out, ErrInvalidPlan",
+        "return out, err",
+        "return out, ErrInstallerVersionConflict",
+        "return out, ErrInstallerNotFound",
+        "return out, fmt.Errorf(\"%w: install step %s requires precheck and verify\", ErrInvalidPlan, s.Name)",
+        "return out, fmt.Errorf(\"%w: verify step %s must be verify-only\", ErrInvalidPlan, s.Name)",
+        "return out, fmt.Errorf(\"%w: rollback step %s requires precheck and verify\", ErrInvalidPlan, s.Name)",
+        "return fmt.Errorf(\"%w: readiness blocked\", ErrInstallerIncompatible)",
+        "return fmt.Errorf(\"%w: os %s\", ErrInstallerIncompatible, s.OSID)",
+        "return fmt.Errorf(\"%w: arch %s\", ErrInstallerIncompatible, s.Architecture)",
+        "return fmt.Errorf(\"%w: memory %d<%d\", ErrInstallerIncompatible, s.MemoryMB, m.MinMemoryMB)",
+        "return fmt.Errorf(\"%w: root required\", ErrInstallerIncompatible)",
+        "return fmt.Errorf(\"%w: dns required\", ErrInstallerIncompatible)",
+        "return fmt.Errorf(\"%w: outbound https required\", ErrInstallerIncompatible)",
+        "return fmt.Errorf(\"%w: reboot required\", ErrInstallerIncompatible)",
+        "return fmt.Errorf(\"%w: disk %d<%d\", ErrInstallerIncompatible, s.DiskFreeMB, m.MinDiskMB)",
+        "return ErrInvalidPlan",
+        "return nil, err",
+        "return ScriptStep{}, ErrInvalidArtifact",
+        "return ierr",
+        "return derr",
+        "return resolved, InstallerRun{}, err",
+        "return resolved, InstallerRun{}, ErrInvalidPlan",
+        "return resolved, run, err",
+        "return resolved, run, ErrInstallerRunConflict",
+        "return s, err",
+        "return s, &ReadinessError{Codes: []string{code}, Retryable: retryable}",
+        "return s, readinessError(current)",
+        "func (e *ReadinessError) Unwrap() error { return ErrServerReadinessBlocked }",
+        "return CommandResult{ExitCode: &code, Stderr: \"Temporary failure resolving\"}, fmt.Errorf(\"%w: exit 2\", ErrSSHCommand)",
+        "return s, ErrInvalidPlan",
+        "return s, ErrScriptVersionConflict",
+        "return nil, ErrScriptNotFound",
+        "return nil, ErrScriptVersionConflict",
+        "return res, err",
+        "return errors.Join(ErrScriptVerify, err)",
+        "return CommandResult{ExitCode: &code, Stderr: \"not ready\"}, fmt.Errorf(\"%w: exit 1\", ErrSSHCommand)",
+        "// Override the generic stub behavior with a runner that returns DNS stderr.",
+        "return CommandResult{ExitCode: &code, Stderr: \"Temporary failure resolving 'archive.ubuntu.com'\"}, fmt.Errorf(\"%w: exit 1\", ErrSSHCommand)",
+        "return fmt.Errorf(\"%w: last=%v\", waitCtx.Err(), last)",
+        "return fmt.Errorf(\"%w: %v\", ErrSSHNotReady, err)",
+        "return fmt.Errorf(\"%w: session: %v\", ErrSSHNotReady, err)",
+        "return fmt.Errorf(\"%w: probe: %v\", ErrSSHNotReady, err)",
+        "return r.Stdout + r.Stderr, e",
+        "return CommandResult{}, err",
+        "return CommandResult{}, fmt.Errorf(\"ssh session: %w\", err)",
+        "return res, fmt.Errorf(\"%w: %w\", ErrSSHCommand, err)",
+        "return nil, fmt.Errorf(\"ssh private key: %w\", err)",
+        "hostKeyCallback := func(_ string, _ net.Addr, _ ssh.PublicKey) error { return ErrHostKeyVerifierMissing }",
+        "return nil, fmt.Errorf(\"ssh tcp dial: %w\", err)",
+        "return nil, fmt.Errorf(\"ssh handshake: %w\", err)",
+        "return errors.Join(ErrCommandOutcomeUnknown, ctx.Err())",
+        "return 0, err",
+        "return attempts, ErrStepTerminal",
+        "return attempts, ErrStepRetryDeferred",
+        "return attempts, ErrStepRetryLimit",
+        "return n, err",
+        "return interrupted, err",
+        "return false, err",
+        "return stepAttemptCompleted(started, finished, lastErr, terminal), nil",
+        "return started.Valid && finished.Valid && !finished.Time.Before(started.Time) && !lastErr.Valid && !terminal",
+        "return Run{}, false, err",
+        "return r, false, err",
+        "return fmt.Sprintf(\"%v: code=%d message=%s\", ErrSCPProtocol, e.Code, e.Message)",
+        "func (e scpAckError) Unwrap() error { return ErrSCPProtocol }",
+        "return fmt.Errorf(\"%s ack: %w\", stage, err)",
+        "return fmt.Errorf(\"%s ack: %w: unexpected code=%d\", stage, ErrSCPProtocol, b)",
+        "return fmt.Errorf(\"%s ack: code=%d: %w\", stage, b, readErr)"
+      ],
+      "incident_guardrails": [
+        "INC-001"
+      ]
+    },
+    {
+      "subsystem": "proxy_network",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-PROXY-NETWORK-01",
+          "text": "HTTP/SOCKS proxy model"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-02",
+          "text": "per-account proxy binding"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-03",
+          "text": "sticky identity while healthy"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-04",
+          "text": "country affinity and controlled fallback"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-05",
+          "text": "required proxy failure is fail-closed"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-06",
+          "text": "network identity/geo context remain account-scoped"
+        },
+        {
+          "id": "DEEP-PROXY-NETWORK-07",
+          "text": "health/recovery must not silently leak direct egress"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/network/client.go",
+        "internal/network/client_test.go",
+        "internal/network/egress_guard.go",
+        "internal/network/egress_guard_test.go",
+        "internal/network/gate.go",
+        "internal/network/gate_test.go",
+        "internal/network/guard.go",
+        "internal/network/guard_test.go",
+        "internal/network/health.go",
+        "internal/network/health_state.go",
+        "internal/network/health_state_test.go",
+        "internal/network/health_store.go",
+        "internal/network/health_test.go",
+        "internal/network/ipv4.go",
+        "internal/network/ipv4_test.go",
+        "internal/network/isolation.go",
+        "internal/network/isolation_test.go",
+        "internal/network/leakcheck.go",
+        "internal/network/leakcheck_test.go",
+        "internal/network/metadata.go",
+        "internal/network/metadata_test.go",
+        "internal/network/monitor.go",
+        "internal/network/privacy.go",
+        "internal/network/privacy_test.go",
+        "internal/network/profiles.go",
+        "internal/network/profiles_test.go",
+        "internal/network/proxy_failure_test.go",
+        "internal/network/proxy_gateway.go",
+        "internal/network/proxy_gateway_test.go",
+        "internal/network/proxy_probe_test.go",
+        "internal/network/rotating_test.go",
+        "internal/network/scheduler.go",
+        "internal/network/scheduler_test.go"
+      ],
+      "function_count": 69,
+      "api_surface": [],
+      "db_tables": [
+        "proxies"
+      ],
+      "dependency_call_symbols": [
+        "AccountNamespace",
+        "Add",
+        "AllowMutation",
+        "Apply",
+        "Check",
+        "CheckProxy",
+        "Client",
+        "Close",
+        "CloseIdleConnections",
+        "Context",
+        "DialContextIPv4",
+        "DirectDial",
+        "Do",
+        "Error",
+        "Get",
+        "HasForbiddenOutboundHeader",
+        "Header",
+        "IPv4Endpoint",
+        "New",
+        "NewBrowserProfile",
+        "NewHTTPProfile",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "NewProxyProbeGateway",
+        "NewTLSProfile",
+        "Observe",
+        "Read",
+        "ResolveIPv4",
+        "RoundTrip",
+        "Run",
+        "Save",
+        "Set",
+        "String",
+        "Validate",
+        "ValidateLeakObservation",
+        "ValidateRoute",
+        "errorsIs",
+        "newProxyGateway",
+        "randomRequestID",
+        "runOnce"
+      ],
+      "test_count": 30,
+      "tests": [
+        {
+          "name": "TestClientsAreNotSharedAcrossAccounts",
+          "file": "internal/network/client_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestEgressGuardDetectsChange",
+          "file": "internal/network/egress_guard_test.go",
+          "line": 21
+        },
+        {
+          "name": "TestAccountGateRequiresHealthyProxy",
+          "file": "internal/network/gate_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestProxyRequiredFailsClosed",
+          "file": "internal/network/guard_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestProxyRequiredAllowsHealthyProxy",
+          "file": "internal/network/guard_test.go",
+          "line": 14
+        },
+        {
+          "name": "TestHealthStateUsesHysteresis",
+          "file": "internal/network/health_state_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestProxyHealthValidatesExitIP",
+          "file": "internal/network/health_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestProxyHealthRejectsUnexpectedExitIP",
+          "file": "internal/network/health_test.go",
+          "line": 23
+        },
+        {
+          "name": "TestResolveIPv4RejectsIPv6Literal",
+          "file": "internal/network/ipv4_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestResolveIPv4AcceptsIPv4Literal",
+          "file": "internal/network/ipv4_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestAccountContextsCannotCross",
+          "file": "internal/network/isolation_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestAccountNamespaceStableAndDistinct",
+          "file": "internal/network/isolation_test.go",
+          "line": 12
+        },
+        {
+          "name": "TestLeakObservationPassesExpectedProxy",
+          "file": "internal/network/leakcheck_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestLeakObservationRejectsServerIP",
+          "file": "internal/network/leakcheck_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestLeakObservationRejectsForwardingHeader",
+          "file": "internal/network/leakcheck_test.go",
+          "line": 22
+        },
+        {
+          "name": "TestMetadataTransportDoesNotLeakInternalIdentity",
+          "file": "internal/network/metadata_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestPrivacyTransportStripsLeakHeaders",
+          "file": "internal/network/privacy_test.go",
+          "line": 14
+        },
+        {
+          "name": "TestSecurityProfilesHaveSeparateState",
+          "file": "internal/network/profiles_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestGateBlocksDegradedAndDown",
+          "file": "internal/network/proxy_failure_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestRouteRejectsMissingOrUnhealthyProxy",
+          "file": "internal/network/proxy_failure_test.go",
+          "line": 21
+        },
+        {
+          "name": "TestHealthRejectsServerIPLeak",
+          "file": "internal/network/proxy_failure_test.go",
+          "line": 36
+        },
+        {
+          "name": "TestHighLatencyDegradesThenDown",
+          "file": "internal/network/proxy_failure_test.go",
+          "line": 48
+        },
+        {
+          "name": "TestRecoveryRequiresConsecutiveSuccesses",
+          "file": "internal/network/proxy_failure_test.go",
+          "line": 63
+        },
+        {
+          "name": "TestHTTPGatewayIsAccountScoped",
+          "file": "internal/network/proxy_gateway_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestGatewayDirectDialFailsClosed",
+          "file": "internal/network/proxy_gateway_test.go",
+          "line": 23
+        },
+        {
+          "name": "TestProbeGatewayAllowsUnhealthyStatusButTrafficDoesNot",
+          "file": "internal/network/proxy_probe_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestProbeGatewayStillValidatesEndpointAndType",
+          "file": "internal/network/proxy_probe_test.go",
+          "line": 21
+        },
+        {
+          "name": "TestRotatingExitAllowed",
+          "file": "internal/network/rotating_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestRotatingExitStillRejectsServerIP",
+          "file": "internal/network/rotating_test.go",
+          "line": 22
+        },
+        {
+          "name": "TestHealthSchedulerRejectsUnhealthyProxyBeforeNetwork",
+          "file": "internal/network/scheduler_test.go",
+          "line": 19
+        }
+      ],
+      "failure_evidence": [
+        "return nil, err",
+        "return ErrAccountContextMismatch",
+        "return \"\", ErrProxyConfigInvalid",
+        "return \"\", err",
+        "return ip, ErrEgressChanged",
+        "func errorsIs(a, b error) bool { return a == b }",
+        "return ErrAccountNetworkNotReady",
+        "return ErrProxyRequired",
+        "return ErrProxyUnavailable",
+        "return ErrHealthStore",
+        "return \"\", ErrIPv4Required",
+        "return ErrUnexpectedExitIP",
+        "return ErrServerIPLeak",
+        "return ErrForbiddenOutboundHeader",
+        "return ctx.Err()",
+        "func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }",
+        "return nil, ErrProxyConfigInvalid",
+        "return nil, ErrProxyRequired",
+        "return target.State, err",
+        "return state, err"
+      ],
+      "incident_guardrails": [
+        "INC-002"
+      ]
+    },
+    {
+      "subsystem": "reality",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-REALITY-01",
+          "text": "Reality credentials are generated/managed explicitly"
+        },
+        {
+          "id": "DEEP-REALITY-02",
+          "text": "target discovery/observations/scoring/selection are dedicated concerns"
+        },
+        {
+          "id": "DEEP-REALITY-03",
+          "text": "SNI selection follows policy/target finder rather than arbitrary fixed target"
+        },
+        {
+          "id": "DEEP-REALITY-04",
+          "text": "probe/health verification is explicit"
+        },
+        {
+          "id": "DEEP-REALITY-05",
+          "text": "Reality contract/global policy remain separate from provider lifecycle"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "persists/mutates DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/panels/globalreality/service.go",
+        "internal/panels/realitycontract/contract.go",
+        "internal/panels/realitycontract/contract_test.go",
+        "internal/panels/sanaei/realityconfig/builder.go",
+        "internal/panels/sanaei/realityconfig/builder_test.go",
+        "internal/reality/probe_test.go",
+        "internal/reality/runner.go",
+        "internal/reality/scorer.go",
+        "internal/reality/scorer_test.go",
+        "internal/reality/scorer_tls_test.go",
+        "internal/reality/ssh_prober.go",
+        "internal/reality/ssh_prober_test.go",
+        "internal/reality/stability.go",
+        "internal/reality/stability_test.go",
+        "internal/reality/store.go",
+        "internal/reality/validate.go"
+      ],
+      "function_count": 31,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "deployments",
+        "global_config_policies",
+        "panel_inbound_inventory",
+        "panel_instances",
+        "reality_target_observations",
+        "reality_target_selections"
+      ],
+      "dependency_call_symbols": [
+        "Acquire",
+        "Aggregate",
+        "BootstrapPanel",
+        "Build",
+        "ChooseStable",
+        "Close",
+        "Ensure",
+        "Evaluate",
+        "Get",
+        "Invalidate",
+        "Marshal",
+        "New",
+        "Payload",
+        "Probe",
+        "Rank",
+        "Recent",
+        "ResetCircuit",
+        "Run",
+        "Save",
+        "Select",
+        "URI",
+        "VLESSRealityURI",
+        "ValidateCandidate",
+        "Wipe",
+        "normalized",
+        "obs",
+        "version"
+      ],
+      "test_count": 13,
+      "tests": [
+        {
+          "name": "TestPayloadAndURIStaySymmetric",
+          "file": "internal/panels/realitycontract/contract_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestBuildRealityInbound",
+          "file": "internal/panels/sanaei/realityconfig/builder_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestBuildRejectsUnsafeTarget",
+          "file": "internal/panels/sanaei/realityconfig/builder_test.go",
+          "line": 75
+        },
+        {
+          "name": "TestValidateCandidate",
+          "file": "internal/reality/probe_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestRankPrefersReliableLowLatency",
+          "file": "internal/reality/scorer_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestRejectsInvalidCertificate",
+          "file": "internal/reality/scorer_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestEvaluateAcceptsTLS13Spellings",
+          "file": "internal/reality/scorer_tls_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestEvaluateRejectsTLS12",
+          "file": "internal/reality/scorer_tls_test.go",
+          "line": 13
+        },
+        {
+          "name": "TestSSHProberDecodesObservation",
+          "file": "internal/reality/ssh_prober_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestSSHProberDoesNotEmbedCandidatePlaintext",
+          "file": "internal/reality/ssh_prober_test.go",
+          "line": 73
+        },
+        {
+          "name": "TestStabilityRequiresHistory",
+          "file": "internal/reality/stability_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestHysteresisKeepsCurrentForSmallGain",
+          "file": "internal/reality/stability_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestHysteresisSwitchesForMeaningfulGain",
+          "file": "internal/reality/stability_test.go",
+          "line": 27
+        }
+      ],
+      "failure_evidence": [
+        "return errors.New(\"global reality config\")",
+        "return errors.New(\"global reality ports\")",
+        "return fmt.Errorf(\"invalid reality port %d\", port)",
+        "return fmt.Errorf(\"port %d: %w\", port, e)",
+        "return fmt.Errorf(\"port %d occupied by incompatible inbound\", port)",
+        "return err",
+        "return realityconfig.Payload{}, ErrInvalid",
+        "return \"\", ErrInvalid",
+        "return Payload{}, ErrInvalidConfig",
+        "return nil, err",
+        "return CycleResult{}, ErrProbeCycle",
+        "return r, err",
+        "return r, ErrProbeCycle",
+        "return Observation{}, err",
+        "return Observation{}, ErrProbeFailed",
+        "return StableCandidate{}, false, ErrInsufficientHistory",
+        "return ErrObservationStore",
+        "return ErrInvalidCandidate"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "residential",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-RESIDENTIAL-01",
+          "text": "residential CRUD/test is independent"
+        },
+        {
+          "id": "DEEP-RESIDENTIAL-02",
+          "text": "panel association/outbound tag/priority are explicit"
+        },
+        {
+          "id": "DEEP-RESIDENTIAL-03",
+          "text": "Sanaei synchronization is isolated from account control-plane proxy"
+        },
+        {
+          "id": "DEEP-RESIDENTIAL-04",
+          "text": "residential country/egress behavior is observable"
+        }
+      ],
+      "responsibility_evidence": [
+        "HTTP handler",
+        "HTTP handler; persists/mutates DB state",
+        "HTTP handler; persists/mutates DB state; reads DB state",
+        "HTTP handler; reads DB state",
+        "HTTP handler; reads DB state; performs HTTP/API call",
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state",
+        "reads DB state; performs HTTP/API call"
+      ],
+      "owned_files": [
+        "internal/adminapi/account_automation.go",
+        "internal/adminapi/account_identity.go",
+        "internal/adminapi/account_options.go",
+        "internal/adminapi/account_preflight.go",
+        "internal/adminapi/account_preview.go",
+        "internal/adminapi/account_validation.go",
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/accounts_write.go",
+        "internal/adminapi/auth.go",
+        "internal/adminapi/build_activity.go",
+        "internal/adminapi/capacity_cleanup.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/config_expr.go",
+        "internal/adminapi/config_expr_test.go",
+        "internal/adminapi/configs.go",
+        "internal/adminapi/configs_global.go",
+        "internal/adminapi/dashboard.go",
+        "internal/adminapi/discovery.go",
+        "internal/adminapi/install_scripts.go",
+        "internal/adminapi/installer_rearm.go",
+        "internal/adminapi/installer_selection.go",
+        "internal/adminapi/installers.go",
+        "internal/adminapi/locale.go",
+        "internal/adminapi/network_identity_auto.go",
+        "internal/adminapi/network_isolation.go",
+        "internal/adminapi/output.go",
+        "internal/adminapi/output_expiry_test.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/panel_settings.go",
+        "internal/adminapi/providers.go",
+        "internal/adminapi/provision_activity.go",
+        "internal/adminapi/provision_errors.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/proxies_write.go",
+        "internal/adminapi/proxy_details.go",
+        "internal/adminapi/proxy_detect.go",
+        "internal/adminapi/proxy_health.go",
+        "internal/adminapi/proxy_observe.go",
+        "internal/adminapi/proxy_pool.go",
+        "internal/adminapi/residential.go",
+        "internal/adminapi/resources.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/runtime_api.go",
+        "internal/adminapi/sanaei_installer.go",
+        "internal/adminapi/security.go",
+        "internal/adminapi/server.go",
+        "internal/adminapi/server_test.go",
+        "internal/adminapi/status.go",
+        "internal/adminapi/templates.go",
+        "internal/adminapi/token_validate.go",
+        "internal/panels/residentialsync/service.go"
+      ],
+      "function_count": 120,
+      "api_surface": [
+        {
+          "method": "GET",
+          "path": "/healthz",
+          "handler": "health"
+        },
+        {
+          "method": "GET",
+          "path": "/readyz",
+          "handler": "ready"
+        },
+        {
+          "method": "GET",
+          "path": "/version",
+          "handler": "version"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "handler": "login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/logout",
+          "handler": "logout"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts",
+          "handler": "createAccount"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/preview",
+          "handler": "accountPreview"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "updateAccount"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/accounts/{id}",
+          "handler": "deleteAccount"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/options",
+          "handler": "accountOptions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/identity",
+          "handler": "accountIdentity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/preflight",
+          "handler": "accountPreflight"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/console-session",
+          "handler": "createVultrBrowserTicket"
+        },
+        {
+          "method": "GET",
+          "path": "/vultr-browser/{path...}",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/websockify",
+          "handler": "vultrBrowserProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies",
+          "handler": "createProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "updateProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "deleteProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies/{id}",
+          "handler": "proxyDetails"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/residential-proxies",
+          "handler": "residentialProxies"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies",
+          "handler": "createResidentialProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "updateResidentialProxy"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/v1/residential-proxies/{id}",
+          "handler": "deleteResidentialProxy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies/{id}/test",
+          "handler": "testResidentialProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/configs",
+          "handler": "getGlobalConfigs"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity",
+          "handler": "configCapacity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/config-capacity/delete-all-clients",
+          "handler": "deleteAllCapacityClients"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity/cleanup/{id}",
+          "handler": "cleanupJobStatus"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/output",
+          "handler": "outputConfigs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/output/share",
+          "handler": "createOutputShare"
+        },
+        {
+          "method": "GET",
+          "path": "/share/output/{token}",
+          "handler": "sharedOutput"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/config-panels",
+          "handler": "getConfigPanels"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/configs",
+          "handler": "putGlobalConfig"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies/{id}/test",
+          "handler": "testProxy"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}/network",
+          "handler": "assignProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/discovery",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/refresh",
+          "handler": "accountDiscovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/proxy-test",
+          "handler": "testAccountProxy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/templates",
+          "handler": "listTemplates"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/templates",
+          "handler": "uploadTemplate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/dashboard",
+          "handler": "accountDashboard"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/resources",
+          "handler": "accountResources"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/capacity",
+          "handler": "accountCapacity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime",
+          "handler": "accountRuntime"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts",
+          "handler": "accounts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies",
+          "handler": "proxies"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity",
+          "handler": "buildActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity/{id}/provision",
+          "handler": "provisionActivity"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/provision-errors",
+          "handler": "provisionErrors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei/preview",
+          "handler": "previewSanaeiInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei",
+          "handler": "createSanaeiInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/installers",
+          "handler": "listInstallers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/installers",
+          "handler": "createInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/install-scripts",
+          "handler": "listInstallScripts"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/install-scripts",
+          "handler": "createInstallScript"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer",
+          "handler": "selectDeploymentInstaller"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer/rearm",
+          "handler": "rearmDeploymentInstaller"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/audit",
+          "handler": "audit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/system",
+          "handler": "system"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/providers",
+          "handler": "providersMetadata"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/panel-settings",
+          "handler": "getPanelSettings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/panel-settings",
+          "handler": "updatePanelSettings"
+        }
+      ],
+      "db_tables": [
+        "EXCLUDED",
+        "LATERAL",
+        "SET",
+        "account_capacity_events",
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "all",
+        "already",
+        "audit_events",
+        "candidate",
+        "current_output_uris",
+        "deployment_events",
+        "deployment_installer_selections",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "excluded",
+        "global_config_policies",
+        "inbound_export_metadata",
+        "inbound_structural_snapshots",
+        "install_scripts",
+        "installer_runs",
+        "installers",
+        "network_profiles",
+        "operations",
+        "output_config_snapshots",
+        "output_share_tokens",
+        "panel_inbound_policies",
+        "panel_instances",
+        "panel_settings",
+        "provider_capacity_observations",
+        "provider_snapshots",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "proxies",
+        "residential_proxies",
+        "resources",
+        "schedules",
+        "server_readiness_issues",
+        "server_readiness_snapshots",
+        "user_capacity_snapshots",
+        "worker_heartbeats",
+        "worker_item_failures",
+        "xui_database_templates",
+        "xui_panel_deployments"
+      ],
+      "dependency_call_symbols": [
+        "Account",
+        "Acquire",
+        "Add",
+        "Allow",
+        "Authenticate",
+        "Available",
+        "Build",
+        "CanAdmin",
+        "CanCreateCapacity",
+        "CanWrite",
+        "Capacity",
+        "Catalog",
+        "Class",
+        "ClassifyAccountProviderError",
+        "Close",
+        "CloseIdleConnections",
+        "Context",
+        "Create",
+        "Current",
+        "DeleteProxy",
+        "DeleteSession",
+        "Do",
+        "EligibleReadyPanels",
+        "Error",
+        "Get",
+        "GetProxy",
+        "Has",
+        "Header",
+        "InspectTemplate",
+        "InstallerHash",
+        "Invalidate",
+        "LocaleForCountry",
+        "Login",
+        "Marshal",
+        "Metadata",
+        "MetadataAll",
+        "Name",
+        "New",
+        "NewIsolatedDirectClient",
+        "NewLoginLimiter",
+        "NewProxyGateway",
+        "NewProxyProbeGateway",
+        "Normalize",
+        "Observe",
+        "ObserveProxy",
+        "Open",
+        "ProviderStateRuntimeStatus",
+        "ProxyAdapterCapabilities",
+        "ProxySessionUsername",
+        "Put",
+        "PutProxy",
+        "Read",
+        "Readiness",
+        "RecordProviderObservation",
+        "RegisterInstaller",
+        "Rollback",
+        "Routes",
+        "Runtime",
+        "Set",
+        "Snapshot",
+        "String",
+        "UpdateInboundRaw",
+        "VLESSRealityURI",
+        "Wait",
+        "accounts",
+        "apply",
+        "cachedPanelOutput",
+        "clearPanelClients",
+        "clearPanelClientsFast",
+        "collectRuntimeOutput",
+        "detectProxy",
+        "detectProxyTypes",
+        "errorBody",
+        "fastExitIP",
+        "hasDup",
+        "localeForCountry",
+        "min",
+        "mustJSON",
+        "networkIdentityCollision",
+        "newShareToken",
+        "next",
+        "normalizeProxyPool",
+        "observeProxy",
+        "outputMap",
+        "outputSnapshotResponse",
+        "outputVisibleUntil",
+        "parseLifetimeMinutes",
+        "parseProductExpr",
+        "parseQuotaMB",
+        "persistOutputSnapshot",
+        "principal",
+        "proxies",
+        "refreshNetworkIdentityIfDue",
+        "refreshPanelOutput",
+        "refreshPanelOutputAsync",
+        "require",
+        "resolveProxyType",
+        "runCleanupJob",
+        "securityHeaders",
+        "storePanelOutput",
+        "syncAccountAutomation",
+        "syncAccountAutomationTx",
+        "syncAccountProxyPool",
+        "testProxy",
+        "validProxyWrite",
+        "validateAccountSettings",
+        "validateReplacementToken",
+        "writeJSON",
+        "writeProviderPreviewError",
+        "zeroBytes"
+      ],
+      "test_count": 5,
+      "tests": [
+        {
+          "name": "TestConfigExpressions",
+          "file": "internal/adminapi/config_expr_test.go",
+          "line": 5
+        },
+        {
+          "name": "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestOutputVisibleUntilNoExpiry",
+          "file": "internal/adminapi/output_expiry_test.go",
+          "line": 17
+        },
+        {
+          "name": "TestHealthEndpoint",
+          "file": "internal/adminapi/server_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestReadinessWithoutDatabase",
+          "file": "internal/adminapi/server_test.go",
+          "line": 17
+        }
+      ],
+      "failure_evidence": [
+        "return err",
+        "return false, err",
+        "return 0, err",
+        "return 0, fmt.Errorf(\"structural_snapshot_missing\")",
+        "return 0, errConfigExpr",
+        "return collision, err",
+        "return \"\", errProxyUndetected",
+        "return ProxyObservation{}, err",
+        "return ProxyObservation{}, errors.New(\"geo lookup failed\")",
+        "return ProxyObservation{}, errors.New(\"invalid geo response\")",
+        "func errorBody() map[string]string { return map[string]string{\"error\": \"internal_error\"} }",
+        "return providers.Account{}, err",
+        "return providers.Account{}, errors.New(\"proxy_not_healthy\")",
+        "return providers.Account{}, errors.New(\"provider_registry_unavailable\")",
+        "return providers.Account{}, errors.New(\"provider_account_capability_missing\")",
+        "return errors.New(\"residential sync config\")",
+        "return errors.New(\"xray read\")",
+        "return errors.New(\"xray parse\")",
+        "return fmt.Errorf(\"xray save: %s\", saved.Msg)"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "sanaei_panel",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-SANAEI-PANEL-01",
+          "text": "panel abstraction remains modular"
+        },
+        {
+          "id": "DEEP-SANAEI-PANEL-02",
+          "text": "Sanaei API is live read/write plane where implemented"
+        },
+        {
+          "id": "DEEP-SANAEI-PANEL-03",
+          "text": "authentication/session behavior is resilient"
+        },
+        {
+          "id": "DEEP-SANAEI-PANEL-04",
+          "text": "inbound/client mutation and inventory are API-driven"
+        },
+        {
+          "id": "DEEP-SANAEI-PANEL-05",
+          "text": "desired/create/update/planner/ready-worker responsibilities remain separated"
+        },
+        {
+          "id": "DEEP-SANAEI-PANEL-06",
+          "text": "panel bootstrap and user capacity are observable"
+        }
+      ],
+      "responsibility_evidence": [
+        "HTTP handler",
+        "internal computation/orchestration",
+        "performs HTTP/API call",
+        "persists/mutates DB state",
+        "persists/mutates DB state; reads DB state",
+        "reads DB state"
+      ],
+      "owned_files": [
+        "internal/panels/sanaei/api.go",
+        "internal/panels/sanaei/api_error_test.go",
+        "internal/panels/sanaei/auth.go",
+        "internal/panels/sanaei/auth_test.go",
+        "internal/panels/sanaei/client_mutation.go",
+        "internal/panels/sanaei/clients.go",
+        "internal/panels/sanaei/clients_test.go",
+        "internal/panels/sanaei/database.go",
+        "internal/panels/sanaei/direct_session.go",
+        "internal/panels/sanaei/driver.go",
+        "internal/panels/sanaei/driver_test.go",
+        "internal/panels/sanaei/inbound_get.go",
+        "internal/panels/sanaei/inbounds.go",
+        "internal/panels/sanaei/installer.go",
+        "internal/panels/sanaei/installer_adapter.go",
+        "internal/panels/sanaei/installer_adapter_test.go",
+        "internal/panels/sanaei/inventory.go",
+        "internal/panels/sanaei/inventory_test.go",
+        "internal/panels/sanaei/manager.go",
+        "internal/panels/sanaei/mutation.go",
+        "internal/panels/sanaei/mutation_test.go",
+        "internal/panels/sanaei/panel_configurer.go",
+        "internal/panels/sanaei/panel_configurer_test.go",
+        "internal/panels/sanaei/panel_page.go",
+        "internal/panels/sanaei/panel_session.go",
+        "internal/panels/sanaei/panel_session_index_test.go",
+        "internal/panels/sanaei/panel_session_test.go",
+        "internal/panels/sanaei/raw_list.go",
+        "internal/panels/sanaei/reality_scan.go",
+        "internal/panels/sanaei/resilient.go",
+        "internal/panels/sanaei/resilient_test.go",
+        "internal/panels/sanaei/runtime.go",
+        "internal/panels/sanaei/runtime_manager.go",
+        "internal/panels/sanaei/runtime_manager_test.go",
+        "internal/panels/sanaei/runtime_test.go",
+        "internal/panels/sanaei/session_executor.go",
+        "internal/panels/sanaei/session_executor_test.go",
+        "internal/panels/sanaei/ssh_session_executor.go",
+        "internal/panels/sanaei/ssh_session_executor_v2.go",
+        "internal/panels/sanaei/ssh_session_executor_v2_post.go",
+        "internal/panels/sanaei/store.go",
+        "internal/panels/sanaei/template.go",
+        "internal/panels/sanaei/template_test.go",
+        "internal/panels/sanaei/traffic.go",
+        "internal/panels/sanaei/traffic_adapter.go"
+      ],
+      "function_count": 131,
+      "api_surface": [],
+      "db_tables": [
+        "SET",
+        "deployments",
+        "panel_instances",
+        "xui_clients",
+        "xui_panel_deployments"
+      ],
+      "dependency_call_symbols": [
+        "Acquire",
+        "Add",
+        "AddClient",
+        "AddClients",
+        "AddInbound",
+        "Authorize",
+        "BestRealityTarget",
+        "Build",
+        "CheckInstallerCompatibility",
+        "Client",
+        "Close",
+        "Create",
+        "DefaultDatabasePaths",
+        "DefaultInstallerDefinition",
+        "DefaultRetryPolicy",
+        "DeleteClient",
+        "Discover",
+        "DiscoverWithExecutor",
+        "Do",
+        "Error",
+        "Get",
+        "GetClientTraffic",
+        "Header",
+        "ImportCommand",
+        "Index",
+        "InspectTemplate",
+        "Invalidate",
+        "Load",
+        "Login",
+        "Marshal",
+        "Name",
+        "New",
+        "NewAPIClient",
+        "NewPanelPassword",
+        "NewPanelSession",
+        "Observe",
+        "Open",
+        "PurgeExpired",
+        "Put",
+        "Read",
+        "ReadAllBounded",
+        "ReadInventory",
+        "ReadRawInboundList",
+        "Run",
+        "RunDetailed",
+        "Save",
+        "ScanRealityTargets",
+        "Set",
+        "SetEnabled",
+        "Size",
+        "Snapshot",
+        "UUIDv4",
+        "Upload",
+        "ValidateSessionTransport",
+        "VerifyCommand",
+        "Wait",
+        "buildSnapshotIndex",
+        "circuitDelay",
+        "client",
+        "decodeV2Body",
+        "delay",
+        "doPOST",
+        "errorsIs",
+        "exists",
+        "extractV2Wire",
+        "fastPolicy",
+        "get",
+        "json",
+        "login",
+        "observe",
+        "panelConfigureCommand",
+        "panelDefaults",
+        "probe",
+        "quote",
+        "retryableError",
+        "retryableErrorWithContext",
+        "retryableStatus",
+        "shellQuote",
+        "shellQuoteSession",
+        "streamSummary",
+        "supported",
+        "ttl",
+        "wipe",
+        "wipeAuth"
+      ],
+      "test_count": 37,
+      "tests": [
+        {
+          "name": "TestLoginPreservesTransportCause",
+          "file": "internal/panels/sanaei/api_error_test.go",
+          "line": 14
+        },
+        {
+          "name": "TestBearerAuthReadsSecretAndSetsHeader",
+          "file": "internal/panels/sanaei/auth_test.go",
+          "line": 23
+        },
+        {
+          "name": "TestSessionCredentialsRefusePlainHTTP",
+          "file": "internal/panels/sanaei/auth_test.go",
+          "line": 60
+        },
+        {
+          "name": "TestUUIDv4",
+          "file": "internal/panels/sanaei/clients_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestDriverDiscoveryClassifiesRuntimeCapabilities",
+          "file": "internal/panels/sanaei/driver_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestDiscoverWithExecutorIsReadOnly",
+          "file": "internal/panels/sanaei/driver_test.go",
+          "line": 37
+        },
+        {
+          "name": "TestInstallerAdapterBuildsImmutableCoreDefinition",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestInstallerAdapterRejectsUnpinnedOrInsecureArtifact",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 31
+        },
+        {
+          "name": "TestInstallerAdapterCompatibilityDefaults",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 39
+        },
+        {
+          "name": "TestLegacyInstallerCommandDoesNotBecomeAdapterSource",
+          "file": "internal/panels/sanaei/installer_adapter_test.go",
+          "line": 56
+        },
+        {
+          "name": "TestReadInventoryNormalizesWithoutSecrets",
+          "file": "internal/panels/sanaei/inventory_test.go",
+          "line": 8
+        },
+        {
+          "name": "TestAddInboundUsesRestrictedEndpoint",
+          "file": "internal/panels/sanaei/mutation_test.go",
+          "line": 28
+        },
+        {
+          "name": "TestAddInboundRejectsSuccessFalse",
+          "file": "internal/panels/sanaei/mutation_test.go",
+          "line": 112
+        },
+        {
+          "name": "TestPanelDefaultsDeterministicAndScoped",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestPanelPasswordsAreRandomURLSafeAndNotReused",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 24
+        },
+        {
+          "name": "TestPanelConfigureCommandDoesNotContainCredential",
+          "file": "internal/panels/sanaei/panel_configurer_test.go",
+          "line": 43
+        },
+        {
+          "name": "TestPanelSessionBuildsAndClearsIndex",
+          "file": "internal/panels/sanaei/panel_session_index_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestPanelSessionSnapshotLoadsOnce",
+          "file": "internal/panels/sanaei/panel_session_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestResilientRetries5xx",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 21
+        },
+        {
+          "name": "TestResilientRetries429",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 96
+        },
+        {
+          "name": "TestResilientFailsFast400",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 158
+        },
+        {
+          "name": "TestResilientHonorsCancellation",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 216
+        },
+        {
+          "name": "TestReadAllBounded",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 251
+        },
+        {
+          "name": "TestRetryableErrorWithContextClientTimeout",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 293
+        },
+        {
+          "name": "TestResilientDoesNotBlindRetryMutation",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 305
+        },
+        {
+          "name": "TestResilientStillRetriesSafeRead",
+          "file": "internal/panels/sanaei/resilient_test.go",
+          "line": 319
+        },
+        {
+          "name": "TestRuntimeManagerRejectsEmptyPanel",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 11
+        },
+        {
+          "name": "TestRuntimeManagerInvalidateAndPurge",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 18
+        },
+        {
+          "name": "TestRuntimeManagerConcurrentCacheRead",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 33
+        },
+        {
+          "name": "TestCircuitDelay",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 50
+        },
+        {
+          "name": "TestRuntimeManagerCircuitOpen",
+          "file": "internal/panels/sanaei/runtime_manager_test.go",
+          "line": 61
+        },
+        {
+          "name": "TestRuntimeFactoryRejectsMissingDependencies",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestRetryableStatusClassification",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestRetryableErrorCancellationIsPermanent",
+          "file": "internal/panels/sanaei/runtime_test.go",
+          "line": 27
+        },
+        {
+          "name": "TestSessionExecutorContract",
+          "file": "internal/panels/sanaei/session_executor_test.go",
+          "line": 16
+        },
+        {
+          "name": "TestInspectTemplateRequiresSQLite",
+          "file": "internal/panels/sanaei/template_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestImportCommandHasRollbackAndChecksum",
+          "file": "internal/panels/sanaei/template_test.go",
+          "line": 24
+        }
+      ],
+      "failure_evidence": [
+        "return nil, ErrAPIRequest",
+        "return fmt.Errorf(\"%w: csrf request: %v\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: csrf transport: %w\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: csrf status %d\", ErrAPIRequest, resp.StatusCode)",
+        "return ErrAPIRequest",
+        "return fmt.Errorf(\"%w: login request: %v\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: login transport: %w\", ErrAPIRequest, err)",
+        "return fmt.Errorf(\"%w: status %d\", ErrAPIRequest, resp.StatusCode)",
+        "return fmt.Errorf(\"%w: api transport: %w\", ErrAPIRequest, err)",
+        "func (f failingTransport) RoundTrip(*http.Request) (*http.Response, error) { return nil, f.err }",
+        "return err",
+        "return ErrInsecureCredentialTransport",
+        "return ErrMutationRequest",
+        "return fmt.Errorf(\"%w: http=%d\", ErrAddClientUnsupported, resp.StatusCode)",
+        "return fmt.Errorf(\"%w: addClient http=%d body=%q\", ErrMutationRequest, resp.StatusCode, string(body))",
+        "return fmt.Errorf(\"%w: addClient invalid json body=%q\", ErrMutationRequest, string(body))",
+        "return fmt.Errorf(\"%w: http=%d msg=%q\", ErrMutationRejected, resp.StatusCode, envelope.Msg)",
+        "return nil, ErrClientCount",
+        "return out, err",
+        "return \"\", err",
+        "return SessionResponse{}, ErrSessionRequest",
+        "return SessionResponse{}, err",
+        "return 0, err",
+        "return 0, fmt.Errorf(\"%w: %v\", panels.ErrUnavailable, err)",
+        "return panels.Discovery{}, err",
+        "return panels.ErrUnauthorized",
+        "return fmt.Errorf(\"%w: status %d\", panels.ErrUnavailable, code)",
+        "return panels.Discovery{}, ErrSessionRequest",
+        "return postflight.Inbound{}, ErrMutationRequest",
+        "return postflight.Inbound{}, ErrMutationRejected",
+        "return nil, err",
+        "return nil, fmt.Errorf(\"%w: api rejected\", ErrAPIRequest)",
+        "return fmt.Errorf(\"%w: api rejected\", ErrAPIRequest)",
+        "return provisioning.InstallerManifest{}, nil, ErrInvalidInstallerDefinition",
+        "return provisioning.ResolvedInstaller{}, err",
+        "return (provisioning.InstallerRegistry{DB: db, Scripts: sr}).Create(ctx, m)",
+        "return inventory.Snapshot{}, err",
+        "return inventory.Snapshot{}, ErrSessionRequest",
+        "return ErrTemplateMismatch",
+        "return fmt.Errorf(\"database import command: %w; diagnostic=%s\", err, strings.TrimSpace(out))",
+        "return ErrMutationRejected",
+        "return nil, ErrMutationRequest",
+        "return nil, ErrMutationRejected",
+        "return errors.New(\"panel config missing\")",
+        "return errors.New(",
+        "return nil, 0, ErrSessionRequest",
+        "return nil, 0, err",
+        "return nil, 0, fmt.Errorf(\"%w: page ssh: %v diagnostic=%q\", ErrSessionRequest, err, result.Stderr)",
+        "return s.raws, s.loadErr",
+        "return nil, false, err",
+        "return nil, ErrSessionRequest",
+        "return nil, ErrInventoryRejected",
+        "return nil, ErrRealityScan",
+        "return RealityScanResult{}, \"\", ErrRealityScan",
+        "return RealityScanResult{}, \"\", err",
+        "return retryableError(err)",
+        "return ctx.Err()",
+        "return resp, err",
+        "return SessionResponse{}, lastErr",
+        "return errors.New(\"sanaei runtime mutation config\")",
+        "return nil, errors.New(\"sanaei runtime config\")",
+        "return nil, errors.New(\"sanaei runtime panel id\")",
+        "return nil, fmt.Errorf(\"%w: retry in %s\", ErrRuntimeCircuitOpen, remain)",
+        "return nil, ctx.Err()",
+        "return r, err",
+        "return ErrSessionRequest",
+        "return f.resp, f.err",
+        "return SessionResponse{}, fmt.Errorf(\"%w: missing response trailer\", ErrSessionRequest)",
+        "return SessionResponse{}, fmt.Errorf(\"%w: invalid HTTP status %q\", ErrSessionRequest, statusText)",
+        "return SessionResponse{}, fmt.Errorf(\"%w: invalid response encoding\", ErrSessionRequest)",
+        "return SessionResponse{}, fmt.Errorf(\"%w: invalid compressed response\", ErrSessionRequest)",
+        "return DatabaseTemplate{}, err",
+        "return DatabaseTemplate{}, ErrInvalidTemplate",
+        "return ClientTraffic{}, err",
+        "return ClientTraffic{}, fmt.Errorf(\"%w: traffic lookup rejected\", ErrAPIRequest)",
+        "return t.Up, t.Down, err"
+      ],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "tests",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-TESTS-01",
+          "text": "focused subsystem tests precede broad verification"
+        },
+        {
+          "id": "DEEP-TESTS-02",
+          "text": "provider regressions have characterization tests"
+        },
+        {
+          "id": "DEEP-TESTS-03",
+          "text": "runtime-visible changes require real flow smoke verification"
+        },
+        {
+          "id": "DEEP-TESTS-04",
+          "text": "test maps trace features to verification commands"
+        },
+        {
+          "id": "DEEP-TESTS-05",
+          "text": "handoff knowledge gates do not substitute for product tests"
+        }
+      ],
+      "responsibility_evidence": [],
+      "owned_files": [],
+      "function_count": 0,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [],
+      "test_count": 0,
+      "tests": [],
+      "failure_evidence": [],
+      "incident_guardrails": []
+    },
+    {
+      "subsystem": "vultr",
+      "purpose_requirements": [
+        {
+          "id": "DEEP-VULTR-01",
+          "text": "provider-specific API semantics"
+        },
+        {
+          "id": "DEEP-VULTR-02",
+          "text": "accurate capacity is first-class"
+        },
+        {
+          "id": "DEEP-VULTR-03",
+          "text": "interactive browser capacity observation isolated from generic provider core"
+        },
+        {
+          "id": "DEEP-VULTR-04",
+          "text": "manual challenge path remains human-interactive"
+        },
+        {
+          "id": "DEEP-VULTR-05",
+          "text": "authorized browser state may be reused after manual challenge"
+        }
+      ],
+      "responsibility_evidence": [
+        "internal computation/orchestration",
+        "performs HTTP/API call"
+      ],
+      "owned_files": [
+        "internal/providers/vultr/client.go",
+        "internal/providers/vultr/client_test.go",
+        "internal/providers/vultr/driver.go",
+        "internal/providers/vultr/driver_test.go",
+        "internal/providers/vultr/mutation.go",
+        "internal/providers/vultr/mutation_driver.go",
+        "internal/providers/vultr/mutation_driver_test.go",
+        "internal/providers/vultr/read.go",
+        "internal/providers/vultr/read_driver.go",
+        "internal/providers/vultr/read_driver_test.go",
+        "internal/providers/vultrconsole/browser.go",
+        "internal/providers/vultrconsole/browser_test.go",
+        "internal/providers/vultrconsole/proxy_bridge.go"
+      ],
+      "function_count": 60,
+      "api_surface": [],
+      "db_tables": [],
+      "dependency_call_symbols": [
+        "Account",
+        "Add",
+        "Addr",
+        "CanCreateCapacity",
+        "Capacity",
+        "Catalog",
+        "Client",
+        "Close",
+        "Context",
+        "CreateInstance",
+        "CreateSSHKey",
+        "CreateServer",
+        "DeleteInstance",
+        "DeleteSSHKey",
+        "DeleteServer",
+        "Do",
+        "Error",
+        "FindServerByIdentity",
+        "Get",
+        "Header",
+        "Health",
+        "Instance",
+        "Instances",
+        "Inventory",
+        "IsClass",
+        "IsRetryable",
+        "ListServers",
+        "Marshal",
+        "Metadata",
+        "New",
+        "NewClient",
+        "NewClientFromSource",
+        "NewContext",
+        "OS",
+        "Observe",
+        "Plans",
+        "Regions",
+        "RoundTrip",
+        "Run",
+        "SSHKey",
+        "Set",
+        "String",
+        "Text",
+        "Username",
+        "auth",
+        "connect",
+        "containsString",
+        "do",
+        "doOnce",
+        "errorsAs",
+        "fixtureReadDriver",
+        "normalizeError",
+        "normalizeOS",
+        "normalizeServer",
+        "pagePath",
+        "zeroCredential"
+      ],
+      "test_count": 11,
+      "tests": [
+        {
+          "name": "TestClientAuthorizationAndHealth",
+          "file": "internal/providers/vultr/client_test.go",
+          "line": 10
+        },
+        {
+          "name": "TestGET429RetriesButMutationDoesNot",
+          "file": "internal/providers/vultr/client_test.go",
+          "line": 30
+        },
+        {
+          "name": "TestInstancesFollowsPaginationNext",
+          "file": "internal/providers/vultr/client_test.go",
+          "line": 61
+        },
+        {
+          "name": "TestFactoryMetadata",
+          "file": "internal/providers/vultr/driver_test.go",
+          "line": 9
+        },
+        {
+          "name": "TestErrorTaxonomy",
+          "file": "internal/providers/vultr/driver_test.go",
+          "line": 18
+        },
+        {
+          "name": "TestMutationContracts",
+          "file": "internal/providers/vultr/mutation_driver_test.go",
+          "line": 15
+        },
+        {
+          "name": "TestCreate429IsAmbiguousWithRetryAfter",
+          "file": "internal/providers/vultr/mutation_driver_test.go",
+          "line": 76
+        },
+        {
+          "name": "TestDelete404IsIdempotent",
+          "file": "internal/providers/vultr/mutation_driver_test.go",
+          "line": 95
+        },
+        {
+          "name": "TestReadContracts",
+          "file": "internal/providers/vultr/read_driver_test.go",
+          "line": 38
+        },
+        {
+          "name": "TestNormalizeUbuntuVersions",
+          "file": "internal/providers/vultr/read_driver_test.go",
+          "line": 68
+        },
+        {
+          "name": "TestMaximumInstancesPattern",
+          "file": "internal/providers/vultrconsole/browser_test.go",
+          "line": 5
+        }
+      ],
+      "failure_evidence": [
+        "func (e HTTPError) Error() string { return fmt.Sprintf(\"vultr http %d: %s\", e.Status, e.Message) }",
+        "return err",
+        "return ctx.Err()",
+        "return getErr",
+        "return errors.New(\"vultr: empty credential\")",
+        "return HTTPError{Status: resp.StatusCode, Message: x.Error, RetryAfter: retry}",
+        "return nil, fmt.Errorf(\"vultr driver: invalid open request\")",
+        "return nil, err",
+        "return nil, fmt.Errorf(\"vultr driver: empty credential\")",
+        "return normalizeError(\"health\", d.client.do(ctx, http.MethodGet, \"/account\", nil, &x))",
+        "return out.Instance, err",
+        "return out.SSHKey, err",
+        "return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: \"create_server\", Message: \"invalid Vultr OS id\", Cause: err}",
+        "return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, normalizeError(\"get_ssh_key\", keyErr)",
+        "return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: \"create_server\", Message: \"Vultr SSH public key is empty or unsupported\"}",
+        "return providers.CreateServerResult{Outcome: out}, pe",
+        "return providers.CreateServerResult{Outcome: providers.OutcomeAmbiguous}, &providers.Error{Class: providers.ErrorAmbiguousOutcome, Operation: \"create_server\", Message: \"Vultr create returned no instance id\"}",
+        "return providers.CreateServerResult{ServerID: x.ID, Outcome: providers.OutcomeAccepted}, nil",
+        "return providers.SSHKey{}, normalizeError(\"create_ssh_key\", err)",
+        "return providers.SSHKey{}, normalizeError(\"verify_ssh_key\", getErr)",
+        "return providers.SSHKey{}, ctx.Err()",
+        "return providers.SSHKey{}, &providers.Error{Class: providers.ErrorUnavailable, Operation: \"verify_ssh_key\", Message: \"Vultr SSH key not visible after create\"}",
+        "func errorsAs(err error, target any) bool { return errors.As(err, target) }",
+        "return x, err",
+        "return x.Instance, err",
+        "return x.SSHKey, err",
+        "return x.AvailablePlans, err",
+        "return providers.Account{}, normalizeError(\"account\", err)",
+        "return providers.Account{}, &providers.Error{Class: providers.ErrorUnavailable, Message: \"vultr account email missing\"}",
+        "return providers.Capacity{}, normalizeError(\"capacity\", err)",
+        "return providers.Catalog{}, normalizeError(\"catalog_regions\", err)",
+        "return providers.Catalog{}, normalizeError(\"catalog_plans\", err)",
+        "return providers.Catalog{}, normalizeError(\"catalog_os\", err)",
+        "return providers.Server{}, normalizeError(\"get_server\", err)",
+        "return nil, normalizeError(\"list_servers\", err)",
+        "return providers.Inventory{}, err",
+        "return providers.Observation{}, err",
+        "return 0, fmt.Errorf(\"navigate: %w\", err)",
+        "return 0, ErrChallenge",
+        "return 0, fmt.Errorf(\"login_form url=%s title=%q: %w\", currentURL, title, err)",
+        "return 0, fmt.Errorf(\"limits_page url=%s title=%q: %w\", currentURL, title, err)",
+        "return 0, errors.New(\"maximum instances not found\")",
+        "return 0, errors.New(\"invalid maximum instances\")",
+        "return \"\", err"
+      ],
+      "incident_guardrails": [
+        "INC-006"
+      ]
+    }
+  ],
+  "methodology": "composes intent + function behavior + routes + DB touches + tests + incident guardrails into one subsystem view; structural evidence is not a substitute for exact source/runtime"
+}
