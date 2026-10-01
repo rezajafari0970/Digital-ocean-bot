@@ -31,6 +31,14 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			}
 		}
 	}
+	if item.State == droplets.Expiring && item.ReplacementDeploymentID != "" {
+		var replacementState string
+		_ = c.DB.QueryRowContext(ctx, "SELECT state FROM deployments WHERE id=$1 AND account_id=$2", item.ReplacementDeploymentID, item.AccountID).Scan(&replacementState)
+		if replacementState == "FAILED" || replacementState == "INSTALL_FAILED" || replacementState == "INSTALL_ROLLED_BACK" {
+			_, _ = c.DB.ExecContext(ctx, "UPDATE droplets SET replacement_deployment_id=NULL,updated_at=now() WHERE id=$1 AND replacement_deployment_id=$2", item.ID, item.ReplacementDeploymentID)
+			item.ReplacementDeploymentID = ""
+		}
+	}
 	if item.State == droplets.Expiring {
 		// Converge oversupply back to desired capacity. Claim excess retirement
 		// under an account-scoped advisory lock so concurrent lifecycle workers
