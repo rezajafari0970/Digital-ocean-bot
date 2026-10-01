@@ -81,3 +81,35 @@ func TestNormalizeUbuntuVersions(t *testing.T) {
 		t.Fatal(strings.Join([]string{f, v}, "/"))
 	}
 }
+
+func TestObserveFastDoesNotDependOnCatalogEndpoints(t *testing.T) {
+	var catalogHits int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/account":
+			_, _ = w.Write([]byte("{\"account\":{\"name\":\"acct\",\"email\":\"owner@example.test\"}}"))
+		case "/instances":
+			_, _ = w.Write([]byte("{\"instances\":[{\"id\":\"i1\",\"main_ip\":\"203.0.113.8\",\"status\":\"active\"}]}"))
+		case "/plans", "/regions", "/os":
+			catalogHits++
+			http.Error(w, "catalog unavailable", http.StatusBadGateway)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer s.Close()
+	c := NewClient(s.Client(), "token")
+	c.base = s.URL
+	d := &Driver{client: c}
+	obs, err := d.ObserveFast(context.Background())
+	if err != nil {
+		t.Fatalf("fast observation must survive catalog outage: %v", err)
+	}
+	if catalogHits != 0 {
+		t.Fatalf("fast observation touched catalog endpoints %d times", catalogHits)
+	}
+	if obs.Capacity.ComputeInUse != 1 || len(obs.Inventory.Servers) != 1 {
+		t.Fatalf("obs=%+v", obs)
+	}
+}
