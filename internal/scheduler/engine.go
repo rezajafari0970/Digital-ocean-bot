@@ -44,6 +44,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		var automationReady bool
 		_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady)
 		if !automationReady {
+			log.Printf("scheduler skip account=%s reason=automation_not_ready profile=%s", x.AccountID, x.ProfileID)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
@@ -62,6 +63,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		}
 		cap, capErr := capacity.Read(ctx, e.DB, x.AccountID, 2*time.Minute)
 		if capErr != nil {
+			log.Printf("scheduler skip account=%s reason=capacity_read err=%v", x.AccountID, capErr)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
@@ -70,16 +72,19 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)
 		needed := desired - managed - preCreate
 		if needed <= 0 {
+			log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d precreate=%d", x.AccountID, desired, managed, preCreate)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
 		if x.MaxConcurrent > 0 && concurrent >= x.MaxConcurrent {
+			log.Printf("scheduler skip account=%s reason=max_concurrent concurrent=%d max=%d", x.AccountID, concurrent, x.MaxConcurrent)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
 		// Creation cadence is independent from the scheduler wake-up cadence.
 		// At most one new deployment starts per configured spacing window.
 		if nextBuild.Valid && now.Before(nextBuild.Time) {
+			log.Printf("scheduler skip account=%s reason=build_spacing next=%s", x.AccountID, nextBuild.Time.UTC().Format(time.RFC3339))
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
@@ -101,6 +106,9 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		}
 		if allowed > available {
 			allowed = available
+		}
+		if allowed < 1 {
+			log.Printf("scheduler skip account=%s reason=no_available_capacity known=%v limit=%d inuse=%d pending=%d", x.AccountID, cap.LimitKnown, cap.Limit, cap.InUse, cap.Pending)
 		}
 		for i := 0; i < allowed; i++ {
 			if err := e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID); err == nil {
