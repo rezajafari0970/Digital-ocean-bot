@@ -1,0 +1,1132 @@
+{
+  "schema_version": 1,
+  "source_commit": "ccfa4e72955080f80b7e7d508efa18d58696f1e1",
+  "file": "web/static/app.js",
+  "function_count": 23,
+  "action_count": 41,
+  "event_handler_evidence_count": 6,
+  "functions": [
+    {
+      "name": "openAccountWizard",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 2,
+      "end_line": 50,
+      "api_literals": [
+        "/api/v1/accounts",
+        "/api/v1/accounts/",
+        "/api/v1/accounts/preview",
+        "/api/v1/panel-settings",
+        "/api/v1/profiles",
+        "/api/v1/providers",
+        "/api/v1/proxies",
+        "/api/v1/templates"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [
+        "busy"
+      ],
+      "storage_ops": [
+        "setItem"
+      ],
+      "candidate_calls": [
+        "Error",
+        "FormData",
+        "Number",
+        "String",
+        "accountDash",
+        "add",
+        "alert",
+        "api",
+        "async",
+        "close",
+        "concat",
+        "dt",
+        "entries",
+        "esc",
+        "fetch",
+        "filter",
+        "find",
+        "forEach",
+        "formatDate",
+        "from",
+        "fromEntries",
+        "get",
+        "health",
+        "includes",
+        "indexOf",
+        "isArray",
+        "isFinite",
+        "isInteger",
+        "join",
+        "keys",
+        "limit",
+        "load",
+        "map",
+        "now",
+        "open",
+        "parseMinutesExpr",
+        "pickOS",
+        "preventDefault",
+        "pushState",
+        "querySelectorAll",
+        "remove",
+        "replaceAll",
+        "requestSubmit",
+        "round",
+        "set",
+        "setInterval",
+        "setItem",
+        "showApp",
+        "showLogin",
+        "showModal",
+        "sizeLabel",
+        "sizeOptions",
+        "slice",
+        "some",
+        "startsWith",
+        "stat",
+        "stringify",
+        "syncPlan",
+        "text",
+        "then",
+        "to",
+        "toFixed",
+        "toLowerCase",
+        "toUpperCase",
+        "toast",
+        "v"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "async function openAccountWizard(){const allProviders=await api('/api/v1/providers'),providerList=allProviders.filter(x=>x.status==='ready');if(!providerList.length)throw Error('No provider driver is registered');let proxies=[{id:'',name:'No proxy — Direct server IP'}];try{const p=await api('/api/v1",
+        "$('#modalSubmit').disabled=true;",
+        "$('#modalSubmit').disabled=",
+        "$('#modalSubmit').hidden=false}catch(e){$('#modalError').textContent=e.message}finally{b.classList.remove('busy')}};$('#modalForm').onsubmit=null;$('#modalSubmit').onclick=async()=>{if(!cache.accountPreview)return;const f=new FormData($('#modalForm')),d=cache.accountPreview;const proxyIDs=[f.get('pr",
+        "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current=="
+      ],
+      "error_evidence": [
+        "async function openAccountWizard(){const allProviders=await api('/api/v1/providers'),providerList=allProviders.filter(x=>x.status==='ready');if(!providerList.length)throw Error('No provider driver is registered');let proxies=[{id:'',name:'No proxy — Direct server IP'}];try{const p=await api('/api/v1",
+        "$('#modalSubmit').hidden=false}catch(e){$('#modalError').textContent=e.message}finally{b.classList.remove('busy')}};$('#modalForm').onsubmit=null;$('#modalSubmit').onclick=async()=>{if(!cache.accountPreview)return;const f=new FormData($('#modalForm')),d=cache.accountPreview;const proxyIDs=[f.get('pr",
+        "$('#modalError').textContent=",
+        "const priorityRegions=[f.get('region'),f.get('region2'),f.get('region3'),f.get('region4'),f.get('region5')].filter((v,i,a)=>v&&a.indexOf(v)===i);const lifeMin=Number(f.get('lifetime_min_minutes')),lifeMax=Number(f.get('lifetime_max_minutes')),desired=Number(f.get('desired_server_count')),bsMin=parse",
+        "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current=="
+      ]
+    },
+    {
+      "name": "accountCard",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 51,
+      "end_line": 51,
+      "api_literals": [],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "String",
+        "esc",
+        "formatDate",
+        "isArray",
+        "join",
+        "replaceAll",
+        "toLowerCase",
+        "toUpperCase"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [
+        "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ER"
+      ],
+      "error_evidence": [
+        "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ER"
+      ]
+    },
+    {
+      "name": "accountRefresh",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 52,
+      "end_line": 52,
+      "api_literals": [
+        "/api/v1/accounts",
+        "/api/v1/accounts/",
+        "/api/v1/proxies"
+      ],
+      "dom_selectors": [
+        "[data-action="
+      ],
+      "class_mutations": [
+        "busy"
+      ],
+      "storage_ops": [],
+      "candidate_calls": [
+        "FormData",
+        "Instances",
+        "Number",
+        "String",
+        "accountDash",
+        "add",
+        "alert",
+        "all",
+        "api",
+        "async",
+        "close",
+        "closest",
+        "confirm",
+        "entries",
+        "esc",
+        "filter",
+        "find",
+        "findIndex",
+        "forEach",
+        "from",
+        "get",
+        "includes",
+        "indexOf",
+        "info",
+        "isArray",
+        "isFinite",
+        "isInteger",
+        "join",
+        "limit",
+        "load",
+        "map",
+        "max",
+        "now",
+        "parseMinutesExpr",
+        "password",
+        "querySelector",
+        "querySelectorAll",
+        "regOpts",
+        "remove",
+        "render",
+        "round",
+        "sel",
+        "showModal",
+        "stringify",
+        "to",
+        "toast",
+        "token"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\"
+      ],
+      "error_evidence": [
+        "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\"
+      ]
+    },
+    {
+      "name": "editProxy",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 53,
+      "end_line": 54,
+      "api_literals": [
+        "/api/v1/proxies/"
+      ],
+      "dom_selectors": [
+        ".fieldEye"
+      ],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "FormData",
+        "Number",
+        "accountDash",
+        "accountPreflight",
+        "accountRefresh",
+        "addEventListener",
+        "alert",
+        "api",
+        "close",
+        "closest",
+        "confirm",
+        "deleteAccount",
+        "deleteProxy",
+        "editAccount",
+        "esc",
+        "get",
+        "load",
+        "openForm",
+        "openVultrConsole",
+        "preventDefault",
+        "proxyTest",
+        "querySelector",
+        "showModal",
+        "stringify",
+        "testProxy"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.editProxy=async id=>{try{const r=await api('/api/v1/proxies/'+id);$('#modalTitle').textContent='Edit proxy';$('#modalFields').innerHTML='<label>Name<input name=\"name\" value=\"'+esc(r.name)+'\"></label><label>Type<select name=\"type\"><option value=\"auto\">Auto detect</option><option value=\"http\">H"
+      ]
+    },
+    {
+      "name": "testProxy",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 55,
+      "end_line": 56,
+      "api_literals": [
+        "/api/v1/proxies/"
+      ],
+      "dom_selectors": [
+        "[data-action=\\"
+      ],
+      "class_mutations": [
+        "busy"
+      ],
+      "storage_ops": [],
+      "candidate_calls": [
+        "accountDash",
+        "add",
+        "addEventListener",
+        "alert",
+        "api",
+        "load",
+        "querySelector",
+        "remove",
+        "route"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy healthy\\nType: '+d.type+'\\nExit IP: '+d.exit_ip+'\\nCountry: '+d.country+' ('+d"
+      ],
+      "error_evidence": [
+        "window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy healthy\\nType: '+d.type+'\\nExit IP: '+d.exit_ip+'\\nCountry: '+d.country+' ('+d"
+      ]
+    },
+    {
+      "name": "statusClass",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 57,
+      "end_line": 57,
+      "api_literals": [],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "String",
+        "toLowerCase"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "proxyCard",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 58,
+      "end_line": 60,
+      "api_literals": [],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "esc",
+        "formatDate",
+        "load",
+        "setInterval",
+        "statusClass"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "parseMinutesExpr",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 61,
+      "end_line": 69,
+      "api_literals": [
+        "/api/v1/build-activity",
+        "/api/v1/provision-errors"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [
+        "setItem"
+      ],
+      "candidate_calls": [
+        "Date",
+        "DateTimeFormat",
+        "Error",
+        "Number",
+        "String",
+        "all",
+        "api",
+        "async",
+        "clearTimeout",
+        "esc",
+        "filter",
+        "forEach",
+        "format",
+        "formatDate",
+        "function",
+        "includes",
+        "isFinite",
+        "isNaN",
+        "join",
+        "map",
+        "openProvisionDetail",
+        "panel",
+        "querySelectorAll",
+        "reduce",
+        "round",
+        "setItem",
+        "setTimeout",
+        "some",
+        "splice",
+        "split",
+        "stat",
+        "test",
+        "toUpperCase",
+        "toast",
+        "trim"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "const renderBuild=async()=>{current='build-activity';sessionStorage.setItem('page',current);$('#title').textContent='Build Activity';$('#primaryAction').hidden=true;const c=$('#content');c.innerHTML='<p class=\"muted\">Loading build activity...</p>';try{const [d,errs]=await Promise.all([api('/api/v1/b"
+      ],
+      "error_evidence": [
+        "function parseMinutesExpr(v){v=String(v||'').trim();if(!/^[0-9.]+(?:\\s*\\*\\s*[0-9.]+)*$/.test(v))throw Error('Build spacing must be minutes, e.g. 30 or 6*60');const n=v.split('*').reduce((a,x)=>a*Number(x.trim()),1);if(!Number.isFinite(n)||n<1||n>525600)throw Error('Build spacing is out of range');re",
+        "const renderBuild=async()=>{current='build-activity';sessionStorage.setItem('page',current);$('#title').textContent='Build Activity';$('#primaryAction').hidden=true;const c=$('#content');c.innerHTML='<p class=\"muted\">Loading build activity...</p>';try{const [d,errs]=await Promise.all([api('/api/v1/b"
+      ]
+    },
+    {
+      "name": "openProvisionDetail",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 70,
+      "end_line": 74,
+      "api_literals": [
+        "/api/v1/build-activity/"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "addEventListener",
+        "alert",
+        "api",
+        "baseLoad",
+        "esc",
+        "formatDate",
+        "function",
+        "join",
+        "keys",
+        "map",
+        "renderBuild",
+        "setInterval",
+        "showModal"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.openProvisionDetail=async id=>{try{const d=await api('/api/v1/build-activity/'+id+'/provision');$('#modalTitle').textContent='SSH & Installation Diagnostics';const steps=(d.steps||[]).map(x=>'<tr><td>'+esc(x.step)+'</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.terminal?'Terminal':x.next_retry_"
+      ]
+    },
+    {
+      "name": "openConfigForm",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 75,
+      "end_line": 83,
+      "api_literals": [
+        "/api/v1/configs"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "FormData",
+        "Number",
+        "SNIs",
+        "Set",
+        "String",
+        "alert",
+        "api",
+        "close",
+        "esc",
+        "filter",
+        "get",
+        "join",
+        "limit",
+        "load",
+        "map",
+        "preventDefault",
+        "round",
+        "showModal",
+        "some",
+        "split",
+        "stringify",
+        "test",
+        "trim"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "$('#modalFields [name=\"sni_selection_mode\"]').value=x.sni_selection_mode||'scored';$('#modalError').textContent='';$('#modal').showModal();",
+        "$('#modalForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),ports=String(f.get('ports')||'').split(',').map(v=>Number(v.trim())).filter(Number.isInteger),sn=String(f.get('manual_snis')||'').split(/\\r?\\n|,/).map(v=>v.trim()).filter(Boolean);if(!ports.length){$('#modalError').",
+        "}catch(e){alert(e.message)}"
+      ]
+    },
+    {
+      "name": "editConfig",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 84,
+      "end_line": 86,
+      "api_literals": [
+        "/api/v1/configs"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "addEventListener",
+        "api",
+        "async",
+        "closest",
+        "openConfigForm"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "deleteAllCapacityClients",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 87,
+      "end_line": 91,
+      "api_literals": [
+        "/api/v1/config-capacity/cleanup/",
+        "/api/v1/config-capacity/delete-all-clients"
+      ],
+      "dom_selectors": [
+        "[data-action="
+      ],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "Error",
+        "Promise",
+        "addEventListener",
+        "api",
+        "async",
+        "closest",
+        "confirm",
+        "encodeURIComponent",
+        "load",
+        "querySelector",
+        "setTimeout",
+        "toast"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-"
+      ],
+      "error_evidence": [
+        "window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-"
+      ]
+    },
+    {
+      "name": "outputQuery",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 92,
+      "end_line": 92,
+      "api_literals": [],
+      "dom_selectors": [
+        "#outputExpiryMinutes",
+        "#outputRecentMinutes"
+      ],
+      "class_mutations": [],
+      "storage_ops": [
+        "setItem"
+      ],
+      "candidate_calls": [
+        "Number",
+        "max",
+        "min",
+        "querySelector",
+        "setItem"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "openSnapshot",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 93,
+      "end_line": 93,
+      "api_literals": [
+        "/api/v1/output/share"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "api",
+        "open",
+        "outputQuery",
+        "toast"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.openSnapshot=async mode=>{try{const d=await api('/api/v1/output/share',{method:'POST'}),u=location.origin+d.url+outputQuery(mode),w=window.open(u,'_blank');if(!w)toast('Popup blocked','error')}catch(e){toast(e.message,'error')}};"
+      ]
+    },
+    {
+      "name": "shareSnapshot",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 94,
+      "end_line": 95,
+      "api_literals": [
+        "/api/v1/output/share"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "addEventListener",
+        "api",
+        "closest",
+        "openSnapshot",
+        "outputQuery",
+        "toast",
+        "writeText"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.shareSnapshot=async mode=>{try{const d=await api('/api/v1/output/share',{method:'POST'}),u=location.origin+d.url+outputQuery(mode);await navigator.clipboard.writeText(u);toast('Share link copied')}catch(e){toast('Share link failed: '+e.message,'error')}};"
+      ]
+    },
+    {
+      "name": "openResidentialForm",
+      "kind": "function",
+      "file": "web/static/app.js",
+      "start_line": 96,
+      "end_line": 96,
+      "api_literals": [
+        "/api/v1/residential-proxies",
+        "/api/v1/residential-proxies/"
+      ],
+      "dom_selectors": [
+        ".residentialEye"
+      ],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "FormData",
+        "Number",
+        "api",
+        "close",
+        "esc",
+        "get",
+        "load",
+        "preventDefault",
+        "querySelector",
+        "showModal",
+        "stringify"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "async function openResidentialForm(existing=null){const x=existing||{};$('#modalTitle').textContent=existing?'Edit Residential proxy':'New Residential proxy';$('#modalFields').innerHTML='<label>Name<input name=\"name\" value=\"'+esc(x.name||'')+'\" required></label><label>Type<select name=\"type\"><option"
+      ]
+    },
+    {
+      "name": "editResidential",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 97,
+      "end_line": 97,
+      "api_literals": [
+        "/api/v1/residential-proxies"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "api",
+        "find",
+        "openResidentialForm"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "testResidential",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 98,
+      "end_line": 98,
+      "api_literals": [
+        "/api/v1/residential-proxies/"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "api",
+        "load",
+        "toast"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.testResidential=async id=>{try{const d=await api('/api/v1/residential-proxies/'+id+'/test',{method:'POST'});toast('Residential test passed'+(d?.exit_ip?'\\nIP: '+d.exit_ip:'')+(d?.country?'\\nCountry: '+d.country:''));load('residential')}catch(e){toast('Residential test failed: '+e.message,'err"
+      ]
+    },
+    {
+      "name": "deleteResidential",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 99,
+      "end_line": 100,
+      "api_literals": [
+        "/api/v1/residential-proxies/"
+      ],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "addEventListener",
+        "api",
+        "closest",
+        "confirm",
+        "editResidential",
+        "load",
+        "testResidential",
+        "toast"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.deleteResidential=async id=>{if(!confirm('Delete this Residential proxy?'))return;try{await api('/api/v1/residential-proxies/'+id,{method:'DELETE'});load('residential')}catch(e){toast(e.message,'error')}};"
+      ]
+    },
+    {
+      "name": "loadOutput",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 101,
+      "end_line": 101,
+      "api_literals": [
+        "/api/v1/output"
+      ],
+      "dom_selectors": [
+        "#outputExpiryMinutes"
+      ],
+      "class_mutations": [],
+      "storage_ops": [
+        "setItem"
+      ],
+      "candidate_calls": [
+        "Error",
+        "Number",
+        "String",
+        "async",
+        "close",
+        "encodeURIComponent",
+        "fetch",
+        "headers",
+        "logout",
+        "max",
+        "min",
+        "open",
+        "querySelector",
+        "setItem",
+        "text",
+        "toast",
+        "trim",
+        "write"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [
+        "window.loadOutput=async(expiry=false)=>{let path='/api/v1/output';if(expiry){const input=document.querySelector('#outputExpiryMinutes'),minutes=Math.max(1,Math.min(1440,Number(input?.value||4)));if(input)input.value=String(minutes);localStorage.setItem('outputExpiryMinutes',String(minutes));path+='?"
+      ],
+      "error_evidence": [
+        "window.loadOutput=async(expiry=false)=>{let path='/api/v1/output';if(expiry){const input=document.querySelector('#outputExpiryMinutes'),minutes=Math.max(1,Math.min(1440,Number(input?.value||4)));if(input)input.value=String(minutes);localStorage.setItem('outputExpiryMinutes',String(minutes));path+='?"
+      ]
+    },
+    {
+      "name": "openOutput",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 102,
+      "end_line": 102,
+      "api_literals": [],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "loadOutput"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "openExpiryOutput",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 103,
+      "end_line": 103,
+      "api_literals": [],
+      "dom_selectors": [],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "loadOutput"
+      ],
+      "has_try": false,
+      "has_catch": false,
+      "loading_evidence": [],
+      "error_evidence": []
+    },
+    {
+      "name": "copyOutput",
+      "kind": "window",
+      "file": "web/static/app.js",
+      "start_line": 104,
+      "end_line": 105,
+      "api_literals": [],
+      "dom_selectors": [
+        "#outputViewer"
+      ],
+      "class_mutations": [],
+      "storage_ops": [],
+      "candidate_calls": [
+        "addEventListener",
+        "async",
+        "closest",
+        "openExpiryOutput",
+        "openOutput",
+        "querySelector",
+        "toast",
+        "writeText"
+      ],
+      "has_try": true,
+      "has_catch": true,
+      "loading_evidence": [],
+      "error_evidence": [
+        "window.copyOutput=async()=>{const t=document.querySelector('#outputViewer')?.textContent||'';if(!t||t==='No matching Reality configs found.')return toast('Nothing to copy','error');try{await navigator.clipboard.writeText(t);toast('Output copied')}catch{toast('Copy failed','error')}};"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "action": "edit-settings",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "open-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "share-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "open-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "share-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "open-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "share-snapshot",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "test-residential",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "edit-residential",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "delete-residential",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "delete-all-capacity-clients",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "edit-config",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "test-proxy",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "edit-proxy",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "delete-proxy",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "account-dashboard",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "proxy-test",
+      "line": 1,
+      "owner_function": null,
+      "context": "const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Accounts'],['proxies','Proxies'],['residential','Residential'],['configs','Configs'],['output','Output'],['settings','Panel Settings']];const route=()=>{const h=location.hash.slice(1),m=h.match(/^account\\/([^/]+)$/);return m?{page:'accounts',accountId:m[1]}:{page:pages.some(x=>x[0]===h)?h:(sessionStorage.getItem('page')||'dashboard'),accountId:null}};let initialRoute=route(),token=localStorage.getItem('token')||session"
+    },
+    {
+      "action": "account-refresh",
+      "line": 48,
+      "owner_function": "openAccountWizard",
+      "context": "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current==='settings'){path='/api/v1/panel-settings';method='PUT';o.listen_port=Number(o.listen_port);await api(path,{method,body:JSON.stringify(o)});$('#modal').close();load(current);return}if(current==='templ"
+    },
+    {
+      "action": "account-preflight",
+      "line": 48,
+      "owner_function": "openAccountWizard",
+      "context": "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current==='settings'){path='/api/v1/panel-settings';method='PUT';o.listen_port=Number(o.listen_port);await api(path,{method,body:JSON.stringify(o)});$('#modal').close();load(current);return}if(current==='templ"
+    },
+    {
+      "action": "vultr-console",
+      "line": 48,
+      "owner_function": "openAccountWizard",
+      "context": "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current==='settings'){path='/api/v1/panel-settings';method='PUT';o.listen_port=Number(o.listen_port);await api(path,{method,body:JSON.stringify(o)});$('#modal').close();load(current);return}if(current==='templ"
+    },
+    {
+      "action": "account-back",
+      "line": 48,
+      "owner_function": "openAccountWizard",
+      "context": "$('#modalClose').onclick=$('#modalCancel').onclick=()=>$('#modal').close();$('#modalSubmit').onclick=()=>{if(current!=='accounts')$('#modalForm').requestSubmit()};$('#modalForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),o=Object.fromEntries(fd.entries());try{if(current==='settings'){path='/api/v1/panel-settings';method='PUT';o.listen_port=Number(o.listen_port);await api(path,{method,body:JSON.stringify(o)});$('#modal').close();load(current);return}if(current==='templ"
+    },
+    {
+      "action": "account-dashboard",
+      "line": 51,
+      "owner_function": "accountCard",
+      "context": "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ERROR:'Proxy error',DISABLED:'Disabled',CANNOT_CREATE:'Capacity full'}[ps]||ps.replaceAll('_',' ').toLowerCase(),stateReason={LOCKED:'Provider account is locked. Open the provider control panel or conta"
+    },
+    {
+      "action": "edit-account",
+      "line": 51,
+      "owner_function": "accountCard",
+      "context": "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ERROR:'Proxy error',DISABLED:'Disabled',CANNOT_CREATE:'Capacity full'}[ps]||ps.replaceAll('_',' ').toLowerCase(),stateReason={LOCKED:'Provider account is locked. Open the provider control panel or conta"
+    },
+    {
+      "action": "account-preflight",
+      "line": 51,
+      "owner_function": "accountCard",
+      "context": "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ERROR:'Proxy error',DISABLED:'Disabled',CANNOT_CREATE:'Capacity full'}[ps]||ps.replaceAll('_',' ').toLowerCase(),stateReason={LOCKED:'Provider account is locked. Open the provider control panel or conta"
+    },
+    {
+      "action": "delete-account",
+      "line": 51,
+      "owner_function": "accountCard",
+      "context": "function accountCard(r){const ps=String(r.provider_state||'UNKNOWN').toUpperCase(),providerGood=ps==='ACTIVE',stateLabel={ACTIVE:'Active',LOCKED:'Account locked',TOKEN_INVALID:'Token invalid',PERMISSION_DENIED:'Permission denied',RATE_LIMITED:'Rate limited',TRANSPORT_ERROR:'Transport error',PROXY_ERROR:'Proxy error',DISABLED:'Disabled',CANNOT_CREATE:'Capacity full'}[ps]||ps.replaceAll('_',' ').toLowerCase(),stateReason={LOCKED:'Provider account is locked. Open the provider control panel or conta"
+    },
+    {
+      "action": "account-refresh",
+      "line": 52,
+      "owner_function": "accountRefresh",
+      "context": "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\nServers: '+(d.provider_servers??d.provider_droplets)+(d.limit_known===false?' / provider limit unavailable':(' / '+(d.server_limit??d.droplet_limit))));await accountDash(id,{preserveHash:true})}catch"
+    },
+    {
+      "action": "account-preflight",
+      "line": 52,
+      "owner_function": "accountRefresh",
+      "context": "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\nServers: '+(d.provider_servers??d.provider_droplets)+(d.limit_known===false?' / provider limit unavailable':(' / '+(d.server_limit??d.droplet_limit))));await accountDash(id,{preserveHash:true})}catch"
+    },
+    {
+      "action": "test-proxy",
+      "line": 58,
+      "owner_function": "proxyCard",
+      "context": "function proxyCard(r){const rotating=(r.adapter||'generic')==='generic',ipLabel=rotating?'Current sample IP':'Exit IP',countryLabel=rotating?'Sample country':'Country',asnLabel=rotating?'Sample ASN':'ASN';return '<div class=\"card proxyCard\"><div class=\"accountCardTop\"><div><div class=\"accountName\">'+esc(r.name)+'</div><div class=\"muted\">'+esc(r.host)+':'+esc(r.port)+'</div></div><span class=\"statusBadge '+statusClass(r.status)+'\">'+esc(r.status)+'</span></div><div class=\"proxyMeta\"><span>Type</s"
+    },
+    {
+      "action": "edit-proxy",
+      "line": 58,
+      "owner_function": "proxyCard",
+      "context": "function proxyCard(r){const rotating=(r.adapter||'generic')==='generic',ipLabel=rotating?'Current sample IP':'Exit IP',countryLabel=rotating?'Sample country':'Country',asnLabel=rotating?'Sample ASN':'ASN';return '<div class=\"card proxyCard\"><div class=\"accountCardTop\"><div><div class=\"accountName\">'+esc(r.name)+'</div><div class=\"muted\">'+esc(r.host)+':'+esc(r.port)+'</div></div><span class=\"statusBadge '+statusClass(r.status)+'\">'+esc(r.status)+'</span></div><div class=\"proxyMeta\"><span>Type</s"
+    },
+    {
+      "action": "delete-proxy",
+      "line": 58,
+      "owner_function": "proxyCard",
+      "context": "function proxyCard(r){const rotating=(r.adapter||'generic')==='generic',ipLabel=rotating?'Current sample IP':'Exit IP',countryLabel=rotating?'Sample country':'Country',asnLabel=rotating?'Sample ASN':'ASN';return '<div class=\"card proxyCard\"><div class=\"accountCardTop\"><div><div class=\"accountName\">'+esc(r.name)+'</div><div class=\"muted\">'+esc(r.host)+':'+esc(r.port)+'</div></div><span class=\"statusBadge '+statusClass(r.status)+'\">'+esc(r.status)+'</span></div><div class=\"proxyMeta\"><span>Type</s"
+    },
+    {
+      "action": "edit-config",
+      "line": 86,
+      "owner_function": "editConfig",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"edit-config\"]');if(b)window.editConfig()});"
+    },
+    {
+      "action": "delete-all-capacity-clients",
+      "line": 87,
+      "owner_function": "deleteAllCapacityClients",
+      "context": "window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-action=\"delete-all-capacity-clients\"]'),old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Starting...'}try{const start=await api('/api/v1/config-capacity/delete-all-clients',{method:'POS"
+    },
+    {
+      "action": "delete-all-capacity-clients",
+      "line": 88,
+      "owner_function": "deleteAllCapacityClients",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"delete-all-capacity-clients\"]');if(b)deleteAllCapacityClients()});"
+    },
+    {
+      "action": "open-snapshot",
+      "line": 95,
+      "owner_function": "shareSnapshot",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-snapshot\"],[data-action=\"share-snapshot\"]');if(!b)return;b.dataset.action==='open-snapshot'?openSnapshot(b.dataset.mode):shareSnapshot(b.dataset.mode)});"
+    },
+    {
+      "action": "share-snapshot",
+      "line": 95,
+      "owner_function": "shareSnapshot",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-snapshot\"],[data-action=\"share-snapshot\"]');if(!b)return;b.dataset.action==='open-snapshot'?openSnapshot(b.dataset.mode):shareSnapshot(b.dataset.mode)});"
+    },
+    {
+      "action": "test-residential",
+      "line": 100,
+      "owner_function": "deleteResidential",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)});"
+    },
+    {
+      "action": "edit-residential",
+      "line": 100,
+      "owner_function": "deleteResidential",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)});"
+    },
+    {
+      "action": "delete-residential",
+      "line": 100,
+      "owner_function": "deleteResidential",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)});"
+    },
+    {
+      "action": "open-output",
+      "line": 105,
+      "owner_function": "copyOutput",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    },
+    {
+      "action": "open-expiry-output",
+      "line": 105,
+      "owner_function": "copyOutput",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    },
+    {
+      "action": "copy-output",
+      "line": 105,
+      "owner_function": "copyOutput",
+      "context": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    }
+  ],
+  "event_handlers": [
+    {
+      "line": 54,
+      "owner_function": "editProxy",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;if(a==='edit-proxy')window.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')wind"
+    },
+    {
+      "line": 86,
+      "owner_function": "editConfig",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"edit-config\"]');if(b)window.editConfig()});"
+    },
+    {
+      "line": 88,
+      "owner_function": "deleteAllCapacityClients",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"delete-all-capacity-clients\"]');if(b)deleteAllCapacityClients()});"
+    },
+    {
+      "line": 95,
+      "owner_function": "shareSnapshot",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-snapshot\"],[data-action=\"share-snapshot\"]');if(!b)return;b.dataset.action==='open-snapshot'?openSnapshot(b.dataset.mode):shareSnapshot(b.dataset.mode)});"
+    },
+    {
+      "line": 100,
+      "owner_function": "deleteResidential",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)});"
+    },
+    {
+      "line": 105,
+      "owner_function": "copyOutput",
+      "text": "document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    }
+  ]
+}
