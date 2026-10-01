@@ -1,0 +1,207 @@
+[
+  {
+    "holdout_id": 31,
+    "correct": {
+      "symbols": [
+        "TestParseCurrentXrayFormat",
+        "TestUUIDv4",
+        "TestShortID",
+        "TestWipe",
+        "TestParseXrayPublicKeyLabel"
+      ]
+    }
+  },
+  {
+    "holdout_id": 32,
+    "correct": {
+      "symbols": [
+        "Compare",
+        "key"
+      ]
+    }
+  },
+  {
+    "holdout_id": 33,
+    "correct": {
+      "symbols": [
+        "VerifyCommand",
+        "shellQuote"
+      ]
+    }
+  },
+  {
+    "holdout_id": 34,
+    "correct": {
+      "symbols": [
+        "ObservationStore",
+        "CycleResult",
+        "RunPanel"
+      ]
+    }
+  },
+  {
+    "holdout_id": 37,
+    "correct": {
+      "symbols": [
+        "ClientBundle",
+        "NewIsolatedDirectClient",
+        "Validate",
+        "CloseIdleConnections"
+      ]
+    }
+  },
+  {
+    "holdout_id": 38,
+    "correct": {
+      "symbols": [
+        "Profile",
+        "Droplet"
+      ]
+    }
+  },
+  {
+    "holdout_id": 39,
+    "correct": {
+      "symbols": [
+        "InstallerDefinition",
+        "DefaultInstallerDefinition",
+        "Build",
+        "quote",
+        "RegisterInstaller"
+      ]
+    }
+  },
+  {
+    "holdout_id": 40,
+    "correct": {
+      "symbols": [
+        "InstallerStateStore",
+        "InstallerExecutor",
+        "Execute",
+        "Rollback",
+        "installerStepName"
+      ]
+    }
+  },
+  {
+    "holdout_id": 41,
+    "correct": {
+      "symbols": [
+        "SessionRequest",
+        "SessionResponse",
+        "SessionExecutor",
+        "ExecutorAuth",
+        "Authorize"
+      ]
+    }
+  },
+  {
+    "holdout_id": 42,
+    "correct": {
+      "symbols": [
+        "testAccountProxy",
+        "zeroBytes"
+      ]
+    }
+  },
+  {
+    "holdout_id": 43,
+    "correct": {
+      "symbols": [
+        "TestHashPassword",
+        "TestShortPasswordRejected",
+        "TestRBAC"
+      ]
+    }
+  },
+  {
+    "holdout_id": 44,
+    "correct": {
+      "symbols": [
+        "Resource",
+        "Difference"
+      ]
+    }
+  },
+  {
+    "holdout_id": 46,
+    "correct": {
+      "symbols": [
+        "ReadinessSnapshot",
+        "ReadinessRecorder",
+        "ReadinessCollector",
+        "Collect",
+        "Readiness"
+      ]
+    }
+  },
+  {
+    "holdout_id": 47,
+    "correct": {
+      "symbols": [
+        "Managed",
+        "normalized",
+        "Payload",
+        "URI"
+      ]
+    }
+  },
+  {
+    "holdout_id": 48,
+    "correct": {
+      "symbols": [
+        "ClassifyAccountProviderError",
+        "ProviderStateRuntimeStatus",
+        "IsProviderObservationError",
+        "ProviderProbeInterval"
+      ]
+    }
+  },
+  {
+    "holdout_id": 49,
+    "correct": {
+      "symbols": [
+        "PanelSettings",
+        "PanelSettings",
+        "Addr"
+      ]
+    }
+  },
+  {
+    "holdout_id": 50,
+    "correct": {
+      "symbols": [
+        "Capabilities",
+        "Driver",
+        "AccountReader",
+        "CatalogReader",
+        "ComputeDriver",
+        "SSHKeyDriver",
+        "InventoryReader",
+        "ObservationReader",
+        "CredentialSource",
+        "OpenRequest",
+        "Factory",
+        "CanCreateCapacity"
+      ]
+    }
+  },
+  {
+    "holdout_id": 58,
+    "correct": {
+      "handler": "getGlobalConfigs"
+    }
+  },
+  {
+    "holdout_id": 59,
+    "correct": {
+      "handler": "getConfigPanels"
+    }
+  },
+  {
+    "holdout_id": 60,
+    "correct": {
+      "handler": "accountPreview"
+    }
+  }
+]

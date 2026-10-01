@@ -1,0 +1,32 @@
+[
+  {
+    "holdout_id": 64,
+    "correct": {
+      "text": "\tfor _, v := range ss {\n\t\tplans = append(plans, providers.Plan{ID: v, Name: v, Available: true})\n\t}\n\t_ = preferredImage\n\timages := []providers.Image{{ID: \"ubuntu-22-04-x64\", Name: \"Ubuntu 22.04\", Family: \"ubuntu\", Version: \"22.04\", Architecture: \"x86_64\", Available: true}, {ID: \"ubuntu-24-04-x64\", Name: \"Ubuntu 24.04\", Family: \"ubuntu\", Version: \"24.04\", Architecture: \"x86_64\", Available: true}, {ID: \"ubuntu-26-04-x64\", Name: \"Ubuntu 26.04\", Family: \"ubuntu\", Version: \"26.04\", Architecture: \"x86_64\", Available: true}}\n\twriteJSON(w, 200, map[string]any{\"regions\": regions, \"plans\": plans, \"sizes\": plans, \"images\": images, \"source\": \"account_preferences\", \"warning\": \"provider_options_not_cached\"})\n}"
+    }
+  },
+  {
+    "holdout_id": 69,
+    "correct": {
+      "text": "\t}\n\tx.LifetimeSeconds = x.LifetimeMinSeconds\n\tfallbackAnyRegion := true\n\tif x.FallbackAnyRegion != nil {\n\t\tfallbackAnyRegion = *x.FallbackAnyRegion\n\t}\n\tvar id string\n\terr := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)"
+    }
+  },
+  {
+    "holdout_id": 72,
+    "correct": {
+      "text": "\t\t}\n\t}\n\tif _, err = s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT (account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {\n\t\t_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)\n\t\twriteJSON(w, http.StatusInternalServerError, map[string]string{\"error\": \"network_profile_failed\", \"detail\": err.Error()})\n\t\treturn\n\t}\n\tif x.NetworkMode == \"proxy_required\" {"
+    }
+  },
+  {
+    "holdout_id": 73,
+    "correct": {
+      "text": "\t\t}\n\t}\n\tvar preferredRegions, preferredSizes []byte\n\tvar preferredImage string\n\tif err := s.DB.QueryRowContext(r.Context(), `SELECT preferred_regions,preferred_sizes,COALESCE(preferred_image,'') FROM accounts WHERE id=$1`, id).Scan(&preferredRegions, &preferredSizes, &preferredImage); err != nil {\n\t\twriteJSON(w, 404, map[string]string{\"error\": \"not_found\"})\n\t\treturn\n\t}"
+    }
+  },
+  {
+    "holdout_id": 76,
+    "correct": {
+      "text": "\t\t\treturn ui\n\t\t}\n\t\treturn images[i].Version > images[j].Version\n\t})\n\tproxies := []map[string]any{{\"id\": \"\", \"name\": \"No proxy — Direct server IP\", \"status\": \"direct\"}}\n\trows, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,name,status,COALESCE(country,'') FROM proxies WHERE status='healthy' ORDER BY name`)\n\tif rows != nil {\n\t\tdefer rows.Close()"
+    }
+  }
+]
