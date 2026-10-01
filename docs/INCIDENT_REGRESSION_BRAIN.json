@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
+  "source_commit": "9a57a8921e235351c57943af23724dc7e119474f",
   "incident_count": 10,
-  "candidate_regression_commits_count": 196,
+  "candidate_regression_commits_count": 198,
   "incidents": [
     {
       "id": "INC-001",
@@ -181,6 +181,11 @@
           "subject": "fix output viewer and add near expiry filter"
         },
         {
+          "commit": "9a57a8921e235351c57943af23724dc7e119474f",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): clear stale browser display lock safely"
+        },
+        {
           "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
           "date": "2026-09-30",
           "subject": "feat(vultr): support exact console capacity observations"
@@ -214,11 +219,6 @@
           "commit": "9fd0701cc92aa7276644b1df3250ad8cab483a06",
           "date": "2026-09-29",
           "subject": "trace output exclusion reasons"
-        },
-        {
-          "commit": "ebb56972d0434073b60bca849c493704c2a15cf5",
-          "date": "2026-09-28",
-          "subject": "audit: fix exact port 443 result"
         }
       ]
     },
@@ -242,6 +242,11 @@
           "commit": "20d022e6a570ee7b8a725133a8269c21713949ef",
           "date": "2026-09-29",
           "subject": "make output expiry exact and refresh efficient"
+        },
+        {
+          "commit": "f85ba2dccbd27a3ca1ffcb9eda83604f5f33e1c0",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr browser isolation"
         },
         {
           "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
@@ -287,11 +292,6 @@
           "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
           "date": "2026-09-27",
           "subject": "refresh volatile readiness before installer activation"
-        },
-        {
-          "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
-          "date": "2026-09-23",
-          "subject": "feat add provider snapshot freshness and stale refresh"
         }
       ]
     },
@@ -670,6 +670,16 @@
           "subject": "test: isolate fresh-session exam answers from tracked knowledge"
         },
         {
+          "commit": "9a57a8921e235351c57943af23724dc7e119474f",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): clear stale browser display lock safely"
+        },
+        {
+          "commit": "f85ba2dccbd27a3ca1ffcb9eda83604f5f33e1c0",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr browser isolation"
+        },
+        {
           "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
           "date": "2026-10-01",
           "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
@@ -713,21 +723,21 @@
           "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
           "date": "2026-09-23",
           "subject": "fix distinguish unknown provider stats from zero"
-        },
-        {
-          "commit": "c3b75d5acce9c1f2fef72cffa999ba1141477997",
-          "date": "2026-09-23",
-          "subject": "fix distinguish panel session 401 from provider token 401"
-        },
-        {
-          "commit": "d1cd682fe2f8fdd44720fdf59f7a4d70893317e8",
-          "date": "2026-09-23",
-          "subject": "fix decouple modal save from dialog submit"
         }
       ]
     }
   ],
   "candidate_regression_commits": [
+    {
+      "commit": "9a57a8921e235351c57943af23724dc7e119474f",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): clear stale browser display lock safely"
+    },
+    {
+      "commit": "f85ba2dccbd27a3ca1ffcb9eda83604f5f33e1c0",
+      "date": "2026-10-01",
+      "subject": "docs: refresh knowledge after Vultr browser isolation"
+    },
     {
       "commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
       "date": "2026-10-01",

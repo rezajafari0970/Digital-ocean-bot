@@ -1,6 +1,6 @@
 # State Transition Brain
 
-Commit `b63c88181c5515b90d824e93c2a19de7b220d861` — **54 known state-like values**, **62 owner functions with transition/guard evidence**.
+Commit `9a57a8921e235351c57943af23724dc7e119474f` — **54 known state-like values**, **62 owner functions with transition/guard evidence**.
 
 - Owners with explicit state-write evidence: **48**
 - Owners with guard/precondition evidence: **52**
