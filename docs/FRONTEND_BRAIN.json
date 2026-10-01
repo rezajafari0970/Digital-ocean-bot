@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "source_commit": "00e3ebba6243773ea388c726dd80538202946a06",
+  "pages": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts"
+    },
+    {
+      "id": "proxies",
+      "label": "Proxies"
+    },
+    {
+      "id": "residential",
+      "label": "Residential"
+    },
+    {
+      "id": "configs",
+      "label": "Configs"
+    },
+    {
+      "id": "output",
+      "label": "Output"
+    },
+    {
+      "id": "settings",
+      "label": "Panel Settings"
+    }
+  ],
+  "api_paths": [
+    "/api/v1/accounts",
+    "/api/v1/accounts/",
+    "/api/v1/accounts/preview",
+    "/api/v1/audit",
+    "/api/v1/auth/login",
+    "/api/v1/auth/logout",
+    "/api/v1/build-activity",
+    "/api/v1/build-activity/",
+    "/api/v1/config-capacity",
+    "/api/v1/config-capacity/cleanup/",
+    "/api/v1/config-capacity/delete-all-clients",
+    "/api/v1/configs",
+    "/api/v1/output",
+    "/api/v1/output/share",
+    "/api/v1/panel-settings",
+    "/api/v1/profiles",
+    "/api/v1/providers",
+    "/api/v1/provision-errors",
+    "/api/v1/proxies",
+    "/api/v1/proxies/",
+    "/api/v1/residential-proxies",
+    "/api/v1/residential-proxies/",
+    "/api/v1/system",
+    "/api/v1/templates"
+  ],
+  "actions": [
+    "account-back",
+    "account-dashboard",
+    "account-preflight",
+    "account-refresh",
+    "copy-output",
+    "delete-account",
+    "delete-all-capacity-clients",
+    "delete-proxy",
+    "delete-residential",
+    "edit-account",
+    "edit-config",
+    "edit-proxy",
+    "edit-residential",
+    "edit-settings",
+    "open-expiry-output",
+    "open-output",
+    "open-snapshot",
+    "proxy-test",
+    "share-snapshot",
+    "test-proxy",
+    "test-residential",
+    "vultr-console"
+  ],
+  "window_functions": [
+    "__buildActivityInstalled",
+    "accountDash",
+    "accountPreflight",
+    "accountRefresh",
+    "copyOutput",
+    "deleteAccount",
+    "deleteAllCapacityClients",
+    "deleteProxy",
+    "deleteResidential",
+    "editAccount",
+    "editConfig",
+    "editProxy",
+    "editResidential",
+    "load",
+    "loadOutput",
+    "openExpiryOutput",
+    "openOutput",
+    "openProvisionDetail",
+    "openSnapshot",
+    "openVultrConsole",
+    "proxyTest",
+    "shareSnapshot",
+    "testProxy",
+    "testResidential"
+  ],
+  "html_ids": [
+    "app",
+    "content",
+    "login",
+    "loginError",
+    "loginForm",
+    "logout",
+    "modal",
+    "modalCancel",
+    "modalClose",
+    "modalError",
+    "modalFields",
+    "modalForm",
+    "modalSubmit",
+    "modalTitle",
+    "nav",
+    "password",
+    "primaryAction",
+    "rememberMe",
+    "status",
+    "title",
+    "toast",
+    "togglePassword",
+    "userMenu",
+    "userPopup",
+    "username"
+  ],
+  "html_classes": [
+    "actions",
+    "brand",
+    "card",
+    "center",
+    "error",
+    "eye",
+    "ghost",
+    "login",
+    "logout",
+    "modal",
+    "modalHead",
+    "muted",
+    "passwordWrap",
+    "pill",
+    "remember",
+    "toast",
+    "userMenu",
+    "userPopup"
+  ],
+  "css_selector_count": 112,
+  "action_context": {
+    "account-back": [
+      "n>'+(a.provider==='vultr'?'<button class=\"small ghost\" data-action=\"vultr-console\" data-id=\"'+esc(id)+'\">Open Vultr Console</button>':'')+'<button class=\"small ghost\" data-action=\"account-back\">Back</button></div>'}catch(e){alert(e.message)}};window.openVultrConsole=async id=>{const tab=window.open('about:blank','_blank');try{await api('/api/v1/accounts/'+id+'/console-session',{method:'POST'});const u='/vultr-browser/vnc.html?autoconnec",
+      "w.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if"
+    ],
+    "account-dashboard": [
+      "utton><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></td>':page==='accounts'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Dashboard</button><button class=\"small ghost\" data-action=\"proxy-test\" data-id=\"'+r.id+'\">Proxy test</button></td>':'')+'</tr>').join('')+'</tbody></table></div>'+(page==='accounts'?'<div class=\"accountCards\">'+d.map(accou",
+      "an><span>'+esc(r.proxy||'Direct server IP')+'</span><span>Added</span><span>'+esc(formatDate(r.added_at))+'</span></div><div class=\"cardActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Details</button><button class=\"small ghost\" data-action=\"edit-account\" data-id=\"'+r.id+'\">Edit</button><button class=\"small\" data-action=\"account-preflight\" data-id=\"'+r.id+'\">Preflight</button><button class=\"small danger\"",
+      "ataset.action,id=b.dataset.id;if(a==='edit-proxy')window.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-p"
+    ],
+    "account-preflight": [
+      "'</details><div class=\"cardActions\"><button class=\"small\" data-action=\"account-refresh\" data-id=\"'+esc(id)+'\">Refresh Account Data</button><button class=\"small ghost\" data-action=\"account-preflight\" data-id=\"'+esc(id)+'\">Preflight</button>'+(a.provider==='vultr'?'<button class=\"small ghost\" data-action=\"vultr-console\" data-id=\"'+esc(id)+'\">Open Vultr Console</button>':'')+'<button class=\"small ghost\" data-action=\"account-back\">Back</but",
+      "on=\"account-dashboard\" data-id=\"'+r.id+'\">Details</button><button class=\"small ghost\" data-action=\"edit-account\" data-id=\"'+r.id+'\">Edit</button><button class=\"small\" data-action=\"account-preflight\" data-id=\"'+r.id+'\">Preflight</button><button class=\"small danger\" data-action=\"delete-account\" data-id=\"'+r.id+'\">Delete</button></div></div>'} window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][",
+      ".message,'error')}finally{if(b){b.classList.remove('busy');b.textContent='Refresh Account Data'}}};window.accountPreflight=async id=>{const b=document.querySelector('[data-action=\"account-preflight\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Checking...'}try{const d=await api('/api/v1/accounts/'+id+'/preflight',{method:'POST'});const failed=Object.entries(d.checks||{}).filter(([,v])=>!v).map(([k])=>k);toast(d.read"
+    ],
+    "account-refresh": [
+      ")+'</td></tr>').join('')+'</tbody></table></div>':'<p class=\"muted\">No historical deployment failures.</p>')+'</details><div class=\"cardActions\"><button class=\"small\" data-action=\"account-refresh\" data-id=\"'+esc(id)+'\">Refresh Account Data</button><button class=\"small ghost\" data-action=\"account-preflight\" data-id=\"'+esc(id)+'\">Preflight</button>'+(a.provider==='vultr'?'<button class=\"small ghost\" data-action=\"vultr-console\" data-id=\"'+",
+      "n class=\"small danger\" data-action=\"delete-account\" data-id=\"'+r.id+'\">Delete</button></div></div>'} window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\nServers: '+(d.provider_servers??d.prov",
+      "rd')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if(a==='delete-account')window.deleteAccount(id);else if(a==='edit-settings')openForm('settings'"
+    ],
+    "copy-output": [
+      "}catch{toast('Copy failed','error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});",
+      "\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    ],
+    "delete-account": [
+      "\"edit-account\" data-id=\"'+r.id+'\">Edit</button><button class=\"small\" data-action=\"account-preflight\" data-id=\"'+r.id+'\">Preflight</button><button class=\"small danger\" data-action=\"delete-account\" data-id=\"'+r.id+'\">Delete</button></div></div>'} window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await ",
+      "if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if(a==='delete-account')window.deleteAccount(id);else if(a==='edit-settings')openForm('settings')}); window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api"
+    ],
+    "delete-all-capacity-clients": [
+      "/span><span>'+esc(x.expired||0)+'</span><span>Quota exhausted</span><span>'+esc(x.quota_exhausted||0)+'</span></div>'+'<div class=\"cardActions\"><button class=\"danger\" data-action=\"delete-all-capacity-clients\">Delete All Clients</button></div><p class=\"muted\">Freezes Reality creation first. Policy stays disabled after cleanup.</p>'+(rows.length?'<div class=\"tableWrap\"><table class=\"table\"><thead><tr><th>Server</th><th>Port</th><th>Target",
+      "ity creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-action=\"delete-all-capacity-clients\"]'),old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Starting...'}try{const start=await api('/api/v1/config-capacity/delete-all-clients',{method:'POST'});const id=start.job_id;if(!id)throw new Error('missing job id');",
+      "'+e.message,'error')}finally{if(btn){btn.disabled=false;btn.textContent=old||'Delete All Clients'}}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"delete-all-capacity-clients\"]');if(b)deleteAllCapacityClients()});    function outputQuery(mode){if(mode==='expiry'){const e=document.querySelector('#outputExpiryMinutes'),n=Math.max(1,Math.min(1440,Number(e?.value||4)));if(e)e.value=n;localStorage.setItem('ou"
+    ],
+    "delete-proxy": [
+      "-action=\"test-proxy\" data-id=\"'+r.id+'\">Test</button><button class=\"small ghost\" data-action=\"edit-proxy\" data-id=\"'+r.id+'\">Edit</button><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></td>':page==='accounts'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Dashboard</button><button class=\"small ghost\" data-action=\"proxy-test\" data-id=\"'+r.id+'\">",
+      ".closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;if(a==='edit-proxy')window.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh",
+      "-action=\"test-proxy\" data-id=\"'+r.id+'\">Test</button><button class=\"small ghost\" data-action=\"edit-proxy\" data-id=\"'+r.id+'\">Edit</button><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></div></div>'} let proxyRefreshTimer=setInterval(()=>{if(token&&current==='proxies'&&!$('#modal').open)load('proxies')},15000);  function parseMinutesExpr(v){v=String(v||'').trim();if(!/^[0-9.]+(?:\\s*\\*\\s*[0-9.]+"
+    ],
+    "delete-residential": [
+      "ial\" data-id=\"'+esc(x.id)+'\">Test</button><button class=\"small ghost\" data-action=\"edit-residential\" data-id=\"'+esc(x.id)+'\">Edit</button><button class=\"small danger\" data-action=\"delete-residential\" data-id=\"'+esc(x.id)+'\">Delete</button></div></div><div class=\"kv\"><span>Type</span><span>'+esc(x.type)+'</span><span>Endpoint</span><span>'+esc(x.host+':'+x.port)+'</span><span>Username</span><span>'+esc(x.username||'—')+'</span><span>Pass",
+      "atch(e){toast(e.message,'error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)}); wind",
+      ");if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)}); window.loadOutput=async(expiry=false)=>{let path='/api/v1/output';if(expiry){const input=document.querySelector('#outputExpiryMinutes'),minutes=Math.max(1,Math.min(1440,Number(input?.value||4)));if(input)i"
+    ],
+    "edit-account": [
+      "added_at))+'</span></div><div class=\"cardActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Details</button><button class=\"small ghost\" data-action=\"edit-account\" data-id=\"'+r.id+'\">Edit</button><button class=\"small\" data-action=\"account-preflight\" data-id=\"'+r.id+'\">Preflight</button><button class=\"small danger\" data-action=\"delete-account\" data-id=\"'+r.id+'\">Delete</button></div></div>'} window.accountRe",
+      "indow.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if(a==='delete-account')window.deleteAccount(i"
+    ],
+    "edit-config": [
+      "ss=\"cardHeader\"><div><h3>Global Reality</h3><span class=\"badge '+(x.enabled?'good':'')+'\">'+(x.enabled?'Enabled':'Disabled')+'</span></div><button class=\"small ghost\" data-action=\"edit-config\">Edit</button></div><div class=\"kv\"><span>Scope</span><span>All current & future Sanaei servers</span><span>Protocol</span><span>VLESS / TCP / Reality</span><span>Ports / Inbounds</span><span>'+esc(ports)+' ('+esc(x.inbound_count)+' inbounds)</span",
+      "fig=async()=>{const list=cache.configs||await api('/api/v1/configs');openConfigForm(list[0]||null)};  document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"edit-config\"]');if(b)window.editConfig()}); window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructi"
+    ],
+    "edit-proxy": [
+      "'</td>').join('')+(page==='proxies'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"test-proxy\" data-id=\"'+r.id+'\">Test</button><button class=\"small ghost\" data-action=\"edit-proxy\" data-id=\"'+r.id+'\">Edit</button><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></td>':page==='accounts'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Dash",
+      "roxies')}catch(e){alert(e.message)}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;if(a==='edit-proxy')window.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')loa",
+      "n current exit identity.</p>':'')+'<div class=\"cardActions\"><button class=\"small\" data-action=\"test-proxy\" data-id=\"'+r.id+'\">Test</button><button class=\"small ghost\" data-action=\"edit-proxy\" data-id=\"'+r.id+'\">Edit</button><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></div></div>'} let proxyRefreshTimer=setInterval(()=>{if(token&&current==='proxies'&&!$('#modal').open)load('proxies')},15000)"
+    ],
+    "edit-residential": [
+      "(x.status)+'</span></div><div class=\"rowActions\"><button class=\"small\" data-action=\"test-residential\" data-id=\"'+esc(x.id)+'\">Test</button><button class=\"small ghost\" data-action=\"edit-residential\" data-id=\"'+esc(x.id)+'\">Edit</button><button class=\"small danger\" data-action=\"delete-residential\" data-id=\"'+esc(x.id)+'\">Delete</button></div></div><div class=\"kv\"><span>Type</span><span>'+esc(x.type)+'</span><span>Endpoint</span><span>'+es",
+      ":'DELETE'});load('residential')}catch(e){toast(e.message,'error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')delete",
+      "\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)}); window.loadOutput=async(expiry=false)=>{let path='/api/v1/output';if(expiry){const input=document.querySelector('#outputExpiryMinutes'"
+    ],
+    "edit-settings": [
+      "-settings');cache.settings=d;c.innerHTML='<div class=\"card section\"><p>Listen: '+esc(d.listen_host+':'+d.listen_port)+'</p><p>Web path: '+esc(d.web_path)+'</p><button data-action=\"edit-settings\">Edit settings</button><p class=\"muted\">Port changes apply after API restart.</p></div>';return}if(page==='output'){const mins=localStorage.getItem('outputExpiryMinutes')||'4',recent=localStorage.getItem('outputRecentMinutes')||'1';c.innerHTML='<",
+      "e if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if(a==='delete-account')window.deleteAccount(id);else if(a==='edit-settings')openForm('settings')}); window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy"
+    ],
+    "open-expiry-output": [
+      "writeText(t);toast('Output copied')}catch{toast('Copy failed','error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});",
+      "('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    ],
+    "open-output": [
+      "y{await navigator.clipboard.writeText(t);toast('Output copied')}catch{toast('Copy failed','error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});",
+      "ventListener('click',e=>{const b=e.target.closest('[data-action=\"open-output\"],[data-action=\"open-expiry-output\"],[data-action=\"copy-output\"]');if(!b)return;if(b.dataset.action==='open-output')openOutput();if(b.dataset.action==='open-expiry-output')openExpiryOutput();if(b.dataset.action==='copy-output')copyOutput()});"
+    ],
+    "open-snapshot": [
+      "utes')||'4',recent=localStorage.getItem('outputRecentMinutes')||'1';c.innerHTML='<div class=\"card section\"><h3>All Server Configs</h3><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"all\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"all\">Copy Share Link</button></div></div><div class=\"card section\"><h3>Near Expiry Configs</h3><label>Minutes before expiry<input id=\"outputExpiryMinutes\"",
+      "onfigs</h3><label>Minutes before expiry<input id=\"outputExpiryMinutes\" type=\"number\" min=\"1\" max=\"1440\" value=\"'+esc(mins)+'\"></label><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"expiry\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"expiry\">Copy Share Link</button></div></div><div class=\"card section\"><h3>Recently Created Configs</h3><label>Created within last N minutes<input id=\"o",
+      "><label>Created within last N minutes<input id=\"outputRecentMinutes\" type=\"number\" min=\"1\" max=\"1440\" value=\"'+esc(recent)+'\"></label><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"recent\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"recent\">Copy Share Link</button></div></div>';return}if(page==='residential'){const d=await api('/api/v1/residential-proxies');cache.residential=d;c.in"
+    ],
+    "proxy-test": [
+      "/td>':page==='accounts'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"account-dashboard\" data-id=\"'+r.id+'\">Dashboard</button><button class=\"small ghost\" data-action=\"proxy-test\" data-id=\"'+r.id+'\">Proxy test</button></td>':'')+'</tr>').join('')+'</tbody></table></div>'+(page==='accounts'?'<div class=\"accountCards\">'+d.map(accountCard).join('')+'</div>':page==='proxies'?'<div class=\"proxyCards\">'+d.map(proxyCard).join('')+'",
+      "location=u;else location.href=u}catch(e){if(tab)tab.close();toast('Vultr Console: '+e.message,'error')}};window.proxyTest=async id=>{try{const d=await api('/api/v1/accounts/'+id+'/proxy-test',{method:'POST'});toast(d.provider_usable?'Proxy healthy — provider reachable':('Proxy healthy — provider unavailable'+(d.provider_error?'\\n'+d.provider_error:'')),d.provider_usable?'ok':'error');await accountDash(id,{preserveHash:true})}catch(e){to",
+      "w.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vult"
+    ],
+    "share-snapshot": [
+      "='<div class=\"card section\"><h3>All Server Configs</h3><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"all\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"all\">Copy Share Link</button></div></div><div class=\"card section\"><h3>Near Expiry Configs</h3><label>Minutes before expiry<input id=\"outputExpiryMinutes\" type=\"number\" min=\"1\" max=\"1440\" value=\"'+esc(mins)+'\"></label><div class=\"car",
+      "r\" min=\"1\" max=\"1440\" value=\"'+esc(mins)+'\"></label><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"expiry\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"expiry\">Copy Share Link</button></div></div><div class=\"card section\"><h3>Recently Created Configs</h3><label>Created within last N minutes<input id=\"outputRecentMinutes\" type=\"number\" min=\"1\" max=\"1440\" value=\"'+esc(recent)+'\"></lab",
+      " min=\"1\" max=\"1440\" value=\"'+esc(recent)+'\"></label><div class=\"cardActions\"><button data-action=\"open-snapshot\" data-mode=\"recent\">Open</button><button class=\"ghost\" data-action=\"share-snapshot\" data-mode=\"recent\">Copy Share Link</button></div></div>';return}if(page==='residential'){const d=await api('/api/v1/residential-proxies');cache.residential=d;c.innerHTML='<div class=\"card section\"><h3>Residential Proxies</h3><p class=\"muted\">Re"
+    ],
+    "test-proxy": [
+      "hy')+'\">'+esc(r[k])+'</span>':esc(typeof r[k]==='object'?JSON.stringify(r[k]):r[k]))+'</td>').join('')+(page==='proxies'?'<td class=\"rowActions\"><button class=\"small\" data-action=\"test-proxy\" data-id=\"'+r.id+'\">Test</button><button class=\"small ghost\" data-action=\"edit-proxy\" data-id=\"'+r.id+'\">Edit</button><button class=\"small danger\" data-action=\"delete-proxy\" data-id=\"'+r.id+'\">Delete</button></td>':page==='accounts'?'<td class=\"rowA",
+      ".addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;if(a==='edit-proxy')window.editProxy(id);else if(a==='test-proxy')window.testProxy(id);else if(a==='delete-proxy')window.deleteProxy(id);else if(a==='account-dashboard')window.accountDash(id);else if(a==='proxy-test')window.proxyTest(id);else if(a==='account-back')load('accounts');else if(a==='edit-account')windo",
+      "lse if(a==='delete-account')window.deleteAccount(id);else if(a==='edit-settings')openForm('settings')}); window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy healthy\\nType: '+d.type+'\\nExit IP: '+d.exit_ip+'\\nCountry: '+d.country+' ('+d.country_code+')\\nASN: '+d.asn+'\\nL"
+    ],
+    "test-residential": [
+      "/h3><span class=\"statusBadge '+(x.status==='healthy'?'statusHealthy':'statusUnhealthy')+'\">'+esc(x.status)+'</span></div><div class=\"rowActions\"><button class=\"small\" data-action=\"test-residential\" data-id=\"'+esc(x.id)+'\">Test</button><button class=\"small ghost\" data-action=\"edit-residential\" data-id=\"'+esc(x.id)+'\">Edit</button><button class=\"small danger\" data-action=\"delete-residential\" data-id=\"'+esc(x.id)+'\">Delete</button></div></",
+      "/residential-proxies/'+id,{method:'DELETE'});load('residential')}catch(e){toast(e.message,'error')}}; document.addEventListener('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.act",
+      "er('click',e=>{const b=e.target.closest('[data-action=\"test-residential\"],[data-action=\"edit-residential\"],[data-action=\"delete-residential\"]');if(!b)return;if(b.dataset.action==='test-residential')testResidential(b.dataset.id);if(b.dataset.action==='edit-residential')editResidential(b.dataset.id);if(b.dataset.action==='delete-residential')deleteResidential(b.dataset.id)}); window.loadOutput=async(expiry=false)=>{let path='/api/v1/outpu"
+    ],
+    "vultr-console": [
+      " Data</button><button class=\"small ghost\" data-action=\"account-preflight\" data-id=\"'+esc(id)+'\">Preflight</button>'+(a.provider==='vultr'?'<button class=\"small ghost\" data-action=\"vultr-console\" data-id=\"'+esc(id)+'\">Open Vultr Console</button>':'')+'<button class=\"small ghost\" data-action=\"account-back\">Back</button></div>'}catch(e){alert(e.message)}};window.openVultrConsole=async id=>{const tab=window.open('about:blank','_blank');try{",
+      ";else if(a==='edit-account')window.editAccount(id);else if(a==='account-refresh')window.accountRefresh(id);else if(a==='account-preflight')window.accountPreflight(id);else if(a==='vultr-console')window.openVultrConsole(id);else if(a==='delete-account')window.deleteAccount(id);else if(a==='edit-settings')openForm('settings')}); window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');"
+    ]
+  }
+}

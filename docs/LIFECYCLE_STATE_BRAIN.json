@@ -1,0 +1,1799 @@
+{
+  "schema_version": 1,
+  "source_commit": "00e3ebba6243773ea388c726dd80538202946a06",
+  "files": [
+    "internal/app/deploy.go",
+    "internal/app/deployment_ready.go",
+    "internal/app/lifecycle.go",
+    "internal/app/recovery.go",
+    "internal/droplets/compute_stub_test.go",
+    "internal/droplets/executor.go",
+    "internal/droplets/executor_test.go",
+    "internal/droplets/factory.go",
+    "internal/droplets/lifecycle.go",
+    "internal/droplets/lifecycle_engine.go",
+    "internal/droplets/model.go",
+    "internal/droplets/postgres_e2e_test.go",
+    "internal/droplets/reconcile.go",
+    "internal/droplets/reconcile_test.go",
+    "internal/droplets/safety_characterization_test.go",
+    "internal/provisioning/bootstrap_plan.go",
+    "internal/provisioning/bootstrap_plan_test.go",
+    "internal/provisioning/diagnostics.go",
+    "internal/provisioning/diagnostics_test.go",
+    "internal/provisioning/dynamic_plan_test.go",
+    "internal/provisioning/engine.go",
+    "internal/provisioning/engine_test.go",
+    "internal/provisioning/events.go",
+    "internal/provisioning/hostkey.go",
+    "internal/provisioning/installer.go",
+    "internal/provisioning/installer_capability_test.go",
+    "internal/provisioning/installer_executor.go",
+    "internal/provisioning/installer_executor_test.go",
+    "internal/provisioning/installer_orchestrator.go",
+    "internal/provisioning/installer_test.go",
+    "internal/provisioning/model.go",
+    "internal/provisioning/readiness.go",
+    "internal/provisioning/readiness_policy.go",
+    "internal/provisioning/readiness_policy_test.go",
+    "internal/provisioning/readiness_test.go",
+    "internal/provisioning/script.go",
+    "internal/provisioning/script_registry.go",
+    "internal/provisioning/script_runner.go",
+    "internal/provisioning/script_runner_test.go",
+    "internal/provisioning/ssh.go",
+    "internal/provisioning/ssh_stages.go",
+    "internal/provisioning/step_attempts.go",
+    "internal/provisioning/step_completion_test.go",
+    "internal/provisioning/store.go",
+    "internal/provisioning/unknown_outcome_test.go",
+    "internal/provisioning/upload.go",
+    "internal/provisioning/upload_test.go",
+    "internal/provisioning/waiting_installer_test.go",
+    "internal/provisioning/worker_restart_test.go",
+    "internal/scheduler/engine.go",
+    "internal/scheduler/lease.go",
+    "internal/scheduler/model.go",
+    "internal/scheduler/planner.go",
+    "internal/scheduler/provider_gate_test.go",
+    "internal/scheduler/store.go",
+    "internal/worker/failures.go",
+    "internal/worker/heartbeat.go",
+    "internal/worker/lifecycle.go",
+    "internal/worker/recovery.go",
+    "internal/worker/worker.go"
+  ],
+  "states": {
+    "ALLOW_CREATE": [
+      {
+        "file": "internal/scheduler/model.go",
+        "line": 8,
+        "text": "AllowCreate   Decision = \"ALLOW_CREATE\""
+      }
+    ],
+    "BOOTSTRAPPING": [
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 11,
+        "text": "Bootstrapping     State = \"BOOTSTRAPPING\""
+      }
+    ],
+    "COMPLETED": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 302,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"COMPLETED\", Attempt: stepAttempt, Duration: duration, Diagnostic: Diagnostic{StdoutTail: result.Stdout, StderrTail: result.Stderr, ExitCode: result.ExitCode, Signal: result.Signal}})"
+      },
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 17,
+        "text": "Completed         State = \"COMPLETED\""
+      }
+    ],
+    "CONFIGURING_PANEL": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "CREATE_DROPLET": [
+      {
+        "file": "internal/app/recovery.go",
+        "line": 17,
+        "text": "if item.Kind != \"CREATE_DROPLET\" && item.Kind != \"DELETE_DROPLET\" {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 27,
+        "text": "if item.Kind == \"CREATE_DROPLET\" {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 45,
+        "text": "if item.Kind == \"CREATE_DROPLET\" && exists {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 64,
+        "text": "if item.Kind == \"CREATE_DROPLET\" && exists {"
+      },
+      {
+        "file": "internal/droplets/factory.go",
+        "line": 8,
+        "text": "Kind:           \"CREATE_DROPLET\","
+      },
+      {
+        "file": "internal/droplets/safety_characterization_test.go",
+        "line": 12,
+        "text": "store := &opStore{exists: true, saved: jobs.Operation{ID: \"op\", AccountID: \"a\", Kind: \"CREATE_DROPLET\", IdempotencyKey: \"deploy:x:create\", State: jobs.OperationUnknown}}"
+      }
+    ],
+    "CREATE_TERMINAL_FREEZE_V2": [
+      {
+        "file": "internal/app/recovery.go",
+        "line": 147,
+        "text": "_ = store.Event(ctx, d.ID, \"create\", workflow.Failed, \"CREATE_TERMINAL_FREEZE_V2\")"
+      }
+    ],
+    "CREATING": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/droplets/model.go",
+        "line": 10,
+        "text": "Creating     State = \"CREATING\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "DATABASE_COMPLETE": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "DELETED": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 49,
+        "text": "(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED'),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 204,
+        "text": "if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 204,
+        "text": "if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 231,
+        "text": "if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=now(),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND a.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 231,
+        "text": "if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=now(),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND a.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {"
+      },
+      {
+        "file": "internal/droplets/model.go",
+        "line": 17,
+        "text": "Deleted      State = \"DELETED\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 55,
+        "text": "(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 57,
+        "text": "OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)"
+      }
+    ],
+    "DELETE_DROPLET": [
+      {
+        "file": "internal/app/recovery.go",
+        "line": 17,
+        "text": "if item.Kind != \"CREATE_DROPLET\" && item.Kind != \"DELETE_DROPLET\" {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 67,
+        "text": "if item.Kind == \"DELETE_DROPLET\" && !exists {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 74,
+        "text": "if item.Kind == \"DELETE_DROPLET\" && state == \"succeeded\" {"
+      },
+      {
+        "file": "internal/droplets/reconcile.go",
+        "line": 68,
+        "text": "return jobs.Operation{AccountID: accountID, Kind: \"DELETE_DROPLET\", IdempotencyKey: \"delete:\" + accountID + \":\" + providerID, ResourceID: providerID, State: jobs.OperationPlanned}"
+      }
+    ],
+    "DNS_RESOLUTION_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 162,
+        "text": "d.Code = \"DNS_RESOLUTION_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 15,
+        "text": "{\"dns\", \"Temporary failure resolving 'archive.ubuntu.com'\", \"DNS_RESOLUTION_FAILED\", true},"
+      }
+    ],
+    "FAILED": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 79,
+        "text": "terminalFailed := deploymentState == \"FAILED\" || deploymentState == \"INSTALL_FAILED\" || deploymentState == \"INSTALL_ROLLED_BACK\""
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 227,
+        "text": "if _, err = tx.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,'lifecycle','FAILED','RESOURCE_DELETED')`, id); err != nil {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 28,
+        "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 128,
+        "text": "if ps == \"FAILED\" {"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 129,
+        "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, \"provision failed: \"+pe)"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 146,
+        "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 141,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"FAILED\", Diagnostic: diag, Retryable: false, Metadata: map[string]any{\"reason\": \"interrupted_without_precheck\"}})"
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 290,
+        "text": "state = \"FAILED\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 39,
+        "text": "state := \"FAILED\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 60,
+        "text": "state := \"FAILED\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 104,
+        "text": "state = \"FAILED\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 142,
+        "text": "_ = e.States.SetState(ctx, ir.ID, \"FAILED\", \"rollback: \"+err.Error())"
+      },
+      {
+        "file": "internal/provisioning/installer_orchestrator.go",
+        "line": 50,
+        "text": "case \"PREPARING\", \"INSTALLING\", \"VERIFYING\", \"INSTALL_COMPLETE\", \"ROLLBACK_REQUIRED\", \"ROLLED_BACK\", \"FAILED\":"
+      },
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 18,
+        "text": "Failed            State = \"FAILED\""
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 99,
+        "text": "issues[i].State = \"FAILED\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 70,
+        "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      }
+    ],
+    "INSTALLER_NOT_CONFIGURED": [
+      {
+        "file": "internal/app/recovery.go",
+        "line": 120,
+        "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 56,
+        "text": "d.Code = \"INSTALLER_NOT_CONFIGURED\""
+      }
+    ],
+    "INSTALLING": [
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 20,
+        "text": "if err := e.States.SetState(ctx, ir.ID, \"INSTALLING\", \"\"); err != nil {"
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 99,
+        "text": "state := \"INSTALLING\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor_test.go",
+        "line": 25,
+        "text": "if len(states.states) != 2 || states.states[0] != \"INSTALLING\" || states.states[1] != \"INSTALL_COMPLETE\" {"
+      },
+      {
+        "file": "internal/provisioning/installer_executor_test.go",
+        "line": 104,
+        "text": "if got := states.states[len(states.states)-1]; got != \"INSTALLING\" {"
+      },
+      {
+        "file": "internal/provisioning/installer_orchestrator.go",
+        "line": 50,
+        "text": "case \"PREPARING\", \"INSTALLING\", \"VERIFYING\", \"INSTALL_COMPLETE\", \"ROLLBACK_REQUIRED\", \"ROLLED_BACK\", \"FAILED\":"
+      }
+    ],
+    "INSTALLING_PANEL": [
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 12,
+        "text": "InstallingPanel   State = \"INSTALLING_PANEL\""
+      }
+    ],
+    "INSTALL_COMPLETE": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 112,
+        "text": "return e.States.SetState(ctx, ir.ID, \"INSTALL_COMPLETE\", \"\")"
+      },
+      {
+        "file": "internal/provisioning/installer_executor_test.go",
+        "line": 25,
+        "text": "if len(states.states) != 2 || states.states[0] != \"INSTALLING\" || states.states[1] != \"INSTALL_COMPLETE\" {"
+      },
+      {
+        "file": "internal/provisioning/installer_orchestrator.go",
+        "line": 50,
+        "text": "case \"PREPARING\", \"INSTALLING\", \"VERIFYING\", \"INSTALL_COMPLETE\", \"ROLLBACK_REQUIRED\", \"ROLLED_BACK\", \"FAILED\":"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "INSTALL_FAILED": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 79,
+        "text": "terminalFailed := deploymentState == \"FAILED\" || deploymentState == \"INSTALL_FAILED\" || deploymentState == \"INSTALL_ROLLED_BACK\""
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 28,
+        "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 70,
+        "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      }
+    ],
+    "INSTALL_ROLLED_BACK": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 79,
+        "text": "terminalFailed := deploymentState == \"FAILED\" || deploymentState == \"INSTALL_FAILED\" || deploymentState == \"INSTALL_ROLLED_BACK\""
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 28,
+        "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 70,
+        "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      }
+    ],
+    "PACKAGE_HEALTH_FAILED": [
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 35,
+        "text": "add(\"PACKAGE_HEALTH_FAILED\", \"BLOCK\", \"BLOCK\", \"\", \"package health check failed\")"
+      }
+    ],
+    "PACKAGE_STATE_INCOMPLETE": [
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 103,
+        "text": "if issues[i].Code == \"PACKAGE_STATE_INCOMPLETE\" {"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 33,
+        "text": "add(\"PACKAGE_STATE_INCOMPLETE\", \"BLOCK\", \"AUTO_REMEDIATE\", \"dpkg --configure -a\", \"dpkg audit reported incomplete state\")"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy_test.go",
+        "line": 33,
+        "text": "x := issueByCode(DecideReadiness(s), \"PACKAGE_STATE_INCOMPLETE\")"
+      }
+    ],
+    "PANEL_COMPLETE": [
+      {
+        "file": "internal/app/deploy.go",
+        "line": 153,
+        "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 161,
+        "text": "WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 28,
+        "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 70,
+        "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+      }
+    ],
+    "PENDING": [
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 8,
+        "text": "Pending           State = \"PENDING\""
+      }
+    ],
+    "PHASE_FAILED": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 229,
+        "text": "state = \"PHASE_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 233,
+        "text": "state = \"PHASE_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 79,
+        "text": "state = \"PHASE_FAILED\""
+      }
+    ],
+    "PKG_DEPENDENCY_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 174,
+        "text": "d.Code = \"PKG_DEPENDENCY_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 19,
+        "text": "{\"deps\", \"E: Unmet dependencies. Try apt --fix-broken install\", \"PKG_DEPENDENCY_FAILED\", true},"
+      }
+    ],
+    "PROBE_FAILED": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 191,
+        "text": "state = \"PROBE_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 205,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, Substep: \"probe\", State: \"PROBE_FAILED\", Attempt: stepAttempt, Diagnostic: diag, Duration: dur, Retryable: true, Metadata: map[string]any{\"probe\": probe}})"
+      }
+    ],
+    "PROVISIONING": [
+      {
+        "file": "internal/app/deployment_ready.go",
+        "line": 24,
+        "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+      },
+      {
+        "file": "internal/app/deployment_ready.go",
+        "line": 34,
+        "text": "res, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='PROVISIONING'`, d.DropletID, d.AccountID)"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/droplets/model.go",
+        "line": 12,
+        "text": "Provisioning State = \"PROVISIONING\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "PROVISION_TERMINAL_FREEZE_V1": [
+      {
+        "file": "internal/app/recovery.go",
+        "line": 130,
+        "text": "_ = store.Event(ctx, d.ID, \"provision\", workflow.Failed, \"PROVISION_TERMINAL_FREEZE_V1\")"
+      }
+    ],
+    "READY": [
+      {
+        "file": "internal/app/deploy.go",
+        "line": 55,
+        "text": "if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != \"READY\" || providerState != ProviderStateActive || providerError != \"\" {"
+      },
+      {
+        "file": "internal/app/deploy.go",
+        "line": 153,
+        "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {"
+      },
+      {
+        "file": "internal/app/deployment_ready.go",
+        "line": 24,
+        "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+      },
+      {
+        "file": "internal/app/deployment_ready.go",
+        "line": 24,
+        "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 117,
+        "text": "_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND runtime_status IN ('ROTATION_BLOCKED_CAPACITY','ROTATION_CAPACITY_BREAKING')`, item.AccountID)"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 161,
+        "text": "WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 28,
+        "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/droplets/lifecycle.go",
+        "line": 29,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM droplets WHERE (state IN ('RETIRING','DELETING') OR (state IN ('READY','EXPIRING') AND expires_at IS NOT NULL AND expires_at <= $1::times"
+      },
+      {
+        "file": "internal/droplets/model.go",
+        "line": 13,
+        "text": "Ready        State = \"READY\""
+      },
+      {
+        "file": "internal/provisioning/installer_test.go",
+        "line": 11,
+        "text": "good := ReadinessSnapshot{Status: \"READY\", OSID: \"ubuntu\", Architecture: \"x86_64\", MemoryMB: 512, DiskFreeMB: 5000}"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 40,
+        "text": "s := ReadinessSnapshot{Status: \"READY\", TimeSync: \"unknown\", Checks: map[string]string{}}"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 57,
+        "text": "status := \"READY\""
+      },
+      {
+        "file": "internal/provisioning/readiness_test.go",
+        "line": 56,
+        "text": "if s.Status != \"READY\" || s.OSID != \"ubuntu\" || s.DiskFreeMB != 20000 || !s.DNSOK {"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 18,
+        "text": "return enabled && runtimeStatus == \"READY\" && providerState == \"ACTIVE\" && providerError == \"\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 70,
+        "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+      },
+      {
+        "file": "internal/scheduler/provider_gate_test.go",
+        "line": 12,
+        "text": "{\"ready\", true, \"READY\", \"ACTIVE\", \"\", true},"
+      },
+      {
+        "file": "internal/scheduler/provider_gate_test.go",
+        "line": 13,
+        "text": "{\"locked\", true, \"READY\", \"LOCKED\", \"\", false},"
+      },
+      {
+        "file": "internal/scheduler/provider_gate_test.go",
+        "line": 14,
+        "text": "{\"transport\", true, \"READY\", \"ACTIVE\", \"TRANSPORT_ERROR\", false},"
+      },
+      {
+        "file": "internal/scheduler/provider_gate_test.go",
+        "line": 15,
+        "text": "{\"proxy\", true, \"READY\", \"ACTIVE\", \"PROXY_ERROR\", false},"
+      },
+      {
+        "file": "internal/scheduler/provider_gate_test.go",
+        "line": 17,
+        "text": "{\"disabled\", false, \"READY\", \"ACTIVE\", \"\", false},"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      }
+    ],
+    "REBOOT_REQUIRED": [
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 48,
+        "text": "add(\"REBOOT_REQUIRED\", \"WARN\", \"WARN\", \"\", \"server reports reboot required\")"
+      }
+    ],
+    "RESOURCE_DELETED": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 227,
+        "text": "if _, err = tx.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,'lifecycle','FAILED','RESOURCE_DELETED')`, id); err != nil {"
+      }
+    ],
+    "RETRY": [
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 58,
+        "text": "issue.Action = \"RETRY\""
+      },
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 39,
+        "text": "add(\"PACKAGE_LOCK_BUSY\", \"BLOCK\", \"RETRY\", \"\", \"package manager lock is busy\")"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 42,
+        "text": "add(\"DNS_UNAVAILABLE\", \"BLOCK\", \"RETRY\", \"\", \"DNS resolution failed\")"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy.go",
+        "line": 45,
+        "text": "add(\"OUTBOUND_HTTPS_UNAVAILABLE\", \"BLOCK\", \"RETRY\", \"\", \"HTTPS egress failed\")"
+      },
+      {
+        "file": "internal/provisioning/readiness_policy_test.go",
+        "line": 17,
+        "text": "if x == nil || x.Action != \"RETRY\" {"
+      }
+    ],
+    "RETRY_WAIT": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 288,
+        "text": "state := \"RETRY_WAIT\""
+      }
+    ],
+    "RUNNING": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 163,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"RUNNING\", Attempt: stepAttempt, Metadata: map[string]any{\"host\": target.Host, \"port\": target.Port, \"user\": target.User}})"
+      }
+    ],
+    "RUNNING_SCRIPT": [
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 13,
+        "text": "RunningScript     State = \"RUNNING_SCRIPT\""
+      }
+    ],
+    "SERVICE_START_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 177,
+        "text": "d.Code = \"SERVICE_START_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 20,
+        "text": "{\"service\", \"Failed to start x.service: Unit x.service failed\", \"SERVICE_START_FAILED\", true},"
+      }
+    ],
+    "SSH_AUTH_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 93,
+        "text": "d.Code = \"SSH_AUTH_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 50,
+        "text": "{\"ssh not ready: ssh handshake: ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain\", \"SSH_AUTH_FAILED\"},"
+      }
+    ],
+    "SSH_COMMAND_EXIT": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 78,
+        "text": "d.Code = \"SSH_COMMAND_EXIT\""
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 226,
+        "text": "if d.Code == \"SSH_COMMAND_FAILED\" || d.Code == \"SSH_COMMAND_EXIT\" {"
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 76,
+        "text": "if p.Phase == \"precheck\" && (d.Code == \"SSH_COMMAND_FAILED\" || d.Code == \"SSH_COMMAND_EXIT\") {"
+      },
+      {
+        "file": "internal/provisioning/script_runner.go",
+        "line": 62,
+        "text": "if diag.Code != \"SSH_COMMAND_FAILED\" && diag.Code != \"SSH_COMMAND_EXIT\" {"
+      }
+    ],
+    "SSH_COMMAND_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 87,
+        "text": "d.Code = \"SSH_COMMAND_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 43,
+        "text": "if d.Code != \"SSH_COMMAND_FAILED\" {"
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 226,
+        "text": "if d.Code == \"SSH_COMMAND_FAILED\" || d.Code == \"SSH_COMMAND_EXIT\" {"
+      },
+      {
+        "file": "internal/provisioning/installer_executor.go",
+        "line": 76,
+        "text": "if p.Phase == \"precheck\" && (d.Code == \"SSH_COMMAND_FAILED\" || d.Code == \"SSH_COMMAND_EXIT\") {"
+      },
+      {
+        "file": "internal/provisioning/script_runner.go",
+        "line": 62,
+        "text": "if diag.Code != \"SSH_COMMAND_FAILED\" && diag.Code != \"SSH_COMMAND_EXIT\" {"
+      }
+    ],
+    "SSH_CONNECTION_REFUSED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 102,
+        "text": "d.Code = \"SSH_CONNECTION_REFUSED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 49,
+        "text": "{\"ssh not ready: ssh tcp dial: dial tcp 127.0.0.1:22: connect: connection refused\", \"SSH_CONNECTION_REFUSED\"},"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_CONNECTION_RESET": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 108,
+        "text": "d.Code = \"SSH_CONNECTION_RESET\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_CONNECT_TIMEOUT": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 84,
+        "text": "d.Code = \"SSH_CONNECT_TIMEOUT\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_CONTEXT_TIMEOUT": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 71,
+        "text": "d.Code = \"SSH_CONTEXT_TIMEOUT\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_DISCONNECTED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 180,
+        "text": "d.Code = \"SSH_DISCONNECTED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 21,
+        "text": "{\"disconnect\", \"client_loop: send disconnect: Broken pipe\", \"SSH_DISCONNECTED\", true},"
+      }
+    ],
+    "SSH_HANDSHAKE_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 99,
+        "text": "d.Code = \"SSH_HANDSHAKE_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 52,
+        "text": "{\"ssh not ready: ssh handshake: connection reset by peer\", \"SSH_HANDSHAKE_FAILED\"},"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_HOST_KEY_FAILED": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 96,
+        "text": "d.Code = \"SSH_HOST_KEY_FAILED\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 191,
+        "text": "case \"DISK_FULL\", \"PERMISSION_DENIED\", \"SSH_HOST_KEY_FAILED\", \"COMMAND_OUTCOME_UNKNOWN\":"
+      }
+    ],
+    "SSH_HOST_KEY_MISMATCH": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 59,
+        "text": "d.Code = \"SSH_HOST_KEY_MISMATCH\""
+      }
+    ],
+    "SSH_HOST_KEY_VERIFIER_MISSING": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 62,
+        "text": "d.Code = \"SSH_HOST_KEY_VERIFIER_MISSING\""
+      }
+    ],
+    "SSH_NOT_READY": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 111,
+        "text": "d.Code = \"SSH_NOT_READY\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_NO_ROUTE": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 105,
+        "text": "d.Code = \"SSH_NO_ROUTE\""
+      },
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 189,
+        "text": "case \"SERVER_READINESS_BLOCKED\", \"PKG_LOCK_BUSY\", \"DNS_RESOLUTION_FAILED\", \"DPKG_INTERRUPTED\", \"SERVICE_START_FAILED\", \"SSH_DISCONNECTED\", \"SSH_CONNECTION_REFUSED\", \"SSH_CONNECT_TIMEOUT\", \"SSH_NO_ROUTE\", \"SSH_CONNECTION_RESET\", \"SSH_NOT_READY\", \"SSH_CONTEXT_TIMEOUT\", \"PROCESS_KILLED\":"
+      },
+      {
+        "file": "internal/provisioning/diagnostics_test.go",
+        "line": 51,
+        "text": "{\"ssh not ready: ssh tcp dial: dial tcp: no route to host\", \"SSH_NO_ROUTE\"},"
+      },
+      {
+        "file": "internal/provisioning/readiness.go",
+        "line": 55,
+        "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+      }
+    ],
+    "SSH_UNKNOWN": [
+      {
+        "file": "internal/provisioning/diagnostics.go",
+        "line": 50,
+        "text": "d := Diagnostic{Class: ClassUnknown, Code: \"SSH_UNKNOWN\", Message: redact.Text(err.Error())}"
+      }
+    ],
+    "STAGE_FAILED": [
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 173,
+        "text": "state = \"STAGE_FAILED\""
+      }
+    ],
+    "WAITING_INSTALLER": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 120,
+        "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+      },
+      {
+        "file": "internal/app/recovery.go",
+        "line": 121,
+        "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)"
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 102,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: steps[i].name, State: \"WAITING_INSTALLER\", Diagnostic: diag, Retryable: false})"
+      },
+      {
+        "file": "internal/provisioning/engine.go",
+        "line": 119,
+        "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"WAITING_INSTALLER\", Diagnostic: diag, Retryable: false})"
+      },
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 14,
+        "text": "WaitingInstaller  State = \"WAITING_INSTALLER\""
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/failures.go",
+        "line": 55,
+        "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "WAITING_RESOURCE": [
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 88,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+      },
+      {
+        "file": "internal/app/lifecycle.go",
+        "line": 210,
+        "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFI"
+      },
+      {
+        "file": "internal/scheduler/engine.go",
+        "line": 53,
+        "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.stat"
+      },
+      {
+        "file": "internal/worker/recovery.go",
+        "line": 42,
+        "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','"
+      }
+    ],
+    "WAITING_SSH": [
+      {
+        "file": "internal/provisioning/model.go",
+        "line": 9,
+        "text": "WaitingSSH        State = \"WAITING_SSH\""
+      }
+    ]
+  },
+  "transition_evidence": [
+    {
+      "file": "internal/app/deploy.go",
+      "line": 153,
+      "states": [
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {"
+    },
+    {
+      "file": "internal/app/deployment_ready.go",
+      "line": 24,
+      "states": [
+        "READY",
+        "PROVISIONING",
+        "READY"
+      ],
+      "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+    },
+    {
+      "file": "internal/app/deployment_ready.go",
+      "line": 34,
+      "states": [
+        "RETIRING",
+        "PROVISIONING"
+      ],
+      "text": "res, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='PROVISIONING'`, d.DropletID, d.AccountID)"
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 57,
+      "states": [
+        "RETIRING",
+        "EXPIRING"
+      ],
+      "text": "res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)"
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 79,
+      "states": [
+        "FAILED",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK"
+      ],
+      "text": "terminalFailed := deploymentState == \"FAILED\" || deploymentState == \"INSTALL_FAILED\" || deploymentState == \"INSTALL_ROLLED_BACK\""
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 108,
+      "states": [
+        "EXPIRING"
+      ],
+      "text": "_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(runtime_status,''),(SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY created_at,id LIMIT 1) FROM accounts WHERE id=$1`, item.AccountID).Scan(&runtimeStatus, &oldestExpiring)"
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 161,
+      "states": [
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "text": "WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'"
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 204,
+      "states": [
+        "DELETED",
+        "DELETING",
+        "DELETED"
+      ],
+      "text": "if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {"
+    },
+    {
+      "file": "internal/app/lifecycle.go",
+      "line": 210,
+      "states": [
+        "FAILED",
+        "RESOURCE_DELETED",
+        "PLANNED",
+        "RESERVED",
+        "CREATING",
+        "WAITING_RESOURCE",
+        "PROVISIONING",
+        "WAITING_INSTALLER",
+        "INSTALL_COMPLETE",
+        "IMPORTING_DATABASE",
+        "DATABASE_COMPLETE",
+        "CONFIGURING_PANEL",
+        "REGISTERING_CLIENTS",
+        "REGISTERING_TRAFFIC"
+      ],
+      "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') RETURNING id::text`, accountID, providerID)"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 28,
+      "states": [
+        "FAILED",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 74,
+      "states": [
+        "DELETE_DROPLET"
+      ],
+      "text": "if item.Kind == \"DELETE_DROPLET\" && state == \"succeeded\" {"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 120,
+      "states": [
+        "WAITING_INSTALLER",
+        "INSTALLER_NOT_CONFIGURED"
+      ],
+      "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 121,
+      "states": [
+        "WAITING_INSTALLER"
+      ],
+      "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 129,
+      "states": [
+        "FAILED"
+      ],
+      "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, \"provision failed: \"+pe)"
+    },
+    {
+      "file": "internal/app/recovery.go",
+      "line": 146,
+      "states": [
+        "FAILED"
+      ],
+      "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 8,
+      "states": [
+        "REQUESTED"
+      ],
+      "text": "Requested    State = \"REQUESTED\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 9,
+      "states": [
+        "PLANNED"
+      ],
+      "text": "Planned      State = \"PLANNED\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 10,
+      "states": [
+        "CREATING"
+      ],
+      "text": "Creating     State = \"CREATING\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 11,
+      "states": [
+        "ACTIVE"
+      ],
+      "text": "Active       State = \"ACTIVE\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 12,
+      "states": [
+        "PROVISIONING"
+      ],
+      "text": "Provisioning State = \"PROVISIONING\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 13,
+      "states": [
+        "READY"
+      ],
+      "text": "Ready        State = \"READY\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 14,
+      "states": [
+        "EXPIRING"
+      ],
+      "text": "Expiring     State = \"EXPIRING\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 15,
+      "states": [
+        "RETIRING"
+      ],
+      "text": "Retiring     State = \"RETIRING\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 16,
+      "states": [
+        "DELETING"
+      ],
+      "text": "Deleting     State = \"DELETING\""
+    },
+    {
+      "file": "internal/droplets/model.go",
+      "line": 17,
+      "states": [
+        "DELETED"
+      ],
+      "text": "Deleted      State = \"DELETED\""
+    },
+    {
+      "file": "internal/droplets/reconcile.go",
+      "line": 68,
+      "states": [
+        "DELETE_DROPLET"
+      ],
+      "text": "return jobs.Operation{AccountID: accountID, Kind: \"DELETE_DROPLET\", IdempotencyKey: \"delete:\" + accountID + \":\" + providerID, ResourceID: providerID, State: jobs.OperationPlanned}"
+    },
+    {
+      "file": "internal/droplets/safety_characterization_test.go",
+      "line": 12,
+      "states": [
+        "CREATE_DROPLET"
+      ],
+      "text": "store := &opStore{exists: true, saved: jobs.Operation{ID: \"op\", AccountID: \"a\", Kind: \"CREATE_DROPLET\", IdempotencyKey: \"deploy:x:create\", State: jobs.OperationUnknown}}"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 102,
+      "states": [
+        "WAITING_INSTALLER"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: steps[i].name, State: \"WAITING_INSTALLER\", Diagnostic: diag, Retryable: false})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 119,
+      "states": [
+        "WAITING_INSTALLER"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"WAITING_INSTALLER\", Diagnostic: diag, Retryable: false})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 141,
+      "states": [
+        "FAILED"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"FAILED\", Diagnostic: diag, Retryable: false, Metadata: map[string]any{\"reason\": \"interrupted_without_precheck\"}})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 163,
+      "states": [
+        "RUNNING"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"RUNNING\", Attempt: stepAttempt, Metadata: map[string]any{\"host\": target.Host, \"port\": target.Port, \"user\": target.User}})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 173,
+      "states": [
+        "STAGE_FAILED"
+      ],
+      "text": "state = \"STAGE_FAILED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 191,
+      "states": [
+        "PROBE_FAILED"
+      ],
+      "text": "state = \"PROBE_FAILED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 205,
+      "states": [
+        "PROBE_FAILED"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, Substep: \"probe\", State: \"PROBE_FAILED\", Attempt: stepAttempt, Diagnostic: diag, Duration: dur, Retryable: true, Metadata: map[string]any{\"probe\": probe}})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 208,
+      "states": [
+        "PROBE_OK"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, Substep: \"probe\", State: \"PROBE_OK\", Attempt: stepAttempt, Duration: dur, Metadata: map[string]any{\"probe\": probe}})"
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 223,
+      "states": [
+        "PHASE_SKIPPED"
+      ],
+      "text": "state = \"PHASE_SKIPPED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 227,
+      "states": [
+        "PRECHECK_MISS"
+      ],
+      "text": "state = \"PRECHECK_MISS\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 229,
+      "states": [
+        "PHASE_FAILED"
+      ],
+      "text": "state = \"PHASE_FAILED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 233,
+      "states": [
+        "PHASE_FAILED"
+      ],
+      "text": "state = \"PHASE_FAILED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 290,
+      "states": [
+        "FAILED"
+      ],
+      "text": "state = \"FAILED\""
+    },
+    {
+      "file": "internal/provisioning/engine.go",
+      "line": 302,
+      "states": [
+        "COMPLETED"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: \"COMPLETED\", Attempt: stepAttempt, Duration: duration, Diagnostic: Diagnostic{StdoutTail: result.Stdout, StderrTail: result.Stderr, ExitCode: result.ExitCode, Signal: result.Signal}})"
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 41,
+      "states": [
+        "ROLLBACK_REQUIRED"
+      ],
+      "text": "state = \"ROLLBACK_REQUIRED\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 62,
+      "states": [
+        "ROLLBACK_REQUIRED"
+      ],
+      "text": "state = \"ROLLBACK_REQUIRED\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 77,
+      "states": [
+        "PRECHECK_MISS"
+      ],
+      "text": "state = \"PRECHECK_MISS\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 79,
+      "states": [
+        "PHASE_FAILED"
+      ],
+      "text": "state = \"PHASE_FAILED\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 102,
+      "states": [
+        "ROLLBACK_REQUIRED"
+      ],
+      "text": "state = \"ROLLBACK_REQUIRED\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 104,
+      "states": [
+        "FAILED"
+      ],
+      "text": "state = \"FAILED\""
+    },
+    {
+      "file": "internal/provisioning/installer_executor.go",
+      "line": 148,
+      "states": [
+        "ROLLBACK_OK"
+      ],
+      "text": "_ = e.Events.Event(ctx, Event{RunID: ir.ProvisionRunID, Step: name, State: \"ROLLBACK_OK\", Attempt: attempt, Metadata: map[string]any{\"installer\": resolved.Manifest.Name}})"
+    },
+    {
+      "file": "internal/provisioning/installer_orchestrator.go",
+      "line": 32,
+      "states": [
+        "PREPARING"
+      ],
+      "text": "run := InstallerRun{DeploymentID: deploymentID, ProvisionRunID: provisionRunID, InstallerID: resolved.RegistryID, ManifestSHA256: resolved.SHA256, Manifest: resolved.Manifest, State: \"PREPARING\", Generation: generation}"
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 8,
+      "states": [
+        "PENDING"
+      ],
+      "text": "Pending           State = \"PENDING\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 9,
+      "states": [
+        "WAITING_SSH"
+      ],
+      "text": "WaitingSSH        State = \"WAITING_SSH\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 10,
+      "states": [
+        "CHECKING_READINESS"
+      ],
+      "text": "CheckingReadiness State = \"CHECKING_READINESS\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 11,
+      "states": [
+        "BOOTSTRAPPING"
+      ],
+      "text": "Bootstrapping     State = \"BOOTSTRAPPING\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 12,
+      "states": [
+        "INSTALLING_PANEL"
+      ],
+      "text": "InstallingPanel   State = \"INSTALLING_PANEL\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 13,
+      "states": [
+        "RUNNING_SCRIPT"
+      ],
+      "text": "RunningScript     State = \"RUNNING_SCRIPT\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 14,
+      "states": [
+        "WAITING_INSTALLER"
+      ],
+      "text": "WaitingInstaller  State = \"WAITING_INSTALLER\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 15,
+      "states": [
+        "IMPORTING_DATABASE"
+      ],
+      "text": "ImportingDatabase State = \"IMPORTING_DATABASE\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 16,
+      "states": [
+        "VERIFYING"
+      ],
+      "text": "Verifying         State = \"VERIFYING\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 17,
+      "states": [
+        "COMPLETED"
+      ],
+      "text": "Completed         State = \"COMPLETED\""
+    },
+    {
+      "file": "internal/provisioning/model.go",
+      "line": 18,
+      "states": [
+        "FAILED"
+      ],
+      "text": "Failed            State = \"FAILED\""
+    },
+    {
+      "file": "internal/provisioning/readiness.go",
+      "line": 56,
+      "states": [
+        "BLOCK",
+        "BLOCK",
+        "OPEN"
+      ],
+      "text": "issue := ReadinessIssue{Code: code, Severity: \"BLOCK\", Action: \"BLOCK\", Detail: \"SSH readiness probe failed\", State: \"OPEN\"}"
+    },
+    {
+      "file": "internal/provisioning/readiness.go",
+      "line": 99,
+      "states": [
+        "FAILED"
+      ],
+      "text": "issues[i].State = \"FAILED\""
+    },
+    {
+      "file": "internal/provisioning/readiness.go",
+      "line": 102,
+      "states": [
+        "REMEDIATED"
+      ],
+      "text": "issues[i].State = \"REMEDIATED\""
+    },
+    {
+      "file": "internal/provisioning/readiness.go",
+      "line": 143,
+      "states": [
+        "OPEN"
+      ],
+      "text": "i.State = \"OPEN\""
+    },
+    {
+      "file": "internal/provisioning/readiness_policy.go",
+      "line": 20,
+      "states": [
+        "OPEN"
+      ],
+      "text": "out = append(out, ReadinessIssue{Code: code, Severity: severity, Action: action, Remediation: remediation, Detail: detail, State: \"OPEN\"})"
+    },
+    {
+      "file": "internal/scheduler/engine.go",
+      "line": 18,
+      "states": [
+        "READY",
+        "ACTIVE"
+      ],
+      "text": "return enabled && runtimeStatus == \"READY\" && providerState == \"ACTIVE\" && providerError == \"\""
+    },
+    {
+      "file": "internal/worker/failures.go",
+      "line": 55,
+      "states": [
+        "READY",
+        "FAILED",
+        "INSTALL_COMPLETE",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "WAITING_INSTALLER"
+      ],
+      "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+    },
+    {
+      "file": "internal/worker/failures.go",
+      "line": 57,
+      "states": [
+        "DELETED"
+      ],
+      "text": "OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)"
+    },
+    {
+      "file": "internal/worker/recovery.go",
+      "line": 42,
+      "states": [
+        "WAITING_INSTALLER",
+        "INSTALL_COMPLETE",
+        "IMPORTING_DATABASE",
+        "DATABASE_COMPLETE",
+        "CONFIGURING_PANEL",
+        "INSTALL_COMPLETE",
+        "PLANNED",
+        "RESERVED",
+        "CREATING",
+        "WAITING_RESOURCE",
+        "PROVISIONING"
+      ],
+      "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND EXISTS(SELECT 1 FROM installer_runs ir WHERE ir.deployme"
+    }
+  ],
+  "timing_evidence": [
+    {
+      "file": "internal/provisioning/ssh.go",
+      "line": 61,
+      "text": "case <-time.After(interval):"
+    },
+    {
+      "file": "internal/provisioning/ssh.go",
+      "line": 191,
+      "text": "case <-time.After(2 * time.Second):"
+    },
+    {
+      "file": "internal/worker/worker.go",
+      "line": 30,
+      "text": "ticker := time.NewTicker(interval)"
+    }
+  ],
+  "note": "Static evidence index. Transition direction/ownership must be confirmed from exact source before mutation."
+}
