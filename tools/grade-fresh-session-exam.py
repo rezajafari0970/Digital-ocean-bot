@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json,sys,os
 if len(sys.argv)!=2:raise SystemExit('usage: grade-fresh-session-exam.py ANSWERS.json')
-key=json.load(open('docs/FRESH_SESSION_EXAM_KEY.json',encoding='utf-8'))['keys']; ans=json.load(open(sys.argv[1],encoding='utf-8')); answers=ans.get('answers',ans)
+key=json.load(open('.audit/fresh-session-exam/key.json',encoding='utf-8'))['keys']; ans=json.load(open(sys.argv[1],encoding='utf-8')); answers=ans.get('answers',ans)
 # Exact structural equality by design: fresh session should emit answer object from evidence.
 rows=[]
 for i,k in key.items():

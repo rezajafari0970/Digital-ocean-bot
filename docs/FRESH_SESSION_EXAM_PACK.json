@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "04768c4987d68af5f6ac0a28195698c6f91df152",
+  "source_commit": "a24fad8b90d1977dd34067cb0776f3798a722e04",
   "question_count": 40,
   "rules": [
     "Answer without opening the private key file.",

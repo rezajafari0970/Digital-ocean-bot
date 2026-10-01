@@ -1,5 +1,5 @@
 # Fresh Session Exam Pack
 
-Commit `04768c4987d68af5f6ac0a28195698c6f91df152` — **40 stratified cross-layer questions**. The public pack contains no answer keys. Private grading key SHA256: `dac5e40783558e68c01fb84d9cb888dc9765812c4f229781d8b776efe4a8938c`.
+Commit `a24fad8b90d1977dd34067cb0776f3798a722e04` — **40 stratified cross-layer questions**. The public pack contains no answer keys. Private grading key SHA256: `27fb9d8b90678ee937052b80e5147197285543dc9046bd47e412d151eaa5d367`.
 
 This pack is intended for a genuinely fresh session: answer first using Project Brain/source evidence, freeze answers, then grade.
