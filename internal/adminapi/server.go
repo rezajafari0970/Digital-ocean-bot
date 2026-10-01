@@ -163,7 +163,7 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/vultr-browser/client.html" || r.URL.Path == "/vultr-browser/vnc.html" || r.URL.Path == "/vultr-browser/vnc_lite.html" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
-		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=7\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=7\"></script></body></html>"))
+		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=7\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=8\"></script></body></html>"))
 		return
 	}
 	upstream := "http://127.0.0.1:16080"
