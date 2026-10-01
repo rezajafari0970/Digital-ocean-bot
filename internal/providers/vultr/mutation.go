@@ -11,7 +11,7 @@ type createInstanceRequest struct {
 	OSID            int      `json:"os_id"`
 	Label           string   `json:"label,omitempty"`
 	Hostname        string   `json:"hostname,omitempty"`
-	SSHKeyIDs       []string `json:"sshkey_id,omitempty"`
+	SSHKeyIDs       []string `json:"ssh_key_ids,omitempty"`
 	Tags            []string `json:"tags,omitempty"`
 	EnableIPv6      bool     `json:"enable_ipv6"`
 	ActivationEmail bool     `json:"activation_email"`

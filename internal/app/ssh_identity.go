@@ -50,6 +50,7 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	}
 	snap.SSHKeySecretRef = ref
 	snap.SSHProviderKeyID = workflow.ProviderKeyRef(created.ID)
+	snap.SSHKeyFingerprint = ssh.FingerprintSHA256(pub)
 	snap.SSHUser = "root"
 	raw, err := json.Marshal(snap)
 	if err != nil {

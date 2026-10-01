@@ -43,6 +43,7 @@ type ProfileSnapshot struct {
 	SSHUser            string                     `json:"ssh_user"`
 	SSHKeySecretRef    string                     `json:"ssh_key_secret_ref"`
 	SSHProviderKeyID   ProviderKeyRef             `json:"ssh_provider_key_id,omitempty"`
+	SSHKeyFingerprint  string                     `json:"ssh_key_fingerprint,omitempty"`
 	InstallerURL       string                     `json:"installer_url"`
 	InstallerRef       *provisioning.InstallerRef `json:"installer_ref,omitempty"`
 	InstallScriptRefs  []provisioning.ScriptRef   `json:"install_script_refs,omitempty"`
