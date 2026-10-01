@@ -1,0 +1,1 @@
+[{"kind":"topology","cue":{"file":"cmd/worker/main.go"},"answer":{"symbols":["main"]}},{"kind":"topology","cue":{"method":"GET","path":"/api/v1/accounts/{id}/discovery"},"answer":{"handler":"accountDiscovery"}},{"kind":"topology","cue":{"file":"internal/adminapi/accounts_write.go"},"answer":{"symbols":["accountWrite","createAccount","mustJSON","requireAdmin"]}}]

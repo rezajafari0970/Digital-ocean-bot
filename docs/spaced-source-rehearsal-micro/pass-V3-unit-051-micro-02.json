@@ -1,0 +1,1 @@
+[{"kind":"verbatim","cue":{"file":"internal/adminapi/provision_errors.go","start_line":33,"end_line":35,"first_line":"\t}"},"answer":{"text":"\t}\n\twriteJSON(w, 200, out)\n}"}},{"kind":"verbatim","cue":{"file":"internal/adminapi/installer_rearm.go","start_line":57,"end_line":57,"first_line":"}"},"answer":{"text":"}"}}]
