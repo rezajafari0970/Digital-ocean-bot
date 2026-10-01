@@ -37,8 +37,8 @@ func TestProxyControlCircuitOpensAndRecoversWithHysteresis(t *testing.T) {
 	}
 	ok := network.HealthResult{Status: network.StatusHealthy, Latency: time.Millisecond, CheckedAt: now.Add(2*time.Minute + time.Second)}
 	x = ApplyHealth(x, ok, p)
-	if x.CircuitState != resilience.Open && x.CircuitState != resilience.HalfOpen {
-		t.Fatalf("single recovery probe must not fully recover health: %+v", x)
+	if x.CircuitState != resilience.HalfOpen {
+		t.Fatalf("successful recovery probe must remain half-open until hysteresis completes: %+v", x)
 	}
 	ok.CheckedAt = now.Add(2*time.Minute + 2*time.Second)
 	x = ApplyHealth(x, ok, p)

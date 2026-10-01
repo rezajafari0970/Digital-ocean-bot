@@ -91,7 +91,7 @@ func ApplyHealth(x State, result network.HealthResult, policy Policy) State {
 		x.LastErrorDetail = result.Error
 	}
 
-	if x.CircuitState == resilience.HalfOpen || x.ConsecutiveFailures >= policy.CircuitFailureThreshold {
+	if (x.CircuitState == resilience.HalfOpen && result.Status != network.StatusHealthy) || x.ConsecutiveFailures >= policy.CircuitFailureThreshold {
 		x.CircuitState = resilience.Open
 		retry := result.CheckedAt.Add(policy.OpenDuration)
 		x.RetryAfter = &retry
