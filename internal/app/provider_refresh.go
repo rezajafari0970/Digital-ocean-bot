@@ -65,10 +65,20 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			if rt.Config.Provider == "vultr" {
 				var previous providers.Observation
 				var previousCanonical []byte
-				if qerr := c.DB.QueryRowContext(ctx, `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&previousCanonical); qerr == nil {
-					_ = json.Unmarshal(previousCanonical, &previous)
+				hasPrevious := false
+				if qerr := c.DB.QueryRowContext(ctx, `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&previousCanonical); qerr == nil && json.Unmarshal(previousCanonical, &previous) == nil {
+					hasPrevious = true
 				}
-				obs, err = fastProviderObservation(ctx, rt.Driver, previous)
+				if fastReader, fastOK := rt.Driver.(providers.FastObservationReader); fastOK && hasPrevious {
+					fastCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+					obs, err = fastReader.ObserveFast(fastCtx)
+					cancel()
+					if err == nil {
+						obs.Catalog = previous.Catalog
+					}
+				} else {
+					obs, err = snapshotReader.Observe(ctx)
+				}
 			} else {
 				obs, err = snapshotReader.Observe(ctx)
 			}

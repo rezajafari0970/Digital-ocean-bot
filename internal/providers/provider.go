@@ -49,6 +49,12 @@ type ObservationReader interface {
 	Observe(context.Context) (Observation, error)
 }
 
+// FastObservationReader is the health/capacity hot path. Implementations must
+// avoid optional catalog calls so inventory freshness is not coupled to catalog availability.
+type FastObservationReader interface {
+	ObserveFast(context.Context) (Observation, error)
+}
+
 type CredentialSource interface {
 	Get(context.Context) ([]byte, error)
 }
