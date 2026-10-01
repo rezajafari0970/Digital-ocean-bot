@@ -1,0 +1,35 @@
+{
+  "ready": true,
+  "checks": [
+    {
+      "name": "drift",
+      "pass": true,
+      "stdout": "KNOWLEDGE DRIFT PASS head e7f51cb0ab47\ncurrent-source docs/FULL_SOURCE_KNOWLEDGE.json distance=19 changed=0\ncurrent-source docs/SEMANTIC_KNOWLEDGE.json distance=19 changed=0\ncurrent-source docs/DEEP_REQUIREMENTS_BRAIN.json distance=17 changed=0\ncurrent-source docs/FUNCTION_BEHAVIOR_BRAIN.json distance=16 changed=0\ncurrent-source docs/COLUMN_BEHAVIOR_BRAIN.json distance=15 changed=0\ncurrent-source docs/TEST_BEHAVIOR_BRAIN.json distance=14 changed=0\ncurrent-source docs/STATE_TRANSITION_BRAIN.json distance=13 changed=0\ncurrent-source docs/FRONTEND_ACTION_STATE_BRAIN.json distance=12 changed=0\ncurrent-source docs/INCIDENT_REGRESSION_BRAIN.json distance=11 changed=0\ncurrent-source docs/BLIND_KNOWLEDGE_CHALLENGE.json distance=9 changed=0\n",
+      "stderr": ""
+    },
+    {
+      "name": "handoff",
+      "pass": true,
+      "stdout": "ACCEPTANCE 100/100 READY\n",
+      "stderr": ""
+    },
+    {
+      "name": "deep_mastery",
+      "pass": true,
+      "stdout": "DEEP MASTERY 100.0 (106/106)\naccounts: 100.0%\nadmin_api: 100.0%\narchitecture: 100.0%\nconfig_users: 100.0%\ncontinuity: 100.0%\ndatabase: 100.0%\ndeployment_runtime: 100.0%\ndigitalocean: 100.0%\nfrontend: 100.0%\nhistory: 100.0%\nlifecycle: 100.0%\noutput: 100.0%\nprovisioning: 100.0%\nproxy_network: 100.0%\nreality: 100.0%\nresidential: 100.0%\nsanaei_panel: 100.0%\nsource: 100.0%\ntests: 100.0%\nvultr: 100.0%\n",
+      "stderr": ""
+    },
+    {
+      "name": "blind_structure",
+      "pass": true,
+      "stdout": "BLIND CHALLENGE 110 questions PASS\n",
+      "stderr": ""
+    },
+    {
+      "name": "master_v3",
+      "pass": true,
+      "stdout": "score=100.0 ready=True",
+      "stderr": ""
+    }
+  ]
+}

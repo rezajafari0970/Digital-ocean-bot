@@ -13,3 +13,6 @@ For a fresh ChatGPT session continuing this project, do not reconstruct from cha
 9. Continue from the exact boundary in `HANDOFF.md`; inspect live source/runtime before mutation.
 
 Acceptance policy: `docs/HANDOFF_ACCEPTANCE_100.json` must report `ready: true` and score `100` before this handoff is called READY. This means tested recoverability/traceability, not unaided memorization of every token.
+
+## Mastery bootstrap
+Read `docs/FRESH_CHAT_MASTERY_PROTOCOL.md` and run `python3 tools/fresh-chat-mastery-gate.py` before claiming full current-project mastery. Require `FRESH CHAT MASTERY READY`.
