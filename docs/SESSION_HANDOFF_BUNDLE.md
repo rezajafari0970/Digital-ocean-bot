@@ -2,9 +2,9 @@
 
 > Generated continuity entrypoint. Read this first; source/runtime remain authoritative.
 
-Generated UTC: 2026-10-01T03:50:21.957661+00:00
+Generated UTC: 2026-10-01T04:15:52.274018+00:00
 Branch: `checkpoint/final-e2e-20260929`
-HEAD at bundle generation: `e986b921ddb5e650cb57caa3f1115993d9a3e476`
+HEAD at bundle generation: `03f810813368f1902cb85f42d8de0d9d8d48c198`
 
 ## Mandatory startup procedure
 1. Read this bundle completely.
@@ -290,7 +290,7 @@ A logical stage is not complete until code/tests are committed, pushed to the ca
 ```json
 {
   "branch": "checkpoint/final-e2e-20260929",
-  "head": "e986b921ddb5e650cb57caa3f1115993d9a3e476",
+  "head": "03f810813368f1902cb85f42d8de0d9d8d48c198",
   "services": {
     "digital-ocean-bot-api": "active",
     "digital-ocean-bot-worker": "active"

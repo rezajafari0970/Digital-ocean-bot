@@ -1,6 +1,6 @@
 # Semantic Source Knowledge
 
-Commit-pinned semantic/navigation layer for **409 Go files** and **1537 symbols** at `1d412f50d6b347a99f8930f095d9fd3d7f9f058c`.
+Commit-pinned semantic/navigation layer for **409 Go files** and **1537 symbols** at `03f810813368f1902cb85f42d8de0d9d8d48c198`.
 
 Records file roles, imports, symbol ranges, lexical calls, candidate caller files, SQL tables and endpoint literals. Candidate callers are navigation hints, not a compiler-proven call graph.
 

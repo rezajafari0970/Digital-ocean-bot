@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "97839c38cb12e75fca5640a75e030b79b0499112",
-  "file_count": 631,
-  "total_lines": 33289,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "file_count": 640,
+  "total_lines": 33920,
   "files": [
     {
       "path": "cmd/admin-bootstrap/main.go",
@@ -12415,10 +12415,38 @@
       "symbols": []
     },
     {
+      "path": "tools/build-frontend-brain.py",
+      "sha256": "eea4fc44477b2ed95985e68020024c2d9ef920431fb0e64e74afe0486a01e22e",
+      "bytes": 2038,
+      "line_count": 21,
+      "symbols": []
+    },
+    {
       "path": "tools/build-handoff-bundle.py",
       "sha256": "94b05db358f78f78bedf835fccd06d726cd22d9befc9fcbc69f238e90210dfae",
       "bytes": 2393,
       "line_count": 28,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-impact-graph.py",
+      "sha256": "2aa1e20c2a5321a925f3d158677dfe1107cda81baac8b1d0b2e8c0abb435f788",
+      "bytes": 2394,
+      "line_count": 30,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-lifecycle-brain.py",
+      "sha256": "79a26813dae83d7776f8d679d8c1af8feb40cb0e55f4917270022d1795a48b88",
+      "bytes": 2952,
+      "line_count": 20,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-live-db-brain.py",
+      "sha256": "0e3b8525228a106f1f786db2a1cd02524db6ca928dcee6e868d52e67855283e6",
+      "bytes": 2206,
+      "line_count": 27,
       "symbols": []
     },
     {
@@ -12429,10 +12457,24 @@
       "symbols": []
     },
     {
+      "path": "tools/build-runtime-worker-brain.py",
+      "sha256": "20125bdbdef2f793118cf36f000cc177fb158888dfddf2ad6de6f6139e139a4d",
+      "bytes": 1507,
+      "line_count": 21,
+      "symbols": []
+    },
+    {
       "path": "tools/build-schema-index.py",
       "sha256": "f3285835a1a7f611c59d8f52424228b3ac1f26dfca8e36f56e406f9af0a925e3",
       "bytes": 3871,
       "line_count": 43,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-semantic-knowledge.py",
+      "sha256": "1afd7a2f76aa66d4d122c85a63daa1f3bab2ef6131138196b69a64df7b3a3cbc",
+      "bytes": 4773,
+      "line_count": 40,
       "symbols": []
     },
     {
@@ -12457,6 +12499,13 @@
       "symbols": []
     },
     {
+      "path": "tools/build-traceability-matrix.py",
+      "sha256": "96509b9996fdc7ed4112e0941f6388b0744626720643ca928bac43e92a9e9177",
+      "bytes": 8340,
+      "line_count": 374,
+      "symbols": []
+    },
+    {
       "path": "tools/check-project-continuity.sh",
       "sha256": "642c326c4e5ffa8c635c63831361601bcb876e1d7a1e47a908182076bdb32f97",
       "bytes": 748,
@@ -12465,9 +12514,23 @@
     },
     {
       "path": "tools/checkpoint-project.sh",
-      "sha256": "2f80bc23d7ede50c1aee53af81d0f7064d2fbedf06c87791c3eaf57f5196c1b6",
-      "bytes": 1443,
-      "line_count": 25,
+      "sha256": "249cfb9bb73c3210e28a5b20b2d18b819b95bebf72852abfdba3b5e88fed309d",
+      "bytes": 1991,
+      "line_count": 32,
+      "symbols": []
+    },
+    {
+      "path": "tools/handoff-acceptance-100.py",
+      "sha256": "46e605ef61aa7a7e192bb13a5559b69a0018224665f8476692f700d26031d537",
+      "bytes": 5412,
+      "line_count": 55,
+      "symbols": []
+    },
+    {
+      "path": "tools/project-brain-query.py",
+      "sha256": "4e8dbbd2cc2fbd1e813bcb138e950fdd538e5c5a82779fdf8b259456eeab9224",
+      "bytes": 2093,
+      "line_count": 36,
       "symbols": []
     },
     {

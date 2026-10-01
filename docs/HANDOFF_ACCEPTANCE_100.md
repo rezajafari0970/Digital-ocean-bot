@@ -1,0 +1,104 @@
+# Fresh-session Acceptance
+
+Score: **100/100** — **READY**
+
+- [x] 001 `source` — internal/adminapi/server.go
+- [x] 002 `source` — internal/adminapi/output.go
+- [x] 003 `source` — internal/providers/digitalocean/client.go
+- [x] 004 `source` — internal/providers/vultr/client.go
+- [x] 005 `source` — internal/providers/vultrconsole/browser.go
+- [x] 006 `source` — internal/panels/sanaei/api.go
+- [x] 007 `source` — internal/droplets/lifecycle_engine.go
+- [x] 008 `source` — internal/network/client.go
+- [x] 009 `source` — cmd/api/main.go
+- [x] 010 `source` — cmd/worker/main.go
+- [x] 011 `source` — web/static/app.js
+- [x] 012 `source` — >=600 indexed files
+- [x] 013 `source` — >=30000 indexed lines
+- [x] 014 `source` — >=1500 semantic symbols
+- [x] 015 `source` — server.go line 105 retrievable
+- [x] 016 `intent` — ARCH-001
+- [x] 017 `intent` — ACC-001
+- [x] 018 `intent` — NET-001
+- [x] 019 `intent` — LIFE-001
+- [x] 020 `intent` — DO-001
+- [x] 021 `intent` — VULTR-001
+- [x] 022 `intent` — VULTR-002
+- [x] 023 `intent` — VULTR-003
+- [x] 024 `intent` — OUT-001
+- [x] 025 `intent` — OPS-001
+- [x] 026 `api` — /api/v1/accounts
+- [x] 027 `api` — /api/v1/output
+- [x] 028 `api` — /api/v1/output/share
+- [x] 029 `api` — /api/v1/providers
+- [x] 030 `api` — /api/v1/configs
+- [x] 031 `api` — /api/v1/config-capacity
+- [x] 032 `api` — /api/v1/proxies
+- [x] 033 `api` — /api/v1/residential-proxies
+- [x] 034 `api` — /api/v1/accounts/{id}/console-session
+- [x] 035 `api` — /version
+- [x] 036 `db` — source migrations >=102
+- [x] 037 `db` — live migrations >=102
+- [x] 038 `db` — live tables >=50
+- [x] 039 `db` — table accounts
+- [x] 040 `db` — table deployments
+- [x] 041 `db` — table panel_instances
+- [x] 042 `db` — table output_config_snapshots
+- [x] 043 `db` — table provider_capacity_observations
+- [x] 044 `db` — table schema_migrations
+- [x] 045 `db` — table network_profiles
+- [x] 046 `ui` — pages >=7
+- [x] 047 `ui` — api paths >=20
+- [x] 048 `ui` — actions >=20
+- [x] 049 `ui` — page dashboard
+- [x] 050 `ui` — page accounts
+- [x] 051 `ui` — page proxies
+- [x] 052 `ui` — page residential
+- [x] 053 `ui` — page configs
+- [x] 054 `ui` — page output
+- [x] 055 `ui` — page settings
+- [x] 056 `lifecycle` — states >=40
+- [x] 057 `lifecycle` — transition evidence >=50
+- [x] 058 `lifecycle` — runtime events >=20
+- [x] 059 `lifecycle` — state CREATING
+- [x] 060 `lifecycle` — state FAILED
+- [x] 061 `lifecycle` — state DELETED
+- [x] 062 `lifecycle` — state INSTALLING
+- [x] 063 `lifecycle` — state INSTALL_COMPLETE
+- [x] 064 `lifecycle` — state INSTALL_FAILED
+- [x] 065 `lifecycle` — state CONFIGURING_PANEL
+- [x] 066 `tests` — test files >=120
+- [x] 067 `tests` — test funcs >=250
+- [x] 068 `tests` — feature digitalocean
+- [x] 069 `tests` — feature vultr
+- [x] 070 `tests` — feature network_proxy
+- [x] 071 `tests` — feature compute_lifecycle
+- [x] 072 `tests` — feature sanaei
+- [x] 073 `tests` — feature reality_policy
+- [x] 074 `tests` — feature output
+- [x] 075 `tests` — feature adminapi
+- [x] 076 `runtime` — api active
+- [x] 077 `runtime` — worker active
+- [x] 078 `runtime` — tools/verify-production-revision.py
+- [x] 079 `runtime` — docs/PRODUCTION_REVISION_IDENTITY.md
+- [x] 080 `runtime` — docs/RUNTIME_MAP.json
+- [x] 081 `runtime` — docs/RUNTIME_WORKER_BRAIN.json
+- [x] 082 `runtime` — deploy/upgrade.sh
+- [x] 083 `runtime` — deploy/healthcheck.sh
+- [x] 084 `runtime` — internal/buildinfo/buildinfo.go
+- [x] 085 `runtime` — tools/build-runtime-map.py
+- [x] 086 `impact` — nodes >=2000
+- [x] 087 `impact` — edges >=2000
+- [x] 088 `impact` — trace rows cover requirements
+- [x] 089 `impact` — trace ARCH-001
+- [x] 090 `impact` — trace NET-001
+- [x] 091 `impact` — trace LIFE-001
+- [x] 092 `impact` — trace VULTR-002
+- [x] 093 `impact` — trace OUT-002
+- [x] 094 `impact` — trace REAL-001
+- [x] 095 `impact` — trace RES-001
+- [x] 096 `handoff` — docs/SESSION_HANDOFF_BUNDLE.md
+- [x] 097 `handoff` — docs/HANDOFF_READINESS_AUDIT.md
+- [x] 098 `handoff` — tools/project-brain-query.py
+- [x] 099 `handoff` — tools/source-lookup.py
+- [x] 100 `handoff` — tools/check-project-continuity.sh

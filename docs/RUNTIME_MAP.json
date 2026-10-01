@@ -3,7 +3,7 @@
   "canonical_repo": "/root/projects/Digital-ocean-bot-canonical-e2e",
   "git": {
     "branch": "checkpoint/final-e2e-20260929",
-    "head": "fa815e643a71d3623d2abce17058d2f725a00f4e"
+    "head": "03f810813368f1902cb85f42d8de0d9d8d48c198"
   },
   "paths": {
     "app": "/opt/digital-ocean-bot",
@@ -17,24 +17,24 @@
     "digital-ocean-bot-api": {
       "ActiveState": "active",
       "SubState": "running",
-      "MainPID": "2532688",
+      "MainPID": "2542899",
       "FragmentPath": "/etc/systemd/system/digital-ocean-bot-api.service",
       "WorkingDirectory": "/opt/digital-ocean-bot",
-      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; ignore_errors=no ; start_time=[Thu 2026-10-01 03:40:48 UTC] ; stop_time=[n/a] ; pid=2532688 ; code=(null) ; status=0/0 }",
+      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; ignore_errors=no ; start_time=[Thu 2026-10-01 03:59:08 UTC] ; stop_time=[n/a] ; pid=2542899 ; code=(null) ; status=0/0 }",
       "EnvironmentFiles": "/etc/digital-ocean-bot/env (ignore_errors=no)",
       "resolved_executable": "/opt/digital-ocean-bot/bin/digital-ocean-bot-api",
-      "binary_sha256": "2f8eb59be1ce359a0fd9500ac741f3b2e717c0b7e1c08662b00e7f7ef9c78598"
+      "binary_sha256": "c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450"
     },
     "digital-ocean-bot-worker": {
       "ActiveState": "active",
       "SubState": "running",
-      "MainPID": "2137080",
+      "MainPID": "2542900",
       "FragmentPath": "/etc/systemd/system/digital-ocean-bot-worker.service",
       "WorkingDirectory": "/opt/digital-ocean-bot",
-      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }",
+      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; ignore_errors=no ; start_time=[Thu 2026-10-01 03:59:08 UTC] ; stop_time=[n/a] ; pid=2542900 ; code=(null) ; status=0/0 }",
       "EnvironmentFiles": "/etc/digital-ocean-bot/env (ignore_errors=no)",
       "resolved_executable": "/opt/digital-ocean-bot/bin/digital-ocean-bot-worker",
-      "binary_sha256": "7bd4042953d7f5d6f43a53311ef0b2d600b0e72e293ca21b18e7d0159cd56fcb"
+      "binary_sha256": "6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840"
     }
   },
   "source_units": [

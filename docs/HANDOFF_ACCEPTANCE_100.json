@@ -1,0 +1,607 @@
+{
+  "score": 100,
+  "total": 100,
+  "ready": true,
+  "checks": [
+    {
+      "n": 1,
+      "category": "source",
+      "name": "internal/adminapi/server.go",
+      "pass": true
+    },
+    {
+      "n": 2,
+      "category": "source",
+      "name": "internal/adminapi/output.go",
+      "pass": true
+    },
+    {
+      "n": 3,
+      "category": "source",
+      "name": "internal/providers/digitalocean/client.go",
+      "pass": true
+    },
+    {
+      "n": 4,
+      "category": "source",
+      "name": "internal/providers/vultr/client.go",
+      "pass": true
+    },
+    {
+      "n": 5,
+      "category": "source",
+      "name": "internal/providers/vultrconsole/browser.go",
+      "pass": true
+    },
+    {
+      "n": 6,
+      "category": "source",
+      "name": "internal/panels/sanaei/api.go",
+      "pass": true
+    },
+    {
+      "n": 7,
+      "category": "source",
+      "name": "internal/droplets/lifecycle_engine.go",
+      "pass": true
+    },
+    {
+      "n": 8,
+      "category": "source",
+      "name": "internal/network/client.go",
+      "pass": true
+    },
+    {
+      "n": 9,
+      "category": "source",
+      "name": "cmd/api/main.go",
+      "pass": true
+    },
+    {
+      "n": 10,
+      "category": "source",
+      "name": "cmd/worker/main.go",
+      "pass": true
+    },
+    {
+      "n": 11,
+      "category": "source",
+      "name": "web/static/app.js",
+      "pass": true
+    },
+    {
+      "n": 12,
+      "category": "source",
+      "name": ">=600 indexed files",
+      "pass": true
+    },
+    {
+      "n": 13,
+      "category": "source",
+      "name": ">=30000 indexed lines",
+      "pass": true
+    },
+    {
+      "n": 14,
+      "category": "source",
+      "name": ">=1500 semantic symbols",
+      "pass": true
+    },
+    {
+      "n": 15,
+      "category": "source",
+      "name": "server.go line 105 retrievable",
+      "pass": true
+    },
+    {
+      "n": 16,
+      "category": "intent",
+      "name": "ARCH-001",
+      "pass": true
+    },
+    {
+      "n": 17,
+      "category": "intent",
+      "name": "ACC-001",
+      "pass": true
+    },
+    {
+      "n": 18,
+      "category": "intent",
+      "name": "NET-001",
+      "pass": true
+    },
+    {
+      "n": 19,
+      "category": "intent",
+      "name": "LIFE-001",
+      "pass": true
+    },
+    {
+      "n": 20,
+      "category": "intent",
+      "name": "DO-001",
+      "pass": true
+    },
+    {
+      "n": 21,
+      "category": "intent",
+      "name": "VULTR-001",
+      "pass": true
+    },
+    {
+      "n": 22,
+      "category": "intent",
+      "name": "VULTR-002",
+      "pass": true
+    },
+    {
+      "n": 23,
+      "category": "intent",
+      "name": "VULTR-003",
+      "pass": true
+    },
+    {
+      "n": 24,
+      "category": "intent",
+      "name": "OUT-001",
+      "pass": true
+    },
+    {
+      "n": 25,
+      "category": "intent",
+      "name": "OPS-001",
+      "pass": true
+    },
+    {
+      "n": 26,
+      "category": "api",
+      "name": "/api/v1/accounts",
+      "pass": true
+    },
+    {
+      "n": 27,
+      "category": "api",
+      "name": "/api/v1/output",
+      "pass": true
+    },
+    {
+      "n": 28,
+      "category": "api",
+      "name": "/api/v1/output/share",
+      "pass": true
+    },
+    {
+      "n": 29,
+      "category": "api",
+      "name": "/api/v1/providers",
+      "pass": true
+    },
+    {
+      "n": 30,
+      "category": "api",
+      "name": "/api/v1/configs",
+      "pass": true
+    },
+    {
+      "n": 31,
+      "category": "api",
+      "name": "/api/v1/config-capacity",
+      "pass": true
+    },
+    {
+      "n": 32,
+      "category": "api",
+      "name": "/api/v1/proxies",
+      "pass": true
+    },
+    {
+      "n": 33,
+      "category": "api",
+      "name": "/api/v1/residential-proxies",
+      "pass": true
+    },
+    {
+      "n": 34,
+      "category": "api",
+      "name": "/api/v1/accounts/{id}/console-session",
+      "pass": true
+    },
+    {
+      "n": 35,
+      "category": "api",
+      "name": "/version",
+      "pass": true
+    },
+    {
+      "n": 36,
+      "category": "db",
+      "name": "source migrations >=102",
+      "pass": true
+    },
+    {
+      "n": 37,
+      "category": "db",
+      "name": "live migrations >=102",
+      "pass": true
+    },
+    {
+      "n": 38,
+      "category": "db",
+      "name": "live tables >=50",
+      "pass": true
+    },
+    {
+      "n": 39,
+      "category": "db",
+      "name": "table accounts",
+      "pass": true
+    },
+    {
+      "n": 40,
+      "category": "db",
+      "name": "table deployments",
+      "pass": true
+    },
+    {
+      "n": 41,
+      "category": "db",
+      "name": "table panel_instances",
+      "pass": true
+    },
+    {
+      "n": 42,
+      "category": "db",
+      "name": "table output_config_snapshots",
+      "pass": true
+    },
+    {
+      "n": 43,
+      "category": "db",
+      "name": "table provider_capacity_observations",
+      "pass": true
+    },
+    {
+      "n": 44,
+      "category": "db",
+      "name": "table schema_migrations",
+      "pass": true
+    },
+    {
+      "n": 45,
+      "category": "db",
+      "name": "table network_profiles",
+      "pass": true
+    },
+    {
+      "n": 46,
+      "category": "ui",
+      "name": "pages >=7",
+      "pass": true
+    },
+    {
+      "n": 47,
+      "category": "ui",
+      "name": "api paths >=20",
+      "pass": true
+    },
+    {
+      "n": 48,
+      "category": "ui",
+      "name": "actions >=20",
+      "pass": true
+    },
+    {
+      "n": 49,
+      "category": "ui",
+      "name": "page dashboard",
+      "pass": true
+    },
+    {
+      "n": 50,
+      "category": "ui",
+      "name": "page accounts",
+      "pass": true
+    },
+    {
+      "n": 51,
+      "category": "ui",
+      "name": "page proxies",
+      "pass": true
+    },
+    {
+      "n": 52,
+      "category": "ui",
+      "name": "page residential",
+      "pass": true
+    },
+    {
+      "n": 53,
+      "category": "ui",
+      "name": "page configs",
+      "pass": true
+    },
+    {
+      "n": 54,
+      "category": "ui",
+      "name": "page output",
+      "pass": true
+    },
+    {
+      "n": 55,
+      "category": "ui",
+      "name": "page settings",
+      "pass": true
+    },
+    {
+      "n": 56,
+      "category": "lifecycle",
+      "name": "states >=40",
+      "pass": true
+    },
+    {
+      "n": 57,
+      "category": "lifecycle",
+      "name": "transition evidence >=50",
+      "pass": true
+    },
+    {
+      "n": 58,
+      "category": "lifecycle",
+      "name": "runtime events >=20",
+      "pass": true
+    },
+    {
+      "n": 59,
+      "category": "lifecycle",
+      "name": "state CREATING",
+      "pass": true
+    },
+    {
+      "n": 60,
+      "category": "lifecycle",
+      "name": "state FAILED",
+      "pass": true
+    },
+    {
+      "n": 61,
+      "category": "lifecycle",
+      "name": "state DELETED",
+      "pass": true
+    },
+    {
+      "n": 62,
+      "category": "lifecycle",
+      "name": "state INSTALLING",
+      "pass": true
+    },
+    {
+      "n": 63,
+      "category": "lifecycle",
+      "name": "state INSTALL_COMPLETE",
+      "pass": true
+    },
+    {
+      "n": 64,
+      "category": "lifecycle",
+      "name": "state INSTALL_FAILED",
+      "pass": true
+    },
+    {
+      "n": 65,
+      "category": "lifecycle",
+      "name": "state CONFIGURING_PANEL",
+      "pass": true
+    },
+    {
+      "n": 66,
+      "category": "tests",
+      "name": "test files >=120",
+      "pass": true
+    },
+    {
+      "n": 67,
+      "category": "tests",
+      "name": "test funcs >=250",
+      "pass": true
+    },
+    {
+      "n": 68,
+      "category": "tests",
+      "name": "feature digitalocean",
+      "pass": true
+    },
+    {
+      "n": 69,
+      "category": "tests",
+      "name": "feature vultr",
+      "pass": true
+    },
+    {
+      "n": 70,
+      "category": "tests",
+      "name": "feature network_proxy",
+      "pass": true
+    },
+    {
+      "n": 71,
+      "category": "tests",
+      "name": "feature compute_lifecycle",
+      "pass": true
+    },
+    {
+      "n": 72,
+      "category": "tests",
+      "name": "feature sanaei",
+      "pass": true
+    },
+    {
+      "n": 73,
+      "category": "tests",
+      "name": "feature reality_policy",
+      "pass": true
+    },
+    {
+      "n": 74,
+      "category": "tests",
+      "name": "feature output",
+      "pass": true
+    },
+    {
+      "n": 75,
+      "category": "tests",
+      "name": "feature adminapi",
+      "pass": true
+    },
+    {
+      "n": 76,
+      "category": "runtime",
+      "name": "api active",
+      "pass": true
+    },
+    {
+      "n": 77,
+      "category": "runtime",
+      "name": "worker active",
+      "pass": true
+    },
+    {
+      "n": 78,
+      "category": "runtime",
+      "name": "tools/verify-production-revision.py",
+      "pass": true
+    },
+    {
+      "n": 79,
+      "category": "runtime",
+      "name": "docs/PRODUCTION_REVISION_IDENTITY.md",
+      "pass": true
+    },
+    {
+      "n": 80,
+      "category": "runtime",
+      "name": "docs/RUNTIME_MAP.json",
+      "pass": true
+    },
+    {
+      "n": 81,
+      "category": "runtime",
+      "name": "docs/RUNTIME_WORKER_BRAIN.json",
+      "pass": true
+    },
+    {
+      "n": 82,
+      "category": "runtime",
+      "name": "deploy/upgrade.sh",
+      "pass": true
+    },
+    {
+      "n": 83,
+      "category": "runtime",
+      "name": "deploy/healthcheck.sh",
+      "pass": true
+    },
+    {
+      "n": 84,
+      "category": "runtime",
+      "name": "internal/buildinfo/buildinfo.go",
+      "pass": true
+    },
+    {
+      "n": 85,
+      "category": "runtime",
+      "name": "tools/build-runtime-map.py",
+      "pass": true
+    },
+    {
+      "n": 86,
+      "category": "impact",
+      "name": "nodes >=2000",
+      "pass": true
+    },
+    {
+      "n": 87,
+      "category": "impact",
+      "name": "edges >=2000",
+      "pass": true
+    },
+    {
+      "n": 88,
+      "category": "impact",
+      "name": "trace rows cover requirements",
+      "pass": true
+    },
+    {
+      "n": 89,
+      "category": "impact",
+      "name": "trace ARCH-001",
+      "pass": true
+    },
+    {
+      "n": 90,
+      "category": "impact",
+      "name": "trace NET-001",
+      "pass": true
+    },
+    {
+      "n": 91,
+      "category": "impact",
+      "name": "trace LIFE-001",
+      "pass": true
+    },
+    {
+      "n": 92,
+      "category": "impact",
+      "name": "trace VULTR-002",
+      "pass": true
+    },
+    {
+      "n": 93,
+      "category": "impact",
+      "name": "trace OUT-002",
+      "pass": true
+    },
+    {
+      "n": 94,
+      "category": "impact",
+      "name": "trace REAL-001",
+      "pass": true
+    },
+    {
+      "n": 95,
+      "category": "impact",
+      "name": "trace RES-001",
+      "pass": true
+    },
+    {
+      "n": 96,
+      "category": "handoff",
+      "name": "docs/SESSION_HANDOFF_BUNDLE.md",
+      "pass": true
+    },
+    {
+      "n": 97,
+      "category": "handoff",
+      "name": "docs/HANDOFF_READINESS_AUDIT.md",
+      "pass": true
+    },
+    {
+      "n": 98,
+      "category": "handoff",
+      "name": "tools/project-brain-query.py",
+      "pass": true
+    },
+    {
+      "n": 99,
+      "category": "handoff",
+      "name": "tools/source-lookup.py",
+      "pass": true
+    },
+    {
+      "n": 100,
+      "category": "handoff",
+      "name": "tools/check-project-continuity.sh",
+      "pass": true
+    }
+  ]
+}

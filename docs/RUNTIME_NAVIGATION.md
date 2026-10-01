@@ -1,6 +1,6 @@
 # Deployment / Runtime Map
 
-Canonical source: `/root/projects/Digital-ocean-bot-canonical-e2e` on branch `checkpoint/final-e2e-20260929` at `fa815e643a71d3623d2abce17058d2f725a00f4e`.
+Canonical source: `/root/projects/Digital-ocean-bot-canonical-e2e` on branch `checkpoint/final-e2e-20260929` at `03f810813368f1902cb85f42d8de0d9d8d48c198`.
 
 ## Production layout
 - App: `/opt/digital-ocean-bot`
@@ -12,18 +12,18 @@ Canonical source: `/root/projects/Digital-ocean-bot-canonical-e2e` on branch `ch
 
 ## Services
 ### `digital-ocean-bot-api`
-- State: `active/running`; PID `2532688`
+- State: `active/running`; PID `2542899`
 - Unit: `/etc/systemd/system/digital-ocean-bot-api.service`
 - Working directory: `/opt/digital-ocean-bot`
 - Executable: `/opt/digital-ocean-bot/bin/digital-ocean-bot-api`
-- Binary SHA256: `2f8eb59be1ce359a0fd9500ac741f3b2e717c0b7e1c08662b00e7f7ef9c78598`
+- Binary SHA256: `c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450`
 
 ### `digital-ocean-bot-worker`
-- State: `active/running`; PID `2137080`
+- State: `active/running`; PID `2542900`
 - Unit: `/etc/systemd/system/digital-ocean-bot-worker.service`
 - Working directory: `/opt/digital-ocean-bot`
 - Executable: `/opt/digital-ocean-bot/bin/digital-ocean-bot-worker`
-- Binary SHA256: `7bd4042953d7f5d6f43a53311ef0b2d600b0e72e293ca21b18e7d0159cd56fcb`
+- Binary SHA256: `6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840`
 
 ## Build / deploy path
 - `deploy/install.sh` builds API/worker directly from source into `/opt/digital-ocean-bot/bin`, copies migrations/static assets, installs systemd units and enables services.

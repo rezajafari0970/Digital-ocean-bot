@@ -1,6 +1,6 @@
 # Lifecycle State-Machine Brain
 
-Commit `00e3ebba6243773ea388c726dd80538202946a06`. Indexed **60 lifecycle/provisioning/worker files**, **54 state-like constants**, **69 transition evidence locations**, **3 timing/retry locations**.
+Commit `03f810813368f1902cb85f42d8de0d9d8d48c198`. Indexed **60 lifecycle/provisioning/worker files**, **54 state-like constants**, **69 transition evidence locations**, **3 timing/retry locations**.
 
 This is static evidence, not a formally proven state machine. Before changing a transition, inspect its exact source, owner and persistence behavior.
 

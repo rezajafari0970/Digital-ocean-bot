@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "symbol_count": 1534,
-  "route_count": 61,
+  "symbol_count": 1537,
+  "route_count": 62,
   "symbols": [
     {
       "kind": "func",
@@ -1265,7 +1265,7 @@
       "receiver": "",
       "package": "adminapi",
       "file": "internal/adminapi/server.go",
-      "line": 121
+      "line": 122
     },
     {
       "kind": "method",
@@ -1273,7 +1273,7 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/server.go",
-      "line": 126
+      "line": 127
     },
     {
       "kind": "method",
@@ -1281,7 +1281,7 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/server.go",
-      "line": 129
+      "line": 130
     },
     {
       "kind": "method",
@@ -1289,7 +1289,7 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/server.go",
-      "line": 138
+      "line": 139
     },
     {
       "kind": "method",
@@ -1297,7 +1297,7 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/server.go",
-      "line": 164
+      "line": 165
     },
     {
       "kind": "func",
@@ -1321,7 +1321,7 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/status.go",
-      "line": 5
+      "line": 8
     },
     {
       "kind": "method",
@@ -1329,7 +1329,15 @@
       "receiver": "s *Server",
       "package": "adminapi",
       "file": "internal/adminapi/status.go",
-      "line": 25
+      "line": 28
+    },
+    {
+      "kind": "method",
+      "name": "version",
+      "receiver": "s *Server",
+      "package": "adminapi",
+      "file": "internal/adminapi/status.go",
+      "line": 36
     },
     {
       "kind": "method",
@@ -2266,6 +2274,22 @@
       "package": "auth",
       "file": "internal/auth/store.go",
       "line": 28
+    },
+    {
+      "kind": "struct",
+      "name": "Info",
+      "receiver": "",
+      "package": "buildinfo",
+      "file": "internal/buildinfo/buildinfo.go",
+      "line": 10
+    },
+    {
+      "kind": "func",
+      "name": "Current",
+      "receiver": "",
+      "package": "buildinfo",
+      "file": "internal/buildinfo/buildinfo.go",
+      "line": 17
     },
     {
       "kind": "interface",
@@ -12289,7 +12313,7 @@
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/server.go",
-        "line": 126
+        "line": 127
       }
     },
     {
@@ -12304,7 +12328,22 @@
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/server.go",
-        "line": 129
+        "line": 130
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/version",
+      "handler": "version",
+      "registration_file": "internal/adminapi/server.go",
+      "registration_line": 60,
+      "handler_definition": {
+        "kind": "method",
+        "name": "version",
+        "receiver": "s *Server",
+        "package": "adminapi",
+        "file": "internal/adminapi/status.go",
+        "line": 36
       }
     },
     {
@@ -12312,7 +12351,7 @@
       "path": "/api/v1/auth/login",
       "handler": "login",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 60,
+      "registration_line": 61,
       "handler_definition": {
         "kind": "method",
         "name": "login",
@@ -12327,7 +12366,7 @@
       "path": "/api/v1/auth/logout",
       "handler": "logout",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 61,
+      "registration_line": 62,
       "handler_definition": {
         "kind": "method",
         "name": "logout",
@@ -12342,7 +12381,7 @@
       "path": "/api/v1/accounts",
       "handler": "createAccount",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 62,
+      "registration_line": 63,
       "handler_definition": {
         "kind": "method",
         "name": "createAccount",
@@ -12357,7 +12396,7 @@
       "path": "/api/v1/accounts/preview",
       "handler": "accountPreview",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 63,
+      "registration_line": 64,
       "handler_definition": {
         "kind": "method",
         "name": "accountPreview",
@@ -12372,7 +12411,7 @@
       "path": "/api/v1/accounts/{id}",
       "handler": "updateAccount",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 64,
+      "registration_line": 65,
       "handler_definition": {
         "kind": "method",
         "name": "updateAccount",
@@ -12387,7 +12426,7 @@
       "path": "/api/v1/accounts/{id}",
       "handler": "deleteAccount",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 65,
+      "registration_line": 66,
       "handler_definition": {
         "kind": "method",
         "name": "deleteAccount",
@@ -12402,7 +12441,7 @@
       "path": "/api/v1/accounts/{id}/options",
       "handler": "accountOptions",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 66,
+      "registration_line": 67,
       "handler_definition": {
         "kind": "method",
         "name": "accountOptions",
@@ -12417,7 +12456,7 @@
       "path": "/api/v1/accounts/{id}/identity",
       "handler": "accountIdentity",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 67,
+      "registration_line": 68,
       "handler_definition": {
         "kind": "method",
         "name": "accountIdentity",
@@ -12432,7 +12471,7 @@
       "path": "/api/v1/accounts/{id}/preflight",
       "handler": "accountPreflight",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 68,
+      "registration_line": 69,
       "handler_definition": {
         "kind": "method",
         "name": "accountPreflight",
@@ -12447,34 +12486,19 @@
       "path": "/api/v1/accounts/{id}/console-session",
       "handler": "createVultrBrowserTicket",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 69,
+      "registration_line": 70,
       "handler_definition": {
         "kind": "method",
         "name": "createVultrBrowserTicket",
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/server.go",
-        "line": 164
+        "line": 165
       }
     },
     {
       "method": "GET",
       "path": "/vultr-browser/{path...}",
-      "handler": "vultrBrowserProxy",
-      "registration_file": "internal/adminapi/server.go",
-      "registration_line": 70,
-      "handler_definition": {
-        "kind": "method",
-        "name": "vultrBrowserProxy",
-        "receiver": "s *Server",
-        "package": "adminapi",
-        "file": "internal/adminapi/server.go",
-        "line": 138
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/websockify",
       "handler": "vultrBrowserProxy",
       "registration_file": "internal/adminapi/server.go",
       "registration_line": 71,
@@ -12484,7 +12508,22 @@
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/server.go",
-        "line": 138
+        "line": 139
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/websockify",
+      "handler": "vultrBrowserProxy",
+      "registration_file": "internal/adminapi/server.go",
+      "registration_line": 72,
+      "handler_definition": {
+        "kind": "method",
+        "name": "vultrBrowserProxy",
+        "receiver": "s *Server",
+        "package": "adminapi",
+        "file": "internal/adminapi/server.go",
+        "line": 139
       }
     },
     {
@@ -12492,7 +12531,7 @@
       "path": "/api/v1/proxies",
       "handler": "createProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 72,
+      "registration_line": 73,
       "handler_definition": {
         "kind": "method",
         "name": "createProxy",
@@ -12507,7 +12546,7 @@
       "path": "/api/v1/proxies/{id}",
       "handler": "updateProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 73,
+      "registration_line": 74,
       "handler_definition": {
         "kind": "method",
         "name": "updateProxy",
@@ -12522,7 +12561,7 @@
       "path": "/api/v1/proxies/{id}",
       "handler": "deleteProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 74,
+      "registration_line": 75,
       "handler_definition": {
         "kind": "method",
         "name": "deleteProxy",
@@ -12537,7 +12576,7 @@
       "path": "/api/v1/proxies/{id}",
       "handler": "proxyDetails",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 75,
+      "registration_line": 76,
       "handler_definition": {
         "kind": "method",
         "name": "proxyDetails",
@@ -12552,7 +12591,7 @@
       "path": "/api/v1/residential-proxies",
       "handler": "residentialProxies",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 76,
+      "registration_line": 77,
       "handler_definition": {
         "kind": "method",
         "name": "residentialProxies",
@@ -12567,7 +12606,7 @@
       "path": "/api/v1/residential-proxies",
       "handler": "createResidentialProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 77,
+      "registration_line": 78,
       "handler_definition": {
         "kind": "method",
         "name": "createResidentialProxy",
@@ -12582,7 +12621,7 @@
       "path": "/api/v1/residential-proxies/{id}",
       "handler": "updateResidentialProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 78,
+      "registration_line": 79,
       "handler_definition": {
         "kind": "method",
         "name": "updateResidentialProxy",
@@ -12597,7 +12636,7 @@
       "path": "/api/v1/residential-proxies/{id}",
       "handler": "deleteResidentialProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 79,
+      "registration_line": 80,
       "handler_definition": {
         "kind": "method",
         "name": "deleteResidentialProxy",
@@ -12612,7 +12651,7 @@
       "path": "/api/v1/residential-proxies/{id}/test",
       "handler": "testResidentialProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 80,
+      "registration_line": 81,
       "handler_definition": {
         "kind": "method",
         "name": "testResidentialProxy",
@@ -12627,7 +12666,7 @@
       "path": "/api/v1/configs",
       "handler": "getGlobalConfigs",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 81,
+      "registration_line": 82,
       "handler_definition": {
         "kind": "method",
         "name": "getGlobalConfigs",
@@ -12642,7 +12681,7 @@
       "path": "/api/v1/config-capacity",
       "handler": "configCapacity",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 82,
+      "registration_line": 83,
       "handler_definition": {
         "kind": "method",
         "name": "configCapacity",
@@ -12657,7 +12696,7 @@
       "path": "/api/v1/config-capacity/delete-all-clients",
       "handler": "deleteAllCapacityClients",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 83,
+      "registration_line": 84,
       "handler_definition": {
         "kind": "method",
         "name": "deleteAllCapacityClients",
@@ -12672,7 +12711,7 @@
       "path": "/api/v1/config-capacity/cleanup/{id}",
       "handler": "cleanupJobStatus",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 84,
+      "registration_line": 85,
       "handler_definition": {
         "kind": "method",
         "name": "cleanupJobStatus",
@@ -12687,7 +12726,7 @@
       "path": "/api/v1/output",
       "handler": "outputConfigs",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 85,
+      "registration_line": 86,
       "handler_definition": {
         "kind": "method",
         "name": "outputConfigs",
@@ -12702,7 +12741,7 @@
       "path": "/api/v1/output/share",
       "handler": "createOutputShare",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 86,
+      "registration_line": 87,
       "handler_definition": {
         "kind": "method",
         "name": "createOutputShare",
@@ -12717,7 +12756,7 @@
       "path": "/share/output/{token}",
       "handler": "sharedOutput",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 87,
+      "registration_line": 88,
       "handler_definition": {
         "kind": "method",
         "name": "sharedOutput",
@@ -12732,7 +12771,7 @@
       "path": "/api/v1/config-panels",
       "handler": "getConfigPanels",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 88,
+      "registration_line": 89,
       "handler_definition": {
         "kind": "method",
         "name": "getConfigPanels",
@@ -12747,7 +12786,7 @@
       "path": "/api/v1/configs",
       "handler": "putGlobalConfig",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 89,
+      "registration_line": 90,
       "handler_definition": {
         "kind": "method",
         "name": "putGlobalConfig",
@@ -12762,7 +12801,7 @@
       "path": "/api/v1/proxies/{id}/test",
       "handler": "testProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 90,
+      "registration_line": 91,
       "handler_definition": {
         "kind": "method",
         "name": "testProxy",
@@ -12777,7 +12816,7 @@
       "path": "/api/v1/accounts/{id}/network",
       "handler": "assignProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 91,
+      "registration_line": 92,
       "handler_definition": {
         "kind": "struct",
         "name": "assignProxy",
@@ -12792,7 +12831,7 @@
       "path": "/api/v1/accounts/{id}/discovery",
       "handler": "accountDiscovery",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 92,
+      "registration_line": 93,
       "handler_definition": {
         "kind": "method",
         "name": "accountDiscovery",
@@ -12807,7 +12846,7 @@
       "path": "/api/v1/accounts/{id}/refresh",
       "handler": "accountDiscovery",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 93,
+      "registration_line": 94,
       "handler_definition": {
         "kind": "method",
         "name": "accountDiscovery",
@@ -12822,7 +12861,7 @@
       "path": "/api/v1/accounts/{id}/proxy-test",
       "handler": "testAccountProxy",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 94,
+      "registration_line": 95,
       "handler_definition": {
         "kind": "method",
         "name": "testAccountProxy",
@@ -12837,7 +12876,7 @@
       "path": "/api/v1/templates",
       "handler": "listTemplates",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 95,
+      "registration_line": 96,
       "handler_definition": {
         "kind": "method",
         "name": "listTemplates",
@@ -12852,7 +12891,7 @@
       "path": "/api/v1/templates",
       "handler": "uploadTemplate",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 96,
+      "registration_line": 97,
       "handler_definition": {
         "kind": "method",
         "name": "uploadTemplate",
@@ -12867,7 +12906,7 @@
       "path": "/api/v1/accounts/{id}/dashboard",
       "handler": "accountDashboard",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 97,
+      "registration_line": 98,
       "handler_definition": {
         "kind": "struct",
         "name": "accountDashboard",
@@ -12882,7 +12921,7 @@
       "path": "/api/v1/accounts/{id}/resources",
       "handler": "accountResources",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 98,
+      "registration_line": 99,
       "handler_definition": {
         "kind": "method",
         "name": "accountResources",
@@ -12897,7 +12936,7 @@
       "path": "/api/v1/accounts/{id}/capacity",
       "handler": "accountCapacity",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 99,
+      "registration_line": 100,
       "handler_definition": {
         "kind": "method",
         "name": "accountCapacity",
@@ -12912,7 +12951,7 @@
       "path": "/api/v1/accounts/{id}/runtime",
       "handler": "accountRuntime",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 100,
+      "registration_line": 101,
       "handler_definition": {
         "kind": "method",
         "name": "accountRuntime",
@@ -12927,7 +12966,7 @@
       "path": "/api/v1/accounts",
       "handler": "accounts",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 101,
+      "registration_line": 102,
       "handler_definition": {
         "kind": "method",
         "name": "accounts",
@@ -12942,7 +12981,7 @@
       "path": "/api/v1/proxies",
       "handler": "proxies",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 102,
+      "registration_line": 103,
       "handler_definition": {
         "kind": "method",
         "name": "proxies",
@@ -12957,7 +12996,7 @@
       "path": "/api/v1/build-activity",
       "handler": "buildActivity",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 103,
+      "registration_line": 104,
       "handler_definition": {
         "kind": "method",
         "name": "buildActivity",
@@ -12972,7 +13011,7 @@
       "path": "/api/v1/build-activity/{id}/provision",
       "handler": "provisionActivity",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 104,
+      "registration_line": 105,
       "handler_definition": {
         "kind": "method",
         "name": "provisionActivity",
@@ -12987,7 +13026,7 @@
       "path": "/api/v1/provision-errors",
       "handler": "provisionErrors",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 105,
+      "registration_line": 106,
       "handler_definition": {
         "kind": "method",
         "name": "provisionErrors",
@@ -13002,7 +13041,7 @@
       "path": "/api/v1/installers/sanaei/preview",
       "handler": "previewSanaeiInstaller",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 106,
+      "registration_line": 107,
       "handler_definition": {
         "kind": "method",
         "name": "previewSanaeiInstaller",
@@ -13017,7 +13056,7 @@
       "path": "/api/v1/installers/sanaei",
       "handler": "createSanaeiInstaller",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 107,
+      "registration_line": 108,
       "handler_definition": {
         "kind": "method",
         "name": "createSanaeiInstaller",
@@ -13032,7 +13071,7 @@
       "path": "/api/v1/installers",
       "handler": "listInstallers",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 108,
+      "registration_line": 109,
       "handler_definition": {
         "kind": "method",
         "name": "listInstallers",
@@ -13047,7 +13086,7 @@
       "path": "/api/v1/installers",
       "handler": "createInstaller",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 109,
+      "registration_line": 110,
       "handler_definition": {
         "kind": "method",
         "name": "createInstaller",
@@ -13062,7 +13101,7 @@
       "path": "/api/v1/install-scripts",
       "handler": "listInstallScripts",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 110,
+      "registration_line": 111,
       "handler_definition": {
         "kind": "method",
         "name": "listInstallScripts",
@@ -13077,7 +13116,7 @@
       "path": "/api/v1/install-scripts",
       "handler": "createInstallScript",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 111,
+      "registration_line": 112,
       "handler_definition": {
         "kind": "method",
         "name": "createInstallScript",
@@ -13092,7 +13131,7 @@
       "path": "/api/v1/deployments/{id}/installer",
       "handler": "selectDeploymentInstaller",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 112,
+      "registration_line": 113,
       "handler_definition": {
         "kind": "method",
         "name": "selectDeploymentInstaller",
@@ -13107,7 +13146,7 @@
       "path": "/api/v1/deployments/{id}/installer/rearm",
       "handler": "rearmDeploymentInstaller",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 113,
+      "registration_line": 114,
       "handler_definition": {
         "kind": "method",
         "name": "rearmDeploymentInstaller",
@@ -13122,14 +13161,14 @@
       "path": "/api/v1/audit",
       "handler": "audit",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 114,
+      "registration_line": 115,
       "handler_definition": {
         "kind": "method",
         "name": "audit",
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/status.go",
-        "line": 5
+        "line": 8
       }
     },
     {
@@ -13137,14 +13176,14 @@
       "path": "/api/v1/system",
       "handler": "system",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 115,
+      "registration_line": 116,
       "handler_definition": {
         "kind": "method",
         "name": "system",
         "receiver": "s *Server",
         "package": "adminapi",
         "file": "internal/adminapi/status.go",
-        "line": 25
+        "line": 28
       }
     },
     {
@@ -13152,7 +13191,7 @@
       "path": "/api/v1/providers",
       "handler": "providersMetadata",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 116,
+      "registration_line": 117,
       "handler_definition": {
         "kind": "method",
         "name": "providersMetadata",
@@ -13167,7 +13206,7 @@
       "path": "/api/v1/panel-settings",
       "handler": "getPanelSettings",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 117,
+      "registration_line": 118,
       "handler_definition": {
         "kind": "method",
         "name": "getPanelSettings",
@@ -13182,7 +13221,7 @@
       "path": "/api/v1/panel-settings",
       "handler": "updatePanelSettings",
       "registration_file": "internal/adminapi/server.go",
-      "registration_line": 118,
+      "registration_line": 119,
       "handler_definition": {
         "kind": "method",
         "name": "updatePanelSettings",

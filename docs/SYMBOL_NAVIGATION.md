@@ -1,13 +1,14 @@
 # Symbol Navigation Index
 
-Generated from source: **1534 symbols**, **61 HTTP routes**. Full machine-readable index: `docs/SYMBOL_INDEX.json`.
+Generated from source: **1537 symbols**, **62 HTTP routes**. Full machine-readable index: `docs/SYMBOL_INDEX.json`.
 
 ## HTTP route → handler definitions
 
 | Method | Path | Handler | Definition |
 |---|---|---|---|
-| GET | `/healthz` | `health` | `internal/adminapi/server.go:126` |
-| GET | `/readyz` | `ready` | `internal/adminapi/server.go:129` |
+| GET | `/healthz` | `health` | `internal/adminapi/server.go:127` |
+| GET | `/readyz` | `ready` | `internal/adminapi/server.go:130` |
+| GET | `/version` | `version` | `internal/adminapi/status.go:36` |
 | POST | `/api/v1/auth/login` | `login` | `internal/adminapi/auth.go:19` |
 | POST | `/api/v1/auth/logout` | `logout` | `internal/adminapi/auth.go:40` |
 | POST | `/api/v1/accounts` | `createAccount` | `internal/adminapi/accounts_write.go:40` |
@@ -17,9 +18,9 @@ Generated from source: **1534 symbols**, **61 HTTP routes**. Full machine-readab
 | GET | `/api/v1/accounts/{id}/options` | `accountOptions` | `internal/adminapi/account_options.go:10` |
 | POST | `/api/v1/accounts/{id}/identity` | `accountIdentity` | `internal/adminapi/account_identity.go:8` |
 | POST | `/api/v1/accounts/{id}/preflight` | `accountPreflight` | `internal/adminapi/account_preflight.go:11` |
-| POST | `/api/v1/accounts/{id}/console-session` | `createVultrBrowserTicket` | `internal/adminapi/server.go:164` |
-| GET | `/vultr-browser/{path...}` | `vultrBrowserProxy` | `internal/adminapi/server.go:138` |
-| GET | `/websockify` | `vultrBrowserProxy` | `internal/adminapi/server.go:138` |
+| POST | `/api/v1/accounts/{id}/console-session` | `createVultrBrowserTicket` | `internal/adminapi/server.go:165` |
+| GET | `/vultr-browser/{path...}` | `vultrBrowserProxy` | `internal/adminapi/server.go:139` |
+| GET | `/websockify` | `vultrBrowserProxy` | `internal/adminapi/server.go:139` |
 | POST | `/api/v1/proxies` | `createProxy` | `internal/adminapi/proxies_write.go:31` |
 | PUT | `/api/v1/proxies/{id}` | `updateProxy` | `internal/adminapi/proxies_manage.go:8` |
 | DELETE | `/api/v1/proxies/{id}` | `deleteProxy` | `internal/adminapi/proxies_manage.go:67` |
@@ -62,8 +63,8 @@ Generated from source: **1534 symbols**, **61 HTTP routes**. Full machine-readab
 | POST | `/api/v1/install-scripts` | `createInstallScript` | `internal/adminapi/install_scripts.go:29` |
 | POST | `/api/v1/deployments/{id}/installer` | `selectDeploymentInstaller` | `internal/adminapi/installer_selection.go:8` |
 | POST | `/api/v1/deployments/{id}/installer/rearm` | `rearmDeploymentInstaller` | `internal/adminapi/installer_rearm.go:9` |
-| GET | `/api/v1/audit` | `audit` | `internal/adminapi/status.go:5` |
-| GET | `/api/v1/system` | `system` | `internal/adminapi/status.go:25` |
+| GET | `/api/v1/audit` | `audit` | `internal/adminapi/status.go:8` |
+| GET | `/api/v1/system` | `system` | `internal/adminapi/status.go:28` |
 | GET | `/api/v1/providers` | `providersMetadata` | `internal/adminapi/providers.go:5` |
 | GET | `/api/v1/panel-settings` | `getPanelSettings` | `internal/adminapi/panel_settings.go:18` |
 | PUT | `/api/v1/panel-settings` | `updatePanelSettings` | `internal/adminapi/panel_settings.go:26` |

@@ -1,21 +1,21 @@
 {
   "branch": "checkpoint/final-e2e-20260929",
-  "git_head": "f92b5a7fa7c49e791a78c54cde1041e55c6a6efb",
+  "git_head": "97839c38cb12e75fca5640a75e030b79b0499112",
   "runtime_version": {
-    "commit": "f92b5a7fa7c49e791a78c54cde1041e55c6a6efb",
-    "build_time": "2026-10-01T03:57:13Z",
+    "commit": "97839c38cb12e75fca5640a75e030b79b0499112",
+    "build_time": "2026-10-01T03:59:07Z",
     "go_version": "go1.27.1",
     "modified": true
   },
   "artifact_manifest": {
-    "commit": "f92b5a7fa7c49e791a78c54cde1041e55c6a6efb",
-    "build_time": "2026-10-01T03:57:13Z",
-    "api_sha256": "c9247c35d3cbfb39838c13c61840b1e76bd58aca9abef910130ac9c5d491b71e",
-    "worker_sha256": "321557742c1d96efbe03ff549e1f839441a43502b9d3ad186ddc4a2cf8e5f19f"
+    "commit": "97839c38cb12e75fca5640a75e030b79b0499112",
+    "build_time": "2026-10-01T03:59:07Z",
+    "api_sha256": "c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450",
+    "worker_sha256": "6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840"
   },
   "actual_binary_hashes": {
-    "api_sha256": "c9247c35d3cbfb39838c13c61840b1e76bd58aca9abef910130ac9c5d491b71e",
-    "worker_sha256": "321557742c1d96efbe03ff549e1f839441a43502b9d3ad186ddc4a2cf8e5f19f"
+    "api_sha256": "c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450",
+    "worker_sha256": "6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840"
   },
   "services": {
     "digital-ocean-bot-api": "active",

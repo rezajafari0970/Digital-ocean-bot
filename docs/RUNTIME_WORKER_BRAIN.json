@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "e81af0edb4b1b934a5a26957e86da87855b57570",
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
   "files": [
     "cmd/api/main.go",
     "cmd/worker/main.go",
