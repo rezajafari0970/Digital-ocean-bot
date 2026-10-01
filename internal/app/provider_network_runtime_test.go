@@ -20,6 +20,9 @@ func TestProviderNetworkRuntimeDirectIsAccountScoped(t *testing.T) {
 	if rt.Client == nil || rt.Gateway != nil {
 		t.Fatalf("unexpected runtime: %+v", rt)
 	}
+	if rt.Generation != 0 {
+		t.Fatalf("direct runtime must not claim a proxy generation, got=%d", rt.Generation)
+	}
 	if err := rt.Gate.AllowMutation(); err != nil {
 		t.Fatalf("direct gate rejected: %v", err)
 	}
@@ -40,9 +43,12 @@ func TestProviderNetworkRuntimeProxyRequiredUsesSharedGateway(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer rt.Gateway.CloseIdleConnections()
+	defer rt.CloseIdleConnections()
 	if rt.Client == nil || rt.Gateway == nil || rt.Client != rt.Gateway.Client {
 		t.Fatal("provider must receive the canonical account proxy client")
+	}
+	if rt.Generation < 1 {
+		t.Fatalf("proxy runtime must carry a positive transport generation, got=%d", rt.Generation)
 	}
 	if err := rt.Gateway.Validate("account-a"); err != nil {
 		t.Fatalf("gateway account binding failed: %v", err)

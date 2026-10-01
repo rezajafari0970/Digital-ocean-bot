@@ -22,12 +22,13 @@ type Container struct {
 	Providers *providers.Registry
 }
 type AccountRuntime struct {
-	Config     AccountConfig
-	Cell       *accounts.Cell
-	Gateway    *network.Gateway
-	Driver     providers.Driver
-	Operations jobs.SQLStore
-	Gate       network.AccountGate
+	Config              AccountConfig
+	Cell                *accounts.Cell
+	Gateway             *network.Gateway
+	Driver              providers.Driver
+	Operations          jobs.SQLStore
+	Gate                network.AccountGate
+	TransportGeneration int64
 }
 
 type accountCredentialSource struct {
@@ -81,12 +82,13 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		return AccountRuntime{}, err
 	}
 	return AccountRuntime{
-		Config:     cfg,
-		Cell:       cell,
-		Gateway:    netrt.Gateway,
-		Driver:     driver,
-		Operations: jobs.SQLStore{DB: c.DB},
-		Gate:       netrt.Gate,
+		Config:              cfg,
+		Cell:                cell,
+		Gateway:             netrt.Gateway,
+		Driver:              driver,
+		Operations:          jobs.SQLStore{DB: c.DB},
+		Gate:                netrt.Gate,
+		TransportGeneration: netrt.Generation,
 	}, nil
 }
 func wipe(b []byte) {
