@@ -79,6 +79,8 @@ func ApplyHealth(x State, result network.HealthResult, policy Policy) State {
 	if hs.Status == network.StatusHealthy {
 		x.CircuitState = resilience.Closed
 		x.RetryAfter = nil
+		x.HalfOpenProbeInFlight = false
+		x.HalfOpenProbeLeaseUntil = nil
 		x.LastErrorClass = ""
 		x.LastErrorDetail = ""
 		return x
@@ -93,6 +95,8 @@ func ApplyHealth(x State, result network.HealthResult, policy Policy) State {
 		x.CircuitState = resilience.Open
 		retry := result.CheckedAt.Add(policy.OpenDuration)
 		x.RetryAfter = &retry
+		x.HalfOpenProbeInFlight = false
+		x.HalfOpenProbeLeaseUntil = nil
 	}
 	return x
 }

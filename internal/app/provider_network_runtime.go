@@ -3,14 +3,17 @@ package app
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
 type providerNetworkRuntime struct {
-	Client  *http.Client
-	Gateway *network.Gateway
-	Gate    network.AccountGate
+	Client     *http.Client
+	Gateway    *network.Gateway
+	Gate       network.AccountGate
+	Generation int64
 }
 
 // buildProviderNetworkRuntime is the single provider-agnostic network boundary.
@@ -21,6 +24,19 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 	if cfg.Network.Mode == network.RouteProxyRequired {
 		if cfg.Proxy == nil {
 			return providerNetworkRuntime{}, ErrNetworkNotReady
+		}
+		generation := int64(1)
+		if c.DB != nil {
+			state, allowed, err := (proxycontrol.SQLStore{DB: c.DB}).Acquire(
+				ctx, cfg.ID, cfg.Proxy.ID, cfg.Provider, time.Now().UTC(), 30*time.Second,
+			)
+			if err != nil {
+				return providerNetworkRuntime{}, err
+			}
+			if !allowed {
+				return providerNetworkRuntime{}, network.ErrProxyCircuitOpen
+			}
+			generation = state.Generation
 		}
 		password := []byte(nil)
 		var err error
@@ -44,7 +60,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			Proxy:   cfg.Proxy,
 			Health:  network.HealthState{Status: cfg.Proxy.Status},
 		}
-		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate}, nil
+		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation}, nil
 	}
 
 	bundle, err := network.NewIsolatedDirectClient(cfg.ID)

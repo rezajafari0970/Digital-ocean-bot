@@ -8,19 +8,21 @@ import (
 )
 
 type State struct {
-	AccountID            string
-	ProxyID              string
-	Provider             string
-	HealthState          network.ProxyStatus
-	CircuitState         resilience.CircuitState
-	ConsecutiveFailures  int
-	ConsecutiveSuccesses int
-	RetryAfter           *time.Time
-	Generation           int64
-	LastErrorClass       string
-	LastErrorDetail      string
-	LastCheckedAt        *time.Time
-	LastSuccessAt        *time.Time
+	AccountID               string
+	ProxyID                 string
+	Provider                string
+	HealthState             network.ProxyStatus
+	CircuitState            resilience.CircuitState
+	ConsecutiveFailures     int
+	ConsecutiveSuccesses    int
+	RetryAfter              *time.Time
+	Generation              int64
+	LastErrorClass          string
+	LastErrorDetail         string
+	LastCheckedAt           *time.Time
+	LastSuccessAt           *time.Time
+	HalfOpenProbeInFlight   bool
+	HalfOpenProbeLeaseUntil *time.Time
 }
 
 func DefaultState(accountID, proxyID, provider string) State {

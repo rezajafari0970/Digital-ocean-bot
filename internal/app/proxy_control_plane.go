@@ -8,7 +8,6 @@ import (
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 )
 
 // MaintainProxyControlPlane is the provider-agnostic proxy keeper.
@@ -33,17 +32,13 @@ WHERE a.id=$1 AND a.enabled=true
 	}
 
 	store := proxycontrol.SQLStore{DB: c.DB}
-	state, err := store.Load(ctx, accountID, proxyID, provider)
+	state, allowed, err := store.Acquire(ctx, accountID, proxyID, provider, time.Now().UTC(), 20*time.Second)
 	if err != nil {
 		return err
 	}
-	state, allowErr := proxycontrol.Allow(state, time.Now().UTC())
-	if errors.Is(allowErr, resilience.ErrCircuitOpen) {
-		// Cooldown is intentional; the keeper will retry on a later tick.
+	if !allowed {
+		// Cooldown or another half-open probe lease is active.
 		return nil
-	}
-	if allowErr != nil {
-		return allowErr
 	}
 
 	beforeSession, beforeIP := proxyIdentitySignature(ctx, c.DB, accountID)

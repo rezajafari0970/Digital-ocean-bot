@@ -23,6 +23,7 @@ func TestClassifyAccountProviderError(t *testing.T) {
 		{"permission", &providers.Error{Class: providers.ErrorPermissionDenied}, false, ProviderStatePermissionDenied},
 		{"rate", &providers.Error{Class: providers.ErrorRateLimited}, false, ProviderStateRateLimited},
 		{"proxy", fmt.Errorf("wrapped: %w", network.ErrProxyRequired), true, ProviderStateProxyError},
+		{"proxy-circuit", network.ErrProxyCircuitOpen, true, ProviderStateProxyError},
 		{"transport", errors.New("connection reset"), false, ProviderStateTransportError},
 	}
 	for _, tc := range cases {

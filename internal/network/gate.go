@@ -3,6 +3,7 @@ package network
 import "errors"
 
 var ErrAccountNetworkNotReady = errors.New("account network not ready")
+var ErrProxyCircuitOpen = errors.New("proxy circuit open")
 
 type AccountGate struct {
 	Profile Profile
