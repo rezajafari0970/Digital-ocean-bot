@@ -27,3 +27,6 @@ When explicitly asked to prove fresh-session mastery, follow `docs/FRESH_SESSION
 Treat it as evidence of sampled cross-layer recoverability only when `verified: true`.
 
 The recorded proof is **40/40 across all eight exam categories**. Source/runtime drift gates must still be run after future product changes.
+
+## Final continuity gate
+Run `python3 tools/continuity-finalization-gate.py`. `CONTINUITY FINALIZATION READY` means the independent 40/40 fresh-session proof, Master Knowledge v3 100%, source-aware drift gate, canonical branch, and clean product-source working tree all agree. `.audit` and generated status dirtiness are governed by `docs/VOLATILE_AUDIT_POLICY.md` and are not automatically source drift.
