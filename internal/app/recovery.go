@@ -166,9 +166,9 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		return h.Container.activateInstaller(ctx, d, snap)
 	}
 	if placeholder := provisioning.InstallerPlaceholderName(cfg.Provision); d.CurrentStep == "provision" && placeholder != "" {
-		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
-		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)
-		_ = store.Event(ctx, d.ID, "provision", workflow.WaitingInstaller, "installer not configured")
+		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='WAITING_INSTALLER_ACTIVATION',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
+		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='waiting for installer activation',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)
+		_ = store.Event(ctx, d.ID, "provision", workflow.WaitingInstaller, "waiting for installer activation")
 		return nil
 	}
 	if d.CurrentStep == "provision" && d.DropletID != "" {
