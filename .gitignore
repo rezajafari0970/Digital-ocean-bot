@@ -11,3 +11,4 @@ coverage.out
 .local/spaced-rehearsal-progress.json
 .local/spaced-results/
 .local/spaced-mastery.json
+.local/spaced-mastery-v2.json
