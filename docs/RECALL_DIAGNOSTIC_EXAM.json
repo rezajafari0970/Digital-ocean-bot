@@ -1,0 +1,578 @@
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "question_count": 55,
+  "note": "Closed-book recognition/cued diagnostic after Cohort-1 priming. This is not a free-recall score.",
+  "questions": [
+    {
+      "id": 1,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `GetClientTraffic`?",
+      "options": [
+        "internal/network/guard_test.go",
+        "internal/app/network_identity.go",
+        "internal/panels/listeners/collector.go",
+        "internal/panels/sanaei/traffic.go"
+      ]
+    },
+    {
+      "id": 2,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `TestCircuitDelay`?",
+      "options": [
+        "internal/panels/sanaei/runtime_manager_test.go",
+        "cmd/vultr-capacity-probe/main.go",
+        "internal/network/proxy_gateway_test.go",
+        "internal/app/lifecycle.go"
+      ]
+    },
+    {
+      "id": 3,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `StepInterrupted`?",
+      "options": [
+        "internal/app/deploy.go",
+        "internal/provisioning/engine_test.go",
+        "internal/providers/digitalocean/errors_parse_test.go",
+        "internal/panels/create/orchestrator.go"
+      ]
+    },
+    {
+      "id": 4,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `valid`?",
+      "options": [
+        "internal/adminapi/locale.go",
+        "internal/panels/healthverify/xray_test.go",
+        "internal/droplets/lifecycle_engine.go",
+        "internal/workflow/steps.go"
+      ]
+    },
+    {
+      "id": 5,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `emitStage`?",
+      "options": [
+        "internal/panels/store.go",
+        "internal/workflow/provider_key_ref_test.go",
+        "internal/droplets/postgres_e2e_test.go",
+        "internal/provisioning/ssh.go"
+      ]
+    },
+    {
+      "id": 6,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `CreateSession`?",
+      "options": [
+        "internal/adminapi/auth.go",
+        "internal/workflow/runtime.go",
+        "internal/panels/export/vless.go",
+        "internal/auth/store.go"
+      ]
+    },
+    {
+      "id": 7,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `Set`?",
+      "options": [
+        "internal/panels/sanaei/runtime_test.go",
+        "internal/panels/sanaei/postflight/payload.go",
+        "internal/app/capacity_guard.go",
+        "internal/observability/metrics.go"
+      ]
+    },
+    {
+      "id": 8,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `Capabilities`?",
+      "options": [
+        "internal/providers/provider_v2_test.go",
+        "internal/audit/audit.go",
+        "internal/provisioning/engine.go",
+        "cmd/ready-panel-worker/main.go"
+      ]
+    },
+    {
+      "id": 9,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `SetEnabled`?",
+      "options": [
+        "internal/geoctx/http.go",
+        "internal/panels/sanaei/store.go",
+        "internal/adminapi/configs_global.go",
+        "internal/adminapi/proxy_details.go"
+      ]
+    },
+    {
+      "id": 10,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `activateInstaller`?",
+      "options": [
+        "internal/panels/export/vless_test.go",
+        "internal/panels/listeners/collector.go",
+        "internal/app/installer_activation.go",
+        "internal/network/privacy_test.go"
+      ]
+    },
+    {
+      "id": 11,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `health`?",
+      "options": [
+        "internal/reality/validate.go",
+        "internal/adminapi/account_automation.go",
+        "internal/provisioning/ssh.go",
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "id": 12,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `GetAction`?",
+      "options": [
+        "internal/app/consistency.go",
+        "internal/providers/digitalocean/client_test.go",
+        "cmd/cleanup-test-droplet/main.go",
+        "internal/providers/digitalocean/mutations.go"
+      ]
+    },
+    {
+      "id": 13,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `Configure`?",
+      "options": [
+        "internal/testharness/provider_live_cert_test.go",
+        "internal/workflow/runtime.go",
+        "internal/panels/sanaei/clients.go",
+        "internal/network/privacy.go"
+      ]
+    },
+    {
+      "id": 14,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `TestSensitiveHeadersAreRedacted`?",
+      "options": [
+        "internal/adminapi/templates.go",
+        "internal/redact/redact_test.go",
+        "internal/secrets/key.go",
+        "internal/providers/digitalocean/resources.go"
+      ]
+    },
+    {
+      "id": 15,
+      "mode": "recognition",
+      "domain": "conceptual",
+      "prompt": "Which file contains symbol `RunScript`?",
+      "options": [
+        "internal/reality/probe.go",
+        "internal/provisioning/script_runner.go",
+        "internal/app/account_state.go",
+        "internal/panels/sanaei/runtime_test.go"
+      ]
+    },
+    {
+      "id": 16,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `PUT /api/v1/residential-proxies/{id}`?",
+      "options": [
+        "health",
+        "deleteAllCapacityClients",
+        "updateResidentialProxy",
+        "getPanelSettings"
+      ]
+    },
+    {
+      "id": 17,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `DELETE /api/v1/proxies/{id}`?",
+      "options": [
+        "outputConfigs",
+        "accountResources",
+        "audit",
+        "deleteProxy"
+      ]
+    },
+    {
+      "id": 18,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `GET /websockify`?",
+      "options": [
+        "testAccountProxy",
+        "vultrBrowserProxy",
+        "proxyDetails",
+        "ready"
+      ]
+    },
+    {
+      "id": 19,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `POST /api/v1/accounts/{id}/console-session`?",
+      "options": [
+        "accountPreflight",
+        "updateAccount",
+        "createVultrBrowserTicket",
+        "putGlobalConfig"
+      ]
+    },
+    {
+      "id": 20,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `POST /api/v1/output/share`?",
+      "options": [
+        "selectDeploymentInstaller",
+        "accountRuntime",
+        "createOutputShare",
+        "audit"
+      ]
+    },
+    {
+      "id": 21,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `GET /api/v1/system`?",
+      "options": [
+        "sharedOutput",
+        "selectDeploymentInstaller",
+        "system",
+        "accountPreview"
+      ]
+    },
+    {
+      "id": 22,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `GET /api/v1/accounts/{id}/resources`?",
+      "options": [
+        "createOutputShare",
+        "accountResources",
+        "ready",
+        "updateProxy"
+      ]
+    },
+    {
+      "id": 23,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `POST /api/v1/accounts/{id}/identity`?",
+      "options": [
+        "accountIdentity",
+        "updatePanelSettings",
+        "accountRuntime",
+        "audit"
+      ]
+    },
+    {
+      "id": 24,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `POST /api/v1/proxies`?",
+      "options": [
+        "accountPreflight",
+        "createProxy",
+        "health",
+        "updatePanelSettings"
+      ]
+    },
+    {
+      "id": 25,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "What is the handler for `GET /api/v1/accounts/{id}/capacity`?",
+      "options": [
+        "updateProxy",
+        "provisionActivity",
+        "accountCapacity",
+        "residentialProxies"
+      ]
+    },
+    {
+      "id": 26,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "In `internal/providers/provider.go`, which symbol immediately follows `OpenRequest`?",
+      "options": [
+        "Factory",
+        "Once",
+        "plansResponse",
+        "fastGatewayExitIP"
+      ]
+    },
+    {
+      "id": 27,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "In `internal/testharness/harness.go`, which symbol immediately follows `NewSteps`?",
+      "options": [
+        "writeJSON",
+        "call",
+        "TestRetryableErrorWithContextClientTimeout",
+        "TestAdoptUnknownCreateAmbiguousTagStaysUnknown"
+      ]
+    },
+    {
+      "id": 28,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "In `internal/adminapi/resources.go`, which symbol immediately follows `accounts`?",
+      "options": [
+        "Aggregate",
+        "TestPlaceholderInstallerPausesBeforeExecute",
+        "proxies",
+        "computeStub"
+      ]
+    },
+    {
+      "id": 29,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "In `internal/provisioning/store.go`, which symbol immediately follows `Reserve`?",
+      "options": [
+        "TestUnknownFailureKeepsFingerprint",
+        "CycleResult",
+        "Update",
+        "TestRotatingExitAllowed"
+      ]
+    },
+    {
+      "id": 30,
+      "mode": "recognition",
+      "domain": "topology",
+      "prompt": "In `internal/network/client.go`, which symbol immediately follows `NewIsolatedDirectClient`?",
+      "options": [
+        "TestResilientStillRetriesSafeRead",
+        "ipv4ProxyDialer",
+        "ReconcileEnabled",
+        "Validate"
+      ]
+    },
+    {
+      "id": 31,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 41-48 of `internal/adminapi/account_preview.go`?",
+      "options": [
+        "\tif s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider)  {\n\t\twriteJSON(w, 400, map[string]string{\"error\": \"provider_not_supported\"})\n\t\treturn\n\t}\n\tvar client *http.Client\n\tvar closeFn func()\n\tpreviewExitIP := \"\"\n\tif x.ProxyID != \"\" {",
+        "\tif s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) {\n\t\twriteJSON(w, 400, map[string]string{\"error\": \"provider_not_supported\"})\n\t\treturn\n\t}\n\tvar client *http.Client\n\tvar closeFn func()\n\tpreviewExitIP := \"\"\n\tif x.ProxyID != \"\" {",
+        "    if s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) {\n\t\twriteJSON(w, 400, map[string]string{\"error\": \"provider_not_supported\"})\n\t\treturn\n\t}\n\tvar client *http.Client\n\tvar closeFn func()\n\tpreviewExitIP := \"\"\n\tif x.ProxyID != \"\" {",
+        "\tif s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) {\n\t\twriteJSON(w, 400, map[string]string{\"error\": \"provider_not_supported\"})\n\t\treturn\n\t}\n\tvar client *http.Client\n\tvar closeFn func()\n\tpreviewExitIP = \"\"\n\tif x.ProxyID != \"\" {"
+      ]
+    },
+    {
+      "id": 32,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 33-40 of `internal/adminapi/account_validation.go`?",
+      "options": [
+        "\tif strings.EqualFold(strings.TrimSpace(provider), \"digitalocean\") {\n\t\tallowedImages := map[string]bool{\"ubuntu-22-04-x64\": true, \"ubuntu-24-04-x64\": true, \"ubuntu-26-04-x64\": true}\n\t\tfor _, image := range x.Images {\n\t\t\tif !allowedImages[strings.TrimSpace(image)] {\n\t\t\t\treturn \"unsupported_os_image\"\n\t\t\t}\n\t\t}\n\t} else {",
+        "    if strings.EqualFold(strings.TrimSpace(provider), \"digitalocean\") {\n\t\tallowedImages := map[string]bool{\"ubuntu-22-04-x64\": true, \"ubuntu-24-04-x64\": true, \"ubuntu-26-04-x64\": true}\n\t\tfor _, image := range x.Images {\n\t\t\tif !allowedImages[strings.TrimSpace(image)] {\n\t\t\t\treturn \"unsupported_os_image\"\n\t\t\t}\n\t\t}\n\t} else {",
+        "\tif strings.EqualFold(strings.TrimSpace(provider) , \"digitalocean\") {\n\t\tallowedImages := map[string]bool{\"ubuntu-22-04-x64\": true, \"ubuntu-24-04-x64\": true, \"ubuntu-26-04-x64\": true}\n\t\tfor _, image := range x.Images {\n\t\t\tif !allowedImages[strings.TrimSpace(image)] {\n\t\t\t\treturn \"unsupported_os_image\"\n\t\t\t}\n\t\t}\n\t} else {",
+        "\tif strings.EqualFold(strings.TrimSpace(provider), \"digitalocean\") {\n\t\tallowedImages = map[string]bool{\"ubuntu-22-04-x64\": true, \"ubuntu-24-04-x64\": true, \"ubuntu-26-04-x64\": true}\n\t\tfor _, image := range x.Images {\n\t\t\tif !allowedImages[strings.TrimSpace(image)] {\n\t\t\t\treturn \"unsupported_os_image\"\n\t\t\t}\n\t\t}\n\t} else {"
+      ]
+    },
+    {
+      "id": 33,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 281-288 of `cmd/worker/main.go`?",
+      "options": [
+        "\t\t\tselect {\n\t\t\tcase <-ctx.Done() :\n\t\t\t\treturn\n\t\t\tcase <-t.C:\n\t\t\t\trun()\n\t\t\t}\n\t\t}\n\t}()",
+        "    \t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-t.C:\n\t\t\t\trun()\n\t\t\t}\n\t\t}\n\t}()",
+        "\t\t\tselect{\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-t.C:\n\t\t\t\trun()\n\t\t\t}\n\t\t}\n\t}()",
+        "\t\t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-t.C:\n\t\t\t\trun()\n\t\t\t}\n\t\t}\n\t}()"
+      ]
+    },
+    {
+      "id": 34,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 105-112 of `internal/adminapi/accounts_write.go`?",
+      "options": [
+        "\t\tx.BatchSize = 1\n\t}\n\tif x.MaxConcurrent < 1{\n\t\tx.MaxConcurrent = 1\n\t}\n\tif x.DesiredServerCount < 0 {\n\t\tx.DesiredServerCount = 0\n\t}",
+        "\t\tx.BatchSize = 1\n\t}\n\tif x.MaxConcurrent < 1 {\n\t\tx.MaxConcurrent = 1\n\t}\n\tif x.DesiredServerCount < 0 {\n\t\tx.DesiredServerCount = 0\n\t}",
+        "\t\tx.BatchSize = 1\n\t}\n\tif x.MaxConcurrent < 1 {\n\t\tx.MaxConcurrent = 1\n\t}\n\tif x.DesiredServerCount < 0 {\n\t\tx.DesiredServerCount = 0\n\t}\n",
+        "    \tx.BatchSize = 1\n\t}\n\tif x.MaxConcurrent < 1 {\n\t\tx.MaxConcurrent = 1\n\t}\n\tif x.DesiredServerCount < 0 {\n\t\tx.DesiredServerCount = 0\n\t}"
+      ]
+    },
+    {
+      "id": 35,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 33-40 of `cmd/ready-panel-worker/main.go`?",
+      "options": [
+        "\t\t\tpanic(err) \n\t\t}\n\t\tboot, reconciled, failed := 0, 0, 0\n\t\tfmt.Printf(\"CYCLE=%d ELIGIBLE=%d\\n\", cycle, len(results))\n\t\tfor _, r := range results {\n\t\t\tif r.Bootstrapped {\n\t\t\t\tboot++\n\t\t\t}",
+        "    \t\tpanic(err)\n\t\t}\n\t\tboot, reconciled, failed := 0, 0, 0\n\t\tfmt.Printf(\"CYCLE=%d ELIGIBLE=%d\\n\", cycle, len(results))\n\t\tfor _, r := range results {\n\t\t\tif r.Bootstrapped {\n\t\t\t\tboot++\n\t\t\t}",
+        "\t\t\tpanic(err)\n\t\t}\n\t\tboot, reconciled, failed = 0, 0, 0\n\t\tfmt.Printf(\"CYCLE=%d ELIGIBLE=%d\\n\", cycle, len(results))\n\t\tfor _, r := range results {\n\t\t\tif r.Bootstrapped {\n\t\t\t\tboot++\n\t\t\t}",
+        "\t\t\tpanic(err)\n\t\t}\n\t\tboot, reconciled, failed := 0, 0, 0\n\t\tfmt.Printf(\"CYCLE=%d ELIGIBLE=%d\\n\", cycle, len(results))\n\t\tfor _, r := range results {\n\t\t\tif r.Bootstrapped {\n\t\t\t\tboot++\n\t\t\t}"
+      ]
+    },
+    {
+      "id": 36,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 9-16 of `internal/accounts/identity_test.go`?",
+      "options": [
+        "\t}\n\tb, err := NewRuntimeIdentity() \n\tif err != nil {\n\t\tt.Fatal(err)\n\t}\n\tif a.CellID == b.CellID || a.RequestScope == b.RequestScope || a.CorrelationScope == b.CorrelationScope || a.AuditScope == b.AuditScope {\n\t\tt.Fatal(\"runtime identities must be independent\")\n\t}",
+        "    }\n\tb, err := NewRuntimeIdentity()\n\tif err != nil {\n\t\tt.Fatal(err)\n\t}\n\tif a.CellID == b.CellID || a.RequestScope == b.RequestScope || a.CorrelationScope == b.CorrelationScope || a.AuditScope == b.AuditScope {\n\t\tt.Fatal(\"runtime identities must be independent\")\n\t}",
+        "\t}\n\tb, err := NewRuntimeIdentity()\n\tif err != nil {\n\t\tt.Fatal(err)\n\t}\n\tif a.CellID == b.CellID || a.RequestScope == b.RequestScope || a.CorrelationScope == b.CorrelationScope || a.AuditScope == b.AuditScope {\n\t\tt.Fatal(\"runtime identities must be independent\")\n\t}",
+        "\t}\n\tb, err = NewRuntimeIdentity()\n\tif err != nil {\n\t\tt.Fatal(err)\n\t}\n\tif a.CellID == b.CellID || a.RequestScope == b.RequestScope || a.CorrelationScope == b.CorrelationScope || a.AuditScope == b.AuditScope {\n\t\tt.Fatal(\"runtime identities must be independent\")\n\t}"
+      ]
+    },
+    {
+      "id": 37,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 321-328 of `cmd/worker/main.go`?",
+      "options": [
+        "\t\t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-ticker.C:\n\t\t\t}\n\t\t}\n\t}()\n\tlog.Printf(\"worker started\")",
+        "    \t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-ticker.C:\n\t\t\t}\n\t\t}\n\t}()\n\tlog.Printf(\"worker started\")",
+        "\t\t\tselect{\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-ticker.C:\n\t\t\t}\n\t\t}\n\t}()\n\tlog.Printf(\"worker started\")",
+        "\t\t\tselect {\n\t\t\tcase <-ctx.Done() :\n\t\t\t\treturn\n\t\t\tcase <-ticker.C:\n\t\t\t}\n\t\t}\n\t}()\n\tlog.Printf(\"worker started\")"
+      ]
+    },
+    {
+      "id": 38,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 9-16 of `cmd/ready-panel-worker/main.go`?",
+      "options": [
+        "\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning\"\n)\n\nfunc main() {\n\tctx = context.Background()",
+        "\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning\"\n) \n\nfunc main() {\n\tctx := context.Background()",
+        "    \"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning\"\n)\n\nfunc main() {\n\tctx := context.Background()",
+        "\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning\"\n)\n\nfunc main() {\n\tctx := context.Background()"
+      ]
+    },
+    {
+      "id": 39,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 89-96 of `cmd/vultr-browser-session/main.go`?",
+      "options": [
+        "    \tpanic(err)\n\t}\n\tdefer chrome.Process.Kill()\n\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)\n\tsig := make(chan os.Signal, 1)\n\tsignal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)\n\tselect {\n\tcase <-sig:",
+        "\t\tpanic(err)\n\t}\n\tdefer chrome.Process.Kill()\n\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)\n\tsig = make(chan os.Signal, 1)\n\tsignal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)\n\tselect {\n\tcase <-sig:",
+        "\t\tpanic(err) \n\t}\n\tdefer chrome.Process.Kill()\n\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)\n\tsig := make(chan os.Signal, 1)\n\tsignal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)\n\tselect {\n\tcase <-sig:",
+        "\t\tpanic(err)\n\t}\n\tdefer chrome.Process.Kill()\n\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)\n\tsig := make(chan os.Signal, 1)\n\tsignal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)\n\tselect {\n\tcase <-sig:"
+      ]
+    },
+    {
+      "id": 40,
+      "mode": "recognition",
+      "domain": "verbatim",
+      "prompt": "Which option exactly matches lines 25-32 of `cmd/admin-bootstrap/main.go`?",
+      "options": [
+        "\thash, err := auth.HashPassword(password) \n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tpassword = \"\"\n\tctx := context.Background()\n\ta, err := app.Bootstrap(ctx)\n\tif err != nil {",
+        "    hash, err := auth.HashPassword(password)\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tpassword = \"\"\n\tctx := context.Background()\n\ta, err := app.Bootstrap(ctx)\n\tif err != nil {",
+        "\thash, err := auth.HashPassword(password)\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tpassword = \"\"\n\tctx := context.Background()\n\ta, err := app.Bootstrap(ctx)\n\tif err != nil {",
+        "\thash, err = auth.HashPassword(password)\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\tpassword = \"\"\n\tctx := context.Background()\n\ta, err := app.Bootstrap(ctx)\n\tif err != nil {"
+      ]
+    },
+    {
+      "id": 41,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/workflow/server_waiter_test.go`, the symbol immediately after `GetServer` is what?"
+    },
+    {
+      "id": 42,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/adminapi/capacity_cleanup.go`, the symbol immediately after `cleanupResult` is what?"
+    },
+    {
+      "id": 43,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/app/config.go`, the symbol immediately after `Config` is what?"
+    },
+    {
+      "id": 44,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/workflow/runtime.go`, the symbol immediately after `Configure` is what?"
+    },
+    {
+      "id": 45,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/panels/desired/service.go`, the symbol immediately after `operationalLifecycle` is what?"
+    },
+    {
+      "id": 46,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/testharness/harness.go`, the symbol immediately after `FailurePlan` is what?"
+    },
+    {
+      "id": 47,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/providers/provider_v2_test.go`, the symbol immediately after `TestRegistryNormalizesAndOpens` is what?"
+    },
+    {
+      "id": 48,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/providers/digitalocean/resources.go`, the symbol immediately after `Resource` is what?"
+    },
+    {
+      "id": 49,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/providers/vultr/read_driver.go`, the symbol immediately after `normalizeServer` is what?"
+    },
+    {
+      "id": 50,
+      "mode": "cued",
+      "domain": "topology",
+      "prompt": "In `internal/providers/vultr/mutation_driver_test.go`, the symbol immediately after `TestDelete404IsIdempotent` is what?"
+    },
+    {
+      "id": 51,
+      "mode": "cued",
+      "domain": "verbatim",
+      "prompt": "Given this exact first line:\n\n\t\treturn RuntimeIdentity{}, err\n\nfrom `internal/accounts/identity.go` lines 41-44, reproduce all remaining lines exactly."
+    },
+    {
+      "id": 52,
+      "mode": "cued",
+      "domain": "verbatim",
+      "prompt": "Given this exact first line:\n\nfunc mustJSON(v any) string { b, _ := json.Marshal(v); return string(b) }\n\nfrom `internal/adminapi/accounts_write.go` lines 185-187, reproduce all remaining lines exactly."
+    },
+    {
+      "id": 53,
+      "mode": "cued",
+      "domain": "verbatim",
+      "prompt": "Given this exact first line:\n\n\tif strings.EqualFold(strings.TrimSpace(provider), \"digitalocean\") {\n\nfrom `internal/adminapi/account_validation.go` lines 33-40, reproduce all remaining lines exactly."
+    },
+    {
+      "id": 54,
+      "mode": "cued",
+      "domain": "verbatim",
+      "prompt": "Given this exact first line:\n\npackage adminapi\n\nfrom `internal/adminapi/accounts_write.go` lines 1-8, reproduce all remaining lines exactly."
+    },
+    {
+      "id": 55,
+      "mode": "cued",
+      "domain": "verbatim",
+      "prompt": "Given this exact first line:\n\n\t\t\t\tlog.Printf(\"lifecycle worker: %v\", err)\n\nfrom `cmd/worker/main.go` lines 305-312, reproduce all remaining lines exactly."
+    }
+  ]
+}
