@@ -13,3 +13,6 @@ A new ChatGPT session must perform this sequence before changing production code
 9. After a successful logical stage: update PROJECT_STATE/HANDOFF, commit, push, and record deploy/test outcome.
 
 The continuity documents summarize intent; Git source and production runtime remain authoritative for exact implementation details. When they disagree, investigate and update the docs rather than forcing runtime to match stale prose.
+
+10. Use `docs/FEATURE_FLOW_INDEX.md` to locate the vertical feature path before broad searching.
+11. Follow `docs/CHANGE_PROTOCOL.md` for implementation, verification, deploy and checkpoint discipline.
