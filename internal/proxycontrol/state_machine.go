@@ -57,6 +57,16 @@ func ApplyHealth(x State, result network.HealthResult, policy Policy) State {
 		LastCheckedAt:        derefTime(x.LastCheckedAt),
 		LastSuccessAt:        derefTime(x.LastSuccessAt),
 	}
+	// A brand-new proxy may become healthy after one successful authoritative
+	// probe. Recovery from degraded/down still requires the configured
+	// consecutive-success hysteresis.
+	if x.HealthState == network.StatusUnknown && result.Status == network.StatusHealthy {
+		recovery := policy.Health.RecoveryThreshold
+		if recovery < 1 {
+			recovery = 2
+		}
+		hs.ConsecutiveSuccesses = recovery - 1
+	}
 	hs = hs.Apply(result, policy.Health)
 	x.HealthState = hs.Status
 	x.ConsecutiveFailures = hs.ConsecutiveFailures

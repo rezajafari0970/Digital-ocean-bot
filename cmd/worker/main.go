@@ -56,7 +56,7 @@ func main() {
 			}
 			rows.Close()
 			for _, id := range ids {
-				_ = application.Container.MaintainStickyIdentity(ctx, id)
+				_ = application.Container.MaintainProxyControlPlane(ctx, id)
 			}
 		}
 		run()
