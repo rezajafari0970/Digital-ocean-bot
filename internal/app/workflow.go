@@ -5,6 +5,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 )
@@ -29,7 +30,10 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
 	if runtime.Config.Provider == "vultr" {
 		executor.OnCreateError = func(cbCtx context.Context, createErr error) {
-			c.recordVultrSaturation(cbCtx, accountID, compute, createErr)
+			c.handleVultrCreateError(cbCtx, accountID, compute, createErr)
+		}
+		executor.OnCreateSuccess = func(cbCtx context.Context, _ providers.CreateServerResult) {
+			c.recordVultrProbeSuccess(cbCtx, accountID)
 		}
 	}
 	var eg *network.EgressGuard

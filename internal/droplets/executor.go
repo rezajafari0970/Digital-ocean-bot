@@ -14,11 +14,12 @@ var ErrMutationBlocked = errors.New("droplet mutation blocked")
 type MutationGate interface{ AllowMutation() error }
 
 type Executor struct {
-	Operations    jobs.Store
-	Provider      providers.ComputeDriver
-	Gate          MutationGate
-	EgressCheck   func(context.Context) error
-	OnCreateError func(context.Context, error)
+	Operations      jobs.Store
+	Provider        providers.ComputeDriver
+	Gate            MutationGate
+	EgressCheck     func(context.Context) error
+	OnCreateError   func(context.Context, error)
+	OnCreateSuccess func(context.Context, providers.CreateServerResult)
 }
 
 func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile) (jobs.Operation, error) {
@@ -70,6 +71,9 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		reserved.State = jobs.OperationFailed
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, errors.New("provider rejected create without server id")
+	}
+	if e.OnCreateSuccess != nil {
+		e.OnCreateSuccess(ctx, result)
 	}
 	if result.Outcome == providers.OutcomeAmbiguous {
 		reserved.State = jobs.OperationUnknown

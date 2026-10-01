@@ -91,6 +91,14 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// create operations without a provider resource consume additional slots;
 		// this avoids double-counting droplets already visible at DigitalOcean.
 		available := cap.Available()
+		if available < 1 && cap.Pending == 0 {
+			_, _ = e.DB.ExecContext(ctx, `UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true AND updated_at < now()-interval '30 minutes'`, x.AccountID)
+			var probeDue bool
+			_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_capacity_observations pco JOIN accounts a ON a.id=pco.account_id WHERE pco.account_id=$1 AND a.provider='vultr' AND pco.probe_in_flight=false AND ((pco.source='vultr_api_saturation' AND pco.probe_after IS NOT NULL AND pco.probe_after<=now()) OR pco.source='vultr_api_probe_success'))`, x.AccountID).Scan(&probeDue)
+			if probeDue {
+				available = 1
+			}
+		}
 		if allowed > available {
 			allowed = available
 		}

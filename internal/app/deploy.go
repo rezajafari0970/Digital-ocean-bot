@@ -60,7 +60,16 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
 	}
 	if (cap.LimitKnown && cap.Limit < 1) || cap.Available() < 1 {
-		return workflow.Deployment{}, ErrCapacityUnavailable
+		var provider string
+		_ = tx.QueryRowContext(ctx, `SELECT provider FROM accounts WHERE id=$1`, accountID).Scan(&provider)
+		if provider != "vultr" || cap.Pending > 0 {
+			return workflow.Deployment{}, ErrCapacityUnavailable
+		}
+		var claimed bool
+		err = tx.QueryRowContext(ctx, `UPDATE provider_capacity_observations SET probe_in_flight=true,source='vultr_api_probe',updated_at=now() WHERE account_id=$1 AND probe_in_flight=false AND ((source='vultr_api_saturation' AND probe_after IS NOT NULL AND probe_after<=now()) OR source='vultr_api_probe_success') RETURNING true`, accountID).Scan(&claimed)
+		if err != nil || !claimed {
+			return workflow.Deployment{}, ErrCapacityUnavailable
+		}
 	}
 	store := workflow.SQLStore{DB: tx}
 	d, _, err := store.Reserve(ctx, workflow.Request{AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})

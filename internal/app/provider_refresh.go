@@ -77,10 +77,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			// Maximum Instances limit. Overlay the latest proven capacity observation
 			// (manual/legacy Console evidence or API saturation evidence) when present;
 			// current usage always remains API-derived.
+			observedCapacitySource := ""
 			if rt.Config.Provider == "vultr" {
 				var observedLimit int
 				var observedAt time.Time
-				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt); qerr == nil {
+				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at,source FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt, &observedCapacitySource); qerr == nil {
 					obs.Capacity.ComputeLimit = observedLimit
 					obs.Capacity.LimitKnown = true
 					if observedAt.After(obs.Capacity.ObservedAt) {
@@ -109,7 +110,8 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			}
 			detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_account_status": obs.Account.Status, "can_create": canCreate, "droplet_limit": obs.Capacity.ComputeLimit, "provider_droplets": obs.Capacity.ComputeInUse})
 			runtimeStatus := "READY"
-			if !canCreate {
+			probeManagedCapacity := rt.Config.Provider == "vultr" && (observedCapacitySource == "vultr_api_saturation" || observedCapacitySource == "vultr_api_probe_success" || observedCapacitySource == "vultr_api_probe")
+			if !canCreate && !probeManagedCapacity {
 				runtimeStatus = "PROVIDER_BLOCKED"
 			}
 			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, runtimeStatus, string(detail))

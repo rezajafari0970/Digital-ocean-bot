@@ -41,6 +41,18 @@ func TestCreateErrorCallbackReceivesProviderCapacityError(t *testing.T) {
 	}
 }
 
+func TestCreateSuccessCallbackRunsAfterAcceptedCreate(t *testing.T) {
+	store := &opStore{}
+	provider := &computeStub{}
+	called := false
+	e := Executor{Operations: store, Provider: provider, Gate: gateStub{}, OnCreateSuccess: func(_ context.Context, result providers.CreateServerResult) { called = result.ServerID == "42" }}
+	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
+	got, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
+	if err != nil || !called || got.ResourceID != "42" {
+		t.Fatalf("got=%+v called=%v err=%v", got, called, err)
+	}
+}
+
 func TestCreateIsIdempotent(t *testing.T) {
 	store := &opStore{}
 	provider := &computeStub{}
