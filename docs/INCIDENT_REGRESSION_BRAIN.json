@@ -1,0 +1,1658 @@
+{
+  "schema_version": 1,
+  "source_commit": "4eb0f2c31d2ca6a38e0fc8310556ad5a8154be21",
+  "incident_count": 10,
+  "candidate_regression_commits_count": 185,
+  "incidents": [
+    {
+      "id": "INC-001",
+      "area": "provisioning",
+      "failure": "duplicate/competing installer execution",
+      "lesson": "Long-running install work needs one controlled execution owner; in-process locks alone are insufficient across processes.",
+      "prevent": [
+        "single lifecycle owner",
+        "per-resource coordination",
+        "observable install diagnostics"
+      ],
+      "related_commits": [
+        {
+          "commit": "9c2f23140a9d3883da17af5a3eb009b866b6e945",
+          "date": "2026-09-26",
+          "subject": "fix: pin Sanaei installer execution to explicit release"
+        },
+        {
+          "commit": "f09c3d4259e5904ea01eb21c8dd1c5cbf94b15b5",
+          "date": "2026-09-30",
+          "subject": "fix(output): stop panel work at expiry cutoff"
+        },
+        {
+          "commit": "ef802548d584dfe9cde563a231b1b5863a119e43",
+          "date": "2026-09-30",
+          "subject": "fix(installer): retire terminal readiness failures"
+        },
+        {
+          "commit": "1c0cb3e4f3cbfd7fe5e1bbc309dbaec6097419b3",
+          "date": "2026-09-30",
+          "subject": "fix(droplets): preserve create outcome across proxy checks"
+        },
+        {
+          "commit": "f196cd0cf25fa433b601f3c98d02d281735b3c9f",
+          "date": "2026-09-29",
+          "subject": "preserve capacity state across client cleanup"
+        },
+        {
+          "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
+          "date": "2026-09-27",
+          "subject": "refresh volatile readiness before installer activation"
+        },
+        {
+          "commit": "eddc36f22a67e96cd0cfcde29e73d548a5a6b101",
+          "date": "2026-09-26",
+          "subject": "feat: expose installer generation history"
+        },
+        {
+          "commit": "ee2f481bd8cae57f6d767eec3c59668a0d194940",
+          "date": "2026-09-26",
+          "subject": "feat: add immutable installer run generations"
+        },
+        {
+          "commit": "3f337114527a193292fbd2faf805d80063b8dbd4",
+          "date": "2026-09-26",
+          "subject": "feat: enforce installer readiness requirements"
+        },
+        {
+          "commit": "71a2805f94022976c3f7da82f9f32424076a82db",
+          "date": "2026-09-26",
+          "subject": "feat: adapt Sanaei installation to immutable installer core"
+        },
+        {
+          "commit": "966c36085ff63bdfaf4da757e524dab42e7d529d",
+          "date": "2026-09-26",
+          "subject": "test: add deterministic installer failure matrix harness"
+        },
+        {
+          "commit": "3ef99ce67e9efb83126d29d59f9b08afd0624bf5",
+          "date": "2026-09-26",
+          "subject": "fix: respect installer retry backoff after activation"
+        }
+      ]
+    },
+    {
+      "id": "INC-002",
+      "area": "proxy_network",
+      "failure": "shared account egress/proxy identity",
+      "lesson": "Account network identity must remain isolated; shared proxy state is a regression.",
+      "prevent": [
+        "per-account isolation",
+        "fail-closed required proxy"
+      ],
+      "related_commits": [
+        {
+          "commit": "92e6fd3aa95960948fd233648403b4e980770dd0",
+          "date": "2026-09-29",
+          "subject": "add account proxy pools and enforce ipv4 egress"
+        },
+        {
+          "commit": "6745b1ed2ba5a01647b5e93fc1030ef311f90202",
+          "date": "2026-09-29",
+          "subject": "enforce fresh per-account proxy identity on mutations"
+        },
+        {
+          "commit": "e8067499ea616a6e2391b70bb1e8c7248ed93b54",
+          "date": "2026-09-29",
+          "subject": "add multi proxy account management"
+        },
+        {
+          "commit": "639811461af018ee5a6a5ef4b5a87e917100306a",
+          "date": "2026-09-26",
+          "subject": "checkpoint: harden proxy and account control plane"
+        },
+        {
+          "commit": "af2d023d6072f4f431ad1549294726c11b1f4665",
+          "date": "2026-09-25",
+          "subject": "checkpoint: stable proxy and account runtime"
+        },
+        {
+          "commit": "36bc275451366222452a54e440f2eeec2e5e0e36",
+          "date": "2026-09-23",
+          "subject": "fix account token validation feedback state"
+        },
+        {
+          "commit": "fc31892bfe2ff2317da64b80d4b52d89b7ef302c",
+          "date": "2026-09-23",
+          "subject": "fix account region and plan selection state"
+        },
+        {
+          "commit": "cee346117182bc8224dc00b70263684628fd7f30",
+          "date": "2026-09-23",
+          "subject": "fix account action buttons and remove dashboard proxy test"
+        },
+        {
+          "commit": "aa27ebd7508c87ab0cf61dc1c175d5ab341d0857",
+          "date": "2026-09-23",
+          "subject": "fix: harden proxy lifecycle and account assignment"
+        },
+        {
+          "commit": "49d2d38a015585186e7c2bf152e424db96fd2316",
+          "date": "2026-09-23",
+          "subject": "fix: enforce persisted proxy health in account runtime"
+        },
+        {
+          "commit": "c100e86eefd6819ce773e719446a7e06e1daeca8",
+          "date": "2026-09-23",
+          "subject": "fix: use proxy-owned credentials in account runtimes"
+        },
+        {
+          "commit": "231c4d7347abb94982d8107ca969e3e47427c19a",
+          "date": "2026-09-22",
+          "subject": "feat: persist proxy health and gate account mutations"
+        }
+      ]
+    },
+    {
+      "id": "INC-003",
+      "area": "output",
+      "failure": "stale output visibility / approximate expiry",
+      "lesson": "Use persisted exact visibility/expiry semantics and apply them consistently to direct/share output.",
+      "prevent": [
+        "visible_until",
+        "canonical validity filter",
+        "avoid coarse TTL-only logic"
+      ],
+      "related_commits": [
+        {
+          "commit": "86f0f5a1fed74657556655e8d678509285e19a65",
+          "date": "2026-09-30",
+          "subject": "fix(output): cap visibility before server expiry"
+        },
+        {
+          "commit": "20d022e6a570ee7b8a725133a8269c21713949ef",
+          "date": "2026-09-29",
+          "subject": "make output expiry exact and refresh efficient"
+        },
+        {
+          "commit": "f09c3d4259e5904ea01eb21c8dd1c5cbf94b15b5",
+          "date": "2026-09-30",
+          "subject": "fix(output): stop panel work at expiry cutoff"
+        },
+        {
+          "commit": "ed199f023f4bd16d9a8dd5f86048c010c2c700b9",
+          "date": "2026-09-29",
+          "subject": "fix output viewer and add near expiry filter"
+        },
+        {
+          "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): support exact console capacity observations"
+        },
+        {
+          "commit": "489e1ae745f3431b32cce04275483d6901ed7c41",
+          "date": "2026-09-30",
+          "subject": "feat(ui): show managed server expiry"
+        },
+        {
+          "commit": "76c1aefb65fbc19c872337649ce21c0ee75aacbe",
+          "date": "2026-09-30",
+          "subject": "fix(lifecycle): never retire servers before expiry"
+        },
+        {
+          "commit": "63ab01a4960a8bb5e09636b5deec797c5303d5c4",
+          "date": "2026-09-30",
+          "subject": "fix(output): enforce server cutoff in snapshot upsert"
+        },
+        {
+          "commit": "6514987ea3fc152beb928cc3338c9ac0ce0e0ca1",
+          "date": "2026-09-30",
+          "subject": "fix(panels): self-heal host firewall before direct API retry"
+        },
+        {
+          "commit": "852d7034065ab9e5d41364a30f76f18e0684f5cb",
+          "date": "2026-09-30",
+          "subject": "fix(vultr): verify ssh key visibility before instance create"
+        },
+        {
+          "commit": "9fd0701cc92aa7276644b1df3250ad8cab483a06",
+          "date": "2026-09-29",
+          "subject": "trace output exclusion reasons"
+        },
+        {
+          "commit": "ebb56972d0434073b60bca849c493704c2a15cf5",
+          "date": "2026-09-28",
+          "subject": "audit: fix exact port 443 result"
+        }
+      ]
+    },
+    {
+      "id": "INC-004",
+      "area": "output",
+      "failure": "high-frequency refresh causing memory pressure/OOM risk",
+      "lesson": "Keep Output fast but use lightweight/separated refresh rather than unbounded expensive refresh work.",
+      "prevent": [
+        "bounded refresh work",
+        "live API path",
+        "avoid SSH aggregation"
+      ],
+      "related_commits": [
+        {
+          "commit": "f09c3d4259e5904ea01eb21c8dd1c5cbf94b15b5",
+          "date": "2026-09-30",
+          "subject": "fix(output): stop panel work at expiry cutoff"
+        },
+        {
+          "commit": "20d022e6a570ee7b8a725133a8269c21713949ef",
+          "date": "2026-09-29",
+          "subject": "make output expiry exact and refresh efficient"
+        },
+        {
+          "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
+          "date": "2026-09-30",
+          "subject": "fix(ui): handle unknown provider limits on refresh"
+        },
+        {
+          "commit": "63ab01a4960a8bb5e09636b5deec797c5303d5c4",
+          "date": "2026-09-30",
+          "subject": "fix(output): enforce server cutoff in snapshot upsert"
+        },
+        {
+          "commit": "86f0f5a1fed74657556655e8d678509285e19a65",
+          "date": "2026-09-30",
+          "subject": "fix(output): cap visibility before server expiry"
+        },
+        {
+          "commit": "aa3ee877ea91930413ce438cef60d14a03775583",
+          "date": "2026-09-30",
+          "subject": "fix(ssh): bound readiness wait and fail fast on auth"
+        },
+        {
+          "commit": "9fd0701cc92aa7276644b1df3250ad8cab483a06",
+          "date": "2026-09-29",
+          "subject": "trace output exclusion reasons"
+        },
+        {
+          "commit": "ed199f023f4bd16d9a8dd5f86048c010c2c700b9",
+          "date": "2026-09-29",
+          "subject": "fix output viewer and add near expiry filter"
+        },
+        {
+          "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
+          "date": "2026-09-27",
+          "subject": "refresh volatile readiness before installer activation"
+        },
+        {
+          "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
+          "date": "2026-09-23",
+          "subject": "feat add provider snapshot freshness and stale refresh"
+        },
+        {
+          "commit": "15e06a921a7303675a697f13648e75953e85f5cd",
+          "date": "2026-09-23",
+          "subject": "fix keep account editor open until token validation succeeds"
+        },
+        {
+          "commit": "0d9ef340bbe84da49e046a50d49d2bcba7e4b70b",
+          "date": "2026-09-23",
+          "subject": "feat refresh provider inventory and account capacity stats"
+        }
+      ]
+    },
+    {
+      "id": "INC-005",
+      "area": "providers",
+      "failure": "DigitalOcean-specific assumptions leaking into generic provider paths",
+      "lesson": "Generic lifecycle must not validate/catalog/reconcile with DO-only assumptions.",
+      "prevent": [
+        "provider-neutral contracts",
+        "provider-specific drivers"
+      ],
+      "related_commits": [
+        {
+          "commit": "0b62936c06675ac6535731064b2c90996d5c22be",
+          "date": "2026-09-30",
+          "subject": "fix(lifecycle): materialize failed owned provider orphans"
+        },
+        {
+          "commit": "7319eb244e5fe193600b0a4e69ddff8d3d413d55",
+          "date": "2026-09-27",
+          "subject": "reconcile ready panel instances from lifecycle state"
+        },
+        {
+          "commit": "acf278f5f0bf7796ff46364776362daf3ce95888",
+          "date": "2026-09-23",
+          "subject": "fix: preserve query strings in DigitalOcean API paths"
+        },
+        {
+          "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
+          "date": "2026-09-30",
+          "subject": "fix(ui): handle unknown provider limits on refresh"
+        },
+        {
+          "commit": "c1594d8d7c1afc2702bfd60139bcf22b07c43182",
+          "date": "2026-09-30",
+          "subject": "feat(ui): show provider-aware server capacity and badges"
+        },
+        {
+          "commit": "76c1aefb65fbc19c872337649ce21c0ee75aacbe",
+          "date": "2026-09-30",
+          "subject": "fix(lifecycle): never retire servers before expiry"
+        },
+        {
+          "commit": "d29534353ca1a7f32caf80616c137fc36357b3b0",
+          "date": "2026-09-30",
+          "subject": "feat(accounts): clarify provider and managed capacity"
+        },
+        {
+          "commit": "a5bd31d72df027e229f4005edf1fac1a621b1719",
+          "date": "2026-09-29",
+          "subject": "feat(ui): label servers by provider and render unknown capacity"
+        },
+        {
+          "commit": "3da60ea3de07d7c10bfa8ed74780ccfe0e121091",
+          "date": "2026-09-29",
+          "subject": "fix(proxy): use sticky adapter during provider preview"
+        },
+        {
+          "commit": "e9ef3a8f3cadd2d7fc29ae83bb848e2435f72830",
+          "date": "2026-09-29",
+          "subject": "feat(vultr): complete provider parity integration"
+        },
+        {
+          "commit": "b57f590de622ea4aff6b176eb984776b5b442719",
+          "date": "2026-09-29",
+          "subject": "add isolated vultr provider plugin skeleton"
+        },
+        {
+          "commit": "a28b5a78522c796feb32335c08d647e792d60ebe",
+          "date": "2026-09-29",
+          "subject": "harden digitalocean driver observation and errors"
+        }
+      ]
+    },
+    {
+      "id": "INC-006",
+      "area": "vultr",
+      "failure": "unknown Vultr capacity treated as hard blocker",
+      "lesson": "Unknown API limit is not the same as zero capacity; authoritative capacity observation is provider-specific.",
+      "prevent": [
+        "LimitKnown semantics",
+        "console capacity observation when needed"
+      ],
+      "related_commits": [
+        {
+          "commit": "a5bd31d72df027e229f4005edf1fac1a621b1719",
+          "date": "2026-09-29",
+          "subject": "feat(ui): label servers by provider and render unknown capacity"
+        },
+        {
+          "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
+          "date": "2026-09-23",
+          "subject": "fix distinguish unknown provider stats from zero"
+        },
+        {
+          "commit": "7b79dad6a5b0be7bdee4584a67593f9327d023ba",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): add console capacity browser probe"
+        },
+        {
+          "commit": "4b8e1998b4bb33e4596d599b76dd7da71a78c9e0",
+          "date": "2026-09-30",
+          "subject": "fix(ui): surface Vultr capacity fields near token"
+        },
+        {
+          "commit": "505e73fab79c4c397c1146bd5755d16506309b69",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): add secure console capacity credentials"
+        },
+        {
+          "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): support exact console capacity observations"
+        },
+        {
+          "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
+          "date": "2026-09-30",
+          "subject": "fix(ui): handle unknown provider limits on refresh"
+        },
+        {
+          "commit": "c1594d8d7c1afc2702bfd60139bcf22b07c43182",
+          "date": "2026-09-30",
+          "subject": "feat(ui): show provider-aware server capacity and badges"
+        },
+        {
+          "commit": "d29534353ca1a7f32caf80616c137fc36357b3b0",
+          "date": "2026-09-30",
+          "subject": "feat(accounts): clarify provider and managed capacity"
+        },
+        {
+          "commit": "e9ef3a8f3cadd2d7fc29ae83bb848e2435f72830",
+          "date": "2026-09-29",
+          "subject": "feat(vultr): complete provider parity integration"
+        },
+        {
+          "commit": "b57f590de622ea4aff6b176eb984776b5b442719",
+          "date": "2026-09-29",
+          "subject": "add isolated vultr provider plugin skeleton"
+        },
+        {
+          "commit": "1cad79fe881e2d6691b875c25e6f759c77e00087",
+          "date": "2026-09-29",
+          "subject": "centralize provider capacity decisions"
+        }
+      ]
+    },
+    {
+      "id": "INC-007",
+      "area": "vultr_console",
+      "failure": "noVNC/WebSocket path mismatch / connecting state",
+      "lesson": "Reverse proxy must preserve the supported WebSocket upgrade path and interactive session authorization.",
+      "prevent": [
+        "websockify path compatibility",
+        "fresh console ticket/session",
+        "interactive challenge visibility"
+      ],
+      "related_commits": [
+        {
+          "commit": "7126567c330ca8276a9e28dc082aeb02fa572700",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): correct noVNC websocket path behind proxy"
+        },
+        {
+          "commit": "af598d7955399908174badc22638c66cd014a4c6",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): authorize interactive console tabs with short session cookie"
+        },
+        {
+          "commit": "7c9f335ccf3bfc4e36bb00bb352628fbe42d0bd9",
+          "date": "2026-10-01",
+          "subject": "feat(vultr): add interactive console challenge session"
+        },
+        {
+          "commit": "6834d813fc16a6b4aefd05f2cb8696c18b0c0fec",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): accept root noVNC websocket alias"
+        },
+        {
+          "commit": "7b79dad6a5b0be7bdee4584a67593f9327d023ba",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): add console capacity browser probe"
+        },
+        {
+          "commit": "505e73fab79c4c397c1146bd5755d16506309b69",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): add secure console capacity credentials"
+        },
+        {
+          "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
+          "date": "2026-09-30",
+          "subject": "feat(vultr): support exact console capacity observations"
+        },
+        {
+          "commit": "1c0cb3e4f3cbfd7fe5e1bbc309dbaec6097419b3",
+          "date": "2026-09-30",
+          "subject": "fix(droplets): preserve create outcome across proxy checks"
+        },
+        {
+          "commit": "1b4d1739ccda1253d6f7436b9b96b8c055a40e5a",
+          "date": "2026-09-29",
+          "subject": "add canonical vultr read path"
+        },
+        {
+          "commit": "f196cd0cf25fa433b601f3c98d02d281735b3c9f",
+          "date": "2026-09-29",
+          "subject": "preserve capacity state across client cleanup"
+        },
+        {
+          "commit": "df0f2e6d4a42a8a81e29e7e18073b4ff6d9e8e1b",
+          "date": "2026-09-23",
+          "subject": "fix preserve DigitalOcean v2 base path"
+        },
+        {
+          "commit": "98ffae18758e61128417cd7d67dcecbe0187c1bd",
+          "date": "2026-10-01",
+          "subject": "docs: generate single session handoff bundle"
+        }
+      ]
+    },
+    {
+      "id": "INC-008",
+      "area": "database",
+      "failure": "schema/source drift or migration mismatch",
+      "lesson": "Verify live migration level/checksums before schema-sensitive work; do not infer live schema solely from source migrations.",
+      "prevent": [
+        "schema_migrations checksums",
+        "LIVE_DB_BRAIN",
+        "migration verification"
+      ],
+      "related_commits": [
+        {
+          "commit": "852d7034065ab9e5d41364a30f76f18e0684f5cb",
+          "date": "2026-09-30",
+          "subject": "fix(vultr): verify ssh key visibility before instance create"
+        },
+        {
+          "commit": "f09c3d4259e5904ea01eb21c8dd1c5cbf94b15b5",
+          "date": "2026-09-30",
+          "subject": "fix(output): stop panel work at expiry cutoff"
+        },
+        {
+          "commit": "76c1aefb65fbc19c872337649ce21c0ee75aacbe",
+          "date": "2026-09-30",
+          "subject": "fix(lifecycle): never retire servers before expiry"
+        },
+        {
+          "commit": "86f0f5a1fed74657556655e8d678509285e19a65",
+          "date": "2026-09-30",
+          "subject": "fix(output): cap visibility before server expiry"
+        },
+        {
+          "commit": "6514987ea3fc152beb928cc3338c9ac0ce0e0ca1",
+          "date": "2026-09-30",
+          "subject": "fix(panels): self-heal host firewall before direct API retry"
+        },
+        {
+          "commit": "fe87aa98f8832fb867b930656deb40e3d77507e1",
+          "date": "2026-09-30",
+          "subject": "fix(recovery): restore ssh identity before create"
+        },
+        {
+          "commit": "353103112e1f53d4af15fcf9a7469e90726d83c1",
+          "date": "2026-09-29",
+          "subject": "fix canonical terminal state migration sequence"
+        },
+        {
+          "commit": "7319eb244e5fe193600b0a4e69ddff8d3d413d55",
+          "date": "2026-09-27",
+          "subject": "reconcile ready panel instances from lifecycle state"
+        },
+        {
+          "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
+          "date": "2026-09-27",
+          "subject": "refresh volatile readiness before installer activation"
+        },
+        {
+          "commit": "d89fee8a6e37012d1f5fea5e3907f1913f1faa50",
+          "date": "2026-09-26",
+          "subject": "feat: activate selected installers from waiting deployments"
+        },
+        {
+          "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
+          "date": "2026-09-23",
+          "subject": "fix distinguish unknown provider stats from zero"
+        },
+        {
+          "commit": "c3b75d5acce9c1f2fef72cffa999ba1141477997",
+          "date": "2026-09-23",
+          "subject": "fix distinguish panel session 401 from provider token 401"
+        }
+      ]
+    },
+    {
+      "id": "INC-009",
+      "area": "production",
+      "failure": "assuming Git HEAD equals deployed production",
+      "lesson": "Service health does not prove revision identity.",
+      "prevent": [
+        "/version stamp",
+        "artifact manifest hashes",
+        "production revision verifier"
+      ],
+      "related_commits": [
+        {
+          "commit": "fe87aa98f8832fb867b930656deb40e3d77507e1",
+          "date": "2026-09-30",
+          "subject": "fix(recovery): restore ssh identity before create"
+        },
+        {
+          "commit": "6745b1ed2ba5a01647b5e93fc1030ef311f90202",
+          "date": "2026-09-29",
+          "subject": "enforce fresh per-account proxy identity on mutations"
+        },
+        {
+          "commit": "bc2f5ce0b6efba434f0113494045ce10b577a12f",
+          "date": "2026-09-23",
+          "subject": "fix validate replacement token before identity swap"
+        },
+        {
+          "commit": "49d2d38a015585186e7c2bf152e424db96fd2316",
+          "date": "2026-09-23",
+          "subject": "fix: enforce persisted proxy health in account runtime"
+        },
+        {
+          "commit": "554768598e3ff86e322956f30bf651b7d789bc07",
+          "date": "2026-09-23",
+          "subject": "fix: allow health monitor to probe degraded proxies"
+        },
+        {
+          "commit": "549004b4fe5396c44b3ce297ffcc1c79ba2a8e3d",
+          "date": "2026-09-23",
+          "subject": "feat: continuously monitor proxy health with hysteresis"
+        },
+        {
+          "commit": "cfc3e3bed7bb45b5f5404080c109925fdf83cf28",
+          "date": "2026-09-23",
+          "subject": "style: color proxy health status badges"
+        },
+        {
+          "commit": "d0d3b5e5504cccb90da028d9aa0365a365274753",
+          "date": "2026-09-23",
+          "subject": "fix: generate base64 encoded production master key"
+        },
+        {
+          "commit": "109a914a66e61f5bddb2235d0b7c7e55a733b298",
+          "date": "2026-09-23",
+          "subject": "feat: add proxy health discovery and template upload APIs"
+        },
+        {
+          "commit": "231c4d7347abb94982d8107ca969e3e47427c19a",
+          "date": "2026-09-22",
+          "subject": "feat: persist proxy health and gate account mutations"
+        },
+        {
+          "commit": "1d08bf520c03cdcbd43ad2499ffd2c637e86690b",
+          "date": "2026-09-22",
+          "subject": "feat: add proxy health and exit IP verification"
+        }
+      ]
+    },
+    {
+      "id": "INC-010",
+      "area": "continuity",
+      "failure": "new chat reconstructing project from stale/partial history",
+      "lesson": "Use canonical repo plus commit-pinned knowledge brains and acceptance gates.",
+      "prevent": [
+        "NEW_CHAT_ENTRYPOINT",
+        "Project Brain",
+        "handoff acceptance gate"
+      ],
+      "related_commits": [
+        {
+          "commit": "f80ca7ba5e3c50f33a79289f74828631fe486c65",
+          "date": "2026-09-29",
+          "subject": "add canonical vultr mutation driver"
+        },
+        {
+          "commit": "1b4d1739ccda1253d6f7436b9b96b8c055a40e5a",
+          "date": "2026-09-29",
+          "subject": "add canonical vultr read path"
+        },
+        {
+          "commit": "353103112e1f53d4af15fcf9a7469e90726d83c1",
+          "date": "2026-09-29",
+          "subject": "fix canonical terminal state migration sequence"
+        },
+        {
+          "commit": "7319eb244e5fe193600b0a4e69ddff8d3d413d55",
+          "date": "2026-09-27",
+          "subject": "reconcile ready panel instances from lifecycle state"
+        },
+        {
+          "commit": "eddc36f22a67e96cd0cfcde29e73d548a5a6b101",
+          "date": "2026-09-26",
+          "subject": "feat: expose installer generation history"
+        },
+        {
+          "commit": "d89fee8a6e37012d1f5fea5e3907f1913f1faa50",
+          "date": "2026-09-26",
+          "subject": "feat: activate selected installers from waiting deployments"
+        },
+        {
+          "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
+          "date": "2026-09-23",
+          "subject": "feat add provider snapshot freshness and stale refresh"
+        },
+        {
+          "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
+          "date": "2026-09-23",
+          "subject": "fix distinguish unknown provider stats from zero"
+        },
+        {
+          "commit": "c3b75d5acce9c1f2fef72cffa999ba1141477997",
+          "date": "2026-09-23",
+          "subject": "fix distinguish panel session 401 from provider token 401"
+        },
+        {
+          "commit": "d1cd682fe2f8fdd44720fdf59f7a4d70893317e8",
+          "date": "2026-09-23",
+          "subject": "fix decouple modal save from dialog submit"
+        },
+        {
+          "commit": "b430e9871b09d8d2fed3310922ad5e95418de8fd",
+          "date": "2026-09-23",
+          "subject": "fix isolate account form from generic submit"
+        },
+        {
+          "commit": "e1261a6555920a63508147c0e5bf88599d389724",
+          "date": "2026-09-23",
+          "subject": "fix bust stale frontend cache"
+        }
+      ]
+    }
+  ],
+  "candidate_regression_commits": [
+    {
+      "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+      "date": "2026-10-01",
+      "subject": "docs: add requirement to runtime traceability matrix"
+    },
+    {
+      "commit": "98ffae18758e61128417cd7d67dcecbe0187c1bd",
+      "date": "2026-10-01",
+      "subject": "docs: generate single session handoff bundle"
+    },
+    {
+      "commit": "d44242ec70ba042a27ded020476ce886f1847359",
+      "date": "2026-10-01",
+      "subject": "docs: add master architecture and session bootstrap context"
+    },
+    {
+      "commit": "6834d813fc16a6b4aefd05f2cb8696c18b0c0fec",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): accept root noVNC websocket alias"
+    },
+    {
+      "commit": "7126567c330ca8276a9e28dc082aeb02fa572700",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): correct noVNC websocket path behind proxy"
+    },
+    {
+      "commit": "af598d7955399908174badc22638c66cd014a4c6",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): authorize interactive console tabs with short session cookie"
+    },
+    {
+      "commit": "7c9f335ccf3bfc4e36bb00bb352628fbe42d0bd9",
+      "date": "2026-10-01",
+      "subject": "feat(vultr): add interactive console challenge session"
+    },
+    {
+      "commit": "7b79dad6a5b0be7bdee4584a67593f9327d023ba",
+      "date": "2026-09-30",
+      "subject": "feat(vultr): add console capacity browser probe"
+    },
+    {
+      "commit": "672e34dca0fd203282ee8825aaa1694cd5724647",
+      "date": "2026-09-30",
+      "subject": "fix(accounts): return JSON on save and tolerate empty responses"
+    },
+    {
+      "commit": "6191ea8918e90fe4f09631db9d24bc0b4e01d668",
+      "date": "2026-09-30",
+      "subject": "fix(ui): restore admin app after Vultr fields syntax error"
+    },
+    {
+      "commit": "43ed6e7e83d7569000632574fa5fde9102273974",
+      "date": "2026-09-30",
+      "subject": "fix(deploy): ship current admin static assets"
+    },
+    {
+      "commit": "4b8e1998b4bb33e4596d599b76dd7da71a78c9e0",
+      "date": "2026-09-30",
+      "subject": "fix(ui): surface Vultr capacity fields near token"
+    },
+    {
+      "commit": "505e73fab79c4c397c1146bd5755d16506309b69",
+      "date": "2026-09-30",
+      "subject": "feat(vultr): add secure console capacity credentials"
+    },
+    {
+      "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
+      "date": "2026-09-30",
+      "subject": "feat(vultr): support exact console capacity observations"
+    },
+    {
+      "commit": "489e1ae745f3431b32cce04275483d6901ed7c41",
+      "date": "2026-09-30",
+      "subject": "feat(ui): show managed server expiry"
+    },
+    {
+      "commit": "f09c3d4259e5904ea01eb21c8dd1c5cbf94b15b5",
+      "date": "2026-09-30",
+      "subject": "fix(output): stop panel work at expiry cutoff"
+    },
+    {
+      "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
+      "date": "2026-09-30",
+      "subject": "fix(ui): handle unknown provider limits on refresh"
+    },
+    {
+      "commit": "c1594d8d7c1afc2702bfd60139bcf22b07c43182",
+      "date": "2026-09-30",
+      "subject": "feat(ui): show provider-aware server capacity and badges"
+    },
+    {
+      "commit": "76c1aefb65fbc19c872337649ce21c0ee75aacbe",
+      "date": "2026-09-30",
+      "subject": "fix(lifecycle): never retire servers before expiry"
+    },
+    {
+      "commit": "d29534353ca1a7f32caf80616c137fc36357b3b0",
+      "date": "2026-09-30",
+      "subject": "feat(accounts): clarify provider and managed capacity"
+    },
+    {
+      "commit": "63ab01a4960a8bb5e09636b5deec797c5303d5c4",
+      "date": "2026-09-30",
+      "subject": "fix(output): enforce server cutoff in snapshot upsert"
+    },
+    {
+      "commit": "86f0f5a1fed74657556655e8d678509285e19a65",
+      "date": "2026-09-30",
+      "subject": "fix(output): cap visibility before server expiry"
+    },
+    {
+      "commit": "6514987ea3fc152beb928cc3338c9ac0ce0e0ca1",
+      "date": "2026-09-30",
+      "subject": "fix(panels): self-heal host firewall before direct API retry"
+    },
+    {
+      "commit": "872fd9b566ac121a8c0de3ed6e9e4f4760bc5de3",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): inject deployment ssh key with cloud-init"
+    },
+    {
+      "commit": "0ceb4254550ab363c24ff048fd73dc21d9cbe131",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): observe REST sshkey_id attachment"
+    },
+    {
+      "commit": "aa3ee877ea91930413ce438cef60d14a03775583",
+      "date": "2026-09-30",
+      "subject": "fix(ssh): bound readiness wait and fail fast on auth"
+    },
+    {
+      "commit": "6beda7a8747fdc91b1dd59d25c3b3806f44473b1",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): send sshkey_id as REST array"
+    },
+    {
+      "commit": "fc39a10ae52bf56fd58dbe63ab8107c62f694ab9",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): send REST sshkey_id on instance create"
+    },
+    {
+      "commit": "bf2435825d29712edfe853bd65cb762d8e669c2f",
+      "date": "2026-09-30",
+      "subject": "fix(readiness): retry transient ssh startup failures"
+    },
+    {
+      "commit": "ef802548d584dfe9cde563a231b1b5863a119e43",
+      "date": "2026-09-30",
+      "subject": "fix(installer): retire terminal readiness failures"
+    },
+    {
+      "commit": "852d7034065ab9e5d41364a30f76f18e0684f5cb",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): verify ssh key visibility before instance create"
+    },
+    {
+      "commit": "68a21d5eba1835a09a45b38eb3650f7c07338702",
+      "date": "2026-09-30",
+      "subject": "feat(vultr): observe instance ssh key attachments"
+    },
+    {
+      "commit": "fe87aa98f8832fb867b930656deb40e3d77507e1",
+      "date": "2026-09-30",
+      "subject": "fix(recovery): restore ssh identity before create"
+    },
+    {
+      "commit": "1bd4449cf5e48fc75ceeb950d0f88103e66386da",
+      "date": "2026-09-30",
+      "subject": "fix(worker): recover planned deployments"
+    },
+    {
+      "commit": "0b62936c06675ac6535731064b2c90996d5c22be",
+      "date": "2026-09-30",
+      "subject": "fix(lifecycle): materialize failed owned provider orphans"
+    },
+    {
+      "commit": "7f2a9683014c5f45a1dd3fa5c7328d2da4889e45",
+      "date": "2026-09-30",
+      "subject": "fix(vultr): decode numeric instance disk"
+    },
+    {
+      "commit": "1c0cb3e4f3cbfd7fe5e1bbc309dbaec6097419b3",
+      "date": "2026-09-30",
+      "subject": "fix(droplets): preserve create outcome across proxy checks"
+    },
+    {
+      "commit": "44ecde90f8d431fe6567f7532377004ca40ab6a1",
+      "date": "2026-09-29",
+      "subject": "fix(scheduler): log deployment start failures"
+    },
+    {
+      "commit": "2de0245dfc66de5e37d2924f228b18f3508b0f38",
+      "date": "2026-09-29",
+      "subject": "fix(ui): repair account capacity rendering"
+    },
+    {
+      "commit": "a5bd31d72df027e229f4005edf1fac1a621b1719",
+      "date": "2026-09-29",
+      "subject": "feat(ui): label servers by provider and render unknown capacity"
+    },
+    {
+      "commit": "0c63a6231fe24085de563e78123d322d384da32a",
+      "date": "2026-09-29",
+      "subject": "feat(vultr): expose sticky preview exit ip on auth failure"
+    },
+    {
+      "commit": "3da60ea3de07d7c10bfa8ed74780ccfe0e121091",
+      "date": "2026-09-29",
+      "subject": "fix(proxy): use sticky adapter during provider preview"
+    },
+    {
+      "commit": "e9ef3a8f3cadd2d7fc29ae83bb848e2435f72830",
+      "date": "2026-09-29",
+      "subject": "feat(vultr): complete provider parity integration"
+    },
+    {
+      "commit": "f80ca7ba5e3c50f33a79289f74828631fe486c65",
+      "date": "2026-09-29",
+      "subject": "add canonical vultr mutation driver"
+    },
+    {
+      "commit": "1b4d1739ccda1253d6f7436b9b96b8c055a40e5a",
+      "date": "2026-09-29",
+      "subject": "add canonical vultr read path"
+    },
+    {
+      "commit": "b57f590de622ea4aff6b176eb984776b5b442719",
+      "date": "2026-09-29",
+      "subject": "add isolated vultr provider plugin skeleton"
+    },
+    {
+      "commit": "e8067499ea616a6e2391b70bb1e8c7248ed93b54",
+      "date": "2026-09-29",
+      "subject": "add multi proxy account management"
+    },
+    {
+      "commit": "92e6fd3aa95960948fd233648403b4e980770dd0",
+      "date": "2026-09-29",
+      "subject": "add account proxy pools and enforce ipv4 egress"
+    },
+    {
+      "commit": "6745b1ed2ba5a01647b5e93fc1030ef311f90202",
+      "date": "2026-09-29",
+      "subject": "enforce fresh per-account proxy identity on mutations"
+    },
+    {
+      "commit": "a28b5a78522c796feb32335c08d647e792d60ebe",
+      "date": "2026-09-29",
+      "subject": "harden digitalocean driver observation and errors"
+    },
+    {
+      "commit": "1cad79fe881e2d6691b875c25e6f759c77e00087",
+      "date": "2026-09-29",
+      "subject": "centralize provider capacity decisions"
+    },
+    {
+      "commit": "be3033fdcfdb18070b2b2a9f837f91c30777e21c",
+      "date": "2026-09-29",
+      "subject": "fix lifecycle capacity deadlock and restrict ubuntu images"
+    },
+    {
+      "commit": "f196cd0cf25fa433b601f3c98d02d281735b3c9f",
+      "date": "2026-09-29",
+      "subject": "preserve capacity state across client cleanup"
+    },
+    {
+      "commit": "20d022e6a570ee7b8a725133a8269c21713949ef",
+      "date": "2026-09-29",
+      "subject": "make output expiry exact and refresh efficient"
+    },
+    {
+      "commit": "671adbc79f82b24f0f79292025cbfb5e798c84ba",
+      "date": "2026-09-29",
+      "subject": "skip slow cleanup fallback without structural snapshot"
+    },
+    {
+      "commit": "9fd0701cc92aa7276644b1df3250ad8cab483a06",
+      "date": "2026-09-29",
+      "subject": "trace output exclusion reasons"
+    },
+    {
+      "commit": "ed199f023f4bd16d9a8dd5f86048c010c2c700b9",
+      "date": "2026-09-29",
+      "subject": "fix output viewer and add near expiry filter"
+    },
+    {
+      "commit": "353103112e1f53d4af15fcf9a7469e90726d83c1",
+      "date": "2026-09-29",
+      "subject": "fix canonical terminal state migration sequence"
+    },
+    {
+      "commit": "9c7bbbe7c64a3b42b3ad61e7fc8aa36136a87d72",
+      "date": "2026-09-29",
+      "subject": "optimize legacy Sanaei capacity per inbound"
+    },
+    {
+      "commit": "12f07e7db8bd1f2fefa465792a6dcf743570adee",
+      "date": "2026-09-29",
+      "subject": "use full update fallback for legacy Sanaei capacity"
+    },
+    {
+      "commit": "202f056037f69ba509541b3e8c59809142d68da4",
+      "date": "2026-09-29",
+      "subject": "fallback when Sanaei addClient is unavailable"
+    },
+    {
+      "commit": "18c14649fc641f43a5972d62ab9300cb162abf9b",
+      "date": "2026-09-29",
+      "subject": "chunk Sanaei capacity fills and improve diagnostics"
+    },
+    {
+      "commit": "ab6b19a890b6309e4dbbf751cbf47d13a5c2d153",
+      "date": "2026-09-29",
+      "subject": "productionize Sanaei runtime reconciliation and capacity"
+    },
+    {
+      "commit": "9e8cbc6a1b3e84fb226f3e312ef92a3976150b8e",
+      "date": "2026-09-29",
+      "subject": "Harden adaptive Sanaei capacity runtime"
+    },
+    {
+      "commit": "ebb56972d0434073b60bca849c493704c2a15cf5",
+      "date": "2026-09-28",
+      "subject": "audit: fix exact port 443 result"
+    },
+    {
+      "commit": "7319eb244e5fe193600b0a4e69ddff8d3d413d55",
+      "date": "2026-09-27",
+      "subject": "reconcile ready panel instances from lifecycle state"
+    },
+    {
+      "commit": "ab17a170ddd2bda01786cb5b8f99592f50fb02db",
+      "date": "2026-09-27",
+      "subject": "reconcile panel registry with deleted droplets"
+    },
+    {
+      "commit": "d7aa3207265f922aa0fa168f15cd6706bac6a399",
+      "date": "2026-09-27",
+      "subject": "add ssh-backed read-only sanaei session transport"
+    },
+    {
+      "commit": "efa6a1cab9ee0e33c395cfaadb257349c9ad039a",
+      "date": "2026-09-27",
+      "subject": "retry ambiguous deletes for the same provider resource"
+    },
+    {
+      "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
+      "date": "2026-09-27",
+      "subject": "refresh volatile readiness before installer activation"
+    },
+    {
+      "commit": "6df2ef5b41e7be8f7ffdd96aa5af20a7e5d105ab",
+      "date": "2026-09-27",
+      "subject": "preserve retryable server readiness failures"
+    },
+    {
+      "commit": "c01812408d54514ae1f5d17c43cf64ff2f7e6b54",
+      "date": "2026-09-27",
+      "subject": "fix completed postinstall reconciliation"
+    },
+    {
+      "commit": "34649e9cc63b183d18202a654c12ffacecd5785f",
+      "date": "2026-09-27",
+      "subject": "reconcile completed postinstall ledgers to panel complete"
+    },
+    {
+      "commit": "bfc2d7ae57300bccbfcd6d6845ae183c0f2613bd",
+      "date": "2026-09-27",
+      "subject": "fix explicit postinstall recovery test contract"
+    },
+    {
+      "commit": "ee73b84ec20bc246b004da1aaf9e334fe189aa3f",
+      "date": "2026-09-27",
+      "subject": "reconcile resource registry on droplet deletion"
+    },
+    {
+      "commit": "536e696542484ded6664c9a5920f38cd57c5f847",
+      "date": "2026-09-27",
+      "subject": "complete modular proxy-to-panel workflow"
+    },
+    {
+      "commit": "eddc36f22a67e96cd0cfcde29e73d548a5a6b101",
+      "date": "2026-09-26",
+      "subject": "feat: expose installer generation history"
+    },
+    {
+      "commit": "ee2f481bd8cae57f6d767eec3c59668a0d194940",
+      "date": "2026-09-26",
+      "subject": "feat: add immutable installer run generations"
+    },
+    {
+      "commit": "3f337114527a193292fbd2faf805d80063b8dbd4",
+      "date": "2026-09-26",
+      "subject": "feat: enforce installer readiness requirements"
+    },
+    {
+      "commit": "9c2f23140a9d3883da17af5a3eb009b866b6e945",
+      "date": "2026-09-26",
+      "subject": "fix: pin Sanaei installer execution to explicit release"
+    },
+    {
+      "commit": "71a2805f94022976c3f7da82f9f32424076a82db",
+      "date": "2026-09-26",
+      "subject": "feat: adapt Sanaei installation to immutable installer core"
+    },
+    {
+      "commit": "966c36085ff63bdfaf4da757e524dab42e7d529d",
+      "date": "2026-09-26",
+      "subject": "test: add deterministic installer failure matrix harness"
+    },
+    {
+      "commit": "45186bceb4922df888756b29a3fdf1a14de5b651",
+      "date": "2026-09-26",
+      "subject": "fix: reconcile completion against latest step attempt"
+    },
+    {
+      "commit": "3ef99ce67e9efb83126d29d59f9b08afd0624bf5",
+      "date": "2026-09-26",
+      "subject": "fix: respect installer retry backoff after activation"
+    },
+    {
+      "commit": "02d48aa2e3c4e1b86b867444b401d5c31b7ed16b",
+      "date": "2026-09-26",
+      "subject": "fix: enforce crash-safe installer step recovery"
+    },
+    {
+      "commit": "b4a958bf0577178a4b5a82ac3d0639bc0f38a70f",
+      "date": "2026-09-26",
+      "subject": "fix: allow reconciled rolled-back installer state"
+    },
+    {
+      "commit": "8c4b31b847725303ac074e3bde8cf905e4820b69",
+      "date": "2026-09-26",
+      "subject": "fix: collect readiness for legacy installer activation"
+    },
+    {
+      "commit": "62fc052a5f5336608c29d765a2e0dc4fba927a78",
+      "date": "2026-09-26",
+      "subject": "fix: complete installer failure and rollback state machine"
+    },
+    {
+      "commit": "0026a8555858246fdec33b96d467615e314e22e5",
+      "date": "2026-09-26",
+      "subject": "fix: classify unmet prechecks as expected misses"
+    },
+    {
+      "commit": "d89fee8a6e37012d1f5fea5e3907f1913f1faa50",
+      "date": "2026-09-26",
+      "subject": "feat: activate selected installers from waiting deployments"
+    },
+    {
+      "commit": "96071d1038f52679a17e7b7bed43be13ef160c27",
+      "date": "2026-09-26",
+      "subject": "feat: add generic installer orchestration core"
+    },
+    {
+      "commit": "5ba51a8e53d914989dfefc003c7c25578ef73d18",
+      "date": "2026-09-26",
+      "subject": "fix: make provider lock state reversible and authoritative"
+    },
+    {
+      "commit": "5a5d72f57c569d173a935ddb52ddc2b5b590447b",
+      "date": "2026-09-26",
+      "subject": "feat: modularize pre-installer bootstrap pipeline"
+    },
+    {
+      "commit": "ee4fe87519458d1753181390e215837cc2b6d33e",
+      "date": "2026-09-26",
+      "subject": "fix: bypass retry delay for installer reconciliation"
+    },
+    {
+      "commit": "f04a71254c18e40ed44db221255aba04e667a65a",
+      "date": "2026-09-26",
+      "subject": "fix: pause deployments when installer is not configured"
+    },
+    {
+      "commit": "e11d95a97914cfc9aa411f070ba68940f0ac0194",
+      "date": "2026-09-26",
+      "subject": "fix: reconcile delete evidence and clear resolved failures"
+    },
+    {
+      "commit": "6371f1749df2d2ee7052ffe45a3f65dbc2c96e9d",
+      "date": "2026-09-26",
+      "subject": "fix: fail closed on missing deployment ssh secret"
+    },
+    {
+      "commit": "639811461af018ee5a6a5ef4b5a87e917100306a",
+      "date": "2026-09-26",
+      "subject": "checkpoint: harden proxy and account control plane"
+    },
+    {
+      "commit": "af2d023d6072f4f431ad1549294726c11b1f4665",
+      "date": "2026-09-25",
+      "subject": "checkpoint: stable proxy and account runtime"
+    },
+    {
+      "commit": "ed4dccf90d07cc649e7a48db37b40baed5f0d2fa",
+      "date": "2026-09-23",
+      "subject": "fix bump frontend cache after account back navigation"
+    },
+    {
+      "commit": "482336fa31b212b08ee26adacfe05daab0a5bf75",
+      "date": "2026-09-23",
+      "subject": "fix account details back navigation"
+    },
+    {
+      "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
+      "date": "2026-09-23",
+      "subject": "feat add provider snapshot freshness and stale refresh"
+    },
+    {
+      "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
+      "date": "2026-09-23",
+      "subject": "fix distinguish unknown provider stats from zero"
+    },
+    {
+      "commit": "772f1244dc205b32799544ee1a6711efd855fcdf",
+      "date": "2026-09-23",
+      "subject": "feat make remember me sessions last 30 days"
+    },
+    {
+      "commit": "c3b75d5acce9c1f2fef72cffa999ba1141477997",
+      "date": "2026-09-23",
+      "subject": "fix distinguish panel session 401 from provider token 401"
+    },
+    {
+      "commit": "36bc275451366222452a54e440f2eeec2e5e0e36",
+      "date": "2026-09-23",
+      "subject": "fix account token validation feedback state"
+    },
+    {
+      "commit": "db390e3dcdae4179ad9075513b64c26f326f4465",
+      "date": "2026-09-23",
+      "subject": "fix show account save validation result"
+    },
+    {
+      "commit": "e4ae1bb2b1763ce537686322e1a4a6fa2b932d73",
+      "date": "2026-09-23",
+      "subject": "fix restore account save button after validation error"
+    },
+    {
+      "commit": "7f8dde5c3112ad58c0e92836a6094dbed54fe5de",
+      "date": "2026-09-23",
+      "subject": "fix bound replacement token validation time"
+    },
+    {
+      "commit": "15e06a921a7303675a697f13648e75953e85f5cd",
+      "date": "2026-09-23",
+      "subject": "fix keep account editor open until token validation succeeds"
+    },
+    {
+      "commit": "bc2f5ce0b6efba434f0113494045ce10b577a12f",
+      "date": "2026-09-23",
+      "subject": "fix validate replacement token before identity swap"
+    },
+    {
+      "commit": "0d9ef340bbe84da49e046a50d49d2bcba7e4b70b",
+      "date": "2026-09-23",
+      "subject": "feat refresh provider inventory and account capacity stats"
+    },
+    {
+      "commit": "3f0eceb9b9965c7420c90b9e4a53f876fe90d974",
+      "date": "2026-09-23",
+      "subject": "chore remove account edit debug tracing"
+    },
+    {
+      "commit": "c53864dff9fcb36a267782f9385160e88f389e63",
+      "date": "2026-09-23",
+      "subject": "fix all scheduler interval parameter casts"
+    },
+    {
+      "commit": "0d4c45a7df935819f49a00c7c8590ae8c625473d",
+      "date": "2026-09-23",
+      "subject": "fix account automation interval parameter type"
+    },
+    {
+      "commit": "83e651586f673e7e47841c3f6b82eb43ff13c143",
+      "date": "2026-09-23",
+      "subject": "debug trace account edit transaction stages"
+    },
+    {
+      "commit": "e692e770f4bd4d98f92184e4e01154ebfd489c0f",
+      "date": "2026-09-23",
+      "subject": "debug trace safe account edit payload"
+    },
+    {
+      "commit": "d1cd682fe2f8fdd44720fdf59f7a4d70893317e8",
+      "date": "2026-09-23",
+      "subject": "fix decouple modal save from dialog submit"
+    },
+    {
+      "commit": "b430e9871b09d8d2fed3310922ad5e95418de8fd",
+      "date": "2026-09-23",
+      "subject": "fix isolate account form from generic submit"
+    },
+    {
+      "commit": "e1261a6555920a63508147c0e5bf88599d389724",
+      "date": "2026-09-23",
+      "subject": "fix bust stale frontend cache"
+    },
+    {
+      "commit": "b3910b38b816998030feb71330c2e713db47a5ec",
+      "date": "2026-09-23",
+      "subject": "fix remove duplicate desired server fields"
+    },
+    {
+      "commit": "2bc3e4c079085ffa1de49a51c209d0a63e501498",
+      "date": "2026-09-23",
+      "subject": "fix account fallback option labels"
+    },
+    {
+      "commit": "272165cb567c80f8114cab99cde3946822a0b21c",
+      "date": "2026-09-23",
+      "subject": "fix allow instant edit without provider snapshot"
+    },
+    {
+      "commit": "41b0eefbeeb40b76d7917da1e43f234b100446aa",
+      "date": "2026-09-23",
+      "subject": "fix preserve scheduler timing on account edits"
+    },
+    {
+      "commit": "7220f695234c0afcee91d07dc99304b45dc57ae3",
+      "date": "2026-09-23",
+      "subject": "fix improve account edit plan labels"
+    },
+    {
+      "commit": "47e9caa9515e135c8d7293542b387bdbd1be4c39",
+      "date": "2026-09-23",
+      "subject": "fix account edit desired server field"
+    },
+    {
+      "commit": "d819aaeeba7505b653fabb906889dba8bc6fa541",
+      "date": "2026-09-23",
+      "subject": "fix harden account create edit and delete flows"
+    },
+    {
+      "commit": "ee49b425fab1be7f395de91328b3da3894af528e",
+      "date": "2026-09-23",
+      "subject": "fix backfill account automation schedules"
+    },
+    {
+      "commit": "732625804b1407d02676d995068d7892a8150455",
+      "date": "2026-09-23",
+      "subject": "feat add safe replacement rotation capacity guard"
+    },
+    {
+      "commit": "541cd85f47d76922ef267d7bc445ab7691ab6b70",
+      "date": "2026-09-23",
+      "subject": "debug expose DigitalOcean transport failure"
+    },
+    {
+      "commit": "a996eb1c888df20f4c984bbc0d1ee9ed5121b299",
+      "date": "2026-09-23",
+      "subject": "fix account secret upsert conflict target"
+    },
+    {
+      "commit": "6d9f36f29e2957fffa8a577a2e6319e96ce4e662",
+      "date": "2026-09-23",
+      "subject": "fix DigitalOcean region JSON mapping"
+    },
+    {
+      "commit": "fc31892bfe2ff2317da64b80d4b52d89b7ef302c",
+      "date": "2026-09-23",
+      "subject": "fix account region and plan selection state"
+    },
+    {
+      "commit": "619854d546ce3862466262227dc6400b369120a3",
+      "date": "2026-09-23",
+      "subject": "fix account save flow and frontend size fields"
+    },
+    {
+      "commit": "3174f0d24c8df2ad222139194cb134845b16adf0",
+      "date": "2026-09-23",
+      "subject": "fix DigitalOcean size JSON field names"
+    },
+    {
+      "commit": "2f119dd5308bbb2d8fa2668828c49de4261801ee",
+      "date": "2026-09-23",
+      "subject": "debug expose safe account save stage errors"
+    },
+    {
+      "commit": "cee346117182bc8224dc00b70263684628fd7f30",
+      "date": "2026-09-23",
+      "subject": "fix account action buttons and remove dashboard proxy test"
+    },
+    {
+      "commit": "b0a47f54d715e7111a1807e8929113af74009cc6",
+      "date": "2026-09-23",
+      "subject": "fix account preview email mapping on save"
+    },
+    {
+      "commit": "0db8205d2418fbe3491e1269a57edb6540fe5518",
+      "date": "2026-09-23",
+      "subject": "fix DigitalOcean pagination v2 path duplication"
+    },
+    {
+      "commit": "df0f2e6d4a42a8a81e29e7e18073b4ff6d9e8e1b",
+      "date": "2026-09-23",
+      "subject": "fix preserve DigitalOcean v2 base path"
+    },
+    {
+      "commit": "a85027c0980c0f30b8e8b8a04e8afa4933a2ce25",
+      "date": "2026-09-23",
+      "subject": "fix DigitalOcean v2 API URL resolution"
+    },
+    {
+      "commit": "1e32eca4916bb632e8b967200dfc60f2a1d01261",
+      "date": "2026-09-23",
+      "subject": "fix account catalog validation"
+    },
+    {
+      "commit": "acf278f5f0bf7796ff46364776362daf3ce95888",
+      "date": "2026-09-23",
+      "subject": "fix: preserve query strings in DigitalOcean API paths"
+    },
+    {
+      "commit": "250d571cac965635e9b113b83574d425489a386e",
+      "date": "2026-09-23",
+      "subject": "fix: normalize proxy IP and enrich status card"
+    },
+    {
+      "commit": "5229949966ad292a567afbbfb020ca2aa7eef4cc",
+      "date": "2026-09-23",
+      "subject": "feat: add responsive live proxy status cards"
+    },
+    {
+      "commit": "aa27ebd7508c87ab0cf61dc1c175d5ab341d0857",
+      "date": "2026-09-23",
+      "subject": "fix: harden proxy lifecycle and account assignment"
+    },
+    {
+      "commit": "49d2d38a015585186e7c2bf152e424db96fd2316",
+      "date": "2026-09-23",
+      "subject": "fix: enforce persisted proxy health in account runtime"
+    },
+    {
+      "commit": "0fb9727c777914017f6753855df9b194ec2cbddb",
+      "date": "2026-09-23",
+      "subject": "fix: make proxy recovery migration idempotent"
+    },
+    {
+      "commit": "a732fe811f2540c7acce781033916cb2628d7ec6",
+      "date": "2026-09-23",
+      "subject": "fix: persist proxy recovery success counter"
+    },
+    {
+      "commit": "28f72291e038e6839154472ef07e91586d967171",
+      "date": "2026-09-23",
+      "subject": "fix: support rotating proxy exit IPs safely"
+    },
+    {
+      "commit": "554768598e3ff86e322956f30bf651b7d789bc07",
+      "date": "2026-09-23",
+      "subject": "fix: allow health monitor to probe degraded proxies"
+    },
+    {
+      "commit": "549004b4fe5396c44b3ce297ffcc1c79ba2a8e3d",
+      "date": "2026-09-23",
+      "subject": "feat: continuously monitor proxy health with hysteresis"
+    },
+    {
+      "commit": "5d60762de8940c8fabd2b6739a6e5022d66ab4c8",
+      "date": "2026-09-23",
+      "subject": "test: cover proxy fail-closed leak and recovery rules"
+    },
+    {
+      "commit": "c100e86eefd6819ce773e719446a7e06e1daeca8",
+      "date": "2026-09-23",
+      "subject": "fix: use proxy-owned credentials in account runtimes"
+    },
+    {
+      "commit": "cfc3e3bed7bb45b5f5404080c109925fdf83cf28",
+      "date": "2026-09-23",
+      "subject": "style: color proxy health status badges"
+    },
+    {
+      "commit": "13686d50ee94b8dbcc2bc6940efe288285c7bdc6",
+      "date": "2026-09-23",
+      "subject": "fix: return proxy observation fields from test endpoint"
+    },
+    {
+      "commit": "1a50811c4aeeede52f39bd1b47ccef4fd0e50fb7",
+      "date": "2026-09-23",
+      "subject": "feat: show proxy exit ip country and latency in tests"
+    },
+    {
+      "commit": "1f28407da792d4f4f5a0c3ebb359f7610c7bdd35",
+      "date": "2026-09-23",
+      "subject": "feat: add proxy type selection details and test action"
+    },
+    {
+      "commit": "208583d3c1f931dd3cf62f3d317c68ddb31bd7ae",
+      "date": "2026-09-23",
+      "subject": "fix: use CSP-safe action handlers in admin panel"
+    },
+    {
+      "commit": "6c6022910cd432d2253388553277d07860f7301a",
+      "date": "2026-09-23",
+      "subject": "feat: add proxy edit and delete controls"
+    },
+    {
+      "commit": "b789243d58dc29a435b5b012b359956fc944aee4",
+      "date": "2026-09-23",
+      "subject": "fix: migrate secret ownership primary key"
+    },
+    {
+      "commit": "5732f2595fe2ee2af5a949ba4df3dc220027d4cb",
+      "date": "2026-09-23",
+      "subject": "fix: support encrypted secrets owned by proxies"
+    },
+    {
+      "commit": "70abba5c415f9b2102ef50072b168c4d2308db4f",
+      "date": "2026-09-23",
+      "subject": "fix: store proxy secret after proxy record creation"
+    },
+    {
+      "commit": "8b203b4127d1d25131240de8ea93b849e6742023",
+      "date": "2026-09-23",
+      "subject": "feat: add password visibility to proxy form"
+    },
+    {
+      "commit": "caf17af88856150496d0ca09f09ab1c0587cea5b",
+      "date": "2026-09-23",
+      "subject": "feat: auto detect proxy protocol before save"
+    },
+    {
+      "commit": "b1cc3f0eaa93e01271de99e1923458de029d4a9c",
+      "date": "2026-09-23",
+      "subject": "fix: make account views fully responsive"
+    },
+    {
+      "commit": "6cf312a1d42d67b31d4500769891dee2517a8fda",
+      "date": "2026-09-23",
+      "subject": "feat: add remember login and password visibility"
+    },
+    {
+      "commit": "6ec7dab96df9c36963f8e320f5d4838d6f10686b",
+      "date": "2026-09-23",
+      "subject": "fix: keep admin panel hidden until login"
+    },
+    {
+      "commit": "4e3cc1455e64e3c7b92ebc1b68781c54a89794c7",
+      "date": "2026-09-23",
+      "subject": "fix: improve mobile panel layout and empty states"
+    },
+    {
+      "commit": "cac62c7b1aae8c5cfa06cc013d09d3c2390f67a4",
+      "date": "2026-09-23",
+      "subject": "fix: serve admin panel static files"
+    },
+    {
+      "commit": "b22814177c3534947971d4eb290ce5f763cfd1d6",
+      "date": "2026-09-23",
+      "subject": "fix: read bootstrap password from stdin"
+    },
+    {
+      "commit": "fa2c79d2d93589d03f330aa1ce69ef84060e3366",
+      "date": "2026-09-23",
+      "subject": "fix: serialize migrations and add admin bootstrap"
+    },
+    {
+      "commit": "d0d3b5e5504cccb90da028d9aa0365a365274753",
+      "date": "2026-09-23",
+      "subject": "fix: generate base64 encoded production master key"
+    },
+    {
+      "commit": "b4fdad1fb141536b20156a6d2fd534f052687d86",
+      "date": "2026-09-23",
+      "subject": "fix: harden scheduler and workflow concurrency"
+    },
+    {
+      "commit": "1f130dc4d9c6d3b747dd975057aaeacd8f145014",
+      "date": "2026-09-23",
+      "subject": "feat: add account dashboard resources and capacity APIs"
+    },
+    {
+      "commit": "109a914a66e61f5bddb2235d0b7c7e55a733b298",
+      "date": "2026-09-23",
+      "subject": "feat: add proxy health discovery and template upload APIs"
+    },
+    {
+      "commit": "c3cdd871a9afbaa51cc73eff1a51062e2cad6451",
+      "date": "2026-09-23",
+      "subject": "feat: secure admin API with sessions and RBAC"
+    },
+    {
+      "commit": "ca6e4fb2f3306876ec052baf0bcd2c29f661dc15",
+      "date": "2026-09-22",
+      "subject": "feat: add retry backoff circuit breaker and rate classification"
+    },
+    {
+      "commit": "88dc9c9363abd78097fd8919413d622e368d9fc0",
+      "date": "2026-09-22",
+      "subject": "feat: add migrations worker and recovery loop"
+    },
+    {
+      "commit": "0e53e51811d3ff94c5d74130ce5f60aed1a2fe3c",
+      "date": "2026-09-22",
+      "subject": "feat: add scheduler capacity planner and droplet lifecycle foundation"
+    },
+    {
+      "commit": "c40e66a6150fe6312ca89c41e6a6b6529b4a6a8c",
+      "date": "2026-09-22",
+      "subject": "fix: complete provider layer types and reconciliation base"
+    },
+    {
+      "commit": "231c4d7347abb94982d8107ca969e3e47427c19a",
+      "date": "2026-09-22",
+      "subject": "feat: persist proxy health and gate account mutations"
+    },
+    {
+      "commit": "1d08bf520c03cdcbd43ad2499ffd2c637e86690b",
+      "date": "2026-09-22",
+      "subject": "feat: add proxy health and exit IP verification"
+    },
+    {
+      "commit": "765f37babcda8d765e0fb6de8768633b4fce36ee",
+      "date": "2026-09-22",
+      "subject": "feat: add account-scoped proxy gateway"
+    },
+    {
+      "commit": "391d2ede0d88a3c7c5692f4bdf1d34cf3381d0a6",
+      "date": "2026-09-22",
+      "subject": "feat: enforce per-account session isolation"
+    }
+  ],
+  "source_note": "Incidents encode durable lessons already present in project history/decision ledger; commit links are lexical candidates and must be inspected before causal attribution."
+}
