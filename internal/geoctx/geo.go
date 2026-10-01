@@ -9,3 +9,14 @@ func LocaleForCountry(code string) string {
 	}
 	return "en-US"
 }
+
+func CountryCodeForName(name string) string {
+	v := strings.ToLower(strings.TrimSpace(name))
+	v = strings.Join(strings.Fields(v), " ")
+	if len(v) == 2 {
+		if territoryDefaultLocale[strings.ToUpper(v)] != "" {
+			return v
+		}
+	}
+	return countryNameToCode[v]
+}

@@ -119,7 +119,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, "proxy exit IP/subnet collision: "+ip)
 		return ErrIsolationWait
 	}
-	_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,exit_ip,subnet_key) VALUES($1,$2::inet,host(network(set_masklen($2::inet,24)))||'/24') ON CONFLICT(account_id) DO UPDATE SET exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,updated_at=now()`, accountID, ip)
+	_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,exit_ip,subnet_key) VALUES($1,$2::inet,host(network(set_masklen($2::inet,24)))||'/24') ON CONFLICT(account_id) DO UPDATE SET country=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.country ELSE NULL END,country_code=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.country_code ELSE NULL END,asn=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.asn ELSE NULL END,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,updated_at=now()`, accountID, ip)
 	if err != nil {
 		return err
 	}

@@ -130,7 +130,7 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "account_not_found"})
 		return
 	}
-	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, accountID)
+	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, accountID)
 	if err := tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return

@@ -29,6 +29,7 @@ type Proxy struct {
 	Status        ProxyStatus
 	ExitIP        string
 	Country       string
+	CountryCode   string
 	ASN           string
 	LastCheckedAt *time.Time
 	LastSuccessAt *time.Time

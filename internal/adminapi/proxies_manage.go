@@ -40,7 +40,7 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(r.Context(), `UPDATE proxies SET name=$2,type=$3,host=$4,port=$5,username=NULLIF($6,''),adapter=$7,status='healthy',failure_count=0,consecutive_successes=0,last_checked_at=now(),last_success_at=now(),updated_at=now() WHERE id=$1`, id, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter)
+	res, err := tx.ExecContext(r.Context(), `UPDATE proxies SET name=$2,type=$3,host=$4,port=$5,username=NULLIF($6,''),adapter=$7,status='healthy',exit_ip=NULL,country=NULL,country_code=NULL,asn=NULL,latency_ms=NULL,health_error=NULL,failure_count=0,consecutive_successes=0,last_checked_at=now(),last_success_at=now(),updated_at=now() WHERE id=$1`, id, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
@@ -50,7 +50,7 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
 		return
 	}
-	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id IN (SELECT account_id FROM network_profiles WHERE proxy_id=$1)`, id)
+	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id IN (SELECT account_id FROM network_profiles WHERE proxy_id=$1)`, id)
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return

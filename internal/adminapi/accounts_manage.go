@@ -163,7 +163,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		_, _ = tx.ExecContext(r.Context(), `UPDATE account_proxy_pool SET enabled=false,updated_at=now() WHERE account_id=$1`, id)
 	}
 	if oldMode != x.NetworkMode || oldProxyID != x.ProxyID {
-		_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)
+		_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)
 	}
 	if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})

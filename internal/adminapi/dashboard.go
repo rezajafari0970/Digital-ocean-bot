@@ -145,7 +145,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	// Backfill identity from already-observed proxy data so existing accounts do
 	// not stay unknown after this feature is introduced.
 	if proxyID.Valid {
-		_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country) SELECT $1,'UTC','en-US',p.exit_ip,host(network(set_masklen(p.exit_ip,24)))||'/24',COALESCE(p.asn,''),COALESCE(p.country,'') FROM proxies p WHERE p.id=$2 AND p.exit_ip IS NOT NULL AND family(p.exit_ip)=4 ON CONFLICT(account_id) DO NOTHING`, id, proxyID.String)
+		_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country,country_code) SELECT $1,'UTC','en-US',p.exit_ip,host(network(set_masklen(p.exit_ip,24)))||'/24',COALESCE(p.asn,''),COALESCE(p.country,''),lower(COALESCE(p.country_code,'')) FROM proxies p WHERE p.id=$2 AND p.exit_ip IS NOT NULL AND family(p.exit_ip)=4 ON CONFLICT(account_id) DO NOTHING`, id, proxyID.String)
 		// Mark fallback identity as needing an explicit proxy test; do not perform
 		// external geo requests merely because Details was opened.
 		var fallback bool
@@ -154,12 +154,12 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 			d.Network["identity_refresh_required"] = true
 		}
 	}
-	var exitIP, subnet, asn, country, timezone, locale, preferredCountry, preferredCode, stickySession string
+	var exitIP, subnet, asn, country, countryCode, timezone, locale, preferredCountry, preferredCode, stickySession string
 	var fallbackActive bool
 	var lastHealth sql.NullTime
 	var lastHealthOK sql.NullBool
 	var rotationStarted sql.NullTime
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(host(exit_ip),''),COALESCE(subnet_key,''),COALESCE(asn,''),COALESCE(country,''),timezone,locale,COALESCE(preferred_country,''),COALESCE(preferred_country_code,''),COALESCE(sticky_session,''),fallback_active,last_health_at,last_health_ok,rotation_started_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&exitIP, &subnet, &asn, &country, &timezone, &locale, &preferredCountry, &preferredCode, &stickySession, &fallbackActive, &lastHealth, &lastHealthOK, &rotationStarted); err == nil {
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(host(exit_ip),''),COALESCE(subnet_key,''),COALESCE(asn,''),COALESCE(country,''),COALESCE(country_code,''),timezone,locale,COALESCE(preferred_country,''),COALESCE(preferred_country_code,''),COALESCE(sticky_session,''),fallback_active,last_health_at,last_health_ok,rotation_started_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&exitIP, &subnet, &asn, &country, &countryCode, &timezone, &locale, &preferredCountry, &preferredCode, &stickySession, &fallbackActive, &lastHealth, &lastHealthOK, &rotationStarted); err == nil {
 		isolation := "isolated"
 		var collision bool
 		_ = s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND ((exit_ip IS NOT NULL AND exit_ip=$2::inet) OR (subnet_key<>'' AND subnet_key=$3)))`, id, exitIP, subnet).Scan(&collision)
@@ -170,6 +170,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		d.Network["subnet"] = subnet
 		d.Network["asn"] = asn
 		d.Network["country"] = country
+		d.Network["country_code"] = countryCode
 		d.Network["timezone"] = timezone
 		d.Network["locale"] = locale
 		d.Network["isolation_status"] = isolation

@@ -42,8 +42,8 @@ func (s *Server) testAccountProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	locale := localeForCountry(obs.CountryCode)
-	_, _ = s.DB.ExecContext(ctx, `UPDATE proxies SET status='healthy',exit_ip=$2,country=$3,asn=$4,latency_ms=$5,last_checked_at=now(),last_success_at=now(),failure_count=0,consecutive_successes=1,health_error=NULL WHERE id=$1`, cfg.Proxy.ID, obs.IP, obs.Country, obs.ASN, obs.LatencyMS)
-	_, _ = s.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country) VALUES($1,COALESCE(NULLIF($2,''),'UTC'),$3,$4::inet,host(network(set_masklen($4::inet,24)))||'/24',$5,$6) ON CONFLICT(account_id) DO UPDATE SET timezone=EXCLUDED.timezone,locale=EXCLUDED.locale,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,asn=EXCLUDED.asn,country=EXCLUDED.country,updated_at=now()`, id, obs.Timezone, locale, obs.IP, obs.ASN, obs.Country)
+	_, _ = s.DB.ExecContext(ctx, `UPDATE proxies SET status='healthy',exit_ip=$2,country=$3,country_code=lower($4),asn=$5,latency_ms=$6,last_checked_at=now(),last_success_at=now(),failure_count=0,consecutive_successes=1,health_error=NULL WHERE id=$1`, cfg.Proxy.ID, obs.IP, obs.Country, obs.CountryCode, obs.ASN, obs.LatencyMS)
+	_, _ = s.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country,country_code) VALUES($1,COALESCE(NULLIF($2,''),'UTC'),$3,$4::inet,host(network(set_masklen($4::inet,24)))||'/24',$5,$6,lower($7)) ON CONFLICT(account_id) DO UPDATE SET timezone=EXCLUDED.timezone,locale=EXCLUDED.locale,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,asn=EXCLUDED.asn,country=EXCLUDED.country,country_code=EXCLUDED.country_code,updated_at=now()`, id, obs.Timezone, locale, obs.IP, obs.ASN, obs.Country, obs.CountryCode)
 	providerUsable := false
 	providerError := ""
 	if rt, rtErr := s.Container.Runtime(ctx, id); rtErr == nil {

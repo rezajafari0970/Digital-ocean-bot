@@ -50,8 +50,10 @@ func observeStickyGeo(ctx context.Context, g *network.Gateway) (stickyGeo, error
 func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountConfig, string, string, string, bool, *time.Time, error) {
 	cfg, err := c.Accounts.Account(ctx, accountID)
 	if errors.Is(err, ErrNetworkIdentityCollision) {
+		// Repository already populated the account/network fields before the
+		// collision check. Keep that partial config so the proxy keeper can
+		// repair the collision instead of silently opting out of recovery.
 		err = nil
-		cfg = AccountConfig{ID: accountID}
 	}
 	if err != nil {
 		return cfg, "", "", "", false, nil, err
@@ -71,7 +73,33 @@ func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountC
 		return cfg, "", cc, country, false, nil, err
 	}
 	if err != nil || session == "" {
-		err = c.DB.QueryRowContext(ctx, `INSERT INTO account_network_identities(account_id,sticky_session,preferred_country,preferred_country_code) SELECT $1,replace(gen_random_uuid()::text,'-',''),COALESCE(p.country,''),CASE WHEN lower(COALESCE(p.country,''))='venezuela' THEN 've' ELSE '' END FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1 ON CONFLICT(account_id) DO UPDATE SET sticky_session=COALESCE(account_network_identities.sticky_session,EXCLUDED.sticky_session),preferred_country=COALESCE(NULLIF(account_network_identities.preferred_country,''),EXCLUDED.preferred_country),preferred_country_code=COALESCE(NULLIF(account_network_identities.preferred_country_code,''),EXCLUDED.preferred_country_code) RETURNING sticky_session,COALESCE(preferred_country_code,''),COALESCE(preferred_country,''),fallback_active,rotation_started_at`, accountID).Scan(&session, &cc, &country, &fallback, &started)
+		err = c.DB.QueryRowContext(ctx, `INSERT INTO account_network_identities(account_id,sticky_session,preferred_country,preferred_country_code) SELECT $1,replace(gen_random_uuid()::text,'-',''),COALESCE(p.country,''),lower(COALESCE(p.country_code,'')) FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1 ON CONFLICT(account_id) DO UPDATE SET sticky_session=COALESCE(account_network_identities.sticky_session,EXCLUDED.sticky_session),preferred_country=COALESCE(NULLIF(account_network_identities.preferred_country,''),EXCLUDED.preferred_country),preferred_country_code=COALESCE(NULLIF(account_network_identities.preferred_country_code,''),EXCLUDED.preferred_country_code) RETURNING sticky_session,COALESCE(preferred_country_code,''),COALESCE(preferred_country,''),fallback_active,rotation_started_at`, accountID).Scan(&session, &cc, &country, &fallback, &started)
+	}
+	if err == nil && cc == "" {
+		var proxyCode, proxyCountry string
+		if qerr := c.DB.QueryRowContext(ctx, `
+SELECT lower(COALESCE(p.country_code,'')),COALESCE(p.country,'')
+FROM network_profiles np
+JOIN proxies p ON p.id=np.proxy_id
+WHERE np.account_id=$1
+`, accountID).Scan(&proxyCode, &proxyCountry); qerr == nil {
+			if proxyCode == "" {
+				proxyCode = geoctx.CountryCodeForName(proxyCountry)
+			}
+			if proxyCode != "" {
+				cc = strings.ToLower(proxyCode)
+				_, _ = c.DB.ExecContext(ctx, `
+UPDATE account_network_identities
+SET preferred_country_code=$2,
+    preferred_country=COALESCE(NULLIF(preferred_country,''),NULLIF($3,'')),
+    updated_at=now()
+WHERE account_id=$1
+`, accountID, cc, proxyCountry)
+				if country == "" {
+					country = proxyCountry
+				}
+			}
+		}
 	}
 	return cfg, session, cc, country, fallback, started, err
 }
@@ -205,9 +233,10 @@ WHERE account_id=$1
 			    exit_ip=$2::inet,
 			    subnet_key=host(network(set_masklen($2::inet,24)))||'/24',
 			    country=$3,
-			    timezone=COALESCE(NULLIF($4,''),timezone),
-			    locale=$5,
-			    asn=$6,
+			    country_code=lower($4),
+			    timezone=COALESCE(NULLIF($5,''),timezone),
+			    locale=$6,
+			    asn=$7,
 			    last_health_at=now(),
 			    last_health_ok=true,
 			    rotation_started_at=NULL,
@@ -218,6 +247,7 @@ WHERE account_id=$1
 			accountID,
 			geo.IP,
 			geo.Country,
+			geo.CountryCode,
 			geo.Timezone,
 			newLocale,
 			geo.ASN,
@@ -274,7 +304,7 @@ WHERE account_id=$1
 		var priorIP, priorCountry, priorTZ, priorLocale string
 		_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),''),COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorIP, &priorCountry, &priorTZ, &priorLocale)
 		newLocale := geoctx.LocaleForCountry(preferredGeo.CountryCode)
-		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.Timezone, newLocale)
+		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.CountryCode, preferredGeo.Timezone, newLocale)
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
 		if pgErr == nil {
@@ -323,7 +353,7 @@ WHERE account_id=$1
 	var priorCountry, priorTZ, priorLocale string
 	_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorCountry, &priorTZ, &priorLocale)
 	newLocale := geoctx.LocaleForCountry(geo.CountryCode)
-	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,timezone=COALESCE(NULLIF($5,''),timezone),locale=$6,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$7,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.Timezone, newLocale, allowFallback)
+	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$8,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.CountryCode, geo.Timezone, newLocale, allowFallback)
 	if err == nil && (priorCountry != geo.Country || priorTZ != geo.Timezone || priorLocale != newLocale) {
 	}
 	if err != nil {
