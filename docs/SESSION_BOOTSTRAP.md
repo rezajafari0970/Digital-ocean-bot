@@ -18,3 +18,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 11. Follow `docs/CHANGE_PROTOCOL.md` for implementation, verification, deploy and checkpoint discipline.
 12. Read `docs/HISTORICAL_DECISION_LEDGER.md` before architectural changes so rejected patterns and prior incidents are not reintroduced.
 13. Use `docs/REQUIREMENTS_MATRIX.md` as an invariant checklist when changing a subsystem.
+14. Read `docs/PROJECT_MANIFEST.json` first for machine-readable navigation, then run `tools/check-project-continuity.sh` to detect branch/HEAD/runtime drift before relying on the manifest snapshot.

@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "generated_for": "ChatGPT project continuity",
+  "canonical_repo": "/root/projects/Digital-ocean-bot-canonical-e2e",
+  "remote": "git@github.com:rezajafari0970/Digital-ocean-bot.git",
+  "branch": "checkpoint/final-e2e-20260929",
+  "head_at_generation": "d6d4caa5e901e98c3a94e78fcba5fe5479075ae5",
+  "startup_read_order": [
+    "docs/PROJECT_MANIFEST.json",
+    "docs/CHATGPT_MASTER_CONTEXT.md",
+    "PROJECT_CONTEXT.md",
+    "PROJECT_STATE.md",
+    "HANDOFF.md",
+    "docs/CODEBASE_MAP.md",
+    "docs/FEATURE_FLOW_INDEX.md",
+    "docs/HISTORICAL_DECISION_LEDGER.md",
+    "docs/REQUIREMENTS_MATRIX.md",
+    "docs/CHANGE_PROTOCOL.md"
+  ],
+  "runtime": {
+    "services": [
+      "digital-ocean-bot-api",
+      "digital-ocean-bot-worker"
+    ],
+    "api_entry": "cmd/api/main.go",
+    "worker_entry": "cmd/worker/main.go",
+    "web": [
+      "web/static/index.html",
+      "web/static/app.js",
+      "web/static/app.css"
+    ],
+    "deploy_dir": "deploy",
+    "migrations_dir": "migrations"
+  },
+  "providers": {
+    "common": "internal/providers",
+    "digitalocean": "internal/providers/digitalocean",
+    "vultr": "internal/providers/vultr",
+    "vultr_interactive_console": "internal/providers/vultrconsole"
+  },
+  "features": {
+    "accounts": [
+      "internal/adminapi/accounts_manage.go",
+      "internal/adminapi/accounts_write.go",
+      "internal/accounts",
+      "internal/app/account_state.go"
+    ],
+    "proxies": [
+      "internal/adminapi/proxies_manage.go",
+      "internal/adminapi/proxies_write.go",
+      "internal/network",
+      "internal/app/sticky_proxy.go"
+    ],
+    "compute_lifecycle": [
+      "internal/droplets",
+      "internal/app/lifecycle.go",
+      "internal/app/scheduler.go",
+      "cmd/worker/main.go"
+    ],
+    "sanaei": [
+      "internal/panels/sanaei",
+      "internal/panels/create",
+      "internal/panels/update"
+    ],
+    "reality": [
+      "internal/panels/policy",
+      "internal/panels/realityconfig",
+      "internal/panels/realitycontract",
+      "internal/panels/globalreality"
+    ],
+    "output": [
+      "internal/adminapi/output.go",
+      "internal/adminapi/output_snapshot.go",
+      "internal/panels/sanaei/runtime_manager.go"
+    ],
+    "residential": [
+      "internal/adminapi/residential.go",
+      "internal/panels/residentialsync"
+    ],
+    "vultr_capacity_console": [
+      "internal/adminapi/server.go",
+      "internal/providers/vultrconsole",
+      "cmd/vultr-capacity-probe",
+      "cmd/vultr-browser-session"
+    ]
+  },
+  "recent_migrations": [
+    "000090_output_snapshots.up.sql",
+    "000091_inbound_structural_snapshots.up.sql",
+    "000092_output_visibility.up.sql",
+    "000093_ubuntu_images_only.up.sql",
+    "000094_account_soft_delete.up.sql",
+    "000095_finalize_pending_account_archives.up.sql",
+    "000096_remove_account_login_browser_legacy.up.sql",
+    "000097_provider_snapshot_canonical.up.sql",
+    "000098_remove_unused_trafficguard.up.sql",
+    "000099_account_proxy_pool.up.sql",
+    "000100_provider_capacity_observations.up.sql",
+    "000101_vultr_console_capacity_credentials.up.sql"
+  ],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "handler": "health"
+    },
+    {
+      "method": "GET",
+      "path": "/readyz",
+      "handler": "ready"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "handler": "login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "handler": "logout"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts",
+      "handler": "createAccount"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/preview",
+      "handler": "accountPreview"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/accounts/{id}",
+      "handler": "updateAccount"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/accounts/{id}",
+      "handler": "deleteAccount"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/options",
+      "handler": "accountOptions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/{id}/identity",
+      "handler": "accountIdentity"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/{id}/preflight",
+      "handler": "accountPreflight"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/{id}/console-session",
+      "handler": "createVultrBrowserTicket"
+    },
+    {
+      "method": "GET",
+      "path": "/vultr-browser/{path...}",
+      "handler": "vultrBrowserProxy"
+    },
+    {
+      "method": "GET",
+      "path": "/websockify",
+      "handler": "vultrBrowserProxy"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/proxies",
+      "handler": "createProxy"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/proxies/{id}",
+      "handler": "updateProxy"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/proxies/{id}",
+      "handler": "deleteProxy"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/proxies/{id}",
+      "handler": "proxyDetails"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/residential-proxies",
+      "handler": "residentialProxies"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/residential-proxies",
+      "handler": "createResidentialProxy"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/residential-proxies/{id}",
+      "handler": "updateResidentialProxy"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/residential-proxies/{id}",
+      "handler": "deleteResidentialProxy"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/residential-proxies/{id}/test",
+      "handler": "testResidentialProxy"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/configs",
+      "handler": "getGlobalConfigs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/config-capacity",
+      "handler": "configCapacity"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/config-capacity/delete-all-clients",
+      "handler": "deleteAllCapacityClients"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/config-capacity/cleanup/{id}",
+      "handler": "cleanupJobStatus"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/output",
+      "handler": "outputConfigs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/output/share",
+      "handler": "createOutputShare"
+    },
+    {
+      "method": "GET",
+      "path": "/share/output/{token}",
+      "handler": "sharedOutput"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/config-panels",
+      "handler": "getConfigPanels"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/configs",
+      "handler": "putGlobalConfig"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/proxies/{id}/test",
+      "handler": "testProxy"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/accounts/{id}/network",
+      "handler": "assignProxy"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/discovery",
+      "handler": "accountDiscovery"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/{id}/refresh",
+      "handler": "accountDiscovery"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accounts/{id}/proxy-test",
+      "handler": "testAccountProxy"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/templates",
+      "handler": "listTemplates"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/templates",
+      "handler": "uploadTemplate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/dashboard",
+      "handler": "accountDashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/resources",
+      "handler": "accountResources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/capacity",
+      "handler": "accountCapacity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts/{id}/runtime",
+      "handler": "accountRuntime"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/accounts",
+      "handler": "accounts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/proxies",
+      "handler": "proxies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/build-activity",
+      "handler": "buildActivity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/build-activity/{id}/provision",
+      "handler": "provisionActivity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/provision-errors",
+      "handler": "provisionErrors"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/installers/sanaei/preview",
+      "handler": "previewSanaeiInstaller"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/installers/sanaei",
+      "handler": "createSanaeiInstaller"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/installers",
+      "handler": "listInstallers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/installers",
+      "handler": "createInstaller"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/install-scripts",
+      "handler": "listInstallScripts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/install-scripts",
+      "handler": "createInstallScript"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/deployments/{id}/installer",
+      "handler": "selectDeploymentInstaller"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/deployments/{id}/installer/rearm",
+      "handler": "rearmDeploymentInstaller"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "handler": "audit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/system",
+      "handler": "system"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/providers",
+      "handler": "providersMetadata"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/panel-settings",
+      "handler": "getPanelSettings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/panel-settings",
+      "handler": "updatePanelSettings"
+    }
+  ],
+  "current_work": {
+    "area": "Vultr interactive console/capacity",
+    "verification_boundary": "Fresh Admin session -> Open Vultr Console -> fresh ticket -> successful noVNC WebSocket -> manual challenge if presented -> reuse authorized state for capacity workflow",
+    "handoff": "HANDOFF.md"
+  },
+  "invariants": [
+    "provider-neutral core",
+    "provider-specific semantics stay in drivers",
+    "per-account proxy/network isolation",
+    "required proxy fails closed",
+    "single coherent deployment lifecycle owner",
+    "Sanaei API is live Output data plane",
+    "exact Output visibility/expiry semantics",
+    "secrets never stored in continuity docs"
+  ],
+  "source_of_truth_rule": "Manifest/docs are navigation and intent. Git source, live DB migration state and production runtime are authoritative for exact behavior."
+}
