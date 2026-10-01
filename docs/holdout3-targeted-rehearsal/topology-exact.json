@@ -1,0 +1,247 @@
+[
+  {
+    "holdout_id": 31,
+    "correct": {
+      "symbols": [
+        "TestAllocatePreferredThenDynamic",
+        "TestAllocateDeterministic",
+        "TestAllocateFailsClosed"
+      ]
+    }
+  },
+  {
+    "holdout_id": 32,
+    "correct": {
+      "symbols": [
+        "Secrets",
+        "updateDeps",
+        "Build",
+        "Service",
+        "operationalLifecycle",
+        "panelDeps",
+        "Ready",
+        "RefreshInventory",
+        "OccupiedPorts",
+        "Build",
+        "Add",
+        "Update",
+        "Verify",
+        "ReconcilePanel"
+      ]
+    }
+  },
+  {
+    "holdout_id": 34,
+    "correct": {
+      "symbols": [
+        "RetryPolicy",
+        "DefaultRetryPolicy",
+        "ResilientSession",
+        "retryableStatus",
+        "retryableError",
+        "retryableErrorWithContext",
+        "login",
+        "delay",
+        "Do",
+        "ReadAllBounded"
+      ]
+    }
+  },
+  {
+    "holdout_id": 35,
+    "correct": {
+      "symbols": [
+        "TestValidateReality",
+        "TestRejectsCryptoDrift",
+        "TestValidateRealityWithManagedClientAmongCapacityUsers",
+        "TestValidateRealityRejectsMissingManagedClientAmongCapacityUsers",
+        "TestValidateServerNamesOrderIsSemantic"
+      ]
+    }
+  },
+  {
+    "holdout_id": 37,
+    "correct": {
+      "symbols": [
+        "Record",
+        "Repository",
+        "Store",
+        "NewStore",
+        "Put",
+        "Get"
+      ]
+    }
+  },
+  {
+    "holdout_id": 38,
+    "correct": {
+      "symbols": [
+        "ScriptPhaseResult",
+        "ScriptExecutor",
+        "SSHScriptRunner",
+        "RunScript"
+      ]
+    }
+  },
+  {
+    "holdout_id": 39,
+    "correct": {
+      "symbols": [
+        "Check",
+        "Report",
+        "Health",
+        "Readiness"
+      ]
+    }
+  },
+  {
+    "holdout_id": 40,
+    "correct": {
+      "symbols": [
+        "InstallerRun",
+        "InstallerOrchestrator",
+        "Prepare",
+        "SetState"
+      ]
+    }
+  },
+  {
+    "holdout_id": 41,
+    "correct": {
+      "symbols": [
+        "LegacyFastFill",
+        "legacyObject",
+        "legacyFastFillFromPolicy"
+      ]
+    }
+  },
+  {
+    "holdout_id": 42,
+    "correct": {
+      "symbols": [
+        "Input",
+        "Payload",
+        "Build",
+        "Marshal"
+      ]
+    }
+  },
+  {
+    "holdout_id": 43,
+    "correct": {
+      "symbols": [
+        "installerStateStub",
+        "SetState",
+        "TestInstallerExecutorCompletes",
+        "installerFailScripts",
+        "RunScript",
+        "TestInstallerTerminalFailureRequiresRollback",
+        "eventRecorderStub",
+        "Event",
+        "precheckMissScripts",
+        "RunScript",
+        "TestInstallerPrecheckMissIsNotFailure",
+        "retryableDNSScripts",
+        "RunScript",
+        "TestInstallerRetryableFailureStaysInstalling",
+        "TestInstallerInterruptedUnsafeNeverReexecutes"
+      ]
+    }
+  },
+  {
+    "holdout_id": 45,
+    "correct": {
+      "symbols": [
+        "obs",
+        "TestStabilityRequiresHistory",
+        "TestHysteresisKeepsCurrentForSmallGain",
+        "TestHysteresisSwitchesForMeaningfulGain"
+      ]
+    }
+  },
+  {
+    "holdout_id": 46,
+    "correct": {
+      "symbols": [
+        "TestAccountContextsCannotCross",
+        "TestAccountNamespaceStableAndDistinct"
+      ]
+    }
+  },
+  {
+    "holdout_id": 47,
+    "correct": {
+      "symbols": [
+        "RecoveryItem",
+        "RecoveryStore",
+        "Operations",
+        "Deployments"
+      ]
+    }
+  },
+  {
+    "holdout_id": 48,
+    "correct": {
+      "symbols": [
+        "EligibilitySource",
+        "Bootstrapper",
+        "DesiredReconciler",
+        "PostReconciler",
+        "ProductionAdapter",
+        "Eligible",
+        "Bootstrap",
+        "Reconcile"
+      ]
+    }
+  },
+  {
+    "holdout_id": 49,
+    "correct": {
+      "symbols": [
+        "detectProxy",
+        "detectProxyTypes"
+      ]
+    }
+  },
+  {
+    "holdout_id": 50,
+    "correct": {
+      "symbols": [
+        "Querier",
+        "Snapshot",
+        "Available",
+        "Read"
+      ]
+    }
+  },
+  {
+    "holdout_id": 51,
+    "correct": {
+      "handler": "listInstallers"
+    }
+  },
+  {
+    "holdout_id": 52,
+    "correct": {
+      "handler": "health"
+    }
+  },
+  {
+    "holdout_id": 54,
+    "correct": {
+      "handler": "outputConfigs"
+    }
+  },
+  {
+    "holdout_id": 56,
+    "correct": {
+      "handler": "selectDeploymentInstaller"
+    }
+  },
+  {
+    "holdout_id": 57,
+    "correct": {
+      "handler": "providersMetadata"
+    }
+  }
+]

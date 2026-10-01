@@ -1,0 +1,98 @@
+[
+  {
+    "holdout_id": 61,
+    "correct": {
+      "text": "\tIntervalSeconds        int      `json:\"interval_seconds\"`\n\tBuildSpacingMinutes    int      `json:\"build_spacing_minutes\"`\n\tBuildSpacingMaxMinutes int      `json:\"build_spacing_max_minutes\"`\n\tBatchSize              int      `json:\"batch_size\"`\n\tMaxConcurrent          int      `json:\"max_concurrent\"`\n\tLifetimeSeconds        int      `json:\"lifetime_seconds\"`\n\tLifetimeMinSeconds     int      `json:\"lifetime_min_seconds\"`\n\tLifetimeMaxSeconds     int      `json:\"lifetime_max_seconds\"`"
+    }
+  },
+  {
+    "holdout_id": 63,
+    "correct": {
+      "text": "\t\t}\n\t\tclient = g.Client\n\t\tcloseFn = g.CloseIdleConnections\n\t\tprobeCtx, probeCancel := context.WithTimeout(r.Context(), 6*time.Second)\n\t\tprobeReq, _ := http.NewRequestWithContext(probeCtx, http.MethodGet, \"https://api.ipify.org\", nil)\n\t\tif probeResp, probeErr := client.Do(probeReq); probeErr == nil && probeResp != nil {\n\t\t\tb, _ := io.ReadAll(io.LimitReader(probeResp.Body, 128))\n\t\t\tprobeResp.Body.Close()"
+    }
+  },
+  {
+    "holdout_id": 64,
+    "correct": {
+      "text": "\t\tfor rows.Next() {\n\t\t\tvar id, n, st, c string\n\t\t\tif rows.Scan(&id, &n, &st, &c) == nil {\n\t\t\t\tproxies = append(proxies, map[string]any{\"id\": id, \"name\": n, \"status\": st, \"country\": c})\n\t\t\t}\n\t\t}\n\t}\n\tmeta, _ := s.Container.Providers.Metadata(driver.Name())"
+    }
+  },
+  {
+    "holdout_id": 65,
+    "correct": {
+      "text": "\trt, err := s.Container.Runtime(r.Context(), id)\n\tif err == nil {\n\t\tar, ok := rt.Driver.(providers.AccountReader)\n\t\tvar account providers.Account\n\t\tidentityErr := error(nil)\n\t\tif !ok {\n\t\t\tidentityErr = app.ErrProviderComputeUnsupported\n\t\t} else {"
+    }
+  },
+  {
+    "holdout_id": 67,
+    "correct": {
+      "text": "\t\tpanic(err)\n\t}\n\tdefer chrome.Process.Kill()\n\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)\n\tsig := make(chan os.Signal, 1)\n\tsignal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)\n\tselect {\n\tcase <-sig:"
+    }
+  },
+  {
+    "holdout_id": 68,
+    "correct": {
+      "text": "\tvar email, passRef, proxyID, proxyHost, proxyUser, proxyRef string\n\tvar proxyPort int\n\terr = a.DB.QueryRowContext(ctx, `\nSELECT COALESCE(ac.console_email,''),COALESCE(ac.console_password_secret_ref,''),\n       COALESCE(p.id::text,''),COALESCE(p.host,''),COALESCE(p.port,0),COALESCE(p.username,''),COALESCE(p.secret_ref,'')\nFROM accounts ac\nLEFT JOIN account_proxy_pool ap ON ap.account_id=ac.id AND ap.enabled=true AND ap.priority=1\nLEFT JOIN proxies p ON p.id=ap.proxy_id"
+    }
+  },
+  {
+    "holdout_id": 69,
+    "correct": {
+      "text": "\t}\n\tgo func() {\n\t\tt := time.NewTicker(5 * time.Second)\n\t\tdefer t.Stop()\n\t\tfor {\n\t\t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn"
+    }
+  },
+  {
+    "holdout_id": 71,
+    "correct": {
+      "text": "package adminapi\n\nimport (\n\t\"encoding/json\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/providers\"\n\t\"net/http\"\n\t\"time\"\n)"
+    }
+  },
+  {
+    "holdout_id": 72,
+    "correct": {
+      "text": "package adminapi\n\nimport (\n\t\"encoding/json\"\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/providers\"\n\t\"net/http\"\n\n\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/app\""
+    }
+  },
+  {
+    "holdout_id": 73,
+    "correct": {
+      "text": "\t\treturn c\n\t}\n\tc := &Cell{Context: NewContext(accountID)}\n\tm.cells[accountID] = c\n\treturn c\n}\n\nfunc (m *CellManager) Acquire(accountID string) (*Cell, error) {"
+    }
+  },
+  {
+    "holdout_id": 74,
+    "correct": {
+      "text": "\terr = s.DB.QueryRowContext(ctx, `INSERT INTO deployment_profiles(id,account_id,name,version,config,enabled)\nVALUES(gen_random_uuid(),$1,'account-auto',1,$2,true)\nON CONFLICT(account_id,name,version) DO UPDATE SET config=EXCLUDED.config,enabled=true,updated_at=now()\nRETURNING id::text`, accountID, raw).Scan(&profileID)\n\tif err != nil {\n\t\treturn err\n\t}\n"
+    }
+  },
+  {
+    "holdout_id": 75,
+    "correct": {
+      "text": "\tlimit, err := observer.Observe(ctx, email, string(pass), proxyURL)\n\tif errors.Is(err, vultrconsole.ErrChallenge) {\n\t\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='challenge_required',console_capacity_checked_at=now(),console_capacity_detail='manual challenge required' WHERE id=$1`, accountID)\n\t\tfmt.Println(\"challenge_required\")\n\t\treturn\n\t}\n\tif err != nil {\n\t\t_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='failed',console_capacity_checked_at=now(),console_capacity_detail=$2 WHERE id=$1`, accountID, err.Error())"
+    }
+  },
+  {
+    "holdout_id": 76,
+    "correct": {
+      "text": "\t\tfor _, image := range x.Images {\n\t\t\tif strings.TrimSpace(image) == \"\" {\n\t\t\t\treturn \"unsupported_os_image\"\n\t\t\t}\n\t\t}\n\t}\n\treturn \"\"\n}"
+    }
+  },
+  {
+    "holdout_id": 78,
+    "correct": {
+      "text": "}\n\ntype RuntimeIdentity struct {\n\tCellID           string\n\tRequestScope     string\n\tCorrelationScope string\n\tAuditScope       string\n}"
+    }
+  },
+  {
+    "holdout_id": 79,
+    "correct": {
+      "text": "\t\t\t}\n\t\t\tvar ids []string\n\t\t\tfor rows.Next() {\n\t\t\t\tvar id string\n\t\t\t\tif rows.Scan(&id) == nil {\n\t\t\t\t\tids = append(ids, id)\n\t\t\t\t}\n\t\t\t}"
+    }
+  },
+  {
+    "holdout_id": 80,
+    "correct": {
+      "text": "\t\t\tselect {\n\t\t\tcase <-ctx.Done():\n\t\t\t\treturn\n\t\t\tcase <-t.C:\n\t\t\t\trun()\n\t\t\t}\n\t\t}\n\t}()"
+    }
+  }
+]

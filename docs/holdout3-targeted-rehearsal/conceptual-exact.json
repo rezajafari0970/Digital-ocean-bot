@@ -1,0 +1,586 @@
+[
+  {
+    "holdout_id": 1,
+    "correct": {
+      "package": "create",
+      "previous_symbol": "Dependencies",
+      "next_symbol": "contains",
+      "calls": [
+        "Add",
+        "Build",
+        "OccupiedPorts",
+        "Ready",
+        "RefreshInventory",
+        "Verify",
+        "findManaged"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 2,
+    "correct": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "CommandRunner",
+      "calls": [
+        "Get"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 3,
+    "correct": {
+      "package": "redact",
+      "previous_symbol": null,
+      "next_symbol": "TestBearerTokensAreRedactedFromText",
+      "calls": [
+        "Header"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 4,
+    "correct": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "TestNormalizeServerUsesStringIDAndReadiness",
+      "calls": [
+        "normalizeCatalog"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 5,
+    "correct": {
+      "package": "digitalocean",
+      "previous_symbol": "Account",
+      "next_symbol": "Catalog",
+      "calls": [
+        "GetAccount",
+        "ListDropletModels",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 6,
+    "correct": {
+      "package": "inventory",
+      "previous_symbol": "SQLStore",
+      "next_symbol": null,
+      "calls": [
+        "Rollback"
+      ],
+      "db_reads": [
+        "panel_inbound_inventory"
+      ],
+      "db_writes": [
+        "SET",
+        "panel_inbound_inventory",
+        "panel_inventory_syncs"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 7,
+    "correct": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "proxies",
+      "calls": [
+        "Close",
+        "Context",
+        "Error",
+        "min",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "LATERAL",
+        "account_capacity_events",
+        "account_proxy_pool",
+        "accounts",
+        "droplets",
+        "network_profiles",
+        "provider_snapshots",
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts"
+        }
+      ],
+      "side_effects": [
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 8,
+    "correct": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "HashPassword"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "admin_users"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 9,
+    "correct": {
+      "package": "digitalocean",
+      "previous_symbol": "Inventory",
+      "next_symbol": "normalizeCatalog",
+      "calls": [
+        "Catalog",
+        "GetAccount",
+        "ListDropletModels",
+        "normalizeCatalog",
+        "normalizeError",
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 10,
+    "correct": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "CreateSSHKey",
+        "DeleteSSHKey",
+        "Marshal",
+        "Put",
+        "Runtime",
+        "wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "deployments"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 11,
+    "correct": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "DeploymentConfigFromSnapshot",
+      "calls": [
+        "DefaultPreInstallerSteps"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 12,
+    "correct": {
+      "package": "app",
+      "previous_symbol": "computeDriver",
+      "next_symbol": "wipe",
+      "calls": [
+        "Account",
+        "CloseIdleConnections",
+        "GetProxy",
+        "NewCellManager",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "Register",
+        "ensureActiveAccountProxy",
+        "openDriver",
+        "wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 13,
+    "correct": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "droplets",
+        "lifecycle_events"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 14,
+    "correct": {
+      "package": "sanaei",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Do"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": [
+        "http_call"
+      ]
+    }
+  },
+  {
+    "holdout_id": 15,
+    "correct": {
+      "package": "adminapi",
+      "previous_symbol": "Server",
+      "next_symbol": "Routes",
+      "calls": [
+        "NewLoginLimiter"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 16,
+    "correct": {
+      "package": "provisioning",
+      "previous_symbol": "Event",
+      "next_symbol": null,
+      "calls": [
+        "Marshal",
+        "Text",
+        "tailDiagnostic"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "provision_events"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 17,
+    "correct": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "ProviderStateRuntimeStatus",
+      "calls": [
+        "Class",
+        "Error"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 18,
+    "correct": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "Event",
+      "calls": [
+        "Event"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 19,
+    "correct": {
+      "package": "adminapi",
+      "previous_symbol": "collectPanelOutput",
+      "next_symbol": "collectRuntimeOutput",
+      "calls": [
+        "EligibleReadyPanels",
+        "refreshPanelOutput"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "output_config_snapshots"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 20,
+    "correct": {
+      "package": "export",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Get",
+        "VLESSRealityURI"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 21,
+    "correct": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "SSHProber",
+      "calls": [
+        "Probe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 22,
+    "correct": {
+      "package": "sanaei",
+      "previous_symbol": "Health",
+      "next_symbol": null,
+      "calls": [
+        "Do",
+        "supported"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": [
+        "http_call"
+      ]
+    }
+  },
+  {
+    "holdout_id": 23,
+    "correct": {
+      "package": "vultr",
+      "previous_symbol": null,
+      "next_symbol": "TestErrorTaxonomy",
+      "calls": [
+        "Metadata"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 24,
+    "correct": {
+      "package": "app",
+      "previous_symbol": "deploymentReadyFinalizer",
+      "next_symbol": "deploymentFailureFinalizer",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "droplets"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 25,
+    "correct": {
+      "package": "planner",
+      "previous_symbol": "TestPlanDetectsDrift",
+      "next_symbol": "TestPlanRejectsPortCollision",
+      "calls": [
+        "Plan"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 26,
+    "correct": {
+      "package": "reality",
+      "previous_symbol": "SQLStore",
+      "next_symbol": "Select",
+      "calls": [
+        "Evaluate",
+        "ValidateCandidate"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "reality_target_observations"
+      ],
+      "routes": [],
+      "side_effects": [
+        "database_write",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 27,
+    "correct": {
+      "package": "residentialsync",
+      "previous_symbol": "ReconcilePanel",
+      "next_symbol": null,
+      "calls": [
+        "Do",
+        "GetProxy",
+        "Marshal",
+        "New",
+        "Set"
+      ],
+      "db_reads": [
+        "deployments",
+        "panel_instances",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": [
+        "http_call",
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 28,
+    "correct": {
+      "package": "residentialsync",
+      "previous_symbol": null,
+      "next_symbol": "Service",
+      "calls": [
+        "GetProxy"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  },
+  {
+    "holdout_id": 29,
+    "correct": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "account_runtime_state"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime"
+        }
+      ],
+      "side_effects": [
+        "database_io"
+      ]
+    }
+  },
+  {
+    "holdout_id": 30,
+    "correct": {
+      "package": "droplets",
+      "previous_symbol": "TestAdoptUnknownCreateUsesUniqueTag",
+      "next_symbol": null,
+      "calls": [
+        "AdoptUnknownCreate",
+        "taggedServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [],
+      "side_effects": []
+    }
+  }
+]
