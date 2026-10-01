@@ -34,10 +34,16 @@ func (m *manager) start(account string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.cmd != nil && m.cmd.ProcessState == nil {
-		if m.account == account && portReady("127.0.0.1:15900") && portReady("127.0.0.1:16080") {
+		if m.account != account {
+			return fmt.Errorf("busy")
+		}
+		if portReady("127.0.0.1:15900") && portReady("127.0.0.1:16080") {
 			return nil
 		}
-		return fmt.Errorf("busy")
+		_ = syscall.Kill(-m.cmd.Process.Pid, syscall.SIGKILL)
+		for i := 0; i < 20 && m.cmd != nil && m.cmd.ProcessState == nil; i++ {
+			time.Sleep(50 * time.Millisecond)
+		}
 	}
 	cmd := exec.Command("/opt/digital-ocean-bot/bin/vultr-browser-session", account)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr

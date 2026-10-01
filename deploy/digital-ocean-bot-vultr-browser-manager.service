@@ -18,7 +18,7 @@ NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/var/lib/digital-ocean-bot
-PrivateTmp=false
+PrivateTmp=true
 UMask=0077
 
 [Install]
