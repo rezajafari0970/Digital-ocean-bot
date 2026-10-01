@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-01T08:55:49.516454+00:00",
+  "repository_head": "c7e5b0aee4743c2d72f1f54c291cadd336590a76",
+  "branch": "checkpoint/final-e2e-20260929",
+  "knowledge_source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "coverage": {
+    "symbol_memory": 1537,
+    "topology_files": 406,
+    "topology_routes": 62,
+    "verbatim_packs": 89
+  },
+  "artifacts": [
+    {
+      "path": "docs/SOURCE_INTERNALIZATION_BRAIN.json",
+      "bytes": 2929185,
+      "sha256": "b0049c4838be1fc2025024ca4c278b9d778db7e2dff9ac98900417c54a5d50a6"
+    },
+    {
+      "path": "docs/SYMBOL_TOPOLOGY_MEMORY_PACK.json",
+      "bytes": 55545,
+      "sha256": "aafb3128a0e622bd6bb7911bf5d20de929222427be990cfc08a924f8be510588"
+    },
+    {
+      "path": "docs/SOURCE_MEMORY_PACK_MANIFEST.json",
+      "bytes": 19729,
+      "sha256": "cacc45ce358064be3406e20df452bda68299cb91835473d626377c34f9a6f127"
+    },
+    {
+      "path": "docs/CONTINUITY_FINAL_STATUS.json",
+      "bytes": 1321,
+      "sha256": "25fe5412668c4e5f96af8ce78840f69e049665d697467c795fae3ac00b091c74"
+    },
+    {
+      "path": "docs/KNOWLEDGE_DRIFT_STATUS.json",
+      "bytes": 2617,
+      "sha256": "8db12a7d3f295133179d22ee82fde69516fe31614134b356d14e599823d0c7fd"
+    },
+    {
+      "path": "docs/PRODUCTION_REVISION_STATUS.json",
+      "bytes": 1158,
+      "sha256": "7ec5fb93f1e2466615c361f673222e4c5ec794f56a2a8069c3bf2bf0ec72619c"
+    }
+  ],
+  "closed_book_claim": "Not equivalent to whole-repository verbatim memory. Operational mastery uses deterministic retrieval from frozen knowledge artifacts.",
+  "spaced_rehearsal_service": "intentionally_disabled_after_architecture_review"
+}
