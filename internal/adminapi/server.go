@@ -157,9 +157,11 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	target, _ := url.Parse("http://127.0.0.1:16080")
 	proxy := httputil.NewSingleHostReverseProxy(target)
-	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
-	if r.URL.Path == "" || r.URL.Path == "/" {
-		r.URL.Path = "/vnc.html"
+	if strings.HasPrefix(r.URL.Path, "/vultr-browser") {
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			r.URL.Path = "/vnc.html"
+		}
 	}
 	proxy.ServeHTTP(w, r)
 }
