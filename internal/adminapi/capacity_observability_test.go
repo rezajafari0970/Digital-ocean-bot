@@ -17,7 +17,7 @@ func TestCapacityEvidenceStates(t *testing.T) {
 		{"inventory lower bound", "vultr_api_lower_bound", "PROVEN_LOWER_BOUND", 6, false, nil},
 		{"probe success is not exact", "vultr_api_probe_success", "PROVEN_LOWER_BOUND", 11, false, &now},
 		{"saturation proves exact ceiling", "vultr_api_saturation", "EXACT", 10, false, &now},
-		{"manual exact ceiling", "vultr_console", "EXACT", 10, false, nil},
+		{"legacy console evidence is no longer authoritative", "vultr_console", "PROVEN_LOWER_BOUND", 10, false, nil},
 		{"claimed probe", "vultr_api_probe", "PROBING", 10, true, &now},
 	}
 	for _, tt := range tests {

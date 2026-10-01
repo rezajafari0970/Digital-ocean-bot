@@ -15,7 +15,7 @@ func deriveCapacityEvidence(source string, lowerBound int, probeInFlight bool, p
 	switch {
 	case probeInFlight || source == "vultr_api_probe":
 		state = "PROBING"
-	case source == "vultr_api_saturation" || source == "vultr_console":
+	case source == "vultr_api_saturation":
 		state = "EXACT"
 	case lowerBound > 0 || source == "vultr_api_lower_bound" || source == "vultr_api_probe_success":
 		state = "PROVEN_LOWER_BOUND"

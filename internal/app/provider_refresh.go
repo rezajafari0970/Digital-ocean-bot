@@ -74,12 +74,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			// Vultr's public API exposes current instances but not the account's
-			// Maximum Instances limit. Overlay the latest proven capacity observation
-			// (manual/legacy Console evidence or API saturation evidence) when present;
-			// current usage always remains API-derived.
+			// Maximum Instances limit. Overlay only API-proven capacity evidence;
+			// current usage and lower-bound learning always remain API-derived.
 			observedCapacitySource := ""
 			if rt.Config.Provider == "vultr" {
-				_, _ = c.DB.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,lower_bound,probe_in_flight) VALUES($1,0,'vultr_api_lower_bound',now(),now(),$2,false) ON CONFLICT(account_id) DO UPDATE SET lower_bound=GREATEST(provider_capacity_observations.lower_bound,$2),source=CASE WHEN provider_capacity_observations.source IN ('vultr_api_saturation','vultr_api_probe','vultr_api_probe_success','vultr_console') THEN provider_capacity_observations.source ELSE 'vultr_api_lower_bound' END,observed_at=now(),updated_at=now()`, id, obs.Capacity.ComputeInUse)
+				_, _ = c.DB.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,lower_bound,probe_in_flight) VALUES($1,0,'vultr_api_lower_bound',now(),now(),$2,false) ON CONFLICT(account_id) DO UPDATE SET lower_bound=GREATEST(provider_capacity_observations.lower_bound,$2),source=CASE WHEN provider_capacity_observations.source IN ('vultr_api_saturation','vultr_api_probe','vultr_api_probe_success') THEN provider_capacity_observations.source ELSE 'vultr_api_lower_bound' END,observed_at=now(),updated_at=now()`, id, obs.Capacity.ComputeInUse)
 				var observedLimit int
 				var observedAt time.Time
 				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at,source FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt, &observedCapacitySource); qerr == nil {
