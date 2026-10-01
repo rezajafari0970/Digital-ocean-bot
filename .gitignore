@@ -8,3 +8,4 @@ node_modules/
 *.pid
 coverage.out
 /secrets/
+.local/spaced-rehearsal-progress.json
