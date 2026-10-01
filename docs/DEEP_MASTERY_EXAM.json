@@ -1,0 +1,667 @@
+{
+  "schema_version": 1,
+  "check_count": 106,
+  "passed": 106,
+  "overall_percent": 100.0,
+  "area_scores": {
+    "accounts": 100.0,
+    "admin_api": 100.0,
+    "architecture": 100.0,
+    "config_users": 100.0,
+    "continuity": 100.0,
+    "database": 100.0,
+    "deployment_runtime": 100.0,
+    "digitalocean": 100.0,
+    "frontend": 100.0,
+    "history": 100.0,
+    "lifecycle": 100.0,
+    "output": 100.0,
+    "provisioning": 100.0,
+    "proxy_network": 100.0,
+    "reality": 100.0,
+    "residential": 100.0,
+    "sanaei_panel": 100.0,
+    "source": 100.0,
+    "tests": 100.0,
+    "vultr": 100.0
+  },
+  "checks": [
+    {
+      "area": "architecture",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "4"
+    },
+    {
+      "area": "architecture",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "accounts",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "accounts",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "digitalocean",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "digitalocean",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "vultr",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "vultr",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "proxy_network",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "7"
+    },
+    {
+      "area": "proxy_network",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "lifecycle",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "lifecycle",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "provisioning",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "provisioning",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "sanaei_panel",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "sanaei_panel",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "reality",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "reality",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "config_users",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "config_users",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "output",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "9"
+    },
+    {
+      "area": "output",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "residential",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "4"
+    },
+    {
+      "area": "residential",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "database",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "admin_api",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "admin_api",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "frontend",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "frontend",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "5"
+    },
+    {
+      "area": "tests",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "continuity",
+      "name": "deep requirements >=4",
+      "pass": true,
+      "evidence": "6"
+    },
+    {
+      "area": "continuity",
+      "name": "intent present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "admin_api",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "118"
+    },
+    {
+      "area": "admin_api",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "admin_api",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "accounts",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "10"
+    },
+    {
+      "area": "accounts",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "accounts",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "proxy_network",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "69"
+    },
+    {
+      "area": "proxy_network",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "proxy_network",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "lifecycle",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "27"
+    },
+    {
+      "area": "lifecycle",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "lifecycle",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "provisioning",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "124"
+    },
+    {
+      "area": "provisioning",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "provisioning",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "sanaei_panel",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "131"
+    },
+    {
+      "area": "sanaei_panel",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "sanaei_panel",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "digitalocean",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "72"
+    },
+    {
+      "area": "digitalocean",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "digitalocean",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "vultr",
+      "name": "function behavior indexed",
+      "pass": true,
+      "evidence": "53"
+    },
+    {
+      "area": "vultr",
+      "name": "call relationships present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "vultr",
+      "name": "error evidence present",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "live columns >=500",
+      "pass": true,
+      "evidence": "595"
+    },
+    {
+      "area": "database",
+      "name": "reader evidence >=400",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "writer evidence >=400",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "migration origins >=500",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "column output_config_snapshots.visible_until",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "column accounts.provider",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "database",
+      "name": "column schema_migrations.checksum",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "lifecycle",
+      "name": ">=50 states",
+      "pass": true,
+      "evidence": "54"
+    },
+    {
+      "area": "lifecycle",
+      "name": ">=40 state-write owners",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "lifecycle",
+      "name": ">=40 guard owners",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "frontend",
+      "name": ">=20 functions",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "frontend",
+      "name": ">=30 actions",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "frontend",
+      "name": "API-bound functions >=15",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "frontend",
+      "name": "error evidence >=15",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "251 tests indexed",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "all have assertions",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "all have candidate calls",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package digitalocean",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package vultr",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package network",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package droplets",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package sanaei",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "tests",
+      "name": "package adminapi",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident provisioning",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident proxy_network",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident output",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident providers",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident vultr",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident vultr_console",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident database",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident production",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "history",
+      "name": "incident continuity",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "admin_api",
+      "name": "routes >=62",
+      "pass": true,
+      "evidence": "62"
+    },
+    {
+      "area": "source",
+      "name": "files >=630",
+      "pass": true,
+      "evidence": "640"
+    },
+    {
+      "area": "source",
+      "name": "lines >=33000",
+      "pass": true,
+      "evidence": "33920"
+    },
+    {
+      "area": "source",
+      "name": "exact internal/adminapi/server.go:105",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "source",
+      "name": "exact web/static/app.js:100",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "source",
+      "name": "exact internal/providers/vultr/read_driver.go:28",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "source",
+      "name": "exact internal/adminapi/output.go:285",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "architecture",
+      "name": "impact nodes >=2000",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "architecture",
+      "name": "impact edges >=2000",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "architecture",
+      "name": "traceability rows >=16",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "docs/RUNTIME_MAP.json",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "docs/RUNTIME_WORKER_BRAIN.json",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "docs/PRODUCTION_REVISION_IDENTITY.md",
+      "pass": true,
+      "evidence": ""
+    },
+    {
+      "area": "deployment_runtime",
+      "name": "tools/verify-production-revision.py",
+      "pass": true,
+      "evidence": ""
+    }
+  ],
+  "note": "Evidence-backed knowledge mastery exam. 100 means all defined recoverability/understanding evidence gates pass; it does not mean unaided memorization of every source token."
+}
