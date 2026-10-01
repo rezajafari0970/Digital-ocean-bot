@@ -56,7 +56,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": providerState, "provider_reason": providerReason, "can_create": canCreate}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	var total, managed, active int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state='active' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)
+	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state<>'deleted'),count(*) FILTER(WHERE state<>'deleted' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1 AND type='server'`, id).Scan(&total, &managed, &active)
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
 	var limit int
