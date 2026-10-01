@@ -50,22 +50,29 @@ func normalizeError(op string, err error) error {
 	class := providers.ErrorTransport
 	var h HTTPError
 	if errors.As(err, &h) {
-		switch h.Status {
-		case 401:
-			class = providers.ErrorAuthentication
-		case 403:
-			class = providers.ErrorPermissionDenied
-		case 404:
-			class = providers.ErrorNotFound
-		case 409:
-			class = providers.ErrorInvalidRequest
-		case 422:
-			class = providers.ErrorInvalidRequest
-		case 429:
-			class = providers.ErrorRateLimited
-		default:
-			if h.Status >= 500 {
-				class = providers.ErrorTransport
+		message := strings.ToLower(strings.TrimSpace(h.Message))
+		if op == "create_server" && strings.Contains(message, "maximum number of active instances") && strings.Contains(message, "account") {
+			class = providers.ErrorCapacity
+		} else if op == "create_server" && (strings.Contains(message, "capacity") || strings.Contains(message, "available")) && (strings.Contains(message, "region") || strings.Contains(message, "location") || strings.Contains(message, "plan")) {
+			class = providers.ErrorRegionCapacity
+		} else {
+			switch h.Status {
+			case 401:
+				class = providers.ErrorAuthentication
+			case 403:
+				class = providers.ErrorPermissionDenied
+			case 404:
+				class = providers.ErrorNotFound
+			case 409:
+				class = providers.ErrorInvalidRequest
+			case 422:
+				class = providers.ErrorInvalidRequest
+			case 429:
+				class = providers.ErrorRateLimited
+			default:
+				if h.Status >= 500 {
+					class = providers.ErrorTransport
+				}
 			}
 		}
 	}
