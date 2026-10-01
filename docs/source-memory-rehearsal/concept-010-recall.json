@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `ReadinessChecker` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `ObservableWaiter` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `StagedWaiter` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `StagedCommandRunner` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `Plan` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `Engine` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `Execute` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `runtimeStep` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `stateForScript` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `wipe` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `min` in `internal/provisioning/engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `memStore` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `Reserve` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `Update` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `BeginStep` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `FinishStep` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `StepInterrupted` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `secretStub` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `Get` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `sshStub` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `Wait` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `Run` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `TestProvisionEngineCompletesAndDoesNotRepeat` in `internal/provisioning/engine_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `EventRecorder` in `internal/provisioning/events.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `Event` in `internal/provisioning/events.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `Event` in `internal/provisioning/events.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `HostKeyPins` in `internal/provisioning/hostkey.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `SQLHostKeyPins` in `internal/provisioning/hostkey.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `VerifyOrPin` in `internal/provisioning/hostkey.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `InstallerRef` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `InstallerArtifact` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `InstallerManifest` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `ResolvedInstaller` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `InstallerRegistry` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `InstallerHash` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `Create` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `Resolve` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `CheckInstallerCompatibility` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `validateInstallerManifest` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `containsFold` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `ArtifactSteps` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `artifactStep` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `shellQuote` in `internal/provisioning/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `TestInstallerCapabilitiesValidated` in `internal/provisioning/installer_capability_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `InstallerStateStore` in `internal/provisioning/installer_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `InstallerExecutor` in `internal/provisioning/installer_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `Execute` in `internal/provisioning/installer_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `Rollback` in `internal/provisioning/installer_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `installerStepName` in `internal/provisioning/installer_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `installerStateStub` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `SetState` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `TestInstallerExecutorCompletes` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `installerFailScripts` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `RunScript` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `TestInstallerTerminalFailureRequiresRollback` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `eventRecorderStub` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `Event` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `precheckMissScripts` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `RunScript` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `TestInstallerPrecheckMissIsNotFailure` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `retryableDNSScripts` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `RunScript` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `TestInstallerRetryableFailureStaysInstalling` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `TestInstallerInterruptedUnsafeNeverReexecutes` in `internal/provisioning/installer_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `InstallerRun` in `internal/provisioning/installer_orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `InstallerOrchestrator` in `internal/provisioning/installer_orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `Prepare` in `internal/provisioning/installer_orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `SetState` in `internal/provisioning/installer_orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `TestInstallerCompatibility` in `internal/provisioning/installer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `TestArtifactStepIntegrityAndShellSyntax` in `internal/provisioning/installer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `TestArtifactRejectsUnsafeDefinition` in `internal/provisioning/installer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `TestInstallerHashDeterministic` in `internal/provisioning/installer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `Target` in `internal/provisioning/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `Step` in `internal/provisioning/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `Run` in `internal/provisioning/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `ReadinessSnapshot` in `internal/provisioning/readiness.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `ReadinessRecorder` in `internal/provisioning/readiness.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `ReadinessCollector` in `internal/provisioning/readiness.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `Collect` in `internal/provisioning/readiness.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `Readiness` in `internal/provisioning/readiness.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `ReadinessIssue` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `DecideReadiness` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `readinessStatus` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `ReadinessError` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `Error` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `Unwrap` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `readinessError` in `internal/provisioning/readiness_policy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `issueByCode` in `internal/provisioning/readiness_policy_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `TestReadinessPolicyDecisions` in `internal/provisioning/readiness_policy_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `TestPackageIncompleteUsesSafeRemediation` in `internal/provisioning/readiness_policy_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `readinessSSHStub` in `internal/provisioning/readiness_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `RunDetailedObserved` in `internal/provisioning/readiness_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `TestReadinessReady` in `internal/provisioning/readiness_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `TestReadinessDNSBlocked` in `internal/provisioning/readiness_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `ScriptStep` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `ScriptPlan` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `validateScriptPlan` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `legacyScriptStep` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `LegacyScriptPlan` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `IsInstallerPlaceholder` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `InstallerPlaceholderName` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `PlanHasInstallerPlaceholder` in `internal/provisioning/script.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `ScriptRef` in `internal/provisioning/script_registry.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `ScriptRegistry` in `internal/provisioning/script_registry.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `ScriptHash` in `internal/provisioning/script_registry.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `Create` in `internal/provisioning/script_registry.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `Resolve` in `internal/provisioning/script_registry.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `ScriptPhaseResult` in `internal/provisioning/script_runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `ScriptExecutor` in `internal/provisioning/script_runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `SSHScriptRunner` in `internal/provisioning/script_runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `RunScript` in `internal/provisioning/script_runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `stagedScriptStub` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `RunDetailedObserved` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `TestScriptRunnerPrecheckSkipsExecuteAndVerifies` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `TestScriptRunnerFailedPrecheckExecutesThenVerifies` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `dnsPrecheckStub` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `RunDetailedObserved` in `internal/provisioning/script_runner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `CommandResult` in `internal/provisioning/ssh.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `SSHClient` in `internal/provisioning/ssh.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

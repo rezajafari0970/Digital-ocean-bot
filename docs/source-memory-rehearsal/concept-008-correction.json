@@ -1,0 +1,1276 @@
+{
+  "answers": {
+    "1": {
+      "package": "digitalocean",
+      "previous_symbol": "SecretReader",
+      "next_symbol": "NewClient",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "2": {
+      "package": "digitalocean",
+      "previous_symbol": "Client",
+      "next_symbol": "Validate",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "3": {
+      "package": "digitalocean",
+      "previous_symbol": "NewClient",
+      "next_symbol": "get",
+      "calls": [
+        "Authorize"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "4": {
+      "package": "digitalocean",
+      "previous_symbol": "Validate",
+      "next_symbol": "zero",
+      "calls": [
+        "Close",
+        "Do",
+        "Get",
+        "Set",
+        "String",
+        "Validate",
+        "parseAPIError",
+        "parseRetryAfter",
+        "zero"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "5": {
+      "package": "digitalocean",
+      "previous_symbol": "get",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "6": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "Get",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "7": {
+      "package": "digitalocean",
+      "previous_symbol": "secretStub",
+      "next_symbol": "RoundTrip",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "8": {
+      "package": "digitalocean",
+      "previous_symbol": "Get",
+      "next_symbol": "TestClientLoadsTokenAndDecodesAccount",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "9": {
+      "package": "digitalocean",
+      "previous_symbol": "RoundTrip",
+      "next_symbol": null,
+      "calls": [
+        "Get",
+        "GetAccount",
+        "NewClient",
+        "NewContext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "10": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "Size",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "11": {
+      "package": "digitalocean",
+      "previous_symbol": "Region",
+      "next_symbol": "Image",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "12": {
+      "package": "digitalocean",
+      "previous_symbol": "Size",
+      "next_symbol": "Droplet",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "13": {
+      "package": "digitalocean",
+      "previous_symbol": "Image",
+      "next_symbol": "Project",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "14": {
+      "package": "digitalocean",
+      "previous_symbol": "Droplet",
+      "next_symbol": "SSHKey",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "15": {
+      "package": "digitalocean",
+      "previous_symbol": "Project",
+      "next_symbol": "Firewall",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "16": {
+      "package": "digitalocean",
+      "previous_symbol": "SSHKey",
+      "next_symbol": "DiscoveryResult",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "17": {
+      "package": "digitalocean",
+      "previous_symbol": "Firewall",
+      "next_symbol": "Discover",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "18": {
+      "package": "digitalocean",
+      "previous_symbol": "DiscoveryResult",
+      "next_symbol": null,
+      "calls": [
+        "GetAccount",
+        "listAll"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "19": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "credentialBridge",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "20": {
+      "package": "digitalocean",
+      "previous_symbol": "Driver",
+      "next_symbol": "Get",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "21": {
+      "package": "digitalocean",
+      "previous_symbol": "credentialBridge",
+      "next_symbol": "Factory",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "22": {
+      "package": "digitalocean",
+      "previous_symbol": "Get",
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "23": {
+      "package": "digitalocean",
+      "previous_symbol": "Factory",
+      "next_symbol": "Metadata",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "24": {
+      "package": "digitalocean",
+      "previous_symbol": "Name",
+      "next_symbol": "Open",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "25": {
+      "package": "digitalocean",
+      "previous_symbol": "Metadata",
+      "next_symbol": "NewDriver",
+      "calls": [
+        "NewClient",
+        "NewContext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "26": {
+      "package": "digitalocean",
+      "previous_symbol": "Open",
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "27": {
+      "package": "digitalocean",
+      "previous_symbol": "NewDriver",
+      "next_symbol": "Capabilities",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "28": {
+      "package": "digitalocean",
+      "previous_symbol": "Name",
+      "next_symbol": "Health",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "29": {
+      "package": "digitalocean",
+      "previous_symbol": "Capabilities",
+      "next_symbol": "Account",
+      "calls": [
+        "GetAccount",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "30": {
+      "package": "digitalocean",
+      "previous_symbol": "Health",
+      "next_symbol": "Capacity",
+      "calls": [
+        "GetAccount",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "31": {
+      "package": "digitalocean",
+      "previous_symbol": "Account",
+      "next_symbol": "Catalog",
+      "calls": [
+        "GetAccount",
+        "ListDropletModels",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "32": {
+      "package": "digitalocean",
+      "previous_symbol": "Capacity",
+      "next_symbol": "CreateServer",
+      "calls": [
+        "normalizeCatalog",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "33": {
+      "package": "digitalocean",
+      "previous_symbol": "Catalog",
+      "next_symbol": "GetServer",
+      "calls": [
+        "CreateDroplet",
+        "IsRetryable",
+        "contains",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "34": {
+      "package": "digitalocean",
+      "previous_symbol": "CreateServer",
+      "next_symbol": "ListServers",
+      "calls": [
+        "GetDroplet",
+        "normalizeError",
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "35": {
+      "package": "digitalocean",
+      "previous_symbol": "GetServer",
+      "next_symbol": "DeleteServer",
+      "calls": [
+        "ListDropletModels",
+        "normalizeError",
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "36": {
+      "package": "digitalocean",
+      "previous_symbol": "ListServers",
+      "next_symbol": "FindServerByIdentity",
+      "calls": [
+        "DeleteDroplet",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "37": {
+      "package": "digitalocean",
+      "previous_symbol": "DeleteServer",
+      "next_symbol": "CreateSSHKey",
+      "calls": [
+        "ListServers",
+        "contains"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "38": {
+      "package": "digitalocean",
+      "previous_symbol": "FindServerByIdentity",
+      "next_symbol": "DeleteSSHKey",
+      "calls": [
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "39": {
+      "package": "digitalocean",
+      "previous_symbol": "CreateSSHKey",
+      "next_symbol": "Inventory",
+      "calls": [
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "40": {
+      "package": "digitalocean",
+      "previous_symbol": "DeleteSSHKey",
+      "next_symbol": "Observe",
+      "calls": [
+        "ListServers"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "41": {
+      "package": "digitalocean",
+      "previous_symbol": "Inventory",
+      "next_symbol": "normalizeCatalog",
+      "calls": [
+        "Catalog",
+        "GetAccount",
+        "ListDropletModels",
+        "normalizeCatalog",
+        "normalizeError",
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "42": {
+      "package": "digitalocean",
+      "previous_symbol": "Observe",
+      "next_symbol": "normalizeImage",
+      "calls": [
+        "normalizeImage"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "43": {
+      "package": "digitalocean",
+      "previous_symbol": "normalizeCatalog",
+      "next_symbol": "normalizeServer",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "44": {
+      "package": "digitalocean",
+      "previous_symbol": "normalizeImage",
+      "next_symbol": "normalizeError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "45": {
+      "package": "digitalocean",
+      "previous_symbol": "normalizeServer",
+      "next_symbol": "contains",
+      "calls": [
+        "IsCapacityError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "46": {
+      "package": "digitalocean",
+      "previous_symbol": "normalizeError",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "47": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "TestNormalizeServerUsesStringIDAndReadiness",
+      "calls": [
+        "normalizeCatalog"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "48": {
+      "package": "digitalocean",
+      "previous_symbol": "TestNormalizeCatalogToCanonicalModels",
+      "next_symbol": "TestReadyRequiresPublicIPv4",
+      "calls": [
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "49": {
+      "package": "digitalocean",
+      "previous_symbol": "TestNormalizeServerUsesStringIDAndReadiness",
+      "next_symbol": "TestNormalizeProviderErrors",
+      "calls": [
+        "normalizeServer"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "50": {
+      "package": "digitalocean",
+      "previous_symbol": "TestReadyRequiresPublicIPv4",
+      "next_symbol": "TestDriverFindServerByIdentity",
+      "calls": [
+        "Class",
+        "New",
+        "normalizeError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "51": {
+      "package": "digitalocean",
+      "previous_symbol": "TestNormalizeProviderErrors",
+      "next_symbol": "TestFactoryMetadataPolicy",
+      "calls": [
+        "FindServerByIdentity",
+        "NewDriver",
+        "fixtureClient"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "52": {
+      "package": "digitalocean",
+      "previous_symbol": "TestDriverFindServerByIdentity",
+      "next_symbol": "TestDigitalOceanCapacityLimitIsKnown",
+      "calls": [
+        "Metadata"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "53": {
+      "package": "digitalocean",
+      "previous_symbol": "TestFactoryMetadataPolicy",
+      "next_symbol": null,
+      "calls": [
+        "Capacity",
+        "NewDriver",
+        "fixtureClient"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "54": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "Error",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "55": {
+      "package": "digitalocean",
+      "previous_symbol": "HTTPError",
+      "next_symbol": "parseAPIError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "56": {
+      "package": "digitalocean",
+      "previous_symbol": "Error",
+      "next_symbol": "IsCapacityError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "57": {
+      "package": "digitalocean",
+      "previous_symbol": "parseAPIError",
+      "next_symbol": "ClassifyError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "58": {
+      "package": "digitalocean",
+      "previous_symbol": "IsCapacityError",
+      "next_symbol": "parseRetryAfter",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "59": {
+      "package": "digitalocean",
+      "previous_symbol": "ClassifyError",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "60": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "TestParseAPIErrorUsesCode",
+      "calls": [
+        "parseAPIError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "61": {
+      "package": "digitalocean",
+      "previous_symbol": "TestParseAPIError",
+      "next_symbol": "TestParseAPIErrorRejectsNonJSON",
+      "calls": [
+        "parseAPIError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "62": {
+      "package": "digitalocean",
+      "previous_symbol": "TestParseAPIErrorUsesCode",
+      "next_symbol": null,
+      "calls": [
+        "parseAPIError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "63": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "ClassifyError",
+        "IsCapacityError",
+        "New",
+        "Run"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "64": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "SSHKeyCreateRequest",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "65": {
+      "package": "digitalocean",
+      "previous_symbol": "CreateDropletRequest",
+      "next_symbol": "SSHKeyCreated",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "66": {
+      "package": "digitalocean",
+      "previous_symbol": "SSHKeyCreateRequest",
+      "next_symbol": "CreateSSHKey",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "67": {
+      "package": "digitalocean",
+      "previous_symbol": "SSHKeyCreated",
+      "next_symbol": "DeleteSSHKey",
+      "calls": [
+        "request"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "68": {
+      "package": "digitalocean",
+      "previous_symbol": "CreateSSHKey",
+      "next_symbol": "Action",
+      "calls": [
+        "request"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "69": {
+      "package": "digitalocean",
+      "previous_symbol": "DeleteSSHKey",
+      "next_symbol": "createDropletEnvelope",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "70": {
+      "package": "digitalocean",
+      "previous_symbol": "Action",
+      "next_symbol": "actionEnvelope",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "71": {
+      "package": "digitalocean",
+      "previous_symbol": "createDropletEnvelope",
+      "next_symbol": "request",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "72": {
+      "package": "digitalocean",
+      "previous_symbol": "actionEnvelope",
+      "next_symbol": "CreateDroplet",
+      "calls": [
+        "Close",
+        "Do",
+        "Get",
+        "Marshal",
+        "Set",
+        "String",
+        "Validate",
+        "parseRetryAfter",
+        "zero"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "73": {
+      "package": "digitalocean",
+      "previous_symbol": "request",
+      "next_symbol": "DeleteDroplet",
+      "calls": [
+        "request"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "74": {
+      "package": "digitalocean",
+      "previous_symbol": "CreateDroplet",
+      "next_symbol": "GetAction",
+      "calls": [
+        "request"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "75": {
+      "package": "digitalocean",
+      "previous_symbol": "DeleteDroplet",
+      "next_symbol": null,
+      "calls": [
+        "get"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "76": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "extractNext",
+      "calls": [
+        "New",
+        "Set",
+        "extractNext",
+        "get"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "77": {
+      "package": "digitalocean",
+      "previous_symbol": "listAll",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "78": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "extractNext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "79": {
+      "package": "digitalocean",
+      "previous_symbol": null,
+      "next_symbol": "ListResources",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "80": {
+      "package": "digitalocean",
+      "previous_symbol": "Resource",
+      "next_symbol": "ListDroplets",
+      "calls": [
+        "ListDropletModels"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "81": {
+      "package": "digitalocean",
+      "previous_symbol": "ListResources",
+      "next_symbol": "DropletExists",
+      "calls": [
+        "ListResources"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "82": {
+      "package": "digitalocean",
+      "previous_symbol": "ListDroplets",
+      "next_symbol": "GetDroplet",
+      "calls": [
+        "GetDroplet"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "83": {
+      "package": "digitalocean",
+      "previous_symbol": "DropletExists",
+      "next_symbol": "ListDropletModels",
+      "calls": [
+        "get"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "84": {
+      "package": "digitalocean",
+      "previous_symbol": "GetDroplet",
+      "next_symbol": null,
+      "calls": [
+        "listAll"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "85": {
+      "package": "providers",
+      "previous_symbol": null,
+      "next_symbol": "Error",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "86": {
+      "package": "providers",
+      "previous_symbol": "Error",
+      "next_symbol": "Unwrap",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "87": {
+      "package": "providers",
+      "previous_symbol": "Error",
+      "next_symbol": "Class",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "88": {
+      "package": "providers",
+      "previous_symbol": "Unwrap",
+      "next_symbol": "IsClass",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "89": {
+      "package": "providers",
+      "previous_symbol": "Class",
+      "next_symbol": "IsRetryable",
+      "calls": [
+        "Class"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "90": {
+      "package": "providers",
+      "previous_symbol": "IsClass",
+      "next_symbol": null,
+      "calls": [
+        "Class"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "91": {
+      "package": "providers",
+      "previous_symbol": null,
+      "next_symbol": "Defaults",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "92": {
+      "package": "providers",
+      "previous_symbol": "ImagePolicy",
+      "next_symbol": "Metadata",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "93": {
+      "package": "providers",
+      "previous_symbol": "Defaults",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "94": {
+      "package": "providers",
+      "previous_symbol": null,
+      "next_symbol": "Driver",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "95": {
+      "package": "providers",
+      "previous_symbol": "Capabilities",
+      "next_symbol": "AccountReader",
+      "calls": [
+        "Capabilities",
+        "Health",
+        "Name"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "96": {
+      "package": "providers",
+      "previous_symbol": "Driver",
+      "next_symbol": "CatalogReader",
+      "calls": [
+        "Account",
+        "Capacity"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "97": {
+      "package": "providers",
+      "previous_symbol": "AccountReader",
+      "next_symbol": "ComputeDriver",
+      "calls": [
+        "Catalog"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "98": {
+      "package": "providers",
+      "previous_symbol": "CatalogReader",
+      "next_symbol": "SSHKeyDriver",
+      "calls": [
+        "CreateServer",
+        "DeleteServer",
+        "FindServerByIdentity",
+        "GetServer",
+        "ListServers"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "99": {
+      "package": "providers",
+      "previous_symbol": "ComputeDriver",
+      "next_symbol": "InventoryReader",
+      "calls": [
+        "CreateSSHKey",
+        "DeleteSSHKey"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "100": {
+      "package": "providers",
+      "previous_symbol": "SSHKeyDriver",
+      "next_symbol": "ObservationReader",
+      "calls": [
+        "Inventory"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "101": {
+      "package": "providers",
+      "previous_symbol": "InventoryReader",
+      "next_symbol": "CredentialSource",
+      "calls": [
+        "Observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "102": {
+      "package": "providers",
+      "previous_symbol": "ObservationReader",
+      "next_symbol": "OpenRequest",
+      "calls": [
+        "Get"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "103": {
+      "package": "providers",
+      "previous_symbol": "CredentialSource",
+      "next_symbol": "Factory",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "104": {
+      "package": "providers",
+      "previous_symbol": "OpenRequest",
+      "next_symbol": "CanCreateCapacity",
+      "calls": [
+        "Metadata",
+        "Name",
+        "Open"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "105": {
+      "package": "providers",
+      "previous_symbol": "Factory",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "106": {
+      "package": "providers",
+      "previous_symbol": null,
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "107": {
+      "package": "providers",
+      "previous_symbol": "testDriver",
+      "next_symbol": "Capabilities",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "108": {
+      "package": "providers",
+      "previous_symbol": "Name",
+      "next_symbol": "Health",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "109": {
+      "package": "providers",
+      "previous_symbol": "Capabilities",
+      "next_symbol": "testFactory",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "110": {
+      "package": "providers",
+      "previous_symbol": "Health",
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "111": {
+      "package": "providers",
+      "previous_symbol": "testFactory",
+      "next_symbol": "Metadata",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "112": {
+      "package": "providers",
+      "previous_symbol": "Name",
+      "next_symbol": "Open",
+      "calls": [
+        "normalizeName"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "113": {
+      "package": "providers",
+      "previous_symbol": "Metadata",
+      "next_symbol": "TestRegistryNormalizesAndOpens",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "114": {
+      "package": "providers",
+      "previous_symbol": "Open",
+      "next_symbol": "TestRegistryRejectsDuplicate",
+      "calls": [
+        "Has",
+        "Name",
+        "NewRegistry",
+        "Open",
+        "Register"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "115": {
+      "package": "providers",
+      "previous_symbol": "TestRegistryNormalizesAndOpens",
+      "next_symbol": "TestRegistryNamesSorted",
+      "calls": [
+        "NewRegistry",
+        "Register"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "116": {
+      "package": "providers",
+      "previous_symbol": "TestRegistryRejectsDuplicate",
+      "next_symbol": "TestProviderErrorTaxonomy",
+      "calls": [
+        "Names",
+        "NewRegistry",
+        "Register"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "117": {
+      "package": "providers",
+      "previous_symbol": "TestRegistryNamesSorted",
+      "next_symbol": "TestCapabilityInterfacesRemainIndependent",
+      "calls": [
+        "Class",
+        "IsClass",
+        "IsRetryable",
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "118": {
+      "package": "providers",
+      "previous_symbol": "TestProviderErrorTaxonomy",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "119": {
+      "package": "providers",
+      "previous_symbol": null,
+      "next_symbol": "NewRegistry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "120": {
+      "package": "providers",
+      "previous_symbol": "Registry",
+      "next_symbol": "normalizeName",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    }
+  }
+}

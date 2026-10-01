@@ -1,0 +1,568 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `errorBody`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `proxies`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/adminapi/resources.go`, what immediately follows `proxies`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `accountCapacity`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `accountResources`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/adminapi/resources_api.go`, what immediately follows `accountResources`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `accountRuntime`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `createSanaeiInstaller`?"
+    },
+    {
+      "id": 9,
+      "prompt": "Which file contains `previewSanaeiInstaller`?"
+    },
+    {
+      "id": 10,
+      "prompt": "In `internal/adminapi/sanaei_installer.go`, what immediately follows `createSanaeiInstaller`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `Secure`?"
+    },
+    {
+      "id": 12,
+      "prompt": "Which file contains `LoginLimiter`?"
+    },
+    {
+      "id": 13,
+      "prompt": "In `internal/adminapi/security.go`, what immediately follows `securityHeaders`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `Routes`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `vultrBrowserProxy`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/adminapi/server.go`, what immediately follows `ready`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestReadinessWithoutDatabase`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `TestHealthEndpoint`?"
+    },
+    {
+      "id": 19,
+      "prompt": "In `internal/adminapi/server_test.go`, what immediately follows `TestHealthEndpoint`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `audit`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `system`?"
+    },
+    {
+      "id": 22,
+      "prompt": "In `internal/adminapi/status.go`, what immediately follows `system`?"
+    },
+    {
+      "id": 23,
+      "prompt": "Which file contains `uploadTemplate`?"
+    },
+    {
+      "id": 24,
+      "prompt": "Which file contains `listTemplates`?"
+    },
+    {
+      "id": 25,
+      "prompt": "In `internal/adminapi/templates.go`, what immediately follows `listTemplates`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `validateReplacementToken`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `ProviderStateRuntimeStatus`?"
+    },
+    {
+      "id": 28,
+      "prompt": "Which file contains `ProviderProbeInterval`?"
+    },
+    {
+      "id": 29,
+      "prompt": "In `internal/app/account_state.go`, what immediately follows `IsProviderObservationError`?"
+    },
+    {
+      "id": 30,
+      "prompt": "Which file contains `TestClassifyAccountProviderError`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `TestProviderStateRecoveryPolicy`?"
+    },
+    {
+      "id": 32,
+      "prompt": "In `internal/app/account_state_test.go`, what immediately follows `TestClassifyAccountProviderError`?"
+    },
+    {
+      "id": 33,
+      "prompt": "Which file contains `Close`?"
+    },
+    {
+      "id": 34,
+      "prompt": "Which file contains `Bootstrap`?"
+    },
+    {
+      "id": 35,
+      "prompt": "In `internal/app/bootstrap.go`, what immediately follows `Application`?"
+    },
+    {
+      "id": 36,
+      "prompt": "Which file contains `Available`?"
+    },
+    {
+      "id": 37,
+      "prompt": "Which file contains `CreateCapacity`?"
+    },
+    {
+      "id": 38,
+      "prompt": "In `internal/app/capacity_guard.go`, what immediately follows `Available`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `TestCreateCapacityUnknownLimitAllowsCreate`?"
+    },
+    {
+      "id": 40,
+      "prompt": "Which file contains `TestCreateCapacityAvailable`?"
+    },
+    {
+      "id": 41,
+      "prompt": "In `internal/app/capacity_guard_test.go`, what immediately follows `TestCreateCapacityAvailable`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `RunDailyCatalogSync`?"
+    },
+    {
+      "id": 43,
+      "prompt": "Which file contains `SyncCatalogs`?"
+    },
+    {
+      "id": 44,
+      "prompt": "In `internal/app/catalog_sync.go`, what immediately follows `SyncCatalogs`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `LoadConfig`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `Config`?"
+    },
+    {
+      "id": 47,
+      "prompt": "In `internal/app/config.go`, what immediately follows `Config`?"
+    },
+    {
+      "id": 48,
+      "prompt": "Which file contains `ReconcileLocalState`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `computeDriver`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `accountCredentialSource`?"
+    },
+    {
+      "id": 51,
+      "prompt": "In `internal/app/container.go`, what immediately follows `AccountRuntime`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `StartDeployment`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `deploymentFailureFinalizer`?"
+    },
+    {
+      "id": 54,
+      "prompt": "Which file contains `MarkReady`?"
+    },
+    {
+      "id": 55,
+      "prompt": "In `internal/app/deployment_ready.go`, what immediately follows `MarkReady`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `setInstallerDeploymentState`?"
+    },
+    {
+      "id": 57,
+      "prompt": "Which file contains `activateInstaller`?"
+    },
+    {
+      "id": 58,
+      "prompt": "In `internal/app/installer_activation.go`, what immediately follows `deploymentInstallerRef`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `ConfirmDeleted`?"
+    },
+    {
+      "id": 60,
+      "prompt": "Which file contains `ProcessLifecycle`?"
+    },
+    {
+      "id": 61,
+      "prompt": "In `internal/app/lifecycle.go`, what immediately follows `ProcessLifecycle`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `fastGatewayExitIP`?"
+    },
+    {
+      "id": 63,
+      "prompt": "Which file contains `result`?"
+    },
+    {
+      "id": 64,
+      "prompt": "In `internal/app/network_identity.go`, what immediately follows `result`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `ReconcileOwnedOrphans`?"
+    },
+    {
+      "id": 66,
+      "prompt": "Which file contains `PanelSettings`?"
+    },
+    {
+      "id": 67,
+      "prompt": "Which file contains `PanelSettings`?"
+    },
+    {
+      "id": 68,
+      "prompt": "In `internal/app/panel.go`, what immediately follows `PanelSettings`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `PostInstallWorkflow`?"
+    },
+    {
+      "id": 70,
+      "prompt": "Which file contains `RequirePostInstallCapabilities`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `RearmPostInstall`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `ReconcileCompletedPostInstall`?"
+    },
+    {
+      "id": 73,
+      "prompt": "Which file contains `defaultProvisionPlan`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `DeploymentConfigFromSnapshot`?"
+    },
+    {
+      "id": 75,
+      "prompt": "In `internal/app/profile.go`, what immediately follows `defaultProvisionPlan`?"
+    },
+    {
+      "id": 76,
+      "prompt": "Which file contains `RecordProviderObservation`?"
+    },
+    {
+      "id": 77,
+      "prompt": "Which file contains `RefreshProviderSnapshots`?"
+    },
+    {
+      "id": 78,
+      "prompt": "In `internal/app/provider_refresh.go`, what immediately follows `RefreshProviderSnapshots`?"
+    },
+    {
+      "id": 79,
+      "prompt": "Which file contains `ensureActiveAccountProxy`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `proxySessionUsername`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `Match`?"
+    },
+    {
+      "id": 82,
+      "prompt": "In `internal/app/proxy_provider.go`, what immediately follows `genericProxyAdapter`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `TestGenericDoesNotRewrite`?"
+    },
+    {
+      "id": 84,
+      "prompt": "Which file contains `TestSuffixAdapterPreservesPolicy`?"
+    },
+    {
+      "id": 85,
+      "prompt": "In `internal/app/proxy_provider_test.go`, what immediately follows `TestGenericDoesNotRewrite`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `RecoverOperation`?"
+    },
+    {
+      "id": 87,
+      "prompt": "Which file contains `RecoveryHandler`?"
+    },
+    {
+      "id": 88,
+      "prompt": "In `internal/app/recovery.go`, what immediately follows `RecoverOperation`?"
+    },
+    {
+      "id": 89,
+      "prompt": "Which file contains `Repository`?"
+    },
+    {
+      "id": 90,
+      "prompt": "Which file contains `AccountConfig`?"
+    },
+    {
+      "id": 91,
+      "prompt": "In `internal/app/repository.go`, what immediately follows `Repository`?"
+    },
+    {
+      "id": 92,
+      "prompt": "Which file contains `StartScheduledDeployment`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `ScheduledStarter`?"
+    },
+    {
+      "id": 94,
+      "prompt": "In `internal/app/scheduler.go`, what immediately follows `ScheduledStarter`?"
+    },
+    {
+      "id": 95,
+      "prompt": "Which file contains `ensureDeploymentSSHIdentity`?"
+    },
+    {
+      "id": 96,
+      "prompt": "Which file contains `stickyConfig`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `MaintainStickyIdentity`?"
+    },
+    {
+      "id": 98,
+      "prompt": "In `internal/app/sticky_proxy.go`, what immediately follows `stickyGeo`?"
+    },
+    {
+      "id": 99,
+      "prompt": "Which file contains `Workflow`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `DeploymentConfig`?"
+    },
+    {
+      "id": 101,
+      "prompt": "In `internal/app/workflow.go`, what immediately follows `DeploymentConfig`?"
+    },
+    {
+      "id": 102,
+      "prompt": "Which file contains `Event`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `SQLRecorder`?"
+    },
+    {
+      "id": 104,
+      "prompt": "In `internal/audit/audit.go`, what immediately follows `SQLRecorder`?"
+    },
+    {
+      "id": 105,
+      "prompt": "Which file contains `Principal`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `Session`?"
+    },
+    {
+      "id": 107,
+      "prompt": "In `internal/auth/model.go`, what immediately follows `CanWrite`?"
+    },
+    {
+      "id": 108,
+      "prompt": "Which file contains `Authenticate`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `HashPassword`?"
+    },
+    {
+      "id": 110,
+      "prompt": "In `internal/auth/service.go`, what immediately follows `Service`?"
+    },
+    {
+      "id": 111,
+      "prompt": "Which file contains `TestShortPasswordRejected`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `TestRBAC`?"
+    },
+    {
+      "id": 113,
+      "prompt": "In `internal/auth/service_test.go`, what immediately follows `TestShortPasswordRejected`?"
+    },
+    {
+      "id": 114,
+      "prompt": "Which file contains `FindSession`?"
+    },
+    {
+      "id": 115,
+      "prompt": "Which file contains `CreateSession`?"
+    },
+    {
+      "id": 116,
+      "prompt": "In `internal/auth/store.go`, what immediately follows `SQLStore`?"
+    },
+    {
+      "id": 117,
+      "prompt": "Which file contains `Info`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Which file contains `Current`?"
+    },
+    {
+      "id": 119,
+      "prompt": "In `internal/buildinfo/buildinfo.go`, what immediately follows `Info`?"
+    },
+    {
+      "id": 120,
+      "prompt": "Which file contains `Querier`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Which file contains `Snapshot`?"
+    },
+    {
+      "id": 122,
+      "prompt": "In `internal/capacity/service.go`, what immediately follows `Snapshot`?"
+    },
+    {
+      "id": 123,
+      "prompt": "Which file contains `TestAvailable`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `TestAvailableUnknownLimit`?"
+    },
+    {
+      "id": 125,
+      "prompt": "In `internal/capacity/service_test.go`, what immediately follows `TestAvailable`?"
+    },
+    {
+      "id": 126,
+      "prompt": "Which file contains `FindServerByIdentity`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `GetServer`?"
+    },
+    {
+      "id": 128,
+      "prompt": "In `internal/droplets/compute_stub_test.go`, what immediately follows `computeStub`?"
+    },
+    {
+      "id": 129,
+      "prompt": "Which file contains `Delete`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Which file contains `MutationGate`?"
+    },
+    {
+      "id": 131,
+      "prompt": "In `internal/droplets/executor.go`, what immediately follows `MutationGate`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 133,
+      "prompt": "Which file contains `AllowMutation`?"
+    },
+    {
+      "id": 134,
+      "prompt": "In `internal/droplets/executor_test.go`, what immediately follows `Reserve`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Which file contains `BuildCreateOperation`?"
+    },
+    {
+      "id": 136,
+      "prompt": "Which file contains `LifecycleStore`?"
+    },
+    {
+      "id": 137,
+      "prompt": "Which file contains `LifecycleItem`?"
+    },
+    {
+      "id": 138,
+      "prompt": "In `internal/droplets/lifecycle.go`, what immediately follows `Due`?"
+    },
+    {
+      "id": 139,
+      "prompt": "Which file contains `LifecycleEngine`?"
+    },
+    {
+      "id": 140,
+      "prompt": "Which file contains `LifecycleExecutor`?"
+    },
+    {
+      "id": 141,
+      "prompt": "In `internal/droplets/lifecycle_engine.go`, what immediately follows `LifecycleEngine`?"
+    }
+  ]
+}

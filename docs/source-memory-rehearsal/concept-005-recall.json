@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `Service` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `operationalLifecycle` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `panelDeps` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `Ready` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `RefreshInventory` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `OccupiedPorts` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `Build` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `Add` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `Update` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `Verify` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `ReconcilePanel` in `internal/panels/desired/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `Instance` in `internal/panels/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `Capabilities` in `internal/panels/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `Discovery` in `internal/panels/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `Driver` in `internal/panels/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `VLESSReality` in `internal/panels/export/vless.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `VLESSRealityURI` in `internal/panels/export/vless.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `TestRealityURIAlwaysCarriesVisionFlow` in `internal/panels/export/vless_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `Secrets` in `internal/panels/globalreality/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `Service` in `internal/panels/globalreality/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `ReconcilePanel` in `internal/panels/globalreality/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `RealityClient` in `internal/panels/healthverify/xray.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `Result` in `internal/panels/healthverify/xray.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `Runner` in `internal/panels/healthverify/xray.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `Probe` in `internal/panels/healthverify/xray.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `command` in `internal/panels/healthverify/xray.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `fakeRunner` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `Run` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `valid` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `TestProbePass` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `TestProbeRejectsWrongExit` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `TestProbeRejectsTunnelFailure` in `internal/panels/healthverify/xray_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `InboundRecord` in `internal/panels/inventory/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `Snapshot` in `internal/panels/inventory/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `SyncResult` in `internal/panels/inventory/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `SQLStore` in `internal/panels/inventory/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `Sync` in `internal/panels/inventory/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `Collector` in `internal/panels/listeners/collector.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `SSHCollector` in `internal/panels/listeners/collector.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `Ports` in `internal/panels/listeners/collector.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `TestSSHCollector` in `internal/panels/listeners/collector_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `ParseSS` in `internal/panels/listeners/parser.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `TestParseSS` in `internal/panels/listeners/parser_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `Secrets` in `internal/panels/panelbootstrap/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `Service` in `internal/panels/panelbootstrap/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `BootstrapPanel` in `internal/panels/panelbootstrap/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `DesiredInbound` in `internal/panels/planner/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `Action` in `internal/panels/planner/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `Policy` in `internal/panels/planner/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `Plan` in `internal/panels/planner/planner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `differs` in `internal/panels/planner/planner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `TestPlanCreatesMissing` in `internal/panels/planner/planner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `TestPlanDetectsDrift` in `internal/panels/planner/planner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `TestPlanDoesNotDeleteByDefault` in `internal/panels/planner/planner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `TestPlanRejectsPortCollision` in `internal/panels/planner/planner_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `AllocatePorts` in `internal/panels/policy/allocator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `TestAllocatePreferredThenDynamic` in `internal/panels/policy/allocator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `TestAllocateDeterministic` in `internal/panels/policy/allocator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `TestAllocateFailsClosed` in `internal/panels/policy/allocator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `Expand` in `internal/panels/policy/expand.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `TestExpandStableKeys` in `internal/panels/policy/expand_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `InboundPolicy` in `internal/panels/policy/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `Normalize` in `internal/panels/policy/normalize.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `SQLStore` in `internal/panels/policy/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `Put` in `internal/panels/policy/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `Validate` in `internal/panels/policy/validate.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `TestValidateRejectsDuplicatePortsAcrossLists` in `internal/panels/policy/validate_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `HostKeyPins` in `internal/panels/proberegistry/hostkey.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `VerifyOrPin` in `internal/panels/proberegistry/hostkey.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `Node` in `internal/panels/proberegistry/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `Result` in `internal/panels/proberegistry/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `SQLStore` in `internal/panels/proberegistry/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `Select` in `internal/panels/proberegistry/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `SaveResult` in `internal/panels/proberegistry/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `EligibilitySource` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `Bootstrapper` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `DesiredReconciler` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `PostReconciler` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `ProductionAdapter` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `Eligible` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `Bootstrap` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `Reconcile` in `internal/panels/readyworker/adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `sourceFake` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `EligibleReadyPanels` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `bootstrapFake` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `BootstrapPanel` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `desiredFake` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `ReconcilePanel` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `TestProductionAdapterPropagatesDryRun` in `internal/panels/readyworker/adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `SQLSource` in `internal/panels/readyworker/sql_source.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `EligibleReadyPanels` in `internal/panels/readyworker/sql_source.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `EligibleExpiringPanels` in `internal/panels/readyworker/sql_source.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `Panel` in `internal/panels/readyworker/worker.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `PanelResult` in `internal/panels/readyworker/worker.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `Adapter` in `internal/panels/readyworker/worker.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `Worker` in `internal/panels/readyworker/worker.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `Run` in `internal/panels/readyworker/worker.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `fake` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `Eligible` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `Bootstrap` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `Reconcile` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `TestWorkerBoundedDryRun` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `TestBootstrapFailureStopsPanelOnly` in `internal/panels/readyworker/worker_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `Managed` in `internal/panels/realitycontract/contract.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `normalized` in `internal/panels/realitycontract/contract.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `Payload` in `internal/panels/realitycontract/contract.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `URI` in `internal/panels/realitycontract/contract.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `TestPayloadAndURIStaySymmetric` in `internal/panels/realitycontract/contract_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `Secrets` in `internal/panels/residentialsync/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `Service` in `internal/panels/residentialsync/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `rp` in `internal/panels/residentialsync/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `ReconcilePanel` in `internal/panels/residentialsync/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `apply` in `internal/panels/residentialsync/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `Credentials` in `internal/panels/sanaei/api.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `APIClient` in `internal/panels/sanaei/api.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `NewAPIClient` in `internal/panels/sanaei/api.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `Login` in `internal/panels/sanaei/api.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `json` in `internal/panels/sanaei/api.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `failingTransport` in `internal/panels/sanaei/api_error_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `RoundTrip` in `internal/panels/sanaei/api_error_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

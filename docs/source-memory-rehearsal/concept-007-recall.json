@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `DefaultRetryPolicy` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `ResilientSession` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `retryableStatus` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `retryableError` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `retryableErrorWithContext` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `login` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `delay` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `ReadAllBounded` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `fastPolicy` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `TestResilientRetries5xx` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `TestResilientRetries429` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `TestResilientFailsFast400` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `TestResilientHonorsCancellation` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `TestReadAllBounded` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `TestRetryableErrorWithContextClientTimeout` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `TestResilientDoesNotBlindRetryMutation` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `TestResilientStillRetriesSafeRead` in `internal/panels/sanaei/resilient_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `RuntimeSecrets` in `internal/panels/sanaei/runtime.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `PanelRuntime` in `internal/panels/sanaei/runtime.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `WithMutation` in `internal/panels/sanaei/runtime.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `RuntimeFactory` in `internal/panels/sanaei/runtime.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `Open` in `internal/panels/sanaei/runtime.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `runtimeEntry` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `circuitState` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `RuntimeManager` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `ttl` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `circuitDelay` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `observe` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `Acquire` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `ResetCircuit` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `Invalidate` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `PurgeExpired` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `Size` in `internal/panels/sanaei/runtime_manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `TestRuntimeManagerRejectsEmptyPanel` in `internal/panels/sanaei/runtime_manager_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `TestRuntimeManagerInvalidateAndPurge` in `internal/panels/sanaei/runtime_manager_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `TestRuntimeManagerConcurrentCacheRead` in `internal/panels/sanaei/runtime_manager_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `TestCircuitDelay` in `internal/panels/sanaei/runtime_manager_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `TestRuntimeManagerCircuitOpen` in `internal/panels/sanaei/runtime_manager_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `TestRuntimeFactoryRejectsMissingDependencies` in `internal/panels/sanaei/runtime_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `TestRetryableStatusClassification` in `internal/panels/sanaei/runtime_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `TestRetryableErrorCancellationIsPermanent` in `internal/panels/sanaei/runtime_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `SessionRequest` in `internal/panels/sanaei/session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `SessionResponse` in `internal/panels/sanaei/session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `SessionExecutor` in `internal/panels/sanaei/session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `ExecutorAuth` in `internal/panels/sanaei/session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `Authorize` in `internal/panels/sanaei/session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `fakeExecutor` in `internal/panels/sanaei/session_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/session_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `TestSessionExecutorContract` in `internal/panels/sanaei/session_executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `SSHSecretReader` in `internal/panels/sanaei/ssh_session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `SSHSessionExecutor` in `internal/panels/sanaei/ssh_session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `shellQuoteSession` in `internal/panels/sanaei/ssh_session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/ssh_session_executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `SSHSessionExecutorV2` in `internal/panels/sanaei/ssh_session_executor_v2.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `extractV2Wire` in `internal/panels/sanaei/ssh_session_executor_v2.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `decodeV2Body` in `internal/panels/sanaei/ssh_session_executor_v2.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/ssh_session_executor_v2.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `doPOST` in `internal/panels/sanaei/ssh_session_executor_v2_post.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `SQLClientStore` in `internal/panels/sanaei/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `Save` in `internal/panels/sanaei/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `SetEnabled` in `internal/panels/sanaei/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `DatabaseTemplate` in `internal/panels/sanaei/template.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `InspectTemplate` in `internal/panels/sanaei/template.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `TestInspectTemplateRequiresSQLite` in `internal/panels/sanaei/template_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `TestImportCommandHasRollbackAndChecksum` in `internal/panels/sanaei/template_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `ClientTraffic` in `internal/panels/sanaei/traffic.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `trafficResponse` in `internal/panels/sanaei/traffic.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `GetClientTraffic` in `internal/panels/sanaei/traffic.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `TrafficAdapter` in `internal/panels/sanaei/traffic_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `Get` in `internal/panels/sanaei/traffic_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `ClientDisabler` in `internal/panels/sanaei/traffic_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `Disable` in `internal/panels/sanaei/traffic_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `SQLStore` in `internal/panels/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `SaveDiscovery` in `internal/panels/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `ReconcileEnabled` in `internal/panels/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `InstanceReconcileResult` in `internal/panels/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `ReconcileInstances` in `internal/panels/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `Request` in `internal/panels/update/orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `Result` in `internal/panels/update/orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `Dependencies` in `internal/panels/update/orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `Run` in `internal/panels/update/orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `ownedRecords` in `internal/panels/update/orchestrator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `fake` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `Ready` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `RefreshInventory` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `Build` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `Update` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `Verify` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `TestConfirmedUpdate` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `TestRejectsDuplicateOwnership` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `TestRecoversAmbiguousUpdate` in `internal/panels/update/orchestrator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `FastFill` in `internal/panels/usercapacity/fastfill.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `LegacyFastFill` in `internal/panels/usercapacity/legacy_fill.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `legacyObject` in `internal/panels/usercapacity/legacy_fill.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `legacyFastFillFromPolicy` in `internal/panels/usercapacity/legacy_fill.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `Secrets` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `Service` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `rawInbound` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `ReconcilePanel` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `PolicyPorts` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `FastFillFromPolicy` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `ReconcileRuntimeFromPolicy` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `ReconcileRuntime` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `reconcileRuntimeLocked` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `NeedsReconcile` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `maxInt` in `internal/panels/usercapacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `AccountInfo` in `internal/providers/digitalocean/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `Limits` in `internal/providers/digitalocean/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `accountEnvelope` in `internal/providers/digitalocean/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `GetAccount` in `internal/providers/digitalocean/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `GetLimits` in `internal/providers/digitalocean/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `Catalog` in `internal/providers/digitalocean/catalog.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `fixtureClient` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `TestGetLimitsMirrorsAccountLimits` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `TestCatalogFetchesAccountRegionsSizesImages` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `TestDiscoverIsFailFast` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `TestDropletMutationAndReadCharacterization` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `TestSSHKeyAndActionCharacterization` in `internal/providers/digitalocean/characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `SecretReader` in `internal/providers/digitalocean/client.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

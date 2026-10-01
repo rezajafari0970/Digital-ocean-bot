@@ -1,0 +1,404 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 65-72."
+    },
+    {
+      "id": 2,
+      "prompt": "Continue exactly after first line `\t\tproxyURL = u.String()` in `cmd/vultr-capacity-probe/main.go` block 65-72."
+    },
+    {
+      "id": 3,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 73-80."
+    },
+    {
+      "id": 4,
+      "prompt": "Continue exactly after first line `\t\tlocalProxy, e := bridge.Start()` in `cmd/vultr-capacity-probe/main.go` block 73-80."
+    },
+    {
+      "id": 5,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 81-88."
+    },
+    {
+      "id": 6,
+      "prompt": "Continue exactly after first line `\tlimit, err := observer.Observe(ctx, email, string(pass), proxyURL)` in `cmd/vultr-capacity-probe/main.go` block 81-88."
+    },
+    {
+      "id": 7,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 89-96."
+    },
+    {
+      "id": 8,
+      "prompt": "Continue exactly after first line `\t\tfmt.Println(\"failed\")` in `cmd/vultr-capacity-probe/main.go` block 89-96."
+    },
+    {
+      "id": 9,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 97-101."
+    },
+    {
+      "id": 10,
+      "prompt": "Continue exactly after first line `\t\tpanic(err)` in `cmd/vultr-capacity-probe/main.go` block 97-101."
+    },
+    {
+      "id": 11,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 1-8."
+    },
+    {
+      "id": 12,
+      "prompt": "Continue exactly after first line `package main` in `cmd/worker/main.go` block 1-8."
+    },
+    {
+      "id": 13,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 9-16."
+    },
+    {
+      "id": 14,
+      "prompt": "Continue exactly after first line `\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels\"` in `cmd/worker/main.go` block 9-16."
+    },
+    {
+      "id": 15,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 17-24."
+    },
+    {
+      "id": 16,
+      "prompt": "Continue exactly after first line `\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/worker\"` in `cmd/worker/main.go` block 17-24."
+    },
+    {
+      "id": 17,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 25-32."
+    },
+    {
+      "id": 18,
+      "prompt": "Continue exactly after first line `func main() {` in `cmd/worker/main.go` block 25-32."
+    },
+    {
+      "id": 19,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 33-40."
+    },
+    {
+      "id": 20,
+      "prompt": "Continue exactly after first line `\tif err := (migrate.Runner{DB: application.DB, Dir: \"migrations\"}).Up(ctx); err != nil {` in `cmd/worker/main.go` block 33-40."
+    },
+    {
+      "id": 21,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 41-48."
+    },
+    {
+      "id": 22,
+      "prompt": "Continue exactly after first line `\t// minutes the resolver may accept a healthy unique fallback country.` in `cmd/worker/main.go` block 41-48."
+    },
+    {
+      "id": 23,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 49-56."
+    },
+    {
+      "id": 24,
+      "prompt": "Continue exactly after first line `\t\t\t}` in `cmd/worker/main.go` block 49-56."
+    },
+    {
+      "id": 25,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 57-64."
+    },
+    {
+      "id": 26,
+      "prompt": "Continue exactly after first line `\t\t\trows.Close()` in `cmd/worker/main.go` block 57-64."
+    },
+    {
+      "id": 27,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 65-72."
+    },
+    {
+      "id": 28,
+      "prompt": "Continue exactly after first line `\t\t\tcase <-ctx.Done():` in `cmd/worker/main.go` block 65-72."
+    },
+    {
+      "id": 29,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 73-80."
+    },
+    {
+      "id": 30,
+      "prompt": "Continue exactly after first line `\t// Capacity refresh coordinator: one full provider refresh per account only` in `cmd/worker/main.go` block 73-80."
+    },
+    {
+      "id": 31,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 81-88."
+    },
+    {
+      "id": 32,
+      "prompt": "Continue exactly after first line `\t\t\tcase <-ctx.Done():` in `cmd/worker/main.go` block 81-88."
+    },
+    {
+      "id": 33,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 89-96."
+    },
+    {
+      "id": 34,
+      "prompt": "Continue exactly after first line `\tgo func() {` in `cmd/worker/main.go` block 89-96."
+    },
+    {
+      "id": 35,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 97-104."
+    },
+    {
+      "id": 36,
+      "prompt": "Continue exactly after first line `\t\t}` in `cmd/worker/main.go` block 97-104."
+    },
+    {
+      "id": 37,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 105-112."
+    },
+    {
+      "id": 38,
+      "prompt": "Continue exactly after first line `\t\t\t}` in `cmd/worker/main.go` block 105-112."
+    },
+    {
+      "id": 39,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 113-120."
+    },
+    {
+      "id": 40,
+      "prompt": "Continue exactly after first line `\t}` in `cmd/worker/main.go` block 113-120."
+    },
+    {
+      "id": 41,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 121-128."
+    },
+    {
+      "id": 42,
+      "prompt": "Continue exactly after first line `\t\t\tcase <-t.C:` in `cmd/worker/main.go` block 121-128."
+    },
+    {
+      "id": 43,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 129-136."
+    },
+    {
+      "id": 44,
+      "prompt": "Continue exactly after first line `\t\tt := time.NewTicker(10 * time.Second)` in `cmd/worker/main.go` block 129-136."
+    },
+    {
+      "id": 45,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 137-144."
+    },
+    {
+      "id": 46,
+      "prompt": "Continue exactly after first line `\t\t\t\tlog.Printf(\"global reality discovery: %v\", err)` in `cmd/worker/main.go` block 137-144."
+    },
+    {
+      "id": 47,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 145-152."
+    },
+    {
+      "id": 48,
+      "prompt": "Continue exactly after first line `\t\t\t\tgo func() {` in `cmd/worker/main.go` block 145-152."
+    },
+    {
+      "id": 49,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 153-160."
+    },
+    {
+      "id": 50,
+      "prompt": "Continue exactly after first line `\t\t\t\t\tcctx, cancel := context.WithTimeout(ctx, 20*time.Second)` in `cmd/worker/main.go` block 153-160."
+    },
+    {
+      "id": 51,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 161-168."
+    },
+    {
+      "id": 52,
+      "prompt": "Continue exactly after first line `\t\t}` in `cmd/worker/main.go` block 161-168."
+    },
+    {
+      "id": 53,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 169-176."
+    },
+    {
+      "id": 54,
+      "prompt": "Continue exactly after first line `\t\t\t}` in `cmd/worker/main.go` block 169-176."
+    },
+    {
+      "id": 55,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 177-184."
+    },
+    {
+      "id": 56,
+      "prompt": "Continue exactly after first line `\t\tsource := readyworker.SQLSource{DB: application.DB}` in `cmd/worker/main.go` block 177-184."
+    },
+    {
+      "id": 57,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 185-192."
+    },
+    {
+      "id": 58,
+      "prompt": "Continue exactly after first line `\t\t\tsem := make(chan struct{}, 8)` in `cmd/worker/main.go` block 185-192."
+    },
+    {
+      "id": 59,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 193-200."
+    },
+    {
+      "id": 60,
+      "prompt": "Continue exactly after first line `\t\t\t\t\tcase sem <- struct{}{}:` in `cmd/worker/main.go` block 193-200."
+    },
+    {
+      "id": 61,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 201-208."
+    },
+    {
+      "id": 62,
+      "prompt": "Continue exactly after first line `\t\t\t\t\tif err != nil {` in `cmd/worker/main.go` block 201-208."
+    },
+    {
+      "id": 63,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 209-216."
+    },
+    {
+      "id": 64,
+      "prompt": "Continue exactly after first line `\t\t\t\t\t}` in `cmd/worker/main.go` block 209-216."
+    },
+    {
+      "id": 65,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 217-224."
+    },
+    {
+      "id": 66,
+      "prompt": "Continue exactly after first line `\t\t\tcase <-ctx.Done():` in `cmd/worker/main.go` block 217-224."
+    },
+    {
+      "id": 67,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 225-232."
+    },
+    {
+      "id": 68,
+      "prompt": "Continue exactly after first line `\t// User capacity cleanup: expensive full snapshot on a slower cadence.` in `cmd/worker/main.go` block 225-232."
+    },
+    {
+      "id": 69,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 233-240."
+    },
+    {
+      "id": 70,
+      "prompt": "Continue exactly after first line `\t\t\tif err != nil {` in `cmd/worker/main.go` block 233-240."
+    },
+    {
+      "id": 71,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 241-248."
+    },
+    {
+      "id": 72,
+      "prompt": "Continue exactly after first line `\t\t\t\t\terr = capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime)` in `cmd/worker/main.go` block 241-248."
+    },
+    {
+      "id": 73,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 249-256."
+    },
+    {
+      "id": 74,
+      "prompt": "Continue exactly after first line `\t\trun()` in `cmd/worker/main.go` block 249-256."
+    },
+    {
+      "id": 75,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 257-264."
+    },
+    {
+      "id": 76,
+      "prompt": "Continue exactly after first line `\t\t}` in `cmd/worker/main.go` block 257-264."
+    },
+    {
+      "id": 77,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 265-272."
+    },
+    {
+      "id": 78,
+      "prompt": "Continue exactly after first line `\t\tssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}` in `cmd/worker/main.go` block 265-272."
+    },
+    {
+      "id": 79,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 273-280."
+    },
+    {
+      "id": 80,
+      "prompt": "Continue exactly after first line `\t\t\tfor _, panel := range panels {` in `cmd/worker/main.go` block 273-280."
+    },
+    {
+      "id": 81,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 281-288."
+    },
+    {
+      "id": 82,
+      "prompt": "Continue exactly after first line `\t\t\tselect {` in `cmd/worker/main.go` block 281-288."
+    },
+    {
+      "id": 83,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 289-296."
+    },
+    {
+      "id": 84,
+      "prompt": "Continue exactly after first line `` in `cmd/worker/main.go` block 289-296."
+    },
+    {
+      "id": 85,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 297-304."
+    },
+    {
+      "id": 86,
+      "prompt": "Continue exactly after first line `\tlw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100}` in `cmd/worker/main.go` block 297-304."
+    },
+    {
+      "id": 87,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 305-312."
+    },
+    {
+      "id": 88,
+      "prompt": "Continue exactly after first line `\t\t\t\tlog.Printf(\"lifecycle worker: %v\", err)` in `cmd/worker/main.go` block 305-312."
+    },
+    {
+      "id": 89,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 313-320."
+    },
+    {
+      "id": 90,
+      "prompt": "Continue exactly after first line `\t}()` in `cmd/worker/main.go` block 313-320."
+    },
+    {
+      "id": 91,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 321-328."
+    },
+    {
+      "id": 92,
+      "prompt": "Continue exactly after first line `\t\t\tselect {` in `cmd/worker/main.go` block 321-328."
+    },
+    {
+      "id": 93,
+      "prompt": "Reproduce exactly `cmd/worker/main.go` lines 329-332."
+    },
+    {
+      "id": 94,
+      "prompt": "Continue exactly after first line `\tif err := w.Run(ctx); err != nil && ctx.Err() == nil {` in `cmd/worker/main.go` block 329-332."
+    },
+    {
+      "id": 95,
+      "prompt": "Reproduce exactly `internal/accounts/cell.go` lines 1-8."
+    },
+    {
+      "id": 96,
+      "prompt": "Continue exactly after first line `package accounts` in `internal/accounts/cell.go` block 1-8."
+    },
+    {
+      "id": 97,
+      "prompt": "Reproduce exactly `internal/accounts/cell.go` lines 9-16."
+    },
+    {
+      "id": 98,
+      "prompt": "Continue exactly after first line `` in `internal/accounts/cell.go` block 9-16."
+    },
+    {
+      "id": 99,
+      "prompt": "Reproduce exactly `internal/accounts/cell.go` lines 17-24."
+    },
+    {
+      "id": 100,
+      "prompt": "Continue exactly after first line `}` in `internal/accounts/cell.go` block 17-24."
+    }
+  ]
+}

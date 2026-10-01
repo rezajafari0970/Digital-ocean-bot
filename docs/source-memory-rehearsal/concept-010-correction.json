@@ -1,0 +1,1281 @@
+{
+  "answers": {
+    "1": {
+      "package": "provisioning",
+      "previous_symbol": "DetailedCommandRunner",
+      "next_symbol": "ObservableWaiter",
+      "calls": [
+        "Collect"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "2": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessChecker",
+      "next_symbol": "StagedWaiter",
+      "calls": [
+        "WaitObserved"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "3": {
+      "package": "provisioning",
+      "previous_symbol": "ObservableWaiter",
+      "next_symbol": "StagedCommandRunner",
+      "calls": [
+        "WaitStages"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "4": {
+      "package": "provisioning",
+      "previous_symbol": "StagedWaiter",
+      "next_symbol": "Plan",
+      "calls": [
+        "RunDetailedObserved"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "5": {
+      "package": "provisioning",
+      "previous_symbol": "StagedCommandRunner",
+      "next_symbol": "Engine",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "6": {
+      "package": "provisioning",
+      "previous_symbol": "Plan",
+      "next_symbol": "Execute",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "7": {
+      "package": "provisioning",
+      "previous_symbol": "Engine",
+      "next_symbol": "runtimeStep",
+      "calls": [
+        "Get",
+        "LegacyScriptPlan",
+        "Reserve",
+        "validateScriptPlan",
+        "wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "8": {
+      "package": "provisioning",
+      "previous_symbol": "Execute",
+      "next_symbol": "stateForScript",
+      "calls": [
+        "BeginStep",
+        "ClassifyCommandFailure",
+        "ClassifyError",
+        "Collect",
+        "DiagnosticRetryable",
+        "Error",
+        "Event",
+        "FinishStep",
+        "IsInstallerPlaceholder",
+        "Run",
+        "RunDetailed",
+        "RunDetailedObserved",
+        "RunScript",
+        "StepInterrupted",
+        "Update",
+        "Wait",
+        "WaitObserved",
+        "WaitStages",
+        "stateForScript",
+        "tailDiagnostic"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "9": {
+      "package": "provisioning",
+      "previous_symbol": "runtimeStep",
+      "next_symbol": "wipe",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "10": {
+      "package": "provisioning",
+      "previous_symbol": "stateForScript",
+      "next_symbol": "min",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "11": {
+      "package": "provisioning",
+      "previous_symbol": "wipe",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "12": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "Reserve",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "13": {
+      "package": "provisioning",
+      "previous_symbol": "memStore",
+      "next_symbol": "Update",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "14": {
+      "package": "provisioning",
+      "previous_symbol": "Reserve",
+      "next_symbol": "BeginStep",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "15": {
+      "package": "provisioning",
+      "previous_symbol": "Update",
+      "next_symbol": "FinishStep",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "16": {
+      "package": "provisioning",
+      "previous_symbol": "BeginStep",
+      "next_symbol": "StepInterrupted",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "17": {
+      "package": "provisioning",
+      "previous_symbol": "FinishStep",
+      "next_symbol": "secretStub",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "18": {
+      "package": "provisioning",
+      "previous_symbol": "StepInterrupted",
+      "next_symbol": "Get",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "19": {
+      "package": "provisioning",
+      "previous_symbol": "secretStub",
+      "next_symbol": "sshStub",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "20": {
+      "package": "provisioning",
+      "previous_symbol": "Get",
+      "next_symbol": "Wait",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "21": {
+      "package": "provisioning",
+      "previous_symbol": "sshStub",
+      "next_symbol": "Run",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "22": {
+      "package": "provisioning",
+      "previous_symbol": "Wait",
+      "next_symbol": "TestProvisionEngineCompletesAndDoesNotRepeat",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "23": {
+      "package": "provisioning",
+      "previous_symbol": "Run",
+      "next_symbol": null,
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "24": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "Event",
+      "calls": [
+        "Event"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "25": {
+      "package": "provisioning",
+      "previous_symbol": "EventRecorder",
+      "next_symbol": "Event",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "26": {
+      "package": "provisioning",
+      "previous_symbol": "Event",
+      "next_symbol": null,
+      "calls": [
+        "Marshal",
+        "Text",
+        "tailDiagnostic"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "provision_events"
+      ],
+      "routes": []
+    },
+    "27": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "SQLHostKeyPins",
+      "calls": [
+        "VerifyOrPin"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "28": {
+      "package": "provisioning",
+      "previous_symbol": "HostKeyPins",
+      "next_symbol": "VerifyOrPin",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "29": {
+      "package": "provisioning",
+      "previous_symbol": "SQLHostKeyPins",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [
+        "provision_runs"
+      ],
+      "db_writes": [
+        "provision_runs"
+      ],
+      "routes": []
+    },
+    "30": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "InstallerArtifact",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "31": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerRef",
+      "next_symbol": "InstallerManifest",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "32": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerArtifact",
+      "next_symbol": "ResolvedInstaller",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "33": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerManifest",
+      "next_symbol": "InstallerRegistry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "34": {
+      "package": "provisioning",
+      "previous_symbol": "ResolvedInstaller",
+      "next_symbol": "InstallerHash",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "35": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerRegistry",
+      "next_symbol": "Create",
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "36": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerHash",
+      "next_symbol": "Resolve",
+      "calls": [
+        "InstallerHash",
+        "Marshal",
+        "validateInstallerManifest"
+      ],
+      "db_reads": [
+        "installers"
+      ],
+      "db_writes": [
+        "installers"
+      ],
+      "routes": []
+    },
+    "37": {
+      "package": "provisioning",
+      "previous_symbol": "Create",
+      "next_symbol": "CheckInstallerCompatibility",
+      "calls": [
+        "ArtifactSteps",
+        "CheckInstallerCompatibility",
+        "InstallerHash",
+        "shellQuote"
+      ],
+      "db_reads": [
+        "installers"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "38": {
+      "package": "provisioning",
+      "previous_symbol": "Resolve",
+      "next_symbol": "validateInstallerManifest",
+      "calls": [
+        "DecideReadiness",
+        "containsFold",
+        "readinessError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "39": {
+      "package": "provisioning",
+      "previous_symbol": "CheckInstallerCompatibility",
+      "next_symbol": "containsFold",
+      "calls": [
+        "artifactStep"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "40": {
+      "package": "provisioning",
+      "previous_symbol": "validateInstallerManifest",
+      "next_symbol": "ArtifactSteps",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "41": {
+      "package": "provisioning",
+      "previous_symbol": "containsFold",
+      "next_symbol": "artifactStep",
+      "calls": [
+        "artifactStep"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "42": {
+      "package": "provisioning",
+      "previous_symbol": "ArtifactSteps",
+      "next_symbol": "shellQuote",
+      "calls": [
+        "shellQuote"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "43": {
+      "package": "provisioning",
+      "previous_symbol": "artifactStep",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "44": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "validateInstallerManifest"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "45": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "InstallerExecutor",
+      "calls": [
+        "SetState"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "46": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerStateStore",
+      "next_symbol": "Execute",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "47": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerExecutor",
+      "next_symbol": "Rollback",
+      "calls": [
+        "BeginStep",
+        "ClassifyCommandFailure",
+        "DiagnosticRetryable",
+        "Error",
+        "Event",
+        "FinishStep",
+        "RunScript",
+        "SetState",
+        "StepCompleted",
+        "StepInterrupted",
+        "installerStepName"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "48": {
+      "package": "provisioning",
+      "previous_symbol": "Execute",
+      "next_symbol": "installerStepName",
+      "calls": [
+        "BeginStep",
+        "ClassifyCommandFailure",
+        "DiagnosticRetryable",
+        "Error",
+        "Event",
+        "FinishStep",
+        "RunScript",
+        "SetState",
+        "StepCompleted",
+        "installerStepName"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "49": {
+      "package": "provisioning",
+      "previous_symbol": "Rollback",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "50": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "SetState",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "51": {
+      "package": "provisioning",
+      "previous_symbol": "installerStateStub",
+      "next_symbol": "TestInstallerExecutorCompletes",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "52": {
+      "package": "provisioning",
+      "previous_symbol": "SetState",
+      "next_symbol": "installerFailScripts",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "53": {
+      "package": "provisioning",
+      "previous_symbol": "TestInstallerExecutorCompletes",
+      "next_symbol": "RunScript",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "54": {
+      "package": "provisioning",
+      "previous_symbol": "installerFailScripts",
+      "next_symbol": "TestInstallerTerminalFailureRequiresRollback",
+      "calls": [
+        "New",
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "55": {
+      "package": "provisioning",
+      "previous_symbol": "RunScript",
+      "next_symbol": "eventRecorderStub",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "56": {
+      "package": "provisioning",
+      "previous_symbol": "TestInstallerTerminalFailureRequiresRollback",
+      "next_symbol": "Event",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "57": {
+      "package": "provisioning",
+      "previous_symbol": "eventRecorderStub",
+      "next_symbol": "precheckMissScripts",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "58": {
+      "package": "provisioning",
+      "previous_symbol": "Event",
+      "next_symbol": "RunScript",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "59": {
+      "package": "provisioning",
+      "previous_symbol": "precheckMissScripts",
+      "next_symbol": "TestInstallerPrecheckMissIsNotFailure",
+      "calls": [
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "60": {
+      "package": "provisioning",
+      "previous_symbol": "RunScript",
+      "next_symbol": "retryableDNSScripts",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "61": {
+      "package": "provisioning",
+      "previous_symbol": "TestInstallerPrecheckMissIsNotFailure",
+      "next_symbol": "RunScript",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "62": {
+      "package": "provisioning",
+      "previous_symbol": "retryableDNSScripts",
+      "next_symbol": "TestInstallerRetryableFailureStaysInstalling",
+      "calls": [
+        "New",
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "63": {
+      "package": "provisioning",
+      "previous_symbol": "RunScript",
+      "next_symbol": "TestInstallerInterruptedUnsafeNeverReexecutes",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "64": {
+      "package": "provisioning",
+      "previous_symbol": "TestInstallerRetryableFailureStaysInstalling",
+      "next_symbol": null,
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "65": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "InstallerOrchestrator",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "66": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerRun",
+      "next_symbol": "Prepare",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "67": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerOrchestrator",
+      "next_symbol": "SetState",
+      "calls": [
+        "Marshal",
+        "Resolve"
+      ],
+      "db_reads": [
+        "installer_runs"
+      ],
+      "db_writes": [
+        "installer_runs"
+      ],
+      "routes": []
+    },
+    "68": {
+      "package": "provisioning",
+      "previous_symbol": "Prepare",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "installer_runs"
+      ],
+      "routes": []
+    },
+    "69": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "TestArtifactStepIntegrityAndShellSyntax",
+      "calls": [
+        "CheckInstallerCompatibility"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "70": {
+      "package": "provisioning",
+      "previous_symbol": "TestInstallerCompatibility",
+      "next_symbol": "TestArtifactRejectsUnsafeDefinition",
+      "calls": [
+        "Run",
+        "artifactStep"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "71": {
+      "package": "provisioning",
+      "previous_symbol": "TestArtifactStepIntegrityAndShellSyntax",
+      "next_symbol": "TestInstallerHashDeterministic",
+      "calls": [
+        "artifactStep"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "72": {
+      "package": "provisioning",
+      "previous_symbol": "TestArtifactRejectsUnsafeDefinition",
+      "next_symbol": null,
+      "calls": [
+        "InstallerHash"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "73": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "Step",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "74": {
+      "package": "provisioning",
+      "previous_symbol": "Target",
+      "next_symbol": "Run",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "75": {
+      "package": "provisioning",
+      "previous_symbol": "Step",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "76": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "ReadinessRecorder",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "77": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessSnapshot",
+      "next_symbol": "ReadinessCollector",
+      "calls": [
+        "Readiness"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "78": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessRecorder",
+      "next_symbol": "Collect",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "79": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessCollector",
+      "next_symbol": "Readiness",
+      "calls": [
+        "ClassifyCommandFailure",
+        "DecideReadiness",
+        "Readiness",
+        "RunDetailedObserved",
+        "readinessError",
+        "readinessStatus",
+        "tailDiagnostic"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "80": {
+      "package": "provisioning",
+      "previous_symbol": "Collect",
+      "next_symbol": null,
+      "calls": [
+        "Marshal",
+        "Rollback"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "server_readiness_issues",
+        "server_readiness_snapshots"
+      ],
+      "routes": []
+    },
+    "81": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "DecideReadiness",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "82": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessIssue",
+      "next_symbol": "readinessStatus",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "83": {
+      "package": "provisioning",
+      "previous_symbol": "DecideReadiness",
+      "next_symbol": "ReadinessError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "84": {
+      "package": "provisioning",
+      "previous_symbol": "readinessStatus",
+      "next_symbol": "Error",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "85": {
+      "package": "provisioning",
+      "previous_symbol": "ReadinessError",
+      "next_symbol": "Unwrap",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "86": {
+      "package": "provisioning",
+      "previous_symbol": "Error",
+      "next_symbol": "readinessError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "87": {
+      "package": "provisioning",
+      "previous_symbol": "Unwrap",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "88": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "TestReadinessPolicyDecisions",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "89": {
+      "package": "provisioning",
+      "previous_symbol": "issueByCode",
+      "next_symbol": "TestPackageIncompleteUsesSafeRemediation",
+      "calls": [
+        "DecideReadiness",
+        "issueByCode",
+        "readinessError"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "90": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadinessPolicyDecisions",
+      "next_symbol": null,
+      "calls": [
+        "DecideReadiness",
+        "issueByCode"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "91": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "RunDetailedObserved",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "92": {
+      "package": "provisioning",
+      "previous_symbol": "readinessSSHStub",
+      "next_symbol": "TestReadinessReady",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "93": {
+      "package": "provisioning",
+      "previous_symbol": "RunDetailedObserved",
+      "next_symbol": "TestReadinessDNSBlocked",
+      "calls": [
+        "Collect"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "94": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadinessReady",
+      "next_symbol": null,
+      "calls": [
+        "Collect"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "95": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "ScriptPlan",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "96": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptStep",
+      "next_symbol": "validateScriptPlan",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "97": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptPlan",
+      "next_symbol": "legacyScriptStep",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "98": {
+      "package": "provisioning",
+      "previous_symbol": "validateScriptPlan",
+      "next_symbol": "LegacyScriptPlan",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "99": {
+      "package": "provisioning",
+      "previous_symbol": "legacyScriptStep",
+      "next_symbol": "IsInstallerPlaceholder",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "100": {
+      "package": "provisioning",
+      "previous_symbol": "LegacyScriptPlan",
+      "next_symbol": "InstallerPlaceholderName",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "101": {
+      "package": "provisioning",
+      "previous_symbol": "IsInstallerPlaceholder",
+      "next_symbol": "PlanHasInstallerPlaceholder",
+      "calls": [
+        "IsInstallerPlaceholder",
+        "LegacyScriptPlan"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "102": {
+      "package": "provisioning",
+      "previous_symbol": "InstallerPlaceholderName",
+      "next_symbol": null,
+      "calls": [
+        "InstallerPlaceholderName"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "103": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "ScriptRegistry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "104": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptRef",
+      "next_symbol": "ScriptHash",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "105": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptRegistry",
+      "next_symbol": "Create",
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "106": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptHash",
+      "next_symbol": "Resolve",
+      "calls": [
+        "ScriptHash"
+      ],
+      "db_reads": [
+        "install_scripts"
+      ],
+      "db_writes": [
+        "install_scripts"
+      ],
+      "routes": []
+    },
+    "107": {
+      "package": "provisioning",
+      "previous_symbol": "Create",
+      "next_symbol": null,
+      "calls": [
+        "ScriptHash"
+      ],
+      "db_reads": [
+        "install_scripts"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "108": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "ScriptExecutor",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "109": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptPhaseResult",
+      "next_symbol": "SSHScriptRunner",
+      "calls": [
+        "RunScript"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "110": {
+      "package": "provisioning",
+      "previous_symbol": "ScriptExecutor",
+      "next_symbol": "RunScript",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "111": {
+      "package": "provisioning",
+      "previous_symbol": "SSHScriptRunner",
+      "next_symbol": null,
+      "calls": [
+        "ClassifyCommandFailure",
+        "RunDetailedObserved",
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "112": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "RunDetailedObserved",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "113": {
+      "package": "provisioning",
+      "previous_symbol": "stagedScriptStub",
+      "next_symbol": "TestScriptRunnerPrecheckSkipsExecuteAndVerifies",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "114": {
+      "package": "provisioning",
+      "previous_symbol": "RunDetailedObserved",
+      "next_symbol": "TestScriptRunnerFailedPrecheckExecutesThenVerifies",
+      "calls": [
+        "RunScript"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "115": {
+      "package": "provisioning",
+      "previous_symbol": "TestScriptRunnerPrecheckSkipsExecuteAndVerifies",
+      "next_symbol": "TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute",
+      "calls": [
+        "RunScript"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "116": {
+      "package": "provisioning",
+      "previous_symbol": "TestScriptRunnerFailedPrecheckExecutesThenVerifies",
+      "next_symbol": "dnsPrecheckStub",
+      "calls": [
+        "RunScript"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "117": {
+      "package": "provisioning",
+      "previous_symbol": "TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute",
+      "next_symbol": "RunDetailedObserved",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "118": {
+      "package": "provisioning",
+      "previous_symbol": "dnsPrecheckStub",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "119": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "SSHClient",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "120": {
+      "package": "provisioning",
+      "previous_symbol": "CommandResult",
+      "next_symbol": "Wait",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    }
+  }
+}

@@ -1,0 +1,568 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `TestLocalX25519GeneratorCompatibility`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `credentialLock`?"
+    },
+    {
+      "id": 3,
+      "prompt": "Which file contains `TestCredentialIdentityIsDeterministic`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `getRecord`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `SecretWriter`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/reality/credentials/registry.go`, what immediately follows `KeyGenerator`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `Generate`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `XrayGenerator`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `internal/reality/credentials/xray.go`, what immediately follows `XrayGenerator`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `TestXrayGenerator`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `Candidate`?"
+    },
+    {
+      "id": 12,
+      "prompt": "Which file contains `Observation`?"
+    },
+    {
+      "id": 13,
+      "prompt": "In `internal/reality/model.go`, what immediately follows `Score`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `SSHProber`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `Prober`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/reality/probe.go`, what immediately follows `Prober`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestValidateCandidate`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `ObservationStore`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `RunPanel`?"
+    },
+    {
+      "id": 20,
+      "prompt": "In `internal/reality/runner.go`, what immediately follows `CycleResult`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `Evaluate`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `Rank`?"
+    },
+    {
+      "id": 23,
+      "prompt": "In `internal/reality/scorer.go`, what immediately follows `Evaluate`?"
+    },
+    {
+      "id": 24,
+      "prompt": "Which file contains `TestRejectsInvalidCertificate`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `TestRankPrefersReliableLowLatency`?"
+    },
+    {
+      "id": 26,
+      "prompt": "In `internal/reality/scorer_test.go`, what immediately follows `TestRankPrefersReliableLowLatency`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `TestEvaluateAcceptsTLS13Spellings`?"
+    },
+    {
+      "id": 28,
+      "prompt": "Which file contains `TestEvaluateRejectsTLS12`?"
+    },
+    {
+      "id": 29,
+      "prompt": "In `internal/reality/scorer_tls_test.go`, what immediately follows `TestEvaluateAcceptsTLS13Spellings`?"
+    },
+    {
+      "id": 30,
+      "prompt": "Which file contains `probeWire`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `Probe`?"
+    },
+    {
+      "id": 32,
+      "prompt": "In `internal/reality/ssh_prober.go`, what immediately follows `probeWire`?"
+    },
+    {
+      "id": 33,
+      "prompt": "Which file contains `TestSSHProberDoesNotEmbedCandidatePlaintext`?"
+    },
+    {
+      "id": 34,
+      "prompt": "Which file contains `TestSSHProberDecodesObservation`?"
+    },
+    {
+      "id": 35,
+      "prompt": "In `internal/reality/ssh_prober_test.go`, what immediately follows `TestSSHProberDecodesObservation`?"
+    },
+    {
+      "id": 36,
+      "prompt": "Which file contains `ChooseStable`?"
+    },
+    {
+      "id": 37,
+      "prompt": "Which file contains `StableCandidate`?"
+    },
+    {
+      "id": 38,
+      "prompt": "In `internal/reality/stability.go`, what immediately follows `StabilityPolicy`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `TestStabilityRequiresHistory`?"
+    },
+    {
+      "id": 40,
+      "prompt": "Which file contains `obs`?"
+    },
+    {
+      "id": 41,
+      "prompt": "In `internal/reality/stability_test.go`, what immediately follows `TestStabilityRequiresHistory`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `Recent`?"
+    },
+    {
+      "id": 43,
+      "prompt": "Which file contains `Save`?"
+    },
+    {
+      "id": 44,
+      "prompt": "In `internal/reality/store.go`, what immediately follows `Recent`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `ValidateCandidate`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `Text`?"
+    },
+    {
+      "id": 47,
+      "prompt": "Which file contains `Header`?"
+    },
+    {
+      "id": 48,
+      "prompt": "In `internal/redact/redact.go`, what immediately follows `Header`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `TestBearerTokensAreRedactedFromText`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `TestSensitiveHeadersAreRedacted`?"
+    },
+    {
+      "id": 51,
+      "prompt": "In `internal/redact/redact_test.go`, what immediately follows `TestSensitiveHeadersAreRedacted`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `Allow`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `Success`?"
+    },
+    {
+      "id": 54,
+      "prompt": "In `internal/resilience/circuit.go`, what immediately follows `Allow`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `DefaultPolicy`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `Delay`?"
+    },
+    {
+      "id": 57,
+      "prompt": "In `internal/resilience/policy.go`, what immediately follows `Policy`?"
+    },
+    {
+      "id": 58,
+      "prompt": "Which file contains `Do`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `Retrier`?"
+    },
+    {
+      "id": 60,
+      "prompt": "In `internal/resilience/retry.go`, what immediately follows `Retrier`?"
+    },
+    {
+      "id": 61,
+      "prompt": "Which file contains `TestPermanentDoesNotRetry`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `TestCircuitOpens`?"
+    },
+    {
+      "id": 63,
+      "prompt": "In `internal/resilience/retry_test.go`, what immediately follows `TestRetryEventuallySucceeds`?"
+    },
+    {
+      "id": 64,
+      "prompt": "Which file contains `Save`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `Load`?"
+    },
+    {
+      "id": 66,
+      "prompt": "In `internal/resilience/store.go`, what immediately follows `RuntimeState`?"
+    },
+    {
+      "id": 67,
+      "prompt": "Which file contains `Resource`?"
+    },
+    {
+      "id": 68,
+      "prompt": "Which file contains `Difference`?"
+    },
+    {
+      "id": 69,
+      "prompt": "In `internal/resources/model.go`, what immediately follows `Resource`?"
+    },
+    {
+      "id": 70,
+      "prompt": "Which file contains `SQLRegistry`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `Sync`?"
+    },
+    {
+      "id": 72,
+      "prompt": "In `internal/resources/postgres.go`, what immediately follows `Sync`?"
+    },
+    {
+      "id": 73,
+      "prompt": "Which file contains `key`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `Compare`?"
+    },
+    {
+      "id": 75,
+      "prompt": "In `internal/resources/reconcile.go`, what immediately follows `Compare`?"
+    },
+    {
+      "id": 76,
+      "prompt": "Which file contains `TestCompareDetectsDifferences`?"
+    },
+    {
+      "id": 77,
+      "prompt": "Which file contains `Registry`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `Reconciler`?"
+    },
+    {
+      "id": 79,
+      "prompt": "In `internal/resources/registry.go`, what immediately follows `Registry`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `Resolve`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `XrayResolver`?"
+    },
+    {
+      "id": 82,
+      "prompt": "In `internal/runtimecap/xray.go`, what immediately follows `XrayResolver`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `TestResolveMissing`?"
+    },
+    {
+      "id": 84,
+      "prompt": "Which file contains `TestResolveXray`?"
+    },
+    {
+      "id": 85,
+      "prompt": "In `internal/runtimecap/xray_test.go`, what immediately follows `TestResolveXray`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `RunDue`?"
+    },
+    {
+      "id": 87,
+      "prompt": "Which file contains `Engine`?"
+    },
+    {
+      "id": 88,
+      "prompt": "In `internal/scheduler/engine.go`, what immediately follows `providerAllowsCreate`?"
+    },
+    {
+      "id": 89,
+      "prompt": "Which file contains `ClaimDue`?"
+    },
+    {
+      "id": 90,
+      "prompt": "Which file contains `LeaseStore`?"
+    },
+    {
+      "id": 91,
+      "prompt": "In `internal/scheduler/lease.go`, what immediately follows `ClaimDue`?"
+    },
+    {
+      "id": 92,
+      "prompt": "Which file contains `Capacity`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `Policy`?"
+    },
+    {
+      "id": 94,
+      "prompt": "In `internal/scheduler/model.go`, what immediately follows `Available`?"
+    },
+    {
+      "id": 95,
+      "prompt": "Which file contains `Plan`?"
+    },
+    {
+      "id": 96,
+      "prompt": "Which file contains `TestProviderGateNegativeStates`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `Due`?"
+    },
+    {
+      "id": 98,
+      "prompt": "Which file contains `Schedule`?"
+    },
+    {
+      "id": 99,
+      "prompt": "In `internal/scheduler/store.go`, what immediately follows `Due`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `decodeMasterKey`?"
+    },
+    {
+      "id": 101,
+      "prompt": "Which file contains `LoadMasterKey`?"
+    },
+    {
+      "id": 102,
+      "prompt": "In `internal/secrets/key.go`, what immediately follows `LoadMasterKey`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `TestLoadMasterKeyFromFile`?"
+    },
+    {
+      "id": 104,
+      "prompt": "Which file contains `TestLoadMasterKeyFromEnvironment`?"
+    },
+    {
+      "id": 105,
+      "prompt": "In `internal/secrets/key_test.go`, what immediately follows `TestLoadMasterKeyFromEnvironment`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 107,
+      "prompt": "Which file contains `Put`?"
+    },
+    {
+      "id": 108,
+      "prompt": "In `internal/secrets/postgres.go`, what immediately follows `Put`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `PutProbe`?"
+    },
+    {
+      "id": 110,
+      "prompt": "Which file contains `GetProbe`?"
+    },
+    {
+      "id": 111,
+      "prompt": "In `internal/secrets/probe.go`, what immediately follows `PutProbe`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `PutProxy`?"
+    },
+    {
+      "id": 113,
+      "prompt": "Which file contains `GetProxy`?"
+    },
+    {
+      "id": 114,
+      "prompt": "Which file contains `DeleteProxy`?"
+    },
+    {
+      "id": 115,
+      "prompt": "In `internal/secrets/proxy_access.go`, what immediately follows `GetProxy`?"
+    },
+    {
+      "id": 116,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 117,
+      "prompt": "Which file contains `Put`?"
+    },
+    {
+      "id": 118,
+      "prompt": "In `internal/secrets/store.go`, what immediately follows `Repository`?"
+    },
+    {
+      "id": 119,
+      "prompt": "Which file contains `Put`?"
+    },
+    {
+      "id": 120,
+      "prompt": "Which file contains `TestSecretsAreEncryptedAndTenantBound`?"
+    },
+    {
+      "id": 121,
+      "prompt": "In `internal/secrets/store_test.go`, what immediately follows `Get`?"
+    },
+    {
+      "id": 122,
+      "prompt": "Which file contains `TestConcurrentReadyRunsDoNotDuplicateCreate`?"
+    },
+    {
+      "id": 123,
+      "prompt": "Which file contains `TestEndToEndHappyPath`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `TestFailureResumeDoesNotRepeatCompletedSteps`?"
+    },
+    {
+      "id": 125,
+      "prompt": "In `internal/testharness/e2e_test.go`, what immediately follows `TestEndToEndHappyPath`?"
+    },
+    {
+      "id": 126,
+      "prompt": "Which file contains `TestFailureInjectionEveryWorkflowStage`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `TestRepeatedRunAfterReadyIsNoop`?"
+    },
+    {
+      "id": 128,
+      "prompt": "In `internal/testharness/failure_matrix_test.go`, what immediately follows `TestFailureInjectionEveryWorkflowStage`?"
+    },
+    {
+      "id": 129,
+      "prompt": "Which file contains `WaitResource`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Which file contains `call`?"
+    },
+    {
+      "id": 131,
+      "prompt": "In `internal/testharness/harness.go`, what immediately follows `NewSteps`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `TestInstallerCrashRecoveryMatrix`?"
+    },
+    {
+      "id": 133,
+      "prompt": "Which file contains `TestInstallerGenerationsHaveIndependentAttempts`?"
+    },
+    {
+      "id": 134,
+      "prompt": "In `internal/testharness/installer_failure_matrix_test.go`, what immediately follows `TestInstallerCrashRecoveryMatrix`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Which file contains `NewInstallerStore`?"
+    },
+    {
+      "id": 136,
+      "prompt": "Which file contains `StepCompleted`?"
+    },
+    {
+      "id": 137,
+      "prompt": "In `internal/testharness/installer_harness.go`, what immediately follows `RunScript`?"
+    },
+    {
+      "id": 138,
+      "prompt": "Which file contains `TestDigitalOceanLiveDriverCertification`?"
+    },
+    {
+      "id": 139,
+      "prompt": "Which file contains `Event`?"
+    },
+    {
+      "id": 140,
+      "prompt": "Which file contains `Store`?"
+    },
+    {
+      "id": 141,
+      "prompt": "In `internal/testharness/store.go`, what immediately follows `Store`?"
+    }
+  ]
+}

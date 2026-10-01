@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `main` in `cmd/admin-bootstrap/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `main` in `cmd/api/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `main` in `cmd/cleanup-test-droplet/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `main` in `cmd/lifecycle-once/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `main` in `cmd/ready-panel-worker/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `main` in `cmd/resume-one/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `wipe` in `cmd/vultr-browser-session/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `start` in `cmd/vultr-browser-session/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `main` in `cmd/vultr-browser-session/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `wipe` in `cmd/vultr-capacity-probe/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `main` in `cmd/vultr-capacity-probe/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `main` in `cmd/worker/main.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `Cell` in `internal/accounts/cell.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `CellManager` in `internal/accounts/cell.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `NewCellManager` in `internal/accounts/cell.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `Register` in `internal/accounts/cell.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `Acquire` in `internal/accounts/cell.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `TestCellManagerKeepsAccountsSeparate` in `internal/accounts/cell_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `Context` in `internal/accounts/context.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `NewContext` in `internal/accounts/context.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `Authorize` in `internal/accounts/context.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `TestAccountNamespacesAreDistinct` in `internal/accounts/context_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `SecureID` in `internal/accounts/identity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `RuntimeIdentity` in `internal/accounts/identity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `NewRuntimeIdentity` in `internal/accounts/identity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `TestRuntimeIdentitiesAreIndependent` in `internal/accounts/identity_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `syncAccountAutomation` in `internal/adminapi/account_automation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `syncAccountAutomationTx` in `internal/adminapi/account_automation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `accountIdentity` in `internal/adminapi/account_identity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `accountOptions` in `internal/adminapi/account_options.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `accountPreflight` in `internal/adminapi/account_preflight.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `previewAccount` in `internal/adminapi/account_preview.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `previewCredential` in `internal/adminapi/account_preview.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `Get` in `internal/adminapi/account_preview.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `accountPreview` in `internal/adminapi/account_preview.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `writeProviderPreviewError` in `internal/adminapi/account_preview.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `validateAccountSettings` in `internal/adminapi/account_validation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `hasDup` in `internal/adminapi/account_validation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `accountUpdate` in `internal/adminapi/accounts_manage.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `updateAccount` in `internal/adminapi/accounts_manage.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `deleteAccount` in `internal/adminapi/accounts_manage.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `accountWrite` in `internal/adminapi/accounts_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `createAccount` in `internal/adminapi/accounts_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `mustJSON` in `internal/adminapi/accounts_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `requireAdmin` in `internal/adminapi/accounts_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `principalKey` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `loginRequest` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `login` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `logout` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `require` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `principal` in `internal/adminapi/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `buildActivity` in `internal/adminapi/build_activity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `cleanupInbound` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `cleanupJob` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `cleanupResult` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `deleteAllCapacityClients` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `cleanupJobStatus` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `runCleanupJob` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `clearPanelClientsFast` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `item` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `clearPanelClients` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `clearPanelClientsLegacy` in `internal/adminapi/capacity_cleanup.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `configCapacity` in `internal/adminapi/config_capacity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `parseProductExpr` in `internal/adminapi/config_expr.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `parseQuotaMB` in `internal/adminapi/config_expr.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `parseLifetimeMinutes` in `internal/adminapi/config_expr.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `TestConfigExpressions` in `internal/adminapi/config_expr_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `configRequest` in `internal/adminapi/configs.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `putConfig` in `internal/adminapi/configs.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `getConfigs` in `internal/adminapi/configs.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `getConfigPanels` in `internal/adminapi/configs.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `globalConfigRequest` in `internal/adminapi/configs_global.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `putGlobalConfig` in `internal/adminapi/configs_global.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `getGlobalConfigs` in `internal/adminapi/configs_global.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `accountDashboard` in `internal/adminapi/dashboard.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `accountDashboard` in `internal/adminapi/dashboard.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `managedServerInfo` in `internal/adminapi/dashboard.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `accountDiscovery` in `internal/adminapi/discovery.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `listInstallScripts` in `internal/adminapi/install_scripts.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `createInstallScript` in `internal/adminapi/install_scripts.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `rearmDeploymentInstaller` in `internal/adminapi/installer_rearm.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `selectDeploymentInstaller` in `internal/adminapi/installer_selection.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `listInstallers` in `internal/adminapi/installers.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `createInstaller` in `internal/adminapi/installers.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `localeForCountry` in `internal/adminapi/locale.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `fastExitIP` in `internal/adminapi/network_identity_auto.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `result` in `internal/adminapi/network_identity_auto.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `refreshNetworkIdentityIfDue` in `internal/adminapi/network_identity_auto.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `networkIdentityCollision` in `internal/adminapi/network_isolation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `outputInbound` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `outputCacheEntry` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `outputRecord` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `outputVisibleUntil` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `outputMap` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `cachedPanelOutput` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `storePanelOutput` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `refreshPanelOutput` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `refreshPanelOutputAsync` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `collectPanelOutput` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `WarmOutputCache` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `collectRuntimeOutput` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `outputConfigs` in `internal/adminapi/output.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `TestOutputVisibleUntilTenSecondsBeforeExpiry` in `internal/adminapi/output_expiry_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `TestOutputVisibleUntilNoExpiry` in `internal/adminapi/output_expiry_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `persistOutputSnapshot` in `internal/adminapi/output_snapshot.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `newShareToken` in `internal/adminapi/output_snapshot.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `createOutputShare` in `internal/adminapi/output_snapshot.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `sharedOutput` in `internal/adminapi/output_snapshot.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `outputSnapshotResponse` in `internal/adminapi/output_snapshot.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `panelSettings` in `internal/adminapi/panel_settings.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `getPanelSettings` in `internal/adminapi/panel_settings.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `updatePanelSettings` in `internal/adminapi/panel_settings.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `providersMetadata` in `internal/adminapi/providers.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `provisionActivity` in `internal/adminapi/provision_activity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `provisionErrors` in `internal/adminapi/provision_errors.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `updateProxy` in `internal/adminapi/proxies_manage.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `deleteProxy` in `internal/adminapi/proxies_manage.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `proxyWrite` in `internal/adminapi/proxies_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `validProxyWrite` in `internal/adminapi/proxies_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `resolveProxyType` in `internal/adminapi/proxies_write.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

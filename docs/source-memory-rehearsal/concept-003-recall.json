@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `proxySessionUsername` in `internal/app/proxy_provider.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `ProxySessionUsername` in `internal/app/proxy_provider.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `ProxyAdapterCapabilities` in `internal/app/proxy_provider.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `TestGenericDoesNotRewrite` in `internal/app/proxy_provider_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `TestSuffixAdapterPreservesPolicy` in `internal/app/proxy_provider_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `RecoveryHandler` in `internal/app/recovery.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `RecoverOperation` in `internal/app/recovery.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `RecoverDeployment` in `internal/app/recovery.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `BypassDeploymentBackoff` in `internal/app/recovery.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `AccountConfig` in `internal/app/repository.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `Repository` in `internal/app/repository.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `Account` in `internal/app/repository.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `ScheduledStarter` in `internal/app/scheduler.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `PrepareScheduledAccount` in `internal/app/scheduler.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `StartScheduledDeployment` in `internal/app/scheduler.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `ensureDeploymentSSHIdentity` in `internal/app/ssh_identity.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `stickyGeo` in `internal/app/sticky_proxy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `observeStickyGeo` in `internal/app/sticky_proxy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `stickyConfig` in `internal/app/sticky_proxy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `MaintainStickyIdentity` in `internal/app/sticky_proxy.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `DeploymentConfig` in `internal/app/workflow.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `Workflow` in `internal/app/workflow.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `Event` in `internal/audit/audit.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `Recorder` in `internal/audit/audit.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `SQLRecorder` in `internal/audit/audit.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `Record` in `internal/audit/audit.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `User` in `internal/auth/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `Session` in `internal/auth/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `Principal` in `internal/auth/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `CanWrite` in `internal/auth/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `CanAdmin` in `internal/auth/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `Store` in `internal/auth/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `Service` in `internal/auth/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `Login` in `internal/auth/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `Authenticate` in `internal/auth/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `HashPassword` in `internal/auth/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `TestHashPassword` in `internal/auth/service_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `TestShortPasswordRejected` in `internal/auth/service_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `TestRBAC` in `internal/auth/service_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `SQLStore` in `internal/auth/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `FindUser` in `internal/auth/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `CreateSession` in `internal/auth/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `FindSession` in `internal/auth/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `DeleteSession` in `internal/auth/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `Info` in `internal/buildinfo/buildinfo.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `Current` in `internal/buildinfo/buildinfo.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `Querier` in `internal/capacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `Snapshot` in `internal/capacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `Available` in `internal/capacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `Read` in `internal/capacity/service.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `TestAvailable` in `internal/capacity/service_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `TestAvailableUnknownLimit` in `internal/capacity/service_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `computeStub` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `CreateServer` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `GetServer` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `ListServers` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `DeleteServer` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `FindServerByIdentity` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `taggedServer` in `internal/droplets/compute_stub_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `MutationGate` in `internal/droplets/executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `Executor` in `internal/droplets/executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `Create` in `internal/droplets/executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `Delete` in `internal/droplets/executor.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `gateStub` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `AllowMutation` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `opStore` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `Reserve` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `Get` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `Update` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `TestCreateIsIdempotent` in `internal/droplets/executor_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `BuildCreateOperation` in `internal/droplets/factory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `LifecycleItem` in `internal/droplets/lifecycle.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `LifecycleStore` in `internal/droplets/lifecycle.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `Due` in `internal/droplets/lifecycle.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `Transition` in `internal/droplets/lifecycle.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `Event` in `internal/droplets/lifecycle.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `LifecycleExecutor` in `internal/droplets/lifecycle_engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `LifecycleEngine` in `internal/droplets/lifecycle_engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `Process` in `internal/droplets/lifecycle_engine.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `Profile` in `internal/droplets/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `Droplet` in `internal/droplets/model.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `TestRetiringWithoutExpiryIsDueE2E` in `internal/droplets/postgres_e2e_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `Reconciler` in `internal/droplets/reconcile.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `VerifyCreate` in `internal/droplets/reconcile.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `AdoptUnknownCreate` in `internal/droplets/reconcile.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `BuildDeleteOperation` in `internal/droplets/reconcile.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `TestAdoptUnknownCreateUsesUniqueTag` in `internal/droplets/reconcile_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `TestAdoptUnknownCreateAmbiguousTagStaysUnknown` in `internal/droplets/reconcile_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `TestUnknownExistingCreateNeverIssuesSecondMutation` in `internal/droplets/safety_characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `TestDeleteSuccessRequiresLaterConfirmation` in `internal/droplets/safety_characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `TestDeleteErrorIsAmbiguousUnknown` in `internal/droplets/safety_characterization_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `AccountContext` in `internal/geoctx/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `Valid` in `internal/geoctx/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `AcceptLanguage` in `internal/geoctx/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `ForAccount` in `internal/geoctx/account.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `Env` in `internal/geoctx/env.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `LocaleForCountry` in `internal/geoctx/geo.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `TestCoverage` in `internal/geoctx/geo_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `ApplyRequest` in `internal/geoctx/http.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `Operation` in `internal/jobs/operation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `Authorize` in `internal/jobs/operation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `TestOperationRejectsCrossTenantUse` in `internal/jobs/operation_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `Queue` in `internal/jobs/queue.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `Push` in `internal/jobs/queue.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `Len` in `internal/jobs/queue.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `Store` in `internal/jobs/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `SQLStore` in `internal/jobs/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `Reserve` in `internal/jobs/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `Get` in `internal/jobs/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `Update` in `internal/jobs/store.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `Runner` in `internal/migrate/runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `Up` in `internal/migrate/runner.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `ClientBundle` in `internal/network/client.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `NewIsolatedDirectClient` in `internal/network/client.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `Validate` in `internal/network/client.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `CloseIdleConnections` in `internal/network/client.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `TestClientsAreNotSharedAcrossAccounts` in `internal/network/client_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `EgressGuard` in `internal/network/egress_guard.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `Observe` in `internal/network/egress_guard.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `Baseline` in `internal/network/egress_guard.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

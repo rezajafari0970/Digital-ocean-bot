@@ -1,0 +1,1909 @@
+{
+  "answers": {
+    "1": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "HashPassword"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "admin_users"
+      ],
+      "routes": []
+    },
+    "2": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Addr",
+        "Bootstrap",
+        "Close",
+        "New",
+        "PanelSettings",
+        "Routes",
+        "Secure",
+        "Up",
+        "WarmOutputCache"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "3": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "DeleteServer",
+        "GetServer",
+        "Runtime"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "4": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "ProcessLifecycle"
+      ],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "5": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "Run"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "6": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "RecoverDeployment"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "7": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": "start",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "8": {
+      "package": "main",
+      "previous_symbol": "wipe",
+      "next_symbol": "main",
+      "calls": [
+        "Start"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "9": {
+      "package": "main",
+      "previous_symbol": "start",
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "GetProxy",
+        "Start",
+        "start",
+        "wipe"
+      ],
+      "db_reads": [
+        "account_proxy_pool",
+        "proxies"
+      ],
+      "db_writes": [
+        "accounts"
+      ],
+      "routes": []
+    },
+    "10": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": "main",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "11": {
+      "package": "main",
+      "previous_symbol": "wipe",
+      "next_symbol": null,
+      "calls": [
+        "Bootstrap",
+        "Close",
+        "Error",
+        "Get",
+        "GetProxy",
+        "Observe",
+        "Start",
+        "String",
+        "wipe"
+      ],
+      "db_reads": [
+        "account_proxy_pool",
+        "accounts",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "accounts",
+        "provider_capacity_observations"
+      ],
+      "routes": []
+    },
+    "12": {
+      "package": "main",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Acquire",
+        "Add",
+        "Bootstrap",
+        "Close",
+        "EligibleReadyPanels",
+        "FastFillFromPolicy",
+        "MaintainStickyIdentity",
+        "Once",
+        "PurgeExpired",
+        "ReconcileInstances",
+        "ReconcileLocalState",
+        "ReconcilePanel",
+        "ReconcileRuntimeFromPolicy",
+        "RefreshProviderSnapshots",
+        "Run",
+        "RunDailyCatalogSync",
+        "RunDue",
+        "Up",
+        "Wait"
+      ],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "provider"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "13": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": "CellManager",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "14": {
+      "package": "accounts",
+      "previous_symbol": "Cell",
+      "next_symbol": "NewCellManager",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "15": {
+      "package": "accounts",
+      "previous_symbol": "CellManager",
+      "next_symbol": "Register",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "16": {
+      "package": "accounts",
+      "previous_symbol": "NewCellManager",
+      "next_symbol": "Acquire",
+      "calls": [
+        "NewContext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "17": {
+      "package": "accounts",
+      "previous_symbol": "Register",
+      "next_symbol": null,
+      "calls": [
+        "Authorize"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "18": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Acquire",
+        "NewCellManager",
+        "Register"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "19": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": "NewContext",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "20": {
+      "package": "accounts",
+      "previous_symbol": "Context",
+      "next_symbol": "Authorize",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "21": {
+      "package": "accounts",
+      "previous_symbol": "NewContext",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "22": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Authorize",
+        "NewContext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "23": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": "RuntimeIdentity",
+      "calls": [
+        "Read"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "24": {
+      "package": "accounts",
+      "previous_symbol": "SecureID",
+      "next_symbol": "NewRuntimeIdentity",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "25": {
+      "package": "accounts",
+      "previous_symbol": "RuntimeIdentity",
+      "next_symbol": null,
+      "calls": [
+        "SecureID"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "26": {
+      "package": "accounts",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "NewRuntimeIdentity"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "27": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "syncAccountAutomationTx",
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [
+        "EXCLUDED",
+        "accounts"
+      ],
+      "db_writes": [
+        "SET",
+        "deployment_profiles",
+        "schedules"
+      ],
+      "routes": []
+    },
+    "28": {
+      "package": "adminapi",
+      "previous_symbol": "syncAccountAutomation",
+      "next_symbol": null,
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [
+        "EXCLUDED",
+        "accounts"
+      ],
+      "db_writes": [
+        "SET",
+        "deployment_profiles",
+        "schedules"
+      ],
+      "routes": []
+    },
+    "29": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Account",
+        "CanAdmin",
+        "CloseIdleConnections",
+        "Context",
+        "Error",
+        "Runtime",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "accounts"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/identity"
+        }
+      ]
+    },
+    "30": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "provider_snapshots"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/options"
+        }
+      ]
+    },
+    "31": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Account",
+        "CanAdmin",
+        "ClassifyAccountProviderError",
+        "CloseIdleConnections",
+        "Context",
+        "Error",
+        "Marshal",
+        "ProviderStateRuntimeStatus",
+        "RecordProviderObservation",
+        "Runtime",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "accounts"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/preflight"
+        }
+      ]
+    },
+    "32": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "previewCredential",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "33": {
+      "package": "adminapi",
+      "previous_symbol": "previewAccount",
+      "next_symbol": "Get",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "34": {
+      "package": "adminapi",
+      "previous_symbol": "previewCredential",
+      "next_symbol": "accountPreview",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "35": {
+      "package": "adminapi",
+      "previous_symbol": "Get",
+      "next_symbol": "writeProviderPreviewError",
+      "calls": [
+        "Account",
+        "CanAdmin",
+        "Capacity",
+        "Catalog",
+        "Close",
+        "Context",
+        "Do",
+        "Error",
+        "GetProxy",
+        "Has",
+        "Metadata",
+        "Name",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "Open",
+        "ProxyAdapterCapabilities",
+        "ProxySessionUsername",
+        "errorBody",
+        "principal",
+        "writeJSON",
+        "writeProviderPreviewError",
+        "zeroBytes"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/preview"
+        }
+      ]
+    },
+    "36": {
+      "package": "adminapi",
+      "previous_symbol": "accountPreview",
+      "next_symbol": null,
+      "calls": [
+        "Class",
+        "Error",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "37": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "hasDup",
+      "calls": [
+        "hasDup"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "38": {
+      "package": "adminapi",
+      "previous_symbol": "validateAccountSettings",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "39": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "updateAccount",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "40": {
+      "package": "adminapi",
+      "previous_symbol": "accountUpdate",
+      "next_symbol": "deleteAccount",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "Error",
+        "Get",
+        "Marshal",
+        "Put",
+        "Rollback",
+        "errorBody",
+        "networkIdentityCollision",
+        "normalizeProxyPool",
+        "principal",
+        "syncAccountAutomationTx",
+        "syncAccountProxyPool",
+        "validateAccountSettings",
+        "validateReplacementToken",
+        "writeJSON",
+        "zeroBytes"
+      ],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "provider_snapshots",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "account_network_identities",
+        "account_proxy_pool",
+        "accounts",
+        "network_profiles",
+        "provider_capacity_observations"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}"
+        }
+      ]
+    },
+    "41": {
+      "package": "adminapi",
+      "previous_symbol": "updateAccount",
+      "next_symbol": null,
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "Rollback",
+        "errorBody",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "droplets",
+        "resources"
+      ],
+      "db_writes": [
+        "accounts",
+        "droplets"
+      ],
+      "routes": [
+        {
+          "method": "DELETE",
+          "path": "/api/v1/accounts/{id}"
+        }
+      ]
+    },
+    "42": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "createAccount",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "43": {
+      "package": "adminapi",
+      "previous_symbol": "accountWrite",
+      "next_symbol": "mustJSON",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "Error",
+        "Has",
+        "Put",
+        "accounts",
+        "mustJSON",
+        "networkIdentityCollision",
+        "normalizeProxyPool",
+        "principal",
+        "syncAccountAutomation",
+        "validateAccountSettings",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "account_proxy_pool",
+        "accounts",
+        "network_profiles"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts"
+        }
+      ]
+    },
+    "44": {
+      "package": "adminapi",
+      "previous_symbol": "createAccount",
+      "next_symbol": "requireAdmin",
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "45": {
+      "package": "adminapi",
+      "previous_symbol": "mustJSON",
+      "next_symbol": null,
+      "calls": [
+        "CanAdmin"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "46": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "loginRequest",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "47": {
+      "package": "adminapi",
+      "previous_symbol": "principalKey",
+      "next_symbol": "login",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "48": {
+      "package": "adminapi",
+      "previous_symbol": "loginRequest",
+      "next_symbol": "logout",
+      "calls": [
+        "Allow",
+        "Context",
+        "Login",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login"
+        }
+      ]
+    },
+    "49": {
+      "package": "adminapi",
+      "previous_symbol": "login",
+      "next_symbol": "require",
+      "calls": [
+        "Context",
+        "DeleteSession",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/logout"
+        }
+      ]
+    },
+    "50": {
+      "package": "adminapi",
+      "previous_symbol": "logout",
+      "next_symbol": "principal",
+      "calls": [
+        "Authenticate",
+        "CanWrite",
+        "Context",
+        "Get",
+        "next",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "51": {
+      "package": "adminapi",
+      "previous_symbol": "require",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "52": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployment_events",
+        "deployments"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity"
+        }
+      ]
+    },
+    "53": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "cleanupJob",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "54": {
+      "package": "adminapi",
+      "previous_symbol": "cleanupInbound",
+      "next_symbol": "cleanupResult",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "55": {
+      "package": "adminapi",
+      "previous_symbol": "cleanupJob",
+      "next_symbol": "deleteAllCapacityClients",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "56": {
+      "package": "adminapi",
+      "previous_symbol": "cleanupResult",
+      "next_symbol": "cleanupJobStatus",
+      "calls": [
+        "Context",
+        "EligibleReadyPanels",
+        "errorBody",
+        "runCleanupJob",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "global_config_policies"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/config-capacity/delete-all-clients"
+        }
+      ]
+    },
+    "57": {
+      "package": "adminapi",
+      "previous_symbol": "deleteAllCapacityClients",
+      "next_symbol": "runCleanupJob",
+      "calls": [
+        "Marshal",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity/cleanup/{id}"
+        }
+      ]
+    },
+    "58": {
+      "package": "adminapi",
+      "previous_symbol": "cleanupJobStatus",
+      "next_symbol": "clearPanelClientsFast",
+      "calls": [
+        "Add",
+        "Error",
+        "Wait",
+        "clearPanelClients"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "user_capacity_snapshots"
+      ],
+      "routes": []
+    },
+    "59": {
+      "package": "adminapi",
+      "previous_symbol": "runCleanupJob",
+      "next_symbol": "item",
+      "calls": [
+        "Close"
+      ],
+      "db_reads": [
+        "inbound_structural_snapshots"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "60": {
+      "package": "adminapi",
+      "previous_symbol": "clearPanelClientsFast",
+      "next_symbol": "clearPanelClients",
+      "calls": [
+        "Invalidate",
+        "Open",
+        "UpdateInboundRaw"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "61": {
+      "package": "adminapi",
+      "previous_symbol": "item",
+      "next_symbol": "clearPanelClientsLegacy",
+      "calls": [
+        "clearPanelClientsFast"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "62": {
+      "package": "adminapi",
+      "previous_symbol": "clearPanelClients",
+      "next_symbol": null,
+      "calls": [
+        "Invalidate",
+        "Open",
+        "Snapshot",
+        "UpdateInboundRaw"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "63": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "panel_instances",
+        "user_capacity_snapshots"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/config-capacity"
+        }
+      ]
+    },
+    "64": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "parseQuotaMB",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "65": {
+      "package": "adminapi",
+      "previous_symbol": "parseProductExpr",
+      "next_symbol": "parseLifetimeMinutes",
+      "calls": [
+        "parseProductExpr"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "66": {
+      "package": "adminapi",
+      "previous_symbol": "parseQuotaMB",
+      "next_symbol": null,
+      "calls": [
+        "parseProductExpr"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "67": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "parseLifetimeMinutes",
+        "parseQuotaMB"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "68": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "putConfig",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "69": {
+      "package": "adminapi",
+      "previous_symbol": "configRequest",
+      "next_symbol": "getConfigs",
+      "calls": [
+        "Context",
+        "Error",
+        "Normalize",
+        "Put",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "70": {
+      "package": "adminapi",
+      "previous_symbol": "putConfig",
+      "next_symbol": "getConfigPanels",
+      "calls": [
+        "Close",
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "panel_inbound_policies",
+        "panel_instances"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "71": {
+      "package": "adminapi",
+      "previous_symbol": "getConfigs",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "panel_instances"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/config-panels"
+        }
+      ]
+    },
+    "72": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "putGlobalConfig",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "73": {
+      "package": "adminapi",
+      "previous_symbol": "globalConfigRequest",
+      "next_symbol": "getGlobalConfigs",
+      "calls": [
+        "Context",
+        "Marshal",
+        "parseLifetimeMinutes",
+        "parseQuotaMB",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "global_config_policies"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/configs"
+        }
+      ]
+    },
+    "74": {
+      "package": "adminapi",
+      "previous_symbol": "putGlobalConfig",
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "global_config_policies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/configs"
+        }
+      ]
+    },
+    "75": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "accountDashboard",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "76": {
+      "package": "adminapi",
+      "previous_symbol": "accountDashboard",
+      "next_symbol": "managedServerInfo",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "refreshNetworkIdentityIfDue",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "already",
+        "deployments",
+        "droplets",
+        "network_profiles",
+        "operations",
+        "provider_snapshots",
+        "proxies",
+        "resources"
+      ],
+      "db_writes": [
+        "account_network_identities"
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/dashboard"
+        }
+      ]
+    },
+    "77": {
+      "package": "adminapi",
+      "previous_symbol": "accountDashboard",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "78": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "CanCreateCapacity",
+        "ClassifyAccountProviderError",
+        "CloseIdleConnections",
+        "Context",
+        "Error",
+        "Marshal",
+        "Observe",
+        "RecordProviderObservation",
+        "Runtime",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "accounts",
+        "provider_snapshots"
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/discovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/refresh"
+        }
+      ]
+    },
+    "79": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "createInstallScript",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "install_scripts"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/install-scripts"
+        }
+      ]
+    },
+    "80": {
+      "package": "adminapi",
+      "previous_symbol": "listInstallScripts",
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "Create",
+        "Error",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/install-scripts"
+        }
+      ]
+    },
+    "81": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "Rollback",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "deployments",
+        "installers",
+        "worker_item_failures"
+      ],
+      "db_writes": [
+        "deployment_installer_selections",
+        "deployments",
+        "worker_item_failures"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer/rearm"
+        }
+      ]
+    },
+    "82": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "deployments",
+        "installers"
+      ],
+      "db_writes": [
+        "deployment_installer_selections"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/deployments/{id}/installer"
+        }
+      ]
+    },
+    "83": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "createInstaller",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "installers"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/installers"
+        }
+      ]
+    },
+    "84": {
+      "package": "adminapi",
+      "previous_symbol": "listInstallers",
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "Create",
+        "Error",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/installers"
+        }
+      ]
+    },
+    "85": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "LocaleForCountry"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "86": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "result",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "87": {
+      "package": "adminapi",
+      "previous_symbol": "fastExitIP",
+      "next_symbol": "refreshNetworkIdentityIfDue",
+      "calls": [
+        "Close",
+        "Do",
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "88": {
+      "package": "adminapi",
+      "previous_symbol": "result",
+      "next_symbol": null,
+      "calls": [
+        "CloseIdleConnections",
+        "GetProxy",
+        "NewProxyGateway",
+        "fastExitIP",
+        "zeroBytes"
+      ],
+      "db_reads": [
+        "account_network_identities",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "account_network_identities",
+        "accounts",
+        "proxies"
+      ],
+      "routes": []
+    },
+    "89": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [
+        "account_network_identities",
+        "candidate",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "90": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "outputCacheEntry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "91": {
+      "package": "adminapi",
+      "previous_symbol": "outputInbound",
+      "next_symbol": "outputRecord",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "92": {
+      "package": "adminapi",
+      "previous_symbol": "outputCacheEntry",
+      "next_symbol": "outputVisibleUntil",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "93": {
+      "package": "adminapi",
+      "previous_symbol": "outputRecord",
+      "next_symbol": "outputMap",
+      "calls": [
+        "Add"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "94": {
+      "package": "adminapi",
+      "previous_symbol": "outputVisibleUntil",
+      "next_symbol": "cachedPanelOutput",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "95": {
+      "package": "adminapi",
+      "previous_symbol": "outputMap",
+      "next_symbol": "storePanelOutput",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "96": {
+      "package": "adminapi",
+      "previous_symbol": "cachedPanelOutput",
+      "next_symbol": "refreshPanelOutput",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "97": {
+      "package": "adminapi",
+      "previous_symbol": "storePanelOutput",
+      "next_symbol": "refreshPanelOutputAsync",
+      "calls": [
+        "Acquire",
+        "Open",
+        "cachedPanelOutput",
+        "collectRuntimeOutput",
+        "persistOutputSnapshot"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "98": {
+      "package": "adminapi",
+      "previous_symbol": "refreshPanelOutput",
+      "next_symbol": "collectPanelOutput",
+      "calls": [
+        "refreshPanelOutput"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "99": {
+      "package": "adminapi",
+      "previous_symbol": "refreshPanelOutputAsync",
+      "next_symbol": "WarmOutputCache",
+      "calls": [
+        "cachedPanelOutput",
+        "refreshPanelOutputAsync"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "100": {
+      "package": "adminapi",
+      "previous_symbol": "collectPanelOutput",
+      "next_symbol": "collectRuntimeOutput",
+      "calls": [
+        "EligibleReadyPanels",
+        "refreshPanelOutput"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "output_config_snapshots"
+      ],
+      "routes": []
+    },
+    "101": {
+      "package": "adminapi",
+      "previous_symbol": "WarmOutputCache",
+      "next_symbol": "outputConfigs",
+      "calls": [
+        "Close",
+        "Invalidate",
+        "Marshal",
+        "Snapshot",
+        "String",
+        "VLESSRealityURI",
+        "outputMap",
+        "outputVisibleUntil",
+        "storePanelOutput"
+      ],
+      "db_reads": [
+        "deployments",
+        "inbound_export_metadata",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "SET",
+        "inbound_structural_snapshots"
+      ],
+      "routes": []
+    },
+    "102": {
+      "package": "adminapi",
+      "previous_symbol": "collectRuntimeOutput",
+      "next_symbol": null,
+      "calls": [
+        "outputSnapshotResponse"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/output"
+        }
+      ]
+    },
+    "103": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "TestOutputVisibleUntilNoExpiry",
+      "calls": [
+        "Add",
+        "outputVisibleUntil"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "104": {
+      "package": "adminapi",
+      "previous_symbol": "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+      "next_symbol": null,
+      "calls": [
+        "outputVisibleUntil"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "105": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "newShareToken",
+      "calls": [
+        "Close",
+        "Rollback"
+      ],
+      "db_reads": [
+        "current_output_uris",
+        "droplets",
+        "excluded",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "SET",
+        "output_config_snapshots"
+      ],
+      "routes": []
+    },
+    "106": {
+      "package": "adminapi",
+      "previous_symbol": "persistOutputSnapshot",
+      "next_symbol": "createOutputShare",
+      "calls": [
+        "Read"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "107": {
+      "package": "adminapi",
+      "previous_symbol": "newShareToken",
+      "next_symbol": "sharedOutput",
+      "calls": [
+        "Context",
+        "errorBody",
+        "newShareToken",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "output_share_tokens"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/output/share"
+        }
+      ]
+    },
+    "108": {
+      "package": "adminapi",
+      "previous_symbol": "createOutputShare",
+      "next_symbol": "outputSnapshotResponse",
+      "calls": [
+        "Context",
+        "outputSnapshotResponse"
+      ],
+      "db_reads": [
+        "output_share_tokens"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/share/output/{token}"
+        }
+      ]
+    },
+    "109": {
+      "package": "adminapi",
+      "previous_symbol": "sharedOutput",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "Error",
+        "Get",
+        "Header",
+        "Set",
+        "String",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "110": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "getPanelSettings",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "111": {
+      "package": "adminapi",
+      "previous_symbol": "panelSettings",
+      "next_symbol": "updatePanelSettings",
+      "calls": [
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "panel_settings"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/panel-settings"
+        }
+      ]
+    },
+    "112": {
+      "package": "adminapi",
+      "previous_symbol": "getPanelSettings",
+      "next_symbol": null,
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "errorBody",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "panel_settings"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/panel-settings"
+        }
+      ]
+    },
+    "113": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "MetadataAll",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/providers"
+        }
+      ]
+    },
+    "114": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "deployments",
+        "installer_runs",
+        "installers",
+        "provision_events",
+        "provision_runs",
+        "provision_step_attempts",
+        "server_readiness_issues",
+        "server_readiness_snapshots"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/build-activity/{id}/provision"
+        }
+      ]
+    },
+    "115": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "min",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "provision_events",
+        "provision_runs"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/provision-errors"
+        }
+      ]
+    },
+    "116": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "deleteProxy",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "GetProxy",
+        "PutProxy",
+        "Rollback",
+        "errorBody",
+        "principal",
+        "resolveProxyType",
+        "validProxyWrite",
+        "writeJSON",
+        "zeroBytes"
+      ],
+      "db_reads": [
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "account_network_identities",
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/proxies/{id}"
+        }
+      ]
+    },
+    "117": {
+      "package": "adminapi",
+      "previous_symbol": "updateProxy",
+      "next_symbol": null,
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "errorBody",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "all",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "DELETE",
+          "path": "/api/v1/proxies/{id}"
+        }
+      ]
+    },
+    "118": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "validProxyWrite",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "119": {
+      "package": "adminapi",
+      "previous_symbol": "proxyWrite",
+      "next_symbol": "resolveProxyType",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "120": {
+      "package": "adminapi",
+      "previous_symbol": "validProxyWrite",
+      "next_symbol": "createProxy",
+      "calls": [
+        "Context",
+        "detectProxy",
+        "detectProxyTypes"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    }
+  }
+}

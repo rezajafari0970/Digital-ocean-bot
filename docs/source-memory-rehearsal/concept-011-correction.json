@@ -1,0 +1,1326 @@
+{
+  "answers": {
+    "1": {
+      "package": "provisioning",
+      "previous_symbol": "SSHClient",
+      "next_symbol": "WaitObserved",
+      "calls": [
+        "WaitObserved"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "2": {
+      "package": "provisioning",
+      "previous_symbol": "Wait",
+      "next_symbol": "WaitStages",
+      "calls": [
+        "WaitStages"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "3": {
+      "package": "provisioning",
+      "previous_symbol": "WaitObserved",
+      "next_symbol": "Probe",
+      "calls": [
+        "ClassifyError",
+        "observe",
+        "probeStages"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "4": {
+      "package": "provisioning",
+      "previous_symbol": "WaitStages",
+      "next_symbol": "probeStages",
+      "calls": [
+        "probeStages"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "5": {
+      "package": "provisioning",
+      "previous_symbol": "Probe",
+      "next_symbol": "Run",
+      "calls": [
+        "Close",
+        "connectStages",
+        "emitStage",
+        "runSessionContext"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "6": {
+      "package": "provisioning",
+      "previous_symbol": "probeStages",
+      "next_symbol": "RunDetailed",
+      "calls": [
+        "RunDetailed"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "7": {
+      "package": "provisioning",
+      "previous_symbol": "Run",
+      "next_symbol": "RunDetailedObserved",
+      "calls": [
+        "RunDetailedObserved"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "8": {
+      "package": "provisioning",
+      "previous_symbol": "RunDetailed",
+      "next_symbol": "connect",
+      "calls": [
+        "Close",
+        "String",
+        "connectStages",
+        "emitStage",
+        "runSessionContext",
+        "tailDiagnostic"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "9": {
+      "package": "provisioning",
+      "previous_symbol": "RunDetailedObserved",
+      "next_symbol": "connectStages",
+      "calls": [
+        "connectStages"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "10": {
+      "package": "provisioning",
+      "previous_symbol": "connect",
+      "next_symbol": "emitStage",
+      "calls": [
+        "Close",
+        "NewClient",
+        "VerifyOrPin",
+        "emitStage"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "11": {
+      "package": "provisioning",
+      "previous_symbol": "connectStages",
+      "next_symbol": "runSessionContext",
+      "calls": [
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "12": {
+      "package": "provisioning",
+      "previous_symbol": "emitStage",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Start",
+        "Wait"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "13": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "14": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "BeginStep",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "15": {
+      "package": "provisioning",
+      "previous_symbol": "StepPolicy",
+      "next_symbol": "FinishStep",
+      "calls": [],
+      "db_reads": [
+        "provision_step_attempts"
+      ],
+      "db_writes": [
+        "SET",
+        "provision_step_attempts"
+      ],
+      "routes": []
+    },
+    "16": {
+      "package": "provisioning",
+      "previous_symbol": "BeginStep",
+      "next_symbol": "StepInterrupted",
+      "calls": [
+        "Add",
+        "Error",
+        "min"
+      ],
+      "db_reads": [
+        "provision_step_attempts"
+      ],
+      "db_writes": [
+        "provision_step_attempts"
+      ],
+      "routes": []
+    },
+    "17": {
+      "package": "provisioning",
+      "previous_symbol": "FinishStep",
+      "next_symbol": "StepCompletionStore",
+      "calls": [],
+      "db_reads": [
+        "provision_step_attempts"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "18": {
+      "package": "provisioning",
+      "previous_symbol": "StepInterrupted",
+      "next_symbol": "StepCompleted",
+      "calls": [
+        "StepCompleted"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "19": {
+      "package": "provisioning",
+      "previous_symbol": "StepCompletionStore",
+      "next_symbol": "stepAttemptCompleted",
+      "calls": [
+        "stepAttemptCompleted"
+      ],
+      "db_reads": [
+        "provision_step_attempts"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "20": {
+      "package": "provisioning",
+      "previous_symbol": "StepCompleted",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "21": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Add",
+        "stepAttemptCompleted"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "22": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "SQLStore",
+      "calls": [
+        "BeginStep",
+        "FinishStep",
+        "Reserve",
+        "StepInterrupted",
+        "Update"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "23": {
+      "package": "provisioning",
+      "previous_symbol": "Store",
+      "next_symbol": "Reserve",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "24": {
+      "package": "provisioning",
+      "previous_symbol": "SQLStore",
+      "next_symbol": "Update",
+      "calls": [],
+      "db_reads": [
+        "provision_runs"
+      ],
+      "db_writes": [
+        "provision_runs"
+      ],
+      "routes": []
+    },
+    "25": {
+      "package": "provisioning",
+      "previous_symbol": "Reserve",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "provision_runs"
+      ],
+      "routes": []
+    },
+    "26": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "RunScript",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "27": {
+      "package": "provisioning",
+      "previous_symbol": "unknownOutcomeScripts",
+      "next_symbol": "TestUnknownCommandOutcomeWithoutPrecheckFailsClosed",
+      "calls": [
+        "observe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "28": {
+      "package": "provisioning",
+      "previous_symbol": "RunScript",
+      "next_symbol": "TestUnknownCommandOutcomeWithPrecheckRemainsRetryable",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "29": {
+      "package": "provisioning",
+      "previous_symbol": "TestUnknownCommandOutcomeWithoutPrecheckFailsClosed",
+      "next_symbol": null,
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "30": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "Error",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "31": {
+      "package": "provisioning",
+      "previous_symbol": "scpAckError",
+      "next_symbol": "Unwrap",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "32": {
+      "package": "provisioning",
+      "previous_symbol": "Error",
+      "next_symbol": "readSCPAck",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "33": {
+      "package": "provisioning",
+      "previous_symbol": "Unwrap",
+      "next_symbol": "Upload",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "34": {
+      "package": "provisioning",
+      "previous_symbol": "readSCPAck",
+      "next_symbol": "shellArg",
+      "calls": [
+        "Close",
+        "Open",
+        "Size",
+        "Start",
+        "Wait",
+        "connect",
+        "readSCPAck",
+        "shellArg"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "35": {
+      "package": "provisioning",
+      "previous_symbol": "Upload",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "36": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "TestReadSCPAckRemoteError",
+      "calls": [
+        "readSCPAck"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "37": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadSCPAckOK",
+      "next_symbol": "TestReadSCPAckUnexpectedCode",
+      "calls": [
+        "Error",
+        "readSCPAck"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "38": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadSCPAckRemoteError",
+      "next_symbol": "TestReadSCPAckEOF",
+      "calls": [
+        "readSCPAck"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "39": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadSCPAckUnexpectedCode",
+      "next_symbol": "TestShellArgEscapesQuote",
+      "calls": [
+        "Error",
+        "readSCPAck"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "40": {
+      "package": "provisioning",
+      "previous_symbol": "TestReadSCPAckEOF",
+      "next_symbol": null,
+      "calls": [
+        "shellArg"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "41": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "TestHistoricalVerifyReconcilesToWaitingInstaller",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "42": {
+      "package": "provisioning",
+      "previous_symbol": "TestPlaceholderInstallerPausesBeforeExecute",
+      "next_symbol": null,
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "43": {
+      "package": "provisioning",
+      "previous_symbol": null,
+      "next_symbol": "TestRestartAfterKilledWorkerReconcilesWhenPrecheckExists",
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "44": {
+      "package": "provisioning",
+      "previous_symbol": "TestRestartAfterKilledWorkerFailsClosedWithoutPrecheck",
+      "next_symbol": null,
+      "calls": [
+        "Execute"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "45": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": "ParseX25519",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "46": {
+      "package": "credentials",
+      "previous_symbol": "KeyPair",
+      "next_symbol": "UUID",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "47": {
+      "package": "credentials",
+      "previous_symbol": "ParseX25519",
+      "next_symbol": "ShortID",
+      "calls": [
+        "Read"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "48": {
+      "package": "credentials",
+      "previous_symbol": "UUID",
+      "next_symbol": "Wipe",
+      "calls": [
+        "New",
+        "Read"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "49": {
+      "package": "credentials",
+      "previous_symbol": "ShortID",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "50": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": "TestUUIDv4",
+      "calls": [
+        "ParseX25519"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "51": {
+      "package": "credentials",
+      "previous_symbol": "TestParseCurrentXrayFormat",
+      "next_symbol": "TestShortID",
+      "calls": [
+        "UUID"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "52": {
+      "package": "credentials",
+      "previous_symbol": "TestUUIDv4",
+      "next_symbol": "TestWipe",
+      "calls": [
+        "ShortID"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "53": {
+      "package": "credentials",
+      "previous_symbol": "TestShortID",
+      "next_symbol": "TestParseXrayPublicKeyLabel",
+      "calls": [
+        "Wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "54": {
+      "package": "credentials",
+      "previous_symbol": "TestWipe",
+      "next_symbol": null,
+      "calls": [
+        "ParseX25519"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "55": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": "Generate",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "56": {
+      "package": "credentials",
+      "previous_symbol": "LocalX25519Generator",
+      "next_symbol": null,
+      "calls": [
+        "Read",
+        "Wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "57": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Generate",
+        "Wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "58": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "59": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "60": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": "KeyGenerator",
+      "calls": [
+        "Put"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "61": {
+      "package": "credentials",
+      "previous_symbol": "SecretWriter",
+      "next_symbol": "Record",
+      "calls": [
+        "Generate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "62": {
+      "package": "credentials",
+      "previous_symbol": "KeyGenerator",
+      "next_symbol": "Registry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "63": {
+      "package": "credentials",
+      "previous_symbol": "Record",
+      "next_symbol": "Ensure",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "64": {
+      "package": "credentials",
+      "previous_symbol": "Registry",
+      "next_symbol": "queryRower",
+      "calls": [
+        "Generate",
+        "Put",
+        "Rollback",
+        "ShortID",
+        "UUID",
+        "Wipe",
+        "credentialLock",
+        "getRecord"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "reality_credentials"
+      ],
+      "routes": []
+    },
+    "65": {
+      "package": "credentials",
+      "previous_symbol": "Ensure",
+      "next_symbol": "getRecord",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "66": {
+      "package": "credentials",
+      "previous_symbol": "queryRower",
+      "next_symbol": "get",
+      "calls": [],
+      "db_reads": [
+        "reality_credentials"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "67": {
+      "package": "credentials",
+      "previous_symbol": "getRecord",
+      "next_symbol": null,
+      "calls": [
+        "getRecord"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "68": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": "Generate",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "69": {
+      "package": "credentials",
+      "previous_symbol": "XrayGenerator",
+      "next_symbol": null,
+      "calls": [
+        "ParseX25519",
+        "Run"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "70": {
+      "package": "credentials",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Generate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "71": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "Observation",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "72": {
+      "package": "reality",
+      "previous_symbol": "Candidate",
+      "next_symbol": "Score",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "73": {
+      "package": "reality",
+      "previous_symbol": "Observation",
+      "next_symbol": "ScanSelection",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "74": {
+      "package": "reality",
+      "previous_symbol": "Score",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "75": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "SSHProber",
+      "calls": [
+        "Probe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "76": {
+      "package": "reality",
+      "previous_symbol": "Prober",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "77": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "ValidateCandidate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "78": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "CycleResult",
+      "calls": [
+        "Recent",
+        "Save",
+        "Select"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "79": {
+      "package": "reality",
+      "previous_symbol": "ObservationStore",
+      "next_symbol": "RunPanel",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "80": {
+      "package": "reality",
+      "previous_symbol": "CycleResult",
+      "next_symbol": null,
+      "calls": [
+        "Aggregate",
+        "ChooseStable",
+        "Probe",
+        "Recent",
+        "Save",
+        "Select"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "81": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "Rank",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "82": {
+      "package": "reality",
+      "previous_symbol": "Evaluate",
+      "next_symbol": null,
+      "calls": [
+        "Evaluate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "83": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "TestRejectsInvalidCertificate",
+      "calls": [
+        "Rank"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "84": {
+      "package": "reality",
+      "previous_symbol": "TestRankPrefersReliableLowLatency",
+      "next_symbol": null,
+      "calls": [
+        "Evaluate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "85": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "TestEvaluateRejectsTLS12",
+      "calls": [
+        "Evaluate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "86": {
+      "package": "reality",
+      "previous_symbol": "TestEvaluateAcceptsTLS13Spellings",
+      "next_symbol": null,
+      "calls": [
+        "Evaluate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "87": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "Probe",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "88": {
+      "package": "reality",
+      "previous_symbol": "probeWire",
+      "next_symbol": null,
+      "calls": [
+        "Marshal",
+        "Run",
+        "ValidateCandidate",
+        "version"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "89": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "TestSSHProberDoesNotEmbedCandidatePlaintext",
+      "calls": [
+        "Probe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "90": {
+      "package": "reality",
+      "previous_symbol": "TestSSHProberDecodesObservation",
+      "next_symbol": null,
+      "calls": [
+        "Probe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "91": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "StableCandidate",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "92": {
+      "package": "reality",
+      "previous_symbol": "StabilityPolicy",
+      "next_symbol": "Aggregate",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "93": {
+      "package": "reality",
+      "previous_symbol": "StableCandidate",
+      "next_symbol": "bucket",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "94": {
+      "package": "reality",
+      "previous_symbol": "Aggregate",
+      "next_symbol": "ChooseStable",
+      "calls": [
+        "Evaluate"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "95": {
+      "package": "reality",
+      "previous_symbol": "bucket",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "96": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "TestStabilityRequiresHistory",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "97": {
+      "package": "reality",
+      "previous_symbol": "obs",
+      "next_symbol": "TestHysteresisKeepsCurrentForSmallGain",
+      "calls": [
+        "Aggregate",
+        "ChooseStable",
+        "obs"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "98": {
+      "package": "reality",
+      "previous_symbol": "TestStabilityRequiresHistory",
+      "next_symbol": "TestHysteresisSwitchesForMeaningfulGain",
+      "calls": [
+        "Aggregate",
+        "ChooseStable",
+        "Evaluate",
+        "obs"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "99": {
+      "package": "reality",
+      "previous_symbol": "TestHysteresisKeepsCurrentForSmallGain",
+      "next_symbol": null,
+      "calls": [
+        "Aggregate",
+        "ChooseStable",
+        "Evaluate",
+        "obs"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "100": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": "Save",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "101": {
+      "package": "reality",
+      "previous_symbol": "SQLStore",
+      "next_symbol": "Select",
+      "calls": [
+        "Evaluate",
+        "ValidateCandidate"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "reality_target_observations"
+      ],
+      "routes": []
+    },
+    "102": {
+      "package": "reality",
+      "previous_symbol": "Save",
+      "next_symbol": "Recent",
+      "calls": [
+        "ValidateCandidate"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "reality_target_selections"
+      ],
+      "routes": []
+    },
+    "103": {
+      "package": "reality",
+      "previous_symbol": "Select",
+      "next_symbol": "SaveScanSelection",
+      "calls": [
+        "Close"
+      ],
+      "db_reads": [
+        "reality_target_observations"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "104": {
+      "package": "reality",
+      "previous_symbol": "Recent",
+      "next_symbol": null,
+      "calls": [
+        "Marshal"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "reality_target_selections"
+      ],
+      "routes": []
+    },
+    "105": {
+      "package": "reality",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "106": {
+      "package": "redact",
+      "previous_symbol": null,
+      "next_symbol": "Text",
+      "calls": [
+        "Text"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "107": {
+      "package": "redact",
+      "previous_symbol": "Header",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "108": {
+      "package": "redact",
+      "previous_symbol": null,
+      "next_symbol": "TestBearerTokensAreRedactedFromText",
+      "calls": [
+        "Header"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "109": {
+      "package": "redact",
+      "previous_symbol": "TestSensitiveHeadersAreRedacted",
+      "next_symbol": null,
+      "calls": [
+        "Text"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "110": {
+      "package": "resilience",
+      "previous_symbol": null,
+      "next_symbol": "Allow",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "111": {
+      "package": "resilience",
+      "previous_symbol": "Circuit",
+      "next_symbol": "Success",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "112": {
+      "package": "resilience",
+      "previous_symbol": "Allow",
+      "next_symbol": "Failure",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "113": {
+      "package": "resilience",
+      "previous_symbol": "Success",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "114": {
+      "package": "resilience",
+      "previous_symbol": null,
+      "next_symbol": "DefaultPolicy",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "115": {
+      "package": "resilience",
+      "previous_symbol": "Policy",
+      "next_symbol": "Delay",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "116": {
+      "package": "resilience",
+      "previous_symbol": "DefaultPolicy",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "117": {
+      "package": "resilience",
+      "previous_symbol": null,
+      "next_symbol": "Do",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "118": {
+      "package": "resilience",
+      "previous_symbol": "Retrier",
+      "next_symbol": null,
+      "calls": [
+        "Allow",
+        "DefaultPolicy",
+        "Delay",
+        "Failure",
+        "Success"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "119": {
+      "package": "resilience",
+      "previous_symbol": null,
+      "next_symbol": "TestPermanentDoesNotRetry",
+      "calls": [
+        "Do",
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "120": {
+      "package": "resilience",
+      "previous_symbol": "TestRetryEventuallySucceeds",
+      "next_symbol": "TestCircuitOpens",
+      "calls": [
+        "DefaultPolicy",
+        "Do",
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    }
+  }
+}

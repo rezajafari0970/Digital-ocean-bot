@@ -1,0 +1,552 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `Profile`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `Droplet`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/droplets/model.go`, what immediately follows `Profile`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `TestRetiringWithoutExpiryIsDueE2E`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `AdoptUnknownCreate`?"
+    },
+    {
+      "id": 6,
+      "prompt": "Which file contains `BuildDeleteOperation`?"
+    },
+    {
+      "id": 7,
+      "prompt": "In `internal/droplets/reconcile.go`, what immediately follows `Reconciler`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `TestAdoptUnknownCreateUsesUniqueTag`?"
+    },
+    {
+      "id": 9,
+      "prompt": "Which file contains `TestAdoptUnknownCreateAmbiguousTagStaysUnknown`?"
+    },
+    {
+      "id": 10,
+      "prompt": "In `internal/droplets/reconcile_test.go`, what immediately follows `TestAdoptUnknownCreateUsesUniqueTag`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `TestUnknownExistingCreateNeverIssuesSecondMutation`?"
+    },
+    {
+      "id": 12,
+      "prompt": "Which file contains `TestDeleteSuccessRequiresLaterConfirmation`?"
+    },
+    {
+      "id": 13,
+      "prompt": "In `internal/droplets/safety_characterization_test.go`, what immediately follows `TestDeleteSuccessRequiresLaterConfirmation`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `ForAccount`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `AcceptLanguage`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/geoctx/account.go`, what immediately follows `AccountContext`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `Env`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `LocaleForCountry`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `TestCoverage`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `ApplyRequest`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `Authorize`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `Operation`?"
+    },
+    {
+      "id": 23,
+      "prompt": "In `internal/jobs/operation.go`, what immediately follows `Operation`?"
+    },
+    {
+      "id": 24,
+      "prompt": "Which file contains `TestOperationRejectsCrossTenantUse`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `Queue`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `Len`?"
+    },
+    {
+      "id": 27,
+      "prompt": "In `internal/jobs/queue.go`, what immediately follows `Push`?"
+    },
+    {
+      "id": 28,
+      "prompt": "Which file contains `Update`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `SQLStore`?"
+    },
+    {
+      "id": 30,
+      "prompt": "In `internal/jobs/store.go`, what immediately follows `Reserve`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `Up`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `Runner`?"
+    },
+    {
+      "id": 33,
+      "prompt": "In `internal/migrate/runner.go`, what immediately follows `Runner`?"
+    },
+    {
+      "id": 34,
+      "prompt": "Which file contains `Validate`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `CloseIdleConnections`?"
+    },
+    {
+      "id": 36,
+      "prompt": "In `internal/network/client.go`, what immediately follows `ClientBundle`?"
+    },
+    {
+      "id": 37,
+      "prompt": "Which file contains `TestClientsAreNotSharedAcrossAccounts`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `Observe`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `Baseline`?"
+    },
+    {
+      "id": 40,
+      "prompt": "In `internal/network/egress_guard.go`, what immediately follows `Observe`?"
+    },
+    {
+      "id": 41,
+      "prompt": "Which file contains `TestEgressGuardDetectsChange`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `RoundTrip`?"
+    },
+    {
+      "id": 43,
+      "prompt": "In `internal/network/egress_guard_test.go`, what immediately follows `RoundTrip`?"
+    },
+    {
+      "id": 44,
+      "prompt": "Which file contains `AccountGate`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `AllowMutation`?"
+    },
+    {
+      "id": 46,
+      "prompt": "In `internal/network/gate.go`, what immediately follows `AccountGate`?"
+    },
+    {
+      "id": 47,
+      "prompt": "Which file contains `TestAccountGateRequiresHealthyProxy`?"
+    },
+    {
+      "id": 48,
+      "prompt": "Which file contains `ValidateRoute`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `TestProxyRequiredFailsClosed`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `TestProxyRequiredAllowsHealthyProxy`?"
+    },
+    {
+      "id": 51,
+      "prompt": "In `internal/network/guard_test.go`, what immediately follows `TestProxyRequiredFailsClosed`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `HealthResult`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `ipPayload`?"
+    },
+    {
+      "id": 54,
+      "prompt": "In `internal/network/health.go`, what immediately follows `HealthResult`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `HealthState`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `HealthPolicy`?"
+    },
+    {
+      "id": 57,
+      "prompt": "In `internal/network/health_state.go`, what immediately follows `HealthState`?"
+    },
+    {
+      "id": 58,
+      "prompt": "Which file contains `TestHealthStateUsesHysteresis`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `HealthStore`?"
+    },
+    {
+      "id": 60,
+      "prompt": "Which file contains `SQLHealthStore`?"
+    },
+    {
+      "id": 61,
+      "prompt": "In `internal/network/health_store.go`, what immediately follows `HealthStore`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `TestProxyHealthRejectsUnexpectedExitIP`?"
+    },
+    {
+      "id": 63,
+      "prompt": "Which file contains `TestProxyHealthValidatesExitIP`?"
+    },
+    {
+      "id": 64,
+      "prompt": "In `internal/network/health_test.go`, what immediately follows `TestProxyHealthValidatesExitIP`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `ResolveIPv4`?"
+    },
+    {
+      "id": 66,
+      "prompt": "Which file contains `Dial`?"
+    },
+    {
+      "id": 67,
+      "prompt": "In `internal/network/ipv4.go`, what immediately follows `ipv4ProxyDialer`?"
+    },
+    {
+      "id": 68,
+      "prompt": "Which file contains `TestResolveIPv4RejectsIPv6Literal`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `TestResolveIPv4AcceptsIPv4Literal`?"
+    },
+    {
+      "id": 70,
+      "prompt": "In `internal/network/ipv4_test.go`, what immediately follows `TestResolveIPv4RejectsIPv6Literal`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `AccountContext`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `Validate`?"
+    },
+    {
+      "id": 73,
+      "prompt": "In `internal/network/isolation.go`, what immediately follows `AccountContext`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `TestAccountContextsCannotCross`?"
+    },
+    {
+      "id": 75,
+      "prompt": "Which file contains `TestAccountNamespaceStableAndDistinct`?"
+    },
+    {
+      "id": 76,
+      "prompt": "In `internal/network/isolation_test.go`, what immediately follows `TestAccountContextsCannotCross`?"
+    },
+    {
+      "id": 77,
+      "prompt": "Which file contains `ValidateLeakObservation`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `LeakObservation`?"
+    },
+    {
+      "id": 79,
+      "prompt": "In `internal/network/leakcheck.go`, what immediately follows `LeakObservation`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `TestLeakObservationRejectsForwardingHeader`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `TestLeakObservationPassesExpectedProxy`?"
+    },
+    {
+      "id": 82,
+      "prompt": "In `internal/network/leakcheck_test.go`, what immediately follows `TestLeakObservationPassesExpectedProxy`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `MetadataTransport`?"
+    },
+    {
+      "id": 84,
+      "prompt": "Which file contains `randomRequestID`?"
+    },
+    {
+      "id": 85,
+      "prompt": "In `internal/network/metadata.go`, what immediately follows `randomRequestID`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `TestMetadataTransportDoesNotLeakInternalIdentity`?"
+    },
+    {
+      "id": 87,
+      "prompt": "Which file contains `Profile`?"
+    },
+    {
+      "id": 88,
+      "prompt": "Which file contains `Proxy`?"
+    },
+    {
+      "id": 89,
+      "prompt": "In `internal/network/model.go`, what immediately follows `Proxy`?"
+    },
+    {
+      "id": 90,
+      "prompt": "Which file contains `runOnce`?"
+    },
+    {
+      "id": 91,
+      "prompt": "Which file contains `markFailure`?"
+    },
+    {
+      "id": 92,
+      "prompt": "In `internal/network/monitor.go`, what immediately follows `Monitor`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `RoundTrip`?"
+    },
+    {
+      "id": 94,
+      "prompt": "Which file contains `PrivacyTransport`?"
+    },
+    {
+      "id": 95,
+      "prompt": "In `internal/network/privacy.go`, what immediately follows `RoundTrip`?"
+    },
+    {
+      "id": 96,
+      "prompt": "Which file contains `TestPrivacyTransportStripsLeakHeaders`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `RoundTrip`?"
+    },
+    {
+      "id": 98,
+      "prompt": "In `internal/network/privacy_test.go`, what immediately follows `RoundTrip`?"
+    },
+    {
+      "id": 99,
+      "prompt": "Which file contains `NewBrowserProfile`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `TLSProfile`?"
+    },
+    {
+      "id": 101,
+      "prompt": "In `internal/network/profiles.go`, what immediately follows `HTTPProfile`?"
+    },
+    {
+      "id": 102,
+      "prompt": "Which file contains `TestSecurityProfilesHaveSeparateState`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `TestGateBlocksDegradedAndDown`?"
+    },
+    {
+      "id": 104,
+      "prompt": "Which file contains `TestHealthRejectsServerIPLeak`?"
+    },
+    {
+      "id": 105,
+      "prompt": "In `internal/network/proxy_failure_test.go`, what immediately follows `TestRouteRejectsMissingOrUnhealthyProxy`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `DirectDial`?"
+    },
+    {
+      "id": 107,
+      "prompt": "Which file contains `result`?"
+    },
+    {
+      "id": 108,
+      "prompt": "In `internal/network/proxy_gateway.go`, what immediately follows `ProxyCredentials`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `TestHTTPGatewayIsAccountScoped`?"
+    },
+    {
+      "id": 110,
+      "prompt": "Which file contains `TestGatewayDirectDialFailsClosed`?"
+    },
+    {
+      "id": 111,
+      "prompt": "In `internal/network/proxy_gateway_test.go`, what immediately follows `TestHTTPGatewayIsAccountScoped`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `TestProbeGatewayStillValidatesEndpointAndType`?"
+    },
+    {
+      "id": 113,
+      "prompt": "Which file contains `TestProbeGatewayAllowsUnhealthyStatusButTrafficDoesNot`?"
+    },
+    {
+      "id": 114,
+      "prompt": "In `internal/network/proxy_probe_test.go`, what immediately follows `TestProbeGatewayAllowsUnhealthyStatusButTrafficDoesNot`?"
+    },
+    {
+      "id": 115,
+      "prompt": "Which file contains `TestRotatingExitStillRejectsServerIP`?"
+    },
+    {
+      "id": 116,
+      "prompt": "Which file contains `TestRotatingExitAllowed`?"
+    },
+    {
+      "id": 117,
+      "prompt": "In `internal/network/rotating_test.go`, what immediately follows `TestRotatingExitAllowed`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Which file contains `Check`?"
+    },
+    {
+      "id": 119,
+      "prompt": "Which file contains `HealthTarget`?"
+    },
+    {
+      "id": 120,
+      "prompt": "In `internal/network/scheduler.go`, what immediately follows `HealthTarget`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Which file contains `memoryHealthStore`?"
+    },
+    {
+      "id": 122,
+      "prompt": "Which file contains `TestHealthSchedulerRejectsUnhealthyProxyBeforeNetwork`?"
+    },
+    {
+      "id": 123,
+      "prompt": "In `internal/network/scheduler_test.go`, what immediately follows `Save`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `Health`?"
+    },
+    {
+      "id": 125,
+      "prompt": "Which file contains `Check`?"
+    },
+    {
+      "id": 126,
+      "prompt": "In `internal/observability/health.go`, what immediately follows `Report`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `Set`?"
+    },
+    {
+      "id": 128,
+      "prompt": "Which file contains `Inc`?"
+    },
+    {
+      "id": 129,
+      "prompt": "In `internal/observability/metrics.go`, what immediately follows `Set`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Which file contains `TestMetricsOutput`?"
+    },
+    {
+      "id": 131,
+      "prompt": "Which file contains `Dependencies`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `Run`?"
+    },
+    {
+      "id": 133,
+      "prompt": "In `internal/panels/create/orchestrator.go`, what immediately follows `Dependencies`?"
+    },
+    {
+      "id": 134,
+      "prompt": "Which file contains `TestSuccessfulButMissingIsUnconfirmed`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Which file contains `Ready`?"
+    },
+    {
+      "id": 136,
+      "prompt": "In `internal/panels/create/orchestrator_test.go`, what immediately follows `TestNoopExisting`?"
+    },
+    {
+      "id": 137,
+      "prompt": "Which file contains `TestOperationalLifecycle`?"
+    }
+  ]
+}

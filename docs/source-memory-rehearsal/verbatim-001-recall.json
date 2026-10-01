@@ -1,0 +1,404 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 1-8."
+    },
+    {
+      "id": 2,
+      "prompt": "Continue exactly after first line `package main` in `cmd/admin-bootstrap/main.go` block 1-8."
+    },
+    {
+      "id": 3,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 9-16."
+    },
+    {
+      "id": 4,
+      "prompt": "Continue exactly after first line `\t\"log\"` in `cmd/admin-bootstrap/main.go` block 9-16."
+    },
+    {
+      "id": 5,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 17-24."
+    },
+    {
+      "id": 6,
+      "prompt": "Continue exactly after first line `\t\tlog.Fatal(\"ADMIN_USERNAME required\")` in `cmd/admin-bootstrap/main.go` block 17-24."
+    },
+    {
+      "id": 7,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 25-32."
+    },
+    {
+      "id": 8,
+      "prompt": "Continue exactly after first line `\thash, err := auth.HashPassword(password)` in `cmd/admin-bootstrap/main.go` block 25-32."
+    },
+    {
+      "id": 9,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 33-40."
+    },
+    {
+      "id": 10,
+      "prompt": "Continue exactly after first line `\t\tlog.Fatal(err)` in `cmd/admin-bootstrap/main.go` block 33-40."
+    },
+    {
+      "id": 11,
+      "prompt": "Reproduce exactly `cmd/admin-bootstrap/main.go` lines 41-42."
+    },
+    {
+      "id": 12,
+      "prompt": "Continue exactly after first line `\tfmt.Printf(\"admin ready: %s (%s)\\n\", username, id)` in `cmd/admin-bootstrap/main.go` block 41-42."
+    },
+    {
+      "id": 13,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 1-8."
+    },
+    {
+      "id": 14,
+      "prompt": "Continue exactly after first line `package main` in `cmd/api/main.go` block 1-8."
+    },
+    {
+      "id": 15,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 9-16."
+    },
+    {
+      "id": 16,
+      "prompt": "Continue exactly after first line `\t\"net/http\"` in `cmd/api/main.go` block 9-16."
+    },
+    {
+      "id": 17,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 17-24."
+    },
+    {
+      "id": 18,
+      "prompt": "Continue exactly after first line `\t\tlog.Fatal(err)` in `cmd/api/main.go` block 17-24."
+    },
+    {
+      "id": 19,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 25-32."
+    },
+    {
+      "id": 20,
+      "prompt": "Continue exactly after first line `\t\tlog.Fatal(err)` in `cmd/api/main.go` block 25-32."
+    },
+    {
+      "id": 21,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 33-40."
+    },
+    {
+      "id": 22,
+      "prompt": "Continue exactly after first line `\t\tfor {` in `cmd/api/main.go` block 33-40."
+    },
+    {
+      "id": 23,
+      "prompt": "Reproduce exactly `cmd/api/main.go` lines 41-45."
+    },
+    {
+      "id": 24,
+      "prompt": "Continue exactly after first line `\t}()` in `cmd/api/main.go` block 41-45."
+    },
+    {
+      "id": 25,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 1-8."
+    },
+    {
+      "id": 26,
+      "prompt": "Continue exactly after first line `package main` in `cmd/cleanup-test-droplet/main.go` block 1-8."
+    },
+    {
+      "id": 27,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 9-16."
+    },
+    {
+      "id": 28,
+      "prompt": "Continue exactly after first line `)` in `cmd/cleanup-test-droplet/main.go` block 9-16."
+    },
+    {
+      "id": 29,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 17-24."
+    },
+    {
+      "id": 30,
+      "prompt": "Continue exactly after first line `\tif err != nil {` in `cmd/cleanup-test-droplet/main.go` block 17-24."
+    },
+    {
+      "id": 31,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 25-32."
+    },
+    {
+      "id": 32,
+      "prompt": "Continue exactly after first line `\tcompute, ok := rt.Driver.(providers.ComputeDriver)` in `cmd/cleanup-test-droplet/main.go` block 25-32."
+    },
+    {
+      "id": 33,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 33-40."
+    },
+    {
+      "id": 34,
+      "prompt": "Continue exactly after first line `\tfmt.Printf(\"Found test server: id=%s name=%s region=%s state=%s\\n\", srv.ID, srv.Name, srv.RegionID, srv.State)` in `cmd/cleanup-test-droplet/main.go` block 33-40."
+    },
+    {
+      "id": 35,
+      "prompt": "Reproduce exactly `cmd/cleanup-test-droplet/main.go` lines 41-42."
+    },
+    {
+      "id": 36,
+      "prompt": "Continue exactly after first line `\tfmt.Printf(\"Delete request accepted for test server %s\\n\", serverID)` in `cmd/cleanup-test-droplet/main.go` block 41-42."
+    },
+    {
+      "id": 37,
+      "prompt": "Reproduce exactly `cmd/lifecycle-once/main.go` lines 1-3."
+    },
+    {
+      "id": 38,
+      "prompt": "Continue exactly after first line `package main` in `cmd/lifecycle-once/main.go` block 1-3."
+    },
+    {
+      "id": 39,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 1-8."
+    },
+    {
+      "id": 40,
+      "prompt": "Continue exactly after first line `package main` in `cmd/ready-panel-worker/main.go` block 1-8."
+    },
+    {
+      "id": 41,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 9-16."
+    },
+    {
+      "id": 42,
+      "prompt": "Continue exactly after first line `\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/desired\"` in `cmd/ready-panel-worker/main.go` block 9-16."
+    },
+    {
+      "id": 43,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 17-24."
+    },
+    {
+      "id": 44,
+      "prompt": "Continue exactly after first line `\ta, err := app.Bootstrap(ctx)` in `cmd/ready-panel-worker/main.go` block 17-24."
+    },
+    {
+      "id": 45,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 25-32."
+    },
+    {
+      "id": 46,
+      "prompt": "Continue exactly after first line `\t\tEligibility:  readyworker.SQLSource{DB: a.Container.DB},` in `cmd/ready-panel-worker/main.go` block 25-32."
+    },
+    {
+      "id": 47,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 33-40."
+    },
+    {
+      "id": 48,
+      "prompt": "Continue exactly after first line `\t\t\tpanic(err)` in `cmd/ready-panel-worker/main.go` block 33-40."
+    },
+    {
+      "id": 49,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 41-48."
+    },
+    {
+      "id": 50,
+      "prompt": "Continue exactly after first line `\t\t\tif r.Reconciled {` in `cmd/ready-panel-worker/main.go` block 41-48."
+    },
+    {
+      "id": 51,
+      "prompt": "Reproduce exactly `cmd/ready-panel-worker/main.go` lines 49-54."
+    },
+    {
+      "id": 52,
+      "prompt": "Continue exactly after first line `\t\tfmt.Printf(\"SUMMARY cycle=%d bootstrapped=%d reconciled=%d failed=%d mutated=0\\n\", cycle, boot, reconciled, failed)` in `cmd/ready-panel-worker/main.go` block 49-54."
+    },
+    {
+      "id": 53,
+      "prompt": "Reproduce exactly `cmd/resume-one/main.go` lines 1-8."
+    },
+    {
+      "id": 54,
+      "prompt": "Continue exactly after first line `package main` in `cmd/resume-one/main.go` block 1-8."
+    },
+    {
+      "id": 55,
+      "prompt": "Reproduce exactly `cmd/resume-one/main.go` lines 9-16."
+    },
+    {
+      "id": 56,
+      "prompt": "Continue exactly after first line `` in `cmd/resume-one/main.go` block 9-16."
+    },
+    {
+      "id": 57,
+      "prompt": "Reproduce exactly `cmd/resume-one/main.go` lines 17-19."
+    },
+    {
+      "id": 58,
+      "prompt": "Continue exactly after first line `\te = (app.RecoveryHandler{Container: a.Container}).RecoverDeployment(ctx, worker.RecoveryItem{ID: \"14f02b13-98d8-4e3e-b224-843d09385184\", AccountID: \"188a2610-2482-4be6-88f2-36c880877705\", Kind: \"deployment\"})` in `cmd/resume-one/main.go` block 17-19."
+    },
+    {
+      "id": 59,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 1-8."
+    },
+    {
+      "id": 60,
+      "prompt": "Continue exactly after first line `package main` in `cmd/vultr-browser-session/main.go` block 1-8."
+    },
+    {
+      "id": 61,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 9-16."
+    },
+    {
+      "id": 62,
+      "prompt": "Continue exactly after first line `\t\"os/signal\"` in `cmd/vultr-browser-session/main.go` block 9-16."
+    },
+    {
+      "id": 63,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 17-24."
+    },
+    {
+      "id": 64,
+      "prompt": "Continue exactly after first line `` in `cmd/vultr-browser-session/main.go` block 17-24."
+    },
+    {
+      "id": 65,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 25-32."
+    },
+    {
+      "id": 66,
+      "prompt": "Continue exactly after first line `\tc.Stdout = os.Stdout` in `cmd/vultr-browser-session/main.go` block 25-32."
+    },
+    {
+      "id": 67,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 33-40."
+    },
+    {
+      "id": 68,
+      "prompt": "Continue exactly after first line `\t\tpanic(\"account id required\")` in `cmd/vultr-browser-session/main.go` block 33-40."
+    },
+    {
+      "id": 69,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 41-48."
+    },
+    {
+      "id": 70,
+      "prompt": "Continue exactly after first line `\tdefer a.Close()` in `cmd/vultr-browser-session/main.go` block 41-48."
+    },
+    {
+      "id": 71,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 49-56."
+    },
+    {
+      "id": 72,
+      "prompt": "Continue exactly after first line `\tif err != nil {` in `cmd/vultr-browser-session/main.go` block 49-56."
+    },
+    {
+      "id": 73,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 57-64."
+    },
+    {
+      "id": 74,
+      "prompt": "Continue exactly after first line `\t\tpanic(err)` in `cmd/vultr-browser-session/main.go` block 57-64."
+    },
+    {
+      "id": 75,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 65-72."
+    },
+    {
+      "id": 76,
+      "prompt": "Continue exactly after first line `\txvfb, err := start(\"Xvfb\", \":99\", \"-screen\", \"0\", \"1280x800x24\", \"-nolisten\", \"tcp\")` in `cmd/vultr-browser-session/main.go` block 65-72."
+    },
+    {
+      "id": 77,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 73-80."
+    },
+    {
+      "id": 78,
+      "prompt": "Continue exactly after first line `\t\tpanic(err)` in `cmd/vultr-browser-session/main.go` block 73-80."
+    },
+    {
+      "id": 79,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 81-88."
+    },
+    {
+      "id": 80,
+      "prompt": "Continue exactly after first line `\tchrome := exec.Command(\"/usr/bin/google-chrome-stable\",` in `cmd/vultr-browser-session/main.go` block 81-88."
+    },
+    {
+      "id": 81,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 89-96."
+    },
+    {
+      "id": 82,
+      "prompt": "Continue exactly after first line `\t\tpanic(err)` in `cmd/vultr-browser-session/main.go` block 89-96."
+    },
+    {
+      "id": 83,
+      "prompt": "Reproduce exactly `cmd/vultr-browser-session/main.go` lines 97-99."
+    },
+    {
+      "id": 84,
+      "prompt": "Continue exactly after first line `\tcase <-time.After(30 * time.Minute):` in `cmd/vultr-browser-session/main.go` block 97-99."
+    },
+    {
+      "id": 85,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 1-8."
+    },
+    {
+      "id": 86,
+      "prompt": "Continue exactly after first line `package main` in `cmd/vultr-capacity-probe/main.go` block 1-8."
+    },
+    {
+      "id": 87,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 9-16."
+    },
+    {
+      "id": 88,
+      "prompt": "Continue exactly after first line `\t\"time\"` in `cmd/vultr-capacity-probe/main.go` block 9-16."
+    },
+    {
+      "id": 89,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 17-24."
+    },
+    {
+      "id": 90,
+      "prompt": "Continue exactly after first line `\t\tb[i] = 0` in `cmd/vultr-capacity-probe/main.go` block 17-24."
+    },
+    {
+      "id": 91,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 25-32."
+    },
+    {
+      "id": 92,
+      "prompt": "Continue exactly after first line `\taccountID := os.Args[1]` in `cmd/vultr-capacity-probe/main.go` block 25-32."
+    },
+    {
+      "id": 93,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 33-40."
+    },
+    {
+      "id": 94,
+      "prompt": "Continue exactly after first line `\tvar email, passRef, proxyID, proxyHost, proxyUser, proxyRef string` in `cmd/vultr-capacity-probe/main.go` block 33-40."
+    },
+    {
+      "id": 95,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 41-48."
+    },
+    {
+      "id": 96,
+      "prompt": "Continue exactly after first line `WHERE ac.id=$1 AND ac.provider='vultr'`, accountID).` in `cmd/vultr-capacity-probe/main.go` block 41-48."
+    },
+    {
+      "id": 97,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 49-56."
+    },
+    {
+      "id": 98,
+      "prompt": "Continue exactly after first line `\tpass, err := a.Container.Secrets.Get(ctx, accountID, passRef)` in `cmd/vultr-capacity-probe/main.go` block 49-56."
+    },
+    {
+      "id": 99,
+      "prompt": "Reproduce exactly `cmd/vultr-capacity-probe/main.go` lines 57-64."
+    },
+    {
+      "id": 100,
+      "prompt": "Continue exactly after first line `\t\tu := &url.URL{Scheme: \"http\", Host: fmt.Sprintf(\"%s:%d\", proxyHost, proxyPort)}` in `cmd/vultr-capacity-probe/main.go` block 57-64."
+    }
+  ]
+}

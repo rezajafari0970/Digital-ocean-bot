@@ -1,0 +1,720 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 3,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 6,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `wipe`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `cmd/vultr-browser-session/main.go`, what immediately follows `wipe`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `wipe`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 12,
+      "prompt": "In `cmd/vultr-capacity-probe/main.go`, what immediately follows `wipe`?"
+    },
+    {
+      "id": 13,
+      "prompt": "Which file contains `main`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `CellManager`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `NewCellManager`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/accounts/cell.go`, what immediately follows `CellManager`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestCellManagerKeepsAccountsSeparate`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `NewContext`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `Authorize`?"
+    },
+    {
+      "id": 20,
+      "prompt": "In `internal/accounts/context.go`, what immediately follows `Context`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `TestAccountNamespacesAreDistinct`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `SecureID`?"
+    },
+    {
+      "id": 23,
+      "prompt": "Which file contains `NewRuntimeIdentity`?"
+    },
+    {
+      "id": 24,
+      "prompt": "In `internal/accounts/identity.go`, what immediately follows `SecureID`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `TestRuntimeIdentitiesAreIndependent`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `syncAccountAutomationTx`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `syncAccountAutomation`?"
+    },
+    {
+      "id": 28,
+      "prompt": "In `internal/adminapi/account_automation.go`, what immediately follows `syncAccountAutomation`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `accountIdentity`?"
+    },
+    {
+      "id": 30,
+      "prompt": "Which file contains `accountOptions`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `accountPreflight`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `accountPreview`?"
+    },
+    {
+      "id": 33,
+      "prompt": "Which file contains `writeProviderPreviewError`?"
+    },
+    {
+      "id": 34,
+      "prompt": "In `internal/adminapi/account_preview.go`, what immediately follows `accountPreview`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `validateAccountSettings`?"
+    },
+    {
+      "id": 36,
+      "prompt": "Which file contains `hasDup`?"
+    },
+    {
+      "id": 37,
+      "prompt": "In `internal/adminapi/account_validation.go`, what immediately follows `validateAccountSettings`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `updateAccount`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `accountUpdate`?"
+    },
+    {
+      "id": 40,
+      "prompt": "In `internal/adminapi/accounts_manage.go`, what immediately follows `updateAccount`?"
+    },
+    {
+      "id": 41,
+      "prompt": "Which file contains `createAccount`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `mustJSON`?"
+    },
+    {
+      "id": 43,
+      "prompt": "In `internal/adminapi/accounts_write.go`, what immediately follows `mustJSON`?"
+    },
+    {
+      "id": 44,
+      "prompt": "Which file contains `require`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `login`?"
+    },
+    {
+      "id": 46,
+      "prompt": "In `internal/adminapi/auth.go`, what immediately follows `principalKey`?"
+    },
+    {
+      "id": 47,
+      "prompt": "Which file contains `buildActivity`?"
+    },
+    {
+      "id": 48,
+      "prompt": "Which file contains `item`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `cleanupInbound`?"
+    },
+    {
+      "id": 50,
+      "prompt": "In `internal/adminapi/capacity_cleanup.go`, what immediately follows `deleteAllCapacityClients`?"
+    },
+    {
+      "id": 51,
+      "prompt": "Which file contains `configCapacity`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `parseLifetimeMinutes`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `parseQuotaMB`?"
+    },
+    {
+      "id": 54,
+      "prompt": "In `internal/adminapi/config_expr.go`, what immediately follows `parseProductExpr`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `TestConfigExpressions`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `getConfigs`?"
+    },
+    {
+      "id": 57,
+      "prompt": "Which file contains `getConfigPanels`?"
+    },
+    {
+      "id": 58,
+      "prompt": "In `internal/adminapi/configs.go`, what immediately follows `configRequest`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `globalConfigRequest`?"
+    },
+    {
+      "id": 60,
+      "prompt": "Which file contains `getGlobalConfigs`?"
+    },
+    {
+      "id": 61,
+      "prompt": "In `internal/adminapi/configs_global.go`, what immediately follows `globalConfigRequest`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `accountDashboard`?"
+    },
+    {
+      "id": 63,
+      "prompt": "Which file contains `managedServerInfo`?"
+    },
+    {
+      "id": 64,
+      "prompt": "In `internal/adminapi/dashboard.go`, what immediately follows `accountDashboard`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `accountDiscovery`?"
+    },
+    {
+      "id": 66,
+      "prompt": "Which file contains `listInstallScripts`?"
+    },
+    {
+      "id": 67,
+      "prompt": "Which file contains `createInstallScript`?"
+    },
+    {
+      "id": 68,
+      "prompt": "In `internal/adminapi/install_scripts.go`, what immediately follows `listInstallScripts`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `rearmDeploymentInstaller`?"
+    },
+    {
+      "id": 70,
+      "prompt": "Which file contains `selectDeploymentInstaller`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `listInstallers`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `createInstaller`?"
+    },
+    {
+      "id": 73,
+      "prompt": "In `internal/adminapi/installers.go`, what immediately follows `listInstallers`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `localeForCountry`?"
+    },
+    {
+      "id": 75,
+      "prompt": "Which file contains `result`?"
+    },
+    {
+      "id": 76,
+      "prompt": "Which file contains `refreshNetworkIdentityIfDue`?"
+    },
+    {
+      "id": 77,
+      "prompt": "In `internal/adminapi/network_identity_auto.go`, what immediately follows `result`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `networkIdentityCollision`?"
+    },
+    {
+      "id": 79,
+      "prompt": "Which file contains `refreshPanelOutputAsync`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `WarmOutputCache`?"
+    },
+    {
+      "id": 81,
+      "prompt": "In `internal/adminapi/output.go`, what immediately follows `refreshPanelOutputAsync`?"
+    },
+    {
+      "id": 82,
+      "prompt": "Which file contains `TestOutputVisibleUntilTenSecondsBeforeExpiry`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `TestOutputVisibleUntilNoExpiry`?"
+    },
+    {
+      "id": 84,
+      "prompt": "In `internal/adminapi/output_expiry_test.go`, what immediately follows `TestOutputVisibleUntilTenSecondsBeforeExpiry`?"
+    },
+    {
+      "id": 85,
+      "prompt": "Which file contains `sharedOutput`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `persistOutputSnapshot`?"
+    },
+    {
+      "id": 87,
+      "prompt": "In `internal/adminapi/output_snapshot.go`, what immediately follows `sharedOutput`?"
+    },
+    {
+      "id": 88,
+      "prompt": "Which file contains `panelSettings`?"
+    },
+    {
+      "id": 89,
+      "prompt": "Which file contains `updatePanelSettings`?"
+    },
+    {
+      "id": 90,
+      "prompt": "In `internal/adminapi/panel_settings.go`, what immediately follows `panelSettings`?"
+    },
+    {
+      "id": 91,
+      "prompt": "Which file contains `providersMetadata`?"
+    },
+    {
+      "id": 92,
+      "prompt": "Which file contains `provisionActivity`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `provisionErrors`?"
+    },
+    {
+      "id": 94,
+      "prompt": "Which file contains `updateProxy`?"
+    },
+    {
+      "id": 95,
+      "prompt": "Which file contains `deleteProxy`?"
+    },
+    {
+      "id": 96,
+      "prompt": "In `internal/adminapi/proxies_manage.go`, what immediately follows `updateProxy`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `createProxy`?"
+    },
+    {
+      "id": 98,
+      "prompt": "Which file contains `assignProxy`?"
+    },
+    {
+      "id": 99,
+      "prompt": "In `internal/adminapi/proxies_write.go`, what immediately follows `resolveProxyType`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `proxyDetails`?"
+    },
+    {
+      "id": 101,
+      "prompt": "Which file contains `testProxy`?"
+    },
+    {
+      "id": 102,
+      "prompt": "In `internal/adminapi/proxy_details.go`, what immediately follows `proxyDetails`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `detectProxyTypes`?"
+    },
+    {
+      "id": 104,
+      "prompt": "Which file contains `detectProxy`?"
+    },
+    {
+      "id": 105,
+      "prompt": "In `internal/adminapi/proxy_detect.go`, what immediately follows `detectProxy`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `testAccountProxy`?"
+    },
+    {
+      "id": 107,
+      "prompt": "Which file contains `zeroBytes`?"
+    },
+    {
+      "id": 108,
+      "prompt": "In `internal/adminapi/proxy_health.go`, what immediately follows `testAccountProxy`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `ProxyObservation`?"
+    },
+    {
+      "id": 110,
+      "prompt": "Which file contains `observeProxy`?"
+    },
+    {
+      "id": 111,
+      "prompt": "In `internal/adminapi/proxy_observe.go`, what immediately follows `observeProxy`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `normalizeProxyPool`?"
+    },
+    {
+      "id": 113,
+      "prompt": "Which file contains `syncAccountProxyPool`?"
+    },
+    {
+      "id": 114,
+      "prompt": "In `internal/adminapi/proxy_pool.go`, what immediately follows `normalizeProxyPool`?"
+    },
+    {
+      "id": 115,
+      "prompt": "Which file contains `deleteResidentialProxy`?"
+    },
+    {
+      "id": 116,
+      "prompt": "Which file contains `updateResidentialProxy`?"
+    },
+    {
+      "id": 117,
+      "prompt": "In `internal/adminapi/residential.go`, what immediately follows `residentialProxies`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Handler for `GET /healthz`?"
+    },
+    {
+      "id": 119,
+      "prompt": "Handler for `GET /readyz`?"
+    },
+    {
+      "id": 120,
+      "prompt": "Handler for `GET /version`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Handler for `POST /api/v1/auth/login`?"
+    },
+    {
+      "id": 122,
+      "prompt": "Handler for `POST /api/v1/auth/logout`?"
+    },
+    {
+      "id": 123,
+      "prompt": "Handler for `POST /api/v1/accounts`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Handler for `POST /api/v1/accounts/preview`?"
+    },
+    {
+      "id": 125,
+      "prompt": "Handler for `PUT /api/v1/accounts/{id}`?"
+    },
+    {
+      "id": 126,
+      "prompt": "Handler for `DELETE /api/v1/accounts/{id}`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/options`?"
+    },
+    {
+      "id": 128,
+      "prompt": "Handler for `POST /api/v1/accounts/{id}/identity`?"
+    },
+    {
+      "id": 129,
+      "prompt": "Handler for `POST /api/v1/accounts/{id}/preflight`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Handler for `POST /api/v1/accounts/{id}/console-session`?"
+    },
+    {
+      "id": 131,
+      "prompt": "Handler for `GET /vultr-browser/{path...}`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Handler for `GET /websockify`?"
+    },
+    {
+      "id": 133,
+      "prompt": "Handler for `POST /api/v1/proxies`?"
+    },
+    {
+      "id": 134,
+      "prompt": "Handler for `PUT /api/v1/proxies/{id}`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Handler for `DELETE /api/v1/proxies/{id}`?"
+    },
+    {
+      "id": 136,
+      "prompt": "Handler for `GET /api/v1/proxies/{id}`?"
+    },
+    {
+      "id": 137,
+      "prompt": "Handler for `GET /api/v1/residential-proxies`?"
+    },
+    {
+      "id": 138,
+      "prompt": "Handler for `POST /api/v1/residential-proxies`?"
+    },
+    {
+      "id": 139,
+      "prompt": "Handler for `PUT /api/v1/residential-proxies/{id}`?"
+    },
+    {
+      "id": 140,
+      "prompt": "Handler for `DELETE /api/v1/residential-proxies/{id}`?"
+    },
+    {
+      "id": 141,
+      "prompt": "Handler for `POST /api/v1/residential-proxies/{id}/test`?"
+    },
+    {
+      "id": 142,
+      "prompt": "Handler for `GET /api/v1/configs`?"
+    },
+    {
+      "id": 143,
+      "prompt": "Handler for `GET /api/v1/config-capacity`?"
+    },
+    {
+      "id": 144,
+      "prompt": "Handler for `POST /api/v1/config-capacity/delete-all-clients`?"
+    },
+    {
+      "id": 145,
+      "prompt": "Handler for `GET /api/v1/config-capacity/cleanup/{id}`?"
+    },
+    {
+      "id": 146,
+      "prompt": "Handler for `GET /api/v1/output`?"
+    },
+    {
+      "id": 147,
+      "prompt": "Handler for `POST /api/v1/output/share`?"
+    },
+    {
+      "id": 148,
+      "prompt": "Handler for `GET /share/output/{token}`?"
+    },
+    {
+      "id": 149,
+      "prompt": "Handler for `GET /api/v1/config-panels`?"
+    },
+    {
+      "id": 150,
+      "prompt": "Handler for `PUT /api/v1/configs`?"
+    },
+    {
+      "id": 151,
+      "prompt": "Handler for `POST /api/v1/proxies/{id}/test`?"
+    },
+    {
+      "id": 152,
+      "prompt": "Handler for `PUT /api/v1/accounts/{id}/network`?"
+    },
+    {
+      "id": 153,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/discovery`?"
+    },
+    {
+      "id": 154,
+      "prompt": "Handler for `POST /api/v1/accounts/{id}/refresh`?"
+    },
+    {
+      "id": 155,
+      "prompt": "Handler for `POST /api/v1/accounts/{id}/proxy-test`?"
+    },
+    {
+      "id": 156,
+      "prompt": "Handler for `GET /api/v1/templates`?"
+    },
+    {
+      "id": 157,
+      "prompt": "Handler for `POST /api/v1/templates`?"
+    },
+    {
+      "id": 158,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/dashboard`?"
+    },
+    {
+      "id": 159,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/resources`?"
+    },
+    {
+      "id": 160,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/capacity`?"
+    },
+    {
+      "id": 161,
+      "prompt": "Handler for `GET /api/v1/accounts/{id}/runtime`?"
+    },
+    {
+      "id": 162,
+      "prompt": "Handler for `GET /api/v1/accounts`?"
+    },
+    {
+      "id": 163,
+      "prompt": "Handler for `GET /api/v1/proxies`?"
+    },
+    {
+      "id": 164,
+      "prompt": "Handler for `GET /api/v1/build-activity`?"
+    },
+    {
+      "id": 165,
+      "prompt": "Handler for `GET /api/v1/build-activity/{id}/provision`?"
+    },
+    {
+      "id": 166,
+      "prompt": "Handler for `GET /api/v1/provision-errors`?"
+    },
+    {
+      "id": 167,
+      "prompt": "Handler for `POST /api/v1/installers/sanaei/preview`?"
+    },
+    {
+      "id": 168,
+      "prompt": "Handler for `POST /api/v1/installers/sanaei`?"
+    },
+    {
+      "id": 169,
+      "prompt": "Handler for `GET /api/v1/installers`?"
+    },
+    {
+      "id": 170,
+      "prompt": "Handler for `POST /api/v1/installers`?"
+    },
+    {
+      "id": 171,
+      "prompt": "Handler for `GET /api/v1/install-scripts`?"
+    },
+    {
+      "id": 172,
+      "prompt": "Handler for `POST /api/v1/install-scripts`?"
+    },
+    {
+      "id": 173,
+      "prompt": "Handler for `POST /api/v1/deployments/{id}/installer`?"
+    },
+    {
+      "id": 174,
+      "prompt": "Handler for `POST /api/v1/deployments/{id}/installer/rearm`?"
+    },
+    {
+      "id": 175,
+      "prompt": "Handler for `GET /api/v1/audit`?"
+    },
+    {
+      "id": 176,
+      "prompt": "Handler for `GET /api/v1/system`?"
+    },
+    {
+      "id": 177,
+      "prompt": "Handler for `GET /api/v1/providers`?"
+    },
+    {
+      "id": 178,
+      "prompt": "Handler for `GET /api/v1/panel-settings`?"
+    },
+    {
+      "id": 179,
+      "prompt": "Handler for `PUT /api/v1/panel-settings`?"
+    }
+  ]
+}

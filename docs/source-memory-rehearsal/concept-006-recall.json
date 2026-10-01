@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Recall `TestLoginPreservesTransportCause` in `internal/panels/sanaei/api_error_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 2,
+      "prompt": "Recall `BearerAuth` in `internal/panels/sanaei/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 3,
+      "prompt": "Recall `Authorize` in `internal/panels/sanaei/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 4,
+      "prompt": "Recall `SessionCredential` in `internal/panels/sanaei/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 5,
+      "prompt": "Recall `ValidateSessionTransport` in `internal/panels/sanaei/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 6,
+      "prompt": "Recall `wipeAuth` in `internal/panels/sanaei/auth.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 7,
+      "prompt": "Recall `Get` in `internal/panels/sanaei/auth_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 8,
+      "prompt": "Recall `TestBearerAuthReadsSecretAndSetsHeader` in `internal/panels/sanaei/auth_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 9,
+      "prompt": "Recall `TestSessionCredentialsRefusePlainHTTP` in `internal/panels/sanaei/auth_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 10,
+      "prompt": "Recall `errorsIs` in `internal/panels/sanaei/auth_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 11,
+      "prompt": "Recall `AddClientsSession` in `internal/panels/sanaei/client_mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 12,
+      "prompt": "Recall `DeleteClientSession` in `internal/panels/sanaei/client_mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 13,
+      "prompt": "Recall `Client` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 14,
+      "prompt": "Recall `ClientRecord` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 15,
+      "prompt": "Recall `ClientStore` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 16,
+      "prompt": "Recall `ClientManager` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 17,
+      "prompt": "Recall `CreateMany` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 18,
+      "prompt": "Recall `UUIDv4` in `internal/panels/sanaei/clients.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 19,
+      "prompt": "Recall `TestUUIDv4` in `internal/panels/sanaei/clients_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 20,
+      "prompt": "Recall `DatabasePaths` in `internal/panels/sanaei/database.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 21,
+      "prompt": "Recall `DefaultDatabasePaths` in `internal/panels/sanaei/database.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 22,
+      "prompt": "Recall `ImportCommand` in `internal/panels/sanaei/database.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 23,
+      "prompt": "Recall `DirectSessionExecutor` in `internal/panels/sanaei/direct_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 24,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/direct_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 25,
+      "prompt": "Recall `AuthProvider` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 26,
+      "prompt": "Recall `Driver` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 27,
+      "prompt": "Recall `Name` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 28,
+      "prompt": "Recall `client` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 29,
+      "prompt": "Recall `probe` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 30,
+      "prompt": "Recall `supported` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 31,
+      "prompt": "Recall `exists` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 32,
+      "prompt": "Recall `Discover` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 33,
+      "prompt": "Recall `Health` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 34,
+      "prompt": "Recall `DiscoverWithExecutor` in `internal/panels/sanaei/driver.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 35,
+      "prompt": "Recall `TestDriverDiscoveryClassifiesRuntimeCapabilities` in `internal/panels/sanaei/driver_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 36,
+      "prompt": "Recall `TestDiscoverWithExecutorIsReadOnly` in `internal/panels/sanaei/driver_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 37,
+      "prompt": "Recall `GetInbound` in `internal/panels/sanaei/inbound_get.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 38,
+      "prompt": "Recall `Inbound` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 39,
+      "prompt": "Recall `inboundListResponse` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 40,
+      "prompt": "Recall `genericResponse` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 41,
+      "prompt": "Recall `ListInbounds` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 42,
+      "prompt": "Recall `AddClient` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 43,
+      "prompt": "Recall `AddClients` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 44,
+      "prompt": "Recall `DeleteClient` in `internal/panels/sanaei/inbounds.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 45,
+      "prompt": "Recall `VerifyCommand` in `internal/panels/sanaei/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 46,
+      "prompt": "Recall `shellQuote` in `internal/panels/sanaei/installer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 47,
+      "prompt": "Recall `InstallerDefinition` in `internal/panels/sanaei/installer_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 48,
+      "prompt": "Recall `DefaultInstallerDefinition` in `internal/panels/sanaei/installer_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 49,
+      "prompt": "Recall `Build` in `internal/panels/sanaei/installer_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 50,
+      "prompt": "Recall `quote` in `internal/panels/sanaei/installer_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 51,
+      "prompt": "Recall `RegisterInstaller` in `internal/panels/sanaei/installer_adapter.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 52,
+      "prompt": "Recall `TestInstallerAdapterBuildsImmutableCoreDefinition` in `internal/panels/sanaei/installer_adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 53,
+      "prompt": "Recall `TestInstallerAdapterRejectsUnpinnedOrInsecureArtifact` in `internal/panels/sanaei/installer_adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 54,
+      "prompt": "Recall `TestInstallerAdapterCompatibilityDefaults` in `internal/panels/sanaei/installer_adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 55,
+      "prompt": "Recall `TestLegacyInstallerCommandDoesNotBecomeAdapterSource` in `internal/panels/sanaei/installer_adapter_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 56,
+      "prompt": "Recall `inventoryEnvelope` in `internal/panels/sanaei/inventory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 57,
+      "prompt": "Recall `inboundSummary` in `internal/panels/sanaei/inventory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 58,
+      "prompt": "Recall `ReadInventory` in `internal/panels/sanaei/inventory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 59,
+      "prompt": "Recall `streamSummary` in `internal/panels/sanaei/inventory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 60,
+      "prompt": "Recall `InventoryFromRaw` in `internal/panels/sanaei/inventory.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 61,
+      "prompt": "Recall `TestReadInventoryNormalizesWithoutSecrets` in `internal/panels/sanaei/inventory_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 62,
+      "prompt": "Recall `SecretReader` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 63,
+      "prompt": "Recall `Runner` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 64,
+      "prompt": "Recall `Uploader` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 65,
+      "prompt": "Recall `DatabaseManager` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 66,
+      "prompt": "Recall `Import` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 67,
+      "prompt": "Recall `wipe` in `internal/panels/sanaei/manager.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 68,
+      "prompt": "Recall `mutationEnvelope` in `internal/panels/sanaei/mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 69,
+      "prompt": "Recall `AddInbound` in `internal/panels/sanaei/mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 70,
+      "prompt": "Recall `DeleteInbound` in `internal/panels/sanaei/mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 71,
+      "prompt": "Recall `UpdateInbound` in `internal/panels/sanaei/mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 72,
+      "prompt": "Recall `UpdateInboundRaw` in `internal/panels/sanaei/mutation.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 73,
+      "prompt": "Recall `captureMutationExecutor` in `internal/panels/sanaei/mutation_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 74,
+      "prompt": "Recall `Do` in `internal/panels/sanaei/mutation_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 75,
+      "prompt": "Recall `TestAddInboundUsesRestrictedEndpoint` in `internal/panels/sanaei/mutation_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 76,
+      "prompt": "Recall `TestAddInboundRejectsSuccessFalse` in `internal/panels/sanaei/mutation_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 77,
+      "prompt": "Recall `SecretWriterReader` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 78,
+      "prompt": "Recall `PanelConfigurer` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 79,
+      "prompt": "Recall `NewPanelPassword` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 80,
+      "prompt": "Recall `panelDefaults` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 81,
+      "prompt": "Recall `Configure` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 82,
+      "prompt": "Recall `panelConfigureCommand` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 83,
+      "prompt": "Recall `RepairCompleted` in `internal/panels/sanaei/panel_configurer.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 84,
+      "prompt": "Recall `TestPanelDefaultsDeterministicAndScoped` in `internal/panels/sanaei/panel_configurer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 85,
+      "prompt": "Recall `TestPanelPasswordsAreRandomURLSafeAndNotReused` in `internal/panels/sanaei/panel_configurer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 86,
+      "prompt": "Recall `TestPanelConfigureCommandDoesNotContainCredential` in `internal/panels/sanaei/panel_configurer_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 87,
+      "prompt": "Recall `FetchPanelPage` in `internal/panels/sanaei/panel_page.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 88,
+      "prompt": "Recall `PanelSession` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 89,
+      "prompt": "Recall `NewPanelSession` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 90,
+      "prompt": "Recall `Snapshot` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 91,
+      "prompt": "Recall `Invalidate` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 92,
+      "prompt": "Recall `RawInbound` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 93,
+      "prompt": "Recall `Index` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 94,
+      "prompt": "Recall `SnapshotIndex` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 95,
+      "prompt": "Recall `buildSnapshotIndex` in `internal/panels/sanaei/panel_session.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 96,
+      "prompt": "Recall `TestPanelSessionBuildsAndClearsIndex` in `internal/panels/sanaei/panel_session_index_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 97,
+      "prompt": "Recall `TestPanelSessionSnapshotLoadsOnce` in `internal/panels/sanaei/panel_session_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 98,
+      "prompt": "Recall `ValidatePayload` in `internal/panels/sanaei/postflight/payload.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 99,
+      "prompt": "Recall `validateSniffing` in `internal/panels/sanaei/postflight/sniffing.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 100,
+      "prompt": "Recall `Expected` in `internal/panels/sanaei/postflight/validator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 101,
+      "prompt": "Recall `Inbound` in `internal/panels/sanaei/postflight/validator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 102,
+      "prompt": "Recall `object` in `internal/panels/sanaei/postflight/validator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 103,
+      "prompt": "Recall `Validate` in `internal/panels/sanaei/postflight/validator.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 104,
+      "prompt": "Recall `TestValidateReality` in `internal/panels/sanaei/postflight/validator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 105,
+      "prompt": "Recall `TestRejectsCryptoDrift` in `internal/panels/sanaei/postflight/validator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 106,
+      "prompt": "Recall `TestValidateRealityWithManagedClientAmongCapacityUsers` in `internal/panels/sanaei/postflight/validator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 107,
+      "prompt": "Recall `TestValidateRealityRejectsMissingManagedClientAmongCapacityUsers` in `internal/panels/sanaei/postflight/validator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 108,
+      "prompt": "Recall `TestValidateServerNamesOrderIsSemantic` in `internal/panels/sanaei/postflight/validator_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 109,
+      "prompt": "Recall `ReadRawInboundList` in `internal/panels/sanaei/raw_list.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 110,
+      "prompt": "Recall `RealityScanResult` in `internal/panels/sanaei/reality_scan.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 111,
+      "prompt": "Recall `ScanRealityTargets` in `internal/panels/sanaei/reality_scan.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 112,
+      "prompt": "Recall `BestRealityTarget` in `internal/panels/sanaei/reality_scan.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 113,
+      "prompt": "Recall `FindAndUseRealityTarget` in `internal/panels/sanaei/reality_scan.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 114,
+      "prompt": "Recall `Input` in `internal/panels/sanaei/realityconfig/builder.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 115,
+      "prompt": "Recall `Payload` in `internal/panels/sanaei/realityconfig/builder.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 116,
+      "prompt": "Recall `Build` in `internal/panels/sanaei/realityconfig/builder.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 117,
+      "prompt": "Recall `Marshal` in `internal/panels/sanaei/realityconfig/builder.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 118,
+      "prompt": "Recall `TestBuildRealityInbound` in `internal/panels/sanaei/realityconfig/builder_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 119,
+      "prompt": "Recall `TestBuildRejectsUnsafeTarget` in `internal/panels/sanaei/realityconfig/builder_test.go`: package, previous/next, calls, DB reads/writes, routes."
+    },
+    {
+      "id": 120,
+      "prompt": "Recall `RetryPolicy` in `internal/panels/sanaei/resilient.go`: package, previous/next, calls, DB reads/writes, routes."
+    }
+  ]
+}

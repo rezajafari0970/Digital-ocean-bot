@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-001.json",
+      "recall": "docs/source-memory-rehearsal/topology-001-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-001-correction.json",
+      "questions": 179
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-002.json",
+      "recall": "docs/source-memory-rehearsal/topology-002-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-002-correction.json",
+      "questions": 141
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-003.json",
+      "recall": "docs/source-memory-rehearsal/topology-003-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-003-correction.json",
+      "questions": 137
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-004.json",
+      "recall": "docs/source-memory-rehearsal/topology-004-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-004-correction.json",
+      "questions": 135
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-005.json",
+      "recall": "docs/source-memory-rehearsal/topology-005-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-005-correction.json",
+      "questions": 143
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-006.json",
+      "recall": "docs/source-memory-rehearsal/topology-006-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-006-correction.json",
+      "questions": 157
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-007.json",
+      "recall": "docs/source-memory-rehearsal/topology-007-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-007-correction.json",
+      "questions": 141
+    },
+    {
+      "kind": "topology",
+      "pack": "docs/source-memory-packs/topology-008.json",
+      "recall": "docs/source-memory-rehearsal/topology-008-recall.json",
+      "correction": "docs/source-memory-rehearsal/topology-008-correction.json",
+      "questions": 57
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-001.json",
+      "recall": "docs/source-memory-rehearsal/concept-001-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-001-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-002.json",
+      "recall": "docs/source-memory-rehearsal/concept-002-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-002-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-003.json",
+      "recall": "docs/source-memory-rehearsal/concept-003-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-003-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-004.json",
+      "recall": "docs/source-memory-rehearsal/concept-004-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-004-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-005.json",
+      "recall": "docs/source-memory-rehearsal/concept-005-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-005-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-006.json",
+      "recall": "docs/source-memory-rehearsal/concept-006-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-006-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-007.json",
+      "recall": "docs/source-memory-rehearsal/concept-007-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-007-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-008.json",
+      "recall": "docs/source-memory-rehearsal/concept-008-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-008-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-009.json",
+      "recall": "docs/source-memory-rehearsal/concept-009-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-009-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-010.json",
+      "recall": "docs/source-memory-rehearsal/concept-010-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-010-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-011.json",
+      "recall": "docs/source-memory-rehearsal/concept-011-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-011-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-012.json",
+      "recall": "docs/source-memory-rehearsal/concept-012-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-012-correction.json",
+      "questions": 120
+    },
+    {
+      "kind": "conceptual",
+      "pack": "docs/source-memory-packs/concept-013.json",
+      "recall": "docs/source-memory-rehearsal/concept-013-recall.json",
+      "correction": "docs/source-memory-rehearsal/concept-013-correction.json",
+      "questions": 97
+    },
+    {
+      "kind": "verbatim",
+      "pack": "docs/source-memory-packs/verbatim-001.json",
+      "recall": "docs/source-memory-rehearsal/verbatim-001-recall.json",
+      "correction": "docs/source-memory-rehearsal/verbatim-001-correction.json",
+      "questions": 100
+    },
+    {
+      "kind": "verbatim",
+      "pack": "docs/source-memory-packs/verbatim-002.json",
+      "recall": "docs/source-memory-rehearsal/verbatim-002-recall.json",
+      "correction": "docs/source-memory-rehearsal/verbatim-002-correction.json",
+      "questions": 100
+    },
+    {
+      "kind": "verbatim",
+      "pack": "docs/source-memory-packs/verbatim-003.json",
+      "recall": "docs/source-memory-rehearsal/verbatim-003-recall.json",
+      "correction": "docs/source-memory-rehearsal/verbatim-003-correction.json",
+      "questions": 99
+    },
+    {
+      "kind": "verbatim",
+      "pack": "docs/source-memory-packs/verbatim-004.json",
+      "recall": "docs/source-memory-rehearsal/verbatim-004-recall.json",
+      "correction": "docs/source-memory-rehearsal/verbatim-004-correction.json",
+      "questions": 100
+    },
+    {
+      "kind": "verbatim",
+      "pack": "docs/source-memory-packs/verbatim-005.json",
+      "recall": "docs/source-memory-rehearsal/verbatim-005-recall.json",
+      "correction": "docs/source-memory-rehearsal/verbatim-005-correction.json",
+      "questions": 99
+    }
+  ]
+}

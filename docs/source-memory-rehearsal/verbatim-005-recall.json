@@ -1,0 +1,400 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 113-120."
+    },
+    {
+      "id": 2,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_manage.go` block 113-120."
+    },
+    {
+      "id": 3,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 121-128."
+    },
+    {
+      "id": 4,
+      "prompt": "Continue exactly after first line `\t\tx.NetworkMode = \"direct\"` in `internal/adminapi/accounts_manage.go` block 121-128."
+    },
+    {
+      "id": 5,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 129-136."
+    },
+    {
+      "id": 6,
+      "prompt": "Continue exactly after first line `\t\tif x.ProxyID == \"\" || tx.QueryRowContext(r.Context(), `SELECT status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&status) != nil || status != \"healthy\" {` in `internal/adminapi/accounts_manage.go` block 129-136."
+    },
+    {
+      "id": 7,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 137-144."
+    },
+    {
+      "id": 8,
+      "prompt": "Continue exactly after first line `\t\t}` in `internal/adminapi/accounts_manage.go` block 137-144."
+    },
+    {
+      "id": 9,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 145-152."
+    },
+    {
+      "id": 10,
+      "prompt": "Continue exactly after first line `\tif err != nil {` in `internal/adminapi/accounts_manage.go` block 145-152."
+    },
+    {
+      "id": 11,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 153-160."
+    },
+    {
+      "id": 12,
+      "prompt": "Continue exactly after first line `\t\t}` in `internal/adminapi/accounts_manage.go` block 153-160."
+    },
+    {
+      "id": 13,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 161-168."
+    },
+    {
+      "id": 14,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_manage.go` block 161-168."
+    },
+    {
+      "id": 15,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 169-176."
+    },
+    {
+      "id": 16,
+      "prompt": "Continue exactly after first line `\t\tif collision {` in `internal/adminapi/accounts_manage.go` block 169-176."
+    },
+    {
+      "id": 17,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 177-184."
+    },
+    {
+      "id": 18,
+      "prompt": "Continue exactly after first line `\t\twriteJSON(w, 500, errorBody())` in `internal/adminapi/accounts_manage.go` block 177-184."
+    },
+    {
+      "id": 19,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 185-192."
+    },
+    {
+      "id": 20,
+      "prompt": "Continue exactly after first line `\t} else {` in `internal/adminapi/accounts_manage.go` block 185-192."
+    },
+    {
+      "id": 21,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 193-200."
+    },
+    {
+      "id": 22,
+      "prompt": "Continue exactly after first line `\t\treturn` in `internal/adminapi/accounts_manage.go` block 193-200."
+    },
+    {
+      "id": 23,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 201-208."
+    },
+    {
+      "id": 24,
+      "prompt": "Continue exactly after first line `\tvar previousToken []byte` in `internal/adminapi/accounts_manage.go` block 201-208."
+    },
+    {
+      "id": 25,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 209-216."
+    },
+    {
+      "id": 26,
+      "prompt": "Continue exactly after first line `\t\t\treturn` in `internal/adminapi/accounts_manage.go` block 209-216."
+    },
+    {
+      "id": 27,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 217-224."
+    },
+    {
+      "id": 28,
+      "prompt": "Continue exactly after first line `\t\t}` in `internal/adminapi/accounts_manage.go` block 217-224."
+    },
+    {
+      "id": 29,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 225-232."
+    },
+    {
+      "id": 30,
+      "prompt": "Continue exactly after first line `\t\t\t_ = s.Container.Secrets.Put(r.Context(), id, credentialRef, providerForCredential+\"_credential\", previousToken)` in `internal/adminapi/accounts_manage.go` block 225-232."
+    },
+    {
+      "id": 31,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 233-240."
+    },
+    {
+      "id": 32,
+      "prompt": "Continue exactly after first line `}` in `internal/adminapi/accounts_manage.go` block 233-240."
+    },
+    {
+      "id": 33,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 241-248."
+    },
+    {
+      "id": 34,
+      "prompt": "Continue exactly after first line `\ttx, err := s.DB.BeginTx(r.Context(), nil)` in `internal/adminapi/accounts_manage.go` block 241-248."
+    },
+    {
+      "id": 35,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 249-256."
+    },
+    {
+      "id": 36,
+      "prompt": "Continue exactly after first line `\t\twriteJSON(w, 500, errorBody())` in `internal/adminapi/accounts_manage.go` block 249-256."
+    },
+    {
+      "id": 37,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 257-264."
+    },
+    {
+      "id": 38,
+      "prompt": "Continue exactly after first line `\tn, _ := res.RowsAffected()` in `internal/adminapi/accounts_manage.go` block 257-264."
+    },
+    {
+      "id": 39,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 265-272."
+    },
+    {
+      "id": 40,
+      "prompt": "Continue exactly after first line `\t\t\treturn` in `internal/adminapi/accounts_manage.go` block 265-272."
+    },
+    {
+      "id": 41,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_manage.go` lines 273-273."
+    },
+    {
+      "id": 42,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 1-8."
+    },
+    {
+      "id": 43,
+      "prompt": "Continue exactly after first line `package adminapi` in `internal/adminapi/accounts_write.go` block 1-8."
+    },
+    {
+      "id": 44,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 9-16."
+    },
+    {
+      "id": 45,
+      "prompt": "Continue exactly after first line `\t\"github.com/rezajafari0970/Digital-ocean-bot/internal/auth\"` in `internal/adminapi/accounts_write.go` block 9-16."
+    },
+    {
+      "id": 46,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 17-24."
+    },
+    {
+      "id": 47,
+      "prompt": "Continue exactly after first line `\tImages                 []string `json:\"images\"`` in `internal/adminapi/accounts_write.go` block 17-24."
+    },
+    {
+      "id": 48,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 25-32."
+    },
+    {
+      "id": 49,
+      "prompt": "Continue exactly after first line `\tIntervalSeconds        int      `json:\"interval_seconds\"`` in `internal/adminapi/accounts_write.go` block 25-32."
+    },
+    {
+      "id": 50,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 33-40."
+    },
+    {
+      "id": 51,
+      "prompt": "Continue exactly after first line `\tDesiredServerCount     int      `json:\"desired_server_count\"`` in `internal/adminapi/accounts_write.go` block 33-40."
+    },
+    {
+      "id": 52,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 41-48."
+    },
+    {
+      "id": 53,
+      "prompt": "Continue exactly after first line `\tstarted := time.Now()` in `internal/adminapi/accounts_write.go` block 41-48."
+    },
+    {
+      "id": 54,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 49-56."
+    },
+    {
+      "id": 55,
+      "prompt": "Continue exactly after first line `\tvar x accountWrite` in `internal/adminapi/accounts_write.go` block 49-56."
+    },
+    {
+      "id": 56,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 57-64."
+    },
+    {
+      "id": 57,
+      "prompt": "Continue exactly after first line `\t\tx.ProxyID = x.ProxyIDs[0]` in `internal/adminapi/accounts_write.go` block 57-64."
+    },
+    {
+      "id": 58,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 65-72."
+    },
+    {
+      "id": 59,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_write.go` block 65-72."
+    },
+    {
+      "id": 60,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 73-80."
+    },
+    {
+      "id": 61,
+      "prompt": "Continue exactly after first line `\tif len(x.Regions) > 5 {` in `internal/adminapi/accounts_write.go` block 73-80."
+    },
+    {
+      "id": 62,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 81-88."
+    },
+    {
+      "id": 63,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_write.go` block 81-88."
+    },
+    {
+      "id": 64,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 89-96."
+    },
+    {
+      "id": 65,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_write.go` block 89-96."
+    },
+    {
+      "id": 66,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 97-104."
+    },
+    {
+      "id": 67,
+      "prompt": "Continue exactly after first line `\tif x.BuildSpacingMinutes < 1 {` in `internal/adminapi/accounts_write.go` block 97-104."
+    },
+    {
+      "id": 68,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 105-112."
+    },
+    {
+      "id": 69,
+      "prompt": "Continue exactly after first line `\t\tx.BatchSize = 1` in `internal/adminapi/accounts_write.go` block 105-112."
+    },
+    {
+      "id": 70,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 113-120."
+    },
+    {
+      "id": 71,
+      "prompt": "Continue exactly after first line `\tif x.DesiredServerCount == 0 {` in `internal/adminapi/accounts_write.go` block 113-120."
+    },
+    {
+      "id": 72,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 121-128."
+    },
+    {
+      "id": 73,
+      "prompt": "Continue exactly after first line `\t}` in `internal/adminapi/accounts_write.go` block 121-128."
+    },
+    {
+      "id": 74,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 129-136."
+    },
+    {
+      "id": 75,
+      "prompt": "Continue exactly after first line `VALUES(gen_random_uuid(),$1,$2,$3,NULLIF($4,''),$5,'provider-primary',$6,$7,$8,$9,$10,$11,$12,$13)` in `internal/adminapi/accounts_write.go` block 129-136."
+    },
+    {
+      "id": 76,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 137-144."
+    },
+    {
+      "id": 77,
+      "prompt": "Continue exactly after first line `\tcleanup := func() {` in `internal/adminapi/accounts_write.go` block 137-144."
+    },
+    {
+      "id": 78,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 145-152."
+    },
+    {
+      "id": 79,
+      "prompt": "Continue exactly after first line `\tdefer cleanup()` in `internal/adminapi/accounts_write.go` block 145-152."
+    },
+    {
+      "id": 80,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 153-160."
+    },
+    {
+      "id": 81,
+      "prompt": "Continue exactly after first line `\t\twriteJSON(w, http.StatusInternalServerError, map[string]string{\"error\": \"secret_store_failed\", \"detail\": err.Error()})` in `internal/adminapi/accounts_write.go` block 153-160."
+    },
+    {
+      "id": 82,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 161-168."
+    },
+    {
+      "id": 83,
+      "prompt": "Continue exactly after first line `\t\t}` in `internal/adminapi/accounts_write.go` block 161-168."
+    },
+    {
+      "id": 84,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 169-176."
+    },
+    {
+      "id": 85,
+      "prompt": "Continue exactly after first line `\t\tfor i, pid := range x.ProxyIDs {` in `internal/adminapi/accounts_write.go` block 169-176."
+    },
+    {
+      "id": 86,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 177-184."
+    },
+    {
+      "id": 87,
+      "prompt": "Continue exactly after first line `\t\twriteJSON(w, 500, map[string]string{\"error\": \"automation_sync_failed\", \"detail\": err.Error()})` in `internal/adminapi/accounts_write.go` block 177-184."
+    },
+    {
+      "id": 88,
+      "prompt": "Reproduce exactly `internal/adminapi/accounts_write.go` lines 185-187."
+    },
+    {
+      "id": 89,
+      "prompt": "Continue exactly after first line `func mustJSON(v any) string { b, _ := json.Marshal(v); return string(b) }` in `internal/adminapi/accounts_write.go` block 185-187."
+    },
+    {
+      "id": 90,
+      "prompt": "Reproduce exactly `internal/adminapi/auth.go` lines 1-8."
+    },
+    {
+      "id": 91,
+      "prompt": "Continue exactly after first line `package adminapi` in `internal/adminapi/auth.go` block 1-8."
+    },
+    {
+      "id": 92,
+      "prompt": "Reproduce exactly `internal/adminapi/auth.go` lines 9-16."
+    },
+    {
+      "id": 93,
+      "prompt": "Continue exactly after first line `\t\"time\"` in `internal/adminapi/auth.go` block 9-16."
+    },
+    {
+      "id": 94,
+      "prompt": "Reproduce exactly `internal/adminapi/auth.go` lines 17-24."
+    },
+    {
+      "id": 95,
+      "prompt": "Continue exactly after first line `}` in `internal/adminapi/auth.go` block 17-24."
+    },
+    {
+      "id": 96,
+      "prompt": "Reproduce exactly `internal/adminapi/auth.go` lines 25-32."
+    },
+    {
+      "id": 97,
+      "prompt": "Continue exactly after first line `\tif json.NewDecoder(r.Body).Decode(&req) != nil {` in `internal/adminapi/auth.go` block 25-32."
+    },
+    {
+      "id": 98,
+      "prompt": "Reproduce exactly `internal/adminapi/auth.go` lines 33-40."
+    },
+    {
+      "id": 99,
+      "prompt": "Continue exactly after first line `\ttoken, p, err := authSvc.Login(r.Context(), req.Username, req.Password)` in `internal/adminapi/auth.go` block 33-40."
+    }
+  ]
+}

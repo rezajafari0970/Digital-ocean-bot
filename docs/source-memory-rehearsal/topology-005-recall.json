@@ -1,0 +1,576 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `AddInbound`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `DeleteInbound`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/panels/sanaei/mutation.go`, what immediately follows `mutationEnvelope`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `TestAddInboundUsesRestrictedEndpoint`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `TestAddInboundRejectsSuccessFalse`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/panels/sanaei/mutation_test.go`, what immediately follows `TestAddInboundUsesRestrictedEndpoint`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `PanelConfigurer`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `NewPanelPassword`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `internal/panels/sanaei/panel_configurer.go`, what immediately follows `panelConfigureCommand`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `TestPanelConfigureCommandDoesNotContainCredential`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `TestPanelPasswordsAreRandomURLSafeAndNotReused`?"
+    },
+    {
+      "id": 12,
+      "prompt": "In `internal/panels/sanaei/panel_configurer_test.go`, what immediately follows `TestPanelDefaultsDeterministicAndScoped`?"
+    },
+    {
+      "id": 13,
+      "prompt": "Which file contains `FetchPanelPage`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `buildSnapshotIndex`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `NewPanelSession`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/panels/sanaei/panel_session.go`, what immediately follows `PanelSession`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestPanelSessionBuildsAndClearsIndex`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `TestPanelSessionSnapshotLoadsOnce`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `ValidatePayload`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `validateSniffing`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `Expected`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `object`?"
+    },
+    {
+      "id": 23,
+      "prompt": "In `internal/panels/sanaei/postflight/validator.go`, what immediately follows `Inbound`?"
+    },
+    {
+      "id": 24,
+      "prompt": "Which file contains `TestValidateServerNamesOrderIsSemantic`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `TestValidateRealityWithManagedClientAmongCapacityUsers`?"
+    },
+    {
+      "id": 26,
+      "prompt": "In `internal/panels/sanaei/postflight/validator_test.go`, what immediately follows `TestValidateRealityWithManagedClientAmongCapacityUsers`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `ReadRawInboundList`?"
+    },
+    {
+      "id": 28,
+      "prompt": "Which file contains `RealityScanResult`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `BestRealityTarget`?"
+    },
+    {
+      "id": 30,
+      "prompt": "In `internal/panels/sanaei/reality_scan.go`, what immediately follows `RealityScanResult`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `Payload`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `Build`?"
+    },
+    {
+      "id": 33,
+      "prompt": "In `internal/panels/sanaei/realityconfig/builder.go`, what immediately follows `Build`?"
+    },
+    {
+      "id": 34,
+      "prompt": "Which file contains `TestBuildRejectsUnsafeTarget`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `TestBuildRealityInbound`?"
+    },
+    {
+      "id": 36,
+      "prompt": "In `internal/panels/sanaei/realityconfig/builder_test.go`, what immediately follows `TestBuildRealityInbound`?"
+    },
+    {
+      "id": 37,
+      "prompt": "Which file contains `DefaultRetryPolicy`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `login`?"
+    },
+    {
+      "id": 39,
+      "prompt": "In `internal/panels/sanaei/resilient.go`, what immediately follows `login`?"
+    },
+    {
+      "id": 40,
+      "prompt": "Which file contains `TestReadAllBounded`?"
+    },
+    {
+      "id": 41,
+      "prompt": "Which file contains `TestRetryableErrorWithContextClientTimeout`?"
+    },
+    {
+      "id": 42,
+      "prompt": "In `internal/panels/sanaei/resilient_test.go`, what immediately follows `TestResilientDoesNotBlindRetryMutation`?"
+    },
+    {
+      "id": 43,
+      "prompt": "Which file contains `RuntimeFactory`?"
+    },
+    {
+      "id": 44,
+      "prompt": "Which file contains `WithMutation`?"
+    },
+    {
+      "id": 45,
+      "prompt": "In `internal/panels/sanaei/runtime.go`, what immediately follows `RuntimeSecrets`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `RuntimeManager`?"
+    },
+    {
+      "id": 47,
+      "prompt": "Which file contains `observe`?"
+    },
+    {
+      "id": 48,
+      "prompt": "In `internal/panels/sanaei/runtime_manager.go`, what immediately follows `circuitState`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `TestRuntimeManagerRejectsEmptyPanel`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `TestRuntimeManagerConcurrentCacheRead`?"
+    },
+    {
+      "id": 51,
+      "prompt": "In `internal/panels/sanaei/runtime_manager_test.go`, what immediately follows `TestRuntimeManagerRejectsEmptyPanel`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `TestRetryableStatusClassification`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `TestRetryableErrorCancellationIsPermanent`?"
+    },
+    {
+      "id": 54,
+      "prompt": "In `internal/panels/sanaei/runtime_test.go`, what immediately follows `TestRuntimeFactoryRejectsMissingDependencies`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `SessionRequest`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `SessionExecutor`?"
+    },
+    {
+      "id": 57,
+      "prompt": "In `internal/panels/sanaei/session_executor.go`, what immediately follows `SessionResponse`?"
+    },
+    {
+      "id": 58,
+      "prompt": "Which file contains `fakeExecutor`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `Do`?"
+    },
+    {
+      "id": 60,
+      "prompt": "In `internal/panels/sanaei/session_executor_test.go`, what immediately follows `fakeExecutor`?"
+    },
+    {
+      "id": 61,
+      "prompt": "Which file contains `SSHSecretReader`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `SSHSessionExecutor`?"
+    },
+    {
+      "id": 63,
+      "prompt": "In `internal/panels/sanaei/ssh_session_executor.go`, what immediately follows `shellQuoteSession`?"
+    },
+    {
+      "id": 64,
+      "prompt": "Which file contains `decodeV2Body`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `extractV2Wire`?"
+    },
+    {
+      "id": 66,
+      "prompt": "In `internal/panels/sanaei/ssh_session_executor_v2.go`, what immediately follows `SSHSessionExecutorV2`?"
+    },
+    {
+      "id": 67,
+      "prompt": "Which file contains `doPOST`?"
+    },
+    {
+      "id": 68,
+      "prompt": "Which file contains `Save`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `SetEnabled`?"
+    },
+    {
+      "id": 70,
+      "prompt": "In `internal/panels/sanaei/store.go`, what immediately follows `SQLClientStore`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `InspectTemplate`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `DatabaseTemplate`?"
+    },
+    {
+      "id": 73,
+      "prompt": "In `internal/panels/sanaei/template.go`, what immediately follows `DatabaseTemplate`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `TestInspectTemplateRequiresSQLite`?"
+    },
+    {
+      "id": 75,
+      "prompt": "Which file contains `TestImportCommandHasRollbackAndChecksum`?"
+    },
+    {
+      "id": 76,
+      "prompt": "In `internal/panels/sanaei/template_test.go`, what immediately follows `TestInspectTemplateRequiresSQLite`?"
+    },
+    {
+      "id": 77,
+      "prompt": "Which file contains `ClientTraffic`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `GetClientTraffic`?"
+    },
+    {
+      "id": 79,
+      "prompt": "In `internal/panels/sanaei/traffic.go`, what immediately follows `trafficResponse`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `ClientDisabler`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 82,
+      "prompt": "In `internal/panels/sanaei/traffic_adapter.go`, what immediately follows `TrafficAdapter`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `ReconcileEnabled`?"
+    },
+    {
+      "id": 84,
+      "prompt": "Which file contains `SQLStore`?"
+    },
+    {
+      "id": 85,
+      "prompt": "In `internal/panels/store.go`, what immediately follows `ReconcileEnabled`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `Run`?"
+    },
+    {
+      "id": 87,
+      "prompt": "Which file contains `Result`?"
+    },
+    {
+      "id": 88,
+      "prompt": "In `internal/panels/update/orchestrator.go`, what immediately follows `Run`?"
+    },
+    {
+      "id": 89,
+      "prompt": "Which file contains `fake`?"
+    },
+    {
+      "id": 90,
+      "prompt": "Which file contains `Ready`?"
+    },
+    {
+      "id": 91,
+      "prompt": "In `internal/panels/update/orchestrator_test.go`, what immediately follows `Update`?"
+    },
+    {
+      "id": 92,
+      "prompt": "Which file contains `FastFill`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `legacyFastFillFromPolicy`?"
+    },
+    {
+      "id": 94,
+      "prompt": "Which file contains `legacyObject`?"
+    },
+    {
+      "id": 95,
+      "prompt": "In `internal/panels/usercapacity/legacy_fill.go`, what immediately follows `LegacyFastFill`?"
+    },
+    {
+      "id": 96,
+      "prompt": "Which file contains `Service`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `rawInbound`?"
+    },
+    {
+      "id": 98,
+      "prompt": "In `internal/panels/usercapacity/service.go`, what immediately follows `Service`?"
+    },
+    {
+      "id": 99,
+      "prompt": "Which file contains `accountEnvelope`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `GetAccount`?"
+    },
+    {
+      "id": 101,
+      "prompt": "In `internal/providers/digitalocean/account.go`, what immediately follows `GetAccount`?"
+    },
+    {
+      "id": 102,
+      "prompt": "Which file contains `Catalog`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `TestDiscoverIsFailFast`?"
+    },
+    {
+      "id": 104,
+      "prompt": "Which file contains `TestCatalogFetchesAccountRegionsSizesImages`?"
+    },
+    {
+      "id": 105,
+      "prompt": "In `internal/providers/digitalocean/characterization_test.go`, what immediately follows `TestDiscoverIsFailFast`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `Validate`?"
+    },
+    {
+      "id": 107,
+      "prompt": "Which file contains `NewClient`?"
+    },
+    {
+      "id": 108,
+      "prompt": "In `internal/providers/digitalocean/client.go`, what immediately follows `get`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `TestClientLoadsTokenAndDecodesAccount`?"
+    },
+    {
+      "id": 110,
+      "prompt": "Which file contains `RoundTrip`?"
+    },
+    {
+      "id": 111,
+      "prompt": "In `internal/providers/digitalocean/client_test.go`, what immediately follows `secretStub`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `Region`?"
+    },
+    {
+      "id": 113,
+      "prompt": "Which file contains `Droplet`?"
+    },
+    {
+      "id": 114,
+      "prompt": "In `internal/providers/digitalocean/discovery.go`, what immediately follows `Region`?"
+    },
+    {
+      "id": 115,
+      "prompt": "Which file contains `Metadata`?"
+    },
+    {
+      "id": 116,
+      "prompt": "Which file contains `Observe`?"
+    },
+    {
+      "id": 117,
+      "prompt": "In `internal/providers/digitalocean/driver_v2.go`, what immediately follows `Name`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Which file contains `TestFactoryMetadataPolicy`?"
+    },
+    {
+      "id": 119,
+      "prompt": "Which file contains `TestNormalizeCatalogToCanonicalModels`?"
+    },
+    {
+      "id": 120,
+      "prompt": "In `internal/providers/digitalocean/driver_v2_test.go`, what immediately follows `TestFactoryMetadataPolicy`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Which file contains `HTTPError`?"
+    },
+    {
+      "id": 122,
+      "prompt": "Which file contains `parseAPIError`?"
+    },
+    {
+      "id": 123,
+      "prompt": "In `internal/providers/digitalocean/errors.go`, what immediately follows `Error`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `TestParseAPIErrorUsesCode`?"
+    },
+    {
+      "id": 125,
+      "prompt": "Which file contains `TestParseAPIErrorRejectsNonJSON`?"
+    },
+    {
+      "id": 126,
+      "prompt": "In `internal/providers/digitalocean/errors_parse_test.go`, what immediately follows `TestParseAPIError`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `TestCapacityClassification`?"
+    },
+    {
+      "id": 128,
+      "prompt": "Which file contains `SSHKeyCreateRequest`?"
+    },
+    {
+      "id": 129,
+      "prompt": "Which file contains `actionEnvelope`?"
+    },
+    {
+      "id": 130,
+      "prompt": "In `internal/providers/digitalocean/mutations.go`, what immediately follows `SSHKeyCreated`?"
+    },
+    {
+      "id": 131,
+      "prompt": "Which file contains `extractNext`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `listAll`?"
+    },
+    {
+      "id": 133,
+      "prompt": "In `internal/providers/digitalocean/pagination.go`, what immediately follows `listAll`?"
+    },
+    {
+      "id": 134,
+      "prompt": "Which file contains `TestExtractNextStripsAPIVersionPrefix`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Which file contains `GetDroplet`?"
+    },
+    {
+      "id": 136,
+      "prompt": "Which file contains `ListDropletModels`?"
+    },
+    {
+      "id": 137,
+      "prompt": "In `internal/providers/digitalocean/resources.go`, what immediately follows `GetDroplet`?"
+    },
+    {
+      "id": 138,
+      "prompt": "Which file contains `Error`?"
+    },
+    {
+      "id": 139,
+      "prompt": "Which file contains `IsClass`?"
+    },
+    {
+      "id": 140,
+      "prompt": "In `internal/providers/errors.go`, what immediately follows `Class`?"
+    },
+    {
+      "id": 141,
+      "prompt": "Which file contains `Defaults`?"
+    },
+    {
+      "id": 142,
+      "prompt": "Which file contains `Metadata`?"
+    },
+    {
+      "id": 143,
+      "prompt": "In `internal/providers/metadata.go`, what immediately follows `ImagePolicy`?"
+    }
+  ]
+}

@@ -1,0 +1,1742 @@
+{
+  "answers": {
+    "1": {
+      "package": "adminapi",
+      "previous_symbol": "resolveProxyType",
+      "next_symbol": "assignProxy",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "DeleteProxy",
+        "PutProxy",
+        "errorBody",
+        "principal",
+        "proxies",
+        "resolveProxyType",
+        "validProxyWrite",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies"
+        }
+      ]
+    },
+    "2": {
+      "package": "adminapi",
+      "previous_symbol": "createProxy",
+      "next_symbol": "assignProxy",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "3": {
+      "package": "adminapi",
+      "previous_symbol": "assignProxy",
+      "next_symbol": null,
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "Rollback",
+        "errorBody",
+        "networkIdentityCollision",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [
+        "account_network_identities",
+        "network_profiles"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/accounts/{id}/network"
+        }
+      ]
+    },
+    "4": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "testProxy",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies/{id}"
+        }
+      ]
+    },
+    "5": {
+      "package": "adminapi",
+      "previous_symbol": "proxyDetails",
+      "next_symbol": null,
+      "calls": [
+        "CanWrite",
+        "Context",
+        "GetProxy",
+        "detectProxyTypes",
+        "localeForCountry",
+        "observeProxy",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/proxies/{id}/test"
+        }
+      ]
+    },
+    "6": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "detectProxyTypes",
+      "calls": [
+        "detectProxyTypes"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "7": {
+      "package": "adminapi",
+      "previous_symbol": "detectProxy",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "CloseIdleConnections",
+        "Do",
+        "NewProxyGateway"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "8": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "zeroBytes",
+      "calls": [
+        "Account",
+        "Catalog",
+        "CloseIdleConnections",
+        "Context",
+        "Error",
+        "GetProxy",
+        "NewProxyProbeGateway",
+        "Runtime",
+        "localeForCountry",
+        "observeProxy",
+        "writeJSON",
+        "zeroBytes"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "account_network_identities",
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/proxy-test"
+        }
+      ]
+    },
+    "9": {
+      "package": "adminapi",
+      "previous_symbol": "testAccountProxy",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "10": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "observeProxy",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "11": {
+      "package": "adminapi",
+      "previous_symbol": "ProxyObservation",
+      "next_symbol": "ObserveProxy",
+      "calls": [
+        "ObserveProxy"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "12": {
+      "package": "adminapi",
+      "previous_symbol": "observeProxy",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "CloseIdleConnections",
+        "Do",
+        "New",
+        "NewProxyGateway"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "13": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "syncAccountProxyPool",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "14": {
+      "package": "adminapi",
+      "previous_symbol": "normalizeProxyPool",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "SET",
+        "account_proxy_pool"
+      ],
+      "routes": []
+    },
+    "15": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "residentialProxies",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "16": {
+      "package": "adminapi",
+      "previous_symbol": "residentialWrite",
+      "next_symbol": "createResidentialProxy",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies",
+        "residential_proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/residential-proxies"
+        }
+      ]
+    },
+    "17": {
+      "package": "adminapi",
+      "previous_symbol": "residentialProxies",
+      "next_symbol": "testResidentialProxy",
+      "calls": [
+        "CanAdmin",
+        "Context",
+        "PutProxy",
+        "Rollback",
+        "errorBody",
+        "principal",
+        "proxies",
+        "resolveProxyType",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies",
+        "residential_proxies"
+      ],
+      "db_writes": [
+        "proxies",
+        "residential_proxies"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies"
+        }
+      ]
+    },
+    "18": {
+      "package": "adminapi",
+      "previous_symbol": "createResidentialProxy",
+      "next_symbol": "updateResidentialProxy",
+      "calls": [
+        "testProxy"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/residential-proxies/{id}/test"
+        }
+      ]
+    },
+    "19": {
+      "package": "adminapi",
+      "previous_symbol": "testResidentialProxy",
+      "next_symbol": "deleteResidentialProxy",
+      "calls": [
+        "Context",
+        "PutProxy",
+        "errorBody",
+        "resolveProxyType",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "residential_proxies"
+      ],
+      "db_writes": [
+        "proxies",
+        "residential_proxies"
+      ],
+      "routes": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/residential-proxies/{id}"
+        }
+      ]
+    },
+    "20": {
+      "package": "adminapi",
+      "previous_symbol": "updateResidentialProxy",
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "DeleteProxy",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [
+        "proxies"
+      ],
+      "routes": [
+        {
+          "method": "DELETE",
+          "path": "/api/v1/residential-proxies/{id}"
+        }
+      ]
+    },
+    "21": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "proxies",
+      "calls": [
+        "Close",
+        "Context",
+        "Error",
+        "min",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "LATERAL",
+        "account_capacity_events",
+        "account_proxy_pool",
+        "accounts",
+        "droplets",
+        "network_profiles",
+        "provider_snapshots",
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts"
+        }
+      ]
+    },
+    "22": {
+      "package": "adminapi",
+      "previous_symbol": "accounts",
+      "next_symbol": "errorBody",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/proxies"
+        }
+      ]
+    },
+    "23": {
+      "package": "adminapi",
+      "previous_symbol": "proxies",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "24": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "accountCapacity",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "resources"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/resources"
+        }
+      ]
+    },
+    "25": {
+      "package": "adminapi",
+      "previous_symbol": "accountResources",
+      "next_symbol": null,
+      "calls": [
+        "Available",
+        "Context",
+        "Read",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/capacity"
+        }
+      ]
+    },
+    "26": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "account_runtime_state"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/accounts/{id}/runtime"
+        }
+      ]
+    },
+    "27": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "previewSanaeiInstaller",
+      "calls": [
+        "Context",
+        "Error",
+        "RegisterInstaller",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei"
+        }
+      ]
+    },
+    "28": {
+      "package": "adminapi",
+      "previous_symbol": "createSanaeiInstaller",
+      "next_symbol": null,
+      "calls": [
+        "Build",
+        "Error",
+        "InstallerHash",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/installers/sanaei/preview"
+        }
+      ]
+    },
+    "29": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "LoginLimiter",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "30": {
+      "package": "adminapi",
+      "previous_symbol": "loginBucket",
+      "next_symbol": "NewLoginLimiter",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "31": {
+      "package": "adminapi",
+      "previous_symbol": "LoginLimiter",
+      "next_symbol": "Allow",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "32": {
+      "package": "adminapi",
+      "previous_symbol": "NewLoginLimiter",
+      "next_symbol": "securityHeaders",
+      "calls": [
+        "Add"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "33": {
+      "package": "adminapi",
+      "previous_symbol": "Allow",
+      "next_symbol": "Secure",
+      "calls": [
+        "Header",
+        "Set"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "34": {
+      "package": "adminapi",
+      "previous_symbol": "securityHeaders",
+      "next_symbol": null,
+      "calls": [
+        "securityHeaders"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "35": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "New",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "36": {
+      "package": "adminapi",
+      "previous_symbol": "Server",
+      "next_symbol": "Routes",
+      "calls": [
+        "NewLoginLimiter"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "37": {
+      "package": "adminapi",
+      "previous_symbol": "New",
+      "next_symbol": "writeJSON",
+      "calls": [
+        "require"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "38": {
+      "package": "adminapi",
+      "previous_symbol": "Routes",
+      "next_symbol": "health",
+      "calls": [
+        "Header",
+        "Set"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "39": {
+      "package": "adminapi",
+      "previous_symbol": "writeJSON",
+      "next_symbol": "ready",
+      "calls": [
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/healthz"
+        }
+      ]
+    },
+    "40": {
+      "package": "adminapi",
+      "previous_symbol": "health",
+      "next_symbol": "vultrBrowserProxy",
+      "calls": [
+        "Context",
+        "Readiness",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/readyz"
+        }
+      ]
+    },
+    "41": {
+      "package": "adminapi",
+      "previous_symbol": "ready",
+      "next_symbol": "createVultrBrowserTicket",
+      "calls": [
+        "Error"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/vultr-browser/{path...}"
+        },
+        {
+          "method": "GET",
+          "path": "/websockify"
+        }
+      ]
+    },
+    "42": {
+      "package": "adminapi",
+      "previous_symbol": "vultrBrowserProxy",
+      "next_symbol": null,
+      "calls": [
+        "Add",
+        "Context",
+        "Read",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/accounts/{id}/console-session"
+        }
+      ]
+    },
+    "43": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "TestReadinessWithoutDatabase",
+      "calls": [
+        "Routes"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "44": {
+      "package": "adminapi",
+      "previous_symbol": "TestHealthEndpoint",
+      "next_symbol": null,
+      "calls": [
+        "Routes"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "45": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "system",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "audit_events"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/audit"
+        }
+      ]
+    },
+    "46": {
+      "package": "adminapi",
+      "previous_symbol": "audit",
+      "next_symbol": "version",
+      "calls": [
+        "Context",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "worker_heartbeats"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/system"
+        }
+      ]
+    },
+    "47": {
+      "package": "adminapi",
+      "previous_symbol": "system",
+      "next_symbol": null,
+      "calls": [
+        "Current",
+        "writeJSON"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/version"
+        }
+      ]
+    },
+    "48": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": "uploadTemplate",
+      "calls": [
+        "Close",
+        "Context",
+        "errorBody",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "xui_database_templates"
+      ],
+      "db_writes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/v1/templates"
+        }
+      ]
+    },
+    "49": {
+      "package": "adminapi",
+      "previous_symbol": "listTemplates",
+      "next_symbol": null,
+      "calls": [
+        "CanWrite",
+        "Close",
+        "Context",
+        "InspectTemplate",
+        "Name",
+        "errorBody",
+        "principal",
+        "writeJSON"
+      ],
+      "db_reads": [
+        "xui_database_templates"
+      ],
+      "db_writes": [
+        "xui_database_templates"
+      ],
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/v1/templates"
+        }
+      ]
+    },
+    "50": {
+      "package": "adminapi",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Account",
+        "GetProxy",
+        "New",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "Open",
+        "zeroBytes"
+      ],
+      "db_reads": [
+        "proxies"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "51": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "ProviderStateRuntimeStatus",
+      "calls": [
+        "Class",
+        "Error"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "52": {
+      "package": "app",
+      "previous_symbol": "ClassifyAccountProviderError",
+      "next_symbol": "IsProviderObservationError",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "53": {
+      "package": "app",
+      "previous_symbol": "ProviderStateRuntimeStatus",
+      "next_symbol": "ProviderProbeInterval",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "54": {
+      "package": "app",
+      "previous_symbol": "IsProviderObservationError",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "55": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "TestProviderStateRecoveryPolicy",
+      "calls": [
+        "ClassifyAccountProviderError",
+        "New",
+        "Run"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "56": {
+      "package": "app",
+      "previous_symbol": "TestClassifyAccountProviderError",
+      "next_symbol": null,
+      "calls": [
+        "IsProviderObservationError",
+        "ProviderProbeInterval"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "57": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "Bootstrap",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "58": {
+      "package": "app",
+      "previous_symbol": "Application",
+      "next_symbol": "Close",
+      "calls": [
+        "Close",
+        "LoadConfig",
+        "LoadMasterKey",
+        "NewRegistry",
+        "NewStore",
+        "Open",
+        "Register",
+        "wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "59": {
+      "package": "app",
+      "previous_symbol": "Bootstrap",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "60": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "Available",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "61": {
+      "package": "app",
+      "previous_symbol": "CreateCapacity",
+      "next_symbol": "RequireCreateCapacity",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "62": {
+      "package": "app",
+      "previous_symbol": "Available",
+      "next_symbol": null,
+      "calls": [
+        "Available",
+        "Read"
+      ],
+      "db_reads": [
+        "accounts"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "63": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "TestCreateCapacityUnknownLimitAllowsCreate",
+      "calls": [
+        "Available"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "64": {
+      "package": "app",
+      "previous_symbol": "TestCreateCapacityAvailable",
+      "next_symbol": null,
+      "calls": [
+        "Available"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "65": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "RunDailyCatalogSync",
+      "calls": [
+        "Catalog",
+        "Close",
+        "CloseIdleConnections",
+        "Marshal",
+        "Runtime"
+      ],
+      "db_reads": [
+        "accounts",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "SET",
+        "provider_catalog_cache"
+      ],
+      "routes": []
+    },
+    "66": {
+      "package": "app",
+      "previous_symbol": "SyncCatalogs",
+      "next_symbol": null,
+      "calls": [
+        "SyncCatalogs"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "67": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "LoadConfig",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "68": {
+      "package": "app",
+      "previous_symbol": "Config",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "69": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Marshal"
+      ],
+      "db_reads": [
+        "accounts",
+        "droplets"
+      ],
+      "db_writes": [
+        "SET",
+        "deployments",
+        "resources"
+      ],
+      "routes": []
+    },
+    "70": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "AccountRuntime",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "71": {
+      "package": "app",
+      "previous_symbol": "Container",
+      "next_symbol": "accountCredentialSource",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "72": {
+      "package": "app",
+      "previous_symbol": "AccountRuntime",
+      "next_symbol": "Get",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "73": {
+      "package": "app",
+      "previous_symbol": "accountCredentialSource",
+      "next_symbol": "providerRegistry",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "74": {
+      "package": "app",
+      "previous_symbol": "Get",
+      "next_symbol": "openDriver",
+      "calls": [
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "75": {
+      "package": "app",
+      "previous_symbol": "providerRegistry",
+      "next_symbol": "computeDriver",
+      "calls": [
+        "Open",
+        "providerRegistry"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "76": {
+      "package": "app",
+      "previous_symbol": "openDriver",
+      "next_symbol": "Runtime",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "77": {
+      "package": "app",
+      "previous_symbol": "computeDriver",
+      "next_symbol": "wipe",
+      "calls": [
+        "Account",
+        "CloseIdleConnections",
+        "GetProxy",
+        "NewCellManager",
+        "NewIsolatedDirectClient",
+        "NewProxyGateway",
+        "Register",
+        "ensureActiveAccountProxy",
+        "openDriver",
+        "wipe"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "78": {
+      "package": "app",
+      "previous_symbol": "Runtime",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "79": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "AttachSnapshot",
+        "Available",
+        "Close",
+        "DeploymentConfigFromSnapshot",
+        "Get",
+        "MaintainStickyIdentity",
+        "Read",
+        "Reserve",
+        "Resolve",
+        "Rollback",
+        "Run",
+        "ScriptStep",
+        "SnapshotForDeployment",
+        "Workflow",
+        "defaultProvisionPlan",
+        "ensureDeploymentSSHIdentity"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "provider_snapshots",
+        "xui_database_templates"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "80": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "MarkReady",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "81": {
+      "package": "app",
+      "previous_symbol": "deploymentReadyFinalizer",
+      "next_symbol": "deploymentFailureFinalizer",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "droplets"
+      ],
+      "routes": []
+    },
+    "82": {
+      "package": "app",
+      "previous_symbol": "MarkReady",
+      "next_symbol": "MarkFailed",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "83": {
+      "package": "app",
+      "previous_symbol": "deploymentFailureFinalizer",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [
+        "droplets",
+        "lifecycle_events"
+      ],
+      "routes": []
+    },
+    "84": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "setInstallerDeploymentState",
+      "calls": [],
+      "db_reads": [
+        "deployment_installer_selections",
+        "deployments"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "85": {
+      "package": "app",
+      "previous_symbol": "deploymentInstallerRef",
+      "next_symbol": "installerTarget",
+      "calls": [
+        "Event"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "deployments"
+      ],
+      "routes": []
+    },
+    "86": {
+      "package": "app",
+      "previous_symbol": "setInstallerDeploymentState",
+      "next_symbol": "installerReadiness",
+      "calls": [
+        "Get",
+        "Runtime",
+        "Wait",
+        "computeDriver"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "87": {
+      "package": "app",
+      "previous_symbol": "installerTarget",
+      "next_symbol": "activateInstaller",
+      "calls": [
+        "Collect"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "88": {
+      "package": "app",
+      "previous_symbol": "installerReadiness",
+      "next_symbol": null,
+      "calls": [
+        "Error",
+        "Execute",
+        "MarkFailed",
+        "Prepare",
+        "Rollback",
+        "deploymentInstallerRef",
+        "installerReadiness",
+        "installerTarget",
+        "setInstallerDeploymentState"
+      ],
+      "db_reads": [
+        "installer_runs",
+        "provision_runs"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "89": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "ConfirmDeleted",
+      "calls": [
+        "Capabilities",
+        "EnsureFreshNetworkIdentity",
+        "Event",
+        "Observe",
+        "Process",
+        "Read",
+        "Rollback",
+        "Runtime",
+        "StartDeployment",
+        "Transition",
+        "computeDriver",
+        "proxyAdapterByName"
+      ],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "schedules"
+      ],
+      "db_writes": [
+        "accounts",
+        "droplets",
+        "resources"
+      ],
+      "routes": []
+    },
+    "90": {
+      "package": "app",
+      "previous_symbol": "ProcessLifecycle",
+      "next_symbol": null,
+      "calls": [
+        "Close",
+        "Rollback"
+      ],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [
+        "accounts",
+        "deployment_events",
+        "deployments",
+        "droplets",
+        "resources"
+      ],
+      "routes": []
+    },
+    "91": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "result",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "92": {
+      "package": "app",
+      "previous_symbol": "fastGatewayExitIP",
+      "next_symbol": "EnsureFreshNetworkIdentity",
+      "calls": [
+        "Close",
+        "Do",
+        "New"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "93": {
+      "package": "app",
+      "previous_symbol": "result",
+      "next_symbol": null,
+      "calls": [
+        "Account",
+        "Capabilities",
+        "CloseIdleConnections",
+        "GetProxy",
+        "NewProxyGateway",
+        "fastGatewayExitIP",
+        "proxyAdapterByName",
+        "proxySessionUsername",
+        "wipe"
+      ],
+      "db_reads": [
+        "account_network_identities",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "account_network_identities",
+        "accounts"
+      ],
+      "routes": []
+    },
+    "94": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "droplets",
+        "lifecycle_events"
+      ],
+      "routes": []
+    },
+    "95": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "PanelSettings",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "96": {
+      "package": "app",
+      "previous_symbol": "PanelSettings",
+      "next_symbol": "Addr",
+      "calls": [],
+      "db_reads": [
+        "panel_settings"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "97": {
+      "package": "app",
+      "previous_symbol": "PanelSettings",
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "98": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Configure"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "99": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [],
+      "db_reads": [
+        "deployments",
+        "installer_runs"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "100": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "RequirePostInstallCapabilities",
+        "Rollback"
+      ],
+      "db_reads": [
+        "deployments",
+        "xui_database_deployments"
+      ],
+      "db_writes": [
+        "deployment_events",
+        "deployments"
+      ],
+      "routes": []
+    },
+    "101": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "DeploymentConfigFromSnapshot",
+        "Get",
+        "MarkReady",
+        "RequirePostInstallCapabilities",
+        "Rollback"
+      ],
+      "db_reads": [
+        "deployments",
+        "xui_database_deployments",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [
+        "deployment_events",
+        "deployments"
+      ],
+      "routes": []
+    },
+    "102": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "DeploymentConfigFromSnapshot",
+      "calls": [
+        "DefaultPreInstallerSteps"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "103": {
+      "package": "app",
+      "previous_symbol": "defaultProvisionPlan",
+      "next_symbol": null,
+      "calls": [
+        "DefaultDatabasePaths",
+        "SnapshotForDeployment",
+        "String",
+        "defaultProvisionPlan"
+      ],
+      "db_reads": [
+        "xui_database_templates"
+      ],
+      "db_writes": [],
+      "routes": []
+    },
+    "104": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "RecordProviderObservation",
+      "calls": [
+        "CanCreateCapacity",
+        "ClassifyAccountProviderError",
+        "Close",
+        "CloseIdleConnections",
+        "Error",
+        "Marshal",
+        "Observe",
+        "ProviderProbeInterval",
+        "ReconcileOwnedOrphans",
+        "RecordProviderObservation",
+        "Runtime"
+      ],
+      "db_reads": [
+        "accounts",
+        "provider_capacity_observations",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "account_capacity_events",
+        "accounts",
+        "provider_snapshots"
+      ],
+      "routes": []
+    },
+    "105": {
+      "package": "app",
+      "previous_symbol": "RefreshProviderSnapshots",
+      "next_symbol": null,
+      "calls": [
+        "IsProviderObservationError",
+        "ProviderStateRuntimeStatus"
+      ],
+      "db_reads": [],
+      "db_writes": [
+        "accounts"
+      ],
+      "routes": []
+    },
+    "106": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": null,
+      "calls": [
+        "Rollback"
+      ],
+      "db_reads": [
+        "account_proxy_pool",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "SET",
+        "account_network_identities",
+        "network_profiles"
+      ],
+      "routes": []
+    },
+    "107": {
+      "package": "app",
+      "previous_symbol": null,
+      "next_symbol": "ProxySessionRequest",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "108": {
+      "package": "app",
+      "previous_symbol": "ProxyCapabilities",
+      "next_symbol": "ProxyProviderAdapter",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "109": {
+      "package": "app",
+      "previous_symbol": "ProxySessionRequest",
+      "next_symbol": "genericProxyAdapter",
+      "calls": [
+        "Capabilities",
+        "Match",
+        "Name",
+        "Username"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "110": {
+      "package": "app",
+      "previous_symbol": "ProxyProviderAdapter",
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "111": {
+      "package": "app",
+      "previous_symbol": "genericProxyAdapter",
+      "next_symbol": "Match",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "112": {
+      "package": "app",
+      "previous_symbol": "Name",
+      "next_symbol": "Capabilities",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "113": {
+      "package": "app",
+      "previous_symbol": "Match",
+      "next_symbol": "Username",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "114": {
+      "package": "app",
+      "previous_symbol": "Capabilities",
+      "next_symbol": "suffixSessionAdapter",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "115": {
+      "package": "app",
+      "previous_symbol": "Username",
+      "next_symbol": "Name",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "116": {
+      "package": "app",
+      "previous_symbol": "suffixSessionAdapter",
+      "next_symbol": "Match",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "117": {
+      "package": "app",
+      "previous_symbol": "Name",
+      "next_symbol": "Capabilities",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "118": {
+      "package": "app",
+      "previous_symbol": "Match",
+      "next_symbol": "Username",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "119": {
+      "package": "app",
+      "previous_symbol": "Capabilities",
+      "next_symbol": "proxyAdapterByName",
+      "calls": [
+        "Index"
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    },
+    "120": {
+      "package": "app",
+      "previous_symbol": "Username",
+      "next_symbol": "proxySessionUsername",
+      "calls": [],
+      "db_reads": [],
+      "db_writes": [],
+      "routes": []
+    }
+  }
+}

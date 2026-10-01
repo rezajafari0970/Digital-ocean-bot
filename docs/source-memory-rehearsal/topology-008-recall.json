@@ -1,0 +1,232 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `Clear`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `minFailure`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/worker/failures.go`, what immediately follows `ClearResolved`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `Heartbeat`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `Beat`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/worker/heartbeat.go`, what immediately follows `Heartbeat`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `LifecycleWorker`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `Once`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `internal/worker/lifecycle.go`, what immediately follows `LifecycleWorker`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `Deployments`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `Operations`?"
+    },
+    {
+      "id": 12,
+      "prompt": "In `internal/worker/recovery.go`, what immediately follows `Operations`?"
+    },
+    {
+      "id": 13,
+      "prompt": "Which file contains `Handler`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `Once`?"
+    },
+    {
+      "id": 15,
+      "prompt": "In `internal/worker/worker.go`, what immediately follows `BackoffBypasser`?"
+    },
+    {
+      "id": 16,
+      "prompt": "Which file contains `terminalDeploymentState`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `Engine`?"
+    },
+    {
+      "id": 18,
+      "prompt": "In `internal/workflow/engine.go`, what immediately follows `Engine`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `x`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `Reserve`?"
+    },
+    {
+      "id": 21,
+      "prompt": "In `internal/workflow/engine_test.go`, what immediately follows `memStore`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `RetryableClass`?"
+    },
+    {
+      "id": 23,
+      "prompt": "Which file contains `ClassifyStepError`?"
+    },
+    {
+      "id": 24,
+      "prompt": "In `internal/workflow/error_class.go`, what immediately follows `ClassifyStepError`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `TestClassifyStepError`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `Request`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `Deployment`?"
+    },
+    {
+      "id": 28,
+      "prompt": "In `internal/workflow/model.go`, what immediately follows `Deployment`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `TestSQLStepRetrySemanticsE2E`?"
+    },
+    {
+      "id": 30,
+      "prompt": "Which file contains `e2eDB`?"
+    },
+    {
+      "id": 31,
+      "prompt": "In `internal/workflow/postgres_e2e_test.go`, what immediately follows `e2eDB`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `UnmarshalJSON`?"
+    },
+    {
+      "id": 33,
+      "prompt": "Which file contains `PersistentProfile`?"
+    },
+    {
+      "id": 34,
+      "prompt": "In `internal/workflow/profile.go`, what immediately follows `String`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `SnapshotForDeployment`?"
+    },
+    {
+      "id": 36,
+      "prompt": "Which file contains `ProfileStore`?"
+    },
+    {
+      "id": 37,
+      "prompt": "In `internal/workflow/profile_store.go`, what immediately follows `ProfileStore`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `TestProviderKeyRefReadsHistoricalNumberAndNewString`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `RunLease`?"
+    },
+    {
+      "id": 40,
+      "prompt": "Which file contains `Acquire`?"
+    },
+    {
+      "id": 41,
+      "prompt": "In `internal/workflow/run_lease.go`, what immediately follows `PostgresRunLease`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `fakeRunLease`?"
+    },
+    {
+      "id": 43,
+      "prompt": "Which file contains `TestRunLeaseRejectsConcurrentOwner`?"
+    },
+    {
+      "id": 44,
+      "prompt": "In `internal/workflow/run_lease_test.go`, what immediately follows `Acquire`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `RuntimeSteps`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `Store`?"
+    },
+    {
+      "id": 47,
+      "prompt": "In `internal/workflow/runtime.go`, what immediately follows `ResourceWaiter`?"
+    },
+    {
+      "id": 48,
+      "prompt": "Which file contains `Wait`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `ServerWaiter`?"
+    },
+    {
+      "id": 50,
+      "prompt": "In `internal/workflow/server_waiter.go`, what immediately follows `ServerWaiter`?"
+    },
+    {
+      "id": 51,
+      "prompt": "Which file contains `TestServerWaiterPermanentError`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `FindServerByIdentity`?"
+    },
+    {
+      "id": 53,
+      "prompt": "In `internal/workflow/server_waiter_test.go`, what immediately follows `GetServer`?"
+    },
+    {
+      "id": 54,
+      "prompt": "Which file contains `StepPolicy`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `Store`?"
+    },
+    {
+      "id": 57,
+      "prompt": "In `internal/workflow/store.go`, what immediately follows `DBTX`?"
+    }
+  ]
+}

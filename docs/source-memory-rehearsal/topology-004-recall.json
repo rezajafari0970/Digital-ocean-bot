@@ -1,0 +1,544 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `Build`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `Service`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/panels/desired/service.go`, what immediately follows `Build`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `Instance`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `Driver`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/panels/driver.go`, what immediately follows `Capabilities`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `VLESSRealityURI`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `VLESSReality`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `internal/panels/export/vless.go`, what immediately follows `VLESSReality`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `TestRealityURIAlwaysCarriesVisionFlow`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `ReconcilePanel`?"
+    },
+    {
+      "id": 12,
+      "prompt": "Which file contains `Service`?"
+    },
+    {
+      "id": 13,
+      "prompt": "In `internal/panels/globalreality/service.go`, what immediately follows `Service`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `RealityClient`?"
+    },
+    {
+      "id": 15,
+      "prompt": "Which file contains `Runner`?"
+    },
+    {
+      "id": 16,
+      "prompt": "In `internal/panels/healthverify/xray.go`, what immediately follows `Probe`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestProbeRejectsTunnelFailure`?"
+    },
+    {
+      "id": 18,
+      "prompt": "Which file contains `TestProbeRejectsWrongExit`?"
+    },
+    {
+      "id": 19,
+      "prompt": "In `internal/panels/healthverify/xray_test.go`, what immediately follows `valid`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `InboundRecord`?"
+    },
+    {
+      "id": 21,
+      "prompt": "Which file contains `Snapshot`?"
+    },
+    {
+      "id": 22,
+      "prompt": "In `internal/panels/inventory/model.go`, what immediately follows `InboundRecord`?"
+    },
+    {
+      "id": 23,
+      "prompt": "Which file contains `SQLStore`?"
+    },
+    {
+      "id": 24,
+      "prompt": "Which file contains `SyncResult`?"
+    },
+    {
+      "id": 25,
+      "prompt": "In `internal/panels/inventory/store.go`, what immediately follows `SQLStore`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `Ports`?"
+    },
+    {
+      "id": 27,
+      "prompt": "Which file contains `Collector`?"
+    },
+    {
+      "id": 28,
+      "prompt": "In `internal/panels/listeners/collector.go`, what immediately follows `Collector`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `TestSSHCollector`?"
+    },
+    {
+      "id": 30,
+      "prompt": "Which file contains `ParseSS`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `TestParseSS`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `BootstrapPanel`?"
+    },
+    {
+      "id": 33,
+      "prompt": "Which file contains `Secrets`?"
+    },
+    {
+      "id": 34,
+      "prompt": "In `internal/panels/panelbootstrap/service.go`, what immediately follows `Service`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `Action`?"
+    },
+    {
+      "id": 36,
+      "prompt": "Which file contains `DesiredInbound`?"
+    },
+    {
+      "id": 37,
+      "prompt": "In `internal/panels/planner/model.go`, what immediately follows `Action`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `Plan`?"
+    },
+    {
+      "id": 39,
+      "prompt": "Which file contains `differs`?"
+    },
+    {
+      "id": 40,
+      "prompt": "In `internal/panels/planner/planner.go`, what immediately follows `Plan`?"
+    },
+    {
+      "id": 41,
+      "prompt": "Which file contains `TestPlanCreatesMissing`?"
+    },
+    {
+      "id": 42,
+      "prompt": "Which file contains `TestPlanDoesNotDeleteByDefault`?"
+    },
+    {
+      "id": 43,
+      "prompt": "In `internal/panels/planner/planner_test.go`, what immediately follows `TestPlanCreatesMissing`?"
+    },
+    {
+      "id": 44,
+      "prompt": "Which file contains `AllocatePorts`?"
+    },
+    {
+      "id": 45,
+      "prompt": "Which file contains `TestAllocateFailsClosed`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `TestAllocateDeterministic`?"
+    },
+    {
+      "id": 47,
+      "prompt": "In `internal/panels/policy/allocator_test.go`, what immediately follows `TestAllocateDeterministic`?"
+    },
+    {
+      "id": 48,
+      "prompt": "Which file contains `Expand`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `TestExpandStableKeys`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `InboundPolicy`?"
+    },
+    {
+      "id": 51,
+      "prompt": "Which file contains `Normalize`?"
+    },
+    {
+      "id": 52,
+      "prompt": "Which file contains `Put`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `SQLStore`?"
+    },
+    {
+      "id": 54,
+      "prompt": "In `internal/panels/policy/store.go`, what immediately follows `SQLStore`?"
+    },
+    {
+      "id": 55,
+      "prompt": "Which file contains `Validate`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `TestValidateRejectsDuplicatePortsAcrossLists`?"
+    },
+    {
+      "id": 57,
+      "prompt": "Which file contains `HostKeyPins`?"
+    },
+    {
+      "id": 58,
+      "prompt": "Which file contains `VerifyOrPin`?"
+    },
+    {
+      "id": 59,
+      "prompt": "In `internal/panels/proberegistry/hostkey.go`, what immediately follows `HostKeyPins`?"
+    },
+    {
+      "id": 60,
+      "prompt": "Which file contains `Result`?"
+    },
+    {
+      "id": 61,
+      "prompt": "Which file contains `SQLStore`?"
+    },
+    {
+      "id": 62,
+      "prompt": "In `internal/panels/proberegistry/store.go`, what immediately follows `Result`?"
+    },
+    {
+      "id": 63,
+      "prompt": "Which file contains `DesiredReconciler`?"
+    },
+    {
+      "id": 64,
+      "prompt": "Which file contains `Reconcile`?"
+    },
+    {
+      "id": 65,
+      "prompt": "In `internal/panels/readyworker/adapter.go`, what immediately follows `Bootstrapper`?"
+    },
+    {
+      "id": 66,
+      "prompt": "Which file contains `BootstrapPanel`?"
+    },
+    {
+      "id": 67,
+      "prompt": "Which file contains `ReconcilePanel`?"
+    },
+    {
+      "id": 68,
+      "prompt": "In `internal/panels/readyworker/adapter_test.go`, what immediately follows `ReconcilePanel`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `EligibleExpiringPanels`?"
+    },
+    {
+      "id": 70,
+      "prompt": "Which file contains `EligibleReadyPanels`?"
+    },
+    {
+      "id": 71,
+      "prompt": "In `internal/panels/readyworker/sql_source.go`, what immediately follows `EligibleReadyPanels`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `Adapter`?"
+    },
+    {
+      "id": 73,
+      "prompt": "Which file contains `Run`?"
+    },
+    {
+      "id": 74,
+      "prompt": "In `internal/panels/readyworker/worker.go`, what immediately follows `Worker`?"
+    },
+    {
+      "id": 75,
+      "prompt": "Which file contains `TestWorkerBoundedDryRun`?"
+    },
+    {
+      "id": 76,
+      "prompt": "Which file contains `Reconcile`?"
+    },
+    {
+      "id": 77,
+      "prompt": "In `internal/panels/readyworker/worker_test.go`, what immediately follows `fake`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `URI`?"
+    },
+    {
+      "id": 79,
+      "prompt": "Which file contains `normalized`?"
+    },
+    {
+      "id": 80,
+      "prompt": "In `internal/panels/realitycontract/contract.go`, what immediately follows `Managed`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `TestPayloadAndURIStaySymmetric`?"
+    },
+    {
+      "id": 82,
+      "prompt": "Which file contains `rp`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `Secrets`?"
+    },
+    {
+      "id": 84,
+      "prompt": "In `internal/panels/residentialsync/service.go`, what immediately follows `Service`?"
+    },
+    {
+      "id": 85,
+      "prompt": "Which file contains `NewAPIClient`?"
+    },
+    {
+      "id": 86,
+      "prompt": "Which file contains `json`?"
+    },
+    {
+      "id": 87,
+      "prompt": "In `internal/panels/sanaei/api.go`, what immediately follows `Login`?"
+    },
+    {
+      "id": 88,
+      "prompt": "Which file contains `failingTransport`?"
+    },
+    {
+      "id": 89,
+      "prompt": "Which file contains `TestLoginPreservesTransportCause`?"
+    },
+    {
+      "id": 90,
+      "prompt": "In `internal/panels/sanaei/api_error_test.go`, what immediately follows `failingTransport`?"
+    },
+    {
+      "id": 91,
+      "prompt": "Which file contains `BearerAuth`?"
+    },
+    {
+      "id": 92,
+      "prompt": "Which file contains `Authorize`?"
+    },
+    {
+      "id": 93,
+      "prompt": "In `internal/panels/sanaei/auth.go`, what immediately follows `BearerAuth`?"
+    },
+    {
+      "id": 94,
+      "prompt": "Which file contains `Get`?"
+    },
+    {
+      "id": 95,
+      "prompt": "Which file contains `TestBearerAuthReadsSecretAndSetsHeader`?"
+    },
+    {
+      "id": 96,
+      "prompt": "In `internal/panels/sanaei/auth_test.go`, what immediately follows `TestSessionCredentialsRefusePlainHTTP`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `AddClientsSession`?"
+    },
+    {
+      "id": 98,
+      "prompt": "Which file contains `DeleteClientSession`?"
+    },
+    {
+      "id": 99,
+      "prompt": "In `internal/panels/sanaei/client_mutation.go`, what immediately follows `AddClientsSession`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `Client`?"
+    },
+    {
+      "id": 101,
+      "prompt": "Which file contains `ClientManager`?"
+    },
+    {
+      "id": 102,
+      "prompt": "In `internal/panels/sanaei/clients.go`, what immediately follows `ClientStore`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `TestUUIDv4`?"
+    },
+    {
+      "id": 104,
+      "prompt": "Which file contains `DatabasePaths`?"
+    },
+    {
+      "id": 105,
+      "prompt": "Which file contains `ImportCommand`?"
+    },
+    {
+      "id": 106,
+      "prompt": "In `internal/panels/sanaei/database.go`, what immediately follows `DefaultDatabasePaths`?"
+    },
+    {
+      "id": 107,
+      "prompt": "Which file contains `Do`?"
+    },
+    {
+      "id": 108,
+      "prompt": "Which file contains `DirectSessionExecutor`?"
+    },
+    {
+      "id": 109,
+      "prompt": "In `internal/panels/sanaei/direct_session.go`, what immediately follows `DirectSessionExecutor`?"
+    },
+    {
+      "id": 110,
+      "prompt": "Which file contains `supported`?"
+    },
+    {
+      "id": 111,
+      "prompt": "Which file contains `Driver`?"
+    },
+    {
+      "id": 112,
+      "prompt": "In `internal/panels/sanaei/driver.go`, what immediately follows `client`?"
+    },
+    {
+      "id": 113,
+      "prompt": "Which file contains `TestDriverDiscoveryClassifiesRuntimeCapabilities`?"
+    },
+    {
+      "id": 114,
+      "prompt": "Which file contains `TestDiscoverWithExecutorIsReadOnly`?"
+    },
+    {
+      "id": 115,
+      "prompt": "In `internal/panels/sanaei/driver_test.go`, what immediately follows `TestDriverDiscoveryClassifiesRuntimeCapabilities`?"
+    },
+    {
+      "id": 116,
+      "prompt": "Which file contains `GetInbound`?"
+    },
+    {
+      "id": 117,
+      "prompt": "Which file contains `Inbound`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Which file contains `AddClients`?"
+    },
+    {
+      "id": 119,
+      "prompt": "In `internal/panels/sanaei/inbounds.go`, what immediately follows `ListInbounds`?"
+    },
+    {
+      "id": 120,
+      "prompt": "Which file contains `VerifyCommand`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Which file contains `shellQuote`?"
+    },
+    {
+      "id": 122,
+      "prompt": "In `internal/panels/sanaei/installer.go`, what immediately follows `VerifyCommand`?"
+    },
+    {
+      "id": 123,
+      "prompt": "Which file contains `RegisterInstaller`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `quote`?"
+    },
+    {
+      "id": 125,
+      "prompt": "In `internal/panels/sanaei/installer_adapter.go`, what immediately follows `quote`?"
+    },
+    {
+      "id": 126,
+      "prompt": "Which file contains `TestLegacyInstallerCommandDoesNotBecomeAdapterSource`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `TestInstallerAdapterCompatibilityDefaults`?"
+    },
+    {
+      "id": 128,
+      "prompt": "In `internal/panels/sanaei/installer_adapter_test.go`, what immediately follows `TestInstallerAdapterBuildsImmutableCoreDefinition`?"
+    },
+    {
+      "id": 129,
+      "prompt": "Which file contains `InventoryFromRaw`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Which file contains `ReadInventory`?"
+    },
+    {
+      "id": 131,
+      "prompt": "In `internal/panels/sanaei/inventory.go`, what immediately follows `inventoryEnvelope`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `TestReadInventoryNormalizesWithoutSecrets`?"
+    },
+    {
+      "id": 133,
+      "prompt": "Which file contains `DatabaseManager`?"
+    },
+    {
+      "id": 134,
+      "prompt": "Which file contains `Uploader`?"
+    },
+    {
+      "id": 135,
+      "prompt": "In `internal/panels/sanaei/manager.go`, what immediately follows `SecretReader`?"
+    }
+  ]
+}

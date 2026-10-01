@@ -1,0 +1,632 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "prompt": "Which file contains `InventoryReader`?"
+    },
+    {
+      "id": 2,
+      "prompt": "Which file contains `ObservationReader`?"
+    },
+    {
+      "id": 3,
+      "prompt": "In `internal/providers/provider.go`, what immediately follows `Factory`?"
+    },
+    {
+      "id": 4,
+      "prompt": "Which file contains `Health`?"
+    },
+    {
+      "id": 5,
+      "prompt": "Which file contains `testDriver`?"
+    },
+    {
+      "id": 6,
+      "prompt": "In `internal/providers/provider_v2_test.go`, what immediately follows `Health`?"
+    },
+    {
+      "id": 7,
+      "prompt": "Which file contains `Has`?"
+    },
+    {
+      "id": 8,
+      "prompt": "Which file contains `MetadataAll`?"
+    },
+    {
+      "id": 9,
+      "prompt": "In `internal/providers/registry.go`, what immediately follows `Registry`?"
+    },
+    {
+      "id": 10,
+      "prompt": "Which file contains `SSHKey`?"
+    },
+    {
+      "id": 11,
+      "prompt": "Which file contains `CreateServerResult`?"
+    },
+    {
+      "id": 12,
+      "prompt": "In `internal/providers/types.go`, what immediately follows `Account`?"
+    },
+    {
+      "id": 13,
+      "prompt": "Which file contains `HTTPError`?"
+    },
+    {
+      "id": 14,
+      "prompt": "Which file contains `pagePath`?"
+    },
+    {
+      "id": 15,
+      "prompt": "In `internal/providers/vultr/client.go`, what immediately follows `pagePath`?"
+    },
+    {
+      "id": 16,
+      "prompt": "Which file contains `TestGET429RetriesButMutationDoesNot`?"
+    },
+    {
+      "id": 17,
+      "prompt": "Which file contains `TestClientAuthorizationAndHealth`?"
+    },
+    {
+      "id": 18,
+      "prompt": "In `internal/providers/vultr/client_test.go`, what immediately follows `TestGET429RetriesButMutationDoesNot`?"
+    },
+    {
+      "id": 19,
+      "prompt": "Which file contains `Metadata`?"
+    },
+    {
+      "id": 20,
+      "prompt": "Which file contains `Factory`?"
+    },
+    {
+      "id": 21,
+      "prompt": "In `internal/providers/vultr/driver.go`, what immediately follows `Driver`?"
+    },
+    {
+      "id": 22,
+      "prompt": "Which file contains `TestFactoryMetadata`?"
+    },
+    {
+      "id": 23,
+      "prompt": "Which file contains `TestErrorTaxonomy`?"
+    },
+    {
+      "id": 24,
+      "prompt": "In `internal/providers/vultr/driver_test.go`, what immediately follows `TestFactoryMetadata`?"
+    },
+    {
+      "id": 25,
+      "prompt": "Which file contains `DeleteInstance`?"
+    },
+    {
+      "id": 26,
+      "prompt": "Which file contains `createInstanceRequest`?"
+    },
+    {
+      "id": 27,
+      "prompt": "In `internal/providers/vultr/mutation.go`, what immediately follows `CreateSSHKey`?"
+    },
+    {
+      "id": 28,
+      "prompt": "Which file contains `CreateSSHKey`?"
+    },
+    {
+      "id": 29,
+      "prompt": "Which file contains `containsString`?"
+    },
+    {
+      "id": 30,
+      "prompt": "In `internal/providers/vultr/mutation_driver.go`, what immediately follows `CreateServer`?"
+    },
+    {
+      "id": 31,
+      "prompt": "Which file contains `errorsAs`?"
+    },
+    {
+      "id": 32,
+      "prompt": "Which file contains `TestCreate429IsAmbiguousWithRetryAfter`?"
+    },
+    {
+      "id": 33,
+      "prompt": "In `internal/providers/vultr/mutation_driver_test.go`, what immediately follows `TestMutationContracts`?"
+    },
+    {
+      "id": 34,
+      "prompt": "Which file contains `Regions`?"
+    },
+    {
+      "id": 35,
+      "prompt": "Which file contains `OS`?"
+    },
+    {
+      "id": 36,
+      "prompt": "In `internal/providers/vultr/read.go`, what immediately follows `SSHKey`?"
+    },
+    {
+      "id": 37,
+      "prompt": "Which file contains `Inventory`?"
+    },
+    {
+      "id": 38,
+      "prompt": "Which file contains `GetServer`?"
+    },
+    {
+      "id": 39,
+      "prompt": "In `internal/providers/vultr/read_driver.go`, what immediately follows `Capacity`?"
+    },
+    {
+      "id": 40,
+      "prompt": "Which file contains `TestNormalizeUbuntuVersions`?"
+    },
+    {
+      "id": 41,
+      "prompt": "Which file contains `fixtureReadDriver`?"
+    },
+    {
+      "id": 42,
+      "prompt": "In `internal/providers/vultr/read_driver_test.go`, what immediately follows `fixtureReadDriver`?"
+    },
+    {
+      "id": 43,
+      "prompt": "Which file contains `sshKeysResponse`?"
+    },
+    {
+      "id": 44,
+      "prompt": "Which file contains `plansResponse`?"
+    },
+    {
+      "id": 45,
+      "prompt": "In `internal/providers/vultr/types.go`, what immediately follows `regionsResponse`?"
+    },
+    {
+      "id": 46,
+      "prompt": "Which file contains `Observe`?"
+    },
+    {
+      "id": 47,
+      "prompt": "Which file contains `BrowserObserver`?"
+    },
+    {
+      "id": 48,
+      "prompt": "In `internal/providers/vultrconsole/browser.go`, what immediately follows `BrowserObserver`?"
+    },
+    {
+      "id": 49,
+      "prompt": "Which file contains `TestMaximumInstancesPattern`?"
+    },
+    {
+      "id": 50,
+      "prompt": "Which file contains `connect`?"
+    },
+    {
+      "id": 51,
+      "prompt": "Which file contains `Start`?"
+    },
+    {
+      "id": 52,
+      "prompt": "In `internal/providers/vultrconsole/proxy_bridge.go`, what immediately follows `auth`?"
+    },
+    {
+      "id": 53,
+      "prompt": "Which file contains `DefaultPreInstallerSteps`?"
+    },
+    {
+      "id": 54,
+      "prompt": "Which file contains `DefaultBootstrapSteps`?"
+    },
+    {
+      "id": 55,
+      "prompt": "In `internal/provisioning/bootstrap_plan.go`, what immediately follows `DefaultBootstrapSteps`?"
+    },
+    {
+      "id": 56,
+      "prompt": "Which file contains `TestDefaultBootstrapPlanIsIndependentAndReconcilable`?"
+    },
+    {
+      "id": 57,
+      "prompt": "Which file contains `TestDefaultPreInstallerStopsAtPlaceholder`?"
+    },
+    {
+      "id": 58,
+      "prompt": "In `internal/provisioning/bootstrap_plan_test.go`, what immediately follows `TestDefaultBootstrapPlanIsIndependentAndReconcilable`?"
+    },
+    {
+      "id": 59,
+      "prompt": "Which file contains `DiagnosticRetryable`?"
+    },
+    {
+      "id": 60,
+      "prompt": "Which file contains `ClassifyCommandFailure`?"
+    },
+    {
+      "id": 61,
+      "prompt": "In `internal/provisioning/diagnostics.go`, what immediately follows `tailDiagnostic`?"
+    },
+    {
+      "id": 62,
+      "prompt": "Which file contains `TestLinuxFailureTaxonomy`?"
+    },
+    {
+      "id": 63,
+      "prompt": "Which file contains `TestSSHFailureTaxonomy`?"
+    },
+    {
+      "id": 64,
+      "prompt": "In `internal/provisioning/diagnostics_test.go`, what immediately follows `TestLinuxFailureTaxonomy`?"
+    },
+    {
+      "id": 65,
+      "prompt": "Which file contains `TestDynamicScriptPlanResumesAtFailedStep`?"
+    },
+    {
+      "id": 66,
+      "prompt": "Which file contains `RunScript`?"
+    },
+    {
+      "id": 67,
+      "prompt": "In `internal/provisioning/dynamic_plan_test.go`, what immediately follows `scriptExecStub`?"
+    },
+    {
+      "id": 68,
+      "prompt": "Which file contains `Plan`?"
+    },
+    {
+      "id": 69,
+      "prompt": "Which file contains `ObservableWaiter`?"
+    },
+    {
+      "id": 70,
+      "prompt": "In `internal/provisioning/engine.go`, what immediately follows `Execute`?"
+    },
+    {
+      "id": 71,
+      "prompt": "Which file contains `Reserve`?"
+    },
+    {
+      "id": 72,
+      "prompt": "Which file contains `FinishStep`?"
+    },
+    {
+      "id": 73,
+      "prompt": "In `internal/provisioning/engine_test.go`, what immediately follows `memStore`?"
+    },
+    {
+      "id": 74,
+      "prompt": "Which file contains `Event`?"
+    },
+    {
+      "id": 75,
+      "prompt": "Which file contains `EventRecorder`?"
+    },
+    {
+      "id": 76,
+      "prompt": "In `internal/provisioning/events.go`, what immediately follows `EventRecorder`?"
+    },
+    {
+      "id": 77,
+      "prompt": "Which file contains `VerifyOrPin`?"
+    },
+    {
+      "id": 78,
+      "prompt": "Which file contains `HostKeyPins`?"
+    },
+    {
+      "id": 79,
+      "prompt": "In `internal/provisioning/hostkey.go`, what immediately follows `HostKeyPins`?"
+    },
+    {
+      "id": 80,
+      "prompt": "Which file contains `InstallerHash`?"
+    },
+    {
+      "id": 81,
+      "prompt": "Which file contains `InstallerRef`?"
+    },
+    {
+      "id": 82,
+      "prompt": "In `internal/provisioning/installer.go`, what immediately follows `CheckInstallerCompatibility`?"
+    },
+    {
+      "id": 83,
+      "prompt": "Which file contains `TestInstallerCapabilitiesValidated`?"
+    },
+    {
+      "id": 84,
+      "prompt": "Which file contains `Execute`?"
+    },
+    {
+      "id": 85,
+      "prompt": "Which file contains `InstallerExecutor`?"
+    },
+    {
+      "id": 86,
+      "prompt": "In `internal/provisioning/installer_executor.go`, what immediately follows `Rollback`?"
+    },
+    {
+      "id": 87,
+      "prompt": "Which file contains `TestInstallerTerminalFailureRequiresRollback`?"
+    },
+    {
+      "id": 88,
+      "prompt": "Which file contains `eventRecorderStub`?"
+    },
+    {
+      "id": 89,
+      "prompt": "In `internal/provisioning/installer_executor_test.go`, what immediately follows `RunScript`?"
+    },
+    {
+      "id": 90,
+      "prompt": "Which file contains `SetState`?"
+    },
+    {
+      "id": 91,
+      "prompt": "Which file contains `Prepare`?"
+    },
+    {
+      "id": 92,
+      "prompt": "In `internal/provisioning/installer_orchestrator.go`, what immediately follows `InstallerOrchestrator`?"
+    },
+    {
+      "id": 93,
+      "prompt": "Which file contains `TestInstallerCompatibility`?"
+    },
+    {
+      "id": 94,
+      "prompt": "Which file contains `TestInstallerHashDeterministic`?"
+    },
+    {
+      "id": 95,
+      "prompt": "In `internal/provisioning/installer_test.go`, what immediately follows `TestArtifactRejectsUnsafeDefinition`?"
+    },
+    {
+      "id": 96,
+      "prompt": "Which file contains `Step`?"
+    },
+    {
+      "id": 97,
+      "prompt": "Which file contains `Run`?"
+    },
+    {
+      "id": 98,
+      "prompt": "In `internal/provisioning/model.go`, what immediately follows `Target`?"
+    },
+    {
+      "id": 99,
+      "prompt": "Which file contains `ReadinessCollector`?"
+    },
+    {
+      "id": 100,
+      "prompt": "Which file contains `ReadinessRecorder`?"
+    },
+    {
+      "id": 101,
+      "prompt": "In `internal/provisioning/readiness.go`, what immediately follows `ReadinessCollector`?"
+    },
+    {
+      "id": 102,
+      "prompt": "Which file contains `DecideReadiness`?"
+    },
+    {
+      "id": 103,
+      "prompt": "Which file contains `Error`?"
+    },
+    {
+      "id": 104,
+      "prompt": "In `internal/provisioning/readiness_policy.go`, what immediately follows `ReadinessIssue`?"
+    },
+    {
+      "id": 105,
+      "prompt": "Which file contains `issueByCode`?"
+    },
+    {
+      "id": 106,
+      "prompt": "Which file contains `TestPackageIncompleteUsesSafeRemediation`?"
+    },
+    {
+      "id": 107,
+      "prompt": "In `internal/provisioning/readiness_policy_test.go`, what immediately follows `TestReadinessPolicyDecisions`?"
+    },
+    {
+      "id": 108,
+      "prompt": "Which file contains `RunDetailedObserved`?"
+    },
+    {
+      "id": 109,
+      "prompt": "Which file contains `readinessSSHStub`?"
+    },
+    {
+      "id": 110,
+      "prompt": "In `internal/provisioning/readiness_test.go`, what immediately follows `TestReadinessReady`?"
+    },
+    {
+      "id": 111,
+      "prompt": "Which file contains `legacyScriptStep`?"
+    },
+    {
+      "id": 112,
+      "prompt": "Which file contains `ScriptPlan`?"
+    },
+    {
+      "id": 113,
+      "prompt": "In `internal/provisioning/script.go`, what immediately follows `legacyScriptStep`?"
+    },
+    {
+      "id": 114,
+      "prompt": "Which file contains `ScriptRegistry`?"
+    },
+    {
+      "id": 115,
+      "prompt": "Which file contains `Resolve`?"
+    },
+    {
+      "id": 116,
+      "prompt": "In `internal/provisioning/script_registry.go`, what immediately follows `ScriptHash`?"
+    },
+    {
+      "id": 117,
+      "prompt": "Which file contains `ScriptPhaseResult`?"
+    },
+    {
+      "id": 118,
+      "prompt": "Which file contains `ScriptExecutor`?"
+    },
+    {
+      "id": 119,
+      "prompt": "In `internal/provisioning/script_runner.go`, what immediately follows `ScriptExecutor`?"
+    },
+    {
+      "id": 120,
+      "prompt": "Which file contains `TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute`?"
+    },
+    {
+      "id": 121,
+      "prompt": "Which file contains `TestScriptRunnerFailedPrecheckExecutesThenVerifies`?"
+    },
+    {
+      "id": 122,
+      "prompt": "In `internal/provisioning/script_runner_test.go`, what immediately follows `RunDetailedObserved`?"
+    },
+    {
+      "id": 123,
+      "prompt": "Which file contains `Probe`?"
+    },
+    {
+      "id": 124,
+      "prompt": "Which file contains `probeStages`?"
+    },
+    {
+      "id": 125,
+      "prompt": "In `internal/provisioning/ssh.go`, what immediately follows `RunDetailedObserved`?"
+    },
+    {
+      "id": 126,
+      "prompt": "Which file contains `StageObservation`?"
+    },
+    {
+      "id": 127,
+      "prompt": "Which file contains `BeginStep`?"
+    },
+    {
+      "id": 128,
+      "prompt": "Which file contains `StepInterrupted`?"
+    },
+    {
+      "id": 129,
+      "prompt": "In `internal/provisioning/step_attempts.go`, what immediately follows `StepCompleted`?"
+    },
+    {
+      "id": 130,
+      "prompt": "Which file contains `TestStepAttemptCompletionUsesLatestAttempt`?"
+    },
+    {
+      "id": 131,
+      "prompt": "Which file contains `Update`?"
+    },
+    {
+      "id": 132,
+      "prompt": "Which file contains `Store`?"
+    },
+    {
+      "id": 133,
+      "prompt": "In `internal/provisioning/store.go`, what immediately follows `Store`?"
+    },
+    {
+      "id": 134,
+      "prompt": "Which file contains `TestUnknownCommandOutcomeWithoutPrecheckFailsClosed`?"
+    },
+    {
+      "id": 135,
+      "prompt": "Which file contains `RunScript`?"
+    },
+    {
+      "id": 136,
+      "prompt": "In `internal/provisioning/unknown_outcome_test.go`, what immediately follows `unknownOutcomeScripts`?"
+    },
+    {
+      "id": 137,
+      "prompt": "Which file contains `shellArg`?"
+    },
+    {
+      "id": 138,
+      "prompt": "Which file contains `Error`?"
+    },
+    {
+      "id": 139,
+      "prompt": "In `internal/provisioning/upload.go`, what immediately follows `Unwrap`?"
+    },
+    {
+      "id": 140,
+      "prompt": "Which file contains `TestShellArgEscapesQuote`?"
+    },
+    {
+      "id": 141,
+      "prompt": "Which file contains `TestReadSCPAckEOF`?"
+    },
+    {
+      "id": 142,
+      "prompt": "In `internal/provisioning/upload_test.go`, what immediately follows `TestReadSCPAckUnexpectedCode`?"
+    },
+    {
+      "id": 143,
+      "prompt": "Which file contains `TestHistoricalVerifyReconcilesToWaitingInstaller`?"
+    },
+    {
+      "id": 144,
+      "prompt": "Which file contains `TestPlaceholderInstallerPausesBeforeExecute`?"
+    },
+    {
+      "id": 145,
+      "prompt": "In `internal/provisioning/waiting_installer_test.go`, what immediately follows `TestPlaceholderInstallerPausesBeforeExecute`?"
+    },
+    {
+      "id": 146,
+      "prompt": "Which file contains `TestRestartAfterKilledWorkerFailsClosedWithoutPrecheck`?"
+    },
+    {
+      "id": 147,
+      "prompt": "Which file contains `TestRestartAfterKilledWorkerReconcilesWhenPrecheckExists`?"
+    },
+    {
+      "id": 148,
+      "prompt": "In `internal/provisioning/worker_restart_test.go`, what immediately follows `TestRestartAfterKilledWorkerFailsClosedWithoutPrecheck`?"
+    },
+    {
+      "id": 149,
+      "prompt": "Which file contains `ParseX25519`?"
+    },
+    {
+      "id": 150,
+      "prompt": "Which file contains `UUID`?"
+    },
+    {
+      "id": 151,
+      "prompt": "In `internal/reality/credentials/generator.go`, what immediately follows `UUID`?"
+    },
+    {
+      "id": 152,
+      "prompt": "Which file contains `TestParseCurrentXrayFormat`?"
+    },
+    {
+      "id": 153,
+      "prompt": "Which file contains `TestParseXrayPublicKeyLabel`?"
+    },
+    {
+      "id": 154,
+      "prompt": "In `internal/reality/credentials/generator_test.go`, what immediately follows `TestShortID`?"
+    },
+    {
+      "id": 155,
+      "prompt": "Which file contains `Generate`?"
+    },
+    {
+      "id": 156,
+      "prompt": "Which file contains `LocalX25519Generator`?"
+    },
+    {
+      "id": 157,
+      "prompt": "In `internal/reality/credentials/local.go`, what immediately follows `LocalX25519Generator`?"
+    }
+  ]
+}
