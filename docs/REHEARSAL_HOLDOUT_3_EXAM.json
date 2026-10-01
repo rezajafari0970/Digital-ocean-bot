@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "question_count": 80,
+  "answer_contract": {
+    "conceptual": "Return an exact object containing package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects.",
+    "topology": "Return an exact object containing symbols or handler as requested.",
+    "verbatim": "Return an exact object {\"text\": \"...\"}."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Run` in `internal/panels/create/orchestrator.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 2,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `SecretReader` in `internal/provisioning/engine.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 3,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestSensitiveHeadersAreRedacted` in `internal/redact/redact_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 4,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestNormalizeCatalogToCanonicalModels` in `internal/providers/digitalocean/driver_v2_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 5,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Capacity` in `internal/providers/digitalocean/driver_v2.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 6,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Sync` in `internal/panels/inventory/store.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 7,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `accounts` in `internal/adminapi/resources.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 8,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `main` in `cmd/admin-bootstrap/main.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 9,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Observe` in `internal/providers/digitalocean/driver_v2.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 10,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `ensureDeploymentSSHIdentity` in `internal/app/ssh_identity.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 11,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `defaultProvisionPlan` in `internal/app/profile.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 12,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Runtime` in `internal/app/container.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 13,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `ReconcileOwnedOrphans` in `internal/app/orphan_reconcile.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 14,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `GetInbound` in `internal/panels/sanaei/inbound_get.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 15,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `New` in `internal/adminapi/server.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 16,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Event` in `internal/provisioning/events.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 17,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `ClassifyAccountProviderError` in `internal/app/account_state.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 18,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `EventRecorder` in `internal/provisioning/events.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 19,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `WarmOutputCache` in `internal/adminapi/output.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 20,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestRealityURIAlwaysCarriesVisionFlow` in `internal/panels/export/vless_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 21,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Prober` in `internal/reality/probe.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 22,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `DiscoverWithExecutor` in `internal/panels/sanaei/driver.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 23,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestFactoryMetadata` in `internal/providers/vultr/driver_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 24,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `MarkReady` in `internal/app/deployment_ready.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 25,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestPlanDoesNotDeleteByDefault` in `internal/panels/planner/planner_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 26,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Save` in `internal/reality/store.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 27,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `apply` in `internal/panels/residentialsync/service.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 28,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `Secrets` in `internal/panels/residentialsync/service.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 29,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `accountRuntime` in `internal/adminapi/runtime_api.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 30,
+      "metric": "conceptual",
+      "prompt": "Closed-book structured recall: for `TestAdoptUnknownCreateAmbiguousTagStaysUnknown` in `internal/droplets/reconcile_test.go`, return exactly package, previous_symbol, next_symbol, calls, db_reads, db_writes, routes, side_effects."
+    },
+    {
+      "id": 31,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/policy/allocator_test.go`."
+    },
+    {
+      "id": 32,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/desired/service.go`."
+    },
+    {
+      "id": 33,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 34,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/sanaei/resilient.go`."
+    },
+    {
+      "id": 35,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/sanaei/postflight/validator_test.go`."
+    },
+    {
+      "id": 36,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/app/account_state.go`."
+    },
+    {
+      "id": 37,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/secrets/store.go`."
+    },
+    {
+      "id": 38,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/provisioning/script_runner.go`."
+    },
+    {
+      "id": 39,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/observability/health.go`."
+    },
+    {
+      "id": 40,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/provisioning/installer_orchestrator.go`."
+    },
+    {
+      "id": 41,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/usercapacity/legacy_fill.go`."
+    },
+    {
+      "id": 42,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/sanaei/realityconfig/builder.go`."
+    },
+    {
+      "id": 43,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/provisioning/installer_executor_test.go`."
+    },
+    {
+      "id": 44,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/providers/provider.go`."
+    },
+    {
+      "id": 45,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/reality/stability_test.go`."
+    },
+    {
+      "id": 46,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/network/isolation_test.go`."
+    },
+    {
+      "id": 47,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/worker/recovery.go`."
+    },
+    {
+      "id": 48,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/panels/readyworker/adapter.go`."
+    },
+    {
+      "id": 49,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/adminapi/proxy_detect.go`."
+    },
+    {
+      "id": 50,
+      "metric": "topology",
+      "prompt": "Closed-book exact topology: ordered symbols in `internal/capacity/service.go`."
+    },
+    {
+      "id": 51,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /api/v1/installers`."
+    },
+    {
+      "id": 52,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /healthz`."
+    },
+    {
+      "id": 53,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /api/v1/system`."
+    },
+    {
+      "id": 54,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /api/v1/output`."
+    },
+    {
+      "id": 55,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `POST /api/v1/accounts/{id}/proxy-test`."
+    },
+    {
+      "id": 56,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `POST /api/v1/deployments/{id}/installer`."
+    },
+    {
+      "id": 57,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /api/v1/providers`."
+    },
+    {
+      "id": 58,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `GET /api/v1/residential-proxies`."
+    },
+    {
+      "id": 59,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `POST /api/v1/proxies/{id}/test`."
+    },
+    {
+      "id": 60,
+      "metric": "topology",
+      "prompt": "Closed-book exact handler: `POST /api/v1/output/share`."
+    },
+    {
+      "id": 61,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 25-32 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 62,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 113-120 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 63,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 73-80 of `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 64,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 137-144 of `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 65,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 41-48 of `internal/adminapi/account_preflight.go`."
+    },
+    {
+      "id": 66,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 65-72 of `internal/adminapi/accounts_manage.go`."
+    },
+    {
+      "id": 67,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 89-96 of `cmd/vultr-browser-session/main.go`."
+    },
+    {
+      "id": 68,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 33-40 of `cmd/vultr-capacity-probe/main.go`."
+    },
+    {
+      "id": 69,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 113-120 of `cmd/worker/main.go`."
+    },
+    {
+      "id": 70,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 249-256 of `internal/adminapi/accounts_manage.go`."
+    },
+    {
+      "id": 71,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 1-8 of `internal/adminapi/account_options.go`."
+    },
+    {
+      "id": 72,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 1-8 of `internal/adminapi/account_preflight.go`."
+    },
+    {
+      "id": 73,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 25-32 of `internal/accounts/cell.go`."
+    },
+    {
+      "id": 74,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 41-48 of `internal/adminapi/account_automation.go`."
+    },
+    {
+      "id": 75,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 81-88 of `cmd/vultr-capacity-probe/main.go`."
+    },
+    {
+      "id": 76,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 41-48 of `internal/adminapi/account_validation.go`."
+    },
+    {
+      "id": 77,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 57-64 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 78,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 17-24 of `internal/accounts/identity.go`."
+    },
+    {
+      "id": 79,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 49-56 of `cmd/worker/main.go`."
+    },
+    {
+      "id": 80,
+      "metric": "verbatim",
+      "prompt": "Closed-book exact source: reproduce lines 281-288 of `cmd/worker/main.go`."
+    }
+  ]
+}
