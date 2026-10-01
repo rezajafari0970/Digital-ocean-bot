@@ -1,0 +1,465 @@
+UNAIDED SOURCE MEMORY EXAM — SEALED DELIVERY
+
+STRICT RULES
+
+1. From the moment this prompt is delivered until the answer file
+   is frozen, use ZERO external retrieval.
+
+2. Do NOT use:
+   - tools
+   - web
+   - server
+   - repository
+   - Project Brain
+   - source files
+   - GitHub
+   - connectors
+   - search
+   - previous chats
+   - files
+   - source snapshots
+   - answer keys
+
+3. The questions contained in this prompt are the ONLY exam
+   material you may inspect.
+
+4. Answer only from unaided active/model recall.
+
+5. If you genuinely do not remember an answer, use null.
+   Do not research or verify it.
+
+6. Return exactly one JSON object:
+
+   {
+     "answers": {
+       "1": ...,
+       "2": ...,
+       ...
+       "80": ...
+     }
+   }
+
+7. Do not explain your answers.
+
+8. Do not verify your answers.
+
+9. Freeze the JSON before any grading or retrieval occurs.
+
+10. This test measures MEMORY, not retrieval capability.
+
+PUBLIC_EXAM_SHA256=be76b921c61b71962887c241773eb84c107f7a70f07b95641d7469598e2fe0c6
+
+================ EXAM START ================
+
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "question_count": 80,
+  "rules": [
+    "No repository, Brain, server, tools, files, prior answer keys, search, or lookup may be consulted while answering.",
+    "Answer from active conversational/model recall only.",
+    "Freeze answers before grading."
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Prober` in `internal/reality/probe.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 2,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Metadata` in `internal/providers/registry.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 3,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestParseAPIError` in `internal/providers/digitalocean/errors_parse_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 4,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `proxies` in `internal/adminapi/resources.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 5,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `collectPanelOutput` in `internal/adminapi/output.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 6,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `e2eDB` in `internal/workflow/postgres_e2e_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 7,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Authenticate` in `internal/auth/service.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 8,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `do` in `internal/providers/vultr/client.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 9,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `ConfigurePanel` in `internal/testharness/harness.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 10,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestFactoryMetadata` in `internal/providers/vultr/driver_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 11,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestPrivacyTransportStripsLeakHeaders` in `internal/network/privacy_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 12,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `ReconcileCompletedPostInstall` in `internal/app/postinstall_reconcile.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 13,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `DeleteSSHKey` in `internal/providers/vultr/mutation_driver.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 14,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Put` in `internal/panels/policy/store.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 15,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `GetAccount` in `internal/providers/digitalocean/account.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 16,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Registry` in `internal/resources/registry.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 17,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `EligibleExpiringPanels` in `internal/panels/readyworker/sql_source.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 18,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `testProxy` in `internal/adminapi/proxy_details.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 19,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestSSHProberDecodesObservation` in `internal/reality/ssh_prober_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 20,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `mustJSON` in `internal/adminapi/accounts_write.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 21,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Wait` in `internal/provisioning/ssh.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 22,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Store` in `internal/jobs/store.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 23,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `getGlobalConfigs` in `internal/adminapi/configs_global.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 24,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestInstallerPrecheckMissIsNotFailure` in `internal/provisioning/installer_executor_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 25,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `ProxyProviderAdapter` in `internal/app/proxy_provider.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 26,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Acquire` in `internal/panels/sanaei/runtime_manager.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 27,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `TestSessionCredentialsRefusePlainHTTP` in `internal/panels/sanaei/auth_test.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 28,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `Run` in `internal/panels/update/orchestrator.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 29,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `ListServers` in `internal/providers/vultr/read_driver.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 30,
+      "metric": "conceptual",
+      "prompt": "Without lookup: describe the implementation topology of symbol `ReconcileOwnedOrphans` in `internal/app/orphan_reconcile.go`: package, signature, immediate previous/next symbol, calls, DB reads/writes, routes and side effects."
+    },
+    {
+      "id": 31,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/app/account_state.go`."
+    },
+    {
+      "id": 32,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/adminapi/proxy_detect.go`."
+    },
+    {
+      "id": 33,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/providers/vultrconsole/proxy_bridge.go`."
+    },
+    {
+      "id": 34,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/app/panel.go`."
+    },
+    {
+      "id": 35,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/panels/sanaei/database.go`."
+    },
+    {
+      "id": 36,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/app/provider_refresh.go`."
+    },
+    {
+      "id": 37,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/provisioning/installer_orchestrator.go`."
+    },
+    {
+      "id": 38,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/panels/sanaei/auth_test.go`."
+    },
+    {
+      "id": 39,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/reality/credentials/generator.go`."
+    },
+    {
+      "id": 40,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/panels/sanaei/panel_configurer.go`."
+    },
+    {
+      "id": 41,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/app/sticky_proxy.go`."
+    },
+    {
+      "id": 42,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/reality/ssh_prober_test.go`."
+    },
+    {
+      "id": 43,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/resources/postgres.go`."
+    },
+    {
+      "id": 44,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/providers/digitalocean/driver_v2.go`."
+    },
+    {
+      "id": 45,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/observability/metrics.go`."
+    },
+    {
+      "id": 46,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/worker/worker.go`."
+    },
+    {
+      "id": 47,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/provisioning/script_runner_test.go`."
+    },
+    {
+      "id": 48,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/app/repository.go`."
+    },
+    {
+      "id": 49,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/adminapi/proxies_write.go`."
+    },
+    {
+      "id": 50,
+      "metric": "topology",
+      "prompt": "Without lookup: list the ordered symbols in `internal/adminapi/sanaei_installer.go`."
+    },
+    {
+      "id": 51,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `GET /api/v1/config-capacity/cleanup/{id}`."
+    },
+    {
+      "id": 52,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `POST /api/v1/auth/logout`."
+    },
+    {
+      "id": 53,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `GET /api/v1/accounts/{id}/discovery`."
+    },
+    {
+      "id": 54,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `POST /api/v1/installers`."
+    },
+    {
+      "id": 55,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `POST /api/v1/config-capacity/delete-all-clients`."
+    },
+    {
+      "id": 56,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `GET /api/v1/residential-proxies`."
+    },
+    {
+      "id": 57,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `POST /api/v1/accounts/{id}/proxy-test`."
+    },
+    {
+      "id": 58,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `PUT /api/v1/panel-settings`."
+    },
+    {
+      "id": 59,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `POST /api/v1/proxies`."
+    },
+    {
+      "id": 60,
+      "metric": "topology",
+      "prompt": "Without lookup: give the handler name for `GET /api/v1/config-panels`."
+    },
+    {
+      "id": 61,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 17-24 of `internal/reality/credentials/generator_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 62,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 9-16 of `internal/panels/sanaei/postflight/validator.go` including indentation and punctuation."
+    },
+    {
+      "id": 63,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 73-80 of `internal/panels/sanaei/reality_scan.go` including indentation and punctuation."
+    },
+    {
+      "id": 64,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 145-152 of `internal/panels/sanaei/resilient_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 65,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 9-16 of `internal/adminapi/output_expiry_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 66,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 249-256 of `internal/panels/sanaei/ssh_session_executor.go` including indentation and punctuation."
+    },
+    {
+      "id": 67,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 113-120 of `internal/providers/digitalocean/mutations.go` including indentation and punctuation."
+    },
+    {
+      "id": 68,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 1-8 of `internal/reality/ssh_prober_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 69,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 153-160 of `internal/adminapi/dashboard.go` including indentation and punctuation."
+    },
+    {
+      "id": 70,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 129-136 of `internal/panels/sanaei/runtime_manager.go` including indentation and punctuation."
+    },
+    {
+      "id": 71,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 17-22 of `internal/runtimecap/xray_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 72,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 73-80 of `internal/provisioning/script_registry.go` including indentation and punctuation."
+    },
+    {
+      "id": 73,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 25-32 of `internal/adminapi/proxy_observe.go` including indentation and punctuation."
+    },
+    {
+      "id": 74,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 153-160 of `internal/app/recovery.go` including indentation and punctuation."
+    },
+    {
+      "id": 75,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 17-24 of `internal/app/sticky_proxy.go` including indentation and punctuation."
+    },
+    {
+      "id": 76,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 17-24 of `internal/secrets/postgres.go` including indentation and punctuation."
+    },
+    {
+      "id": 77,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 161-168 of `internal/testharness/provider_live_cert_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 78,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 9-16 of `internal/panels/sanaei/panel_configurer_test.go` including indentation and punctuation."
+    },
+    {
+      "id": 79,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 89-96 of `internal/adminapi/accounts_write.go` including indentation and punctuation."
+    },
+    {
+      "id": 80,
+      "metric": "verbatim",
+      "prompt": "Without lookup: reproduce exactly lines 9-16 of `internal/panels/sanaei/panel_page.go` including indentation and punctuation."
+    }
+  ]
+}
