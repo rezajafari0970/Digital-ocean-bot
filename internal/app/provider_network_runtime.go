@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
@@ -66,6 +67,31 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			Profile: cfg.Network,
 			Proxy:   cfg.Proxy,
 			Health:  network.HealthState{Status: cfg.Proxy.Status},
+		}
+		if c.DB != nil {
+			store := proxycontrol.SQLStore{DB: c.DB}
+			policy := proxycontrol.DefaultPolicy()
+			healthy := cfg.Proxy.Status == network.StatusHealthy
+			var healthMu sync.Mutex
+			gateway.Client.Transport = network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
+				healthMu.Lock()
+				defer healthMu.Unlock()
+				if obs.Err == nil && healthy {
+					return
+				}
+				status, errText := network.StatusHealthy, ""
+				if obs.Err != nil {
+					status, errText = network.StatusDown, obs.Err.Error()
+				}
+				reportCtx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
+				defer cancel()
+				next, reportErr := store.ApplyObservation(reportCtx, cfg.ID, cfg.Proxy.ID, cfg.Provider, network.HealthResult{
+					Status: status, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency), Error: errText,
+				}, policy)
+				if reportErr == nil {
+					healthy = next.HealthState == network.StatusHealthy
+				}
+			})
 		}
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, closeIdle: gateway.CloseIdleConnections}, nil
 	}

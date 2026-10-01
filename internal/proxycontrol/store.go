@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 )
 
 type SQLStore struct{ DB *sql.DB }
@@ -199,4 +201,76 @@ SET generation=proxy_runtime_state.generation+1,updated_at=now()
 RETURNING generation
 `, accountID, proxyID, provider).Scan(&generation)
 	return generation, err
+}
+
+func (s SQLStore) ApplyObservation(ctx context.Context, accountID, proxyID, provider string, result network.HealthResult, policy Policy) (State, error) {
+	x := DefaultState(accountID, proxyID, provider)
+	if s.DB == nil {
+		return x, errors.New("proxy control store unavailable")
+	}
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return x, err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `
+INSERT INTO proxy_runtime_state(account_id,proxy_id,provider)
+VALUES($1,$2,$3)
+ON CONFLICT(account_id,proxy_id,provider) DO NOTHING
+`, accountID, proxyID, provider); err != nil {
+		return x, err
+	}
+	var retry, checked, success, probeLease sql.NullTime
+	var errClass, errDetail sql.NullString
+	err = tx.QueryRowContext(ctx, `
+SELECT health_state,circuit_state,consecutive_failures,consecutive_successes,
+       retry_after,generation,last_error_class,last_error_detail,last_checked_at,last_success_at,
+       half_open_probe_in_flight,half_open_probe_lease_until
+FROM proxy_runtime_state
+WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
+FOR UPDATE
+`, accountID, proxyID, provider).Scan(
+		&x.HealthState, &x.CircuitState, &x.ConsecutiveFailures, &x.ConsecutiveSuccesses,
+		&retry, &x.Generation, &errClass, &errDetail, &checked, &success,
+		&x.HalfOpenProbeInFlight, &probeLease,
+	)
+	if err != nil {
+		return x, err
+	}
+	if retry.Valid {
+		x.RetryAfter = &retry.Time
+	}
+	if checked.Valid {
+		x.LastCheckedAt = &checked.Time
+	}
+	if success.Valid {
+		x.LastSuccessAt = &success.Time
+	}
+	if probeLease.Valid {
+		x.HalfOpenProbeLeaseUntil = &probeLease.Time
+	}
+	if errClass.Valid {
+		x.LastErrorClass = errClass.String
+	}
+	if errDetail.Valid {
+		x.LastErrorDetail = errDetail.String
+	}
+	x = ApplyHealth(x, result, policy)
+	_, err = tx.ExecContext(ctx, `
+UPDATE proxy_runtime_state SET
+ health_state=$4,circuit_state=$5,consecutive_failures=$6,consecutive_successes=$7,
+ retry_after=$8,generation=$9,last_error_class=NULLIF($10,''),last_error_detail=NULLIF($11,''),
+ last_checked_at=$12,last_success_at=$13,half_open_probe_in_flight=$14,
+ half_open_probe_lease_until=$15,updated_at=now()
+WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
+`, accountID, proxyID, provider, x.HealthState, x.CircuitState, x.ConsecutiveFailures,
+		x.ConsecutiveSuccesses, x.RetryAfter, x.Generation, x.LastErrorClass, x.LastErrorDetail,
+		x.LastCheckedAt, x.LastSuccessAt, x.HalfOpenProbeInFlight, x.HalfOpenProbeLeaseUntil)
+	if err != nil {
+		return x, err
+	}
+	if err = tx.Commit(); err != nil {
+		return x, err
+	}
+	return x, nil
 }
