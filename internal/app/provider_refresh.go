@@ -61,7 +61,17 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				c.RecordProviderObservation(ctx, id, ProviderStatePermissionDenied, ErrProviderComputeUnsupported, "provider observation capability unavailable")
 				return
 			}
-			obs, err := snapshotReader.Observe(ctx)
+			var obs providers.Observation
+			if rt.Config.Provider == "vultr" {
+				var previous providers.Observation
+				var previousCanonical []byte
+				if qerr := c.DB.QueryRowContext(ctx, `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&previousCanonical); qerr == nil {
+					_ = json.Unmarshal(previousCanonical, &previous)
+				}
+				obs, err = fastProviderObservation(ctx, rt.Driver, previous)
+			} else {
+				obs, err = snapshotReader.Observe(ctx)
+			}
 			if rt.Gateway != nil {
 				rt.Gateway.CloseIdleConnections()
 			}
@@ -72,6 +82,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
 				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
 				return
+			}
+			if rt.Config.Provider == "vultr" {
+				if syncErr := c.syncVultrResourceRegistry(ctx, id, obs.Inventory.Servers); syncErr != nil {
+					log.Printf("vultr resource registry sync account=%s: %v", id, syncErr)
+				}
 			}
 			// Vultr's public API exposes current instances but not the account's
 			// Maximum Instances limit. Overlay only API-proven capacity evidence;

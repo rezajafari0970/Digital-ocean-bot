@@ -32,29 +32,15 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		providerFreshness := "never"
 		capacityFreshness := "never"
 		if providerStateAt.Valid {
-			providerChecked = providerStateAt.Time
-			age := time.Since(providerStateAt.Time)
-			if age <= 2*time.Minute {
-				providerFreshness = "fresh"
-			} else if age <= 5*time.Minute {
-				providerFreshness = "stale"
-			} else {
-				providerFreshness = "expired"
-			}
+			providerObserved = providerStateAt.Time
 		}
 		if providerObservationAt.Valid {
-			providerObserved = providerObservationAt.Time
+			providerChecked = providerObservationAt.Time
+			providerFreshness = observationFreshness(providerObservationAt.Time, time.Now())
 		}
 		if capacityCheckedAt.Valid {
 			capacityChecked = capacityCheckedAt.Time
-			age := time.Since(capacityCheckedAt.Time)
-			if age <= 2*time.Minute {
-				capacityFreshness = "fresh"
-			} else if age <= 5*time.Minute {
-				capacityFreshness = "stale"
-			} else {
-				capacityFreshness = "expired"
-			}
+			capacityFreshness = observationFreshness(capacityCheckedAt.Time, time.Now())
 		}
 		if lastDropletCreated.Valid {
 			ldc = lastDropletCreated.Time
