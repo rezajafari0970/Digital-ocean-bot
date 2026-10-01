@@ -1,6 +1,9 @@
 package adminapi
 
-import "net/http"
+import (
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo"
+	"net/http"
+)
 
 func (s *Server) audit(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.DB.QueryContext(r.Context(), `SELECT id,COALESCE(account_id::text,''),actor,action,resource_type,COALESCE(resource_id,''),result,message,created_at FROM audit_events ORDER BY created_at DESC LIMIT 500`)
@@ -28,4 +31,8 @@ func (s *Server) system(w http.ResponseWriter, r *http.Request) {
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`).Scan(&deployments)
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'`).Scan(&workers)
 	writeJSON(w, 200, map[string]any{"enabled_accounts": accounts, "active_deployments": deployments, "live_workers": workers})
+}
+
+func (s *Server) version(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, 200, buildinfo.Current())
 }

@@ -57,6 +57,7 @@ func (s *Server) Routes() *http.ServeMux {
 	})
 	m.HandleFunc("GET /healthz", s.health)
 	m.HandleFunc("GET /readyz", s.ready)
+	m.HandleFunc("GET /version", s.version)
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
 	m.HandleFunc("POST /api/v1/accounts", s.require(s.createAccount, true))
