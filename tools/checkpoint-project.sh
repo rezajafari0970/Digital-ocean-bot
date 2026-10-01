@@ -21,6 +21,7 @@ python3 tools/build-state-transition-brain.py
 python3 tools/build-live-db-brain.py
 python3 tools/build-runtime-worker-brain.py
 python3 tools/build-handoff-bundle.py
+python3 tools/knowledge-drift-gate.py
 python3 tools/audit-handoff-readiness.py
 python3 -m json.tool docs/PROJECT_MANIFEST.json >/dev/null
 python3 -m json.tool docs/CURRENT_SNAPSHOT.json >/dev/null
