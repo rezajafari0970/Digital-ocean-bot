@@ -1,0 +1,965 @@
+{
+  "schema_version": 1,
+  "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5",
+  "requirement_count": 101,
+  "areas": 18,
+  "requirements": [
+    {
+      "id": "DEEP-ARCHITECTURE-01",
+      "area": "architecture",
+      "requirement": "provider-neutral core",
+      "parent_requirement_ids": [
+        "ARCH-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ARCHITECTURE-02",
+      "area": "architecture",
+      "requirement": "provider-specific behavior remains in drivers",
+      "parent_requirement_ids": [
+        "ARCH-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ARCHITECTURE-03",
+      "area": "architecture",
+      "requirement": "modular independently testable subsystems",
+      "parent_requirement_ids": [
+        "ARCH-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ARCHITECTURE-04",
+      "area": "architecture",
+      "requirement": "source/runtime are authoritative over stale prose",
+      "parent_requirement_ids": [
+        "ARCH-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ACCOUNTS-01",
+      "area": "accounts",
+      "requirement": "account CRUD and provider identity",
+      "parent_requirement_ids": [
+        "ACC-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ACCOUNTS-02",
+      "area": "accounts",
+      "requirement": "independent account isolation cell",
+      "parent_requirement_ids": [
+        "ACC-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ACCOUNTS-03",
+      "area": "accounts",
+      "requirement": "explicit account/provider states",
+      "parent_requirement_ids": [
+        "ACC-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ACCOUNTS-04",
+      "area": "accounts",
+      "requirement": "optional browser credentials do not replace API token flow",
+      "parent_requirement_ids": [
+        "ACC-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ACCOUNTS-05",
+      "area": "accounts",
+      "requirement": "automation settings remain account-scoped",
+      "parent_requirement_ids": [
+        "ACC-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DIGITALOCEAN-01",
+      "area": "digitalocean",
+      "requirement": "preserve mature DigitalOcean behavior",
+      "parent_requirement_ids": [
+        "DO-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DIGITALOCEAN-02",
+      "area": "digitalocean",
+      "requirement": "provider catalog drives region/size/image availability",
+      "parent_requirement_ids": [
+        "DO-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DIGITALOCEAN-03",
+      "area": "digitalocean",
+      "requirement": "classified provider errors",
+      "parent_requirement_ids": [
+        "DO-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DIGITALOCEAN-04",
+      "area": "digitalocean",
+      "requirement": "capacity/history/snapshots remain observable",
+      "parent_requirement_ids": [
+        "DO-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DIGITALOCEAN-05",
+      "area": "digitalocean",
+      "requirement": "catalog synchronization does not regress active lifecycle",
+      "parent_requirement_ids": [
+        "DO-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-VULTR-01",
+      "area": "vultr",
+      "requirement": "provider-specific API semantics",
+      "parent_requirement_ids": [
+        "VULTR-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-VULTR-02",
+      "area": "vultr",
+      "requirement": "accurate capacity is first-class",
+      "parent_requirement_ids": [
+        "VULTR-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-VULTR-03",
+      "area": "vultr",
+      "requirement": "interactive browser capacity observation isolated from generic provider core",
+      "parent_requirement_ids": [
+        "VULTR-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-VULTR-04",
+      "area": "vultr",
+      "requirement": "manual challenge path remains human-interactive",
+      "parent_requirement_ids": [
+        "VULTR-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-VULTR-05",
+      "area": "vultr",
+      "requirement": "authorized browser state may be reused after manual challenge",
+      "parent_requirement_ids": [
+        "VULTR-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-01",
+      "area": "proxy_network",
+      "requirement": "HTTP/SOCKS proxy model",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-02",
+      "area": "proxy_network",
+      "requirement": "per-account proxy binding",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-03",
+      "area": "proxy_network",
+      "requirement": "sticky identity while healthy",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-04",
+      "area": "proxy_network",
+      "requirement": "country affinity and controlled fallback",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-05",
+      "area": "proxy_network",
+      "requirement": "required proxy failure is fail-closed",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-06",
+      "area": "proxy_network",
+      "requirement": "network identity/geo context remain account-scoped",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROXY-NETWORK-07",
+      "area": "proxy_network",
+      "requirement": "health/recovery must not silently leak direct egress",
+      "parent_requirement_ids": [
+        "NET-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-01",
+      "area": "lifecycle",
+      "requirement": "desired server count is reconciled state",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-02",
+      "area": "lifecycle",
+      "requirement": "build spacing and concurrency are controlled",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-03",
+      "area": "lifecycle",
+      "requirement": "one coherent lifecycle execution owner",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-04",
+      "area": "lifecycle",
+      "requirement": "creation/readiness/install/panel stages are observable",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-05",
+      "area": "lifecycle",
+      "requirement": "expiry/deletion/replacement are reconciled",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-LIFECYCLE-06",
+      "area": "lifecycle",
+      "requirement": "recovery and retries remain idempotent where possible",
+      "parent_requirement_ids": [
+        "LIFE-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-01",
+      "area": "provisioning",
+      "requirement": "provision run/steps are observable",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-02",
+      "area": "provisioning",
+      "requirement": "SSH readiness/host-key behavior is explicit",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-03",
+      "area": "provisioning",
+      "requirement": "installer registry and selection are modular",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-04",
+      "area": "provisioning",
+      "requirement": "retry/backoff and error classification are visible",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-05",
+      "area": "provisioning",
+      "requirement": "rearm/recovery does not duplicate ownership",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-PROVISIONING-06",
+      "area": "provisioning",
+      "requirement": "post-install completion is separate from provider create success",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-01",
+      "area": "sanaei_panel",
+      "requirement": "panel abstraction remains modular",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-02",
+      "area": "sanaei_panel",
+      "requirement": "Sanaei API is live read/write plane where implemented",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-03",
+      "area": "sanaei_panel",
+      "requirement": "authentication/session behavior is resilient",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-04",
+      "area": "sanaei_panel",
+      "requirement": "inbound/client mutation and inventory are API-driven",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-05",
+      "area": "sanaei_panel",
+      "requirement": "desired/create/update/planner/ready-worker responsibilities remain separated",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-SANAEI-PANEL-06",
+      "area": "sanaei_panel",
+      "requirement": "panel bootstrap and user capacity are observable",
+      "parent_requirement_ids": [
+        "PANEL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-REALITY-01",
+      "area": "reality",
+      "requirement": "Reality credentials are generated/managed explicitly",
+      "parent_requirement_ids": [
+        "REAL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-REALITY-02",
+      "area": "reality",
+      "requirement": "target discovery/observations/scoring/selection are dedicated concerns",
+      "parent_requirement_ids": [
+        "REAL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-REALITY-03",
+      "area": "reality",
+      "requirement": "SNI selection follows policy/target finder rather than arbitrary fixed target",
+      "parent_requirement_ids": [
+        "REAL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-REALITY-04",
+      "area": "reality",
+      "requirement": "probe/health verification is explicit",
+      "parent_requirement_ids": [
+        "REAL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-REALITY-05",
+      "area": "reality",
+      "requirement": "Reality contract/global policy remain separate from provider lifecycle",
+      "parent_requirement_ids": [
+        "REAL-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-01",
+      "area": "config_users",
+      "requirement": "global config and port policies are configurable",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-02",
+      "area": "config_users",
+      "requirement": "inbound allocation follows policy",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-03",
+      "area": "config_users",
+      "requirement": "bulk user creation scales without changing semantics",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-04",
+      "area": "config_users",
+      "requirement": "quota/lifetime/device limit remain independent controls",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-05",
+      "area": "config_users",
+      "requirement": "slot/capacity handling reflects live panel state",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONFIG-USERS-06",
+      "area": "config_users",
+      "requirement": "client deletion frees capacity",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-01",
+      "area": "output",
+      "requirement": "Output uses Sanaei/API state rather than SSH scraping",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-02",
+      "area": "output",
+      "requirement": "Output is fast/live",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-03",
+      "area": "output",
+      "requirement": "snapshots support performance without stale validity",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-04",
+      "area": "output",
+      "requirement": "direct and share views use same canonical visibility rules",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-05",
+      "area": "output",
+      "requirement": "first_seen/last_seen are preserved",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-06",
+      "area": "output",
+      "requirement": "visible_until/exact expiry controls disappearance",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-07",
+      "area": "output",
+      "requirement": "configs may disappear shortly before scheduled invalidation",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-08",
+      "area": "output",
+      "requirement": "refresh must avoid OOM regressions",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-OUTPUT-09",
+      "area": "output",
+      "requirement": "no-cache user expectation is preserved",
+      "parent_requirement_ids": [
+        "OUT-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-RESIDENTIAL-01",
+      "area": "residential",
+      "requirement": "residential CRUD/test is independent",
+      "parent_requirement_ids": [
+        "RES-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-RESIDENTIAL-02",
+      "area": "residential",
+      "requirement": "panel association/outbound tag/priority are explicit",
+      "parent_requirement_ids": [
+        "RES-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-RESIDENTIAL-03",
+      "area": "residential",
+      "requirement": "Sanaei synchronization is isolated from account control-plane proxy",
+      "parent_requirement_ids": [
+        "RES-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-RESIDENTIAL-04",
+      "area": "residential",
+      "requirement": "residential country/egress behavior is observable",
+      "parent_requirement_ids": [
+        "RES-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DATABASE-01",
+      "area": "database",
+      "requirement": "migrations are append-only ordered history",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DATABASE-02",
+      "area": "database",
+      "requirement": "migration checksum integrity is enforced",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DATABASE-03",
+      "area": "database",
+      "requirement": "live schema must be checked before schema-sensitive work",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DATABASE-04",
+      "area": "database",
+      "requirement": "continuity snapshots store metadata not user rows/secrets",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DATABASE-05",
+      "area": "database",
+      "requirement": "schema ownership is traceable to code and migrations",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ADMIN-API-01",
+      "area": "admin_api",
+      "requirement": "routes remain explicit and traceable to handlers",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ADMIN-API-02",
+      "area": "admin_api",
+      "requirement": "auth protects mutating/admin operations",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ADMIN-API-03",
+      "area": "admin_api",
+      "requirement": "account/provider/config/output/proxy/residential APIs preserve module boundaries",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ADMIN-API-04",
+      "area": "admin_api",
+      "requirement": "errors should remain classifiable/actionable",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-ADMIN-API-05",
+      "area": "admin_api",
+      "requirement": "settings changes do not silently alter unrelated modules",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-01",
+      "area": "frontend",
+      "requirement": "seven operational module pages remain navigable",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-02",
+      "area": "frontend",
+      "requirement": "UI actions map to explicit APIs",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-03",
+      "area": "frontend",
+      "requirement": "mobile/operational usability is preserved",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-04",
+      "area": "frontend",
+      "requirement": "refresh/save should preserve working context where possible",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-05",
+      "area": "frontend",
+      "requirement": "interactive challenge flows provide visible browser feedback",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-FRONTEND-06",
+      "area": "frontend",
+      "requirement": "frontend must not invent backend state",
+      "parent_requirement_ids": [
+        "UI-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-TESTS-01",
+      "area": "tests",
+      "requirement": "focused subsystem tests precede broad verification",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-TESTS-02",
+      "area": "tests",
+      "requirement": "provider regressions have characterization tests",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-TESTS-03",
+      "area": "tests",
+      "requirement": "runtime-visible changes require real flow smoke verification",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-TESTS-04",
+      "area": "tests",
+      "requirement": "test maps trace features to verification commands",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-TESTS-05",
+      "area": "tests",
+      "requirement": "handoff knowledge gates do not substitute for product tests",
+      "parent_requirement_ids": [],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-01",
+      "area": "deployment_runtime",
+      "requirement": "builds are stamped with commit/time",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-02",
+      "area": "deployment_runtime",
+      "requirement": "artifact hashes bind binaries to build manifest",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-03",
+      "area": "deployment_runtime",
+      "requirement": "health and readiness are checked after deploy",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-04",
+      "area": "deployment_runtime",
+      "requirement": "production revision claims require verifier success",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-05",
+      "area": "deployment_runtime",
+      "requirement": "Git HEAD may differ from production until deploy",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-DEPLOYMENT-RUNTIME-06",
+      "area": "deployment_runtime",
+      "requirement": "secrets never enter continuity docs",
+      "parent_requirement_ids": [
+        "OPS-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-01",
+      "area": "continuity",
+      "requirement": "new chat starts from canonical repo not main assumptions",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-02",
+      "area": "continuity",
+      "requirement": "knowledge artifacts are commit-pinned",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-03",
+      "area": "continuity",
+      "requirement": "exact line questions use source snapshot not guesses",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-04",
+      "area": "continuity",
+      "requirement": "intent/history/impact are read before behavioral changes",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-05",
+      "area": "continuity",
+      "requirement": "audit evidence is preserved",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    },
+    {
+      "id": "DEEP-CONTINUITY-06",
+      "area": "continuity",
+      "requirement": "100/100 means tested recoverability/traceability not unaided token memorization",
+      "parent_requirement_ids": [
+        "KNOW-001"
+      ],
+      "status": "normative",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5"
+    }
+  ],
+  "principle": "These are durable project intent/behavior requirements for knowledge continuity; exact implementation is verified through traceability/source/runtime brains."
+}
