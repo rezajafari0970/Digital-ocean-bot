@@ -1,0 +1,102 @@
+به سرور پروژه متصل شو و فقط برای Active-Rehearsal به مسیر زیر برو:
+
+/root/projects/Digital-ocean-bot-canonical-e2e
+
+ابتدا فقط این دو فایل را بخوان:
+
+docs/RESUMABLE_REHEARSAL_ORCHESTRATOR.md
+docs/ACTIVE_RECALL_REHEARSAL_MANIFEST.json
+
+هدف این مرحله توسعه پروژه نیست.
+
+هدف افزایش Generative Recall از Source است.
+
+در مجموع دقیقاً 26 واحد وجود دارد.
+
+واحدها را فقط به ترتیب 1 تا 26 پردازش کن.
+
+برای دریافت metadata واحد فعلی می‌توانی از دستور زیر استفاده کنی:
+
+python3 tools/rehearsal-unit-info.py N
+
+که N شماره همان واحد است.
+
+این دستور فقط metadata کوچک همان واحد را می‌دهد.
+
+برای هر واحد دقیقاً این چرخه را انجام بده:
+
+PACK
+→ ACTIVE RECALL
+→ CORRECTION
+→ REGENERATE MISSES
+→ CHECKPOINT
+
+قوانین:
+
+1. pack همان واحد را کامل بخوان.
+
+2. بعد از خواندن pack دیگر هنگام Recall به آن مراجعه نکن.
+
+3. recall همان واحد را بخوان.
+
+4. تمام سؤال‌های Recall را از حافظه پاسخ بده.
+
+5. correction را قبل از تکمیل Recall باز نکن.
+
+6. بعد از تکمیل Recall، correction را بخوان.
+
+7. تمام اشتباه‌ها و کمبودها را شناسایی و internalize کن.
+
+8. pack و correction را ببند.
+
+9. تمام موارد missed را یک بار دیگر فقط از حافظه regenerate کن.
+
+10. فقط بعد از تکمیل واقعی کل واحد checkpoint بده:
+
+UNIT NN/26 COMPLETE — kind
+
+خروجی‌های بزرگ Recall یا Correction را داخل terminal/tool output چاپ نکن.
+
+اطلاعات را بخوان و در context خودت پردازش کن.
+
+اگر Tool قطع شد، truncate شد، fail شد یا مطمئن نبودی واحد کامل شده:
+
+همان واحد را از pack دوباره شروع کن.
+
+واحد بعدی را شروع نکن.
+
+ترتیب الزامی:
+
+01–08 Topology
+09–21 Conceptual
+22–26 Verbatim
+
+مطلقاً باز نکن:
+
+docs/REHEARSAL_HOLDOUT_2_EXAM.json
+
+هیچ فایل `.audit` را باز نکن.
+
+هیچ answer key یا grader را باز نکن.
+
+هیچ Holdout دیگری را باز نکن.
+
+Source پروژه را تغییر نده.
+
+هیچ commit یا deploy انجام نده.
+
+Rehearsal answerها را در repository ذخیره نکن.
+
+بعد از تکمیل واحد 26 و ثبت:
+
+UNIT 26/26 COMPLETE — verbatim
+
+تمام Toolها و مراجعه‌ها را متوقف کن.
+
+از آن لحظه وارد CLOSED-BOOK MODE شو.
+
+بعد فقط و دقیقاً بنویس:
+
+REHEARSAL COMPLETE — CLOSED-BOOK READY
+
+بعد از این عبارت هیچ Tool call دیگری انجام نده.
