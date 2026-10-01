@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
   "incident_count": 10,
-  "candidate_regression_commits_count": 191,
+  "candidate_regression_commits_count": 193,
   "incidents": [
     {
       "id": "INC-001",
@@ -244,6 +244,11 @@
           "subject": "make output expiry exact and refresh efficient"
         },
         {
+          "commit": "1221904429cfc7ca6c21d5ac120fe9840302b2a9",
+          "date": "2026-10-01",
+          "subject": "docs: refresh mastery corpus after deploy gate fix"
+        },
+        {
           "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
           "date": "2026-09-30",
           "subject": "fix(ui): handle unknown provider limits on refresh"
@@ -287,11 +292,6 @@
           "commit": "15e06a921a7303675a697f13648e75953e85f5cd",
           "date": "2026-09-23",
           "subject": "fix keep account editor open until token validation succeeds"
-        },
-        {
-          "commit": "0d9ef340bbe84da49e046a50d49d2bcba7e4b70b",
-          "date": "2026-09-23",
-          "subject": "feat refresh provider inventory and account capacity stats"
         }
       ]
     },
@@ -466,6 +466,11 @@
           "subject": "feat(vultr): add interactive console challenge session"
         },
         {
+          "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): start interactive console before issuing ticket"
+        },
+        {
           "commit": "6834d813fc16a6b4aefd05f2cb8696c18b0c0fec",
           "date": "2026-10-01",
           "subject": "fix(vultr): accept root noVNC websocket alias"
@@ -504,11 +509,6 @@
           "commit": "df0f2e6d4a42a8a81e29e7e18073b4ff6d9e8e1b",
           "date": "2026-09-23",
           "subject": "fix preserve DigitalOcean v2 base path"
-        },
-        {
-          "commit": "7e0a744088539b11314d718d61d3f3e0d2d8ab5a",
-          "date": "2026-10-01",
-          "subject": "docs: record independently verified fresh-session mastery proof"
         }
       ]
     },
@@ -527,6 +527,11 @@
           "commit": "852d7034065ab9e5d41364a30f76f18e0684f5cb",
           "date": "2026-09-30",
           "subject": "fix(vultr): verify ssh key visibility before instance create"
+        },
+        {
+          "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): start interactive console before issuing ticket"
         },
         {
           "commit": "28a1f45a5c79d8728900eb82d547f49360dbb7b7",
@@ -577,11 +582,6 @@
           "commit": "d89fee8a6e37012d1f5fea5e3907f1913f1faa50",
           "date": "2026-09-26",
           "subject": "feat: activate selected installers from waiting deployments"
-        },
-        {
-          "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
-          "date": "2026-09-23",
-          "subject": "fix distinguish unknown provider stats from zero"
         }
       ]
     },
@@ -728,6 +728,16 @@
     }
   ],
   "candidate_regression_commits": [
+    {
+      "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): start interactive console before issuing ticket"
+    },
+    {
+      "commit": "1221904429cfc7ca6c21d5ac120fe9840302b2a9",
+      "date": "2026-10-01",
+      "subject": "docs: refresh mastery corpus after deploy gate fix"
+    },
     {
       "commit": "7e0a744088539b11314d718d61d3f3e0d2d8ab5a",
       "date": "2026-10-01",

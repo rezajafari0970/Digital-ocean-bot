@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
   "methodology": "static evidence for state guards/writes and owners; from→to direction is not asserted unless explicit in source",
   "state_count": 54,
   "owner_count": 62,

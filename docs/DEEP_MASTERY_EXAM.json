@@ -246,7 +246,7 @@
       "area": "admin_api",
       "name": "function behavior indexed",
       "pass": true,
-      "evidence": "118"
+      "evidence": "119"
     },
     {
       "area": "admin_api",
@@ -594,7 +594,7 @@
       "area": "source",
       "name": "lines >=33000",
       "pass": true,
-      "evidence": "40148"
+      "evidence": "40208"
     },
     {
       "area": "source",

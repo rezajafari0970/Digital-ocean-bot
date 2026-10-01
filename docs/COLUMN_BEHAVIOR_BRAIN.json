@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
   "scope": "live production public schema metadata enriched with commit-pinned static source/migration evidence; contains no application row data or secrets",
   "table_count": 58,
   "column_count": 595,
@@ -377,12 +377,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -9556,7 +9556,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "RequireCreateCapacity",
@@ -10080,12 +10080,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -11396,7 +11396,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "SyncCatalogs",
@@ -11585,7 +11585,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "TestProviderStateRecoveryPolicy",
@@ -11861,7 +11861,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "TestRetiringWithoutExpiryIsDueE2E",
@@ -12085,7 +12085,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -17915,12 +17915,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -20005,12 +20005,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -23057,12 +23057,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -26186,12 +26186,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -30068,12 +30068,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -32088,7 +32088,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -32868,7 +32868,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -33173,7 +33173,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "Bootstrap",
@@ -36192,12 +36192,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -42756,12 +42756,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -51558,12 +51558,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -53018,7 +53018,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -53793,7 +53793,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -55195,6 +55195,11 @@
           "line": 39
         },
         {
+          "name": "ensureVultrBrowser",
+          "file": "internal/adminapi/server.go",
+          "line": 170
+        },
+        {
           "name": "listTemplates",
           "file": "internal/adminapi/templates.go",
           "line": 14
@@ -56016,12 +56021,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -59765,12 +59770,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -61245,7 +61250,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -62040,7 +62045,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -62691,6 +62696,11 @@
           "name": "accountCapacity",
           "file": "internal/adminapi/resources_api.go",
           "line": 39
+        },
+        {
+          "name": "ensureVultrBrowser",
+          "file": "internal/adminapi/server.go",
+          "line": 170
         },
         {
           "name": "listTemplates",
@@ -63494,12 +63504,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -66804,12 +66814,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -70334,12 +70344,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -74828,12 +74838,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "validateReplacementToken",
@@ -75543,12 +75553,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -78523,12 +78533,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -80345,7 +80355,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -83890,12 +83900,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -88198,12 +88208,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -90868,7 +90878,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -92682,12 +92692,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -95375,12 +95385,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -99454,12 +99464,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -101414,7 +101424,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "TestProviderStateRecoveryPolicy",
@@ -101744,7 +101754,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -102904,12 +102914,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -106798,12 +106808,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -112568,12 +112578,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -114123,7 +114133,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -115013,7 +115023,7 @@
         {
           "name": "writeJSON",
           "file": "internal/adminapi/server.go",
-          "line": 122
+          "line": 127
         },
         {
           "name": "validateReplacementToken",
@@ -117443,17 +117453,17 @@
         {
           "name": "writeJSON",
           "file": "internal/adminapi/server.go",
-          "line": 122
+          "line": 127
         },
         {
           "name": "health",
           "file": "internal/adminapi/server.go",
-          "line": 127
+          "line": 132
         },
         {
           "name": "ready",
           "file": "internal/adminapi/server.go",
-          "line": 130
+          "line": 135
         },
         {
           "name": "validateReplacementToken",
@@ -120393,12 +120403,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -123024,12 +123034,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -124463,7 +124473,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -126753,17 +126763,17 @@
         {
           "name": "writeJSON",
           "file": "internal/adminapi/server.go",
-          "line": 122
+          "line": 127
         },
         {
           "name": "health",
           "file": "internal/adminapi/server.go",
-          "line": 127
+          "line": 132
         },
         {
           "name": "ready",
           "file": "internal/adminapi/server.go",
-          "line": 130
+          "line": 135
         },
         {
           "name": "validateReplacementToken",
@@ -128570,12 +128580,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -129995,7 +130005,7 @@
         {
           "name": "vultrBrowserProxy",
           "file": "internal/adminapi/server.go",
-          "line": 139
+          "line": 144
         },
         {
           "name": "installerTarget",
@@ -132404,7 +132414,7 @@
         {
           "name": "vultrBrowserProxy",
           "file": "internal/adminapi/server.go",
-          "line": 139
+          "line": 144
         },
         {
           "name": "installerTarget",
@@ -136265,12 +136275,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -138205,7 +138215,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "TestProviderStateRecoveryPolicy",
@@ -138675,7 +138685,7 @@
         {
           "name": "writeJSON",
           "file": "internal/adminapi/server.go",
-          "line": 122
+          "line": 127
         },
         {
           "name": "validateReplacementToken",
@@ -141240,12 +141250,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -144800,7 +144810,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -145625,12 +145635,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -149329,12 +149339,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -150744,7 +150754,7 @@
         {
           "name": "ready",
           "file": "internal/adminapi/server.go",
-          "line": 130
+          "line": 135
         },
         {
           "name": "TestHealthEndpoint",
@@ -152057,6 +152067,11 @@
           "line": 26
         },
         {
+          "name": "createVultrBrowserTicket",
+          "file": "internal/adminapi/server.go",
+          "line": 217
+        },
+        {
           "name": "RefreshProviderSnapshots",
           "file": "internal/app/provider_refresh.go",
           "line": 13
@@ -152668,12 +152683,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -154823,17 +154838,17 @@
         {
           "name": "writeJSON",
           "file": "internal/adminapi/server.go",
-          "line": 122
+          "line": 127
         },
         {
           "name": "health",
           "file": "internal/adminapi/server.go",
-          "line": 127
+          "line": 132
         },
         {
           "name": "ready",
           "file": "internal/adminapi/server.go",
-          "line": 130
+          "line": 135
         },
         {
           "name": "validateReplacementToken",
@@ -159529,12 +159544,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -163122,12 +163137,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -167125,12 +167140,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",
@@ -168580,7 +168595,7 @@
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "listTemplates",
@@ -169355,7 +169370,7 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "version",
@@ -169960,6 +169975,11 @@
           "name": "accountCapacity",
           "file": "internal/adminapi/resources_api.go",
           "line": 39
+        },
+        {
+          "name": "ensureVultrBrowser",
+          "file": "internal/adminapi/server.go",
+          "line": 170
         },
         {
           "name": "listTemplates",
@@ -170798,12 +170818,12 @@
         {
           "name": "Routes",
           "file": "internal/adminapi/server.go",
-          "line": 44
+          "line": 49
         },
         {
           "name": "createVultrBrowserTicket",
           "file": "internal/adminapi/server.go",
-          "line": 165
+          "line": 217
         },
         {
           "name": "audit",

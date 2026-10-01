@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
   "file_count": 696,
-  "total_lines": 40148,
+  "total_lines": 40208,
   "files": [
     {
       "path": "cmd/admin-bootstrap/main.go",
@@ -166,16 +166,16 @@
     },
     {
       "path": "deploy/install.sh",
-      "sha256": "9958e7ffad8e3f1a59f00b0ad746802c59c4479e727f0b2625c90f5e0a2bd6fe",
-      "bytes": 2911,
-      "line_count": 49,
+      "sha256": "ccaf0f5b23f015c5cd86539f9509ad8481efeb1f5cf2d7fcbbbeadf935694eb7",
+      "bytes": 3014,
+      "line_count": 50,
       "symbols": []
     },
     {
       "path": "deploy/upgrade.sh",
-      "sha256": "41041601a6c2348c2f9cc0e20eeee55448964f422ab76550e673cbb21087a5f5",
-      "bytes": 1354,
-      "line_count": 20,
+      "sha256": "6e7c5741435aa725ee10a580d9328b2c6c8b64b434f1945b24db6cc012e35381",
+      "bytes": 1534,
+      "line_count": 22,
       "symbols": []
     },
     {
@@ -1298,49 +1298,54 @@
     },
     {
       "path": "internal/adminapi/server.go",
-      "sha256": "8f946cdb1e262dabf44a1a146b99bea2c439c112fd6fc53adf7ee88035e0b29b",
-      "bytes": 9188,
-      "line_count": 187,
+      "sha256": "efaeba46049901a7aff8d77e93be786fe2f52bf00dd4a640cf2bed797ff02960",
+      "bytes": 10806,
+      "line_count": 244,
       "symbols": [
         {
           "kind": "struct",
           "name": "Server",
-          "line": 21
+          "line": 24
         },
         {
           "kind": "func",
           "name": "New",
-          "line": 41
+          "line": 46
         },
         {
           "kind": "method",
           "name": "Routes",
-          "line": 44
+          "line": 49
         },
         {
           "kind": "func",
           "name": "writeJSON",
-          "line": 122
-        },
-        {
-          "kind": "method",
-          "name": "health",
           "line": 127
         },
         {
           "kind": "method",
+          "name": "health",
+          "line": 132
+        },
+        {
+          "kind": "method",
           "name": "ready",
-          "line": 130
+          "line": 135
         },
         {
           "kind": "method",
           "name": "vultrBrowserProxy",
-          "line": 139
+          "line": 144
+        },
+        {
+          "kind": "method",
+          "name": "ensureVultrBrowser",
+          "line": 170
         },
         {
           "kind": "method",
           "name": "createVultrBrowserTicket",
-          "line": 165
+          "line": 217
         }
       ]
     },

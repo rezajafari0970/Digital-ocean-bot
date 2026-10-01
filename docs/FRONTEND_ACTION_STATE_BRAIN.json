@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
   "file": "web/static/app.js",
   "function_count": 23,
   "action_count": 41,

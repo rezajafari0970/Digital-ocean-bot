@@ -1,6 +1,6 @@
 # Function / Behavior Brain
 
-Commit `d1bb445894ad8b1388380da146d8fd6c6bf1746e` — **1081 functions/methods** indexed.
+Commit `36b625d64cc2ea480ae1b76669bdba328fdcfd55` — **1082 functions/methods** indexed.
 
 - HTTP handlers: **61**
 - Functions/methods with DB reads: **148**
@@ -10,7 +10,7 @@ For each function this brain stores exact source range/signature, parameter/retu
 
 ## Package coverage
 - `accounts` — 10
-- `adminapi` — 118
+- `adminapi` — 119
 - `app` — 71
 - `audit` — 1
 - `auth` — 12
