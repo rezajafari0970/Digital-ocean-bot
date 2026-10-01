@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -22,7 +23,8 @@ func (s SQLStore) BeginStep(ctx context.Context, runID, step string, max int) (i
 	var attempts int
 	var next sql.NullTime
 	var terminal bool
-	err := s.DB.QueryRowContext(ctx, `SELECT attempts,next_retry_at,terminal FROM provision_step_attempts WHERE run_id=$1 AND step=$2`, runID, step).Scan(&attempts, &next, &terminal)
+	var lastErr sql.NullString
+	err := s.DB.QueryRowContext(ctx, `SELECT attempts,next_retry_at,terminal,last_error FROM provision_step_attempts WHERE run_id=$1 AND step=$2`, runID, step).Scan(&attempts, &next, &terminal, &lastErr)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
 	}
@@ -34,7 +36,7 @@ func (s SQLStore) BeginStep(ctx context.Context, runID, step string, max int) (i
 			return attempts, ErrStepRetryDeferred
 		}
 		if max > 0 && attempts >= max {
-			return attempts, ErrStepRetryLimit
+			return attempts, stepRetryLimitError(step, attempts, lastErr.String)
 		}
 	}
 	var n int
@@ -88,4 +90,11 @@ func (s SQLStore) StepCompleted(ctx context.Context, runID, step string) (bool, 
 }
 func stepAttemptCompleted(started, finished sql.NullTime, lastErr sql.NullString, terminal bool) bool {
 	return started.Valid && finished.Valid && !finished.Time.Before(started.Time) && !lastErr.Valid && !terminal
+}
+
+func stepRetryLimitError(step string, attempts int, lastErr string) error {
+	if lastErr != "" {
+		return fmt.Errorf("%w: step=%s attempts=%d last_error=%s", ErrStepRetryLimit, step, attempts, lastErr)
+	}
+	return fmt.Errorf("%w: step=%s attempts=%d", ErrStepRetryLimit, step, attempts)
 }

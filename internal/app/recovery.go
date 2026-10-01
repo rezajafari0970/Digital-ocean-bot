@@ -106,7 +106,20 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		return err
 	}
 	if item.Kind == "DELETE_DROPLET" && state == "succeeded" {
-		return h.Container.ConfirmDeleted(ctx, item.AccountID, providerID)
+		if err := h.Container.ConfirmDeleted(ctx, item.AccountID, providerID); err != nil {
+			return err
+		}
+		// The per-deployment public key is no longer needed by Vultr once the
+		// server is gone. Remove it best-effort to avoid accumulating provider
+		// SSH-key objects; deletion does not affect authorized_keys on the gone VM.
+		var keyID string
+		_ = h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(profile_snapshot->>'ssh_provider_key_id','') FROM deployments WHERE account_id=$1 AND provider_id=$2 ORDER BY created_at DESC LIMIT 1`, item.AccountID, providerID).Scan(&keyID)
+		if keyID != "" {
+			if sshDriver, ok := runtime.Driver.(providers.SSHKeyDriver); ok {
+				_ = sshDriver.DeleteSSHKey(ctx, keyID)
+			}
+		}
+		return nil
 	}
 	return nil
 }

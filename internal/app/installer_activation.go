@@ -28,6 +28,9 @@ func (c Container) deploymentInstallerRef(ctx context.Context, deploymentID stri
 }
 func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.Deployment, state workflow.State, step, msg string) error {
 	_, err := c.DB.ExecContext(ctx, `UPDATE deployments SET state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)
+	if err == nil && (state == workflow.InstallFailed || state == workflow.InstallRolledBack) && d.DropletID != "" {
+		_, _ = c.DB.ExecContext(ctx, `UPDATE provision_runs SET state='FAILED',current_step=$3,last_error=$4,next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2 AND state<>'FAILED'`, d.AccountID, d.DropletID, step, msg)
+	}
 	if err == nil {
 		_ = (workflow.SQLStore{DB: c.DB}).Event(ctx, d.ID, "installer", state, msg)
 	}
