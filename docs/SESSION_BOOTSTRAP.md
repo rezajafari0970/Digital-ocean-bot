@@ -38,3 +38,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 29. Before schema-sensitive work, regenerate/read `docs/LIVE_DB_BRAIN.json`; it contains production schema metadata only and must not contain application rows/secrets.
 30. Before worker/scheduler/runtime cadence changes, read `docs/RUNTIME_WORKER_BRAIN.json`, then verify exact ownership/control flow in source and live services.
 33. Read `docs/DEEP_REQUIREMENTS_BRAIN.md` before interpreting or changing subsystem behavior; it is the fine-grained intent/specification layer beyond the coarse requirement IDs.
+34. For implementation-understanding questions, use `docs/FUNCTION_BEHAVIOR_BRAIN.json` to retrieve function ranges/signatures, routes, calls/callers, DB reads/writes, side-effect classes and error evidence before drawing behavioral conclusions.

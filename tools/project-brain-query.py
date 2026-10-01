@@ -2,7 +2,7 @@
 import json,sys,re,os
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..')); os.chdir(ROOT)
 def load(p): return json.load(open(p,encoding='utf-8'))
-source=load('docs/FULL_SOURCE_KNOWLEDGE.json'); sem=load('docs/SEMANTIC_KNOWLEDGE.json'); sym=load('docs/SYMBOL_INDEX.json'); schema=load('docs/SCHEMA_INDEX.json'); tests=load('docs/TEST_MAP.json')
+source=load('docs/FULL_SOURCE_KNOWLEDGE.json'); sem=load('docs/SEMANTIC_KNOWLEDGE.json'); sym=load('docs/SYMBOL_INDEX.json'); schema=load('docs/SCHEMA_INDEX.json'); tests=load('docs/TEST_MAP.json'); behavior=load('docs/FUNCTION_BEHAVIOR_BRAIN.json')
 q=' '.join(sys.argv[1:]).strip()
 if not q: raise SystemExit('usage: project-brain-query.py <file:line | symbol | endpoint | table | text>')
 result={'query':q,'source_commit':source['source_commit'],'matches':[]}
@@ -19,6 +19,9 @@ for r in sym.get('routes',[]):
 # symbols exact first, then substring
 for s in sem.get('symbols',[]):
  if s['symbol']==q or q.lower() in s['symbol'].lower(): result['matches'].append({'kind':'symbol','semantic':s})
+# function behavior exact/substring
+for b in behavior.get('functions',[]):
+ if b['name']==q or q.lower() in b['name'].lower(): result['matches'].append({'kind':'function_behavior','behavior':b})
 # table
 for t in schema.get('tables',[]):
  if t['table']==q or q.lower() in t['table'].lower(): result['matches'].append({'kind':'table','schema':t})
