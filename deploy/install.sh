@@ -43,5 +43,7 @@ systemctl daemon-reload
 API_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-api" | awk '{print $1}')"
 WORKER_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-worker" | awk '{print $1}')"
 printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s"}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$API_SHA" "$WORKER_SHA" > "$APP/build-manifest.json"
-systemctl enable --now digital-ocean-bot-api digital-ocean-bot-worker
+systemctl enable digital-ocean-bot-api digital-ocean-bot-worker
+# Always restart: enable --now does not restart already-active services after replacing binaries.
+systemctl restart digital-ocean-bot-api digital-ocean-bot-worker
 systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker || true
