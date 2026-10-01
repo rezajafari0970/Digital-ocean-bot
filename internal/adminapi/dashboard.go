@@ -1,7 +1,6 @@
 package adminapi
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -22,13 +21,6 @@ type accountDashboard struct {
 
 func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	// Best-effort automatic identity refresh. Rate limiting is enforced by the
-	// persisted identity timestamp so opening Details does not spam providers.
-	go func(accountID string) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-		defer cancel()
-		s.refreshNetworkIdentityIfDue(ctx, accountID)
-	}(id)
 	var name, provider, email, externalID, runtimeStatus, runtimeDetail string
 	var enabled bool
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT name,provider,enabled,COALESCE(email,''),COALESCE(external_id,''),runtime_status,COALESCE(runtime_status_detail,'') FROM accounts WHERE id=$1`, id).Scan(&name, &provider, &enabled, &email, &externalID, &runtimeStatus, &runtimeDetail); err != nil {
@@ -142,18 +134,8 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		d.Network["last_operation_at"] = opAt.Time
 		d.Network["egress_fail_closed"] = opState == "unknown"
 	}
-	// Backfill identity from already-observed proxy data so existing accounts do
-	// not stay unknown after this feature is introduced.
-	if proxyID.Valid {
-		_, _ = s.DB.ExecContext(r.Context(), `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,asn,country,country_code) SELECT $1,'UTC','en-US',p.exit_ip,host(network(set_masklen(p.exit_ip,24)))||'/24',COALESCE(p.asn,''),COALESCE(p.country,''),lower(COALESCE(p.country_code,'')) FROM proxies p WHERE p.id=$2 AND p.exit_ip IS NOT NULL AND family(p.exit_ip)=4 ON CONFLICT(account_id) DO NOTHING`, id, proxyID.String)
-		// Mark fallback identity as needing an explicit proxy test; do not perform
-		// external geo requests merely because Details was opened.
-		var fallback bool
-		_ = s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id=$1 AND timezone='UTC')`, id).Scan(&fallback)
-		if fallback {
-			d.Network["identity_refresh_required"] = true
-		}
-	}
+	// Dashboard is strictly read-only. Proxy identity is owned and refreshed by
+	// the shared Proxy Control Plane worker, never by UI reads.
 	var exitIP, subnet, asn, country, countryCode, timezone, locale, preferredCountry, preferredCode, stickySession string
 	var fallbackActive bool
 	var lastHealth sql.NullTime
