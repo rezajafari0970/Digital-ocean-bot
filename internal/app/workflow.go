@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -31,7 +34,12 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	executor.PreCreateCheck = func(checkCtx context.Context) error {
 		var desired, managed, preCreate int
 		err := c.DB.QueryRowContext(checkCtx, `SELECT (SELECT desired_server_count FROM accounts WHERE id=$1),(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')='')`, accountID).Scan(&desired, &managed, &preCreate)
-		if err != nil || !desiredAllowsReservedCreate(desired, managed, preCreate) {
+		cap, capErr := capacity.Read(checkCtx, c.DB, accountID, 2*time.Minute)
+		effectiveManaged := managed
+		if capErr == nil {
+			effectiveManaged = desiredEffectiveManaged(managed, cap.InUse)
+		}
+		if err != nil || capErr != nil || !desiredAllowsReservedCreate(desired, effectiveManaged, preCreate) {
 			if runtime.Config.Provider == "vultr" {
 				_, _ = c.DB.ExecContext(checkCtx, `UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true`, accountID)
 			}

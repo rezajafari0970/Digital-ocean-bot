@@ -62,12 +62,13 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 		(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')='')`, accountID).Scan(&desired, &managed, &preCreate); err != nil {
 		return workflow.Deployment{}, err
 	}
-	if !desiredAllowsCreate(desired, managed, preCreate) {
-		return workflow.Deployment{}, ErrCapacityUnavailable
-	}
 	cap, capErr := capacity.Read(ctx, tx, accountID, 2*time.Minute)
 	if capErr != nil {
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
+	}
+	effectiveManaged := desiredEffectiveManaged(managed, cap.InUse)
+	if !desiredAllowsCreate(desired, effectiveManaged, preCreate) {
+		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
 	if (cap.LimitKnown && cap.Limit < 1) || cap.Available() < 1 {
 		var provider string

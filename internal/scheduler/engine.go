@@ -70,9 +70,13 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// Active deployments that already own a droplet count in managed. Only pre-create deployments are pending capacity.
 		var preCreate int
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)
-		needed := desired - managed - preCreate
+		effectiveManaged := managed
+		if cap.InUse > effectiveManaged {
+			effectiveManaged = cap.InUse
+		}
+		needed := desired - effectiveManaged - preCreate
 		if needed <= 0 {
-			log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d precreate=%d", x.AccountID, desired, managed, preCreate)
+			log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d provider_inuse=%d effective=%d precreate=%d", x.AccountID, desired, managed, cap.InUse, effectiveManaged, preCreate)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}

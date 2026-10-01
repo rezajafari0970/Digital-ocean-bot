@@ -37,3 +37,15 @@ func TestDesiredReservedCreateRecheck(t *testing.T) {
 		t.Fatal("reserved create must fail closed when managed already reaches desired")
 	}
 }
+
+func TestDesiredEffectiveManagedUsesProviderHighWatermark(t *testing.T) {
+	if got := desiredEffectiveManaged(14, 15); got != 15 {
+		t.Fatalf("got=%d want=15", got)
+	}
+	if got := desiredEffectiveManaged(15, 14); got != 15 {
+		t.Fatalf("got=%d want=15", got)
+	}
+	if desiredAllowsCreate(15, desiredEffectiveManaged(14, 15), 0) {
+		t.Fatal("must not backfill until provider-confirmed deletion frees the slot")
+	}
+}
