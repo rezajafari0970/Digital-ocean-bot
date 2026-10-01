@@ -59,15 +59,15 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if err = tx.QueryRowContext(ctx, `SELECT
 		(SELECT desired_server_count FROM accounts WHERE id=$1),
 		(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),
-		(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')='')`, accountID).Scan(&desired, &managed, &preCreate); err != nil {
+		(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL)`, accountID).Scan(&desired, &managed, &preCreate); err != nil {
 		return workflow.Deployment{}, err
 	}
 	cap, capErr := capacity.Read(ctx, tx, accountID, 2*time.Minute)
 	if capErr != nil {
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
 	}
-	effectiveManaged := desiredEffectiveManaged(managed, cap.InUse)
-	if !desiredAllowsCreate(desired, effectiveManaged, preCreate) {
+	effectiveOccupancy := desiredEffectiveOccupancy(managed, preCreate, cap.InUse)
+	if !desiredOccupancyAllowsCreate(desired, effectiveOccupancy) {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
 	if (cap.LimitKnown && cap.Limit < 1) || cap.Available() < 1 {

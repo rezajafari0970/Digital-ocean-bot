@@ -14,3 +14,19 @@ func desiredEffectiveManaged(localManaged, providerInUse int) int {
 	}
 	return localManaged
 }
+
+func desiredEffectiveOccupancy(localManaged, unmaterialized, providerInUse int) int {
+	localCommitted := localManaged + unmaterialized
+	if providerInUse > localCommitted {
+		return providerInUse
+	}
+	return localCommitted
+}
+
+func desiredOccupancyAllowsCreate(desired, occupancy int) bool {
+	return desired > 0 && occupancy >= 0 && occupancy < desired
+}
+
+func desiredOccupancyAllowsReserved(desired, occupancy int) bool {
+	return desired > 0 && occupancy > 0 && occupancy <= desired
+}

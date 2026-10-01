@@ -33,13 +33,13 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
 	executor.PreCreateCheck = func(checkCtx context.Context) error {
 		var desired, managed, preCreate int
-		err := c.DB.QueryRowContext(checkCtx, `SELECT (SELECT desired_server_count FROM accounts WHERE id=$1),(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')='')`, accountID).Scan(&desired, &managed, &preCreate)
+		err := c.DB.QueryRowContext(checkCtx, `SELECT (SELECT desired_server_count FROM accounts WHERE id=$1),(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL)`, accountID).Scan(&desired, &managed, &preCreate)
 		cap, capErr := capacity.Read(checkCtx, c.DB, accountID, 2*time.Minute)
-		effectiveManaged := managed
+		effectiveOccupancy := managed + preCreate
 		if capErr == nil {
-			effectiveManaged = desiredEffectiveManaged(managed, cap.InUse)
+			effectiveOccupancy = desiredEffectiveOccupancy(managed, preCreate, cap.InUse)
 		}
-		if err != nil || capErr != nil || !desiredAllowsReservedCreate(desired, effectiveManaged, preCreate) {
+		if err != nil || capErr != nil || !desiredOccupancyAllowsReserved(desired, effectiveOccupancy) {
 			if runtime.Config.Provider == "vultr" {
 				_, _ = c.DB.ExecContext(checkCtx, `UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true`, accountID)
 			}
