@@ -153,3 +153,19 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 }
 
 var _ = fmt.Sprintf
+
+func (d *Driver) ObserveFast(ctx context.Context) (providers.Observation, error) {
+	a, err := d.Account(ctx)
+	if err != nil {
+		return providers.Observation{}, err
+	}
+	inv, err := d.Inventory(ctx)
+	if err != nil {
+		return providers.Observation{}, err
+	}
+	now := time.Now().UTC()
+	cap := providers.Capacity{LimitKnown: false, ComputeInUse: len(inv.Servers), ObservedAt: now}
+	return providers.Observation{Account: a, Capacity: cap, Inventory: inv, ObservedAt: now}, nil
+}
+
+var _ providers.FastObservationReader = (*Driver)(nil)

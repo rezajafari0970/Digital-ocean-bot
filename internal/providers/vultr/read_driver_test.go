@@ -64,6 +64,10 @@ func TestReadContracts(t *testing.T) {
 	if e != nil || obs.Capacity.LimitKnown || obs.Capacity.ComputeInUse != 2 || len(obs.Inventory.Servers) != 2 {
 		t.Fatalf("obs=%+v err=%v", obs, e)
 	}
+	fast, e := d.ObserveFast(ctx)
+	if e != nil || fast.Capacity.ComputeInUse != 2 || len(fast.Inventory.Servers) != 2 || len(fast.Catalog.Plans) != 0 {
+		t.Fatalf("fast=%+v err=%v", fast, e)
+	}
 }
 func TestNormalizeUbuntuVersions(t *testing.T) {
 	for _, v := range []string{"22.04", "24.04", "26.04"} {
