@@ -1,0 +1,3348 @@
+{
+  "schema_version": 1,
+  "source_commit": "d4835948fc7ab79e041823b919159332a6dbcfd2",
+  "methodology": "static evidence for state guards/writes and owners; from→to direction is not asserted unless explicit in source",
+  "state_count": 54,
+  "owner_count": 62,
+  "terminal_like_states": [
+    "COMPLETED",
+    "DATABASE_COMPLETE",
+    "DELETED",
+    "DNS_RESOLUTION_FAILED",
+    "FAILED",
+    "INSTALL_COMPLETE",
+    "INSTALL_FAILED",
+    "PACKAGE_HEALTH_FAILED",
+    "PACKAGE_STATE_INCOMPLETE",
+    "PANEL_COMPLETE",
+    "PHASE_FAILED",
+    "PKG_DEPENDENCY_FAILED",
+    "PROBE_FAILED",
+    "READY",
+    "RESOURCE_DELETED",
+    "SERVICE_START_FAILED",
+    "SSH_AUTH_FAILED",
+    "SSH_COMMAND_FAILED",
+    "SSH_HANDSHAKE_FAILED",
+    "SSH_HOST_KEY_FAILED",
+    "SSH_NOT_READY",
+    "STAGE_FAILED"
+  ],
+  "owners": [
+    {
+      "owner_function": "accountPreflight",
+      "file": "internal/adminapi/account_preflight.go",
+      "start_line": 11,
+      "end_line": 90,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 71,
+          "text": "providerState := app.ProviderStateActive",
+          "states": []
+        },
+        {
+          "line": 75,
+          "text": "providerState = app.ClassifyAccountProviderError(err, mode == \"proxy_required\")",
+          "states": []
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "proxies"
+      ],
+      "db_writes": [
+        "accounts"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "deleteAccount",
+      "file": "internal/adminapi/accounts_manage.go",
+      "start_line": 234,
+      "end_line": 273,
+      "states_mentioned": [
+        "DELETED",
+        "PROVISIONING",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 263,
+          "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {",
+          "states": [
+            "PROVISIONING",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 248,
+          "text": "if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {"
+        },
+        {
+          "line": 263,
+          "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets",
+        "resources"
+      ],
+      "db_writes": [
+        "accounts",
+        "droplets"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "accountDashboard",
+      "file": "internal/adminapi/dashboard.go",
+      "start_line": 23,
+      "end_line": 215,
+      "states_mentioned": [
+        "CREATE_DROPLET",
+        "DELETED",
+        "DELETE_DROPLET",
+        "FAILED",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 45,
+          "text": "providerState := \"ACTIVE\"",
+          "states": []
+        },
+        {
+          "line": 49,
+          "text": "providerState = v",
+          "states": []
+        },
+        {
+          "line": 59,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state='active' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)",
+          "states": []
+        },
+        {
+          "line": 142,
+          "text": "d.Network[\"egress_fail_closed\"] = opState == \"unknown\"",
+          "states": []
+        },
+        {
+          "line": 196,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE state='READY') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready)",
+          "states": [
+            "FAILED",
+            "INSTALL_FAILED",
+            "INSTALL_ROLLED_BACK",
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        },
+        {
+          "line": 198,
+          "text": "rowsFail, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,current_step,attempt,COALESCE(last_error,''),updated_at FROM deployments WHERE account_id=$1 AND state='FAILED' AND updated_at > now()-interval '24 hours' ORDER BY updated_at DESC LIMIT 10`, id)",
+          "states": [
+            "FAILED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 48,
+          "text": "if v, ok := runtimeMeta[\"provider_state\"].(string); ok && v != \"\" {"
+        },
+        {
+          "line": 59,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state='active' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)"
+        },
+        {
+          "line": 75,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id).Scan(&managedDroplets)"
+        },
+        {
+          "line": 130,
+          "text": "if err := s.DB.QueryRowContext(r.Context(), `SELECT kind,state,COALESCE(resource_id,''),updated_at FROM operations WHERE account_id=$1 AND kind IN ('CREATE_DROPLET','DELETE_DROPLET') ORDER BY updated_at DESC LIMIT 1`, id).Scan(&opKind, &opState, &opResource, &opAt); err == nil {"
+        },
+        {
+          "line": 188,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT circuit_state,consecutive_failures,retry_after FROM account_runtime_state WHERE account_id=$1`, id).Scan(&circuit, &failures, &retry)"
+        },
+        {
+          "line": 196,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE state='READY') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready)"
+        },
+        {
+          "line": 198,
+          "text": "rowsFail, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,current_step,attempt,COALESCE(last_error,''),updated_at FROM deployments WHERE account_id=$1 AND state='FAILED' AND updated_at > now()-interval '24 hours' ORDER BY updated_at DESC LIMIT 10`, id)"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 187,
+          "text": "var retry sql.NullTime"
+        },
+        {
+          "line": 188,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT circuit_state,consecutive_failures,retry_after FROM account_runtime_state WHERE account_id=$1`, id).Scan(&circuit, &failures, &retry)"
+        },
+        {
+          "line": 194,
+          "text": "d.Runtime[\"retry_after\"] = retry.Time"
+        }
+      ],
+      "db_reads": [
+        "account_network_identities",
+        "account_proxy_pool",
+        "account_runtime_state",
+        "accounts",
+        "already",
+        "deployments",
+        "droplets",
+        "network_profiles",
+        "operations",
+        "provider_snapshots",
+        "proxies",
+        "resources"
+      ],
+      "db_writes": [
+        "account_network_identities"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "accountDiscovery",
+      "file": "internal/adminapi/discovery.go",
+      "start_line": 12,
+      "end_line": 64,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 20,
+          "text": "if semanticState == app.ProviderStateActive && observationError == \"\" {",
+          "states": []
+        },
+        {
+          "line": 46,
+          "text": "state := app.ClassifyAccountProviderError(err, mode == \"proxy_required\")",
+          "states": []
+        },
+        {
+          "line": 62,
+          "text": "_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$4,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$5,runtime_status_detail=$4,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, string(detail), status)",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 19,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&semanticState, &observationError)"
+        },
+        {
+          "line": 20,
+          "text": "if semanticState == app.ProviderStateActive && observationError == \"\" {"
+        },
+        {
+          "line": 62,
+          "text": "_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$4,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$5,runtime_status_detail=$4,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, string(detail), status)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "network_profiles",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "accounts",
+        "provider_snapshots"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "rearmDeploymentInstaller",
+      "file": "internal/adminapi/installer_rearm.go",
+      "start_line": 9,
+      "end_line": 57,
+      "states_mentioned": [
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "WAITING_INSTALLER"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 47,
+          "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET installer_generation=$2,state='WAITING_INSTALLER',current_step='installer_rearmed',last_error='',updated_at=now() WHERE id=$1`, id, next); err != nil {",
+          "states": [
+            "WAITING_INSTALLER"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 29,
+          "text": "if err = tx.QueryRowContext(r.Context(), `SELECT state,installer_generation FROM deployments WHERE id=$1 FOR UPDATE`, id).Scan(&state, &generation); err != nil {"
+        },
+        {
+          "line": 33,
+          "text": "if state != \"INSTALL_FAILED\" && state != \"INSTALL_ROLLED_BACK\" {"
+        },
+        {
+          "line": 47,
+          "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET installer_generation=$2,state='WAITING_INSTALLER',current_step='installer_rearmed',last_error='',updated_at=now() WHERE id=$1`, id, next); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "installers",
+        "worker_item_failures"
+      ],
+      "db_writes": [
+        "deployment_installer_selections",
+        "deployments",
+        "worker_item_failures"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "selectDeploymentInstaller",
+      "file": "internal/adminapi/installer_selection.go",
+      "start_line": 8,
+      "end_line": 36,
+      "states_mentioned": [
+        "WAITING_INSTALLER"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 25,
+          "text": "res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,generation,installer_name,installer_version,source) SELECT id,installer_generation,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id,generation) DO NOTHING`, id, x.Name, x.Version)",
+          "states": [
+            "WAITING_INSTALLER"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 25,
+          "text": "res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,generation,installer_name,installer_version,source) SELECT id,installer_generation,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id,generation) DO NOTHING`, id, x.Name, x.Version)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "installers"
+      ],
+      "db_writes": [
+        "deployment_installer_selections"
+      ],
+      "candidate_callers": [
+        "internal/adminapi/server.go"
+      ]
+    },
+    {
+      "owner_function": "WarmOutputCache",
+      "file": "internal/adminapi/output.go",
+      "start_line": 128,
+      "end_line": 153,
+      "states_mentioned": [
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 142,
+          "text": "WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'",
+          "states": [
+            "PANEL_COMPLETE"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 142,
+          "text": "WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "output_config_snapshots"
+      ],
+      "candidate_callers": [
+        "cmd/api/main.go"
+      ]
+    },
+    {
+      "owner_function": "outputSnapshotResponse",
+      "file": "internal/adminapi/output_snapshot.go",
+      "start_line": 84,
+      "end_line": 123,
+      "states_mentioned": [
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 85,
+          "text": "where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `",
+          "states": [
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 85,
+          "text": "where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "output_config_snapshots",
+        "panel_instances"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/output.go"
+      ]
+    },
+    {
+      "owner_function": "accounts",
+      "file": "internal/adminapi/resources.go",
+      "start_line": 10,
+      "end_line": 150,
+      "states_mentioned": [
+        "DELETED",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 11,
+          "text": "rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.provider,a.enabled,a.created_at,n.mode,COALESCE(p.name,''),COALESCE(a.preferred_regions,'[]'::jsonb),COALESCE(a.preferred_sizes,'[]'::jsonb),COALESCE(a.preferred_images,'[]'::jsonb),COALESCE(a.preferred_image,''),COALESCE(a.server_lifetime_min_seconds,a.server_lifetime_seconds),COALESCE(a.server_lifetime_max_seconds,a.server_lifetime_seconds),a.auto_interval_seconds,a.auto",
+          "states": [
+            "DELETED"
+          ]
+        },
+        {
+          "line": 83,
+          "text": "providerState := providerStateDB",
+          "states": []
+        },
+        {
+          "line": 84,
+          "text": "if providerState == \"\" {",
+          "states": []
+        },
+        {
+          "line": 85,
+          "text": "providerState = \"UNKNOWN\"",
+          "states": []
+        },
+        {
+          "line": 87,
+          "text": "canCreate := enabled && providerState == \"ACTIVE\" && providerErrorState == \"\" && providerFreshness == \"fresh\" && capacityFreshness == \"fresh\" && (!limitKnown || dropletLimit > providerDroplets) && runtimeStatus == \"READY\"",
+          "states": [
+            "READY"
+          ]
+        },
+        {
+          "line": 91,
+          "text": "providerState = \"DISABLED\"",
+          "states": []
+        },
+        {
+          "line": 105,
+          "text": "} else if providerState == \"LOCKED\" {",
+          "states": []
+        },
+        {
+          "line": 107,
+          "text": "} else if providerState == \"TOKEN_INVALID\" {",
+          "states": []
+        },
+        {
+          "line": 109,
+          "text": "} else if providerState == \"PERMISSION_DENIED\" {",
+          "states": []
+        },
+        {
+          "line": 111,
+          "text": "} else if providerState == \"RATE_LIMITED\" {",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 11,
+          "text": "rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.provider,a.enabled,a.created_at,n.mode,COALESCE(p.name,''),COALESCE(a.preferred_regions,'[]'::jsonb),COALESCE(a.preferred_sizes,'[]'::jsonb),COALESCE(a.preferred_images,'[]'::jsonb),COALESCE(a.preferred_image,''),COALESCE(a.server_lifetime_min_seconds,a.server_lifetime_seconds),COALESCE(a.server_lifetime_max_seconds,a.server_lifetime_seconds),a.auto_interval_seconds,a.auto"
+        },
+        {
+          "line": 27,
+          "text": "if err := rows.Scan(&id, &name, &email, &region, &provider, &enabled, &created, &mode, &proxy, &regions, &sizes, &images, &image, &lifetimeMin, &lifetimeMax, &interval, &batch, &spacingMinutes, &spacingMaxMinutes, &concurrent, &lifetime, &proxyID, &runtimeStatus, &runtimeDetail, &desired, &fallbackAnyRegion, &dropletLimit, &limitKnown, &providerDroplets, &capacityCheckedAt, &lastDropletCreated, &lastDropletDeleted, &nextDropletDelete, &capacityOld, &capacityNew, &capacityDelta, &capacityChangedA"
+        },
+        {
+          "line": 34,
+          "text": "if providerStateAt.Valid {"
+        },
+        {
+          "line": 84,
+          "text": "if providerState == \"\" {"
+        },
+        {
+          "line": 105,
+          "text": "} else if providerState == \"LOCKED\" {"
+        },
+        {
+          "line": 107,
+          "text": "} else if providerState == \"TOKEN_INVALID\" {"
+        },
+        {
+          "line": 109,
+          "text": "} else if providerState == \"PERMISSION_DENIED\" {"
+        },
+        {
+          "line": 111,
+          "text": "} else if providerState == \"RATE_LIMITED\" {"
+        },
+        {
+          "line": 113,
+          "text": "} else if providerErrorState != \"\" {"
+        },
+        {
+          "line": 124,
+          "text": "if v, ok := providerMeta[\"provider_error\"].(string); ok && v != \"\" && providerState != \"ACTIVE\" {"
+        },
+        {
+          "line": 139,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'`, id).Scan(&managedActive)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "LATERAL",
+        "account_capacity_events",
+        "account_proxy_pool",
+        "accounts",
+        "droplets",
+        "network_profiles",
+        "provider_snapshots",
+        "proxies"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "cmd/vultr-browser-session/main.go",
+        "cmd/vultr-capacity-probe/main.go",
+        "cmd/worker/main.go",
+        "internal/accounts/cell.go",
+        "internal/accounts/cell_test.go",
+        "internal/accounts/context.go",
+        "internal/accounts/context_test.go",
+        "internal/accounts/identity.go",
+        "internal/accounts/identity_test.go",
+        "internal/adminapi/account_automation.go",
+        "internal/adminapi/account_identity.go",
+        "internal/adminapi/account_options.go",
+        "internal/adminapi/account_preflight.go",
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/accounts_write.go",
+        "internal/adminapi/build_activity.go",
+        "internal/adminapi/dashboard.go",
+        "internal/adminapi/discovery.go",
+        "internal/adminapi/network_identity_auto.go",
+        "internal/adminapi/output.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/provision_errors.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/server.go",
+        "internal/adminapi/status.go",
+        "internal/app/account_state_test.go",
+        "internal/app/capacity_guard.go",
+        "internal/app/catalog_sync.go",
+        "internal/app/consistency.go",
+        "internal/app/container.go",
+        "internal/app/deploy.go",
+        "internal/app/lifecycle.go",
+        "internal/app/network_identity.go",
+        "internal/app/provider_refresh.go",
+        "internal/app/repository.go",
+        "internal/app/sticky_proxy.go",
+        "internal/droplets/postgres_e2e_test.go",
+        "internal/network/isolation_test.go",
+        "internal/panels/desired/service.go",
+        "internal/panels/readyworker/sql_source.go",
+        "internal/providers/digitalocean/characterization_test.go",
+        "internal/providers/digitalocean/client.go",
+        "internal/providers/digitalocean/client_test.go",
+        "internal/providers/digitalocean/driver_v2.go",
+        "internal/scheduler/engine.go",
+        "internal/testharness/provider_live_cert_test.go",
+        "internal/workflow/postgres_e2e_test.go"
+      ]
+    },
+    {
+      "owner_function": "system",
+      "file": "internal/adminapi/status.go",
+      "start_line": 28,
+      "end_line": 35,
+      "states_mentioned": [
+        "FAILED",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 31,
+          "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`).Scan(&deployments)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "worker_heartbeats"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/server.go",
+        "internal/provisioning/script_runner.go"
+      ]
+    },
+    {
+      "owner_function": "ProviderStateRuntimeStatus",
+      "file": "internal/app/account_state.go",
+      "start_line": 44,
+      "end_line": 50,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 45,
+          "text": "if state == ProviderStateActive {",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 45,
+          "text": "if state == ProviderStateActive {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/account_preflight.go",
+        "internal/app/provider_refresh.go"
+      ]
+    },
+    {
+      "owner_function": "RequireCreateCapacity",
+      "file": "internal/app/capacity_guard.go",
+      "start_line": 31,
+      "end_line": 47,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 35,
+          "text": "if err := c.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != \"READY\" || providerState != ProviderStateActive || providerError != \"\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts"
+      ],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "ReconcileLocalState",
+      "file": "internal/app/consistency.go",
+      "start_line": 11,
+      "end_line": 46,
+      "states_mentioned": [
+        "DELETED",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 31,
+          "text": "resourceState := \"provisioning\"",
+          "states": []
+        },
+        {
+          "line": 32,
+          "text": "if providerState != ProviderStateLocked && (state == \"READY\" || state == \"EXPIRING\" || state == \"RETIRING\") {",
+          "states": [
+            "READY"
+          ]
+        },
+        {
+          "line": 33,
+          "text": "resourceState = \"active\"",
+          "states": []
+        },
+        {
+          "line": 35,
+          "text": "if providerState == ProviderStateLocked {",
+          "states": []
+        },
+        {
+          "line": 36,
+          "text": "resourceState = \"retiring\"",
+          "states": []
+        },
+        {
+          "line": 41,
+          "text": "DO UPDATE SET state=EXCLUDED.state,managed=true,metadata=EXCLUDED.metadata,updated_at=now()`, aid, pid, resourceState, meta, providerName)",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 19,
+          "text": "rows, err := c.DB.QueryContext(ctx, `SELECT r.id::text,r.account_id::text,r.provider_resource_id,r.state,r.profile,a.provider_state,a.provider FROM droplets r JOIN accounts a ON a.id=r.account_id WHERE r.provider_resource_id IS NOT NULL AND r.state<>'DELETED'`)"
+        },
+        {
+          "line": 27,
+          "text": "if rows.Scan(&did, &aid, &pid, &state, &profile, &providerState, &providerName) != nil {"
+        },
+        {
+          "line": 32,
+          "text": "if providerState != ProviderStateLocked && (state == \"READY\" || state == \"EXPIRING\" || state == \"RETIRING\") {"
+        },
+        {
+          "line": 35,
+          "text": "if providerState == ProviderStateLocked {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "droplets"
+      ],
+      "db_writes": [
+        "SET",
+        "deployments",
+        "resources"
+      ],
+      "candidate_callers": [
+        "cmd/worker/main.go"
+      ]
+    },
+    {
+      "owner_function": "StartDeployment",
+      "file": "internal/app/deploy.go",
+      "start_line": 22,
+      "end_line": 221,
+      "states_mentioned": [
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 153,
+          "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {",
+          "states": [
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 55,
+          "text": "if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != \"READY\" || providerState != ProviderStateActive || providerError != \"\" {"
+        },
+        {
+          "line": 146,
+          "text": "rows, qerr := c.DB.QueryContext(ctx, \"SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200\", accountID, pq.Array(images))"
+        },
+        {
+          "line": 150,
+          "text": "if rows.Scan(&image, &state, &lastError) != nil {"
+        },
+        {
+          "line": 153,
+          "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "provider_snapshots",
+        "xui_database_templates"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/app/lifecycle.go",
+        "internal/app/scheduler.go"
+      ]
+    },
+    {
+      "owner_function": "MarkReady",
+      "file": "internal/app/deployment_ready.go",
+      "start_line": 16,
+      "end_line": 27,
+      "states_mentioned": [
+        "PROVISIONING",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 24,
+          "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)",
+          "states": [
+            "PROVISIONING",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 24,
+          "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [
+        "droplets"
+      ],
+      "candidate_callers": [
+        "internal/app/postinstall_reconcile.go",
+        "internal/workflow/engine.go"
+      ]
+    },
+    {
+      "owner_function": "MarkFailed",
+      "file": "internal/app/deployment_ready.go",
+      "start_line": 30,
+      "end_line": 43,
+      "states_mentioned": [
+        "PROVISIONING"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 34,
+          "text": "res, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='PROVISIONING'`, d.DropletID, d.AccountID)",
+          "states": [
+            "PROVISIONING"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 34,
+          "text": "res, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state='PROVISIONING'`, d.DropletID, d.AccountID)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [
+        "droplets",
+        "lifecycle_events"
+      ],
+      "candidate_callers": [
+        "internal/app/installer_activation.go",
+        "internal/app/recovery.go",
+        "internal/workflow/engine.go"
+      ]
+    },
+    {
+      "owner_function": "setInstallerDeploymentState",
+      "file": "internal/app/installer_activation.go",
+      "start_line": 29,
+      "end_line": 35,
+      "states_mentioned": [
+        "WAITING_INSTALLER"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 30,
+          "text": "_, err := c.DB.ExecContext(ctx, `UPDATE deployments SET state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)",
+          "states": [
+            "WAITING_INSTALLER"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 30,
+          "text": "_, err := c.DB.ExecContext(ctx, `UPDATE deployments SET state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [
+        "deployments"
+      ],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "activateInstaller",
+      "file": "internal/app/installer_activation.go",
+      "start_line": 65,
+      "end_line": 132,
+      "states_mentioned": [
+        "FAILED",
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 84,
+          "text": "d.State = workflow.InstallFailed",
+          "states": []
+        },
+        {
+          "line": 111,
+          "text": "if ir.State == \"ROLLBACK_REQUIRED\" {",
+          "states": []
+        },
+        {
+          "line": 120,
+          "text": "if state == \"ROLLBACK_REQUIRED\" && resolved.Manifest.AutoRollback {",
+          "states": []
+        },
+        {
+          "line": 126,
+          "text": "if state == \"FAILED\" {",
+          "states": [
+            "FAILED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 97,
+          "text": "switch ir.State {"
+        },
+        {
+          "line": 111,
+          "text": "if ir.State == \"ROLLBACK_REQUIRED\" {"
+        },
+        {
+          "line": 119,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT state FROM installer_runs WHERE id=$1`, ir.ID).Scan(&state)"
+        },
+        {
+          "line": 120,
+          "text": "if state == \"ROLLBACK_REQUIRED\" && resolved.Manifest.AutoRollback {"
+        },
+        {
+          "line": 126,
+          "text": "if state == \"FAILED\" {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 82,
+          "text": "if errors.As(err, &re) && !re.Retryable {"
+        }
+      ],
+      "db_reads": [
+        "installer_runs",
+        "provision_runs"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/app/recovery.go"
+      ]
+    },
+    {
+      "owner_function": "ProcessLifecycle",
+      "file": "internal/app/lifecycle.go",
+      "start_line": 12,
+      "end_line": 197,
+      "states_mentioned": [
+        "CONFIGURING_PANEL",
+        "CREATING",
+        "DATABASE_COMPLETE",
+        "DELETED",
+        "FAILED",
+        "INSTALL_COMPLETE",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "PROVISIONING",
+        "READY",
+        "WAITING_INSTALLER",
+        "WAITING_RESOURCE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 15,
+          "text": "providerLocked := providerState == ProviderStateLocked",
+          "states": []
+        },
+        {
+          "line": 20,
+          "text": "_, _ = c.DB.ExecContext(ctx, \"UPDATE resources SET state='retiring',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true AND state<>'deleted'\", item.AccountID, item.ProviderID)",
+          "states": []
+        },
+        {
+          "line": 21,
+          "text": "if item.State == droplets.Ready || item.State == droplets.Expiring {",
+          "states": []
+        },
+        {
+          "line": 27,
+          "text": "item.State = droplets.Retiring",
+          "states": []
+        },
+        {
+          "line": 34,
+          "text": "if item.State == droplets.Expiring {",
+          "states": []
+        },
+        {
+          "line": 57,
+          "text": "res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)",
+          "states": []
+        },
+        {
+          "line": 69,
+          "text": "item.State = droplets.Retiring",
+          "states": []
+        },
+        {
+          "line": 79,
+          "text": "terminalFailed := deploymentState == \"FAILED\" || deploymentState == \"INSTALL_FAILED\" || deploymentState == \"INSTALL_ROLLED_BACK\"",
+          "states": [
+            "FAILED",
+            "INSTALL_FAILED",
+            "INSTALL_ROLLED_BACK"
+          ]
+        },
+        {
+          "line": 108,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(runtime_status,''),(SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY created_at,id LIMIT 1) FROM accounts WHERE id=$1`, item.AccountID).Scan(&runtimeStatus, &oldestExpiring)",
+          "states": []
+        },
+        {
+          "line": 161,
+          "text": "WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'",
+          "states": [
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 14,
+          "text": "_ = c.DB.QueryRowContext(ctx, \"SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1\", item.AccountID).Scan(&providerState)"
+        },
+        {
+          "line": 20,
+          "text": "_, _ = c.DB.ExecContext(ctx, \"UPDATE resources SET state='retiring',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true AND state<>'deleted'\", item.AccountID, item.ProviderID)"
+        },
+        {
+          "line": 21,
+          "text": "if item.State == droplets.Ready || item.State == droplets.Expiring {"
+        },
+        {
+          "line": 34,
+          "text": "if item.State == droplets.Expiring {"
+        },
+        {
+          "line": 49,
+          "text": "(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED'),"
+        },
+        {
+          "line": 50,
+          "text": "(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state IN ('RETIRING','DELETING'))"
+        },
+        {
+          "line": 57,
+          "text": "res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)"
+        },
+        {
+          "line": 78,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE droplet_id=$1 ORDER BY updated_at DESC LIMIT 1`, item.ID).Scan(&deploymentState)"
+        },
+        {
+          "line": 88,
+          "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+        },
+        {
+          "line": 96,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'UNKNOWN'),COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState, &providerError)"
+        },
+        {
+          "line": 99,
+          "text": "if providerState != \"ACTIVE\" || providerError != \"\" {"
+        },
+        {
+          "line": 108,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(runtime_status,''),(SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY created_at,id LIMIT 1) FROM accounts WHERE id=$1`, item.AccountID).Scan(&runtimeStatus, &oldestExpiring)"
+        },
+        {
+          "line": 161,
+          "text": "WHERE d.id=$1 AND d.state='PANEL_COMPLETE' AND r.state='READY'"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "schedules"
+      ],
+      "db_writes": [
+        "accounts",
+        "droplets",
+        "resources"
+      ],
+      "candidate_callers": [
+        "cmd/lifecycle-once/main.go",
+        "internal/worker/lifecycle.go"
+      ]
+    },
+    {
+      "owner_function": "ConfirmDeleted",
+      "file": "internal/app/lifecycle.go",
+      "start_line": 198,
+      "end_line": 235,
+      "states_mentioned": [
+        "CONFIGURING_PANEL",
+        "CREATING",
+        "DATABASE_COMPLETE",
+        "DELETED",
+        "FAILED",
+        "INSTALL_COMPLETE",
+        "PROVISIONING",
+        "RESOURCE_DELETED",
+        "WAITING_INSTALLER",
+        "WAITING_RESOURCE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 204,
+          "text": "if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {",
+          "states": [
+            "DELETED"
+          ]
+        },
+        {
+          "line": 207,
+          "text": "if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {",
+          "states": []
+        },
+        {
+          "line": 210,
+          "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') RETURNING id::text`, accountID, providerID)",
+          "states": [
+            "CONFIGURING_PANEL",
+            "CREATING",
+            "DATABASE_COMPLETE",
+            "DELETED",
+            "FAILED",
+            "INSTALL_COMPLETE",
+            "PROVISIONING",
+            "RESOURCE_DELETED",
+            "WAITING_INSTALLER",
+            "WAITING_RESOURCE"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 204,
+          "text": "if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {"
+        },
+        {
+          "line": 207,
+          "text": "if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {"
+        },
+        {
+          "line": 210,
+          "text": "rows, err := tx.QueryContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='RESOURCE_DELETED',updated_at=now() WHERE account_id=$1 AND provider_id=$2 AND state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') RETURNING id::text`, accountID, providerID)"
+        },
+        {
+          "line": 227,
+          "text": "if _, err = tx.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,'lifecycle','FAILED','RESOURCE_DELETED')`, id); err != nil {"
+        },
+        {
+          "line": 231,
+          "text": "if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=now(),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND a.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [
+        "accounts",
+        "deployment_events",
+        "deployments",
+        "droplets",
+        "resources"
+      ],
+      "candidate_callers": [
+        "internal/app/recovery.go"
+      ]
+    },
+    {
+      "owner_function": "ReconcileOwnedOrphans",
+      "file": "internal/app/orphan_reconcile.go",
+      "start_line": 17,
+      "end_line": 66,
+      "states_mentioned": [
+        "DELETED",
+        "FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 48,
+          "text": "err = c.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile) SELECT gen_random_uuid(),d.account_id,d.profile_id,$3,'RETIRING','{}'::jsonb FROM deployments d WHERE d.id=$1::uuid AND d.account_id=$2 AND d.state='FAILED' AND NOT EXISTS(SELECT 1 FROM droplets z WHERE z.account_id=$2 AND z.provider_resource_id=$3 AND z.state<>'DELETED') RETURNING id::text`, depID, accountID, x.ID).Scan(&localID)",
+          "states": [
+            "DELETED",
+            "FAILED"
+          ]
+        },
+        {
+          "line": 57,
+          "text": "res, err := c.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',replacement_deployment_id=NULL,updated_at=now() WHERE id=$1::uuid AND account_id=$2 AND provider_resource_id=$3 AND state='DELETED'`, localID, accountID, x.ID)",
+          "states": [
+            "DELETED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 42,
+          "text": "err := c.DB.QueryRowContext(ctx, `SELECT dr.id::text,dr.state FROM deployments d JOIN droplets dr ON dr.id=d.droplet_id WHERE d.id=$1::uuid AND d.account_id=$2 AND dr.provider_resource_id=$3`, depID, accountID, x.ID).Scan(&localID, &state)"
+        },
+        {
+          "line": 44,
+          "text": "if c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE id=$1::uuid AND account_id=$2`, depID, accountID).Scan(&depState) != nil || depState != \"FAILED\" {"
+        },
+        {
+          "line": 48,
+          "text": "err = c.DB.QueryRowContext(ctx, `INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile) SELECT gen_random_uuid(),d.account_id,d.profile_id,$3,'RETIRING','{}'::jsonb FROM deployments d WHERE d.id=$1::uuid AND d.account_id=$2 AND d.state='FAILED' AND NOT EXISTS(SELECT 1 FROM droplets z WHERE z.account_id=$2 AND z.provider_resource_id=$3 AND z.state<>'DELETED') RETURNING id::text`, depID, accountID, x.ID).Scan(&localID)"
+        },
+        {
+          "line": 54,
+          "text": "if err != nil || state != \"DELETED\" {"
+        },
+        {
+          "line": 57,
+          "text": "res, err := c.DB.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',replacement_deployment_id=NULL,updated_at=now() WHERE id=$1::uuid AND account_id=$2 AND provider_resource_id=$3 AND state='DELETED'`, localID, accountID, x.ID)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "droplets",
+        "lifecycle_events"
+      ],
+      "candidate_callers": [
+        "internal/app/provider_refresh.go"
+      ]
+    },
+    {
+      "owner_function": "RequirePostInstallCapabilities",
+      "file": "internal/app/postinstall_capabilities.go",
+      "start_line": 13,
+      "end_line": 31,
+      "states_mentioned": [
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 15,
+          "text": "err := c.DB.QueryRowContext(ctx, `SELECT ir.manifest_snapshot FROM installer_runs ir JOIN deployments d ON d.id=ir.deployment_id WHERE ir.deployment_id=$1 AND ir.generation=d.installer_generation AND ir.state='INSTALL_COMPLETE'`, deploymentID).Scan(&raw)",
+          "states": [
+            "INSTALL_COMPLETE"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 15,
+          "text": "err := c.DB.QueryRowContext(ctx, `SELECT ir.manifest_snapshot FROM installer_runs ir JOIN deployments d ON d.id=ir.deployment_id WHERE ir.deployment_id=$1 AND ir.generation=d.installer_generation AND ir.state='INSTALL_COMPLETE'`, deploymentID).Scan(&raw)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "installer_runs"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/app/postinstall_rearm.go",
+        "internal/app/postinstall_reconcile.go",
+        "internal/app/recovery.go"
+      ]
+    },
+    {
+      "owner_function": "RearmPostInstall",
+      "file": "internal/app/postinstall_rearm.go",
+      "start_line": 11,
+      "end_line": 50,
+      "states_mentioned": [
+        "FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 30,
+          "text": "err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM xui_database_deployments WHERE droplet_id=$1 AND generation=$2 AND state='FAILED')`, dropletID, generation).Scan(&failed)",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 37,
+          "text": "res, err := tx.ExecContext(ctx, `UPDATE deployments SET postinstall_generation=postinstall_generation+1,state='IMPORTING_DATABASE',current_step='database',last_error=NULL,updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 22,
+          "text": "err = tx.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(droplet_id::text,''),postinstall_generation FROM deployments WHERE id=$1 AND account_id=$2 FOR UPDATE`, deploymentID, accountID).Scan(&state, &step, &dropletID, &generation)"
+        },
+        {
+          "line": 26,
+          "text": "if state != \"FAILED\" || step != \"done\" || dropletID == \"\" {"
+        },
+        {
+          "line": 30,
+          "text": "err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM xui_database_deployments WHERE droplet_id=$1 AND generation=$2 AND state='FAILED')`, dropletID, generation).Scan(&failed)"
+        },
+        {
+          "line": 37,
+          "text": "res, err := tx.ExecContext(ctx, `UPDATE deployments SET postinstall_generation=postinstall_generation+1,state='IMPORTING_DATABASE',current_step='database',last_error=NULL,updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "xui_database_deployments"
+      ],
+      "db_writes": [
+        "deployment_events",
+        "deployments"
+      ],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "ReconcileCompletedPostInstall",
+      "file": "internal/app/postinstall_reconcile.go",
+      "start_line": 12,
+      "end_line": 59,
+      "states_mentioned": [
+        "COMPLETED",
+        "PANEL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 26,
+          "text": "EXISTS(SELECT 1 FROM xui_database_deployments x WHERE x.droplet_id=$1 AND x.generation=$2 AND x.state='COMPLETED')",
+          "states": [
+            "COMPLETED"
+          ]
+        },
+        {
+          "line": 28,
+          "text": "EXISTS(SELECT 1 FROM xui_panel_deployments p WHERE p.droplet_id=$1 AND p.generation=$2 AND p.state='COMPLETED')`, d.DropletID, generation).Scan(&ok)",
+          "states": [
+            "COMPLETED"
+          ]
+        },
+        {
+          "line": 47,
+          "text": "res, err := tx.ExecContext(ctx, `UPDATE deployments SET state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)",
+          "states": [
+            "PANEL_COMPLETE"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 26,
+          "text": "EXISTS(SELECT 1 FROM xui_database_deployments x WHERE x.droplet_id=$1 AND x.generation=$2 AND x.state='COMPLETED')"
+        },
+        {
+          "line": 28,
+          "text": "EXISTS(SELECT 1 FROM xui_panel_deployments p WHERE p.droplet_id=$1 AND p.generation=$2 AND p.state='COMPLETED')`, d.DropletID, generation).Scan(&ok)"
+        },
+        {
+          "line": 47,
+          "text": "res, err := tx.ExecContext(ctx, `UPDATE deployments SET state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)"
+        },
+        {
+          "line": 55,
+          "text": "if _, err = tx.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,'panel','PANEL_COMPLETE','RECONCILED_FROM_COMPLETED_LEDGERS')`, deploymentID); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "xui_database_deployments",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [
+        "deployment_events",
+        "deployments"
+      ],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "RefreshProviderSnapshots",
+      "file": "internal/app/provider_refresh.go",
+      "start_line": 13,
+      "end_line": 119,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 38,
+          "text": "if fresh && providerState == ProviderStateActive && providerError == \"\" {",
+          "states": []
+        },
+        {
+          "line": 49,
+          "text": "if fresh && providerState == ProviderStateActive && providerError == \"\" {",
+          "states": []
+        },
+        {
+          "line": 54,
+          "text": "providerState := ClassifyAccountProviderError(err, true)",
+          "states": []
+        },
+        {
+          "line": 71,
+          "text": "providerState := ClassifyAccountProviderError(err, proxyRequired)",
+          "states": []
+        },
+        {
+          "line": 90,
+          "text": "providerState := \"active\"",
+          "states": []
+        },
+        {
+          "line": 93,
+          "text": "providerState = \"disabled\"",
+          "states": []
+        },
+        {
+          "line": 95,
+          "text": "providerState = \"cannot_create\"",
+          "states": []
+        },
+        {
+          "line": 114,
+          "text": "_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, runtimeStatus, string(detail))",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 32,
+          "text": "_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt)"
+        },
+        {
+          "line": 33,
+          "text": "if interval := ProviderProbeInterval(providerState); interval > 0 && time.Since(providerCheckedAt) < interval {"
+        },
+        {
+          "line": 38,
+          "text": "if fresh && providerState == ProviderStateActive && providerError == \"\" {"
+        },
+        {
+          "line": 49,
+          "text": "if fresh && providerState == ProviderStateActive && providerError == \"\" {"
+        },
+        {
+          "line": 114,
+          "text": "_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, runtimeStatus, string(detail))"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "provider_capacity_observations",
+        "provider_snapshots"
+      ],
+      "db_writes": [
+        "account_capacity_events",
+        "accounts",
+        "provider_snapshots"
+      ],
+      "candidate_callers": [
+        "cmd/worker/main.go"
+      ]
+    },
+    {
+      "owner_function": "RecoverOperation",
+      "file": "internal/app/recovery.go",
+      "start_line": 16,
+      "end_line": 79,
+      "states_mentioned": [
+        "CREATE_DROPLET",
+        "DELETE_DROPLET",
+        "FAILED",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 28,
+          "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)",
+          "states": [
+            "FAILED",
+            "INSTALL_FAILED",
+            "INSTALL_ROLLED_BACK",
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        },
+        {
+          "line": 63,
+          "text": "state := \"unknown\"",
+          "states": []
+        },
+        {
+          "line": 65,
+          "text": "state = \"succeeded\"",
+          "states": []
+        },
+        {
+          "line": 68,
+          "text": "state = \"succeeded\"",
+          "states": []
+        },
+        {
+          "line": 70,
+          "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID, state)",
+          "states": []
+        },
+        {
+          "line": 74,
+          "text": "if item.Kind == \"DELETE_DROPLET\" && state == \"succeeded\" {",
+          "states": [
+            "DELETE_DROPLET"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 28,
+          "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)"
+        },
+        {
+          "line": 43,
+          "text": "_ = h.Container.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM resources WHERE account_id=$1 AND provider_resource_id=$2 AND state<>'deleted')`, item.AccountID, providerID).Scan(&registryExists)"
+        },
+        {
+          "line": 70,
+          "text": "_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID, state)"
+        },
+        {
+          "line": 74,
+          "text": "if item.Kind == \"DELETE_DROPLET\" && state == \"succeeded\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "operations",
+        "provider_snapshots",
+        "resources"
+      ],
+      "db_writes": [
+        "operations"
+      ],
+      "candidate_callers": [
+        "internal/worker/worker.go"
+      ]
+    },
+    {
+      "owner_function": "RecoverDeployment",
+      "file": "internal/app/recovery.go",
+      "start_line": 80,
+      "end_line": 162,
+      "states_mentioned": [
+        "CREATE_TERMINAL_FREEZE_V2",
+        "FAILED",
+        "INSTALLER_NOT_CONFIGURED",
+        "PROVISION_TERMINAL_FREEZE_V1",
+        "WAITING_INSTALLER"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 105,
+          "text": "if d.State == workflow.InstallComplete || d.State == workflow.ImportingDatabase || d.State == workflow.DatabaseComplete || d.State == workflow.ConfiguringPanel {",
+          "states": []
+        },
+        {
+          "line": 116,
+          "text": "if d.State == workflow.WaitingInstaller {",
+          "states": []
+        },
+        {
+          "line": 120,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)",
+          "states": [
+            "INSTALLER_NOT_CONFIGURED",
+            "WAITING_INSTALLER"
+          ]
+        },
+        {
+          "line": 121,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)",
+          "states": [
+            "WAITING_INSTALLER"
+          ]
+        },
+        {
+          "line": 129,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, \"provision failed: \"+pe)",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 145,
+          "text": "if opState == \"failed\" && resourceID == \"\" {",
+          "states": []
+        },
+        {
+          "line": 146,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)",
+          "states": [
+            "FAILED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 105,
+          "text": "if d.State == workflow.InstallComplete || d.State == workflow.ImportingDatabase || d.State == workflow.DatabaseComplete || d.State == workflow.ConfiguringPanel {"
+        },
+        {
+          "line": 116,
+          "text": "if d.State == workflow.WaitingInstaller {"
+        },
+        {
+          "line": 120,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='INSTALLER_NOT_CONFIGURED',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+        },
+        {
+          "line": 121,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)"
+        },
+        {
+          "line": 127,
+          "text": "if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &innerStep, &pe); qerr == nil {"
+        },
+        {
+          "line": 129,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, \"provision failed: \"+pe)"
+        },
+        {
+          "line": 143,
+          "text": "qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,COALESCE(resource_id,'') FROM operations WHERE account_id=$1 AND idempotency_key LIKE 'deploy:'||$2||':create:%' ORDER BY created_at DESC LIMIT 1`, item.AccountID, d.ID).Scan(&opState, &resourceID)"
+        },
+        {
+          "line": 145,
+          "text": "if opState == \"failed\" && resourceID == \"\" {"
+        },
+        {
+          "line": 146,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 121,
+          "text": "_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='installer not configured',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)"
+        },
+        {
+          "line": 135,
+          "text": "_ = h.Container.DB.QueryRowContext(ctx, `SELECT next_retry_at FROM provision_step_attempts psa JOIN provision_runs pr ON pr.id=psa.run_id WHERE pr.account_id=$1 AND pr.droplet_id=$2 AND psa.step=$3`, item.AccountID, d.DropletID, innerStep).Scan(&pn)"
+        }
+      ],
+      "db_reads": [
+        "operations",
+        "provision_runs",
+        "provision_step_attempts"
+      ],
+      "db_writes": [
+        "deployments",
+        "provision_runs"
+      ],
+      "candidate_callers": [
+        "cmd/resume-one/main.go",
+        "internal/worker/worker.go"
+      ]
+    },
+    {
+      "owner_function": "Read",
+      "file": "internal/capacity/service.go",
+      "start_line": 33,
+      "end_line": 46,
+      "states_mentioned": [
+        "CREATE_DROPLET"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 38,
+          "text": "err := q.QueryRowContext(ctx, `SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int,0),COALESCE((ps.canonical->'Capacity'->>'LimitKnown')::boolean,CASE WHEN COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int,0)>0 THEN true ELSE false END),COALESCE((ps.canonical->'Capacity'->>'ComputeInUse')::int,jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)),0),(SELECT count(*) FROM operations WH",
+          "states": [
+            "CREATE_DROPLET"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 38,
+          "text": "err := q.QueryRowContext(ctx, `SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int,0),COALESCE((ps.canonical->'Capacity'->>'LimitKnown')::boolean,CASE WHEN COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int,0)>0 THEN true ELSE false END),COALESCE((ps.canonical->'Capacity'->>'ComputeInUse')::int,jsonb_array_length(COALESCE(ps.data->'Droplets','[]'::jsonb)),0),(SELECT count(*) FROM operations WH"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "operations",
+        "provider_snapshots"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/accounts/identity.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/resources_api.go",
+        "internal/adminapi/server.go",
+        "internal/app/capacity_guard.go",
+        "internal/app/deploy.go",
+        "internal/app/lifecycle.go",
+        "internal/auth/service.go",
+        "internal/network/metadata.go",
+        "internal/panels/sanaei/clients.go",
+        "internal/panels/sanaei/panel_configurer.go",
+        "internal/reality/credentials/generator.go",
+        "internal/reality/credentials/local.go",
+        "internal/scheduler/engine.go",
+        "internal/secrets/probe.go",
+        "internal/secrets/proxy.go"
+      ]
+    },
+    {
+      "owner_function": "BuildCreateOperation",
+      "file": "internal/droplets/factory.go",
+      "start_line": 5,
+      "end_line": 12,
+      "states_mentioned": [
+        "CREATE_DROPLET"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 10,
+          "text": "State:          jobs.OperationPlanned,",
+          "states": []
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/droplets/executor_test.go",
+        "internal/workflow/runtime.go"
+      ]
+    },
+    {
+      "owner_function": "Due",
+      "file": "internal/droplets/lifecycle.go",
+      "start_line": 22,
+      "end_line": 44,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 29,
+          "text": "rows, err := s.DB.QueryContext(ctx, `SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM droplets WHERE (state IN ('RETIRING','DELETING') OR (state IN ('READY','EXPIRING') AND expires_at IS NOT NULL AND expires_at <= $1::timestamptz)) ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)"
+        },
+        {
+          "line": 37,
+          "text": "if err := rows.Scan(&x.ID, &x.AccountID, &x.ProviderID, &x.ProfileID, &x.ReplacementDeploymentID, &x.State, &x.ReadyAt, &x.ExpiresAt, &x.UpdatedAt); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/droplets/postgres_e2e_test.go",
+        "internal/scheduler/store.go",
+        "internal/worker/failures.go",
+        "internal/worker/lifecycle.go",
+        "internal/worker/worker.go"
+      ]
+    },
+    {
+      "owner_function": "BuildDeleteOperation",
+      "file": "internal/droplets/reconcile.go",
+      "start_line": 67,
+      "end_line": 69,
+      "states_mentioned": [
+        "DELETE_DROPLET"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 68,
+          "text": "return jobs.Operation{AccountID: accountID, Kind: \"DELETE_DROPLET\", IdempotencyKey: \"delete:\" + accountID + \":\" + providerID, ResourceID: providerID, State: jobs.OperationPlanned}",
+          "states": [
+            "DELETE_DROPLET"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/droplets/lifecycle_engine.go",
+        "internal/droplets/safety_characterization_test.go"
+      ]
+    },
+    {
+      "owner_function": "TestUnknownExistingCreateNeverIssuesSecondMutation",
+      "file": "internal/droplets/safety_characterization_test.go",
+      "start_line": 11,
+      "end_line": 23,
+      "states_mentioned": [
+        "CREATE_DROPLET"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 12,
+          "text": "store := &opStore{exists: true, saved: jobs.Operation{ID: \"op\", AccountID: \"a\", Kind: \"CREATE_DROPLET\", IdempotencyKey: \"deploy:x:create\", State: jobs.OperationUnknown}}",
+          "states": [
+            "CREATE_DROPLET"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "TestOperationalLifecycle",
+      "file": "internal/panels/desired/lifecycle_test.go",
+      "start_line": 5,
+      "end_line": 12,
+      "states_mentioned": [
+        "DELETED",
+        "FAILED",
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 8,
+          "text": "if got := operationalLifecycle(state); got != want {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "operationalLifecycle",
+      "file": "internal/panels/desired/service.go",
+      "start_line": 60,
+      "end_line": 68,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 61,
+          "text": "switch state {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/panels/desired/lifecycle_test.go"
+      ]
+    },
+    {
+      "owner_function": "Sync",
+      "file": "internal/panels/inventory/store.go",
+      "start_line": 21,
+      "end_line": 336,
+      "states_mentioned": [
+        "COMPLETED",
+        "RUNNING"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 300,
+          "text": "state='COMPLETED',",
+          "states": [
+            "COMPLETED"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "panel_inbound_inventory"
+      ],
+      "db_writes": [
+        "SET",
+        "panel_inbound_inventory",
+        "panel_inventory_syncs"
+      ],
+      "candidate_callers": [
+        "internal/panels/desired/service.go",
+        "internal/panels/panelbootstrap/service.go",
+        "internal/resources/postgres.go",
+        "internal/resources/registry.go"
+      ]
+    },
+    {
+      "owner_function": "BootstrapPanel",
+      "file": "internal/panels/panelbootstrap/service.go",
+      "start_line": 35,
+      "end_line": 166,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 54,
+          "text": "if state != \"READY\" && state != \"EXPIRING\" && state != \"RETIRING\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "global_config_policies",
+        "panel_instances",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/panels/globalreality/service.go",
+        "internal/panels/readyworker/adapter.go",
+        "internal/panels/readyworker/adapter_test.go"
+      ]
+    },
+    {
+      "owner_function": "EligibleReadyPanels",
+      "file": "internal/panels/readyworker/sql_source.go",
+      "start_line": 10,
+      "end_line": 45,
+      "states_mentioned": [
+        "COMPLETED",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 27,
+          "text": "AND d.state='PANEL_COMPLETE'",
+          "states": [
+            "PANEL_COMPLETE"
+          ]
+        },
+        {
+          "line": 28,
+          "text": "AND x.state='COMPLETED'",
+          "states": [
+            "COMPLETED"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "panel_instances",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "cmd/worker/main.go",
+        "internal/adminapi/capacity_cleanup.go",
+        "internal/adminapi/output.go",
+        "internal/panels/readyworker/adapter.go",
+        "internal/panels/readyworker/adapter_test.go"
+      ]
+    },
+    {
+      "owner_function": "EligibleExpiringPanels",
+      "file": "internal/panels/readyworker/sql_source.go",
+      "start_line": 46,
+      "end_line": 70,
+      "states_mentioned": [
+        "COMPLETED",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 56,
+          "text": "rows, err := s.DB.QueryContext(ctx, `SELECT DISTINCT pi.id::text FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id JOIN accounts a ON a.id=r.account_id JOIN deployments d ON d.droplet_id=pi.droplet_id JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation WHERE pi.enabled=true AND r.state IN ('READY','EXPIRING','RETIRING') AND r.expires_at IS NOT NULL AND r.expires_at > now()+interval '10 seconds' AND r.expires_at <= now()+($1*interval '1",
+          "states": [
+            "COMPLETED",
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 56,
+          "text": "rows, err := s.DB.QueryContext(ctx, `SELECT DISTINCT pi.id::text FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id JOIN accounts a ON a.id=r.account_id JOIN deployments d ON d.droplet_id=pi.droplet_id JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation WHERE pi.enabled=true AND r.state IN ('READY','EXPIRING','RETIRING') AND r.expires_at IS NOT NULL AND r.expires_at > now()+interval '10 seconds' AND r.expires_at <= now()+($1*interval '1"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployments",
+        "droplets",
+        "panel_instances",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "Configure",
+      "file": "internal/panels/sanaei/panel_configurer.go",
+      "start_line": 44,
+      "end_line": 115,
+      "states_mentioned": [
+        "COMPLETED",
+        "FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 69,
+          "text": "if state == \"COMPLETED\" {",
+          "states": [
+            "COMPLETED"
+          ]
+        },
+        {
+          "line": 109,
+          "text": "_, _ = p.DB.ExecContext(ctx, `UPDATE xui_panel_deployments SET state='FAILED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, dropletID, generation)",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 112,
+          "text": "_, err = p.DB.ExecContext(ctx, `UPDATE xui_panel_deployments SET state='COMPLETED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, dropletID, generation)",
+          "states": [
+            "COMPLETED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 54,
+          "text": "err := p.DB.QueryRowContext(ctx, `SELECT username,password_secret_ref,port,web_path,state FROM xui_panel_deployments WHERE droplet_id=$1 AND generation=$2`, dropletID, generation).Scan(&user, &ref, &port, &path, &state)"
+        },
+        {
+          "line": 69,
+          "text": "if state == \"COMPLETED\" {"
+        },
+        {
+          "line": 109,
+          "text": "_, _ = p.DB.ExecContext(ctx, `UPDATE xui_panel_deployments SET state='FAILED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, dropletID, generation)"
+        },
+        {
+          "line": 112,
+          "text": "_, err = p.DB.ExecContext(ctx, `UPDATE xui_panel_deployments SET state='COMPLETED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, dropletID, generation)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [
+        "xui_panel_deployments"
+      ],
+      "candidate_callers": [
+        "internal/app/postinstall.go",
+        "internal/app/workflow.go",
+        "internal/workflow/runtime.go"
+      ]
+    },
+    {
+      "owner_function": "RepairCompleted",
+      "file": "internal/panels/sanaei/panel_configurer.go",
+      "start_line": 120,
+      "end_line": 307,
+      "states_mentioned": [
+        "COMPLETED"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 186,
+          "text": "if state != \"COMPLETED\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "ReconcileEnabled",
+      "file": "internal/panels/store.go",
+      "start_line": 93,
+      "end_line": 129,
+      "states_mentioned": [
+        "DELETED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 119,
+          "text": "AND d.state='DELETED'",
+          "states": [
+            "DELETED"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [
+        "panel_instances"
+      ],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "ReconcileInstances",
+      "file": "internal/panels/store.go",
+      "start_line": 135,
+      "end_line": 187,
+      "states_mentioned": [
+        "COMPLETED",
+        "DELETED",
+        "PANEL_COMPLETE",
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 152,
+          "text": "WHERE d.state='PANEL_COMPLETE' AND r.state='READY' AND x.state='COMPLETED'",
+          "states": [
+            "COMPLETED",
+            "PANEL_COMPLETE",
+            "READY"
+          ]
+        },
+        {
+          "line": 174,
+          "text": "WHERE d.id=pi.droplet_id AND pi.enabled=true AND d.state='DELETED'",
+          "states": [
+            "DELETED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 152,
+          "text": "WHERE d.state='PANEL_COMPLETE' AND r.state='READY' AND x.state='COMPLETED'"
+        },
+        {
+          "line": 174,
+          "text": "WHERE d.id=pi.droplet_id AND pi.enabled=true AND d.state='DELETED'"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments",
+        "droplets",
+        "excluded",
+        "true",
+        "xui_panel_deployments"
+      ],
+      "db_writes": [
+        "SET",
+        "panel_instances"
+      ],
+      "candidate_callers": [
+        "cmd/worker/main.go"
+      ]
+    },
+    {
+      "owner_function": "FastFillFromPolicy",
+      "file": "internal/panels/usercapacity/service.go",
+      "start_line": 72,
+      "end_line": 117,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 101,
+          "text": "if e := s.DB.QueryRowContext(runCtx, \"SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1\", runtime.PanelID).Scan(&lifecycle); e != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets",
+        "global_config_policies",
+        "panel_instances"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "cmd/worker/main.go"
+      ]
+    },
+    {
+      "owner_function": "reconcileRuntimeLocked",
+      "file": "internal/panels/usercapacity/service.go",
+      "start_line": 153,
+      "end_line": 281,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 158,
+          "text": "if e := s.DB.QueryRowContext(ctx, \"SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1\", runtime.PanelID).Scan(&lifecycle); e != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets",
+        "panel_instances"
+      ],
+      "db_writes": [
+        "SET",
+        "clients",
+        "user_capacity_snapshots"
+      ],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "Execute",
+      "file": "internal/provisioning/installer_executor.go",
+      "start_line": 19,
+      "end_line": 113,
+      "states_mentioned": [
+        "FAILED",
+        "INSTALLING",
+        "INSTALL_COMPLETE",
+        "PHASE_FAILED",
+        "SSH_COMMAND_EXIT",
+        "SSH_COMMAND_FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 39,
+          "text": "state := \"FAILED\"",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 41,
+          "text": "state = \"ROLLBACK_REQUIRED\"",
+          "states": []
+        },
+        {
+          "line": 60,
+          "text": "state := \"FAILED\"",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 62,
+          "text": "state = \"ROLLBACK_REQUIRED\"",
+          "states": []
+        },
+        {
+          "line": 71,
+          "text": "state := \"PHASE_OK\"",
+          "states": []
+        },
+        {
+          "line": 77,
+          "text": "state = \"PRECHECK_MISS\"",
+          "states": []
+        },
+        {
+          "line": 79,
+          "text": "state = \"PHASE_FAILED\"",
+          "states": [
+            "FAILED",
+            "PHASE_FAILED"
+          ]
+        },
+        {
+          "line": 84,
+          "text": "_ = e.Events.Event(ctx, Event{RunID: ir.ProvisionRunID, Step: name, Substep: p.Phase, State: state, Attempt: attempt, Diagnostic: diag, Duration: p.Duration, Retryable: retryable, Metadata: map[string]any{\"installer\": resolved.Manifest.Name, \"installer_version\": resolved.Manifest.Version}})",
+          "states": []
+        },
+        {
+          "line": 99,
+          "text": "state := \"INSTALLING\"",
+          "states": [
+            "INSTALLING"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "state = \"ROLLBACK_REQUIRED\"",
+          "states": []
+        },
+        {
+          "line": 104,
+          "text": "state = \"FAILED\"",
+          "states": [
+            "FAILED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 20,
+          "text": "if err := e.States.SetState(ctx, ir.ID, \"INSTALLING\", \"\"); err != nil {"
+        },
+        {
+          "line": 26,
+          "text": "if err := e.States.SetState(ctx, ir.ID, \"VERIFYING\", \"\"); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 57,
+          "text": "if errors.Is(err, ErrStepRetryDeferred) {"
+        },
+        {
+          "line": 73,
+          "text": "retryable := false"
+        },
+        {
+          "line": 81,
+          "text": "retryable = DiagnosticRetryable(diag)"
+        },
+        {
+          "line": 84,
+          "text": "_ = e.Events.Event(ctx, Event{RunID: ir.ProvisionRunID, Step: name, Substep: p.Phase, State: state, Attempt: attempt, Diagnostic: diag, Duration: p.Duration, Retryable: retryable, Metadata: map[string]any{\"installer\": resolved.Manifest.Name, \"installer_version\": resolved.Manifest.Version}})"
+        },
+        {
+          "line": 89,
+          "text": "retryable := DiagnosticRetryable(diag)"
+        },
+        {
+          "line": 92,
+          "text": "retryable = re.Retryable"
+        },
+        {
+          "line": 95,
+          "text": "retryable = false"
+        },
+        {
+          "line": 97,
+          "text": "terminal := !retryable"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/install_scripts.go",
+        "internal/app/installer_activation.go",
+        "internal/panels/sanaei/installer_adapter.go",
+        "internal/panels/sanaei/installer_adapter_test.go",
+        "internal/provisioning/bootstrap_plan.go",
+        "internal/provisioning/bootstrap_plan_test.go",
+        "internal/provisioning/dynamic_plan_test.go",
+        "internal/provisioning/engine.go",
+        "internal/provisioning/engine_test.go",
+        "internal/provisioning/installer.go",
+        "internal/provisioning/installer_executor_test.go",
+        "internal/provisioning/installer_test.go",
+        "internal/provisioning/script.go",
+        "internal/provisioning/script_registry.go",
+        "internal/provisioning/script_runner.go",
+        "internal/provisioning/script_runner_test.go",
+        "internal/provisioning/unknown_outcome_test.go",
+        "internal/provisioning/waiting_installer_test.go",
+        "internal/provisioning/worker_restart_test.go",
+        "internal/testharness/installer_failure_matrix_test.go",
+        "internal/testharness/installer_harness.go",
+        "internal/workflow/runtime.go"
+      ]
+    },
+    {
+      "owner_function": "Rollback",
+      "file": "internal/provisioning/installer_executor.go",
+      "start_line": 114,
+      "end_line": 152,
+      "states_mentioned": [
+        "FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 148,
+          "text": "_ = e.Events.Event(ctx, Event{RunID: ir.ProvisionRunID, Step: name, State: \"ROLLBACK_OK\", Attempt: attempt, Metadata: map[string]any{\"installer\": resolved.Manifest.Name}})",
+          "states": []
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [
+        {
+          "line": 137,
+          "text": "retryable := DiagnosticRetryable(diag)"
+        },
+        {
+          "line": 138,
+          "text": "_ = e.Store.FinishStep(ctx, ir.ProvisionRunID, name, err, !retryable)"
+        },
+        {
+          "line": 139,
+          "text": "if retryable {"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/accounts_manage.go",
+        "internal/adminapi/installer_rearm.go",
+        "internal/adminapi/output_snapshot.go",
+        "internal/adminapi/proxies_manage.go",
+        "internal/adminapi/proxies_write.go",
+        "internal/adminapi/residential.go",
+        "internal/app/deploy.go",
+        "internal/app/installer_activation.go",
+        "internal/app/lifecycle.go",
+        "internal/app/postinstall_rearm.go",
+        "internal/app/postinstall_reconcile.go",
+        "internal/app/proxy_pool.go",
+        "internal/migrate/runner.go",
+        "internal/panels/inventory/store.go",
+        "internal/panels/store.go",
+        "internal/provisioning/installer.go",
+        "internal/provisioning/installer_executor_test.go",
+        "internal/provisioning/readiness.go",
+        "internal/reality/credentials/registry.go",
+        "internal/resources/postgres.go",
+        "internal/scheduler/lease.go",
+        "internal/testharness/installer_failure_matrix_test.go",
+        "internal/testharness/installer_harness.go"
+      ]
+    },
+    {
+      "owner_function": "TestInstallerExecutorCompletes",
+      "file": "internal/provisioning/installer_executor_test.go",
+      "start_line": 15,
+      "end_line": 29,
+      "states_mentioned": [
+        "INSTALLING",
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 25,
+          "text": "if len(states.states) != 2 || states.states[0] != \"INSTALLING\" || states.states[1] != \"INSTALL_COMPLETE\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "TestInstallerRetryableFailureStaysInstalling",
+      "file": "internal/provisioning/installer_executor_test.go",
+      "start_line": 96,
+      "end_line": 108,
+      "states_mentioned": [
+        "INSTALLING"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 105,
+          "text": "t.Fatalf(\"state=%s\", got)",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 104,
+          "text": "if got := states.states[len(states.states)-1]; got != \"INSTALLING\" {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 96,
+          "text": "func TestInstallerRetryableFailureStaysInstalling(t *testing.T) {"
+        },
+        {
+          "line": 99,
+          "text": "e := InstallerExecutor{Store: store, Scripts: retryableDNSScripts{}, States: states}"
+        },
+        {
+          "line": 102,
+          "text": "t.Fatal(\"expected retryable error\")"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "SetState",
+      "file": "internal/provisioning/installer_orchestrator.go",
+      "start_line": 48,
+      "end_line": 56,
+      "states_mentioned": [
+        "FAILED",
+        "INSTALLING",
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 54,
+          "text": "_, err := o.DB.ExecContext(ctx, `UPDATE installer_runs SET state=$2,last_error=$3,updated_at=now() WHERE id=$1`, runID, state, lastError)",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 49,
+          "text": "switch state {"
+        },
+        {
+          "line": 54,
+          "text": "_, err := o.DB.ExecContext(ctx, `UPDATE installer_runs SET state=$2,last_error=$3,updated_at=now() WHERE id=$1`, runID, state, lastError)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [
+        "installer_runs"
+      ],
+      "candidate_callers": [
+        "internal/provisioning/installer_executor.go",
+        "internal/provisioning/installer_executor_test.go",
+        "internal/testharness/installer_harness.go"
+      ]
+    },
+    {
+      "owner_function": "Collect",
+      "file": "internal/provisioning/readiness.go",
+      "start_line": 39,
+      "end_line": 128,
+      "states_mentioned": [
+        "FAILED",
+        "PACKAGE_STATE_INCOMPLETE",
+        "READY",
+        "RETRY",
+        "SSH_CONNECTION_REFUSED",
+        "SSH_CONNECTION_RESET",
+        "SSH_CONNECT_TIMEOUT",
+        "SSH_CONTEXT_TIMEOUT",
+        "SSH_HANDSHAKE_FAILED",
+        "SSH_NOT_READY",
+        "SSH_NO_ROUTE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 56,
+          "text": "issue := ReadinessIssue{Code: code, Severity: \"BLOCK\", Action: \"BLOCK\", Detail: \"SSH readiness probe failed\", State: \"OPEN\"}",
+          "states": []
+        },
+        {
+          "line": 99,
+          "text": "issues[i].State = \"FAILED\"",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "issues[i].State = \"REMEDIATED\"",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 103,
+          "text": "if issues[i].Code == \"PACKAGE_STATE_INCOMPLETE\" {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 55,
+          "text": "retryable := code == \"SSH_CONNECTION_REFUSED\" || code == \"SSH_CONNECT_TIMEOUT\" || code == \"SSH_CONTEXT_TIMEOUT\" || code == \"SSH_NO_ROUTE\" || code == \"SSH_CONNECTION_RESET\" || code == \"SSH_NOT_READY\" || code == \"SSH_HANDSHAKE_FAILED\""
+        },
+        {
+          "line": 57,
+          "text": "if retryable {"
+        },
+        {
+          "line": 58,
+          "text": "issue.Action = \"RETRY\""
+        },
+        {
+          "line": 66,
+          "text": "return s, &ReadinessError{Codes: []string{code}, Retryable: retryable}"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/app/installer_activation.go",
+        "internal/provisioning/engine.go",
+        "internal/provisioning/readiness_test.go"
+      ]
+    },
+    {
+      "owner_function": "DecideReadiness",
+      "file": "internal/provisioning/readiness_policy.go",
+      "start_line": 17,
+      "end_line": 55,
+      "states_mentioned": [
+        "PACKAGE_HEALTH_FAILED",
+        "PACKAGE_STATE_INCOMPLETE",
+        "REBOOT_REQUIRED",
+        "RETRY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 20,
+          "text": "out = append(out, ReadinessIssue{Code: code, Severity: severity, Action: action, Remediation: remediation, Detail: detail, State: \"OPEN\"})",
+          "states": []
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [
+        {
+          "line": 39,
+          "text": "add(\"PACKAGE_LOCK_BUSY\", \"BLOCK\", \"RETRY\", \"\", \"package manager lock is busy\")"
+        },
+        {
+          "line": 42,
+          "text": "add(\"DNS_UNAVAILABLE\", \"BLOCK\", \"RETRY\", \"\", \"DNS resolution failed\")"
+        },
+        {
+          "line": 45,
+          "text": "add(\"OUTBOUND_HTTPS_UNAVAILABLE\", \"BLOCK\", \"RETRY\", \"\", \"HTTPS egress failed\")"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/provisioning/installer.go",
+        "internal/provisioning/readiness.go",
+        "internal/provisioning/readiness_policy_test.go"
+      ]
+    },
+    {
+      "owner_function": "providerAllowsCreate",
+      "file": "internal/scheduler/engine.go",
+      "start_line": 17,
+      "end_line": 20,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 18,
+          "text": "return enabled && runtimeStatus == \"READY\" && providerState == \"ACTIVE\" && providerError == \"\"",
+          "states": [
+            "READY"
+          ]
+        }
+      ],
+      "guard_evidence": [],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/scheduler/provider_gate_test.go"
+      ]
+    },
+    {
+      "owner_function": "RunDue",
+      "file": "internal/scheduler/engine.go",
+      "start_line": 28,
+      "end_line": 114,
+      "states_mentioned": [
+        "CONFIGURING_PANEL",
+        "CREATING",
+        "DATABASE_COMPLETE",
+        "DELETED",
+        "FAILED",
+        "INSTALL_COMPLETE",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "PANEL_COMPLETE",
+        "PROVISIONING",
+        "READY",
+        "WAITING_INSTALLER",
+        "WAITING_RESOURCE"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 39,
+          "text": "if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !providerAllowsCreate(enabled, runtimeStatus, providerState, providerError) {"
+        },
+        {
+          "line": 53,
+          "text": "(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),"
+        },
+        {
+          "line": 55,
+          "text": "(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),"
+        },
+        {
+          "line": 70,
+          "text": "_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND COALESCE(provider_id,'')=''`, x.AccountID, x.ProfileID).Scan(&preCreate)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "accounts",
+        "deployment_profiles",
+        "deployments",
+        "droplets",
+        "installers",
+        "the"
+      ],
+      "db_writes": [
+        "accounts"
+      ],
+      "candidate_callers": [
+        "cmd/worker/main.go"
+      ]
+    },
+    {
+      "owner_function": "TestProviderGateNegativeStates",
+      "file": "internal/scheduler/provider_gate_test.go",
+      "start_line": 5,
+      "end_line": 26,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 21,
+          "text": "if got := providerAllowsCreate(tc.enabled, tc.runtime, tc.state, tc.providerErr); got != tc.want {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "TestInstallerFailureMatrix",
+      "file": "internal/testharness/installer_failure_matrix_test.go",
+      "start_line": 10,
+      "end_line": 81,
+      "states_mentioned": [
+        "FAILED",
+        "INSTALLING",
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 17,
+          "text": "t.Fatalf(\"state=%s writes=%d\", states.Last(), scripts.Writes)",
+          "states": []
+        },
+        {
+          "line": 29,
+          "text": "t.Fatalf(\"state=%s\", states.Last())",
+          "states": []
+        },
+        {
+          "line": 35,
+          "text": "t.Fatalf(\"state=%s attempts=%v writes=%d\", states.Last(), st.Attempts, scripts.Writes)",
+          "states": []
+        },
+        {
+          "line": 44,
+          "text": "t.Fatalf(\"state=%s\", states.Last())",
+          "states": []
+        },
+        {
+          "line": 53,
+          "text": "t.Fatalf(\"state=%s marker=%v\", states.Last(), scripts.Marker)",
+          "states": []
+        },
+        {
+          "line": 65,
+          "text": "t.Fatalf(\"state=%s marker=%v\", states.Last(), scripts.Marker)",
+          "states": []
+        },
+        {
+          "line": 77,
+          "text": "t.Fatalf(\"state=%s\", states.Last())",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 16,
+          "text": "if states.Last() != \"INSTALL_COMPLETE\" || scripts.Writes != 1 {"
+        },
+        {
+          "line": 28,
+          "text": "if states.Last() != \"INSTALLING\" {"
+        },
+        {
+          "line": 34,
+          "text": "if states.Last() != \"INSTALL_COMPLETE\" || st.Attempts[\"installer-g1-harness-v1-install\"] != 2 || scripts.Writes != 1 {"
+        },
+        {
+          "line": 43,
+          "text": "if states.Last() != \"ROLLBACK_REQUIRED\" {"
+        },
+        {
+          "line": 52,
+          "text": "if states.Last() != \"ROLLBACK_REQUIRED\" || !scripts.Marker {"
+        },
+        {
+          "line": 64,
+          "text": "if states.Last() != \"ROLLED_BACK\" || scripts.Marker {"
+        },
+        {
+          "line": 76,
+          "text": "if states.Last() != \"FAILED\" {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 23,
+          "text": "t.Run(\"retryable_then_success\", func(t *testing.T) {"
+        },
+        {
+          "line": 24,
+          "text": "e, st, states, scripts, r, run := InstallerFixture(InstallerRetryable)"
+        },
+        {
+          "line": 26,
+          "text": "t.Fatal(\"expected retryable failure\")"
+        }
+      ],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "TestInstallerCrashRecoveryMatrix",
+      "file": "internal/testharness/installer_failure_matrix_test.go",
+      "start_line": 82,
+      "end_line": 128,
+      "states_mentioned": [
+        "INSTALL_COMPLETE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 93,
+          "text": "t.Fatalf(\"attempts=%v writes=%d state=%s\", st.Attempts, scripts.Writes, states.Last())",
+          "states": []
+        },
+        {
+          "line": 107,
+          "text": "t.Fatalf(\"attempts=%v writes=%d state=%s\", st.Attempts, scripts.Writes, states.Last())",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 92,
+          "text": "if st.Attempts[install] != 2 || scripts.Writes != 1 || states.Last() != \"INSTALL_COMPLETE\" {"
+        },
+        {
+          "line": 106,
+          "text": "if st.Attempts[install] != 2 || scripts.Writes != 1 || states.Last() != \"INSTALL_COMPLETE\" {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "TestDigitalOceanLiveDriverCertification",
+      "file": "internal/testharness/provider_live_cert_test.go",
+      "start_line": 18,
+      "end_line": 195,
+      "states_mentioned": [
+        "READY"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 38,
+          "text": "\"SELECT id::text,runtime_status,provider_state FROM accounts WHERE name=$1 AND deleted_at IS NULL\","
+        },
+        {
+          "line": 42,
+          "text": "if runtimeStatus != \"READY\" || providerState != \"ACTIVE\" {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 157,
+          "text": "time.Sleep(2 * time.Second)"
+        },
+        {
+          "line": 183,
+          "text": "time.Sleep(2 * time.Second)"
+        }
+      ],
+      "db_reads": [
+        "accounts"
+      ],
+      "db_writes": [],
+      "candidate_callers": []
+    },
+    {
+      "owner_function": "ClearResolved",
+      "file": "internal/worker/failures.go",
+      "start_line": 50,
+      "end_line": 59,
+      "states_mentioned": [
+        "DELETED",
+        "FAILED",
+        "INSTALL_COMPLETE",
+        "INSTALL_FAILED",
+        "INSTALL_ROLLED_BACK",
+        "READY",
+        "WAITING_INSTALLER"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 55,
+          "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))",
+          "states": [
+            "FAILED",
+            "INSTALL_COMPLETE",
+            "INSTALL_FAILED",
+            "INSTALL_ROLLED_BACK",
+            "READY",
+            "WAITING_INSTALLER"
+          ]
+        },
+        {
+          "line": 57,
+          "text": "OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)",
+          "states": [
+            "DELETED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 55,
+          "text": "(f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))"
+        },
+        {
+          "line": 56,
+          "text": "OR (f.kind='operation' AND EXISTS(SELECT 1 FROM operations o WHERE o.id::text=f.item_id AND o.state IN ('succeeded','failed')))"
+        },
+        {
+          "line": 57,
+          "text": "OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployment_installer_selections",
+        "deployments",
+        "droplets",
+        "operations",
+        "worker_item_failures"
+      ],
+      "db_writes": [
+        "worker_item_failures"
+      ],
+      "candidate_callers": [
+        "internal/worker/worker.go"
+      ]
+    },
+    {
+      "owner_function": "Deployments",
+      "file": "internal/worker/recovery.go",
+      "start_line": 38,
+      "end_line": 56,
+      "states_mentioned": [
+        "CONFIGURING_PANEL",
+        "CREATING",
+        "DATABASE_COMPLETE",
+        "INSTALL_COMPLETE",
+        "PROVISIONING",
+        "WAITING_INSTALLER",
+        "WAITING_RESOURCE"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 42,
+          "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND EXISTS(SELECT 1 FROM installer_runs ir WHERE ir.deployme",
+          "states": [
+            "CONFIGURING_PANEL",
+            "CREATING",
+            "DATABASE_COMPLETE",
+            "INSTALL_COMPLETE",
+            "PROVISIONING",
+            "WAITING_INSTALLER",
+            "WAITING_RESOURCE"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 42,
+          "text": "rows, err := s.DB.QueryContext(ctx, `SELECT d.id::text,d.account_id::text,'deployment',d.state,d.updated_at FROM deployments d WHERE (d.state='WAITING_INSTALLER' AND (d.profile_snapshot->'installer_ref' IS NOT NULL OR EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))) OR (d.state IN ('INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL') AND EXISTS(SELECT 1 FROM installer_runs ir WHERE ir.deployme"
+        },
+        {
+          "line": 50,
+          "text": "if err := rows.Scan(&x.ID, &x.AccountID, &x.Kind, &x.State, &x.UpdatedAt); err != nil {"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployment_installer_selections",
+        "deployments",
+        "installer_runs"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "internal/adminapi/dashboard.go",
+        "internal/worker/worker.go"
+      ]
+    },
+    {
+      "owner_function": "Run",
+      "file": "internal/workflow/engine.go",
+      "start_line": 40,
+      "end_line": 197,
+      "states_mentioned": [
+        "INSTALLER_NOT_CONFIGURED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 66,
+          "text": "if d.State == DatabaseComplete {",
+          "states": []
+        },
+        {
+          "line": 67,
+          "text": "d.State = ConfiguringPanel",
+          "states": []
+        },
+        {
+          "line": 75,
+          "text": "if d.State == InstallComplete {",
+          "states": []
+        },
+        {
+          "line": 76,
+          "text": "d.State = ImportingDatabase",
+          "states": []
+        },
+        {
+          "line": 99,
+          "text": "d.State = Failed",
+          "states": []
+        },
+        {
+          "line": 113,
+          "text": "d.State = step.state",
+          "states": []
+        },
+        {
+          "line": 129,
+          "text": "d.State = WaitingInstaller",
+          "states": []
+        },
+        {
+          "line": 141,
+          "text": "d.State = Failed",
+          "states": []
+        },
+        {
+          "line": 145,
+          "text": "if d.State == Failed && e.FailureFinalizer != nil {",
+          "states": []
+        },
+        {
+          "line": 152,
+          "text": "d.State = DatabaseComplete",
+          "states": []
+        },
+        {
+          "line": 168,
+          "text": "d.State = PanelComplete",
+          "states": []
+        },
+        {
+          "line": 188,
+          "text": "d.State = Ready",
+          "states": []
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 62,
+          "text": "if terminalDeploymentState(d.State) {"
+        },
+        {
+          "line": 66,
+          "text": "if d.State == DatabaseComplete {"
+        },
+        {
+          "line": 75,
+          "text": "if d.State == InstallComplete {"
+        },
+        {
+          "line": 145,
+          "text": "if d.State == Failed && e.FailureFinalizer != nil {"
+        }
+      ],
+      "retry_timing_evidence": [
+        {
+          "line": 96,
+          "text": "if errors.Is(beginErr, ErrStepRetryDeferred) {"
+        },
+        {
+          "line": 107,
+          "text": "if errors.Is(beginErr, ErrStepRetryLimit) {"
+        },
+        {
+          "line": 108,
+          "text": "code = \"STEP_RETRY_LIMIT\""
+        },
+        {
+          "line": 140,
+          "text": "if !RetryableClass(class) {"
+        }
+      ],
+      "db_reads": [
+        "DATABASE_COMPLETE"
+      ],
+      "db_writes": [],
+      "candidate_callers": [
+        "cmd/ready-panel-worker/main.go",
+        "cmd/worker/main.go",
+        "internal/app/account_state_test.go",
+        "internal/app/deploy.go",
+        "internal/app/recovery.go",
+        "internal/network/monitor.go",
+        "internal/network/proxy_failure_test.go",
+        "internal/panels/create/orchestrator.go",
+        "internal/panels/create/orchestrator_test.go",
+        "internal/panels/desired/service.go",
+        "internal/panels/globalreality/service.go",
+        "internal/panels/healthverify/xray.go",
+        "internal/panels/healthverify/xray_test.go",
+        "internal/panels/listeners/collector.go",
+        "internal/panels/listeners/collector_test.go",
+        "internal/panels/panelbootstrap/service.go",
+        "internal/panels/readyworker/adapter_test.go",
+        "internal/panels/readyworker/worker.go",
+        "internal/panels/readyworker/worker_test.go",
+        "internal/panels/sanaei/manager.go",
+        "internal/panels/sanaei/panel_configurer.go",
+        "internal/panels/update/orchestrator.go",
+        "internal/panels/update/orchestrator_test.go",
+        "internal/providers/digitalocean/errors_test.go",
+        "internal/providers/vultrconsole/browser.go",
+        "internal/provisioning/diagnostics_test.go",
+        "internal/provisioning/engine.go",
+        "internal/provisioning/engine_test.go",
+        "internal/provisioning/installer_test.go",
+        "internal/provisioning/model.go",
+        "internal/provisioning/ssh.go",
+        "internal/provisioning/store.go",
+        "internal/provisioning/waiting_installer_test.go",
+        "internal/provisioning/worker_restart_test.go",
+        "internal/reality/credentials/xray.go",
+        "internal/reality/credentials/xray_test.go",
+        "internal/reality/probe.go",
+        "internal/reality/ssh_prober.go",
+        "internal/reality/ssh_prober_test.go",
+        "internal/runtimecap/xray.go",
+        "internal/runtimecap/xray_test.go",
+        "internal/scheduler/provider_gate_test.go",
+        "internal/testharness/concurrency_test.go",
+        "internal/testharness/e2e_test.go",
+        "internal/testharness/failure_matrix_test.go",
+        "internal/testharness/installer_failure_matrix_test.go",
+        "internal/testharness/installer_harness.go",
+        "internal/worker/worker.go",
+        "internal/workflow/engine_test.go",
+        "internal/workflow/error_class_test.go",
+        "internal/workflow/runtime.go"
+      ]
+    },
+    {
+      "owner_function": "WaitResource",
+      "file": "internal/workflow/runtime.go",
+      "start_line": 99,
+      "end_line": 124,
+      "states_mentioned": [
+        "DELETED",
+        "PROVISIONING"
+      ],
+      "transition_write_evidence": [],
+      "guard_evidence": [
+        {
+          "line": 114,
+          "text": "err = r.DB.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 AND state<>'DELETED' ORDER BY created_at DESC LIMIT 1`, d.AccountID, d.ProviderID).Scan(&d.DropletID)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "droplets"
+      ],
+      "db_writes": [
+        "droplets"
+      ],
+      "candidate_callers": [
+        "internal/testharness/harness.go",
+        "internal/workflow/engine.go",
+        "internal/workflow/engine_test.go"
+      ]
+    },
+    {
+      "owner_function": "ImportDatabase",
+      "file": "internal/workflow/runtime.go",
+      "start_line": 145,
+      "end_line": 178,
+      "states_mentioned": [
+        "COMPLETED",
+        "FAILED"
+      ],
+      "transition_write_evidence": [
+        {
+          "line": 169,
+          "text": "if state == \"COMPLETED\" {",
+          "states": [
+            "COMPLETED"
+          ]
+        },
+        {
+          "line": 173,
+          "text": "_, _ = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='FAILED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)",
+          "states": [
+            "FAILED"
+          ]
+        },
+        {
+          "line": 176,
+          "text": "_, err = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='COMPLETED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)",
+          "states": [
+            "COMPLETED"
+          ]
+        }
+      ],
+      "guard_evidence": [
+        {
+          "line": 169,
+          "text": "if state == \"COMPLETED\" {"
+        },
+        {
+          "line": 173,
+          "text": "_, _ = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='FAILED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)"
+        },
+        {
+          "line": 176,
+          "text": "_, err = r.DB.ExecContext(ctx, `UPDATE xui_database_deployments SET state='COMPLETED',updated_at=now() WHERE droplet_id=$1 AND generation=$2`, d.DropletID, generation)"
+        }
+      ],
+      "retry_timing_evidence": [],
+      "db_reads": [
+        "deployments"
+      ],
+      "db_writes": [
+        "SET",
+        "xui_database_deployments"
+      ],
+      "candidate_callers": [
+        "internal/testharness/harness.go",
+        "internal/workflow/engine.go",
+        "internal/workflow/engine_test.go"
+      ]
+    }
+  ]
+}

@@ -42,3 +42,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 
 35. For database-understanding questions, use `docs/COLUMN_BEHAVIOR_BRAIN.json` for live column metadata, migration origin and conservative function-level reader/writer evidence; confirm dynamic or indirect access in exact source when necessary.
 36. For verification-understanding questions, use `docs/TEST_BEHAVIOR_BRAIN.json` to inspect exact test ranges, assertions, fixtures, candidate calls, subtests and endpoint/table evidence rather than inferring coverage from filenames alone.
+37. For lifecycle/state questions, use `docs/STATE_TRANSITION_BRAIN.json` for owner functions, state-write evidence, guards, retry/timing evidence and DB touches; do not infer a from→to edge unless exact source supports it.
