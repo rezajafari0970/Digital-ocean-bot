@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source_commit": "17a923b74411e528c2a8cec61bb3c08daafa2675",
+  "findings": {
+    "database": {
+      "unused_or_migration_only_columns": [
+        "account_security_profiles.profile_version",
+        "account_security_profiles.tls_policy",
+        "account_security_profiles.http_policy",
+        "account_security_profiles.browser_policy",
+        "account_security_profiles.browser_namespace",
+        "proxies.expected_exit_ip"
+      ],
+      "evidence": "Repository-wide exact-name search found these names only in their migrations, with no cmd/internal/web/deploy references.",
+      "knowledge_conclusion": "Their lack of function mentions is fully characterized: current source has no direct lexical application access. This is known absence, not unknown ownership."
+    },
+    "residential": {
+      "direct_tests": [],
+      "implementation_evidence": [
+        "cmd/worker/main.go:260-275",
+        "internal/adminapi/residential.go",
+        "internal/panels/residentialsync/service.go",
+        "migrations/000086_residential_proxies.up.sql",
+        "web/static/app.js:96-100"
+      ],
+      "git_history_candidates": [
+        "3270e99ecf8c1d1de7eaab3a790ddf060a543105"
+      ],
+      "knowledge_conclusion": "Residential implementation/API/UI/sync/schema are directly evidenced. No direct residential test exists. Git -S/-G finds historical presence, but no dedicated residential regression commit subject sufficient to claim an incident guardrail."
+    }
+  },
+  "principle": "Mastery of project knowledge can be complete about an evidence absence: known-no-direct-test is different from unknown. Product test coverage itself is not upgraded by documenting that absence."
+}
