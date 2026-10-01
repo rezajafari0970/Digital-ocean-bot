@@ -11,3 +11,6 @@ You are being tested on whether a genuinely fresh ChatGPT session can recover th
 7. Report only that the answer file is frozen and give its SHA256. The old session/operator will grade it separately against the isolated key.
 
 Passing requires all 40 structurally exact evidence answers. This tests retrieval/composition, not unaided token memorization.
+
+## Canonical answer-shape rule
+For DB, route, state, and UI chain questions, use `tools/project-knowledge-contract.py` and preserve its canonical field names. Do not substitute the raw richer Brain object. For exact-line questions, the substantive answer is exact `text`; provenance metadata may be added separately but must not replace it.
