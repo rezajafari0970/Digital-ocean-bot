@@ -41,3 +41,6 @@ The new session should answer a sample spanning intent, cross-package ownership,
 
 ## Meaning of 100%
 `MASTER_KNOWLEDGE_SCORE_V3 = 100%` means epistemic completeness for the defined current project knowledge: facts are directly evidenced, explained, or confirmed absent. It does not mean unaided memorization of every source token and it does not claim missing product tests/history/access exist.
+
+## Phase 5 — Genuine fresh-session exam
+Use `docs/FRESH_SESSION_EXAM_PACK.json`, which contains questions but no answers. The fresh session must retrieve evidence and freeze an `ANSWERS.json` before `tools/grade-fresh-session-exam.py ANSWERS.json` is run. Do not expose/read `docs/FRESH_SESSION_EXAM_KEY.json` while answering. This is the operational test that the new chat can consume the knowledge system, not merely that the knowledge files exist.
