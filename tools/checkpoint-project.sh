@@ -4,11 +4,12 @@ cd "$(dirname "$0")/.."
 python3 tools/update-project-continuity.py
 python3 tools/build-symbol-index.py
 python3 tools/build-schema-index.py
+python3 tools/build-test-map.py
 python3 tools/build-handoff-bundle.py
 python3 tools/audit-handoff-readiness.py
 python3 -m json.tool docs/PROJECT_MANIFEST.json >/dev/null
 python3 -m json.tool docs/CURRENT_SNAPSHOT.json >/dev/null
-git add docs/PROJECT_MANIFEST.json docs/CURRENT_SNAPSHOT.json PROJECT_STATE.md HANDOFF.md docs/*.md tools/update-project-continuity.py tools/check-project-continuity.sh tools/checkpoint-project.sh tools/build-handoff-bundle.py tools/build-symbol-index.py tools/build-schema-index.py tools/audit-handoff-readiness.py docs/SESSION_HANDOFF_BUNDLE.md docs/HANDOFF_READINESS_AUDIT.md
+git add docs/PROJECT_MANIFEST.json docs/CURRENT_SNAPSHOT.json PROJECT_STATE.md HANDOFF.md docs/*.md tools/update-project-continuity.py tools/check-project-continuity.sh tools/checkpoint-project.sh tools/build-handoff-bundle.py tools/build-symbol-index.py tools/build-schema-index.py tools/build-test-map.py tools/audit-handoff-readiness.py docs/SESSION_HANDOFF_BUNDLE.md docs/HANDOFF_READINESS_AUDIT.md
 if git diff --cached --quiet; then echo 'continuity: no staged changes'; exit 0; fi
 msg="${1:-docs: refresh project continuity checkpoint}"
 git commit -m "$msg"

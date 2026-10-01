@@ -1,0 +1,1270 @@
+{
+  "schema_version": 1,
+  "test_file_count": 121,
+  "test_function_count": 251,
+  "test_files": [
+    {
+      "file": "internal/accounts/cell_test.go",
+      "package": "accounts",
+      "tests": [
+        "TestCellManagerKeepsAccountsSeparate"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/accounts/context_test.go",
+      "package": "accounts",
+      "tests": [
+        "TestAccountNamespacesAreDistinct"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/accounts/identity_test.go",
+      "package": "accounts",
+      "tests": [
+        "TestRuntimeIdentitiesAreIndependent"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/adminapi/config_expr_test.go",
+      "package": "adminapi",
+      "tests": [
+        "TestConfigExpressions"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/adminapi/output_expiry_test.go",
+      "package": "adminapi",
+      "tests": [
+        "TestOutputVisibleUntilTenSecondsBeforeExpiry",
+        "TestOutputVisibleUntilNoExpiry"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/adminapi/server_test.go",
+      "package": "adminapi",
+      "tests": [
+        "TestHealthEndpoint",
+        "TestReadinessWithoutDatabase"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/app/account_state_test.go",
+      "package": "app",
+      "tests": [
+        "TestClassifyAccountProviderError",
+        "TestProviderStateRecoveryPolicy"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/app/capacity_guard_test.go",
+      "package": "app",
+      "tests": [
+        "TestCreateCapacityAvailable",
+        "TestCreateCapacityUnknownLimitAllowsCreate"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/app/proxy_provider_test.go",
+      "package": "app",
+      "tests": [
+        "TestGenericDoesNotRewrite",
+        "TestSuffixAdapterPreservesPolicy"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/auth/service_test.go",
+      "package": "auth",
+      "tests": [
+        "TestHashPassword",
+        "TestShortPasswordRejected",
+        "TestRBAC"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/capacity/service_test.go",
+      "package": "capacity",
+      "tests": [
+        "TestAvailable",
+        "TestAvailableUnknownLimit"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/droplets/compute_stub_test.go",
+      "package": "droplets",
+      "tests": [],
+      "test_count": 0
+    },
+    {
+      "file": "internal/droplets/executor_test.go",
+      "package": "droplets",
+      "tests": [
+        "TestCreateIsIdempotent"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/droplets/postgres_e2e_test.go",
+      "package": "droplets",
+      "tests": [
+        "TestRetiringWithoutExpiryIsDueE2E"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/droplets/reconcile_test.go",
+      "package": "droplets",
+      "tests": [
+        "TestAdoptUnknownCreateUsesUniqueTag",
+        "TestAdoptUnknownCreateAmbiguousTagStaysUnknown"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/droplets/safety_characterization_test.go",
+      "package": "droplets",
+      "tests": [
+        "TestUnknownExistingCreateNeverIssuesSecondMutation",
+        "TestDeleteSuccessRequiresLaterConfirmation",
+        "TestDeleteErrorIsAmbiguousUnknown"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/geoctx/geo_test.go",
+      "package": "geoctx",
+      "tests": [
+        "TestCoverage"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/jobs/operation_test.go",
+      "package": "jobs",
+      "tests": [
+        "TestOperationRejectsCrossTenantUse"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/client_test.go",
+      "package": "network",
+      "tests": [
+        "TestClientsAreNotSharedAcrossAccounts"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/egress_guard_test.go",
+      "package": "network",
+      "tests": [
+        "TestEgressGuardDetectsChange"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/gate_test.go",
+      "package": "network",
+      "tests": [
+        "TestAccountGateRequiresHealthyProxy"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/guard_test.go",
+      "package": "network",
+      "tests": [
+        "TestProxyRequiredFailsClosed",
+        "TestProxyRequiredAllowsHealthyProxy"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/health_state_test.go",
+      "package": "network",
+      "tests": [
+        "TestHealthStateUsesHysteresis"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/health_test.go",
+      "package": "network",
+      "tests": [
+        "TestProxyHealthValidatesExitIP",
+        "TestProxyHealthRejectsUnexpectedExitIP"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/ipv4_test.go",
+      "package": "network",
+      "tests": [
+        "TestResolveIPv4RejectsIPv6Literal",
+        "TestResolveIPv4AcceptsIPv4Literal"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/isolation_test.go",
+      "package": "network",
+      "tests": [
+        "TestAccountContextsCannotCross",
+        "TestAccountNamespaceStableAndDistinct"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/leakcheck_test.go",
+      "package": "network",
+      "tests": [
+        "TestLeakObservationPassesExpectedProxy",
+        "TestLeakObservationRejectsServerIP",
+        "TestLeakObservationRejectsForwardingHeader"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/network/metadata_test.go",
+      "package": "network",
+      "tests": [
+        "TestMetadataTransportDoesNotLeakInternalIdentity"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/privacy_test.go",
+      "package": "network",
+      "tests": [
+        "TestPrivacyTransportStripsLeakHeaders"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/profiles_test.go",
+      "package": "network",
+      "tests": [
+        "TestSecurityProfilesHaveSeparateState"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/network/proxy_failure_test.go",
+      "package": "network",
+      "tests": [
+        "TestGateBlocksDegradedAndDown",
+        "TestRouteRejectsMissingOrUnhealthyProxy",
+        "TestHealthRejectsServerIPLeak",
+        "TestHighLatencyDegradesThenDown",
+        "TestRecoveryRequiresConsecutiveSuccesses"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/network/proxy_gateway_test.go",
+      "package": "network",
+      "tests": [
+        "TestHTTPGatewayIsAccountScoped",
+        "TestGatewayDirectDialFailsClosed"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/proxy_probe_test.go",
+      "package": "network",
+      "tests": [
+        "TestProbeGatewayAllowsUnhealthyStatusButTrafficDoesNot",
+        "TestProbeGatewayStillValidatesEndpointAndType"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/rotating_test.go",
+      "package": "network",
+      "tests": [
+        "TestRotatingExitAllowed",
+        "TestRotatingExitStillRejectsServerIP"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/network/scheduler_test.go",
+      "package": "network",
+      "tests": [
+        "TestHealthSchedulerRejectsUnhealthyProxyBeforeNetwork"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/observability/metrics_test.go",
+      "package": "observability",
+      "tests": [
+        "TestMetricsOutput"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/create/orchestrator_test.go",
+      "package": "create",
+      "tests": [
+        "TestNoopExisting",
+        "TestPortCollisionFailsClosed",
+        "TestUnknownOutcomeRecoveredByPostflight",
+        "TestSuccessfulButMissingIsUnconfirmed"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/panels/desired/lifecycle_test.go",
+      "package": "desired",
+      "tests": [
+        "TestOperationalLifecycle"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/export/vless_test.go",
+      "package": "export",
+      "tests": [
+        "TestRealityURIAlwaysCarriesVisionFlow"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/healthverify/xray_test.go",
+      "package": "healthverify",
+      "tests": [
+        "TestProbePass",
+        "TestProbeRejectsWrongExit",
+        "TestProbeRejectsTunnelFailure"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/panels/listeners/collector_test.go",
+      "package": "listeners",
+      "tests": [
+        "TestSSHCollector"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/listeners/parser_test.go",
+      "package": "listeners",
+      "tests": [
+        "TestParseSS"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/planner/planner_test.go",
+      "package": "planner",
+      "tests": [
+        "TestPlanCreatesMissing",
+        "TestPlanDetectsDrift",
+        "TestPlanDoesNotDeleteByDefault",
+        "TestPlanRejectsPortCollision"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/panels/policy/allocator_test.go",
+      "package": "policy",
+      "tests": [
+        "TestAllocatePreferredThenDynamic",
+        "TestAllocateDeterministic",
+        "TestAllocateFailsClosed"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/panels/policy/expand_test.go",
+      "package": "policy",
+      "tests": [
+        "TestExpandStableKeys"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/policy/validate_test.go",
+      "package": "policy",
+      "tests": [
+        "TestValidateRejectsDuplicatePortsAcrossLists"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/readyworker/adapter_test.go",
+      "package": "readyworker",
+      "tests": [
+        "TestProductionAdapterPropagatesDryRun"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/readyworker/worker_test.go",
+      "package": "readyworker",
+      "tests": [
+        "TestWorkerBoundedDryRun",
+        "TestBootstrapFailureStopsPanelOnly"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/realitycontract/contract_test.go",
+      "package": "realitycontract",
+      "tests": [
+        "TestPayloadAndURIStaySymmetric"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/api_error_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestLoginPreservesTransportCause"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/auth_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestBearerAuthReadsSecretAndSetsHeader",
+        "TestSessionCredentialsRefusePlainHTTP"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/sanaei/clients_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestUUIDv4"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/driver_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestDriverDiscoveryClassifiesRuntimeCapabilities",
+        "TestDiscoverWithExecutorIsReadOnly"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/sanaei/installer_adapter_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestInstallerAdapterBuildsImmutableCoreDefinition",
+        "TestInstallerAdapterRejectsUnpinnedOrInsecureArtifact",
+        "TestInstallerAdapterCompatibilityDefaults",
+        "TestLegacyInstallerCommandDoesNotBecomeAdapterSource"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/panels/sanaei/inventory_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestReadInventoryNormalizesWithoutSecrets"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/mutation_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestAddInboundUsesRestrictedEndpoint",
+        "TestAddInboundRejectsSuccessFalse"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/sanaei/panel_configurer_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestPanelDefaultsDeterministicAndScoped",
+        "TestPanelPasswordsAreRandomURLSafeAndNotReused",
+        "TestPanelConfigureCommandDoesNotContainCredential"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/panels/sanaei/panel_session_index_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestPanelSessionBuildsAndClearsIndex"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/panel_session_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestPanelSessionSnapshotLoadsOnce"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/postflight/validator_test.go",
+      "package": "postflight",
+      "tests": [
+        "TestValidateReality",
+        "TestRejectsCryptoDrift",
+        "TestValidateRealityWithManagedClientAmongCapacityUsers",
+        "TestValidateRealityRejectsMissingManagedClientAmongCapacityUsers",
+        "TestValidateServerNamesOrderIsSemantic"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/panels/sanaei/realityconfig/builder_test.go",
+      "package": "realityconfig",
+      "tests": [
+        "TestBuildRealityInbound",
+        "TestBuildRejectsUnsafeTarget"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/sanaei/resilient_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestResilientRetries5xx",
+        "TestResilientRetries429",
+        "TestResilientFailsFast400",
+        "TestResilientHonorsCancellation",
+        "TestReadAllBounded",
+        "TestRetryableErrorWithContextClientTimeout",
+        "TestResilientDoesNotBlindRetryMutation",
+        "TestResilientStillRetriesSafeRead"
+      ],
+      "test_count": 8
+    },
+    {
+      "file": "internal/panels/sanaei/runtime_manager_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestRuntimeManagerRejectsEmptyPanel",
+        "TestRuntimeManagerInvalidateAndPurge",
+        "TestRuntimeManagerConcurrentCacheRead",
+        "TestCircuitDelay",
+        "TestRuntimeManagerCircuitOpen"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/panels/sanaei/runtime_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestRuntimeFactoryRejectsMissingDependencies",
+        "TestRetryableStatusClassification",
+        "TestRetryableErrorCancellationIsPermanent"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/panels/sanaei/session_executor_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestSessionExecutorContract"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/panels/sanaei/template_test.go",
+      "package": "sanaei",
+      "tests": [
+        "TestInspectTemplateRequiresSQLite",
+        "TestImportCommandHasRollbackAndChecksum"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/panels/update/orchestrator_test.go",
+      "package": "update",
+      "tests": [
+        "TestConfirmedUpdate",
+        "TestRejectsDuplicateOwnership",
+        "TestRecoversAmbiguousUpdate"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/providers/digitalocean/characterization_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestGetLimitsMirrorsAccountLimits",
+        "TestCatalogFetchesAccountRegionsSizesImages",
+        "TestDiscoverIsFailFast",
+        "TestDropletMutationAndReadCharacterization",
+        "TestSSHKeyAndActionCharacterization"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/providers/digitalocean/client_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestClientLoadsTokenAndDecodesAccount"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/providers/digitalocean/driver_v2_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestNormalizeCatalogToCanonicalModels",
+        "TestNormalizeServerUsesStringIDAndReadiness",
+        "TestReadyRequiresPublicIPv4",
+        "TestNormalizeProviderErrors",
+        "TestDriverFindServerByIdentity",
+        "TestFactoryMetadataPolicy",
+        "TestDigitalOceanCapacityLimitIsKnown"
+      ],
+      "test_count": 7
+    },
+    {
+      "file": "internal/providers/digitalocean/errors_parse_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestParseAPIError",
+        "TestParseAPIErrorUsesCode",
+        "TestParseAPIErrorRejectsNonJSON"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/providers/digitalocean/errors_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestCapacityClassification"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/providers/digitalocean/pagination_regression_test.go",
+      "package": "digitalocean",
+      "tests": [
+        "TestExtractNextStripsAPIVersionPrefix"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/providers/provider_v2_test.go",
+      "package": "providers",
+      "tests": [
+        "TestRegistryNormalizesAndOpens",
+        "TestRegistryRejectsDuplicate",
+        "TestRegistryNamesSorted",
+        "TestProviderErrorTaxonomy",
+        "TestCapabilityInterfacesRemainIndependent"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/providers/vultr/client_test.go",
+      "package": "vultr",
+      "tests": [
+        "TestClientAuthorizationAndHealth",
+        "TestGET429RetriesButMutationDoesNot",
+        "TestInstancesFollowsPaginationNext"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/providers/vultr/driver_test.go",
+      "package": "vultr",
+      "tests": [
+        "TestFactoryMetadata",
+        "TestErrorTaxonomy"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/providers/vultr/mutation_driver_test.go",
+      "package": "vultr",
+      "tests": [
+        "TestMutationContracts",
+        "TestCreate429IsAmbiguousWithRetryAfter",
+        "TestDelete404IsIdempotent"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/providers/vultr/read_driver_test.go",
+      "package": "vultr",
+      "tests": [
+        "TestReadContracts",
+        "TestNormalizeUbuntuVersions"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/providers/vultrconsole/browser_test.go",
+      "package": "vultrconsole",
+      "tests": [
+        "TestMaximumInstancesPattern"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/provisioning/bootstrap_plan_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestDefaultBootstrapPlanIsIndependentAndReconcilable",
+        "TestDefaultPreInstallerStopsAtPlaceholder"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/provisioning/diagnostics_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestLinuxFailureTaxonomy",
+        "TestUnknownFailureKeepsFingerprint",
+        "TestSSHFailureTaxonomy",
+        "TestFingerprintNormalizesDynamicValues"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/provisioning/dynamic_plan_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestDynamicScriptPlanResumesAtFailedStep"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/provisioning/engine_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestProvisionEngineCompletesAndDoesNotRepeat"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/provisioning/installer_capability_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestInstallerCapabilitiesValidated"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/provisioning/installer_executor_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestInstallerExecutorCompletes",
+        "TestInstallerTerminalFailureRequiresRollback",
+        "TestInstallerPrecheckMissIsNotFailure",
+        "TestInstallerRetryableFailureStaysInstalling",
+        "TestInstallerInterruptedUnsafeNeverReexecutes"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/provisioning/installer_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestInstallerCompatibility",
+        "TestArtifactStepIntegrityAndShellSyntax",
+        "TestArtifactRejectsUnsafeDefinition",
+        "TestInstallerHashDeterministic"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/provisioning/readiness_policy_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestReadinessPolicyDecisions",
+        "TestPackageIncompleteUsesSafeRemediation"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/provisioning/readiness_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestReadinessReady",
+        "TestReadinessDNSBlocked"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/provisioning/script_runner_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestScriptRunnerPrecheckSkipsExecuteAndVerifies",
+        "TestScriptRunnerFailedPrecheckExecutesThenVerifies",
+        "TestScriptRunnerPrecheckInfrastructureFailureDoesNotExecute"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/provisioning/step_completion_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestStepAttemptCompletionUsesLatestAttempt"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/provisioning/unknown_outcome_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestUnknownCommandOutcomeWithoutPrecheckFailsClosed",
+        "TestUnknownCommandOutcomeWithPrecheckRemainsRetryable"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/provisioning/upload_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestReadSCPAckOK",
+        "TestReadSCPAckRemoteError",
+        "TestReadSCPAckUnexpectedCode",
+        "TestReadSCPAckEOF",
+        "TestShellArgEscapesQuote"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/provisioning/waiting_installer_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestPlaceholderInstallerPausesBeforeExecute",
+        "TestHistoricalVerifyReconcilesToWaitingInstaller"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/provisioning/worker_restart_test.go",
+      "package": "provisioning",
+      "tests": [
+        "TestRestartAfterKilledWorkerFailsClosedWithoutPrecheck",
+        "TestRestartAfterKilledWorkerReconcilesWhenPrecheckExists"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/reality/credentials/generator_test.go",
+      "package": "credentials",
+      "tests": [
+        "TestParseCurrentXrayFormat",
+        "TestUUIDv4",
+        "TestShortID",
+        "TestWipe",
+        "TestParseXrayPublicKeyLabel"
+      ],
+      "test_count": 5
+    },
+    {
+      "file": "internal/reality/credentials/local_test.go",
+      "package": "credentials",
+      "tests": [
+        "TestLocalX25519GeneratorCompatibility"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/reality/credentials/lock_test.go",
+      "package": "credentials",
+      "tests": [
+        "TestCredentialIdentityIsDeterministic"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/reality/credentials/xray_test.go",
+      "package": "credentials",
+      "tests": [
+        "TestXrayGenerator"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/reality/probe_test.go",
+      "package": "reality",
+      "tests": [
+        "TestValidateCandidate"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/reality/scorer_test.go",
+      "package": "reality",
+      "tests": [
+        "TestRankPrefersReliableLowLatency",
+        "TestRejectsInvalidCertificate"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/reality/scorer_tls_test.go",
+      "package": "reality",
+      "tests": [
+        "TestEvaluateAcceptsTLS13Spellings",
+        "TestEvaluateRejectsTLS12"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/reality/ssh_prober_test.go",
+      "package": "reality",
+      "tests": [
+        "TestSSHProberDecodesObservation",
+        "TestSSHProberDoesNotEmbedCandidatePlaintext"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/reality/stability_test.go",
+      "package": "reality",
+      "tests": [
+        "TestStabilityRequiresHistory",
+        "TestHysteresisKeepsCurrentForSmallGain",
+        "TestHysteresisSwitchesForMeaningfulGain"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/redact/redact_test.go",
+      "package": "redact",
+      "tests": [
+        "TestSensitiveHeadersAreRedacted",
+        "TestBearerTokensAreRedactedFromText"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/resilience/retry_test.go",
+      "package": "resilience",
+      "tests": [
+        "TestRetryEventuallySucceeds",
+        "TestPermanentDoesNotRetry",
+        "TestCircuitOpens"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/resources/reconcile_test.go",
+      "package": "resources",
+      "tests": [
+        "TestCompareDetectsDifferences"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/runtimecap/xray_test.go",
+      "package": "runtimecap",
+      "tests": [
+        "TestResolveXray",
+        "TestResolveMissing"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/scheduler/provider_gate_test.go",
+      "package": "scheduler",
+      "tests": [
+        "TestProviderGateNegativeStates"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/secrets/key_test.go",
+      "package": "secrets",
+      "tests": [
+        "TestLoadMasterKeyFromEnvironment",
+        "TestLoadMasterKeyFromFile"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/secrets/store_test.go",
+      "package": "secrets",
+      "tests": [
+        "TestSecretsAreEncryptedAndTenantBound"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/testharness/concurrency_test.go",
+      "package": "testharness",
+      "tests": [
+        "TestConcurrentReadyRunsDoNotDuplicateCreate"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/testharness/e2e_test.go",
+      "package": "testharness",
+      "tests": [
+        "TestEndToEndHappyPath",
+        "TestFailureResumeDoesNotRepeatCompletedSteps"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/testharness/failure_matrix_test.go",
+      "package": "testharness",
+      "tests": [
+        "TestFailureInjectionEveryWorkflowStage",
+        "TestRepeatedRunAfterReadyIsNoop"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/testharness/installer_failure_matrix_test.go",
+      "package": "testharness",
+      "tests": [
+        "TestInstallerFailureMatrix",
+        "TestInstallerCrashRecoveryMatrix",
+        "TestInstallerGenerationsHaveIndependentAttempts"
+      ],
+      "test_count": 3
+    },
+    {
+      "file": "internal/testharness/provider_live_cert_test.go",
+      "package": "testharness",
+      "tests": [
+        "TestDigitalOceanLiveDriverCertification"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/workflow/engine_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestWorkflowRunsOnceAndResumesCompleted",
+        "TestWorkflowTerminalStatesDoNotResume",
+        "TestInstallCompleteContinuesThroughDatabaseAndPanelThenStopsSafely",
+        "TestDatabaseCompleteResumesAtPanelOnly"
+      ],
+      "test_count": 4
+    },
+    {
+      "file": "internal/workflow/error_class_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestClassifyStepError"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/workflow/postgres_e2e_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestPostgresRunLeaseExclusiveE2E",
+        "TestSQLStepRetrySemanticsE2E"
+      ],
+      "test_count": 2
+    },
+    {
+      "file": "internal/workflow/provider_key_ref_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestProviderKeyRefReadsHistoricalNumberAndNewString"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/workflow/run_lease_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestRunLeaseRejectsConcurrentOwner"
+      ],
+      "test_count": 1
+    },
+    {
+      "file": "internal/workflow/server_waiter_test.go",
+      "package": "workflow",
+      "tests": [
+        "TestServerWaiterReady",
+        "TestServerWaiterPermanentError"
+      ],
+      "test_count": 2
+    }
+  ],
+  "features": {
+    "providers_common": {
+      "files": [
+        "internal/providers/digitalocean/characterization_test.go",
+        "internal/providers/digitalocean/client_test.go",
+        "internal/providers/digitalocean/driver_v2_test.go",
+        "internal/providers/digitalocean/errors_parse_test.go",
+        "internal/providers/digitalocean/errors_test.go",
+        "internal/providers/digitalocean/pagination_regression_test.go",
+        "internal/providers/provider_v2_test.go",
+        "internal/providers/vultr/client_test.go",
+        "internal/providers/vultr/driver_test.go",
+        "internal/providers/vultr/mutation_driver_test.go",
+        "internal/providers/vultr/read_driver_test.go",
+        "internal/providers/vultrconsole/browser_test.go"
+      ],
+      "test_functions": 34,
+      "command": "go test ./internal/providers/..."
+    },
+    "digitalocean": {
+      "files": [
+        "internal/providers/digitalocean/characterization_test.go",
+        "internal/providers/digitalocean/client_test.go",
+        "internal/providers/digitalocean/driver_v2_test.go",
+        "internal/providers/digitalocean/errors_parse_test.go",
+        "internal/providers/digitalocean/errors_test.go",
+        "internal/providers/digitalocean/pagination_regression_test.go"
+      ],
+      "test_functions": 18,
+      "command": "go test ./internal/providers/digitalocean/..."
+    },
+    "vultr": {
+      "files": [
+        "internal/providers/vultr/client_test.go",
+        "internal/providers/vultr/driver_test.go",
+        "internal/providers/vultr/mutation_driver_test.go",
+        "internal/providers/vultr/read_driver_test.go",
+        "internal/providers/vultrconsole/browser_test.go"
+      ],
+      "test_functions": 11,
+      "command": "go test ./internal/providers/vultr/... ./internal/providers/vultrconsole/..."
+    },
+    "accounts": {
+      "files": [
+        "internal/accounts/cell_test.go",
+        "internal/accounts/context_test.go",
+        "internal/accounts/identity_test.go"
+      ],
+      "test_functions": 3,
+      "command": "go test ./internal/accounts/... ./internal/adminapi/..."
+    },
+    "network_proxy": {
+      "files": [
+        "internal/network/client_test.go",
+        "internal/network/egress_guard_test.go",
+        "internal/network/gate_test.go",
+        "internal/network/guard_test.go",
+        "internal/network/health_state_test.go",
+        "internal/network/health_test.go",
+        "internal/network/ipv4_test.go",
+        "internal/network/isolation_test.go",
+        "internal/network/leakcheck_test.go",
+        "internal/network/metadata_test.go",
+        "internal/network/privacy_test.go",
+        "internal/network/profiles_test.go",
+        "internal/network/proxy_failure_test.go",
+        "internal/network/proxy_gateway_test.go",
+        "internal/network/proxy_probe_test.go",
+        "internal/network/rotating_test.go",
+        "internal/network/scheduler_test.go"
+      ],
+      "test_functions": 30,
+      "command": "go test ./internal/network/..."
+    },
+    "compute_lifecycle": {
+      "files": [
+        "internal/droplets/compute_stub_test.go",
+        "internal/droplets/executor_test.go",
+        "internal/droplets/postgres_e2e_test.go",
+        "internal/droplets/reconcile_test.go",
+        "internal/droplets/safety_characterization_test.go"
+      ],
+      "test_functions": 7,
+      "command": "go test ./internal/droplets/..."
+    },
+    "sanaei": {
+      "files": [
+        "internal/panels/sanaei/api_error_test.go",
+        "internal/panels/sanaei/auth_test.go",
+        "internal/panels/sanaei/clients_test.go",
+        "internal/panels/sanaei/driver_test.go",
+        "internal/panels/sanaei/installer_adapter_test.go",
+        "internal/panels/sanaei/inventory_test.go",
+        "internal/panels/sanaei/mutation_test.go",
+        "internal/panels/sanaei/panel_configurer_test.go",
+        "internal/panels/sanaei/panel_session_index_test.go",
+        "internal/panels/sanaei/panel_session_test.go",
+        "internal/panels/sanaei/postflight/validator_test.go",
+        "internal/panels/sanaei/realityconfig/builder_test.go",
+        "internal/panels/sanaei/resilient_test.go",
+        "internal/panels/sanaei/runtime_manager_test.go",
+        "internal/panels/sanaei/runtime_test.go",
+        "internal/panels/sanaei/session_executor_test.go",
+        "internal/panels/sanaei/template_test.go"
+      ],
+      "test_functions": 44,
+      "command": "go test ./internal/panels/sanaei/..."
+    },
+    "reality_policy": {
+      "files": [
+        "internal/panels/policy/allocator_test.go",
+        "internal/panels/policy/expand_test.go",
+        "internal/panels/policy/validate_test.go",
+        "internal/panels/realitycontract/contract_test.go"
+      ],
+      "test_functions": 6,
+      "command": "go test ./internal/panels/policy/... ./internal/panels/realityconfig/... ./internal/panels/realitycontract/... ./internal/panels/globalreality/..."
+    },
+    "panel_lifecycle": {
+      "files": [
+        "internal/panels/create/orchestrator_test.go",
+        "internal/panels/desired/lifecycle_test.go",
+        "internal/panels/readyworker/adapter_test.go",
+        "internal/panels/readyworker/worker_test.go",
+        "internal/panels/update/orchestrator_test.go"
+      ],
+      "test_functions": 11,
+      "command": "go test ./internal/panels/create/... ./internal/panels/update/... ./internal/panels/desired/... ./internal/panels/readyworker/..."
+    },
+    "output": {
+      "files": [
+        "internal/adminapi/output_expiry_test.go"
+      ],
+      "test_functions": 2,
+      "command": "go test ./internal/adminapi/... ./internal/panels/sanaei/..."
+    },
+    "adminapi": {
+      "files": [
+        "internal/adminapi/config_expr_test.go",
+        "internal/adminapi/output_expiry_test.go",
+        "internal/adminapi/server_test.go"
+      ],
+      "test_functions": 5,
+      "command": "go test ./internal/adminapi/..."
+    },
+    "auth": {
+      "files": [
+        "internal/auth/service_test.go"
+      ],
+      "test_functions": 3,
+      "command": "go test ./internal/auth/..."
+    },
+    "jobs": {
+      "files": [
+        "internal/jobs/operation_test.go"
+      ],
+      "test_functions": 1,
+      "command": "go test ./internal/jobs/..."
+    }
+  },
+  "verification_tiers": {
+    "focused": "Run mapped feature/package tests first.",
+    "broad": "go test ./internal/...",
+    "build": "go build ./cmd/api ./cmd/worker",
+    "runtime": "After deploy verify systemd API/worker health and exercise the real feature flow."
+  }
+}
