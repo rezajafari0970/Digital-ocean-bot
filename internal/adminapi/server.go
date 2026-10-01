@@ -68,6 +68,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/accounts/{id}/preflight", s.require(s.accountPreflight, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/console-session", s.require(s.createVultrBrowserTicket, true))
 	m.HandleFunc("GET /vultr-browser/{path...}", s.vultrBrowserProxy)
+	m.HandleFunc("GET /websockify", s.vultrBrowserProxy)
 	m.HandleFunc("POST /api/v1/proxies", s.require(s.createProxy, true))
 	m.HandleFunc("PUT /api/v1/proxies/{id}", s.require(s.updateProxy, true))
 	m.HandleFunc("DELETE /api/v1/proxies/{id}", s.require(s.deleteProxy, true))
@@ -180,6 +181,6 @@ func (s *Server) createVultrBrowserTicket(w http.ResponseWriter, r *http.Request
 	}
 	s.BrowserTickets[token] = time.Now().Add(5 * time.Minute)
 	s.BrowserMu.Unlock()
-	http.SetCookie(w, &http.Cookie{Name: "vultr_browser_session", Value: token, Path: "/vultr-browser/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 300})
+	http.SetCookie(w, &http.Cookie{Name: "vultr_browser_session", Value: token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 300})
 	writeJSON(w, 200, map[string]any{"ok": true, "expires_in": 300})
 }
