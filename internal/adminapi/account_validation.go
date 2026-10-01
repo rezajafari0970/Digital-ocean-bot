@@ -18,7 +18,7 @@ func validateAccountSettings(x accountWrite, dropletLimit int, provider string) 
 	if x.DesiredServerCount <= 0 {
 		return "desired_servers_must_be_positive"
 	}
-	if dropletLimit > 0 && x.DesiredServerCount > dropletLimit {
+	if !strings.EqualFold(strings.TrimSpace(provider), "vultr") && dropletLimit > 0 && x.DesiredServerCount > dropletLimit {
 		return "desired_servers_exceeds_droplet_limit"
 	}
 	if hasDup(x.Regions) {
