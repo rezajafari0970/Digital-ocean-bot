@@ -31,3 +31,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 23. For exact file/line questions, use `docs/FULL_SOURCE_KNOWLEDGE.json` or `python3 tools/source-lookup.py FILE LINE [END]` before reopening source. Always bind line answers to `source_commit`; regenerate with `python3 tools/build-source-knowledge.py` after source changes.
 
 24. Use `docs/SEMANTIC_KNOWLEDGE.json` as the semantic/navigation layer (roles, symbol ranges, candidate calls/callers, SQL tables, endpoint literals), then confirm exact behavior from the commit-pinned line snapshot. Regenerate after Go source changes.
+25. Use `tools/project-brain-query.py` as the first unified retrieval interface for file:line, symbol, endpoint, table, path and exact-text questions; results are commit-pinned and should be verified against live source/runtime when freshness matters.
