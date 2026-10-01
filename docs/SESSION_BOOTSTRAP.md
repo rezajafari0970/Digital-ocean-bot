@@ -41,3 +41,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 34. For implementation-understanding questions, use `docs/FUNCTION_BEHAVIOR_BRAIN.json` to retrieve function ranges/signatures, routes, calls/callers, DB reads/writes, side-effect classes and error evidence before drawing behavioral conclusions.
 
 35. For database-understanding questions, use `docs/COLUMN_BEHAVIOR_BRAIN.json` for live column metadata, migration origin and conservative function-level reader/writer evidence; confirm dynamic or indirect access in exact source when necessary.
+36. For verification-understanding questions, use `docs/TEST_BEHAVIOR_BRAIN.json` to inspect exact test ranges, assertions, fixtures, candidate calls, subtests and endpoint/table evidence rather than inferring coverage from filenames alone.

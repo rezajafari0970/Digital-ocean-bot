@@ -2,7 +2,7 @@
 import json,sys,re,os
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..')); os.chdir(ROOT)
 def load(p): return json.load(open(p,encoding='utf-8'))
-source=load('docs/FULL_SOURCE_KNOWLEDGE.json'); sem=load('docs/SEMANTIC_KNOWLEDGE.json'); sym=load('docs/SYMBOL_INDEX.json'); schema=load('docs/SCHEMA_INDEX.json'); tests=load('docs/TEST_MAP.json'); behavior=load('docs/FUNCTION_BEHAVIOR_BRAIN.json'); columns=load('docs/COLUMN_BEHAVIOR_BRAIN.json')
+source=load('docs/FULL_SOURCE_KNOWLEDGE.json'); sem=load('docs/SEMANTIC_KNOWLEDGE.json'); sym=load('docs/SYMBOL_INDEX.json'); schema=load('docs/SCHEMA_INDEX.json'); tests=load('docs/TEST_MAP.json'); behavior=load('docs/FUNCTION_BEHAVIOR_BRAIN.json'); columns=load('docs/COLUMN_BEHAVIOR_BRAIN.json'); test_behavior=load('docs/TEST_BEHAVIOR_BRAIN.json')
 q=' '.join(sys.argv[1:]).strip()
 if not q: raise SystemExit('usage: project-brain-query.py <file:line | symbol | endpoint | table | text>')
 result={'query':q,'source_commit':source['source_commit'],'matches':[]}
@@ -25,6 +25,9 @@ for b in behavior.get('functions',[]):
 # table
 for t in schema.get('tables',[]):
  if t['table']==q or q.lower() in t['table'].lower(): result['matches'].append({'kind':'table','schema':t})
+# test behavior exact/substring lookup
+for t in test_behavior.get('tests',[]):
+ if t['test']==q or q.lower() in t['test'].lower(): result['matches'].append({'kind':'test_behavior','test':t})
 # database column exact table.column or column-name lookup
 for c in columns.get('columns', []):
     key = c['table'] + '.' + c['column']
