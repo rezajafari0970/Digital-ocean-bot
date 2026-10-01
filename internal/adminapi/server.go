@@ -11,6 +11,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -139,6 +140,10 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/websockify" {
+		_, cookieErr := r.Cookie("vultr_browser_session")
+		log.Printf("vultr ws request upgrade=%q connection=%q protocol=%q cookie=%t", r.Header.Get("Upgrade"), r.Header.Get("Connection"), r.Header.Get("Sec-WebSocket-Protocol"), cookieErr == nil)
+	}
 	c, err := r.Cookie("vultr_browser_session")
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
