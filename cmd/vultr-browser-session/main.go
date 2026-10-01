@@ -65,7 +65,7 @@ func main() {
 	for _, name := range []string{"SingletonLock", "SingletonSocket", "SingletonCookie"} {
 		_ = os.Remove(filepath.Join(profile, name))
 	}
-	xvfb, err := start("Xvfb", ":199", "-screen", "0", "1280x800x24", "-nolisten", "tcp")
+	xvfb, err := start("Xvfb", ":199", "-screen", "0", "412x915x24", "-nolisten", "tcp")
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +84,9 @@ func main() {
 	chrome := exec.Command("/usr/bin/google-chrome-stable",
 		"--no-sandbox", "--disable-dev-shm-usage", "--no-first-run",
 		"--user-data-dir="+profile, "--proxy-server="+localProxy,
-		"--window-size=1280,800", "https://my.vultr.com/")
+		"--window-size=412,915", "--force-device-scale-factor=1", "--touch-events=enabled",
+		"--user-agent=Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+		"https://my.vultr.com/")
 	chrome.Env = append(os.Environ(), "DISPLAY=:199")
 	chrome.Stdout = os.Stdout
 	chrome.Stderr = os.Stderr
