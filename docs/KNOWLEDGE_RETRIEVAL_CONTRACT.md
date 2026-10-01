@@ -8,3 +8,6 @@ For fresh-session exam and high-confidence project questions, do not copy arbitr
 - UI: `python3 tools/project-knowledge-contract.py ui FUNCTION` → `function, file, line, dom, loading, errors`.
 
 These shapes intentionally match the semantic fields tested by the blind challenge. Richer Brain objects remain available for investigation, but should not replace these canonical answer fields when a question asks for these chains.
+- Intent: `python3 tools/project-knowledge-contract.py intent REQUIREMENT_ID` → `area, requirement, parents`.
+- Exact line: `python3 tools/project-knowledge-contract.py line 'FILE:LINE'` → `text, sha256, commit`.
+- Test: `python3 tools/project-knowledge-contract.py test TEST_NAME` → `file, line, calls, assertions`.

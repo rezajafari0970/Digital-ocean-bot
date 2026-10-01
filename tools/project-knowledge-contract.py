@@ -20,6 +20,20 @@ elif typ=='state':
  # exact owner function query
  for z in x['owners']:
   if z['owner_function']==q:out={'function':z['owner_function'],'file':z['file'],'line':z['start_line'],'writes':z['transition_write_evidence'][:2],'guards':z['guard_evidence'][:2]};break
+
+elif typ=='intent':
+ x=J('docs/DEEP_REQUIREMENTS_BRAIN.json')
+ for z in x['requirements']:
+  if z['id']==q:out={'area':z['area'],'requirement':z['requirement'],'parents':z.get('parent_requirement_ids',[])};break
+elif typ=='line':
+ # query FILE:LINE, split from right so paths remain intact
+ path,n=q.rsplit(':',1);n=int(n);x=J('docs/FULL_SOURCE_KNOWLEDGE.json')
+ for z in x['files']:
+  if z['path']==path and 1<=n<=z['line_count']:out={'text':z['lines'][n-1]['text'],'sha256':z['sha256'],'commit':x['source_commit']};break
+elif typ=='test':
+ x=J('docs/TEST_BEHAVIOR_BRAIN.json')
+ for z in x['tests']:
+  if z['test']==q:out={'file':z['file'],'line':z['start_line'],'calls':z['candidate_calls'][:6],'assertions':z['assertion_evidence'][:3]};break
 elif typ=='ui':
  x=J('docs/FRONTEND_ACTION_STATE_BRAIN.json')
  for z in x['functions']:
