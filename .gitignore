@@ -9,3 +9,4 @@ node_modules/
 coverage.out
 /secrets/
 .local/spaced-rehearsal-progress.json
+.local/spaced-results/
