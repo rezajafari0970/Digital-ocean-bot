@@ -1,6 +1,6 @@
 # Deep Requirements & Intent Brain
 
-Commit `adb7ec3665137d5f54bb72b0eda88ce1d5851fb5` — **101 requirements across 18 knowledge areas**.
+Commit `d1bb445894ad8b1388380da146d8fd6c6bf1746e` — **101 requirements across 18 knowledge areas**.
 
 This expands the coarse requirement brain into durable behavioral intent. It exists to teach a fresh session *why* the project behaves as it does, not merely where code lives.
 

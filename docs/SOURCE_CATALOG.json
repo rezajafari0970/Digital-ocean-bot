@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
-  "file_count": 640,
-  "total_lines": 33920,
+  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
+  "file_count": 696,
+  "total_lines": 40148,
   "files": [
     {
       "path": "cmd/admin-bootstrap/main.go",
@@ -166,9 +166,9 @@
     },
     {
       "path": "deploy/install.sh",
-      "sha256": "6d0edd0049ccd6eeec04f48d6f6d2c03cf73062e3e8fbec487632f8fce3554d5",
-      "bytes": 2754,
-      "line_count": 47,
+      "sha256": "9958e7ffad8e3f1a59f00b0ad746802c59c4479e727f0b2625c90f5e0a2bd6fe",
+      "bytes": 2911,
+      "line_count": 49,
       "symbols": []
     },
     {
@@ -12415,10 +12415,115 @@
       "symbols": []
     },
     {
+      "path": "tools/build-active-recall-rehearsal.py",
+      "sha256": "398c7ca9903003b0149c61ccbedccd5db1e4d8ce54cc4b405adbdd3f1ed5a02a",
+      "bytes": 3309,
+      "line_count": 35,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-blind-knowledge-challenge.py",
+      "sha256": "d5b47c1b919936d5139aa428fdf6574f41919d49df2b70efd677b0ad6e36e4cc",
+      "bytes": 4331,
+      "line_count": 32,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-column-behavior-brain.py",
+      "sha256": "62ce0497955840f6b313059a31fb6256eecf06bd0b4334ef525f9d65cfff92ab",
+      "bytes": 8918,
+      "line_count": 425,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-conceptual-micro-rehearsal.py",
+      "sha256": "3f3717b3175c60384de6bde923ddcf877b4c228e32db1d6587e39b3af26824e3",
+      "bytes": 1862,
+      "line_count": 17,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-context-priming-packs.py",
+      "sha256": "b476c74e5415676944d7e61a9e15b7dfc147e33f2c883403dd44ef21434d5295",
+      "bytes": 4872,
+      "line_count": 302,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-deep-evidence-investigation.py",
+      "sha256": "a956299f3cfc1a27a53e3bf209b352728376159b8e5577bb059e4cf9cbe14f2b",
+      "bytes": 2780,
+      "line_count": 17,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-deep-requirements-brain.py",
+      "sha256": "e5845363ede8982932dfbd8aa06be1f0b2e74a74d66ad0701952bec56c090660",
+      "bytes": 7400,
+      "line_count": 39,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-distributed-source-rehearsal.py",
+      "sha256": "78f6da6196ca6116f0d02f8680ea87ea14ea316b6fbddfb81b45387d2e0c2812",
+      "bytes": 4415,
+      "line_count": 271,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-evidence-gap-closure.py",
+      "sha256": "227759eb441b05f403485f8e1bce367aea00022c2007467b69e178b643006243",
+      "bytes": 3735,
+      "line_count": 35,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-feature-ownership-brain.py",
+      "sha256": "b14bac01a174c3bb49c4a955bccde1253b840ba9dff47d327f57be1f0a6aedc0",
+      "bytes": 4558,
+      "line_count": 38,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-fresh-session-exam-pack.py",
+      "sha256": "6bf2790039c0b17ac7b1599f726c645eeed003b324e42017604157b4fa12ef6c",
+      "bytes": 2122,
+      "line_count": 24,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-fresh-session-exam-v2.py",
+      "sha256": "388600d909e16c94bb1ef420fdc31b16a3a691d8f85735d95e9f526f72d9b8d2",
+      "bytes": 2161,
+      "line_count": 24,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-fresh-session-exam-v3.py",
+      "sha256": "ae8c640ec4e875746a35f696af904ab2e4f8cd54fd1b95720dd637d64ad310ef",
+      "bytes": 2559,
+      "line_count": 23,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-frontend-action-brain.py",
+      "sha256": "4dba763537e8ded3f23302ee2cadf15863d77f0f00d8cb7eb085ad9056ce65c1",
+      "bytes": 3877,
+      "line_count": 35,
+      "symbols": []
+    },
+    {
       "path": "tools/build-frontend-brain.py",
       "sha256": "eea4fc44477b2ed95985e68020024c2d9ef920431fb0e64e74afe0486a01e22e",
       "bytes": 2038,
       "line_count": 21,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-function-behavior-brain.py",
+      "sha256": "ed0f60e735cd9e935753d52c8b7cb716da1977079a55f665b99f9ea9a56c0051",
+      "bytes": 4124,
+      "line_count": 46,
       "symbols": []
     },
     {
@@ -12429,10 +12534,38 @@
       "symbols": []
     },
     {
+      "path": "tools/build-holdout2-targeted-rehearsal.py",
+      "sha256": "89519269098fe11260c181171ee3197d3dfadefdeb48e1ce10db6804f38b96a3",
+      "bytes": 1685,
+      "line_count": 90,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-holdout3-targeted-rehearsal.py",
+      "sha256": "9a086ef5bd15390a10fb4f2e65339ad32b6197be043c6f201ba157c6f336d340",
+      "bytes": 939,
+      "line_count": 10,
+      "symbols": []
+    },
+    {
       "path": "tools/build-impact-graph.py",
       "sha256": "2aa1e20c2a5321a925f3d158677dfe1107cda81baac8b1d0b2e8c0abb435f788",
       "bytes": 2394,
       "line_count": 30,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-incident-regression-brain.py",
+      "sha256": "dac737a6d4212c6b4b4ffb4bd652cc0c50adaf2b4a367fa263ff4635a1485724",
+      "bytes": 5460,
+      "line_count": 36,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-knowledge-coverage-gap-brain.py",
+      "sha256": "f1fbfedaf406a190a0c99e67a78a8709201fbdaca9c0b9831a36734840d2d856",
+      "bytes": 4238,
+      "line_count": 34,
       "symbols": []
     },
     {
@@ -12447,6 +12580,62 @@
       "sha256": "0e3b8525228a106f1f786db2a1cd02524db6ca928dcee6e868d52e67855283e6",
       "bytes": 2206,
       "line_count": 27,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-master-knowledge-score-v2.py",
+      "sha256": "1fb717adee42fdc3f1ba1e2a5822a3e4d4dfe0270b4aba82aed5b8ff680d54b3",
+      "bytes": 3393,
+      "line_count": 35,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-master-knowledge-score-v3.py",
+      "sha256": "62b0e1ce5b44d2890766b727175c2a95fc67209e8ac98a5e5dcc0016de2c7bc0",
+      "bytes": 3774,
+      "line_count": 25,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-memory-priming-cohort-1.py",
+      "sha256": "d0b09491cd43bc1ae6628fd08040cbee2e60b90c9c89df147b11811543af6296",
+      "bytes": 3438,
+      "line_count": 22,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-recall-diagnostic-exam.py",
+      "sha256": "187398a98f9b9d2eb293a6778154f5475ac7f08d7c9a7c978139a34f8a3bb916",
+      "bytes": 7801,
+      "line_count": 474,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-rehearsal-holdout-2.py",
+      "sha256": "ae981a8d51b30c7a698fdc3b69c63ac767ddeaffdb947dc5a1f8da6053033789",
+      "bytes": 5359,
+      "line_count": 332,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-rehearsal-holdout-3.py",
+      "sha256": "43cfc2f1daabf7770b7b8f02de62808b3da970d06f04e41a7e398dbd2eb40228",
+      "bytes": 5625,
+      "line_count": 297,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-rehearsal-holdout-4.py",
+      "sha256": "b47249e04853ecc216c799a38cb90141ee095c84139d094649252afc5659bff3",
+      "bytes": 6741,
+      "line_count": 418,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-rehearsal-holdout-5.py",
+      "sha256": "cd97fee8f871c0c5aaafa9341dd7c83ec47695861fe81a99f1b290049d4719d7",
+      "bytes": 6793,
+      "line_count": 419,
       "symbols": []
     },
     {
@@ -12471,10 +12660,24 @@
       "symbols": []
     },
     {
+      "path": "tools/build-sealed-unaided-memory-exam.py",
+      "sha256": "df31200ea1fe0647f6080acfe4ce60edb707ed61cc5ccb1e2bb09b693830c45a",
+      "bytes": 2133,
+      "line_count": 147,
+      "symbols": []
+    },
+    {
       "path": "tools/build-semantic-knowledge.py",
       "sha256": "1afd7a2f76aa66d4d122c85a63daa1f3bab2ef6131138196b69a64df7b3a3cbc",
       "bytes": 4773,
       "line_count": 40,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-source-internalization-brain.py",
+      "sha256": "f5263ceac953144d146cee443efebf8524d7dc82d5d6b0a8d463ff5a21ff96c0",
+      "bytes": 2999,
+      "line_count": 27,
       "symbols": []
     },
     {
@@ -12485,10 +12688,38 @@
       "symbols": []
     },
     {
+      "path": "tools/build-spaced-source-rehearsal.py",
+      "sha256": "cefdb24339fd530a0f4da9e1679cb9f785251b40ca546e08eb144444c1acf876",
+      "bytes": 5915,
+      "line_count": 367,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-state-transition-brain.py",
+      "sha256": "2978d16bfe59801404603a49f4b441d4b7503e7a4937ea09dc2845b5a88e8e7d",
+      "bytes": 3261,
+      "line_count": 34,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-subsystem-explanation-brain.py",
+      "sha256": "2570836e1212ace991df1d4f00d7484d6207012e0e45aa4a2fa0608508eb90ce",
+      "bytes": 3823,
+      "line_count": 28,
+      "symbols": []
+    },
+    {
       "path": "tools/build-symbol-index.py",
       "sha256": "d22d3fa8e2043a47398e4cd38181e4877511fb5017f7941d81e3a18cdc0d4981",
       "bytes": 2844,
       "line_count": 38,
+      "symbols": []
+    },
+    {
+      "path": "tools/build-test-behavior-brain.py",
+      "sha256": "00217d5f7f1aea161ab235c0e350064cbff741955f6c3f87b5636b345e911d3a",
+      "bytes": 3487,
+      "line_count": 35,
       "symbols": []
     },
     {
@@ -12506,6 +12737,13 @@
       "symbols": []
     },
     {
+      "path": "tools/build-unaided-memory-baseline-exam.py",
+      "sha256": "f574de7a68d94f3339eeaedf9d69a056e86e6edd83e71e90e1485a95a40ddefc",
+      "bytes": 2997,
+      "line_count": 14,
+      "symbols": []
+    },
+    {
       "path": "tools/check-project-continuity.sh",
       "sha256": "642c326c4e5ffa8c635c63831361601bcb876e1d7a1e47a908182076bdb32f97",
       "bytes": 748,
@@ -12514,9 +12752,58 @@
     },
     {
       "path": "tools/checkpoint-project.sh",
-      "sha256": "249cfb9bb73c3210e28a5b20b2d18b819b95bebf72852abfdba3b5e88fed309d",
-      "bytes": 1991,
-      "line_count": 32,
+      "sha256": "ca80d13288e686fd4c3696b8ce9067fc7a356f8acbe8b40cab8a6252c992683a",
+      "bytes": 2817,
+      "line_count": 43,
+      "symbols": []
+    },
+    {
+      "path": "tools/conceptual-micro-info.py",
+      "sha256": "7d4bb834738c18fa133517f65ac3a0d9f3489f3466c6e430c724a4881c1f854d",
+      "bytes": 377,
+      "line_count": 5,
+      "symbols": []
+    },
+    {
+      "path": "tools/continuity-finalization-gate.py",
+      "sha256": "59e58dbbdb44b20183917fb20e8e18e1345aae6f868cfc54b7fe6a5fb4ad7754",
+      "bytes": 2288,
+      "line_count": 28,
+      "symbols": []
+    },
+    {
+      "path": "tools/deep-mastery-exam.py",
+      "sha256": "e40504c6b59a71e9522fc5edc255c46c0374c7acd7fa00ef1482808f1b2338d1",
+      "bytes": 6012,
+      "line_count": 51,
+      "symbols": []
+    },
+    {
+      "path": "tools/final-development-mastery-gate.py",
+      "sha256": "33fa90173adf5a46e3525e2e96fb0c11c763ebd3a1cf6981dab307e2fff6d32a",
+      "bytes": 935,
+      "line_count": 22,
+      "symbols": []
+    },
+    {
+      "path": "tools/fresh-chat-mastery-gate.py",
+      "sha256": "8e69c5d232f5153a20ff409e129af3c404c9463c3a59ca8b7af96ed750e3fa35",
+      "bytes": 1299,
+      "line_count": 14,
+      "symbols": []
+    },
+    {
+      "path": "tools/grade-fresh-session-exam-v2.py",
+      "sha256": "4a2e87dac2e35dd9e76cea7b67b1d6e5b5a1592d7be2661aefcb5a896f6bb187",
+      "bytes": 1982,
+      "line_count": 34,
+      "symbols": []
+    },
+    {
+      "path": "tools/grade-fresh-session-exam.py",
+      "sha256": "9960633e61338b3912dd4001f5236b47cdf7c441ba5de25f16eb73bf0aa64425",
+      "bytes": 710,
+      "line_count": 12,
       "symbols": []
     },
     {
@@ -12527,10 +12814,45 @@
       "symbols": []
     },
     {
+      "path": "tools/knowledge-drift-gate.py",
+      "sha256": "7a478bb3bed76531ff97881dfe3670dff63492d81dff69a5f3093641db234901",
+      "bytes": 2215,
+      "line_count": 25,
+      "symbols": []
+    },
+    {
+      "path": "tools/micro-split-spaced-rehearsal.py",
+      "sha256": "7ef4eee56b24310d3eec414745ba2e2314e5fb443ca4e7eb84ba1cee845521a1",
+      "bytes": 1203,
+      "line_count": 11,
+      "symbols": []
+    },
+    {
+      "path": "tools/new-chat-bootstrap.sh",
+      "sha256": "f828a684c86d635988f9e71f9872e9d57e5448f94e59b0aadbdcc9c01552bfdf",
+      "bytes": 966,
+      "line_count": 19,
+      "symbols": []
+    },
+    {
       "path": "tools/project-brain-query.py",
-      "sha256": "4e8dbbd2cc2fbd1e813bcb138e950fdd538e5c5a82779fdf8b259456eeab9224",
-      "bytes": 2093,
-      "line_count": 36,
+      "sha256": "50598700f8a537a048ba9d624bf6671dcbf08f3dcda717c2403b263a7ee0246c",
+      "bytes": 3009,
+      "line_count": 57,
+      "symbols": []
+    },
+    {
+      "path": "tools/project-knowledge-contract.py",
+      "sha256": "007cc928017c8fbf75009df0faea29c84ec01442c81a368c91eeb32fb3359f84",
+      "bytes": 2241,
+      "line_count": 42,
+      "symbols": []
+    },
+    {
+      "path": "tools/rehearsal-unit-info.py",
+      "sha256": "40699d7895dcb989a134f2072e575c8eb10760f51fceb83ef5af26689c587124",
+      "bytes": 974,
+      "line_count": 81,
       "symbols": []
     },
     {
@@ -12541,6 +12863,55 @@
       "symbols": []
     },
     {
+      "path": "tools/spaced-api-runner-dry.py",
+      "sha256": "b445828539e64cfdd8732d7d80df1cc94aea2b44197c59a28825b21cdf7cc56c",
+      "bytes": 4787,
+      "line_count": 257,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-api-runner-live.py",
+      "sha256": "ddf68388ae4903402dfd116b5ae7144ce8d14eefa80791c655d9cc23b32da495",
+      "bytes": 10273,
+      "line_count": 494,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-api-runner.py",
+      "sha256": "b445828539e64cfdd8732d7d80df1cc94aea2b44197c59a28825b21cdf7cc56c",
+      "bytes": 4787,
+      "line_count": 257,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-mastery-v2.py",
+      "sha256": "3927d42fb060e4d028a70d07b2ac3058a147cf5a038d4298bfb648d036e5482a",
+      "bytes": 2824,
+      "line_count": 35,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-mastery.py",
+      "sha256": "857a00bc5cf796c5bfb03228f6b6a5df9c6f17d4600b081cace46ee818bfdd41",
+      "bytes": 4724,
+      "line_count": 274,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-progress.py",
+      "sha256": "2a71bec519aacab697914cb3c8d374687254285b4df574b1ed12d83fd70ec183",
+      "bytes": 3024,
+      "line_count": 57,
+      "symbols": []
+    },
+    {
+      "path": "tools/spaced-runner-daemon.py",
+      "sha256": "474353d08fc0475e34c003f2c68207a607bfb25b7317a8d4c62de4567e34cec8",
+      "bytes": 2989,
+      "line_count": 155,
+      "symbols": []
+    },
+    {
       "path": "tools/update-project-continuity.py",
       "sha256": "bce3ec0dab727e96acf00c1891fd0397eb5dc79b4b23ab99c29d95f673426b72",
       "bytes": 2244,
@@ -12548,10 +12919,31 @@
       "symbols": []
     },
     {
+      "path": "tools/validate-blind-knowledge-challenge.py",
+      "sha256": "578bd58c9e71a8503a2f6edb76d0e6c25fcc883da311f767e87560f2ceb32ef8",
+      "bytes": 587,
+      "line_count": 10,
+      "symbols": []
+    },
+    {
+      "path": "tools/verify-fresh-session-answer-file.py",
+      "sha256": "18bf99b240e8cf7a01408a45f0020c4f382855df8eb1656a10c10b5644e026f2",
+      "bytes": 554,
+      "line_count": 8,
+      "symbols": []
+    },
+    {
       "path": "tools/verify-production-revision.py",
       "sha256": "30a811479486a2483fa5b6ea5a3f9b01ba292798e486bb616908dd914fc48031",
       "bytes": 1702,
       "line_count": 28,
+      "symbols": []
+    },
+    {
+      "path": "tools/verify-unaided-memory-answer.py",
+      "sha256": "d696b314151f4ea08235f3d25e658552601e4305dbe1e8f022d18a31f8698836",
+      "bytes": 1057,
+      "line_count": 96,
       "symbols": []
     },
     {

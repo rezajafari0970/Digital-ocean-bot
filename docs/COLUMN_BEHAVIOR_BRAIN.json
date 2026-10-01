@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "5ec0fbc2c4c293d04841de677ad603373db25eaa",
+  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
   "scope": "live production public schema metadata enriched with commit-pinned static source/migration evidence; contains no application row data or secrets",
   "table_count": 58,
   "column_count": 595,
