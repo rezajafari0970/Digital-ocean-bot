@@ -1,6 +1,6 @@
 # Function / Behavior Brain
 
-Commit `9a57a8921e235351c57943af23724dc7e119474f` — **1086 functions/methods** indexed.
+Commit `3ae7c9ab62846a93e4f65c4f5eef023d88599b75` — **1085 functions/methods** indexed.
 
 - HTTP handlers: **61**
 - Functions/methods with DB reads: **148**
@@ -28,7 +28,7 @@ For each function this brain stores exact source range/signature, parameter/retu
 - `inventory` — 1
 - `jobs` — 7
 - `listeners` — 4
-- `main` — 16
+- `main` — 15
 - `migrate` — 1
 - `network` — 69
 - `observability` — 6

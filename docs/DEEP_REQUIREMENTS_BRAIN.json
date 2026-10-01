@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "9a57a8921e235351c57943af23724dc7e119474f",
+  "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
   "requirement_count": 101,
   "areas": 18,
   "requirements": [
@@ -12,7 +12,7 @@
         "ARCH-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ARCHITECTURE-02",
@@ -22,7 +22,7 @@
         "ARCH-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ARCHITECTURE-03",
@@ -32,7 +32,7 @@
         "ARCH-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ARCHITECTURE-04",
@@ -42,7 +42,7 @@
         "ARCH-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ACCOUNTS-01",
@@ -52,7 +52,7 @@
         "ACC-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ACCOUNTS-02",
@@ -62,7 +62,7 @@
         "ACC-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ACCOUNTS-03",
@@ -72,7 +72,7 @@
         "ACC-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ACCOUNTS-04",
@@ -82,7 +82,7 @@
         "ACC-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ACCOUNTS-05",
@@ -92,7 +92,7 @@
         "ACC-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DIGITALOCEAN-01",
@@ -102,7 +102,7 @@
         "DO-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DIGITALOCEAN-02",
@@ -112,7 +112,7 @@
         "DO-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DIGITALOCEAN-03",
@@ -122,7 +122,7 @@
         "DO-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DIGITALOCEAN-04",
@@ -132,7 +132,7 @@
         "DO-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DIGITALOCEAN-05",
@@ -142,7 +142,7 @@
         "DO-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-VULTR-01",
@@ -152,7 +152,7 @@
         "VULTR-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-VULTR-02",
@@ -162,7 +162,7 @@
         "VULTR-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-VULTR-03",
@@ -172,7 +172,7 @@
         "VULTR-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-VULTR-04",
@@ -182,7 +182,7 @@
         "VULTR-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-VULTR-05",
@@ -192,7 +192,7 @@
         "VULTR-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-01",
@@ -202,7 +202,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-02",
@@ -212,7 +212,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-03",
@@ -222,7 +222,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-04",
@@ -232,7 +232,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-05",
@@ -242,7 +242,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-06",
@@ -252,7 +252,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROXY-NETWORK-07",
@@ -262,7 +262,7 @@
         "NET-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-01",
@@ -272,7 +272,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-02",
@@ -282,7 +282,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-03",
@@ -292,7 +292,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-04",
@@ -302,7 +302,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-05",
@@ -312,7 +312,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-LIFECYCLE-06",
@@ -322,7 +322,7 @@
         "LIFE-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-01",
@@ -330,7 +330,7 @@
       "requirement": "provision run/steps are observable",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-02",
@@ -338,7 +338,7 @@
       "requirement": "SSH readiness/host-key behavior is explicit",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-03",
@@ -346,7 +346,7 @@
       "requirement": "installer registry and selection are modular",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-04",
@@ -354,7 +354,7 @@
       "requirement": "retry/backoff and error classification are visible",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-05",
@@ -362,7 +362,7 @@
       "requirement": "rearm/recovery does not duplicate ownership",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-PROVISIONING-06",
@@ -370,7 +370,7 @@
       "requirement": "post-install completion is separate from provider create success",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-01",
@@ -380,7 +380,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-02",
@@ -390,7 +390,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-03",
@@ -400,7 +400,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-04",
@@ -410,7 +410,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-05",
@@ -420,7 +420,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-SANAEI-PANEL-06",
@@ -430,7 +430,7 @@
         "PANEL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-REALITY-01",
@@ -440,7 +440,7 @@
         "REAL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-REALITY-02",
@@ -450,7 +450,7 @@
         "REAL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-REALITY-03",
@@ -460,7 +460,7 @@
         "REAL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-REALITY-04",
@@ -470,7 +470,7 @@
         "REAL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-REALITY-05",
@@ -480,7 +480,7 @@
         "REAL-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-01",
@@ -488,7 +488,7 @@
       "requirement": "global config and port policies are configurable",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-02",
@@ -496,7 +496,7 @@
       "requirement": "inbound allocation follows policy",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-03",
@@ -504,7 +504,7 @@
       "requirement": "bulk user creation scales without changing semantics",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-04",
@@ -512,7 +512,7 @@
       "requirement": "quota/lifetime/device limit remain independent controls",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-05",
@@ -520,7 +520,7 @@
       "requirement": "slot/capacity handling reflects live panel state",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONFIG-USERS-06",
@@ -528,7 +528,7 @@
       "requirement": "client deletion frees capacity",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-01",
@@ -538,7 +538,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-02",
@@ -548,7 +548,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-03",
@@ -558,7 +558,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-04",
@@ -568,7 +568,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-05",
@@ -578,7 +578,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-06",
@@ -588,7 +588,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-07",
@@ -598,7 +598,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-08",
@@ -608,7 +608,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-OUTPUT-09",
@@ -618,7 +618,7 @@
         "OUT-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-RESIDENTIAL-01",
@@ -628,7 +628,7 @@
         "RES-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-RESIDENTIAL-02",
@@ -638,7 +638,7 @@
         "RES-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-RESIDENTIAL-03",
@@ -648,7 +648,7 @@
         "RES-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-RESIDENTIAL-04",
@@ -658,7 +658,7 @@
         "RES-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DATABASE-01",
@@ -666,7 +666,7 @@
       "requirement": "migrations are append-only ordered history",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DATABASE-02",
@@ -674,7 +674,7 @@
       "requirement": "migration checksum integrity is enforced",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DATABASE-03",
@@ -682,7 +682,7 @@
       "requirement": "live schema must be checked before schema-sensitive work",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DATABASE-04",
@@ -690,7 +690,7 @@
       "requirement": "continuity snapshots store metadata not user rows/secrets",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DATABASE-05",
@@ -698,7 +698,7 @@
       "requirement": "schema ownership is traceable to code and migrations",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ADMIN-API-01",
@@ -706,7 +706,7 @@
       "requirement": "routes remain explicit and traceable to handlers",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ADMIN-API-02",
@@ -714,7 +714,7 @@
       "requirement": "auth protects mutating/admin operations",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ADMIN-API-03",
@@ -722,7 +722,7 @@
       "requirement": "account/provider/config/output/proxy/residential APIs preserve module boundaries",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ADMIN-API-04",
@@ -730,7 +730,7 @@
       "requirement": "errors should remain classifiable/actionable",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-ADMIN-API-05",
@@ -738,7 +738,7 @@
       "requirement": "settings changes do not silently alter unrelated modules",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-01",
@@ -748,7 +748,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-02",
@@ -758,7 +758,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-03",
@@ -768,7 +768,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-04",
@@ -778,7 +778,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-05",
@@ -788,7 +788,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-FRONTEND-06",
@@ -798,7 +798,7 @@
         "UI-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-TESTS-01",
@@ -806,7 +806,7 @@
       "requirement": "focused subsystem tests precede broad verification",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-TESTS-02",
@@ -814,7 +814,7 @@
       "requirement": "provider regressions have characterization tests",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-TESTS-03",
@@ -822,7 +822,7 @@
       "requirement": "runtime-visible changes require real flow smoke verification",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-TESTS-04",
@@ -830,7 +830,7 @@
       "requirement": "test maps trace features to verification commands",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-TESTS-05",
@@ -838,7 +838,7 @@
       "requirement": "handoff knowledge gates do not substitute for product tests",
       "parent_requirement_ids": [],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-01",
@@ -848,7 +848,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-02",
@@ -858,7 +858,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-03",
@@ -868,7 +868,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-04",
@@ -878,7 +878,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-05",
@@ -888,7 +888,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-DEPLOYMENT-RUNTIME-06",
@@ -898,7 +898,7 @@
         "OPS-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-01",
@@ -908,7 +908,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-02",
@@ -918,7 +918,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-03",
@@ -928,7 +928,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-04",
@@ -938,7 +938,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-05",
@@ -948,7 +948,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     },
     {
       "id": "DEEP-CONTINUITY-06",
@@ -958,7 +958,7 @@
         "KNOW-001"
       ],
       "status": "normative",
-      "source_commit": "9a57a8921e235351c57943af23724dc7e119474f"
+      "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75"
     }
   ],
   "principle": "These are durable project intent/behavior requirements for knowledge continuity; exact implementation is verified through traceability/source/runtime brains."

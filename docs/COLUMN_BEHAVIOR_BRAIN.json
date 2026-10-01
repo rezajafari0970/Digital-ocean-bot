@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "9a57a8921e235351c57943af23724dc7e119474f",
+  "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
   "scope": "live production public schema metadata enriched with commit-pinned static source/migration evidence; contains no application row data or secrets",
   "table_count": 58,
   "column_count": 595,
@@ -62,12 +62,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -1672,7 +1672,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -2441,7 +2441,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5112,7 +5112,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5171,7 +5171,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5647,7 +5647,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5701,7 +5701,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5837,7 +5837,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5876,7 +5876,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5937,7 +5937,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -5996,7 +5996,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -7111,7 +7111,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -8299,7 +8299,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -9461,7 +9461,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -9648,7 +9648,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -9770,12 +9770,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -11824,6 +11824,11 @@
       "definition": "TEXT NOT NULL",
       "reader_functions": [
         {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
+        },
+        {
           "name": "syncAccountAutomation",
           "file": "internal/adminapi/account_automation.go",
           "line": 9
@@ -11896,6 +11901,11 @@
       ],
       "writer_functions": [
         {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
+        },
+        {
           "name": "updateAccount",
           "file": "internal/adminapi/accounts_manage.go",
           "line": 33
@@ -11935,7 +11945,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -13136,7 +13151,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -13188,7 +13203,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -13235,7 +13250,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -13341,7 +13356,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -13458,7 +13473,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -13510,7 +13525,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17426,7 +17441,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17443,7 +17458,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17460,7 +17475,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17516,7 +17531,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17528,7 +17543,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17540,7 +17555,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -17610,12 +17625,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -19705,12 +19720,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -21315,7 +21330,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -21710,7 +21725,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -22762,12 +22777,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -24367,7 +24382,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -25896,12 +25911,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -29783,12 +29798,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -31428,7 +31443,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -31963,7 +31978,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -33413,7 +33433,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -35912,12 +35932,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -37732,7 +37752,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -41671,7 +41691,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -42481,12 +42501,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -44246,7 +44266,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -45871,7 +45891,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "ReconcileLocalState",
@@ -47406,7 +47426,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -49973,7 +49993,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -51288,12 +51308,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -52908,7 +52928,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -55751,12 +55776,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -59505,12 +59530,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -61145,7 +61170,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -63239,12 +63269,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -64854,7 +64884,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -66554,12 +66584,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -68264,7 +68294,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -69109,7 +69139,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -70089,12 +70119,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -71754,7 +71784,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -75303,12 +75333,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -77014,7 +77044,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -77180,7 +77210,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -77248,7 +77278,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -78288,12 +78318,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -81790,7 +81820,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -82390,7 +82420,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "clearPanelClientsLegacy",
@@ -82505,7 +82535,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -83665,12 +83695,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -85535,7 +85565,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -86536,7 +86566,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "clearPanelClientsLegacy",
@@ -87983,12 +88013,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -89648,7 +89678,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -91313,7 +91343,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -92472,12 +92502,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -95170,12 +95200,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -97374,7 +97404,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -98539,7 +98569,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -99254,12 +99284,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -100924,7 +100954,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -102144,7 +102174,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "updateAccount",
@@ -102709,12 +102739,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -106068,7 +106098,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -106608,12 +106638,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -108253,7 +108283,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -112144,7 +112174,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -112383,12 +112413,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -113967,6 +113997,11 @@
       "definition": "TEXT NOT NULL UNIQUE",
       "reader_functions": [
         {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
+        },
+        {
           "name": "accountPreview",
           "file": "internal/adminapi/account_preview.go",
           "line": 27
@@ -114098,7 +114133,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -115449,7 +115489,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -115598,7 +115638,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -115984,7 +116024,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -116123,7 +116163,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -116709,7 +116749,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -116843,7 +116883,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -117099,7 +117139,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -117218,7 +117258,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -120213,12 +120253,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -122849,12 +122889,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -124448,7 +124488,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -125297,7 +125342,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -125696,7 +125741,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -126393,7 +126438,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -128400,12 +128445,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -130795,7 +130840,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -133219,7 +133264,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -134672,7 +134717,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -134892,7 +134937,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -134992,7 +135037,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -136100,12 +136145,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -137755,7 +137800,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -141080,12 +141125,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -142720,7 +142765,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -143370,7 +143415,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -145251,7 +145296,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -145470,12 +145515,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -147056,7 +147101,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -147180,7 +147225,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -148836,7 +148881,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -148950,7 +148995,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -149179,12 +149224,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -152528,12 +152573,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -154203,7 +154248,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -156567,7 +156612,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -158483,7 +158528,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -159394,12 +159439,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -160998,7 +161043,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -161914,7 +161959,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -162992,12 +163037,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -164612,7 +164657,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -167000,12 +167045,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -168615,7 +168660,12 @@
         {
           "name": "start",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 25
+          "line": 23
+        },
+        {
+          "name": "main",
+          "file": "cmd/vultr-browser-session/main.go",
+          "line": 31
         },
         {
           "name": "syncAccountAutomation",
@@ -170678,12 +170728,12 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-manager/main.go",
-          "line": 69
+          "line": 72
         },
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -172333,7 +172383,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -173108,7 +173158,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",
@@ -173508,7 +173558,7 @@
         {
           "name": "main",
           "file": "cmd/vultr-browser-session/main.go",
-          "line": 49
+          "line": 31
         },
         {
           "name": "main",

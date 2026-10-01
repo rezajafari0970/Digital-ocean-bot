@@ -1,6 +1,6 @@
 # Blind Cross-Layer Knowledge Challenge
 
-Commit `9a57a8921e235351c57943af23724dc7e119474f` — **110 evidence-keyed challenges**.
+Commit `3ae7c9ab62846a93e4f65c4f5eef023d88599b75` — **110 evidence-keyed challenges**.
 
 These questions require cross-layer retrieval/composition rather than merely checking that an artifact exists. Answer keys are generated from commit-pinned knowledge evidence.
 

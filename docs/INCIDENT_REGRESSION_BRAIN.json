@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "9a57a8921e235351c57943af23724dc7e119474f",
+  "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
   "incident_count": 10,
-  "candidate_regression_commits_count": 198,
+  "candidate_regression_commits_count": 200,
   "incidents": [
     {
       "id": "INC-001",
@@ -181,6 +181,11 @@
           "subject": "fix output viewer and add near expiry filter"
         },
         {
+          "commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): recover stale interactive browser sessions"
+        },
+        {
           "commit": "9a57a8921e235351c57943af23724dc7e119474f",
           "date": "2026-10-01",
           "subject": "fix(vultr): clear stale browser display lock safely"
@@ -214,11 +219,6 @@
           "commit": "852d7034065ab9e5d41364a30f76f18e0684f5cb",
           "date": "2026-09-30",
           "subject": "fix(vultr): verify ssh key visibility before instance create"
-        },
-        {
-          "commit": "9fd0701cc92aa7276644b1df3250ad8cab483a06",
-          "date": "2026-09-29",
-          "subject": "trace output exclusion reasons"
         }
       ]
     },
@@ -242,6 +242,11 @@
           "commit": "20d022e6a570ee7b8a725133a8269c21713949ef",
           "date": "2026-09-29",
           "subject": "make output expiry exact and refresh efficient"
+        },
+        {
+          "commit": "6ce868b86114e5009f5a6cbf04fdc4f5bc4ec8bd",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr display recovery"
         },
         {
           "commit": "f85ba2dccbd27a3ca1ffcb9eda83604f5f33e1c0",
@@ -287,11 +292,6 @@
           "commit": "ed199f023f4bd16d9a8dd5f86048c010c2c700b9",
           "date": "2026-09-29",
           "subject": "fix output viewer and add near expiry filter"
-        },
-        {
-          "commit": "199c9cb924eaaac1add3d9dcdbe35c07bf2faec1",
-          "date": "2026-09-27",
-          "subject": "refresh volatile readiness before installer activation"
         }
       ]
     },
@@ -476,6 +476,11 @@
           "subject": "fix(vultr): accept root noVNC websocket alias"
         },
         {
+          "commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): recover stale interactive browser sessions"
+        },
+        {
           "commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
           "date": "2026-10-01",
           "subject": "feat(vultr): isolate interactive browser runtime"
@@ -504,11 +509,6 @@
           "commit": "cba955dbbde29e2a8704d4f309aef8edaa6c08f1",
           "date": "2026-09-30",
           "subject": "feat(vultr): support exact console capacity observations"
-        },
-        {
-          "commit": "1c0cb3e4f3cbfd7fe5e1bbc309dbaec6097419b3",
-          "date": "2026-09-30",
-          "subject": "fix(droplets): preserve create outcome across proxy checks"
         }
       ]
     },
@@ -670,6 +670,16 @@
           "subject": "test: isolate fresh-session exam answers from tracked knowledge"
         },
         {
+          "commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
+          "date": "2026-10-01",
+          "subject": "fix(vultr): recover stale interactive browser sessions"
+        },
+        {
+          "commit": "6ce868b86114e5009f5a6cbf04fdc4f5bc4ec8bd",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr display recovery"
+        },
+        {
           "commit": "9a57a8921e235351c57943af23724dc7e119474f",
           "date": "2026-10-01",
           "subject": "fix(vultr): clear stale browser display lock safely"
@@ -713,21 +723,21 @@
           "commit": "d89fee8a6e37012d1f5fea5e3907f1913f1faa50",
           "date": "2026-09-26",
           "subject": "feat: activate selected installers from waiting deployments"
-        },
-        {
-          "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
-          "date": "2026-09-23",
-          "subject": "feat add provider snapshot freshness and stale refresh"
-        },
-        {
-          "commit": "7a41658c0f2467c5bd5707c67e7958927d1a59a6",
-          "date": "2026-09-23",
-          "subject": "fix distinguish unknown provider stats from zero"
         }
       ]
     }
   ],
   "candidate_regression_commits": [
+    {
+      "commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
+      "date": "2026-10-01",
+      "subject": "fix(vultr): recover stale interactive browser sessions"
+    },
+    {
+      "commit": "6ce868b86114e5009f5a6cbf04fdc4f5bc4ec8bd",
+      "date": "2026-10-01",
+      "subject": "docs: refresh knowledge after Vultr display recovery"
+    },
     {
       "commit": "9a57a8921e235351c57943af23724dc7e119474f",
       "date": "2026-10-01",

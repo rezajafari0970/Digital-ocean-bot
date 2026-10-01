@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "9a57a8921e235351c57943af23724dc7e119474f",
+  "source_commit": "3ae7c9ab62846a93e4f65c4f5eef023d88599b75",
   "file_count": 698,
-  "total_lines": 40331,
+  "total_lines": 40318,
   "files": [
     {
       "path": "cmd/admin-bootstrap/main.go",
@@ -84,57 +84,52 @@
     },
     {
       "path": "cmd/vultr-browser-manager/main.go",
-      "sha256": "f899b4e7b9fafd39f64e53794d9e233a915dc20b8f575b85624f47c493401303",
-      "bytes": 2081,
-      "line_count": 102,
+      "sha256": "4d99face4e415ef4c14a398fd9e73de433a2a8c68cb4aa1e0b23666e0caa5ec7",
+      "bytes": 2230,
+      "line_count": 105,
       "symbols": [
         {
           "kind": "struct",
           "name": "manager",
-          "line": 17
+          "line": 18
         },
         {
           "kind": "func",
           "name": "portReady",
-          "line": 23
+          "line": 24
         },
         {
           "kind": "method",
           "name": "start",
-          "line": 32
-        },
-        {
-          "kind": "func",
-          "name": "main",
-          "line": 69
-        }
-      ]
-    },
-    {
-      "path": "cmd/vultr-browser-session/main.go",
-      "sha256": "e2e1796cced4b6f9697f27c6a78cc9c794173e2c861bcd8b170903b7b9229b3f",
-      "bytes": 3285,
-      "line_count": 118,
-      "symbols": [
-        {
-          "kind": "func",
-          "name": "wipe",
-          "line": 20
-        },
-        {
-          "kind": "func",
-          "name": "start",
-          "line": 25
-        },
-        {
-          "kind": "func",
-          "name": "clearStaleDisplay99",
           "line": 33
         },
         {
           "kind": "func",
           "name": "main",
-          "line": 49
+          "line": 72
+        }
+      ]
+    },
+    {
+      "path": "cmd/vultr-browser-session/main.go",
+      "sha256": "8fa1477f72eb3d5d34d256014e226c9c4ff0019cb6b85501e5b07436460e36f8",
+      "bytes": 3049,
+      "line_count": 102,
+      "symbols": [
+        {
+          "kind": "func",
+          "name": "wipe",
+          "line": 18
+        },
+        {
+          "kind": "func",
+          "name": "start",
+          "line": 23
+        },
+        {
+          "kind": "func",
+          "name": "main",
+          "line": 31
         }
       ]
     },

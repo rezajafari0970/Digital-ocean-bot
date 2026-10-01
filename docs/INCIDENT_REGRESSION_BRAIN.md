@@ -1,6 +1,6 @@
 # Historical Incident / Regression Brain
 
-Commit `9a57a8921e235351c57943af23724dc7e119474f` — **10 durable incident/regression classes**, **198 candidate regression-related commits** from recent history.
+Commit `3ae7c9ab62846a93e4f65c4f5eef023d88599b75` — **10 durable incident/regression classes**, **200 candidate regression-related commits** from recent history.
 
 This brain teaches a fresh session what previously went wrong, the durable lesson, and the guardrails that must not regress. Commit associations are lexical navigation candidates, not automatic proof of causality.
 
