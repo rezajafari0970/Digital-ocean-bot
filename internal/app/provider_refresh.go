@@ -74,8 +74,9 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			// Vultr's public API exposes current instances but not the account's
-			// Maximum Instances limit. Overlay the latest exact Console observation
-			// when present; current usage always remains API-derived.
+			// Maximum Instances limit. Overlay the latest proven capacity observation
+			// (manual/legacy Console evidence or API saturation evidence) when present;
+			// current usage always remains API-derived.
 			if rt.Config.Provider == "vultr" {
 				var observedLimit int
 				var observedAt time.Time

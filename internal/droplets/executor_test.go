@@ -3,6 +3,7 @@ package droplets
 import (
 	"context"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"testing"
 )
 
@@ -26,6 +27,19 @@ func (s *opStore) Reserve(_ context.Context, o jobs.Operation) (jobs.Operation, 
 }
 func (s *opStore) Get(context.Context, string, string) (jobs.Operation, error) { return s.saved, nil }
 func (s *opStore) Update(_ context.Context, o jobs.Operation) error            { s.saved = o; return nil }
+
+func TestCreateErrorCallbackReceivesProviderCapacityError(t *testing.T) {
+	store := &opStore{}
+	capacityErr := &providers.Error{Class: providers.ErrorCapacity, Operation: "create_server", Message: "account saturated"}
+	provider := &computeStub{createErr: capacityErr}
+	var seen error
+	e := Executor{Operations: store, Provider: provider, Gate: gateStub{}, OnCreateError: func(_ context.Context, err error) { seen = err }}
+	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
+	_, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
+	if err == nil || seen != capacityErr || store.saved.State != jobs.OperationFailed {
+		t.Fatalf("err=%v seen=%v state=%s", err, seen, store.saved.State)
+	}
+}
 
 func TestCreateIsIdempotent(t *testing.T) {
 	store := &opStore{}

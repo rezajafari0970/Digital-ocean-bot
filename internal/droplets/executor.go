@@ -14,10 +14,11 @@ var ErrMutationBlocked = errors.New("droplet mutation blocked")
 type MutationGate interface{ AllowMutation() error }
 
 type Executor struct {
-	Operations  jobs.Store
-	Provider    providers.ComputeDriver
-	Gate        MutationGate
-	EgressCheck func(context.Context) error
+	Operations    jobs.Store
+	Provider      providers.ComputeDriver
+	Gate          MutationGate
+	EgressCheck   func(context.Context) error
+	OnCreateError func(context.Context, error)
 }
 
 func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile) (jobs.Operation, error) {
@@ -53,6 +54,9 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	}
 	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {
+		if e.OnCreateError != nil {
+			e.OnCreateError(ctx, err)
+		}
 		class := providers.Class(err)
 		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {
 			reserved.State = jobs.OperationFailed

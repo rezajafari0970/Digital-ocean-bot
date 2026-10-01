@@ -27,6 +27,11 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		return workflow.Engine{}, err
 	}
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
+	if runtime.Config.Provider == "vultr" {
+		executor.OnCreateError = func(cbCtx context.Context, createErr error) {
+			c.recordVultrSaturation(cbCtx, accountID, compute, createErr)
+		}
+	}
 	var eg *network.EgressGuard
 	if runtime.Gateway != nil && !proxyAdapterByName(runtime.Config.ProxyAdapter).Capabilities().StickySession {
 		eg = &network.EgressGuard{Client: runtime.Gateway.Client}
