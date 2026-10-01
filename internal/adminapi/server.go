@@ -155,7 +155,11 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	target, _ := url.Parse("http://127.0.0.1:16080")
+	upstream := "http://127.0.0.1:16080"
+	if r.URL.Path == "/websockify" {
+		upstream = "http://127.0.0.1:15900"
+	}
+	target, _ := url.Parse(upstream)
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	if strings.HasPrefix(r.URL.Path, "/vultr-browser") {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
