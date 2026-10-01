@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+  "question_count": 80,
+  "questions": [
+    {
+      "id": 1,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestProxyRequiredFailsClosed` in `internal/network/guard_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 2,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestInstallerHashDeterministic` in `internal/provisioning/installer_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 3,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `apply` in `internal/panels/residentialsync/service.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 4,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `UpdateInboundRaw` in `internal/panels/sanaei/mutation.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 5,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestAccountGateRequiresHealthyProxy` in `internal/network/gate_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 6,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `doOnce` in `internal/providers/vultr/client.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 7,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Readiness` in `internal/provisioning/readiness.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 8,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `SaveScanSelection` in `internal/reality/store.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 9,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Create` in `internal/provisioning/script_registry.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 10,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `CreateSSHKey` in `internal/providers/vultr/mutation.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 11,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Create` in `internal/testharness/harness.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 12,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestConcurrentReadyRunsDoNotDuplicateCreate` in `internal/testharness/concurrency_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 13,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `normalizeCatalog` in `internal/providers/digitalocean/driver_v2.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 14,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `RearmPostInstall` in `internal/app/postinstall_rearm.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 15,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestHTTPGatewayIsAccountScoped` in `internal/network/proxy_gateway_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 16,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `probeStages` in `internal/provisioning/ssh.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 17,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Open` in `internal/providers/digitalocean/driver_v2.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 18,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `audit` in `internal/adminapi/status.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 19,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestShortID` in `internal/reality/credentials/generator_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 20,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestParseAPIErrorUsesCode` in `internal/providers/digitalocean/errors_parse_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 21,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `SyncCatalogs` in `internal/app/catalog_sync.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 22,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestResilientDoesNotBlindRetryMutation` in `internal/panels/sanaei/resilient_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 23,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `ReconcilePanel` in `internal/panels/desired/service.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 24,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Validate` in `internal/providers/digitalocean/client.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 25,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `TestProvisionEngineCompletesAndDoesNotRepeat` in `internal/provisioning/engine_test.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 26,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `login` in `internal/panels/sanaei/resilient.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 27,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Store` in `internal/auth/service.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 28,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `Compare` in `internal/resources/reconcile.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 29,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `doPOST` in `internal/panels/sanaei/ssh_session_executor_v2_post.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 30,
+      "metric": "conceptual",
+      "prompt": "Closed-book: for `syncAccountAutomation` in `internal/adminapi/account_automation.go`, give package, previous/next symbol, calls, DB reads/writes, routes, and side effects."
+    },
+    {
+      "id": 31,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/reality/credentials/generator_test.go`."
+    },
+    {
+      "id": 32,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/resources/reconcile.go`."
+    },
+    {
+      "id": 33,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/panels/sanaei/installer.go`."
+    },
+    {
+      "id": 34,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/reality/runner.go`."
+    },
+    {
+      "id": 35,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `cmd/vultr-browser-session/main.go`."
+    },
+    {
+      "id": 36,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `cmd/vultr-capacity-probe/main.go`."
+    },
+    {
+      "id": 37,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/network/client.go`."
+    },
+    {
+      "id": 38,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/droplets/model.go`."
+    },
+    {
+      "id": 39,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/panels/sanaei/installer_adapter.go`."
+    },
+    {
+      "id": 40,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/provisioning/installer_executor.go`."
+    },
+    {
+      "id": 41,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/panels/sanaei/session_executor.go`."
+    },
+    {
+      "id": 42,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/adminapi/proxy_health.go`."
+    },
+    {
+      "id": 43,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/auth/service_test.go`."
+    },
+    {
+      "id": 44,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/resources/model.go`."
+    },
+    {
+      "id": 45,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/network/guard_test.go`."
+    },
+    {
+      "id": 46,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/provisioning/readiness.go`."
+    },
+    {
+      "id": 47,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/panels/realitycontract/contract.go`."
+    },
+    {
+      "id": 48,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/app/account_state.go`."
+    },
+    {
+      "id": 49,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/app/panel.go`."
+    },
+    {
+      "id": 50,
+      "metric": "topology",
+      "prompt": "Closed-book: list ordered symbols in `internal/providers/provider.go`."
+    },
+    {
+      "id": 51,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `POST /api/v1/install-scripts`?"
+    },
+    {
+      "id": 52,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `PUT /api/v1/proxies/{id}`?"
+    },
+    {
+      "id": 53,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `POST /api/v1/residential-proxies/{id}/test`?"
+    },
+    {
+      "id": 54,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `PUT /api/v1/residential-proxies/{id}`?"
+    },
+    {
+      "id": 55,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `POST /api/v1/auth/logout`?"
+    },
+    {
+      "id": 56,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `GET /api/v1/accounts/{id}/capacity`?"
+    },
+    {
+      "id": 57,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `DELETE /api/v1/accounts/{id}`?"
+    },
+    {
+      "id": 58,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `GET /api/v1/configs`?"
+    },
+    {
+      "id": 59,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `GET /api/v1/config-panels`?"
+    },
+    {
+      "id": 60,
+      "metric": "topology",
+      "prompt": "Closed-book: handler for `POST /api/v1/accounts/preview`?"
+    },
+    {
+      "id": 61,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 17-24 of `cmd/admin-bootstrap/main.go`."
+    },
+    {
+      "id": 62,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 105-112 of `cmd/worker/main.go`."
+    },
+    {
+      "id": 63,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 9-16 of `internal/accounts/cell_test.go`."
+    },
+    {
+      "id": 64,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 41-47 of `internal/adminapi/account_options.go`."
+    },
+    {
+      "id": 65,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 33-40 of `cmd/cleanup-test-droplet/main.go`."
+    },
+    {
+      "id": 66,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 1-8 of `internal/accounts/context_test.go`."
+    },
+    {
+      "id": 67,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 65-72 of `internal/adminapi/accounts_manage.go`."
+    },
+    {
+      "id": 68,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 1-8 of `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 69,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 121-128 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 70,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 177-184 of `cmd/worker/main.go`."
+    },
+    {
+      "id": 71,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 17-24 of `cmd/vultr-capacity-probe/main.go`."
+    },
+    {
+      "id": 72,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 161-168 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 73,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 25-32 of `internal/adminapi/account_options.go`."
+    },
+    {
+      "id": 74,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 1-8 of `cmd/api/main.go`."
+    },
+    {
+      "id": 75,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 217-224 of `internal/adminapi/accounts_manage.go`."
+    },
+    {
+      "id": 76,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 129-136 of `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 77,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 49-56 of `internal/adminapi/accounts_write.go`."
+    },
+    {
+      "id": 78,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 25-32 of `internal/adminapi/account_preview.go`."
+    },
+    {
+      "id": 79,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 17-24 of `internal/adminapi/auth.go`."
+    },
+    {
+      "id": 80,
+      "metric": "verbatim",
+      "prompt": "Closed-book: reproduce exactly lines 25-32 of `cmd/admin-bootstrap/main.go`."
+    }
+  ],
+  "verbatim_coverage_percent": 5.67
+}
