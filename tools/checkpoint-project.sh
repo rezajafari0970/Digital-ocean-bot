@@ -9,6 +9,7 @@ python3 tools/build-runtime-map.py
 python3 tools/build-source-knowledge.py
 python3 tools/build-semantic-knowledge.py
 python3 tools/build-function-behavior-brain.py
+python3 tools/build-column-behavior-brain.py
 python3 tools/build-deep-requirements-brain.py
 python3 tools/build-impact-graph.py
 python3 tools/build-frontend-brain.py
