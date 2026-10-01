@@ -1,0 +1,2501 @@
+{
+  "schema_version": 1,
+  "source_commit": "7753b590b248953d1ddbef4a1ec1f2b7f16622cd",
+  "challenge_count": 110,
+  "categories": {
+    "route-chain": 20,
+    "db-chain": 20,
+    "state-chain": 15,
+    "ui-chain": 15,
+    "history-chain": 10,
+    "test-chain": 10,
+    "intent-chain": 10,
+    "line-recall": 10
+  },
+  "challenges": [
+    {
+      "id": 1,
+      "category": "route-chain",
+      "question": "Where is GET /healthz handled?",
+      "answer_key": {
+        "handler": "health",
+        "file": "internal/adminapi/server.go",
+        "line": 127
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "route-chain",
+      "question": "Where is GET /readyz handled?",
+      "answer_key": {
+        "handler": "ready",
+        "file": "internal/adminapi/server.go",
+        "line": 130
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 3,
+      "category": "route-chain",
+      "question": "Where is GET /version handled?",
+      "answer_key": {
+        "handler": "version",
+        "file": "internal/adminapi/status.go",
+        "line": 36
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 4,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/auth/login handled?",
+      "answer_key": {
+        "handler": "login",
+        "file": "internal/adminapi/auth.go",
+        "line": 19
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 5,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/auth/logout handled?",
+      "answer_key": {
+        "handler": "logout",
+        "file": "internal/adminapi/auth.go",
+        "line": 40
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 6,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts handled?",
+      "answer_key": {
+        "handler": "createAccount",
+        "file": "internal/adminapi/accounts_write.go",
+        "line": 40
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 7,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts/preview handled?",
+      "answer_key": {
+        "handler": "accountPreview",
+        "file": "internal/adminapi/account_preview.go",
+        "line": 27
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 8,
+      "category": "route-chain",
+      "question": "Where is PUT /api/v1/accounts/{id} handled?",
+      "answer_key": {
+        "handler": "updateAccount",
+        "file": "internal/adminapi/accounts_manage.go",
+        "line": 33
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 9,
+      "category": "route-chain",
+      "question": "Where is DELETE /api/v1/accounts/{id} handled?",
+      "answer_key": {
+        "handler": "deleteAccount",
+        "file": "internal/adminapi/accounts_manage.go",
+        "line": 234
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 10,
+      "category": "route-chain",
+      "question": "Where is GET /api/v1/accounts/{id}/options handled?",
+      "answer_key": {
+        "handler": "accountOptions",
+        "file": "internal/adminapi/account_options.go",
+        "line": 10
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts/{id}/identity handled?",
+      "answer_key": {
+        "handler": "accountIdentity",
+        "file": "internal/adminapi/account_identity.go",
+        "line": 8
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 12,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts/{id}/preflight handled?",
+      "answer_key": {
+        "handler": "accountPreflight",
+        "file": "internal/adminapi/account_preflight.go",
+        "line": 11
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 13,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts/{id}/console-session handled?",
+      "answer_key": {
+        "handler": "createVultrBrowserTicket",
+        "file": "internal/adminapi/server.go",
+        "line": 165
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 14,
+      "category": "route-chain",
+      "question": "Where is GET /vultr-browser/{path...} handled?",
+      "answer_key": {
+        "handler": "vultrBrowserProxy",
+        "file": "internal/adminapi/server.go",
+        "line": 139
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 15,
+      "category": "route-chain",
+      "question": "Where is GET /websockify handled?",
+      "answer_key": {
+        "handler": "vultrBrowserProxy",
+        "file": "internal/adminapi/server.go",
+        "line": 139
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 16,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/proxies handled?",
+      "answer_key": {
+        "handler": "createProxy",
+        "file": "internal/adminapi/proxies_write.go",
+        "line": 31
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 17,
+      "category": "route-chain",
+      "question": "Where is PUT /api/v1/proxies/{id} handled?",
+      "answer_key": {
+        "handler": "updateProxy",
+        "file": "internal/adminapi/proxies_manage.go",
+        "line": 8
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 18,
+      "category": "route-chain",
+      "question": "Where is DELETE /api/v1/proxies/{id} handled?",
+      "answer_key": {
+        "handler": "deleteProxy",
+        "file": "internal/adminapi/proxies_manage.go",
+        "line": 67
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 19,
+      "category": "route-chain",
+      "question": "Where is GET /api/v1/proxies/{id} handled?",
+      "answer_key": {
+        "handler": "proxyDetails",
+        "file": "internal/adminapi/proxy_details.go",
+        "line": 8
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 20,
+      "category": "route-chain",
+      "question": "Where is GET /api/v1/residential-proxies handled?",
+      "answer_key": {
+        "handler": "residentialProxies",
+        "file": "internal/adminapi/residential.go",
+        "line": 20
+      },
+      "evidence": [
+        "SYMBOL_INDEX"
+      ]
+    },
+    {
+      "id": 21,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.id?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          },
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 22,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.account_id?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          },
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 23,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.old_limit?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          },
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 24,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.new_limit?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          },
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 25,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.delta?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          },
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 26,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.detected_at?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "accounts",
+            "file": "internal/adminapi/resources.go",
+            "line": 10
+          }
+        ],
+        "writers": []
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 27,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.snapshot_id?",
+      "answer_key": {
+        "added_by": "000038_capacity_history.up.sql",
+        "readers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ],
+        "writers": [
+          {
+            "name": "RefreshProviderSnapshots",
+            "file": "internal/app/provider_refresh.go",
+            "line": 13
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 28,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.account_id?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 29,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.timezone?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "ensureActiveAccountProxy",
+            "file": "internal/app/proxy_pool.go",
+            "line": 9
+          },
+          {
+            "name": "stickyConfig",
+            "file": "internal/app/sticky_proxy.go",
+            "line": 50
+          }
+        ],
+        "writers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "testAccountProxy",
+            "file": "internal/adminapi/proxy_health.go",
+            "line": 12
+          },
+          {
+            "name": "ensureActiveAccountProxy",
+            "file": "internal/app/proxy_pool.go",
+            "line": 9
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 30,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.locale?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "ensureActiveAccountProxy",
+            "file": "internal/app/proxy_pool.go",
+            "line": 9
+          },
+          {
+            "name": "stickyConfig",
+            "file": "internal/app/sticky_proxy.go",
+            "line": 50
+          }
+        ],
+        "writers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "testAccountProxy",
+            "file": "internal/adminapi/proxy_health.go",
+            "line": 12
+          },
+          {
+            "name": "ensureActiveAccountProxy",
+            "file": "internal/app/proxy_pool.go",
+            "line": 9
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 31,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.exit_ip?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 32,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.subnet_key?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 33,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.asn?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 34,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.country?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 35,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.updated_at?",
+      "answer_key": {
+        "added_by": "000041_account_network_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "refreshNetworkIdentityIfDue",
+            "file": "internal/adminapi/network_identity_auto.go",
+            "line": 55
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 36,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.sticky_session?",
+      "answer_key": {
+        "added_by": "000048_sticky_proxy_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 37,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.preferred_country_code?",
+      "answer_key": {
+        "added_by": "000048_sticky_proxy_identity.up.sql",
+        "readers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "EnsureFreshNetworkIdentity",
+            "file": "internal/app/network_identity.go",
+            "line": 59
+          },
+          {
+            "name": "Account",
+            "file": "internal/app/repository.go",
+            "line": 28
+          }
+        ],
+        "writers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "EnsureFreshNetworkIdentity",
+            "file": "internal/app/network_identity.go",
+            "line": 59
+          },
+          {
+            "name": "stickyConfig",
+            "file": "internal/app/sticky_proxy.go",
+            "line": 50
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 38,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.preferred_country?",
+      "answer_key": {
+        "added_by": "000048_sticky_proxy_identity.up.sql",
+        "readers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "stickyConfig",
+            "file": "internal/app/sticky_proxy.go",
+            "line": 50
+          }
+        ],
+        "writers": [
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "stickyConfig",
+            "file": "internal/app/sticky_proxy.go",
+            "line": 50
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 39,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.rotation_started_at?",
+      "answer_key": {
+        "added_by": "000048_sticky_proxy_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 40,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.fallback_active?",
+      "answer_key": {
+        "added_by": "000048_sticky_proxy_identity.up.sql",
+        "readers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ],
+        "writers": [
+          {
+            "name": "updateAccount",
+            "file": "internal/adminapi/accounts_manage.go",
+            "line": 33
+          },
+          {
+            "name": "accountDashboard",
+            "file": "internal/adminapi/dashboard.go",
+            "line": 23
+          },
+          {
+            "name": "updateProxy",
+            "file": "internal/adminapi/proxies_manage.go",
+            "line": 8
+          }
+        ]
+      },
+      "evidence": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ]
+    },
+    {
+      "id": 41,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "answer_key": {
+        "function": "accountPreflight",
+        "file": "internal/adminapi/account_preflight.go",
+        "line": 11,
+        "writes": [
+          {
+            "line": 71,
+            "text": "providerState := app.ProviderStateActive",
+            "states": []
+          },
+          {
+            "line": 75,
+            "text": "providerState = app.ClassifyAccountProviderError(err, mode == \"proxy_required\")",
+            "states": []
+          }
+        ],
+        "guards": []
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 42,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving DELETED, PROVISIONING, READY?",
+      "answer_key": {
+        "function": "deleteAccount",
+        "file": "internal/adminapi/accounts_manage.go",
+        "line": 234,
+        "writes": [
+          {
+            "line": 263,
+            "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {",
+            "states": [
+              "PROVISIONING",
+              "READY"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 248,
+            "text": "if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {"
+          },
+          {
+            "line": 263,
+            "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 43,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving CREATE_DROPLET, DELETED, DELETE_DROPLET?",
+      "answer_key": {
+        "function": "accountDashboard",
+        "file": "internal/adminapi/dashboard.go",
+        "line": 23,
+        "writes": [
+          {
+            "line": 45,
+            "text": "providerState := \"ACTIVE\"",
+            "states": []
+          },
+          {
+            "line": 49,
+            "text": "providerState = v",
+            "states": []
+          }
+        ],
+        "guards": [
+          {
+            "line": 48,
+            "text": "if v, ok := runtimeMeta[\"provider_state\"].(string); ok && v != \"\" {"
+          },
+          {
+            "line": 59,
+            "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state='active'),count(*) FILTER(WHERE state='active' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1`, id).Scan(&total, &managed, &active)"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 44,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "answer_key": {
+        "function": "accountDiscovery",
+        "file": "internal/adminapi/discovery.go",
+        "line": 12,
+        "writes": [
+          {
+            "line": 20,
+            "text": "if semanticState == app.ProviderStateActive && observationError == \"\" {",
+            "states": []
+          },
+          {
+            "line": 46,
+            "text": "state := app.ClassifyAccountProviderError(err, mode == \"proxy_required\")",
+            "states": []
+          }
+        ],
+        "guards": [
+          {
+            "line": 19,
+            "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&semanticState, &observationError)"
+          },
+          {
+            "line": 20,
+            "text": "if semanticState == app.ProviderStateActive && observationError == \"\" {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 45,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving INSTALL_FAILED, INSTALL_ROLLED_BACK, WAITING_INSTALLER?",
+      "answer_key": {
+        "function": "rearmDeploymentInstaller",
+        "file": "internal/adminapi/installer_rearm.go",
+        "line": 9,
+        "writes": [
+          {
+            "line": 47,
+            "text": "if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET installer_generation=$2,state='WAITING_INSTALLER',current_step='installer_rearmed',last_error='',updated_at=now() WHERE id=$1`, id, next); err != nil {",
+            "states": [
+              "WAITING_INSTALLER"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 29,
+            "text": "if err = tx.QueryRowContext(r.Context(), `SELECT state,installer_generation FROM deployments WHERE id=$1 FOR UPDATE`, id).Scan(&state, &generation); err != nil {"
+          },
+          {
+            "line": 33,
+            "text": "if state != \"INSTALL_FAILED\" && state != \"INSTALL_ROLLED_BACK\" {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 46,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving WAITING_INSTALLER?",
+      "answer_key": {
+        "function": "selectDeploymentInstaller",
+        "file": "internal/adminapi/installer_selection.go",
+        "line": 8,
+        "writes": [
+          {
+            "line": 25,
+            "text": "res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,generation,installer_name,installer_version,source) SELECT id,installer_generation,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id,generation) DO NOTHING`, id, x.Name, x.Version)",
+            "states": [
+              "WAITING_INSTALLER"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 25,
+            "text": "res, err := s.DB.ExecContext(r.Context(), `INSERT INTO deployment_installer_selections(deployment_id,generation,installer_name,installer_version,source) SELECT id,installer_generation,$2,$3,'operator' FROM deployments WHERE id=$1 AND state='WAITING_INSTALLER' ON CONFLICT(deployment_id,generation) DO NOTHING`, id, x.Name, x.Version)"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 47,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving PANEL_COMPLETE, READY?",
+      "answer_key": {
+        "function": "WarmOutputCache",
+        "file": "internal/adminapi/output.go",
+        "line": 128,
+        "writes": [
+          {
+            "line": 142,
+            "text": "WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'",
+            "states": [
+              "PANEL_COMPLETE"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 142,
+            "text": "WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 48,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving PANEL_COMPLETE, READY?",
+      "answer_key": {
+        "function": "outputSnapshotResponse",
+        "file": "internal/adminapi/output_snapshot.go",
+        "line": 84,
+        "writes": [
+          {
+            "line": 85,
+            "text": "where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `",
+            "states": [
+              "PANEL_COMPLETE",
+              "READY"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 85,
+            "text": "where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 49,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving DELETED, READY?",
+      "answer_key": {
+        "function": "accounts",
+        "file": "internal/adminapi/resources.go",
+        "line": 10,
+        "writes": [
+          {
+            "line": 11,
+            "text": "rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.provider,a.enabled,a.created_at,n.mode,COALESCE(p.name,''),COALESCE(a.preferred_regions,'[]'::jsonb),COALESCE(a.preferred_sizes,'[]'::jsonb),COALESCE(a.preferred_images,'[]'::jsonb),COALESCE(a.preferred_image,''),COALESCE(a.server_lifetime_min_seconds,a.server_lifetime_seconds),COALESCE(a.server_lifetime_max_seconds,a.server_lifetime_seconds),a.auto_interval_seconds,a.auto",
+            "states": [
+              "DELETED"
+            ]
+          },
+          {
+            "line": 83,
+            "text": "providerState := providerStateDB",
+            "states": []
+          }
+        ],
+        "guards": [
+          {
+            "line": 11,
+            "text": "rows, err := s.DB.QueryContext(r.Context(), `SELECT a.id::text,a.name,COALESCE(a.email,''),COALESCE(a.preferred_region,''),a.provider,a.enabled,a.created_at,n.mode,COALESCE(p.name,''),COALESCE(a.preferred_regions,'[]'::jsonb),COALESCE(a.preferred_sizes,'[]'::jsonb),COALESCE(a.preferred_images,'[]'::jsonb),COALESCE(a.preferred_image,''),COALESCE(a.server_lifetime_min_seconds,a.server_lifetime_seconds),COALESCE(a.server_lifetime_max_seconds,a.server_lifetime_seconds),a.auto_interval_seconds,a.auto"
+          },
+          {
+            "line": 27,
+            "text": "if err := rows.Scan(&id, &name, &email, &region, &provider, &enabled, &created, &mode, &proxy, &regions, &sizes, &images, &image, &lifetimeMin, &lifetimeMax, &interval, &batch, &spacingMinutes, &spacingMaxMinutes, &concurrent, &lifetime, &proxyID, &runtimeStatus, &runtimeDetail, &desired, &fallbackAnyRegion, &dropletLimit, &limitKnown, &providerDroplets, &capacityCheckedAt, &lastDropletCreated, &lastDropletDeleted, &nextDropletDelete, &capacityOld, &capacityNew, &capacityDelta, &capacityChangedA"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 50,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving FAILED, INSTALL_FAILED, INSTALL_ROLLED_BACK?",
+      "answer_key": {
+        "function": "system",
+        "file": "internal/adminapi/status.go",
+        "line": 28,
+        "writes": [],
+        "guards": [
+          {
+            "line": 31,
+            "text": "_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`).Scan(&deployments)"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 51,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "answer_key": {
+        "function": "ProviderStateRuntimeStatus",
+        "file": "internal/app/account_state.go",
+        "line": 44,
+        "writes": [
+          {
+            "line": 45,
+            "text": "if state == ProviderStateActive {",
+            "states": []
+          }
+        ],
+        "guards": [
+          {
+            "line": 45,
+            "text": "if state == ProviderStateActive {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 52,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "answer_key": {
+        "function": "RequireCreateCapacity",
+        "file": "internal/app/capacity_guard.go",
+        "line": 31,
+        "writes": [],
+        "guards": [
+          {
+            "line": 35,
+            "text": "if err := c.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != \"READY\" || providerState != ProviderStateActive || providerError != \"\" {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 53,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving DELETED, READY?",
+      "answer_key": {
+        "function": "ReconcileLocalState",
+        "file": "internal/app/consistency.go",
+        "line": 11,
+        "writes": [
+          {
+            "line": 31,
+            "text": "resourceState := \"provisioning\"",
+            "states": []
+          },
+          {
+            "line": 32,
+            "text": "if providerState != ProviderStateLocked && (state == \"READY\" || state == \"EXPIRING\" || state == \"RETIRING\") {",
+            "states": [
+              "READY"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 19,
+            "text": "rows, err := c.DB.QueryContext(ctx, `SELECT r.id::text,r.account_id::text,r.provider_resource_id,r.state,r.profile,a.provider_state,a.provider FROM droplets r JOIN accounts a ON a.id=r.account_id WHERE r.provider_resource_id IS NOT NULL AND r.state<>'DELETED'`)"
+          },
+          {
+            "line": 27,
+            "text": "if rows.Scan(&did, &aid, &pid, &state, &profile, &providerState, &providerName) != nil {"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 54,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving PANEL_COMPLETE, READY?",
+      "answer_key": {
+        "function": "StartDeployment",
+        "file": "internal/app/deploy.go",
+        "line": 22,
+        "writes": [
+          {
+            "line": 153,
+            "text": "if state == \"PANEL_COMPLETE\" || state == \"READY\" {",
+            "states": [
+              "PANEL_COMPLETE",
+              "READY"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 55,
+            "text": "if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != \"READY\" || providerState != ProviderStateActive || providerError != \"\" {"
+          },
+          {
+            "line": 146,
+            "text": "rows, qerr := c.DB.QueryContext(ctx, \"SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200\", accountID, pq.Array(images))"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 55,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving PROVISIONING, READY?",
+      "answer_key": {
+        "function": "MarkReady",
+        "file": "internal/app/deployment_ready.go",
+        "line": 16,
+        "writes": [
+          {
+            "line": 24,
+            "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)",
+            "states": [
+              "PROVISIONING",
+              "READY"
+            ]
+          }
+        ],
+        "guards": [
+          {
+            "line": 24,
+            "text": "_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)"
+          }
+        ]
+      },
+      "evidence": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 56,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/accounts and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "openAccountWizard",
+        "file": "web/static/app.js",
+        "line": 2,
+        "dom": [],
+        "loading": [
+          "async function openAccountWizard(){const allProviders=await api('/api/v1/providers'),providerList=allProviders.filter(x=>x.status==='ready');if(!providerList.length)throw Error('No provider driver is registered');let proxies=[{id:'',name:'No proxy — Direct server IP'}];try{const p=await api('/api/v1",
+          "$('#modalSubmit').disabled=true;",
+          "$('#modalSubmit').disabled="
+        ],
+        "errors": [
+          "async function openAccountWizard(){const allProviders=await api('/api/v1/providers'),providerList=allProviders.filter(x=>x.status==='ready');if(!providerList.length)throw Error('No provider driver is registered');let proxies=[{id:'',name:'No proxy — Direct server IP'}];try{const p=await api('/api/v1",
+          "$('#modalSubmit').hidden=false}catch(e){$('#modalError').textContent=e.message}finally{b.classList.remove('busy')}};$('#modalForm').onsubmit=null;$('#modalSubmit').onclick=async()=>{if(!cache.accountPreview)return;const f=new FormData($('#modalForm')),d=cache.accountPreview;const proxyIDs=[f.get('pr",
+          "$('#modalError').textContent="
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 57,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/accounts and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "accountRefresh",
+        "file": "web/static/app.js",
+        "line": 52,
+        "dom": [
+          "[data-action="
+        ],
+        "loading": [
+          "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\"
+        ],
+        "errors": [
+          "window.accountRefresh=async id=>{const b=document.querySelector('[data-action=\"account-refresh\"][data-id=\"'+id+'\"]');if(b){b.classList.add('busy');b.textContent='Refreshing...'}try{const d=await api('/api/v1/accounts/'+id+'/refresh',{method:'POST'});cache.accounts=null;toast('Account data refreshed\\"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 58,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/proxies/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "editProxy",
+        "file": "web/static/app.js",
+        "line": 53,
+        "dom": [
+          ".fieldEye"
+        ],
+        "loading": [],
+        "errors": [
+          "window.editProxy=async id=>{try{const r=await api('/api/v1/proxies/'+id);$('#modalTitle').textContent='Edit proxy';$('#modalFields').innerHTML='<label>Name<input name=\"name\" value=\"'+esc(r.name)+'\"></label><label>Type<select name=\"type\"><option value=\"auto\">Auto detect</option><option value=\"http\">H"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 59,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/proxies/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "testProxy",
+        "file": "web/static/app.js",
+        "line": 55,
+        "dom": [
+          "[data-action=\\"
+        ],
+        "loading": [
+          "window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy healthy\\nType: '+d.type+'\\nExit IP: '+d.exit_ip+'\\nCountry: '+d.country+' ('+d"
+        ],
+        "errors": [
+          "window.testProxy=async id=>{const b=document.querySelector('[data-action=\\\"test-proxy\\\"][data-id=\\\"'+id+'\\\"]');if(b)b.classList.add('busy');try{const d=await api('/api/v1/proxies/'+id+'/test',{method:'POST'});alert('Proxy healthy\\nType: '+d.type+'\\nExit IP: '+d.exit_ip+'\\nCountry: '+d.country+' ('+d"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 60,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/build-activity and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "parseMinutesExpr",
+        "file": "web/static/app.js",
+        "line": 61,
+        "dom": [],
+        "loading": [
+          "const renderBuild=async()=>{current='build-activity';sessionStorage.setItem('page',current);$('#title').textContent='Build Activity';$('#primaryAction').hidden=true;const c=$('#content');c.innerHTML='<p class=\"muted\">Loading build activity...</p>';try{const [d,errs]=await Promise.all([api('/api/v1/b"
+        ],
+        "errors": [
+          "function parseMinutesExpr(v){v=String(v||'').trim();if(!/^[0-9.]+(?:\\s*\\*\\s*[0-9.]+)*$/.test(v))throw Error('Build spacing must be minutes, e.g. 30 or 6*60');const n=v.split('*').reduce((a,x)=>a*Number(x.trim()),1);if(!Number.isFinite(n)||n<1||n>525600)throw Error('Build spacing is out of range');re",
+          "const renderBuild=async()=>{current='build-activity';sessionStorage.setItem('page',current);$('#title').textContent='Build Activity';$('#primaryAction').hidden=true;const c=$('#content');c.innerHTML='<p class=\"muted\">Loading build activity...</p>';try{const [d,errs]=await Promise.all([api('/api/v1/b"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 61,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/build-activity/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "openProvisionDetail",
+        "file": "web/static/app.js",
+        "line": 70,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "window.openProvisionDetail=async id=>{try{const d=await api('/api/v1/build-activity/'+id+'/provision');$('#modalTitle').textContent='SSH & Installation Diagnostics';const steps=(d.steps||[]).map(x=>'<tr><td>'+esc(x.step)+'</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.terminal?'Terminal':x.next_retry_"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 62,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/configs and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "openConfigForm",
+        "file": "web/static/app.js",
+        "line": 75,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "$('#modalFields [name=\"sni_selection_mode\"]').value=x.sni_selection_mode||'scored';$('#modalError').textContent='';$('#modal').showModal();",
+          "$('#modalForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),ports=String(f.get('ports')||'').split(',').map(v=>Number(v.trim())).filter(Number.isInteger),sn=String(f.get('manual_snis')||'').split(/\\r?\\n|,/).map(v=>v.trim()).filter(Boolean);if(!ports.length){$('#modalError').",
+          "}catch(e){alert(e.message)}"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 63,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/configs and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "editConfig",
+        "file": "web/static/app.js",
+        "line": 84,
+        "dom": [],
+        "loading": [],
+        "errors": []
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 64,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/config-capacity/cleanup/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "deleteAllCapacityClients",
+        "file": "web/static/app.js",
+        "line": 87,
+        "dom": [
+          "[data-action="
+        ],
+        "loading": [
+          "window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-"
+        ],
+        "errors": [
+          "window.deleteAllCapacityClients=async()=>{if(!confirm('Delete ALL managed Reality clients from every eligible Sanaei panel? Reality creation will be disabled and stay disabled.'))return;if(!confirm('This is destructive. Continue deleting all clients?'))return;const btn=document.querySelector('[data-"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 65,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/output/share and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "openSnapshot",
+        "file": "web/static/app.js",
+        "line": 93,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "window.openSnapshot=async mode=>{try{const d=await api('/api/v1/output/share',{method:'POST'}),u=location.origin+d.url+outputQuery(mode),w=window.open(u,'_blank');if(!w)toast('Popup blocked','error')}catch(e){toast(e.message,'error')}};"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 66,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/output/share and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "shareSnapshot",
+        "file": "web/static/app.js",
+        "line": 94,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "window.shareSnapshot=async mode=>{try{const d=await api('/api/v1/output/share',{method:'POST'}),u=location.origin+d.url+outputQuery(mode);await navigator.clipboard.writeText(u);toast('Share link copied')}catch(e){toast('Share link failed: '+e.message,'error')}};"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 67,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/residential-proxies and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "openResidentialForm",
+        "file": "web/static/app.js",
+        "line": 96,
+        "dom": [
+          ".residentialEye"
+        ],
+        "loading": [],
+        "errors": [
+          "async function openResidentialForm(existing=null){const x=existing||{};$('#modalTitle').textContent=existing?'Edit Residential proxy':'New Residential proxy';$('#modalFields').innerHTML='<label>Name<input name=\"name\" value=\"'+esc(x.name||'')+'\" required></label><label>Type<select name=\"type\"><option"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 68,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/residential-proxies and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "editResidential",
+        "file": "web/static/app.js",
+        "line": 97,
+        "dom": [],
+        "loading": [],
+        "errors": []
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 69,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/residential-proxies/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "testResidential",
+        "file": "web/static/app.js",
+        "line": 98,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "window.testResidential=async id=>{try{const d=await api('/api/v1/residential-proxies/'+id+'/test',{method:'POST'});toast('Residential test passed'+(d?.exit_ip?'\\nIP: '+d.exit_ip:'')+(d?.country?'\\nCountry: '+d.country:''));load('residential')}catch(e){toast('Residential test failed: '+e.message,'err"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 70,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/residential-proxies/ and what UI evidence surrounds it?",
+      "answer_key": {
+        "function": "deleteResidential",
+        "file": "web/static/app.js",
+        "line": 99,
+        "dom": [],
+        "loading": [],
+        "errors": [
+          "window.deleteResidential=async id=>{if(!confirm('Delete this Residential proxy?'))return;try{await api('/api/v1/residential-proxies/'+id,{method:'DELETE'});load('residential')}catch(e){toast(e.message,'error')}};"
+        ]
+      },
+      "evidence": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ]
+    },
+    {
+      "id": 71,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to duplicate/competing installer execution?",
+      "answer_key": {
+        "lesson": "Long-running install work needs one controlled execution owner; in-process locks alone are insufficient across processes.",
+        "prevent": [
+          "single lifecycle owner",
+          "per-resource coordination",
+          "observable install diagnostics"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 72,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to shared account egress/proxy identity?",
+      "answer_key": {
+        "lesson": "Account network identity must remain isolated; shared proxy state is a regression.",
+        "prevent": [
+          "per-account isolation",
+          "fail-closed required proxy"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 73,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to stale output visibility / approximate expiry?",
+      "answer_key": {
+        "lesson": "Use persisted exact visibility/expiry semantics and apply them consistently to direct/share output.",
+        "prevent": [
+          "visible_until",
+          "canonical validity filter",
+          "avoid coarse TTL-only logic"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 74,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to high-frequency refresh causing memory pressure/OOM risk?",
+      "answer_key": {
+        "lesson": "Keep Output fast but use lightweight/separated refresh rather than unbounded expensive refresh work.",
+        "prevent": [
+          "bounded refresh work",
+          "live API path",
+          "avoid SSH aggregation"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 75,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to DigitalOcean-specific assumptions leaking into generic provider paths?",
+      "answer_key": {
+        "lesson": "Generic lifecycle must not validate/catalog/reconcile with DO-only assumptions.",
+        "prevent": [
+          "provider-neutral contracts",
+          "provider-specific drivers"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 76,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to unknown Vultr capacity treated as hard blocker?",
+      "answer_key": {
+        "lesson": "Unknown API limit is not the same as zero capacity; authoritative capacity observation is provider-specific.",
+        "prevent": [
+          "LimitKnown semantics",
+          "console capacity observation when needed"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 77,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to noVNC/WebSocket path mismatch / connecting state?",
+      "answer_key": {
+        "lesson": "Reverse proxy must preserve the supported WebSocket upgrade path and interactive session authorization.",
+        "prevent": [
+          "websockify path compatibility",
+          "fresh console ticket/session",
+          "interactive challenge visibility"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 78,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to schema/source drift or migration mismatch?",
+      "answer_key": {
+        "lesson": "Verify live migration level/checksums before schema-sensitive work; do not infer live schema solely from source migrations.",
+        "prevent": [
+          "schema_migrations checksums",
+          "LIVE_DB_BRAIN",
+          "migration verification"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 79,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to assuming Git HEAD equals deployed production?",
+      "answer_key": {
+        "lesson": "Service health does not prove revision identity.",
+        "prevent": [
+          "/version stamp",
+          "artifact manifest hashes",
+          "production revision verifier"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 80,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to new chat reconstructing project from stale/partial history?",
+      "answer_key": {
+        "lesson": "Use canonical repo plus commit-pinned knowledge brains and acceptance gates.",
+        "prevent": [
+          "NEW_CHAT_ENTRYPOINT",
+          "Project Brain",
+          "handoff acceptance gate"
+        ]
+      },
+      "evidence": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "id": 81,
+      "category": "test-chain",
+      "question": "What does TestCellManagerKeepsAccountsSeparate exercise structurally?",
+      "answer_key": {
+        "file": "internal/accounts/cell_test.go",
+        "line": 5,
+        "calls": [
+          "Acquire",
+          "Fatal",
+          "NewCellManager",
+          "Register"
+        ],
+        "assertions": [
+          "t.Fatal(\"cells must be distinct\")",
+          "t.Fatal(\"missing cell must fail\")",
+          "t.Fatal(err)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 82,
+      "category": "test-chain",
+      "question": "What does TestAccountNamespacesAreDistinct exercise structurally?",
+      "answer_key": {
+        "file": "internal/accounts/context_test.go",
+        "line": 5,
+        "calls": [
+          "Authorize",
+          "Fatal",
+          "NewContext"
+        ],
+        "assertions": [
+          "t.Fatal(\"cache namespace collision\")",
+          "t.Fatal(\"secret namespace collision\")",
+          "t.Fatal(\"cross-account access must fail\")"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 83,
+      "category": "test-chain",
+      "question": "What does TestRuntimeIdentitiesAreIndependent exercise structurally?",
+      "answer_key": {
+        "file": "internal/accounts/identity_test.go",
+        "line": 5,
+        "calls": [
+          "Fatal",
+          "NewRuntimeIdentity"
+        ],
+        "assertions": [
+          "t.Fatal(err)",
+          "t.Fatal(err)",
+          "t.Fatal(\"runtime identities must be independent\")"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 84,
+      "category": "test-chain",
+      "question": "What does TestConfigExpressions exercise structurally?",
+      "answer_key": {
+        "file": "internal/adminapi/config_expr_test.go",
+        "line": 5,
+        "calls": [
+          "Fatalf",
+          "parseLifetimeMinutes",
+          "parseQuotaMB"
+        ],
+        "assertions": [
+          "t.Fatalf(\"quota %d %v\", q, e)",
+          "t.Fatalf(\"product quota %d %v\", q, e)",
+          "t.Fatalf(\"life %d %v\", life, e)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 85,
+      "category": "test-chain",
+      "question": "What does TestOutputVisibleUntilTenSecondsBeforeExpiry exercise structurally?",
+      "answer_key": {
+        "file": "internal/adminapi/output_expiry_test.go",
+        "line": 8,
+        "calls": [
+          "Add",
+          "Date",
+          "Equal",
+          "Fatalf",
+          "UnixMilli",
+          "float64"
+        ],
+        "assertions": [
+          "t.Fatalf(\"got %v want %v\", got, want)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 86,
+      "category": "test-chain",
+      "question": "What does TestOutputVisibleUntilNoExpiry exercise structurally?",
+      "answer_key": {
+        "file": "internal/adminapi/output_expiry_test.go",
+        "line": 17,
+        "calls": [
+          "Fatalf",
+          "float64",
+          "outputVisibleUntil"
+        ],
+        "assertions": [
+          "t.Fatalf(\"got %v want nil\", got)",
+          "t.Fatalf(\"got %v want nil\", got)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 87,
+      "category": "test-chain",
+      "question": "What does TestHealthEndpoint exercise structurally?",
+      "answer_key": {
+        "file": "internal/adminapi/server_test.go",
+        "line": 8,
+        "calls": [
+          "Fatalf",
+          "NewRecorder",
+          "NewRequest",
+          "Routes",
+          "ServeHTTP"
+        ],
+        "assertions": [
+          "t.Fatalf(\"code=%d\", w.Code)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 88,
+      "category": "test-chain",
+      "question": "What does TestReadinessWithoutDatabase exercise structurally?",
+      "answer_key": {
+        "file": "internal/adminapi/server_test.go",
+        "line": 17,
+        "calls": [
+          "Fatalf",
+          "NewRecorder",
+          "NewRequest",
+          "Routes",
+          "ServeHTTP"
+        ],
+        "assertions": [
+          "t.Fatalf(\"code=%d\", w.Code)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 89,
+      "category": "test-chain",
+      "question": "What does TestClassifyAccountProviderError exercise structurally?",
+      "answer_key": {
+        "file": "internal/app/account_state_test.go",
+        "line": 13,
+        "calls": [
+          "ClassifyAccountProviderError",
+          "Errorf",
+          "Fatalf",
+          "New",
+          "Run",
+          "func"
+        ],
+        "assertions": [
+          "t.Fatalf(\"got %q want %q\", got, tc.want)"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 90,
+      "category": "test-chain",
+      "question": "What does TestProviderStateRecoveryPolicy exercise structurally?",
+      "answer_key": {
+        "file": "internal/app/account_state_test.go",
+        "line": 36,
+        "calls": [
+          "Fatal",
+          "IsProviderObservationError",
+          "ProviderProbeInterval"
+        ],
+        "assertions": [
+          "t.Fatal(\"locked accounts must be reprobed quickly\")",
+          "t.Fatal(\"lock is semantic provider state\")",
+          "t.Fatal(\"transport/proxy must stay separate\")"
+        ]
+      },
+      "evidence": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 91,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-01?",
+      "answer_key": {
+        "area": "architecture",
+        "requirement": "provider-neutral core",
+        "parents": [
+          "ARCH-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 92,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-02?",
+      "answer_key": {
+        "area": "architecture",
+        "requirement": "provider-specific behavior remains in drivers",
+        "parents": [
+          "ARCH-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 93,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-03?",
+      "answer_key": {
+        "area": "architecture",
+        "requirement": "modular independently testable subsystems",
+        "parents": [
+          "ARCH-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 94,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-04?",
+      "answer_key": {
+        "area": "architecture",
+        "requirement": "source/runtime are authoritative over stale prose",
+        "parents": [
+          "ARCH-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 95,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-01?",
+      "answer_key": {
+        "area": "accounts",
+        "requirement": "account CRUD and provider identity",
+        "parents": [
+          "ACC-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 96,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-02?",
+      "answer_key": {
+        "area": "accounts",
+        "requirement": "independent account isolation cell",
+        "parents": [
+          "ACC-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 97,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-03?",
+      "answer_key": {
+        "area": "accounts",
+        "requirement": "explicit account/provider states",
+        "parents": [
+          "ACC-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 98,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-04?",
+      "answer_key": {
+        "area": "accounts",
+        "requirement": "optional browser credentials do not replace API token flow",
+        "parents": [
+          "ACC-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 99,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-05?",
+      "answer_key": {
+        "area": "accounts",
+        "requirement": "automation settings remain account-scoped",
+        "parents": [
+          "ACC-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 100,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-DIGITALOCEAN-01?",
+      "answer_key": {
+        "area": "digitalocean",
+        "requirement": "preserve mature DigitalOcean behavior",
+        "parents": [
+          "DO-001"
+        ]
+      },
+      "evidence": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "id": 101,
+      "category": "line-recall",
+      "question": "What is exact line 4 of cmd/ready-panel-worker/main.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t\"context\"",
+        "sha256": "d22393aeef8ce5692d22f7752c0e92f0a7a5497237024cf938ada0b51b20eb77",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 102,
+      "category": "line-recall",
+      "question": "What is exact line 10 of internal/adminapi/account_validation.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t\treturn \"lifetime_from_exceeds_to\"",
+        "sha256": "dc3f9c2f9287b51dc5491fcff67f5f5d71f680bb39a4c1420a587eb268d93f13",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 103,
+      "category": "line-recall",
+      "question": "What is exact line 8 of internal/adminapi/installer_rearm.go at snapshot commit?",
+      "answer_key": {
+        "text": "",
+        "sha256": "f4a19f4fe9ea0635b8d9fb3c23d959f8a8f3202e1812620ed5b8d061ed1d942a",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 104,
+      "category": "line-recall",
+      "question": "What is exact line 39 of internal/adminapi/proxy_observe.go at snapshot commit?",
+      "answer_key": {
+        "text": "\tdefer resp.Body.Close()",
+        "sha256": "d7d8365091c1d228e9345a620a21a895d1b96687b36495f44aa482f00da7775a",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 105,
+      "category": "line-recall",
+      "question": "What is exact line 4 of internal/app/capacity_guard_test.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t\"testing\"",
+        "sha256": "684fc6d2e25085af0345ee1a18dd413b7862a373fe61dd726f6358e88c11ca59",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 106,
+      "category": "line-recall",
+      "question": "What is exact line 26 of internal/app/provider_refresh.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t\t}",
+        "sha256": "8ecacafd8e14714b27fd69c85c80acf8937c8ac554260aff99c24b3373857cf0",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 107,
+      "category": "line-recall",
+      "question": "What is exact line 42 of internal/droplets/postgres_e2e_test.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t}",
+        "sha256": "96a3c630c81da206741e8993d066d154deac95c1bafdb5166ced5fc10ed076cb",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 108,
+      "category": "line-recall",
+      "question": "What is exact line 20 of internal/network/leakcheck.go at snapshot commit?",
+      "answer_key": {
+        "text": "",
+        "sha256": "101ad24077ce1680ff699309fb21d349f6e4f776f90a1f221f179ae2a9427558",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 109,
+      "category": "line-recall",
+      "question": "What is exact line 38 of internal/panels/export/vless.go at snapshot commit?",
+      "answer_key": {
+        "text": "\t}",
+        "sha256": "703f9a255f92a93e9d6470db41484993d092ad32dc545cfefbfc39d6adc426d7",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "id": 110,
+      "category": "line-recall",
+      "question": "What is exact line 2 of internal/panels/sanaei/api_error_test.go at snapshot commit?",
+      "answer_key": {
+        "text": "",
+        "sha256": "45a7a533265b3fdd3cf92025cae324b42842926ef5e32c76da169f3feb706987",
+        "commit": "03f810813368f1902cb85f42d8de0d9d8d48c198"
+      },
+      "evidence": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    }
+  ],
+  "rule": "Answers are evidence keys for a fresh-session blind challenge. Passing requires exact retrieval/cross-layer composition; no answer should be guessed from memory."
+}
