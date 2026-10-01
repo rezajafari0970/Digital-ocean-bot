@@ -94,7 +94,7 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 			if diag.Code == "COMMAND_OUTCOME_UNKNOWN" && step.Precheck == "" {
 				retryable = false
 			}
-			terminal := !retryable
+			terminal := !retryable || (step.MaxAttempts > 0 && attempt >= step.MaxAttempts)
 			_ = e.Store.FinishStep(ctx, ir.ProvisionRunID, name, err, terminal)
 			state := "INSTALLING"
 			if terminal {
@@ -135,7 +135,7 @@ func (e InstallerExecutor) Rollback(ctx context.Context, ir InstallerRun, resolv
 		if err != nil {
 			diag := ClassifyCommandFailure(err, last)
 			retryable := DiagnosticRetryable(diag)
-			_ = e.Store.FinishStep(ctx, ir.ProvisionRunID, name, err, !retryable)
+			_ = e.Store.FinishStep(ctx, ir.ProvisionRunID, name, err, !retryable || (step.MaxAttempts > 0 && attempt >= step.MaxAttempts))
 			if retryable {
 				_ = e.States.SetState(ctx, ir.ID, "ROLLBACK_REQUIRED", "rollback: "+err.Error())
 			} else {

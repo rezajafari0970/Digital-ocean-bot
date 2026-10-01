@@ -279,7 +279,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			if diag.Code == "COMMAND_OUTCOME_UNKNOWN" && step.script != nil && step.script.Precheck != "" {
 				retryable = true
 			}
-			terminal := !retryable
+			terminal := !retryable || (maxAttempts > 0 && stepAttempt >= maxAttempts)
 			_ = e.Store.FinishStep(ctx, run.ID, step.name, err, terminal)
 			if terminal {
 				run.State = Failed
