@@ -14,6 +14,13 @@ type providerNetworkRuntime struct {
 	Gateway    *network.Gateway
 	Gate       network.AccountGate
 	Generation int64
+	closeIdle  func()
+}
+
+func (r providerNetworkRuntime) CloseIdleConnections() {
+	if r.closeIdle != nil {
+		r.closeIdle()
+	}
 }
 
 // buildProviderNetworkRuntime is the single provider-agnostic network boundary.
@@ -60,7 +67,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			Proxy:   cfg.Proxy,
 			Health:  network.HealthState{Status: cfg.Proxy.Status},
 		}
-		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation}, nil
+		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, closeIdle: gateway.CloseIdleConnections}, nil
 	}
 
 	bundle, err := network.NewIsolatedDirectClient(cfg.ID)
@@ -68,7 +75,8 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		return providerNetworkRuntime{}, err
 	}
 	return providerNetworkRuntime{
-		Client: bundle.Client,
-		Gate:   network.AccountGate{Profile: cfg.Network},
+		Client:    bundle.Client,
+		Gate:      network.AccountGate{Profile: cfg.Network},
+		closeIdle: bundle.CloseIdleConnections,
 	}, nil
 }

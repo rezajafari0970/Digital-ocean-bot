@@ -77,9 +77,7 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 	}
 	driver, err := c.openDriver(ctx, cfg, netrt.Client)
 	if err != nil {
-		if netrt.Gateway != nil {
-			netrt.Gateway.CloseIdleConnections()
-		}
+		netrt.CloseIdleConnections()
 		return AccountRuntime{}, err
 	}
 	return AccountRuntime{
