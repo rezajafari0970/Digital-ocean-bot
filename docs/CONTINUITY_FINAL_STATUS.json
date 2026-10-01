@@ -29,9 +29,9 @@
     "?? .audit/step1-reader-micro/",
     "?? .audit/step1-reader-packs/",
     "?? .audit/step1-semantic-ledger/",
-    "?? docs/VOLATILE_AUDIT_POLICY.md",
-    "?? tools/continuity-finalization-gate.py",
-    "?? tools/grade-fresh-session-exam-v2.py"
+    "?? docs/FINAL_NEW_CHAT_BOOTSTRAP.md",
+    "?? tools/grade-fresh-session-exam-v2.py",
+    "?? tools/new-chat-bootstrap.sh"
   ],
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately."
 }

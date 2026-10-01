@@ -4,7 +4,7 @@
     {
       "name": "drift",
       "pass": true,
-      "stdout": "KNOWLEDGE DRIFT PASS head e7f51cb0ab47\ncurrent-source docs/FULL_SOURCE_KNOWLEDGE.json distance=19 changed=0\ncurrent-source docs/SEMANTIC_KNOWLEDGE.json distance=19 changed=0\ncurrent-source docs/DEEP_REQUIREMENTS_BRAIN.json distance=17 changed=0\ncurrent-source docs/FUNCTION_BEHAVIOR_BRAIN.json distance=16 changed=0\ncurrent-source docs/COLUMN_BEHAVIOR_BRAIN.json distance=15 changed=0\ncurrent-source docs/TEST_BEHAVIOR_BRAIN.json distance=14 changed=0\ncurrent-source docs/STATE_TRANSITION_BRAIN.json distance=13 changed=0\ncurrent-source docs/FRONTEND_ACTION_STATE_BRAIN.json distance=12 changed=0\ncurrent-source docs/INCIDENT_REGRESSION_BRAIN.json distance=11 changed=0\ncurrent-source docs/BLIND_KNOWLEDGE_CHALLENGE.json distance=9 changed=0\n",
+      "stdout": "KNOWLEDGE DRIFT PASS head b962dbf1a371\ncurrent-source docs/FULL_SOURCE_KNOWLEDGE.json distance=29 changed=0\ncurrent-source docs/SEMANTIC_KNOWLEDGE.json distance=29 changed=0\ncurrent-source docs/DEEP_REQUIREMENTS_BRAIN.json distance=27 changed=0\ncurrent-source docs/FUNCTION_BEHAVIOR_BRAIN.json distance=26 changed=0\ncurrent-source docs/COLUMN_BEHAVIOR_BRAIN.json distance=25 changed=0\ncurrent-source docs/TEST_BEHAVIOR_BRAIN.json distance=24 changed=0\ncurrent-source docs/STATE_TRANSITION_BRAIN.json distance=23 changed=0\ncurrent-source docs/FRONTEND_ACTION_STATE_BRAIN.json distance=22 changed=0\ncurrent-source docs/INCIDENT_REGRESSION_BRAIN.json distance=21 changed=0\ncurrent-source docs/BLIND_KNOWLEDGE_CHALLENGE.json distance=19 changed=0\n",
       "stderr": ""
     },
     {
