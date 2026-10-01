@@ -11,8 +11,10 @@ cp -a "$SRC/migrations" "$APP/"
 cd "$SRC"
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api.new" ./cmd/api
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker.new" ./cmd/worker
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session.new" ./cmd/vultr-browser-session
 mv "$APP/bin/digital-ocean-bot-api.new" "$APP/bin/digital-ocean-bot-api"
 mv "$APP/bin/digital-ocean-bot-worker.new" "$APP/bin/digital-ocean-bot-worker"
+mv "$APP/bin/vultr-browser-session.new" "$APP/bin/vultr-browser-session"
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 API_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-api" | awk '{print $1}')"
 WORKER_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-worker" | awk '{print $1}')"

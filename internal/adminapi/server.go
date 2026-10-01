@@ -6,13 +6,16 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -36,6 +39,8 @@ type Server struct {
 	CleanupJobs      map[string]*cleanupJob
 	BrowserMu        sync.Mutex
 	BrowserTickets   map[string]time.Time
+	BrowserProcess   *exec.Cmd
+	BrowserAccount   string
 }
 
 func New(db *sql.DB, c app.Container) *Server {
@@ -162,10 +167,62 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
+func (s *Server) ensureVultrBrowser(accountID string) error {
+	s.BrowserMu.Lock()
+	defer s.BrowserMu.Unlock()
+	if s.BrowserProcess != nil && s.BrowserProcess.ProcessState == nil {
+		if s.BrowserAccount == accountID {
+			return nil
+		}
+		return fmt.Errorf("console already active for another account")
+	}
+	cmd := exec.Command("/opt/digital-ocean-bot/bin/vultr-browser-session", accountID)
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("start console: %w", err)
+	}
+	s.BrowserProcess, s.BrowserAccount = cmd, accountID
+	done := make(chan error, 1)
+	go func() {
+		err := cmd.Wait()
+		done <- err
+		s.BrowserMu.Lock()
+		if s.BrowserProcess == cmd {
+			s.BrowserProcess, s.BrowserAccount = nil, ""
+		}
+		s.BrowserMu.Unlock()
+	}()
+	deadline := time.NewTimer(15 * time.Second)
+	defer deadline.Stop()
+	tick := time.NewTicker(200 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		select {
+		case err := <-done:
+			s.BrowserProcess, s.BrowserAccount = nil, ""
+			return fmt.Errorf("console exited before ready: %w", err)
+		case <-deadline.C:
+			_ = cmd.Process.Kill()
+			s.BrowserProcess, s.BrowserAccount = nil, ""
+			return fmt.Errorf("console readiness timeout")
+		case <-tick.C:
+			c, err := net.DialTimeout("tcp", "127.0.0.1:16080", 200*time.Millisecond)
+			if err == nil {
+				c.Close()
+				return nil
+			}
+		}
+	}
+}
+
 func (s *Server) createVultrBrowserTicket(w http.ResponseWriter, r *http.Request) {
+	accountID := r.PathValue("id")
 	var provider string
-	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", r.PathValue("id")).Scan(&provider); err != nil || provider != "vultr" {
+	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", accountID).Scan(&provider); err != nil || provider != "vultr" {
 		writeJSON(w, 404, map[string]string{"error": "vultr_account_not_found"})
+		return
+	}
+	if err := s.ensureVultrBrowser(accountID); err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "vultr_console_unavailable", "detail": err.Error()})
 		return
 	}
 	raw := make([]byte, 32)

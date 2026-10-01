@@ -20,6 +20,7 @@ cp -a "$SRC/web/static/." "$APP/web/static/"
 cd "$SRC"
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api" ./cmd/api
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session" ./cmd/vultr-browser-session
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
 if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
