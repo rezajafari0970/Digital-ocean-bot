@@ -9,6 +9,9 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
@@ -59,6 +62,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/accounts/{id}/options", s.require(s.accountOptions, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/identity", s.require(s.accountIdentity, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/preflight", s.require(s.accountPreflight, true))
+	m.HandleFunc("GET /vultr-browser/{path...}", s.require(s.vultrBrowserProxy, false))
 	m.HandleFunc("POST /api/v1/proxies", s.require(s.createProxy, true))
 	m.HandleFunc("PUT /api/v1/proxies/{id}", s.require(s.updateProxy, true))
 	m.HandleFunc("DELETE /api/v1/proxies/{id}", s.require(s.deleteProxy, true))
@@ -123,4 +127,14 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 		code = 503
 	}
 	writeJSON(w, code, x)
+}
+
+func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
+	target, _ := url.Parse("http://127.0.0.1:16080")
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
+	if r.URL.Path == "" || r.URL.Path == "/" {
+		r.URL.Path = "/vnc.html"
+	}
+	proxy.ServeHTTP(w, r)
 }
