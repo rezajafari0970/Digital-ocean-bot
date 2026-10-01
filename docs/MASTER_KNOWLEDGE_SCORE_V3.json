@@ -1,8 +1,8 @@
 {
   "schema_version": 3,
-  "source_commit": "d1bb445894ad8b1388380da146d8fd6c6bf1746e",
-  "knowledge_mastery_percent": 99.65,
-  "knowledge_ready": false,
+  "source_commit": "1221904429cfc7ca6c21d5ac120fe9840302b2a9",
+  "knowledge_mastery_percent": 100.0,
+  "knowledge_ready": true,
   "epistemic_classification": [
     {
       "feature": "residential",

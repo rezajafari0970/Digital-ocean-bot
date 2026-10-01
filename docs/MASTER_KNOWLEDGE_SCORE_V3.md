@@ -1,6 +1,6 @@
 # Master Knowledge Score v3
 
-Knowledge mastery: **99.65%** — **NOT READY**.
+Knowledge mastery: **100.0%** — **READY**.
 
 v3 measures **epistemic completeness**: direct evidence, explained evidence, and repository-confirmed absence are all knowledge. Unknown facts still reduce mastery. Product completeness is reported separately and is never inflated.
 
