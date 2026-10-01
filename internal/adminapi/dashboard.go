@@ -93,7 +93,8 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if desiredRemaining < 0 {
 		desiredRemaining = 0
 	}
-	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
+	evidence := s.capacityEvidenceForAccount(id, provider)
+	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "lower_bound": evidence.LowerBound, "evidence_source": evidence.Source, "probe_in_flight": evidence.ProbeInFlight, "probe_after": evidence.ProbeAfter, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
 	if lastRefresh.Valid {
 		d.Capacity["limit_known"] = limitKnown
 		d.Capacity["provider_servers"] = providerDroplets
