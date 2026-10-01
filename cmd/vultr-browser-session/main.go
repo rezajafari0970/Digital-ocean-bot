@@ -85,8 +85,9 @@ func main() {
 		"--no-sandbox", "--disable-dev-shm-usage", "--no-first-run",
 		"--user-data-dir="+profile, "--proxy-server="+localProxy,
 		"--window-size=412,915", "--force-device-scale-factor=1", "--touch-events=enabled",
+		"--disable-session-crashed-bubble", "--hide-crash-restore-bubble", "--disable-infobars",
 		"--user-agent=Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
-		"https://my.vultr.com/")
+		"--app=https://my.vultr.com/")
 	chrome.Env = append(os.Environ(), "DISPLAY=:199")
 	chrome.Stdout = os.Stdout
 	chrome.Stderr = os.Stderr

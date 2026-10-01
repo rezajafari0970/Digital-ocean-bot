@@ -9,7 +9,10 @@ status.textContent = 'Connecting…';
 const rfb = new RFB(screen, wsURL, { shared: true });
 rfb.scaleViewport = true;
 rfb.resizeSession = false;
-rfb.addEventListener('connect', () => { status.textContent = 'Connected'; });
+rfb.addEventListener('connect', () => {
+  status.textContent = 'Connected';
+  setTimeout(() => { status.hidden = true; }, 900);
+});
 rfb.addEventListener('disconnect', e => {
   status.textContent = e.detail.clean ? 'Disconnected' : 'Connection failed';
 });
