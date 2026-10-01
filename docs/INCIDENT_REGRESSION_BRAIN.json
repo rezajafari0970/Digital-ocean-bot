@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
+  "source_commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
   "incident_count": 10,
-  "candidate_regression_commits_count": 193,
+  "candidate_regression_commits_count": 196,
   "incidents": [
     {
       "id": "INC-001",
@@ -244,6 +244,11 @@
           "subject": "make output expiry exact and refresh efficient"
         },
         {
+          "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
+        },
+        {
           "commit": "1221904429cfc7ca6c21d5ac120fe9840302b2a9",
           "date": "2026-10-01",
           "subject": "docs: refresh mastery corpus after deploy gate fix"
@@ -287,11 +292,6 @@
           "commit": "97f7af301553c5c65f3a518533ec3c870e81f3bc",
           "date": "2026-09-23",
           "subject": "feat add provider snapshot freshness and stale refresh"
-        },
-        {
-          "commit": "15e06a921a7303675a697f13648e75953e85f5cd",
-          "date": "2026-09-23",
-          "subject": "fix keep account editor open until token validation succeeds"
         }
       ]
     },
@@ -319,6 +319,11 @@
           "commit": "acf278f5f0bf7796ff46364776362daf3ce95888",
           "date": "2026-09-23",
           "subject": "fix: preserve query strings in DigitalOcean API paths"
+        },
+        {
+          "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
         },
         {
           "commit": "5cce5a907a4e3ad37979f0873d28809702c463c4",
@@ -359,11 +364,6 @@
           "commit": "b57f590de622ea4aff6b176eb984776b5b442719",
           "date": "2026-09-29",
           "subject": "add isolated vultr provider plugin skeleton"
-        },
-        {
-          "commit": "a28b5a78522c796feb32335c08d647e792d60ebe",
-          "date": "2026-09-29",
-          "subject": "harden digitalocean driver observation and errors"
         }
       ]
     },
@@ -476,6 +476,21 @@
           "subject": "fix(vultr): accept root noVNC websocket alias"
         },
         {
+          "commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
+          "date": "2026-10-01",
+          "subject": "feat(vultr): isolate interactive browser runtime"
+        },
+        {
+          "commit": "cc6a99348055e99a1bfd7030187d931b2ec8c0a7",
+          "date": "2026-10-01",
+          "subject": "docs: finalize mastery after Vultr console fix"
+        },
+        {
+          "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
+        },
+        {
           "commit": "7b79dad6a5b0be7bdee4584a67593f9327d023ba",
           "date": "2026-09-30",
           "subject": "feat(vultr): add console capacity browser probe"
@@ -494,21 +509,6 @@
           "commit": "1c0cb3e4f3cbfd7fe5e1bbc309dbaec6097419b3",
           "date": "2026-09-30",
           "subject": "fix(droplets): preserve create outcome across proxy checks"
-        },
-        {
-          "commit": "1b4d1739ccda1253d6f7436b9b96b8c055a40e5a",
-          "date": "2026-09-29",
-          "subject": "add canonical vultr read path"
-        },
-        {
-          "commit": "f196cd0cf25fa433b601f3c98d02d281735b3c9f",
-          "date": "2026-09-29",
-          "subject": "preserve capacity state across client cleanup"
-        },
-        {
-          "commit": "df0f2e6d4a42a8a81e29e7e18073b4ff6d9e8e1b",
-          "date": "2026-09-23",
-          "subject": "fix preserve DigitalOcean v2 base path"
         }
       ]
     },
@@ -670,6 +670,11 @@
           "subject": "test: isolate fresh-session exam answers from tracked knowledge"
         },
         {
+          "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
+          "date": "2026-10-01",
+          "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
+        },
+        {
           "commit": "f80ca7ba5e3c50f33a79289f74828631fe486c65",
           "date": "2026-09-29",
           "subject": "add canonical vultr mutation driver"
@@ -718,16 +723,26 @@
           "commit": "d1cd682fe2f8fdd44720fdf59f7a4d70893317e8",
           "date": "2026-09-23",
           "subject": "fix decouple modal save from dialog submit"
-        },
-        {
-          "commit": "b430e9871b09d8d2fed3310922ad5e95418de8fd",
-          "date": "2026-09-23",
-          "subject": "fix isolate account form from generic submit"
         }
       ]
     }
   ],
   "candidate_regression_commits": [
+    {
+      "commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
+      "date": "2026-10-01",
+      "subject": "feat(vultr): isolate interactive browser runtime"
+    },
+    {
+      "commit": "cc6a99348055e99a1bfd7030187d931b2ec8c0a7",
+      "date": "2026-10-01",
+      "subject": "docs: finalize mastery after Vultr console fix"
+    },
+    {
+      "commit": "fadd3114b35d355284d39345bbd936fa5ce91ce6",
+      "date": "2026-10-01",
+      "subject": "docs: refresh knowledge after Vultr console lifecycle fix"
+    },
     {
       "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
       "date": "2026-10-01",

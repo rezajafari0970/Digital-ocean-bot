@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
-  "file_count": 696,
-  "total_lines": 40208,
+  "source_commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
+  "file_count": 698,
+  "total_lines": 40312,
   "files": [
     {
       "path": "cmd/admin-bootstrap/main.go",
@@ -83,6 +83,34 @@
       ]
     },
     {
+      "path": "cmd/vultr-browser-manager/main.go",
+      "sha256": "f899b4e7b9fafd39f64e53794d9e233a915dc20b8f575b85624f47c493401303",
+      "bytes": 2081,
+      "line_count": 102,
+      "symbols": [
+        {
+          "kind": "struct",
+          "name": "manager",
+          "line": 17
+        },
+        {
+          "kind": "func",
+          "name": "portReady",
+          "line": 23
+        },
+        {
+          "kind": "method",
+          "name": "start",
+          "line": 32
+        },
+        {
+          "kind": "func",
+          "name": "main",
+          "line": 69
+        }
+      ]
+    },
+    {
       "path": "cmd/vultr-browser-session/main.go",
       "sha256": "e51477d66d756b6a02ac55d3e2dd5a19aae797fdf1eac2131c615c0a2bef3c9d",
       "bytes": 2909,
@@ -151,6 +179,13 @@
       "symbols": []
     },
     {
+      "path": "deploy/digital-ocean-bot-vultr-browser-manager.service",
+      "sha256": "5369e435c8191cb19224bdad0afb95d052e03200c9ec254b89a3519b631aa44f",
+      "bytes": 602,
+      "line_count": 25,
+      "symbols": []
+    },
+    {
       "path": "deploy/digital-ocean-bot-worker.service",
       "sha256": "996c2ab09f3700a7d2597b81a66147d98c229b233b431099ecaeb46a0aa21afc",
       "bytes": 528,
@@ -166,16 +201,16 @@
     },
     {
       "path": "deploy/install.sh",
-      "sha256": "ccaf0f5b23f015c5cd86539f9509ad8481efeb1f5cf2d7fcbbbeadf935694eb7",
-      "bytes": 3014,
-      "line_count": 50,
+      "sha256": "23f5bb960b9d9f15b6f3047bcb679c5d3f02f5f33ece56ccc681a810387d6ace",
+      "bytes": 3378,
+      "line_count": 53,
       "symbols": []
     },
     {
       "path": "deploy/upgrade.sh",
-      "sha256": "6e7c5741435aa725ee10a580d9328b2c6c8b64b434f1945b24db6cc012e35381",
-      "bytes": 1534,
-      "line_count": 22,
+      "sha256": "44ecf0a8cef54e0b9d92a88a4cb7a70304af33db4fe16d0c5a130156a089d36f",
+      "bytes": 1794,
+      "line_count": 24,
       "symbols": []
     },
     {
@@ -1298,54 +1333,54 @@
     },
     {
       "path": "internal/adminapi/server.go",
-      "sha256": "efaeba46049901a7aff8d77e93be786fe2f52bf00dd4a640cf2bed797ff02960",
-      "bytes": 10806,
-      "line_count": 244,
+      "sha256": "bc2419f707bdc75f9ac4031736c89fad7b07fe77b8475ec753c9df9d9b24c359",
+      "bytes": 9963,
+      "line_count": 216,
       "symbols": [
         {
           "kind": "struct",
           "name": "Server",
-          "line": 24
+          "line": 23
         },
         {
           "kind": "func",
           "name": "New",
-          "line": 46
+          "line": 43
         },
         {
           "kind": "method",
           "name": "Routes",
-          "line": 49
+          "line": 46
         },
         {
           "kind": "func",
           "name": "writeJSON",
-          "line": 127
+          "line": 124
         },
         {
           "kind": "method",
           "name": "health",
-          "line": 132
+          "line": 129
         },
         {
           "kind": "method",
           "name": "ready",
-          "line": 135
+          "line": 132
         },
         {
           "kind": "method",
           "name": "vultrBrowserProxy",
-          "line": 144
+          "line": 141
         },
         {
           "kind": "method",
           "name": "ensureVultrBrowser",
-          "line": 170
+          "line": 167
         },
         {
           "kind": "method",
           "name": "createVultrBrowserTicket",
-          "line": 217
+          "line": 189
         }
       ]
     },

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55",
+  "source_commit": "b63c88181c5515b90d824e93c2a19de7b220d861",
   "challenge_count": 110,
   "categories": {
     "route-chain": 20,
@@ -2373,7 +2373,7 @@
       "answer_key": {
         "text": "\t\"context\"",
         "sha256": "d22393aeef8ce5692d22f7752c0e92f0a7a5497237024cf938ada0b51b20eb77",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2382,11 +2382,11 @@
     {
       "id": 102,
       "category": "line-recall",
-      "question": "What is exact line 10 of internal/adminapi/account_validation.go at snapshot commit?",
+      "question": "What is exact line 138 of internal/adminapi/account_preview.go at snapshot commit?",
       "answer_key": {
-        "text": "\t\treturn \"lifetime_from_exceeds_to\"",
-        "sha256": "dc3f9c2f9287b51dc5491fcff67f5f5d71f680bb39a4c1420a587eb268d93f13",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\t\t\tvar id, n, st, c string",
+        "sha256": "21de7e803675a43996d60c331af3ef8b97a21a460fa6ad5a476bc66948d1126a",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2395,11 +2395,11 @@
     {
       "id": 103,
       "category": "line-recall",
-      "question": "What is exact line 8 of internal/adminapi/installer_rearm.go at snapshot commit?",
+      "question": "What is exact line 35 of internal/adminapi/install_scripts.go at snapshot commit?",
       "answer_key": {
-        "text": "",
-        "sha256": "f4a19f4fe9ea0635b8d9fb3c23d959f8a8f3202e1812620ed5b8d061ed1d942a",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\t\tExecute        string `json:\"execute\"`",
+        "sha256": "ec1f6ad1f6d41c8f0aed0ce4c9f62889d367ecfb805d74a588fe4306ca0d6443",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2408,11 +2408,11 @@
     {
       "id": 104,
       "category": "line-recall",
-      "question": "What is exact line 39 of internal/adminapi/proxy_observe.go at snapshot commit?",
+      "question": "What is exact line 38 of internal/adminapi/proxy_health.go at snapshot commit?",
       "answer_key": {
-        "text": "\tdefer resp.Body.Close()",
-        "sha256": "d7d8365091c1d228e9345a620a21a895d1b96687b36495f44aa482f00da7775a",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\tobs, obsErr := observeProxy(ctx, x, cfg.Proxy.Type)",
+        "sha256": "5f2f8a0cc7d16c03a52eaa9b3e7f9a25de367c68e968b4781341a18efed70a79",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2421,11 +2421,11 @@
     {
       "id": 105,
       "category": "line-recall",
-      "question": "What is exact line 4 of internal/app/capacity_guard_test.go at snapshot commit?",
+      "question": "What is exact line 29 of internal/app/capacity_guard.go at snapshot commit?",
       "answer_key": {
-        "text": "\t\"testing\"",
-        "sha256": "684fc6d2e25085af0345ee1a18dd413b7862a373fe61dd726f6358e88c11ca59",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\treturn n",
+        "sha256": "f61ee9c2958a3ceba7794ae0ba2d4d99ff98eeabdceff513998dacd732bb31f4",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2434,11 +2434,11 @@
     {
       "id": 106,
       "category": "line-recall",
-      "question": "What is exact line 26 of internal/app/provider_refresh.go at snapshot commit?",
+      "question": "What is exact line 1 of internal/app/profile.go at snapshot commit?",
       "answer_key": {
-        "text": "\t\t}",
-        "sha256": "8ecacafd8e14714b27fd69c85c80acf8937c8ac554260aff99c24b3373857cf0",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "package app",
+        "sha256": "ef87a50c47ee6e9c7d624fad8a67e1f96e77d5cd4dffa12bb8def0ac54442770",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2447,11 +2447,11 @@
     {
       "id": 107,
       "category": "line-recall",
-      "question": "What is exact line 42 of internal/droplets/postgres_e2e_test.go at snapshot commit?",
+      "question": "What is exact line 14 of internal/droplets/model.go at snapshot commit?",
       "answer_key": {
-        "text": "\t}",
-        "sha256": "96a3c630c81da206741e8993d066d154deac95c1bafdb5166ced5fc10ed076cb",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\tExpiring     State = \"EXPIRING\"",
+        "sha256": "c1ae7b593c59e6dab2b3195379b6e2780e350e88db06c01dce6beb4cde6aa407",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2460,11 +2460,11 @@
     {
       "id": 108,
       "category": "line-recall",
-      "question": "What is exact line 20 of internal/network/leakcheck.go at snapshot commit?",
+      "question": "What is exact line 14 of internal/network/isolation_test.go at snapshot commit?",
       "answer_key": {
-        "text": "",
-        "sha256": "101ad24077ce1680ff699309fb21d349f6e4f776f90a1f221f179ae2a9427558",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\ta2 := AccountNamespace(\"account-a\")",
+        "sha256": "c79c9ad820739a6c18aa2b488756bc0a3c012aebd3579690dd3b72307fab69e5",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2473,11 +2473,11 @@
     {
       "id": 109,
       "category": "line-recall",
-      "question": "What is exact line 38 of internal/panels/export/vless.go at snapshot commit?",
+      "question": "What is exact line 27 of internal/panels/driver.go at snapshot commit?",
       "answer_key": {
-        "text": "\t}",
-        "sha256": "703f9a255f92a93e9d6470db41484993d092ad32dc545cfefbfc39d6adc426d7",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\tInventorySlim bool `json:\"inventory_slim\"`",
+        "sha256": "21d6a9fcb1e5689c6ce2544635c606804bcf392c8922b65755e7d2c4871405de",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"
@@ -2486,11 +2486,11 @@
     {
       "id": 110,
       "category": "line-recall",
-      "question": "What is exact line 2 of internal/panels/sanaei/api_error_test.go at snapshot commit?",
+      "question": "What is exact line 49 of internal/panels/sanaei/api.go at snapshot commit?",
       "answer_key": {
-        "text": "",
-        "sha256": "45a7a533265b3fdd3cf92025cae324b42842926ef5e32c76da169f3feb706987",
-        "commit": "36b625d64cc2ea480ae1b76669bdba328fdcfd55"
+        "text": "\tif resp.StatusCode < 200 || resp.StatusCode >= 300 {",
+        "sha256": "8857ffb282c0d261843aadf5a353ec7007aa3c18b83af2865a68bef0b1d400ae",
+        "commit": "b63c88181c5515b90d824e93c2a19de7b220d861"
       },
       "evidence": [
         "FULL_SOURCE_KNOWLEDGE"

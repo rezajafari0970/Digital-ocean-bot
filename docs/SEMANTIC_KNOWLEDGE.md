@@ -1,6 +1,6 @@
 # Semantic Source Knowledge
 
-Commit-pinned semantic/navigation layer for **409 Go files** and **1538 symbols** at `36b625d64cc2ea480ae1b76669bdba328fdcfd55`.
+Commit-pinned semantic/navigation layer for **410 Go files** and **1542 symbols** at `b63c88181c5515b90d824e93c2a19de7b220d861`.
 
 Records file roles, imports, symbol ranges, lexical calls, candidate caller files, SQL tables and endpoint literals. Candidate callers are navigation hints, not a compiler-proven call graph.
 
@@ -16,7 +16,7 @@ Records file roles, imports, symbol ranges, lexical calls, candidate caller file
 - **compute lifecycle/reconciliation** — 11 files
 - **network/proxy isolation and health** — 34 files
 - **panel lifecycle/policy/inventory subsystem** — 45 files
-- **project implementation/support** — 143 files
+- **project implementation/support** — 144 files
 - **provider contracts/registry/common behavior** — 6 files
 - **worker process entrypoint** — 1 files
 
