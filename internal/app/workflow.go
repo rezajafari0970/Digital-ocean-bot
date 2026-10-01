@@ -33,7 +33,7 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 			c.handleVultrCreateError(cbCtx, accountID, compute, createErr)
 		}
 		executor.OnCreateSuccess = func(cbCtx context.Context, _ providers.CreateServerResult) {
-			c.recordVultrProbeSuccess(cbCtx, accountID)
+			c.recordVultrCreateSuccess(cbCtx, accountID, compute)
 		}
 	}
 	var eg *network.EgressGuard

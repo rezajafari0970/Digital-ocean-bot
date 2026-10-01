@@ -79,11 +79,14 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			// current usage always remains API-derived.
 			observedCapacitySource := ""
 			if rt.Config.Provider == "vultr" {
+				_, _ = c.DB.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,lower_bound,probe_in_flight) VALUES($1,0,'vultr_api_lower_bound',now(),now(),$2,false) ON CONFLICT(account_id) DO UPDATE SET lower_bound=GREATEST(provider_capacity_observations.lower_bound,$2),source=CASE WHEN provider_capacity_observations.source IN ('vultr_api_saturation','vultr_api_probe','vultr_api_probe_success','vultr_console') THEN provider_capacity_observations.source ELSE 'vultr_api_lower_bound' END,observed_at=now(),updated_at=now()`, id, obs.Capacity.ComputeInUse)
 				var observedLimit int
 				var observedAt time.Time
 				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at,source FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt, &observedCapacitySource); qerr == nil {
-					obs.Capacity.ComputeLimit = observedLimit
-					obs.Capacity.LimitKnown = true
+					if observedCapacitySource != "vultr_api_lower_bound" {
+						obs.Capacity.ComputeLimit = observedLimit
+						obs.Capacity.LimitKnown = true
+					}
 					if observedAt.After(obs.Capacity.ObservedAt) {
 						obs.Capacity.ObservedAt = observedAt
 					}

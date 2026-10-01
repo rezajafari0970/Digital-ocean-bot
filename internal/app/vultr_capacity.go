@@ -33,7 +33,7 @@ func (c Container) recordVultrSaturation(ctx context.Context, accountID string, 
 	}
 	var oldLimit int
 	_ = tx.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&oldLimit)
-	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false`, accountID, limit); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=GREATEST(provider_capacity_observations.lower_bound,EXCLUDED.lower_bound)`, accountID, limit); err != nil {
 		return
 	}
 	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: limit, LimitKnown: true, ComputeInUse: limit, ObservedAt: time.Now().UTC()})
@@ -75,7 +75,7 @@ func (c Container) recordVultrProbeSuccess(ctx context.Context, accountID string
 		return
 	}
 	newLimit := oldLimit + 1
-	if _, err = tx.ExecContext(ctx, "UPDATE provider_capacity_observations SET compute_limit=$2,source='vultr_api_probe_success',observed_at=now(),updated_at=now(),probe_after=now(),probe_in_flight=false WHERE account_id=$1", accountID, newLimit); err != nil {
+	if _, err = tx.ExecContext(ctx, "UPDATE provider_capacity_observations SET compute_limit=$2,lower_bound=GREATEST(lower_bound,$2),source='vultr_api_probe_success',observed_at=now(),updated_at=now(),probe_after=now(),probe_in_flight=false WHERE account_id=$1", accountID, newLimit); err != nil {
 		return
 	}
 	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: newLimit, LimitKnown: true, ComputeInUse: newLimit, ObservedAt: time.Now().UTC()})
@@ -90,4 +90,31 @@ func (c Container) recordVultrProbeSuccess(ctx context.Context, accountID string
 		return
 	}
 	log.Printf("vultr capacity probe succeeded account=%s admitted_limit=%d", accountID, newLimit)
+}
+
+func (c Container) recordVultrCreateSuccess(ctx context.Context, accountID string, compute providers.ComputeDriver) {
+	var source string
+	var probeInFlight bool
+	err := c.DB.QueryRowContext(ctx, "SELECT source,probe_in_flight FROM provider_capacity_observations WHERE account_id=$1", accountID).Scan(&source, &probeInFlight)
+	if err == nil && source == "vultr_api_probe" && probeInFlight {
+		c.recordVultrProbeSuccess(ctx, accountID)
+		return
+	}
+
+	servers, listErr := compute.ListServers(ctx)
+	apiCount := 0
+	if listErr == nil {
+		apiCount = len(servers)
+	}
+	var snapshotInUse int
+	_ = c.DB.QueryRowContext(ctx, "SELECT COALESCE((canonical->'Capacity'->>'ComputeInUse')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1", accountID).Scan(&snapshotInUse)
+	lowerBound := snapshotInUse + 1
+	if apiCount > lowerBound {
+		lowerBound = apiCount
+	}
+	if lowerBound < 1 {
+		lowerBound = 1
+	}
+	_, _ = c.DB.ExecContext(ctx, "INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,lower_bound,probe_in_flight) VALUES($1,0,'vultr_api_lower_bound',now(),now(),$2,false) ON CONFLICT(account_id) DO UPDATE SET lower_bound=GREATEST(provider_capacity_observations.lower_bound,$2),source=CASE WHEN provider_capacity_observations.source IN ('vultr_api_saturation','vultr_api_probe','vultr_api_probe_success','vultr_console') THEN provider_capacity_observations.source ELSE 'vultr_api_lower_bound' END,observed_at=now(),updated_at=now()", accountID, lowerBound)
+	log.Printf("vultr capacity lower-bound account=%s proven_at_least=%d", accountID, lowerBound)
 }
