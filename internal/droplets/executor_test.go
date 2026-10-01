@@ -109,3 +109,21 @@ func TestPreCreateCheckBlocksProviderMutation(t *testing.T) {
 		t.Fatalf("err=%v creates=%d state=%s", err, provider.creates, store.saved.State)
 	}
 }
+
+func TestCreateTransportErrorStaysUnknownForReconciliation(t *testing.T) {
+	store := &opStore{}
+	transportErr := &providers.Error{Class: providers.ErrorTransport, Operation: "create_server", Message: "timeout"}
+	provider := &computeStub{createErr: transportErr}
+	successCalled := false
+	e := Executor{
+		Operations:      store,
+		Provider:        provider,
+		Gate:            gateStub{},
+		OnCreateSuccess: func(context.Context, providers.CreateServerResult) { successCalled = true },
+	}
+	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
+	_, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
+	if !providers.IsClass(err, providers.ErrorTransport) || successCalled || store.saved.State != jobs.OperationUnknown {
+		t.Fatalf("err=%v success=%v state=%s", err, successCalled, store.saved.State)
+	}
+}

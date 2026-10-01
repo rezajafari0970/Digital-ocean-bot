@@ -106,3 +106,64 @@ func TestDelete404IsIdempotent(t *testing.T) {
 	}
 }
 func errorsAs(err error, target any) bool { return errors.As(err, target) }
+
+func TestCreate502IsAmbiguousAndNotRetried(t *testing.T) {
+	var calls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.WriteHeader(http.StatusBadGateway)
+		_, _ = w.Write([]byte("{\"error\":\"upstream maintenance\"}"))
+	}))
+	defer s.Close()
+	c := NewClient(s.Client(), "t")
+	c.base = s.URL
+	d := &Driver{client: c}
+	got, err := d.CreateServer(context.Background(), providers.CreateServerRequest{RegionID: "ewr", PlanID: "vc2", ImageID: "2284"})
+	if err == nil || got.Outcome != providers.OutcomeAmbiguous || !providers.IsClass(err, providers.ErrorTransport) {
+		t.Fatalf("got=%+v err=%v", got, err)
+	}
+	if calls != 1 {
+		t.Fatalf("mutation retried %d times", calls)
+	}
+}
+
+func TestCreateClientTimeoutIsAmbiguousAndNotRetried(t *testing.T) {
+	var calls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		time.Sleep(80 * time.Millisecond)
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer s.Close()
+	hc := s.Client()
+	hc.Timeout = 20 * time.Millisecond
+	c := NewClient(hc, "t")
+	c.base = s.URL
+	d := &Driver{client: c}
+	got, err := d.CreateServer(context.Background(), providers.CreateServerRequest{RegionID: "ewr", PlanID: "vc2", ImageID: "2284"})
+	if err == nil || got.Outcome != providers.OutcomeAmbiguous || !providers.IsClass(err, providers.ErrorTransport) {
+		t.Fatalf("got=%+v err=%v", got, err)
+	}
+	if calls != 1 {
+		t.Fatalf("timed-out mutation retried %d times", calls)
+	}
+}
+
+func TestDelete502ReturnsAmbiguousProviderError(t *testing.T) {
+	var calls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	defer s.Close()
+	c := NewClient(s.Client(), "t")
+	c.base = s.URL
+	d := &Driver{client: c}
+	err := d.DeleteServer(context.Background(), "v1")
+	if err == nil || !providers.IsClass(err, providers.ErrorTransport) {
+		t.Fatalf("err=%v", err)
+	}
+	if calls != 1 {
+		t.Fatalf("delete mutation retried %d times", calls)
+	}
+}
