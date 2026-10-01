@@ -20,3 +20,5 @@ The continuity documents summarize intent; Git source and production runtime rem
 13. Use `docs/REQUIREMENTS_MATRIX.md` as an invariant checklist when changing a subsystem.
 14. Read `docs/PROJECT_MANIFEST.json` first for machine-readable navigation, then run `tools/check-project-continuity.sh` to detect branch/HEAD/runtime drift before relying on the manifest snapshot.
 15. At the end of a completed logical stage, run `tools/checkpoint-project.sh "<commit message>"` after updating HANDOFF/PROJECT_STATE. It regenerates the machine-readable manifest/current snapshot, validates JSON, commits and pushes the continuity checkpoint.
+
+16. Read `docs/SESSION_HANDOFF_BUNDLE.md` as the single fast-entry context bundle; use its sections as navigation, then verify exact details against source/runtime.
