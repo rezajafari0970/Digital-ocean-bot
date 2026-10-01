@@ -24,8 +24,42 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		return err
 	}
 	if providerID == "" {
-		if item.Kind == "CREATE_DROPLET" {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations o SET state='failed',updated_at=now() WHERE o.id=$1 AND o.account_id=$2 AND o.state='unknown' AND EXISTS (SELECT 1 FROM deployments d WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%' AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY'))`, item.ID, item.AccountID)
+		if item.Kind != "CREATE_DROPLET" {
+			return nil
+		}
+		var deploymentID, deploymentState string
+		qerr := h.Container.DB.QueryRowContext(ctx, `SELECT d.id::text,d.state
+			FROM deployments d
+			JOIN operations o ON o.id=$1 AND o.account_id=$2
+			WHERE o.idempotency_key LIKE 'deploy:'||d.id::text||':create:%'
+			LIMIT 1`, item.ID, item.AccountID).Scan(&deploymentID, &deploymentState)
+		if qerr != nil {
+			if errors.Is(qerr, sql.ErrNoRows) {
+				return nil
+			}
+			return qerr
+		}
+		runtime, rerr := h.Container.Runtime(ctx, item.AccountID)
+		if rerr != nil {
+			return rerr
+		}
+		compute, cerr := computeDriver(runtime)
+		if cerr != nil {
+			return cerr
+		}
+		matches, ferr := compute.FindServerByIdentity(ctx, "dob-deployment-"+deploymentID)
+		if ferr != nil {
+			return ferr
+		}
+		if len(matches) > 1 {
+			return errors.New("multiple provider servers match stale create identity")
+		}
+		if len(matches) == 1 {
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID)
+			return err
+		}
+		if terminalDeploymentStateForCreateRecovery(deploymentState) {
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='stale_create_without_provider_resource',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID)
 			return err
 		}
 		return nil
@@ -182,4 +216,13 @@ func (h RecoveryHandler) BypassDeploymentBackoff(ctx context.Context, item worke
 	}
 	cfg, _, err := h.Container.DeploymentConfigFromSnapshot(ctx, item.ID)
 	return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)
+}
+
+func terminalDeploymentStateForCreateRecovery(state string) bool {
+	switch state {
+	case "FAILED", "INSTALL_FAILED", "INSTALL_ROLLED_BACK", "PANEL_COMPLETE", "READY":
+		return true
+	default:
+		return false
+	}
 }
