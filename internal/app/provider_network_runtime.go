@@ -76,12 +76,14 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			gateway.Client.Transport = network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
 				healthMu.Lock()
 				defer healthMu.Unlock()
-				if obs.Err == nil && healthy {
+				if obs.Err == nil && !obs.ProxyAuthRequired && healthy {
 					return
 				}
 				status, errText := network.StatusHealthy, ""
 				if obs.Err != nil {
 					status, errText = network.StatusDown, obs.Err.Error()
+				} else if obs.ProxyAuthRequired {
+					status, errText = network.StatusDown, "proxy authentication required"
 				}
 				reportCtx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
 				defer cancel()
