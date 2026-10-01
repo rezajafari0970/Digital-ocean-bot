@@ -86,6 +86,7 @@ func main() {
 		"--user-data-dir="+profile, "--proxy-server="+localProxy,
 		"--window-size=412,915", "--force-device-scale-factor=1", "--touch-events=enabled",
 		"--disable-session-crashed-bubble", "--hide-crash-restore-bubble", "--disable-infobars",
+		"--remote-debugging-address=127.0.0.1", "--remote-debugging-port=19223",
 		"--user-agent=Mozilla/5.0 (Linux; Android 16; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
 		"--app=https://my.vultr.com/")
 	chrome.Env = append(os.Environ(), "DISPLAY=:199")
@@ -95,6 +96,12 @@ func main() {
 		panic(err)
 	}
 	defer chrome.Process.Kill()
+	time.Sleep(700 * time.Millisecond)
+	inputBridge, err := start("/opt/digital-ocean-bot/bin/vultr-input-bridge")
+	if err != nil {
+		panic(err)
+	}
+	defer inputBridge.Process.Kill()
 	_, _ = a.DB.ExecContext(ctx, `UPDATE accounts SET console_capacity_status='manual_session_open',console_capacity_detail='interactive console session available' WHERE id=$1`, accountID)
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)

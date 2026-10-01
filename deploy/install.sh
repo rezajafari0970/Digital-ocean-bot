@@ -23,6 +23,7 @@ go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api" ./cmd
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session" ./cmd/vultr-browser-session
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-manager" ./cmd/vultr-browser-manager
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-input-bridge" ./cmd/vultr-input-bridge
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
 if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
