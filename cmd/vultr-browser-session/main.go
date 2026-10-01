@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -26,6 +28,22 @@ func start(name string, args ...string) (*exec.Cmd, error) {
 	c.Stderr = os.Stderr
 	err := c.Start()
 	return c, err
+}
+
+func clearStaleDisplay99() {
+	raw, err := os.ReadFile("/tmp/.X99-lock")
+	if err != nil {
+		return
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(raw)))
+	if err != nil || pid <= 0 {
+		return
+	}
+	if err := syscall.Kill(pid, 0); err == nil {
+		return
+	}
+	_ = os.Remove("/tmp/.X99-lock")
+	_ = os.Remove("/tmp/.X11-unix/X99")
 }
 
 func main() {
@@ -59,6 +77,7 @@ func main() {
 	defer bridge.Close()
 
 	profile := filepath.Join("/var/lib/digital-ocean-bot/browser-sessions", accountID)
+	clearStaleDisplay99()
 	if err = os.MkdirAll(profile, 0700); err != nil {
 		panic(err)
 	}
