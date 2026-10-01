@@ -71,40 +71,25 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		return AccountRuntime{}, err
 	}
 	cell := accounts.NewCellManager().Register(accountID)
-	if cfg.Network.Mode == network.RouteProxyRequired {
-		if cfg.Proxy == nil {
-			return AccountRuntime{}, ErrNetworkNotReady
-		}
-		password := []byte(nil)
-		if cfg.ProxySecretRef != "" {
-			password, err = c.Secrets.GetProxy(ctx, cfg.Proxy.ID, cfg.ProxySecretRef)
-			if err != nil {
-				return AccountRuntime{}, err
-			}
-			defer wipe(password)
-		}
-		gateway, err := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)})
-		if err != nil {
-			return AccountRuntime{}, err
-		}
-		gate := network.AccountGate{Profile: cfg.Network, Proxy: cfg.Proxy, Health: network.HealthState{Status: cfg.Proxy.Status}}
-		driver, err := c.openDriver(ctx, cfg, gateway.Client)
-		if err != nil {
-			return AccountRuntime{}, err
-		}
-		return AccountRuntime{Config: cfg, Cell: cell, Gateway: gateway, Driver: driver, Operations: jobs.SQLStore{DB: c.DB}, Gate: gate}, nil
-	}
-	bundle, err := network.NewIsolatedDirectClient(accountID)
+	netrt, err := c.buildProviderNetworkRuntime(ctx, cfg)
 	if err != nil {
 		return AccountRuntime{}, err
 	}
-	driver, err := c.openDriver(ctx, cfg, bundle.Client)
+	driver, err := c.openDriver(ctx, cfg, netrt.Client)
 	if err != nil {
-		bundle.CloseIdleConnections()
+		if netrt.Gateway != nil {
+			netrt.Gateway.CloseIdleConnections()
+		}
 		return AccountRuntime{}, err
 	}
-	gate := network.AccountGate{Profile: cfg.Network}
-	return AccountRuntime{Config: cfg, Cell: cell, Driver: driver, Operations: jobs.SQLStore{DB: c.DB}, Gate: gate}, nil
+	return AccountRuntime{
+		Config:     cfg,
+		Cell:       cell,
+		Gateway:    netrt.Gateway,
+		Driver:     driver,
+		Operations: jobs.SQLStore{DB: c.DB},
+		Gate:       netrt.Gate,
+	}, nil
 }
 func wipe(b []byte) {
 	for i := range b {
