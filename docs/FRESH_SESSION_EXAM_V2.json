@@ -1,0 +1,428 @@
+{
+  "schema_version": 2,
+  "source_commit": "c841cf18de70e4ff05c2dfcb4753f9fe1c01f1db",
+  "question_count": 40,
+  "contract": "docs/KNOWLEDGE_RETRIEVAL_CONTRACT.md",
+  "questions": [
+    {
+      "exam_id": 1,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.id?",
+      "evidence_sources": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ],
+      "retrieval": {
+        "type": "db",
+        "query": "account_capacity_events.id"
+      }
+    },
+    {
+      "exam_id": 2,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_capacity_events.delta?",
+      "evidence_sources": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ],
+      "retrieval": {
+        "type": "db",
+        "query": "account_capacity_events.delta"
+      }
+    },
+    {
+      "exam_id": 3,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.timezone?",
+      "evidence_sources": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ],
+      "retrieval": {
+        "type": "db",
+        "query": "account_network_identities.timezone"
+      }
+    },
+    {
+      "exam_id": 4,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.asn?",
+      "evidence_sources": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ],
+      "retrieval": {
+        "type": "db",
+        "query": "account_network_identities.asn"
+      }
+    },
+    {
+      "exam_id": 5,
+      "category": "db-chain",
+      "question": "What is the origin and code evidence for account_network_identities.preferred_country_code?",
+      "evidence_sources": [
+        "COLUMN_BEHAVIOR_BRAIN",
+        "SCHEMA_INDEX"
+      ],
+      "retrieval": {
+        "type": "db",
+        "query": "account_network_identities.preferred_country_code"
+      }
+    },
+    {
+      "exam_id": 6,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to duplicate/competing installer execution?",
+      "evidence_sources": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "exam_id": 7,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to stale output visibility / approximate expiry?",
+      "evidence_sources": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "exam_id": 8,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to DigitalOcean-specific assumptions leaking into generic provider paths?",
+      "evidence_sources": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "exam_id": 9,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to noVNC/WebSocket path mismatch / connecting state?",
+      "evidence_sources": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "exam_id": 10,
+      "category": "history-chain",
+      "question": "What regression guardrail applies to assuming Git HEAD equals deployed production?",
+      "evidence_sources": [
+        "INCIDENT_REGRESSION_BRAIN",
+        "HISTORICAL_DECISION_LEDGER"
+      ]
+    },
+    {
+      "exam_id": 11,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-01?",
+      "evidence_sources": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "exam_id": 12,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ARCHITECTURE-03?",
+      "evidence_sources": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "exam_id": 13,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-01?",
+      "evidence_sources": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "exam_id": 14,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-03?",
+      "evidence_sources": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "exam_id": 15,
+      "category": "intent-chain",
+      "question": "What durable requirement is DEEP-ACCOUNTS-05?",
+      "evidence_sources": [
+        "DEEP_REQUIREMENTS_BRAIN"
+      ]
+    },
+    {
+      "exam_id": 16,
+      "category": "line-recall",
+      "question": "What is exact line 4 of cmd/ready-panel-worker/main.go at snapshot commit?",
+      "evidence_sources": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 17,
+      "category": "line-recall",
+      "question": "What is exact line 8 of internal/adminapi/installer_rearm.go at snapshot commit?",
+      "evidence_sources": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 18,
+      "category": "line-recall",
+      "question": "What is exact line 4 of internal/app/capacity_guard_test.go at snapshot commit?",
+      "evidence_sources": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 19,
+      "category": "line-recall",
+      "question": "What is exact line 42 of internal/droplets/postgres_e2e_test.go at snapshot commit?",
+      "evidence_sources": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 20,
+      "category": "line-recall",
+      "question": "What is exact line 38 of internal/panels/export/vless.go at snapshot commit?",
+      "evidence_sources": [
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 21,
+      "category": "route-chain",
+      "question": "Where is GET /healthz handled?",
+      "evidence_sources": [
+        "SYMBOL_INDEX"
+      ],
+      "retrieval": {
+        "type": "route",
+        "query": "GET|/healthz"
+      }
+    },
+    {
+      "exam_id": 22,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/auth/logout handled?",
+      "evidence_sources": [
+        "SYMBOL_INDEX"
+      ],
+      "retrieval": {
+        "type": "route",
+        "query": "POST|/api/v1/auth/logout"
+      }
+    },
+    {
+      "exam_id": 23,
+      "category": "route-chain",
+      "question": "Where is DELETE /api/v1/accounts/{id} handled?",
+      "evidence_sources": [
+        "SYMBOL_INDEX"
+      ],
+      "retrieval": {
+        "type": "route",
+        "query": "DELETE|/api/v1/accounts/{id}"
+      }
+    },
+    {
+      "exam_id": 24,
+      "category": "route-chain",
+      "question": "Where is POST /api/v1/accounts/{id}/console-session handled?",
+      "evidence_sources": [
+        "SYMBOL_INDEX"
+      ],
+      "retrieval": {
+        "type": "route",
+        "query": "POST|/api/v1/accounts/{id}/console-session"
+      }
+    },
+    {
+      "exam_id": 25,
+      "category": "route-chain",
+      "question": "Where is PUT /api/v1/proxies/{id} handled?",
+      "evidence_sources": [
+        "SYMBOL_INDEX"
+      ],
+      "retrieval": {
+        "type": "route",
+        "query": "PUT|/api/v1/proxies/{id}"
+      }
+    },
+    {
+      "exam_id": 26,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "evidence_sources": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ],
+      "retrieval": {
+        "type": "state",
+        "query": "accountPreflight"
+      }
+    },
+    {
+      "exam_id": 27,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving READY?",
+      "evidence_sources": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ],
+      "retrieval": {
+        "type": "state",
+        "query": "accountDiscovery"
+      }
+    },
+    {
+      "exam_id": 28,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving PANEL_COMPLETE, READY?",
+      "evidence_sources": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ],
+      "retrieval": {
+        "type": "state",
+        "query": "WarmOutputCache"
+      }
+    },
+    {
+      "exam_id": 29,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving FAILED, INSTALL_FAILED, INSTALL_ROLLED_BACK?",
+      "evidence_sources": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ],
+      "retrieval": {
+        "type": "state",
+        "query": "system"
+      }
+    },
+    {
+      "exam_id": 30,
+      "category": "state-chain",
+      "question": "Which function owns state evidence involving DELETED, READY?",
+      "evidence_sources": [
+        "STATE_TRANSITION_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ],
+      "retrieval": {
+        "type": "state",
+        "query": "ReconcileLocalState"
+      }
+    },
+    {
+      "exam_id": 31,
+      "category": "test-chain",
+      "question": "What does TestCellManagerKeepsAccountsSeparate exercise structurally?",
+      "evidence_sources": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 32,
+      "category": "test-chain",
+      "question": "What does TestRuntimeIdentitiesAreIndependent exercise structurally?",
+      "evidence_sources": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 33,
+      "category": "test-chain",
+      "question": "What does TestOutputVisibleUntilTenSecondsBeforeExpiry exercise structurally?",
+      "evidence_sources": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 34,
+      "category": "test-chain",
+      "question": "What does TestHealthEndpoint exercise structurally?",
+      "evidence_sources": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 35,
+      "category": "test-chain",
+      "question": "What does TestClassifyAccountProviderError exercise structurally?",
+      "evidence_sources": [
+        "TEST_BEHAVIOR_BRAIN",
+        "FULL_SOURCE_KNOWLEDGE"
+      ]
+    },
+    {
+      "exam_id": 36,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/accounts and what UI evidence surrounds it?",
+      "evidence_sources": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ],
+      "retrieval": {
+        "type": "ui",
+        "query": "openAccountWizard"
+      }
+    },
+    {
+      "exam_id": 37,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/proxies/ and what UI evidence surrounds it?",
+      "evidence_sources": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ],
+      "retrieval": {
+        "type": "ui",
+        "query": "testProxy"
+      }
+    },
+    {
+      "exam_id": 38,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/configs and what UI evidence surrounds it?",
+      "evidence_sources": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ],
+      "retrieval": {
+        "type": "ui",
+        "query": "openConfigForm"
+      }
+    },
+    {
+      "exam_id": 39,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/output/share and what UI evidence surrounds it?",
+      "evidence_sources": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ],
+      "retrieval": {
+        "type": "ui",
+        "query": "openSnapshot"
+      }
+    },
+    {
+      "exam_id": 40,
+      "category": "ui-chain",
+      "question": "Which frontend function calls /api/v1/residential-proxies and what UI evidence surrounds it?",
+      "evidence_sources": [
+        "FRONTEND_ACTION_STATE_BRAIN"
+      ],
+      "retrieval": {
+        "type": "ui",
+        "query": "editResidential"
+      }
+    }
+  ]
+}
