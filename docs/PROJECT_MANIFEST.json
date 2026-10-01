@@ -4,7 +4,7 @@
   "canonical_repo": "/root/projects/Digital-ocean-bot-canonical-e2e",
   "remote": "git@github.com:rezajafari0970/Digital-ocean-bot.git",
   "branch": "checkpoint/final-e2e-20260929",
-  "head_at_generation": "d6d4caa5e901e98c3a94e78fcba5fe5479075ae5",
+  "head_at_generation": "4c5fc509fd34d055d7ed4b010cdd3150ee891cd3",
   "startup_read_order": [
     "docs/PROJECT_MANIFEST.json",
     "docs/CHATGPT_MASTER_CONTEXT.md",
@@ -420,5 +420,11 @@
     "exact Output visibility/expiry semantics",
     "secrets never stored in continuity docs"
   ],
-  "source_of_truth_rule": "Manifest/docs are navigation and intent. Git source, live DB migration state and production runtime are authoritative for exact behavior."
+  "source_of_truth_rule": "Manifest/docs are navigation and intent. Git source, live DB migration state and production runtime are authoritative for exact behavior.",
+  "generated_at_utc": "2026-10-01T03:49:46.149542+00:00",
+  "inventory": {
+    "go_files": 408,
+    "tests": 121,
+    "up_migrations": 102
+  }
 }

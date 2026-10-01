@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+python3 tools/update-project-continuity.py
+python3 -m json.tool docs/PROJECT_MANIFEST.json >/dev/null
+python3 -m json.tool docs/CURRENT_SNAPSHOT.json >/dev/null
+git add docs/PROJECT_MANIFEST.json docs/CURRENT_SNAPSHOT.json PROJECT_STATE.md HANDOFF.md docs/*.md tools/update-project-continuity.py tools/check-project-continuity.sh tools/checkpoint-project.sh
+if git diff --cached --quiet; then echo 'continuity: no staged changes'; exit 0; fi
+msg="${1:-docs: refresh project continuity checkpoint}"
+git commit -m "$msg"
+git push origin "$(git branch --show-current)"
+python3 tools/update-project-continuity.py
+# Keep generated snapshot aligned with the checkpoint commit itself.
+git add docs/PROJECT_MANIFEST.json docs/CURRENT_SNAPSHOT.json
+if ! git diff --cached --quiet; then
+  git commit --amend --no-edit
+  git push --force-with-lease origin "$(git branch --show-current)"
+fi
+echo "continuity checkpoint=$(git rev-parse HEAD)"

@@ -1,0 +1,42 @@
+{
+  "generated_at_utc": "2026-10-01T03:49:46.149542+00:00",
+  "branch": "checkpoint/final-e2e-20260929",
+  "head": "4c5fc509fd34d055d7ed4b010cdd3150ee891cd3",
+  "services": {
+    "digital-ocean-bot-api": "active",
+    "digital-ocean-bot-worker": "active"
+  },
+  "inventory": {
+    "go_files": 408,
+    "tests": 121,
+    "up_migrations": 102
+  },
+  "route_count": 61,
+  "working_tree": [
+    " M .audit/provider-step2/chunk-progress.json",
+    " M docs/PROJECT_MANIFEST.json",
+    "?? .audit/provider-step1/",
+    "?? .audit/provider-step2/final-bundles/",
+    "?? .audit/provider-step2/migration-bundles/",
+    "?? .audit/provider-step2/migration-small/",
+    "?? .audit/step1-full-source/",
+    "?? .audit/step1-reader-micro/",
+    "?? .audit/step1-reader-packs/",
+    "?? .audit/step1-semantic-ledger/"
+  ],
+  "recent_commits": [
+    "4c5fc50 (HEAD -> checkpoint/final-e2e-20260929, origin/checkpoint/final-e2e-20260929) tools: automate project continuity snapshots",
+    "add585c docs: add machine-readable project continuity manifest",
+    "d6d4caa docs: preserve historical decisions and subsystem invariants",
+    "7b49e77 docs: index feature flows and change protocol",
+    "d44242e docs: add master architecture and session bootstrap context",
+    "80d29ac docs: add durable project continuity checkpoint",
+    "6834d81 fix(vultr): accept root noVNC websocket alias",
+    "7126567 fix(vultr): correct noVNC websocket path behind proxy"
+  ],
+  "current_work": {
+    "area": "Vultr interactive console/capacity",
+    "verification_boundary": "Fresh Admin session -> Open Vultr Console -> fresh ticket -> successful noVNC WebSocket -> manual challenge if presented -> reuse authorized state for capacity workflow",
+    "handoff": "HANDOFF.md"
+  }
+}
