@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "canonical_repo": "/root/projects/Digital-ocean-bot-canonical-e2e",
+  "git": {
+    "branch": "checkpoint/final-e2e-20260929",
+    "head": "fa815e643a71d3623d2abce17058d2f725a00f4e"
+  },
+  "paths": {
+    "app": "/opt/digital-ocean-bot",
+    "bin": "/opt/digital-ocean-bot/bin",
+    "env": "/etc/digital-ocean-bot/env",
+    "data": "/var/lib/digital-ocean-bot",
+    "static": "/opt/digital-ocean-bot/web/static",
+    "migrations": "/opt/digital-ocean-bot/migrations"
+  },
+  "services": {
+    "digital-ocean-bot-api": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "MainPID": "2532688",
+      "FragmentPath": "/etc/systemd/system/digital-ocean-bot-api.service",
+      "WorkingDirectory": "/opt/digital-ocean-bot",
+      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-api ; ignore_errors=no ; start_time=[Thu 2026-10-01 03:40:48 UTC] ; stop_time=[n/a] ; pid=2532688 ; code=(null) ; status=0/0 }",
+      "EnvironmentFiles": "/etc/digital-ocean-bot/env (ignore_errors=no)",
+      "resolved_executable": "/opt/digital-ocean-bot/bin/digital-ocean-bot-api",
+      "binary_sha256": "2f8eb59be1ce359a0fd9500ac741f3b2e717c0b7e1c08662b00e7f7ef9c78598"
+    },
+    "digital-ocean-bot-worker": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "MainPID": "2137080",
+      "FragmentPath": "/etc/systemd/system/digital-ocean-bot-worker.service",
+      "WorkingDirectory": "/opt/digital-ocean-bot",
+      "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }",
+      "EnvironmentFiles": "/etc/digital-ocean-bot/env (ignore_errors=no)",
+      "resolved_executable": "/opt/digital-ocean-bot/bin/digital-ocean-bot-worker",
+      "binary_sha256": "7bd4042953d7f5d6f43a53311ef0b2d600b0e72e293ca21b18e7d0159cd56fcb"
+    }
+  },
+  "source_units": [
+    "deploy/digital-ocean-bot-api.service",
+    "deploy/digital-ocean-bot-worker.service"
+  ],
+  "scripts": {
+    "install": "deploy/install.sh",
+    "upgrade": "deploy/upgrade.sh",
+    "healthcheck": "deploy/healthcheck.sh",
+    "bootstrap": "deploy/bootstrap.sh"
+  },
+  "health": {
+    "healthz": "http://127.0.0.1:18080/healthz",
+    "readyz": "http://127.0.0.1:18080/readyz"
+  },
+  "build": {
+    "api": "go build -trimpath -ldflags=-s\\ -w -o /opt/digital-ocean-bot/bin/digital-ocean-bot-api ./cmd/api",
+    "worker": "go build -trimpath -ldflags=-s\\ -w -o /opt/digital-ocean-bot/bin/digital-ocean-bot-worker ./cmd/worker"
+  },
+  "production_revision_note": "Current binaries are not stamped with Git commit by the existing build scripts; binary hash + deploy time/runtime checks can prove artifact identity but not map it to a commit without a recorded build manifest."
+}
