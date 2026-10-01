@@ -22,3 +22,4 @@ The continuity documents summarize intent; Git source and production runtime rem
 15. At the end of a completed logical stage, run `tools/checkpoint-project.sh "<commit message>"` after updating HANDOFF/PROJECT_STATE. It regenerates the machine-readable manifest/current snapshot, validates JSON, commits and pushes the continuity checkpoint.
 
 16. Read `docs/SESSION_HANDOFF_BUNDLE.md` as the single fast-entry context bundle; use its sections as navigation, then verify exact details against source/runtime.
+17. Run `python3 tools/audit-handoff-readiness.py` before a planned chat migration. Do not treat the handoff as self-sufficient if any readiness check fails.
