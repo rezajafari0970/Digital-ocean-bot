@@ -1,0 +1,66 @@
+{
+  "schema_version": 3,
+  "source_commit": "9fba8f9cfbbb6815fdf0641e203b0e56b9fe9d81",
+  "knowledge_mastery_percent": 100.0,
+  "knowledge_ready": true,
+  "epistemic_classification": [
+    {
+      "feature": "residential",
+      "dimension": "tests",
+      "severity": "high",
+      "reason": "no directly matched test evidence",
+      "evidence": {
+        "requirements": 5,
+        "routes": 5,
+        "functions": 7,
+        "columns": 6,
+        "tests": 0,
+        "frontend_functions": 4,
+        "incidents": 0
+      },
+      "closure_status": "confirmed-gap",
+      "epistemic_status": "known-absence",
+      "classification_reason": "repository-wide test search confirms no direct Residential test"
+    },
+    {
+      "feature": "database",
+      "dimension": "code-mentions",
+      "severity": "medium",
+      "reason": "6 live columns lack direct function mention evidence",
+      "evidence": {
+        "columns_with_reader_functions": 512,
+        "columns_with_writer_functions": 540,
+        "columns_with_function_mentions": 589,
+        "columns_with_migration_origin": 590
+      },
+      "closure_status": "confirmed-indirect",
+      "epistemic_status": "known-absence",
+      "classification_reason": "repository-wide exact-name search confirms six columns have no direct application lexical access"
+    },
+    {
+      "feature": "residential",
+      "dimension": "history",
+      "severity": "low",
+      "reason": "no dedicated incident guardrail currently encoded",
+      "evidence": {
+        "requirements": 5,
+        "routes": 5,
+        "functions": 7,
+        "columns": 6,
+        "tests": 0,
+        "frontend_functions": 4,
+        "incidents": 0
+      },
+      "closure_status": "unresolved",
+      "epistemic_status": "known-absence",
+      "classification_reason": "Git history search confirms Residential code history but no defensible dedicated incident/regression guardrail"
+    }
+  ],
+  "unknown_gaps": [],
+  "product_evidence_absences": {
+    "residential_direct_test": false,
+    "residential_dedicated_incident_history": false,
+    "six_columns_direct_application_access": false
+  },
+  "definition": "Knowledge mastery measures whether current project facts are known and evidence-characterized, including known absence. It does NOT claim missing product tests/history/access exist, and does NOT mean unaided memorization of every token."
+}
