@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "source_commit": "be30070a041aee16100278b60538fb14067c239c",
+  "closures": [
+    {
+      "gap": "residential/tests",
+      "status": "confirmed-gap",
+      "evidence": "grep across internal/**/*_test.go found no residential/residentialsync references",
+      "interpretation": "No direct Residential test evidence exists in current repository; keep as knowledge/product verification gap, do not mark covered."
+    },
+    {
+      "gap": "database/migration-origin/provider_catalog_cache.catalog",
+      "status": "explained",
+      "evidence": "table is pre-existing/alter-only in static migration parser output",
+      "interpretation": "Origin cannot be assigned to a CREATE migration from current parser evidence."
+    },
+    {
+      "gap": "database/migration-origin/provider_catalog_cache.refreshed_at",
+      "status": "explained",
+      "evidence": "table is pre-existing/alter-only in static migration parser output",
+      "interpretation": "Origin cannot be assigned to a CREATE migration from current parser evidence."
+    },
+    {
+      "gap": "database/migration-origin/schema_migrations.*",
+      "status": "explained",
+      "evidence": "internal/migrate/runner.go creates/alters schema_migrations at runtime before applying migration files",
+      "interpretation": "These columns are bootstrap-owned by migration runner, not a numbered migration."
+    },
+    {
+      "gap": "database/code-mentions/security_profile_columns",
+      "status": "confirmed-indirect",
+      "evidence": "columns exist from 000003_security_profiles.up.sql but no direct function-level lexical mention",
+      "interpretation": "Do not fabricate reader/writer ownership; access may be indirect/unused."
+    },
+    {
+      "gap": "database/code-mentions/proxies.expected_exit_ip",
+      "status": "confirmed-indirect",
+      "evidence": "column originates in 000004_proxy_health.up.sql but no direct function-level lexical mention",
+      "interpretation": "Keep as direct-evidence gap until source proves access."
+    }
+  ],
+  "historical_direct_evidence": {
+    "sanaei_panel": [
+      {
+        "commit": "6514987ea3fc152beb928cc3338c9ac0ce0e0ca1",
+        "date": "2026-09-30",
+        "subject": "fix(panels): self-heal host firewall before direct API retry"
+      },
+      {
+        "commit": "9c7bbbe7c64a3b42b3ad61e7fc8aa36136a87d72",
+        "date": "2026-09-29",
+        "subject": "optimize legacy Sanaei capacity per inbound"
+      },
+      {
+        "commit": "12f07e7db8bd1f2fefa465792a6dcf743570adee",
+        "date": "2026-09-29",
+        "subject": "use full update fallback for legacy Sanaei capacity"
+      },
+      {
+        "commit": "202f056037f69ba509541b3e8c59809142d68da4",
+        "date": "2026-09-29",
+        "subject": "fallback when Sanaei addClient is unavailable"
+      },
+      {
+        "commit": "18c14649fc641f43a5972d62ab9300cb162abf9b",
+        "date": "2026-09-29",
+        "subject": "chunk Sanaei capacity fills and improve diagnostics"
+      },
+      {
+        "commit": "ab6b19a890b6309e4dbbf751cbf47d13a5c2d153",
+        "date": "2026-09-29",
+        "subject": "productionize Sanaei runtime reconciliation and capacity"
+      }
+    ],
+    "reality": [
+      {
+        "commit": "3a6ba7a9dff0f39739522ad30dccd4f95910b35a",
+        "date": "2026-09-29",
+        "subject": "snapshot empty reality inbounds structurally"
+      },
+      {
+        "commit": "09f0488cc0ddd338dbdff4c494d423cb2401f9df",
+        "date": "2026-09-28",
+        "subject": "require semantic postflight for managed reality"
+      },
+      {
+        "commit": "26d4077967800fbe3f06fe094ded13743e488355",
+        "date": "2026-09-28",
+        "subject": "mirror sanaei find-targets use semantics"
+      },
+      {
+        "commit": "b2dfc38aebe236c4608c4d7f07ca3cc6c80b47e4",
+        "date": "2026-09-27",
+        "subject": "unify managed reality server and client contract"
+      },
+      {
+        "commit": "c6433c3aaeee204ff5be35760dfa331424554518",
+        "date": "2026-09-27",
+        "subject": "select reality targets from sanaei scanner metadata"
+      }
+    ],
+    "admin_api": [
+      {
+        "commit": "c3b75d5acce9c1f2fef72cffa999ba1141477997",
+        "date": "2026-09-23",
+        "subject": "fix distinguish panel session 401 from provider token 401"
+      },
+      {
+        "commit": "c3cdd871a9afbaa51cc73eff1a51062e2cad6451",
+        "date": "2026-09-23",
+        "subject": "feat: secure admin API with sessions and RBAC"
+      },
+      {
+        "commit": "965247098c8a6d50b5bec1236ce158f0082a3d40",
+        "date": "2026-09-23",
+        "subject": "feat: harden admin panel security"
+      }
+    ],
+    "frontend": [
+      {
+        "commit": "6191ea8918e90fe4f09631db9d24bc0b4e01d668",
+        "date": "2026-09-30",
+        "subject": "fix(ui): restore admin app after Vultr fields syntax error"
+      },
+      {
+        "commit": "2de0245dfc66de5e37d2924f228b18f3508b0f38",
+        "date": "2026-09-29",
+        "subject": "fix(ui): repair account capacity rendering"
+      },
+      {
+        "commit": "ed4dccf90d07cc649e7a48db37b40baed5f0d2fa",
+        "date": "2026-09-23",
+        "subject": "fix bump frontend cache after account back navigation"
+      },
+      {
+        "commit": "e1261a6555920a63508147c0e5bf88599d389724",
+        "date": "2026-09-23",
+        "subject": "fix bust stale frontend cache"
+      },
+      {
+        "commit": "252dd4b62c578ed286e4d54eef41973fcac3c2ad",
+        "date": "2026-09-23",
+        "subject": "perf make account save UI instant"
+      },
+      {
+        "commit": "208583d3c1f931dd3cf62f3d317c68ddb31bd7ae",
+        "date": "2026-09-23",
+        "subject": "fix: use CSP-safe action handlers in admin panel"
+      }
+    ],
+    "residential": []
+  },
+  "principle": "Explained gaps remain visible unless direct evidence closes them. No missing test, migration origin, or code ownership is fabricated."
+}
