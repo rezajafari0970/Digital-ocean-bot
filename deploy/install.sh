@@ -13,6 +13,7 @@ DB_USER=${DB_USER:-digitaloceanbot}
 
 id -u digitaloceanbot >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin digitaloceanbot
 install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$APP/bin" "$DATA" "$DATA/templates"
+install -d -o digitaloceanbot -g digitaloceanbot -m 0700 "$DATA/browser-sessions"
 install -d -o root -g digitaloceanbot -m 0750 "$ETC"
 install -d -o root -g digitaloceanbot -m 0755 "$APP/web/static"
 cp -a "$SRC/migrations" "$APP/"
@@ -21,6 +22,7 @@ cd "$SRC"
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api" ./cmd/api
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
 go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session" ./cmd/vultr-browser-session
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-manager" ./cmd/vultr-browser-manager
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
 if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
@@ -40,11 +42,12 @@ EOF
 fi
 install -m 0644 "$SRC/deploy/digital-ocean-bot-api.service" /etc/systemd/system/
 install -m 0644 "$SRC/deploy/digital-ocean-bot-worker.service" /etc/systemd/system/
+install -m 0644 "$SRC/deploy/digital-ocean-bot-vultr-browser-manager.service" /etc/systemd/system/
 systemctl daemon-reload
 API_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-api" | awk '{print $1}')"
 WORKER_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-worker" | awk '{print $1}')"
 printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s"}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$API_SHA" "$WORKER_SHA" > "$APP/build-manifest.json"
-systemctl enable digital-ocean-bot-api digital-ocean-bot-worker
+systemctl enable digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-vultr-browser-manager
 # Always restart: enable --now does not restart already-active services after replacing binaries.
-systemctl restart digital-ocean-bot-api digital-ocean-bot-worker
+systemctl restart digital-ocean-bot-vultr-browser-manager digital-ocean-bot-api digital-ocean-bot-worker
 systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker || true

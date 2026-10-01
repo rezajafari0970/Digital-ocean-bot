@@ -1,0 +1,25 @@
+[Unit]
+Description=Digital Ocean Bot Vultr browser manager
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=digitaloceanbot
+Group=digitaloceanbot
+EnvironmentFile=/etc/digital-ocean-bot/env
+WorkingDirectory=/opt/digital-ocean-bot
+RuntimeDirectory=digital-ocean-bot
+RuntimeDirectoryMode=0750
+ExecStart=/opt/digital-ocean-bot/bin/vultr-browser-manager
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/digital-ocean-bot
+PrivateTmp=false
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -39,8 +38,6 @@ type Server struct {
 	CleanupJobs      map[string]*cleanupJob
 	BrowserMu        sync.Mutex
 	BrowserTickets   map[string]time.Time
-	BrowserProcess   *exec.Cmd
-	BrowserAccount   string
 }
 
 func New(db *sql.DB, c app.Container) *Server {
@@ -168,50 +165,25 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ensureVultrBrowser(accountID string) error {
-	s.BrowserMu.Lock()
-	defer s.BrowserMu.Unlock()
-	if s.BrowserProcess != nil && s.BrowserProcess.ProcessState == nil {
-		if s.BrowserAccount == accountID {
-			return nil
-		}
-		return fmt.Errorf("console already active for another account")
+	c, err := net.DialTimeout("unix", "/run/digital-ocean-bot/vultr-browser.sock", time.Second)
+	if err != nil {
+		return err
 	}
-	cmd := exec.Command("/opt/digital-ocean-bot/bin/vultr-browser-session", accountID)
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("start console: %w", err)
+	defer c.Close()
+	_ = c.SetDeadline(time.Now().Add(20 * time.Second))
+	if _, err = c.Write([]byte(accountID + "\n")); err != nil {
+		return err
 	}
-	s.BrowserProcess, s.BrowserAccount = cmd, accountID
-	done := make(chan error, 1)
-	go func() {
-		err := cmd.Wait()
-		done <- err
-		s.BrowserMu.Lock()
-		if s.BrowserProcess == cmd {
-			s.BrowserProcess, s.BrowserAccount = nil, ""
-		}
-		s.BrowserMu.Unlock()
-	}()
-	deadline := time.NewTimer(15 * time.Second)
-	defer deadline.Stop()
-	tick := time.NewTicker(200 * time.Millisecond)
-	defer tick.Stop()
-	for {
-		select {
-		case err := <-done:
-			s.BrowserProcess, s.BrowserAccount = nil, ""
-			return fmt.Errorf("console exited before ready: %w", err)
-		case <-deadline.C:
-			_ = cmd.Process.Kill()
-			s.BrowserProcess, s.BrowserAccount = nil, ""
-			return fmt.Errorf("console readiness timeout")
-		case <-tick.C:
-			c, err := net.DialTimeout("tcp", "127.0.0.1:16080", 200*time.Millisecond)
-			if err == nil {
-				c.Close()
-				return nil
-			}
-		}
+	buf := make([]byte, 256)
+	n, err := c.Read(buf)
+	if err != nil {
+		return err
 	}
+	response := strings.TrimSpace(string(buf[:n]))
+	if response != "READY" {
+		return errors.New(response)
+	}
+	return nil
 }
 
 func (s *Server) createVultrBrowserTicket(w http.ResponseWriter, r *http.Request) {
