@@ -113,3 +113,45 @@ func TestObserveFastDoesNotDependOnCatalogEndpoints(t *testing.T) {
 		t.Fatalf("obs=%+v", obs)
 	}
 }
+
+func TestCatalogEndpointsFollowPaginationNext(t *testing.T) {
+	tests := []struct {
+		name, path, key, first, second string
+		call                           func(context.Context, *Client) (int, error)
+	}{
+		{"regions", "/regions", "regions",
+			"{\"id\":\"ewr\",\"city\":\"A\",\"country\":\"US\"}",
+			"{\"id\":\"fra\",\"city\":\"B\",\"country\":\"DE\"}",
+			func(ctx context.Context, c *Client) (int, error) { x, e := c.Regions(ctx); return len(x), e }},
+		{"plans", "/plans", "plans",
+			"{\"id\":\"p1\",\"type\":\"vc2\"}",
+			"{\"id\":\"p2\",\"type\":\"vc2\"}",
+			func(ctx context.Context, c *Client) (int, error) { x, e := c.Plans(ctx); return len(x), e }},
+		{"os", "/os", "os",
+			"{\"id\":1,\"name\":\"Ubuntu 24.04\",\"family\":\"ubuntu\"}",
+			"{\"id\":2,\"name\":\"Ubuntu 26.04\",\"family\":\"ubuntu\"}",
+			func(ctx context.Context, c *Client) (int, error) { x, e := c.OS(ctx); return len(x), e }},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var calls int
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				calls++
+				w.Header().Set("Content-Type", "application/json")
+				if r.URL.Query().Get("cursor") == "next" {
+					_, _ = w.Write([]byte("{\"" + tt.key + "\":[" + tt.second + "],\"meta\":{\"links\":{\"next\":\"\"}}}"))
+					return
+				}
+				next := "http://" + r.Host + tt.path + "?cursor=next"
+				_, _ = w.Write([]byte("{\"" + tt.key + "\":[" + tt.first + "],\"meta\":{\"links\":{\"next\":\"" + next + "\"}}}"))
+			}))
+			defer s.Close()
+			c := NewClient(s.Client(), "t")
+			c.base = s.URL
+			n, err := tt.call(context.Background(), c)
+			if err != nil || n != 2 || calls != 2 {
+				t.Fatalf("n=%d calls=%d err=%v", n, calls, err)
+			}
+		})
+	}
+}
