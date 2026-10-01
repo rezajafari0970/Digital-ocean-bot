@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "provider": "vultr",
+  "frozen_at": "2026-10-01T22:10:53Z",
+  "branch": "checkpoint/final-e2e-20260929",
+  "revision": "7b776a28a980f35057a7a25303b482bfc3073615",
+  "acceptance": {
+    "desired": 15,
+    "local_managed": 15,
+    "provider_in_use": 15,
+    "registry_servers": 15,
+    "unresolved_operations": 0,
+    "runtime_status": "READY",
+    "provider_state": "ACTIVE",
+    "provider_error": null,
+    "ssh_cleanup_markers": 10
+  },
+  "capacity": {
+    "source": "vultr_api_lower_bound",
+    "proven_lower_bound": 17,
+    "exact_limit": null,
+    "probe_in_flight": false,
+    "semantics": "historical lower bound is monotonic; Desired ceiling does not imply exact limit"
+  },
+  "gates": [
+    "hard_desired_ceiling",
+    "provider_confirmed_delete_before_backfill",
+    "unmaterialized_deployment_counts_as_occupancy",
+    "no_blind_mutation_retry",
+    "ambiguous_identity_reconciliation",
+    "capacity_error_taxonomy",
+    "fast_inventory_catalog_isolation",
+    "ssh_key_ids_contract",
+    "pagination_regions_plans_os_instances",
+    "final_attempt_terminalization",
+    "account_fair_lifecycle",
+    "failed_replacement_recovery",
+    "provider_server_registry_namespace"
+  ],
+  "regression_commands": [
+    "go test ./internal/providers/vultr ./internal/droplets ./internal/app ./internal/capacity ./internal/scheduler ./internal/provisioning ./internal/resources -count=1",
+    "go test ./..."
+  ]
+}
