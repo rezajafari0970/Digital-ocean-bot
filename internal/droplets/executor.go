@@ -18,6 +18,7 @@ type Executor struct {
 	Provider        providers.ComputeDriver
 	Gate            MutationGate
 	EgressCheck     func(context.Context) error
+	PreCreateCheck  func(context.Context) error
 	OnCreateError   func(context.Context, error)
 	OnCreateSuccess func(context.Context, providers.CreateServerResult)
 }
@@ -49,6 +50,13 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if err := e.Operations.Update(ctx, reserved); err != nil {
 		return reserved, err
 	}
+	if e.PreCreateCheck != nil {
+		if err := e.PreCreateCheck(ctx); err != nil {
+			reserved.State = jobs.OperationFailed
+			_ = e.Operations.Update(ctx, reserved)
+			return reserved, err
+		}
+	}
 	ssh := []string(nil)
 	if profile.SSHKeyID != "" {
 		ssh = []string{profile.SSHKeyID}
@@ -72,13 +80,13 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, errors.New("provider rejected create without server id")
 	}
-	if e.OnCreateSuccess != nil {
-		e.OnCreateSuccess(ctx, result)
-	}
 	if result.Outcome == providers.OutcomeAmbiguous {
 		reserved.State = jobs.OperationUnknown
 		_ = e.Operations.Update(ctx, reserved)
 		return reserved, ErrOutcomeStillUnknown
+	}
+	if e.OnCreateSuccess != nil {
+		e.OnCreateSuccess(ctx, result)
 	}
 	reserved.ResourceID = result.ServerID
 	reserved.State = jobs.OperationVerifying

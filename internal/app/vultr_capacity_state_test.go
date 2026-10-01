@@ -75,3 +75,49 @@ func TestOnlyAccountCapacityErrorProvesSaturation(t *testing.T) {
 		}
 	}
 }
+
+func TestProbeFailureRecoveryPolicy(t *testing.T) {
+	hold := []providers.ErrorClass{
+		providers.ErrorTransport,
+		providers.ErrorUnavailable,
+		providers.ErrorRateLimited,
+		providers.ErrorUnknown,
+	}
+	for _, class := range hold {
+		if !vultrProbeFailureMustHoldClaim(class) {
+			t.Fatalf("%s must hold probe claim", class)
+		}
+	}
+	release := []providers.ErrorClass{
+		providers.ErrorRegionCapacity,
+		providers.ErrorImageUnavailable,
+		providers.ErrorInvalidRequest,
+		providers.ErrorPermissionDenied,
+	}
+	for _, class := range release {
+		if vultrProbeFailureMustHoldClaim(class) {
+			t.Fatalf("%s must release probe claim", class)
+		}
+	}
+}
+
+func TestCapacityDecreaseOnlyChangesExactOnFreshSaturation(t *testing.T) {
+	state := vultrCapacityState{Phase: vultrCapacityExact, LowerBound: 10, ExactLimit: 10}
+	// Inventory dropping to 8 means servers were deleted; it does not prove
+	// the provider reduced the account ceiling.
+	if state.ExactLimit != 10 {
+		t.Fatal("inventory decrease must not lower exact provider ceiling")
+	}
+	state = learnVultrSaturation(state, 8)
+	if state.Phase != vultrCapacityExact || state.ExactLimit != 8 || state.LowerBound != 8 {
+		t.Fatalf("fresh saturation must replace both exact ceiling and current lower bound: %+v", state)
+	}
+}
+
+func TestInventoryAboveOldExactInvalidatesExact(t *testing.T) {
+	state := vultrCapacityState{Phase: vultrCapacityExact, LowerBound: 3, ExactLimit: 3}
+	state = learnVultrSuccess(state, 4)
+	if state.Phase != vultrCapacityLowerBound || state.ExactLimit != 0 || state.LowerBound != 4 {
+		t.Fatalf("inventory/create evidence above old exact must invalidate exact: %+v", state)
+	}
+}

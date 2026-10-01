@@ -92,7 +92,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// this avoids double-counting droplets already visible at DigitalOcean.
 		available := cap.Available()
 		if available < 1 && cap.Pending == 0 {
-			_, _ = e.DB.ExecContext(ctx, `UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true AND updated_at < now()-interval '30 minutes'`, x.AccountID)
+			_, _ = e.DB.ExecContext(ctx, `UPDATE provider_capacity_observations p SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE p.account_id=$1 AND p.source='vultr_api_probe' AND p.probe_in_flight=true AND p.updated_at < now()-interval '30 minutes' AND NOT EXISTS (SELECT 1 FROM operations o WHERE o.account_id=p.account_id AND o.kind='CREATE_DROPLET' AND o.state IN ('running','unknown','verifying'))`, x.AccountID)
 			var probeDue bool
 			_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_capacity_observations pco JOIN accounts a ON a.id=pco.account_id WHERE pco.account_id=$1 AND a.provider='vultr' AND pco.probe_in_flight=false AND ((pco.source='vultr_api_saturation' AND pco.probe_after IS NOT NULL AND pco.probe_after<=now()) OR pco.source='vultr_api_probe_success'))`, x.AccountID).Scan(&probeDue)
 			if probeDue {

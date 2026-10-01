@@ -33,7 +33,7 @@ func (c Container) recordVultrSaturation(ctx context.Context, accountID string, 
 	}
 	var oldLimit int
 	_ = tx.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&oldLimit)
-	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=GREATEST(provider_capacity_observations.lower_bound,EXCLUDED.lower_bound)`, accountID, limit); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=EXCLUDED.lower_bound`, accountID, limit); err != nil {
 		return
 	}
 	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: limit, LimitKnown: true, ComputeInUse: limit, ObservedAt: time.Now().UTC()})
@@ -58,6 +58,13 @@ func (c Container) handleVultrCreateError(ctx context.Context, accountID string,
 		c.recordVultrSaturation(ctx, accountID, compute, createErr)
 		return
 	}
+	class := providers.Class(createErr)
+	// Ambiguous/retryable failures may have created a server. Keep the probe
+	// claim until reconciliation or the watchdog proves it safe to retry.
+	if vultrProbeFailureMustHoldClaim(class) {
+		return
+	}
+	// Definitive non-account failures did not consume account capacity.
 	_, _ = c.DB.ExecContext(ctx, "UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now()+interval '2 minutes',updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true", accountID)
 }
 

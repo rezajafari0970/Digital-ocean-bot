@@ -82,6 +82,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				var observedLimit int
 				var observedAt time.Time
 				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at,source FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt, &observedCapacitySource); qerr == nil {
+					if observedCapacitySource == "vultr_api_saturation" && obs.Capacity.ComputeInUse > observedLimit {
+						_, _ = c.DB.ExecContext(ctx, `UPDATE provider_capacity_observations SET compute_limit=0,lower_bound=GREATEST(lower_bound,$2),source='vultr_api_lower_bound',probe_in_flight=false,probe_after=NULL,observed_at=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_saturation' AND compute_limit<$2`, id, obs.Capacity.ComputeInUse)
+						observedCapacitySource = "vultr_api_lower_bound"
+						observedLimit = 0
+					}
 					if observedCapacitySource != "vultr_api_lower_bound" {
 						obs.Capacity.ComputeLimit = observedLimit
 						obs.Capacity.LimitKnown = true

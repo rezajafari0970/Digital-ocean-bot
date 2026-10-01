@@ -8,6 +8,7 @@ import (
 type computeStub struct {
 	creates, deletes     int
 	createErr, deleteErr error
+	createResult         *providers.CreateServerResult
 	servers              []providers.Server
 }
 
@@ -15,6 +16,9 @@ func (p *computeStub) CreateServer(context.Context, providers.CreateServerReques
 	p.creates++
 	if p.createErr != nil {
 		return providers.CreateServerResult{}, p.createErr
+	}
+	if p.createResult != nil {
+		return *p.createResult, nil
 	}
 	return providers.CreateServerResult{ServerID: "42", Outcome: providers.OutcomeAccepted}, nil
 }

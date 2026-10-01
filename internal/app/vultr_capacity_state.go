@@ -29,9 +29,7 @@ func learnVultrSuccess(s vultrCapacityState, observed int) vultrCapacityState {
 }
 
 func learnVultrSaturation(s vultrCapacityState, current int) vultrCapacityState {
-	if current > s.LowerBound {
-		s.LowerBound = current
-	}
+	s.LowerBound = current
 	s.Phase = vultrCapacityExact
 	s.ExactLimit = current
 	return s
@@ -39,4 +37,13 @@ func learnVultrSaturation(s vultrCapacityState, current int) vultrCapacityState 
 
 func vultrErrorProvesSaturation(err error) bool {
 	return providers.IsClass(err, providers.ErrorCapacity)
+}
+
+func vultrProbeFailureMustHoldClaim(class providers.ErrorClass) bool {
+	switch class {
+	case providers.ErrorTransport, providers.ErrorUnavailable, providers.ErrorRateLimited, providers.ErrorUnknown:
+		return true
+	default:
+		return false
+	}
 }

@@ -25,3 +25,15 @@ func TestDesiredServerHardCeiling(t *testing.T) {
 		})
 	}
 }
+
+func TestDesiredReservedCreateRecheck(t *testing.T) {
+	if !desiredAllowsReservedCreate(5, 4, 1) {
+		t.Fatal("reserved fifth create should remain allowed")
+	}
+	if desiredAllowsReservedCreate(4, 4, 1) {
+		t.Fatal("lowering desired must cancel reserved fifth create before provider mutation")
+	}
+	if desiredAllowsReservedCreate(5, 5, 1) {
+		t.Fatal("reserved create must fail closed when managed already reaches desired")
+	}
+}

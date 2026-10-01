@@ -2,6 +2,7 @@ package droplets
 
 import (
 	"context"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"testing"
@@ -72,5 +73,39 @@ func TestCreateIsIdempotent(t *testing.T) {
 	}
 	if provider.creates != 1 {
 		t.Fatal("duplicate provider mutation")
+	}
+}
+
+func TestAmbiguousCreateDoesNotAdvanceCapacitySuccess(t *testing.T) {
+	store := &opStore{}
+	result := providers.CreateServerResult{ServerID: "maybe-42", Outcome: providers.OutcomeAmbiguous}
+	provider := &computeStub{createResult: &result}
+	successCalled := false
+	e := Executor{
+		Operations:      store,
+		Provider:        provider,
+		Gate:            gateStub{},
+		OnCreateSuccess: func(context.Context, providers.CreateServerResult) { successCalled = true },
+	}
+	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
+	_, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
+	if !errors.Is(err, ErrOutcomeStillUnknown) || successCalled || store.saved.State != jobs.OperationUnknown {
+		t.Fatalf("err=%v successCalled=%v state=%s", err, successCalled, store.saved.State)
+	}
+}
+
+func TestPreCreateCheckBlocksProviderMutation(t *testing.T) {
+	store := &opStore{}
+	provider := &computeStub{}
+	e := Executor{
+		Operations:     store,
+		Provider:       provider,
+		Gate:           gateStub{},
+		PreCreateCheck: func(context.Context) error { return ErrMutationBlocked },
+	}
+	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
+	_, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
+	if !errors.Is(err, ErrMutationBlocked) || provider.creates != 0 || store.saved.State != jobs.OperationFailed {
+		t.Fatalf("err=%v creates=%d state=%s", err, provider.creates, store.saved.State)
 	}
 }
