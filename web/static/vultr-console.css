@@ -1,0 +1,18 @@
+html, body, #screen {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+}
+#status {
+  position: fixed;
+  z-index: 2;
+  top: 8px;
+  left: 8px;
+  padding: 6px 9px;
+  background: rgba(0,0,0,.73);
+  color: #fff;
+  font: 14px sans-serif;
+  border-radius: 6px;
+}

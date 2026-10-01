@@ -160,13 +160,10 @@ func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	if r.URL.Path == "/vultr-browser/vnc.html" || r.URL.Path == "/vultr-browser/vnc_lite.html" {
-		http.Redirect(w, r, "/vultr-browser/client.html?v=4", http.StatusTemporaryRedirect)
-		return
-	}
-	if r.URL.Path == "/vultr-browser/client.html" {
+	if r.URL.Path == "/vultr-browser/client.html" || r.URL.Path == "/vultr-browser/vnc.html" || r.URL.Path == "/vultr-browser/vnc_lite.html" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>html,body,#screen{margin:0;width:100%;height:100%;overflow:hidden;background:#111}#status{position:fixed;z-index:2;top:8px;left:8px;padding:6px 9px;background:#000b;color:#fff;font:14px sans-serif;border-radius:6px}</style></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js\"></script></body></html>"))
+		w.Header().Set("Cache-Control", "no-store")
+		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=5\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=5\"></script></body></html>"))
 		return
 	}
 	upstream := "http://127.0.0.1:16080"
