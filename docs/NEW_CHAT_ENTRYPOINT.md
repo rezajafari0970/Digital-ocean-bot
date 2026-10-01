@@ -16,3 +16,6 @@ Acceptance policy: `docs/HANDOFF_ACCEPTANCE_100.json` must report `ready: true` 
 
 ## Mastery bootstrap
 Read `docs/FRESH_CHAT_MASTERY_PROTOCOL.md` and run `python3 tools/fresh-chat-mastery-gate.py` before claiming full current-project mastery. Require `FRESH CHAT MASTERY READY`.
+
+## Independent fresh-session proof
+When explicitly asked to prove fresh-session mastery, follow `docs/FRESH_SESSION_EXAM_INSTRUCTIONS.md`. Freeze all 40 answers before any grading and never inspect `.audit/fresh-session-exam/` or historical/deleted answer-key material.
