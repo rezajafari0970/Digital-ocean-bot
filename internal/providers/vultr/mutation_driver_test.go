@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -128,9 +129,9 @@ func TestCreate502IsAmbiguousAndNotRetried(t *testing.T) {
 }
 
 func TestCreateClientTimeoutIsAmbiguousAndNotRetried(t *testing.T) {
-	var calls int
+	var calls atomic.Int32
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		calls++
+		calls.Add(1)
 		time.Sleep(80 * time.Millisecond)
 		w.WriteHeader(http.StatusAccepted)
 	}))
@@ -144,8 +145,8 @@ func TestCreateClientTimeoutIsAmbiguousAndNotRetried(t *testing.T) {
 	if err == nil || got.Outcome != providers.OutcomeAmbiguous || !providers.IsClass(err, providers.ErrorTransport) {
 		t.Fatalf("got=%+v err=%v", got, err)
 	}
-	if calls != 1 {
-		t.Fatalf("timed-out mutation retried %d times", calls)
+	if gotCalls := calls.Load(); gotCalls != 1 {
+		t.Fatalf("timed-out mutation retried %d times", gotCalls)
 	}
 }
 

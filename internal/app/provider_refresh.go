@@ -44,7 +44,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		}
 		func() {
 			defer c.DB.ExecContext(context.Background(), `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "provider-refresh:"+id)
-			// Re-check after acquiring the lock: another coordinator may just have refreshed.
+			// Re-check account state and freshness after acquiring the lock: another
+			// coordinator may have refreshed or changed provider state while we waited.
+			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError); qerr != nil {
+				return
+			}
 			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
 			if fresh && providerState == ProviderStateActive && providerError == "" {
 				return

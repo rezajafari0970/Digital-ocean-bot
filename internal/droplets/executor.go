@@ -47,13 +47,13 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	}
 	reserved.State = jobs.OperationRunning
 	reserved.Attempt++
-	if err := e.Operations.Update(ctx, reserved); err != nil {
+	if err := e.Operations.Update(ctx, &reserved); err != nil {
 		return reserved, err
 	}
 	if e.PreCreateCheck != nil {
 		if err := e.PreCreateCheck(ctx); err != nil {
 			reserved.State = jobs.OperationFailed
-			_ = e.Operations.Update(ctx, reserved)
+			_ = e.Operations.Update(ctx, &reserved)
 			return reserved, err
 		}
 	}
@@ -72,17 +72,17 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		} else {
 			reserved.State = jobs.OperationUnknown
 		}
-		_ = e.Operations.Update(ctx, reserved)
+		_ = e.Operations.Update(ctx, &reserved)
 		return reserved, err
 	}
 	if result.Outcome == providers.OutcomeRejected || result.ServerID == "" {
 		reserved.State = jobs.OperationFailed
-		_ = e.Operations.Update(ctx, reserved)
+		_ = e.Operations.Update(ctx, &reserved)
 		return reserved, errors.New("provider rejected create without server id")
 	}
 	if result.Outcome == providers.OutcomeAmbiguous {
 		reserved.State = jobs.OperationUnknown
-		_ = e.Operations.Update(ctx, reserved)
+		_ = e.Operations.Update(ctx, &reserved)
 		return reserved, ErrOutcomeStillUnknown
 	}
 	if e.OnCreateSuccess != nil {
@@ -90,13 +90,13 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	}
 	reserved.ResourceID = result.ServerID
 	reserved.State = jobs.OperationVerifying
-	if err := e.Operations.Update(ctx, reserved); err != nil {
+	if err := e.Operations.Update(ctx, &reserved); err != nil {
 		return reserved, err
 	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, reserved)
+			_ = e.Operations.Update(ctx, &reserved)
 			return reserved, err
 		}
 	}
@@ -117,38 +117,38 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID stri
 		}
 	} else {
 		reserved.ResourceID = providerID
-		if err := e.Operations.Update(ctx, reserved); err != nil {
+		if err := e.Operations.Update(ctx, &reserved); err != nil {
 			return reserved, err
 		}
 	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, reserved)
+			_ = e.Operations.Update(ctx, &reserved)
 			return reserved, err
 		}
 	}
 	reserved.State = jobs.OperationRunning
 	reserved.Attempt++
-	if err := e.Operations.Update(ctx, reserved); err != nil {
+	if err := e.Operations.Update(ctx, &reserved); err != nil {
 		return reserved, err
 	}
 	if err := e.Provider.DeleteServer(ctx, providerID); err != nil {
 		if providers.IsClass(err, providers.ErrorNotFound) {
 			reserved.State = jobs.OperationVerifying
-			return reserved, e.Operations.Update(ctx, reserved)
+			return reserved, e.Operations.Update(ctx, &reserved)
 		}
 		reserved.State = jobs.OperationUnknown
-		_ = e.Operations.Update(ctx, reserved)
+		_ = e.Operations.Update(ctx, &reserved)
 		return reserved, err
 	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, reserved)
+			_ = e.Operations.Update(ctx, &reserved)
 			return reserved, err
 		}
 	}
 	reserved.State = jobs.OperationVerifying
-	return reserved, e.Operations.Update(ctx, reserved)
+	return reserved, e.Operations.Update(ctx, &reserved)
 }

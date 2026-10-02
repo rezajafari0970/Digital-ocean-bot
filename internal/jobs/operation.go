@@ -27,6 +27,7 @@ type Operation struct {
 	ProviderActionID string
 	ResourceID       string
 	Attempt          int
+	LockVersion      int64
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }

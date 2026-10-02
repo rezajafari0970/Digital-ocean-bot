@@ -27,7 +27,7 @@ func (r Reconciler) VerifyCreate(ctx context.Context, op jobs.Operation) (jobs.O
 		for _, item := range items {
 			if item.ID == op.ResourceID {
 				op.State = jobs.OperationSucceeded
-				return op, r.Operations.Update(ctx, op)
+				return op, r.Operations.Update(ctx, &op)
 			}
 		}
 	}
@@ -62,7 +62,7 @@ func (r Reconciler) AdoptUnknownCreate(ctx context.Context, op jobs.Operation, i
 	}
 	op.ResourceID = match.ID
 	op.State = jobs.OperationVerifying
-	return op, r.Operations.Update(ctx, op)
+	return op, r.Operations.Update(ctx, &op)
 }
 func BuildDeleteOperation(accountID, providerID string) jobs.Operation {
 	return jobs.Operation{AccountID: accountID, Kind: "DELETE_DROPLET", IdempotencyKey: "delete:" + accountID + ":" + providerID, ResourceID: providerID, State: jobs.OperationPlanned}

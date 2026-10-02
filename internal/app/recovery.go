@@ -93,6 +93,19 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		} else {
 			return gerr
 		}
+		if item.Kind == "DELETE_DROPLET" && exists {
+			// DELETE is idempotent at the provider boundary. Re-issue the delete
+			// instead of returning nil with state=unknown forever. Temporary
+			// provider/network errors are returned so FailureStore applies backoff.
+			if err := runtime.CheckMutationGeneration(ctx); err != nil {
+				return err
+			}
+			if derr := compute.DeleteServer(ctx, providerID); derr != nil {
+				return derr
+			}
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID)
+			return err
+		}
 	}
 	state := "unknown"
 	if item.Kind == "CREATE_DROPLET" && exists {

@@ -144,7 +144,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 					return nil
 				}
 			} else {
-				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND runtime_status IN ('ROTATION_BLOCKED_CAPACITY','ROTATION_CAPACITY_BREAKING')`, item.AccountID)
+				_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')='' AND runtime_status IN ('ROTATION_BLOCKED_CAPACITY','ROTATION_CAPACITY_BREAKING')`, item.AccountID)
 			}
 			if !cap.LimitKnown || inUse+pending < limit {
 				// Capacity is available, or the provider does not publish a hard limit.

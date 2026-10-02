@@ -123,6 +123,6 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 	if err != nil {
 		return err
 	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
+	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID)
 	return nil
 }

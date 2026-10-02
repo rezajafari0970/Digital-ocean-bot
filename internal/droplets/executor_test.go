@@ -27,7 +27,11 @@ func (s *opStore) Reserve(_ context.Context, o jobs.Operation) (jobs.Operation, 
 	return o, true, nil
 }
 func (s *opStore) Get(context.Context, string, string) (jobs.Operation, error) { return s.saved, nil }
-func (s *opStore) Update(_ context.Context, o jobs.Operation) error            { s.saved = o; return nil }
+func (s *opStore) Update(_ context.Context, o *jobs.Operation) error {
+	s.saved = *o
+	o.LockVersion++
+	return nil
+}
 
 func TestCreateErrorCallbackReceivesProviderCapacityError(t *testing.T) {
 	store := &opStore{}

@@ -308,7 +308,7 @@ WHERE account_id=$1
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
 		if pgErr == nil {
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
+			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID)
 		}
 		return pgErr
 	}
@@ -363,6 +363,6 @@ WHERE account_id=$1
 	if allowFallback && cc != "" && !strings.EqualFold(geo.CountryCode, cc) {
 		detail = "preferred country unavailable for 5 minutes; temporary fallback: " + geo.Country
 	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, detail)
+	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID, detail)
 	return nil
 }
