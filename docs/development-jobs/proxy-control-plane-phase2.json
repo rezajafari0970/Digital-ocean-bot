@@ -3,6 +3,7 @@
   "goal": "Add the smallest generation-aware transport observation guard: a provider runtime observation must be applied only when the proxy-control generation captured by that runtime still equals the current stored generation. Stale observations must be ignored without weakening fail-closed admission.",
   "context": "Limit this job strictly to rejecting stale passive transport observations at persistence time plus focused tests. Do NOT add per-request generation validation, wrapper transports, repository/account lookups, new network calls, driver changes, state-machine policy changes, sticky recovery changes, schema changes, or Vultr behavior changes. The provider request data path must gain no additional DB/repository lookup. Later generation-aware admission/recovery work will be separate jobs.",
   "api_implement": true,
+  "structured_files": true,
   "api_timeout_seconds": 170,
   "source_context_bytes": 70000,
   "commands": {

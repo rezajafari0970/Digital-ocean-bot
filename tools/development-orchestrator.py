@@ -57,6 +57,33 @@ def patch_paths(patch):
         if line.startswith("+++ b/") or line.startswith("--- a/"):
             paths.add(line[6:])
     return paths
+def parse_file_replacements(text,allowed):
+    try: data=json.loads(text)
+    except Exception: return None
+    changes=data.get("files") if isinstance(data,dict) else None
+    if not isinstance(changes,list) or not changes: return None
+    out=[]; seen=set()
+    for item in changes:
+        if not isinstance(item,dict): return None
+        path=item.get("path"); content=item.get("content")
+        if not isinstance(path,str) or not isinstance(content,str) or not allowed_path(path,allowed) or path in seen: return None
+        seen.add(path); out.append((path,content))
+    return out
+def apply_file_replacements(job,changes):
+    backup={}
+    try:
+        for rel,content in changes:
+            p=ROOT/rel
+            if not p.is_file(): raise RuntimeError("replacement target missing: "+rel)
+            backup[rel]=p.read_bytes()
+            p.write_text(content)
+        p=subprocess.run(["git","diff","--check","--",*[x[0] for x in changes]],cwd=ROOT,text=True,capture_output=True)
+        if p.returncode: raise RuntimeError(p.stderr[-4000:])
+        ev(event="api_structured_files_applied",job=job,paths=[x[0] for x in changes])
+        return True
+    except Exception as e:
+        for rel,data in backup.items(): (ROOT/rel).write_bytes(data)
+        ev(event="api_structured_apply_failure",job=job,error=str(e)); return False
 def api_implement(job,m,j):
     allowed=m.get("allowed_paths",[])
     if not allowed: return False
@@ -71,17 +98,31 @@ def api_implement(job,m,j):
         chunks.append(block)
     plan_path=BASE/(job+"-plan.json")
     plan=plan_path.read_text(errors="replace") if plan_path.exists() else ""
-    prompt=("Return ONLY a valid git unified diff beginning with 'diff --git'. No explanation, prose, JSON, or markdown fences. "
-            "The patch MUST modify at least one existing file and every modified path MUST be in ALLOWED_PATHS. "
-            "Implement the bounded goal using only the supplied source. Do not invent files or APIs outside the supplied source. "
-            "Preserve existing behavior unless the goal requires change. Include focused tests in the patch when a test file is allowed.\nGOAL:\n"+m["goal"]+
+    structured=m.get("structured_files",False)
+    if structured:
+        output_rule=("Return ONLY one JSON object of the form {\"files\":[{\"path\":\"allowed/file\",\"content\":\"COMPLETE FILE CONTENT\"}]}. "
+                     "Return complete replacement content only for files that must change. No markdown, diff, prose, or extra keys. ")
+    else:
+        output_rule="Return ONLY a valid git unified diff beginning with 'diff --git'. No explanation, prose, JSON, or markdown fences. "
+    prompt=(output_rule+
+            "Every modified path MUST be in ALLOWED_PATHS. Implement the bounded goal using only the supplied source. "
+            "Do not invent files or APIs outside the supplied source. Preserve existing behavior unless the goal requires change. "
+            "Include focused tests when a test file is allowed.\nGOAL:\n"+m["goal"]+
             "\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(allowed)+"\nPLAN:\n"+plan+"\nSOURCE:\n"+"".join(chunks))
     p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
     if p.returncode!=0:
         ev(event="api_implement_failure",job=job,returncode=p.returncode,stderr=p.stderr[-2000:]); return False
-    try: patch=clean_patch(json.loads(p.stdout)["text"])
+    try: model_text=json.loads(p.stdout)["text"]
     except Exception as e:
         ev(event="api_patch_parse_failure",job=job,error=str(e)); return False
+    if structured:
+        changes=parse_file_replacements(model_text,allowed)
+        if not changes:
+            ev(event="api_structured_parse_failure",job=job); return False
+        if not apply_file_replacements(job,changes): return False
+        j["api_patch_saved"]=True
+        return True
+    patch=clean_patch(model_text)
     paths=patch_paths(patch)
     if not paths or any(not allowed_path(x,allowed) for x in paths):
         ev(event="api_patch_scope_failure",job=job,paths=sorted(paths)); return False
