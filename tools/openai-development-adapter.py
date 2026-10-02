@@ -7,7 +7,7 @@ if not key: raise SystemExit(78)
 payload={"model":os.environ.get("OPENAI_MODEL","gpt-5.6"),"input":prompt,"max_output_tokens":int(os.environ.get("OPENAI_MAX_OUTPUT_TOKENS","8000"))}
 req=urllib.request.Request("https://api.openai.com/v1/responses",json.dumps(payload).encode(),{"Authorization":"Bearer "+key,"Content-Type":"application/json"})
 try:
-    with urllib.request.urlopen(req,timeout=180) as r: data=json.load(r)
+    with urllib.request.urlopen(req,timeout=int(os.environ.get("OPENAI_HTTP_TIMEOUT_SECONDS","180"))) as r: data=json.load(r)
 except urllib.error.HTTPError as e:
     raise SystemExit(75 if e.code==429 or e.code>=500 else 1)
 except Exception:
