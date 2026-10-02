@@ -21,16 +21,22 @@ func (s *Server) syncAccountAutomation(ctx context.Context, accountID string) er
 		size = sizes[0]
 	}
 
+	var installerName string
+	var installerVersion int
+	if err = s.DB.QueryRowContext(ctx, `SELECT name,version FROM installers WHERE active=true AND manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb ORDER BY version DESC,updated_at DESC LIMIT 1`).Scan(&installerName, &installerVersion); err != nil {
+		return err
+	}
 	cfg := map[string]any{
-		"name":         "account-auto",
-		"region":       region,
-		"size":         size,
-		"image":        image,
-		"lifetime":     lifetime * 1000000000,
-		"ssh_user":     "root",
-		"inbound_id":   1,
-		"client_count": 1,
-		"email_prefix": "client",
+		"name":          "account-auto",
+		"installer_ref": map[string]any{"name": installerName, "version": installerVersion},
+		"region":        region,
+		"size":          size,
+		"image":         image,
+		"lifetime":      lifetime * 1000000000,
+		"ssh_user":      "root",
+		"inbound_id":    1,
+		"client_count":  1,
+		"email_prefix":  "client",
 	}
 	raw, err := json.Marshal(cfg)
 	if err != nil {
@@ -65,7 +71,12 @@ func syncAccountAutomationTx(ctx context.Context, tx *sql.Tx, accountID string) 
 	if len(sizes) > 0 {
 		size = sizes[0]
 	}
-	raw, err := json.Marshal(map[string]any{"name": "account-auto", "region": region, "size": size, "image": image, "lifetime": lifetime * 1000000000, "ssh_user": "root", "inbound_id": 1, "client_count": 1, "email_prefix": "client"})
+	var installerName string
+	var installerVersion int
+	if err := tx.QueryRowContext(ctx, `SELECT name,version FROM installers WHERE active=true AND manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb ORDER BY version DESC,updated_at DESC LIMIT 1`).Scan(&installerName, &installerVersion); err != nil {
+		return err
+	}
+	raw, err := json.Marshal(map[string]any{"name": "account-auto", "installer_ref": map[string]any{"name": installerName, "version": installerVersion}, "region": region, "size": size, "image": image, "lifetime": lifetime * 1000000000, "ssh_user": "root", "inbound_id": 1, "client_count": 1, "email_prefix": "client"})
 	if err != nil {
 		return err
 	}
