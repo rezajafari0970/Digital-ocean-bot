@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "goal": "Add the smallest generation-aware transport observation guard: a provider runtime observation must be applied only when the proxy-control generation captured by that runtime still equals the current stored generation. Stale observations must be ignored without weakening fail-closed admission.",
-  "context": "Limit this job to provider_network_runtime plus the minimal proxycontrol read needed to compare generation, with focused tests. Do not redesign drivers, state-machine policy, sticky recovery, schema, or Vultr behavior. Later generation-aware recovery work will be separate jobs.",
+  "context": "Limit this job strictly to rejecting stale passive transport observations at persistence time plus focused tests. Do NOT add per-request generation validation, wrapper transports, repository/account lookups, new network calls, driver changes, state-machine policy changes, sticky recovery changes, schema changes, or Vultr behavior changes. The provider request data path must gain no additional DB/repository lookup. Later generation-aware admission/recovery work will be separate jobs.",
   "api_implement": true,
   "api_timeout_seconds": 170,
   "source_context_bytes": 70000,
   "commands": {
-    "implement": ["gofmt -w internal/app/provider_network_runtime.go internal/app/provider_network_runtime_test.go internal/app/container.go"],
+    "implement": ["gofmt -w internal/app/provider_network_runtime.go internal/app/provider_network_runtime_test.go internal/proxycontrol/store.go"],
     "test": ["go test ./internal/app ./internal/network ./internal/proxycontrol -count=1"],
     "verify": ["go test ./internal/providers/vultr ./internal/providers/digitalocean ./internal/app ./internal/network ./internal/proxycontrol -count=1", "go test ./..."]
   },
@@ -14,7 +14,6 @@
   "allowed_paths": [
     "internal/app/provider_network_runtime.go",
     "internal/app/provider_network_runtime_test.go",
-    "internal/app/container.go",
     "internal/proxycontrol/store.go",
     "docs/development-jobs/proxy-control-plane-phase2.json"
   ],
