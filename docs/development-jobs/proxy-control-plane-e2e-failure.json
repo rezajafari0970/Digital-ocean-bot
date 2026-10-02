@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "goal": "Add deterministic in-process end-to-end failure-injection coverage for the shared proxy control plane: proxy-auth 407 and transport failure drive health/circuit failure, half-open recovery succeeds with hysteresis, generation rotation invalidates an old AccountRuntime, and a fresh runtime generation is admitted.",
-  "context": "This is a test-harness batch, not a production behavior redesign. Compose existing network.HealthReportingTransport/TransportObserver semantics, proxycontrol state-machine functions, and AccountRuntime.CheckMutationGeneration using fakes. Do not call real DigitalOcean/Vultr APIs, do not require network access, do not add schema, and do not duplicate state-machine logic in production. The test must prove provider-neutral behavior; verification must run both DigitalOcean and Vultr driver suites.",
+  "context": "This is a test-harness batch, not a production behavior redesign. Compose existing network.HealthReportingTransport/TransportObserver semantics, proxycontrol state-machine functions, and AccountRuntime.CheckMutationGeneration using fakes. Keep the new scenario entirely in internal/app; do NOT modify provider driver test files. Provider parity is verified by running the existing DigitalOcean/Vultr/VultrConsole suites after the shared scenario. Do not call real provider APIs, require network access, add schema, sleep, or duplicate production state-machine logic.",
   "api_implement": true,
   "structured_edits": true,
   "api_timeout_seconds": 170,
