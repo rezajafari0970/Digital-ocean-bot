@@ -47,10 +47,17 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		}
 		return nil
 	}
-	if runtime.Config.Provider == "vultr" {
-		executor.OnCreateError = func(cbCtx context.Context, createErr error) {
+	executor.OnCreateError = func(cbCtx context.Context, createErr error) {
+		class := providers.Class(createErr)
+		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorRateLimited || class == providers.ErrorTransport || class == providers.ErrorUnavailable || class == providers.ErrorAmbiguousOutcome {
+			state := ClassifyAccountProviderError(createErr, runtime.Config.Network.Mode == network.RouteProxyRequired)
+			_, _ = c.DB.ExecContext(cbCtx, `UPDATE accounts SET provider_state=$2,provider_state_detail=$3,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, state, createErr.Error(), ProviderStateRuntimeStatus(state))
+		}
+		if runtime.Config.Provider == "vultr" {
 			c.handleVultrCreateError(cbCtx, accountID, compute, createErr)
 		}
+	}
+	if runtime.Config.Provider == "vultr" {
 		executor.OnCreateSuccess = func(cbCtx context.Context, _ providers.CreateServerResult) {
 			c.recordVultrCreateSuccess(cbCtx, accountID, compute)
 		}
