@@ -98,7 +98,11 @@ func (s Service) apply(ctx context.Context, panelID string, ps []rp) error {
 		if x.User != "" || len(secret) > 0 {
 			server["users"] = []any{map[string]any{"user": x.User, "pass": string(secret)}}
 		}
-		clean = append(clean, map[string]any{"tag": x.Tag, "protocol": proto, "settings": map[string]any{"servers": []any{server}}})
+		settings := map[string]any{"servers": []any{server}}
+		if proto == "socks" {
+			settings["udp"] = true
+		}
+		clean = append(clean, map[string]any{"tag": x.Tag, "protocol": proto, "settings": settings})
 		for i := range secret {
 			secret[i] = 0
 		}
@@ -115,7 +119,11 @@ func (s Service) apply(ctx context.Context, panelID string, ps []rp) error {
 		rr = append(rr, raw)
 	}
 	if len(ps) > 0 {
-		rule := map[string]any{"type": "field", "ruleTag": "dob-residential-ads", "domain": []string{"geosite:category-ads", "geosite:category-ads-all", "geosite:category-ads-ir", "domain:browserleaks.com"}, "outboundTag": ps[0].Tag}
+		network := "tcp"
+		if ps[0].Type == "socks5" {
+			network = "tcp,udp"
+		}
+		rule := map[string]any{"type": "field", "ruleTag": "dob-residential-ads", "network": network, "domain": []string{"geosite:category-ads", "geosite:category-ads-all", "geosite:category-ads-ir", "domain:browserleaks.com"}, "outboundTag": ps[0].Tag}
 		routing["rules"] = append([]any{rule}, rr...)
 	} else {
 		routing["rules"] = rr
