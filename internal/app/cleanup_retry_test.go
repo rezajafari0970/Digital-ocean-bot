@@ -11,8 +11,8 @@ func TestSlowCleanupProviderErrorOnlyForExternalBlocks(t *testing.T) {
 	for _, state := range []string{ProviderStateLocked, ProviderStateBillingBlocked} {
 		err := slowCleanupProviderError(state, base)
 		h, ok := err.(interface{ RetryDelay() time.Duration })
-		if !ok || h.RetryDelay() != 5*time.Minute {
-			t.Fatalf("state=%s missing 5m retry hint", state)
+		if !ok || h.RetryDelay() != 10*time.Minute {
+			t.Fatalf("state=%s missing 10m retry hint", state)
 		}
 	}
 	if got := slowCleanupProviderError(ProviderStateTransportError, base); got != base {

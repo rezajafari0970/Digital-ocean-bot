@@ -23,3 +23,18 @@ func TestDeleteFirstAtHardDesiredPolicy(t *testing.T) {
 		})
 	}
 }
+
+func TestDeficitBelongsToSchedulerBackfill(t *testing.T) {
+	if !shouldWaitForDeficitBackfill(17, 16) {
+		t.Fatal("lifecycle must not claim a scheduler/backfill deficit as an unrelated replacement")
+	}
+	if shouldWaitForDeficitBackfill(17, 17) {
+		t.Fatal("at desired is not a deficit")
+	}
+	if shouldWaitForDeficitBackfill(17, 18) {
+		t.Fatal("oversupply is not a deficit")
+	}
+	if shouldWaitForDeficitBackfill(0, 0) {
+		t.Fatal("zero desired must fail closed")
+	}
+}

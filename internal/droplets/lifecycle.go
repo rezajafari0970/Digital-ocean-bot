@@ -26,7 +26,13 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 	// Never retire a healthy server before its declared expiry. Replacement
 	// preparation must not shorten the server lifetime; Output independently
 	// hides configs 10 seconds before expires_at.
-	rows, err := s.DB.QueryContext(ctx, `WITH due AS (SELECT id,account_id,provider_resource_id,profile_id,replacement_deployment_id,state,ready_at,created_at,expires_at,updated_at,ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY CASE state WHEN 'DELETING' THEN 0 WHEN 'RETIRING' THEN 1 WHEN 'EXPIRING' THEN 2 ELSE 3 END,COALESCE(expires_at,updated_at),created_at,id) AS rn FROM droplets WHERE (state IN ('RETIRING','DELETING') OR (state IN ('READY','EXPIRING') AND expires_at IS NOT NULL AND expires_at <= $1::timestamptz))) SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM due WHERE rn=1 ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)
+	rows, err := s.DB.QueryContext(ctx, `WITH due AS (
+		SELECT d.id,d.account_id,d.provider_resource_id,d.profile_id,d.replacement_deployment_id,d.state,d.ready_at,d.created_at,d.expires_at,d.updated_at,
+			ROW_NUMBER() OVER (PARTITION BY d.account_id ORDER BY CASE d.state WHEN 'DELETING' THEN 0 WHEN 'RETIRING' THEN 1 WHEN 'EXPIRING' THEN 2 ELSE 3 END,COALESCE(d.expires_at,d.updated_at),d.created_at,d.id) AS rn
+		FROM droplets d JOIN accounts a ON a.id=d.account_id
+		WHERE (d.state IN ('RETIRING','DELETING') OR (d.state IN ('READY','EXPIRING') AND d.expires_at IS NOT NULL AND d.expires_at <= $1::timestamptz))
+		  AND NOT (d.state IN ('RETIRING','DELETING') AND a.provider_state IN ('LOCKED','BILLING_BLOCKED'))
+	) SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM due WHERE rn=1 ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)
 	if err != nil {
 		return nil, err
 	}

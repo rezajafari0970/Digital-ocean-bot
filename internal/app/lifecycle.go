@@ -111,6 +111,20 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			return nil
 		}
 		if !terminalFailed && item.ReplacementDeploymentID == "" {
+			// If a previous deletion already left the account below Desired, that
+			// free slot belongs to scheduler/backfill. Do not attach a new server
+			// created for that deficit to this unrelated EXPIRING resource, because
+			// deleting it after replacement readiness would create churn and can
+			// transiently push provider occupancy above Desired.
+			var desiredNow, managedNow int
+			if err := c.DB.QueryRowContext(ctx, `SELECT
+				(SELECT desired_server_count FROM accounts WHERE id=$1),
+				(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED')`, item.AccountID).Scan(&desiredNow, &managedNow); err != nil {
+				return err
+			}
+			if shouldWaitForDeficitBackfill(desiredNow, managedNow) {
+				return nil
+			}
 			// Rotation must share the same concurrency budget as the scheduler.
 			// Otherwise overlapping expiry windows can create a replacement burst.
 			var active, maxConcurrent int
