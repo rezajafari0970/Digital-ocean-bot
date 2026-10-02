@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -305,6 +306,193 @@ func TestPersistProviderRuntimeObservationUsesCapturedGenerationAndIgnoresStaleR
 	}
 	if healthy {
 		t.Fatal("matching-generation observation did not update runtime health")
+	}
+}
+
+type concurrentRuntimeIsolationStore struct {
+	mu          sync.Mutex
+	generations map[string]int64
+	statuses    map[string]string
+}
+
+func runtimeIsolationKey(accountID, proxyID, provider string) string {
+	return accountID + "\x00" + proxyID + "\x00" + provider
+}
+
+func (s *concurrentRuntimeIsolationStore) setGeneration(accountID, proxyID, provider string, generation int64) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.generations[runtimeIsolationKey(accountID, proxyID, provider)] = generation
+}
+
+func (s *concurrentRuntimeIsolationStore) CurrentGeneration(_ context.Context, accountID, proxyID, provider string) (int64, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	generation, found := s.generations[runtimeIsolationKey(accountID, proxyID, provider)]
+	return generation, found, nil
+}
+
+func (s *concurrentRuntimeIsolationStore) MarkStaleGeneration(_ context.Context, accountID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.statuses[accountID] == accountRuntimeStatusReady || s.statuses[accountID] == accountRuntimeStatusStaleGeneration {
+		s.statuses[accountID] = accountRuntimeStatusStaleGeneration
+	}
+	return nil
+}
+
+func (s *concurrentRuntimeIsolationStore) ClearStaleGeneration(_ context.Context, accountID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.statuses[accountID] == accountRuntimeStatusStaleGeneration {
+		s.statuses[accountID] = accountRuntimeStatusReady
+	}
+	return nil
+}
+
+func (s *concurrentRuntimeIsolationStore) status(accountID string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.statuses[accountID]
+}
+
+type concurrentObservationIsolationStore struct {
+	mu          sync.Mutex
+	generations map[string]int64
+}
+
+func (s *concurrentObservationIsolationStore) ApplyObservationForGeneration(
+	_ context.Context,
+	accountID, proxyID, provider string,
+	generation int64,
+	result network.HealthResult,
+	_ proxycontrol.Policy,
+) (proxycontrol.State, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	current, found := s.generations[runtimeIsolationKey(accountID, proxyID, provider)]
+	return proxycontrol.State{HealthState: result.Status}, found && current == generation, nil
+}
+
+func TestConcurrentProviderRuntimeGenerationsRemainAccountScoped(t *testing.T) {
+	ctx := context.Background()
+	store := &concurrentRuntimeIsolationStore{
+		generations: map[string]int64{},
+		statuses: map[string]string{
+			"account-a": accountRuntimeStatusReady,
+			"account-b": accountRuntimeStatusStaleGeneration,
+		},
+	}
+	proxyA, proxyB := "proxy-a", "proxy-b"
+	runtimeA := AccountRuntime{
+		Config: AccountConfig{
+			ID:       "account-a",
+			Provider: "provider-a",
+			Network:  network.Profile{AccountID: "account-a", Mode: network.RouteProxyRequired, ProxyID: &proxyA},
+		},
+		TransportGeneration: 7,
+		GenerationStore:     store,
+		runtimeStatusStore:  store,
+	}
+	runtimeB := AccountRuntime{
+		Config: AccountConfig{
+			ID:       "account-b",
+			Provider: "provider-b",
+			Network:  network.Profile{AccountID: "account-b", Mode: network.RouteProxyRequired, ProxyID: &proxyB},
+		},
+		TransportGeneration: 12,
+		GenerationStore:     store,
+		runtimeStatusStore:  store,
+	}
+
+	start := make(chan struct{})
+	results := make(chan struct {
+		accountID string
+		err       error
+	}, 2)
+	go func() {
+		<-start
+		store.setGeneration("account-a", proxyA, "provider-a", 8)
+		results <- struct {
+			accountID string
+			err       error
+		}{"account-a", runtimeA.CheckMutationGeneration(ctx)}
+	}()
+	go func() {
+		<-start
+		store.setGeneration("account-b", proxyB, "provider-b", 12)
+		results <- struct {
+			accountID string
+			err       error
+		}{"account-b", runtimeB.CheckMutationGeneration(ctx)}
+	}()
+	close(start)
+
+	for range 2 {
+		result := <-results
+		switch result.accountID {
+		case "account-a":
+			if !errors.Is(result.err, ErrRuntimeGenerationObsolete) {
+				t.Fatalf("stale account error=%v, want ErrRuntimeGenerationObsolete", result.err)
+			}
+		case "account-b":
+			if result.err != nil {
+				t.Fatalf("fresh account rejected: %v", result.err)
+			}
+		default:
+			t.Fatalf("unexpected account result %q", result.accountID)
+		}
+	}
+	if status := store.status("account-a"); status != accountRuntimeStatusStaleGeneration {
+		t.Fatalf("stale account status=%q, want=%q", status, accountRuntimeStatusStaleGeneration)
+	}
+	if status := store.status("account-b"); status != accountRuntimeStatusReady {
+		t.Fatalf("fresh account status=%q, want=%q", status, accountRuntimeStatusReady)
+	}
+
+	observations := &concurrentObservationIsolationStore{generations: map[string]int64{
+		runtimeIsolationKey("account-a", proxyA, "provider-a"): 8,
+		runtimeIsolationKey("account-b", proxyB, "provider-b"): 12,
+	}}
+	healthyA, healthyB := true, true
+	observationStart := make(chan struct{})
+	observationResults := make(chan struct {
+		accountID string
+		err       error
+	}, 2)
+	go func() {
+		<-observationStart
+		err := persistProviderRuntimeObservation(
+			ctx, observations, "account-a", proxyA, "provider-a", 7,
+			network.HealthResult{Status: network.StatusDown}, proxycontrol.DefaultPolicy(), &healthyA,
+		)
+		observationResults <- struct {
+			accountID string
+			err       error
+		}{"account-a", err}
+	}()
+	go func() {
+		<-observationStart
+		err := persistProviderRuntimeObservation(
+			ctx, observations, "account-b", proxyB, "provider-b", 12,
+			network.HealthResult{Status: network.StatusDown}, proxycontrol.DefaultPolicy(), &healthyB,
+		)
+		observationResults <- struct {
+			accountID string
+			err       error
+		}{"account-b", err}
+	}()
+	close(observationStart)
+	for range 2 {
+		if result := <-observationResults; result.err != nil {
+			t.Fatalf("account %s observation failed: %v", result.accountID, result.err)
+		}
+	}
+	if !healthyA {
+		t.Fatal("stale account observation changed runtime health")
+	}
+	if healthyB {
+		t.Fatal("fresh account observation did not change runtime health")
 	}
 }
 
