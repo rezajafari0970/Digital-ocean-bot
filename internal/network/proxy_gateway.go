@@ -3,10 +3,8 @@ package network
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"time"
 
 	xproxy "golang.org/x/net/proxy"
@@ -34,71 +32,95 @@ func NewProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gatewa
 	return newProxyGateway(accountID, p, creds)
 }
 
-// NewProxyProbeGateway is only for health/recovery probes. It validates the
-// proxy endpoint and type but deliberately does not require HEALTHY status.
 func NewProxyProbeGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
 	return newProxyGateway(accountID, p, creds)
+}
+func newSOCKSLiteralDialer(p Proxy, creds ProxyCredentials) (literalProxyDial, error) {
+	var auth *xproxy.Auth
+	if creds.Username != "" {
+		auth = &xproxy.Auth{User: creds.Username, Password: creds.Password}
+	}
+	endpoint, err := IPv4Endpoint(context.Background(), p.Host, p.Port)
+	if err != nil {
+		return nil, err
+	}
+	dialer, err := xproxy.SOCKS5("tcp4", endpoint, auth, &ipv4ProxyDialer{})
+	if err != nil {
+		return nil, err
+	}
+	return func(ctx context.Context, target string) (net.Conn, error) {
+		host, _, err := net.SplitHostPort(target)
+		if err != nil {
+			return nil, err
+		}
+		ip := net.ParseIP(host)
+		if ip == nil || ip.To4() == nil {
+			return nil, ErrIPv4Required
+		}
+		type result struct {
+			c   net.Conn
+			err error
+		}
+		ch := make(chan result, 1)
+		go func() {
+			c, e := dialer.Dial("tcp4", target)
+			ch <- result{c: c, err: e}
+		}()
+		select {
+		case <-ctx.Done():
+			go func() {
+				r := <-ch
+				if r.c != nil {
+					_ = r.c.Close()
+				}
+			}()
+			return nil, ctx.Err()
+		case r := <-ch:
+			return r.c, r.err
+		}
+	}, nil
 }
 
 func newProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
 	if accountID == "" || p.Host == "" || p.Port < 1 {
 		return nil, ErrProxyConfigInvalid
 	}
-	tr := &http.Transport{ForceAttemptHTTP2: true, MaxIdleConns: 20, IdleConnTimeout: 60 * time.Second, TLSHandshakeTimeout: 10 * time.Second}
+	var dialLiteral literalProxyDial
+	var err error
 	switch p.Type {
 	case ProxyHTTP, ProxyHTTPS:
-		scheme := "http"
-		if p.Type == ProxyHTTPS {
-			scheme = "https"
-		}
-		u := &url.URL{Scheme: scheme, Host: net.JoinHostPort(p.Host, fmt.Sprintf("%d", p.Port))}
-		if creds.Username != "" {
-			u.User = url.UserPassword(creds.Username, creds.Password)
-		}
-		tr.Proxy = http.ProxyURL(u)
-		tr.DialContext = DialContextIPv4
+		dialLiteral, err = httpProxyLiteralDialer(p, creds)
 	case ProxySOCKS5:
-		var auth *xproxy.Auth
-		if creds.Username != "" {
-			auth = &xproxy.Auth{User: creds.Username, Password: creds.Password}
-		}
-		proxyEndpoint, err := IPv4Endpoint(context.Background(), p.Host, p.Port)
-		if err != nil {
-			return nil, err
-		}
-		base := &ipv4ProxyDialer{}
-		dialer, err := xproxy.SOCKS5("tcp4", proxyEndpoint, auth, base)
-		if err != nil {
-			return nil, err
-		}
-		tr.Proxy = nil
-		tr.DialContext = func(ctx context.Context, networkName, address string) (net.Conn, error) {
-			host, port, err := net.SplitHostPort(address)
-			if err != nil {
-				return nil, err
-			}
-			ip, err := ResolveIPv4(ctx, host)
-			if err != nil {
-				return nil, err
-			}
-			target := net.JoinHostPort(ip, port)
-			type result struct {
-				c   net.Conn
-				err error
-			}
-			ch := make(chan result, 1)
-			go func() { c, err := dialer.Dial("tcp4", target); ch <- result{c, err} }()
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			case r := <-ch:
-				return r.c, r.err
-			}
-		}
+		dialLiteral, err = newSOCKSLiteralDialer(p, creds)
 	default:
 		return nil, ErrUnsupportedProxyType
 	}
-	client := &http.Client{Transport: MetadataTransport{Base: PrivacyTransport{Base: tr}}, Timeout: 30 * time.Second}
+	if err != nil {
+		return nil, err
+	}
+	resolver := newProxyAResolver(accountID, dialLiteral)
+	tr := &http.Transport{
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          20,
+		IdleConnTimeout:       60 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ResponseHeaderTimeout: 20 * time.Second,
+	}
+	tr.DialContext = func(ctx context.Context, _ string, address string) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(address)
+		if err != nil {
+			return nil, err
+		}
+		ip, err := resolver.Resolve(ctx, host)
+		if err != nil {
+			return nil, err
+		}
+		return dialLiteral(ctx, net.JoinHostPort(ip, port))
+	}
+	client := &http.Client{
+		Transport: MetadataTransport{Base: PrivacyTransport{Base: tr}},
+		Timeout:   30 * time.Second,
+	}
 	return &Gateway{AccountID: accountID, Proxy: p, Credentials: creds, Transport: tr, Client: client}, nil
 }
 

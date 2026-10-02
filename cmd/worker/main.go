@@ -36,11 +36,11 @@ func main() {
 	// Repair only locally provable state links before any scheduler/lifecycle work.
 	application.Container.ReconcileLocalState(ctx)
 	go application.Container.RunDailyCatalogSync(ctx)
-	// Sticky proxy identity keeper: preserve each account's current exit IP while
-	// healthy. On failure, retry the preferred country every 30s; after five
-	// minutes the resolver may accept a healthy unique fallback country.
+	// Sticky proxy identity keeper: preserve each account's current exit IPv4.
+	// On failure retry the previous session every 10s for two minutes, then
+	// rotate within the preferred country until five minutes, then allow fallback.
 	go func() {
-		t := time.NewTicker(30 * time.Second)
+		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		run := func() {
 			rows, err := application.DB.QueryContext(ctx, `SELECT a.id::text FROM accounts a JOIN network_profiles np ON np.account_id=a.id WHERE a.enabled=true AND np.mode='proxy_required'`)
@@ -55,9 +55,25 @@ func main() {
 				}
 			}
 			rows.Close()
+			sem := make(chan struct{}, 64)
+			var wg sync.WaitGroup
 			for _, id := range ids {
-				_ = application.Container.MaintainProxyControlPlane(ctx, id)
+				id := id
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					select {
+					case sem <- struct{}{}:
+						defer func() { <-sem }()
+					case <-ctx.Done():
+						return
+					}
+					cctx, cancel := context.WithTimeout(ctx, 8*time.Second)
+					defer cancel()
+					_ = application.Container.MaintainProxyControlPlane(cctx, id)
+				}()
 			}
+			wg.Wait()
 		}
 		run()
 		for {

@@ -17,6 +17,9 @@ func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID stri
 	if c.DB == nil {
 		return ErrNetworkNotReady
 	}
+	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
+		return err
+	}
 
 	var provider, mode, proxyID string
 	if err := c.DB.QueryRowContext(ctx, `
@@ -53,12 +56,15 @@ WHERE a.id=$1 AND a.enabled=true
 			Latency:   time.Since(started),
 			CheckedAt: now,
 		}, proxycontrol.DefaultPolicy())
-	case errors.Is(maintainErr, ErrIsolationWait), errors.Is(maintainErr, ErrNetworkIdentityCollision):
-		// Isolation conflicts are not proxy transport failures. Keep them
-		// visible as degraded without opening the provider proxy circuit.
+	case errors.Is(maintainErr, ErrIsolationWait), errors.Is(maintainErr, ErrNetworkIdentityCollision), errors.Is(maintainErr, ErrProxyObservationUnavailable):
+		// Isolation conflicts and observer outages are not proxy transport failures.
+		// Keep them degraded/fail-closed without rotating away from a healthy proxy.
 		state.HealthState = network.StatusDegraded
 		state.LastCheckedAt = &now
 		state.LastErrorClass = "ISOLATION_WAIT"
+		if errors.Is(maintainErr, ErrProxyObservationUnavailable) {
+			state.LastErrorClass = "OBSERVATION_UNAVAILABLE"
+		}
 		state.LastErrorDetail = maintainErr.Error()
 	default:
 		state = proxycontrol.ApplyHealth(state, network.HealthResult{

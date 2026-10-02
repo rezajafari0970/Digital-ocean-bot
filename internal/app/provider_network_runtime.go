@@ -104,7 +104,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			policy := proxycontrol.DefaultPolicy()
 			healthy := cfg.Proxy.Status == network.StatusHealthy
 			var healthMu sync.Mutex
-			gateway.Client.Transport = network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
+			observed := network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
 				healthMu.Lock()
 				defer healthMu.Unlock()
 				if obs.Err == nil && !obs.ProxyAuthRequired && healthy {
@@ -132,6 +132,10 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					&healthy,
 				)
 			})
+			gateway.Client.Transport = accountNetworkGuardTransport{
+				Base: observed, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
+				ProxyID: cfg.Proxy.ID, TransportEpoch: transportEpoch,
+			}
 		}
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, TransportEpoch: transportEpoch, closeIdle: gateway.CloseIdleConnections}, nil
 	}

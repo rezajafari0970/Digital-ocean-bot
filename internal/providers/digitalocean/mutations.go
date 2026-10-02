@@ -20,7 +20,7 @@ type CreateDropletRequest struct {
 	Tags       []string `json:"tags,omitempty"`
 	Monitoring bool     `json:"monitoring,omitempty"`
 	UserData   string   `json:"user_data,omitempty"`
-	IPv6       bool     `json:"ipv6,omitempty"`
+	IPv6       bool     `json:"ipv6"`
 }
 
 type SSHKeyCreateRequest struct {

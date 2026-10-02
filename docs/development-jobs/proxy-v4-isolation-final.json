@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "goal": "Enforce account-scoped IPv4-only proxy egress, fail-closed request admission, staged sticky recovery, backup proxy recovery, and DB identity isolation.",
+  "policy": {
+    "keeper_interval_seconds": 10,
+    "same_ip_retry_seconds": 120,
+    "same_country_only_seconds": 300,
+    "cross_country_after_seconds": 300,
+    "direct_fallback": false,
+    "ipv6_allowed": false,
+    "request_preflight_guard": true
+  },
+  "evidence": [
+    "full go test ./... PASS",
+    "focused race suites PASS",
+    "migration 000115 rollback dry-run PASS",
+    "duplicate IPv4 /24 blocked at DB level",
+    "IPv6 identity blocked at DB level",
+    "HTTP CONNECT target IPv4 literal test PASS",
+    "proxied DoH failure is fail-closed",
+    "DigitalOcean ipv6:false wire test PASS"
+  ],
+  "rollback": "Revert this checkpoint and migration 000115; restore prior binaries from deployment rollback directory."
+}

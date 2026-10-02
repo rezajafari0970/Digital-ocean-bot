@@ -2,6 +2,7 @@ package digitalocean
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -112,6 +113,14 @@ func TestDropletMutationAndReadCharacterization(t *testing.T) {
 	c := fixtureClient(t, func(r *http.Request) (int, string) {
 		switch {
 		case r.Method == "POST" && r.URL.Path == "/v2/droplets":
+			var body map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Fatal(err)
+			}
+			v, ok := body["ipv6"]
+			if !ok || v != false {
+				t.Fatalf("ipv6 must be explicitly false on wire: %#v", body)
+			}
 			return 202, `{"droplet":{"id":42,"name":"n","status":"new","region":{"slug":"fra1"},"networks":{"v4":[]}}}`
 		case r.Method == "GET" && r.URL.Path == "/v2/droplets/42":
 			return 200, `{"droplet":{"id":42,"name":"n","status":"active","region":{"slug":"fra1"},"networks":{"v4":[{"ip_address":"203.0.113.7","type":"public"}]}}}`

@@ -177,6 +177,9 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
 		return AccountRuntime{}, err
 	}
+	if err := c.requireAccountNetworkReady(ctx, accountID); err != nil {
+		return AccountRuntime{}, err
+	}
 	cfg, err := c.Accounts.Account(ctx, accountID)
 	if err != nil {
 		return AccountRuntime{}, err

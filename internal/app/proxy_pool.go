@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
 func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID string) error {
@@ -16,8 +18,8 @@ func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID strin
 		return err
 	}
 
-	var mode, current string
-	if err = tx.QueryRowContext(ctx, `SELECT np.mode,COALESCE(np.proxy_id::text,'') FROM network_profiles np WHERE np.account_id=$1 FOR UPDATE`, accountID).Scan(&mode, &current); err != nil {
+	var mode, current, provider string
+	if err = tx.QueryRowContext(ctx, `SELECT np.mode,COALESCE(np.proxy_id::text,''),a.provider FROM network_profiles np JOIN accounts a ON a.id=np.account_id WHERE np.account_id=$1 FOR UPDATE OF np,a`, accountID).Scan(&mode, &current, &provider); err != nil {
 		return err
 	}
 	if mode != "proxy_required" {
@@ -46,7 +48,10 @@ func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID strin
 		if _, err = tx.ExecContext(ctx, `UPDATE network_profiles SET proxy_id=$2::uuid,updated_at=now() WHERE account_id=$1`, accountID, next); err != nil {
 			return err
 		}
-		if _, err = tx.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,last_health_ok,updated_at) VALUES($1,'UTC','en-US',false,now()) ON CONFLICT(account_id) DO UPDATE SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now()`, accountID); err != nil {
+		if _, err = proxycontrol.BumpTransportEpochTx(ctx, tx, accountID, provider, &next, "proxy-pool-switch"); err != nil {
+			return err
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,last_health_ok,rotation_started_at,updated_at) VALUES($1,'UTC','en-US',false,now(),now()) ON CONFLICT(account_id) DO UPDATE SET sticky_session=NULL,fallback_active=false,rotation_started_at=now(),exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now()`, accountID); err != nil {
 			return err
 		}
 	}

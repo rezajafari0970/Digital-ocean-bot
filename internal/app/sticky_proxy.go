@@ -14,7 +14,12 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 )
 
-const stickyFallbackAfter = 5 * time.Minute
+const (
+	stickySameIPRetryFor = 2 * time.Minute
+	stickyFallbackAfter  = 5 * time.Minute
+)
+
+var ErrProxyObservationUnavailable = errors.New("proxy identity observation unavailable")
 
 type stickyGeo struct{ IP, Country, CountryCode, Timezone, ASN string }
 
@@ -45,6 +50,18 @@ func observeStickyGeo(ctx context.Context, g *network.Gateway) (stickyGeo, error
 		asn = fmt.Sprintf("AS%d %s", raw.Connection.ASN, asn)
 	}
 	return stickyGeo{IP: strings.TrimSpace(raw.IP), Country: raw.Country, CountryCode: strings.ToLower(raw.CountryCode), Timezone: strings.TrimSpace(raw.Timezone.ID), ASN: strings.TrimSpace(asn)}, nil
+}
+
+func observeStickyGeoReliable(ctx context.Context, g *network.Gateway) (stickyGeo, error) {
+	geo, err := observeStickyGeo(ctx, g)
+	if err == nil {
+		return geo, nil
+	}
+	if _, probeErr := fastGatewayExitIP(ctx, g); probeErr == nil {
+		return stickyGeo{}, ErrProxyObservationUnavailable
+	} else {
+		return stickyGeo{}, probeErr
+	}
 }
 
 func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountConfig, string, string, string, bool, *time.Time, error) {
@@ -191,7 +208,7 @@ WHERE account_id=$1
 		probeCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
-		geo, err := observeStickyGeo(probeCtx, g)
+		geo, err := observeStickyGeoReliable(probeCtx, g)
 		if err != nil {
 			_, _ = c.DB.ExecContext(ctx, `
 				UPDATE account_network_identities
@@ -293,7 +310,7 @@ WHERE account_id=$1
 		defer pg.CloseIdleConnections()
 		probeCtx, probeCancel := context.WithTimeout(ctx, 5*time.Second)
 		defer probeCancel()
-		preferredGeo, pgErr := observeStickyGeo(probeCtx, pg)
+		preferredGeo, pgErr := observeStickyGeoReliable(probeCtx, pg)
 		if pgErr != nil || !strings.EqualFold(preferredGeo.CountryCode, cc) {
 			return nil
 		}
@@ -318,7 +335,14 @@ WHERE account_id=$1
 		now := time.Now()
 		started = &now
 	}
-	allowFallback := fallback || (started != nil && time.Since(*started) >= stickyFallbackAfter)
+	if started != nil && retryPreviousProxyIP(oldIP, *started, time.Now()) {
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='retrying previous proxy IPv4',runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
+		return ErrIsolationWait
+	}
+	allowFallback := fallback
+	if started != nil {
+		allowFallback = allowCrossCountryFallback(fallback, *started, time.Now())
+	}
 	// A fresh session asks DataImpulse for another endpoint. Keep targeting the
 	// preferred country during the five-minute recovery window.
 	var newSession string
@@ -333,7 +357,7 @@ WHERE account_id=$1
 	defer g2.CloseIdleConnections()
 	geoCtx, cancel2 := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel2()
-	geo, err := observeStickyGeo(geoCtx, g2)
+	geo, err := observeStickyGeoReliable(geoCtx, g2)
 	if err != nil {
 		return err
 	}

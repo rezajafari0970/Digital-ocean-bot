@@ -1,0 +1,6 @@
+DROP INDEX IF EXISTS account_network_identity_sticky_unique;
+DROP INDEX IF EXISTS account_network_identity_ipv4_24_unique;
+DROP INDEX IF EXISTS account_network_identity_exit_ip_unique;
+ALTER TABLE proxies DROP CONSTRAINT IF EXISTS proxies_exit_ipv4;
+ALTER TABLE account_network_identities DROP CONSTRAINT IF EXISTS account_network_identities_subnet_canonical;
+ALTER TABLE account_network_identities DROP CONSTRAINT IF EXISTS account_network_identities_exit_ipv4;
