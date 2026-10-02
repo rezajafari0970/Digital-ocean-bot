@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "goal": "Fail closed before provider mutations when an AccountRuntime was built from an obsolete proxy-control generation. Add one central runtime-generation guard and apply it to server mutation egress checks and direct SSH-key mutations.",
+  "context": "Phase 2 already prevents stale passive observations from mutating proxy health. Phase 3 must prevent a long-lived runtime/driver from performing provider mutations after proxy generation changes. Do not add per-HTTP-request DB lookups. Direct-mode runtimes with generation 0 remain unaffected. Proxy-required runtime mismatch or unavailable generation state must block mutation. Cover workflow/lifecycle server mutations and direct SSH-key create/delete paths with focused tests. Do not redesign drivers, proxy rotation, circuit policy, schema, or Vultr semantics.",
+  "api_implement": true,
+  "structured_files": false,
+  "structured_edits": true,
+  "api_timeout_seconds": 170,
+  "source_context_bytes": 80000,
+  "commands": {
+    "implement": ["gofmt -w internal/app/container.go internal/app/workflow.go internal/app/lifecycle.go internal/app/ssh_identity.go internal/app/recovery.go internal/app/provider_network_runtime_test.go"],
+    "test": ["go test ./internal/app ./internal/network ./internal/proxycontrol ./internal/droplets -count=1"],
+    "verify": ["go test ./internal/providers/vultr ./internal/providers/digitalocean ./internal/app ./internal/network ./internal/proxycontrol ./internal/droplets -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 240,
+  "allowed_paths": [
+    "internal/app/container.go",
+    "internal/app/workflow.go",
+    "internal/app/lifecycle.go",
+    "internal/app/ssh_identity.go",
+    "internal/app/recovery.go",
+    "internal/app/provider_network_runtime_test.go",
+    "internal/proxycontrol/store.go",
+    "docs/development-jobs/proxy-control-plane-phase3.json"
+  ],
+  "commit_message": "feat(proxy): block mutations from stale provider runtimes",
+  "push": true
+}
