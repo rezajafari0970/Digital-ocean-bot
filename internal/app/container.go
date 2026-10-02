@@ -40,6 +40,47 @@ type runtimeGenerationStore interface {
 	CurrentGeneration(ctx context.Context, accountID, proxyID, provider string) (int64, bool, error)
 }
 
+type accountRuntimeStatusStore interface {
+	MarkStaleGeneration(ctx context.Context, accountID string) error
+	ClearStaleGeneration(ctx context.Context, accountID string) error
+}
+
+const (
+	accountRuntimeStatusReady                 = "READY"
+	accountRuntimeStatusStaleGeneration       = "STALE_GENERATION"
+	accountRuntimeStatusStaleGenerationDetail = "Proxy generation was superseded by a newer runtime generation."
+)
+
+type accountRuntimeStatusSQLStore struct {
+	DB *sql.DB
+}
+
+func (s accountRuntimeStatusSQLStore) MarkStaleGeneration(ctx context.Context, accountID string) error {
+	_, err := s.DB.ExecContext(ctx, `
+UPDATE accounts
+SET runtime_status = $2, runtime_status_detail = $3
+WHERE id = $1 AND runtime_status IN ($4, $5)`,
+		accountRuntimeStatusStaleGeneration,
+		accountRuntimeStatusStaleGenerationDetail,
+		accountID,
+		accountRuntimeStatusReady,
+		accountRuntimeStatusStaleGeneration,
+	)
+	return err
+}
+
+func (s accountRuntimeStatusSQLStore) ClearStaleGeneration(ctx context.Context, accountID string) error {
+	_, err := s.DB.ExecContext(ctx, `
+UPDATE accounts
+SET runtime_status = ?, runtime_status_detail = NULL
+WHERE id = ? AND runtime_status = ?`,
+		accountRuntimeStatusReady,
+		accountID,
+		accountRuntimeStatusStaleGeneration,
+	)
+	return err
+}
+
 type AccountRuntime struct {
 	Config              AccountConfig
 	Cell                *accounts.Cell
@@ -49,6 +90,16 @@ type AccountRuntime struct {
 	Gate                network.AccountGate
 	TransportGeneration int64
 	GenerationStore     runtimeGenerationStore
+	runtimeStatusStore  accountRuntimeStatusStore
+}
+
+func (rt AccountRuntime) rejectMutationGeneration(ctx context.Context, cause error) error {
+	if rt.runtimeStatusStore != nil {
+		if err := rt.runtimeStatusStore.MarkStaleGeneration(ctx, rt.Config.ID); err != nil {
+			return fmt.Errorf("%w: stale runtime status persistence failed: %v", cause, err)
+		}
+	}
+	return cause
 }
 
 func (rt AccountRuntime) CheckMutationGeneration(ctx context.Context) error {
@@ -56,17 +107,22 @@ func (rt AccountRuntime) CheckMutationGeneration(ctx context.Context) error {
 		return nil
 	}
 	if rt.TransportGeneration < 1 || rt.Config.Network.ProxyID == nil || *rt.Config.Network.ProxyID == "" || rt.GenerationStore == nil {
-		return ErrRuntimeGenerationObsolete
+		return rt.rejectMutationGeneration(ctx, ErrRuntimeGenerationObsolete)
 	}
 	generation, found, err := rt.GenerationStore.CurrentGeneration(ctx, rt.Config.ID, *rt.Config.Network.ProxyID, rt.Config.Provider)
 	if err != nil {
-		return fmt.Errorf("%w: %v", ErrRuntimeGenerationObsolete, err)
+		return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: %v", ErrRuntimeGenerationObsolete, err))
 	}
 	if !found {
-		return fmt.Errorf("%w: proxy runtime state missing", ErrRuntimeGenerationObsolete)
+		return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: proxy runtime state missing", ErrRuntimeGenerationObsolete))
 	}
 	if generation != rt.TransportGeneration {
-		return fmt.Errorf("%w: runtime generation %d, current generation %d", ErrRuntimeGenerationObsolete, rt.TransportGeneration, generation)
+		return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: runtime generation %d, current generation %d", ErrRuntimeGenerationObsolete, rt.TransportGeneration, generation))
+	}
+	if rt.runtimeStatusStore != nil {
+		if err := rt.runtimeStatusStore.ClearStaleGeneration(ctx, rt.Config.ID); err != nil {
+			return fmt.Errorf("clear stale runtime status: %w", err)
+		}
 	}
 	return nil
 }
@@ -130,6 +186,7 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		Gate:                netrt.Gate,
 		TransportGeneration: netrt.Generation,
 		GenerationStore:     proxycontrol.SQLStore{DB: c.DB},
+		runtimeStatusStore:  accountRuntimeStatusSQLStore{DB: c.DB},
 	}, nil
 }
 func wipe(b []byte) {

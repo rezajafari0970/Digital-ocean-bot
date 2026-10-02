@@ -114,6 +114,92 @@ func TestAccountRuntimeCheckMutationGeneration(t *testing.T) {
 	}
 }
 
+type fakeAccountRuntimeStatusStore struct {
+	status     string
+	detail     string
+	markCalls  int
+	clearCalls int
+	markErr    error
+	clearErr   error
+}
+
+func (s *fakeAccountRuntimeStatusStore) MarkStaleGeneration(context.Context, string) error {
+	s.markCalls++
+	if s.markErr != nil {
+		return s.markErr
+	}
+	if s.status == accountRuntimeStatusReady || s.status == accountRuntimeStatusStaleGeneration {
+		s.status = accountRuntimeStatusStaleGeneration
+		s.detail = accountRuntimeStatusStaleGenerationDetail
+	}
+	return nil
+}
+
+func (s *fakeAccountRuntimeStatusStore) ClearStaleGeneration(context.Context, string) error {
+	s.clearCalls++
+	if s.clearErr != nil {
+		return s.clearErr
+	}
+	if s.status == accountRuntimeStatusStaleGeneration {
+		s.status = accountRuntimeStatusReady
+		s.detail = ""
+	}
+	return nil
+}
+
+func TestAccountRuntimeMutationGenerationStatus(t *testing.T) {
+	ctx := context.Background()
+	proxyID := "proxy-a"
+	newRuntime := func(generation int64, status *fakeAccountRuntimeStatusStore) AccountRuntime {
+		return AccountRuntime{
+			Config: AccountConfig{
+				ID:       "account-a",
+				Provider: "provider-a",
+				Network:  network.Profile{AccountID: "account-a", Mode: network.RouteProxyRequired, ProxyID: &proxyID},
+			},
+			TransportGeneration: 7,
+			GenerationStore:     &fakeRuntimeGenerationStore{generation: generation, found: true},
+			runtimeStatusStore:  status,
+		}
+	}
+
+	status := &fakeAccountRuntimeStatusStore{status: accountRuntimeStatusReady}
+	if err := newRuntime(8, status).CheckMutationGeneration(ctx); !errors.Is(err, ErrRuntimeGenerationObsolete) {
+		t.Fatalf("stale generation error=%v", err)
+	}
+	if status.status != accountRuntimeStatusStaleGeneration || status.detail != accountRuntimeStatusStaleGenerationDetail {
+		t.Fatalf("stale status=%q detail=%q", status.status, status.detail)
+	}
+
+	if err := newRuntime(8, status).CheckMutationGeneration(ctx); !errors.Is(err, ErrRuntimeGenerationObsolete) {
+		t.Fatalf("repeated stale generation error=%v", err)
+	}
+	if status.status != accountRuntimeStatusStaleGeneration || status.detail != accountRuntimeStatusStaleGenerationDetail {
+		t.Fatalf("repeated stale status=%q detail=%q", status.status, status.detail)
+	}
+
+	if err := newRuntime(7, status).CheckMutationGeneration(ctx); err != nil {
+		t.Fatalf("fresh generation rejected: %v", err)
+	}
+	if status.status != accountRuntimeStatusReady || status.detail != "" {
+		t.Fatalf("recovered status=%q detail=%q", status.status, status.detail)
+	}
+
+	providerStatus := &fakeAccountRuntimeStatusStore{status: "PROVIDER_ERROR", detail: "provider failure"}
+	if err := newRuntime(8, providerStatus).CheckMutationGeneration(ctx); !errors.Is(err, ErrRuntimeGenerationObsolete) {
+		t.Fatalf("stale generation with provider error=%v", err)
+	}
+	if providerStatus.status != "PROVIDER_ERROR" || providerStatus.detail != "provider failure" {
+		t.Fatalf("stale rejection overwrote provider state: status=%q detail=%q", providerStatus.status, providerStatus.detail)
+	}
+	if err := newRuntime(7, providerStatus).CheckMutationGeneration(ctx); err != nil {
+		t.Fatalf("fresh generation with provider error rejected: %v", err)
+	}
+	if providerStatus.status != "PROVIDER_ERROR" || providerStatus.detail != "provider failure" {
+		t.Fatalf("fresh generation cleared provider state: status=%q detail=%q", providerStatus.status, providerStatus.detail)
+	}
+}
+
 func TestProviderNetworkRuntimeProxyRequiredUsesSharedGateway(t *testing.T) {
 	c := Container{}
 	p := &network.Proxy{
