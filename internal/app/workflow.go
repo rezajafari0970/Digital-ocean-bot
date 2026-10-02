@@ -64,10 +64,11 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 			return err
 		}
 		if eg != nil {
-			_, err := eg.Observe(ctx)
-			return err
+			if _, err := eg.Observe(ctx); err != nil {
+				return err
+			}
 		}
-		return nil
+		return runtime.CheckMutationGeneration(ctx)
 	}
 	sshClient := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	provisionStore := provisioning.SQLStore{DB: c.DB}

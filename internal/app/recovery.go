@@ -116,6 +116,9 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		_ = h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(profile_snapshot->>'ssh_provider_key_id','') FROM deployments WHERE account_id=$1 AND provider_id=$2 ORDER BY created_at DESC LIMIT 1`, item.AccountID, providerID).Scan(&keyID)
 		if keyID != "" {
 			if sshDriver, ok := runtime.Driver.(providers.SSHKeyDriver); ok {
+				if err := runtime.CheckMutationGeneration(ctx); err != nil {
+					return err
+				}
 				if keyErr := sshDriver.DeleteSSHKey(ctx, keyID); keyErr == nil {
 					_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET profile_snapshot=jsonb_set(profile_snapshot,'{ssh_provider_key_deleted_at}',to_jsonb(now()::text),true),updated_at=now() WHERE account_id=$1 AND provider_id=$2`, item.AccountID, providerID)
 				}

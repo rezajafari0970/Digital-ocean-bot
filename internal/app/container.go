@@ -4,16 +4,20 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"net/http"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/accounts"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
-	"net/http"
 )
 
 var ErrNetworkNotReady = errors.New("account network not ready")
 var ErrProviderComputeUnsupported = errors.New("provider compute capability unavailable")
+var ErrRuntimeGenerationObsolete = errors.New("account runtime proxy generation is obsolete or unavailable")
 
 type Container struct {
 	DB        *sql.DB
@@ -21,6 +25,10 @@ type Container struct {
 	Accounts  Repository
 	Providers *providers.Registry
 }
+type runtimeGenerationStore interface {
+	CurrentGeneration(ctx context.Context, accountID, proxyID, provider string) (int64, bool, error)
+}
+
 type AccountRuntime struct {
 	Config              AccountConfig
 	Cell                *accounts.Cell
@@ -29,6 +37,27 @@ type AccountRuntime struct {
 	Operations          jobs.SQLStore
 	Gate                network.AccountGate
 	TransportGeneration int64
+	GenerationStore     runtimeGenerationStore
+}
+
+func (rt AccountRuntime) CheckMutationGeneration(ctx context.Context) error {
+	if rt.TransportGeneration == 0 && rt.Config.Network.Mode != network.RouteProxyRequired {
+		return nil
+	}
+	if rt.TransportGeneration < 1 || rt.Config.Network.ProxyID == nil || *rt.Config.Network.ProxyID == "" || rt.GenerationStore == nil {
+		return ErrRuntimeGenerationObsolete
+	}
+	generation, found, err := rt.GenerationStore.CurrentGeneration(ctx, rt.Config.ID, *rt.Config.Network.ProxyID, rt.Config.Provider)
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrRuntimeGenerationObsolete, err)
+	}
+	if !found {
+		return fmt.Errorf("%w: proxy runtime state missing", ErrRuntimeGenerationObsolete)
+	}
+	if generation != rt.TransportGeneration {
+		return fmt.Errorf("%w: runtime generation %d, current generation %d", ErrRuntimeGenerationObsolete, rt.TransportGeneration, generation)
+	}
+	return nil
 }
 
 type accountCredentialSource struct {
@@ -89,6 +118,7 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		Operations:          jobs.SQLStore{DB: c.DB},
 		Gate:                netrt.Gate,
 		TransportGeneration: netrt.Generation,
+		GenerationStore:     proxycontrol.SQLStore{DB: c.DB},
 	}, nil
 }
 func wipe(b []byte) {

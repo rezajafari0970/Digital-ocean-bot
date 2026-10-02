@@ -29,6 +29,74 @@ func TestProviderNetworkRuntimeDirectIsAccountScoped(t *testing.T) {
 	}
 }
 
+type fakeRuntimeGenerationStore struct {
+	generation int64
+	found      bool
+	err        error
+	calls      int
+}
+
+func (s *fakeRuntimeGenerationStore) CurrentGeneration(context.Context, string, string, string) (int64, bool, error) {
+	s.calls++
+	return s.generation, s.found, s.err
+}
+
+func TestAccountRuntimeCheckMutationGeneration(t *testing.T) {
+	ctx := context.Background()
+	direct := AccountRuntime{
+		Config: AccountConfig{
+			ID:      "account-a",
+			Network: network.Profile{AccountID: "account-a", Mode: network.RouteDirect},
+		},
+	}
+	if err := direct.CheckMutationGeneration(ctx); err != nil {
+		t.Fatalf("direct runtime rejected: %v", err)
+	}
+
+	proxyID := "proxy-a"
+	newRuntime := func(store runtimeGenerationStore) AccountRuntime {
+		return AccountRuntime{
+			Config: AccountConfig{
+				ID:       "account-a",
+				Provider: "provider-a",
+				Network:  network.Profile{AccountID: "account-a", Mode: network.RouteProxyRequired, ProxyID: &proxyID},
+			},
+			TransportGeneration: 7,
+			GenerationStore:     store,
+		}
+	}
+
+	matching := &fakeRuntimeGenerationStore{generation: 7, found: true}
+	if err := newRuntime(matching).CheckMutationGeneration(ctx); err != nil {
+		t.Fatalf("matching generation rejected: %v", err)
+	}
+	if matching.calls != 1 {
+		t.Fatalf("generation lookups=%d, want=1", matching.calls)
+	}
+
+	for name, store := range map[string]*fakeRuntimeGenerationStore{
+		"mismatch": {generation: 8, found: true},
+		"missing":  {},
+		"error":    {err: errors.New("store unavailable")},
+	} {
+		t.Run(name, func(t *testing.T) {
+			err := newRuntime(store).CheckMutationGeneration(ctx)
+			if !errors.Is(err, ErrRuntimeGenerationObsolete) {
+				t.Fatalf("error=%v, want ErrRuntimeGenerationObsolete", err)
+			}
+			if store.calls != 1 {
+				t.Fatalf("generation lookups=%d, want=1", store.calls)
+			}
+		})
+	}
+
+	missingGeneration := newRuntime(matching)
+	missingGeneration.TransportGeneration = 0
+	if err := missingGeneration.CheckMutationGeneration(ctx); !errors.Is(err, ErrRuntimeGenerationObsolete) {
+		t.Fatalf("proxy-required generation zero error=%v", err)
+	}
+}
+
 func TestProviderNetworkRuntimeProxyRequiredUsesSharedGateway(t *testing.T) {
 	c := Container{}
 	p := &network.Proxy{

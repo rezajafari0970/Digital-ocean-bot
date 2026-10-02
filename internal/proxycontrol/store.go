@@ -11,6 +11,25 @@ import (
 
 type SQLStore struct{ DB *sql.DB }
 
+func (s SQLStore) CurrentGeneration(ctx context.Context, accountID, proxyID, provider string) (int64, bool, error) {
+	if s.DB == nil {
+		return 0, false, errors.New("proxy control store unavailable")
+	}
+	var generation int64
+	err := s.DB.QueryRowContext(ctx, `
+SELECT generation
+FROM proxy_runtime_state
+WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
+`, accountID, proxyID, provider).Scan(&generation)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	return generation, true, nil
+}
+
 func (s SQLStore) Load(ctx context.Context, accountID, proxyID, provider string) (State, error) {
 	x := DefaultState(accountID, proxyID, provider)
 	if s.DB == nil {

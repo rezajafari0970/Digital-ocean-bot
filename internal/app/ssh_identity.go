@@ -39,13 +39,18 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	if !ok {
 		return ErrProviderComputeUnsupported
 	}
+	if err = runtime.CheckMutationGeneration(ctx); err != nil {
+		return err
+	}
 	created, err := sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), string(ssh.MarshalAuthorizedKey(pub)))
 	if err != nil {
 		return err
 	}
 	ref := "ssh-deploy-" + d.ID
 	if err = c.Secrets.Put(ctx, accountID, ref, "ssh_private_key", privatePEM); err != nil {
-		_ = sshDriver.DeleteSSHKey(ctx, created.ID)
+		if runtime.CheckMutationGeneration(ctx) == nil {
+			_ = sshDriver.DeleteSSHKey(ctx, created.ID)
+		}
 		return err
 	}
 	snap.SSHKeySecretRef = ref

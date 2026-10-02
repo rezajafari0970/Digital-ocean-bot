@@ -216,10 +216,11 @@ processLifecycle:
 			return err
 		}
 		if eg != nil {
-			_, err := eg.Observe(ctx)
-			return err
+			if _, err := eg.Observe(ctx); err != nil {
+				return err
+			}
 		}
-		return nil
+		return runtime.CheckMutationGeneration(ctx)
 	}
 	engine := droplets.LifecycleEngine{Store: droplets.LifecycleStore{DB: c.DB}, Executor: executor}
 	return engine.Process(ctx, item)
