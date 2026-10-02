@@ -375,7 +375,15 @@ WHERE account_id=$1
 		cancel2()
 		if gerr != nil {
 			g2.CloseIdleConnections()
-			candidateErr = gerr
+			if errors.Is(gerr, network.ErrProxyAuth) {
+				return gerr
+			}
+			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+			if rerr != nil {
+				return rerr
+			}
+			cfg.Proxy.Port = nextPort
+			candidateErr = ErrIsolationWait
 			continue
 		}
 		if cap.CountryTargeting && !allowFallback && cc != "" && !strings.EqualFold(candidate.CountryCode, cc) {
