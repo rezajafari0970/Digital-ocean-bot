@@ -351,7 +351,7 @@ WHERE account_id=$1
 		started = &now
 	}
 	if started != nil && retryPreviousProxyIP(oldIP, *started, time.Now()) {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='retrying previous proxy IPv4',runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='retrying previous proxy IPv4',runtime_status_at=now(),updated_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID)
 		return ErrIsolationWait
 	}
 	allowFallback := fallback
@@ -450,7 +450,7 @@ WHERE account_id=$1
 	}
 	if !found {
 		detail := fmt.Sprintf("no unique proxy IPv4/subnet after %d session candidates", candidateAttempts)
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1`, accountID, detail)
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID, detail)
 		if candidateErr != nil && !errors.Is(candidateErr, ErrIsolationWait) {
 			return candidateErr
 		}

@@ -127,7 +127,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 		return err
 	}
 	if expectedIP == "" || !lastHealth || rotating || ip != expectedIP {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='proxy identity verification mismatch',runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='proxy identity verification mismatch',runtime_status_at=now(),updated_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID)
 		return ErrIsolationWait
 	}
 	return nil

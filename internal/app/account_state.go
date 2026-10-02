@@ -24,7 +24,7 @@ func ClassifyAccountProviderError(err error, proxyRequired bool) string {
 	if err == nil {
 		return ProviderStateActive
 	}
-	if proxyRequired && (errors.Is(err, network.ErrProxyRequired) || errors.Is(err, network.ErrProxyConfigInvalid) || errors.Is(err, network.ErrAccountNetworkNotReady) || strings.Contains(strings.ToLower(err.Error()), "proxy")) {
+	if proxyRequired && (errors.Is(err, network.ErrProxyRequired) || errors.Is(err, network.ErrProxyConfigInvalid) || errors.Is(err, network.ErrAccountNetworkNotReady) || errors.Is(err, network.ErrProxyCircuitOpen)) {
 		return ProviderStateProxyError
 	}
 	switch providers.Class(err) {
@@ -64,6 +64,8 @@ func ProviderProbeInterval(state string) time.Duration {
 		return 5 * time.Minute
 	case ProviderStateRateLimited:
 		return 2 * time.Minute
+	case ProviderStateTransportError, ProviderStateProxyError:
+		return 15 * time.Second
 	default:
 		return 0
 	}
