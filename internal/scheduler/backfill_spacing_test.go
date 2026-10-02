@@ -19,3 +19,15 @@ func TestBackfillBypassesNormalBuildSpacing(t *testing.T) {
 		t.Fatal("missing next_build_at must not block creation")
 	}
 }
+
+func TestBackfillCanFillMultipleFreeSlotsWithinConcurrencyBudget(t *testing.T) {
+	if got := initialAllowedStarts(0, 5, 0, 3); got != 1 {
+		t.Fatalf("normal growth got %d; want 1", got)
+	}
+	if got := initialAllowedStarts(2, 2, 1, 3); got != 2 {
+		t.Fatalf("backfill got %d; want 2", got)
+	}
+	if got := initialAllowedStarts(5, 4, 2, 3); got != 1 {
+		t.Fatalf("backfill must respect remaining concurrency slot; got %d", got)
+	}
+}

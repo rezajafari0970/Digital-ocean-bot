@@ -22,6 +22,26 @@ func buildSpacingBlocked(backfillPending int, nextBuild sql.NullTime, now time.T
 	return backfillPending <= 0 && nextBuild.Valid && now.Before(nextBuild.Time)
 }
 
+func initialAllowedStarts(backfillPending, needed, concurrent, maxConcurrent int) int {
+	allowed := 1
+	if backfillPending > 0 {
+		allowed = backfillPending
+	}
+	if allowed > needed {
+		allowed = needed
+	}
+	if maxConcurrent > 0 {
+		slots := maxConcurrent - concurrent
+		if allowed > slots {
+			allowed = slots
+		}
+	}
+	if allowed < 0 {
+		return 0
+	}
+	return allowed
+}
+
 type Engine struct {
 	DB      *sql.DB
 	Store   SQLStore
@@ -113,10 +133,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		allowed := 1
-		if allowed > needed {
-			allowed = needed
-		}
+		allowed := initialAllowedStarts(backfillPending, needed, concurrent, x.MaxConcurrent)
 		// Provider snapshot is the source of truth for occupied capacity. Only
 		// create operations without a provider resource consume additional slots;
 		// this avoids double-counting droplets already visible at DigitalOcean.
