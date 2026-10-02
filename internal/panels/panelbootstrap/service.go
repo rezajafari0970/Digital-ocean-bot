@@ -199,4 +199,13 @@ func (s Service) recordRuntimeRepair(ctx context.Context, panelID string, repair
 		return
 	}
 	_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_error=$2 WHERE panel_id=$1`, panelID, repairErr.Error())
+	var attempts int
+	if err := s.DB.QueryRowContext(ctx, `SELECT attempts FROM panel_runtime_repairs WHERE panel_id=$1`, panelID).Scan(&attempts); err != nil || attempts < 3 {
+		return
+	}
+	var accountID, dropletID string
+	err := s.DB.QueryRowContext(ctx, `UPDATE droplets d SET state='RETIRING',updated_at=now() FROM panel_instances p WHERE p.id=$1 AND p.droplet_id=d.id AND d.state IN ('READY','EXPIRING') RETURNING d.account_id::text,d.id::text`, panelID).Scan(&accountID, &dropletID)
+	if err == nil {
+		_, _ = s.DB.ExecContext(ctx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, accountID, dropletID)
+	}
 }
