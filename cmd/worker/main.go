@@ -331,7 +331,7 @@ func main() {
 		}
 	}()
 
-	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 30 * time.Second, Timeout: 12 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
+	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {
 			log.Printf("proxy monitor stopped: %v", err)

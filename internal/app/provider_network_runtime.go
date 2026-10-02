@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"sync"
 	"time"
@@ -17,6 +18,19 @@ type providerNetworkRuntime struct {
 	Generation     int64
 	TransportEpoch int64
 	closeIdle      func()
+}
+
+func classifyProviderProxyObservation(obs network.TransportObservation, alreadyHealthy bool) (network.HealthResult, bool) {
+	if obs.Err == nil && !obs.ProxyAuthRequired {
+		if alreadyHealthy {
+			return network.HealthResult{}, false
+		}
+		return network.HealthResult{Status: network.StatusHealthy, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency)}, true
+	}
+	if obs.ProxyAuthRequired || errors.Is(obs.Err, network.ErrProxyAuth) {
+		return network.HealthResult{Status: network.StatusDown, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency), Error: "proxy authentication required"}, true
+	}
+	return network.HealthResult{}, false
 }
 
 func (r providerNetworkRuntime) CloseIdleConnections() {
@@ -107,14 +121,9 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			observed := network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
 				healthMu.Lock()
 				defer healthMu.Unlock()
-				if obs.Err == nil && !obs.ProxyAuthRequired && healthy {
+				result, apply := classifyProviderProxyObservation(obs, healthy)
+				if !apply {
 					return
-				}
-				status, errText := network.StatusHealthy, ""
-				if obs.Err != nil {
-					status, errText = network.StatusDown, obs.Err.Error()
-				} else if obs.ProxyAuthRequired {
-					status, errText = network.StatusDown, "proxy authentication required"
 				}
 				reportCtx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
 				defer cancel()
@@ -125,9 +134,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					cfg.Proxy.ID,
 					cfg.Provider,
 					generation,
-					network.HealthResult{
-						Status: status, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency), Error: errText,
-					},
+					result,
 					policy,
 					&healthy,
 				)

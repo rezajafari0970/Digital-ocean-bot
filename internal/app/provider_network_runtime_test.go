@@ -608,3 +608,26 @@ func TestProxyControlPlaneFailureRecoveryE2E(t *testing.T) {
 		t.Fatalf("fresh runtime rejected: %v", err)
 	}
 }
+
+func TestClassifyProviderProxyObservationIgnoresOriginError(t *testing.T) {
+	obs := network.TransportObservation{StartedAt: time.Unix(100, 0), Latency: time.Second, Err: errors.New("origin timeout")}
+	if _, apply := classifyProviderProxyObservation(obs, true); apply {
+		t.Fatal("origin error must not mark proxy down")
+	}
+}
+
+func TestClassifyProviderProxyObservationMarksProxyAuthDown(t *testing.T) {
+	obs := network.TransportObservation{StartedAt: time.Unix(100, 0), Latency: time.Second, Err: fmt.Errorf("%w: 407", network.ErrProxyAuth)}
+	got, apply := classifyProviderProxyObservation(obs, true)
+	if !apply || got.Status != network.StatusDown {
+		t.Fatalf("apply=%v status=%s", apply, got.Status)
+	}
+}
+
+func TestClassifyProviderProxyObservationCanRecoverHealth(t *testing.T) {
+	obs := network.TransportObservation{StartedAt: time.Unix(100, 0), Latency: time.Second}
+	got, apply := classifyProviderProxyObservation(obs, false)
+	if !apply || got.Status != network.StatusHealthy {
+		t.Fatalf("apply=%v status=%s", apply, got.Status)
+	}
+}
