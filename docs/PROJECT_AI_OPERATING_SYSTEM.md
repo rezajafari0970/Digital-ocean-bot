@@ -1,6 +1,6 @@
 # Project AI Operating System
 
-Protocol version: 5 — Multi-Model Parallel Council
+Protocol version: 6 — Adaptive Multi-Model Council
 
 This document is the mandatory engineering protocol for every ChatGPT session, API agent, continuation, and automated development job in this repository.
 
@@ -76,3 +76,14 @@ Architect, reviewer, adversary, and independent test-design lanes run concurrent
 The adjudicator must reconcile disagreements by evidence; majority vote is explicitly insufficient.
 Unavailable models may fail independently as long as the minimum independent-lane policy is satisfied. Model names and role routing are configuration, not hard-coded engineering truth.
 Implementation remains bounded by allowed_paths and deterministic TEST/VERIFY/CHECKPOINT gates after council adjudication.
+
+## Adaptive Risk Router
+Before every non-trivial PLAN, tools/ai-risk-router.py deterministically classifies the change as low, medium, high, or critical from the requirement and owned paths. The model cannot lower its own risk class.
+
+Routing policy:
+- low: two fast independent lanes plus adjudication; intended for bounded low-impact work.
+- medium: architecture, review, and independent test design.
+- high: full architect/reviewer/adversary/test-designer council.
+- critical: full council plus mandatory race-or-fault evidence and a recorded rollback commit.
+
+Each profile has its own per-model latency budget and fallback chain. A slow or unavailable model falls through to the next verified model instead of stalling the whole development pipeline. Risk routing affects AI effort, never the authority of deterministic TEST/VERIFY/CHECKPOINT gates.

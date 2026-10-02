@@ -1,16 +1,128 @@
 {
-  "schema": 2,
+  "schema": 3,
   "verified_by_probe": true,
   "lanes": {
-    "architect": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
-    "reviewer": {"models": ["gpt-6-sol", "gpt-6-astra", "gpt-5.6-sol"]},
-    "adversary": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
-    "test_designer": {"models": ["gpt-6-sol", "gpt-6-luna", "gpt-5.6-terra"]},
-    "adjudicator": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
-    "fast_scout": {"models": ["gpt-6-luna", "gpt-5.6-luna"]}
+    "architect": {
+      "models": [
+        "gpt-6-astra",
+        "gpt-6-sol",
+        "gpt-5.6-sol"
+      ]
+    },
+    "reviewer": {
+      "models": [
+        "gpt-6-sol",
+        "gpt-6-astra",
+        "gpt-5.6-sol"
+      ]
+    },
+    "adversary": {
+      "models": [
+        "gpt-6-astra",
+        "gpt-6-sol",
+        "gpt-5.6-sol"
+      ]
+    },
+    "test_designer": {
+      "models": [
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-terra"
+      ]
+    },
+    "adjudicator": {
+      "models": [
+        "gpt-6-astra",
+        "gpt-6-sol",
+        "gpt-5.6-sol"
+      ]
+    },
+    "fast_scout": {
+      "models": [
+        "gpt-6-luna",
+        "gpt-5.6-luna"
+      ]
+    }
+  },
+  "profiles": {
+    "low": {
+      "roles": [
+        "reviewer",
+        "test_designer"
+      ],
+      "minimum_successful_roles": 2,
+      "model_overrides": {
+        "reviewer": [
+          "gpt-6-luna",
+          "gpt-6-sol",
+          "gpt-5.6-luna"
+        ],
+        "test_designer": [
+          "gpt-6-luna",
+          "gpt-6-sol",
+          "gpt-5.6-luna"
+        ],
+        "adjudicator": [
+          "gpt-6-sol",
+          "gpt-5.6-sol"
+        ]
+      },
+      "model_timeout_seconds": 45
+    },
+    "medium": {
+      "roles": [
+        "architect",
+        "reviewer",
+        "test_designer"
+      ],
+      "minimum_successful_roles": 3,
+      "model_overrides": {
+        "architect": [
+          "gpt-6-sol",
+          "gpt-6-astra",
+          "gpt-5.6-sol"
+        ],
+        "reviewer": [
+          "gpt-6-sol",
+          "gpt-6-astra",
+          "gpt-5.6-sol"
+        ],
+        "test_designer": [
+          "gpt-6-luna",
+          "gpt-6-sol",
+          "gpt-5.6-terra"
+        ],
+        "adjudicator": [
+          "gpt-6-sol",
+          "gpt-6-astra",
+          "gpt-5.6-sol"
+        ]
+      },
+      "model_timeout_seconds": 75
+    },
+    "high": {
+      "roles": [
+        "architect",
+        "reviewer",
+        "adversary",
+        "test_designer"
+      ],
+      "minimum_successful_roles": 4,
+      "model_timeout_seconds": 120
+    },
+    "critical": {
+      "roles": [
+        "architect",
+        "reviewer",
+        "adversary",
+        "test_designer"
+      ],
+      "minimum_successful_roles": 4,
+      "require_race_or_fault_gate": true,
+      "require_rollback_point": true,
+      "model_timeout_seconds": 180
+    }
   },
   "parallelism": 4,
-  "minimum_successful_roles": 4,
-  "prompt_cache_ttl": "24h",
-  "rule": "Independent model outputs are advisory; adjudication must expose disagreements; deterministic evidence remains authoritative."
+  "rule": "Adaptive routing may reduce cost and latency, but deterministic evidence remains authoritative and high-risk work must escalate."
 }

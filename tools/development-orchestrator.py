@@ -7,7 +7,7 @@ os.environ.setdefault("HOME", "/root")
 os.environ.setdefault("GOPATH", "/root/go")
 os.environ.setdefault("GOMODCACHE", "/root/go/pkg/mod")
 BASE=ROOT/".local"/"dev-orchestrator"; STATE=BASE/"state.json"; LOCK=BASE/"lock"; LOG=BASE/"events.jsonl"
-JOBS=ROOT/"docs"/"development-jobs"; ADAPTER=ROOT/"tools"/"openai-development-adapter.py"; COUNCIL=ROOT/"tools"/"ai-engineering-council.py"
+JOBS=ROOT/"docs"/"development-jobs"; ADAPTER=ROOT/"tools"/"openai-development-adapter.py"; COUNCIL=ROOT/"tools"/"ai-engineering-council.py"; ROUTER=ROOT/"tools"/"ai-risk-router.py"
 PHASES=["PLAN","IMPLEMENT","TEST","VERIFY","CHECKPOINT","COMPLETE"]
 def now(): return datetime.now(timezone.utc).isoformat()
 def write_state(x):
@@ -239,9 +239,21 @@ def one(job):
         ok=True
         try:
             if phase=="PLAN":
-                prompt="GOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(m.get("allowed_paths",[]))
-                if m.get("ai_council",True):
-                    cp=subprocess.run([str(COUNCIL)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("council_timeout_seconds",900)))
+                route_input=json.dumps({"goal":m["goal"],"context":m.get("context",""),"allowed_paths":m.get("allowed_paths",[]),"push":m.get("push",False)})
+                rr=subprocess.run([str(ROUTER)],input=route_input,text=True,capture_output=True,cwd=ROOT,timeout=15)
+                if rr.returncode!=0: raise RuntimeError("risk router failed")
+                route=json.loads(rr.stdout); profile=route["profile"]
+                j["risk_profile"]=profile; j["risk_score"]=route["score"]; j["risk_reasons"]=route["reasons"]
+                j["rollback_commit"]=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
+                (BASE/(job+"-risk-route.json")).write_text(json.dumps(route,indent=2)+"\n")
+                if profile=="critical":
+                    gates=" ".join(m.get("commands",{}).get("test",[])+m.get("commands",{}).get("verify",[])).lower()
+                    if "-race" not in gates and "fault" not in gates:
+                        ok=False; ev(event="risk_gate_missing",job=job,profile=profile,required="race_or_fault")
+                prompt="GOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(m.get("allowed_paths",[]))+"\nRISK_PROFILE:\n"+profile
+                if ok and m.get("ai_council",True):
+                    council_env=os.environ.copy(); council_env["AI_COUNCIL_PROFILE"]=profile
+                    cp=subprocess.run([str(COUNCIL)],input=prompt,text=True,capture_output=True,cwd=ROOT,env=council_env,timeout=int(m.get("council_timeout_seconds",900)))
                     if cp.returncode in (0,2):
                         (BASE/(job+"-council.json")).write_text(cp.stdout)
                         council=json.loads(cp.stdout); verdict=council.get("verdict",{})

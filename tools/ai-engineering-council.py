@@ -20,7 +20,7 @@ def invoke(role,models,base):
  errors=[]
  for model in models:
   env=os.environ.copy(); env["OPENAI_MODEL"]=model
-  p=subprocess.run([str(AD)],input=f"ROLE={role}\n{ROLE.get(role,'Adjudicate by evidence.')}\nTASK:\n{base}",text=True,capture_output=True,cwd=ROOT,env=env,timeout=180)
+  p=subprocess.run([str(AD)],input=f"ROLE={role}\n{ROLE.get(role,'Adjudicate by evidence.')}\nTASK:\n{base}",text=True,capture_output=True,cwd=ROOT,env=env,timeout=int(os.environ.get("AI_COUNCIL_MODEL_TIMEOUT_SECONDS","180")))
   if p.returncode==0:
    try:
     x=json.loads(p.stdout); return {"role":role,"ok":True,"model":model,"response_id":x.get("id"),"text":x["text"]}
@@ -29,17 +29,23 @@ def invoke(role,models,base):
  return {"role":role,"ok":False,"models":models,"errors":errors}
 base=sys.stdin.read()
 if not base.strip(): raise SystemExit(64)
-roles=["architect","reviewer","adversary","test_designer"]
-with concurrent.futures.ThreadPoolExecutor(max_workers=REG["parallelism"]) as ex:
- results=list(ex.map(lambda r: invoke(r,REG["lanes"][r]["models"],base),roles))
+profile=os.environ.get("AI_COUNCIL_PROFILE","high")
+profile_cfg=REG.get("profiles",{}).get(profile,REG.get("profiles",{}).get("high",{}))
+os.environ.setdefault("AI_COUNCIL_MODEL_TIMEOUT_SECONDS",str(profile_cfg.get("model_timeout_seconds",180)))
+roles=profile_cfg.get("roles",["architect","reviewer","adversary","test_designer"])
+def role_models(role):
+ overrides=profile_cfg.get("model_overrides",{})
+ return overrides.get(role,REG["lanes"][role]["models"])
+with concurrent.futures.ThreadPoolExecutor(max_workers=min(REG["parallelism"],len(roles))) as ex:
+ results=list(ex.map(lambda r: invoke(r,role_models(r),base),roles))
 ok=[x for x in results if x["ok"]]
-bundle={"schema":2,"created_at":datetime.now(timezone.utc).isoformat(),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"input_sha256":hashlib.sha256(base.encode()).hexdigest(),"results":results}
-if len(ok)<REG["minimum_successful_roles"]:
+bundle={"schema":3,"profile":profile,"created_at":datetime.now(timezone.utc).isoformat(),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"input_sha256":hashlib.sha256(base.encode()).hexdigest(),"results":results}
+if len(ok)<int(profile_cfg.get("minimum_successful_roles",len(roles))):
  bundle["status"]="INSUFFICIENT_COUNCIL"; OUT.mkdir(parents=True,exist_ok=True); (OUT/"latest-council.json").write_text(json.dumps(bundle,indent=2)+"\n"); print(json.dumps(bundle)); raise SystemExit(75)
 reports="\n\n".join(f"ROLE={x['role']} MODEL={x['model']}\n{x['text']}" for x in ok)
 judge_prompt=("TASK:\n"+base+"\n\nINDEPENDENT REPORTS:\n"+reports+
 "\n\nAct as evidence adjudicator. Majority vote is not evidence. Return ONLY JSON with keys decision (PASS|REVISE|BLOCK), agreements, disagreements, unresolved, required_gates, chosen_plan. PASS requires unresolved=[] and a bounded chosen_plan.")
-judge=invoke("adjudicator",REG["lanes"]["adjudicator"]["models"],judge_prompt)
+judge=invoke("adjudicator",role_models("adjudicator"),judge_prompt)
 bundle["adjudicator"]=judge
 if not judge["ok"]: bundle["status"]="NO_ADJUDICATION"; verdict={"decision":"REVISE","unresolved":["adjudicator unavailable"]}
 else:
