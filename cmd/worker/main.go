@@ -264,6 +264,7 @@ func main() {
 		source := readyworker.SQLSource{DB: application.DB}
 		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
 		syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh}
+		failures := worker.FailureStore{DB: application.DB}
 		run := func() {
 			panels, err := source.EligibleReadyPanels(ctx)
 			if err != nil {
@@ -282,11 +283,17 @@ func main() {
 					case <-ctx.Done():
 						return
 					}
+					if !failures.Due(ctx, "residential_sync", p.ID) {
+						return
+					}
 					panelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 					defer cancel()
 					if err := syncer.ReconcilePanel(panelCtx, p, false); err != nil {
+						failures.Fail(ctx, "residential_sync", p.ID, "", err)
 						log.Printf("residential sync panel %s: %v", p.ID, err)
+						return
 					}
+					failures.Clear(ctx, "residential_sync", p.ID)
 				}()
 			}
 			for range panels {
