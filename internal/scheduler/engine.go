@@ -158,7 +158,7 @@ func (e Engine) ensureAutomationInstallerRef(ctx context.Context, profileID stri
 	var version int
 	if err := e.DB.QueryRowContext(ctx, `SELECT name,version FROM installers
 		WHERE active=true AND manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb
-		ORDER BY version DESC,updated_at DESC LIMIT 1`).Scan(&name, &version); err != nil {
+		ORDER BY version DESC,name ASC LIMIT 1`).Scan(&name, &version); err != nil {
 		return err
 	}
 	_, err := e.DB.ExecContext(ctx, `UPDATE deployment_profiles
