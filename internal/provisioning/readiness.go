@@ -52,7 +52,7 @@ func (c ReadinessCollector) Collect(ctx context.Context, runID string, t Target,
 	}
 	osraw := run("os", ". /etc/os-release 2>/dev/null; printf '%s|%s' \"$ID\" \"$VERSION_ID\"")
 	if code := strings.TrimPrefix(s.Checks["os"], "error:"); strings.HasPrefix(s.Checks["os"], "error:") {
-		retryable := code == "SSH_CONNECTION_REFUSED" || code == "SSH_CONNECT_TIMEOUT" || code == "SSH_CONTEXT_TIMEOUT" || code == "SSH_NO_ROUTE" || code == "SSH_CONNECTION_RESET" || code == "SSH_NOT_READY" || code == "SSH_HANDSHAKE_FAILED"
+		retryable := code == "SSH_CONNECTION_REFUSED" || code == "SSH_CONNECT_TIMEOUT" || code == "SSH_CONTEXT_TIMEOUT" || code == "SSH_NO_ROUTE" || code == "SSH_CONNECTION_RESET" || code == "SSH_NOT_READY" || code == "SSH_HANDSHAKE_FAILED" || code == "SSH_AUTH_FAILED"
 		issue := ReadinessIssue{Code: code, Severity: "BLOCK", Action: "BLOCK", Detail: "SSH readiness probe failed", State: "OPEN"}
 		if retryable {
 			issue.Action = "RETRY"

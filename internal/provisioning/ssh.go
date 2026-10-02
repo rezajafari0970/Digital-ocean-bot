@@ -51,7 +51,10 @@ func (s SSHClient) WaitStages(ctx context.Context, t Target, key []byte, observe
 			return nil
 		}
 		diag := ClassifyError(err)
-		if diag.Class == ClassAuthentication || diag.Class == ClassHostKey || diag.Class == ClassConfiguration {
+		// Fresh cloud instances can briefly reject the just-installed key while
+		// cloud-init/vendor-data is still converging. Keep authentication inside
+		// the bounded boot wait; host-key/configuration failures remain terminal.
+		if diag.Class == ClassHostKey || diag.Class == ClassConfiguration {
 			return err
 		}
 		last = err
