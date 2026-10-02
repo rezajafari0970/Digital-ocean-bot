@@ -83,7 +83,7 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 	}
 	if err != nil {
 		log.Printf("output refresh panel=%s acquire_error=%v", p.ID, err)
-		return s.cachedPanelOutput(p.ID, 24*time.Hour)
+		return ""
 	}
 	records, ok := s.collectRuntimeOutput(ctx, p, runtime)
 	if ok {
@@ -93,7 +93,7 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		}
 		return ""
 	}
-	return s.cachedPanelOutput(p.ID, 24*time.Hour)
+	return ""
 }
 
 func (s *Server) refreshPanelOutputAsync(p readyworker.Panel) {
@@ -283,5 +283,37 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
+	s.refreshOutputLive(r.Context())
 	s.outputSnapshotResponse(w, r)
+}
+
+func (s *Server) refreshOutputLive(ctx context.Context) {
+	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
+	if err != nil || len(panels) == 0 {
+		return
+	}
+	sem := make(chan struct{}, 8)
+	done := make(chan struct{}, len(panels))
+	for _, panel := range panels {
+		p := panel
+		go func() {
+			defer func() { done <- struct{}{} }()
+			select {
+			case sem <- struct{}{}:
+				defer func() { <-sem }()
+			case <-ctx.Done():
+				return
+			}
+			panelCtx, cancel := context.WithTimeout(ctx, 12*time.Second)
+			defer cancel()
+			_ = s.refreshPanelOutput(panelCtx, p)
+		}()
+	}
+	for range panels {
+		select {
+		case <-done:
+		case <-ctx.Done():
+			return
+		}
+	}
 }

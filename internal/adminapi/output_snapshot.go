@@ -79,6 +79,7 @@ func (s *Server) sharedOutput(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	s.refreshOutputLive(r.Context())
 	s.outputSnapshotResponse(w, r)
 }
 func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) {
