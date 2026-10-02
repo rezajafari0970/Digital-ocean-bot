@@ -160,6 +160,11 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	// can never create a server without the persisted private-key reference.
 	if d.CurrentStep == "create" && d.ProviderID == "" && (snap.SSHKeySecretRef == "" || snap.SSHProviderKeyID == "") {
 		if err := h.Container.ensureDeploymentSSHIdentity(ctx, item.AccountID, d, &snap); err != nil {
+			if frozen, ferr := h.freezePermanentDeploymentError(ctx, d, err); ferr != nil {
+				return ferr
+			} else if frozen {
+				return nil
+			}
 			return err
 		}
 		cfg, snap, err = h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)
