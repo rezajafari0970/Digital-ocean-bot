@@ -110,3 +110,10 @@ The six-stage completion train was executed through production promotion.
 - F: production upgraded to commit c007e318ec41769c88e2938af0c2e59e0a3dac43. Runtime commit/manifest/binary hashes match; API and worker are active. Live migrations 000108 and 000109 are applied. Live invariant check: 8 proxy-required accounts, 0 epoch/proxy mismatches, 0 missing transport-state rows, 0 open proxy circuits at verification time.
 
 Rollback artifact captured before promotion at /opt/digital-ocean-bot/rollback-proxy-c007e31.
+
+## IPv4-only provider egress incident — 2026-10-02
+A Vultr account returned HTTP 401 with an IPv6 address in the provider allowlist error even though the proxy gateway itself was dialed over IPv4. Root cause: SOCKS5 target addresses were passed to the upstream gateway as hostnames, allowing the upstream resolver to select AAAA/IPv6 for api.vultr.com. The SOCKS provider target path now resolves the destination locally with ResolveIPv4 and sends an IPv4 literal through SOCKS using tcp4. Gateway dialing was already IPv4-only.
+
+After production promotion at commit 6e13119cda530a6561d0e61a31b4dd5dadcfc900, both Vultr accounts refreshed to provider_state=ACTIVE, runtime_status=READY, with empty provider_error_state. This demonstrates the previously failing provider API path recovered under the IPv4-target transport.
+
+The configured DataImpulse records currently identify as SOCKS5 on port 823. DataImpulse public documentation describes HTTP/HTTPS on 823 and SOCKS5 on 10000; this configuration should be normalized separately only after a credentialed connectivity probe because the current path is operational and no blind port migration is warranted.
