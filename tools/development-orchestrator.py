@@ -7,7 +7,7 @@ os.environ.setdefault("HOME", "/root")
 os.environ.setdefault("GOPATH", "/root/go")
 os.environ.setdefault("GOMODCACHE", "/root/go/pkg/mod")
 BASE=ROOT/".local"/"dev-orchestrator"; STATE=BASE/"state.json"; LOCK=BASE/"lock"; LOG=BASE/"events.jsonl"
-JOBS=ROOT/"docs"/"development-jobs"; ADAPTER=ROOT/"tools"/"openai-development-adapter.py"
+JOBS=ROOT/"docs"/"development-jobs"; ADAPTER=ROOT/"tools"/"openai-development-adapter.py"; COUNCIL=ROOT/"tools"/"ai-engineering-council.py"
 PHASES=["PLAN","IMPLEMENT","TEST","VERIFY","CHECKPOINT","COMPLETE"]
 def now(): return datetime.now(timezone.utc).isoformat()
 def write_state(x):
@@ -239,12 +239,25 @@ def one(job):
         ok=True
         try:
             if phase=="PLAN":
-                prompt="Create a concise bounded implementation plan. Do not execute commands.\nGOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")
-                p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
-                if p.returncode==0:
-                    (BASE/(job+"-plan.json")).write_text(p.stdout); j["api_plan_saved"]=True
-                else:
-                    ok=False; ev(event="api_failure",job=job,returncode=p.returncode)
+                prompt="GOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(m.get("allowed_paths",[]))
+                if m.get("ai_council",True):
+                    cp=subprocess.run([str(COUNCIL)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("council_timeout_seconds",900)))
+                    if cp.returncode in (0,2):
+                        (BASE/(job+"-council.json")).write_text(cp.stdout)
+                        council=json.loads(cp.stdout); verdict=council.get("verdict",{})
+                        j["council_decision"]=verdict.get("decision","REVISE"); j["ai_council_used"]=True
+                        (BASE/(job+"-adjudication.json")).write_text(json.dumps(verdict,indent=2)+"\n")
+                        if j["council_decision"]!="PASS" and m.get("block_on_council",False):
+                            ok=False; ev(event="council_blocked",job=job,findings=verdict.get("unresolved",[]))
+                    else: ok=False; ev(event="council_failure",job=job,returncode=cp.returncode,stderr=cp.stderr[-2000:])
+                if ok:
+                    evidence=(BASE/(job+"-adjudication.json")).read_text(errors="replace") if (BASE/(job+"-adjudication.json")).exists() else "{}"
+                    plan_prompt="Create a concise bounded implementation plan. Use the council verdict as constraints; do not execute commands.\n"+prompt+"\nCOUNCIL_VERDICT:\n"+evidence
+                    p=subprocess.run([str(ADAPTER)],input=plan_prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
+                    if p.returncode==0:
+                        (BASE/(job+"-plan.json")).write_text(p.stdout); j["api_plan_saved"]=True
+                    else:
+                        ok=False; ev(event="api_failure",job=job,returncode=p.returncode,stderr=p.stderr[-2000:])
             elif phase=="IMPLEMENT":
                 if m.get("api_implement",False):
                     ok=api_implement(job,m,j)

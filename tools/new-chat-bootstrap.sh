@@ -9,8 +9,10 @@ BRANCH=$(git branch --show-current)
 python3 - <<'PY'
 import json
 p=json.load(open('docs/PROJECT_AI_POLICY.json'))
-assert p['protocol']=='PROJECT_AI_OS_V4'
-print('PROJECT_AI_OS_V4 READY')
+assert p['protocol']=='PROJECT_AI_OS_V5_MULTI_MODEL'
+assert __import__('pathlib').Path('docs/AI_MODEL_REGISTRY.json').exists()
+assert __import__('pathlib').Path('tools/ai-engineering-council.py').exists()
+print('PROJECT_AI_OS_V5_MULTI_MODEL READY')
 PY
 python3 tools/continuity-finalization-gate.py
 python3 tools/fresh-chat-mastery-gate.py

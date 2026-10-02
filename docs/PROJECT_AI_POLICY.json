@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "protocol": "PROJECT_AI_OS_V4",
+  "protocol": "PROJECT_AI_OS_V5_MULTI_MODEL",
   "mandatory_for": ["fresh_chat", "continuation", "api_job", "manual_patch", "release_change"],
   "authority": ["git_head", "requirements", "tests", "runtime_evidence", "db_invariants", "verification_gates"],
   "parallel_lanes": ["architect", "implementer", "reviewer", "adversary", "test_designer", "verifier"],

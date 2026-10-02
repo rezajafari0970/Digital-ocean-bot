@@ -1,0 +1,16 @@
+{
+  "schema": 2,
+  "verified_by_probe": true,
+  "lanes": {
+    "architect": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
+    "reviewer": {"models": ["gpt-6-sol", "gpt-6-astra", "gpt-5.6-sol"]},
+    "adversary": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
+    "test_designer": {"models": ["gpt-6-sol", "gpt-6-luna", "gpt-5.6-terra"]},
+    "adjudicator": {"models": ["gpt-6-astra", "gpt-6-sol", "gpt-5.6-sol"]},
+    "fast_scout": {"models": ["gpt-6-luna", "gpt-5.6-luna"]}
+  },
+  "parallelism": 4,
+  "minimum_successful_roles": 4,
+  "prompt_cache_ttl": "24h",
+  "rule": "Independent model outputs are advisory; adjudication must expose disagreements; deterministic evidence remains authoritative."
+}

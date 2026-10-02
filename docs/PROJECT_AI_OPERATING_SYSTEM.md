@@ -1,6 +1,6 @@
 # Project AI Operating System
 
-Protocol version: 4
+Protocol version: 5 — Multi-Model Parallel Council
 
 This document is the mandatory engineering protocol for every ChatGPT session, API agent, continuation, and automated development job in this repository.
 
@@ -69,3 +69,10 @@ The shared source of continuation truth is:
 - deterministic evidence and audit artifacts
 
 Chat history is supplemental, never the continuity authority.
+
+## Multi-Model Parallel Council
+All non-trivial PLAN phases default to the repository model registry in docs/AI_MODEL_REGISTRY.json.
+Architect, reviewer, adversary, and independent test-design lanes run concurrently. Their raw outputs are preserved as evidence.
+The adjudicator must reconcile disagreements by evidence; majority vote is explicitly insufficient.
+Unavailable models may fail independently as long as the minimum independent-lane policy is satisfied. Model names and role routing are configuration, not hard-coded engineering truth.
+Implementation remains bounded by allowed_paths and deterministic TEST/VERIFY/CHECKPOINT gates after council adjudication.
