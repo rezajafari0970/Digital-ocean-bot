@@ -61,7 +61,11 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if profile.SSHKeyID != "" {
 		ssh = []string{profile.SSHKeyID}
 	}
-	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, SSHAuthorizedKeys: []string{profile.SSHAuthorizedKey}, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
+	authorized := []string(nil)
+	if profile.SSHAuthorizedKey != "" {
+		authorized = []string{profile.SSHAuthorizedKey}
+	}
+	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {
 		if e.OnCreateError != nil {
 			e.OnCreateError(ctx, err)
