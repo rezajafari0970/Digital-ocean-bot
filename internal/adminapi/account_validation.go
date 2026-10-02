@@ -21,15 +21,6 @@ func validateAccountSettings(x accountWrite, dropletLimit int, provider string) 
 	if !strings.EqualFold(strings.TrimSpace(provider), "vultr") && dropletLimit > 0 && x.DesiredServerCount > dropletLimit {
 		return "desired_servers_exceeds_droplet_limit"
 	}
-	if hasDup(x.Regions) {
-		return "duplicate_regions"
-	}
-	if hasDup(x.Sizes) {
-		return "duplicate_plans"
-	}
-	if hasDup(x.Images) {
-		return "duplicate_images"
-	}
 	if strings.EqualFold(strings.TrimSpace(provider), "digitalocean") {
 		allowedImages := map[string]bool{"ubuntu-22-04-x64": true, "ubuntu-24-04-x64": true, "ubuntu-26-04-x64": true}
 		for _, image := range x.Images {

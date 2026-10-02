@@ -29,3 +29,27 @@ func TestDigitalOceanDesiredStillRespectsExactProviderLimit(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestDuplicateDeploymentPreferencesAreAllowed(t *testing.T) {
+	x := validAccountWriteForCapacity()
+	x.DesiredServerCount = 5
+	x.Regions = []string{"ewr", "ewr", "ewr"}
+	x.Sizes = []string{"vc2-1c-1gb", "vc2-1c-1gb", "vc2-1c-1gb"}
+	x.Images = []string{"2284", "2284", "2284"}
+	if got := validateAccountSettings(x, 10, "vultr"); got != "" {
+		t.Fatalf("Vultr duplicate preferences must be allowed, got %q", got)
+	}
+	x.Images = []string{"ubuntu-24-04-x64", "ubuntu-24-04-x64", "ubuntu-24-04-x64"}
+	if got := validateAccountSettings(x, 10, "digitalocean"); got != "" {
+		t.Fatalf("DigitalOcean duplicate preferences must be allowed, got %q", got)
+	}
+}
+
+func TestDuplicatePreferencesDoNotBypassImageValidation(t *testing.T) {
+	x := validAccountWriteForCapacity()
+	x.DesiredServerCount = 5
+	x.Images = []string{"not-supported", "not-supported"}
+	if got := validateAccountSettings(x, 10, "digitalocean"); got != "unsupported_os_image" {
+		t.Fatalf("got %q", got)
+	}
+}
