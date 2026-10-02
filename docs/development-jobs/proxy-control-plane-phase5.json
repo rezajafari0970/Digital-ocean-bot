@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "goal": "Make proxy generation stale/recovery observable using existing persistent runtime and worker failure state, without adding a new telemetry subsystem.",
-  "context": "Use existing accounts runtime_status/runtime_status_detail and worker_item_failures. When a stale-generation mutation is rejected, persist a specific non-secret runtime status/detail for the account. When a fresh runtime later passes the mutation-generation guard, clear only that stale-generation status back to READY. Keep secrets, proxy credentials, and raw URLs out of status text. Preserve all existing provider error states and do not add schema.",
+  "context": "Use accounts runtime_status/runtime_status_detail for observability. The worker is already the single writer for worker_item_failures when the guard error propagates, so this phase MUST NOT insert/update/delete worker_item_failures from app/container code. When a stale-generation mutation is rejected, persist a specific non-secret account runtime status/detail. When a fresh runtime later passes the mutation-generation guard, clear only that stale-generation status back to READY. Keep secrets, proxy credentials, provider payloads, and raw URLs out of status text. Do not overwrite provider error states or unrelated runtime statuses. No schema change.",
   "api_implement": true,
   "structured_edits": true,
   "api_timeout_seconds": 170,
