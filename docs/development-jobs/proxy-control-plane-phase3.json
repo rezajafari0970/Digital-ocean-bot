@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "goal": "Fail closed before provider mutations when an AccountRuntime was built from an obsolete proxy-control generation. Add one central runtime-generation guard and apply it to server mutation egress checks and direct SSH-key mutations.",
-  "context": "Phase 2 already prevents stale passive observations from mutating proxy health. Phase 3 must prevent a long-lived runtime/driver from performing provider mutations after proxy generation changes. Do not add per-HTTP-request DB lookups. Direct-mode runtimes with generation 0 remain unaffected. Proxy-required runtime mismatch or unavailable generation state must block mutation. Cover workflow/lifecycle server mutations and direct SSH-key create/delete paths with focused tests. Do not redesign drivers, proxy rotation, circuit policy, schema, or Vultr semantics.",
+  "context": "Phase 2 already prevents stale passive observations from mutating proxy health. The authoritative current generation is persisted in proxy_runtime_state; there is no authoritative in-memory current-generation registry. Phase 3 may perform one proxycontrol generation lookup at the provider mutation guard boundary, but MUST NOT add a lookup per HTTP request. Direct-mode runtimes with generation 0 remain unaffected. Proxy-required runtime mismatch, missing row, or store error must block mutation. Cover workflow/lifecycle server mutations and direct SSH-key create/delete paths with focused tests. Do not invent a new generation registry, redesign drivers, proxy rotation, circuit policy, schema, or Vultr semantics.",
   "api_implement": true,
   "structured_files": false,
   "structured_edits": true,
