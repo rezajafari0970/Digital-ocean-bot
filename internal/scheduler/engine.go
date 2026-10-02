@@ -84,7 +84,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		var concurrent, desired, managed, spacingMin, spacingMax, backfillPending int
+		var concurrent, desired, managed, spacingMin, spacingMax, backfillPending, replacementPairs int
 		var nextBuild sql.NullTime
 		err := e.DB.QueryRowContext(ctx, `SELECT
 			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
@@ -92,8 +92,9 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
 			(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
 			(SELECT build_spacing_max_minutes FROM accounts WHERE id=$1),
+			(SELECT count(*) FROM droplets r JOIN deployments rd ON rd.id=r.replacement_deployment_id WHERE r.account_id=$1 AND r.state<>'DELETED' AND rd.state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')),
 			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL),
-			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &backfillPending, &nextBuild)
+			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &replacementPairs, &backfillPending, &nextBuild)
 		if err != nil {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
@@ -107,10 +108,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		// Active deployments that already own a droplet count in managed. Only pre-create deployments are pending capacity.
 		var preCreate int
 		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL`, x.AccountID, x.ProfileID).Scan(&preCreate)
-		effectiveOccupancy := managed + preCreate
-		if cap.InUse > effectiveOccupancy {
-			effectiveOccupancy = cap.InUse
-		}
+		effectiveOccupancy := capacity.NetOccupancy(managed, preCreate, cap.InUse, replacementPairs)
 		needed := desired - effectiveOccupancy
 		if needed <= 0 {
 			if backfillPending > 0 {
