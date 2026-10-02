@@ -120,6 +120,12 @@ def scoped_checkpoint(job,m,j):
     p=subprocess.run(["git","rev-parse","HEAD"],cwd=ROOT,text=True,capture_output=True)
     j["last_good_commit"]=p.stdout.strip()
     return True
+def mark_retryable(s,j,job,phase,error):
+    j["status"]="RETRYABLE"
+    j["last_error"]=str(error)[:1000]
+    j["retry_after"]=time.time()+min(300,5*(2**min(j["attempt"],6)))
+    s["updated_at"]=now(); write_state(s)
+    ev(event="phase_retryable",job=job,phase=phase,error=j["last_error"],retry_after=j["retry_after"])
 def one(job):
     BASE.mkdir(parents=True,exist_ok=True)
     with LOCK.open("a+") as lk:
@@ -130,28 +136,36 @@ def one(job):
         if "baseline_status" not in j: j["baseline_status"]=git_status()
         if j["phase"]=="COMPLETE": return 0
         if j.get("retry_after",0)>time.time(): return 75
-        phase=j["phase"]; j["status"]="RUNNING"; j["attempt"]+=1; write_state(s); ev(event="phase_start",job=job,phase=phase)
+        phase=j["phase"]; j["status"]="RUNNING"; j["attempt"]+=1; j["started_at"]=now(); s["updated_at"]=now(); write_state(s); ev(event="phase_start",job=job,phase=phase)
         ok=True
-        if phase=="PLAN":
-            prompt="Create a concise bounded implementation plan. Do not execute commands.\nGOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")
-            p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=200)
-            if p.returncode==0:
-                (BASE/(job+"-plan.json")).write_text(p.stdout); j["api_plan_saved"]=True
-            else: ok=False; ev(event="api_failure",job=job,returncode=p.returncode)
-        elif phase=="IMPLEMENT":
-            if m.get("api_implement",False):
-                ok=api_implement(job,m,j)
-            if ok:
-                for c in m.get("commands",{}).get("implement",[]):
+        try:
+            if phase=="PLAN":
+                prompt="Create a concise bounded implementation plan. Do not execute commands.\nGOAL:\n"+m["goal"]+"\nCONTEXT:\n"+m.get("context","")
+                p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
+                if p.returncode==0:
+                    (BASE/(job+"-plan.json")).write_text(p.stdout); j["api_plan_saved"]=True
+                else:
+                    ok=False; ev(event="api_failure",job=job,returncode=p.returncode)
+            elif phase=="IMPLEMENT":
+                if m.get("api_implement",False):
+                    ok=api_implement(job,m,j)
+                if ok:
+                    for c in m.get("commands",{}).get("implement",[]):
+                        if cmd(c,int(m.get("timeout_seconds",240)))!=0: ok=False; break
+            elif phase in ("TEST","VERIFY"):
+                for c in m.get("commands",{}).get(phase.lower(),[]):
                     if cmd(c,int(m.get("timeout_seconds",240)))!=0: ok=False; break
-        elif phase in ("TEST","VERIFY"):
-            for c in m.get("commands",{}).get(phase.lower(),[]):
-                if cmd(c,int(m.get("timeout_seconds",240)))!=0: ok=False; break
-        elif phase=="CHECKPOINT":
-            ok=scoped_checkpoint(job,m,j)
+            elif phase=="CHECKPOINT":
+                ok=scoped_checkpoint(job,m,j)
+        except subprocess.TimeoutExpired as e:
+            mark_retryable(s,j,job,phase,"timeout: "+str(e)); return 75
+        except Exception as e:
+            mark_retryable(s,j,job,phase,"exception: "+repr(e)); return 75
         if not ok:
-            j["status"]="RETRYABLE"; j["retry_after"]=time.time()+min(300,5*(2**min(j["attempt"],6))); write_state(s); return 75
-        j["retry_after"]=0; j["phase"]=PHASES[PHASES.index(phase)+1]; j["status"]="COMPLETE" if j["phase"]=="COMPLETE" else "READY"; s["updated_at"]=now(); write_state(s); ev(event="phase_done",job=job,phase=phase,next=j["phase"]); return 0
+            mark_retryable(s,j,job,phase,"phase returned failure"); return 75
+        j["retry_after"]=0; j.pop("last_error",None); j["phase"]=PHASES[PHASES.index(phase)+1]
+        j["status"]="COMPLETE" if j["phase"]=="COMPLETE" else "READY"; s["updated_at"]=now()
+        write_state(s); ev(event="phase_done",job=job,phase=phase,next=j["phase"]); return 0
 def main():
     job=os.environ.get("DEV_JOB","proxy-control-plane")
     while True:
