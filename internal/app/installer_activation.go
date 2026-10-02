@@ -175,7 +175,7 @@ func (c Container) remediateInstallerReboot(ctx context.Context, d workflow.Depl
 	if n != 1 {
 		return ErrInstallerRebootScheduled
 	}
-	if _, err = ssh.Run(ctx, target, key, "nohup sh -c 'sleep 2; systemctl reboot' >/dev/null 2>&1 & echo scheduled"); err != nil {
+	if _, err = ssh.Run(ctx, target, key, "systemctl reboot --no-block"); err != nil {
 		_, _ = c.DB.ExecContext(ctx, `UPDATE installer_reboot_remediations SET state='FAILED',last_error=$3 WHERE deployment_id=$1 AND generation=$2`, d.ID, generation, err.Error())
 		return err
 	}
