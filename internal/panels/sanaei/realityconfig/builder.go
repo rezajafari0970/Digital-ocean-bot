@@ -153,6 +153,13 @@ func Build(
 			"security": "reality",
 
 			"realitySettings": realitySettings,
+
+			"sockopt": map[string]any{
+				"tcpFastOpen":          true,
+				"tcpNoDelay":           true,
+				"tcpKeepAliveIdle":     25,
+				"tcpKeepAliveInterval": 20,
+			},
 		}
 
 	sniffing :=
