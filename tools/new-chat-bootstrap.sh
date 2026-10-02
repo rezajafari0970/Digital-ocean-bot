@@ -4,6 +4,14 @@ ROOT=/root/projects/Digital-ocean-bot-canonical-e2e
 cd "$ROOT"
 BRANCH=$(git branch --show-current)
 [ "$BRANCH" = checkpoint/final-e2e-20260929 ] || { echo "BOOTSTRAP FAIL wrong branch: $BRANCH"; exit 1; }
+[ -f docs/PROJECT_AI_OPERATING_SYSTEM.md ] || { echo "BOOTSTRAP FAIL missing PROJECT_AI_OPERATING_SYSTEM.md"; exit 1; }
+[ -f docs/PROJECT_AI_POLICY.json ] || { echo "BOOTSTRAP FAIL missing PROJECT_AI_POLICY.json"; exit 1; }
+python3 - <<'PY'
+import json
+p=json.load(open('docs/PROJECT_AI_POLICY.json'))
+assert p['protocol']=='PROJECT_AI_OS_V4'
+print('PROJECT_AI_OS_V4 READY')
+PY
 python3 tools/continuity-finalization-gate.py
 python3 tools/fresh-chat-mastery-gate.py
 python3 - <<'PY'

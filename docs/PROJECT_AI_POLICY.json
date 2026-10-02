@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "protocol": "PROJECT_AI_OS_V4",
+  "mandatory_for": ["fresh_chat", "continuation", "api_job", "manual_patch", "release_change"],
+  "authority": ["git_head", "requirements", "tests", "runtime_evidence", "db_invariants", "verification_gates"],
+  "parallel_lanes": ["architect", "implementer", "reviewer", "adversary", "test_designer", "verifier"],
+  "completion_requires": ["zero_unresolved_disagreements", "focused_tests", "full_regression", "clean_product_source", "checkpoint"],
+  "high_risk_requires": ["independent_review", "race_or_fault_testing", "rollback_point"],
+  "provider_shared_change_requires": ["digitalocean_regression", "vultr_regression", "provider_isolation_check"],
+  "speed": {
+    "batch_compatible_phases": true,
+    "parallel_independent_review": true,
+    "reuse_commit_pinned_knowledge": true,
+    "owner_scoped_context": true,
+    "skip_unchanged_expensive_gates": true
+  }
+}

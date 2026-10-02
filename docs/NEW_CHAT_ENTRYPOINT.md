@@ -1,5 +1,7 @@
 # New Chat Entrypoint
 
+Mandatory first read: `docs/PROJECT_AI_OPERATING_SYSTEM.md` and `docs/PROJECT_AI_POLICY.json`. PROJECT_AI_OS_V4 governs every fresh chat, continuation, API job, manual patch, and release change in this project.
+
 For a fresh ChatGPT session continuing this project, do not reconstruct from chat history and do not start from GitHub main.
 
 1. Canonical repository: `/root/projects/Digital-ocean-bot-canonical-e2e` on `serverprojects.ptr.network`.
