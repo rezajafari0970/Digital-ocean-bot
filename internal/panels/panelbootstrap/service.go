@@ -58,7 +58,23 @@ WHERE pi.id=$1 AND pi.enabled=true
 	exec := sanaei.SSHSessionExecutor{SSH: s.SSH, Target: target, PrivateKeySecretRef: keyref, PanelPasswordSecretRef: pref, AccountID: acc, Username: puser, Port: pport, BasePath: path, DialHost: "127.0.0.1", Secrets: s.Secrets}
 	disc, err := sanaei.DiscoverWithExecutor(ctx, exec, "")
 	if err != nil {
-		return err
+		claimed, claimErr := s.claimRuntimeRepair(ctx, p.ID)
+		if claimErr != nil {
+			return claimErr
+		}
+		if !claimed {
+			return err
+		}
+		repair := sanaei.PanelConfigurer{DB: s.DB, Secrets: s.Secrets, Runner: s.SSH, Uploader: s.SSH}
+		repairErr := repair.RepairCompleted(ctx, acc, did, target)
+		s.recordRuntimeRepair(ctx, p.ID, repairErr)
+		if repairErr != nil {
+			return repairErr
+		}
+		disc, err = sanaei.DiscoverWithExecutor(ctx, exec, "")
+		if err != nil {
+			return err
+		}
 	}
 	if err = (panels.SQLStore{DB: s.DB}).SaveDiscovery(ctx, p.ID, disc); err != nil {
 		return err
@@ -163,4 +179,24 @@ WHERE pi.id=$1 AND pi.enabled=true
 	}
 	_, err = (credentials.Registry{DB: s.DB, Secrets: s.Secrets, Keys: credentials.XrayGenerator{Run: run, Binary: xrayPath}}).Ensure(ctx, acc, p.ID, s.ManagedKey)
 	return err
+}
+
+func (s Service) claimRuntimeRepair(ctx context.Context, panelID string) (bool, error) {
+	var claimed string
+	err := s.DB.QueryRowContext(ctx, `INSERT INTO panel_runtime_repairs(panel_id) VALUES($1)
+ON CONFLICT(panel_id) DO UPDATE SET last_attempt_at=now(),attempts=panel_runtime_repairs.attempts+1
+WHERE panel_runtime_repairs.last_attempt_at < now()-interval '5 minutes'
+RETURNING panel_id::text`, panelID).Scan(&claimed)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
+func (s Service) recordRuntimeRepair(ctx context.Context, panelID string, repairErr error) {
+	if repairErr == nil {
+		_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_success_at=now(),last_error='' WHERE panel_id=$1`, panelID)
+		return
+	}
+	_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_error=$2 WHERE panel_id=$1`, panelID, repairErr.Error())
 }
