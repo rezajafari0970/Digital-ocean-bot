@@ -127,6 +127,10 @@ func (s *Server) updateResidentialProxy(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		_, _ = s.DB.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password' WHERE id=$1`, id)
+		if e = s.invalidateProxyCredentialEpoch(r.Context(), id); e != nil {
+			writeJSON(w, 500, map[string]string{"error": "proxy_epoch_invalidation_failed"})
+			return
+		}
 	}
 	writeJSON(w, 200, map[string]any{"id": id, "type": string(typ)})
 }
