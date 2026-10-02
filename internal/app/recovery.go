@@ -282,13 +282,18 @@ func terminalDeploymentStateForCreateRecovery(state string) bool {
 
 func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d workflow.Deployment, err error) (bool, error) {
 	class := providers.Class(err)
-	switch class {
-	case providers.ErrorAuthentication, providers.ErrorPermissionDenied, providers.ErrorInvalidRequest, providers.ErrorImageUnavailable:
-	default:
+	permanent := class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorInvalidRequest || class == providers.ErrorImageUnavailable
+	if !permanent && d.CurrentStep == "create" && d.ProviderID == "" {
+		var providerState string
+		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, d.AccountID).Scan(&providerState); qerr == nil {
+			permanent = providerState == ProviderStateTokenInvalid || providerState == ProviderStatePermissionDenied || providerState == ProviderStateLocked
+		}
+	}
+	if !permanent {
 		return false, nil
 	}
 	msg := err.Error()
-	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
+	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
 	if qerr != nil {
 		return false, qerr
 	}
