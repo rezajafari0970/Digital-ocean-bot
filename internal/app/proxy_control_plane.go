@@ -10,48 +10,45 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
-func (c Container) acquireProxyKeeperLock(ctx context.Context, accountID string) (*sql.Conn, bool, error) {
+func (c Container) acquireProxyKeeperLock(ctx context.Context, accountID string) (*sql.Tx, bool, error) {
 	if c.DB == nil {
 		return nil, false, ErrNetworkNotReady
 	}
-	conn, err := c.DB.Conn(ctx)
+	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, false, err
 	}
 	var locked bool
-	if err := conn.QueryRowContext(ctx, `SELECT pg_try_advisory_lock(hashtextextended($1,0))`, "proxy-keeper:"+accountID).Scan(&locked); err != nil {
-		conn.Close()
+	if err := tx.QueryRowContext(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, "proxy-keeper:"+accountID).Scan(&locked); err != nil {
+		_ = tx.Rollback()
 		return nil, false, err
 	}
 	if !locked {
-		conn.Close()
+		_ = tx.Rollback()
 		return nil, false, nil
 	}
-	return conn, true, nil
+	return tx, true, nil
 }
 
-func releaseProxyKeeperLock(conn *sql.Conn, accountID string) {
-	if conn == nil {
-		return
+func releaseProxyKeeperLock(tx *sql.Tx) {
+	if tx != nil {
+		_ = tx.Rollback()
 	}
-	defer conn.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	_, _ = conn.ExecContext(ctx, `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "proxy-keeper:"+accountID)
 }
 
 // MaintainProxyControlPlane is the provider-agnostic proxy keeper.
-// A PostgreSQL session advisory lock serializes the full load/recovery/save
-// sequence per account, including across accidental duplicate worker processes.
+// A PostgreSQL transaction-scoped advisory lock serializes the full
+// load/recovery/save sequence per account, including across accidental
+// duplicate worker processes. Transaction scope prevents orphaned locks.
 func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID string) error {
-	conn, locked, err := c.acquireProxyKeeperLock(ctx, accountID)
+	lockTx, locked, err := c.acquireProxyKeeperLock(ctx, accountID)
 	if err != nil {
 		return err
 	}
 	if !locked {
 		return nil
 	}
-	defer releaseProxyKeeperLock(conn, accountID)
+	defer releaseProxyKeeperLock(lockTx)
 
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
 		return err

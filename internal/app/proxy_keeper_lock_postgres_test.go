@@ -28,23 +28,23 @@ func TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E(t *testing.T) {
 	if err != nil || !ok {
 		t.Fatalf("first lock ok=%v err=%v", ok, err)
 	}
-	defer releaseProxyKeeperLock(conn1, key)
+	defer releaseProxyKeeperLock(conn1)
 
 	conn2, ok, err := c.acquireProxyKeeperLock(ctx, key)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if ok {
-		releaseProxyKeeperLock(conn2, key)
+		releaseProxyKeeperLock(conn2)
 		t.Fatal("second connection acquired an already-held keeper lock")
 	}
 
-	releaseProxyKeeperLock(conn1, key)
+	releaseProxyKeeperLock(conn1)
 	conn1 = nil
 
 	conn3, ok, err := c.acquireProxyKeeperLock(ctx, key)
 	if err != nil || !ok {
 		t.Fatalf("reacquire ok=%v err=%v", ok, err)
 	}
-	releaseProxyKeeperLock(conn3, key)
+	releaseProxyKeeperLock(conn3)
 }
