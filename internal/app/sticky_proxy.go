@@ -381,6 +381,23 @@ WHERE account_id=$1
 			candidateErr = ErrIsolationWait
 			continue
 		}
+		// Do not commit a residential identity until the same sticky binding
+		// proves stable. A provider that remaps the session immediately would
+		// otherwise make READY oscillate back to recovery on the next cycle.
+		stable := true
+		for verify := 0; verify < 2; verify++ {
+			verifyCtx, verifyCancel := context.WithTimeout(ctx, 4*time.Second)
+			verifyIP, verr := fastGatewayExitIP(verifyCtx, g2)
+			verifyCancel()
+			if verr != nil || verifyIP != candidate.IP {
+				stable = false
+				candidateErr = ErrIsolationWait
+				break
+			}
+		}
+		if !stable {
+			continue
+		}
 		geo = candidate
 		found = true
 		break
