@@ -48,6 +48,11 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
+		if err := e.ensureAutomationDatabaseTemplate(ctx, x.ProfileID); err != nil {
+			log.Printf("scheduler skip account=%s reason=database_template_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
 		var automationReady bool
 		_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady)
 		if !automationReady {
@@ -164,5 +169,28 @@ func (e Engine) ensureAutomationInstallerRef(ctx context.Context, profileID stri
 	_, err := e.DB.ExecContext(ctx, `UPDATE deployment_profiles
 		SET config=jsonb_set(config,'{installer_ref}',jsonb_build_object('name',$2::text,'version',$3::int),true),updated_at=now()
 		WHERE id=$1 AND enabled=true`, profileID, name, version)
+	return err
+}
+
+func (e Engine) ensureAutomationDatabaseTemplate(ctx context.Context, profileID string) error {
+	var ready bool
+	if err := e.DB.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM deployment_profiles p
+		JOIN xui_database_templates t ON t.id::text=p.config->>'database_template_id'
+		WHERE p.id=$1 AND p.enabled=true AND t.active=true
+	)`, profileID).Scan(&ready); err != nil {
+		return err
+	}
+	if ready {
+		return nil
+	}
+	var id string
+	if err := e.DB.QueryRowContext(ctx, `SELECT id::text FROM xui_database_templates
+		WHERE active=true ORDER BY version DESC,name ASC LIMIT 1`).Scan(&id); err != nil {
+		return err
+	}
+	_, err := e.DB.ExecContext(ctx, `UPDATE deployment_profiles
+		SET config=jsonb_set(config,'{database_template_id}',to_jsonb($2::text),true),updated_at=now()
+		WHERE id=$1 AND enabled=true`, profileID, id)
 	return err
 }
