@@ -26,6 +26,7 @@ func (c Container) ReconcileLocalState(ctx context.Context) {
 		FROM deployments d WHERE d.account_id=pr.account_id AND d.droplet_id=pr.droplet_id
 		AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK') AND pr.state NOT IN ('FAILED','COMPLETED') RETURNING pr.id
 	) UPDATE provision_step_attempts SET next_retry_at=NULL FROM failed WHERE run_id=failed.id`)
+	_, _ = c.DB.ExecContext(ctx, `UPDATE provision_step_attempts psa SET next_retry_at=NULL FROM provision_runs pr WHERE pr.id=psa.run_id AND pr.state IN ('COMPLETED','FAILED') AND psa.next_retry_at IS NOT NULL`)
 	_, _ = c.DB.ExecContext(ctx, `
 UPDATE droplets r
 SET replacement_deployment_id=NULL,backfill_required=true,updated_at=now()
