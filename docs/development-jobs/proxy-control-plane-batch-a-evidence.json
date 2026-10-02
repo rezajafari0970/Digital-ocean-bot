@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "goal": "Proxy Control Plane Batch A: add evidence-first tests for current transaction, concurrency, generation-invalidation and observability gaps without changing production behavior or schema.",
+  "context": "Critical audit. Preserve the existing dirty concurrent account-isolation test if valid and reconcile it into the batch. Add optional PostgreSQL tests guarded by DOB_E2E_DSN for SQLStore Acquire half-open contention/lease behavior, atomic generation bump, and stale-generation observation rejection. Add deterministic tests around pool rotation showing candidate eligibility must be checked under the account lock; do not fix production behavior in this batch. Add characterization tests proving current proxy switch/profile/proxy-definition paths do or do not invalidate runtime generation. Add admin characterization for separate provider circuit vs proxy circuit visibility. This batch is evidence only: no migrations and no production behavior edits. If a known gap is intentionally demonstrated, encode it as an explicit skipped/expected-gap characterization rather than leaving the suite red. No external provider API.",
+  "ai_council": true,
+  "block_on_council": false,
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 180,
+  "council_timeout_seconds": 900,
+  "source_context_bytes": 110000,
+  "commands": {
+    "implement": ["gofmt -w internal/proxycontrol/postgres_e2e_test.go internal/app/provider_network_runtime_test.go internal/app/proxy_pool_test.go internal/adminapi/runtime_api_test.go"],
+    "test": ["go test -race ./internal/proxycontrol ./internal/network ./internal/app ./internal/adminapi -count=1"],
+    "verify": ["go test ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole ./internal/proxycontrol ./internal/network ./internal/app ./internal/adminapi -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 360,
+  "allowed_paths": [
+    "internal/proxycontrol/postgres_e2e_test.go",
+    "internal/app/provider_network_runtime_test.go",
+    "internal/app/proxy_pool_test.go",
+    "internal/adminapi/runtime_api_test.go",
+    "docs/PROXY_CONTROL_PLANE_ZERO_TO_100_AUDIT.md",
+    "docs/development-jobs/proxy-control-plane-batch-a-evidence.json"
+  ],
+  "commit_message": "test(proxy): characterize control-plane concurrency gaps",
+  "push": true
+}
