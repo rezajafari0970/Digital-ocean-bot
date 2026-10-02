@@ -40,7 +40,7 @@ func (suffixSessionAdapter) Username(r ProxySessionRequest) string {
 		p = append(p, "cr."+strings.ToLower(r.CountryCode))
 	}
 	if r.SessionID != "" {
-		p = append(p, "sid."+r.SessionID)
+		p = append(p, "sid."+r.SessionID, "sessttl.120")
 	}
 	if len(p) == 0 {
 		return base

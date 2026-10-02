@@ -84,6 +84,15 @@ func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountC
 	// STICKY_CAP_FROM_ACCOUNT_CONFIG_V1: use the same adapter value loaded by Repository.Account.
 	// This removes the second adapter lookup and makes generic fail closed.
 	stickyCap := proxyAdapterByName(cfg.ProxyAdapter).Capabilities().StickySession
+	if stickyCap {
+		stickyPort, perr := c.ensureAccountStickyPort(ctx, accountID)
+		if perr != nil {
+			return cfg, "", "", "", false, nil, perr
+		}
+		if cfg.Proxy != nil {
+			cfg.Proxy.Port = stickyPort
+		}
+	}
 	err = c.DB.QueryRowContext(ctx, `SELECT COALESCE(sticky_session,''),COALESCE(preferred_country_code,''),COALESCE(preferred_country,country,''),fallback_active,rotation_started_at FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&session, &cc, &country, &fallback, &started)
 	if !stickyCap {
 		_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,sticky_session,fallback_active,rotation_started_at) VALUES($1,'UTC','en-US',NULL,false,NULL) ON CONFLICT(account_id) DO UPDATE SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL`, accountID)

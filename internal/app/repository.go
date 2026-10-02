@@ -58,8 +58,14 @@ func (r Repository) Account(ctx context.Context, id string) (AccountConfig, erro
 		if a.Network.Mode == network.RouteProxyRequired {
 			var session, cc string
 			var fallback bool
-			if qerr := r.DB.QueryRowContext(ctx, `SELECT COALESCE(sticky_session,''),COALESCE(preferred_country_code,''),fallback_active FROM account_network_identities WHERE account_id=$1`, id).Scan(&session, &cc, &fallback); qerr == nil && session != "" && proxyAdapterByName(a.ProxyAdapter).Capabilities().StickySession {
-				a.ProxyUsername = proxySessionUsername(a.ProxyAdapter, proxyUser.String, cc, session, !fallback && cc != "")
+			var stickyPort int
+			if qerr := r.DB.QueryRowContext(ctx, `SELECT COALESCE(sticky_session,''),COALESCE(preferred_country_code,''),fallback_active,COALESCE(sticky_port,0) FROM account_network_identities WHERE account_id=$1`, id).Scan(&session, &cc, &fallback, &stickyPort); qerr == nil {
+				if stickyPort >= 10000 && stickyPort <= 20000 && a.Proxy != nil && proxyAdapterByName(a.ProxyAdapter).Capabilities().StickySession {
+					a.Proxy.Port = stickyPort
+				}
+				if session != "" && proxyAdapterByName(a.ProxyAdapter).Capabilities().StickySession {
+					a.ProxyUsername = proxySessionUsername(a.ProxyAdapter, proxyUser.String, cc, session, !fallback && cc != "")
+				}
 			}
 		}
 	}

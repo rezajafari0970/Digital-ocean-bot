@@ -17,7 +17,7 @@ func TestSuffixAdapterPreservesPolicy(t *testing.T) {
 		t.Fatal("no sticky")
 	}
 	got := proxySessionUsername("suffix-session", "user__sid.old", "de", "abc", true)
-	if got != "user__cr.de;sid.abc" {
+	if got != "user__cr.de;sid.abc;sessttl.120" {
 		t.Fatal(got)
 	}
 }

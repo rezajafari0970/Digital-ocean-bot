@@ -10,13 +10,49 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
-// MaintainProxyControlPlane is the provider-agnostic proxy keeper.
-// It records health/circuit/generation for the exact account+proxy+provider
-// tuple while delegating sticky/fallback mechanics to MaintainStickyIdentity.
-func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID string) error {
+func (c Container) acquireProxyKeeperLock(ctx context.Context, accountID string) (*sql.Conn, bool, error) {
 	if c.DB == nil {
-		return ErrNetworkNotReady
+		return nil, false, ErrNetworkNotReady
 	}
+	conn, err := c.DB.Conn(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	var locked bool
+	if err := conn.QueryRowContext(ctx, `SELECT pg_try_advisory_lock(hashtextextended($1,0))`, "proxy-keeper:"+accountID).Scan(&locked); err != nil {
+		conn.Close()
+		return nil, false, err
+	}
+	if !locked {
+		conn.Close()
+		return nil, false, nil
+	}
+	return conn, true, nil
+}
+
+func releaseProxyKeeperLock(conn *sql.Conn, accountID string) {
+	if conn == nil {
+		return
+	}
+	defer conn.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, _ = conn.ExecContext(ctx, `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "proxy-keeper:"+accountID)
+}
+
+// MaintainProxyControlPlane is the provider-agnostic proxy keeper.
+// A PostgreSQL session advisory lock serializes the full load/recovery/save
+// sequence per account, including across accidental duplicate worker processes.
+func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID string) error {
+	conn, locked, err := c.acquireProxyKeeperLock(ctx, accountID)
+	if err != nil {
+		return err
+	}
+	if !locked {
+		return nil
+	}
+	defer releaseProxyKeeperLock(conn, accountID)
+
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
 		return err
 	}

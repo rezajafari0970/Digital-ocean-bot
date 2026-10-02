@@ -139,9 +139,11 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					&healthy,
 				)
 			})
+			stickySession, exitIP := proxyIdentitySignature(ctx, c.DB, cfg.ID)
 			gateway.Client.Transport = accountNetworkGuardTransport{
 				Base: observed, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
-				ProxyID: cfg.Proxy.ID, TransportEpoch: transportEpoch,
+				ProxyID: cfg.Proxy.ID, Generation: generation, TransportEpoch: transportEpoch,
+				StickySession: stickySession, ExitIP: exitIP,
 			}
 		}
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, TransportEpoch: transportEpoch, closeIdle: gateway.CloseIdleConnections}, nil

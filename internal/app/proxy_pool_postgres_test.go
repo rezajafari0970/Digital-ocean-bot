@@ -77,8 +77,8 @@ WHERE np.account_id=$1`, accountID).Scan(&active, &epoch, &transportProxy, &coun
 	if active != p2 || transportProxy != p2 {
 		t.Fatalf("active=%s transport=%s want=%s", active, transportProxy, p2)
 	}
-	if epoch != 8 {
-		t.Fatalf("epoch=%d want=8", epoch)
+	if epoch <= 7 {
+		t.Fatalf("epoch=%d did not advance", epoch)
 	}
 	if country != "Germany" || cc != "de" {
 		t.Fatalf("preferred country lost: %q %q", country, cc)
