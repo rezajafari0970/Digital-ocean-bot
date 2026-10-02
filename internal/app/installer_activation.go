@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
 )
@@ -74,6 +76,14 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	if err = c.DB.QueryRowContext(ctx, `SELECT id::text FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, d.AccountID, d.DropletID).Scan(&runID); err != nil {
 		return err
 	}
+	var existingState string
+	err = c.DB.QueryRowContext(ctx, `SELECT state FROM installer_runs WHERE deployment_id=$1 AND generation=$2`, d.ID, generation).Scan(&existingState)
+	if err == nil && existingState == "INSTALL_COMPLETE" {
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallComplete, "installer_complete", "")
+	}
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	target, key, err := c.installerTarget(ctx, d, snap)
 	if err != nil {
 		return err
@@ -95,6 +105,14 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	orch := provisioning.InstallerOrchestrator{DB: c.DB, Registry: registry}
 	resolved, ir, err := orch.Prepare(ctx, d.ID, runID, generation, ref, ready)
 	if err != nil {
+		if errors.Is(err, provisioning.ErrInstallerIncompatible) && ready.RebootRequired {
+			remErr := c.remediateInstallerReboot(ctx, d, generation, target, key, ssh)
+			if errors.Is(remErr, ErrInstallerRebootExhausted) {
+				_ = c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", remErr.Error())
+				return nil
+			}
+			return remErr
+		}
 		return err
 	}
 	switch ir.State {
@@ -132,4 +150,34 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 		return err
 	}
 	return c.setInstallerDeploymentState(ctx, d, workflow.InstallComplete, "installer_complete", "")
+}
+
+var ErrInstallerRebootScheduled = errors.New("installer reboot remediation scheduled")
+var ErrInstallerRebootExhausted = errors.New("installer reboot remediation exhausted")
+
+func (c Container) remediateInstallerReboot(ctx context.Context, d workflow.Deployment, generation int, target provisioning.Target, key []byte, ssh provisioning.SSHClient) error {
+	var scheduledAt time.Time
+	err := c.DB.QueryRowContext(ctx, `SELECT scheduled_at FROM installer_reboot_remediations WHERE deployment_id=$1 AND generation=$2 AND state='SCHEDULED'`, d.ID, generation).Scan(&scheduledAt)
+	if err == nil {
+		if time.Since(scheduledAt) < 3*time.Minute {
+			return ErrInstallerRebootScheduled
+		}
+		return ErrInstallerRebootExhausted
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	res, err := c.DB.ExecContext(ctx, `INSERT INTO installer_reboot_remediations(deployment_id,generation,state) VALUES($1,$2,'SCHEDULED') ON CONFLICT(deployment_id,generation) DO NOTHING`, d.ID, generation)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n != 1 {
+		return ErrInstallerRebootScheduled
+	}
+	if _, err = ssh.Run(ctx, target, key, "nohup sh -c 'sleep 2; systemctl reboot' >/dev/null 2>&1 & echo scheduled"); err != nil {
+		_, _ = c.DB.ExecContext(ctx, `UPDATE installer_reboot_remediations SET state='FAILED',last_error=$3 WHERE deployment_id=$1 AND generation=$2`, d.ID, generation, err.Error())
+		return err
+	}
+	return ErrInstallerRebootScheduled
 }
