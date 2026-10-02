@@ -324,15 +324,19 @@ func maxInt(a, b int) int {
 }
 
 func (s Service) rolloutAllowed(ctx context.Context, panelID string) (bool, error) {
-	var count int
-	if err := s.DB.QueryRowContext(ctx, `SELECT count(*) FROM reality_rollout_panels WHERE enabled=true`).Scan(&count); err != nil {
+	var mode string
+	err := s.DB.QueryRowContext(ctx, `SELECT mode FROM reality_rollout_control WHERE policy_key='reality'`).Scan(&mode)
+	if errors.Is(err, sql.ErrNoRows) {
+		return true, nil
+	}
+	if err != nil {
 		return false, err
 	}
-	if count == 0 {
+	if mode == "stable" {
 		return true, nil
 	}
 	var allowed bool
-	if err := s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_rollout_panels WHERE panel_id=$1 AND enabled=true)`, panelID).Scan(&allowed); err != nil {
+	if err = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_rollout_panels WHERE panel_id=$1 AND enabled=true)`, panelID).Scan(&allowed); err != nil {
 		return false, err
 	}
 	return allowed, nil

@@ -39,11 +39,13 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	if e != nil {
 		return e
 	}
-	var rolloutCount int
-	if e = s.DB.QueryRowContext(ctx, `SELECT count(*) FROM reality_rollout_panels WHERE enabled=true`).Scan(&rolloutCount); e != nil {
+	var rolloutMode string
+	if e = s.DB.QueryRowContext(ctx, `SELECT mode FROM reality_rollout_control WHERE policy_key='reality'`).Scan(&rolloutMode); errors.Is(e, sql.ErrNoRows) {
+		rolloutMode = "stable"
+	} else if e != nil {
 		return e
 	}
-	if rolloutCount > 0 {
+	if rolloutMode == "canary" {
 		var allowed bool
 		if e = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_rollout_panels WHERE panel_id=$1 AND enabled=true)`, p.ID).Scan(&allowed); e != nil {
 			return e
