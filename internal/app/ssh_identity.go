@@ -14,7 +14,7 @@ import (
 )
 
 func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID string, d workflow.Deployment, snap *workflow.ProfileSnapshot) error {
-	if snap.SSHKeySecretRef != "" && snap.SSHProviderKeyID != "" {
+	if snap.SSHKeySecretRef != "" && (snap.SSHProviderKeyID != "" || snap.SSHAuthorizedKey != "") {
 		return nil
 	}
 	_, priv, err := ed25519.GenerateKey(rand.Reader)
@@ -42,19 +42,31 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	if err = runtime.CheckMutationGeneration(ctx); err != nil {
 		return err
 	}
-	created, err := sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), string(ssh.MarshalAuthorizedKey(pub)))
-	if err != nil {
-		return err
+	authorizedKey := string(ssh.MarshalAuthorizedKey(pub))
+	created, createErr := sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), authorizedKey)
+	fallbackAuthorizedKey := false
+	if createErr != nil {
+		if runtime.Config.Provider == "digitalocean" && providers.IsClass(createErr, providers.ErrorPermissionDenied) {
+			fallbackAuthorizedKey = true
+		} else {
+			return createErr
+		}
 	}
 	ref := "ssh-deploy-" + d.ID
 	if err = c.Secrets.Put(ctx, accountID, ref, "ssh_private_key", privatePEM); err != nil {
-		if runtime.CheckMutationGeneration(ctx) == nil {
+		if !fallbackAuthorizedKey && runtime.CheckMutationGeneration(ctx) == nil {
 			_ = sshDriver.DeleteSSHKey(ctx, created.ID)
 		}
 		return err
 	}
 	snap.SSHKeySecretRef = ref
-	snap.SSHProviderKeyID = workflow.ProviderKeyRef(created.ID)
+	if fallbackAuthorizedKey {
+		snap.SSHAuthorizedKey = authorizedKey
+		snap.SSHProviderKeyID = ""
+	} else {
+		snap.SSHProviderKeyID = workflow.ProviderKeyRef(created.ID)
+		snap.SSHAuthorizedKey = ""
+	}
 	snap.SSHKeyFingerprint = ssh.FingerprintSHA256(pub)
 	snap.SSHUser = "root"
 	raw, err := json.Marshal(snap)

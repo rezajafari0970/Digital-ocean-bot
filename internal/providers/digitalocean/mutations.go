@@ -19,6 +19,7 @@ type CreateDropletRequest struct {
 	SSHKeys    []any    `json:"ssh_keys,omitempty"`
 	Tags       []string `json:"tags,omitempty"`
 	Monitoring bool     `json:"monitoring,omitempty"`
+	UserData   string   `json:"user_data,omitempty"`
 	IPv6       bool     `json:"ipv6,omitempty"`
 }
 

@@ -160,7 +160,7 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	// A deployment reservation may survive a preparation failure. Before any
 	// create-stage recovery, restore its per-deployment SSH identity so recovery
 	// can never create a server without the persisted private-key reference.
-	if d.CurrentStep == "create" && d.ProviderID == "" && (snap.SSHKeySecretRef == "" || snap.SSHProviderKeyID == "") {
+	if d.CurrentStep == "create" && d.ProviderID == "" && (snap.SSHKeySecretRef == "" || (snap.SSHProviderKeyID == "" && snap.SSHAuthorizedKey == "")) {
 		if err := h.Container.ensureDeploymentSSHIdentity(ctx, item.AccountID, d, &snap); err != nil {
 			if frozen, ferr := h.freezePermanentDeploymentError(ctx, d, err); ferr != nil {
 				return ferr

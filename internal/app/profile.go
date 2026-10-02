@@ -26,7 +26,7 @@ func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentI
 			return DeploymentConfig{}, snap, err
 		}
 	}
-	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei", SSHKeyID: snap.SSHProviderKeyID.String()}, Provision: func() provisioning.Plan {
+	cfg := DeploymentConfig{Profile: droplets.Profile{Name: snap.Name, Region: snap.Region, Regions: snap.Regions, Size: snap.Size, Image: snap.Image, Lifetime: snap.Lifetime, Provision: "sanaei", SSHKeyID: snap.SSHProviderKeyID.String(), SSHAuthorizedKey: snap.SSHAuthorizedKey}, Provision: func() provisioning.Plan {
 		p := defaultProvisionPlan()
 		if len(snap.InstallSteps) > 0 {
 			p.Scripts = snap.InstallSteps

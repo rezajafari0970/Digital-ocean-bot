@@ -18,15 +18,16 @@ const (
 )
 
 type Profile struct {
-	Name        string
-	Region      string
-	Regions     []string
-	Size        string
-	Image       string
-	Lifetime    time.Duration
-	Provision   string
-	IdentityTag string
-	SSHKeyID    string
+	Name             string
+	Region           string
+	Regions          []string
+	Size             string
+	Image            string
+	Lifetime         time.Duration
+	Provision        string
+	IdentityTag      string
+	SSHKeyID         string
+	SSHAuthorizedKey string
 }
 
 type Droplet struct {

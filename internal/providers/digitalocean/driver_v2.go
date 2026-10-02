@@ -90,7 +90,25 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	if req.Identity != "" && !contains(tags, req.Identity) {
 		tags = append(tags, req.Identity)
 	}
-	raw, err := d.client.CreateDroplet(ctx, CreateDropletRequest{Name: req.Name, Region: req.RegionID, Size: req.PlanID, Image: req.ImageID, SSHKeys: keys, Tags: tags})
+	userData := ""
+	if len(req.SSHAuthorizedKeys) > 0 {
+		var b strings.Builder
+		b.WriteString("#cloud-config\ndisable_root: false\nssh_authorized_keys:\n")
+		for _, key := range req.SSHAuthorizedKeys {
+			key = strings.TrimSpace(key)
+			if key == "" {
+				continue
+			}
+			if !strings.HasPrefix(key, "ssh-ed25519 ") && !strings.HasPrefix(key, "ssh-rsa ") && !strings.HasPrefix(key, "ecdsa-sha2-") {
+				return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: "create_server", Message: "unsupported SSH authorized key"}
+			}
+			b.WriteString("  - ")
+			b.WriteString(key)
+			b.WriteByte('\n')
+		}
+		userData = b.String()
+	}
+	raw, err := d.client.CreateDroplet(ctx, CreateDropletRequest{Name: req.Name, Region: req.RegionID, Size: req.PlanID, Image: req.ImageID, SSHKeys: keys, Tags: tags, UserData: userData})
 	if err != nil {
 		pe := normalizeError("create_server", err)
 		out := providers.OutcomeRejected
