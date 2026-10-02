@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "goal": "Proxy Control Plane Batch B1: introduce account-level transport epoch and dual mutation guard without yet rerouting all transition writers.",
+  "context": "Critical migration, fail-closed. Add migration 000108 account_transport_state keyed by account_id with provider, transport_epoch >=1, active_proxy_id nullable, transition_reason, timestamps. Add a proxycontrol/account transport store with CurrentEpoch and atomic BumpEpoch under account-scoped transaction semantics. Runtime creation captures the current epoch for proxy-required accounts; if missing initialize safely. AccountRuntime mutation guard must require BOTH current proxy-specific generation and current account transport epoch. Direct accounts remain unaffected. Do not yet change admin proxy/profile writes or pool rotation; that is B2. Add unit and optional DOB_E2E_DSN PostgreSQL tests for monotonic epoch, missing-state fail-closed behavior, and stale runtime rejection. Preserve existing generation guard and all provider contracts.",
+  "ai_council": true,
+  "block_on_council": false,
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 180,
+  "council_timeout_seconds": 900,
+  "source_context_bytes": 120000,
+  "commands": {
+    "implement": ["gofmt -w internal/proxycontrol/transport_epoch.go internal/proxycontrol/transport_epoch_test.go internal/proxycontrol/postgres_e2e_test.go internal/app/container.go internal/app/provider_network_runtime.go internal/app/provider_network_runtime_test.go"],
+    "test": ["go test -race ./internal/proxycontrol ./internal/network ./internal/app -count=1"],
+    "verify": ["go test ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole ./internal/proxycontrol ./internal/network ./internal/app -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 420,
+  "allowed_paths": [
+    "migrations/000108_account_transport_state.up.sql",
+    "migrations/000108_account_transport_state.down.sql",
+    "internal/proxycontrol/transport_epoch.go",
+    "internal/proxycontrol/transport_epoch_test.go",
+    "internal/proxycontrol/postgres_e2e_test.go",
+    "internal/app/container.go",
+    "internal/app/provider_network_runtime.go",
+    "internal/app/provider_network_runtime_test.go",
+    "docs/development-jobs/proxy-control-plane-batch-b1-transport-epoch.json"
+  ],
+  "commit_message": "feat(proxy): add account transport epoch dual guard",
+  "push": true
+}
