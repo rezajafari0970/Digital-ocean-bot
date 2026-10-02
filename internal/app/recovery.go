@@ -288,7 +288,7 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 	if !permanent && d.CurrentStep == "create" && d.ProviderID == "" {
 		var providerState string
 		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, d.AccountID).Scan(&providerState); qerr == nil {
-			permanent = providerState == ProviderStateTokenInvalid || providerState == ProviderStatePermissionDenied || providerState == ProviderStateLocked
+			permanent = providerState == ProviderStateTokenInvalid || providerState == ProviderStatePermissionDenied || providerState == ProviderStateBillingBlocked || providerState == ProviderStateLocked
 		}
 	}
 	if !permanent {

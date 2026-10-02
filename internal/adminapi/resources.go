@@ -94,6 +94,8 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 			providerReason = providerName + " credential is invalid"
 		} else if providerState == "PERMISSION_DENIED" {
 			providerReason = providerName + " permission denied"
+		} else if providerState == "BILLING_BLOCKED" {
+			providerReason = providerName + " billing blocked; update the provider billing profile"
 		} else if providerState == "RATE_LIMITED" {
 			providerReason = providerName + " rate limited"
 		} else if providerErrorState != "" {

@@ -14,6 +14,7 @@ const (
 	ProviderStateLocked           = "LOCKED"
 	ProviderStateTokenInvalid     = "TOKEN_INVALID"
 	ProviderStatePermissionDenied = "PERMISSION_DENIED"
+	ProviderStateBillingBlocked   = "BILLING_BLOCKED"
 	ProviderStateRateLimited      = "RATE_LIMITED"
 	ProviderStateTransportError   = "TRANSPORT_ERROR"
 	ProviderStateProxyError       = "PROXY_ERROR"
@@ -32,6 +33,10 @@ func ClassifyAccountProviderError(err error, proxyRequired bool) string {
 	case providers.ErrorAuthentication:
 		return ProviderStateTokenInvalid
 	case providers.ErrorPermissionDenied:
+		msg := strings.ToLower(err.Error())
+		if strings.Contains(msg, "outstanding balance") || strings.Contains(msg, "billing profile") {
+			return ProviderStateBillingBlocked
+		}
 		return ProviderStatePermissionDenied
 	case providers.ErrorRateLimited:
 		return ProviderStateRateLimited
@@ -55,7 +60,7 @@ func ProviderProbeInterval(state string) time.Duration {
 	switch state {
 	case ProviderStateLocked:
 		return 45 * time.Second
-	case ProviderStateTokenInvalid, ProviderStatePermissionDenied:
+	case ProviderStateTokenInvalid, ProviderStatePermissionDenied, ProviderStateBillingBlocked:
 		return 5 * time.Minute
 	case ProviderStateRateLimited:
 		return 2 * time.Minute

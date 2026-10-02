@@ -21,6 +21,7 @@ func TestClassifyAccountProviderError(t *testing.T) {
 		{"locked", &providers.Error{Class: providers.ErrorAccountLocked}, true, ProviderStateLocked},
 		{"token", &providers.Error{Class: providers.ErrorAuthentication}, false, ProviderStateTokenInvalid},
 		{"permission", &providers.Error{Class: providers.ErrorPermissionDenied}, false, ProviderStatePermissionDenied},
+		{"billing", &providers.Error{Class: providers.ErrorPermissionDenied, Message: "There is currently an outstanding balance on your account, please visit the billing page to update your billing profile."}, false, ProviderStateBillingBlocked},
 		{"rate", &providers.Error{Class: providers.ErrorRateLimited}, false, ProviderStateRateLimited},
 		{"proxy", fmt.Errorf("wrapped: %w", network.ErrProxyRequired), true, ProviderStateProxyError},
 		{"proxy-circuit", network.ErrProxyCircuitOpen, true, ProviderStateProxyError},
