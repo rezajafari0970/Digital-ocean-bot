@@ -3,7 +3,9 @@ package provisioning
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
+	"io"
 	"strings"
 	"testing"
 )
@@ -40,5 +42,29 @@ func TestShellArgEscapesQuote(t *testing.T) {
 	got := shellArg("/tmp/a'b")
 	if got != "'/tmp/a'\\''b'" {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestSCPStageErrorCanceledAfterStartIsAmbiguous(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err := scpStageError(ctx, "scp-data", io.EOF, true)
+	if !errors.Is(err, ErrCommandOutcomeUnknown) {
+		t.Fatalf("expected unknown outcome, got %v", err)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected canceled, got %v", err)
+	}
+}
+
+func TestSCPStageErrorCanceledBeforeStartNotAmbiguous(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err := scpStageError(ctx, "scp-start", io.EOF, false)
+	if errors.Is(err, ErrCommandOutcomeUnknown) {
+		t.Fatalf("unexpected unknown outcome: %v", err)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected canceled, got %v", err)
 	}
 }
