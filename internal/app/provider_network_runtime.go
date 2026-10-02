@@ -11,11 +11,12 @@ import (
 )
 
 type providerNetworkRuntime struct {
-	Client     *http.Client
-	Gateway    *network.Gateway
-	Gate       network.AccountGate
-	Generation int64
-	closeIdle  func()
+	Client         *http.Client
+	Gateway        *network.Gateway
+	Gate           network.AccountGate
+	Generation     int64
+	TransportEpoch int64
+	closeIdle      func()
 }
 
 func (r providerNetworkRuntime) CloseIdleConnections() {
@@ -59,6 +60,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			return providerNetworkRuntime{}, ErrNetworkNotReady
 		}
 		generation := int64(1)
+		transportEpoch := int64(0)
 		if c.DB != nil {
 			state, allowed, err := (proxycontrol.SQLStore{DB: c.DB}).Acquire(
 				ctx, cfg.ID, cfg.Proxy.ID, cfg.Provider, time.Now().UTC(), 30*time.Second,
@@ -70,6 +72,10 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 				return providerNetworkRuntime{}, network.ErrProxyCircuitOpen
 			}
 			generation = state.Generation
+			transportEpoch, err = (proxycontrol.TransportEpochStore{DB: c.DB}).Ensure(ctx, cfg.ID, cfg.Provider, &cfg.Proxy.ID)
+			if err != nil {
+				return providerNetworkRuntime{}, err
+			}
 		}
 		password := []byte(nil)
 		var err error
@@ -127,7 +133,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 				)
 			})
 		}
-		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, closeIdle: gateway.CloseIdleConnections}, nil
+		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, TransportEpoch: transportEpoch, closeIdle: gateway.CloseIdleConnections}, nil
 	}
 
 	bundle, err := network.NewIsolatedDirectClient(cfg.ID)

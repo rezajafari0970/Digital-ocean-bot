@@ -1,1 +1,1 @@
--- account transport epoch rollback; populated by Batch B1
+DROP TABLE IF EXISTS account_transport_state;

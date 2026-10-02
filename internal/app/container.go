@@ -39,6 +39,9 @@ type Container struct {
 type runtimeGenerationStore interface {
 	CurrentGeneration(ctx context.Context, accountID, proxyID, provider string) (int64, bool, error)
 }
+type runtimeTransportEpochStore interface {
+	CurrentEpoch(ctx context.Context, accountID, provider string) (int64, bool, error)
+}
 
 type accountRuntimeStatusStore interface {
 	MarkStaleGeneration(ctx context.Context, accountID string) error
@@ -89,7 +92,9 @@ type AccountRuntime struct {
 	Operations          jobs.SQLStore
 	Gate                network.AccountGate
 	TransportGeneration int64
+	TransportEpoch      int64
 	GenerationStore     runtimeGenerationStore
+	TransportEpochStore runtimeTransportEpochStore
 	runtimeStatusStore  accountRuntimeStatusStore
 }
 
@@ -118,6 +123,15 @@ func (rt AccountRuntime) CheckMutationGeneration(ctx context.Context) error {
 	}
 	if generation != rt.TransportGeneration {
 		return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: runtime generation %d, current generation %d", ErrRuntimeGenerationObsolete, rt.TransportGeneration, generation))
+	}
+	if rt.TransportEpochStore != nil || rt.TransportEpoch != 0 {
+		if rt.TransportEpoch < 1 || rt.TransportEpochStore == nil {
+			return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: transport epoch unavailable", ErrRuntimeGenerationObsolete))
+		}
+		epoch, found, err := rt.TransportEpochStore.CurrentEpoch(ctx, rt.Config.ID, rt.Config.Provider)
+		if err != nil || !found || epoch != rt.TransportEpoch {
+			return rt.rejectMutationGeneration(ctx, fmt.Errorf("%w: runtime transport epoch %d is not current", ErrRuntimeGenerationObsolete, rt.TransportEpoch))
+		}
 	}
 	if rt.runtimeStatusStore != nil {
 		if err := rt.runtimeStatusStore.ClearStaleGeneration(ctx, rt.Config.ID); err != nil {
@@ -185,7 +199,9 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 		Operations:          jobs.SQLStore{DB: c.DB},
 		Gate:                netrt.Gate,
 		TransportGeneration: netrt.Generation,
+		TransportEpoch:      netrt.TransportEpoch,
 		GenerationStore:     proxycontrol.SQLStore{DB: c.DB},
+		TransportEpochStore: proxycontrol.TransportEpochStore{DB: c.DB},
 		runtimeStatusStore:  accountRuntimeStatusSQLStore{DB: c.DB},
 	}, nil
 }
