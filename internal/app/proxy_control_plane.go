@@ -59,7 +59,7 @@ func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID stri
 SELECT a.provider,np.mode,COALESCE(np.proxy_id::text,'')
 FROM accounts a
 JOIN network_profiles np ON np.account_id=a.id
-WHERE a.id=$1 AND a.enabled=true
+WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 `, accountID).Scan(&provider, &mode, &proxyID); err != nil {
 		return err
 	}
