@@ -262,7 +262,7 @@ func (e SSHSessionExecutorV2) doPOST(
 	if err != nil {
 		return SessionResponse{},
 			fmt.Errorf(
-				"%w: v2 post ssh: %v diagnostic=%q",
+				"%w: v2 post ssh: %w diagnostic=%q",
 				ErrSessionRequest,
 				err,
 				result.Stderr,

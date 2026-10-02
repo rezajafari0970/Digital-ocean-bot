@@ -60,7 +60,7 @@ func (s Service) apply(ctx context.Context, panelID string, ps []rp) error {
 	exec := sanaei.SSHSessionExecutorV2{SSH: s.SSH, Target: provisioning.Target{AccountID: acc, DropletID: did, Host: host, Port: 22, User: user, KeySecretRef: keyref}, PrivateKeySecretRef: keyref, PanelPasswordSecretRef: pref, AccountID: acc, Username: puser, Port: port, BasePath: path, DialHost: "127.0.0.1", Secrets: s.Secrets}
 	cur, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/", TimeoutSeconds: 10})
 	if e != nil {
-		return e
+		return fmt.Errorf("residential read xray: %w", e)
 	}
 	var top struct {
 		Success bool   `json:"success"`
@@ -137,7 +137,13 @@ func (s Service) apply(ctx context.Context, panelID string, ps []rp) error {
 	}
 	resp, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/update", Body: []byte(form.Encode()), ContentType: "application/x-www-form-urlencoded", TimeoutSeconds: 20})
 	if e != nil {
-		return e
+		if errors.Is(e, provisioning.ErrCommandOutcomeUnknown) {
+			verified, verr := readXraySetting(ctx, exec)
+			if verr == nil && desiredResidentialApplied(verified, ps) {
+				return nil
+			}
+		}
+		return fmt.Errorf("residential update xray: %w", e)
 	}
 	var saved struct {
 		Success bool   `json:"success"`
