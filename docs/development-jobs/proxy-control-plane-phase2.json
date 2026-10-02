@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "goal": "Make provider proxy transport recovery generation-aware: when proxy identity/generation changes, stale provider transport state must not remain authoritative or reusable; preserve fail-closed circuit admission and account/provider isolation.",
-  "context": "Current HEAD already has provider-scoped circuit state, half-open leasing, same-country self-healing, transport observations, HTTP 407 classification, and exposes TransportGeneration. Build the smallest production-grade next step. Do not redesign provider drivers or weaken frozen Vultr behavior.",
+  "goal": "Add the smallest generation-aware transport observation guard: a provider runtime observation must be applied only when the proxy-control generation captured by that runtime still equals the current stored generation. Stale observations must be ignored without weakening fail-closed admission.",
+  "context": "Limit this job to provider_network_runtime plus the minimal proxycontrol read needed to compare generation, with focused tests. Do not redesign drivers, state-machine policy, sticky recovery, schema, or Vultr behavior. Later generation-aware recovery work will be separate jobs.",
   "api_implement": true,
-  "api_timeout_seconds": 240,
-  "source_context_bytes": 120000,
+  "api_timeout_seconds": 170,
+  "source_context_bytes": 70000,
   "commands": {
     "implement": ["gofmt -w internal/app/provider_network_runtime.go internal/app/provider_network_runtime_test.go internal/app/container.go"],
     "test": ["go test ./internal/app ./internal/network ./internal/proxycontrol -count=1"],
@@ -16,8 +16,6 @@
     "internal/app/provider_network_runtime_test.go",
     "internal/app/container.go",
     "internal/proxycontrol/store.go",
-    "internal/proxycontrol/state_machine.go",
-    "internal/proxycontrol/state_machine_test.go",
     "docs/development-jobs/proxy-control-plane-phase2.json"
   ],
   "commit_message": "feat(proxy): make provider runtime generation-aware",
