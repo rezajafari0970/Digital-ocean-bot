@@ -9,6 +9,10 @@ import (
 // ReconcileLocalState repairs only relationships that are provable from local
 // persisted state. It never creates or deletes provider resources.
 func (c Container) ReconcileLocalState(ctx context.Context) {
+	// Disabled/deleting accounts must never keep scheduler leases alive.
+	// This also repairs rows created before delete disabled schedules atomically.
+	_, _ = c.DB.ExecContext(ctx, `UPDATE schedules s SET enabled=false,lease_until=NULL,updated_at=now() FROM accounts a WHERE a.id=s.account_id AND a.enabled=false AND (s.enabled=true OR s.lease_until IS NOT NULL)`)
+
 	// Link deployments to an already-known lifecycle droplet when provider IDs agree.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE deployments d SET droplet_id=dr.id,updated_at=now()
         FROM droplets dr WHERE d.droplet_id IS NULL AND d.provider_id IS NOT NULL

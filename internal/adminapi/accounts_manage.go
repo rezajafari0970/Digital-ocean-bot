@@ -107,6 +107,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback()
+	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "deployment-admission:"+id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if x.NetworkMode == "" {
 		x.NetworkMode = "direct"
 	}
@@ -210,6 +214,10 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback()
+	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "deployment-admission:"+id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	var live int
 	if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {
 		writeJSON(w, 500, errorBody())
@@ -223,6 +231,10 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	n, _ := res.RowsAffected()
 	if n == 0 {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
+		return
+	}
+	if _, err = tx.ExecContext(r.Context(), `UPDATE schedules SET enabled=false,lease_until=NULL,updated_at=now() WHERE account_id=$1`, id); err != nil {
+		writeJSON(w, 500, errorBody())
 		return
 	}
 	if live > 0 {

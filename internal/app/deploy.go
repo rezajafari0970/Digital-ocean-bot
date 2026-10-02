@@ -50,6 +50,19 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, "deployment-admission:"+accountID); err != nil {
 		return workflow.Deployment{}, err
 	}
+	profile, err = loadDeploymentProfileTx(ctx, tx, profileID)
+	if err != nil {
+		return workflow.Deployment{}, err
+	}
+	if profile.AccountID != accountID || !profile.Enabled {
+		return workflow.Deployment{}, ErrProfileDisabled
+	}
+	if profile.Config.DatabaseTemplateID == "" {
+		return workflow.Deployment{}, ErrDatabaseTemplateNotConfigured
+	}
+	if err = tx.QueryRowContext(ctx, `SELECT active,storage_path FROM xui_database_templates WHERE id=$1`, profile.Config.DatabaseTemplateID).Scan(&templateActive, &templatePath); err != nil || !templateActive || templatePath == "" || templatePath == "pending" {
+		return workflow.Deployment{}, ErrDatabaseTemplateUnavailable
+	}
 	var enabled bool
 	var runtimeStatus, providerState, providerError string
 	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
@@ -82,6 +95,13 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 			return workflow.Deployment{}, ErrCapacityUnavailable
 		}
 	}
+	var regionsRaw, sizesRaw []byte
+	var imagesRaw []byte
+	var lifetimeMin, lifetimeMax int
+	var fallbackAnyRegion bool
+	if err = tx.QueryRowContext(ctx, `SELECT preferred_regions,preferred_sizes,preferred_images,COALESCE(server_lifetime_min_seconds,server_lifetime_seconds),COALESCE(server_lifetime_max_seconds,server_lifetime_seconds),fallback_any_region FROM accounts WHERE id=$1`, accountID).Scan(&regionsRaw, &sizesRaw, &imagesRaw, &lifetimeMin, &lifetimeMax, &fallbackAnyRegion); err != nil {
+		return workflow.Deployment{}, err
+	}
 	store := workflow.SQLStore{DB: tx}
 	d, _, err := store.Reserve(ctx, workflow.Request{AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})
 	if err != nil {
@@ -91,13 +111,6 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 		return d, err
 	}
 	effective := profile.Config
-	var regionsRaw, sizesRaw []byte
-	var imagesRaw []byte
-	var lifetimeMin, lifetimeMax int
-	var fallbackAnyRegion bool
-	if err := c.DB.QueryRowContext(ctx, `SELECT preferred_regions,preferred_sizes,preferred_images,COALESCE(server_lifetime_min_seconds,server_lifetime_seconds),COALESCE(server_lifetime_max_seconds,server_lifetime_seconds),fallback_any_region FROM accounts WHERE id=$1`, accountID).Scan(&regionsRaw, &sizesRaw, &imagesRaw, &lifetimeMin, &lifetimeMax, &fallbackAnyRegion); err != nil {
-		return d, err
-	}
 	var regions, sizes, images []string
 	_ = json.Unmarshal(regionsRaw, &regions)
 	_ = json.Unmarshal(sizesRaw, &sizes)
