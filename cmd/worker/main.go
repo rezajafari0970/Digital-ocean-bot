@@ -270,9 +270,30 @@ func main() {
 				log.Printf("residential sync discovery: %v", err)
 				return
 			}
+			sem := make(chan struct{}, 12)
+			done := make(chan struct{}, len(panels))
 			for _, panel := range panels {
-				if err := syncer.ReconcilePanel(ctx, panel, false); err != nil {
-					log.Printf("residential sync panel %s: %v", panel.ID, err)
+				p := panel
+				go func() {
+					defer func() { done <- struct{}{} }()
+					select {
+					case sem <- struct{}{}:
+						defer func() { <-sem }()
+					case <-ctx.Done():
+						return
+					}
+					panelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+					defer cancel()
+					if err := syncer.ReconcilePanel(panelCtx, p, false); err != nil {
+						log.Printf("residential sync panel %s: %v", p.ID, err)
+					}
+				}()
+			}
+			for range panels {
+				select {
+				case <-done:
+				case <-ctx.Done():
+					return
 				}
 			}
 		}
