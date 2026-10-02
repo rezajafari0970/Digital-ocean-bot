@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"net/http"
 	"time"
@@ -31,10 +32,12 @@ func releaseAccountRouteSharedLock(conn *sql.Conn, accountID string) {
 	if conn == nil {
 		return
 	}
-	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	_, _ = conn.ExecContext(ctx, `SELECT pg_advisory_unlock_shared(hashtextextended($1,0))`, "account-route:"+accountID)
+	if _, err := conn.ExecContext(ctx, `SELECT pg_advisory_unlock_shared(hashtextextended($1,0))`, "account-route:"+accountID); err != nil {
+		_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+	}
+	_ = conn.Close()
 }
 
 type accountNetworkGuardTransport struct {

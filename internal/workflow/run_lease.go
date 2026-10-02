@@ -3,7 +3,9 @@ package workflow
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
+	"time"
 )
 
 var ErrDeploymentBusy = errors.New("deployment already running")
@@ -34,7 +36,11 @@ func (l PostgresRunLease) Acquire(ctx context.Context, deploymentID string) (fun
 		return nil, ErrDeploymentBusy
 	}
 	release := func() {
-		_, _ = conn.ExecContext(context.Background(), `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "deployment:"+deploymentID)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		if _, err := conn.ExecContext(ctx, `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "deployment:"+deploymentID); err != nil {
+			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+		}
 		_ = conn.Close()
 	}
 	return release, nil

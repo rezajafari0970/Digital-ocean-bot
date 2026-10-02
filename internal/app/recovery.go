@@ -15,7 +15,23 @@ import (
 
 type RecoveryHandler struct{ Container Container }
 
-func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.RecoveryItem) error {
+func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.RecoveryItem) (retErr error) {
+	defer func() {
+		if retErr == nil {
+			return
+		}
+		if item.Kind == "DELETE_DROPLET" {
+			var providerState string
+			if err := h.Container.DB.QueryRowContext(context.Background(), `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState); err == nil {
+				retErr = slowCleanupProviderError(providerState, retErr)
+			}
+		}
+		code := string(providers.Class(retErr))
+		if code == "" {
+			code = "recovery_retry"
+		}
+		_, _ = h.Container.DB.ExecContext(context.Background(), `UPDATE operations SET updated_at=now(),error_code=$3,error_message=$4 WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID, code, retErr.Error())
+	}()
 	if item.Kind != "CREATE_DROPLET" && item.Kind != "DELETE_DROPLET" {
 		return nil
 	}
@@ -26,8 +42,9 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		return err
 	}
 	if providerID == "" {
-		if item.Kind != "CREATE_DROPLET" {
-			return nil
+		if item.Kind == "DELETE_DROPLET" {
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='delete_without_provider_resource',error_message='delete recovery cannot continue without provider resource id',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID)
+			return err
 		}
 		var deploymentID, deploymentState string
 		qerr := h.Container.DB.QueryRowContext(ctx, `SELECT d.id::text,d.state
@@ -66,7 +83,12 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		}
 		return nil
 	}
-	runtime, err := h.Container.Runtime(ctx, item.AccountID)
+	var runtime AccountRuntime
+	if item.Kind == "DELETE_DROPLET" {
+		runtime, err = h.Container.runtimeForLifecycle(ctx, item.AccountID)
+	} else {
+		runtime, err = h.Container.Runtime(ctx, item.AccountID)
+	}
 	if err != nil {
 		return err
 	}
