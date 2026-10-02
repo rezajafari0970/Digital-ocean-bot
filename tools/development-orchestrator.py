@@ -88,7 +88,25 @@ def api_implement(job,m,j):
     patch_file=BASE/(job+"-implement.patch"); patch_file.write_text(patch)
     check=subprocess.run(["git","apply","--check",str(patch_file)],cwd=ROOT,text=True,capture_output=True)
     if check.returncode:
-        ev(event="api_patch_check_failure",job=job,stderr=check.stderr[-4000:]); return False
+        ev(event="api_patch_check_failure",job=job,stderr=check.stderr[-4000:])
+        repair_prompt=("Return ONLY a corrected valid git unified diff beginning with 'diff --git'. No prose or fences. "
+                       "Repair the candidate patch so git apply --check succeeds. Do not change its intended behavior. "
+                       "Every path must remain inside ALLOWED_PATHS.\nALLOWED_PATHS:\n"+"\n".join(allowed)+
+                       "\nGIT_APPLY_ERROR:\n"+check.stderr[-4000:]+"\nCANDIDATE_PATCH:\n"+patch)
+        rp=subprocess.run([str(ADAPTER)],input=repair_prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
+        if rp.returncode!=0:
+            ev(event="api_patch_repair_failure",job=job,returncode=rp.returncode); return False
+        try: repaired=clean_patch(json.loads(rp.stdout)["text"])
+        except Exception as e:
+            ev(event="api_patch_repair_parse_failure",job=job,error=str(e)); return False
+        repaired_paths=patch_paths(repaired)
+        if not repaired_paths or any(not allowed_path(x,allowed) for x in repaired_paths):
+            ev(event="api_patch_repair_scope_failure",job=job,paths=sorted(repaired_paths)); return False
+        patch=repaired; patch_file.write_text(patch)
+        check=subprocess.run(["git","apply","--check",str(patch_file)],cwd=ROOT,text=True,capture_output=True)
+        if check.returncode:
+            ev(event="api_patch_repair_check_failure",job=job,stderr=check.stderr[-4000:]); return False
+        ev(event="api_patch_repaired",job=job,paths=sorted(repaired_paths))
     apply=subprocess.run(["git","apply",str(patch_file)],cwd=ROOT,text=True,capture_output=True)
     if apply.returncode:
         ev(event="api_patch_apply_failure",job=job,stderr=apply.stderr[-4000:]); return False
