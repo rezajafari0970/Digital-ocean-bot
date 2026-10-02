@@ -13,6 +13,19 @@ func (c Container) ReconcileLocalState(ctx context.Context) {
 	// This also repairs rows created before delete disabled schedules atomically.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE schedules s SET enabled=false,lease_until=NULL,updated_at=now() FROM accounts a WHERE a.id=s.account_id AND a.enabled=false AND (s.enabled=true OR s.lease_until IS NOT NULL)`)
 	_, _ = c.DB.ExecContext(ctx, `UPDATE droplets r SET backfill_required=false,updated_at=now() FROM accounts a WHERE a.id=r.account_id AND a.enabled=false AND r.backfill_required=true`)
+
+	// Terminal deployments own the terminal state of their provisioning ledger.
+	// Repair historical rows left behind by crashes or older workflow versions.
+	_, _ = c.DB.ExecContext(ctx, `WITH done AS (
+		UPDATE provision_runs pr SET state='COMPLETED',current_step='done',last_error=NULL,next_retry_at=NULL,updated_at=now()
+		FROM deployments d WHERE d.account_id=pr.account_id AND d.droplet_id=pr.droplet_id
+		AND d.state IN ('PANEL_COMPLETE','READY') AND pr.state<>'COMPLETED' RETURNING pr.id
+	) UPDATE provision_step_attempts SET next_retry_at=NULL FROM done WHERE run_id=done.id`)
+	_, _ = c.DB.ExecContext(ctx, `WITH failed AS (
+		UPDATE provision_runs pr SET state='FAILED',next_retry_at=NULL,updated_at=now()
+		FROM deployments d WHERE d.account_id=pr.account_id AND d.droplet_id=pr.droplet_id
+		AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK') AND pr.state NOT IN ('FAILED','COMPLETED') RETURNING pr.id
+	) UPDATE provision_step_attempts SET next_retry_at=NULL FROM failed WHERE run_id=failed.id`)
 	_, _ = c.DB.ExecContext(ctx, `
 UPDATE droplets r
 SET replacement_deployment_id=NULL,backfill_required=true,updated_at=now()

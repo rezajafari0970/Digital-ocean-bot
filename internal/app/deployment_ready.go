@@ -22,6 +22,13 @@ func (f deploymentReadyFinalizer) MarkReady(ctx context.Context, d workflow.Depl
 		seconds = 1
 	}
 	_, err := f.DB.ExecContext(ctx, `UPDATE droplets SET state='READY',ready_at=COALESCE(ready_at,now()),expires_at=COALESCE(expires_at,now()+($3 * interval '1 second')),updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('PROVISIONING','READY')`, d.DropletID, d.AccountID, seconds)
+	if err != nil {
+		return err
+	}
+	_, err = f.DB.ExecContext(ctx, `WITH done AS (
+		UPDATE provision_runs SET state='COMPLETED',current_step='done',last_error=NULL,next_retry_at=NULL,updated_at=now()
+		WHERE account_id=$1 AND droplet_id=$2 AND state<>'FAILED' RETURNING id
+	) UPDATE provision_step_attempts SET next_retry_at=NULL FROM done WHERE run_id=done.id`, d.AccountID, d.DropletID)
 	return err
 }
 
@@ -37,7 +44,13 @@ func (f deploymentFailureFinalizer) MarkFailed(ctx context.Context, d workflow.D
 	}
 	n, _ := res.RowsAffected()
 	if n == 1 {
-		_, err = f.DB.ExecContext(ctx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, d.AccountID, d.DropletID)
+		if _, err = f.DB.ExecContext(ctx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, d.AccountID, d.DropletID); err != nil {
+			return err
+		}
 	}
+	_, err = f.DB.ExecContext(ctx, `WITH failed AS (
+		UPDATE provision_runs SET state='FAILED',last_error=COALESCE(NULLIF(last_error,''),'deployment terminal failure'),next_retry_at=NULL,updated_at=now()
+		WHERE account_id=$1 AND droplet_id=$2 AND state<>'COMPLETED' RETURNING id
+	) UPDATE provision_step_attempts SET next_retry_at=NULL FROM failed WHERE run_id=failed.id`, d.AccountID, d.DropletID)
 	return err
 }
