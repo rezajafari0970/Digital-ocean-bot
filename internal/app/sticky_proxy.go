@@ -379,6 +379,11 @@ WHERE account_id=$1
 			continue
 		}
 		if cap.CountryTargeting && !allowFallback && cc != "" && !strings.EqualFold(candidate.CountryCode, cc) {
+			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+			if rerr != nil {
+				return rerr
+			}
+			cfg.Proxy.Port = nextPort
 			candidateErr = ErrIsolationWait
 			continue
 		}
@@ -387,6 +392,11 @@ WHERE account_id=$1
 			return qerr
 		}
 		if collision {
+			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+			if rerr != nil {
+				return rerr
+			}
+			cfg.Proxy.Port = nextPort
 			candidateErr = ErrIsolationWait
 			continue
 		}
@@ -413,6 +423,11 @@ WHERE account_id=$1
 			}
 		}
 		if !stable {
+			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+			if rerr != nil {
+				return rerr
+			}
+			cfg.Proxy.Port = nextPort
 			continue
 		}
 		geo = candidate

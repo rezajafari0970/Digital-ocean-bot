@@ -68,7 +68,7 @@ func main() {
 					case <-ctx.Done():
 						return
 					}
-					cctx, cancel := context.WithTimeout(ctx, 8*time.Second)
+					cctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 					defer cancel()
 					_ = application.Container.MaintainProxyControlPlane(cctx, id)
 				}()
