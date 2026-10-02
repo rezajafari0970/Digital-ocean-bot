@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
+	"time"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
-	"time"
 )
 
 type RecoveryHandler struct{ Container Container }
@@ -329,8 +331,14 @@ func (h RecoveryHandler) freezeExhaustedInstallerRecovery(ctx context.Context, d
 		return false, err
 	}
 	exhausted := failures >= 64
-	if firstFailed.Valid && time.Since(firstFailed.Time) >= 30*time.Minute {
-		exhausted = true
+	if firstFailed.Valid {
+		budget := 30 * time.Minute
+		if strings.Contains(lastErr, "SSH_CONNECTION_REFUSED") {
+			budget = 15 * time.Minute
+		}
+		if time.Since(firstFailed.Time) >= budget {
+			exhausted = true
+		}
 	}
 	if !exhausted {
 		return false, nil
