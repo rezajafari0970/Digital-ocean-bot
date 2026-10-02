@@ -72,19 +72,18 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
-	var desired, managed, preCreate, replacementPairs int
+	var desired, managed, preCreate int
 	if err = tx.QueryRowContext(ctx, `SELECT
 		(SELECT desired_server_count FROM accounts WHERE id=$1),
 		(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),
-		(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
-		(SELECT count(*) FROM droplets r JOIN deployments rd ON rd.id=r.replacement_deployment_id WHERE r.account_id=$1 AND r.state<>'DELETED' AND rd.state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK'))`, accountID).Scan(&desired, &managed, &preCreate, &replacementPairs); err != nil {
+		(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL)`, accountID).Scan(&desired, &managed, &preCreate); err != nil {
 		return workflow.Deployment{}, err
 	}
 	cap, capErr := capacity.Read(ctx, tx, accountID, 2*time.Minute)
 	if capErr != nil {
 		return workflow.Deployment{}, ErrCapacitySnapshotStale
 	}
-	effectiveOccupancy := capacity.NetOccupancy(managed, preCreate, cap.InUse, replacementPairs)
+	effectiveOccupancy := desiredEffectiveOccupancy(managed, preCreate, cap.InUse)
 	if !desiredOccupancyAllowsCreate(desired, effectiveOccupancy) {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}

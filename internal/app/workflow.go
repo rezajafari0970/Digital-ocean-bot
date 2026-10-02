@@ -32,16 +32,12 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	}
 	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
 	executor.PreCreateCheck = func(checkCtx context.Context) error {
-		var desired, managed, preCreate, replacementPairs int
-		err := c.DB.QueryRowContext(checkCtx, `SELECT
-			(SELECT desired_server_count FROM accounts WHERE id=$1),
-			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),
-			(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
-			(SELECT count(*) FROM droplets r JOIN deployments rd ON rd.id=r.replacement_deployment_id WHERE r.account_id=$1 AND r.state<>'DELETED' AND rd.state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK'))`, accountID).Scan(&desired, &managed, &preCreate, &replacementPairs)
+		var desired, managed, preCreate int
+		err := c.DB.QueryRowContext(checkCtx, `SELECT (SELECT desired_server_count FROM accounts WHERE id=$1),(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL)`, accountID).Scan(&desired, &managed, &preCreate)
 		cap, capErr := capacity.Read(checkCtx, c.DB, accountID, 2*time.Minute)
 		effectiveOccupancy := managed + preCreate
 		if capErr == nil {
-			effectiveOccupancy = capacity.NetOccupancy(managed, preCreate, cap.InUse, replacementPairs)
+			effectiveOccupancy = desiredEffectiveOccupancy(managed, preCreate, cap.InUse)
 		}
 		if err != nil || capErr != nil || !desiredOccupancyAllowsReserved(desired, effectiveOccupancy) {
 			if runtime.Config.Provider == "vultr" {
