@@ -204,13 +204,24 @@ RETURNING generation
 }
 
 func (s SQLStore) ApplyObservation(ctx context.Context, accountID, proxyID, provider string, result network.HealthResult, policy Policy) (State, error) {
+	x, _, err := s.applyObservation(ctx, accountID, proxyID, provider, 0, false, result, policy)
+	return x, err
+}
+
+// ApplyObservationForGeneration applies passive transport evidence only while
+// the runtime's captured generation still matches the stored generation.
+func (s SQLStore) ApplyObservationForGeneration(ctx context.Context, accountID, proxyID, provider string, generation int64, result network.HealthResult, policy Policy) (State, bool, error) {
+	return s.applyObservation(ctx, accountID, proxyID, provider, generation, true, result, policy)
+}
+
+func (s SQLStore) applyObservation(ctx context.Context, accountID, proxyID, provider string, generation int64, requireGeneration bool, result network.HealthResult, policy Policy) (State, bool, error) {
 	x := DefaultState(accountID, proxyID, provider)
 	if s.DB == nil {
-		return x, errors.New("proxy control store unavailable")
+		return x, false, errors.New("proxy control store unavailable")
 	}
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return x, err
+		return x, false, err
 	}
 	defer tx.Rollback()
 	if _, err = tx.ExecContext(ctx, `
@@ -218,7 +229,7 @@ INSERT INTO proxy_runtime_state(account_id,proxy_id,provider)
 VALUES($1,$2,$3)
 ON CONFLICT(account_id,proxy_id,provider) DO NOTHING
 `, accountID, proxyID, provider); err != nil {
-		return x, err
+		return x, false, err
 	}
 	var retry, checked, success, probeLease sql.NullTime
 	var errClass, errDetail sql.NullString
@@ -235,7 +246,7 @@ FOR UPDATE
 		&x.HalfOpenProbeInFlight, &probeLease,
 	)
 	if err != nil {
-		return x, err
+		return x, false, err
 	}
 	if retry.Valid {
 		x.RetryAfter = &retry.Time
@@ -255,6 +266,9 @@ FOR UPDATE
 	if errDetail.Valid {
 		x.LastErrorDetail = errDetail.String
 	}
+	if requireGeneration && x.Generation != generation {
+		return x, false, nil
+	}
 	x = ApplyHealth(x, result, policy)
 	_, err = tx.ExecContext(ctx, `
 UPDATE proxy_runtime_state SET
@@ -267,10 +281,10 @@ WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
 		x.ConsecutiveSuccesses, x.RetryAfter, x.Generation, x.LastErrorClass, x.LastErrorDetail,
 		x.LastCheckedAt, x.LastSuccessAt, x.HalfOpenProbeInFlight, x.HalfOpenProbeLeaseUntil)
 	if err != nil {
-		return x, err
+		return x, false, err
 	}
 	if err = tx.Commit(); err != nil {
-		return x, err
+		return x, false, err
 	}
-	return x, nil
+	return x, true, nil
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
 func TestProviderNetworkRuntimeDirectIsAccountScoped(t *testing.T) {
@@ -78,5 +79,55 @@ func TestProviderNetworkRuntimeProxyRequiredFailsClosed(t *testing.T) {
 		Proxy:   p,
 	}); !errors.Is(err, network.ErrProxyConfigInvalid) {
 		t.Fatalf("down proxy must fail closed, err=%v", err)
+	}
+}
+
+type fakeProviderObservationStore struct {
+	generation int64
+	next       proxycontrol.State
+	applied    bool
+	err        error
+}
+
+func (s *fakeProviderObservationStore) ApplyObservationForGeneration(
+	_ context.Context,
+	_, _, _ string,
+	generation int64,
+	_ network.HealthResult,
+	_ proxycontrol.Policy,
+) (proxycontrol.State, bool, error) {
+	s.generation = generation
+	return s.next, s.applied, s.err
+}
+
+func TestPersistProviderRuntimeObservationUsesCapturedGenerationAndIgnoresStaleResult(t *testing.T) {
+	store := &fakeProviderObservationStore{
+		next:    proxycontrol.State{HealthState: network.StatusDown},
+		applied: false,
+	}
+	healthy := true
+
+	if err := persistProviderRuntimeObservation(
+		context.Background(), store, "account-a", "proxy-a", "provider-a", 7,
+		network.HealthResult{Status: network.StatusDown}, proxycontrol.DefaultPolicy(), &healthy,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if store.generation != 7 {
+		t.Fatalf("observation generation=%d, want=7", store.generation)
+	}
+	if !healthy {
+		t.Fatal("stale observation changed runtime health")
+	}
+
+	store.applied = true
+	if err := persistProviderRuntimeObservation(
+		context.Background(), store, "account-a", "proxy-a", "provider-a", 7,
+		network.HealthResult{Status: network.StatusDown}, proxycontrol.DefaultPolicy(), &healthy,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if healthy {
+		t.Fatal("matching-generation observation did not update runtime health")
 	}
 }

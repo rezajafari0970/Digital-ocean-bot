@@ -24,6 +24,31 @@ func (r providerNetworkRuntime) CloseIdleConnections() {
 	}
 }
 
+type providerObservationStore interface {
+	ApplyObservationForGeneration(context.Context, string, string, string, int64, network.HealthResult, proxycontrol.Policy) (proxycontrol.State, bool, error)
+}
+
+func persistProviderRuntimeObservation(
+	ctx context.Context,
+	store providerObservationStore,
+	accountID, proxyID, provider string,
+	generation int64,
+	result network.HealthResult,
+	policy proxycontrol.Policy,
+	healthy *bool,
+) error {
+	next, applied, err := store.ApplyObservationForGeneration(
+		ctx, accountID, proxyID, provider, generation, result, policy,
+	)
+	if err != nil {
+		return err
+	}
+	if applied {
+		*healthy = next.HealthState == network.StatusHealthy
+	}
+	return nil
+}
+
 // buildProviderNetworkRuntime is the single provider-agnostic network boundary.
 // Every provider driver receives its HTTP client through this function.
 // Proxy-required accounts fail closed; direct accounts receive an isolated
@@ -87,12 +112,19 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 				}
 				reportCtx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
 				defer cancel()
-				next, reportErr := store.ApplyObservation(reportCtx, cfg.ID, cfg.Proxy.ID, cfg.Provider, network.HealthResult{
-					Status: status, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency), Error: errText,
-				}, policy)
-				if reportErr == nil {
-					healthy = next.HealthState == network.StatusHealthy
-				}
+				_ = persistProviderRuntimeObservation(
+					reportCtx,
+					store,
+					cfg.ID,
+					cfg.Proxy.ID,
+					cfg.Provider,
+					generation,
+					network.HealthResult{
+						Status: status, Latency: obs.Latency, CheckedAt: obs.StartedAt.Add(obs.Latency), Error: errText,
+					},
+					policy,
+					&healthy,
+				)
 			})
 		}
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, closeIdle: gateway.CloseIdleConnections}, nil
