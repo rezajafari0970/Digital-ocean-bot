@@ -73,6 +73,13 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	if s.DB == nil || s.Secrets == nil {
 		return false, errors.New("user capacity config")
 	}
+	allowed, err := s.rolloutAllowed(ctx, p.ID)
+	if err != nil {
+		return false, err
+	}
+	if !allowed {
+		return false, nil
+	}
 	if _, unsupported := addClientUnsupportedPanels.Load(p.ID); unsupported {
 		return s.legacyFastFillFromPolicy(ctx, p, runtime)
 	}
@@ -80,7 +87,7 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	var portsRaw []byte
 	var target, life, limit, rate int
 	var quota int64
-	err := s.DB.QueryRowContext(ctx, "SELECT enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second FROM global_config_policies WHERE policy_key='reality'").Scan(&enabled, &portsRaw, &target, &quota, &life, &limit, &rate)
+	err = s.DB.QueryRowContext(ctx, "SELECT enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second FROM global_config_policies WHERE policy_key='reality'").Scan(&enabled, &portsRaw, &target, &quota, &life, &limit, &rate)
 	if errors.Is(err, sql.ErrNoRows) || !enabled || target <= 0 {
 		return false, nil
 	}
@@ -129,6 +136,13 @@ func (s Service) ReconcileRuntimeFromPolicy(ctx context.Context, p readyworker.P
 	}
 	if e != nil {
 		return e
+	}
+	allowed, e := s.rolloutAllowed(ctx, p.ID)
+	if e != nil {
+		return e
+	}
+	if !allowed {
+		return nil
 	}
 	var ports []int
 	if json.Unmarshal(portsRaw, &ports) != nil {
@@ -307,4 +321,19 @@ func maxInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func (s Service) rolloutAllowed(ctx context.Context, panelID string) (bool, error) {
+	var count int
+	if err := s.DB.QueryRowContext(ctx, `SELECT count(*) FROM reality_rollout_panels WHERE enabled=true`).Scan(&count); err != nil {
+		return false, err
+	}
+	if count == 0 {
+		return true, nil
+	}
+	var allowed bool
+	if err := s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_rollout_panels WHERE panel_id=$1 AND enabled=true)`, panelID).Scan(&allowed); err != nil {
+		return false, err
+	}
+	return allowed, nil
 }
