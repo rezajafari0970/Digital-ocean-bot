@@ -31,9 +31,14 @@ func (c Container) recordVultrSaturation(ctx context.Context, accountID string, 
 	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "capacity-saturation:"+accountID); err != nil {
 		return
 	}
-	var oldLimit int
+	var oldLimit, provenLowerBound int
 	_ = tx.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&oldLimit)
-	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=EXCLUDED.lower_bound`, accountID, limit); err != nil {
+	_ = tx.QueryRowContext(ctx, `SELECT COALESCE(lower_bound,0) FROM provider_capacity_observations WHERE account_id=$1`, accountID).Scan(&provenLowerBound)
+	if limit < provenLowerBound {
+		log.Printf("vultr saturation inventory contradiction account=%s inventory=%d proven_lower_bound=%d", accountID, limit, provenLowerBound)
+		return
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=GREATEST(provider_capacity_observations.lower_bound,EXCLUDED.lower_bound)`, accountID, limit); err != nil {
 		return
 	}
 	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: limit, LimitKnown: true, ComputeInUse: limit, ObservedAt: time.Now().UTC()})
@@ -68,7 +73,13 @@ func (c Container) handleVultrCreateError(ctx context.Context, accountID string,
 	_, _ = c.DB.ExecContext(ctx, "UPDATE provider_capacity_observations SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now()+interval '2 minutes',updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true", accountID)
 }
 
-func (c Container) recordVultrProbeSuccess(ctx context.Context, accountID string) {
+func (c Container) recordVultrProbeSuccess(ctx context.Context, accountID string, compute providers.ComputeDriver) {
+	apiCount := 0
+	if compute != nil {
+		if servers, listErr := compute.ListServers(ctx); listErr == nil {
+			apiCount = len(servers)
+		}
+	}
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return
@@ -81,16 +92,16 @@ func (c Container) recordVultrProbeSuccess(ctx context.Context, accountID string
 	if err = tx.QueryRowContext(ctx, "SELECT compute_limit FROM provider_capacity_observations WHERE account_id=$1 AND source='vultr_api_probe' AND probe_in_flight=true FOR UPDATE", accountID).Scan(&oldLimit); err != nil {
 		return
 	}
-	newLimit := oldLimit + 1
+	newLimit, inUse := vultrProbeEvidence(oldLimit, apiCount)
 	if _, err = tx.ExecContext(ctx, "UPDATE provider_capacity_observations SET compute_limit=$2,lower_bound=GREATEST(lower_bound,$2),source='vultr_api_probe_success',observed_at=now(),updated_at=now(),probe_after=now(),probe_in_flight=false WHERE account_id=$1", accountID, newLimit); err != nil {
 		return
 	}
-	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: newLimit, LimitKnown: true, ComputeInUse: newLimit, ObservedAt: time.Now().UTC()})
+	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: newLimit, LimitKnown: true, ComputeInUse: inUse, ObservedAt: time.Now().UTC()})
 	var snapshotID string
 	if err = tx.QueryRowContext(ctx, "INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical,created_at) SELECT gen_random_uuid(),account_id,provider,version,data,jsonb_set(COALESCE(canonical,'{}'::jsonb),'{Capacity}',$2::jsonb,true),now() FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1 RETURNING id::text", accountID, capacityJSON).Scan(&snapshotID); err != nil {
 		return
 	}
-	if _, err = tx.ExecContext(ctx, "INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)", accountID, oldLimit, newLimit, 1, snapshotID); err != nil {
+	if _, err = tx.ExecContext(ctx, "INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)", accountID, oldLimit, newLimit, newLimit-oldLimit, snapshotID); err != nil {
 		return
 	}
 	if err = tx.Commit(); err != nil {
@@ -104,7 +115,7 @@ func (c Container) recordVultrCreateSuccess(ctx context.Context, accountID strin
 	var probeInFlight bool
 	err := c.DB.QueryRowContext(ctx, "SELECT source,probe_in_flight FROM provider_capacity_observations WHERE account_id=$1", accountID).Scan(&source, &probeInFlight)
 	if err == nil && source == "vultr_api_probe" && probeInFlight {
-		c.recordVultrProbeSuccess(ctx, accountID)
+		c.recordVultrProbeSuccess(ctx, accountID, compute)
 		return
 	}
 
