@@ -325,7 +325,7 @@ WHERE account_id=$1
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
 		if pgErr == nil {
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID)
+			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,provider_error_state=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_state END,provider_error_detail=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_detail END,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND (COALESCE(provider_error_state,'')='' OR (provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%'))`, accountID)
 		}
 		return pgErr
 	}
@@ -387,6 +387,6 @@ WHERE account_id=$1
 	if allowFallback && cc != "" && !strings.EqualFold(geo.CountryCode, cc) {
 		detail = "preferred country unavailable for 5 minutes; temporary fallback: " + geo.Country
 	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID, detail)
+	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),provider_error_state=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_state END,provider_error_detail=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_detail END,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND (COALESCE(provider_error_state,'')='' OR (provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%'))`, accountID, detail)
 	return nil
 }
