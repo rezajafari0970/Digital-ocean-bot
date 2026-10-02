@@ -11,3 +11,7 @@ func vultrProbeEvidence(oldLimit, apiCount int) (newLimit, inUse int) {
 	}
 	return newLimit, inUse
 }
+
+func vultrProbeInventoryProvesSuccess(source string, observedLimit, apiInUse int) bool {
+	return source == "vultr_api_probe" && apiInUse > observedLimit
+}

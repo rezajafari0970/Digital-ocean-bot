@@ -16,3 +16,15 @@ func TestVultrProbeEvidenceUsesStrongestAPIEvidence(t *testing.T) {
 		}
 	}
 }
+
+func TestVultrProbeInventoryRecoveryEvidence(t *testing.T) {
+	if !vultrProbeInventoryProvesSuccess("vultr_api_probe", 3, 4) {
+		t.Fatal("inventory above old probe limit must prove probe success")
+	}
+	if vultrProbeInventoryProvesSuccess("vultr_api_probe", 3, 3) {
+		t.Fatal("same inventory does not prove growth")
+	}
+	if vultrProbeInventoryProvesSuccess("vultr_api_saturation", 3, 4) {
+		t.Fatal("saturation invalidation is a different transition")
+	}
+}

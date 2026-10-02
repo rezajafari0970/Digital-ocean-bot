@@ -31,14 +31,9 @@ func (c Container) recordVultrSaturation(ctx context.Context, accountID string, 
 	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "capacity-saturation:"+accountID); err != nil {
 		return
 	}
-	var oldLimit, provenLowerBound int
+	var oldLimit int
 	_ = tx.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&oldLimit)
-	_ = tx.QueryRowContext(ctx, `SELECT COALESCE(lower_bound,0) FROM provider_capacity_observations WHERE account_id=$1`, accountID).Scan(&provenLowerBound)
-	if limit < provenLowerBound {
-		log.Printf("vultr saturation inventory contradiction account=%s inventory=%d proven_lower_bound=%d", accountID, limit, provenLowerBound)
-		return
-	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=GREATEST(provider_capacity_observations.lower_bound,EXCLUDED.lower_bound)`, accountID, limit); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO provider_capacity_observations(account_id,compute_limit,source,observed_at,updated_at,probe_after,probe_in_flight,lower_bound) VALUES($1,$2,'vultr_api_saturation',now(),now(),now()+interval '15 minutes',false,$2) ON CONFLICT(account_id) DO UPDATE SET compute_limit=EXCLUDED.compute_limit,source=EXCLUDED.source,observed_at=now(),updated_at=now(),probe_after=now()+interval '15 minutes',probe_in_flight=false,lower_bound=EXCLUDED.lower_bound`, accountID, limit); err != nil {
 		return
 	}
 	capacityJSON, _ := json.Marshal(providers.Capacity{ComputeLimit: limit, LimitKnown: true, ComputeInUse: limit, ObservedAt: time.Now().UTC()})
