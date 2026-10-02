@@ -33,6 +33,7 @@ type Deployment struct {
 	State       State
 	CurrentStep string
 	Attempt     int
+	LockVersion int64
 	LastError   string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

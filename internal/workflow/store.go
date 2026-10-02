@@ -8,13 +8,14 @@ import (
 )
 
 var ErrDeploymentNotFound = errors.New("deployment not found")
+var ErrDeploymentVersionConflict = errors.New("deployment version conflict")
 var ErrStepRetryDeferred = errors.New("workflow step retry deferred")
 var ErrStepRetryLimit = errors.New("workflow step retry limit reached")
 var ErrStepTerminal = errors.New("workflow step has terminal failure")
 
 type Store interface {
 	Reserve(context.Context, Request) (Deployment, bool, error)
-	Update(context.Context, Deployment) error
+	Update(context.Context, *Deployment) error
 	Event(context.Context, string, string, State, string) error
 	BeginStep(context.Context, string, string, int) (int, error)
 	FinishStep(context.Context, string, string, error, ErrorClass) error
@@ -30,16 +31,27 @@ type SQLStore struct{ DB DBTX }
 func (s SQLStore) Reserve(ctx context.Context, r Request) (Deployment, bool, error) {
 	var d Deployment
 	if r.DeploymentID != "" {
-		err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),COALESCE(host,''),state,current_step,attempt,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, r.DeploymentID, r.AccountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.Host, &d.State, &d.CurrentStep, &d.Attempt, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
+		err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),COALESCE(host,''),state,current_step,attempt,lock_version,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, r.DeploymentID, r.AccountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.Host, &d.State, &d.CurrentStep, &d.Attempt, &d.LockVersion, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
 		return d, false, err
 	}
-	err := s.DB.QueryRowContext(ctx, `INSERT INTO deployments(id,account_id,profile_id,state,current_step) VALUES(gen_random_uuid(),$1,$2,'PLANNED','create') RETURNING id::text,account_id::text,profile_id::text,state,current_step,attempt,created_at,updated_at`, r.AccountID, r.ProfileID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.State, &d.CurrentStep, &d.Attempt, &d.CreatedAt, &d.UpdatedAt)
+	err := s.DB.QueryRowContext(ctx, `INSERT INTO deployments(id,account_id,profile_id,state,current_step) VALUES(gen_random_uuid(),$1,$2,'PLANNED','create') RETURNING id::text,account_id::text,profile_id::text,state,current_step,attempt,lock_version,created_at,updated_at`, r.AccountID, r.ProfileID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.State, &d.CurrentStep, &d.Attempt, &d.LockVersion, &d.CreatedAt, &d.UpdatedAt)
 	return d, true, err
 }
 
-func (s SQLStore) Update(ctx context.Context, d Deployment) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE deployments SET droplet_id=NULLIF($3,'')::uuid,provider_id=NULLIF($4,''),host=NULLIF($5,''),state=$6,current_step=$7,attempt=$8,last_error=NULLIF($9,''),lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, d.AccountID, d.DropletID, d.ProviderID, d.Host, d.State, d.CurrentStep, d.Attempt, d.LastError)
-	return err
+func (s SQLStore) Update(ctx context.Context, d *Deployment) error {
+	res, err := s.DB.ExecContext(ctx, `UPDATE deployments SET droplet_id=NULLIF($3,'')::uuid,provider_id=NULLIF($4,''),host=NULLIF($5,''),state=$6,current_step=$7,attempt=$8,last_error=NULLIF($9,''),lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$10`, d.ID, d.AccountID, d.DropletID, d.ProviderID, d.Host, d.State, d.CurrentStep, d.Attempt, d.LastError, d.LockVersion)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return ErrDeploymentVersionConflict
+	}
+	d.LockVersion++
+	return nil
 }
 func (s SQLStore) Event(ctx context.Context, id, step string, state State, message string) error {
 	_, err := s.DB.ExecContext(ctx, `INSERT INTO deployment_events(deployment_id,step,state,message) VALUES($1,$2,$3,NULLIF($4,''))`, id, step, state, message)
@@ -48,7 +60,7 @@ func (s SQLStore) Event(ctx context.Context, id, step string, state State, messa
 
 func (s SQLStore) Get(ctx context.Context, id, accountID string) (Deployment, error) {
 	var d Deployment
-	err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),COALESCE(host,''),state,current_step,attempt,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, id, accountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.Host, &d.State, &d.CurrentStep, &d.Attempt, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
+	err := s.DB.QueryRowContext(ctx, `SELECT id::text,account_id::text,profile_id::text,COALESCE(droplet_id::text,''),COALESCE(provider_id,''),COALESCE(host,''),state,current_step,attempt,lock_version,COALESCE(last_error,''),created_at,updated_at FROM deployments WHERE id=$1 AND account_id=$2`, id, accountID).Scan(&d.ID, &d.AccountID, &d.ProfileID, &d.DropletID, &d.ProviderID, &d.Host, &d.State, &d.CurrentStep, &d.Attempt, &d.LockVersion, &d.LastError, &d.CreatedAt, &d.UpdatedAt)
 	return d, err
 }
 

@@ -25,10 +25,11 @@ func (s *Store) Reserve(_ context.Context, r workflow.Request) (workflow.Deploym
 	s.Exists = true
 	return s.D, true, nil
 }
-func (s *Store) Update(_ context.Context, d workflow.Deployment) error {
+func (s *Store) Update(_ context.Context, d *workflow.Deployment) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.D = d
+	s.D = *d
+	d.LockVersion++
 	return nil
 }
 func (s *Store) Event(_ context.Context, _ string, step string, state workflow.State, _ string) error {

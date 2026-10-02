@@ -67,7 +67,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		d.State = ConfiguringPanel
 		d.CurrentStep = "panel"
 		d.LastError = ""
-		if err := e.Store.Update(ctx, d); err != nil {
+		if err := e.Store.Update(ctx, &d); err != nil {
 			return d, err
 		}
 		_ = e.Store.Event(ctx, d.ID, "panel", ConfiguringPanel, "post-database continuation")
@@ -76,7 +76,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		d.State = ImportingDatabase
 		d.CurrentStep = "database"
 		d.LastError = ""
-		if err := e.Store.Update(ctx, d); err != nil {
+		if err := e.Store.Update(ctx, &d); err != nil {
 			return d, err
 		}
 		_ = e.Store.Event(ctx, d.ID, "database", ImportingDatabase, "post-installer continuation")
@@ -99,7 +99,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			d.State = Failed
 			d.CurrentStep = "done"
 			d.LastError = beginErr.Error()
-			_ = e.Store.Update(ctx, d)
+			_ = e.Store.Update(ctx, &d)
 			if e.FailureFinalizer != nil {
 				_ = e.FailureFinalizer.MarkFailed(ctx, d)
 			}
@@ -113,7 +113,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 		d.State = step.state
 		d.CurrentStep = step.name
 		d.Attempt++
-		if err := e.Store.Update(ctx, d); err != nil {
+		if err := e.Store.Update(ctx, &d); err != nil {
 			return d, err
 		}
 		_ = e.Store.Event(ctx, d.ID, step.name, d.State, "")
@@ -129,7 +129,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			d.State = WaitingInstaller
 			d.CurrentStep = "provision"
 			d.LastError = "INSTALLER_NOT_CONFIGURED"
-			_ = e.Store.Update(ctx, d)
+			_ = e.Store.Update(ctx, &d)
 			_ = e.Store.Event(ctx, d.ID, "provision", WaitingInstaller, "installer not configured")
 			return d, nil
 		}
@@ -141,7 +141,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 				d.State = Failed
 				d.CurrentStep = "done"
 			}
-			_ = e.Store.Update(ctx, d)
+			_ = e.Store.Update(ctx, &d)
 			if d.State == Failed && e.FailureFinalizer != nil {
 				_ = e.FailureFinalizer.MarkFailed(ctx, d)
 			}
@@ -152,7 +152,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			d.State = DatabaseComplete
 			d.CurrentStep = "database_complete"
 			d.LastError = ""
-			if err := e.Store.Update(ctx, d); err != nil {
+			if err := e.Store.Update(ctx, &d); err != nil {
 				return d, err
 			}
 			_ = e.Store.Event(ctx, d.ID, "database", DatabaseComplete, "post-install database complete")
@@ -168,14 +168,14 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			d.State = PanelComplete
 			d.CurrentStep = "panel_complete"
 			d.LastError = ""
-			if err := e.Store.Update(ctx, d); err != nil {
+			if err := e.Store.Update(ctx, &d); err != nil {
 				return d, err
 			}
 			_ = e.Store.Event(ctx, d.ID, "panel", PanelComplete, "post-install panel complete")
 			return d, nil
 		}
 		d.CurrentStep = next(step.name)
-		if err := e.Store.Update(ctx, d); err != nil {
+		if err := e.Store.Update(ctx, &d); err != nil {
 			return d, err
 		}
 	}
@@ -188,7 +188,7 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 	d.State = Ready
 	d.CurrentStep = "done"
 	d.LastError = ""
-	if err := e.Store.Update(ctx, d); err != nil {
+	if err := e.Store.Update(ctx, &d); err != nil {
 		return d, err
 	}
 	_ = e.Store.Event(ctx, d.ID, "done", Ready, "")

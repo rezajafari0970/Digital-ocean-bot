@@ -220,9 +220,21 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	}
 	engine, err := h.Container.Workflow(ctx, item.AccountID, cfg)
 	if err != nil {
+		if frozen, ferr := h.freezePermanentDeploymentError(ctx, d, err); ferr != nil {
+			return ferr
+		} else if frozen {
+			return nil
+		}
 		return err
 	}
 	_, err = engine.Run(ctx, workflow.Request{DeploymentID: d.ID, AccountID: item.AccountID, ProfileID: d.ProfileID, ClientCount: snap.ClientCount, InboundID: snap.InboundID, EmailPrefix: snap.EmailPrefix})
+	if err != nil {
+		if frozen, ferr := h.freezePermanentDeploymentError(ctx, d, err); ferr != nil {
+			return ferr
+		} else if frozen {
+			return nil
+		}
+	}
 	return err
 }
 func (h RecoveryHandler) BypassDeploymentBackoff(ctx context.Context, item worker.RecoveryItem) bool {
@@ -256,4 +268,27 @@ func terminalDeploymentStateForCreateRecovery(state string) bool {
 	default:
 		return false
 	}
+}
+
+func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d workflow.Deployment, err error) (bool, error) {
+	class := providers.Class(err)
+	switch class {
+	case providers.ErrorAuthentication, providers.ErrorPermissionDenied, providers.ErrorInvalidRequest, providers.ErrorImageUnavailable:
+	default:
+		return false, nil
+	}
+	msg := err.Error()
+	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
+	if qerr != nil {
+		return false, qerr
+	}
+	n, qerr := res.RowsAffected()
+	if qerr != nil {
+		return false, qerr
+	}
+	if n == 1 {
+		_ = (workflow.SQLStore{DB: h.Container.DB}).Event(ctx, d.ID, d.CurrentStep, workflow.Failed, "RECOVERY_PERMANENT_PROVIDER_ERROR:"+string(class))
+		_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
+	}
+	return n == 1, nil
 }
