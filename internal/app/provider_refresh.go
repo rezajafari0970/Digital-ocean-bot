@@ -30,7 +30,11 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		var providerState, providerError string
 		var providerCheckedAt time.Time
 		_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt)
-		if interval := ProviderProbeInterval(providerState); interval > 0 && time.Since(providerCheckedAt) < interval {
+		effectiveState := providerState
+		if providerError != "" {
+			effectiveState = providerError
+		}
+		if interval := ProviderProbeInterval(effectiveState); interval > 0 && time.Since(providerCheckedAt) < interval {
 			continue
 		}
 		var fresh bool
@@ -51,7 +55,14 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			defer lockTx.Rollback()
 			// Re-check account state and freshness after acquiring the lock: another
 			// coordinator may have refreshed or changed provider state while we waited.
-			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError); qerr != nil {
+			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt); qerr != nil {
+				return
+			}
+			effectiveState = providerState
+			if providerError != "" {
+				effectiveState = providerError
+			}
+			if interval := ProviderProbeInterval(effectiveState); interval > 0 && time.Since(providerCheckedAt) < interval {
 				return
 			}
 			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)

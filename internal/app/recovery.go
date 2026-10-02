@@ -298,7 +298,7 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 	if class != providers.ErrorUnknown && class != "" {
 		state := ClassifyAccountProviderError(err, false)
 		if state != ProviderStateTransportError {
-			_, _ = h.Container.DB.ExecContext(ctx, `UPDATE accounts SET provider_state=$2,provider_state_detail=$3,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, d.AccountID, state, msg, ProviderStateRuntimeStatus(state))
+			h.Container.RecordProviderObservation(ctx, d.AccountID, state, err, msg)
 		}
 	}
 	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)

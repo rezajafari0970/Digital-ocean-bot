@@ -51,7 +51,7 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		class := providers.Class(createErr)
 		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorRateLimited || class == providers.ErrorTransport || class == providers.ErrorUnavailable || class == providers.ErrorAmbiguousOutcome {
 			state := ClassifyAccountProviderError(createErr, runtime.Config.Network.Mode == network.RouteProxyRequired)
-			_, _ = c.DB.ExecContext(cbCtx, `UPDATE accounts SET provider_state=$2,provider_state_detail=$3,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$3,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, state, createErr.Error(), ProviderStateRuntimeStatus(state))
+			c.RecordProviderObservation(cbCtx, accountID, state, createErr, createErr.Error())
 		}
 		if runtime.Config.Provider == "vultr" {
 			c.handleVultrCreateError(cbCtx, accountID, compute, createErr)
