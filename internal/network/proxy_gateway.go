@@ -72,13 +72,22 @@ func newProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gatewa
 			return nil, err
 		}
 		tr.Proxy = nil
-		tr.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+		tr.DialContext = func(ctx context.Context, networkName, address string) (net.Conn, error) {
+			host, port, err := net.SplitHostPort(address)
+			if err != nil {
+				return nil, err
+			}
+			ip, err := ResolveIPv4(ctx, host)
+			if err != nil {
+				return nil, err
+			}
+			target := net.JoinHostPort(ip, port)
 			type result struct {
 				c   net.Conn
 				err error
 			}
 			ch := make(chan result, 1)
-			go func() { c, err := dialer.Dial(network, address); ch <- result{c, err} }()
+			go func() { c, err := dialer.Dial("tcp4", target); ch <- result{c, err} }()
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
