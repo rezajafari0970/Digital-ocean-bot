@@ -87,12 +87,10 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 		AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING')
 		AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds')
 	)`)
-	for _, p := range panels {
-		if ctx.Err() != nil {
-			return
-		}
-		_ = s.refreshPanelOutput(ctx, p)
+	if len(panels) == 0 || ctx.Err() != nil {
+		return
 	}
+	s.refreshOutputLive(ctx)
 }
 
 func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) ([]outputRecord, bool) {
@@ -244,7 +242,7 @@ func (s *Server) refreshOutputLive(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			}
-			panelCtx, cancel := context.WithTimeout(ctx, 12*time.Second)
+			panelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 			_ = s.refreshPanelOutput(panelCtx, p)
 		}()
