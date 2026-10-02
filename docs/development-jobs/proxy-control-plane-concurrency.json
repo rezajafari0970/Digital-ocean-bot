@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "goal": "Add concurrency and race-proof coverage for proxy-control isolation: simultaneous account/provider generations remain isolated, stale and fresh runtime checks do not cross account boundaries, and PostgreSQL half-open admission grants at most one live probe lease under contention.",
+  "context": "This is test-hardening only. Add always-running in-process concurrency tests plus an optional PostgreSQL E2E test guarded by DOB_E2E_DSN, following existing postgres_e2e_test conventions. The DB test must create isolated account/proxy state, force circuit open with retry eligible, launch concurrent AcquireAdmission calls, assert exactly one allowed lease while the lease is live, and clean up. Do not call provider APIs, add schema, sleep for timing, or change production behavior. Use go test -race for proxycontrol/app/network.",
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 170,
+  "source_context_bytes": 100000,
+  "commands": {
+    "implement": ["gofmt -w internal/proxycontrol/concurrency_test.go internal/proxycontrol/postgres_e2e_test.go internal/app/provider_network_runtime_test.go"],
+    "test": ["go test -race ./internal/proxycontrol ./internal/network ./internal/app -count=1"],
+    "verify": ["go test ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole ./internal/proxycontrol ./internal/network ./internal/app -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 300,
+  "allowed_paths": [
+    "internal/proxycontrol/concurrency_test.go",
+    "internal/proxycontrol/postgres_e2e_test.go",
+    "internal/app/provider_network_runtime_test.go",
+    "docs/development-jobs/proxy-control-plane-concurrency.json"
+  ],
+  "commit_message": "test(proxy): prove concurrent control-plane isolation",
+  "push": true
+}
