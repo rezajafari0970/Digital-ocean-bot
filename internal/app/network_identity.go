@@ -110,19 +110,19 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 	if err != nil {
 		return err
 	}
-	var collision bool
-	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, ip).Scan(&collision)
+	// Verification must never rotate or overwrite identity. Sticky recovery is
+	// the sole writer allowed to adopt a new exit IP/session. This guard only
+	// admits the exact healthy identity already committed by that state machine.
+	var expectedIP string
+	var lastHealth bool
+	var rotating bool
+	err = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),''),COALESCE(last_health_ok,false),rotation_started_at IS NOT NULL FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&expectedIP, &lastHealth, &rotating)
 	if err != nil {
 		return err
 	}
-	if collision {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID, "proxy exit IP/subnet collision: "+ip)
+	if expectedIP == "" || !lastHealth || rotating || ip != expectedIP {
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='proxy identity verification mismatch',runtime_status_at=now(),updated_at=now() WHERE id=$1`, accountID)
 		return ErrIsolationWait
 	}
-	_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,exit_ip,subnet_key) VALUES($1,$2::inet,host(network(set_masklen($2::inet,24)))||'/24') ON CONFLICT(account_id) DO UPDATE SET country=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.country ELSE NULL END,country_code=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.country_code ELSE NULL END,asn=CASE WHEN account_network_identities.exit_ip=EXCLUDED.exit_ip THEN account_network_identities.asn ELSE NULL END,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,updated_at=now()`, accountID, ip)
-	if err != nil {
-		return err
-	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND COALESCE(provider_error_state,'')=''`, accountID)
 	return nil
 }
