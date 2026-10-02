@@ -58,6 +58,12 @@ func fastGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) 
 // one fast proxied egress observation and atomically records READY/ISOLATION_WAIT.
 func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID string) error {
 	cfg, err := c.Accounts.Account(ctx, accountID)
+	if errors.Is(err, ErrAccountDisabled) {
+		var cleanup bool
+		if qerr := c.DB.QueryRowContext(ctx, `SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1`, accountID).Scan(&cleanup); qerr == nil && cleanup {
+			cfg, err = c.Accounts.AccountForCleanup(ctx, accountID)
+		}
+	}
 	if err != nil && !errors.Is(err, ErrNetworkIdentityCollision) {
 		return err
 	}
