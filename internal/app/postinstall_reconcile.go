@@ -44,7 +44,7 @@ EXISTS(SELECT 1 FROM xui_panel_deployments p WHERE p.droplet_id=$1 AND p.generat
 		return err
 	}
 	defer tx.Rollback()
-	res, err := tx.ExecContext(ctx, `UPDATE deployments SET state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)
+	res, err := tx.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='PANEL_COMPLETE',current_step='panel_complete',last_error='',updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)
 	if err != nil {
 		return err
 	}

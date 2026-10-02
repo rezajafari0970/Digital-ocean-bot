@@ -35,6 +35,6 @@ func (s ProfileStore) AttachSnapshot(ctx context.Context, deploymentID string, p
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.ExecContext(ctx, `UPDATE deployments SET profile_snapshot=$2 WHERE id=$1 AND profile_snapshot='{}'::jsonb`, deploymentID, raw)
+	_, err = s.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,profile_snapshot=$2 WHERE id=$1 AND profile_snapshot='{}'::jsonb`, deploymentID, raw)
 	return err
 }

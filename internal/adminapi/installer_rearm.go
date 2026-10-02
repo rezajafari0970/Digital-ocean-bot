@@ -44,7 +44,7 @@ func (s *Server) rearmDeploymentInstaller(w http.ResponseWriter, r *http.Request
 		writeJSON(w, 409, map[string]string{"error": "installer_rearm_conflict"})
 		return
 	}
-	if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET installer_generation=$2,state='WAITING_INSTALLER',current_step='installer_rearmed',last_error='',updated_at=now() WHERE id=$1`, id, next); err != nil {
+	if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET lock_version=lock_version+1,installer_generation=$2,state='WAITING_INSTALLER',current_step='installer_rearmed',last_error='',updated_at=now() WHERE id=$1`, id, next); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}

@@ -133,7 +133,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 					return err
 				}
 				if keyErr := sshDriver.DeleteSSHKey(ctx, keyID); keyErr == nil {
-					_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET profile_snapshot=jsonb_set(profile_snapshot,'{ssh_provider_key_deleted_at}',to_jsonb(now()::text),true),updated_at=now() WHERE account_id=$1 AND provider_id=$2`, item.AccountID, providerID)
+					_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,profile_snapshot=jsonb_set(profile_snapshot,'{ssh_provider_key_deleted_at}',to_jsonb(now()::text),true),updated_at=now() WHERE account_id=$1 AND provider_id=$2`, item.AccountID, providerID)
 				}
 			}
 		}
@@ -179,10 +179,15 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		return err
 	}
 	if d.State == workflow.WaitingInstaller {
+		if frozen, ferr := h.freezeExhaustedInstallerRecovery(ctx, d); ferr != nil {
+			return ferr
+		} else if frozen {
+			return nil
+		}
 		return h.Container.activateInstaller(ctx, d, snap)
 	}
 	if placeholder := provisioning.InstallerPlaceholderName(cfg.Provision); d.CurrentStep == "provision" && placeholder != "" {
-		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='WAITING_INSTALLER',last_error='WAITING_INSTALLER_ACTIVATION',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
+		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='WAITING_INSTALLER',last_error='WAITING_INSTALLER_ACTIVATION',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
 		_, _ = h.Container.DB.ExecContext(ctx, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step=$3,last_error='waiting for installer activation',next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID, placeholder)
 		_ = store.Event(ctx, d.ID, "provision", workflow.WaitingInstaller, "waiting for installer activation")
 		return nil
@@ -191,7 +196,7 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		var ps, innerStep, pe string
 		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &innerStep, &pe); qerr == nil {
 			if ps == "FAILED" {
-				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, "provision failed: "+pe)
+				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, "provision failed: "+pe)
 				_ = store.Event(ctx, d.ID, "provision", workflow.Failed, "PROVISION_TERMINAL_FREEZE_V1")
 				_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
 				return nil
@@ -208,7 +213,7 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,COALESCE(resource_id,'') FROM operations WHERE account_id=$1 AND idempotency_key LIKE 'deploy:'||$2||':create:%' ORDER BY created_at DESC LIMIT 1`, item.AccountID, d.ID).Scan(&opState, &resourceID)
 		if qerr == nil {
 			if opState == "failed" && resourceID == "" {
-				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
+				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
 				_ = store.Event(ctx, d.ID, "create", workflow.Failed, "CREATE_TERMINAL_FREEZE_V2")
 				return nil
 			}
@@ -278,7 +283,7 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 		return false, nil
 	}
 	msg := err.Error()
-	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET state='FAILED',current_step='done',last_error=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
+	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
 	if qerr != nil {
 		return false, qerr
 	}
@@ -291,4 +296,31 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 		_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
 	}
 	return n == 1, nil
+}
+
+func (h RecoveryHandler) freezeExhaustedInstallerRecovery(ctx context.Context, d workflow.Deployment) (bool, error) {
+	if d.State != workflow.WaitingInstaller {
+		return false, nil
+	}
+	var failures int
+	var firstFailed sql.NullTime
+	var lastErr string
+	err := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(f.failures,0),f.first_failed_at,COALESCE(f.last_error,'') FROM worker_item_failures f WHERE f.kind='deployment' AND f.item_id=$1`, d.ID).Scan(&failures, &firstFailed, &lastErr)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	exhausted := failures >= 64
+	if firstFailed.Valid && time.Since(firstFailed.Time) >= 30*time.Minute {
+		exhausted = true
+	}
+	if !exhausted {
+		return false, nil
+	}
+	if lastErr == "" {
+		lastErr = "installer recovery budget exhausted"
+	}
+	return true, h.Container.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", "recovery budget exhausted: "+lastErr)
 }

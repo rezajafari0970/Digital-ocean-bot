@@ -34,7 +34,7 @@ func (c Container) RearmPostInstall(ctx context.Context, deploymentID, accountID
 	if !failed {
 		return ErrPostInstallRearmNotAllowed
 	}
-	res, err := tx.ExecContext(ctx, `UPDATE deployments SET postinstall_generation=postinstall_generation+1,state='IMPORTING_DATABASE',current_step='database',last_error=NULL,updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)
+	res, err := tx.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,postinstall_generation=postinstall_generation+1,state='IMPORTING_DATABASE',current_step='database',last_error=NULL,updated_at=now() WHERE id=$1 AND account_id=$2 AND postinstall_generation=$3`, deploymentID, accountID, generation)
 	if err != nil {
 		return err
 	}

@@ -61,6 +61,6 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	if err != nil {
 		return err
 	}
-	_, err = c.DB.ExecContext(ctx, `UPDATE deployments SET profile_snapshot=$2 WHERE id=$1`, d.ID, raw)
+	_, err = c.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,profile_snapshot=$2 WHERE id=$1`, d.ID, raw)
 	return err
 }
