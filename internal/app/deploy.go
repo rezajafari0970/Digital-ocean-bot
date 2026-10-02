@@ -129,17 +129,18 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 			}
 		}
 		compatible := make([]string, 0, len(effective.Regions))
-		seen := map[string]bool{}
+		seenPreferred := map[string]bool{}
 		for _, rg := range effective.Regions {
 			if allowed[rg] {
 				compatible = append(compatible, rg)
-				seen[rg] = true
+				seenPreferred[rg] = true
 			}
 		}
+		seenFallback := map[string]bool{}
 		for _, rg := range catalog.Regions {
-			if rg.Available && allowed[rg.ID] && !seen[rg.ID] {
+			if rg.Available && allowed[rg.ID] && !seenPreferred[rg.ID] && !seenFallback[rg.ID] {
 				compatible = append(compatible, rg.ID)
-				seen[rg.ID] = true
+				seenFallback[rg.ID] = true
 			}
 		}
 		effective.Regions = compatible
