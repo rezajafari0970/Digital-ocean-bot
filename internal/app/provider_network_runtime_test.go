@@ -4,8 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
@@ -300,5 +305,118 @@ func TestPersistProviderRuntimeObservationUsesCapturedGenerationAndIgnoresStaleR
 	}
 	if healthy {
 		t.Fatal("matching-generation observation did not update runtime health")
+	}
+}
+
+type scriptedProxyRoundTripper struct {
+	steps []func(*http.Request) (*http.Response, error)
+	next  int
+}
+
+func (s *scriptedProxyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	if s.next >= len(s.steps) {
+		return nil, fmt.Errorf("unexpected round trip %d", s.next)
+	}
+	step := s.steps[s.next]
+	s.next++
+	return step(req)
+}
+
+func proxyHTTPStatus(status int) func(*http.Request) (*http.Response, error) {
+	return func(req *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: status, Status: http.StatusText(status), Body: io.NopCloser(strings.NewReader("")), Request: req}, nil
+	}
+}
+
+func TestProxyControlPlaneFailureRecoveryE2E(t *testing.T) {
+	ctx := context.Background()
+	now := time.Date(2026, 10, 2, 0, 0, 0, 0, time.UTC)
+	policy := proxycontrol.Policy{
+		Health:                  network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: time.Second},
+		CircuitFailureThreshold: 2,
+		OpenDuration:            10 * time.Second,
+	}
+	state := proxycontrol.DefaultState("account-a", "proxy-a", "provider-a")
+	script := &scriptedProxyRoundTripper{steps: []func(*http.Request) (*http.Response, error){
+		proxyHTTPStatus(http.StatusProxyAuthRequired),
+		func(*http.Request) (*http.Response, error) {
+			return nil, errors.New("dial proxy: injected transport failure")
+		},
+		proxyHTTPStatus(http.StatusOK),
+		proxyHTTPStatus(http.StatusOK),
+	}}
+	clock := func() time.Time { return now }
+	transport := network.HealthReportingTransport{
+		Base: script,
+		Now:  clock,
+		Report: func(result network.HealthResult) {
+			state = proxycontrol.ApplyHealth(state, result, policy)
+		},
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://provider.invalid/test", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil || resp == nil || resp.StatusCode != http.StatusProxyAuthRequired {
+		t.Fatalf("407 step resp=%v err=%v", resp, err)
+	}
+	_ = resp.Body.Close()
+	if state.CircuitState != resilience.Closed || state.HealthState != network.StatusDegraded {
+		t.Fatalf("after 407 circuit=%s health=%s", state.CircuitState, state.HealthState)
+	}
+
+	now = now.Add(time.Second)
+	if _, err = transport.RoundTrip(req); err == nil {
+		t.Fatal("transport failure step unexpectedly succeeded")
+	}
+	if state.CircuitState != resilience.Open || state.HealthState != network.StatusDown || state.RetryAfter == nil {
+		t.Fatalf("after transport failure circuit=%s health=%s retry=%v", state.CircuitState, state.HealthState, state.RetryAfter)
+	}
+	if _, err = proxycontrol.Allow(state, now); !errors.Is(err, resilience.ErrCircuitOpen) {
+		t.Fatalf("open circuit admission err=%v", err)
+	}
+
+	now = state.RetryAfter.Add(time.Nanosecond)
+	state, err = proxycontrol.Allow(state, now)
+	if err != nil || state.CircuitState != resilience.HalfOpen {
+		t.Fatalf("half-open admission circuit=%s err=%v", state.CircuitState, err)
+	}
+	resp, err = transport.RoundTrip(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("first recovery probe resp=%v err=%v", resp, err)
+	}
+	_ = resp.Body.Close()
+	if state.CircuitState != resilience.HalfOpen || state.HealthState == network.StatusHealthy {
+		t.Fatalf("hysteresis bypassed circuit=%s health=%s", state.CircuitState, state.HealthState)
+	}
+
+	now = now.Add(time.Second)
+	resp, err = transport.RoundTrip(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("second recovery probe resp=%v err=%v", resp, err)
+	}
+	_ = resp.Body.Close()
+	if state.CircuitState != resilience.Closed || state.HealthState != network.StatusHealthy {
+		t.Fatalf("recovery failed circuit=%s health=%s", state.CircuitState, state.HealthState)
+	}
+
+	oldGeneration := state.Generation
+	state = proxycontrol.BumpGeneration(state)
+	generationStore := &fakeRuntimeGenerationStore{generation: state.Generation, found: true}
+	proxyID := "proxy-a"
+	runtimeFor := func(generation int64) AccountRuntime {
+		return AccountRuntime{
+			Config:              AccountConfig{ID: "account-a", Provider: "provider-a", Network: network.Profile{AccountID: "account-a", Mode: network.RouteProxyRequired, ProxyID: &proxyID}},
+			TransportGeneration: generation,
+			GenerationStore:     generationStore,
+		}
+	}
+	if err = runtimeFor(oldGeneration).CheckMutationGeneration(ctx); !errors.Is(err, ErrRuntimeGenerationObsolete) {
+		t.Fatalf("old runtime error=%v", err)
+	}
+	if err = runtimeFor(state.Generation).CheckMutationGeneration(ctx); err != nil {
+		t.Fatalf("fresh runtime rejected: %v", err)
 	}
 }
