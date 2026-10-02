@@ -159,6 +159,7 @@ func Build(
 				"tcpNoDelay":           true,
 				"tcpKeepAliveIdle":     25,
 				"tcpKeepAliveInterval": 20,
+				"tcpUserTimeout":       30000,
 			},
 		}
 

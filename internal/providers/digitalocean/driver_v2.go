@@ -93,7 +93,7 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	userData := ""
 	if len(req.SSHAuthorizedKeys) > 0 {
 		var b strings.Builder
-		b.WriteString("#cloud-config\ndisable_root: false\nusers:\n  - name: root\n    lock_passwd: true\n    ssh_authorized_keys:\n")
+		b.WriteString("#cloud-config\ndisable_root: false\nssh_pwauth: false\nusers:\n  - name: root\n    lock_passwd: true\n    ssh_authorized_keys:\n")
 		for _, key := range req.SSHAuthorizedKeys {
 			key = strings.TrimSpace(key)
 			if key == "" {

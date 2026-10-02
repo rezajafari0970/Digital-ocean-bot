@@ -30,7 +30,7 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 		if pub == "" || (!strings.HasPrefix(pub, "ssh-ed25519 ") && !strings.HasPrefix(pub, "ssh-rsa ") && !strings.HasPrefix(pub, "ecdsa-sha2-")) {
 			return providers.CreateServerResult{Outcome: providers.OutcomeRejected}, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: "create_server", Message: "Vultr SSH public key is empty or unsupported"}
 		}
-		cloud := fmt.Sprintf("#cloud-config\ndisable_root: false\nssh_authorized_keys:\n  - %s\n", pub)
+		cloud := fmt.Sprintf("#cloud-config\ndisable_root: false\nssh_pwauth: false\nssh_authorized_keys:\n  - %s\n", pub)
 		userData = base64.StdEncoding.EncodeToString([]byte(cloud))
 	}
 	x, e := d.client.CreateInstance(ctx, createInstanceRequest{Region: req.RegionID, Plan: req.PlanID, OSID: osID, Label: req.Name, Hostname: req.Name, SSHKeyIDs: append([]string(nil), req.SSHKeyRefs...), Tags: tags, EnableIPv6: false, ActivationEmail: false, UserData: userData})
