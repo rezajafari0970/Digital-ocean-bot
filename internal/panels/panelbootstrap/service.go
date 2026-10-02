@@ -19,6 +19,7 @@ import (
 )
 
 var ErrRealityWarming = errors.New("reality stability warming")
+var ErrRuntimeRepairCooldown = errors.New("panel runtime repair cooldown")
 
 type Secrets interface {
 	Get(context.Context, string, string) ([]byte, error)

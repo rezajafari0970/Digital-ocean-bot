@@ -90,7 +90,18 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 				}
 			}
 			if e != nil {
-				return e
+				repairer := panelbootstrap.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: "dob:reality-primary:000001"}
+				rerr := repairer.RepairRuntimePanel(ctx, p)
+				if rerr == nil {
+					s.Runtimes.Invalidate(p.ID)
+					s.Runtimes.ResetCircuit(p.ID)
+					runtime, e = s.Runtimes.Acquire(ctx, p.ID)
+				} else if !errors.Is(rerr, panelbootstrap.ErrRuntimeRepairCooldown) {
+					return fmt.Errorf("runtime repair: %w", rerr)
+				}
+				if e != nil {
+					return e
+				}
 			}
 		}
 	}
