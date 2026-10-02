@@ -24,7 +24,20 @@ func ClassifyAccountProviderError(err error, proxyRequired bool) string {
 	if err == nil {
 		return ProviderStateActive
 	}
-	if proxyRequired && (errors.Is(err, network.ErrProxyRequired) || errors.Is(err, network.ErrProxyConfigInvalid) || errors.Is(err, network.ErrAccountNetworkNotReady) || errors.Is(err, network.ErrProxyCircuitOpen)) {
+	if proxyRequired && (errors.Is(err, network.ErrProxyRequired) ||
+		errors.Is(err, network.ErrProxyUnavailable) ||
+		errors.Is(err, network.ErrProxyConfigInvalid) ||
+		errors.Is(err, network.ErrAccountNetworkNotReady) ||
+		errors.Is(err, network.ErrProxyCircuitOpen) ||
+		errors.Is(err, network.ErrProxyAuth) ||
+		errors.Is(err, network.ErrProxyDNS) ||
+		errors.Is(err, network.ErrProxyConnect) ||
+		errors.Is(err, network.ErrIPv6Prohibited) ||
+		errors.Is(err, network.ErrIPv4Required) ||
+		errors.Is(err, network.ErrUnexpectedExitIP) ||
+		errors.Is(err, network.ErrServerIPLeak) ||
+		errors.Is(err, network.ErrEgressChanged) ||
+		errors.Is(err, network.ErrAccountContextMismatch)) {
 		return ProviderStateProxyError
 	}
 	switch providers.Class(err) {

@@ -60,7 +60,11 @@ func normalizeError(op string, err error) error {
 			case 401:
 				class = providers.ErrorAuthentication
 			case 403:
-				class = providers.ErrorPermissionDenied
+				if strings.Contains(message, "locked") || strings.Contains(message, "suspended") {
+					class = providers.ErrorAccountLocked
+				} else {
+					class = providers.ErrorPermissionDenied
+				}
 			case 404:
 				class = providers.ErrorNotFound
 			case 409:
