@@ -43,7 +43,7 @@ func main() {
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		run := func() {
-			rows, err := application.DB.QueryContext(ctx, `SELECT a.id::text FROM accounts a JOIN network_profiles np ON np.account_id=a.id WHERE a.enabled=true AND np.mode='proxy_required'`)
+			rows, err := application.DB.QueryContext(ctx, `SELECT a.id::text FROM accounts a JOIN network_profiles np ON np.account_id=a.id WHERE np.mode='proxy_required' AND (a.enabled=true OR (a.deletion_requested_at IS NOT NULL AND EXISTS(SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')))`)
 			if err != nil {
 				return
 			}

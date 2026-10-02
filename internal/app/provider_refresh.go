@@ -38,12 +38,17 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		if fresh && providerState == ProviderStateActive && providerError == "" {
 			continue
 		}
+		lockTx, lockErr := c.DB.BeginTx(ctx, nil)
+		if lockErr != nil {
+			continue
+		}
 		var locked bool
-		if err := c.DB.QueryRowContext(ctx, `SELECT pg_try_advisory_lock(hashtextextended($1,0))`, "provider-refresh:"+id).Scan(&locked); err != nil || !locked {
+		if err := lockTx.QueryRowContext(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, "provider-refresh:"+id).Scan(&locked); err != nil || !locked {
+			_ = lockTx.Rollback()
 			continue
 		}
 		func() {
-			defer c.DB.ExecContext(context.Background(), `SELECT pg_advisory_unlock(hashtextextended($1,0))`, "provider-refresh:"+id)
+			defer lockTx.Rollback()
 			// Re-check account state and freshness after acquiring the lock: another
 			// coordinator may have refreshed or changed provider state while we waited.
 			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError); qerr != nil {

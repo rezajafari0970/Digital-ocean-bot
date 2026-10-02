@@ -26,6 +26,14 @@ type AccountConfig struct {
 type Repository struct{ DB *sql.DB }
 
 func (r Repository) Account(ctx context.Context, id string) (AccountConfig, error) {
+	return r.account(ctx, id, false)
+}
+
+func (r Repository) AccountForCleanup(ctx context.Context, id string) (AccountConfig, error) {
+	return r.account(ctx, id, true)
+}
+
+func (r Repository) account(ctx context.Context, id string, allowDisabled bool) (AccountConfig, error) {
 	var a AccountConfig
 	var mode string
 	var proxyID, proxyType, host, proxySecret, proxyUser, proxyStatus, proxyExit, proxyCountry, proxyCountryCode, proxyASN sql.NullString
@@ -34,7 +42,7 @@ func (r Repository) Account(ctx context.Context, id string) (AccountConfig, erro
 	if err != nil {
 		return a, err
 	}
-	if !a.Enabled {
+	if !a.Enabled && !allowDisabled {
 		return a, ErrAccountDisabled
 	}
 	a.Network = network.Profile{AccountID: a.ID, Mode: network.RouteMode(mode)}

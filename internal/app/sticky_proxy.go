@@ -66,6 +66,12 @@ func observeStickyGeoReliable(ctx context.Context, g *network.Gateway) (stickyGe
 
 func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountConfig, string, string, string, bool, *time.Time, error) {
 	cfg, err := c.Accounts.Account(ctx, accountID)
+	if errors.Is(err, ErrAccountDisabled) {
+		var cleanup bool
+		if qerr := c.DB.QueryRowContext(ctx, `SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1`, accountID).Scan(&cleanup); qerr == nil && cleanup {
+			cfg, err = c.Accounts.AccountForCleanup(ctx, accountID)
+		}
+	}
 	if errors.Is(err, ErrNetworkIdentityCollision) {
 		// Repository already populated the account/network fields before the
 		// collision check. Keep that partial config so the proxy keeper can

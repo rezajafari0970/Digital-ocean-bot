@@ -184,6 +184,32 @@ func (c Container) Runtime(ctx context.Context, accountID string) (AccountRuntim
 	if err != nil {
 		return AccountRuntime{}, err
 	}
+	return c.runtimeFromConfig(ctx, cfg)
+}
+
+func (c Container) CleanupRuntime(ctx context.Context, accountID string) (AccountRuntime, error) {
+	var deletionRequested bool
+	if err := c.DB.QueryRowContext(ctx, `SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1`, accountID).Scan(&deletionRequested); err != nil {
+		return AccountRuntime{}, err
+	}
+	if !deletionRequested {
+		return AccountRuntime{}, ErrAccountDisabled
+	}
+	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
+		return AccountRuntime{}, err
+	}
+	if err := c.requireAccountNetworkReady(ctx, accountID); err != nil {
+		return AccountRuntime{}, err
+	}
+	cfg, err := c.Accounts.AccountForCleanup(ctx, accountID)
+	if err != nil {
+		return AccountRuntime{}, err
+	}
+	return c.runtimeFromConfig(ctx, cfg)
+}
+
+func (c Container) runtimeFromConfig(ctx context.Context, cfg AccountConfig) (AccountRuntime, error) {
+	accountID := cfg.ID
 	cell := accounts.NewCellManager().Register(accountID)
 	netrt, err := c.buildProviderNetworkRuntime(ctx, cfg)
 	if err != nil {

@@ -215,7 +215,7 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status=CASE WHEN $2>0 THEN 'DELETE_PENDING' ELSE 'DELETED' END,runtime_status_detail=CASE WHEN $2>0 THEN 'archived; provider cleanup pending' ELSE 'history retained by soft delete' END,deleted_at=COALESCE(deleted_at,now()),updated_at=now() WHERE id=$1 AND deleted_at IS NULL`, id, live)
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status=CASE WHEN $2>0 THEN 'DELETE_PENDING' ELSE 'DELETED' END,runtime_status_detail=CASE WHEN $2>0 THEN 'archived; provider cleanup pending' ELSE 'history retained by soft delete' END,deleted_at=CASE WHEN $2>0 THEN NULL ELSE COALESCE(deleted_at,now()) END,updated_at=now() WHERE id=$1 AND deleted_at IS NULL`, id, live)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return

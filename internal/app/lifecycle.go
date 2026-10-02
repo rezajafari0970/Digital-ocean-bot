@@ -198,7 +198,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 	}
 processLifecycle:
-	runtime, err := c.Runtime(ctx, item.AccountID)
+	runtime, err := c.runtimeForLifecycle(ctx, item.AccountID)
 	if err != nil {
 		return err
 	}
@@ -259,7 +259,7 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 			return err
 		}
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=now(),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND a.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=COALESCE(deleted_at,now()),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {
 		return err
 	}
 	return tx.Commit()
