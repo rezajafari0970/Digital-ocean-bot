@@ -39,7 +39,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		}
 		var fresh bool
 		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
-		if fresh && providerState == ProviderStateActive && providerError == "" {
+		if fresh && providerState == ProviderStateActive && providerError == "" && time.Since(providerCheckedAt) <= maxAge {
 			continue
 		}
 		lockTx, lockErr := c.DB.BeginTx(ctx, nil)
@@ -66,7 +66,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
-			if fresh && providerState == ProviderStateActive && providerError == "" {
+			if fresh && providerState == ProviderStateActive && providerError == "" && time.Since(providerCheckedAt) <= maxAge {
 				return
 			}
 			rt, err := c.Runtime(ctx, id)
@@ -127,6 +127,15 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				var observedLimit int
 				var observedAt time.Time
 				if qerr := c.DB.QueryRowContext(ctx, `SELECT compute_limit,observed_at,source FROM provider_capacity_observations WHERE account_id=$1`, id).Scan(&observedLimit, &observedAt, &observedCapacitySource); qerr == nil {
+					// A probe may succeed at the provider and then the worker can
+					// crash before recording OnCreateSuccess. Fresh inventory
+					// above the old exact limit is authoritative proof that the
+					// account admitted additional capacity.
+					if observedCapacitySource == "vultr_api_probe" && obs.Capacity.ComputeInUse > observedLimit {
+						observedLimit = obs.Capacity.ComputeInUse
+						_, _ = c.DB.ExecContext(ctx, `UPDATE provider_capacity_observations SET compute_limit=$2,lower_bound=GREATEST(lower_bound,$2),source='vultr_api_probe_success',probe_in_flight=false,probe_after=now(),observed_at=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_probe'`, id, observedLimit)
+						observedCapacitySource = "vultr_api_probe_success"
+					}
 					if observedCapacitySource == "vultr_api_saturation" && obs.Capacity.ComputeInUse > observedLimit {
 						_, _ = c.DB.ExecContext(ctx, `UPDATE provider_capacity_observations SET compute_limit=0,lower_bound=GREATEST(lower_bound,$2),source='vultr_api_lower_bound',probe_in_flight=false,probe_after=NULL,observed_at=now(),updated_at=now() WHERE account_id=$1 AND source='vultr_api_saturation' AND compute_limit<$2`, id, obs.Capacity.ComputeInUse)
 						observedCapacitySource = "vultr_api_lower_bound"

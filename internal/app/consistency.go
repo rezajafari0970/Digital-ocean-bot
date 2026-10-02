@@ -13,6 +13,27 @@ func (c Container) ReconcileLocalState(ctx context.Context) {
 	// This also repairs rows created before delete disabled schedules atomically.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE schedules s SET enabled=false,lease_until=NULL,updated_at=now() FROM accounts a WHERE a.id=s.account_id AND a.enabled=false AND (s.enabled=true OR s.lease_until IS NOT NULL)`)
 
+	// A crashed/ambiguous Vultr capacity probe must not hold the account
+	// forever. Active create operations retain the claim; otherwise an old
+	// claim is safely returned to the last proven saturation/lower-bound state.
+	_, _ = c.DB.ExecContext(ctx, `
+UPDATE provider_capacity_observations p
+SET source=CASE WHEN p.compute_limit>0 THEN 'vultr_api_saturation' ELSE 'vultr_api_lower_bound' END,
+    probe_in_flight=false,
+    probe_after=CASE WHEN p.compute_limit>0 THEN now() ELSE NULL END,
+    updated_at=now()
+FROM accounts a
+WHERE a.id=p.account_id
+  AND p.source='vultr_api_probe'
+  AND p.probe_in_flight=true
+  AND (a.enabled=false OR p.updated_at<now()-interval '30 minutes')
+  AND NOT EXISTS (
+    SELECT 1 FROM operations o
+    WHERE o.account_id=p.account_id
+      AND o.kind='CREATE_DROPLET'
+      AND o.state IN ('planned','running','unknown','verifying')
+  )`)
+
 	// Link deployments to an already-known lifecycle droplet when provider IDs agree.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE deployments d SET droplet_id=dr.id,updated_at=now()
         FROM droplets dr WHERE d.droplet_id IS NULL AND d.provider_id IS NOT NULL
