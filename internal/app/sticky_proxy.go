@@ -155,7 +155,7 @@ WHERE account_id=$1
 		}
 	}
 
-	cfg, session, cc, wanted, fallback, started, err := c.stickyConfig(ctx, accountID)
+	cfg, session, cc, _, fallback, started, err := c.stickyConfig(ctx, accountID)
 	if err != nil {
 		return err
 	}
@@ -343,35 +343,54 @@ WHERE account_id=$1
 	if started != nil {
 		allowFallback = allowCrossCountryFallback(fallback, *started, time.Now())
 	}
-	// A fresh session asks DataImpulse for another endpoint. Keep targeting the
-	// preferred country during the five-minute recovery window.
+	// Search several independent sessions in the same keeper cycle. Residential
+	// pools can legitimately return collisions; do not stall the whole account
+	// for another ten seconds after the first duplicate /24.
+	const candidateAttempts = 6
 	var newSession string
-	if err = c.DB.QueryRowContext(ctx, `SELECT replace(gen_random_uuid()::text,'-','')`).Scan(&newSession); err != nil {
-		return err
+	var geo stickyGeo
+	var candidateErr error
+	found := false
+	for attempt := 0; attempt < candidateAttempts; attempt++ {
+		if err = c.DB.QueryRowContext(ctx, `SELECT replace(gen_random_uuid()::text,'-','')`).Scan(&newSession); err != nil {
+			return err
+		}
+		user = proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, newSession, cap.CountryTargeting && !allowFallback && cc != "")
+		g2, gerr := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
+		if gerr != nil {
+			candidateErr = gerr
+			continue
+		}
+		geoCtx, cancel2 := context.WithTimeout(ctx, 5*time.Second)
+		candidate, gerr := observeStickyGeoReliable(geoCtx, g2)
+		cancel2()
+		g2.CloseIdleConnections()
+		if gerr != nil {
+			candidateErr = gerr
+			continue
+		}
+		if cap.CountryTargeting && !allowFallback && cc != "" && !strings.EqualFold(candidate.CountryCode, cc) {
+			candidateErr = ErrIsolationWait
+			continue
+		}
+		var collision bool
+		if qerr := c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, candidate.IP).Scan(&collision); qerr != nil {
+			return qerr
+		}
+		if collision {
+			candidateErr = ErrIsolationWait
+			continue
+		}
+		geo = candidate
+		found = true
+		break
 	}
-	user = proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, newSession, cap.CountryTargeting && !allowFallback && cc != "")
-	g2, err := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
-	if err != nil {
-		return err
-	}
-	defer g2.CloseIdleConnections()
-	geoCtx, cancel2 := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel2()
-	geo, err := observeStickyGeoReliable(geoCtx, g2)
-	if err != nil {
-		return err
-	}
-	if cap.CountryTargeting && !allowFallback && cc != "" && !strings.EqualFold(geo.CountryCode, cc) {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1`, accountID, fmt.Sprintf("waiting for healthy %s proxy IP", wanted))
-		return ErrIsolationWait
-	}
-	var collision bool
-	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, geo.IP).Scan(&collision)
-	if err != nil {
-		return err
-	}
-	if collision {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1`, accountID, "waiting for unique proxy IP/subnet")
+	if !found {
+		detail := fmt.Sprintf("no unique proxy IPv4/subnet after %d session candidates", candidateAttempts)
+		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1`, accountID, detail)
+		if candidateErr != nil && !errors.Is(candidateErr, ErrIsolationWait) {
+			return candidateErr
+		}
 		return ErrIsolationWait
 	}
 	var priorCountry, priorTZ, priorLocale string
