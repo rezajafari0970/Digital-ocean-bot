@@ -72,3 +72,19 @@ Date: 2026-10-02
 - provider mutation remains behind AccountRuntime mutation/egress guards.
 - capacity evidence must be fresh at authoritative create admission.
 - desired capacity remains a hard creation ceiling.
+
+## Production completion evidence
+Production promoted to commit 870750aa3d0fa29c2a5e361551da1e8fce6b5b0f. Runtime version, build manifest, API hash and worker hash all match; API and worker are active.
+
+Live database migration metadata reports 111 migrations with latest 000110_account_runtime_provider_invariant.
+
+Post-promotion evidence:
+- TOKEN_INVALID Vultr account is now runtime_status=PROVIDER_TOKEN_INVALID rather than READY.
+- duplicate idempotency keys: 0.
+- accounts above desired capacity: 0.
+- managed resource orphans: 0.
+- five historical DELETE_DROPLET unknown operations belong to a LOCKED DigitalOcean account. They cannot be safely mutated until the provider account permits access.
+- all five historical unknown operations now have worker failure/backoff rows; observed retry horizon was about 50 seconds during verification and operation attempt counters did not continue the prior 30-second growth pattern.
+- the locked account and its stale snapshot remain intentionally fail-closed; this is external provider state, not a local convergence defect.
+
+Rollback artifact captured before promotion at /opt/digital-ocean-bot/rollback-provider-870750a.
