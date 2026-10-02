@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "goal": "Add deterministic in-process end-to-end failure-injection coverage for the shared proxy control plane: proxy-auth 407 and transport failure drive health/circuit failure, half-open recovery succeeds with hysteresis, generation rotation invalidates an old AccountRuntime, and a fresh runtime generation is admitted.",
-  "context": "This is a test-harness batch, not a production behavior redesign. Compose existing network.HealthReportingTransport/TransportObserver semantics, proxycontrol state-machine functions, and AccountRuntime.CheckMutationGeneration using fakes. Keep the new scenario entirely in internal/app; do NOT modify provider driver test files. Provider parity is verified by running the existing DigitalOcean/Vultr/VultrConsole suites after the shared scenario. Do not call real provider APIs, require network access, add schema, sleep, or duplicate production state-machine logic.",
+  "context": "This is a test-harness batch, not a production behavior redesign. The test MUST actually execute network.HealthReportingTransport.RoundTrip with an in-process scripted RoundTripper that returns HTTP 407, a transport error, and HTTP 200 responses. Feed the emitted HealthResult values through the real proxycontrol.ApplyHealth and proxycontrol.Allow functions using a deterministic clock/policy, and assert CLOSED -> OPEN -> HALF_OPEN -> CLOSED including recovery hysteresis. Then use proxycontrol.BumpGeneration and AccountRuntime.CheckMutationGeneration to prove old-runtime rejection and fresh-runtime admission. A fake store may hold current generation only; it MUST NOT return precomputed health/circuit states. Keep the scenario in the existing internal/app/provider_network_runtime_test.go; do not require a new test file and do not modify provider driver tests. No external network, sleeps, schema, or production behavior changes.",
   "api_implement": true,
   "structured_edits": true,
   "api_timeout_seconds": 170,
   "source_context_bytes": 90000,
   "commands": {
-    "implement": ["gofmt -w internal/app/proxy_control_plane_e2e_test.go internal/app/provider_network_runtime_test.go"],
+    "implement": ["gofmt -w internal/app/provider_network_runtime_test.go"],
     "test": ["go test ./internal/app ./internal/network ./internal/proxycontrol -count=1"],
     "verify": ["go test ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole ./internal/app ./internal/network ./internal/proxycontrol -count=1", "go test ./..."]
   },
