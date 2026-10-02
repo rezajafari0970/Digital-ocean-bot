@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/accounts"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/jobs"
@@ -17,7 +18,17 @@ import (
 
 var ErrNetworkNotReady = errors.New("account network not ready")
 var ErrProviderComputeUnsupported = errors.New("provider compute capability unavailable")
-var ErrRuntimeGenerationObsolete = errors.New("account runtime proxy generation is obsolete or unavailable")
+var ErrRuntimeGenerationObsolete = runtimeGenerationObsoleteError{}
+
+type runtimeGenerationObsoleteError struct{}
+
+func (runtimeGenerationObsoleteError) Error() string {
+	return "account runtime proxy generation is obsolete or unavailable"
+}
+
+func (runtimeGenerationObsoleteError) RetryDelay() time.Duration {
+	return time.Second
+}
 
 type Container struct {
 	DB        *sql.DB

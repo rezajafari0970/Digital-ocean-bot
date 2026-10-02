@@ -7,7 +7,7 @@
   "api_timeout_seconds": 170,
   "source_context_bytes": 70000,
   "commands": {
-    "implement": ["gofmt -w internal/worker/failures.go internal/worker/failures_test.go internal/app/container.go internal/app/provider_network_runtime_test.go"],
+    "implement": ["gofmt -w internal/worker/failures.go internal/app/container.go internal/app/provider_network_runtime_test.go"],
     "test": ["go test ./internal/worker ./internal/app ./internal/droplets -count=1"],
     "verify": ["go test ./internal/providers/vultr ./internal/providers/digitalocean ./internal/worker ./internal/app ./internal/droplets -count=1", "go test ./..."]
   },

@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
@@ -39,6 +41,21 @@ type fakeRuntimeGenerationStore struct {
 func (s *fakeRuntimeGenerationStore) CurrentGeneration(context.Context, string, string, string) (int64, bool, error) {
 	s.calls++
 	return s.generation, s.found, s.err
+}
+
+func TestErrRuntimeGenerationObsoleteRetryDelay(t *testing.T) {
+	for _, err := range []error{
+		ErrRuntimeGenerationObsolete,
+		fmt.Errorf("mutation rejected: %w", ErrRuntimeGenerationObsolete),
+	} {
+		var hint interface{ RetryDelay() time.Duration }
+		if !errors.As(err, &hint) {
+			t.Fatalf("error %v does not expose a retry delay", err)
+		}
+		if delay := hint.RetryDelay(); delay != time.Second {
+			t.Fatalf("retry delay=%v, want=%v", delay, time.Second)
+		}
+	}
 }
 
 func TestAccountRuntimeCheckMutationGeneration(t *testing.T) {

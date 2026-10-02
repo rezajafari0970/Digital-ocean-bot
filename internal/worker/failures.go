@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -36,8 +37,12 @@ RETURNING failures`, kind, itemID, accountID, msg).Scan(&failures)
 	if failures < 1 {
 		failures = 1
 	}
-	backoff := time.Duration(1<<minFailure(failures, 6)) * time.Second
-	_, _ = s.DB.ExecContext(ctx, `UPDATE worker_item_failures SET next_retry_at=now()+($3 * interval '1 second') WHERE kind=$1 AND item_id=$2`, kind, itemID, int(backoff/time.Second))
+	delay := time.Duration(1<<minFailure(failures, 6)) * time.Second
+	if hinted, ok := boundedRetryDelay(err); ok {
+		delay = hinted
+	}
+	seconds := int((delay + time.Second - 1) / time.Second)
+	_, _ = s.DB.ExecContext(ctx, `UPDATE worker_item_failures SET next_retry_at=now()+($3 * interval '1 second') WHERE kind=$1 AND item_id=$2`, kind, itemID, seconds)
 }
 
 func (s FailureStore) Clear(ctx context.Context, kind, itemID string) {
@@ -55,6 +60,25 @@ func (s FailureStore) ClearResolved(ctx context.Context) {
  (f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))
  OR (f.kind='operation' AND EXISTS(SELECT 1 FROM operations o WHERE o.id::text=f.item_id AND o.state IN ('succeeded','failed')))
  OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)
+}
+
+// RetryDelayHint marks an error with a preferred delay before worker recovery.
+type RetryDelayHint interface {
+	RetryDelay() time.Duration
+}
+
+const MaxRetryDelayHint = 30 * time.Second
+
+func boundedRetryDelay(err error) (time.Duration, bool) {
+	var hint RetryDelayHint
+	if !errors.As(err, &hint) {
+		return 0, false
+	}
+	delay := hint.RetryDelay()
+	if delay <= 0 || delay > MaxRetryDelayHint {
+		return 0, false
+	}
+	return delay, true
 }
 
 func minFailure(a, b int) int {
