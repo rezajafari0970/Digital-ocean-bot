@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "goal": "Make stale runtime generation failures recover quickly and safely through the existing worker retry loop. Classify the stale-generation error as a bounded transient retry hint without retrying inside the provider mutation call or bypassing operation idempotency.",
+  "context": "Workers already persist failures and reconstruct Container.Runtime on a later recovery attempt. Preserve that architecture. Add a small cross-package retry-delay contract in worker or another non-cyclic package, make ErrRuntimeGenerationObsolete expose a short bounded retry delay, and make FailureStore honor that hint while retaining exponential backoff for all other errors. No immediate inline retry, no provider call duplication, no schema change.",
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 170,
+  "source_context_bytes": 70000,
+  "commands": {
+    "implement": ["gofmt -w internal/worker/failures.go internal/worker/failures_test.go internal/app/container.go internal/app/provider_network_runtime_test.go"],
+    "test": ["go test ./internal/worker ./internal/app ./internal/droplets -count=1"],
+    "verify": ["go test ./internal/providers/vultr ./internal/providers/digitalocean ./internal/worker ./internal/app ./internal/droplets -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 240,
+  "allowed_paths": [
+    "internal/worker/failures.go",
+    "internal/worker/failures_test.go",
+    "internal/app/container.go",
+    "internal/app/provider_network_runtime_test.go",
+    "docs/development-jobs/proxy-control-plane-phase4.json"
+  ],
+  "commit_message": "feat(proxy): fast-retry stale runtime generation",
+  "push": true
+}
