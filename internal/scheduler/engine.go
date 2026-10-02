@@ -41,6 +41,13 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			continue
 		}
 		// Scheduled automation is allowed only for a fully pinned, capable installer.
+		// Heal missing/stale installer references before evaluating the gate so a
+		// healthy account cannot starve indefinitely because of profile drift.
+		if err := e.ensureAutomationInstallerRef(ctx, x.ProfileID); err != nil {
+			log.Printf("scheduler skip account=%s reason=automation_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
+			_ = e.Leases.Complete(ctx, x, now)
+			continue
+		}
 		var automationReady bool
 		_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady)
 		if !automationReady {
@@ -131,4 +138,31 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		_ = e.Leases.Complete(ctx, x, now)
 	}
 	return nil
+}
+
+func (e Engine) ensureAutomationInstallerRef(ctx context.Context, profileID string) error {
+	var ready bool
+	if err := e.DB.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM deployment_profiles p
+		JOIN installers i ON i.name=p.config->'installer_ref'->>'name'
+		 AND i.version=(p.config->'installer_ref'->>'version')::int
+		WHERE p.id=$1 AND p.enabled=true AND i.active=true
+		 AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb
+	)`, profileID).Scan(&ready); err != nil {
+		return err
+	}
+	if ready {
+		return nil
+	}
+	var name string
+	var version int
+	if err := e.DB.QueryRowContext(ctx, `SELECT name,version FROM installers
+		WHERE active=true AND manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb
+		ORDER BY version DESC,updated_at DESC LIMIT 1`).Scan(&name, &version); err != nil {
+		return err
+	}
+	_, err := e.DB.ExecContext(ctx, `UPDATE deployment_profiles
+		SET config=jsonb_set(config,'{installer_ref}',jsonb_build_object('name',$2::text,'version',$3::int),true),updated_at=now()
+		WHERE id=$1 AND enabled=true`, profileID, name, version)
+	return err
 }
