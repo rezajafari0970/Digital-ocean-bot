@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "goal": "Add deterministic in-process end-to-end failure-injection coverage for the shared proxy control plane: proxy-auth 407 and transport failure drive health/circuit failure, half-open recovery succeeds with hysteresis, generation rotation invalidates an old AccountRuntime, and a fresh runtime generation is admitted.",
+  "context": "This is a test-harness batch, not a production behavior redesign. Compose existing network.HealthReportingTransport/TransportObserver semantics, proxycontrol state-machine functions, and AccountRuntime.CheckMutationGeneration using fakes. Do not call real DigitalOcean/Vultr APIs, do not require network access, do not add schema, and do not duplicate state-machine logic in production. The test must prove provider-neutral behavior; verification must run both DigitalOcean and Vultr driver suites.",
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 170,
+  "source_context_bytes": 90000,
+  "commands": {
+    "implement": ["gofmt -w internal/app/proxy_control_plane_e2e_test.go internal/app/provider_network_runtime_test.go"],
+    "test": ["go test ./internal/app ./internal/network ./internal/proxycontrol -count=1"],
+    "verify": ["go test ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole ./internal/app ./internal/network ./internal/proxycontrol -count=1", "go test ./..."]
+  },
+  "timeout_seconds": 240,
+  "allowed_paths": [
+    "internal/app/proxy_control_plane_e2e_test.go",
+    "internal/app/provider_network_runtime_test.go",
+    "docs/development-jobs/proxy-control-plane-e2e-failure.json"
+  ],
+  "commit_message": "test(proxy): prove control-plane failure recovery e2e",
+  "push": true
+}
