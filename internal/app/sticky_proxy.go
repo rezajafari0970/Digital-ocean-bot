@@ -434,7 +434,7 @@ WHERE account_id=$1
 	if err == nil && (priorCountry != geo.Country || priorTZ != geo.Timezone || priorLocale != newLocale) {
 	}
 	if err != nil {
-		return err
+		return classifyIdentityWriteError(err)
 	}
 	detail := ""
 	if allowFallback && cc != "" && !strings.EqualFold(geo.CountryCode, cc) {
