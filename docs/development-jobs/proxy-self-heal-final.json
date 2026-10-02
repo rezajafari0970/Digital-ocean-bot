@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "goal": "Close the final proxy availability deadlock: a proxy_required account whose global proxy row is down/degraded must be able to perform a bounded recovery probe through the configured proxy without permitting provider mutations or direct fallback; successful recovery must restore global proxy health and account control-plane health, while failed recovery remains fail-closed. Add deterministic regression coverage. Also harden service restart policy so transient crash loops recover automatically without disabling the service.",
+  "context": "Current live evidence: 8 proxy_required profiles, zero missing account_transport_state, but the only proxy row is down while account proxy circuits are mostly closed/degraded. MaintainStickyIdentity rejects cfg.Proxy.Status != healthy before it can probe, creating a recovery deadlock. Use NewProxyProbeGateway only inside keeper/recovery, never provider mutation. Preserve no-direct-leak invariant, generation/transport epoch guards, account isolation, IPv4 SOCKS target behavior, and existing circuit/half-open semantics. Global health recovery must require a real successful proxy observation. Do not weaken NewProxyGateway healthy-status requirement for normal provider traffic. Keep changes minimal and provider-agnostic. For systemd, change deployment unit templates/install behavior only if needed; do not edit host /etc from AI patch. PRE-IMPLEMENTATION COUNCIL NOTE: this PLAN pass has no diff yet. Treat missing implementation/test results as required post-implementation gates, not as a reason to block planning. The orchestrator will run deterministic tests and an independent post-implementation review before promotion.",
+  "ai_council": true,
+  "block_on_council": false,
+  "api_implement": true,
+  "structured_edits": true,
+  "api_timeout_seconds": 240,
+  "council_timeout_seconds": 900,
+  "source_context_bytes": 120000,
+  "commands": {
+    "implement": [
+      "gofmt -w internal/app/sticky_proxy.go internal/app/proxy_control_plane.go internal/app/provider_network_runtime_test.go"
+    ],
+    "test": [
+      "go test -race ./internal/proxycontrol ./internal/network ./internal/app ./internal/providers/digitalocean ./internal/providers/vultr ./internal/providers/vultrconsole -count=1"
+    ],
+    "verify": [
+      "go test ./...",
+      "git diff --check"
+    ]
+  },
+  "timeout_seconds": 480,
+  "allowed_paths": [
+    "internal/app/sticky_proxy.go",
+    "internal/app/proxy_control_plane.go",
+    "internal/app/provider_network_runtime_test.go",
+    "deploy/digital-ocean-bot-api.service",
+    "deploy/digital-ocean-bot-worker.service",
+    "deploy/install.sh",
+    "docs/development-jobs/proxy-self-heal-final.json"
+  ],
+  "commit_message": "fix(proxy): make fail-closed transport self-healing",
+  "push": true
+}
