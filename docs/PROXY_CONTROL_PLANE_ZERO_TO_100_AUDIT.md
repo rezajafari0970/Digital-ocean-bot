@@ -98,3 +98,15 @@ Do not start with schema redesign. First prove the current races:
 - reconcile the unfinished dirty concurrency test;
 - expose proxy circuit/generation separately in admin observability.
 Only then introduce the account transport epoch migration.
+
+## Completion status — 2026-10-02
+The six-stage completion train was executed through production promotion.
+
+- B1: account_transport_state migration and dual proxy-generation + transport-epoch mutation guard implemented.
+- B2: active proxy selection moved under account advisory lock/transaction; candidate eligibility is selected under lock and switch + identity reset are atomic.
+- C: DB invariant triggers invalidate epoch on network profile and proxy-definition changes; password-only credential changes explicitly invalidate affected account epochs.
+- D: runtime API distinguishes provider circuit from proxy circuit and exposes proxy health/generation/lease plus account transport epoch/active proxy/reason.
+- E: race suites, provider parity, full regression, existing 407/circuit/stale-runtime E2E, production-schema migration dry-run with rollback, build verification, and controlled worker restart passed. A destructive production DB outage was intentionally not injected.
+- F: production upgraded to commit c007e318ec41769c88e2938af0c2e59e0a3dac43. Runtime commit/manifest/binary hashes match; API and worker are active. Live migrations 000108 and 000109 are applied. Live invariant check: 8 proxy-required accounts, 0 epoch/proxy mismatches, 0 missing transport-state rows, 0 open proxy circuits at verification time.
+
+Rollback artifact captured before promotion at /opt/digital-ocean-bot/rollback-proxy-c007e31.
