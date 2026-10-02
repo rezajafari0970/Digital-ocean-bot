@@ -152,37 +152,18 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				// Capacity-breaker path: skip replacement creation and delete only this oldest EXPIRING item.
 				goto processLifecycle
 			}
-			// Claim replacement ownership before any provider mutation. The advisory
-			// transaction lock serializes contenders for this exact lifecycle item.
-			claimTx, err := c.DB.BeginTx(ctx, nil)
-			if err != nil {
-				return err
-			}
-			if _, err = claimTx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))`, "replacement-claim:"+item.ID); err != nil {
-				claimTx.Rollback()
-				return err
-			}
+			// Replacement ownership is claimed atomically inside the same short
+			// deployment-admission transaction that reserves the deployment. No DB
+			// transaction remains open across provider/SSH/provisioning work.
 			var existing string
-			if err = claimTx.QueryRowContext(ctx, `SELECT COALESCE(replacement_deployment_id::text,'') FROM droplets WHERE id=$1 FOR UPDATE`, item.ID).Scan(&existing); err != nil {
-				claimTx.Rollback()
-				return err
+			if qerr := c.DB.QueryRowContext(ctx, `SELECT COALESCE(replacement_deployment_id::text,'') FROM droplets WHERE id=$1`, item.ID).Scan(&existing); qerr != nil {
+				return qerr
 			}
 			if existing != "" {
-				return claimTx.Commit()
+				return nil
 			}
-			// Keep the claim transaction open while StartDeployment performs its short
-			// account admission/reservation. No provider mutation occurs before that
-			// reservation is durable; contenders block on this droplet claim.
-			d, err := c.StartDeployment(ctx, item.AccountID, item.ProfileID)
-			if err != nil {
-				claimTx.Rollback()
-				return err
-			}
-			if _, err = claimTx.ExecContext(ctx, `UPDATE droplets SET replacement_deployment_id=$2,updated_at=now() WHERE id=$1 AND replacement_deployment_id IS NULL`, item.ID, d.ID); err != nil {
-				claimTx.Rollback()
-				return err
-			}
-			return claimTx.Commit()
+			_, qerr := c.startDeployment(ctx, item.AccountID, item.ProfileID, false, item.ID)
+			return qerr
 		}
 		if !terminalFailed {
 			var replacementReady bool
@@ -235,7 +216,16 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 		return err
 	}
 	defer tx.Rollback()
-	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID); err != nil {
+	var priorState, replacementID string
+	var accountEnabled bool
+	if err = tx.QueryRowContext(ctx, `SELECT
+		COALESCE((SELECT state FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 LIMIT 1),''),
+		COALESCE((SELECT replacement_deployment_id::text FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 LIMIT 1),''),
+		COALESCE((SELECT enabled FROM accounts WHERE id=$1),false)`, accountID, providerID).Scan(&priorState, &replacementID, &accountEnabled); err != nil {
+		return err
+	}
+	shouldBackfill := accountEnabled && priorState == "DELETING" && replacementID == ""
+	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',backfill_required=CASE WHEN $3 THEN true ELSE backfill_required END,updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID, shouldBackfill); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {

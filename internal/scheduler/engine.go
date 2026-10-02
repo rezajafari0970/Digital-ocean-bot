@@ -11,11 +11,15 @@ import (
 
 type Starter interface {
 	PrepareScheduledAccount(context.Context, string) error
-	StartScheduledDeployment(context.Context, string, string) error
+	StartScheduledDeployment(context.Context, string, string, bool) error
 }
 
 func providerAllowsCreate(enabled bool, runtimeStatus, providerState, providerError string) bool {
 	return enabled && runtimeStatus == "READY" && providerState == "ACTIVE" && providerError == ""
+}
+
+func buildSpacingBlocked(backfillPending int, nextBuild sql.NullTime, now time.Time) bool {
+	return backfillPending <= 0 && nextBuild.Valid && now.Before(nextBuild.Time)
 }
 
 type Engine struct {
@@ -60,7 +64,7 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		var concurrent, desired, managed, spacingMin, spacingMax int
+		var concurrent, desired, managed, spacingMin, spacingMax, backfillPending int
 		var nextBuild sql.NullTime
 		err := e.DB.QueryRowContext(ctx, `SELECT
 			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
@@ -68,7 +72,8 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
 			(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
 			(SELECT build_spacing_max_minutes FROM accounts WHERE id=$1),
-			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &nextBuild)
+			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL),
+			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &backfillPending, &nextBuild)
 		if err != nil {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
@@ -88,6 +93,9 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 		}
 		needed := desired - effectiveOccupancy
 		if needed <= 0 {
+			if backfillPending > 0 {
+				_, _ = e.DB.ExecContext(ctx, `UPDATE droplets SET backfill_required=false,updated_at=now() WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL`, x.AccountID)
+			}
 			log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d provider_inuse=%d effective=%d unmaterialized=%d", x.AccountID, desired, managed, cap.InUse, effectiveOccupancy, preCreate)
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
@@ -97,9 +105,10 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
 		}
-		// Creation cadence is independent from the scheduler wake-up cadence.
-		// At most one new deployment starts per configured spacing window.
-		if nextBuild.Valid && now.Before(nextBuild.Time) {
+		// Normal growth obeys Build Spacing. Lifecycle backfill consumes a durable
+		// backfill ticket and may bypass spacing so rotation never leaves an
+		// account below its Desired target for an entire normal cadence window.
+		if buildSpacingBlocked(backfillPending, nextBuild, now) {
 			log.Printf("scheduler skip account=%s reason=build_spacing next=%s", x.AccountID, nextBuild.Time.UTC().Format(time.RFC3339))
 			_ = e.Leases.Complete(ctx, x, now)
 			continue
@@ -127,17 +136,24 @@ func (e Engine) RunDue(ctx context.Context, now time.Time) error {
 			log.Printf("scheduler skip account=%s reason=no_available_capacity known=%v limit=%d inuse=%d pending=%d", x.AccountID, cap.LimitKnown, cap.Limit, cap.InUse, cap.Pending)
 		}
 		for i := 0; i < allowed; i++ {
-			if err := e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID); err == nil {
-				if spacingMax < spacingMin {
-					spacingMax = spacingMin
+			consumeBackfill := backfillPending > 0
+			if err := e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID, consumeBackfill); err == nil {
+				if consumeBackfill {
+					if backfillPending > 0 {
+						backfillPending--
+					}
+				} else {
+					if spacingMax < spacingMin {
+						spacingMax = spacingMin
+					}
+					minutes := spacingMin
+					if spacingMax > spacingMin {
+						minutes += rand.Intn(spacingMax - spacingMin + 1)
+					}
+					_, _ = e.DB.ExecContext(ctx, `UPDATE accounts SET next_build_at=$2 WHERE id=$1`, x.AccountID, now.Add(time.Duration(minutes)*time.Minute))
 				}
-				minutes := spacingMin
-				if spacingMax > spacingMin {
-					minutes += rand.Intn(spacingMax - spacingMin + 1)
-				}
-				_, _ = e.DB.ExecContext(ctx, `UPDATE accounts SET next_build_at=$2 WHERE id=$1`, x.AccountID, now.Add(time.Duration(minutes)*time.Minute))
 			} else {
-				log.Printf("scheduler start deployment failed account=%s profile=%s err=%v", x.AccountID, x.ProfileID, err)
+				log.Printf("scheduler start deployment failed account=%s profile=%s backfill=%t err=%v", x.AccountID, x.ProfileID, consumeBackfill, err)
 			}
 		}
 		_ = e.Leases.Complete(ctx, x, now)

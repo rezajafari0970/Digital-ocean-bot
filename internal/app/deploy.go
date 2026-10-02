@@ -20,6 +20,10 @@ var ErrDatabaseTemplateNotConfigured = errors.New("database template not configu
 var ErrDatabaseTemplateUnavailable = errors.New("database template unavailable")
 
 func (c Container) StartDeployment(ctx context.Context, accountID, profileID string) (workflow.Deployment, error) {
+	return c.startDeployment(ctx, accountID, profileID, false, "")
+}
+
+func (c Container) startDeployment(ctx context.Context, accountID, profileID string, consumeBackfill bool, replacementDropletID string) (workflow.Deployment, error) {
 	if err := c.MaintainStickyIdentity(ctx, accountID); err != nil {
 		return workflow.Deployment{}, err
 	}
@@ -106,6 +110,37 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 	d, _, err := store.Reserve(ctx, workflow.Request{AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})
 	if err != nil {
 		return d, err
+	}
+	if replacementDropletID != "" {
+		res, qerr := tx.ExecContext(ctx, `UPDATE droplets
+			SET replacement_deployment_id=$3,updated_at=now()
+			WHERE id=$1 AND account_id=$2 AND replacement_deployment_id IS NULL
+			  AND state IN ('READY','EXPIRING','RETIRING')`, replacementDropletID, accountID, d.ID)
+		if qerr != nil {
+			return d, qerr
+		}
+		n, _ := res.RowsAffected()
+		if n != 1 {
+			return d, ErrCapacityUnavailable
+		}
+	}
+	if consumeBackfill {
+		res, qerr := tx.ExecContext(ctx, `UPDATE droplets
+			SET replacement_deployment_id=$2,backfill_required=false,updated_at=now()
+			WHERE id=(
+				SELECT id FROM droplets
+				WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL
+				ORDER BY updated_at,id
+				FOR UPDATE SKIP LOCKED
+				LIMIT 1
+			)`, accountID, d.ID)
+		if qerr != nil {
+			return d, qerr
+		}
+		n, _ := res.RowsAffected()
+		if n != 1 {
+			return d, ErrCapacityUnavailable
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		return d, err

@@ -12,6 +12,20 @@ func (c Container) ReconcileLocalState(ctx context.Context) {
 	// Disabled/deleting accounts must never keep scheduler leases alive.
 	// This also repairs rows created before delete disabled schedules atomically.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE schedules s SET enabled=false,lease_until=NULL,updated_at=now() FROM accounts a WHERE a.id=s.account_id AND a.enabled=false AND (s.enabled=true OR s.lease_until IS NOT NULL)`)
+	_, _ = c.DB.ExecContext(ctx, `UPDATE droplets r SET backfill_required=false,updated_at=now() FROM accounts a WHERE a.id=r.account_id AND a.enabled=false AND r.backfill_required=true`)
+	_, _ = c.DB.ExecContext(ctx, `
+UPDATE droplets r
+SET replacement_deployment_id=NULL,backfill_required=true,updated_at=now()
+FROM deployments d,accounts a
+WHERE r.replacement_deployment_id=d.id
+  AND r.account_id=a.id
+  AND r.state='DELETED'
+  AND a.enabled=true
+  AND d.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')
+  AND NOT EXISTS (
+    SELECT 1 FROM droplets live
+    WHERE live.id=d.droplet_id AND live.state<>'DELETED'
+  )`)
 
 	// A crashed/ambiguous Vultr capacity probe must not hold the account
 	// forever. Active create operations retain the claim; otherwise an old
