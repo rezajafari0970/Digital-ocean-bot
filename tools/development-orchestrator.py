@@ -71,8 +71,10 @@ def api_implement(job,m,j):
         chunks.append(block)
     plan_path=BASE/(job+"-plan.json")
     plan=plan_path.read_text(errors="replace") if plan_path.exists() else ""
-    prompt=("Return ONLY a git unified diff, no markdown fences. Implement the bounded goal using only ALLOWED_PATHS. "
-            "Do not modify files outside scope. Preserve existing behavior unless the goal requires change.\nGOAL:\n"+m["goal"]+
+    prompt=("Return ONLY a valid git unified diff beginning with 'diff --git'. No explanation, prose, JSON, or markdown fences. "
+            "The patch MUST modify at least one existing file and every modified path MUST be in ALLOWED_PATHS. "
+            "Implement the bounded goal using only the supplied source. Do not invent files or APIs outside the supplied source. "
+            "Preserve existing behavior unless the goal requires change. Include focused tests in the patch when a test file is allowed.\nGOAL:\n"+m["goal"]+
             "\nCONTEXT:\n"+m.get("context","")+"\nALLOWED_PATHS:\n"+"\n".join(allowed)+"\nPLAN:\n"+plan+"\nSOURCE:\n"+"".join(chunks))
     p=subprocess.run([str(ADAPTER)],input=prompt,text=True,capture_output=True,cwd=ROOT,timeout=int(m.get("api_timeout_seconds",240)))
     if p.returncode!=0:
