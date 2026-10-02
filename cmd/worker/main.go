@@ -35,6 +35,20 @@ func main() {
 	}
 	// Repair only locally provable state links before any scheduler/lifecycle work.
 	application.Container.ReconcileLocalState(ctx)
+	// Keep local repair self-healing even without a process restart. This clears
+	// stale Vultr probe claims, disabled-account leases and provable orphan links.
+	go func() {
+		t := time.NewTicker(5 * time.Minute)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				application.Container.ReconcileLocalState(ctx)
+			}
+		}
+	}()
 	go application.Container.RunDailyCatalogSync(ctx)
 	// Sticky proxy identity keeper: preserve each account's current exit IPv4.
 	// On failure retry the previous session every 10s for two minutes, then
