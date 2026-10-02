@@ -58,8 +58,8 @@ type accountRuntimeStatusSQLStore struct {
 func (s accountRuntimeStatusSQLStore) MarkStaleGeneration(ctx context.Context, accountID string) error {
 	_, err := s.DB.ExecContext(ctx, `
 UPDATE accounts
-SET runtime_status = $2, runtime_status_detail = $3
-WHERE id = $1 AND runtime_status IN ($4, $5)`,
+SET runtime_status = $1, runtime_status_detail = $2
+WHERE id = $3 AND runtime_status IN ($4, $5)`,
 		accountRuntimeStatusStaleGeneration,
 		accountRuntimeStatusStaleGenerationDetail,
 		accountID,
@@ -72,8 +72,8 @@ WHERE id = $1 AND runtime_status IN ($4, $5)`,
 func (s accountRuntimeStatusSQLStore) ClearStaleGeneration(ctx context.Context, accountID string) error {
 	_, err := s.DB.ExecContext(ctx, `
 UPDATE accounts
-SET runtime_status = ?, runtime_status_detail = NULL
-WHERE id = ? AND runtime_status = ?`,
+SET runtime_status = $1, runtime_status_detail = NULL
+WHERE id = $2 AND runtime_status = $3`,
 		accountRuntimeStatusReady,
 		accountID,
 		accountRuntimeStatusStaleGeneration,
