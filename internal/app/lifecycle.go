@@ -223,7 +223,10 @@ processLifecycle:
 		return runtime.CheckMutationGeneration(ctx)
 	}
 	engine := droplets.LifecycleEngine{Store: droplets.LifecycleStore{DB: c.DB}, Executor: executor}
-	return engine.Process(ctx, item)
+	if err := engine.Process(ctx, item); err != nil {
+		return slowCleanupProviderError(providerState, err)
+	}
+	return nil
 }
 
 func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID string) error {

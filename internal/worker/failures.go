@@ -67,7 +67,7 @@ type RetryDelayHint interface {
 	RetryDelay() time.Duration
 }
 
-const MaxRetryDelayHint = 30 * time.Second
+const MaxRetryDelayHint = 10 * time.Minute
 
 func boundedRetryDelay(err error) (time.Duration, bool) {
 	var hint RetryDelayHint
