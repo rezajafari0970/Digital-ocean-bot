@@ -364,8 +364,8 @@ WHERE account_id=$1
 		geoCtx, cancel2 := context.WithTimeout(ctx, 5*time.Second)
 		candidate, gerr := observeStickyGeoReliable(geoCtx, g2)
 		cancel2()
-		g2.CloseIdleConnections()
 		if gerr != nil {
+			g2.CloseIdleConnections()
 			candidateErr = gerr
 			continue
 		}
@@ -381,14 +381,22 @@ WHERE account_id=$1
 			candidateErr = ErrIsolationWait
 			continue
 		}
-		// Do not commit a residential identity until the same sticky binding
-		// proves stable. A provider that remaps the session immediately would
-		// otherwise make READY oscillate back to recovery on the next cycle.
+		// Prove sticky persistence across fresh proxy connections. Reusing g2
+		// would only prove HTTP keep-alive stability, not that the provider maps
+		// this session to the same exit after reconnect.
+		g2.CloseIdleConnections()
 		stable := true
 		for verify := 0; verify < 2; verify++ {
+			vg, verr := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
+			if verr != nil {
+				stable = false
+				candidateErr = verr
+				break
+			}
 			verifyCtx, verifyCancel := context.WithTimeout(ctx, 4*time.Second)
-			verifyIP, verr := fastGatewayExitIP(verifyCtx, g2)
+			verifyIP, verr := fastGatewayExitIP(verifyCtx, vg)
 			verifyCancel()
+			vg.CloseIdleConnections()
 			if verr != nil || verifyIP != candidate.IP {
 				stable = false
 				candidateErr = ErrIsolationWait
