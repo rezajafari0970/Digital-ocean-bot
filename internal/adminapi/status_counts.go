@@ -15,7 +15,12 @@ WITH live_accounts AS (
  SELECT dr.id, CASE
  WHEN dr.state IN ('RETIRING','DELETING','EXPIRING') OR dr.expires_at<=now()+interval '10 seconds'
    OR a.deletion_requested_at IS NOT NULL THEN 'pending'
- WHEN dr.state LIKE '%FAIL%' OR EXISTS(SELECT 1 FROM user_capacity_snapshots u JOIN panel_instances pi ON pi.id=u.panel_id WHERE pi.droplet_id=dr.id AND u.observed_at>now()-interval '30 seconds' AND COALESCE(u.last_error,'')<>'') OR EXISTS(
+ WHEN dr.state LIKE '%FAIL%' OR EXISTS(
+ SELECT 1 FROM panel_instances pi JOIN panel_routing_state rs ON rs.panel_id=pi.id
+ JOIN worker_item_failures f ON f.kind='residential_sync' AND f.item_id=pi.id::text
+ WHERE pi.droplet_id=dr.id AND pi.enabled AND rs.state='FAILED'
+ AND f.failures>=2 AND f.last_failed_at>now()-interval '2 minutes'
+ ) OR EXISTS(SELECT 1 FROM user_capacity_snapshots u JOIN panel_instances pi ON pi.id=u.panel_id WHERE pi.droplet_id=dr.id AND u.observed_at>now()-interval '30 seconds' AND COALESCE(u.last_error,'')<>'') OR EXISTS(
    SELECT 1 FROM deployments dep WHERE dep.droplet_id=dr.id AND dep.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')
  ) THEN 'broken'
  WHEN dr.state='READY' AND a.provider_state='ACTIVE' AND EXISTS(

@@ -334,3 +334,37 @@ func TestRoutingDueLanesKeepRetiredFailuresOutOfServingQueue(t *testing.T) {
 		t.Fatal(ok, err)
 	}
 }
+
+func TestDashboardRepeatedRoutingFailureIsBrokenButRetirementWins(t *testing.T) {
+	db := adminTestDB(t)
+	account, droplet, panel := seedPanel(t, db, "http://127.0.0.1:1")
+	sqlMust(t, db, "UPDATE accounts SET provider_checked_at=now() WHERE id=$1", account)
+	sqlMust(t, db, "INSERT INTO panel_routing_state(panel_id,state) VALUES($1,'FAILED')", panel)
+	sqlMust(t, db, "INSERT INTO worker_item_failures(kind,item_id,failures,last_failed_at) VALUES('residential_sync',$1,2,now())", panel)
+	check := func(want string) {
+		t.Helper()
+		var raw []byte
+		if err := db.QueryRow(dashboardCountsSQL).Scan(&raw); err != nil {
+			t.Fatal(err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(raw, &m); err != nil {
+			t.Fatal(err)
+		}
+		for _, key := range []string{"active_servers", "inactive_servers", "broken_servers", "pending_deletion_servers"} {
+			expected := float64(0)
+			if key == want {
+				expected = 1
+			}
+			if m[key] != expected {
+				t.Fatal(want, key, m[key])
+			}
+		}
+	}
+	check("broken_servers")
+	sqlMust(t, db, "UPDATE worker_item_failures SET last_failed_at=now()-interval '5 minutes'")
+	check("inactive_servers")
+	sqlMust(t, db, "UPDATE worker_item_failures SET last_failed_at=now()")
+	sqlMust(t, db, "UPDATE droplets SET state='RETIRING' WHERE id=$1", droplet)
+	check("pending_deletion_servers")
+}
