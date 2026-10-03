@@ -212,6 +212,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			}
 		}
 		active, expiredCount, quotaCount := 0, 0, 0
+		activeClients := make([]sanaei.Client, 0, len(arr))
 		ownedPolicies, e := s.activeOwnedPolicy(ctx, p.ID, int64(in.ID))
 		if e != nil {
 			return e
@@ -251,6 +252,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				continue
 			}
 			active++
+			activeClients = append(activeClients, c)
 			if policyChangedThis {
 				policyExpected[c.ID] = c
 			}
@@ -266,6 +268,32 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		effectiveTarget, effectiveRate, e := s.effectiveTargetRate(ctx, p.ID, int64(in.ID), target, rate)
 		if e != nil {
 			return e
+		}
+		shrinkEnabled, shrinkLimit, e := s.shrinkGate(ctx)
+		if e != nil {
+			return e
+		}
+		if shrinkEnabled && !plannedBlocked && active > effectiveTarget {
+			shrinkIDs := ownedShrinkCandidates(activeClients, ownedPolicies, effectiveTarget, shrinkLimit)
+			if len(shrinkIDs) > 0 {
+				shrinkSet := map[string]bool{}
+				for _, id := range shrinkIDs {
+					shrinkSet[id] = true
+					deleteIDs = append(deleteIDs, id)
+				}
+				filtered := kept[:0]
+				for _, item := range kept {
+					b, _ := json.Marshal(item)
+					var c sanaei.Client
+					if json.Unmarshal(b, &c) == nil && shrinkSet[c.ID] {
+						continue
+					}
+					filtered = append(filtered, item)
+				}
+				kept = filtered
+				deleted += len(shrinkIDs)
+				active -= len(shrinkIDs)
+			}
 		}
 		deficit := effectiveTarget - active
 		n := 0
@@ -322,12 +350,18 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			if ve = verifyOwnedPolicySnapshot(verifyRaws, in.ID, policyExpected, deleteIDs); ve != nil {
 				return ve
 			}
+			if e = s.markOwnedDeleted(ctx, p.ID, int64(in.ID), deleteIDs); e != nil {
+				return e
+			}
 			mutated = true
 		} else if !addUnsupported && deleted > 0 && deleted <= 32 {
 			for _, clientID := range deleteIDs {
 				if e = sanaei.DeleteClientSession(ctx, runtime.Session.Exec, in.ID, clientID); e != nil {
 					return fmt.Errorf("inbound %d delete client %s: %w", in.ID, clientID, e)
 				}
+			}
+			if e = s.markOwnedDeleted(ctx, p.ID, int64(in.ID), deleteIDs); e != nil {
+				return e
 			}
 			if len(newClients) > 0 {
 				if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
@@ -349,6 +383,19 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			payload := map[string]any{"enable": in.Enable, "remark": in.Remark, "listen": in.Listen, "port": in.Port, "protocol": in.Protocol, "expiryTime": in.ExpiryTime, "total": in.Total, "settings": st, "streamSettings": stream, "sniffing": sniff}
 			if _, e = sanaei.UpdateInboundRaw(ctx, runtime.Session.Exec, int64(in.ID), payload); e != nil {
 				return fmt.Errorf("inbound %d update clients: %w", in.ID, e)
+			}
+			if len(deleteIDs) > 0 {
+				runtime.Session.Invalidate()
+				verifyRaws, ve := runtime.Session.Snapshot(ctx)
+				if ve != nil {
+					return fmt.Errorf("inbound %d delete verify snapshot: %w", in.ID, ve)
+				}
+				if ve = verifyOwnedPolicySnapshot(verifyRaws, in.ID, map[string]sanaei.Client{}, deleteIDs); ve != nil {
+					return ve
+				}
+				if e = s.markOwnedDeleted(ctx, p.ID, int64(in.ID), deleteIDs); e != nil {
+					return e
+				}
 			}
 			mutated = true
 		}
