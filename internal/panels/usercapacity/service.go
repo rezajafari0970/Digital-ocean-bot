@@ -213,6 +213,10 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		}
 		active, expiredCount, quotaCount := 0, 0, 0
 		activeClients := make([]sanaei.Client, 0, len(arr))
+		shrinkPending, e := s.reconcileShrinkJobs(ctx, p.ID, int64(in.ID))
+		if e != nil {
+			return e
+		}
 		ownedPolicies, e := s.activeOwnedPolicy(ctx, p.ID, int64(in.ID))
 		if e != nil {
 			return e
@@ -273,26 +277,13 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		if e != nil {
 			return e
 		}
-		if shrinkEnabled && !plannedBlocked && active > effectiveTarget {
+		if shrinkEnabled && !plannedBlocked && !shrinkPending && active > effectiveTarget {
 			shrinkIDs := ownedShrinkCandidates(activeClients, ownedPolicies, effectiveTarget, shrinkLimit)
 			if len(shrinkIDs) > 0 {
-				shrinkSet := map[string]bool{}
-				for _, id := range shrinkIDs {
-					shrinkSet[id] = true
-					deleteIDs = append(deleteIDs, id)
+				if e = s.enqueueShrinkDeletes(ctx, p.ID, int64(in.ID), shrinkIDs); e != nil {
+					return e
 				}
-				filtered := kept[:0]
-				for _, item := range kept {
-					b, _ := json.Marshal(item)
-					var c sanaei.Client
-					if json.Unmarshal(b, &c) == nil && shrinkSet[c.ID] {
-						continue
-					}
-					filtered = append(filtered, item)
-				}
-				kept = filtered
-				deleted += len(shrinkIDs)
-				active -= len(shrinkIDs)
+				shrinkPending = true
 			}
 		}
 		deficit := effectiveTarget - active
