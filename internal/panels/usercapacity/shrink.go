@@ -3,6 +3,8 @@ package usercapacity
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"sort"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -30,7 +32,13 @@ func (s Service) shrinkGate(ctx context.Context, panelID string, inboundID int64
 }
 
 func ownedShrinkCandidates(active []sanaei.Client, owned map[string]ownedPolicy, target int, limit int) []string {
-	excess := len(active) - target
+	activeCount := 0
+	for _, c := range active {
+		if c.Enable {
+			activeCount++
+		}
+	}
+	excess := activeCount - target
 	if excess <= 0 || limit <= 0 {
 		return nil
 	}
@@ -39,6 +47,9 @@ func ownedShrinkCandidates(active []sanaei.Client, owned map[string]ownedPolicy,
 	}
 	ids := make([]string, 0)
 	for _, c := range active {
+		if !c.Enable {
+			continue
+		}
 		o, ok := owned[c.ID]
 		if !ok || c.Email != o.Email || !ownershipMatches(c.Email, o.Marker) {
 			continue
@@ -64,4 +75,33 @@ AND o.client_id=$3 AND o.state IN ('ACTIVE','DELETE_PENDING')
 		}
 	}
 	return nil
+}
+
+func (s Service) ShrinkDryRun(ctx context.Context, panelID string, inboundID int64, active []sanaei.Client, target, limit int) ([]string, error) {
+	owned, err := s.activeOwnedPolicy(ctx, panelID, inboundID)
+	if err != nil {
+		return nil, err
+	}
+	return ownedShrinkCandidates(active, owned, target, limit), nil
+}
+
+func (s Service) ShrinkDryRunRuntime(ctx context.Context, panelID string, inboundID int64, runtime *sanaei.PanelRuntime, target, limit int) ([]string, error) {
+	raws, err := runtime.Session.Snapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, raw := range raws {
+		var in rawInbound
+		if json.Unmarshal(raw, &in) != nil || int64(in.ID) != inboundID {
+			continue
+		}
+		var st struct {
+			Clients []sanaei.Client `json:"clients"`
+		}
+		if json.Unmarshal(in.Settings, &st) != nil {
+			return nil, fmt.Errorf("inbound %d settings", inboundID)
+		}
+		return s.ShrinkDryRun(ctx, panelID, inboundID, st.Clients, target, limit)
+	}
+	return nil, fmt.Errorf("inbound %d missing", inboundID)
 }

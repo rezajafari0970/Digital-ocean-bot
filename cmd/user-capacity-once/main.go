@@ -15,7 +15,9 @@ import (
 
 func main() {
 	var panelID string
+	var dryRun bool
 	flag.StringVar(&panelID, "panel", "", "panel uuid")
+	flag.BoolVar(&dryRun, "dry-run", false, "show owned shrink candidates without mutation")
 	flag.Parse()
 	if panelID == "" {
 		log.Fatal("panel required")
@@ -47,6 +49,14 @@ func main() {
 		log.Fatal(err)
 	}
 	s := usercapacity.Service{DB: a.DB, Secrets: a.Container.Secrets}
+	if dryRun {
+		ids, e := s.ShrinkDryRunRuntime(ctx, panelID, 1, rt, 1, 1)
+		if e != nil {
+			log.Fatal(e)
+		}
+		fmt.Printf("SHRINK_DRY_RUN candidates=%d ids=%v\n", len(ids), ids)
+		return
+	}
 	if err = s.ReconcileRuntimeFromPolicy(ctx, *target, rt); err != nil {
 		log.Fatal(err)
 	}

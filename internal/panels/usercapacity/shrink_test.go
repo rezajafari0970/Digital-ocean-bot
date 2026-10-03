@@ -10,9 +10,9 @@ import (
 
 func TestOwnedShrinkCandidatesNeverSelectManualClient(t *testing.T) {
 	active := []sanaei.Client{
-		{ID: "manual", Email: "manual"},
-		{ID: "o1", Email: "u-m-o1"},
-		{ID: "o2", Email: "u-m-o2"},
+		{ID: "manual", Email: "manual", Enable: true},
+		{ID: "o1", Email: "u-m-o1", Enable: true},
+		{ID: "o2", Email: "u-m-o2", Enable: true},
 	}
 	owned := map[string]ownedPolicy{
 		"o1": {Email: "u-m-o1", Marker: "m", CreatedAt: time.Now()},
@@ -35,10 +35,18 @@ func TestOwnedShrinkCandidatesBounded(t *testing.T) {
 	for i := 0; i < 50; i++ {
 		id := fmt.Sprintf("o%02d", i)
 		email := "u-m-" + id
-		active = append(active, sanaei.Client{ID: id, Email: email})
+		active = append(active, sanaei.Client{ID: id, Email: email, Enable: true})
 		owned[id] = ownedPolicy{Email: email, Marker: "m"}
 	}
 	if got := ownedShrinkCandidates(active, owned, 1, 32); len(got) != 32 {
 		t.Fatalf("len=%d", len(got))
+	}
+}
+
+func TestOwnedShrinkCandidatesIgnoresDisabled(t *testing.T) {
+	active := []sanaei.Client{{ID: "base", Email: "base", Enable: true}, {ID: "disabled", Email: "u-m-disabled", Enable: false}}
+	owned := map[string]ownedPolicy{"disabled": {Email: "u-m-disabled", Marker: "m"}}
+	if got := ownedShrinkCandidates(active, owned, 1, 32); len(got) != 0 {
+		t.Fatalf("got=%v", got)
 	}
 }
