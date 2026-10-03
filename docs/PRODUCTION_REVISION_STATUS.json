@@ -1,33 +1,33 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
+  "runtime_source_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-03T11:30:39.991812+00:00",
+  "verified_at_utc": "2026-10-03 13:17:37.761609+00",
   "binaries": {
     "api": {
-      "sha256": "6664a0d350b04f835b96876b8b35cf5df09dec1049afd0861fa0776a6c0420ad",
+      "revision": "b789a47639f5299e84093024262d799edaf644fb",
       "vcs_modified": false,
-      "revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e"
+      "sha256": "b5a0ac409caf11dd4fc76a530c1c2fb0f523a1e05f5999b55c60ed027a63fd27"
     },
     "worker": {
-      "sha256": "6c2fcbd060ed8caf00f06ca6fa96e84c8d6488a483dce3a033236c64dc82ab68",
+      "revision": "b789a47639f5299e84093024262d799edaf644fb",
       "vcs_modified": false,
-      "revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e"
+      "sha256": "9048b0b5a320c7c634577c09aac0e2bc0fdeb5bf588abcd62014c75940a96b20"
     }
   },
   "services": {
     "api": "active",
     "worker": "active",
-    "target_xui": "active",
+    "verified_target_xui_count": 12,
     "api_worker_auto_restarts": 0
   },
-  "migration": "000135_bulk_scale_recovery",
-  "acceptance": "docs/BULK_V3_10000_ACCEPTANCE.json",
+  "migration": "000137_bulk_lifecycle_admission",
+  "acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "verified": true,
-  "note": "10000 configured clients accepted after explicit read-before-write cleanup recovery. All 9950 test clients were visible in Output and were deleted; 50 baseline clients were restored exactly. Original failure audit remains. Both gates and fleet creation policy are disabled. Runtime ae5ccdb is clean-built; later documentation commits do not imply binary drift. This is not evidence of 10000 simultaneous traffic sessions.",
+  "note": "Durable owned lifecycle accepted on two full production canaries. Fleet ramp 1/2/6 removed 441 inactive owned clients without changing nine manual baselines. Twelve eligible scopes now continuously active, including three automatically admitted after readiness. Main gate and global policy enabled under bounded lifecycle authorization; legacy bulk gate closed. Two historical CREATE failures remain isolated. Documentation-only checkpoint commits do not imply binary drift.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
-  "canary_tool_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
-  "resource_sampler_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
+  "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
+  "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "latest_scale_acceptance": "docs/BULK_V3_10000_ACCEPTANCE.json",
   "last_scale_run": {
     "run_id": "ad494773-1793-41f2-ba79-8909e30c2657",
@@ -41,5 +41,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Integrate durable bulk-owned policy drift and expiry/quota lifecycle cleanup before fleet generation enablement."
+  "next_product_step": "Observe continuous operation and budget/expiry boundaries; reconcile the separately excluded historical CREATE failures only after fresh provider state review. Do not restart earlier canary/10000 runs.",
+  "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
+  "active_lifecycle_scopes": 12
 }

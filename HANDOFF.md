@@ -1,3 +1,13 @@
+# Current production continuation — 2026-10-03
+
+The current frontier is durable owned-user lifecycle, accepted and enabled on eligible v3 panels. Start with `docs/BULK_LIFECYCLE_ACCEPTANCE.json`, `docs/PRODUCTION_REVISION_STATUS.json` and the final lifecycle section of `docs/DURABLE_BULK_V3_HANDOFF.md`. Verify live source/DB/runtime first.
+
+Runtime source b789a47639f5299e84093024262d799edaf644fb; canonical branch checkpoint/final-e2e-20260929. Twelve lifecycle scopes were active at acceptance. Main execution gate is deliberately open for bounded continuous operation, concurrency=1; old bulk canary gate remains closed. Two historical CREATE failures are excluded and preserved.
+
+The four requested parts—policy updates, owned cleanup, replacement/Output and gradual production rollout—are accepted. Do not replay the earlier 10000 stage or the archived console task below as the current next step. Retain all failure audit and read before retrying mutations.
+
+## Archived console checkpoint
+
 # Handoff
 Updated: 2026-10-01
 

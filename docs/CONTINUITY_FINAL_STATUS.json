@@ -33,5 +33,14 @@
     "?? tools/grade-fresh-session-exam-v2.py",
     "?? tools/new-chat-bootstrap.sh"
   ],
-  "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately."
+  "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
+  "production_continuation": {
+    "date": "2026-10-03",
+    "runtime_source_revision": "b789a47639f5299e84093024262d799edaf644fb",
+    "status": "ACCEPTED_BOUNDED_FLEET_ACTIVE",
+    "active_scopes_at_acceptance": 12,
+    "acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
+    "handoff": "docs/DURABLE_BULK_V3_HANDOFF.md",
+    "note": "Earlier knowledge-mastery and volatile-worktree lists in this file are historical. Recheck current canonical HEAD/origin and production state; do not repeat priming or earlier canaries."
+  }
 }

@@ -1,0 +1,1027 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-03 13:17:37.761609+00",
+  "status": "ACCEPTED_BOUNDED_FLEET_ACTIVE",
+  "runtime_source_revision": "b789a47639f5299e84093024262d799edaf644fb",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "evidence_directory": "/root/backups/dob-lifecycle-20261003",
+  "implemented": [
+    "Durable owned quota/lifetime/HWID policy updates",
+    "Owned inactive/expiry/quota cleanup with read-before-retry recovery",
+    "Durable rate-limited replacement and aggregate Output refresh",
+    "Full lifecycle production canaries and gradual fleet activation"
+  ],
+  "migrations": [
+    {
+      "version": "000136_bulk_lifecycle",
+      "applied_at": "2026-10-03T12:36:08.78431+00:00"
+    },
+    {
+      "version": "000137_bulk_lifecycle_admission",
+      "applied_at": "2026-10-03T13:02:27.856342+00:00"
+    }
+  ],
+  "binaries": {
+    "api": {
+      "revision": "b789a47639f5299e84093024262d799edaf644fb",
+      "vcs_modified": false,
+      "sha256": "b5a0ac409caf11dd4fc76a530c1c2fb0f523a1e05f5999b55c60ed027a63fd27"
+    },
+    "worker": {
+      "revision": "b789a47639f5299e84093024262d799edaf644fb",
+      "vcs_modified": false,
+      "sha256": "9048b0b5a320c7c634577c09aac0e2bc0fdeb5bf588abcd62014c75940a96b20"
+    },
+    "canary": {
+      "revision": "b789a47639f5299e84093024262d799edaf644fb",
+      "vcs_modified": false,
+      "sha256": "063f0e1a9c9bd994aca82e3b07aeda76c51ddbec8c76c05286bd83a3724f3055"
+    }
+  },
+  "services": {
+    "digital-ocean-bot-api": {
+      "ActiveState": "active",
+      "NRestarts": "0",
+      "MemoryCurrent": "10092544"
+    },
+    "digital-ocean-bot-worker": {
+      "ActiveState": "active",
+      "NRestarts": "0",
+      "MemoryCurrent": "11186176"
+    }
+  },
+  "tests": {
+    "isolated_postgresql": "dob_bulk_test_20261003",
+    "focused_race": "PASS",
+    "full_go_test": "PASS",
+    "clean_detached_full_tests": "PASS",
+    "faults": [
+      "lost UPDATE response after committed mutation: fresh state confirms without duplicate POST",
+      "partial BULK_DELETE and response loss: closes gates, no refill before recovery, retry missing subset only",
+      "concurrent planners reserve one durable plan",
+      "policy supersession before POST produces OBSOLETE without mutation",
+      "renewed client rejected by fresh delete guard",
+      "admission racing gate closure cannot commit authorization",
+      "automatic admission never rearms an existing disabled/exhausted scope",
+      "structural inbound update retains live clients, unknown fields and large integer precision"
+    ]
+  },
+  "production_canaries": [
+    {
+      "run_id": "4b0765ce-f19c-4006-93ed-e0ce72b34ad5",
+      "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+      "generation_state": "CLOSED",
+      "phase": "SUCCEEDED",
+      "evidence": {
+        "kind": "LIFECYCLE",
+        "cleanup_only": true,
+        "baseline_active": 1,
+        "baseline_restored": true,
+        "created_output_verified": 3
+      },
+      "completed_at": "2026-10-03T12:39:29.466171+00:00"
+    },
+    {
+      "run_id": "4f79bce0-8b4a-40d9-b08d-4ef0ad6244d2",
+      "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+      "generation_state": "CLOSED",
+      "phase": "SUCCEEDED",
+      "evidence": {
+        "kind": "LIFECYCLE",
+        "cleanup_only": false,
+        "baseline_active": 1,
+        "expired_deleted": 3,
+        "policy_verified": true,
+        "client_expiry_ms": 1791031338531,
+        "baseline_restored": true,
+        "created_output_verified": 3,
+        "replacements_output_verified": 3,
+        "output_hidden_before_expiry_at": "2026-10-03T12:42:13.568457+00:00"
+      },
+      "completed_at": "2026-10-03T12:42:26.905855+00:00"
+    },
+    {
+      "run_id": "29e47baf-e806-4d94-8335-9f23da9de2e5",
+      "panel_id": "e1b309e2-6c67-45e0-925b-59f68293253d",
+      "generation_state": "CLOSED",
+      "phase": "SUCCEEDED",
+      "evidence": {
+        "kind": "LIFECYCLE",
+        "cleanup_only": false,
+        "baseline_active": 1,
+        "expired_deleted": 3,
+        "policy_verified": true,
+        "client_expiry_ms": 1791032646055,
+        "baseline_restored": true,
+        "created_output_verified": 3,
+        "replacements_output_verified": 3,
+        "output_hidden_before_expiry_at": "2026-10-03T13:04:01.122809+00:00",
+        "output_visible_until_at_least_10_seconds_early": true
+      },
+      "completed_at": "2026-10-03T13:04:14.219235+00:00"
+    }
+  ],
+  "lifecycle_jobs": [
+    {
+      "generation_id": "0204e0fb-af71-4e3f-9e41-68b12d5a2afd",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "10d25671-10de-44f6-9180-3d5a3ef51d34",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "183495c2-de93-446b-a1da-564ca7cad0a3",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "29e47baf-e806-4d94-8335-9f23da9de2e5",
+      "kind": "BULK_CREATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "29e47baf-e806-4d94-8335-9f23da9de2e5",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "29e47baf-e806-4d94-8335-9f23da9de2e5",
+      "kind": "UPDATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 3
+    },
+    {
+      "generation_id": "4b0765ce-f19c-4006-93ed-e0ce72b34ad5",
+      "kind": "BULK_CREATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "4b0765ce-f19c-4006-93ed-e0ce72b34ad5",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "4b0765ce-f19c-4006-93ed-e0ce72b34ad5",
+      "kind": "UPDATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "4cf22f14-64dc-4eee-b125-b5d9f928edbc",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "4f79bce0-8b4a-40d9-b08d-4ef0ad6244d2",
+      "kind": "BULK_CREATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "4f79bce0-8b4a-40d9-b08d-4ef0ad6244d2",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    },
+    {
+      "generation_id": "4f79bce0-8b4a-40d9-b08d-4ef0ad6244d2",
+      "kind": "UPDATE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 3
+    },
+    {
+      "generation_id": "7f69a7da-372e-4b9d-aa06-036d89563251",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "80824847-974d-4c0c-bdb4-ab023e0fe16d",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "9008c21c-2f72-41a0-9429-33df3e9dabee",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 1
+    },
+    {
+      "generation_id": "b8f25b9e-796d-4367-b90b-f869741e088e",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 5
+    },
+    {
+      "generation_id": "c48c1bc3-d85c-4db9-8208-515c7a905c9d",
+      "kind": "BULK_DELETE",
+      "state": "SUCCEEDED",
+      "attempts": 1,
+      "count": 2
+    }
+  ],
+  "failed_first_canary_audit": {
+    "run_id": "4b0765ce-f19c-4006-93ed-e0ce72b34ad5",
+    "cause": "read-only observation spanned concurrent UPDATE snapshots",
+    "recovery": "closed gate; fresh read; durable owned-only cleanup; exact baseline restored",
+    "original_failure_log_preserved": true,
+    "fix_revision": "e71b172d38abcd552723652e0e33d90a8c5bde04",
+    "counts_as_full_cycle_acceptance": false
+  },
+  "fleet": {
+    "stages": [
+      {
+        "stage": 1,
+        "before": {
+          "f06917d6-8127-402b-9c3b-10e44d8e9039": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "3a4638f90130859d225243177b45974d4bf9d5966264263256f87cb4cb722af8",
+            "quota_counts": {
+              "0": 50
+            }
+          }
+        },
+        "after": {
+          "f06917d6-8127-402b-9c3b-10e44d8e9039": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "3a4638f90130859d225243177b45974d4bf9d5966264263256f87cb4cb722af8",
+            "quota_counts": {
+              "0": 1
+            }
+          }
+        },
+        "jobs": [
+          {
+            "kind": "BULK_DELETE",
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "count": 5
+          }
+        ]
+      },
+      {
+        "stage": 2,
+        "before": {
+          "ba9faf11-61f7-41f5-a96b-9d96e460339b": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "43e37a731fb1340b2bf2b29980cc60346c9bca9fc18b6a275309216d2dd02faa",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "1375090a-0f01-4c87-ab5f-9fc5e21ef39c": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "ba74a775e276bd6fd18c060816bf1c0fb1553cbe82b7d945fd991cfee36def7c",
+            "quota_counts": {
+              "0": 50
+            }
+          }
+        },
+        "after": {
+          "ba9faf11-61f7-41f5-a96b-9d96e460339b": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "43e37a731fb1340b2bf2b29980cc60346c9bca9fc18b6a275309216d2dd02faa",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "1375090a-0f01-4c87-ab5f-9fc5e21ef39c": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "ba74a775e276bd6fd18c060816bf1c0fb1553cbe82b7d945fd991cfee36def7c",
+            "quota_counts": {
+              "0": 1
+            }
+          }
+        },
+        "jobs": [
+          {
+            "kind": "BULK_DELETE",
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "count": 4
+          }
+        ]
+      },
+      {
+        "stage": 3,
+        "before": {
+          "e1b309e2-6c67-45e0-925b-59f68293253d": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "4119a0d53c204210b173e9a27453e862f862d222bf0801ff07840ab9e92536f2",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "18ffd694-335c-4bbe-bee8-d0cb56e2a4a4": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "9a6ecb64620042963c76aea89064e06451a6eafd0f877f035526444d449a8539",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "cccfe3c3-027d-46b4-823d-cf3f4e245aaf": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "06c1109bb06b4a945f6ee05962ff5f217e185e6fc369f9318b193d8ca21d5b2e",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "ca9a41a1-cb43-4a3c-bca0-9cede0595560": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "62805e09b095e4ce39579a4e7ca26c20bbc84b372125121c2fda1a07128a2a24",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "c4a2d3e5-868b-4478-9ccc-24187559bafc": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "d693c9d3ac99d0e95195a3db8f821d122f38d07d7b58245a44c2ee8d639de7d7",
+            "quota_counts": {
+              "0": 50
+            }
+          },
+          "45abeeb8-66b1-4aa2-b153-a750daabefc5": {
+            "active": 1,
+            "clients": 50,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 50
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "a1221ce9b514906cdc6a0db65ea2e7268ee86b44fc90cb206208e0a4c6a01d68",
+            "quota_counts": {
+              "0": 50
+            }
+          }
+        },
+        "after": {
+          "e1b309e2-6c67-45e0-925b-59f68293253d": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "4119a0d53c204210b173e9a27453e862f862d222bf0801ff07840ab9e92536f2",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "18ffd694-335c-4bbe-bee8-d0cb56e2a4a4": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "9a6ecb64620042963c76aea89064e06451a6eafd0f877f035526444d449a8539",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "cccfe3c3-027d-46b4-823d-cf3f4e245aaf": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "06c1109bb06b4a945f6ee05962ff5f217e185e6fc369f9318b193d8ca21d5b2e",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "ca9a41a1-cb43-4a3c-bca0-9cede0595560": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "62805e09b095e4ce39579a4e7ca26c20bbc84b372125121c2fda1a07128a2a24",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "c4a2d3e5-868b-4478-9ccc-24187559bafc": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "d693c9d3ac99d0e95195a3db8f821d122f38d07d7b58245a44c2ee8d639de7d7",
+            "quota_counts": {
+              "0": 1
+            }
+          },
+          "45abeeb8-66b1-4aa2-b153-a750daabefc5": {
+            "active": 1,
+            "clients": 1,
+            "enabled": 1,
+            "hwid_counts": {
+              "0": 1
+            },
+            "non_owned": 1,
+            "non_owned_sha256": "a1221ce9b514906cdc6a0db65ea2e7268ee86b44fc90cb206208e0a4c6a01d68",
+            "quota_counts": {
+              "0": 1
+            }
+          }
+        },
+        "jobs": [
+          {
+            "kind": "BULK_DELETE",
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "count": 6
+          }
+        ]
+      }
+    ],
+    "inactive_owned_deleted": 441,
+    "staged_panels": 9,
+    "stage_delete_jobs": 15,
+    "all_stage_jobs_attempt": 1,
+    "manual_hashes_preserved": 9,
+    "automatically_admitted_new_panels": 3,
+    "active_scope_count": 12,
+    "inventory": [
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "21c38deea57f77c67304db1a604a67536c4928f71bb330f6b484bdc5e85cbbb3",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "0a1bfc1f-0415-413b-bd92-71b37cea62b4"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "f5aa5b1c757304011c3e77faee716b018d0362df4d3f45f0e39c8dff3c3c8349",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "12f7bc37-77ae-43dd-8ef7-011c5f914a16"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "ba74a775e276bd6fd18c060816bf1c0fb1553cbe82b7d945fd991cfee36def7c",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "1375090a-0f01-4c87-ab5f-9fc5e21ef39c"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "9a6ecb64620042963c76aea89064e06451a6eafd0f877f035526444d449a8539",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "18ffd694-335c-4bbe-bee8-d0cb56e2a4a4"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "a1221ce9b514906cdc6a0db65ea2e7268ee86b44fc90cb206208e0a4c6a01d68",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "45abeeb8-66b1-4aa2-b153-a750daabefc5"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "43e37a731fb1340b2bf2b29980cc60346c9bca9fc18b6a275309216d2dd02faa",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "ba9faf11-61f7-41f5-a96b-9d96e460339b"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "d693c9d3ac99d0e95195a3db8f821d122f38d07d7b58245a44c2ee8d639de7d7",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "c4a2d3e5-868b-4478-9ccc-24187559bafc"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "62805e09b095e4ce39579a4e7ca26c20bbc84b372125121c2fda1a07128a2a24",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "ca9a41a1-cb43-4a3c-bca0-9cede0595560"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "06c1109bb06b4a945f6ee05962ff5f217e185e6fc369f9318b193d8ca21d5b2e",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "cccfe3c3-027d-46b4-823d-cf3f4e245aaf"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "d7a666e30bd548d4f2230abf9b6cfef2ee39b882d1c4ec0a3c825f91540316d2",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "cff8b1e9-8038-4d91-ab82-86fc5b174d4f"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "4119a0d53c204210b173e9a27453e862f862d222bf0801ff07840ab9e92536f2",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "e1b309e2-6c67-45e0-925b-59f68293253d"
+      },
+      {
+        "active": 1,
+        "clients": 1,
+        "enabled": 1,
+        "hwid_counts": {
+          "0": 1
+        },
+        "non_owned": 1,
+        "non_owned_sha256": "3a4638f90130859d225243177b45974d4bf9d5966264263256f87cb4cb722af8",
+        "quota_counts": {
+          "0": 1
+        },
+        "panel": "f06917d6-8127-402b-9c3b-10e44d8e9039"
+      }
+    ],
+    "scopes": [
+      {
+        "panel_id": "0a1bfc1f-0415-413b-bd92-71b37cea62b4",
+        "inbound_id": 1,
+        "generation_id": "a7f1f206-6df9-4ffe-bf7e-df08c9067458",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 10000,
+        "expires_at": "2026-10-04T07:46:42.464326+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:36.991071+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "12f7bc37-77ae-43dd-8ef7-011c5f914a16",
+        "inbound_id": 1,
+        "generation_id": "404ee5ac-ef06-4116-bfa6-b61f3cb62c1c",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 10000,
+        "expires_at": "2026-10-04T07:45:37.321708+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:36.997707+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "1375090a-0f01-4c87-ab5f-9fc5e21ef39c",
+        "inbound_id": 1,
+        "generation_id": "c48c1bc3-d85c-4db9-8208-515c7a905c9d",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9998,
+        "expires_at": "2026-10-03T14:43:57.885157+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.177709+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "18ffd694-335c-4bbe-bee8-d0cb56e2a4a4",
+        "inbound_id": 1,
+        "generation_id": "0204e0fb-af71-4e3f-9e41-68b12d5a2afd",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T14:38:08.127858+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.126223+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "45abeeb8-66b1-4aa2-b153-a750daabefc5",
+        "inbound_id": 1,
+        "generation_id": "9008c21c-2f72-41a0-9429-33df3e9dabee",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T13:29:42.524777+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.098981+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "ba9faf11-61f7-41f5-a96b-9d96e460339b",
+        "inbound_id": 1,
+        "generation_id": "4cf22f14-64dc-4eee-b125-b5d9f928edbc",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9998,
+        "expires_at": "2026-10-03T15:34:53.970907+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.176522+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "c4a2d3e5-868b-4478-9ccc-24187559bafc",
+        "inbound_id": 1,
+        "generation_id": "10d25671-10de-44f6-9180-3d5a3ef51d34",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T13:34:06.07845+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.00442+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "ca9a41a1-cb43-4a3c-bca0-9cede0595560",
+        "inbound_id": 1,
+        "generation_id": "80824847-974d-4c0c-bdb4-ab023e0fe16d",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T13:49:15.466675+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.030241+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "cccfe3c3-027d-46b4-823d-cf3f4e245aaf",
+        "inbound_id": 1,
+        "generation_id": "183495c2-de93-446b-a1da-564ca7cad0a3",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T14:18:30.525839+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.008817+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "cff8b1e9-8038-4d91-ab82-86fc5b174d4f",
+        "inbound_id": 1,
+        "generation_id": "5343e41e-0ff2-4cb0-8be0-53c13d3aec02",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 10000,
+        "expires_at": "2026-10-04T07:36:43.69712+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.02915+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "e1b309e2-6c67-45e0-925b-59f68293253d",
+        "inbound_id": 1,
+        "generation_id": "7f69a7da-372e-4b9d-aa06-036d89563251",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9999,
+        "expires_at": "2026-10-03T22:10:25.309497+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.089962+00:00",
+        "purpose": "POLICY"
+      },
+      {
+        "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+        "inbound_id": 1,
+        "generation_id": "b8f25b9e-796d-4367-b90b-f869741e088e",
+        "enabled": true,
+        "use_global_policy": true,
+        "allow_create": true,
+        "max_batch_size": 100,
+        "remaining_operations": 9995,
+        "expires_at": "2026-10-03T14:47:47.300769+00:00",
+        "active_users": 1,
+        "last_error": "",
+        "last_observed_at": "2026-10-03T13:17:37.072182+00:00",
+        "purpose": "POLICY"
+      }
+    ],
+    "excluded_historical_failures": [
+      {
+        "panel_id": "249a0885-6310-4103-81f4-0ab06071ea1f",
+        "kind": "CREATE",
+        "state": "FAILED",
+        "count": 2
+      }
+    ]
+  },
+  "execution": {
+    "main_gate": {
+      "enabled": true,
+      "kill_switch": false,
+      "concurrency": 1,
+      "panel_id": null,
+      "inbound_id": null
+    },
+    "legacy_bulk_gate": {
+      "enabled": false,
+      "kill_switch": true,
+      "remaining_batches": 0
+    },
+    "lifecycle_control": {
+      "enabled": true,
+      "auto_enroll": true,
+      "max_active_scopes": 64,
+      "operation_budget": 10000,
+      "max_batch_size": 100
+    },
+    "global_policy": {
+      "enabled": true,
+      "ports": [
+        443
+      ],
+      "target_users_per_inbound": 1,
+      "user_quota_bytes": 0,
+      "user_lifetime_seconds": 10800,
+      "device_limit": 0,
+      "users_per_second": 1
+    },
+    "unresolved_lifecycle_jobs": 0,
+    "planned_or_delete_pending_ownership": 0,
+    "ownership_counts": [
+      {
+        "state": "ACTIVE",
+        "count": 1372
+      },
+      {
+        "state": "DELETED",
+        "count": 10767
+      }
+    ],
+    "mode_note": "Continuous fleet operation is explicitly enabled. Main gate open is expected; concurrency=1, finite per-scope claim budgets and expiry remain enforced. Worker failures close the gate; auto-admission cannot reopen it or rearm existing scopes."
+  },
+  "output": {
+    "fresh_visible": [
+      {
+        "panel_id": "0a1bfc1f-0415-413b-bd92-71b37cea62b4",
+        "visible_count": 1,
+        "observation_age_seconds": 0.31374
+      },
+      {
+        "panel_id": "12f7bc37-77ae-43dd-8ef7-011c5f914a16",
+        "visible_count": 1,
+        "observation_age_seconds": 0.331427
+      },
+      {
+        "panel_id": "1375090a-0f01-4c87-ab5f-9fc5e21ef39c",
+        "visible_count": 1,
+        "observation_age_seconds": 0.191369
+      },
+      {
+        "panel_id": "18ffd694-335c-4bbe-bee8-d0cb56e2a4a4",
+        "visible_count": 1,
+        "observation_age_seconds": 0.245573
+      },
+      {
+        "panel_id": "45abeeb8-66b1-4aa2-b153-a750daabefc5",
+        "visible_count": 1,
+        "observation_age_seconds": 0.337869
+      },
+      {
+        "panel_id": "ba9faf11-61f7-41f5-a96b-9d96e460339b",
+        "visible_count": 1,
+        "observation_age_seconds": 0.173508
+      },
+      {
+        "panel_id": "c4a2d3e5-868b-4478-9ccc-24187559bafc",
+        "visible_count": 1,
+        "observation_age_seconds": 0.327444
+      },
+      {
+        "panel_id": "ca9a41a1-cb43-4a3c-bca0-9cede0595560",
+        "visible_count": 1,
+        "observation_age_seconds": 0.322253
+      },
+      {
+        "panel_id": "cccfe3c3-027d-46b4-823d-cf3f4e245aaf",
+        "visible_count": 1,
+        "observation_age_seconds": 0.318638
+      },
+      {
+        "panel_id": "cff8b1e9-8038-4d91-ab82-86fc5b174d4f",
+        "visible_count": 1,
+        "observation_age_seconds": 0.326383
+      },
+      {
+        "panel_id": "e1b309e2-6c67-45e0-925b-59f68293253d",
+        "visible_count": 1,
+        "observation_age_seconds": 0.312401
+      },
+      {
+        "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+        "visible_count": 1,
+        "observation_age_seconds": 0.273342
+      }
+    ],
+    "expiry_boundary": "production canary verifies persisted visible_until <= client expiry - 10 seconds; later read verifies hidden before expiry",
+    "source": "Sanaei API; no SSH Output extraction"
+  },
+  "limitations": [
+    "Quota exhaustion trigger and transport faults were tested with real isolated PostgreSQL plus an HTTP fault server; actual production quota consumption was not generated. Quota values, HWID, real expiry cleanup and replacement were production-verified.",
+    "Automatic lifecycle covers ready, authorized v3 Reality scopes. The panel with two historical CREATE failures is excluded; those audit rows are unchanged.",
+    "Scope expiry and finite budgets intentionally require fresh authorization when exhausted; they are never automatically renewed.",
+    "This acceptance does not add a concurrent traffic-load benchmark to the historical 10000 configured-client test."
+  ]
+}
