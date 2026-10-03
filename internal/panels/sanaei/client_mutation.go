@@ -207,3 +207,27 @@ func AddClientCompatibleSession(ctx context.Context, exec SessionExecutor, inbou
 	}
 	return AddClientsSession(ctx, exec, inboundID, []Client{client})
 }
+
+func GetClientByEmailSession(ctx context.Context, exec SessionExecutor, email string) (map[string]any, error) {
+	if exec == nil || email == "" {
+		return nil, ErrMutationRequest
+	}
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "panel/api/clients/get/" + url.PathEscape(email), TimeoutSeconds: 8})
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("%w: clients/get http=%d", ErrMutationRequest, resp.StatusCode)
+	}
+	var env struct {
+		Success bool   `json:"success"`
+		Msg     string `json:"msg"`
+		Obj     struct {
+			Client map[string]any `json:"client"`
+		} `json:"obj"`
+	}
+	if json.Unmarshal(resp.Body, &env) != nil || !env.Success || len(env.Obj.Client) == 0 {
+		return nil, fmt.Errorf("%w: clients/get msg=%q", ErrMutationRejected, env.Msg)
+	}
+	return env.Obj.Client, nil
+}

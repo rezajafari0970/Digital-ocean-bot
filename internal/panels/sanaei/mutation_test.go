@@ -266,3 +266,14 @@ func TestAddClientCompatibleFallsBackOnlyOnUnsupportedRoute(t *testing.T) {
 		t.Fatalf("requests=%+v", e.requests)
 	}
 }
+
+func TestGetClientByEmailV3(t *testing.T) {
+	e := &captureMutationExecutor{Response: SessionResponse{StatusCode: 200, Body: []byte(`{"success":true,"obj":{"client":{"uuid":"u1","email":"u@example.com","limitHwid":2,"subId":"keep"}}}`)}}
+	m, err := GetClientByEmailSession(context.Background(), e, "u@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e.Request.Path != "panel/api/clients/get/u@example.com" || m["subId"] != "keep" || m["limitHwid"] != float64(2) {
+		t.Fatalf("request=%+v map=%v", e.Request, m)
+	}
+}

@@ -237,7 +237,14 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			if currentEmail == "" {
 				return ErrClientConflict
 			}
-			payload, patchErr := applyPatchMap(currentMap, patch)
+			global, readErr := sanaei.GetClientByEmailSession(runCtx, rt.Session.Exec, currentEmail)
+			if readErr != nil {
+				return readErr
+			}
+			if uuid, _ := global["uuid"].(string); uuid != "" && uuid != job.ClientID {
+				return ErrClientConflict
+			}
+			payload, patchErr := applyPatchMap(global, patch)
 			if patchErr != nil {
 				return patchErr
 			}
@@ -312,6 +319,9 @@ func updateSatisfiedEverywhere(ctx context.Context, rt *sanaei.PanelRuntime, cli
 		return false, err
 	}
 	found := false
+	currentEmail := ""
+	runtimePatch := patch
+	runtimePatch.LimitHWID = nil
 	for _, raw := range raws {
 		m, ok, e := clientMapFromInbound(raw, clientID)
 		if e != nil && !errors.Is(e, ErrClientConflict) {
@@ -321,12 +331,19 @@ func updateSatisfiedEverywhere(ctx context.Context, rt *sanaei.PanelRuntime, cli
 			continue
 		}
 		found = true
-		if !mapPatchSatisfied(m, patch) {
+		if currentEmail == "" {
+			currentEmail, _ = m["email"].(string)
+		}
+		if !mapPatchSatisfied(m, runtimePatch) {
 			return false, nil
 		}
 	}
-	if !found {
+	if !found || currentEmail == "" {
 		return false, ErrClientConflict
 	}
-	return true, nil
+	global, err := sanaei.GetClientByEmailSession(ctx, rt.Session.Exec, currentEmail)
+	if err != nil {
+		return false, err
+	}
+	return mapPatchSatisfied(global, patch), nil
 }
