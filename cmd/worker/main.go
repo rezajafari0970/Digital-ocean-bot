@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/rollingreboot"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/serverguardian"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
@@ -51,6 +52,13 @@ func main() {
 		}
 	}()
 	go application.Container.RunDailyCatalogSync(ctx)
+	// Persist the rolling-reboot plan only. Execution remains disabled until
+	// the dry-run queue is reviewed and explicitly enabled.
+	if n, err := (rollingreboot.Service{DB: application.DB, Enabled: false, MinReadyPerAccount: 2}).Plan(ctx); err != nil {
+		log.Printf("rolling reboot plan: %v", err)
+	} else if n > 0 {
+		log.Printf("rolling reboot plan queued=%d mode=dry-run", n)
+	}
 	// Fleet resource guardian starts in observe-only mode. It records x-ui,
 	// memory, disk, package-lock and DB health without mutating server state.
 	go func() {
