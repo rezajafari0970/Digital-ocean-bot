@@ -235,13 +235,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			kept = append(kept, v)
 		}
 		deficit := target - active
-		n := 0
-		if deficit > 0 {
-			n = rate
-			if n > deficit {
-				n = deficit
-			}
-		}
+		n := userCreationLimiter.allowance(bulkRateKey(p.ID, int64(in.ID)), rate, deficit, time.Now())
 		newClients := make([]sanaei.Client, 0, n)
 		if n > 0 {
 			expiry := int64(0)

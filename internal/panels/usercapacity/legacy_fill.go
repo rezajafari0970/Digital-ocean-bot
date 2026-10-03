@@ -25,9 +25,9 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		if deficit <= 0 {
 			continue
 		}
-		n := rate
-		if n > deficit {
-			n = deficit
+		n := userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), rate, deficit, time.Now())
+		if n <= 0 {
+			continue
 		}
 		in, err := sanaei.GetInbound(ctx, runtime.Session.Exec, rec.RemoteID)
 		if err != nil {

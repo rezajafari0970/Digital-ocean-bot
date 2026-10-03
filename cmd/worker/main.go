@@ -246,9 +246,10 @@ func main() {
 		}
 	}()
 
-	// User capacity fast fill: lightweight slim inventory + batch add.
+	// User capacity fast fill: time-budgeted per inbound; the one-second cadence
+	// makes users_per_second match its configured wall-clock meaning.
 	go func() {
-		t := time.NewTicker(2 * time.Second)
+		t := time.NewTicker(1 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
