@@ -23,7 +23,7 @@ func main() {
 	if *samples < 0 || *samples > 120 {
 		panic("sample-seconds must be 0..120")
 	}
-	ctx, c := context.WithTimeout(context.Background(), time.Duration(30+*samples)*time.Second)
+	ctx, c := context.WithTimeout(context.Background(), time.Duration(45+*samples)*time.Second)
 	defer c()
 	a, e := app.Bootstrap(ctx)
 	if e != nil {
@@ -37,7 +37,7 @@ func main() {
 			panic(e)
 		}
 		if *globalClients {
-			res, e := rt.Session.Exec.Do(ctx, sanaei.SessionRequest{Method: "GET", Path: "panel/api/clients/list", TimeoutSeconds: 15})
+			res, e := rt.Session.Exec.Do(ctx, sanaei.SessionRequest{Method: "GET", Path: "panel/api/clients/list", TimeoutSeconds: 30})
 			if e != nil {
 				panic(e)
 			}

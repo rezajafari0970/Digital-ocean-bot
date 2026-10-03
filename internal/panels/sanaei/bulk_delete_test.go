@@ -4,7 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
+	"time"
 )
 
 type bulkDeleteStub struct {
@@ -60,5 +64,41 @@ func TestGlobalListRejectsMissingNullOrMalformedArray(t *testing.T) {
 	s := &bulkDeleteStub{response: SessionResponse{StatusCode: 200, Body: []byte(`{"success":true,"obj":[]}`)}}
 	if cs, err := ReadGlobalClientsSession(context.Background(), s); err != nil || len(cs) != 0 {
 		t.Fatal(cs, err)
+	}
+}
+
+// The HTTP client must receive the larger bounded read budget even when its
+// default timeout is shorter. The caller can still impose an earlier deadline.
+type globalListTransport func(*http.Request) (*http.Response, error)
+
+func (f globalListTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+func TestGlobalListBoundedReadBudget(t *testing.T) {
+	for _, callerBound := range []bool{false, true} {
+		calls := 0
+		ctx := context.Background()
+		if callerBound {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, time.Second)
+			defer cancel()
+		}
+		client := &http.Client{Timeout: 8 * time.Second, Transport: globalListTransport(func(r *http.Request) (*http.Response, error) {
+			calls++
+			deadline, ok := r.Context().Deadline()
+			remaining := time.Until(deadline)
+			if !ok || remaining <= 0 || remaining > 30*time.Second || (!callerBound && remaining < 29*time.Second) || (callerBound && remaining > time.Second) {
+				t.Fatalf("unexpected HTTP read budget %v, callerBound=%v", remaining, callerBound)
+			}
+			if r.Method != http.MethodGet || r.URL.Path != "/panel/api/clients/list" {
+				t.Fatal("unexpected request", r.Method, r.URL.Path)
+			}
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"success":true,"obj":[]}`)), Header: make(http.Header)}, nil
+		})}
+		exec := DirectSessionExecutor{Client: &APIClient{BaseURL: "http://panel.test", HTTP: client}}
+		if _, err := ReadGlobalClientsSession(ctx, exec); err != nil || calls != 1 {
+			t.Fatal(err, calls)
+		}
+		if client.Timeout != 8*time.Second {
+			t.Fatal("shared client timeout changed")
+		}
 	}
 }

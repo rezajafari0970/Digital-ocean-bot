@@ -23,7 +23,7 @@ func ReadGlobalClientsSession(ctx context.Context, exec SessionExecutor) ([]Glob
 	if exec == nil {
 		return nil, ErrMutationRequest
 	}
-	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "panel/api/clients/list", TimeoutSeconds: 15})
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "panel/api/clients/list", TimeoutSeconds: 30})
 	if err != nil {
 		return nil, err
 	}
