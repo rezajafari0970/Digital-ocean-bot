@@ -93,6 +93,7 @@ func run() error {
 	var scaleCleanup bool
 	var lifecycleCanary bool
 	var lifecycleCleanup string
+	var quotaHost string
 	flag.StringVar(&panel, "panel", "", "exact panel uuid")
 	flag.Int64Var(&inbound, "inbound", 0, "exact inbound")
 	flag.StringVar(&recoverJob, "recover-job", "", "read-before-write cleanup of an existing bulk job")
@@ -102,9 +103,10 @@ func run() error {
 	flag.BoolVar(&scaleCleanup, "scale-cleanup", false, "stop creation and fresh-read existing scale run for cleanup")
 	flag.BoolVar(&lifecycleCanary, "lifecycle-canary", false, "worker-only policy/expiry/replacement acceptance")
 	flag.StringVar(&lifecycleCleanup, "lifecycle-cleanup", "", "fresh-read cleanup of an existing lifecycle canary run")
+	flag.StringVar(&quotaHost, "quota-callback-host", "", "local public IPv4 for bounded real-traffic quota canary")
 	flag.Parse()
-	if lifecycleCanary || lifecycleCleanup != "" {
-		return runLifecycleCanary(panel, inbound, lifecycleCleanup)
+	if lifecycleCanary || lifecycleCleanup != "" || quotaHost != "" {
+		return runLifecycleCanary(panel, inbound, lifecycleCleanup, quotaHost)
 	}
 	if scaleTarget != 0 || scaleID != "" || scaleCleanup {
 		return runScale(panel, inbound, scaleTarget, scaleID, scaleCleanup)

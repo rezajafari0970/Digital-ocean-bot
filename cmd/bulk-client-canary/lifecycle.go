@@ -50,7 +50,12 @@ func lifeCounts(ctx context.Context, db *sql.DB, id string) (active, deleted, pe
 	pending += jobs
 	return
 }
-func runLifecycleCanary(panel string, inbound int64, recoverID string) (retErr error) {
+func runLifecycleCanary(panel string, inbound int64, recoverID, quotaHost string) (retErr error) {
+	if quotaHost != "" {
+		if err := quotaCallbackIP(quotaHost); err != nil {
+			return err
+		}
+	}
 	signalCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	ctx, cancel := context.WithTimeout(signalCtx, 12*time.Minute)
@@ -302,107 +307,113 @@ func runLifecycleCanary(panel string, inbound int64, recoverID string) (retErr e
 		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('created_output_verified',3),phase='VERIFYING',updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
 			return err
 		}
-		// Fixed origin time is retained when shortening lifetime; no rolling extension.
-		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_lifecycle_scopes SET quota_bytes=20971520,lifetime_seconds=75,device_limit=3,updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
-			return err
-		}
-		var expiry int64
-		if err = lifeWait(ctx, j, "policy update", func() (bool, error) {
-			obs, _, e := clientops.LifecycleInventory(ctx, rt, r.Inbound)
-			if errors.Is(e, clientops.ErrVerify) {
-				return false, nil
-			} // pair can straddle a worker UPDATE; retry reads only.
+		if quotaHost != "" {
+			if err = quotaPhase(ctx, a.DB, rt, j, r, original, quotaHost); err != nil {
+				return err
+			}
+		} else {
+			// Fixed origin time is retained when shortening lifetime; no rolling extension.
+			if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_lifecycle_scopes SET quota_bytes=20971520,lifetime_seconds=75,device_limit=3,updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
+				return err
+			}
+			var expiry int64
+			if err = lifeWait(ctx, j, "policy update", func() (bool, error) {
+				obs, _, e := clientops.LifecycleInventory(ctx, rt, r.Inbound)
+				if errors.Is(e, clientops.ErrVerify) {
+					return false, nil
+				} // pair can straddle a worker UPDATE; retry reads only.
+				if e != nil {
+					return false, e
+				}
+				for id := range original {
+					c, ok := obs[id]
+					if !ok || c.Client.TotalGB != 20971520 || c.Client.LimitHWID != 3 || c.Client.ExpiryTime <= 0 {
+						return false, nil
+					}
+					expiry = c.Client.ExpiryTime
+				}
+				_, _, pending, e := lifeCounts(ctx, a.DB, r.ID)
+				return pending == 0, e
+			}); err != nil {
+				return err
+			}
+			if err = lifeWait(ctx, j, "output expiry boundary", func() (bool, error) {
+				var n int
+				var latest sql.NullTime
+				e := a.DB.QueryRowContext(ctx, `SELECT count(*),max(s.visible_until) FROM output_config_snapshots s JOIN bulk_user_ownership o ON o.client_id=split_part(split_part(s.uri,'://',2),'@',1) WHERE o.generation_id=$1 AND s.panel_id=$2 AND o.state='ACTIVE'`, r.ID, r.Panel).Scan(&n, &latest)
+				if e != nil {
+					return false, e
+				}
+				return n == 3 && latest.Valid && latest.Time.UnixMilli() <= expiry-10000, nil
+			}); err != nil {
+				return err
+			}
+			if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('output_visible_until_at_least_10_seconds_early',true) WHERE generation_id=$1`, r.ID); err != nil {
+				return err
+			}
+			if time.Until(time.UnixMilli(expiry)) < 20*time.Second {
+				return fmt.Errorf("insufficient expiry observation window")
+			}
+			if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('policy_verified',true,'client_expiry_ms',$2::bigint),updated_at=now() WHERE generation_id=$1`, r.ID, expiry); err != nil {
+				return err
+			}
+			fmt.Printf("LIFECYCLE_POLICY_VERIFIED run=%s quota=20971520 lifetime=75 limitHwid=3 expiry_ms=%d\n", r.ID, expiry)
+			timer := time.NewTimer(time.Until(time.UnixMilli(expiry).Add(-5 * time.Second)))
+			defer timer.Stop()
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-timer.C:
+			}
+			if err = scaleOutput(ctx, a.DB, r, original, 0); err != nil {
+				return err
+			}
+			if time.Now().UnixMilli() >= expiry {
+				return fmt.Errorf("pre-expiry output verification was late")
+			}
+			if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('output_hidden_before_expiry_at',now()),updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
+				return err
+			}
+			fmt.Printf("LIFECYCLE_OUTPUT_HIDDEN run=%s before_expiry_ms=%d\n", r.ID, expiry-time.Now().UnixMilli())
+			if err = lifeWait(ctx, j, "expiry and replacement", func() (bool, error) {
+				active, deleted, pending, e := lifeCounts(ctx, a.DB, r.ID)
+				return active == 3 && deleted == 3 && pending == 0, e
+			}); err != nil {
+				return err
+			}
+			all, e := scaleExpected(ctx, a.DB, r)
 			if e != nil {
-				return false, e
+				return e
+			}
+			if len(all) != 6 {
+				return fmt.Errorf("replacement identity count=%d", len(all))
+			}
+			if err = scaleOutput(ctx, a.DB, r, all, 3); err != nil {
+				return err
+			}
+			obs, _, err := clientops.LifecycleInventory(ctx, rt, r.Inbound)
+			if err != nil {
+				return err
 			}
 			for id := range original {
-				c, ok := obs[id]
-				if !ok || c.Client.TotalGB != 20971520 || c.Client.LimitHWID != 3 || c.Client.ExpiryTime <= 0 {
-					return false, nil
+				if _, ok := obs[id]; ok {
+					return fmt.Errorf("expired identity still present")
 				}
-				expiry = c.Client.ExpiryTime
 			}
-			_, _, pending, e := lifeCounts(ctx, a.DB, r.ID)
-			return pending == 0, e
-		}); err != nil {
-			return err
-		}
-		if err = lifeWait(ctx, j, "output expiry boundary", func() (bool, error) {
-			var n int
-			var latest sql.NullTime
-			e := a.DB.QueryRowContext(ctx, `SELECT count(*),max(s.visible_until) FROM output_config_snapshots s JOIN bulk_user_ownership o ON o.client_id=split_part(split_part(s.uri,'://',2),'@',1) WHERE o.generation_id=$1 AND s.panel_id=$2 AND o.state='ACTIVE'`, r.ID, r.Panel).Scan(&n, &latest)
-			if e != nil {
-				return false, e
+			for id := range all {
+				if _, old := original[id]; old {
+					continue
+				}
+				c, ok := obs[id]
+				if !ok || c.Client.TotalGB != 20971520 || c.Client.LimitHWID != 3 || !c.Client.Enable {
+					return fmt.Errorf("replacement policy mismatch")
+				}
 			}
-			return n == 3 && latest.Valid && latest.Time.UnixMilli() <= expiry-10000, nil
-		}); err != nil {
-			return err
-		}
-		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('output_visible_until_at_least_10_seconds_early',true) WHERE generation_id=$1`, r.ID); err != nil {
-			return err
-		}
-		if time.Until(time.UnixMilli(expiry)) < 20*time.Second {
-			return fmt.Errorf("insufficient expiry observation window")
-		}
-		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('policy_verified',true,'client_expiry_ms',$2::bigint),updated_at=now() WHERE generation_id=$1`, r.ID, expiry); err != nil {
-			return err
-		}
-		fmt.Printf("LIFECYCLE_POLICY_VERIFIED run=%s quota=20971520 lifetime=75 limitHwid=3 expiry_ms=%d\n", r.ID, expiry)
-		timer := time.NewTimer(time.Until(time.UnixMilli(expiry).Add(-5 * time.Second)))
-		defer timer.Stop()
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-timer.C:
-		}
-		if err = scaleOutput(ctx, a.DB, r, original, 0); err != nil {
-			return err
-		}
-		if time.Now().UnixMilli() >= expiry {
-			return fmt.Errorf("pre-expiry output verification was late")
-		}
-		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('output_hidden_before_expiry_at',now()),updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
-			return err
-		}
-		fmt.Printf("LIFECYCLE_OUTPUT_HIDDEN run=%s before_expiry_ms=%d\n", r.ID, expiry-time.Now().UnixMilli())
-		if err = lifeWait(ctx, j, "expiry and replacement", func() (bool, error) {
-			active, deleted, pending, e := lifeCounts(ctx, a.DB, r.ID)
-			return active == 3 && deleted == 3 && pending == 0, e
-		}); err != nil {
-			return err
-		}
-		all, e := scaleExpected(ctx, a.DB, r)
-		if e != nil {
-			return e
-		}
-		if len(all) != 6 {
-			return fmt.Errorf("replacement identity count=%d", len(all))
-		}
-		if err = scaleOutput(ctx, a.DB, r, all, 3); err != nil {
-			return err
-		}
-		obs, _, err := clientops.LifecycleInventory(ctx, rt, r.Inbound)
-		if err != nil {
-			return err
-		}
-		for id := range original {
-			if _, ok := obs[id]; ok {
-				return fmt.Errorf("expired identity still present")
+			if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('expired_deleted',3,'replacements_output_verified',3),phase='CLEANING',updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
+				return err
 			}
+			fmt.Printf("LIFECYCLE_REPLACEMENT_VERIFIED run=%s deleted=3 new=3\n", r.ID)
 		}
-		for id := range all {
-			if _, old := original[id]; old {
-				continue
-			}
-			c, ok := obs[id]
-			if !ok || c.Client.TotalGB != 20971520 || c.Client.LimitHWID != 3 || !c.Client.Enable {
-				return fmt.Errorf("replacement policy mismatch")
-			}
-		}
-		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('expired_deleted',3,'replacements_output_verified',3),phase='CLEANING',updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
-			return err
-		}
-		fmt.Printf("LIFECYCLE_REPLACEMENT_VERIFIED run=%s deleted=3 new=3\n", r.ID)
 		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_lifecycle_scopes SET allow_create=false,target_users=0,updated_at=now() WHERE generation_id=$1`, r.ID); err != nil {
 			return err
 		}
