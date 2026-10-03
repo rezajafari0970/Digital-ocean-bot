@@ -44,8 +44,11 @@ func main() {
 	if target == nil {
 		log.Fatal("panel not eligible")
 	}
-	f := sanaei.RuntimeFactory{DB: a.DB, Secrets: a.Container.Secrets, Timeout: 60 * time.Second}
-	rt, err := f.Open(ctx, panelID)
+	runtimes := &sanaei.RuntimeManager{
+		Factory: sanaei.RuntimeFactory{DB: a.DB, Secrets: a.Container.Secrets, Timeout: 60 * time.Second},
+		TTL:     5 * time.Second,
+	}
+	rt, err := runtimes.Acquire(ctx, panelID)
 	if err != nil {
 		log.Fatal(err)
 	}
