@@ -11,6 +11,7 @@ import (
 
 func main() {
 	samples := flag.Int("sample-seconds", 0, "read-only one-second resource samples, maximum 120")
+	bulkDelete := flag.Bool("bulk-delete-contract", false, "read-only installed bulkDel contract")
 	clientRoutes := flag.Bool("client-routes", false, "read-only embedded v3 client route inventory")
 	health := flag.Bool("health", false, "read-only target service and memory metrics")
 	flag.Parse()
@@ -41,6 +42,9 @@ func main() {
 	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: a.DB}}
 	t := provisioning.Target{AccountID: acc, DropletID: did, Host: host, Port: 22, User: user, KeySecretRef: keyref}
 	cmd := `for f in /usr/local/x-ui/x-ui /usr/local/x-ui/bin/x-ui; do if [ -f "$f" ]; then strings "$f" 2>/dev/null | grep -A85 -B2 '"/panel/api/clients/bulkCreate"' | head -95 || true; fi; done`
+	if *bulkDelete {
+		cmd = `for f in /usr/local/x-ui/x-ui /usr/local/x-ui/bin/x-ui; do if [ -f "$f" ]; then strings "$f" 2>/dev/null | grep -A95 -B2 '"/panel/api/clients/bulkDel"' | head -98; fi; done`
+	}
 	if *clientRoutes {
 		cmd = `for f in /usr/local/x-ui/x-ui /usr/local/x-ui/bin/x-ui; do if [ -f "$f" ]; then strings "$f" 2>/dev/null | grep -E '^    "/panel/api/clients/[^"]+":' | head -70; fi; done`
 	}
