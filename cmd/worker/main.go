@@ -450,61 +450,39 @@ func main() {
 		}
 	}()
 
-	// Residential Ads sync: fan out active residential proxies to every ready Sanaei panel.
-	go func() {
-		t := time.NewTicker(time.Second)
-		defer t.Stop()
-		syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
-		failures := worker.FailureStore{DB: application.DB}
-		run := func() {
-			panels, err := syncer.EligiblePanels(ctx)
-			if err != nil {
-				log.Printf("residential sync discovery: %v", err)
-				return
-			}
-			sem := make(chan struct{}, 2)
-			done := make(chan struct{}, len(panels))
-			for _, panel := range panels {
-				p := panel
-				go func() {
-					defer func() { done <- struct{}{} }()
-					select {
-					case sem <- struct{}{}:
-						defer func() { <-sem }()
-					case <-ctx.Done():
-						return
-					}
-					if !failures.Due(ctx, "residential_sync", p.ID) {
-						return
-					}
+	// One serial lane for serving panels and one for retiring/expired panels.
+	// A disconnected retired fleet must not stall live running-router proofs.
+	for _, serving := range []bool{true, false} {
+		go func(serving bool) {
+			t := time.NewTicker(time.Second)
+			defer t.Stop()
+			syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
+			failures := worker.FailureStore{DB: application.DB}
+			for {
+				p, found, err := syncer.NextDuePanel(ctx, serving)
+				if err != nil {
+					log.Printf("residential sync discovery: %v", err)
+				}
+				if err == nil && found {
 					panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-					defer cancel()
-					if err := syncer.ReconcilePanel(panelCtx, p, false); err != nil {
+					err = syncer.ReconcilePanel(panelCtx, p, false)
+					cancel()
+					if err != nil {
 						failures.Fail(ctx, "residential_sync", p.ID, "", err)
 						log.Printf("residential sync panel %s: %v", p.ID, err)
-						return
+					} else {
+						failures.Clear(ctx, "residential_sync", p.ID)
 					}
-					failures.Clear(ctx, "residential_sync", p.ID)
-				}()
-			}
-			for range panels {
+					continue
+				}
 				select {
-				case <-done:
 				case <-ctx.Done():
 					return
+				case <-t.C:
 				}
 			}
-		}
-		run()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				run()
-			}
-		}
-	}()
+		}(serving)
+	}
 
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {

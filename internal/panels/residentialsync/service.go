@@ -288,3 +288,25 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 	}
 	return nil
 }
+
+// NextDuePanel selects one task without a fleet-wide completion barrier.
+// The independent lanes share the existing panel/config lock and together run
+// at most two requests. Backoff and freshness are evaluated in the database.
+func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Panel, bool, error) {
+	var p readyworker.Panel
+	err := s.DB.QueryRowContext(ctx, `SELECT p.id::text FROM panel_instances p
+ JOIN droplets dr ON dr.id=p.droplet_id CROSS JOIN residential_routing_control c
+ LEFT JOIN panel_routing_state r ON r.panel_id=p.id
+ LEFT JOIN worker_item_failures f ON f.kind='residential_sync' AND f.item_id=p.id::text
+ WHERE c.enabled AND (c.fleet OR p.id=ANY(c.panel_ids))
+ AND p.enabled AND dr.state<>'DELETED'
+ AND ((dr.state IN ('READY','EXPIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()))=$1)
+ AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=p.droplet_id AND d.state='PANEL_COMPLETE')
+ AND (r.panel_id IS NULL OR r.revision<>c.revision OR r.next_check_at<=now())
+ AND (f.next_retry_at IS NULL OR f.next_retry_at<=now())
+ ORDER BY COALESCE(r.next_check_at,'-infinity'::timestamptz),p.id LIMIT 1`, serving).Scan(&p.ID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return p, false, nil
+	}
+	return p, err == nil, err
+}

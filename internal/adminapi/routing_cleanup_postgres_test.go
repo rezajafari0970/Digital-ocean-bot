@@ -287,3 +287,42 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 		t.Fatal("unchanged routing restarted")
 	}
 }
+
+func TestRoutingDueLanesKeepRetiredFailuresOutOfServingQueue(t *testing.T) {
+	db := adminTestDB(t)
+	ctx := context.Background()
+	_, liveDroplet, live := seedPanel(t, db, "http://127.0.0.1:1")
+	_, deadDroplet, dead := seedPanel(t, db, "http://127.0.0.1:2")
+	sqlMust(t, db, "UPDATE droplets SET state='READY',expires_at=now()+interval '1 hour' WHERE id=$1", liveDroplet)
+	sqlMust(t, db, "UPDATE droplets SET state='RETIRING',expires_at=now()-interval '1 hour' WHERE id=$1", deadDroplet)
+	sqlMust(t, db, "UPDATE residential_routing_control SET enabled=true,fleet=true")
+	svc := residentialsync.Service{DB: db}
+	for _, tc := range []struct {
+		live bool
+		id   string
+	}{{true, live}, {false, dead}} {
+		p, ok, err := svc.NextDuePanel(ctx, tc.live)
+		if err != nil || !ok || p.ID != tc.id {
+			t.Fatal(tc, p, ok, err)
+		}
+	}
+	sqlMust(t, db, "INSERT INTO worker_item_failures(kind,item_id,next_retry_at) VALUES('residential_sync',$1,now()+interval '1 hour')", dead)
+	if _, ok, err := svc.NextDuePanel(ctx, false); err != nil || ok {
+		t.Fatal(ok, err)
+	}
+	if p, ok, err := svc.NextDuePanel(ctx, true); err != nil || !ok || p.ID != live {
+		t.Fatal(p, ok, err)
+	}
+	sqlMust(t, db, "INSERT INTO panel_routing_state(panel_id,revision,state,next_check_at) SELECT $1,revision,'APPLIED',now()+interval '20 seconds' FROM residential_routing_control", live)
+	if _, ok, err := svc.NextDuePanel(ctx, true); err != nil || ok {
+		t.Fatal(ok, err)
+	}
+	sqlMust(t, db, "UPDATE residential_routing_control SET revision=revision+1")
+	if p, ok, err := svc.NextDuePanel(ctx, true); err != nil || !ok || p.ID != live {
+		t.Fatal(p, ok, err)
+	}
+	sqlMust(t, db, "UPDATE residential_routing_control SET enabled=false")
+	if _, ok, err := svc.NextDuePanel(ctx, true); err != nil || ok {
+		t.Fatal(ok, err)
+	}
+}
