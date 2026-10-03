@@ -223,7 +223,6 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
-	s.refreshOutputLive(r.Context())
 	s.outputSnapshotResponse(w, r)
 }
 
