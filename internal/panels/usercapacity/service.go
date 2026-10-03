@@ -84,6 +84,9 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	if !allowed {
 		return false, nil
 	}
+	if rolledBack, e := s.RollbackExpiredCanary(ctx, p, runtime); e != nil || rolledBack {
+		return rolledBack, e
+	}
 	if _, unsupported := addClientUnsupportedPanels.Load(p.ID); unsupported {
 		return s.legacyFastFillFromPolicy(ctx, p, runtime)
 	}
@@ -239,13 +242,17 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		if e = s.confirmPlannedOwnedClients(ctx, p.ID, int64(in.ID), observedOwned); e != nil {
 			return e
 		}
-		deficit := target - active
-		n := userCreationLimiter.allowance(bulkRateKey(p.ID, int64(in.ID)), rate, deficit, time.Now())
+		effectiveTarget, effectiveRate, e := s.effectiveTargetRate(ctx, p.ID, int64(in.ID), target, rate)
+		if e != nil {
+			return e
+		}
+		deficit := effectiveTarget - active
+		n := userCreationLimiter.allowance(bulkRateKey(p.ID, int64(in.ID)), effectiveRate, deficit, time.Now())
 		newClients := make([]sanaei.Client, 0, n)
 		owned := make([]ownedClient, 0, n)
 		var generation bulkGeneration
 		if n > 0 {
-			generation, e = s.activePolicyGeneration(ctx, p.ID, int64(in.ID))
+			generation, e = s.effectiveGeneration(ctx, p.ID, int64(in.ID))
 			if e != nil {
 				return e
 			}
@@ -300,8 +307,8 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			mutated = true
 		}
 		activeAfter := active + n
-		deficitAfter := maxInt(target-activeAfter, 0)
-		_, _ = s.DB.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,expired_users,quota_exhausted_users,deficit,created_last_cycle,deleted_last_cycle,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET port=excluded.port,target_users=excluded.target_users,active_users=excluded.active_users,expired_users=excluded.expired_users,quota_exhausted_users=excluded.quota_exhausted_users,deficit=excluded.deficit,created_last_cycle=excluded.created_last_cycle,deleted_last_cycle=excluded.deleted_last_cycle,last_error='',observed_at=now()`, p.ID, in.ID, in.Port, target, activeAfter, expiredCount, quotaCount, deficitAfter, n, deleted)
+		deficitAfter := maxInt(effectiveTarget-activeAfter, 0)
+		_, _ = s.DB.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,expired_users,quota_exhausted_users,deficit,created_last_cycle,deleted_last_cycle,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET port=excluded.port,target_users=excluded.target_users,active_users=excluded.active_users,expired_users=excluded.expired_users,quota_exhausted_users=excluded.quota_exhausted_users,deficit=excluded.deficit,created_last_cycle=excluded.created_last_cycle,deleted_last_cycle=excluded.deleted_last_cycle,last_error='',observed_at=now()`, p.ID, in.ID, in.Port, effectiveTarget, activeAfter, expiredCount, quotaCount, deficitAfter, n, deleted)
 	}
 	if mutated {
 		runtime.Session.Invalidate()

@@ -21,11 +21,15 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		if !wanted[rec.Port] || !rec.Enabled || rec.Protocol != "vless" || rec.Transport != "tcp" || rec.Security != "reality" {
 			continue
 		}
-		deficit := target - rec.ClientCount
+		effectiveTarget, effectiveRate, err := s.effectiveTargetRate(ctx, p.ID, rec.RemoteID, target, rate)
+		if err != nil {
+			return mutated, err
+		}
+		deficit := effectiveTarget - rec.ClientCount
 		if deficit <= 0 {
 			continue
 		}
-		n := userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), rate, deficit, time.Now())
+		n := userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), effectiveRate, deficit, time.Now())
 		if n <= 0 {
 			continue
 		}
@@ -53,7 +57,7 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		if err = s.confirmPlannedOwnedClients(ctx, p.ID, rec.RemoteID, observedOwned); err != nil {
 			return mutated, err
 		}
-		generation, err := s.activePolicyGeneration(ctx, p.ID, rec.RemoteID)
+		generation, err := s.effectiveGeneration(ctx, p.ID, rec.RemoteID)
 		if err != nil {
 			return mutated, err
 		}
