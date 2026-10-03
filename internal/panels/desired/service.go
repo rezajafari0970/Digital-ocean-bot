@@ -267,7 +267,18 @@ func (d *panelDeps) Add(
 }
 
 func (d *panelDeps) Update(ctx context.Context, remoteID int64, payload realityconfig.Payload) error {
-	_, err := sanaei.UpdateInbound(ctx, d.exec, remoteID, payload)
+	// Structural reconciliation must never replace the live client list with
+	// the builder's single bootstrap client. Client changes belong to the
+	// durable lifecycle journal, including on legacy panels.
+	current, err := liveInboundSettings(ctx, d.exec, remoteID)
+	if err != nil {
+		return err
+	}
+	payload, err = preserveInboundClients(payload, current)
+	if err != nil {
+		return err
+	}
+	_, err = sanaei.UpdateInbound(ctx, d.exec, remoteID, payload)
 	if err == nil && d.runtime != nil && d.runtime.Session != nil {
 		d.runtime.Session.Invalidate()
 	}

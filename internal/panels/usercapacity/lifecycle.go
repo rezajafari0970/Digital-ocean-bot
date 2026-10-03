@@ -26,6 +26,9 @@ func (s Service) reconcileLifecycle(ctx context.Context, p readyworker.Panel, rt
 	if rt == nil || rt.Session == nil {
 		return true, false, errors.New("user capacity runtime")
 	}
+	if err := s.autoEnrollLifecycle(ctx, p, rt); err != nil {
+		return true, false, err
+	}
 	j := clientops.Journal{DB: s.DB}
 	ids, err := j.LifecycleInbounds(ctx, p.ID)
 	if err != nil {

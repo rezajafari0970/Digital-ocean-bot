@@ -327,6 +327,20 @@ func runLifecycleCanary(panel string, inbound int64, recoverID string) (retErr e
 		}); err != nil {
 			return err
 		}
+		if err = lifeWait(ctx, j, "output expiry boundary", func() (bool, error) {
+			var n int
+			var latest sql.NullTime
+			e := a.DB.QueryRowContext(ctx, `SELECT count(*),max(s.visible_until) FROM output_config_snapshots s JOIN bulk_user_ownership o ON o.client_id=split_part(split_part(s.uri,'://',2),'@',1) WHERE o.generation_id=$1 AND s.panel_id=$2 AND o.state='ACTIVE'`, r.ID, r.Panel).Scan(&n, &latest)
+			if e != nil {
+				return false, e
+			}
+			return n == 3 && latest.Valid && latest.Time.UnixMilli() <= expiry-10000, nil
+		}); err != nil {
+			return err
+		}
+		if _, err = a.DB.ExecContext(ctx, `UPDATE bulk_scale_runs SET evidence=evidence||jsonb_build_object('output_visible_until_at_least_10_seconds_early',true) WHERE generation_id=$1`, r.ID); err != nil {
+			return err
+		}
 		if time.Until(time.UnixMilli(expiry)) < 20*time.Second {
 			return fmt.Errorf("insufficient expiry observation window")
 		}

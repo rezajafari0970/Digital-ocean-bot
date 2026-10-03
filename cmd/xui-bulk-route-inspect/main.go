@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -43,6 +44,43 @@ func main() {
 			if e != nil {
 				panic(e)
 			}
+			rows, e := a.DB.QueryContext(ctx, `SELECT o.client_id,o.email FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=1 AND o.state IN ('PLANNED','ACTIVE','DELETE_PENDING')`, *panel)
+			if e != nil {
+				panic(e)
+			}
+			owned := map[string]string{}
+			for rows.Next() {
+				var id, email string
+				if e = rows.Scan(&id, &email); e != nil {
+					rows.Close()
+					panic(e)
+				}
+				owned[id] = email
+			}
+			e = rows.Err()
+			rows.Close()
+			if e != nil {
+				panic(e)
+			}
+			manual := map[string]sanaei.Client{}
+			active := 0
+			for id, c := range obs {
+				if email, ok := owned[id]; ok {
+					if email != c.Client.Email {
+						panic("ownership mismatch")
+					}
+				} else {
+					manual[id] = c.Client
+				}
+				reason, e := c.InactiveReason(time.Now())
+				if e != nil {
+					panic(e)
+				}
+				if reason == "" {
+					active++
+				}
+			}
+			baseline, _ := json.Marshal(manual)
 			enabled := 0
 			quotas := map[int64]int{}
 			limits := map[int]int{}
@@ -53,7 +91,7 @@ func main() {
 				quotas[c.Client.TotalGB]++
 				limits[c.Client.LimitHWID]++
 			}
-			b, _ := json.Marshal(map[string]any{"clients": len(obs), "enabled": enabled, "quota_counts": quotas, "hwid_counts": limits})
+			b, _ := json.Marshal(map[string]any{"clients": len(obs), "active": active, "non_owned": len(manual), "non_owned_sha256": fmt.Sprintf("%x", sha256.Sum256(baseline)), "enabled": enabled, "quota_counts": quotas, "hwid_counts": limits})
 			fmt.Println(string(b))
 			return
 		}
