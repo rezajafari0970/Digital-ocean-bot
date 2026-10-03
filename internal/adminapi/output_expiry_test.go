@@ -1,6 +1,7 @@
 package adminapi
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -20,5 +21,14 @@ func TestOutputVisibleUntilNoExpiry(t *testing.T) {
 	}
 	if got := outputVisibleUntil(nil); got != nil {
 		t.Fatalf("got %v want nil", got)
+	}
+}
+
+func TestOutputDropletStatePredicateExcludesRetiring(t *testing.T) {
+	if !strings.Contains(outputDropletStatePredicate, "'READY'") || !strings.Contains(outputDropletStatePredicate, "'EXPIRING'") {
+		t.Fatal("output must serve READY and EXPIRING droplets")
+	}
+	if strings.Contains(outputDropletStatePredicate, "'RETIRING'") {
+		t.Fatal("output must stop serving configs as soon as droplet enters RETIRING")
 	}
 }

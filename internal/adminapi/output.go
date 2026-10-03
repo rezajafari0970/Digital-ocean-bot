@@ -22,6 +22,8 @@ type outputInbound struct {
 	StreamSettings json.RawMessage `json:"streamSettings"`
 }
 
+const outputDropletStatePredicate = "dr.state IN ('READY','EXPIRING')"
+
 type outputRecord struct {
 	URI          string
 	VisibleUntil *time.Time
@@ -84,7 +86,7 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 		JOIN accounts a ON a.id=dr.account_id
 		JOIN deployments d ON d.droplet_id=dr.id
 		WHERE p.id=o.panel_id AND p.enabled=true AND d.state='PANEL_COMPLETE'
-		AND a.provider_state='ACTIVE' AND dr.state IN ('READY','EXPIRING','RETIRING')
+		AND a.provider_state='ACTIVE' AND `+outputDropletStatePredicate+`
 		AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds')
 	)`)
 	if len(panels) == 0 || ctx.Err() != nil {
