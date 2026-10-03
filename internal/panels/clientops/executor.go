@@ -45,26 +45,28 @@ func payloadClient(raw json.RawMessage) (sanaei.Client, error) {
 
 func clientFromInbound(raw json.RawMessage, clientID string) (sanaei.Client, bool, error) {
 	var in struct {
-		Settings json.RawMessage
+		Settings any `json:"settings"`
 	}
 	if err := json.Unmarshal(raw, &in); err != nil {
 		return sanaei.Client{}, false, err
 	}
-	var settings struct {
-		Clients []sanaei.Client
-	}
-	if len(in.Settings) == 0 {
+	var settingsBytes []byte
+	switch v := in.Settings.(type) {
+	case string:
+		settingsBytes = []byte(v)
+	case map[string]any:
+		var err error
+		settingsBytes, err = json.Marshal(v)
+		if err != nil {
+			return sanaei.Client{}, false, err
+		}
+	default:
 		return sanaei.Client{}, false, ErrInboundMissing
 	}
-	if in.Settings[0] == '"' {
-		var encoded string
-		if err := json.Unmarshal(in.Settings, &encoded); err != nil {
-			return sanaei.Client{}, false, err
-		}
-		if err := json.Unmarshal([]byte(encoded), &settings); err != nil {
-			return sanaei.Client{}, false, err
-		}
-	} else if err := json.Unmarshal(in.Settings, &settings); err != nil {
+	var settings struct {
+		Clients []sanaei.Client `json:"clients"`
+	}
+	if err := json.Unmarshal(settingsBytes, &settings); err != nil {
 		return sanaei.Client{}, false, err
 	}
 	for _, c := range settings.Clients {

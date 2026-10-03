@@ -79,3 +79,21 @@ func TestCreateExistingUUIDWithDifferentPolicyIsConflict(t *testing.T) {
 		t.Fatal("policy mismatch must be detectable without issuing another create")
 	}
 }
+
+func TestClientFromInboundMatchesProductionStringSettings(t *testing.T) {
+	settings := `{"clients":[{"id":"prod-u","email":"prod","enable":true,"totalGB":0,"expiryTime":0,"limitIp":0,"flow":"xtls-rprx-vision"}]}`
+	raw, err := json.Marshal(map[string]any{
+		"id":       1,
+		"settings": settings,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, ok, err := clientFromInbound(raw, "prod-u")
+	if err != nil || !ok {
+		t.Fatalf("production settings client missing: ok=%v err=%v", ok, err)
+	}
+	if c.ID != "prod-u" || c.Flow != "xtls-rprx-vision" {
+		t.Fatalf("unexpected production client: %+v", c)
+	}
+}
