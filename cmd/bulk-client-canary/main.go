@@ -92,7 +92,7 @@ func run() error {
 	flag.StringVar(&panel, "panel", "", "exact panel uuid")
 	flag.Int64Var(&inbound, "inbound", 0, "exact inbound")
 	flag.StringVar(&recoverJob, "recover-job", "", "read-before-write cleanup of an existing bulk job")
-	flag.IntVar(&count, "count", 10, "bounded canary size: 10 or 25")
+	flag.IntVar(&count, "count", 10, "bounded canary size: 10, 25 or 50")
 	flag.Parse()
 	if recoverJob != "" {
 		return recoverBulk(recoverJob)
@@ -360,8 +360,8 @@ func run() error {
 }
 
 func validateCanaryCount(count int) error {
-	if count != 10 && count != 25 {
-		return fmt.Errorf("canary count must be 10 or 25; larger stages require acceptance")
+	if count != 10 && count != 25 && count != 50 {
+		return fmt.Errorf("canary count must be 10, 25 or 50; larger stages require acceptance")
 	}
 	return nil
 }
