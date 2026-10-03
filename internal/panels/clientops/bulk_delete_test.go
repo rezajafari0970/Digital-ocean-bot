@@ -86,6 +86,12 @@ func TestBulkDeletePostgresOwnedPartialLostResponseAndRetry(t *testing.T) {
 				cs = append(cs, c)
 			}
 			json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": []any{map[string]any{"id": 1, "settings": map[string]any{"clients": cs}}}})
+		case strings.HasSuffix(r.URL.Path, "clients/list"):
+			records := []sanaei.GlobalClient{}
+			for _, c := range state {
+				records = append(records, sanaei.GlobalClient{UUID: c.ID, Email: c.Email, Enable: c.Enable, TotalGB: c.TotalGB, ExpiryTime: c.ExpiryTime, LimitHWID: c.LimitHWID, InboundIDs: []int64{1}})
+			}
+			json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": records})
 		case strings.Contains(r.URL.Path, "clients/get/"):
 			c := state[strings.TrimPrefix(r.URL.Path, "/panel/api/clients/get/")]
 			json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": map[string]any{"client": map[string]any{"uuid": c.ID, "email": c.Email}}})

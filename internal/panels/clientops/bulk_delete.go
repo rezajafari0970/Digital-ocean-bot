@@ -152,7 +152,30 @@ func observeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime, job Job, p 
 	if err != nil {
 		return nil, nil, err
 	}
-	return bulkDeleteObserved(raws, job.InboundID, p.Clients)
+	runtimePresent, _, err := bulkDeleteObserved(raws, job.InboundID, p.Clients)
+	if err != nil {
+		return nil, nil, err
+	}
+	globals, err := globalWanted(ctx, rt, job.InboundID, p.Clients)
+	if err != nil {
+		return nil, nil, err
+	}
+	inRuntime := map[string]bool{}
+	for _, c := range runtimePresent {
+		inRuntime[c.ID] = true
+	}
+	present, absent := []sanaei.Client{}, []sanaei.Client{}
+	for _, c := range p.Clients {
+		if _, exists := globals[c.ID]; exists {
+			present = append(present, c)
+		} else {
+			if inRuntime[c.ID] {
+				return nil, nil, ErrVerify
+			}
+			absent = append(absent, c)
+		}
+	}
+	return present, absent, nil
 }
 func (e Executor) confirmBulkDeleted(ctx context.Context, p BulkPayload, absent []sanaei.Client) error {
 	for _, c := range absent {
@@ -193,13 +216,6 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 	}
 	emails := make([]string, 0, len(present))
 	for _, c := range present {
-		global, err := sanaei.GetClientByEmailSession(ctx, rt.Session.Exec, c.Email)
-		if err != nil {
-			return err
-		}
-		if global["uuid"] != c.ID || global["email"] != c.Email {
-			return ErrClientConflict
-		}
 		emails = append(emails, c.Email)
 	}
 	if err = e.bulkPreflight(ctx, job, p); err != nil {
@@ -263,15 +279,7 @@ func (e Executor) ReconcileBulkDeleteOnly(ctx context.Context, rt *sanaei.PanelR
 	if err != nil {
 		return nil, err
 	}
-	for _, c := range present {
-		g, e := sanaei.GetClientByEmailSession(ctx, rt.Session.Exec, c.Email)
-		if e != nil {
-			return nil, e
-		}
-		if g["uuid"] != c.ID || g["email"] != c.Email {
-			return nil, ErrClientConflict
-		}
-	}
+
 	if err = e.confirmBulkDeleted(ctx, p, absent); err != nil {
 		return nil, err
 	}

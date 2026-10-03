@@ -214,24 +214,16 @@ func observeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job Job, p BulkPa
 		return nil, nil, err
 	}
 	confirmed := make([]sanaei.Client, 0, len(observed))
+	if len(observed) == 0 {
+		return confirmed, missing, nil
+	}
+	globals, err := globalWanted(ctx, rt, job.InboundID, observed)
+	if err != nil {
+		return confirmed, missing, err
+	}
 	for _, c := range observed {
-		global, e := sanaei.GetClientByEmailSession(ctx, rt.Session.Exec, c.Email)
-		if e != nil {
-			return confirmed, missing, e
-		}
-		b, e := json.Marshal(global)
-		if e != nil {
-			return confirmed, missing, e
-		}
-		var g struct {
-			UUID       string `json:"uuid"`
-			Email      string `json:"email"`
-			TotalGB    int64  `json:"totalGB"`
-			ExpiryTime int64  `json:"expiryTime"`
-			LimitHWID  int    `json:"limitHwid"`
-			Enable     bool   `json:"enable"`
-		}
-		if json.Unmarshal(b, &g) != nil || g.UUID != c.ID || g.Email != c.Email || g.TotalGB != c.TotalGB || g.ExpiryTime != c.ExpiryTime || g.LimitHWID != c.LimitHWID || g.Enable != c.Enable {
+		g, ok := globals[c.ID]
+		if !ok || g.UUID != c.ID || g.Email != c.Email || g.TotalGB != c.TotalGB || g.ExpiryTime != c.ExpiryTime || g.LimitHWID != c.LimitHWID || g.Enable != c.Enable {
 			return confirmed, missing, ErrClientConflict
 		}
 		confirmed = append(confirmed, c)

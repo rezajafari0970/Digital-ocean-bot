@@ -49,3 +49,16 @@ func TestBulkDeleteNeverRetriesOrFallsBack(t *testing.T) {
 		}
 	}
 }
+
+func TestGlobalListRejectsMissingNullOrMalformedArray(t *testing.T) {
+	for _, body := range []string{`{"success":true}`, `{"success":true,"obj":null}`, `{"success":true,"obj":{}}`, `{"success":false,"obj":[]}`, `broken`} {
+		s := &bulkDeleteStub{response: SessionResponse{StatusCode: 200, Body: []byte(body)}}
+		if _, err := ReadGlobalClientsSession(context.Background(), s); err == nil {
+			t.Fatal("invalid global list accepted", body)
+		}
+	}
+	s := &bulkDeleteStub{response: SessionResponse{StatusCode: 200, Body: []byte(`{"success":true,"obj":[]}`)}}
+	if cs, err := ReadGlobalClientsSession(context.Background(), s); err != nil || len(cs) != 0 {
+		t.Fatal(cs, err)
+	}
+}
