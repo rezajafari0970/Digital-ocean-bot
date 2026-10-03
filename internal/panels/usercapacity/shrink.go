@@ -170,3 +170,29 @@ func (s Service) shrinkCleanupAllowedForPanel(ctx context.Context, panelID strin
 	}
 	return true, nil
 }
+
+func ClientPresentInRuntime(ctx context.Context, runtime *sanaei.PanelRuntime, inboundID int64, clientID string) (bool, error) {
+	raws, err := runtime.Session.Snapshot(ctx)
+	if err != nil {
+		return false, err
+	}
+	for _, raw := range raws {
+		var in rawInbound
+		if json.Unmarshal(raw, &in) != nil || int64(in.ID) != inboundID {
+			continue
+		}
+		var st struct {
+			Clients []sanaei.Client `json:"clients"`
+		}
+		if json.Unmarshal(in.Settings, &st) != nil {
+			return false, fmt.Errorf("inbound settings")
+		}
+		for _, c := range st.Clients {
+			if c.ID == clientID {
+				return true, nil
+			}
+		}
+		return false, nil
+	}
+	return false, fmt.Errorf("inbound missing")
+}
