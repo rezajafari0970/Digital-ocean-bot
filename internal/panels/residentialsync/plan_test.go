@@ -190,3 +190,41 @@ func TestUnobservedTemplateNeverRestartsOrBlindRetries(t *testing.T) {
 		}
 	}
 }
+
+func TestExistingClassesSurviveDeletionAndReplacement(t *testing.T) {
+	p := routePolicy{Direct: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
+	previous := map[string]clientRoute{"a": {ID: "a", Email: "a", Class: "DIRECT"}, "b": {ID: "b", Email: "b", Class: "RESIDENTIAL"}}
+	plan := func(ids ...string) []clientRoute {
+		t.Helper()
+		clients := []any{}
+		for _, id := range ids {
+			clients = append(clients, map[string]any{"id": id, "email": id})
+		}
+		raw, _ := json.Marshal(map[string]any{"id": 1, "tag": "in", "protocol": "vless", "settings": map[string]any{"clients": clients}})
+		cs, _, err := planClients([]json.RawMessage{raw}, previous, p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return cs
+	}
+	for _, id := range []string{"a", "b"} {
+		cs := plan(id)
+		if len(cs) != 1 || cs[0].Class != previous[id].Class {
+			t.Fatal("remaining identity changed class", cs)
+		}
+	}
+	cs := plan("a", "c")
+	if cs[0].Class != "DIRECT" || cs[1].Class != "RESIDENTIAL" {
+		t.Fatal(cs)
+	}
+	cs = plan("b", "c")
+	if cs[0].Class != "RESIDENTIAL" || cs[1].Class != "DIRECT" {
+		t.Fatal(cs)
+	}
+	p.Configured = 0
+	p.Proxies = nil
+	cs = plan("a", "b")
+	if cs[0].Class != "DIRECT" || cs[1].Class != "RESIDENTIAL" || cs[0].Effective != "DIRECT" || cs[1].Effective != "DIRECT" {
+		t.Fatal("absent proxy changed intent", cs)
+	}
+}

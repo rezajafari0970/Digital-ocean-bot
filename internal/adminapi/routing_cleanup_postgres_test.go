@@ -48,7 +48,7 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 	sqlMust(t, db, "UPDATE panel_routing_state SET revision=$2,selected_proxy_id=$3 WHERE panel_id=$1", panel, rev, proxy)
 	for i, class := range []string{"RESIDENTIAL", "DIRECT", "BLOCKED"} {
 		id := fmt.Sprint(i)
-		sqlMust(t, db, "INSERT INTO panel_client_routes(panel_id,client_id,email,route_class,effective_class,revision) VALUES($1,$2,$2,'RESIDENTIAL',$3,$4)", panel, id, class, rev)
+		sqlMust(t, db, "INSERT INTO panel_client_routes(panel_id,client_id,email,route_class,effective_class,revision) VALUES($1,$2,$2,CASE WHEN $3='DIRECT' THEN 'DIRECT' ELSE 'RESIDENTIAL' END,$3,$4)", panel, id, class, rev)
 		sqlMust(t, db, "INSERT INTO output_config_snapshots(panel_id,uri,client_id) VALUES($1,$2,$3)", panel, "vless://"+id+"@panel.test", id)
 	}
 	s := Server{DB: db}
@@ -78,6 +78,14 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 		if out.Code != 400 {
 			t.Fatal("class widened")
 		}
+	}
+	// No residential configured may make traffic direct, but must not move
+	// residential identities into the never-residential subscription.
+	sqlMust(t, db, "UPDATE panel_client_routes SET effective_class='DIRECT' WHERE panel_id=$1 AND route_class='RESIDENTIAL'", panel)
+	directOnly := httptest.NewRecorder()
+	s.outputSnapshotResponse(directOnly, httptest.NewRequest("GET", "/?route_class=DIRECT", nil))
+	if directOnly.Code != 200 || strings.TrimSpace(directOnly.Body.String()) != "vless://1@panel.test" {
+		t.Fatal("residential identity leaked into direct subscription")
 	}
 	sqlMust(t, db, "UPDATE panel_routing_state SET verified_at=now()-interval '2 minutes'")
 	out := httptest.NewRecorder()

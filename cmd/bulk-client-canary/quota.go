@@ -232,7 +232,7 @@ func quotaPhase(ctx context.Context, db *sql.DB, rt *sanaei.PanelRuntime, j clie
 	var clientID, uri string
 	if err := lifeWait(ctx, j, "fresh direct quota output", func() (bool, error) {
 		err := db.QueryRowContext(ctx, `SELECT o.client_id,s.uri FROM bulk_user_ownership o JOIN output_config_snapshots s ON s.client_id=o.client_id JOIN panel_client_routes m ON m.panel_id=s.panel_id AND m.client_id=s.client_id JOIN panel_routing_state r ON r.panel_id=s.panel_id CROSS JOIN residential_routing_control c
-  WHERE o.generation_id=$1 AND o.state='ACTIVE' AND s.panel_id=$2 AND s.visible_until>now() AND s.last_seen_at>now()-interval '15 seconds' AND m.effective_class='DIRECT' AND m.revision=c.revision AND r.revision=c.revision AND r.state='APPLIED' AND r.verified_at>now()-interval '45 seconds' AND c.enabled AND (c.fleet OR r.panel_id=ANY(c.panel_ids)) ORDER BY o.client_id LIMIT 1`, r.ID, r.Panel).Scan(&clientID, &uri)
+  WHERE o.generation_id=$1 AND o.state='ACTIVE' AND s.panel_id=$2 AND s.visible_until>now() AND s.last_seen_at>now()-interval '15 seconds' AND m.effective_class='DIRECT' AND m.route_class='DIRECT' AND m.revision=c.revision AND r.revision=c.revision AND r.state='APPLIED' AND r.verified_at>now()-interval '45 seconds' AND c.enabled AND (c.fleet OR r.panel_id=ANY(c.panel_ids)) ORDER BY o.client_id LIMIT 1`, r.ID, r.Panel).Scan(&clientID, &uri)
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}

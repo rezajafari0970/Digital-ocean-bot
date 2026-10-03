@@ -121,7 +121,7 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	scoped := ` rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids)) `
 	if class != "ALL" {
 		args = append(args, class)
-		where += " AND (" + scoped + ") AND (" + proof + ") AND cr.effective_class=$1 "
+		where += " AND (" + scoped + ") AND (" + proof + ") AND cr.effective_class=$1 AND cr.route_class=$1 "
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
 	}

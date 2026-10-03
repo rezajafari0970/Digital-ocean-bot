@@ -111,23 +111,33 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 	}
 	out := make([]clientRoute, 0, len(ids))
 	direct := 0
+	var unassigned []int
 	for _, id := range ordered {
 		cl := clientRoute{ID: id, Email: ids[id], Class: "RESIDENTIAL"}
-		if old, ok := previous[id]; ok && old.Email == cl.Email && old.Class == "DIRECT" {
+		old, known := previous[id]
+		known = known && old.Email == cl.Email && (old.Class == "DIRECT" || old.Class == "RESIDENTIAL")
+		switch {
+		case p.Direct && !p.Residential:
 			cl.Class = "DIRECT"
+		case p.Direct && p.Residential && known:
+			cl.Class = old.Class
+		case p.Direct && p.Residential:
+			unassigned = append(unassigned, len(out))
+		}
+		if cl.Class == "DIRECT" {
 			direct++
 		}
 		out = append(out, cl)
 	}
-	for i := range out {
-		if direct < wantedDirect && out[i].Class != "DIRECT" {
+	// Both enabled: retain existing identity classes across partial deletion,
+	// replacement and growth. Fill the desired split using new identities only.
+	for _, i := range unassigned {
+		if direct < wantedDirect {
 			out[i].Class = "DIRECT"
 			direct++
-		} else if direct > wantedDirect && out[i].Class == "DIRECT" {
-			out[i].Class = "RESIDENTIAL"
-			direct--
 		}
 	}
+
 	for i := range out {
 		out[i].Effective = out[i].Class
 		if !p.Direct && !p.Residential {
