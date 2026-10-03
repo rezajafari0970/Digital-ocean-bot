@@ -91,3 +91,32 @@ func TestMapPatchSatisfiedLimitHWID(t *testing.T) {
 		t.Fatal("not satisfied")
 	}
 }
+
+func TestV3UpdatePayloadNormalizesRecordShape(t *testing.T) {
+	q := int64(200)
+	g := map[string]any{"email": "u@example.com", "uuid": "u1", "subId": "s", "allowedIPs": "", "createdAt": float64(1), "updatedAt": float64(2), "totalGB": float64(100), "limitHwid": float64(1), "enable": true}
+	out, err := v3UpdatePayload(g, ClientPatch{TotalGB: &q})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out["id"] != "u1" || out["uuid"] != "u1" || out["totalGB"] != q || out["subId"] != "s" {
+		t.Fatalf("out=%v", out)
+	}
+	if _, ok := out["allowedIPs"]; ok {
+		t.Fatalf("empty allowedIPs should be omitted: %v", out)
+	}
+	if _, ok := out["createdAt"]; ok {
+		t.Fatalf("db-only field leaked: %v", out)
+	}
+}
+func TestV3UpdatePayloadConvertsAllowedIPsToArray(t *testing.T) {
+	g := map[string]any{"email": "u@example.com", "uuid": "u1", "allowedIPs": "10.0.0.2/32, 10.0.0.3/32"}
+	out, err := v3UpdatePayload(g, ClientPatch{Enable: func() *bool { v := true; return &v }()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ips, ok := out["allowedIPs"].([]string)
+	if !ok || len(ips) != 2 {
+		t.Fatalf("out=%v", out)
+	}
+}

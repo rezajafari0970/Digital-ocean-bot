@@ -244,7 +244,7 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			if uuid, _ := global["uuid"].(string); uuid != "" && uuid != job.ClientID {
 				return ErrClientConflict
 			}
-			payload, patchErr := applyPatchMap(global, patch)
+			payload, patchErr := v3UpdatePayload(global, patch)
 			if patchErr != nil {
 				return patchErr
 			}

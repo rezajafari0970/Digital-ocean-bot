@@ -2,6 +2,7 @@ package clientops
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 )
@@ -220,4 +221,33 @@ func mapPatchSatisfied(m map[string]any, p ClientPatch) bool {
 		}
 	}
 	return true
+}
+
+func v3UpdatePayload(global map[string]any, p ClientPatch) (map[string]any, error) {
+	if p.Email != nil {
+		return nil, ErrUnsupportedKind
+	}
+	out := map[string]any{}
+	copyKeys := []string{"email", "subId", "password", "auth", "flow", "security", "totalGB", "expiryTime", "reset", "resetDay", "resetWeekday", "resetMax", "trafficReset", "trafficResetDay", "limitIp", "limitHwid", "tgId", "group", "comment", "enable", "privateKey", "publicKey", "preSharedKey", "keepAlive", "forwardedPorts", "secret", "adTag", "reverse"}
+	for _, k := range copyKeys {
+		if v, ok := global[k]; ok && v != nil {
+			out[k] = v
+		}
+	}
+	if uuid, _ := global["uuid"].(string); uuid != "" {
+		out["id"] = uuid
+		out["uuid"] = uuid
+	}
+	if raw, ok := global["allowedIPs"].(string); ok && strings.TrimSpace(raw) != "" {
+		parts := []string{}
+		for _, x := range strings.Split(raw, ",") {
+			if x = strings.TrimSpace(x); x != "" {
+				parts = append(parts, x)
+			}
+		}
+		if len(parts) > 0 {
+			out["allowedIPs"] = parts
+		}
+	}
+	return applyPatchMap(out, p)
 }
