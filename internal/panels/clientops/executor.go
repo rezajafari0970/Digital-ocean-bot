@@ -128,6 +128,16 @@ func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime,
 	if err != nil {
 		return false, err
 	}
+	if job.Kind == KindUpdate {
+		if !exists {
+			return true, ErrClientConflict
+		}
+		patch, err := payloadPatch(job.Payload)
+		if err != nil {
+			return false, err
+		}
+		return patchSatisfied(current, patch), nil
+	}
 	var want sanaei.Client
 	if job.Kind == KindCreate {
 		want, err = payloadClient(job.Payload)
@@ -179,7 +189,23 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 		case KindDelete:
 			err = sanaei.DeleteClientSession(runCtx, rt.Session.Exec, int(job.InboundID), job.ClientID)
 		case KindUpdate:
-			return ErrUnsupportedKind
+			patch, patchErr := payloadPatch(job.Payload)
+			if patchErr != nil {
+				return patchErr
+			}
+			rt.Session.Invalidate()
+			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+			if readErr != nil {
+				return readErr
+			}
+			if !found {
+				return ErrInboundMissing
+			}
+			payload, patchErr := patchInboundClient(raw, job.ClientID, patch)
+			if patchErr != nil {
+				return patchErr
+			}
+			_, err = sanaei.UpdateInboundRaw(runCtx, rt.Session.Exec, job.InboundID, payload)
 		default:
 			return ErrUnsupportedKind
 		}
