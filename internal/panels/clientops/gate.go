@@ -44,6 +44,16 @@ func (j Journal) FailCloseGate(ctx context.Context) error {
 	if j.DB == nil {
 		return ErrInvalidRequest
 	}
-	_, err := j.DB.ExecContext(ctx, `UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,concurrency=1,updated_at=now() WHERE singleton=true`)
-	return err
+	tx, err := j.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true,remaining_batches=0,updated_at=now() WHERE singleton`); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,concurrency=1,updated_at=now() WHERE singleton`); err != nil {
+		return err
+	}
+	return tx.Commit()
 }

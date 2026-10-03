@@ -13,9 +13,10 @@ type Kind string
 type State string
 
 const (
-	KindCreate Kind = "CREATE"
-	KindUpdate Kind = "UPDATE"
-	KindDelete Kind = "DELETE"
+	KindCreate     Kind = "CREATE"
+	KindUpdate     Kind = "UPDATE"
+	KindDelete     Kind = "DELETE"
+	KindBulkCreate Kind = "BULK_CREATE"
 
 	StatePending   State = "PENDING"
 	StateRunning   State = "RUNNING"
@@ -69,7 +70,7 @@ func (r Request) Validate() error {
 		return ErrInvalidRequest
 	}
 	switch r.Kind {
-	case KindCreate, KindUpdate, KindDelete:
+	case KindCreate, KindUpdate, KindDelete, KindBulkCreate:
 	default:
 		return ErrInvalidRequest
 	}
@@ -174,7 +175,7 @@ func (j Journal) Reconcile(ctx context.Context) error {
 	return err
 }
 
-const claimSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id JOIN client_mutation_execution_gate g ON g.singleton=true WHERE g.enabled=true AND g.kill_switch=false AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND m.state='PENDING' AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) ORDER BY m.created_at,m.id FOR UPDATE OF m SKIP LOCKED LIMIT 1"
+const claimSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id JOIN client_mutation_execution_gate g ON g.singleton=true WHERE g.enabled=true AND g.kill_switch=false AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND (m.kind<>'BULK_CREATE' OR EXISTS(SELECT 1 FROM bulk_client_execution_gate bg WHERE bg.singleton AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.remaining_batches>0 AND bg.expires_at>now() AND jsonb_array_length(m.payload->'Clients')<=bg.max_batch_size)) AND m.state='PENDING' AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) ORDER BY m.created_at,m.id FOR UPDATE OF m SKIP LOCKED LIMIT 1"
 
 func (j Journal) Claim(ctx context.Context) (Job, bool, error) {
 	if j.DB == nil {
@@ -191,6 +192,16 @@ func (j Journal) Claim(ctx context.Context) (Job, bool, error) {
 	}
 	if err != nil {
 		return Job{}, false, err
+	}
+	if job.Kind == KindBulkCreate {
+		res, e := tx.ExecContext(ctx, `UPDATE bulk_client_execution_gate SET remaining_batches=remaining_batches-1,updated_at=now() WHERE singleton AND enabled AND NOT kill_switch AND panel_id=$1 AND inbound_id=$2 AND remaining_batches>0 AND expires_at>now()`, job.PanelID, job.InboundID)
+		if e != nil {
+			return Job{}, false, e
+		}
+		n, e := res.RowsAffected()
+		if e != nil || n != 1 {
+			return Job{}, false, e
+		}
 	}
 	res, err := tx.ExecContext(ctx,
 		"UPDATE client_mutation_jobs SET state='RUNNING',attempts=attempts+1,next_retry_at=NULL,last_error='',updated_at=now() WHERE id=$1 AND state='PENDING'",

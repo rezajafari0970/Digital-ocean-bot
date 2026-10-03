@@ -63,3 +63,11 @@ func durableRateStep(tokens float64, last time.Time, rate, deficit int, now time
 	tokens -= float64(n)
 	return tokens, n
 }
+
+// BulkAllowance shares the production durable token bucket with scoped canaries.
+func (s Service) BulkAllowance(ctx context.Context, panelID string, inboundID int64, rate, deficit int) (int, error) {
+	if rate < 1 || rate > 100 || deficit < 1 || deficit > 250 {
+		return 0, nil
+	}
+	return s.durableAllowance(ctx, panelID, inboundID, rate, deficit, time.Now())
+}

@@ -231,3 +231,68 @@ func GetClientByEmailSession(ctx context.Context, exec SessionExecutor, email st
 	}
 	return env.Obj.Client, nil
 }
+
+type BulkCreateSkipped struct {
+	Email  string `json:"email"`
+	Reason string `json:"reason"`
+}
+type BulkCreateResult struct {
+	Created int                 `json:"created"`
+	Skipped []BulkCreateSkipped `json:"skipped"`
+}
+
+func BulkCreateClientsSession(ctx context.Context, exec SessionExecutor, inboundID int, clients []Client) (BulkCreateResult, error) {
+	var out BulkCreateResult
+	if exec == nil || inboundID <= 0 || len(clients) == 0 {
+		return out, ErrMutationRequest
+	}
+	items := make([]map[string]any, 0, len(clients))
+	for _, c := range clients {
+		items = append(items, map[string]any{"client": c, "inboundIds": []int{inboundID}})
+	}
+	body, err := json.Marshal(items)
+	if err != nil {
+		return out, err
+	}
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodPost, Path: "panel/api/clients/bulkCreate", Body: body, ContentType: "application/json", TimeoutSeconds: 30})
+	if err != nil {
+		return out, err
+	}
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusMethodNotAllowed {
+		return out, fmt.Errorf("%w: bulkCreate http=%d", ErrAddClientUnsupported, resp.StatusCode)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return out, fmt.Errorf("%w: bulkCreate http=%d", ErrMutationRequest, resp.StatusCode)
+	}
+	var envelope struct {
+		Success bool              `json:"success"`
+		Msg     string            `json:"msg"`
+		Obj     *BulkCreateResult `json:"obj"`
+	}
+	if json.Unmarshal(resp.Body, &envelope) != nil {
+		return out, ErrMutationRequest
+	}
+	if envelope.Obj == nil {
+		return out, ErrMutationRequest
+	}
+	out = *envelope.Obj
+	if out.Created < 0 || out.Created > len(clients) || len(out.Skipped) > len(clients) {
+		return out, ErrMutationRequest
+	}
+	if !envelope.Success {
+		return out, fmt.Errorf("%w: bulkCreate msg=%q", ErrMutationRejected, envelope.Msg)
+	}
+	return out, nil
+}
+
+func BulkCreateCompatibleSession(ctx context.Context, exec SessionExecutor, inboundID int, clients []Client) (BulkCreateResult, error) {
+	out, err := BulkCreateClientsSession(ctx, exec, inboundID, clients)
+	if !errors.Is(err, ErrAddClientUnsupported) {
+		return out, err
+	}
+	if err = AddClientsSession(ctx, exec, inboundID, clients); err != nil {
+		return out, err
+	}
+	out.Created = len(clients)
+	return out, nil
+}

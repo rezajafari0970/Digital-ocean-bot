@@ -173,6 +173,9 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 		return err
 	}
 	return rt.WithMutation(ctx, func(runCtx context.Context) error {
+		if job.Kind == KindBulkCreate {
+			return e.executeBulk(runCtx, rt, job)
+		}
 		ok, err := e.desiredSatisfied(runCtx, rt, job)
 		if err != nil && !errors.Is(err, ErrUnsupportedKind) {
 			return err
@@ -272,6 +275,11 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 	if e.Journal.DB == nil || e.Runtimes == nil {
 		return false, ErrInvalidRequest
 	}
+	unlock, acquired, err := e.Journal.executorLock(ctx)
+	if err != nil || !acquired {
+		return false, err
+	}
+	defer unlock()
 	if err := e.Journal.Reconcile(ctx); err != nil {
 		return false, err
 	}
@@ -291,11 +299,11 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 	case errors.Is(execErr, ErrUnsupportedKind),
 		errors.Is(execErr, ErrClientConflict),
 		errors.Is(execErr, ErrInvalidRequest):
-		return true, e.Journal.Fail(finishCtx, job.ID, execErr.Error())
+		return true, retryResult(execErr, e.Journal.Fail(finishCtx, job.ID, execErr.Error()))
 	case errors.Is(execErr, ErrInboundMissing):
-		return true, e.Journal.Obsolete(finishCtx, job.ID, execErr.Error())
+		return true, retryResult(execErr, e.Journal.Obsolete(finishCtx, job.ID, execErr.Error()))
 	case job.Attempts >= 3:
-		return true, e.Journal.Fail(finishCtx, job.ID, execErr.Error())
+		return true, retryResult(execErr, e.Journal.Fail(finishCtx, job.ID, execErr.Error()))
 	default:
 		delay := time.Duration(job.Attempts*2) * time.Second
 		if delay > 10*time.Second {

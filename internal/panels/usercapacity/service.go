@@ -89,9 +89,6 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 	if rolledBack, e := s.RollbackExpiredCanary(ctx, p, runtime); e != nil || rolledBack {
 		return rolledBack, e
 	}
-	if _, unsupported := addClientUnsupportedPanels.Load(p.ID); unsupported {
-		return s.legacyFastFillFromPolicy(ctx, p, runtime)
-	}
 	var enabled bool
 	var portsRaw []byte
 	var target, life, limit, rate int
@@ -208,6 +205,16 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		if json.Unmarshal(raw, &in) != nil || !in.Enable || in.Protocol != "vless" || !wanted[in.Port] {
 			continue
 		}
+		var bulkManaged bool
+		if e = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.mutation_job_id IS NOT NULL AND o.state IN ('PLANNED','ACTIVE','DELETE_PENDING'))`, p.ID, in.ID).Scan(&bulkManaged); e != nil {
+			return e
+		}
+		if bulkManaged {
+			if e = s.observeBulkCapacity(ctx, p.ID, in); e != nil {
+				return e
+			}
+			continue
+		}
 		var stream map[string]any
 		if json.Unmarshal(in.StreamSettings, &stream) != nil || fmt.Sprint(stream["network"]) != "tcp" || fmt.Sprint(stream["security"]) != "reality" {
 			continue
@@ -259,6 +266,10 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			isExpired := c.ExpiryTime > 0 && c.ExpiryTime <= now
 			isQuota := c.TotalGB > 0 && (stat.Up+stat.Down) >= c.TotalGB
 			if !c.Enable || isExpired || isQuota {
+				if _, owned := ownedPolicies[c.ID]; !owned {
+					kept = append(kept, c)
+					continue
+				}
 				deleted++
 				deleteIDs = append(deleteIDs, c.ID)
 				if isQuota {
@@ -304,39 +315,11 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			}
 		}
 		deficit := effectiveTarget - active
+		// All creation, including this slower reconciliation path, is planned
+		// durably. Bulk-owned inbounds are observation-only below.
 		n := 0
-		if !plannedBlocked {
-			n, e = s.durableAllowance(ctx, p.ID, int64(in.ID), effectiveRate, deficit, time.Now())
-			if e != nil {
-				return e
-			}
-		}
-		newClients := make([]sanaei.Client, 0, n)
-		owned := make([]ownedClient, 0, n)
-		var generation bulkGeneration
-		if n > 0 {
-			generation, e = s.effectiveGeneration(ctx, p.ID, int64(in.ID))
-			if e != nil {
-				return e
-			}
-			expiry := int64(0)
-			if life > 0 {
-				expiry = now + int64(life)*1000
-			}
-			for i := 0; i < n; i++ {
-				id, e := sanaei.UUIDv4()
-				if e != nil {
-					return e
-				}
-				email := ownershipEmail(generation.Marker, id)
-				c := sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"}
-				newClients = append(newClients, c)
-				owned = append(owned, ownedClient{ID: id, Email: email})
-				kept = append(kept, c)
-			}
-		}
-		if len(owned) > 0 {
-			if e = s.planOwnedClients(ctx, generation.ID, owned); e != nil {
+		if !plannedBlocked && deficit > 0 && effectiveRate > 0 {
+			if _, e = s.FastFill(ctx, p, runtime, wanted, target, quota, life, limit, rate); e != nil {
 				return e
 			}
 		}
@@ -370,16 +353,6 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			}
 			if e = s.markOwnedDeleted(ctx, p.ID, int64(in.ID), deleteIDs); e != nil {
 				return e
-			}
-			if len(newClients) > 0 {
-				if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
-					return fmt.Errorf("inbound %d add clients: %w", in.ID, e)
-				}
-			}
-			mutated = true
-		} else if !addUnsupported && deleted == 0 && len(newClients) > 0 {
-			if e = sanaei.AddClientsSession(ctx, runtime.Session.Exec, in.ID, newClients); e != nil {
-				return fmt.Errorf("inbound %d add clients: %w", in.ID, e)
 			}
 			mutated = true
 		} else if n > 0 || deleted > 0 {

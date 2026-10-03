@@ -73,7 +73,7 @@ type ownedClient struct {
 
 func (s Service) confirmPlannedOwnedClients(ctx context.Context, panelID string, inboundID int64, observed map[string]string) error {
 	rows, err := s.DB.QueryContext(ctx,
-		"SELECT o.generation_id::text,o.client_id,o.email,g.marker FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='PLANNED'",
+		"SELECT o.generation_id::text,o.client_id,o.email,g.marker FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='PLANNED' AND o.mutation_job_id IS NULL",
 		panelID, inboundID,
 	)
 	if err != nil {

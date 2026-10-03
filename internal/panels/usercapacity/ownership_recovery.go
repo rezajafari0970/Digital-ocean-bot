@@ -38,7 +38,7 @@ func (s Service) recoverPlannedBarrier(ctx context.Context, panelID string, inbo
 SELECT o.generation_id::text,o.client_id,o.email,g.marker,o.created_at,o.recovery_checks,o.last_recovery_check_at
 FROM bulk_user_ownership o
 JOIN bulk_user_generations g ON g.id=o.generation_id
-WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='PLANNED'
+WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='PLANNED' AND o.mutation_job_id IS NULL
 ORDER BY o.created_at,o.client_id
 `, panelID, inboundID)
 	if err != nil {
