@@ -49,7 +49,7 @@ func main() {
 import os,time,json,pathlib
 root=pathlib.Path('/proc')
 ticks=os.sysconf('SC_CLK_TCK')
-prev={};last=time.monotonic()
+prev={};last=time.monotonic();rows=[]
 for index in range(%d+1):
  now=time.monotonic();rss=0;cpu=0;procs=0;current={}
  for p in root.iterdir():
@@ -61,6 +61,7 @@ for index in range(%d+1):
    used=int(fields[11])+int(fields[12]);key=p.name+':'+fields[19]
    current[key]=used
    if key in prev:cpu+=(used-prev[key])/ticks/max(now-last,.001)*100
+   elif index>0:cpu+=used/ticks/max(now-last,.001)*100
    for line in (p/'status').read_text().splitlines():
     if line.startswith('VmRSS:'):rss+=int(line.split()[1])
    procs+=1
@@ -68,10 +69,11 @@ for index in range(%d+1):
  available=next(int(line.split()[1]) for line in (root/'meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
  cg=pathlib.Path('/sys/fs/cgroup/system.slice/x-ui.service/memory.current')
  group=int(cg.read_text()) if cg.exists() else None
- print(json.dumps(dict(time=time.time(),index=index,rss_kib=rss,cpu_pct=round(cpu,2) if index else None,processes=procs,available_kib=available,cgroup_memory_bytes=group)),flush=True)
+ rows.append(dict(time=time.time(),index=index,rss_kib=rss,cpu_pct=round(cpu,2) if index else None,processes=procs,available_kib=available,cgroup_memory_bytes=group))
  prev=current;last=now
  if index<%d:time.sleep(1)
 
+print(json.dumps(dict(samples=len(rows),started_at=rows[0]['time'],ended_at=rows[-1]['time'],peak_sampled_rss_kib=max(x['rss_kib'] for x in rows),peak_sampled_cpu_percent=max(x['cpu_pct'] or 0 for x in rows),minimum_available_kib=min(x['available_kib'] for x in rows),peak_sampled_cgroup_bytes=max(x['cgroup_memory_bytes'] or 0 for x in rows),min_processes=min(x['processes'] for x in rows),max_processes=max(x['processes'] for x in rows),sampling_interval_seconds=1,first=rows[0],last=rows[-1])),flush=True)
 PYRESOURCE`, *samples, *samples)
 	}
 	r, e := ssh.RunDetailed(ctx, t, key, cmd)
