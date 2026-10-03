@@ -1,18 +1,18 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "bc477488c1070cb28c367f043c429262a6737b56",
+  "runtime_source_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-03T10:45:47.932382+00:00",
+  "verified_at_utc": "2026-10-03T11:19:32.187376+00:00",
   "binaries": {
     "api": {
-      "sha256": "ad85d191e7788a6c52ede49efeb6c19a08c0e748b69e562d1e257153353e8126",
+      "sha256": "6664a0d350b04f835b96876b8b35cf5df09dec1049afd0861fa0776a6c0420ad",
       "vcs_modified": false,
-      "revision": "bc477488c1070cb28c367f043c429262a6737b56"
+      "revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e"
     },
     "worker": {
-      "sha256": "5b25bd4b306943e647d840c3e21d9e9b8301487f70172c4624c852fddaece0f2",
+      "sha256": "6c2fcbd060ed8caf00f06ca6fa96e84c8d6488a483dce3a033236c64dc82ab68",
       "vcs_modified": false,
-      "revision": "bc477488c1070cb28c367f043c429262a6737b56"
+      "revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e"
     }
   },
   "services": {
@@ -24,10 +24,10 @@
   "migration": "000135_bulk_scale_recovery",
   "acceptance": "docs/BULK_V3_ACCEPTANCE.json",
   "verified": true,
-  "note": "Runtime revision and migration verified. The 10000-total-client run is IN PROGRESS, not accepted yet. Earlier ramp acceptance files are historical. Bulk cleanup and global-list verification each passed scoped 51-client live tests.",
+  "note": "The 10000-total-client target and 9950 owned Output entries were verified. Cleanup is IN PROGRESS, not fully accepted yet. A second DELETE committed but its original verification timed out; explicit fresh reads reconciled it at attempt=1 without another POST. A first recovery read timed out without mutations. Bounded read budgets were patched and clean-deployed; cleanup resumed.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
-  "canary_tool_revision": "bc477488c1070cb28c367f043c429262a6737b56",
-  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c",
+  "canary_tool_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
+  "resource_sampler_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
   "scale_run_in_progress": {
     "run_id": "ad494773-1793-41f2-ba79-8909e30c2657",
     "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
@@ -36,6 +36,16 @@
     "preserved_baseline": 50,
     "new_owned_target": 9950,
     "evidence_directory": "/root/backups/dob-bulk10000-20261003",
-    "rule": "Read live scale run/jobs/gates and scale.log before recovery. Do not start another run while unresolved."
+    "rule": "Do not start another run or cleanup while this worker-driven cleanup is active. Read live run/jobs/gates, active log/status and collector evidence. On a new failure, close gates and read before retry. Preserve original failure logs.",
+    "phase_observed": "CLEANING",
+    "ownership_observed": {
+      "ACTIVE": 6950,
+      "DELETED": 2900,
+      "DELETE_PENDING": 100
+    },
+    "observed_at": "2026-10-03T11:19:32.124254+00:00",
+    "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
+    "active_log": "/root/backups/dob-bulk10000-20261003/scale-recovery2.log",
+    "active_status": "/root/backups/dob-bulk10000-20261003/scale-recovery2-status.txt"
   }
 }
