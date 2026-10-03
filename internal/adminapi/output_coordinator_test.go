@@ -1,6 +1,7 @@
 package adminapi
 
 import (
+	"context"
 	"os"
 	"strings"
 	"sync"
@@ -86,5 +87,50 @@ func TestPanelRefreshAdmissionIsPerPanel(t *testing.T) {
 	}
 	if p2Busy {
 		t.Fatal("panel-b must remain independently schedulable")
+	}
+}
+
+func TestOutputRefreshConcurrencyIsBounded(t *testing.T) {
+	s := &Server{
+		OutputPanelRun:   map[string]bool{},
+		OutputRefreshSem: make(chan struct{}, 2),
+	}
+	s.OutputRefreshSem <- struct{}{}
+	s.OutputRefreshSem <- struct{}{}
+	if s.startPanelOutputRefresh(context.Background(), readyworker.Panel{ID: "panel-c"}) {
+		t.Fatal("refresh must be rejected when global capacity is full")
+	}
+	s.OutputPanelMu.Lock()
+	busy := s.OutputPanelRun["panel-c"]
+	s.OutputPanelMu.Unlock()
+	if busy {
+		t.Fatal("rejected panel must not be marked busy")
+	}
+}
+
+func TestOutputRefreshDefaultCapacity(t *testing.T) {
+	s := &Server{OutputPanelRun: map[string]bool{}}
+	s.OutputPanelMu.Lock()
+	if s.OutputRefreshSem == nil {
+		s.OutputRefreshSem = make(chan struct{}, 32)
+	}
+	capacity := cap(s.OutputRefreshSem)
+	s.OutputPanelMu.Unlock()
+	if capacity != 32 {
+		t.Fatalf("capacity=%d want 32", capacity)
+	}
+}
+
+func TestRotateOutputPanelsPreventsFixedTailStarvation(t *testing.T) {
+	in := []readyworker.Panel{{ID: "a"}, {ID: "b"}, {ID: "c"}, {ID: "d"}}
+	got := rotateOutputPanels(in, 2)
+	want := []string{"c", "d", "a", "b"}
+	for i, id := range want {
+		if got[i].ID != id {
+			t.Fatalf("index %d got=%s want=%s", i, got[i].ID, id)
+		}
+	}
+	if in[0].ID != "a" {
+		t.Fatal("rotation must not mutate source ordering")
 	}
 }

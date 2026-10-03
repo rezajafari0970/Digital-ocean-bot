@@ -226,6 +226,20 @@ func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
 	s.outputSnapshotResponse(w, r)
 }
 
+func rotateOutputPanels(panels []readyworker.Panel, start int) []readyworker.Panel {
+	if len(panels) == 0 {
+		return nil
+	}
+	start %= len(panels)
+	if start < 0 {
+		start += len(panels)
+	}
+	out := make([]readyworker.Panel, 0, len(panels))
+	out = append(out, panels[start:]...)
+	out = append(out, panels[:start]...)
+	return out
+}
+
 func (s *Server) refreshOutputLive(ctx context.Context) {
 	s.OutputRefreshMu.Lock()
 	defer s.OutputRefreshMu.Unlock()
@@ -236,7 +250,12 @@ func (s *Server) refreshOutputLive(ctx context.Context) {
 	if err != nil {
 		return
 	}
-	for _, panel := range panels {
+	if len(panels) == 0 {
+		return
+	}
+	start := s.OutputRefreshCursor % len(panels)
+	s.OutputRefreshCursor = (start + 1) % len(panels)
+	for _, panel := range rotateOutputPanels(panels, start) {
 		s.startPanelOutputRefresh(ctx, panel)
 	}
 }
@@ -246,15 +265,25 @@ func (s *Server) startPanelOutputRefresh(parent context.Context, panel readywork
 	if s.OutputPanelRun == nil {
 		s.OutputPanelRun = map[string]bool{}
 	}
+	if s.OutputRefreshSem == nil {
+		s.OutputRefreshSem = make(chan struct{}, 32)
+	}
 	if s.OutputPanelRun[panel.ID] {
 		s.OutputPanelMu.Unlock()
 		return false
 	}
-	s.OutputPanelRun[panel.ID] = true
-	s.OutputPanelMu.Unlock()
+	select {
+	case s.OutputRefreshSem <- struct{}{}:
+		s.OutputPanelRun[panel.ID] = true
+		s.OutputPanelMu.Unlock()
+	default:
+		s.OutputPanelMu.Unlock()
+		return false
+	}
 
 	go func() {
 		defer func() {
+			<-s.OutputRefreshSem
 			s.OutputPanelMu.Lock()
 			delete(s.OutputPanelRun, panel.ID)
 			s.OutputPanelMu.Unlock()

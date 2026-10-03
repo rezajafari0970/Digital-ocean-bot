@@ -21,25 +21,27 @@ import (
 )
 
 type Server struct {
-	WebPath         string
-	Auth            auth.Service
-	DB              *sql.DB
-	Container       app.Container
-	Health          observability.Health
-	LoginLimiter    *LoginLimiter
-	OutputRuntimes  *sanaei.RuntimeManager
-	OutputPauseMu   sync.RWMutex
-	OutputRefreshMu sync.Mutex
-	OutputPanelMu   sync.Mutex
-	OutputPanelRun  map[string]bool
-	CleanupMu       sync.RWMutex
-	CleanupJobs     map[string]*cleanupJob
-	BrowserMu       sync.Mutex
-	BrowserTickets  map[string]time.Time
+	WebPath             string
+	Auth                auth.Service
+	DB                  *sql.DB
+	Container           app.Container
+	Health              observability.Health
+	LoginLimiter        *LoginLimiter
+	OutputRuntimes      *sanaei.RuntimeManager
+	OutputPauseMu       sync.RWMutex
+	OutputRefreshMu     sync.Mutex
+	OutputPanelMu       sync.Mutex
+	OutputPanelRun      map[string]bool
+	OutputRefreshSem    chan struct{}
+	OutputRefreshCursor int
+	CleanupMu           sync.RWMutex
+	CleanupJobs         map[string]*cleanupJob
+	BrowserMu           sync.Mutex
+	BrowserTickets      map[string]time.Time
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputPanelRun: map[string]bool{}, CleanupJobs: map[string]*cleanupJob{}, BrowserTickets: map[string]time.Time{}}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputPanelRun: map[string]bool{}, OutputRefreshSem: make(chan struct{}, 32), CleanupJobs: map[string]*cleanupJob{}, BrowserTickets: map[string]time.Time{}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
