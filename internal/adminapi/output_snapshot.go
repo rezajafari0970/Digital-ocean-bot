@@ -83,7 +83,7 @@ func (s *Server) sharedOutput(w http.ResponseWriter, r *http.Request) {
 	s.outputSnapshotResponse(w, r)
 }
 func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) {
-	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
+	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND COALESCE(p.health_state,'UNKNOWN')<>'UNHEALTHY' AND d.state='PANEL_COMPLETE' AND a.provider_state<>'LOCKED' AND dr.state IN ('READY','EXPIRING','RETIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	args := []any{}
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)
