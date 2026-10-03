@@ -108,6 +108,13 @@ func (s Service) legacyFastFillFromPolicy(ctx context.Context, p readyworker.Pan
 	}
 	var mutated bool
 	err = runtime.WithMutation(ctx, func(runCtx context.Context) error {
+		var lifecycle string
+		if e := s.DB.QueryRowContext(runCtx, "SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1", runtime.PanelID).Scan(&lifecycle); e != nil {
+			return e
+		}
+		if !clientMutationLifecycleAllowed(lifecycle) {
+			return nil
+		}
 		var e error
 		mutated, e = s.LegacyFastFill(runCtx, p, runtime, wanted, target, quota, life, limit, rate)
 		return e
