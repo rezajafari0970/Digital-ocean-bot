@@ -220,3 +220,21 @@ func TestDeleteClientCompatibleDoesNotFallbackOnTransportError(t *testing.T) {
 		t.Fatalf("requests=%d", len(e.requests))
 	}
 }
+
+func TestUpdateClientByEmailUsesV3FullReplacementRoute(t *testing.T) {
+	e := &captureMutationExecutor{Response: SessionResponse{StatusCode: 200, Body: []byte(`{"success":true}`)}}
+	payload := map[string]any{"id": "u1", "email": "u@example.com", "totalGB": int64(123), "custom": "keep"}
+	if err := UpdateClientByEmailSession(context.Background(), e, "u@example.com", payload); err != nil {
+		t.Fatal(err)
+	}
+	if e.Request.Path != "panel/api/clients/update/u@example.com" || e.Request.ContentType != "application/json" {
+		t.Fatalf("request=%+v", e.Request)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(e.Request.Body, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["custom"] != "keep" {
+		t.Fatalf("payload=%v", got)
+	}
+}

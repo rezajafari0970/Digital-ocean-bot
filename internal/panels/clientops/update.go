@@ -12,12 +12,13 @@ type ClientPatch struct {
 	TotalGB    *int64  `json:"totalGB,omitempty"`
 	ExpiryTime *int64  `json:"expiryTime,omitempty"`
 	LimitIP    *int    `json:"limitIp,omitempty"`
+	LimitHWID  *int    `json:"limitHwid,omitempty"`
 	Flow       *string `json:"flow,omitempty"`
 }
 
 func (p ClientPatch) Empty() bool {
 	return p.Email == nil && p.Enable == nil && p.TotalGB == nil &&
-		p.ExpiryTime == nil && p.LimitIP == nil && p.Flow == nil
+		p.ExpiryTime == nil && p.LimitIP == nil && p.LimitHWID == nil && p.Flow == nil
 }
 
 func payloadPatch(raw json.RawMessage) (ClientPatch, error) {
@@ -124,4 +125,99 @@ func patchInboundClient(raw json.RawMessage, clientID string, patch ClientPatch)
 	settings["clients"] = clients
 	doc["settings"] = settings
 	return doc, nil
+}
+
+func clientMapFromInbound(raw json.RawMessage, clientID string) (map[string]any, bool, error) {
+	var doc map[string]any
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		return nil, false, err
+	}
+	sr, ok := doc["settings"]
+	if !ok {
+		return nil, false, ErrInboundMissing
+	}
+	var settings map[string]any
+	switch v := sr.(type) {
+	case string:
+		if err := json.Unmarshal([]byte(v), &settings); err != nil {
+			return nil, false, err
+		}
+	case map[string]any:
+		settings = v
+	default:
+		return nil, false, ErrInboundMissing
+	}
+	items, ok := settings["clients"].([]any)
+	if !ok {
+		return nil, false, ErrClientConflict
+	}
+	for _, item := range items {
+		m, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if id, _ := m["id"].(string); id == clientID {
+			return m, true, nil
+		}
+	}
+	return nil, false, nil
+}
+func applyPatchMap(m map[string]any, p ClientPatch) (map[string]any, error) {
+	if p.Email != nil {
+		return nil, ErrUnsupportedKind
+	}
+	out := make(map[string]any, len(m))
+	for k, v := range m {
+		out[k] = v
+	}
+	if p.Enable != nil {
+		out["enable"] = *p.Enable
+	}
+	if p.TotalGB != nil {
+		out["totalGB"] = *p.TotalGB
+	}
+	if p.ExpiryTime != nil {
+		out["expiryTime"] = *p.ExpiryTime
+	}
+	if p.LimitIP != nil {
+		out["limitIp"] = *p.LimitIP
+	}
+	if p.LimitHWID != nil {
+		out["limitHwid"] = *p.LimitHWID
+	}
+	if p.Flow != nil {
+		out["flow"] = *p.Flow
+	}
+	return out, nil
+}
+func mapPatchSatisfied(m map[string]any, p ClientPatch) bool {
+	if p.Email != nil {
+		return false
+	}
+	eqNum := func(k string, w int64) bool { v, ok := m[k].(float64); return ok && int64(v) == w }
+	if p.Enable != nil {
+		v, ok := m["enable"].(bool)
+		if !ok || v != *p.Enable {
+			return false
+		}
+	}
+	if p.TotalGB != nil && !eqNum("totalGB", *p.TotalGB) {
+		return false
+	}
+	if p.ExpiryTime != nil && !eqNum("expiryTime", *p.ExpiryTime) {
+		return false
+	}
+	if p.LimitIP != nil && !eqNum("limitIp", int64(*p.LimitIP)) {
+		return false
+	}
+	if p.LimitHWID != nil && !eqNum("limitHwid", int64(*p.LimitHWID)) {
+		return false
+	}
+	if p.Flow != nil {
+		v, ok := m["flow"].(string)
+		if !ok || v != *p.Flow {
+			return false
+		}
+	}
+	return true
 }

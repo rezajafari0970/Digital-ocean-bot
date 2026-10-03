@@ -2,6 +2,7 @@ package clientops
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -62,4 +63,31 @@ func mustClient(t *testing.T, raw string) sanaei.Client {
 		t.Fatal(err)
 	}
 	return c
+}
+
+func TestApplyPatchMapPreservesUnknownV3Fields(t *testing.T) {
+	q := int64(200)
+	hw := 3
+	in := map[string]any{"id": "u1", "email": "u@example.com", "totalGB": float64(100), "limitHwid": float64(1), "tgId": float64(99), "subId": "keep"}
+	out, err := applyPatchMap(in, ClientPatch{TotalGB: &q, LimitHWID: &hw})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out["tgId"] != float64(99) || out["subId"] != "keep" || out["totalGB"] != q || out["limitHwid"] != hw {
+		t.Fatalf("out=%v", out)
+	}
+}
+func TestApplyPatchMapRejectsEmailRename(t *testing.T) {
+	e := "new@example.com"
+	_, err := applyPatchMap(map[string]any{"email": "old@example.com"}, ClientPatch{Email: &e})
+	if !errors.Is(err, ErrUnsupportedKind) {
+		t.Fatalf("err=%v", err)
+	}
+}
+func TestMapPatchSatisfiedLimitHWID(t *testing.T) {
+	h := 2
+	m := map[string]any{"limitHwid": float64(2)}
+	if !mapPatchSatisfied(m, ClientPatch{LimitHWID: &h}) {
+		t.Fatal("not satisfied")
+	}
 }

@@ -136,7 +136,10 @@ func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime,
 		if err != nil {
 			return false, err
 		}
-		return patchSatisfied(current, patch), nil
+		if patch.Email != nil {
+			return false, ErrUnsupportedKind
+		}
+		return updateSatisfiedEverywhere(ctx, rt, job.ClientID, patch)
 	}
 	var want sanaei.Client
 	if job.Kind == KindCreate {
@@ -211,6 +214,9 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			if patchErr != nil {
 				return patchErr
 			}
+			if patch.Email != nil {
+				return ErrUnsupportedKind
+			}
 			rt.Session.Invalidate()
 			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
 			if readErr != nil {
@@ -219,11 +225,22 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			if !found {
 				return ErrInboundMissing
 			}
-			payload, patchErr := patchInboundClient(raw, job.ClientID, patch)
+			currentMap, exists, readErr := clientMapFromInbound(raw, job.ClientID)
+			if readErr != nil {
+				return readErr
+			}
+			if !exists {
+				return ErrClientConflict
+			}
+			currentEmail, _ := currentMap["email"].(string)
+			if currentEmail == "" {
+				return ErrClientConflict
+			}
+			payload, patchErr := applyPatchMap(currentMap, patch)
 			if patchErr != nil {
 				return patchErr
 			}
-			_, err = sanaei.UpdateInboundRaw(runCtx, rt.Session.Exec, job.InboundID, payload)
+			err = sanaei.UpdateClientByEmailSession(runCtx, rt.Session.Exec, currentEmail, payload)
 		default:
 			return ErrUnsupportedKind
 		}
@@ -285,4 +302,30 @@ func retryResult(execErr, journalErr error) error {
 		return fmt.Errorf("retry client mutation: %w", journalErr)
 	}
 	return execErr
+}
+
+func updateSatisfiedEverywhere(ctx context.Context, rt *sanaei.PanelRuntime, clientID string, patch ClientPatch) (bool, error) {
+	rt.Session.Invalidate()
+	raws, err := rt.Session.Snapshot(ctx)
+	if err != nil {
+		return false, err
+	}
+	found := false
+	for _, raw := range raws {
+		m, ok, e := clientMapFromInbound(raw, clientID)
+		if e != nil && !errors.Is(e, ErrClientConflict) {
+			return false, e
+		}
+		if !ok {
+			continue
+		}
+		found = true
+		if !mapPatchSatisfied(m, patch) {
+			return false, nil
+		}
+	}
+	if !found {
+		return false, ErrClientConflict
+	}
+	return true, nil
 }

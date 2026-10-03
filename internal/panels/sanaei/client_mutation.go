@@ -135,3 +135,36 @@ func DeleteClientCompatibleSession(ctx context.Context, exec SessionExecutor, in
 	}
 	return DeleteClientSession(ctx, exec, inboundID, clientID)
 }
+
+func UpdateClientByEmailSession(ctx context.Context, exec SessionExecutor, currentEmail string, client map[string]any) error {
+	if exec == nil || currentEmail == "" || len(client) == 0 {
+		return ErrMutationRequest
+	}
+	body, err := json.Marshal(client)
+	if err != nil {
+		return err
+	}
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodPost, Path: "panel/api/clients/update/" + url.PathEscape(currentEmail), Body: body, ContentType: "application/json", TimeoutSeconds: 8})
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		b := resp.Body
+		if len(b) > 512 {
+			b = b[:512]
+		}
+		return fmt.Errorf("%w: clients/update http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(b))
+	}
+	var envelope mutationEnvelope
+	if json.Unmarshal(resp.Body, &envelope) != nil {
+		b := resp.Body
+		if len(b) > 512 {
+			b = b[:512]
+		}
+		return fmt.Errorf("%w: clients/update invalid json body=%q", ErrMutationRequest, string(b))
+	}
+	if !envelope.Success {
+		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
+	}
+	return nil
+}
