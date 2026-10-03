@@ -48,6 +48,11 @@ func main() {
 				return
 			case <-t.C:
 				application.Container.ReconcileLocalState(ctx)
+				if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
+					log.Printf("rolling reboot deferred reconcile: %v", err)
+				} else if n > 0 {
+					log.Printf("rolling reboot obsolete=%d", n)
+				}
 			}
 		}
 	}()
