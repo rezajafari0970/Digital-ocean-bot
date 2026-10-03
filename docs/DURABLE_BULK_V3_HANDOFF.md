@@ -26,3 +26,9 @@ On partial/ambiguous failure, leave gates closed. Read the printed job ID and us
 Focused tests include real isolated PostgreSQL concurrent planning, atomic ownership/journal persistence, gate/claim limits, executor lock contention, partial server commit plus lost response, missing-subset retry, and no POST after observed completion. Run focused race tests and go test ./... before a detached clean build.
 
 Deployment/canary acceptance will be appended only after live evidence. Initial acceptance is 10 clients; 25/50/100/250 and fleet enablement remain separate measured gates.
+
+## Live acceptance completed
+
+Runtime source af1a541799088c6d3c89af675d5f6b02f82cd84c deployed from detached clean build. Migration 000134 applied. Job 59956b9c-543f-4ba9-a344-d2f82b5c664f created/verified ten users in one attempt; all ten appeared in Output. Ten durable DELETE jobs succeeded on their first attempt. The original single-client baseline hash was restored; Output has one baseline item and no canary items. Both gates closed, main concurrency=1, bulk remaining_batches=0. API, worker and target x-ui active. Capacity 1/1, deficit=0, no error. See BULK_V3_ACCEPTANCE.json for exact evidence and limitations.
+
+Next: measured 25-client gated canary, then 50/100/250 only after acceptance. Do not enable fleet generation yet. Durable bulk-owned policy drift and expiry cleanup must be integrated before broad enablement. The canary utility currently intentionally fixes ten users; extending it requires reviewed bounds and unchanged cleanup guarantees.

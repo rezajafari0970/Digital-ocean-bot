@@ -18,3 +18,9 @@ The autonomous spaced-rehearsal service is intentionally disabled. API-runner tr
 
 ## Development gate
 Development may resume when the knowledge artifacts exist, their hashes are frozen in the baseline, repository drift is checked at session start, and changes are grounded in live source/tests rather than unsupported recall.
+
+## Latest production continuation (2026-10-03)
+- Read `docs/DURABLE_BULK_V3_HANDOFF.md` and `docs/BULK_V3_ACCEPTANCE.json` for the current frontier.
+- Durable v3 bulk ten-client canary and cleanup passed; runtime source af1a541799088c6d3c89af675d5f6b02f82cd84c.
+- Any following evidence-only commit does not imply binary drift; compare product paths before rebuilding.
+- Gates remain closed. Next step is measured chunk-25 acceptance, with bulk policy/expiry lifecycle integration required before fleet enablement.

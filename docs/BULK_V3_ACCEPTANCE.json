@@ -1,0 +1,122 @@
+{
+  "verified_at_utc": "2026-10-03T08:45:15.161294+00:00",
+  "runtime_source_commit": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "migration": "000134_durable_bulk_create",
+  "scope": {
+    "panel_id": "11f21262-1b20-4080-8ffc-7528a01679a9",
+    "inbound_id": 1
+  },
+  "job_id": "59956b9c-543f-4ba9-a344-d2f82b5c664f",
+  "generation_id": "2015280b-db27-4021-bc28-967c4132f8f7",
+  "bulk_create": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "created": 10,
+    "observed": 10,
+    "missing": 0,
+    "quota_bytes": 104857600,
+    "limit_hwid": 2,
+    "lifetime_seconds": 1800
+  },
+  "cleanup": {
+    "delete_jobs": 10,
+    "all_succeeded": true,
+    "all_attempts": 1,
+    "owned_deleted": 10,
+    "baseline_count": 1,
+    "baseline_hash_before_and_after": "4e6d608353e72ec878e7ca795eb01fc32b12a0fbb9199c4d91f5a696a6092c02"
+  },
+  "output": {
+    "created_clients_observed": 10,
+    "remaining_canary_clients_after_cleanup": 0,
+    "target_current_count": 1,
+    "observed_last_seen_age_seconds": 1.111805
+  },
+  "capacity": {
+    "active_users": 1,
+    "target_users": 1,
+    "deficit": 0,
+    "last_error": ""
+  },
+  "fleet_isolation": {
+    "bulk_jobs_outside_target": 0,
+    "ownership_active_before_and_after": 1813,
+    "ownership_deleted_before": 49,
+    "ownership_deleted_after": 59
+  },
+  "gates": {
+    "main_enabled": false,
+    "main_kill_switch": true,
+    "concurrency": 1,
+    "bulk_enabled": false,
+    "bulk_kill_switch": true,
+    "remaining_batches": 0
+  },
+  "services": {
+    "api": "active",
+    "worker": "active",
+    "target_xui": "active",
+    "api_worker_auto_restarts": 0
+  },
+  "target_memory_samples": {
+    "xui_rss_kib_before": 106252,
+    "xui_rss_kib_after": 111376,
+    "available_mib_before": 1348,
+    "available_mib_after": 1375,
+    "note": "Before/after samples; not peak measurement or scale benchmark."
+  },
+  "validation": {
+    "focused_unit": "PASS",
+    "isolated_postgres_race_fault": "PASS",
+    "full_go_test": "PASS",
+    "clean_detached_full_go_test": "PASS",
+    "diff_check": "PASS",
+    "live_canary": "PASS"
+  },
+  "limits": [
+    "Initial v3 scope only; higher chunks and fleet enablement are not accepted yet.",
+    "Bulk-owned inbound legacy rewrite is suppressed; automatic v3 policy drift/expiry cleanup needs journal integration before fleet enablement.",
+    "Global client field verification is currently per observed identity; measure latency/RAM before raising chunk size."
+  ],
+  "next_step": "Gated 25-client canary with timing/peak resource measurements; retain one-batch scope and cleanup.",
+  "deployment_note": "First readiness query raced asynchronous startup migration and triggered binary rollback. Fresh read proved migration committed. Same clean binaries then installed and verified before canary.",
+  "binaries": {
+    "api": {
+      "sha256": "b1e06f92c7861defd65ef2f96013e391a7fb57a72e96ab5bc557a8974bc16e8d",
+      "vcs_modified": false,
+      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+    },
+    "worker": {
+      "sha256": "72aaeee42161ff0adb198d7c6d67a2bf73e19b5410fe07cd89b84919b0bfce0c",
+      "vcs_modified": false,
+      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+    }
+  },
+  "evidence": {
+    "race-tests.log": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/race-tests.log",
+      "sha256": "166d6adbf96db03206fda328f08b807ad1ba70763b50e4fe0bd7e4c81d3b1e69"
+    },
+    "full-tests.log": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/full-tests.log",
+      "sha256": "b7a87a0d6431b80edee026276b9449938b1e7e4a5b07857d1145e24bc030fb3e"
+    },
+    "clean-full-tests.log": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/clean-full-tests.log",
+      "sha256": "73ceadf37c3c6e23df7af207477fe901ce23c10a1d6e7b1a947f5c1e2c7ae2ff"
+    },
+    "canary-first.log": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/canary-first.log",
+      "sha256": "913f9d99c7233c55efd7260939bd6104f271d6d67ba56f45e72fd47404f186b3"
+    },
+    "target-health-before.txt": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/target-health-before.txt",
+      "sha256": "33a89cb8dfafe4e09baa46a8b3d9b7fd162e381fa34b145717649ce94d82a6ac"
+    },
+    "target-health-after.txt": {
+      "path": "/root/backups/dob-bulk-continuation-20261003/evidence/target-health-after.txt",
+      "sha256": "8cb8280bac205db4991137cb02e8783e5df8ef7d35f366b5455909100d41a1d1"
+    }
+  }
+}

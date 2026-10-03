@@ -1,33 +1,28 @@
 {
-  "branch": "checkpoint/final-e2e-20260929",
-  "git_head": "97839c38cb12e75fca5640a75e030b79b0499112",
-  "runtime_version": {
-    "commit": "97839c38cb12e75fca5640a75e030b79b0499112",
-    "build_time": "2026-10-01T03:59:07Z",
-    "go_version": "go1.27.1",
-    "modified": true
-  },
-  "artifact_manifest": {
-    "commit": "97839c38cb12e75fca5640a75e030b79b0499112",
-    "build_time": "2026-10-01T03:59:07Z",
-    "api_sha256": "c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450",
-    "worker_sha256": "6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840"
-  },
-  "actual_binary_hashes": {
-    "api_sha256": "c1966b097fb039ff9547e55adbc79bc7e27740885652226274fb88d205487450",
-    "worker_sha256": "6ff944cf74339d0c65dd7a1fb03ac3e45d3f5601dec153adf65f174db72d3840"
+  "schema_version": 2,
+  "runtime_source_revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "verified_at_utc": "2026-10-03T08:45:15.161294+00:00",
+  "binaries": {
+    "api": {
+      "sha256": "b1e06f92c7861defd65ef2f96013e391a7fb57a72e96ab5bc557a8974bc16e8d",
+      "vcs_modified": false,
+      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+    },
+    "worker": {
+      "sha256": "72aaeee42161ff0adb198d7c6d67a2bf73e19b5410fe07cd89b84919b0bfce0c",
+      "vcs_modified": false,
+      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+    }
   },
   "services": {
-    "digital-ocean-bot-api": "active",
-    "digital-ocean-bot-worker": "active"
+    "api": "active",
+    "worker": "active",
+    "target_xui": "active",
+    "api_worker_auto_restarts": 0
   },
-  "checks": {
-    "runtime_commit_matches_manifest": true,
-    "manifest_commit_matches_git_head": true,
-    "api_hash_matches_manifest": true,
-    "worker_hash_matches_manifest": true,
-    "api_active": true,
-    "worker_active": true
-  },
-  "verified": true
+  "migration": "000134_durable_bulk_create",
+  "acceptance": "docs/BULK_V3_ACCEPTANCE.json",
+  "verified": true,
+  "note": "This evidence checkpoint is committed after the product-source commit. Binary revision is compared to runtime_source_revision; later documentation-only commits are not undeployed product changes."
 }
