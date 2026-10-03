@@ -67,3 +67,15 @@ func TestUpdateCannotReuseCreateOrDeleteMutation(t *testing.T) {
 		t.Fatal("unexpected kind")
 	}
 }
+
+func TestCreateExistingUUIDWithDifferentPolicyIsConflict(t *testing.T) {
+	raw := json.RawMessage(`{"settings":{"clients":[{"id":"u1","email":"actual","enable":true,"totalGB":0,"expiryTime":0,"limitIp":0}]}}`)
+	current, exists, err := clientFromInbound(raw, "u1")
+	if err != nil || !exists {
+		t.Fatalf("expected existing client: %v", err)
+	}
+	want := sanaei.Client{ID: "u1", Email: "wanted", Enable: true, TotalGB: 100}
+	if sameClient(current, want) {
+		t.Fatal("policy mismatch must be detectable without issuing another create")
+	}
+}

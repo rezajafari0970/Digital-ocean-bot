@@ -110,7 +110,7 @@ func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime,
 			return false, err
 		}
 		if !sameClient(current, want) {
-			return false, ErrClientConflict
+			return true, ErrClientConflict
 		}
 		return true, nil
 	case KindUpdate:
