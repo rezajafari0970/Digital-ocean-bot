@@ -43,9 +43,7 @@ func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, reco
 SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END
 FROM (SELECT DISTINCT ON(uri) uri,visible_until FROM current_output_uris ORDER BY uri) c
 JOIN panel_instances p ON p.id=$1 JOIN droplets dr ON dr.id=p.droplet_id
-ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until
-WHERE output_config_snapshots.last_seen_at < now()-interval '10 seconds'
-   OR output_config_snapshots.visible_until IS DISTINCT FROM excluded.visible_until`, panelID); err != nil {
+ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until`, panelID); err != nil {
 		return
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM output_config_snapshots o WHERE o.panel_id=$1 AND NOT EXISTS (SELECT 1 FROM current_output_uris c WHERE c.uri=o.uri)`, panelID); err != nil {

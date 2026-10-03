@@ -1,6 +1,7 @@
 package adminapi
 
 import (
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -30,5 +31,16 @@ func TestOutputDropletStatePredicateExcludesRetiring(t *testing.T) {
 	}
 	if strings.Contains(outputDropletStatePredicate, "'RETIRING'") {
 		t.Fatal("output must stop serving configs as soon as droplet enters RETIRING")
+	}
+}
+
+func TestOutputSnapshotRefreshesLastSeenEveryObservation(t *testing.T) {
+	src, err := os.ReadFile("output_snapshot.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(src)
+	if strings.Contains(text, "last_seen_at < now()-interval '10 seconds'") {
+		t.Fatal("successful observations must not leave last_seen_at artificially stale")
 	}
 }
