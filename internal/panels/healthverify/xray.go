@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"hash/crc32"
 	"net"
 	"strconv"
 	"strings"
@@ -52,10 +51,9 @@ func Probe(ctx context.Context, r Runner, c RealityClient) (Result, error) {
 	if c.Fingerprint == "" {
 		c.Fingerprint = "chrome"
 	}
-	socksPort := 30000 + int(crc32.ChecksumIEEE([]byte(c.UUID))%20000)
 	cfg := map[string]any{
 		"log":       map[string]any{"loglevel": "warning"},
-		"inbounds":  []any{map[string]any{"listen": "127.0.0.1", "port": socksPort, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}}},
+		"inbounds":  []any{map[string]any{"listen": "127.0.0.1", "port": 0, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}}},
 		"outbounds": []any{map[string]any{"protocol": "vless", "settings": map[string]any{"vnext": []any{map[string]any{"address": c.Host, "port": c.Port, "users": []any{map[string]any{"id": c.UUID, "encryption": "none", "flow": c.Flow}}}}}, "streamSettings": map[string]any{"network": "tcp", "security": "reality", "realitySettings": map[string]any{"serverName": c.SNI, "fingerprint": c.Fingerprint, "publicKey": c.PublicKey, "shortId": c.ShortID, "spiderX": "/"}}}},
 	}
 	raw, e := json.Marshal(cfg)
@@ -64,7 +62,7 @@ func Probe(ctx context.Context, r Runner, c RealityClient) (Result, error) {
 	}
 	encoded := base64.StdEncoding.EncodeToString(raw)
 	started := time.Now()
-	out, e := r.Run(ctx, command(encoded, c.Host, c.Port, socksPort))
+	out, e := r.Run(ctx, command(encoded, c.Host, c.Port))
 	if e != nil {
 		return Result{}, ErrFailed
 	}
@@ -80,9 +78,8 @@ func Probe(ctx context.Context, r Runner, c RealityClient) (Result, error) {
 	return Result{Healthy: true, ExitIP: exitIP, Latency: time.Since(started)}, nil
 }
 
-func command(cfg, host string, port, socksPort int) string {
+func command(cfg, host string, port int) string {
 	return fmt.Sprintf(`set -Eeuo pipefail
-SOCKS_PORT=%s
 XRAY="$(command -v xray || true)"
 [ -n "$XRAY" ] || XRAY=/usr/local/x-ui/bin/xray-linux-amd64
 [ -x "$XRAY" ]
@@ -99,5 +96,5 @@ kill -0 "$XPID"
 curl -fsS --max-time 15 --socks5-hostname "127.0.0.1:$SOCKS_PORT" https://www.cloudflare.com/cdn-cgi/trace >"$TMP/trace"
 echo TUNNEL_HTTPS=PASS
 grep -E '^(ip|loc|warp)=' "$TMP/trace"
-`, strconv.Itoa(socksPort), cfg, host, strconv.Itoa(port))
+`, cfg, host, strconv.Itoa(port))
 }

@@ -8,8 +8,6 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/healthverify"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -152,36 +150,6 @@ func main() {
 				return
 			case <-t.C:
 				sanaeiRuntimes.PurgeExpired()
-			}
-		}
-	}()
-
-	// Active panel health gate. It runs independently from normal ready-panel
-	// eligibility so an unhealthy panel can still be probed and recover.
-	go func() {
-		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
-		repairer := panelbootstrap.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, ManagedKey: "dob:reality-primary:000001"}
-		health := healthverify.Service{
-			DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh,
-			ManagedKey: "dob:reality-primary:000001",
-			Repair: func(c context.Context, panelID string) error {
-				return repairer.RepairRuntimePanel(c, readyworker.Panel{ID: panelID})
-			},
-		}
-		run := func() {
-			if err := health.Run(ctx); err != nil && ctx.Err() == nil {
-				log.Printf("panel health: %v", err)
-			}
-		}
-		run()
-		t := time.NewTicker(30 * time.Second)
-		defer t.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				run()
 			}
 		}
 	}()
