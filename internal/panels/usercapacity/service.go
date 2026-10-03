@@ -140,11 +140,22 @@ func (s Service) ReconcileRuntimeFromPolicy(ctx context.Context, p readyworker.P
 	var target, life, limit, rate int
 	var quota int64
 	e := s.DB.QueryRowContext(ctx, `SELECT enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second FROM global_config_policies WHERE policy_key='reality'`).Scan(&enabled, &portsRaw, &target, &quota, &life, &limit, &rate)
-	if errors.Is(e, sql.ErrNoRows) || !enabled || target <= 0 {
+	if errors.Is(e, sql.ErrNoRows) || target <= 0 {
 		return nil
 	}
 	if e != nil {
 		return e
+	}
+	if !enabled {
+		cleanupAllowed, ce := s.shrinkCleanupAllowedForPanel(ctx, p.ID)
+		if ce != nil {
+			return ce
+		}
+		if !cleanupAllowed {
+			return nil
+		}
+		// Disabled policy may clean owned excess only; it must never create users.
+		rate = 0
 	}
 	allowed, e := s.rolloutAllowed(ctx, p.ID)
 	if e != nil {

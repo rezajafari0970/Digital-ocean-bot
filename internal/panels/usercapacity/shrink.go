@@ -154,3 +154,19 @@ func (s Service) ShrinkDecisionDryRun(ctx context.Context, panelID string, inbou
 	}
 	return out, fmt.Errorf("inbound missing")
 }
+
+func (s Service) shrinkCleanupAllowedForPanel(ctx context.Context, panelID string) (bool, error) {
+	var enabled bool
+	var scope sql.NullString
+	err := s.DB.QueryRowContext(ctx, `SELECT enabled,panel_id::text FROM bulk_user_shrink_gate WHERE singleton=true`).Scan(&enabled, &scope)
+	if err != nil {
+		return false, err
+	}
+	if !enabled {
+		return false, nil
+	}
+	if scope.Valid && scope.String != panelID {
+		return false, nil
+	}
+	return true, nil
+}
