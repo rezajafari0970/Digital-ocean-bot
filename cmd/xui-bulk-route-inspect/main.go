@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	globalClients := flag.Bool("global-client-shape", false, "read-only global list response keys and sizes; no client values")
 	inventory := flag.Bool("inventory", false, "read-only fresh Sanaei inbound summary")
 	panel := flag.String("panel", "11f21262-1b20-4080-8ffc-7528a01679a9", "exact panel for read-only inspection")
 	samples := flag.Int("sample-seconds", 0, "read-only one-second resource samples, maximum 120")
@@ -29,11 +30,45 @@ func main() {
 		panic(e)
 	}
 	defer a.Close()
-	if *inventory {
+	if *inventory || *globalClients {
 		manager := &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: a.DB, Secrets: a.Container.Secrets, Timeout: 8 * time.Second}, TTL: time.Second}
 		rt, e := manager.Acquire(ctx, *panel)
 		if e != nil {
 			panic(e)
+		}
+		if *globalClients {
+			res, e := rt.Session.Exec.Do(ctx, sanaei.SessionRequest{Method: "GET", Path: "panel/api/clients/list", TimeoutSeconds: 15})
+			if e != nil {
+				panic(e)
+			}
+			fmt.Printf("status=%d body_bytes=%d\n", res.StatusCode, len(res.Body))
+			var v map[string]any
+			if e = json.Unmarshal(res.Body, &v); e != nil {
+				panic(e)
+			}
+			for k, value := range v {
+				if k != "obj" {
+					fmt.Printf("envelope_key=%s type=%T\n", k, value)
+				}
+			}
+			switch obj := v["obj"].(type) {
+			case []any:
+				fmt.Printf("obj_array_count=%d\n", len(obj))
+				if len(obj) > 0 {
+					if m, ok := obj[0].(map[string]any); ok {
+						for k, v := range m {
+							fmt.Printf("client_key=%s type=%T\n", k, v)
+						}
+					}
+				}
+			case map[string]any:
+				for k, v := range obj {
+					fmt.Printf("obj_key=%s type=%T\n", k, v)
+				}
+			default:
+				fmt.Printf("obj_type=%T\n", obj)
+			}
+			return
 		}
 		raws, e := rt.Session.Snapshot(ctx)
 		if e != nil {
