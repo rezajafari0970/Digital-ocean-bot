@@ -212,6 +212,12 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			}
 		}
 		active, expiredCount, quotaCount := 0, 0, 0
+		ownedPolicies, e := s.activeOwnedPolicy(ctx, p.ID, int64(in.ID))
+		if e != nil {
+			return e
+		}
+		policyExpected := map[string]sanaei.Client{}
+		policyChanges := 0
 		observedOwned := make(map[string]string, len(arr))
 		kept := make([]any, 0, len(arr))
 		deleteIDs := make([]string, 0)
@@ -223,6 +229,14 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				continue
 			}
 			observedOwned[c.ID] = c.Email
+			policyChangedThis := false
+			if own, ok := ownedPolicies[c.ID]; ok && policyChanges < 32 {
+				if desired, changed := desiredOwnedClient(c, own, quota, life, limit); changed {
+					c = desired
+					policyChanges++
+					policyChangedThis = true
+				}
+			}
 			stat := traffic[c.Email]
 			isExpired := c.ExpiryTime > 0 && c.ExpiryTime <= now
 			isQuota := c.TotalGB > 0 && (stat.Up+stat.Down) >= c.TotalGB
@@ -237,7 +251,10 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				continue
 			}
 			active++
-			kept = append(kept, v)
+			if policyChangedThis {
+				policyExpected[c.ID] = c
+			}
+			kept = append(kept, c)
 		}
 		if e = s.confirmPlannedOwnedClients(ctx, p.ID, int64(in.ID), observedOwned); e != nil {
 			return e
@@ -277,7 +294,26 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				return e
 			}
 		}
-		if !addUnsupported && deleted > 0 && deleted <= 32 {
+		if policyChanges > 0 {
+			st["clients"] = kept
+			var sniff any = map[string]any{"enabled": false}
+			if len(in.Sniffing) > 0 {
+				_ = json.Unmarshal(in.Sniffing, &sniff)
+			}
+			payload := map[string]any{"enable": in.Enable, "remark": in.Remark, "listen": in.Listen, "port": in.Port, "protocol": in.Protocol, "expiryTime": in.ExpiryTime, "total": in.Total, "settings": st, "streamSettings": stream, "sniffing": sniff}
+			if _, e = sanaei.UpdateInboundRaw(ctx, runtime.Session.Exec, int64(in.ID), payload); e != nil {
+				return fmt.Errorf("inbound %d policy update: %w", in.ID, e)
+			}
+			runtime.Session.Invalidate()
+			verifyRaws, ve := runtime.Session.Snapshot(ctx)
+			if ve != nil {
+				return fmt.Errorf("inbound %d policy verify snapshot: %w", in.ID, ve)
+			}
+			if ve = verifyOwnedPolicySnapshot(verifyRaws, in.ID, policyExpected, deleteIDs); ve != nil {
+				return ve
+			}
+			mutated = true
+		} else if !addUnsupported && deleted > 0 && deleted <= 32 {
 			for _, clientID := range deleteIDs {
 				if e = sanaei.DeleteClientSession(ctx, runtime.Session.Exec, in.ID, clientID); e != nil {
 					return fmt.Errorf("inbound %d delete client %s: %w", in.ID, clientID, e)

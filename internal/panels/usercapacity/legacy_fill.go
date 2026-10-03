@@ -25,12 +25,16 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		if err != nil {
 			return mutated, err
 		}
-		deficit := effectiveTarget - rec.ClientCount
-		if deficit <= 0 {
-			continue
+		ownedPolicies, err := s.activeOwnedPolicy(ctx, p.ID, rec.RemoteID)
+		if err != nil {
+			return mutated, err
 		}
-		n := userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), effectiveRate, deficit, time.Now())
-		if n <= 0 {
+		deficit := effectiveTarget - rec.ClientCount
+		n := 0
+		if deficit > 0 {
+			n = userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), effectiveRate, deficit, time.Now())
+		}
+		if n <= 0 && len(ownedPolicies) == 0 {
 			continue
 		}
 		in, err := sanaei.GetInbound(ctx, runtime.Session.Exec, rec.RemoteID)
@@ -47,19 +51,31 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		}
 		clients, _ := st["clients"].([]any)
 		observedOwned := make(map[string]string, len(clients))
-		for _, item := range clients {
+		policyExpected := map[string]sanaei.Client{}
+		policyChanges := 0
+		for i, item := range clients {
 			b, _ := json.Marshal(item)
 			var existing sanaei.Client
 			if json.Unmarshal(b, &existing) == nil && existing.ID != "" {
 				observedOwned[existing.ID] = existing.Email
+				if own, ok := ownedPolicies[existing.ID]; ok && policyChanges < 32 {
+					if desired, changed := desiredOwnedClient(existing, own, quota, life, limit); changed {
+						clients[i] = desired
+						policyExpected[existing.ID] = desired
+						policyChanges++
+					}
+				}
 			}
 		}
 		if err = s.confirmPlannedOwnedClients(ctx, p.ID, rec.RemoteID, observedOwned); err != nil {
 			return mutated, err
 		}
-		generation, err := s.effectiveGeneration(ctx, p.ID, rec.RemoteID)
-		if err != nil {
-			return mutated, err
+		var generation bulkGeneration
+		if n > 0 {
+			generation, err = s.effectiveGeneration(ctx, p.ID, rec.RemoteID)
+			if err != nil {
+				return mutated, err
+			}
 		}
 		owned := make([]ownedClient, 0, n)
 		expiry := int64(0)
@@ -83,6 +99,16 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		payload := map[string]any{"enable": in.Enable, "remark": in.Remark, "port": in.Port, "protocol": in.Protocol, "settings": st, "streamSettings": stream, "sniffing": sniff}
 		if _, err = sanaei.UpdateInboundRaw(ctx, runtime.Session.Exec, rec.RemoteID, payload); err != nil {
 			return mutated, fmt.Errorf("legacy update inbound %d: %w", rec.RemoteID, err)
+		}
+		if policyChanges > 0 {
+			runtime.Session.Invalidate()
+			verifyRaws, ve := runtime.Session.Snapshot(ctx)
+			if ve != nil {
+				return mutated, fmt.Errorf("legacy inbound %d policy verify snapshot: %w", rec.RemoteID, ve)
+			}
+			if ve = verifyOwnedPolicySnapshot(verifyRaws, int(rec.RemoteID), policyExpected, nil); ve != nil {
+				return mutated, ve
+			}
 		}
 		mutated = true
 	}
