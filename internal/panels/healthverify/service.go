@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
 )
 
@@ -18,7 +18,7 @@ type Secrets interface {
 type Service struct {
 	DB         *sql.DB
 	Secrets    Secrets
-	SSH        provisioning.SSHClient
+	Runner     Runner
 	ManagedKey string
 	Repair     func(context.Context, string) error
 }
@@ -54,73 +54,72 @@ ORDER BY COALESCE(pi.health_checked_at,'epoch'),pi.id
 	if err = rows.Err(); err != nil {
 		return err
 	}
+	runner := s.Runner
+	if runner == nil {
+		runner = LocalRunner{}
+	}
+	s.Runner = runner
+	sem := make(chan struct{}, 8)
+	var wg sync.WaitGroup
 	for _, id := range ids {
 		if ctx.Err() != nil {
-			return ctx.Err()
+			break
 		}
-		cctx, cancel := context.WithTimeout(ctx, 35*time.Second)
-		err = s.runOne(cctx, id)
-		cancel()
-		if err != nil {
-			failures := s.recordFailure(ctx, id, err)
-			if failures >= 3 && s.Repair != nil {
-				rctx, rcancel := context.WithTimeout(ctx, 45*time.Second)
-				_ = s.Repair(rctx, id)
-				rcancel()
+		id := id
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			select {
+			case sem <- struct{}{}:
+				defer func() { <-sem }()
+			case <-ctx.Done():
+				return
 			}
-		} else {
-			s.recordSuccess(ctx, id)
-		}
+			cctx, cancel := context.WithTimeout(ctx, 35*time.Second)
+			probeErr := s.runOne(cctx, id)
+			cancel()
+			if probeErr != nil {
+				failures := s.recordFailure(ctx, id, probeErr)
+				if failures >= UnhealthyFailureThreshold && s.Repair != nil {
+					rctx, rcancel := context.WithTimeout(ctx, 45*time.Second)
+					_ = s.Repair(rctx, id)
+					rcancel()
+				}
+			} else {
+				s.recordSuccess(ctx, id)
+			}
+		}()
 	}
-	return nil
+	wg.Wait()
+	return ctx.Err()
 }
 
 func (s Service) runOne(ctx context.Context, panelID string) error {
-	var accountID, dropletID, host, user, keyRef, uuidRef, publicKey, shortID, sni string
+	var accountID, host, uuidRef, publicKey, shortID, sni string
 	var port int
 	err := s.DB.QueryRowContext(ctx, `
-SELECT pi.account_id::text,pi.droplet_id::text,d.host,
-COALESCE(d.profile_snapshot->>'ssh_user','root'),
-COALESCE(d.profile_snapshot->>'ssh_key_secret_ref',''),
-rc.uuid_secret_ref,rc.public_key,rc.short_id,rs.server_name,
+SELECT pi.account_id::text,d.host,rc.uuid_secret_ref,rc.public_key,rc.short_id,rs.server_name,
 (SELECT pii.port FROM panel_inbound_inventory pii WHERE pii.panel_id=pi.id AND pii.present=true AND pii.enabled=true AND pii.protocol='vless' AND pii.security='reality' ORDER BY pii.port LIMIT 1)
 FROM panel_instances pi
 JOIN deployments d ON d.droplet_id=pi.droplet_id
 JOIN reality_credentials rc ON rc.panel_id=pi.id AND rc.managed_key=$2
 JOIN reality_target_selections rs ON rs.panel_id=pi.id
 WHERE pi.id=$1 AND pi.enabled=true
-`, panelID, s.ManagedKey).Scan(&accountID, &dropletID, &host, &user, &keyRef, &uuidRef, &publicKey, &shortID, &sni, &port)
+`, panelID, s.ManagedKey).Scan(&accountID, &host, &uuidRef, &publicKey, &shortID, &sni, &port)
 	if err != nil {
 		return err
 	}
-	if keyRef == "" || uuidRef == "" || host == "" || port < 1 {
+	if uuidRef == "" || host == "" || port < 1 {
 		return ErrInvalid
 	}
-	key, err := s.Secrets.Get(ctx, accountID, keyRef)
-	if err != nil {
-		return err
-	}
-	defer credentials.Wipe(key)
 	uuidRaw, err := s.Secrets.Get(ctx, accountID, uuidRef)
 	if err != nil {
 		return err
 	}
 	defer credentials.Wipe(uuidRaw)
 	uuid := strings.TrimSpace(string(uuidRaw))
-	target := provisioning.Target{AccountID: accountID, DropletID: dropletID, Host: host, User: user, KeySecretRef: keyRef}
-	runner := sshRunner{ssh: s.SSH, target: target, key: key}
-	_, err = Probe(ctx, runner, RealityClient{UUID: uuid, Host: host, Port: port, SNI: sni, PublicKey: publicKey, ShortID: shortID})
+	_, err = Probe(ctx, s.Runner, RealityClient{UUID: uuid, Host: host, Port: port, SNI: sni, PublicKey: publicKey, ShortID: shortID})
 	return err
-}
-
-type sshRunner struct {
-	ssh    provisioning.SSHClient
-	target provisioning.Target
-	key    []byte
-}
-
-func (r sshRunner) Run(ctx context.Context, cmd string) (string, error) {
-	return r.ssh.Run(ctx, r.target, r.key, cmd)
 }
 
 func (s Service) recordFailure(ctx context.Context, id string, probeErr error) int {

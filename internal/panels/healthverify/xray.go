@@ -66,7 +66,7 @@ func Probe(ctx context.Context, r Runner, c RealityClient) (Result, error) {
 	started := time.Now()
 	out, e := r.Run(ctx, command(encoded, c.Host, c.Port, socksPort))
 	if e != nil {
-		return Result{}, ErrFailed
+		return Result{}, fmt.Errorf("%w: %v", ErrFailed, e)
 	}
 	exitIP := ""
 	for _, line := range strings.Split(out, "\n") {
