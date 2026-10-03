@@ -6,12 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"time"
 )
 
 func main() {
+	lifecycleInventory := flag.Bool("lifecycle-inventory", false, "fresh consistent v3 policy counts only; no client identities")
 	globalClients := flag.Bool("global-client-shape", false, "read-only global list response keys and sizes; no client values")
 	inventory := flag.Bool("inventory", false, "read-only fresh Sanaei inbound summary")
 	panel := flag.String("panel", "11f21262-1b20-4080-8ffc-7528a01679a9", "exact panel for read-only inspection")
@@ -30,11 +32,30 @@ func main() {
 		panic(e)
 	}
 	defer a.Close()
-	if *inventory || *globalClients {
+	if *inventory || *globalClients || *lifecycleInventory {
 		manager := &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: a.DB, Secrets: a.Container.Secrets, Timeout: 8 * time.Second}, TTL: time.Second}
 		rt, e := manager.Acquire(ctx, *panel)
 		if e != nil {
 			panic(e)
+		}
+		if *lifecycleInventory {
+			obs, _, e := clientops.LifecycleInventory(ctx, rt, 1)
+			if e != nil {
+				panic(e)
+			}
+			enabled := 0
+			quotas := map[int64]int{}
+			limits := map[int]int{}
+			for _, c := range obs {
+				if c.Client.Enable {
+					enabled++
+				}
+				quotas[c.Client.TotalGB]++
+				limits[c.Client.LimitHWID]++
+			}
+			b, _ := json.Marshal(map[string]any{"clients": len(obs), "enabled": enabled, "quota_counts": quotas, "hwid_counts": limits})
+			fmt.Println(string(b))
+			return
 		}
 		if *globalClients {
 			res, e := rt.Session.Exec.Do(ctx, sanaei.SessionRequest{Method: "GET", Path: "panel/api/clients/list", TimeoutSeconds: 30})

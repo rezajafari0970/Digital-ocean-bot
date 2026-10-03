@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
@@ -308,6 +309,9 @@ func runLifecycleCanary(panel string, inbound int64, recoverID string) (retErr e
 		var expiry int64
 		if err = lifeWait(ctx, j, "policy update", func() (bool, error) {
 			obs, _, e := clientops.LifecycleInventory(ctx, rt, r.Inbound)
+			if errors.Is(e, clientops.ErrVerify) {
+				return false, nil
+			} // pair can straddle a worker UPDATE; retry reads only.
 			if e != nil {
 				return false, e
 			}
