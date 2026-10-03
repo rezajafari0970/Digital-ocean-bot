@@ -19,6 +19,10 @@ type Secrets interface {
 
 var addClientUnsupportedPanels sync.Map
 
+func clientMutationLifecycleAllowed(state string) bool {
+	return state == "READY" || state == "EXPIRING"
+}
+
 type Service struct {
 	DB      *sql.DB
 	Secrets Secrets
@@ -108,7 +112,7 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 		if e := s.DB.QueryRowContext(runCtx, "SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1", runtime.PanelID).Scan(&lifecycle); e != nil {
 			return e
 		}
-		if lifecycle != "READY" && lifecycle != "EXPIRING" && lifecycle != "RETIRING" {
+		if !clientMutationLifecycleAllowed(lifecycle) {
 			return nil
 		}
 		var e error
@@ -172,7 +176,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 	if e := s.DB.QueryRowContext(ctx, "SELECT r.state FROM panel_instances pi JOIN droplets r ON r.id=pi.droplet_id WHERE pi.id=$1", runtime.PanelID).Scan(&lifecycle); e != nil {
 		return e
 	}
-	if lifecycle != "READY" && lifecycle != "EXPIRING" && lifecycle != "RETIRING" {
+	if !clientMutationLifecycleAllowed(lifecycle) {
 		return nil
 	}
 	runtime.Session.Invalidate()
