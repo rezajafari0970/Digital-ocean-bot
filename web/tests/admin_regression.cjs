@@ -24,6 +24,15 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+12000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,150))}throw Error('UI assertion timeout')}
   await waitFor('document.querySelectorAll(".accountCard").length>0');
+  const fixture=process.env.DOB_UI_FIXTURE_ACCOUNT;
+  if(fixture){
+   assert.match(fixture,/^[0-9a-f-]{36}$/);
+   assert.equal(await evaluate('cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+'&&x.name==='+JSON.stringify('acceptance-'+fixture)+')'),true);
+   await evaluate('(()=>{const original=window.confirm;window.confirm=()=>true;document.querySelector('+JSON.stringify('[data-action="delete-account"][data-id="'+fixture+'"]')+').click();window.confirm=original})()');
+   await waitFor('!cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+')||cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+'&&x.deletion)');
+   console.log('UI_ACCOUNT_DELETE_BUTTON_REQUESTED PASS');
+   return;
+  }
   const cards=await evaluate('document.querySelectorAll(".accountCard").length');
   assert.equal(await evaluate('document.querySelectorAll(".accountCard .billingCompact").length'),cards);
   assert.equal(await evaluate('[...document.querySelectorAll(".billingCompact")].every(x=>x.closest(".accountCard")&&!x.open)'),true);

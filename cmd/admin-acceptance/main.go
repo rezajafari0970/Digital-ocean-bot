@@ -30,12 +30,14 @@ func run() error {
 	base := flag.String("base-url", "http://127.0.0.1:18080", "local production API")
 	fixtures := flag.Bool("fixture-delete", false, "exercise deletes on newly created disabled test fixtures only")
 	browserScript := flag.String("browser-script", "", "run a local browser acceptance script with an ephemeral session")
+	fixtureBrowser := flag.String("fixture-browser-script", "", "exercise the new fixture account Delete button in a local browser")
+	residentialFixture := flag.Bool("residential-create-fixture", false, "create and delete a disabled isolated residential fixture using an existing verified endpoint")
 	flag.Parse()
 	u, err := url.Parse(*base)
 	if err != nil || u.Scheme != "http" || u.Hostname() != "127.0.0.1" {
 		return errors.New("local API required")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 	a, err := app.Bootstrap(ctx)
 	if err != nil {
@@ -126,6 +128,57 @@ func run() error {
 		}
 		fmt.Printf("SHARE_CLASS_BOUNDARY %s PASS\n", class)
 	}
+	if *residentialFixture {
+		var endpoint, typ, host, user, ref string
+		var port int
+		err = a.DB.QueryRowContext(ctx, "SELECT proxy_id::text,type,host,port,COALESCE(username,''),COALESCE(secret_ref,'') FROM residential_proxies WHERE enabled AND status='healthy' AND last_success_at>now()-interval '3 minutes' ORDER BY priority LIMIT 1").Scan(&endpoint, &typ, &host, &port, &user, &ref)
+		if err != nil {
+			return errors.New("no verified residential endpoint for fixture")
+		}
+		var password []byte
+		if ref != "" {
+			password, err = a.Container.Secrets.GetResidential(ctx, endpoint, ref)
+			if err != nil {
+				return err
+			}
+		}
+		nameID, _ := sanaei.UUIDv4()
+		body, _ := json.Marshal(map[string]any{"name": "acceptance-" + nameID, "type": typ, "host": host, "port": port, "username": user, "password": string(password), "priority": 999999, "enabled": false})
+		for i := range password {
+			password[i] = 0
+		}
+		code, raw, e := request("POST", "/api/v1/residential-proxies", body)
+		for i := range body {
+			body[i] = 0
+		}
+		if e != nil || code != 201 {
+			return errors.New("residential create outcome unconfirmed; inspect acceptance fixture before retry")
+		}
+		var created struct{ ID string }
+		if json.Unmarshal(raw, &created) != nil || created.ID == "" {
+			return errors.New("residential fixture identity missing")
+		}
+		fmt.Printf("RESIDENTIAL_FIXTURE id=%s\\n", created.ID)
+		var n int
+		if err = a.DB.QueryRowContext(ctx, "SELECT count(*) FROM proxies WHERE id=$1", created.ID).Scan(&n); err != nil || n != 0 {
+			return errors.New("residential create leaked into proxies")
+		}
+		got, e := a.Container.Secrets.GetResidential(ctx, created.ID, "proxy-password")
+		if ref != "" && (e != nil || len(got) == 0) {
+			return errors.New("residential fixture credential not readable")
+		}
+		for i := range got {
+			got[i] = 0
+		}
+		code, _, e = request("DELETE", "/api/v1/residential-proxies/"+created.ID, nil)
+		if e != nil || code != 204 {
+			return errors.New("residential fixture deletion unconfirmed")
+		}
+		if err = a.DB.QueryRowContext(ctx, "SELECT (SELECT count(*) FROM residential_proxies WHERE proxy_id=$1)+(SELECT count(*) FROM residential_proxy_secrets WHERE residential_id=$1)", created.ID).Scan(&n); err != nil || n != 0 {
+			return errors.New("residential fixture data remains")
+		}
+		fmt.Println("RESIDENTIAL_API_CREATE_SECRET_ISOLATION_DELETE PASS")
+	}
 	if !*fixtures {
 		return nil
 	}
@@ -178,9 +231,19 @@ func run() error {
 	if err != nil || code != 200 {
 		return errors.New("account detail failed")
 	}
-	code, _, err = request("DELETE", "/api/v1/accounts/"+account, nil)
-	if err != nil || code != 202 {
-		return errors.New("account deletion journal unconfirmed")
+	if *fixtureBrowser != "" {
+		command := exec.CommandContext(ctx, "node", *fixtureBrowser)
+		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base, "DOB_UI_FIXTURE_ACCOUNT="+account)
+		command.Stdout = os.Stdout
+		command.Stderr = os.Stderr
+		if err = command.Run(); err != nil {
+			return errors.New("fixture browser deletion unconfirmed")
+		}
+	} else {
+		code, _, err = request("DELETE", "/api/v1/accounts/"+account, nil)
+		if err != nil || code != 202 {
+			return errors.New("account deletion journal unconfirmed")
+		}
 	}
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
