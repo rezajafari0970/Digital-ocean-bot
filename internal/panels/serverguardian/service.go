@@ -143,7 +143,7 @@ func guardianCommand(repair bool) string {
 	}
 	return fmt.Sprintf(`set -u
 active=0; restarted=0; systemctl is-active x-ui >/dev/null 2>&1 && active=1
-if [ "$active" -eq 0 ] && [ "%s" = "1" ]; then systemctl restart x-ui >/dev/null 2>&1 || true; sleep 2; systemctl is-active x-ui >/dev/null 2>&1 && { active=1; restarted=1; }; fi
+if [ "$active" -eq 0 ] && [ "%s" = "1" ] && [ -f /etc/x-ui/x-ui.db ]; then systemctl restart x-ui >/dev/null 2>&1 || true; sleep 2; systemctl is-active x-ui >/dev/null 2>&1 && { active=1; restarted=1; }; fi
 mem="$(awk '/MemAvailable:/{printf "%%d",$2/1024}' /proc/meminfo 2>/dev/null || echo 0)"
 disk="$(df -Pm / | awk 'NR==2{print $4}' 2>/dev/null || echo 0)"
 load="$(awk '{print $1}' /proc/loadavg 2>/dev/null || echo 0)"

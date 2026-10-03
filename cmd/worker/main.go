@@ -57,7 +57,7 @@ func main() {
 		g := serverguardian.Service{
 			DB: application.DB, Secrets: application.Container.Secrets,
 			SSH:    provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}},
-			Repair: false,
+			Repair: true,
 		}
 		run := func() {
 			c, cancel := context.WithTimeout(ctx, 2*time.Minute)
