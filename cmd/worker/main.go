@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
@@ -196,6 +197,31 @@ func main() {
 				return
 			case <-t.C:
 				sanaeiRuntimes.PurgeExpired()
+			}
+		}
+	}()
+
+	// Durable client mutations are always serialized. The database execution gate
+	// is checked atomically by Claim; its production default is OFF + kill-switch ON.
+	go func() {
+		t := time.NewTicker(time.Second)
+		defer t.Stop()
+		exec := clientops.Executor{
+			Journal:  clientops.Journal{DB: application.DB},
+			Runtimes: sanaeiRuntimes,
+			Timeout:  30 * time.Second,
+		}
+		run := func() {
+			if _, err := exec.RunOne(ctx); err != nil {
+				log.Printf("client mutation executor: %v", err)
+			}
+		}
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
 			}
 		}
 	}()

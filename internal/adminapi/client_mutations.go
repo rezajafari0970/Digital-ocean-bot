@@ -134,9 +134,11 @@ func (s *Server) clientMutations(w http.ResponseWriter, r *http.Request) {
 	if created {
 		code = http.StatusAccepted
 	}
+	gate, gateErr := (clientops.Journal{DB: s.DB}).Gate(r.Context())
+	executionEnabled := gateErr == nil && gate.Enabled && !gate.KillSwitch && gate.Concurrency == 1
 	writeJSON(w, code, map[string]any{
 		"id": job.ID, "state": job.State, "created": created,
-		"execution_enabled": false,
+		"execution_enabled": executionEnabled,
 	})
 }
 
@@ -193,5 +195,13 @@ func (s *Server) listClientMutations(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"execution_enabled": false, "counts": counts, "recent": recent})
+	gate, gateErr := (clientops.Journal{DB: s.DB}).Gate(r.Context())
+	executionEnabled := gateErr == nil && gate.Enabled && !gate.KillSwitch && gate.Concurrency == 1
+	writeJSON(w, http.StatusOK, map[string]any{
+		"execution_enabled": executionEnabled,
+		"kill_switch":       gate.KillSwitch,
+		"scope_panel_id":    gate.PanelID,
+		"scope_inbound_id":  gate.InboundID,
+		"counts":            counts, "recent": recent,
+	})
 }
