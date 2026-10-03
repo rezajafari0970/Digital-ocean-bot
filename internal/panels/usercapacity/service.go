@@ -76,6 +76,9 @@ func (s Service) PolicyPorts(ctx context.Context) ([]int, error) {
 }
 
 func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) (bool, error) {
+	if handled, planned, err := s.reconcileLifecycle(ctx, p, runtime); handled || err != nil {
+		return planned, err
+	}
 	if s.DB == nil || s.Secrets == nil {
 		return false, errors.New("user capacity config")
 	}
@@ -129,6 +132,9 @@ func (s Service) FastFillFromPolicy(ctx context.Context, p readyworker.Panel, ru
 }
 
 func (s Service) ReconcileRuntimeFromPolicy(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) error {
+	if handled, _, err := s.reconcileLifecycle(ctx, p, runtime); handled || err != nil {
+		return err
+	}
 	if s.DB == nil || s.Secrets == nil {
 		return errors.New("user capacity config")
 	}

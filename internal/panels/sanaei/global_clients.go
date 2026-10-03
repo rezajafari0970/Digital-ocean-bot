@@ -10,13 +10,14 @@ import (
 // GlobalClient retains only the identity/policy fields needed for verification.
 // The installed v3 /clients/list response is an array of these global records.
 type GlobalClient struct {
-	UUID       string  `json:"uuid"`
-	Email      string  `json:"email"`
-	Enable     bool    `json:"enable"`
-	TotalGB    int64   `json:"totalGB"`
-	ExpiryTime int64   `json:"expiryTime"`
-	LimitHWID  int     `json:"limitHwid"`
-	InboundIDs []int64 `json:"inboundIds"`
+	Traffic    *ClientTraffic `json:"traffic"`
+	UUID       string         `json:"uuid"`
+	Email      string         `json:"email"`
+	Enable     bool           `json:"enable"`
+	TotalGB    int64          `json:"totalGB"`
+	ExpiryTime int64          `json:"expiryTime"`
+	LimitHWID  int            `json:"limitHwid"`
+	InboundIDs []int64        `json:"inboundIds"`
 }
 
 func ReadGlobalClientsSession(ctx context.Context, exec SessionExecutor) ([]GlobalClient, error) {

@@ -13,9 +13,12 @@ import (
 )
 
 type BulkPayload struct {
-	GenerationID string
-	TargetUsers  int
-	Clients      []sanaei.Client
+	Policy         LifecyclePolicy `json:",omitempty"`
+	Lifecycle      bool
+	CleanupReasons map[string]string `json:",omitempty"`
+	GenerationID   string
+	TargetUsers    int
+	Clients        []sanaei.Client
 }
 
 func (p BulkPayload) Validate() error {
@@ -214,12 +217,14 @@ func observeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job Job, p BulkPa
 		return nil, nil, err
 	}
 	confirmed := make([]sanaei.Client, 0, len(observed))
-	if len(observed) == 0 {
-		return confirmed, missing, nil
-	}
-	globals, err := globalWanted(ctx, rt, job.InboundID, observed)
+	globals, err := globalWanted(ctx, rt, job.InboundID, p.Clients)
 	if err != nil {
 		return confirmed, missing, err
+	}
+	for _, c := range missing {
+		if _, exists := globals[c.ID]; exists {
+			return confirmed, missing, ErrVerify
+		}
 	}
 	for _, c := range observed {
 		g, ok := globals[c.ID]
@@ -249,6 +254,9 @@ func (e Executor) confirmBulk(ctx context.Context, job Job, clients []sanaei.Cli
 }
 
 func (e Executor) bulkPreflight(ctx context.Context, job Job, p BulkPayload) error {
+	if p.Lifecycle {
+		return e.lifecyclePreflight(ctx, job, p.GenerationID)
+	}
 	var allowed bool
 	err := e.Journal.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM client_mutation_jobs m JOIN client_mutation_execution_gate g ON g.singleton JOIN bulk_client_execution_gate bg ON bg.singleton JOIN panel_instances pi ON pi.id=m.panel_id JOIN droplets d ON d.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=d.id JOIN accounts a ON a.id=pi.account_id JOIN bulk_user_generations gen ON gen.id=$3 WHERE m.id=$1 AND m.state='RUNNING' AND m.attempts=$2 AND (gen.state='ACTIVE' OR (m.kind='BULK_DELETE' AND gen.state='ROLLING_BACK')) AND gen.panel_id=m.panel_id AND gen.inbound_id=m.inbound_id AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.expires_at>now() AND bg.max_batch_size >= $4)`, job.ID, job.Attempts, p.GenerationID, len(p.Clients)).Scan(&allowed)
 	if err != nil {
@@ -314,11 +322,11 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 	release()
 	// Even a lost POST response must be followed by a fresh observation. Use a
 	// separate bounded read context if the request context has just timed out.
-	verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
+	verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 45*time.Second)
 	defer cancel()
 	observed, remaining, verifyErr := observeBulk(verifyCtx, rt, job, p)
 	if err = e.confirmBulk(verifyCtx, job, observed); err != nil {
-		return err
+		verifyErr = err
 	}
 	report := map[string]any{"phase": "VERIFIED", "response": result, "observed": len(observed), "missing": len(remaining)}
 	if postErr != nil {
@@ -329,7 +337,9 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 		report["phase"] = "VERIFY_REQUIRED"
 	}
 	b, _ := json.Marshal(report)
-	if _, err = e.Journal.DB.ExecContext(verifyCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, b); err != nil {
+	reportCtx, reportCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer reportCancel()
+	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, b); err != nil {
 		return err
 	}
 	if verifyErr != nil {
@@ -357,6 +367,9 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 // change waits for this bounded request; once closing commits no later POST can
 // pass this fence. No pool connection is held across readback verification.
 func (e Executor) bulkPostFence(ctx context.Context, job Job, p BulkPayload) (func(), error) {
+	if p.Lifecycle {
+		return e.lifecycleFence(ctx, job, p.GenerationID, true)
+	}
 	tx, err := e.Journal.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err

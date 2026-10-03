@@ -58,6 +58,14 @@ func main() {
 					if m, ok := obj[0].(map[string]any); ok {
 						for k, v := range m {
 							fmt.Printf("client_key=%s type=%T\n", k, v)
+							if k == "traffic" {
+								if traffic, ok := v.(map[string]any); ok {
+									for tk, tv := range traffic {
+										fmt.Printf("traffic_key=%s type=%T\n", tk, tv)
+									}
+								}
+							}
+
 						}
 					}
 				}

@@ -228,6 +228,12 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 	if err != nil {
 		return err
 	}
+	if p.Lifecycle {
+		if err = e.lifecycleDeleteGuard(ctx, rt, job, p, present); err != nil {
+			release()
+			return err
+		}
+	}
 	result, postErr := sanaei.BulkDeleteClientsSession(ctx, rt.Session.Exec, emails)
 	release()
 	verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 45*time.Second)

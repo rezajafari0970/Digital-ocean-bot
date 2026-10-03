@@ -91,6 +91,8 @@ func run() error {
 	var count, scaleTarget int
 	var scaleID string
 	var scaleCleanup bool
+	var lifecycleCanary bool
+	var lifecycleCleanup string
 	flag.StringVar(&panel, "panel", "", "exact panel uuid")
 	flag.Int64Var(&inbound, "inbound", 0, "exact inbound")
 	flag.StringVar(&recoverJob, "recover-job", "", "read-before-write cleanup of an existing bulk job")
@@ -98,7 +100,12 @@ func run() error {
 	flag.IntVar(&scaleTarget, "scale-target", 0, "total client target: 11 recovery canary, 101, or 10000; chunks <=100")
 	flag.StringVar(&scaleID, "scale-run", "", "existing durable scale generation")
 	flag.BoolVar(&scaleCleanup, "scale-cleanup", false, "stop creation and fresh-read existing scale run for cleanup")
+	flag.BoolVar(&lifecycleCanary, "lifecycle-canary", false, "worker-only policy/expiry/replacement acceptance")
+	flag.StringVar(&lifecycleCleanup, "lifecycle-cleanup", "", "fresh-read cleanup of an existing lifecycle canary run")
 	flag.Parse()
+	if lifecycleCanary || lifecycleCleanup != "" {
+		return runLifecycleCanary(panel, inbound, lifecycleCleanup)
+	}
 	if scaleTarget != 0 || scaleID != "" || scaleCleanup {
 		return runScale(panel, inbound, scaleTarget, scaleID, scaleCleanup)
 	}

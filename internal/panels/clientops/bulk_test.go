@@ -84,14 +84,14 @@ func bulkTestDB(t *testing.T) *sql.DB {
 	db.SetMaxOpenConns(12)
 	t.Cleanup(func() { db.Close(); admin.Exec(`DROP SCHEMA ` + schema + ` CASCADE`); admin.Close() })
 	fixture := `CREATE TABLE accounts(id uuid PRIMARY KEY,enabled boolean,provider_state text);
- CREATE TABLE droplets(id uuid PRIMARY KEY,state text);
+ CREATE TABLE droplets(id uuid PRIMARY KEY,state text,expires_at timestamptz);
  CREATE TABLE deployments(droplet_id uuid,state text);
  CREATE TABLE panel_instances(id uuid PRIMARY KEY,account_id uuid,droplet_id uuid,enabled boolean);
- CREATE TABLE panel_inbound_inventory(panel_id uuid,remote_id bigint,present boolean,enabled boolean);`
+ CREATE TABLE panel_inbound_inventory(panel_id uuid,remote_id bigint,present boolean,enabled boolean,port integer DEFAULT 443);`
 	if _, err = db.Exec(fixture); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery"} {
+	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle"} {
 		b, e := os.ReadFile(filepath.Join("../../../migrations", name+".up.sql"))
 		if e != nil {
 			t.Fatal(e)
@@ -101,10 +101,10 @@ func bulkTestDB(t *testing.T) *sql.DB {
 		}
 	}
 	_, err = db.Exec(`INSERT INTO accounts VALUES('11111111-1111-4111-8111-111111111111',true,'ACTIVE');
- INSERT INTO droplets VALUES('22222222-2222-4222-8222-222222222222','READY');
+ INSERT INTO droplets(id,state) VALUES('22222222-2222-4222-8222-222222222222','READY');
  INSERT INTO deployments VALUES('22222222-2222-4222-8222-222222222222','PANEL_COMPLETE');
  INSERT INTO panel_instances VALUES('33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222',true);
- INSERT INTO panel_inbound_inventory VALUES('33333333-3333-4333-8333-333333333333',1,true,true);
+ INSERT INTO panel_inbound_inventory(panel_id,remote_id,present,enabled) VALUES('33333333-3333-4333-8333-333333333333',1,true,true);
  INSERT INTO bulk_user_generations(id,panel_id,inbound_id,purpose,marker) VALUES('44444444-4444-4444-8444-444444444444','33333333-3333-4333-8333-333333333333',1,'CANARY','test');
  UPDATE bulk_client_execution_gate SET enabled=true,kill_switch=false,panel_id='33333333-3333-4333-8333-333333333333',inbound_id=1,remaining_batches=1,expires_at=now()+interval '5 minutes';`)
 	if err != nil {

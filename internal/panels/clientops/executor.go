@@ -172,106 +172,139 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 	if err != nil {
 		return err
 	}
-	return rt.WithMutation(ctx, func(runCtx context.Context) error {
-		if job.Kind == KindBulkDelete {
-			return e.executeBulkDelete(runCtx, rt, job)
-		}
-		if job.Kind == KindBulkCreate {
-			return e.executeBulk(runCtx, rt, job)
-		}
-		ok, err := e.desiredSatisfied(runCtx, rt, job)
-		if err != nil && !errors.Is(err, ErrUnsupportedKind) {
-			return err
-		}
-		if ok {
-			return nil
-		}
-		switch job.Kind {
-		case KindCreate:
-			client, err := payloadClient(job.Payload)
-			if err != nil {
-				return err
-			}
-			if client.ID != job.ClientID {
-				return ErrInvalidRequest
-			}
-			err = sanaei.AddClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), client)
-		case KindDelete:
-			rt.Session.Invalidate()
-			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
-			if readErr != nil {
-				return readErr
-			}
-			if !found {
-				return ErrInboundMissing
-			}
-			current, exists, readErr := clientFromInbound(raw, job.ClientID)
-			if readErr != nil {
-				return readErr
-			}
-			if !exists {
-				return nil
-			}
-			if current.Email == "" {
-				return ErrClientConflict
-			}
-			err = sanaei.DeleteClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), job.ClientID, current.Email)
-		case KindUpdate:
-			patch, patchErr := payloadPatch(job.Payload)
-			if patchErr != nil {
-				return patchErr
-			}
-			if patch.Email != nil {
-				return ErrUnsupportedKind
-			}
-			rt.Session.Invalidate()
-			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
-			if readErr != nil {
-				return readErr
-			}
-			if !found {
-				return ErrInboundMissing
-			}
-			currentMap, exists, readErr := clientMapFromInbound(raw, job.ClientID)
-			if readErr != nil {
-				return readErr
-			}
-			if !exists {
-				return ErrClientConflict
-			}
-			currentEmail, _ := currentMap["email"].(string)
-			if currentEmail == "" {
-				return ErrClientConflict
-			}
-			global, readErr := sanaei.GetClientByEmailSession(runCtx, rt.Session.Exec, currentEmail)
-			if readErr != nil {
-				return readErr
-			}
-			if uuid, _ := global["uuid"].(string); uuid != "" && uuid != job.ClientID {
-				return ErrClientConflict
-			}
-			payload, patchErr := v3UpdatePayload(global, patch)
-			if patchErr != nil {
-				return patchErr
-			}
-			err = sanaei.UpdateClientByEmailSession(runCtx, rt.Session.Exec, currentEmail, payload)
-		default:
-			return ErrUnsupportedKind
-		}
+	return rt.WithMutation(ctx, func(c context.Context) error { return e.executeRuntime(c, rt, job) })
+}
 
-		rt.Session.Invalidate()
-		verified, verifyErr := e.desiredSatisfied(runCtx, rt, job)
-		if verifyErr == nil && verified {
-			return nil
+// executeRuntime is called with the runtime mutation lock held by execute.
+func (e Executor) executeRuntime(ctx context.Context, rt *sanaei.PanelRuntime, job Job) error {
+	runCtx := ctx
+	if job.Kind == KindBulkDelete {
+		return e.executeBulkDelete(runCtx, rt, job)
+	}
+	if job.Kind == KindBulkCreate {
+		return e.executeBulk(runCtx, rt, job)
+	}
+
+	if isLifecycle(job.Payload) {
+		if job.Kind != KindUpdate {
+			return ErrInvalidRequest
 		}
+		var p struct{ GenerationID, ExpectedEmail string }
+		if json.Unmarshal(job.Payload, &p) != nil {
+			return ErrInvalidRequest
+		}
+		release, e := e.lifecycleFence(runCtx, job, p.GenerationID, true)
+		if e != nil {
+			return e
+		}
+		defer release()
+		records, e := globalWanted(runCtx, rt, job.InboundID, []sanaei.Client{{ID: job.ClientID, Email: p.ExpectedEmail}})
+		if e != nil {
+			return e
+		}
+		if _, ok := records[job.ClientID]; !ok {
+			return ErrClientConflict
+		}
+	}
+	ok, err := e.desiredSatisfied(runCtx, rt, job)
+	if err != nil && !errors.Is(err, ErrUnsupportedKind) {
+		return err
+	}
+	if ok {
+		return nil
+	}
+	switch job.Kind {
+	case KindCreate:
+		client, err := payloadClient(job.Payload)
 		if err != nil {
 			return err
 		}
-		if verifyErr != nil {
-			return verifyErr
+		if client.ID != job.ClientID {
+			return ErrInvalidRequest
 		}
-		return ErrVerify
-	})
+		err = sanaei.AddClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), client)
+	case KindDelete:
+		rt.Session.Invalidate()
+		raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+		if readErr != nil {
+			return readErr
+		}
+		if !found {
+			return ErrInboundMissing
+		}
+		current, exists, readErr := clientFromInbound(raw, job.ClientID)
+		if readErr != nil {
+			return readErr
+		}
+		if !exists {
+			return nil
+		}
+		if current.Email == "" {
+			return ErrClientConflict
+		}
+		err = sanaei.DeleteClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), job.ClientID, current.Email)
+	case KindUpdate:
+		patch, patchErr := payloadPatch(job.Payload)
+		if patchErr != nil {
+			return patchErr
+		}
+		if patch.Email != nil {
+			return ErrUnsupportedKind
+		}
+		rt.Session.Invalidate()
+		raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+		if readErr != nil {
+			return readErr
+		}
+		if !found {
+			return ErrInboundMissing
+		}
+		currentMap, exists, readErr := clientMapFromInbound(raw, job.ClientID)
+		if readErr != nil {
+			return readErr
+		}
+		if !exists {
+			return ErrClientConflict
+		}
+		currentEmail, _ := currentMap["email"].(string)
+		if currentEmail == "" {
+			return ErrClientConflict
+		}
+		global, readErr := sanaei.GetClientByEmailSession(runCtx, rt.Session.Exec, currentEmail)
+		if readErr != nil {
+			return readErr
+		}
+		if uuid, _ := global["uuid"].(string); uuid != "" && uuid != job.ClientID {
+			return ErrClientConflict
+		}
+		payload, patchErr := v3UpdatePayload(global, patch)
+		if patchErr != nil {
+			return patchErr
+		}
+		err = sanaei.UpdateClientByEmailSession(runCtx, rt.Session.Exec, currentEmail, payload)
+	default:
+		return ErrUnsupportedKind
+	}
+
+	rt.Session.Invalidate()
+
+	verifyCtx := runCtx
+	if isLifecycle(job.Payload) {
+		var cancel context.CancelFunc
+		verifyCtx, cancel = context.WithTimeout(context.WithoutCancel(runCtx), 45*time.Second)
+		defer cancel()
+	}
+	verified, verifyErr := e.desiredSatisfied(verifyCtx, rt, job)
+	if verifyErr == nil && verified {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if verifyErr != nil {
+		return verifyErr
+	}
+	return ErrVerify
 }
 
 func (e Executor) RunOne(ctx context.Context) (bool, error) {
@@ -297,6 +330,8 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 
 	finishCtx := context.WithoutCancel(ctx)
 	switch {
+	case errors.Is(execErr, ErrLifecycleSuperseded):
+		return true, e.Journal.supersedeLifecycle(finishCtx, job)
 	case execErr == nil:
 		return true, e.Journal.Succeed(finishCtx, job.ID)
 	case errors.Is(execErr, ErrUnsupportedKind),
