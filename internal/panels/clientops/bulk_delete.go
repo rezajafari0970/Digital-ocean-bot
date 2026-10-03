@@ -230,12 +230,12 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 	}
 	result, postErr := sanaei.BulkDeleteClientsSession(ctx, rt.Session.Exec, emails)
 	release()
-	verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
+	verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 45*time.Second)
 	defer cancel()
 	remaining, absent, verifyErr := observeBulkDelete(verifyCtx, rt, job, p)
 	if verifyErr == nil {
 		if err = e.confirmBulkDeleted(verifyCtx, p, absent); err != nil {
-			return err
+			verifyErr = err
 		}
 	}
 	report := map[string]any{"phase": "VERIFIED", "response": result, "absent": len(absent), "remaining": len(remaining)}
@@ -247,7 +247,11 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 		report["verify_error"] = verifyErr.Error()
 	}
 	raw, _ := json.Marshal(report)
-	if _, err = e.Journal.DB.ExecContext(verifyCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, raw); err != nil {
+	// A read deadline must not erase the diagnostic needed for read-before-write
+	// recovery. This bounded DB-only context cannot send another provider POST.
+	reportCtx, reportCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer reportCancel()
+	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, raw); err != nil {
 		return err
 	}
 	if verifyErr != nil {
