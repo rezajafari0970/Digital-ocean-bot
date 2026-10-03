@@ -46,3 +46,11 @@ See BULK_V3_50_ACCEPTANCE.json. Job 20c948e0-db84-449e-83f1-69cd9020b5e8 created
 The complete 101-sample resource window covers create and cleanup. Combined x-ui/Xray sampled RSS maximum 283804 KiB; CPU maximum 25.83% of one core; minimum MemAvailable 1329324 KiB. These are one-second samples, not instantaneous peaks. API, worker and target x-ui remain active. Stored capacity is 1/1 but its observed_at predates this test; live restoration is proven by fresh Sanaei readback, not by treating that snapshot as new.
 
 Current next gate: measured 100-client canary. The utility currently allows only 10, 25 or 50. Preserve worker-only execution, finite scope, durable rate budget and journal cleanup. Fleet generation remains disabled pending durable bulk-owned policy drift and expiry/quota cleanup integration. Runtime API/worker remain af1a541; clean-built canary tool is ce9c44d9967554a58a26996f5317f0c989ca5256.
+
+## Stage 100 accepted
+
+See BULK_V3_100_ACCEPTANCE.json. Job ca287033-c7bb-414d-b325-9774eb8e7b96 created and fresh-verified all 100 clients in one attempt (2033 ms). All were observed in Output. All 100 durable DELETE jobs succeeded on the first attempt (99292 ms cleanup). The original one-client hash was restored; generation CLOSED, no test Output, no pending jobs, both gates closed. Fleet ownership ACTIVE=1813, DELETED=259.
+
+The complete 121-sample resource window covers create and cleanup: sampled combined x-ui/Xray RSS max 139252 KiB; CPU max 24.86% of one core; MemAvailable minimum 1521876 KiB. API, worker and target x-ui are active. Stored capacity remains 1/1 with an older observed_at; fresh Sanaei readback proves restoration. Runtime remains af1a541, canary utility f122101e1ab9d8a066bb04054c7e71c5b6d81be1.
+
+Current next step: prepare the measured 250-client stage. Do not only extend the allowlist: current canary passes count as rate to BulkAllowance (rate max 100/sec, bucket capacity one second), waits for a single full allowance, has a four-minute total deadline, and the sampler caps at 120 seconds. Durable admission must respect 100/sec and recovery; cleanup and sampling deadlines must cover serial 250-client deletion. Fleet remains disabled until durable bulk-owned policy drift and expiry/quota cleanup integration.

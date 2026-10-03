@@ -34,3 +34,8 @@ Development may resume when the knowledge artifacts exist, their hashes are froz
 - Read `docs/BULK_V3_50_ACCEPTANCE.json`: one 50-client batch passed create, Output, complete resource sampling and cleanup.
 - Next measured gate is 100 clients; current utility is bounded to 10/25/50. Both execution gates and fleet generation remain closed.
 - Capacity table timestamp predates this stage; fresh Sanaei readback proves the unchanged one-client baseline.
+
+## Latest ramp checkpoint — stage 100 (2026-10-03)
+- Read `docs/BULK_V3_100_ACCEPTANCE.json`: one 100-client batch passed create, Output, complete resource sampling and cleanup.
+- Next: prepare stage 250 with durable rate<=100/sec and sufficient cleanup/sampling time; allowlist-only expansion is insufficient.
+- Current canary accepts 10/25/50/100. Both gates and fleet generation remain closed. Runtime API/worker remain af1a541.
