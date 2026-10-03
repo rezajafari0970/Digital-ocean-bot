@@ -126,7 +126,7 @@ async function refreshClientOpsStatus(){
  if(current!=='configs'||!document.querySelector('#clientOpsStatus'))return;
  try{
   const d=await api('/api/v1/client-mutations'),c=d.counts||{},recent=d.recent||[];
-  const gate=document.querySelector('#clientOpsGate');if(gate)gate.textContent=d.execution_enabled?'Execution enabled':'Execution gated';
+  const gate=document.querySelector('#clientOpsGate');if(gate){const scoped=d.scope_panel_id&&d.scope_panel_id.Valid;gate.textContent=d.execution_enabled?(scoped?'Execution enabled (scoped)':'Execution enabled'):'Execution gated';}
   const el=document.querySelector('#clientOpsStatus');if(!el)return;
   el.innerHTML='<div class="grid">'+stat('Pending',c.PENDING||0)+stat('Running',c.RUNNING||0)+stat('Succeeded',c.SUCCEEDED||0)+stat('Failed',c.FAILED||0)+'</div>'+
    (recent.length?'<div class="tableWrap"><table class="table"><thead><tr><th>Kind</th><th>Client</th><th>State</th><th>Attempts</th><th>Error</th></tr></thead><tbody>'+

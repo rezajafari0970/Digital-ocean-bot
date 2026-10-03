@@ -135,7 +135,7 @@ func (s *Server) clientMutations(w http.ResponseWriter, r *http.Request) {
 		code = http.StatusAccepted
 	}
 	gate, gateErr := (clientops.Journal{DB: s.DB}).Gate(r.Context())
-	executionEnabled := gateErr == nil && gate.Enabled && !gate.KillSwitch && gate.Concurrency == 1
+	executionEnabled := gateErr == nil && gate.Allows(job)
 	writeJSON(w, code, map[string]any{
 		"id": job.ID, "state": job.State, "created": created,
 		"execution_enabled": executionEnabled,
