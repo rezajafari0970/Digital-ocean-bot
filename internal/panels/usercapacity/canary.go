@@ -133,7 +133,7 @@ func (s Service) RollbackExpiredCanary(ctx context.Context, p readyworker.Panel,
 	}
 	var remaining int
 	if err = s.DB.QueryRowContext(ctx,
-		"SELECT count(*) FROM bulk_user_ownership WHERE generation_id=$1 AND state<>'DELETED'", generationID,
+		"SELECT count(*) FROM bulk_user_ownership WHERE generation_id=$1 AND state IN ('PLANNED','ACTIVE','DELETE_PENDING')", generationID,
 	).Scan(&remaining); err != nil {
 		return mutated, err
 	}

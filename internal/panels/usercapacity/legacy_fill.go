@@ -31,13 +31,7 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		}
 		deficit := effectiveTarget - rec.ClientCount
 		n := 0
-		if deficit > 0 {
-			n, err = s.durableAllowance(ctx, p.ID, rec.RemoteID, effectiveRate, deficit, time.Now())
-			if err != nil {
-				return mutated, err
-			}
-		}
-		if n <= 0 && len(ownedPolicies) == 0 {
+		if deficit <= 0 && len(ownedPolicies) == 0 {
 			continue
 		}
 		in, err := sanaei.GetInbound(ctx, runtime.Session.Exec, rec.RemoteID)
@@ -72,6 +66,19 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		}
 		if err = s.confirmPlannedOwnedClients(ctx, p.ID, rec.RemoteID, observedOwned); err != nil {
 			return mutated, err
+		}
+		plannedBlocked, err := s.recoverPlannedBarrier(ctx, p.ID, rec.RemoteID, observedOwned, time.Now())
+		if err != nil {
+			return mutated, err
+		}
+		if !plannedBlocked && deficit > 0 {
+			n, err = s.durableAllowance(ctx, p.ID, rec.RemoteID, effectiveRate, deficit, time.Now())
+			if err != nil {
+				return mutated, err
+			}
+		}
+		if n == 0 && policyChanges == 0 {
+			continue
 		}
 		var generation bulkGeneration
 		if n > 0 {

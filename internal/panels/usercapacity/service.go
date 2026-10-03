@@ -259,14 +259,21 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		if e = s.confirmPlannedOwnedClients(ctx, p.ID, int64(in.ID), observedOwned); e != nil {
 			return e
 		}
+		plannedBlocked, e := s.recoverPlannedBarrier(ctx, p.ID, int64(in.ID), observedOwned, time.Now())
+		if e != nil {
+			return e
+		}
 		effectiveTarget, effectiveRate, e := s.effectiveTargetRate(ctx, p.ID, int64(in.ID), target, rate)
 		if e != nil {
 			return e
 		}
 		deficit := effectiveTarget - active
-		n, e := s.durableAllowance(ctx, p.ID, int64(in.ID), effectiveRate, deficit, time.Now())
-		if e != nil {
-			return e
+		n := 0
+		if !plannedBlocked {
+			n, e = s.durableAllowance(ctx, p.ID, int64(in.ID), effectiveRate, deficit, time.Now())
+			if e != nil {
+				return e
+			}
 		}
 		newClients := make([]sanaei.Client, 0, n)
 		owned := make([]ownedClient, 0, n)
