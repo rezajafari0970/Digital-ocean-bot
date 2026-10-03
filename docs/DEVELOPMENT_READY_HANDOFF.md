@@ -39,3 +39,9 @@ Development may resume when the knowledge artifacts exist, their hashes are froz
 - Read `docs/BULK_V3_100_ACCEPTANCE.json`: one 100-client batch passed create, Output, complete resource sampling and cleanup.
 - Next: prepare stage 250 with durable rate<=100/sec and sufficient cleanup/sampling time; allowlist-only expansion is insufficient.
 - Current canary accepts 10/25/50/100. Both gates and fleet generation remain closed. Runtime API/worker remain af1a541.
+
+## Latest scale checkpoint — stage 10000 (2026-10-03)
+- Read `docs/BULK_V3_10000_ACCEPTANCE.json` and the final section of `docs/DURABLE_BULK_V3_HANDOFF.md`. The 10000 configured-client stage is accepted and cleanup is complete.
+- 50 existing clients were preserved; 9950 test clients reached fresh Sanaei/Output confirmation and durable deletion. 100 CREATE and 100 DELETE jobs are SUCCEEDED, all attempts=1; one committed DELETE was reconciled by explicit fresh read after a verification timeout. Original failure evidence remains.
+- Production runtime: ae5ccdbe8d41a77078c12c371297bc6543b5899e, migration 135; subsequent evidence-only commits need no binary rebuild. Both execution gates and global fleet generation are disabled.
+- Next: durable bulk-owned policy drift plus expiry/quota cleanup integration before fleet enablement. Do not replay earlier scale stages or start a new 10000 run as a bootstrap step. This test does not prove simultaneous traffic capacity.

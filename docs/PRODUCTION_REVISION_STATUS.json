@@ -2,7 +2,7 @@
   "schema_version": 2,
   "runtime_source_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-03T11:19:32.187376+00:00",
+  "verified_at_utc": "2026-10-03T11:30:39.991812+00:00",
   "binaries": {
     "api": {
       "sha256": "6664a0d350b04f835b96876b8b35cf5df09dec1049afd0861fa0776a6c0420ad",
@@ -22,30 +22,24 @@
     "api_worker_auto_restarts": 0
   },
   "migration": "000135_bulk_scale_recovery",
-  "acceptance": "docs/BULK_V3_ACCEPTANCE.json",
+  "acceptance": "docs/BULK_V3_10000_ACCEPTANCE.json",
   "verified": true,
-  "note": "The 10000-total-client target and 9950 owned Output entries were verified. Cleanup is IN PROGRESS, not fully accepted yet. A second DELETE committed but its original verification timed out; explicit fresh reads reconciled it at attempt=1 without another POST. A first recovery read timed out without mutations. Bounded read budgets were patched and clean-deployed; cleanup resumed.",
+  "note": "10000 configured clients accepted after explicit read-before-write cleanup recovery. All 9950 test clients were visible in Output and were deleted; 50 baseline clients were restored exactly. Original failure audit remains. Both gates and fleet creation policy are disabled. Runtime ae5ccdb is clean-built; later documentation commits do not imply binary drift. This is not evidence of 10000 simultaneous traffic sessions.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
   "resource_sampler_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
-  "scale_run_in_progress": {
+  "latest_scale_acceptance": "docs/BULK_V3_10000_ACCEPTANCE.json",
+  "last_scale_run": {
     "run_id": "ad494773-1793-41f2-ba79-8909e30c2657",
     "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
     "inbound_id": 1,
+    "phase": "SUCCEEDED",
     "target_total": 10000,
     "preserved_baseline": 50,
-    "new_owned_target": 9950,
-    "evidence_directory": "/root/backups/dob-bulk10000-20261003",
-    "rule": "Do not start another run or cleanup while this worker-driven cleanup is active. Read live run/jobs/gates, active log/status and collector evidence. On a new failure, close gates and read before retry. Preserve original failure logs.",
-    "phase_observed": "CLEANING",
-    "ownership_observed": {
-      "ACTIVE": 6950,
-      "DELETED": 2900,
-      "DELETE_PENDING": 100
-    },
-    "observed_at": "2026-10-03T11:19:32.124254+00:00",
+    "owned_created_verified_and_deleted": 9950,
+    "completed_at": "2026-10-03T11:28:17.012942+00:00",
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
-    "active_log": "/root/backups/dob-bulk10000-20261003/scale-recovery2.log",
-    "active_status": "/root/backups/dob-bulk10000-20261003/scale-recovery2-status.txt"
-  }
+    "evidence_directory": "/root/backups/dob-bulk10000-20261003"
+  },
+  "next_product_step": "Integrate durable bulk-owned policy drift and expiry/quota lifecycle cleanup before fleet generation enablement."
 }

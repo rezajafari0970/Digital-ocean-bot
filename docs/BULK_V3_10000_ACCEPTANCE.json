@@ -1,0 +1,406 @@
+{
+  "status": "ACCEPTED_AFTER_READ_BEFORE_WRITE_CLEANUP_RECOVERY",
+  "verified_at_utc": "2026-10-03T11:30:39.991812+00:00",
+  "runtime_revision": "ae5ccdbe8d41a77078c12c371297bc6543b5899e",
+  "target_total": 10000,
+  "baseline_preserved": 50,
+  "created_verified_output_and_deleted": 9950,
+  "baseline_hash": "d276065bc13226fe33c06368d5bf88cd3ff8e5ce2e64ac114de357c2ff2defd6",
+  "creation_and_target_verification_ms": 942416,
+  "recovery_cleanup_elapsed_ms": 871930,
+  "overall_wall_seconds_including_failure_and_patch": 3109.7059960365295,
+  "resources": {
+    "groups": {
+      "samples": {
+        "windows": 9,
+        "samples": 1089,
+        "started_at": 1791023783.9627628,
+        "ended_at": 1791024890.7173526,
+        "maximum_window_gap_seconds": 1.2848639488220215,
+        "peak_sampled_rss_kib": 369984,
+        "peak_sampled_cpu_percent": 100.17,
+        "minimum_available_kib": 946416,
+        "peak_sampled_cgroup_bytes": 675303424,
+        "minimum_processes": 2
+      },
+      "recovery-samples": {
+        "windows": 1,
+        "samples": 121,
+        "started_at": 1791025766.5625842,
+        "ended_at": 1791025887.9224625,
+        "maximum_window_gap_seconds": 0,
+        "peak_sampled_rss_kib": 313464,
+        "peak_sampled_cpu_percent": 99.33,
+        "minimum_available_kib": 930808,
+        "peak_sampled_cgroup_bytes": 666570752,
+        "minimum_processes": 2
+      },
+      "recovery2-samples": {
+        "windows": 8,
+        "samples": 968,
+        "started_at": 1791026014.161339,
+        "ended_at": 1791026996.5536036,
+        "maximum_window_gap_seconds": 1.2034401893615723,
+        "peak_sampled_rss_kib": 344644,
+        "peak_sampled_cpu_percent": 100.69,
+        "minimum_available_kib": 990824,
+        "peak_sampled_cgroup_bytes": 581038080,
+        "minimum_processes": 1
+      }
+    },
+    "windows": 18,
+    "samples": 2178,
+    "peak_sampled_rss_kib": 369984,
+    "peak_sampled_cpu_percent": 100.69,
+    "minimum_available_kib": 930808,
+    "peak_sampled_cgroup_bytes": 675303424,
+    "between_group_gaps_seconds": [
+      875.8452315330505,
+      126.23887658119202
+    ]
+  },
+  "output_at_target": {
+    "phase": "VERIFYING",
+    "observed_at": "2026-10-03T10:52:09.224436+00:00",
+    "oldest_age_seconds": 1.125092,
+    "visible_test_output": 9950,
+    "freshest_age_seconds": 1.125092
+  },
+  "production": {
+    "run": {
+      "phase": "SUCCEEDED",
+      "evidence": {
+        "cleanup_only": true,
+        "target_observed": 10000,
+        "health_at_target": {
+          "time": 1791024729.7376175,
+          "active": true,
+          "rss_kib": 281308,
+          "processes": 2,
+          "available_kib": 1003196
+        },
+        "baseline_restored": true,
+        "target_verified_at": "2026-10-03T10:52:09.821302849Z",
+        "owned_output_observed": 9950
+      },
+      "created_at": "2026-10-03T10:36:27.306946+00:00",
+      "expires_at": "2026-10-03T12:36:27.306719+00:00",
+      "last_error": "",
+      "updated_at": "2026-10-03T11:28:17.012942+00:00",
+      "completed_at": "2026-10-03T11:28:17.012942+00:00",
+      "target_users": 10000,
+      "generation_id": "ad494773-1793-41f2-ba79-8909e30c2657"
+    },
+    "jobs": [
+      {
+        "jobs": 100,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "clients": 9950,
+        "max_attempts": 1,
+        "min_attempts": 1,
+        "first_created_at": "2026-10-03T10:36:28.397307+00:00",
+        "last_completed_at": "2026-10-03T10:52:03.97718+00:00"
+      },
+      {
+        "jobs": 100,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "clients": 9950,
+        "max_attempts": 1,
+        "min_attempts": 1,
+        "first_created_at": "2026-10-03T10:52:10.809917+00:00",
+        "last_completed_at": "2026-10-03T11:28:15.423422+00:00"
+      }
+    ],
+    "bulk_gate": {
+      "enabled": false,
+      "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+      "singleton": true,
+      "expires_at": "2026-10-03T11:30:14.251943+00:00",
+      "inbound_id": 1,
+      "updated_at": "2026-10-03T11:28:17.054858+00:00",
+      "kill_switch": true,
+      "max_batch_size": 50,
+      "remaining_batches": 0
+    },
+    "main_gate": {
+      "enabled": false,
+      "panel_id": null,
+      "singleton": true,
+      "inbound_id": null,
+      "updated_at": "2026-10-03T11:28:17.054858+00:00",
+      "concurrency": 1,
+      "kill_switch": true
+    },
+    "ownership": {
+      "DELETED": 9950
+    },
+    "generation": {
+      "id": "ad494773-1793-41f2-ba79-8909e30c2657",
+      "state": "CLOSED",
+      "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+      "closed_at": "2026-10-03T11:28:17.012942+00:00",
+      "inbound_id": 1
+    },
+    "verified_at": "2026-10-03T11:28:21.867663+00:00",
+    "baseline_count": 50,
+    "policy_enabled": false,
+    "fleet_ownership": {
+      "ACTIVE": 1813,
+      "DELETED": 10311
+    },
+    "scope_ownership": {
+      "ACTIVE": 49,
+      "DELETED": 10052
+    },
+    "pending_scope_jobs": 0,
+    "remaining_test_output": 0,
+    "new_outside_scope_bulk_jobs": 0,
+    "runtime_services_checked_separately": true
+  },
+  "recovered_job": {
+    "id": "b10b2935-b607-4082-85b4-9f670c431de0",
+    "state": "SUCCEEDED",
+    "result": {
+      "phase": "RECOVERY_VERIFIED",
+      "submitted": 100
+    },
+    "attempts": 1,
+    "last_error": "context deadline exceeded; completed by explicit fresh-read recovery",
+    "completed_at": "2026-10-03T11:13:43.207831+00:00"
+  },
+  "recovery": {
+    "original_failure": "Second bulk delete committed remotely but post-read exceeded 15 second verification context; worker closed both gates.",
+    "first_recovery": "No POST: 15 second global-list HTTP body read timed out; both gates remained closed.",
+    "patches": [
+      "9a58559281847221f1d3fab0500ac07b30d9a6f6: bounded 45 second post-delete read and separate 10 second DB report context",
+      "ae5ccdbe8d41a77078c12c371297bc6543b5899e: bounded 30 second global-list HTTP read preserving caller deadline"
+    ],
+    "resolution": "Fresh inbound and global absence reconciled original second DELETE to SUCCEEDED without incrementing attempts or resubmitting it; original audit error retained. Remaining owned clients cleaned through worker-only durable BULK_DELETE jobs."
+  },
+  "resource_limitations": "One-second sampled x-ui/Xray maxima, not instantaneous peaks; bounded windows have recorded gaps. Between-run sampling gaps occurred while gates were closed for recovery patches. CPU is combined percent of one core and includes normal load. This is a client/config provisioning capacity test, not 10000 simultaneous traffic sessions.",
+  "remaining_product_work": "Fleet creation remains disabled pending durable bulk-owned policy drift and expiry/quota cleanup integration.",
+  "baseline_state": {
+    "total": 50,
+    "enabled": 1,
+    "disabled": 49,
+    "expired_now": 49,
+    "expired_at_start": 49
+  },
+  "output_after": {
+    "observed_at": "2026-10-03T11:28:23.294024+00:00",
+    "all_panel_output": 1,
+    "currently_visible": 1,
+    "oldest_observation_age_seconds": 0.532452
+  },
+  "capacity_scope": "10000 configured client records: 9950 newly created enabled test clients plus 50 preserved baseline records. Of the baseline, 49 were already disabled and expired before this test; this is not 10000 enabled users or a traffic concurrency test.",
+  "evidence": {
+    "baseline-summary.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/baseline-summary.json",
+      "sha256": "f10ee65364658abe0fc922bd516959cecad923543130915c6dc6b2197a25fb19"
+    },
+    "output-after.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/output-after.json",
+      "sha256": "26a723ab3097d941bd8ab117c170b6d5d3c29ecc28c0177cd668d6471d2c0c4e"
+    },
+    "scale.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale.log",
+      "sha256": "e30bb09a69f3348c634885c3f3ccbcb5a2e5c7b79bf240bc269885f5afecd429"
+    },
+    "scale-recovery.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-recovery.log",
+      "sha256": "f4a222f9c16bda3e7fb5ec34a38138181e672a12f2c577daa6a6297d8fbe5912"
+    },
+    "scale-recovery2.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-recovery2.log",
+      "sha256": "f3d2a47c9368d020c3deb3c94d395966f66218f76d1981e95437b266edbe6b9b"
+    },
+    "scale-status.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-status.txt",
+      "sha256": "03cbb6c52e522ce55e217e3f9d66dbd66d21ef6bf85024016a3b7f3080c7944f"
+    },
+    "scale-recovery-status.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-recovery-status.txt",
+      "sha256": "03cbb6c52e522ce55e217e3f9d66dbd66d21ef6bf85024016a3b7f3080c7944f"
+    },
+    "scale-recovery2-status.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-recovery2-status.txt",
+      "sha256": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431"
+    },
+    "failed-verification.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/failed-verification.json",
+      "sha256": "4e67afec939becda673c8d9ce1d8d8ffe94fb34476d9811d1d300e3ccd19a68b"
+    },
+    "recovery-first-failed-verification.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-first-failed-verification.json",
+      "sha256": "33daa64f6dfe38c85c6a83b7fc1b002a4293949085791f6b6eec95f7c0739891"
+    },
+    "verification.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/verification.json",
+      "sha256": "3f18bc83a2463156d541d45e3ce4d92fd01b48200b48ea78c15a1630ee078b88"
+    },
+    "recovered-job.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovered-job.json",
+      "sha256": "17f910df91d734223d530ad2a21f6a9a41dad31eb25877504365c812c4b0d506"
+    },
+    "verify-scale.sql": {
+      "path": "/root/backups/dob-bulk10000-20261003/verify-scale.sql",
+      "sha256": "4f0373d546703050dcc255251578f64adbcc278391551467f6483fb4ea02986f"
+    },
+    "deployed-sha256.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/deployed-sha256.txt",
+      "sha256": "af75294972022d0bcd8d476dd8f9d2a216fabed3cf6b980b3e36d51b6b8bd8b5"
+    },
+    "global-race-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/global-race-tests.log",
+      "sha256": "26266bb06ae597eb63199a41abf94ad5210aa5f6f407005fe5777399f550dbb0"
+    },
+    "global-full-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/global-full-tests.log",
+      "sha256": "d1a96a85aa8ab1076506bc1de1a728a5dab96870333cad6b67dfb1d47ae08dff"
+    },
+    "global-clean-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/global-clean-tests.log",
+      "sha256": "fbdb783466e4af81e3a38912efeb1c0822b969dbd452500421ba9f8e5d5c8583"
+    },
+    "recovery-race-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-race-tests.log",
+      "sha256": "67078cac9473c2bb3fd9ec1ae22b818a774abad7090d84b5a147aade0e7233ca"
+    },
+    "recovery-full-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-full-tests.log",
+      "sha256": "71b2e175af00bcd52561de1cdfba5caf9a6dae30811961da41afc8454fefcb8a"
+    },
+    "recovery-clean-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-clean-tests.log",
+      "sha256": "ab8f15ea7eabc7069bf2a588e2cc2dca46ded95f13e26bc954fed319b4f6b15d"
+    },
+    "readbudget-race-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/readbudget-race-tests.log",
+      "sha256": "2f376df28ebe2e4d707a8ebc03c659bb820d740e078e36d0d420407ba80a610e"
+    },
+    "readbudget-full-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/readbudget-full-tests.log",
+      "sha256": "902e03ee429f0fcf50ae7e31a35a556df468c3f210671bff8f17d9530a7919c8"
+    },
+    "readbudget-clean-tests.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/readbudget-clean-tests.log",
+      "sha256": "06f87bf2a3928cab45a6d9b5971bf57d3712bc5d7f9f98ae91b2b90ca525a624"
+    },
+    "recovery-canary.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-canary.log",
+      "sha256": "ce9e05b8a3fb254196f1fee604485e4b776a1f65318a2b4cd13e2442826c9973"
+    },
+    "global-canary.log": {
+      "path": "/root/backups/dob-bulk10000-20261003/global-canary.log",
+      "sha256": "ae8ba0db5bf2e74bb8ecb802064df6bf6d1726057c6a62eb4b5cdc925013176f"
+    },
+    "scale-target-contract.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/scale-target-contract.txt",
+      "sha256": "219426c8ee4d6e58dbc06f86804f26544178dd36739a2093fcd2f1208e8b10ff"
+    },
+    "global-client-shape.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/global-client-shape.txt",
+      "sha256": "05809d6e8aa0c4c88fbe8734858dfb7692d1d50833b1a9235b9fc77db23d699a"
+    },
+    "readbudget-global-read.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/readbudget-global-read.txt",
+      "sha256": "9574b85a23cb0baa36d894697b510cc42d7d9f3b78e9955ef02a852c5f9c189c"
+    },
+    "readbudget-global-read-time.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/readbudget-global-read-time.txt",
+      "sha256": "8ad98fac9ff4a90d19b367f74f7186543b6f9b935569b750c586e96815d073e6"
+    },
+    "peak-output.json": {
+      "path": "/root/backups/dob-bulk10000-20261003/peak-output.json",
+      "sha256": "389c498380d73e1512a597396133d8e98d5d13c00401b01a5ce8789d04c8a4df"
+    },
+    "services.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/services.txt",
+      "sha256": "87721a83b60db9b42c71fcf247cd564c77666d31b65ff80684f8004a92cbbba4"
+    },
+    "target-after.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/target-after.txt",
+      "sha256": "8e7ab9ec32f507a11187ac5aaafcd1ccf7476697e8432996462bdf41b4fb8578"
+    },
+    "inventory-after.txt": {
+      "path": "/root/backups/dob-bulk10000-20261003/inventory-after.txt",
+      "sha256": "741c2dbcd3a3e8905a175f81113155b1e542a7456fa9dbe605816b3848ba9a19"
+    }
+  },
+  "resource_windows": [
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-1.json",
+      "sha256": "c25c59f4f8f993ae760b2bdaf7a126b67dd9a808ece0f199c807ea7c7ccc0ecb"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-2.json",
+      "sha256": "892195bd89a09625a7eb518180e86dd11b2a753e27a4edbc814b1830a1a4f867"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-3.json",
+      "sha256": "7c72fe1be264f47f671b01c31fb5c870c037a78bf4fb9483d6905cfadfba02e4"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-4.json",
+      "sha256": "ba6cfa916d958d43c58166bccd055f83ede0296d38af7a294b337a1e8b84a8a4"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-5.json",
+      "sha256": "48800207ffce635cb7c1038e8ca2c04b328a091cedf177cd7c4de205ef65d7ba"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-6.json",
+      "sha256": "5102b660176fcea1cf660751c576a3838d36c46e7e3c5b853bd5b1137928fccf"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-7.json",
+      "sha256": "0bc92eeb56c1248194138798eb45f8d57c17d20e7b23cb22319d6b7230d7df2f"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-8.json",
+      "sha256": "aba72160cbe6eee8e342a7e35a868158083e63651e3f005fd2483a08855d4bb6"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/samples/window-9.json",
+      "sha256": "a45fe27f9fdcbc9e3615bb452f87787b4a127807b6bd48213ba4ea0d06538f37"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery-samples/window-1.json",
+      "sha256": "fed8d58dd207513c5b37c5d54eb8355646add2e3c1f930c8f15fd92346dd7e48"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-1.json",
+      "sha256": "5d45bee6df6f78f1ded439e5c86628d1f800ad5202ccfd8f8f9ede3c0680adeb"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-2.json",
+      "sha256": "a64dcbf8c6ee1e3f56fadcd6c83c0e667dfabd133525c81cba8f81f4ab082974"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-3.json",
+      "sha256": "7eb82509102c2517ef92cc55780a4f7524bae382ac697d2ea8dc1b419c7da777"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-4.json",
+      "sha256": "743b9867b68c8d12daa17267f8612d8a1e2abfe5b614f600a02ef4f6f624c56a"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-5.json",
+      "sha256": "1cb6925464574ceba25c331210f20d19920a614e5902b558c7dffdf13072ec29"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-6.json",
+      "sha256": "426eb437d5394ca7f1ef665746a0989b35c9c50977eafcb5d1413a845d6dd242"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-7.json",
+      "sha256": "1e01a8f6af377bfe4779e66d1c8a444e9bff59c43ad31cf9e6aaa9cf48cf27e7"
+    },
+    {
+      "path": "/root/backups/dob-bulk10000-20261003/recovery2-samples/window-8.json",
+      "sha256": "8bac1b7492d8dd62fd997d0438b2660a54807942f40c4d7104d8a2b2f84e37ae"
+    }
+  ]
+}
