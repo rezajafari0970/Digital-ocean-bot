@@ -233,31 +233,35 @@ func (s *Server) refreshOutputLive(ctx context.Context) {
 		return
 	}
 	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
-	if err != nil || len(panels) == 0 {
+	if err != nil {
 		return
 	}
-	sem := make(chan struct{}, 8)
-	done := make(chan struct{}, len(panels))
 	for _, panel := range panels {
-		p := panel
-		go func() {
-			defer func() { done <- struct{}{} }()
-			select {
-			case sem <- struct{}{}:
-				defer func() { <-sem }()
-			case <-ctx.Done():
-				return
-			}
-			panelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
-			_ = s.refreshPanelOutput(panelCtx, p)
+		s.startPanelOutputRefresh(ctx, panel)
+	}
+}
+
+func (s *Server) startPanelOutputRefresh(parent context.Context, panel readyworker.Panel) bool {
+	s.OutputPanelMu.Lock()
+	if s.OutputPanelRun == nil {
+		s.OutputPanelRun = map[string]bool{}
+	}
+	if s.OutputPanelRun[panel.ID] {
+		s.OutputPanelMu.Unlock()
+		return false
+	}
+	s.OutputPanelRun[panel.ID] = true
+	s.OutputPanelMu.Unlock()
+
+	go func() {
+		defer func() {
+			s.OutputPanelMu.Lock()
+			delete(s.OutputPanelRun, panel.ID)
+			s.OutputPanelMu.Unlock()
 		}()
-	}
-	for range panels {
-		select {
-		case <-done:
-		case <-ctx.Done():
-			return
-		}
-	}
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
+		defer cancel()
+		_ = s.refreshPanelOutput(ctx, panel)
+	}()
+	return true
 }

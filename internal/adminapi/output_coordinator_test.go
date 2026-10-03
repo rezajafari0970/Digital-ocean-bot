@@ -7,6 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 )
 
 func TestOutputRefreshMutexSerializesRefreshWork(t *testing.T) {
@@ -63,4 +65,26 @@ func sourceFunction(src, start, next string) string {
 		return src[i:]
 	}
 	return src[i : i+j]
+}
+
+func TestPanelRefreshAdmissionIsPerPanel(t *testing.T) {
+	s := &Server{OutputPanelRun: map[string]bool{}}
+	p1 := readyworker.Panel{ID: "panel-a"}
+	p2 := readyworker.Panel{ID: "panel-b"}
+
+	s.OutputPanelMu.Lock()
+	s.OutputPanelRun[p1.ID] = true
+	s.OutputPanelMu.Unlock()
+
+	s.OutputPanelMu.Lock()
+	p1Busy := s.OutputPanelRun[p1.ID]
+	p2Busy := s.OutputPanelRun[p2.ID]
+	s.OutputPanelMu.Unlock()
+
+	if !p1Busy {
+		t.Fatal("panel-a must remain marked busy")
+	}
+	if p2Busy {
+		t.Fatal("panel-b must remain independently schedulable")
+	}
 }
