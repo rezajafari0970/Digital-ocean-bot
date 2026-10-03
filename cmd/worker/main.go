@@ -337,16 +337,31 @@ func main() {
 				log.Printf("user capacity cleanup discovery: %v", err)
 				return
 			}
+			sem := make(chan struct{}, 8)
+			done := make(chan struct{}, len(panels))
 			for _, panel := range panels {
-				cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
-				runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
-				if err == nil {
-					err = capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime)
-				}
-				cancel()
-				if err != nil && ctx.Err() == nil {
-					log.Printf("user capacity cleanup %s: %v", panel.ID, err)
-				}
+				p := panel
+				go func() {
+					defer func() { done <- struct{}{} }()
+					select {
+					case sem <- struct{}{}:
+						defer func() { <-sem }()
+					case <-ctx.Done():
+						return
+					}
+					cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+					defer cancel()
+					runtime, err := sanaeiRuntimes.Acquire(cctx, p.ID)
+					if err == nil {
+						err = capacity.ReconcileRuntimeFromPolicy(cctx, p, runtime)
+					}
+					if err != nil && ctx.Err() == nil {
+						log.Printf("user capacity cleanup %s: %v", p.ID, err)
+					}
+				}()
+			}
+			for range panels {
+				<-done
 			}
 		}
 		run()
