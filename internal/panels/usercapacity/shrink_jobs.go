@@ -7,6 +7,10 @@ import (
 )
 
 func (s Service) reconcileShrinkJobs(ctx context.Context, panelID string, inboundID int64) (bool, error) {
+	var before int
+	if err := s.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='DELETE_PENDING'`, panelID, inboundID).Scan(&before); err != nil {
+		return true, err
+	}
 	_, err := s.DB.ExecContext(ctx, `
 UPDATE bulk_user_ownership o SET state='DELETED',deleted_at=coalesce(o.deleted_at,m.completed_at,now())
 FROM bulk_user_generations g, client_mutation_jobs m
@@ -20,7 +24,7 @@ AND m.state='SUCCEEDED'
 	}
 	var pending int
 	err = s.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='DELETE_PENDING'`, panelID, inboundID).Scan(&pending)
-	return pending > 0, err
+	return before > 0 || pending > 0, err
 }
 
 func (s Service) enqueueShrinkDeletes(ctx context.Context, panelID string, inboundID int64, ids []string) error {
