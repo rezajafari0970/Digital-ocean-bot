@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
@@ -196,6 +197,33 @@ func main() {
 				return
 			case <-t.C:
 				sanaeiRuntimes.PurgeExpired()
+			}
+		}
+	}()
+
+	// Durable client mutations run one at a time. Every retry first reads Sanaei
+	// and converges from observed state, so a timeout-after-commit cannot blindly
+	// duplicate CREATE or DELETE.
+	go func() {
+		t := time.NewTicker(1 * time.Second)
+		defer t.Stop()
+		exec := clientops.Executor{
+			Journal:  clientops.Journal{DB: application.DB},
+			Runtimes: sanaeiRuntimes,
+			Timeout:  30 * time.Second,
+		}
+		run := func() {
+			if _, err := exec.RunOne(ctx); err != nil {
+				log.Printf("client mutation executor: %v", err)
+			}
+		}
+		run()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
 			}
 		}
 	}()

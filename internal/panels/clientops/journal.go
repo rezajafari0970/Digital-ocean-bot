@@ -175,3 +175,83 @@ func (j Journal) Reconcile(ctx context.Context) error {
 }
 
 const claimSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE m.state='PENDING' AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) ORDER BY m.created_at,m.id FOR UPDATE OF m SKIP LOCKED LIMIT 1"
+
+func (j Journal) Claim(ctx context.Context) (Job, bool, error) {
+	if j.DB == nil {
+		return Job{}, false, ErrInvalidRequest
+	}
+	tx, err := j.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return Job{}, false, err
+	}
+	defer tx.Rollback()
+	job, err := scanJob(tx.QueryRowContext(ctx, claimSQL))
+	if errors.Is(err, sql.ErrNoRows) {
+		return Job{}, false, nil
+	}
+	if err != nil {
+		return Job{}, false, err
+	}
+	res, err := tx.ExecContext(ctx,
+		"UPDATE client_mutation_jobs SET state='RUNNING',attempts=attempts+1,next_retry_at=NULL,last_error='',updated_at=now() WHERE id=$1 AND state='PENDING'",
+		job.ID,
+	)
+	if err != nil {
+		return Job{}, false, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil || n != 1 {
+		return Job{}, false, err
+	}
+	if err := tx.Commit(); err != nil {
+		return Job{}, false, err
+	}
+	job.State = StateRunning
+	job.Attempts++
+	return job, true, nil
+}
+
+func (j Journal) Succeed(ctx context.Context, id string) error {
+	res, err := j.DB.ExecContext(ctx,
+		"UPDATE client_mutation_jobs SET state='SUCCEEDED',completed_at=now(),next_retry_at=NULL,last_error='',updated_at=now() WHERE id=$1 AND state='RUNNING'",
+		id,
+	)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return ErrInvalidRequest
+	}
+	return nil
+}
+
+func (j Journal) Retry(ctx context.Context, id, reason string, delay time.Duration) error {
+	if delay < 0 {
+		delay = 0
+	}
+	_, err := j.DB.ExecContext(ctx,
+		"UPDATE client_mutation_jobs SET state='PENDING',next_retry_at=now()+($2*interval '1 millisecond'),last_error=$3,updated_at=now() WHERE id=$1 AND state='RUNNING'",
+		id, delay.Milliseconds(), reason,
+	)
+	return err
+}
+
+func (j Journal) Fail(ctx context.Context, id, reason string) error {
+	_, err := j.DB.ExecContext(ctx,
+		"UPDATE client_mutation_jobs SET state='FAILED',completed_at=now(),next_retry_at=NULL,last_error=$2,updated_at=now() WHERE id=$1 AND state='RUNNING'",
+		id, reason,
+	)
+	return err
+}
+
+func (j Journal) Obsolete(ctx context.Context, id, reason string) error {
+	_, err := j.DB.ExecContext(ctx,
+		"UPDATE client_mutation_jobs SET state='OBSOLETE',completed_at=now(),next_retry_at=NULL,last_error=$2,updated_at=now() WHERE id=$1 AND state='RUNNING'",
+		id, reason,
+	)
+	return err
+}
