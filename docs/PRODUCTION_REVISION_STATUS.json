@@ -1,18 +1,18 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
+  "runtime_source_revision": "bc477488c1070cb28c367f043c429262a6737b56",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-03T10:05:01.728689+00:00",
+  "verified_at_utc": "2026-10-03T10:45:47.932382+00:00",
   "binaries": {
     "api": {
-      "sha256": "b1e06f92c7861defd65ef2f96013e391a7fb57a72e96ab5bc557a8974bc16e8d",
+      "sha256": "ad85d191e7788a6c52ede49efeb6c19a08c0e748b69e562d1e257153353e8126",
       "vcs_modified": false,
-      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+      "revision": "bc477488c1070cb28c367f043c429262a6737b56"
     },
     "worker": {
-      "sha256": "72aaeee42161ff0adb198d7c6d67a2bf73e19b5410fe07cd89b84919b0bfce0c",
+      "sha256": "5b25bd4b306943e647d840c3e21d9e9b8301487f70172c4624c852fddaece0f2",
       "vcs_modified": false,
-      "revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c"
+      "revision": "bc477488c1070cb28c367f043c429262a6737b56"
     }
   },
   "services": {
@@ -21,11 +21,21 @@
     "target_xui": "active",
     "api_worker_auto_restarts": 0
   },
-  "migration": "000134_durable_bulk_create",
+  "migration": "000135_bulk_scale_recovery",
   "acceptance": "docs/BULK_V3_ACCEPTANCE.json",
   "verified": true,
-  "note": "Runtime binaries are compared to runtime_source_revision. Later canary/inspection utility and evidence-only commits do not change API/worker product paths.",
+  "note": "Runtime revision and migration verified. The 10000-total-client run is IN PROGRESS, not accepted yet. Earlier ramp acceptance files are historical. Bulk cleanup and global-list verification each passed scoped 51-client live tests.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
-  "canary_tool_revision": "f122101e1ab9d8a066bb04054c7e71c5b6d81be1",
-  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c"
+  "canary_tool_revision": "bc477488c1070cb28c367f043c429262a6737b56",
+  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c",
+  "scale_run_in_progress": {
+    "run_id": "ad494773-1793-41f2-ba79-8909e30c2657",
+    "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+    "inbound_id": 1,
+    "target_total": 10000,
+    "preserved_baseline": 50,
+    "new_owned_target": 9950,
+    "evidence_directory": "/root/backups/dob-bulk10000-20261003",
+    "rule": "Read live scale run/jobs/gates and scale.log before recovery. Do not start another run while unresolved."
+  }
 }
