@@ -2,16 +2,31 @@ package usercapacity
 
 import (
 	"context"
+	"database/sql"
 	"sort"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 )
 
-func (s Service) shrinkGate(ctx context.Context) (bool, int, error) {
+func (s Service) shrinkGate(ctx context.Context, panelID string, inboundID int64) (bool, int, error) {
 	var enabled bool
 	var limit int
-	err := s.DB.QueryRowContext(ctx, "SELECT enabled,max_delete_per_inbound FROM bulk_user_shrink_gate WHERE singleton=true").Scan(&enabled, &limit)
-	return enabled, limit, err
+	var scopePanel sql.NullString
+	var scopeInbound sql.NullInt64
+	err := s.DB.QueryRowContext(ctx, "SELECT enabled,max_delete_per_inbound,panel_id::text,inbound_id FROM bulk_user_shrink_gate WHERE singleton=true").Scan(&enabled, &limit, &scopePanel, &scopeInbound)
+	if err != nil {
+		return false, 0, err
+	}
+	if !enabled {
+		return false, limit, nil
+	}
+	if scopePanel.Valid && scopePanel.String != panelID {
+		return false, limit, nil
+	}
+	if scopeInbound.Valid && scopeInbound.Int64 != inboundID {
+		return false, limit, nil
+	}
+	return true, limit, nil
 }
 
 func ownedShrinkCandidates(active []sanaei.Client, owned map[string]ownedPolicy, target int, limit int) []string {

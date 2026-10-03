@@ -269,7 +269,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		if e != nil {
 			return e
 		}
-		shrinkEnabled, shrinkLimit, e := s.shrinkGate(ctx)
+		shrinkEnabled, shrinkLimit, e := s.shrinkGate(ctx, p.ID, int64(in.ID))
 		if e != nil {
 			return e
 		}
