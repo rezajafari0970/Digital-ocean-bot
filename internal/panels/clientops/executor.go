@@ -87,6 +87,34 @@ func sameClient(a, b sanaei.Client) bool {
 		a.Flow == b.Flow
 }
 
+type observedDecision int
+
+const (
+	decisionMutate observedDecision = iota
+	decisionSatisfied
+	decisionConflict
+)
+
+func decideObserved(kind Kind, exists bool, current, wanted sanaei.Client) observedDecision {
+	switch kind {
+	case KindDelete:
+		if !exists {
+			return decisionSatisfied
+		}
+		return decisionMutate
+	case KindCreate:
+		if !exists {
+			return decisionMutate
+		}
+		if sameClient(current, wanted) {
+			return decisionSatisfied
+		}
+		return decisionConflict
+	default:
+		return decisionConflict
+	}
+}
+
 func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime, job Job) (bool, error) {
 	rt.Session.Invalidate()
 	raw, found, err := rt.Session.RawInbound(ctx, job.InboundID)
@@ -100,23 +128,23 @@ func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime,
 	if err != nil {
 		return false, err
 	}
-	switch job.Kind {
-	case KindDelete:
-		return !exists, nil
-	case KindCreate:
-		if !exists {
-			return false, nil
-		}
-		want, err := payloadClient(job.Payload)
+	var want sanaei.Client
+	if job.Kind == KindCreate {
+		want, err = payloadClient(job.Payload)
 		if err != nil {
 			return false, err
 		}
-		if !sameClient(current, want) {
-			return true, ErrClientConflict
-		}
+	}
+	switch decideObserved(job.Kind, exists, current, want) {
+	case decisionSatisfied:
 		return true, nil
-	case KindUpdate:
-		return false, ErrUnsupportedKind
+	case decisionMutate:
+		return false, nil
+	case decisionConflict:
+		if job.Kind == KindUpdate {
+			return false, ErrUnsupportedKind
+		}
+		return true, ErrClientConflict
 	default:
 		return false, ErrUnsupportedKind
 	}

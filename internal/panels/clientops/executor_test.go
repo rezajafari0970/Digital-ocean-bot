@@ -97,3 +97,31 @@ func TestClientFromInboundMatchesProductionStringSettings(t *testing.T) {
 		t.Fatalf("unexpected production client: %+v", c)
 	}
 }
+
+func TestCrashRecoveryDecisionNeverDuplicatesCommittedCreate(t *testing.T) {
+	want := sanaei.Client{ID: "u1", Email: "e", Enable: true, Flow: "xtls-rprx-vision"}
+	if got := decideObserved(KindCreate, false, sanaei.Client{}, want); got != decisionMutate {
+		t.Fatalf("before commit decision=%v want mutate", got)
+	}
+	if got := decideObserved(KindCreate, true, want, want); got != decisionSatisfied {
+		t.Fatalf("after commit/restart decision=%v want satisfied", got)
+	}
+}
+
+func TestCrashRecoveryDeleteIsIdempotent(t *testing.T) {
+	current := sanaei.Client{ID: "u1"}
+	if got := decideObserved(KindDelete, true, current, sanaei.Client{}); got != decisionMutate {
+		t.Fatalf("before delete decision=%v want mutate", got)
+	}
+	if got := decideObserved(KindDelete, false, sanaei.Client{}, sanaei.Client{}); got != decisionSatisfied {
+		t.Fatalf("after delete/restart decision=%v want satisfied", got)
+	}
+}
+
+func TestExistingUUIDWithDifferentPayloadNeverMutatesAgain(t *testing.T) {
+	current := sanaei.Client{ID: "u1", Email: "actual", Enable: true}
+	want := sanaei.Client{ID: "u1", Email: "wanted", Enable: true}
+	if got := decideObserved(KindCreate, true, current, want); got != decisionConflict {
+		t.Fatalf("existing conflicting uuid decision=%v want conflict", got)
+	}
+}
