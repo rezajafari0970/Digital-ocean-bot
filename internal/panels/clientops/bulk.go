@@ -47,7 +47,7 @@ func (j Journal) ReserveBulk(ctx context.Context, accountID, panelID string, inb
 		return "", false, err
 	}
 	var blocked bool
-	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM client_mutation_jobs WHERE panel_id=$1 AND inbound_id=$2 AND kind='BULK_CREATE' AND state IN ('PENDING','RUNNING','FAILED')) OR EXISTS(SELECT 1 FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state IN ('PLANNED','DELETE_PENDING'))`, panelID, inboundID).Scan(&blocked); err != nil || blocked {
+	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM client_mutation_jobs WHERE panel_id=$1 AND inbound_id=$2 AND kind IN ('BULK_CREATE','BULK_DELETE') AND state IN ('PENDING','RUNNING','FAILED')) OR EXISTS(SELECT 1 FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state IN ('PLANNED','DELETE_PENDING'))`, panelID, inboundID).Scan(&blocked); err != nil || blocked {
 		return "", false, err
 	}
 	var marker string
@@ -258,7 +258,7 @@ func (e Executor) confirmBulk(ctx context.Context, job Job, clients []sanaei.Cli
 
 func (e Executor) bulkPreflight(ctx context.Context, job Job, p BulkPayload) error {
 	var allowed bool
-	err := e.Journal.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM client_mutation_jobs m JOIN client_mutation_execution_gate g ON g.singleton JOIN bulk_client_execution_gate bg ON bg.singleton JOIN panel_instances pi ON pi.id=m.panel_id JOIN droplets d ON d.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=d.id JOIN accounts a ON a.id=pi.account_id JOIN bulk_user_generations gen ON gen.id=$3 WHERE m.id=$1 AND m.state='RUNNING' AND m.attempts=$2 AND gen.state='ACTIVE' AND gen.panel_id=m.panel_id AND gen.inbound_id=m.inbound_id AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.expires_at>now() AND bg.max_batch_size >= $4)`, job.ID, job.Attempts, p.GenerationID, len(p.Clients)).Scan(&allowed)
+	err := e.Journal.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM client_mutation_jobs m JOIN client_mutation_execution_gate g ON g.singleton JOIN bulk_client_execution_gate bg ON bg.singleton JOIN panel_instances pi ON pi.id=m.panel_id JOIN droplets d ON d.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=d.id JOIN accounts a ON a.id=pi.account_id JOIN bulk_user_generations gen ON gen.id=$3 WHERE m.id=$1 AND m.state='RUNNING' AND m.attempts=$2 AND (gen.state='ACTIVE' OR (m.kind='BULK_DELETE' AND gen.state='ROLLING_BACK')) AND gen.panel_id=m.panel_id AND gen.inbound_id=m.inbound_id AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.expires_at>now() AND bg.max_batch_size >= $4)`, job.ID, job.Attempts, p.GenerationID, len(p.Clients)).Scan(&allowed)
 	if err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func (e Executor) bulkPreflight(ctx context.Context, job Job, p BulkPayload) err
 	for _, c := range p.Clients {
 		ids = append(ids, c.ID)
 	}
-	err = e.Journal.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership WHERE mutation_job_id=$1 AND generation_id=$2 AND client_id=ANY($3) AND state IN ('PLANNED','ACTIVE')`, job.ID, p.GenerationID, pq.Array(ids)).Scan(&count)
+	err = e.Journal.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership WHERE generation_id=$2 AND client_id=ANY($3) AND ((mutation_job_id=$1 AND state IN ('PLANNED','ACTIVE') AND $4='BULK_CREATE') OR ($4='BULK_DELETE' AND state IN ('DELETE_PENDING','DELETED')))`, job.ID, p.GenerationID, pq.Array(ids), string(job.Kind)).Scan(&count)
 	if err != nil {
 		return err
 	}
@@ -370,7 +370,7 @@ func (e Executor) bulkPostFence(ctx context.Context, job Job, p BulkPayload) (fu
 		return nil, err
 	}
 	var id string
-	err = tx.QueryRowContext(ctx, `SELECT m.id::text FROM client_mutation_jobs m JOIN client_mutation_execution_gate g ON g.singleton JOIN bulk_client_execution_gate bg ON bg.singleton JOIN panel_instances pi ON pi.id=m.panel_id JOIN droplets d ON d.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=d.id JOIN accounts a ON a.id=pi.account_id JOIN bulk_user_generations gen ON gen.id=$3 WHERE m.id=$1 AND m.state='RUNNING' AND m.attempts=$2 AND gen.state='ACTIVE' AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.expires_at>now() FOR SHARE OF g,bg,pi,d,a,dep,gen`, job.ID, job.Attempts, p.GenerationID).Scan(&id)
+	err = tx.QueryRowContext(ctx, `SELECT m.id::text FROM client_mutation_jobs m JOIN client_mutation_execution_gate g ON g.singleton JOIN bulk_client_execution_gate bg ON bg.singleton JOIN panel_instances pi ON pi.id=m.panel_id JOIN droplets d ON d.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=d.id JOIN accounts a ON a.id=pi.account_id JOIN bulk_user_generations gen ON gen.id=$3 WHERE m.id=$1 AND m.state='RUNNING' AND m.attempts=$2 AND (gen.state='ACTIVE' OR (m.kind='BULK_DELETE' AND gen.state='ROLLING_BACK')) AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.expires_at>now() FOR SHARE OF g,bg,pi,d,a,dep,gen`, job.ID, job.Attempts, p.GenerationID).Scan(&id)
 	if err != nil {
 		tx.Rollback()
 		if errors.Is(err, sql.ErrNoRows) {

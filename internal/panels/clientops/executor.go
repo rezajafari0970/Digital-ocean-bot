@@ -173,6 +173,9 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 		return err
 	}
 	return rt.WithMutation(ctx, func(runCtx context.Context) error {
+		if job.Kind == KindBulkDelete {
+			return e.executeBulkDelete(runCtx, rt, job)
+		}
 		if job.Kind == KindBulkCreate {
 			return e.executeBulk(runCtx, rt, job)
 		}

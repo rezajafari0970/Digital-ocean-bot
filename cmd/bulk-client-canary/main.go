@@ -88,12 +88,20 @@ func waitJob(ctx context.Context, j clientops.Journal, id string) error {
 func run() error {
 	var panel, recoverJob string
 	var inbound int64
-	var count int
+	var count, scaleTarget int
+	var scaleID string
+	var scaleCleanup bool
 	flag.StringVar(&panel, "panel", "", "exact panel uuid")
 	flag.Int64Var(&inbound, "inbound", 0, "exact inbound")
 	flag.StringVar(&recoverJob, "recover-job", "", "read-before-write cleanup of an existing bulk job")
 	flag.IntVar(&count, "count", 10, "bounded canary size: 10, 25, 50 or 100")
+	flag.IntVar(&scaleTarget, "scale-target", 0, "total client target: 11 recovery canary, 101, or 10000; chunks <=100")
+	flag.StringVar(&scaleID, "scale-run", "", "existing durable scale generation")
+	flag.BoolVar(&scaleCleanup, "scale-cleanup", false, "stop creation and fresh-read existing scale run for cleanup")
 	flag.Parse()
+	if scaleTarget != 0 || scaleID != "" || scaleCleanup {
+		return runScale(panel, inbound, scaleTarget, scaleID, scaleCleanup)
+	}
 	if recoverJob != "" {
 		return recoverBulk(recoverJob)
 	}

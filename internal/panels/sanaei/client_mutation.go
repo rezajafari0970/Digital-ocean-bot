@@ -296,3 +296,49 @@ func BulkCreateCompatibleSession(ctx context.Context, exec SessionExecutor, inbo
 	out.Created = len(clients)
 	return out, nil
 }
+
+// BulkDeleteResult is diagnostic only; fresh identity absence decides success.
+type BulkDeleteResult struct {
+	Deleted int                 `json:"deleted"`
+	Skipped []BulkCreateSkipped `json:"skipped"`
+}
+
+func BulkDeleteClientsSession(ctx context.Context, exec SessionExecutor, emails []string) (BulkDeleteResult, error) {
+	var out BulkDeleteResult
+	if exec == nil || len(emails) == 0 || len(emails) > 100 {
+		return out, ErrMutationRequest
+	}
+	seen := map[string]bool{}
+	for _, email := range emails {
+		if email == "" || seen[email] {
+			return out, ErrMutationRequest
+		}
+		seen[email] = true
+	}
+	body, err := json.Marshal(map[string]any{"emails": emails, "keepTraffic": false})
+	if err != nil {
+		return out, err
+	}
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodPost, Path: "panel/api/clients/bulkDel", Body: body, ContentType: "application/json", TimeoutSeconds: 30})
+	if err != nil {
+		return out, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return out, fmt.Errorf("%w: bulkDel http=%d", ErrMutationRequest, resp.StatusCode)
+	}
+	var envelope struct {
+		Success bool              `json:"success"`
+		Obj     *BulkDeleteResult `json:"obj"`
+	}
+	if json.Unmarshal(resp.Body, &envelope) != nil || envelope.Obj == nil {
+		return out, ErrMutationRequest
+	}
+	out = *envelope.Obj
+	if out.Deleted < 0 || out.Deleted > len(emails) || len(out.Skipped) > len(emails) {
+		return out, ErrMutationRequest
+	}
+	if !envelope.Success {
+		return out, ErrMutationRejected
+	}
+	return out, nil
+}

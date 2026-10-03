@@ -2,14 +2,18 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"time"
 )
 
 func main() {
+	inventory := flag.Bool("inventory", false, "read-only fresh Sanaei inbound summary")
+	panel := flag.String("panel", "11f21262-1b20-4080-8ffc-7528a01679a9", "exact panel for read-only inspection")
 	samples := flag.Int("sample-seconds", 0, "read-only one-second resource samples, maximum 120")
 	bulkDelete := flag.Bool("bulk-delete-contract", false, "read-only installed bulkDel contract")
 	clientRoutes := flag.Bool("client-routes", false, "read-only embedded v3 client route inventory")
@@ -25,8 +29,28 @@ func main() {
 		panic(e)
 	}
 	defer a.Close()
+	if *inventory {
+		manager := &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: a.DB, Secrets: a.Container.Secrets, Timeout: 8 * time.Second}, TTL: time.Second}
+		rt, e := manager.Acquire(ctx, *panel)
+		if e != nil {
+			panic(e)
+		}
+		raws, e := rt.Session.Snapshot(ctx)
+		if e != nil {
+			panic(e)
+		}
+		snap, e := sanaei.InventoryFromRaw(*panel, raws)
+		if e != nil {
+			panic(e)
+		}
+		for _, r := range snap.Records {
+			b, _ := json.Marshal(map[string]any{"inbound": r.RemoteID, "clients": r.ClientCount, "enabled": r.Enabled, "protocol": r.Protocol, "port": r.Port, "transport": r.Transport, "security": r.Security})
+			fmt.Println(string(b))
+		}
+		return
+	}
 	var acc, did, host, user, keyref string
-	e = a.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1`, "11f21262-1b20-4080-8ffc-7528a01679a9").Scan(&acc, &did, &host, &user, &keyref)
+	e = a.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1`, *panel).Scan(&acc, &did, &host, &user, &keyref)
 	if e != nil {
 		panic(e)
 	}
