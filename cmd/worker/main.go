@@ -11,6 +11,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/serverguardian"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
@@ -50,6 +51,33 @@ func main() {
 		}
 	}()
 	go application.Container.RunDailyCatalogSync(ctx)
+	// Fleet resource guardian starts in observe-only mode. It records x-ui,
+	// memory, disk, package-lock and DB health without mutating server state.
+	go func() {
+		g := serverguardian.Service{
+			DB: application.DB, Secrets: application.Container.Secrets,
+			SSH:    provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}},
+			Repair: false,
+		}
+		run := func() {
+			c, cancel := context.WithTimeout(ctx, 2*time.Minute)
+			defer cancel()
+			if err := g.Run(c); err != nil && c.Err() == nil {
+				log.Printf("server guardian: %v", err)
+			}
+		}
+		run()
+		t := time.NewTicker(5 * time.Minute)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				run()
+			}
+		}
+	}()
 	// Sticky proxy identity keeper: preserve each account's current exit IPv4.
 	// On failure retry the previous session every 10s for two minutes, then
 	// rotate within the preferred country until five minutes, then allow fallback.
