@@ -88,12 +88,17 @@ func waitJob(ctx context.Context, j clientops.Journal, id string) error {
 func run() error {
 	var panel, recoverJob string
 	var inbound int64
+	var count int
 	flag.StringVar(&panel, "panel", "", "exact panel uuid")
 	flag.Int64Var(&inbound, "inbound", 0, "exact inbound")
 	flag.StringVar(&recoverJob, "recover-job", "", "read-before-write cleanup of an existing bulk job")
+	flag.IntVar(&count, "count", 10, "bounded canary size: 10 or 25")
 	flag.Parse()
 	if recoverJob != "" {
 		return recoverBulk(recoverJob)
+	}
+	if err := validateCanaryCount(count); err != nil {
+		return err
 	}
 	if panel == "" || inbound <= 0 {
 		return fmt.Errorf("panel and inbound required")
@@ -158,7 +163,7 @@ func run() error {
 			log.Printf("CRITICAL gate close: %v", e)
 		}
 	}()
-	res, err := a.DB.ExecContext(ctx, `UPDATE bulk_client_execution_gate SET enabled=true,kill_switch=false,panel_id=$1,inbound_id=$2,max_batch_size=10,remaining_batches=1,expires_at=now()+interval '3 minutes',updated_at=now() WHERE singleton AND NOT enabled AND kill_switch`, panel, inbound)
+	res, err := a.DB.ExecContext(ctx, `UPDATE bulk_client_execution_gate SET enabled=true,kill_switch=false,panel_id=$1,inbound_id=$2,max_batch_size=$3,remaining_batches=1,expires_at=now()+interval '3 minutes',updated_at=now() WHERE singleton AND NOT enabled AND kill_switch`, panel, inbound, count)
 	if err != nil {
 		return err
 	}
@@ -176,25 +181,25 @@ func run() error {
 		return err
 	}
 	svc := usercapacity.Service{DB: a.DB, Secrets: a.Container.Secrets}
-	// One chunk of ten at an explicit scoped rate of ten/second. The durable
+	// One bounded chunk at the same explicit scoped users/second rate. The durable
 	// bucket is shared with policy planning and is never reset or bypassed.
-	allowance, err := svc.BulkAllowance(ctx, panel, inbound, 10, 10)
+	allowance, err := svc.BulkAllowance(ctx, panel, inbound, count, count)
 	if err != nil {
 		return err
 	}
-	for allowance < 10 {
+	for allowance < count {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-time.After(time.Second):
 		}
-		allowance, err = svc.BulkAllowance(ctx, panel, inbound, 10, 10)
+		allowance, err = svc.BulkAllowance(ctx, panel, inbound, count, count)
 		if err != nil {
 			return err
 		}
 	}
-	payload := clientops.BulkPayload{GenerationID: gen, TargetUsers: len(baseline) + 10}
-	for i := 0; i < 10; i++ {
+	payload := clientops.BulkPayload{GenerationID: gen, TargetUsers: len(baseline) + count}
+	for i := 0; i < count; i++ {
 		id, e := sanaei.UUIDv4()
 		if e != nil {
 			return e
@@ -208,15 +213,16 @@ func run() error {
 	if !planned {
 		return fmt.Errorf("scope blocked before planning")
 	}
-	fmt.Printf("PLANNED job=%s generation=%s clients=10\n", jobID, gen)
+	fmt.Printf("PLANNED job=%s generation=%s clients=%d\n", jobID, gen, count)
 	fmt.Printf("RECOVERY: bulk-client-canary -recover-job %s\n", jobID)
 	var plannedCount int
 	if err = a.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership WHERE mutation_job_id=$1 AND state='PLANNED'`, jobID).Scan(&plannedCount); err != nil {
 		return err
 	}
-	if plannedCount != 10 {
+	if plannedCount != count {
 		return fmt.Errorf("planned ownership=%d", plannedCount)
 	}
+	createStarted := time.Now()
 	res, err = a.DB.ExecContext(ctx, `UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false,panel_id=$1,inbound_id=$2,concurrency=1,updated_at=now() WHERE singleton AND NOT enabled AND kill_switch`, panel, inbound)
 	if err != nil {
 		return err
@@ -235,7 +241,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if len(current) != len(baseline)+10 {
+	if len(current) != len(baseline)+count {
 		return fmt.Errorf("created count=%d", len(current))
 	}
 	for id, c := range baseline {
@@ -247,10 +253,11 @@ func run() error {
 	if err = a.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership WHERE mutation_job_id=$1 AND state='ACTIVE'`, jobID).Scan(&owned); err != nil {
 		return err
 	}
-	if owned != 10 {
+	if owned != count {
 		return fmt.Errorf("active ownership=%d", owned)
 	}
-	fmt.Println("CREATE_VERIFIED active_owned=10 quota=104857600 hwid=2")
+	fmt.Printf("CREATE_VERIFIED active_owned=%d quota=104857600 hwid=2 elapsed_ms=%d\n", count, time.Since(createStarted).Milliseconds())
+	outputStarted := time.Now()
 	outputOK := false
 	for i := 0; i < 20; i++ {
 		var output int
@@ -258,9 +265,9 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		if output == 10 {
+		if output == count {
 			outputOK = true
-			fmt.Println("OUTPUT_VERIFIED clients=10")
+			fmt.Printf("OUTPUT_VERIFIED clients=%d elapsed_ms=%d\n", count, time.Since(outputStarted).Milliseconds())
 			break
 		}
 		select {
@@ -269,6 +276,7 @@ func run() error {
 		case <-time.After(time.Second):
 		}
 	}
+	cleanupStarted := time.Now()
 	// Queue cleanup atomically from exactly this immutable ownership membership.
 	tx, err := a.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -309,7 +317,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if len(deletes) != 10 {
+	if len(deletes) != count {
 		return fmt.Errorf("cleanup jobs=%d", len(deletes))
 	}
 	for _, id := range deletes {
@@ -343,10 +351,17 @@ func run() error {
 	if err = tx.Commit(); err != nil {
 		return err
 	}
-	fmt.Printf("CLEANUP_VERIFIED deleted=10 baseline_count=%d sha256=%x\n", len(after), afterHash)
+	fmt.Printf("CLEANUP_VERIFIED deleted=%d baseline_count=%d sha256=%x elapsed_ms=%d\n", count, len(after), afterHash, time.Since(cleanupStarted).Milliseconds())
 	if !outputOK {
 		return fmt.Errorf("cleanup succeeded; output visibility acceptance failed")
 	}
 	fmt.Printf("BULK_CANARY_OK job=%s generation=%s\n", jobID, gen)
+	return nil
+}
+
+func validateCanaryCount(count int) error {
+	if count != 10 && count != 25 {
+		return fmt.Errorf("canary count must be 10 or 25; larger stages require acceptance")
+	}
 	return nil
 }
