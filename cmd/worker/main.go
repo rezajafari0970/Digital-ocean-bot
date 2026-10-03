@@ -37,6 +37,11 @@ func main() {
 	}
 	// Repair only locally provable state links before any scheduler/lifecycle work.
 	application.Container.ReconcileLocalState(ctx)
+	if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
+		log.Printf("rolling reboot deferred reconcile: %v", err)
+	} else if n > 0 {
+		log.Printf("rolling reboot obsolete=%d", n)
+	}
 	// Keep local repair self-healing even without a process restart. This clears
 	// stale Vultr probe claims, disabled-account leases and provable orphan links.
 	go func() {

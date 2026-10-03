@@ -15,6 +15,25 @@ type Secrets interface {
 	Get(context.Context, string, string) ([]byte, error)
 }
 
+const claimSQL = `
+SELECT j.id::text,j.panel_id::text,j.account_id::text,j.droplet_id::text,dep.host,
+COALESCE(dep.profile_snapshot->>'ssh_user','root'),COALESCE(dep.profile_snapshot->>'ssh_key_secret_ref',''),
+(SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY')
+FROM rolling_reboot_jobs j
+JOIN accounts a ON a.id=j.account_id
+JOIN droplets d ON d.id=j.droplet_id
+JOIN deployments dep ON dep.droplet_id=d.id
+JOIN server_runtime_snapshots rs ON rs.panel_id=j.panel_id
+WHERE j.state='PENDING' AND a.enabled=true AND a.provider_state='ACTIVE'
+AND d.state='READY' AND dep.state='PANEL_COMPLETE'
+AND rs.reboot_required=true AND rs.xui_active=true AND rs.last_error=''
+AND (d.expires_at IS NULL OR d.expires_at>now()+interval '30 minutes')
+AND (SELECT count(*) FROM rolling_reboot_jobs z WHERE z.state IN ('REBOOT_SENT','WAITING_SSH','VERIFYING'))=0
+AND (SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY')>=2
+ORDER BY (SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY') DESC,d.expires_at DESC NULLS LAST,j.id
+FOR UPDATE OF j SKIP LOCKED LIMIT 1
+`
+
 type Executor struct {
 	DB      *sql.DB
 	Secrets Secrets
@@ -50,24 +69,7 @@ func (e Executor) claim(ctx context.Context) (execTarget, bool, error) {
 	}
 	defer tx.Rollback()
 	var t execTarget
-	err = tx.QueryRowContext(ctx, `
-SELECT j.id::text,j.panel_id::text,j.account_id::text,j.droplet_id::text,dep.host,
-COALESCE(dep.profile_snapshot->>'ssh_user','root'),COALESCE(dep.profile_snapshot->>'ssh_key_secret_ref',''),
-(SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY')
-FROM rolling_reboot_jobs j
-JOIN accounts a ON a.id=j.account_id
-JOIN droplets d ON d.id=j.droplet_id
-JOIN deployments dep ON dep.droplet_id=d.id
-JOIN server_runtime_snapshots rs ON rs.panel_id=j.panel_id
-WHERE j.state='PENDING' AND a.enabled=true AND a.provider_state='ACTIVE'
-AND d.state='READY' AND dep.state='PANEL_COMPLETE'
-AND rs.reboot_required=true AND rs.xui_active=true AND rs.last_error=''
-AND (d.expires_at IS NULL OR d.expires_at>now()+interval '30 minutes')
-AND (SELECT count(*) FROM rolling_reboot_jobs z WHERE z.state IN ('REBOOT_SENT','WAITING_SSH','VERIFYING'))=0
-AND (SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY')>=2
-ORDER BY (SELECT count(*) FROM droplets x WHERE x.account_id=j.account_id AND x.state='READY') DESC,d.expires_at DESC NULLS LAST,j.id
-FOR UPDATE OF j SKIP LOCKED LIMIT 1
-`).Scan(&t.job, &t.panel, &t.account, &t.droplet, &t.host, &t.user, &t.keyRef, &t.ready)
+	err = tx.QueryRowContext(ctx, claimSQL).Scan(&t.job, &t.panel, &t.account, &t.droplet, &t.host, &t.user, &t.keyRef, &t.ready)
 	if err == sql.ErrNoRows {
 		return execTarget{}, false, nil
 	}

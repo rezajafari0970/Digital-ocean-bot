@@ -66,8 +66,7 @@ ORDER BY ready DESC,d.expires_at DESC NULLS LAST,j.id
 	return out, rows.Err()
 }
 
-func (s Service) ReconcileDeferred(ctx context.Context) (int, error) {
-	res, err := s.DB.ExecContext(ctx, `
+const reconcileDeferredSQL = `
 UPDATE rolling_reboot_jobs j
 SET state='OBSOLETE',completed_at=now(),next_retry_at=NULL,
     last_error='reboot maintenance no longer applicable',updated_at=now()
@@ -75,9 +74,11 @@ WHERE j.state='DEFERRED'
   AND (
     NOT EXISTS (SELECT 1 FROM droplets d WHERE d.id=j.droplet_id)
     OR EXISTS (SELECT 1 FROM droplets d WHERE d.id=j.droplet_id AND d.state IN ('RETIRING','DELETING','DELETED'))
-    OR EXISTS (SELECT 1 FROM server_runtime_snapshots rs WHERE rs.panel_id=j.panel_id AND rs.reboot_required=false)
   )
-`)
+`
+
+func (s Service) ReconcileDeferred(ctx context.Context) (int, error) {
+	res, err := s.DB.ExecContext(ctx, reconcileDeferredSQL)
 	if err != nil {
 		return 0, err
 	}
@@ -85,8 +86,7 @@ WHERE j.state='DEFERRED'
 	return int(n), nil
 }
 
-func (s Service) Reactivate(ctx context.Context, panelID string) error {
-	res, err := s.DB.ExecContext(ctx, `
+const reactivateSQL = `
 UPDATE rolling_reboot_jobs j
 SET state='PENDING',completed_at=NULL,next_retry_at=NULL,last_error='',boot_id_before='',updated_at=now()
 FROM panel_instances pi
@@ -98,7 +98,10 @@ WHERE j.panel_id=pi.id AND pi.id=$1
   AND a.enabled=true AND a.provider_state='ACTIVE'
   AND d.state='READY' AND rs.reboot_required=true AND rs.xui_active=true AND rs.last_error=''
   AND (d.expires_at IS NULL OR d.expires_at>now()+interval '30 minutes')
-`, panelID)
+`
+
+func (s Service) Reactivate(ctx context.Context, panelID string) error {
+	res, err := s.DB.ExecContext(ctx, reactivateSQL, panelID)
 	if err != nil {
 		return err
 	}
