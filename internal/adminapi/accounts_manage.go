@@ -218,12 +218,16 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "account-mutation:"+id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	var live int
 	if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status=CASE WHEN $2>0 THEN 'DELETE_PENDING' ELSE 'DELETED' END,runtime_status_detail=CASE WHEN $2>0 THEN 'archived; provider cleanup pending' ELSE 'history retained by soft delete' END,deleted_at=CASE WHEN $2>0 THEN NULL ELSE COALESCE(deleted_at,now()) END,updated_at=now() WHERE id=$1 AND deleted_at IS NULL`, id, live)
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status='DELETE_PENDING',runtime_status_detail='deletion requested; cleanup and data purge pending',deleted_at=NULL,updated_at=now() WHERE id=$1`, id)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -237,15 +241,30 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	// Invalidate workflow versions so a stale installer/create runner cannot
+	// continue the account after deletion was requested. Unknown provider creates
+	// retain their operation journal for read-before-write recovery.
+	if _, err = tx.ExecContext(r.Context(), `UPDATE deployments SET state='FAILED',current_step='done',last_error='ACCOUNT_DELETION_REQUESTED',lock_version=lock_version+1,updated_at=now() WHERE account_id=$1 AND state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY')`, id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if live > 0 {
-		if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state IN ('READY','EXPIRING','PROVISIONING')`, id); err != nil {
+		if _, err = tx.ExecContext(r.Context(), `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE account_id=$1 AND state NOT IN ('DELETED','RETIRING','DELETING')`, id); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
+	}
+	if _, err = tx.ExecContext(r.Context(), `INSERT INTO account_deletion_jobs(account_id) VALUES($1) ON CONFLICT(account_id) DO UPDATE SET next_attempt_at=now()`, id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if _, err = tx.ExecContext(r.Context(), `UPDATE bulk_lifecycle_scopes SET enabled=false,updated_at=now() WHERE panel_id IN(SELECT id FROM panel_instances WHERE account_id=$1)`, id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
 	}
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	w.WriteHeader(204)
+	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "detail": "Deletion requested. Managed provider resources must be verified absent before saved account data is purged."})
 }

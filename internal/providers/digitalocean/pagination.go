@@ -15,10 +15,27 @@ func (c *Client) listAll(ctx context.Context, path, field string, target any) er
 		return ErrProviderRequest
 	}
 	next := path
+	seen := map[string]bool{}
 	for next != "" {
+		if seen[next] || len(seen) >= 1000 {
+			return fmt.Errorf("%w: pagination cycle or limit", ErrProviderRequest)
+		}
+		seen[next] = true
 		var raw map[string]json.RawMessage
 		if err := c.get(ctx, next, &raw); err != nil {
 			return err
+		}
+		if b, ok := raw[field]; !ok || len(b) == 0 || string(b) == "null" {
+			return fmt.Errorf("%w: missing list inventory", ErrProviderRequest)
+		}
+		if len(raw["links"]) > 0 {
+			var checked struct{ Pages struct{ Next string } }
+			if json.Unmarshal(raw["links"], &checked) != nil {
+				return fmt.Errorf("%w: invalid pagination", ErrProviderRequest)
+			}
+			if checked.Pages.Next != "" && extractNext(raw["links"]) == "" {
+				return fmt.Errorf("%w: invalid next page", ErrProviderRequest)
+			}
 		}
 		part := reflect.New(rv.Elem().Type()).Interface()
 		if err := json.Unmarshal(raw[field], part); err != nil {

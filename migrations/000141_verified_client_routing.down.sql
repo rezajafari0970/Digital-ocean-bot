@@ -1,0 +1,15 @@
+DROP TRIGGER residential_control_change ON residential_routing_control;
+DROP TRIGGER client_routing_refresh ON client_mutation_jobs;
+DROP FUNCTION wake_panel_routing();
+DROP TRIGGER residential_policy_change ON global_config_policies;
+DROP TRIGGER residential_secret_change ON secrets;
+DROP TRIGGER residential_proxy_change ON proxies;
+DROP TRIGGER residential_route_change ON residential_proxies;
+DROP FUNCTION bump_residential_routing_revision();
+ALTER TABLE output_share_tokens DROP COLUMN route_class;
+ALTER TABLE output_config_snapshots DROP COLUMN client_id;
+DROP TABLE panel_client_routes;
+DROP TABLE panel_routing_state;
+DROP TABLE residential_routing_control;
+ALTER TABLE global_config_policies DROP COLUMN generate_direct;
+ALTER TABLE global_config_policies DROP COLUMN generate_residential;

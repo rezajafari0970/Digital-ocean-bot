@@ -51,21 +51,25 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id IN (SELECT account_id FROM network_profiles WHERE proxy_id=$1)`, id)
+	if x.Password != "" {
+		if err = s.Container.Secrets.PutProxyTx(r.Context(), tx, id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "proxy_saved_secret_update_failed"})
+			return
+		}
+		if _, err = tx.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password' WHERE id=$1`, id); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	if _, err = tx.ExecContext(r.Context(), `UPDATE account_transport_state SET transport_epoch=transport_epoch+1,transition_reason='proxy-configuration-change',updated_at=now() WHERE account_id IN(SELECT account_id FROM network_profiles WHERE proxy_id=$1 UNION SELECT account_id FROM account_proxy_pool WHERE proxy_id=$1)`, id); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if err = tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	if x.Password != "" {
-		if err = s.Container.Secrets.PutProxy(r.Context(), id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
-			writeJSON(w, 500, map[string]string{"error": "proxy_saved_secret_update_failed"})
-			return
-		}
-		_, _ = s.DB.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password' WHERE id=$1`, id)
-		if err = s.invalidateProxyCredentialEpoch(r.Context(), id); err != nil {
-			writeJSON(w, 500, map[string]string{"error": "proxy_epoch_invalidation_failed"})
-			return
-		}
-	}
+
 	writeJSON(w, 200, map[string]string{"type": string(typ)})
 }
 func (s *Server) deleteProxy(w http.ResponseWriter, r *http.Request) {
@@ -75,24 +79,9 @@ func (s *Server) deleteProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
-	var used int
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM network_profiles WHERE proxy_id=$1`, id).Scan(&used); err != nil {
-		writeJSON(w, 500, errorBody())
+	if _, err := s.removeProxy(r.Context(), id, false); err != nil {
+		writeJSON(w, 409, map[string]string{"error": "proxy_delete_pending", "detail": "Proxy assignments changed or a request is still in flight; refresh and retry."})
 		return
 	}
-	if used > 0 {
-		writeJSON(w, 409, map[string]any{"error": "proxy_in_use", "accounts": used, "detail": "Unassign this proxy from all accounts before deleting it."})
-		return
-	}
-	res, err := s.DB.ExecContext(r.Context(), `DELETE FROM proxies WHERE id=$1`, id)
-	if err != nil {
-		writeJSON(w, 409, errorBody())
-		return
-	}
-	n, _ := res.RowsAffected()
-	if n == 0 {
-		writeJSON(w, 404, map[string]string{"error": "not_found"})
-		return
-	}
-	w.WriteHeader(204)
+	w.WriteHeader(http.StatusNoContent)
 }

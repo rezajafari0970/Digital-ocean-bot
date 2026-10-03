@@ -162,6 +162,13 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 	if err != nil {
 		return nil, err
 	}
+	guarded := *client
+	base := client.Transport
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	guarded.Transport = providerMutationFence{base: base, db: c.DB, account: cfg.ID}
+	client = &guarded
 	return r.Open(ctx, cfg.Provider, providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef}})
 }
 

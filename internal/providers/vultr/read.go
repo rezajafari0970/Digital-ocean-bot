@@ -2,6 +2,7 @@ package vultr
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -73,10 +74,18 @@ func (c *Client) OS(ctx context.Context) ([]osItem, error) {
 func (c *Client) Instances(ctx context.Context) ([]instance, error) {
 	path := pagePath("/instances", 500)
 	var out []instance
+	seen := map[string]bool{}
 	for {
+		if seen[path] || len(seen) >= 1000 {
+			return nil, errors.New("instance pagination cycle or limit")
+		}
+		seen[path] = true
 		var x instancesResponse
 		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
 			return nil, err
+		}
+		if x.Instances == nil {
+			return nil, errors.New("missing instance inventory")
 		}
 		out = append(out, x.Instances...)
 		if strings.TrimSpace(x.Meta.Links.Next) == "" {
@@ -86,7 +95,11 @@ func (c *Client) Instances(ctx context.Context) ([]instance, error) {
 		if err != nil {
 			return nil, err
 		}
-		path = u.RequestURI()
+		if u.RawQuery != "" {
+			path = "/instances?" + u.RawQuery
+		} else {
+			path = "/instances?" + url.Values{"per_page": {"500"}, "cursor": {x.Meta.Links.Next}}.Encode()
+		}
 	}
 }
 func (c *Client) Instance(ctx context.Context, id string) (instance, error) {

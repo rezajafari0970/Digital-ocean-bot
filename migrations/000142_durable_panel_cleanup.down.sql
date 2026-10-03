@@ -1,0 +1,1 @@
+DROP TABLE panel_cleanup_inbounds,panel_cleanup_clients,panel_cleanup_targets,panel_cleanup_jobs;

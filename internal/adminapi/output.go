@@ -25,6 +25,7 @@ type outputInbound struct {
 const outputDropletStatePredicate = "dr.state IN ('READY','EXPIRING')"
 
 type outputRecord struct {
+	ClientID     string
 	URI          string
 	VisibleUntil *time.Time
 }
@@ -211,7 +212,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			link, e := export.VLESSRealityURI(export.VLESSReality{UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Flow: fmt.Sprint(cl["flow"]), Remark: remark})
 			if e == nil {
 				visibleUntil := outputVisibleUntil(cl["expiryTime"])
-				records = append(records, outputRecord{URI: link, VisibleUntil: visibleUntil})
+				records = append(records, outputRecord{ClientID: id, URI: link, VisibleUntil: visibleUntil})
 				generated++
 			} else {
 				exportErrors++

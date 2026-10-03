@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/cleanup"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/globalreality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
@@ -19,6 +21,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
+	"os"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -36,6 +39,26 @@ func main() {
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
+	// Each process has a distinct liveness record; stale processes age out.
+	host, _ := os.Hostname()
+	heartbeat := worker.Heartbeat{DB: application.DB, WorkerID: fmt.Sprintf("%s:%d", host, os.Getpid()), Kind: "production"}
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			beatCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker"})
+			cancel()
+			if err != nil && ctx.Err() == nil {
+				log.Printf("worker heartbeat: %v", err)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
 	// Repair only locally provable state links before any scheduler/lifecycle work.
 	application.Container.ReconcileLocalState(ctx)
 	if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
@@ -59,6 +82,38 @@ func main() {
 				} else if n > 0 {
 					log.Printf("rolling reboot obsolete=%d", n)
 				}
+			}
+		}
+	}()
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			jobCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+			if err := application.Container.ProcessAccountDeletions(jobCtx); err != nil && ctx.Err() == nil {
+				log.Printf("account deletion remains pending")
+			}
+			cancel()
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for {
+			billingCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+			if err := application.Container.RefreshOneBillingAccount(billingCtx); err != nil && ctx.Err() == nil {
+				log.Printf("billing observation persistence failed")
+			}
+			cancel()
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
 			}
 		}
 	}()
@@ -230,6 +285,22 @@ func main() {
 		}
 	}()
 
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		executor := cleanup.Service{DB: application.DB, Runtimes: sanaeiRuntimes}
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := executor.RunOne(ctx); err != nil {
+					log.Printf("panel cleanup paused: %v", err)
+				}
+			}
+		}
+	}()
+
 	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
 	go func() {
 		t := time.NewTicker(10 * time.Second)
@@ -381,19 +452,17 @@ func main() {
 
 	// Residential Ads sync: fan out active residential proxies to every ready Sanaei panel.
 	go func() {
-		t := time.NewTicker(10 * time.Second)
+		t := time.NewTicker(time.Second)
 		defer t.Stop()
-		source := readyworker.SQLSource{DB: application.DB}
-		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
-		syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh}
+		syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
 		failures := worker.FailureStore{DB: application.DB}
 		run := func() {
-			panels, err := source.EligibleReadyPanels(ctx)
+			panels, err := syncer.EligiblePanels(ctx)
 			if err != nil {
 				log.Printf("residential sync discovery: %v", err)
 				return
 			}
-			sem := make(chan struct{}, 12)
+			sem := make(chan struct{}, 2)
 			done := make(chan struct{}, len(panels))
 			for _, panel := range panels {
 				p := panel
@@ -408,7 +477,7 @@ func main() {
 					if !failures.Due(ctx, "residential_sync", p.ID) {
 						return
 					}
-					panelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+					panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
 					defer cancel()
 					if err := syncer.ReconcilePanel(panelCtx, p, false); err != nil {
 						failures.Fail(ctx, "residential_sync", p.ID, "", err)

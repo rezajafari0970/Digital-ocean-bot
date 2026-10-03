@@ -266,7 +266,7 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 			return err
 		}
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=COALESCE(deleted_at,now()),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE accounts a SET deleted_at=COALESCE(deleted_at,now()),runtime_status='DELETED',runtime_status_detail='history retained by soft delete',updated_at=now() WHERE a.id=$1 AND a.deletion_requested_at IS NOT NULL AND NOT EXISTS(SELECT 1 FROM account_deletion_jobs j WHERE j.account_id=a.id) AND NOT EXISTS (SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')`, accountID); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE accounts SET provider_checked_at=NULL,updated_at=now() WHERE id=$1 AND enabled=true`, accountID); err != nil {

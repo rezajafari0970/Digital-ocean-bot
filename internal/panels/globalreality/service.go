@@ -26,6 +26,9 @@ type Service struct {
 }
 
 func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bool) error {
+	return sanaei.WithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) error { return s.reconcilePanel(ctx, p, dry) })
+}
+func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bool) error {
 	if s.DB == nil || s.Secrets == nil || p.ID == "" {
 		return errors.New("global reality config")
 	}

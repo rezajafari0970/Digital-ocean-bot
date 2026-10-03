@@ -18,7 +18,7 @@ func ReadRawInboundList(ctx context.Context, exec SessionExecutor) ([]json.RawMe
 	if err = json.Unmarshal(resp.Body, &env); err != nil {
 		return nil, err
 	}
-	if !env.Success {
+	if !env.Success || env.Obj == nil {
 		return nil, ErrInventoryRejected
 	}
 	return env.Obj, nil

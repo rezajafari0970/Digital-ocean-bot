@@ -16,8 +16,10 @@ import (
 type RecoveryHandler struct{ Container Container }
 
 func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.RecoveryItem) (retErr error) {
+	var version int64
+	var versionLoaded bool
 	defer func() {
-		if retErr == nil {
+		if retErr == nil || !versionLoaded {
 			return
 		}
 		if item.Kind == "DELETE_DROPLET" {
@@ -30,20 +32,21 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		if code == "" {
 			code = "recovery_retry"
 		}
-		_, _ = h.Container.DB.ExecContext(context.Background(), `UPDATE operations SET updated_at=now(),error_code=$3,error_message=$4 WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID, code, retErr.Error())
+		_, _ = h.Container.DB.ExecContext(context.Background(), `UPDATE operations SET updated_at=now(),error_code=$3,error_message=$4 WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying') AND lock_version=$5`, item.ID, item.AccountID, code, retErr.Error(), version)
 	}()
 	if item.Kind != "CREATE_DROPLET" && item.Kind != "DELETE_DROPLET" {
 		return nil
 	}
 	var providerID string
 	var operationCreated time.Time
-	err := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,''),created_at FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID, &operationCreated)
+	err := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(resource_id,''),created_at,lock_version FROM operations WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID).Scan(&providerID, &operationCreated, &version)
 	if err != nil {
 		return err
 	}
+	versionLoaded = true
 	if providerID == "" {
 		if item.Kind == "DELETE_DROPLET" {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='delete_without_provider_resource',error_message='delete recovery cannot continue without provider resource id',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID)
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='delete_without_provider_resource',error_message='delete recovery cannot continue without provider resource id',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID, version)
 			return err
 		}
 		var deploymentID, deploymentState string
@@ -58,7 +61,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			}
 			return qerr
 		}
-		runtime, rerr := h.Container.Runtime(ctx, item.AccountID)
+		runtime, rerr := h.Container.runtimeForLifecycle(ctx, item.AccountID)
 		if rerr != nil {
 			return rerr
 		}
@@ -73,12 +76,29 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		if len(matches) > 1 {
 			return errors.New("multiple provider servers match stale create identity")
 		}
+		var deleting bool
+		if err = h.Container.DB.QueryRowContext(ctx, "SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1", item.AccountID).Scan(&deleting); err != nil {
+			return err
+		}
+		if deleting {
+			if len(matches) == 0 {
+				return errors.New("unknown create outcome on deleting account; absence is not final confirmation")
+			}
+			if time.Since(operationCreated) < 2*time.Minute {
+				return errors.New("waiting for create request to settle")
+			}
+			if len(matches) == 1 {
+				if err = h.Container.adoptDeletedAccountServer(ctx, item.AccountID, matches[0].ID); err != nil {
+					return err
+				}
+			}
+		}
 		if len(matches) == 1 {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID)
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID, version)
 			return err
 		}
 		if terminalDeploymentStateForCreateRecovery(deploymentState) {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='stale_create_without_provider_resource',updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID)
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',lock_version=lock_version+1,error_code='stale_create_without_provider_resource',updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
 			return err
 		}
 		return nil
@@ -87,7 +107,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 	if item.Kind == "DELETE_DROPLET" {
 		runtime, err = h.Container.runtimeForLifecycle(ctx, item.AccountID)
 	} else {
-		runtime, err = h.Container.Runtime(ctx, item.AccountID)
+		runtime, err = h.Container.runtimeForLifecycle(ctx, item.AccountID)
 	}
 	if err != nil {
 		return err
@@ -127,20 +147,32 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			if derr := compute.DeleteServer(ctx, providerID); derr != nil {
 				return derr
 			}
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID)
+			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
 			return err
 		}
 	}
 	state := "unknown"
 	if item.Kind == "CREATE_DROPLET" && exists {
+		var deleting bool
+		if err = h.Container.DB.QueryRowContext(ctx, "SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1", item.AccountID).Scan(&deleting); err != nil {
+			return err
+		}
+		if deleting {
+			if err = h.Container.adoptDeletedAccountServer(ctx, item.AccountID, providerID); err != nil {
+				return err
+			}
+		}
 		state = "succeeded"
 	}
 	if item.Kind == "DELETE_DROPLET" && !exists {
 		state = "succeeded"
 	}
-	_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, item.ID, item.AccountID, state)
+	result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
 	if err != nil {
 		return err
+	}
+	if n, _ := result.RowsAffected(); n != 1 {
+		return errors.New("operation changed during recovery")
 	}
 	if item.Kind == "DELETE_DROPLET" && state == "succeeded" {
 		if err := h.Container.ConfirmDeleted(ctx, item.AccountID, providerID); err != nil {
@@ -167,6 +199,14 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 }
 
 func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.RecoveryItem) error {
+	var deleting bool
+	if err := h.Container.DB.QueryRowContext(ctx, "SELECT deletion_requested_at IS NOT NULL FROM accounts WHERE id=$1", item.AccountID).Scan(&deleting); err != nil {
+		return err
+	}
+	if deleting {
+		return nil
+	}
+
 	store := workflow.SQLStore{DB: h.Container.DB}
 	d, err := store.Get(ctx, item.ID, item.AccountID)
 	if errors.Is(err, sql.ErrNoRows) {
