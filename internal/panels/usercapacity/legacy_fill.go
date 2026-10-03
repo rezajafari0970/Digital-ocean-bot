@@ -42,6 +42,22 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 			return mutated, err
 		}
 		clients, _ := st["clients"].([]any)
+		observedOwned := make(map[string]string, len(clients))
+		for _, item := range clients {
+			b, _ := json.Marshal(item)
+			var existing sanaei.Client
+			if json.Unmarshal(b, &existing) == nil && existing.ID != "" {
+				observedOwned[existing.ID] = existing.Email
+			}
+		}
+		if err = s.confirmPlannedOwnedClients(ctx, p.ID, rec.RemoteID, observedOwned); err != nil {
+			return mutated, err
+		}
+		generation, err := s.activePolicyGeneration(ctx, p.ID, rec.RemoteID)
+		if err != nil {
+			return mutated, err
+		}
+		owned := make([]ownedClient, 0, n)
 		expiry := int64(0)
 		if life > 0 {
 			expiry = now + int64(life)*1000
@@ -51,7 +67,12 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 			if e != nil {
 				return mutated, e
 			}
-			clients = append(clients, sanaei.Client{ID: id, Email: "dob-" + id[:8], Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"})
+			email := ownershipEmail(generation.Marker, id)
+			clients = append(clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"})
+			owned = append(owned, ownedClient{ID: id, Email: email})
+		}
+		if err = s.planOwnedClients(ctx, generation.ID, owned); err != nil {
+			return mutated, err
 		}
 		st["clients"] = clients
 		sniff := in.Sniffing

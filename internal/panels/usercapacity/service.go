@@ -209,6 +209,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			}
 		}
 		active, expiredCount, quotaCount := 0, 0, 0
+		observedOwned := make(map[string]string, len(arr))
 		kept := make([]any, 0, len(arr))
 		deleteIDs := make([]string, 0)
 		deleted := 0
@@ -218,6 +219,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			if json.Unmarshal(b, &c) != nil || c.ID == "" {
 				continue
 			}
+			observedOwned[c.ID] = c.Email
 			stat := traffic[c.Email]
 			isExpired := c.ExpiryTime > 0 && c.ExpiryTime <= now
 			isQuota := c.TotalGB > 0 && (stat.Up+stat.Down) >= c.TotalGB
@@ -234,10 +236,19 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			active++
 			kept = append(kept, v)
 		}
+		if e = s.confirmPlannedOwnedClients(ctx, p.ID, int64(in.ID), observedOwned); e != nil {
+			return e
+		}
 		deficit := target - active
 		n := userCreationLimiter.allowance(bulkRateKey(p.ID, int64(in.ID)), rate, deficit, time.Now())
 		newClients := make([]sanaei.Client, 0, n)
+		owned := make([]ownedClient, 0, n)
+		var generation bulkGeneration
 		if n > 0 {
+			generation, e = s.activePolicyGeneration(ctx, p.ID, int64(in.ID))
+			if e != nil {
+				return e
+			}
 			expiry := int64(0)
 			if life > 0 {
 				expiry = now + int64(life)*1000
@@ -247,9 +258,16 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 				if e != nil {
 					return e
 				}
-				c := sanaei.Client{ID: id, Email: "dob-" + id[:8], Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"}
+				email := ownershipEmail(generation.Marker, id)
+				c := sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"}
 				newClients = append(newClients, c)
+				owned = append(owned, ownedClient{ID: id, Email: email})
 				kept = append(kept, c)
+			}
+		}
+		if len(owned) > 0 {
+			if e = s.planOwnedClients(ctx, generation.ID, owned); e != nil {
+				return e
 			}
 		}
 		if !addUnsupported && deleted > 0 && deleted <= 32 {
