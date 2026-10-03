@@ -32,7 +32,10 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 		deficit := effectiveTarget - rec.ClientCount
 		n := 0
 		if deficit > 0 {
-			n = userCreationLimiter.allowance(bulkRateKey(p.ID, rec.RemoteID), effectiveRate, deficit, time.Now())
+			n, err = s.durableAllowance(ctx, p.ID, rec.RemoteID, effectiveRate, deficit, time.Now())
+			if err != nil {
+				return mutated, err
+			}
 		}
 		if n <= 0 && len(ownedPolicies) == 0 {
 			continue

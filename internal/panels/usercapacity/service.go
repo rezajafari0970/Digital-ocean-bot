@@ -264,7 +264,10 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			return e
 		}
 		deficit := effectiveTarget - active
-		n := userCreationLimiter.allowance(bulkRateKey(p.ID, int64(in.ID)), effectiveRate, deficit, time.Now())
+		n, e := s.durableAllowance(ctx, p.ID, int64(in.ID), effectiveRate, deficit, time.Now())
+		if e != nil {
+			return e
+		}
 		newClients := make([]sanaei.Client, 0, n)
 		owned := make([]ownedClient, 0, n)
 		var generation bulkGeneration

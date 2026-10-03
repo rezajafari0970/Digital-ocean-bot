@@ -1,0 +1,65 @@
+package usercapacity
+
+import (
+	"context"
+	"database/sql"
+	"math"
+	"time"
+)
+
+func (s Service) durableAllowance(ctx context.Context, panelID string, inboundID int64, rate, deficit int, now time.Time) (int, error) {
+	if s.DB == nil || panelID == "" || inboundID <= 0 || rate <= 0 || deficit <= 0 {
+		return 0, nil
+	}
+	tx, err := s.DB.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `
+INSERT INTO bulk_user_rate_state(panel_id,inbound_id,tokens,last_refill_at,updated_at)
+VALUES($1,$2,0,$3,$3)
+ON CONFLICT(panel_id,inbound_id) DO NOTHING
+`, panelID, inboundID, now)
+	if err != nil {
+		return 0, err
+	}
+	var tokens float64
+	var last time.Time
+	if err = tx.QueryRowContext(ctx, `
+SELECT tokens,last_refill_at FROM bulk_user_rate_state
+WHERE panel_id=$1 AND inbound_id=$2
+FOR UPDATE
+`, panelID, inboundID).Scan(&tokens, &last); err != nil {
+		return 0, err
+	}
+	tokens, n := durableRateStep(tokens, last, rate, deficit, now)
+	_, err = tx.ExecContext(ctx, `
+UPDATE bulk_user_rate_state SET tokens=$3,last_refill_at=$4,updated_at=now()
+WHERE panel_id=$1 AND inbound_id=$2
+`, panelID, inboundID, tokens, now)
+	if err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return n, nil
+}
+
+func durableRateStep(tokens float64, last time.Time, rate, deficit int, now time.Time) (float64, int) {
+	elapsed := now.Sub(last).Seconds()
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	tokens += elapsed * float64(rate)
+	if tokens > float64(rate) {
+		tokens = float64(rate)
+	}
+	n := int(math.Floor(tokens))
+	if n > deficit {
+		n = deficit
+	}
+	tokens -= float64(n)
+	return tokens, n
+}
