@@ -41,7 +41,7 @@ type Server struct {
 }
 
 func New(db *sql.DB, c app.Container) *Server {
-	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputPanelRun: map[string]bool{}, OutputRefreshSem: make(chan struct{}, 32), CleanupJobs: map[string]*cleanupJob{}, BrowserTickets: map[string]time.Time{}}
+	return &Server{WebPath: "/admin", DB: db, Container: c, Health: observability.Health{DB: db}, Auth: auth.Service{Store: auth.SQLStore{DB: db}}, LoginLimiter: NewLoginLimiter(), OutputRuntimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: c.Secrets, Timeout: 90 * time.Second}, TTL: 2 * time.Minute}, OutputPanelRun: map[string]bool{}, OutputRefreshSem: make(chan struct{}, 64), CleanupJobs: map[string]*cleanupJob{}, BrowserTickets: map[string]time.Time{}}
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()

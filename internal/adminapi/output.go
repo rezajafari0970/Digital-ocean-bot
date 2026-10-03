@@ -266,7 +266,7 @@ func (s *Server) startPanelOutputRefresh(parent context.Context, panel readywork
 		s.OutputPanelRun = map[string]bool{}
 	}
 	if s.OutputRefreshSem == nil {
-		s.OutputRefreshSem = make(chan struct{}, 32)
+		s.OutputRefreshSem = make(chan struct{}, 64)
 	}
 	if s.OutputPanelRun[panel.ID] {
 		s.OutputPanelMu.Unlock()

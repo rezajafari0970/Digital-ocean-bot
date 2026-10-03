@@ -112,12 +112,12 @@ func TestOutputRefreshDefaultCapacity(t *testing.T) {
 	s := &Server{OutputPanelRun: map[string]bool{}}
 	s.OutputPanelMu.Lock()
 	if s.OutputRefreshSem == nil {
-		s.OutputRefreshSem = make(chan struct{}, 32)
+		s.OutputRefreshSem = make(chan struct{}, 64)
 	}
 	capacity := cap(s.OutputRefreshSem)
 	s.OutputPanelMu.Unlock()
-	if capacity != 32 {
-		t.Fatalf("capacity=%d want 32", capacity)
+	if capacity != 64 {
+		t.Fatalf("capacity=%d want 64", capacity)
 	}
 }
 
