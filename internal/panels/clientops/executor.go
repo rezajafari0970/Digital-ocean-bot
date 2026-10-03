@@ -276,9 +276,13 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 		if delay > 10*time.Second {
 			delay = 10 * time.Second
 		}
-		if err := e.Journal.Retry(finishCtx, job.ID, execErr.Error(), delay); err != nil {
-			return true, fmt.Errorf("retry client mutation: %w", err)
-		}
-		return true, nil
+		return true, retryResult(execErr, e.Journal.Retry(finishCtx, job.ID, execErr.Error(), delay))
 	}
+}
+
+func retryResult(execErr, journalErr error) error {
+	if journalErr != nil {
+		return fmt.Errorf("retry client mutation: %w", journalErr)
+	}
+	return execErr
 }

@@ -213,7 +213,11 @@ func main() {
 		}
 		run := func() {
 			if _, err := exec.RunOne(ctx); err != nil {
-				log.Printf("client mutation executor: %v", err)
+				if gateErr := exec.Journal.FailCloseGate(ctx); gateErr != nil {
+					log.Printf("client mutation executor fail-close: %v (original: %v)", gateErr, err)
+					return
+				}
+				log.Printf("client mutation executor: %v; execution gate fail-closed", err)
 			}
 		}
 		for {

@@ -125,3 +125,18 @@ func TestExistingUUIDWithDifferentPayloadNeverMutatesAgain(t *testing.T) {
 		t.Fatalf("existing conflicting uuid decision=%v want conflict", got)
 	}
 }
+
+func TestRetryResultSurfacesExecutionFailure(t *testing.T) {
+	execErr := errors.New("mutation failed")
+	if got := retryResult(execErr, nil); !errors.Is(got, execErr) {
+		t.Fatalf("got=%v", got)
+	}
+}
+func TestRetryResultPrefersJournalFailure(t *testing.T) {
+	execErr := errors.New("mutation failed")
+	journalErr := errors.New("journal failed")
+	got := retryResult(execErr, journalErr)
+	if !errors.Is(got, journalErr) {
+		t.Fatalf("got=%v", got)
+	}
+}
