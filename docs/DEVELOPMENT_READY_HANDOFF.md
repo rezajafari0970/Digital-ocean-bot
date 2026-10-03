@@ -24,3 +24,8 @@ Development may resume when the knowledge artifacts exist, their hashes are froz
 - Durable v3 bulk ten-client canary and cleanup passed; runtime source af1a541799088c6d3c89af675d5f6b02f82cd84c.
 - Any following evidence-only commit does not imply binary drift; compare product paths before rebuilding.
 - Gates remain closed. Next step is measured chunk-25 acceptance, with bulk policy/expiry lifecycle integration required before fleet enablement.
+
+## Latest ramp checkpoint (2026-10-03)
+- Read `docs/BULK_V3_25_ACCEPTANCE.json`: stage 25 is accepted, including complete resource sampling and cleanup.
+- Next measured gate is 50 clients. Main/bulk execution gates remain closed; fleet generation is disabled.
+- Build on the main disk with a disk-backed GOTMPDIR; /tmp tmpfs exhaustion was observed and resolved for this workflow.

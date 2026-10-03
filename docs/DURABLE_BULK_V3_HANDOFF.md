@@ -31,4 +31,10 @@ Deployment/canary acceptance will be appended only after live evidence. Initial 
 
 Runtime source af1a541799088c6d3c89af675d5f6b02f82cd84c deployed from detached clean build. Migration 000134 applied. Job 59956b9c-543f-4ba9-a344-d2f82b5c664f created/verified ten users in one attempt; all ten appeared in Output. Ten durable DELETE jobs succeeded on their first attempt. The original single-client baseline hash was restored; Output has one baseline item and no canary items. Both gates closed, main concurrency=1, bulk remaining_batches=0. API, worker and target x-ui active. Capacity 1/1, deficit=0, no error. See BULK_V3_ACCEPTANCE.json for exact evidence and limitations.
 
-Next: measured 25-client gated canary, then 50/100/250 only after acceptance. Do not enable fleet generation yet. Durable bulk-owned policy drift and expiry cleanup must be integrated before broad enablement. The canary utility currently intentionally fixes ten users; extending it requires reviewed bounds and unchanged cleanup guarantees.
+Next: measured 25-client gated canary, then 50/100/250 only after acceptance. Do not enable fleet generation yet. Durable bulk-owned policy drift and expiry cleanup must be integrated before broad enablement. The canary utility now accepts only 10 or 25 users; larger stages require reviewed bounds and unchanged cleanup guarantees.
+
+## Stage 25 accepted
+
+See BULK_V3_25_ACCEPTANCE.json. Two isolated 25-client runs passed, each one BULK_CREATE attempt and 25 first-attempt DELETE jobs. The second run repaired the resource-measurement evidence after the first SSH output was truncated. Second create verification: 1516 ms; Output observation after create verification: 1003 ms; cleanup: 24573 ms. A complete 56-sample window includes creation and cleanup. Sampled combined x-ui/Xray RSS max 386104 KiB; CPU max 59.57% of one core; MemAvailable minimum 1143000 KiB. Baseline restored, gates closed, capacity 1/1.
+
+Current next gate: 50-client canary. Do not interpret two 25-client runs as a 50-client batch test. Use a disk-backed clean worktree and GOTMPDIR: /tmp is tmpfs and nearly full. Production API/worker remain on af1a541 because this stage changed only canary/inspection utilities and documentation.

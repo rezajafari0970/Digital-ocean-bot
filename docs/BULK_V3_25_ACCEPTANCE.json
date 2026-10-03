@@ -1,0 +1,130 @@
+{
+  "verified_at_utc": "2026-10-03T09:00:09.705109+00:00",
+  "stage": "25",
+  "status": "ACCEPTED",
+  "worker_api_source_revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
+  "canary_tool_revision": "5f0ea1e654cac70f1ff7b3acc1c2fb62811075f7",
+  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c",
+  "panel_id": "11f21262-1b20-4080-8ffc-7528a01679a9",
+  "inbound_id": 1,
+  "runs": [
+    {
+      "job_id": "7deff5d7-7c38-4d7f-950e-5dffea5834bc",
+      "generation_id": "bcebad8e-bdb6-4b5d-b6d2-92429da21b1f",
+      "count": 25,
+      "bulk_state": "SUCCEEDED",
+      "bulk_attempts": 1,
+      "delete_jobs": 25,
+      "delete_attempts": 1,
+      "output_observed": 25,
+      "timing_ms": {
+        "CREATE_VERIFIED": 1527,
+        "OUTPUT_VERIFIED": 15,
+        "CLEANUP_VERIFIED": 24627
+      },
+      "baseline_restored": true
+    },
+    {
+      "job_id": "5b746f3a-c9a1-450c-9c7c-d0bc09a9baa5",
+      "generation_id": "64a7e048-e46c-43e2-87b1-514f3bc82457",
+      "count": 25,
+      "bulk_state": "SUCCEEDED",
+      "bulk_attempts": 1,
+      "delete_jobs": 25,
+      "delete_attempts": 1,
+      "output_observed": 25,
+      "timing_ms": {
+        "CREATE_VERIFIED": 1516,
+        "OUTPUT_VERIFIED": 1003,
+        "CLEANUP_VERIFIED": 24573
+      },
+      "baseline_restored": true
+    }
+  ],
+  "repeat_reason": "First SSH sample stream exceeded the existing stdout capture limit; reran the same 25-client stage using target-side aggregation to obtain a complete resource window. This is not a 50-client batch acceptance.",
+  "resource_window": {
+    "samples": 56,
+    "started_at": 1791017834.1872501,
+    "ended_at": 1791017889.5505438,
+    "peak_sampled_rss_kib": 386104,
+    "peak_sampled_cpu_percent": 59.57,
+    "minimum_available_kib": 1143000,
+    "peak_sampled_cgroup_bytes": 390107136,
+    "min_processes": 2,
+    "max_processes": 2,
+    "sampling_interval_seconds": 1,
+    "first": {
+      "time": 1791017834.1872501,
+      "index": 0,
+      "rss_kib": 339260,
+      "cpu_pct": null,
+      "processes": 2,
+      "available_kib": 1194284,
+      "cgroup_memory_bytes": 337068032
+    },
+    "last": {
+      "time": 1791017889.5505438,
+      "index": 55,
+      "rss_kib": 291352,
+      "cpu_pct": 21.85,
+      "processes": 2,
+      "available_kib": 1235192,
+      "cgroup_memory_bytes": 287117312
+    }
+  },
+  "resource_limitations": "One-second sampled process maxima, not instantaneous peaks. Window includes normal panel load plus create/output/cleanup; it is not an isolated CPU benchmark.",
+  "final_state": {
+    "baseline_clients": 1,
+    "baseline_hash": "4e6d608353e72ec878e7ca795eb01fc32b12a0fbb9199c4d91f5a696a6092c02",
+    "active_users": 1,
+    "target_users": 1,
+    "deficit": 0,
+    "last_error": "",
+    "remaining_test_output": 0,
+    "main_gate_enabled": false,
+    "main_kill_switch": true,
+    "bulk_gate_enabled": false,
+    "bulk_kill_switch": true,
+    "concurrency": 1,
+    "remaining_batches": 0,
+    "owned_active": 1813,
+    "owned_deleted": 109,
+    "api": "active",
+    "worker": "active",
+    "api_worker_auto_restarts": 0
+  },
+  "validation": {
+    "focused_race": "PASS",
+    "full_go_test": "PASS",
+    "detached_clean_full_go_test": "PASS",
+    "live_25_create_output_cleanup": "PASS"
+  },
+  "build_note": "/tmp is memory-backed and ran out of space during the first detached test attempt. Removed the prior owned temporary worktree, recreated this freeze on the main disk, and used disk-backed GOTMPDIR. Clean full tests and utility builds then passed. Future freezes/build temporary data should use the main disk.",
+  "next_step": "Measured 50-client canary, preserving finite scope and journal cleanup. Fleet remains disabled; v3 owned-client policy drift/expiry cleanup integration is required before broad rollout.",
+  "evidence": {
+    "canary.log": {
+      "path": "/root/backups/dob-bulk25-20261003/canary.log",
+      "sha256": "007b8756479f39c08a15d0157815c79b0387281260776b83a90bb594fcc4663b"
+    },
+    "canary-repeat.log": {
+      "path": "/root/backups/dob-bulk25-20261003/canary-repeat.log",
+      "sha256": "07efb05f2c331deb0ad6da13a689ae5a89ab0260dae33fa9b6fa911577cb62bc"
+    },
+    "resources-repeat.json": {
+      "path": "/root/backups/dob-bulk25-20261003/resources-repeat.json",
+      "sha256": "d1cc71ea3820d409674e95bcc91d3d1bb0a6cac6b8892dfe552b5860ba07329b"
+    },
+    "race-tests.log": {
+      "path": "/root/backups/dob-bulk25-20261003/race-tests.log",
+      "sha256": "366b43c0be67228a4da4964c802f01b98ca0edacc2257f3485d4311a72edc97f"
+    },
+    "full-tests.log": {
+      "path": "/root/backups/dob-bulk25-20261003/full-tests.log",
+      "sha256": "412b7abecc2a6652bc4f145174a1ad262d0b05f04bb817da908005a7ac4d3030"
+    },
+    "clean-full-tests-final.log": {
+      "path": "/root/backups/dob-bulk25-20261003/clean-full-tests-final.log",
+      "sha256": "412b7abecc2a6652bc4f145174a1ad262d0b05f04bb817da908005a7ac4d3030"
+    }
+  }
+}

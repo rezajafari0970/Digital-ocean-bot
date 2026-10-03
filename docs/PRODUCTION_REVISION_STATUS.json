@@ -2,7 +2,7 @@
   "schema_version": 2,
   "runtime_source_revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-03T08:45:15.161294+00:00",
+  "verified_at_utc": "2026-10-03T09:00:09.705109+00:00",
   "binaries": {
     "api": {
       "sha256": "b1e06f92c7861defd65ef2f96013e391a7fb57a72e96ab5bc557a8974bc16e8d",
@@ -24,5 +24,8 @@
   "migration": "000134_durable_bulk_create",
   "acceptance": "docs/BULK_V3_ACCEPTANCE.json",
   "verified": true,
-  "note": "This evidence checkpoint is committed after the product-source commit. Binary revision is compared to runtime_source_revision; later documentation-only commits are not undeployed product changes."
+  "note": "This evidence checkpoint is committed after the product-source commit. Binary revision is compared to runtime_source_revision; later documentation-only commits are not undeployed product changes.",
+  "latest_ramp_acceptance": "docs/BULK_V3_25_ACCEPTANCE.json",
+  "canary_tool_revision": "5f0ea1e654cac70f1ff7b3acc1c2fb62811075f7",
+  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c"
 }
