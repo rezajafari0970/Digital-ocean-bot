@@ -17,6 +17,7 @@ type Client struct {
 	TotalGB    int64  `json:"totalGB"`
 	ExpiryTime int64  `json:"expiryTime"`
 	LimitIP    int    `json:"limitIp"`
+	LimitHWID  int    `json:"limitHwid,omitempty"`
 	Flow       string `json:"flow,omitempty"`
 }
 type ClientRecord struct {

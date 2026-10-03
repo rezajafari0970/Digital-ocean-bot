@@ -168,3 +168,42 @@ func UpdateClientByEmailSession(ctx context.Context, exec SessionExecutor, curre
 	}
 	return nil
 }
+
+func AddClientV3Session(ctx context.Context, exec SessionExecutor, inboundID int, client Client) error {
+	if exec == nil || inboundID <= 0 || client.Email == "" {
+		return ErrMutationRequest
+	}
+	body, err := json.Marshal(map[string]any{"client": client, "inboundIds": []int{inboundID}})
+	if err != nil {
+		return err
+	}
+	resp, err := exec.Do(ctx, SessionRequest{Method: http.MethodPost, Path: "panel/api/clients/add", Body: body, ContentType: "application/json", TimeoutSeconds: 12})
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusMethodNotAllowed {
+		return fmt.Errorf("%w: http=%d", ErrAddClientUnsupported, resp.StatusCode)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		b := resp.Body
+		if len(b) > 512 {
+			b = b[:512]
+		}
+		return fmt.Errorf("%w: clients/add http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(b))
+	}
+	var envelope mutationEnvelope
+	if json.Unmarshal(resp.Body, &envelope) != nil {
+		return ErrMutationRequest
+	}
+	if !envelope.Success {
+		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
+	}
+	return nil
+}
+func AddClientCompatibleSession(ctx context.Context, exec SessionExecutor, inboundID int, client Client) error {
+	err := AddClientV3Session(ctx, exec, inboundID, client)
+	if !errors.Is(err, ErrAddClientUnsupported) {
+		return err
+	}
+	return AddClientsSession(ctx, exec, inboundID, []Client{client})
+}

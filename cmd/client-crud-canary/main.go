@@ -66,14 +66,17 @@ func run() error {
 
 	createPayload, _ := json.Marshal(map[string]any{"Client": map[string]any{
 		"id": clientID, "email": "clientops-live-" + clientID[:8], "enable": true,
-		"totalGB": int64(0), "expiryTime": int64(0), "limitIp": 0, "flow": "xtls-rprx-vision"}})
+		"totalGB": int64(0), "expiryTime": int64(0), "limitIp": 0, "limitHwid": 0, "flow": "xtls-rprx-vision"}})
 	create := clientops.Request{AccountID: accountID, PanelID: panelID, InboundID: inboundID, ClientID: clientID, Kind: clientops.KindCreate, IdempotencyKey: "crud-canary-create-" + clientID, Payload: createPayload}
 	if err = runJob(ctx, j, create); err != nil {
 		return fmt.Errorf("CREATE failed client=%s: %w", clientID, err)
 	}
 
-	email := "clientops-live-updated-" + clientID[:8]
-	updatePayload, _ := json.Marshal(map[string]any{"Patch": map[string]any{"email": email}})
+	updatePayload, _ := json.Marshal(map[string]any{"Patch": map[string]any{
+		"totalGB":    int64(104857600),
+		"expiryTime": time.Now().Add(30 * time.Minute).UnixMilli(),
+		"limitHwid":  2,
+	}})
 	update := clientops.Request{AccountID: accountID, PanelID: panelID, InboundID: inboundID, ClientID: clientID, Kind: clientops.KindUpdate, IdempotencyKey: "crud-canary-update-" + clientID, Payload: updatePayload}
 	if err = runJob(ctx, j, update); err != nil {
 		return fmt.Errorf("UPDATE failed client=%s: %w", clientID, err)

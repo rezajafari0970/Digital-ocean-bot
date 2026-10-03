@@ -238,3 +238,31 @@ func TestUpdateClientByEmailUsesV3FullReplacementRoute(t *testing.T) {
 		t.Fatalf("payload=%v", got)
 	}
 }
+
+func TestAddClientCompatiblePrefersV3(t *testing.T) {
+	e := &scriptedMutationExecutor{responses: []SessionResponse{{StatusCode: 200, Body: []byte(`{"success":true}`)}}}
+	c := Client{ID: "u1", Email: "u@example.com", Enable: true, LimitHWID: 2}
+	if err := AddClientCompatibleSession(context.Background(), e, 7, c); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.requests) != 1 || e.requests[0].Path != "panel/api/clients/add" || e.requests[0].ContentType != "application/json" {
+		t.Fatalf("requests=%+v", e.requests)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(e.requests[0].Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	ids := body["inboundIds"].([]any)
+	if len(ids) != 1 || int(ids[0].(float64)) != 7 {
+		t.Fatalf("body=%v", body)
+	}
+}
+func TestAddClientCompatibleFallsBackOnlyOnUnsupportedRoute(t *testing.T) {
+	e := &scriptedMutationExecutor{responses: []SessionResponse{{StatusCode: 404}, {StatusCode: 200, Body: []byte(`{"success":true}`)}}}
+	if err := AddClientCompatibleSession(context.Background(), e, 7, Client{ID: "u1", Email: "u@example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.requests) != 2 || e.requests[1].Path != "panel/api/inbounds/addClient" {
+		t.Fatalf("requests=%+v", e.requests)
+	}
+}

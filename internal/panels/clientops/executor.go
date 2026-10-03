@@ -84,6 +84,7 @@ func sameClient(a, b sanaei.Client) bool {
 		a.TotalGB == b.TotalGB &&
 		a.ExpiryTime == b.ExpiryTime &&
 		a.LimitIP == b.LimitIP &&
+		a.LimitHWID == b.LimitHWID &&
 		a.Flow == b.Flow
 }
 
@@ -188,7 +189,7 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			if client.ID != job.ClientID {
 				return ErrInvalidRequest
 			}
-			err = sanaei.AddClientsSession(runCtx, rt.Session.Exec, int(job.InboundID), []sanaei.Client{client})
+			err = sanaei.AddClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), client)
 		case KindDelete:
 			rt.Session.Invalidate()
 			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
