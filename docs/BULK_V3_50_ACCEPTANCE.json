@@ -1,0 +1,188 @@
+{
+  "verified_at_utc": "2026-10-03T10:00:45.803425+00:00",
+  "stage": "50",
+  "status": "ACCEPTED",
+  "worker_api_source_revision": "af1a541799088c6d3c89af675d5f6b02f82cd84c",
+  "canary_tool_revision": "ce9c44d9967554a58a26996f5317f0c989ca5256",
+  "resource_sampler_revision": "70a53ab2e618962edfbc8a287eab233a90fc104c",
+  "panel_id": "11f21262-1b20-4080-8ffc-7528a01679a9",
+  "inbound_id": 1,
+  "job_id": "20c948e0-db84-449e-83f1-69cd9020b5e8",
+  "generation_id": "017c53d6-b374-4a05-9534-10112a3f9236",
+  "count": 50,
+  "bulk_state": "SUCCEEDED",
+  "bulk_attempts": 1,
+  "delete_jobs": 50,
+  "delete_attempts": 1,
+  "output_observed": 50,
+  "timing_ms": {
+    "CREATE_VERIFIED": 2017,
+    "OUTPUT_VERIFIED": 2,
+    "CLEANUP_VERIFIED": 50113
+  },
+  "baseline_restored": true,
+  "baseline_hash": "4e6d608353e72ec878e7ca795eb01fc32b12a0fbb9199c4d91f5a696a6092c02",
+  "resource_window": {
+    "samples": 101,
+    "started_at": 1791021519.3623536,
+    "ended_at": 1791021619.9449313,
+    "peak_sampled_rss_kib": 283804,
+    "peak_sampled_cpu_percent": 25.83,
+    "minimum_available_kib": 1329324,
+    "peak_sampled_cgroup_bytes": 325066752,
+    "min_processes": 2,
+    "max_processes": 2,
+    "sampling_interval_seconds": 1,
+    "first": {
+      "time": 1791021519.3623536,
+      "index": 0,
+      "rss_kib": 282148,
+      "cpu_pct": null,
+      "processes": 2,
+      "available_kib": 1329324,
+      "cgroup_memory_bytes": 318967808
+    },
+    "last": {
+      "time": 1791021619.9449313,
+      "index": 100,
+      "rss_kib": 125648,
+      "cpu_pct": 0.99,
+      "processes": 2,
+      "available_kib": 1530404,
+      "cgroup_memory_bytes": 154230784
+    }
+  },
+  "resource_limitations": "One-second sampled process maxima, not instantaneous peaks. Combined x-ui/Xray CPU is percent of one core and includes normal load plus creation/output/cleanup.",
+  "timing_note": "CREATE_VERIFIED includes gate enable, worker claim, execution and fresh readback. OUTPUT_VERIFIED is the additional observation wait after create verification, not total propagation latency.",
+  "production_verification": {
+    "bulk": {
+      "id": "20c948e0-db84-449e-83f1-69cd9020b5e8",
+      "kind": "BULK_CREATE",
+      "state": "SUCCEEDED",
+      "result": {
+        "phase": "VERIFIED",
+        "missing": 0,
+        "observed": 50,
+        "response": {
+          "created": 50,
+          "skipped": null
+        }
+      },
+      "attempts": 1,
+      "created_at": "2026-10-03T09:58:44.232412+00:00",
+      "last_error": "",
+      "completed_at": "2026-10-03T09:58:46.221116+00:00"
+    },
+    "deletes": {
+      "count": 50,
+      "succeeded": 50,
+      "first_attempt": 50,
+      "last_completed_at": "2026-10-03T09:59:36.22653+00:00"
+    },
+    "capacity": {
+      "deficit": 0,
+      "last_error": "",
+      "observed_at": "2026-10-03T07:44:10.454322+00:00",
+      "active_users": 1,
+      "target_users": 1
+    },
+    "bulk_gate": {
+      "enabled": false,
+      "panel_id": "11f21262-1b20-4080-8ffc-7528a01679a9",
+      "singleton": true,
+      "expires_at": "2026-10-03T10:01:44.22768+00:00",
+      "inbound_id": 1,
+      "updated_at": "2026-10-03T09:59:36.380306+00:00",
+      "kill_switch": true,
+      "max_batch_size": 50,
+      "remaining_batches": 0
+    },
+    "main_gate": {
+      "enabled": false,
+      "panel_id": null,
+      "singleton": true,
+      "inbound_id": null,
+      "updated_at": "2026-10-03T09:59:36.380306+00:00",
+      "concurrency": 1,
+      "kill_switch": true
+    },
+    "ownership": {
+      "DELETED": 50
+    },
+    "generation": {
+      "id": "017c53d6-b374-4a05-9534-10112a3f9236",
+      "state": "CLOSED",
+      "closed_at": "2026-10-03T09:59:36.377448+00:00"
+    },
+    "verified_at": "2026-10-03T10:00:45.772344+00:00",
+    "pending_jobs": 0,
+    "policy_enabled": false,
+    "fleet_ownership": {
+      "ACTIVE": 1813,
+      "DELETED": 159
+    },
+    "remaining_output": 0,
+    "unexpected_new_scope_jobs": 0
+  },
+  "capacity_note": "Stored capacity remains 1/1, but observed_at predates the canary. Fresh Sanaei readback and exact baseline hash establish restored client state; this stage does not claim a new capacity-reconciler cycle.",
+  "services": {
+    "api": "active",
+    "worker": "active",
+    "target_xui": "active",
+    "api_worker_auto_restarts": 0
+  },
+  "validation": {
+    "focused_race": "PASS",
+    "full_go_test": "PASS",
+    "detached_clean_full_go_test": "PASS",
+    "live_50_create_output_cleanup": "PASS"
+  },
+  "deployment_note": "Only the clean-built bounded canary utility was replaced atomically. API/worker source and binaries remain unchanged.",
+  "next_step": "Measured 100-client canary after extending the bounded tool. Fleet stays disabled until durable bulk-owned policy drift and expiry/quota cleanup integration is complete.",
+  "evidence": {
+    "canary.log": {
+      "path": "/root/backups/dob-bulk50-20261003/canary.log",
+      "sha256": "f4e78a0c80a6319dbcf9aa2a6d09a3cd0634cdee5dd9156460540cc3438e873c"
+    },
+    "resources.json": {
+      "path": "/root/backups/dob-bulk50-20261003/resources.json",
+      "sha256": "c14a23919ad55794d33ca897c4df4c3c1d7ad00674a75250efb20418830d630d"
+    },
+    "verification.json": {
+      "path": "/root/backups/dob-bulk50-20261003/verification.json",
+      "sha256": "acdb7c3767078911ac1a49bf6f0f566e663dcfde27c2d66d22d84928300804c7"
+    },
+    "verify.sql": {
+      "path": "/root/backups/dob-bulk50-20261003/verify.sql",
+      "sha256": "b7c12e58443beea1471816d1c74626caa5ac0c8a85a3e1bb3ceda8449a404315"
+    },
+    "services.txt": {
+      "path": "/root/backups/dob-bulk50-20261003/services.txt",
+      "sha256": "0008281a54f95fec3fbe09478c36d8eeba2bfbc21e7948087f97de605cc9d61f"
+    },
+    "target-before.log": {
+      "path": "/root/backups/dob-bulk50-20261003/target-before.log",
+      "sha256": "9a7760c499ad91ab01313fc4e18083b39a4d0e6d146a27f83c898a1cbe86b247"
+    },
+    "target-after.log": {
+      "path": "/root/backups/dob-bulk50-20261003/target-after.log",
+      "sha256": "63cd4dcf61cbfbf8135cd93024fecb8b692c0ed5396bb96a699f9046e6559399"
+    },
+    "race-tests.log": {
+      "path": "/root/backups/dob-bulk50-20261003/race-tests.log",
+      "sha256": "d340c445914a1f2c12bad023440de803ff26492ae9ed49f152c0eae3b1185b29"
+    },
+    "full-tests.log": {
+      "path": "/root/backups/dob-bulk50-20261003/full-tests.log",
+      "sha256": "9e8518bdf7b8aa23a3c3e19f31fd9707b644802f6b7bca7c9d9e716a143e1d61"
+    },
+    "clean-full-tests.log": {
+      "path": "/root/backups/dob-bulk50-20261003/clean-full-tests.log",
+      "sha256": "3746573e674a889ffcf1373668b4beb434df2f3c1a4cc79de7eea25e979433b1"
+    },
+    "binary-sha256.txt": {
+      "path": "/root/backups/dob-bulk50-20261003/binary-sha256.txt",
+      "sha256": "55c66e302cf34ca14bbaa1cf16ce180416507c665bc697dda76f3de10285a6da"
+    }
+  }
+}

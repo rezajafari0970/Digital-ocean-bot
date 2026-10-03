@@ -38,3 +38,11 @@ Next: measured 25-client gated canary, then 50/100/250 only after acceptance. Do
 See BULK_V3_25_ACCEPTANCE.json. Two isolated 25-client runs passed, each one BULK_CREATE attempt and 25 first-attempt DELETE jobs. The second run repaired the resource-measurement evidence after the first SSH output was truncated. Second create verification: 1516 ms; Output observation after create verification: 1003 ms; cleanup: 24573 ms. A complete 56-sample window includes creation and cleanup. Sampled combined x-ui/Xray RSS max 386104 KiB; CPU max 59.57% of one core; MemAvailable minimum 1143000 KiB. Baseline restored, gates closed, capacity 1/1.
 
 Current next gate: 50-client canary. Do not interpret two 25-client runs as a 50-client batch test. Use a disk-backed clean worktree and GOTMPDIR: /tmp is tmpfs and nearly full. Production API/worker remain on af1a541 because this stage changed only canary/inspection utilities and documentation.
+
+## Stage 50 accepted
+
+See BULK_V3_50_ACCEPTANCE.json. Job 20c948e0-db84-449e-83f1-69cd9020b5e8 created and fresh-verified all 50 clients in one attempt (2017 ms). All appeared in Output; all 50 durable DELETE jobs succeeded on their first attempt (50113 ms cleanup). The original single-client hash was restored, generation CLOSED, test Output empty, both gates closed, no pending jobs or new jobs outside the target scope. Fleet ownership is ACTIVE=1813, DELETED=159.
+
+The complete 101-sample resource window covers create and cleanup. Combined x-ui/Xray sampled RSS maximum 283804 KiB; CPU maximum 25.83% of one core; minimum MemAvailable 1329324 KiB. These are one-second samples, not instantaneous peaks. API, worker and target x-ui remain active. Stored capacity is 1/1 but its observed_at predates this test; live restoration is proven by fresh Sanaei readback, not by treating that snapshot as new.
+
+Current next gate: measured 100-client canary. The utility currently allows only 10, 25 or 50. Preserve worker-only execution, finite scope, durable rate budget and journal cleanup. Fleet generation remains disabled pending durable bulk-owned policy drift and expiry/quota cleanup integration. Runtime API/worker remain af1a541; clean-built canary tool is ce9c44d9967554a58a26996f5317f0c989ca5256.

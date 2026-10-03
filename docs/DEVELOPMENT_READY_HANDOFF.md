@@ -29,3 +29,8 @@ Development may resume when the knowledge artifacts exist, their hashes are froz
 - Read `docs/BULK_V3_25_ACCEPTANCE.json`: stage 25 is accepted, including complete resource sampling and cleanup.
 - Next measured gate is 50 clients. Main/bulk execution gates remain closed; fleet generation is disabled.
 - Build on the main disk with a disk-backed GOTMPDIR; /tmp tmpfs exhaustion was observed and resolved for this workflow.
+
+## Latest ramp checkpoint — stage 50 (2026-10-03)
+- Read `docs/BULK_V3_50_ACCEPTANCE.json`: one 50-client batch passed create, Output, complete resource sampling and cleanup.
+- Next measured gate is 100 clients; current utility is bounded to 10/25/50. Both execution gates and fleet generation remain closed.
+- Capacity table timestamp predates this stage; fresh Sanaei readback proves the unchanged one-client baseline.
