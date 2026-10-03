@@ -144,3 +144,79 @@ func TestAddInboundRejectsSuccessFalse(
 		)
 	}
 }
+
+func TestDeleteClientByEmailUsesV3Route(t *testing.T) {
+	e := &captureMutationExecutor{Response: SessionResponse{StatusCode: 200, Body: []byte(`{"success":true}`)}}
+	if err := DeleteClientByEmailSession(context.Background(), e, "user+one@example.com"); err != nil {
+		t.Fatal(err)
+	}
+	if e.Request.Path != "panel/api/clients/del/user+one@example.com" {
+		t.Fatalf("path=%q", e.Request.Path)
+	}
+}
+
+func TestDeleteClientByEmail404IsRouteUnsupported(t *testing.T) {
+	e := &captureMutationExecutor{Response: SessionResponse{StatusCode: 404}}
+	err := DeleteClientByEmailSession(context.Background(), e, "u@example.com")
+	if !errors.Is(err, ErrDeleteClientRouteUnsupported) {
+		t.Fatalf("err=%v", err)
+	}
+}
+
+type scriptedMutationExecutor struct {
+	responses []SessionResponse
+	errs      []error
+	requests  []SessionRequest
+}
+
+func (e *scriptedMutationExecutor) Do(_ context.Context, r SessionRequest) (SessionResponse, error) {
+	e.requests = append(e.requests, r)
+	i := len(e.requests) - 1
+	var resp SessionResponse
+	if i < len(e.responses) {
+		resp = e.responses[i]
+	}
+	var err error
+	if i < len(e.errs) {
+		err = e.errs[i]
+	}
+	return resp, err
+}
+
+func TestDeleteClientCompatiblePrefersV3(t *testing.T) {
+	e := &scriptedMutationExecutor{responses: []SessionResponse{{StatusCode: 200, Body: []byte(`{"success":true}`)}}}
+	if err := DeleteClientCompatibleSession(context.Background(), e, 1, "uuid", "u@example.com"); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.requests) != 1 || e.requests[0].Path != "panel/api/clients/del/u@example.com" {
+		t.Fatalf("requests=%+v", e.requests)
+	}
+}
+func TestDeleteClientCompatibleFallsBackOnlyOnUnsupportedRoute(t *testing.T) {
+	e := &scriptedMutationExecutor{responses: []SessionResponse{{StatusCode: 404}, {StatusCode: 200, Body: []byte(`{"success":true}`)}}}
+	if err := DeleteClientCompatibleSession(context.Background(), e, 1, "uuid", "u@example.com"); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.requests) != 2 || e.requests[1].Path != "panel/api/inbounds/1/delClient/uuid" {
+		t.Fatalf("requests=%+v", e.requests)
+	}
+}
+func TestDeleteClientCompatibleDoesNotFallbackOnServerError(t *testing.T) {
+	e := &scriptedMutationExecutor{responses: []SessionResponse{{StatusCode: 500, Body: []byte("boom")}}}
+	if err := DeleteClientCompatibleSession(context.Background(), e, 1, "uuid", "u@example.com"); err == nil {
+		t.Fatal("expected error")
+	}
+	if len(e.requests) != 1 {
+		t.Fatalf("requests=%d", len(e.requests))
+	}
+}
+func TestDeleteClientCompatibleDoesNotFallbackOnTransportError(t *testing.T) {
+	boom := errors.New("transport")
+	e := &scriptedMutationExecutor{errs: []error{boom}}
+	if err := DeleteClientCompatibleSession(context.Background(), e, 1, "uuid", "u@example.com"); !errors.Is(err, boom) {
+		t.Fatalf("err=%v", err)
+	}
+	if len(e.requests) != 1 {
+		t.Fatalf("requests=%d", len(e.requests))
+	}
+}

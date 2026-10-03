@@ -187,7 +187,25 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 			}
 			err = sanaei.AddClientsSession(runCtx, rt.Session.Exec, int(job.InboundID), []sanaei.Client{client})
 		case KindDelete:
-			err = sanaei.DeleteClientSession(runCtx, rt.Session.Exec, int(job.InboundID), job.ClientID)
+			rt.Session.Invalidate()
+			raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+			if readErr != nil {
+				return readErr
+			}
+			if !found {
+				return ErrInboundMissing
+			}
+			current, exists, readErr := clientFromInbound(raw, job.ClientID)
+			if readErr != nil {
+				return readErr
+			}
+			if !exists {
+				return nil
+			}
+			if current.Email == "" {
+				return ErrClientConflict
+			}
+			err = sanaei.DeleteClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), job.ClientID, current.Email)
 		case KindUpdate:
 			patch, patchErr := payloadPatch(job.Payload)
 			if patchErr != nil {
