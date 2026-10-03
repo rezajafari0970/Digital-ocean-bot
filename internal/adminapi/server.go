@@ -89,6 +89,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/output/share", s.require(s.createOutputShare, true))
 	m.HandleFunc("GET /share/output/{token}", s.sharedOutput)
 	m.HandleFunc("GET /api/v1/config-panels", s.require(s.getConfigPanels, false))
+	m.HandleFunc("GET /api/v1/client-mutations", s.require(s.listClientMutations, false))
 	m.HandleFunc("POST /api/v1/client-mutations", s.require(s.clientMutations, true))
 	m.HandleFunc("PATCH /api/v1/client-mutations", s.require(s.clientMutations, true))
 	m.HandleFunc("DELETE /api/v1/client-mutations", s.require(s.clientMutations, true))

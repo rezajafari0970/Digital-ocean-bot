@@ -1,10 +1,12 @@
 package adminapi
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -153,4 +155,43 @@ func reqString(v string) *string {
 		return nil
 	}
 	return &v
+}
+
+func (s *Server) listClientMutations(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.DB.QueryContext(r.Context(),
+		"SELECT id::text,kind,client_id,state,attempts,last_error,created_at,updated_at,completed_at FROM client_mutation_jobs ORDER BY created_at DESC LIMIT 20")
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "db_error"})
+		return
+	}
+	defer rows.Close()
+	recent := make([]map[string]any, 0, 20)
+	for rows.Next() {
+		var id, kind, clientID, state, lastError string
+		var attempts int
+		var created, updated time.Time
+		var completed sql.NullTime
+		if rows.Scan(&id, &kind, &clientID, &state, &attempts, &lastError, &created, &updated, &completed) != nil {
+			continue
+		}
+		item := map[string]any{"id": id, "kind": kind, "client_id": clientID, "state": state,
+			"attempts": attempts, "last_error": lastError, "created_at": created, "updated_at": updated}
+		if completed.Valid {
+			item["completed_at"] = completed.Time
+		}
+		recent = append(recent, item)
+	}
+	counts := map[string]int{"PENDING": 0, "RUNNING": 0, "SUCCEEDED": 0, "FAILED": 0, "OBSOLETE": 0}
+	countRows, err := s.DB.QueryContext(r.Context(), "SELECT state,count(*) FROM client_mutation_jobs GROUP BY state")
+	if err == nil {
+		defer countRows.Close()
+		for countRows.Next() {
+			var state string
+			var count int
+			if countRows.Scan(&state, &count) == nil {
+				counts[state] = count
+			}
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"execution_enabled": false, "counts": counts, "recent": recent})
 }
