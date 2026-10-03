@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-03T16:22:28.081020+00:00",
+  "status": "DEPLOYED_SCOPED_ACCEPTANCE_WITH_LIMITATIONS",
+  "canonical_source_revision": "5692830831c3173069df94c82ae54ef2f8e8699e",
+  "branch": "checkpoint/final-e2e-20260929",
+  "evidence_directory": "/root/backups/dob-admin-routing-20261003",
+  "binaries": {
+    "digital-ocean-bot-api": {
+      "revision": "5692830831c3173069df94c82ae54ef2f8e8699e",
+      "vcs_modified": false,
+      "sha256": "553fb9e138108222a6fce54f4538765fd3001a3abbc849034b8ccaae62bb77d6"
+    },
+    "digital-ocean-bot-worker": {
+      "revision": "72780959677e616a4719c0b89048bd122f35d822",
+      "vcs_modified": false,
+      "sha256": "dee91a2777b93482c838ec8ad8a3aa893c3b2b678f8c41997b5ad2e50e7966f7"
+    },
+    "bulk-client-canary": {
+      "revision": "72780959677e616a4719c0b89048bd122f35d822",
+      "vcs_modified": false,
+      "sha256": "11b54433afc7ad01ee7dae02209da85e97b04e08b02308c2f28bbbb820128558"
+    }
+  },
+  "services": {
+    "digital-ocean-bot-api": "active",
+    "digital-ocean-bot-worker": "active"
+  },
+  "tests": {
+    "focused_postgresql_and_race": "PASS",
+    "full_go_test": "PASS",
+    "clean_detached_full_test_and_build": "PASS",
+    "js_syntax": "PASS",
+    "fixture_delete_production_api": "PASS",
+    "durable_cleanup_lost_response_and_restart_integration": "PASS",
+    "stable_class_deletion_replacement_tests": "PASS",
+    "strict_class_output_postgresql": "PASS"
+  },
+  "production_routing": {
+    "control": {
+      "fleet": true,
+      "enabled": true,
+      "revision": 23,
+      "panel_ids": [],
+      "singleton": true
+    },
+    "serving": 19,
+    "verified": 16,
+    "unverified_ids": [
+      "5c390db2-00f6-4e8c-9784-a86307e0adcf",
+      "17608a94-90a3-43b4-8faf-161372568ec0",
+      "a2c199fc-862a-4dd3-b675-c050f443f3a6"
+    ],
+    "configured_residential": 0
+  },
+  "live_freshness_canary": {
+    "samples": 36,
+    "all_five_verified": true,
+    "maximum_proof_age_seconds": 21.900337
+  },
+  "production_class_output_proof": {
+    "disjoint": true,
+    "intent_matches_effective_class": true,
+    "direct_count": 15,
+    "residential_count": 0
+  },
+  "real_quota_canary": {
+    "run_id": "5523aae1-149d-498f-b8ef-37d39f1414de",
+    "panel_id": "0a1bfc1f-0415-413b-bd92-71b37cea62b4",
+    "jobs": [
+      {
+        "kind": "BULK_CREATE",
+        "count": 2,
+        "state": "SUCCEEDED",
+        "attempts": 1
+      },
+      {
+        "kind": "BULK_DELETE",
+        "count": 2,
+        "state": "SUCCEEDED",
+        "attempts": 1
+      },
+      {
+        "kind": "UPDATE",
+        "count": 3,
+        "state": "SUCCEEDED",
+        "attempts": 1
+      }
+    ],
+    "phase": "SUCCEEDED",
+    "evidence": {
+      "kind": "LIFECYCLE",
+      "acceptance": "REAL_QUOTA",
+      "observed_up": 132,
+      "quota_bytes": 2097152,
+      "cleanup_only": false,
+      "observed_down": 6291675,
+      "quota_deleted": 1,
+      "traffic_served": 6291456,
+      "baseline_active": 2,
+      "traffic_received": 6291456,
+      "baseline_restored": true,
+      "quota_observed_at": "2026-10-03T16:03:41.814191+00:00",
+      "quota_replacements": 1,
+      "created_output_verified": 3,
+      "replacement_output_verified": true
+    },
+    "completed_at": "2026-10-03T16:03:55.890324+00:00",
+    "remaining_owned": 0,
+    "generation_state": "CLOSED",
+    "remaining_output": 0
+  },
+  "current_gates_and_policy": {
+    "policy": {
+      "target": 2,
+      "enabled": true,
+      "quota_bytes": 0,
+      "device_limit": 0,
+      "generate_direct": true,
+      "lifetime_seconds": 10800,
+      "users_per_second": 1,
+      "generate_residential": true
+    },
+    "bulk_gate": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "client_gate": {
+      "enabled": true,
+      "panel_id": null,
+      "inbound_id": null,
+      "concurrency": 1,
+      "kill_switch": false
+    },
+    "unresolved_jobs": 0
+  },
+  "billing": [
+    {
+      "fresh": true,
+      "provider": "digitalocean",
+      "observed_at": "2026-10-03T16:19:51.381844+00:00",
+      "invoice_count": 0,
+      "invoice_status_known": false
+    },
+    {
+      "fresh": false,
+      "provider": "digitalocean",
+      "observed_at": "2026-10-03T16:15:03.272034+00:00",
+      "invoice_count": 1,
+      "invoice_status_known": false
+    },
+    {
+      "fresh": true,
+      "provider": "vultr",
+      "observed_at": "2026-10-03T16:20:06.391296+00:00",
+      "invoice_count": 0,
+      "invoice_status_known": false
+    },
+    {
+      "fresh": true,
+      "provider": "vultr",
+      "observed_at": "2026-10-03T16:20:21.424126+00:00",
+      "invoice_count": 1,
+      "invoice_status_known": false
+    }
+  ],
+  "limitations": [
+    "Healthy residential egress through the installed production router has not been traffic-tested; real down-proxy blocking and no-residential direct reconciliation were observed, and healthy routing was covered by HTTP/PostgreSQL integration and installed-Xray configuration validation.",
+    "The original production residential association disappeared during concurrent operations; its shared proxy remained and recovered. This task did not restore or recreate the association.",
+    "Some retiring/expired panels are unreachable; one newly created serving panel was also observed with an API timeout despite SSH/x-ui health. Unverified class output remains hidden and retries retain backoff.",
+    "Full fleet client/inbound destruction was not executed as an acceptance test. It was covered using scoped PostgreSQL/HTTP lost-response/restart tests.",
+    "Account purge was production-tested with a newly created disabled empty account. Destruction of an existing provider-populated account was not executed as a test.",
+    "Provider invoice amount/date are live, but per-invoice settlement is UNKNOWN in inspected API models; balances are not labelled unpaid debt.",
+    "The quota canary sent 6 MiB against 2 MiB configured quota and verified observed counters, durable deletion and one replacement; it does not prove packet-exact enforcement at the quota boundary."
+  ]
+}

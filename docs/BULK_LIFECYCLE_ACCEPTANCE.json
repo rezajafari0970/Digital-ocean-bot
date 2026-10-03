@@ -1023,5 +1023,6 @@
     "Automatic lifecycle covers ready, authorized v3 Reality scopes. The panel with two historical CREATE failures is excluded; those audit rows are unchanged.",
     "Scope expiry and finite budgets intentionally require fresh authorization when exhausted; they are never automatically renewed.",
     "This acceptance does not add a concurrent traffic-load benchmark to the historical 10000 configured-client test."
-  ]
+  ],
+  "real_quota_acceptance_followup": "docs/ADMIN_ROUTING_ACCEPTANCE.json"
 }
