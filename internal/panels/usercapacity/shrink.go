@@ -105,3 +105,52 @@ func (s Service) ShrinkDryRunRuntime(ctx context.Context, panelID string, inboun
 	}
 	return nil, fmt.Errorf("inbound %d missing", inboundID)
 }
+
+type ShrinkDecision struct {
+	Gate            bool
+	Limit           int
+	EffectiveTarget int
+	Pending         bool
+	Candidates      []string
+}
+
+func (s Service) ShrinkDecisionDryRun(ctx context.Context, panelID string, inboundID int64, runtime *sanaei.PanelRuntime, target, rate int) (ShrinkDecision, error) {
+	var out ShrinkDecision
+	raws, err := runtime.Session.Snapshot(ctx)
+	if err != nil {
+		return out, err
+	}
+	owned, err := s.activeOwnedPolicy(ctx, panelID, inboundID)
+	if err != nil {
+		return out, err
+	}
+	var pending int
+	err = s.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state='DELETE_PENDING'`, panelID, inboundID).Scan(&pending)
+	if err != nil {
+		return out, err
+	}
+	out.Pending = pending > 0
+	out.Gate, out.Limit, err = s.shrinkGate(ctx, panelID, inboundID)
+	if err != nil {
+		return out, err
+	}
+	out.EffectiveTarget, _, err = s.effectiveTargetRate(ctx, panelID, inboundID, target, rate)
+	if err != nil {
+		return out, err
+	}
+	for _, raw := range raws {
+		var in rawInbound
+		if json.Unmarshal(raw, &in) != nil || int64(in.ID) != inboundID {
+			continue
+		}
+		var st struct {
+			Clients []sanaei.Client `json:"clients"`
+		}
+		if json.Unmarshal(in.Settings, &st) != nil {
+			return out, fmt.Errorf("inbound settings")
+		}
+		out.Candidates = ownedShrinkCandidates(st.Clients, owned, out.EffectiveTarget, out.Limit)
+		return out, nil
+	}
+	return out, fmt.Errorf("inbound missing")
+}

@@ -15,9 +15,10 @@ import (
 
 func main() {
 	var panelID string
-	var dryRun bool
+	var dryRun, trace bool
 	flag.StringVar(&panelID, "panel", "", "panel uuid")
 	flag.BoolVar(&dryRun, "dry-run", false, "show owned shrink candidates without mutation")
+	flag.BoolVar(&trace, "trace-shrink", false, "show shrink decision without mutation")
 	flag.Parse()
 	if panelID == "" {
 		log.Fatal("panel required")
@@ -49,6 +50,18 @@ func main() {
 		log.Fatal(err)
 	}
 	s := usercapacity.Service{DB: a.DB, Secrets: a.Container.Secrets}
+	if trace {
+		var target, rate int
+		if e := a.DB.QueryRowContext(ctx, `SELECT target_users_per_inbound,users_per_second FROM global_config_policies WHERE policy_key='reality'`).Scan(&target, &rate); e != nil {
+			log.Fatal(e)
+		}
+		decision, e := s.ShrinkDecisionDryRun(ctx, panelID, 1, rt, target, rate)
+		if e != nil {
+			log.Fatal(e)
+		}
+		fmt.Printf("SHRINK_TRACE gate=%v limit=%d effective_target=%d pending=%v candidates=%v\n", decision.Gate, decision.Limit, decision.EffectiveTarget, decision.Pending, decision.Candidates)
+		return
+	}
 	if dryRun {
 		ids, e := s.ShrinkDryRunRuntime(ctx, panelID, 1, rt, 1, 1)
 		if e != nil {

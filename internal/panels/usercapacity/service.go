@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -276,6 +278,10 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 		shrinkEnabled, shrinkLimit, e := s.shrinkGate(ctx, p.ID, int64(in.ID))
 		if e != nil {
 			return e
+		}
+		if shrinkEnabled {
+			traceCandidates := ownedShrinkCandidates(activeClients, ownedPolicies, effectiveTarget, shrinkLimit)
+			log.Printf("user_capacity_shrink_trace panel=%s inbound=%d active=%d effective_target=%d gate=%t limit=%d planned_blocked=%t shrink_pending=%t owned=%d candidates=%d", p.ID, in.ID, active, effectiveTarget, shrinkEnabled, shrinkLimit, plannedBlocked, shrinkPending, len(ownedPolicies), len(traceCandidates))
 		}
 		if shrinkEnabled && !plannedBlocked && !shrinkPending && active > effectiveTarget {
 			shrinkIDs := ownedShrinkCandidates(activeClients, ownedPolicies, effectiveTarget, shrinkLimit)
