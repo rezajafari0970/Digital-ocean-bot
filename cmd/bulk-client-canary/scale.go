@@ -316,15 +316,15 @@ func runScale(panel string, inbound int64, target int, runID string, cleanup boo
 		if err != nil {
 			return err
 		}
-		if len(r.Baseline) != 1 {
-			return fmt.Errorf("new scale expects exactly one preserved manual client")
+		if len(r.Baseline) < 1 || len(r.Baseline) > 100 || len(r.Baseline) >= r.Target {
+			return fmt.Errorf("scale requires 1..100 preserved baseline clients below target")
 		}
 		var owned int
-		if err = a.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state IN ('PLANNED','ACTIVE','DELETE_PENDING')`, r.Panel, r.Inbound).Scan(&owned); err != nil {
+		if err = a.DB.QueryRowContext(ctx, `SELECT count(*) FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.state IN ('PLANNED','DELETE_PENDING')`, r.Panel, r.Inbound).Scan(&owned); err != nil {
 			return err
 		}
 		if owned != 0 {
-			return fmt.Errorf("scope already has owned clients")
+			return fmt.Errorf("scope has unreconciled ownership")
 		}
 		r.ID, err = sanaei.UUIDv4()
 		if err != nil {
@@ -348,7 +348,7 @@ func runScale(panel string, inbound int64, target int, runID string, cleanup boo
 		if err = tx.Commit(); err != nil {
 			return err
 		}
-		fmt.Printf("SCALE_PLANNED run=%s target_total=%d baseline=1 baseline_sha256=%x\n", r.ID, r.Target, sha256.Sum256(b))
+		fmt.Printf("SCALE_PLANNED run=%s target_total=%d baseline=%d baseline_sha256=%x\n", r.ID, r.Target, len(r.Baseline), sha256.Sum256(b))
 		fmt.Printf("SCALE_RECOVERY bulk-client-canary -scale-run %s -scale-cleanup\n", r.ID)
 	}
 	all, err := scaleExpected(ctx, a.DB, r)
