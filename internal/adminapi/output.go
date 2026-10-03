@@ -228,6 +228,11 @@ func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) refreshOutputLive(ctx context.Context) {
+	s.OutputRefreshMu.Lock()
+	defer s.OutputRefreshMu.Unlock()
+	if ctx.Err() != nil {
+		return
+	}
 	panels, err := (readyworker.SQLSource{DB: s.DB}).EligibleReadyPanels(ctx)
 	if err != nil || len(panels) == 0 {
 		return

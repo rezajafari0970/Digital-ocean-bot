@@ -21,18 +21,19 @@ import (
 )
 
 type Server struct {
-	WebPath        string
-	Auth           auth.Service
-	DB             *sql.DB
-	Container      app.Container
-	Health         observability.Health
-	LoginLimiter   *LoginLimiter
-	OutputRuntimes *sanaei.RuntimeManager
-	OutputPauseMu  sync.RWMutex
-	CleanupMu      sync.RWMutex
-	CleanupJobs    map[string]*cleanupJob
-	BrowserMu      sync.Mutex
-	BrowserTickets map[string]time.Time
+	WebPath         string
+	Auth            auth.Service
+	DB              *sql.DB
+	Container       app.Container
+	Health          observability.Health
+	LoginLimiter    *LoginLimiter
+	OutputRuntimes  *sanaei.RuntimeManager
+	OutputPauseMu   sync.RWMutex
+	OutputRefreshMu sync.Mutex
+	CleanupMu       sync.RWMutex
+	CleanupJobs     map[string]*cleanupJob
+	BrowserMu       sync.Mutex
+	BrowserTickets  map[string]time.Time
 }
 
 func New(db *sql.DB, c app.Container) *Server {
