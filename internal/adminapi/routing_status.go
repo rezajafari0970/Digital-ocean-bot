@@ -21,7 +21,7 @@ func (s *Server) residentialRoutingStatus(w http.ResponseWriter, r *http.Request
  'verified_panels',(SELECT count(*) FROM progress WHERE scoped AND verified),
  'failed_panels',(SELECT count(*) FROM progress WHERE scoped AND failed),
  'configured_proxies',(SELECT count(*) FROM residential_proxies),
- 'healthy_proxies',(SELECT count(*) FROM residential_proxies rp JOIN proxies p ON p.id=rp.proxy_id WHERE rp.enabled AND p.status='healthy' AND p.last_success_at>now()-interval '3 minutes'))
+ 'healthy_proxies',(SELECT count(*) FROM residential_proxies rp WHERE rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'))
  FROM residential_routing_control c WHERE singleton`).Scan(&raw)
 	if err != nil {
 		writeJSON(w, 500, errorBody())

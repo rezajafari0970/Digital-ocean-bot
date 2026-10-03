@@ -45,7 +45,7 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 		return "", err
 	}
 	var id string
-	err = tx.QueryRowContext(ctx, "SELECT id::text FROM panel_cleanup_jobs WHERE state<>'SUCCEEDED' FOR UPDATE").Scan(&id)
+	err = tx.QueryRowContext(ctx, "SELECT id::text FROM panel_cleanup_jobs WHERE state NOT IN('SUCCEEDED','CANCELLED') FOR UPDATE").Scan(&id)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return "", err
 	}
@@ -116,10 +116,50 @@ func (s Store) Status(ctx context.Context, id string) (Status, error) {
 	}
 	if st.Status == "SUCCEEDED" {
 		st.Status = "done"
+	} else if st.Status == "CANCELLED" {
+		st.Status = "cancelled"
 	} else if st.Status == "PAUSED" {
 		st.Status = "paused"
 	} else {
 		st.Status = "running"
 	}
 	return st, rows.Err()
+}
+
+// Current returns the latest durable status so page reloads never lose progress.
+func (s Store) Current(ctx context.Context) (Status, error) {
+	var id string
+	if err := s.DB.QueryRowContext(ctx, "SELECT id::text FROM panel_cleanup_jobs ORDER BY created_at DESC LIMIT 1").Scan(&id); err != nil {
+		return Status{}, err
+	}
+	return s.Status(ctx, id)
+}
+
+// Cancel waits for the current mutation to finish before permanently stopping
+// this saved scope. It preserves all observations and never claims a deletion succeeded.
+func (s Store) Cancel(ctx context.Context, id string) error {
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, lock := range []int64{628341902731, 628341902732} {
+		if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock($1)", lock); err != nil {
+			return err
+		}
+	}
+	var state string
+	if err = tx.QueryRowContext(ctx, "SELECT state FROM panel_cleanup_jobs WHERE id=$1 FOR UPDATE", id).Scan(&state); err != nil {
+		return err
+	}
+	if state == "CANCELLED" || state == "SUCCEEDED" {
+		return tx.Commit()
+	}
+	if _, err = tx.ExecContext(ctx, "UPDATE panel_cleanup_jobs SET state='CANCELLED',completed_at=now() WHERE id=$1", id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id IN(SELECT panel_id FROM panel_cleanup_targets WHERE job_id=$1)", id); err != nil {
+		return err
+	}
+	return tx.Commit()
 }

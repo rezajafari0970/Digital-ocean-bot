@@ -74,12 +74,12 @@ func (s *Server) putGlobalConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var cleaning bool
-	if e = tx.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM panel_cleanup_jobs WHERE state<>'SUCCEEDED')").Scan(&cleaning); e != nil {
+	if e = tx.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM panel_cleanup_jobs WHERE state NOT IN('SUCCEEDED','CANCELLED'))").Scan(&cleaning); e != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	if cleaning && x.Enabled {
-		writeJSON(w, 409, map[string]string{"error": "cleanup_in_progress", "detail": "Finish the saved cleanup before enabling creation."})
+		writeJSON(w, 409, map[string]string{"error": "cleanup_in_progress", "detail": "Cleanup is paused or running. Resume it, or cancel remaining cleanup from Configs before enabling creation."})
 		return
 	}
 	ports, _ := json.Marshal(x.Ports)

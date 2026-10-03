@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -28,6 +29,7 @@ func main() {
 func run() error {
 	base := flag.String("base-url", "http://127.0.0.1:18080", "local production API")
 	fixtures := flag.Bool("fixture-delete", false, "exercise deletes on newly created disabled test fixtures only")
+	browserScript := flag.String("browser-script", "", "run a local browser acceptance script with an ephemeral session")
 	flag.Parse()
 	u, err := url.Parse(*base)
 	if err != nil || u.Scheme != "http" || u.Hostname() != "127.0.0.1" {
@@ -84,6 +86,15 @@ func run() error {
 		raw, e := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 		return resp.StatusCode, raw, e
 	}
+	if *browserScript != "" {
+		command := exec.CommandContext(ctx, "node", *browserScript)
+		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base)
+		command.Stdout = os.Stdout
+		command.Stderr = os.Stderr
+		if err = command.Run(); err != nil {
+			return errors.New("browser acceptance failed")
+		}
+	}
 	for _, path := range []string{"/api/v1/system", "/api/v1/accounts", "/api/v1/proxies", "/api/v1/residential-proxies", "/api/v1/residential-routing", "/api/v1/configs", "/api/v1/config-capacity", "/api/v1/output?route_class=DIRECT", "/api/v1/output?route_class=RESIDENTIAL"} {
 		code, raw, e := request("GET", path, nil)
 		if e != nil {
@@ -132,7 +143,7 @@ func run() error {
 		{"INSERT INTO accounts(id,name,provider,secret_ref,enabled) VALUES($1,$2,'digitalocean','fixture',false)", []any{account, "acceptance-" + account}},
 		{"INSERT INTO proxies(id,name,type,host,port,status) VALUES($1,$2,'socks5','127.0.0.1',9,'down')", []any{proxy, "acceptance-" + proxy}},
 		{"INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,'proxy_required',$2)", []any{account, proxy}},
-		{"INSERT INTO residential_proxies(proxy_id,outbound_tag,enabled) VALUES($1,$2,false)", []any{proxy, "residential-ads-" + proxy}},
+		{"INSERT INTO residential_proxies(proxy_id,name,type,host,port,outbound_tag,enabled) VALUES($1,'test','socks5','localhost',1080,$2,false)", []any{proxy, "residential-ads-" + proxy}},
 		{"INSERT INTO account_billing_snapshots(account_id,data) VALUES($1,'{}')", []any{account}},
 	} {
 		if _, err = tx.ExecContext(ctx, q.sql, q.args...); err != nil {

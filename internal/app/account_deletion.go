@@ -50,6 +50,19 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 	if err != nil {
 		// Error codes shown in the UI contain no provider credentials or URLs.
 		detail := "Provider cleanup pending; " + deletionErrorCode(err)
+		var state string
+		if e := c.DB.QueryRowContext(ctx, "SELECT provider_state FROM accounts WHERE id=$1", id).Scan(&state); e == nil {
+			switch state {
+			case "TOKEN_INVALID":
+				detail = "Deletion blocked: provider token is invalid. Update the API credential to verify and delete remaining servers."
+			case "LOCKED":
+				detail = "Deletion blocked: provider account is locked. Restore provider access before remaining servers can be verified."
+			case "PERMISSION_DENIED":
+				detail = "Deletion blocked: provider denied access. Restore read/delete permissions."
+			case "BILLING_BLOCKED":
+				detail = "Deletion blocked: provider billing restriction prevents resource cleanup."
+			}
+		}
 		_, _ = c.DB.ExecContext(ctx, `UPDATE account_deletion_jobs SET last_error=$2 WHERE account_id=$1`, id, detail)
 		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='DELETE_PENDING',runtime_status_detail=$2,deleted_at=NULL WHERE id=$1 AND deletion_requested_at IS NOT NULL`, id, detail)
 	}
@@ -59,10 +72,20 @@ func deletionErrorCode(err error) string {
 	if errors.Is(err, ErrNetworkNotReady) {
 		return "account network not ready"
 	}
-	if class := providers.Class(err); class != "" {
+	if class := providers.Class(err); class != "" && class != providers.ErrorUnknown {
 		return string(class)
 	}
-	return "verification or resource cleanup incomplete"
+	switch err.Error() {
+	case "managed resources or operations pending":
+		return "managed servers or operations are still being deleted"
+	case "waiting for in-flight account work to settle":
+		return "waiting for in-flight work to settle"
+	case "tracked provider resource still exists":
+		return "provider still reports managed servers"
+	case "SSH cleanup continues next chunk":
+		return "managed SSH key cleanup is in progress"
+	}
+	return "fresh provider verification or resource cleanup incomplete"
 }
 func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 	var pending, ever bool

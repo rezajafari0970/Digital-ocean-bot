@@ -294,7 +294,7 @@ exit 1`
 		cmd = `for f in /usr/local/x-ui/x-ui /usr/local/x-ui/bin/x-ui; do if [ -f "$f" ]; then strings "$f" 2>/dev/null | grep -E '^    "/panel/api/clients/[^"]+":' | head -70; fi; done`
 	}
 	if *health {
-		cmd = `systemctl is-active x-ui; ps -C x-ui -C xray -o comm=,rss=,%cpu=; free -m`
+		cmd = `systemctl is-active x-ui; ps -C x-ui -C xray -o comm=,rss=,%cpu=; free -m; ss -lntp | head -25; printf "Local HTTP status: "; curl -s -o /dev/null --max-time 5 -w "%{http_code}\\n" http://127.0.0.1:2053/ || true; ufw status numbered; iptables -L ufw-user-input -n --line-numbers | head -30`
 	}
 	if *samples > 0 {
 		cmd = fmt.Sprintf(`python3 - <<'PYRESOURCE'

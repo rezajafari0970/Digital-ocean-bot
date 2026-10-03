@@ -1,6 +1,8 @@
 package adminapi
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 )
@@ -267,4 +269,18 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "detail": "Deletion requested. Managed provider resources must be verified absent before saved account data is purged."})
+}
+
+func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
+	var requested sql.NullTime
+	var attempts, remaining int
+	var detail string
+	err := s.DB.QueryRowContext(ctx, `SELECT a.deletion_requested_at,COALESCE(j.attempts,0),
+ (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
+ COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker')
+ FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail)
+	if err != nil || !requested.Valid {
+		return nil
+	}
+	return map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail}
 }

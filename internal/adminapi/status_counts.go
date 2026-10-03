@@ -3,7 +3,15 @@ package adminapi
 // Counts are mutually exclusive within each health breakdown. No stale snapshot
 // is promoted to "healthy"; unknown observations remain visible as unverified.
 const dashboardCountsSQL = `
-WITH live_accounts AS (
+WITH provider_inventory AS (
+ SELECT a.id account_id, s.canonical,s.created_at FROM accounts a
+ LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots ps
+ WHERE ps.account_id=a.id AND ps.canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1)s ON true
+), observed_servers AS (
+ SELECT p.account_id,x->>'ID' provider_id,x->>'State' state,p.created_at
+ FROM provider_inventory p CROSS JOIN LATERAL jsonb_array_elements(CASE WHEN jsonb_typeof(p.canonical->'Inventory'->'Servers')='array' THEN p.canonical->'Inventory'->'Servers' ELSE '[]'::jsonb END)x
+ WHERE p.created_at>now()-interval '2 minutes'
+), live_accounts AS (
  SELECT *, CASE
  WHEN deletion_requested_at IS NOT NULL THEN 'pending'
  WHEN provider_state IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED')
@@ -16,19 +24,9 @@ WITH live_accounts AS (
  WHEN dr.state IN ('RETIRING','DELETING','EXPIRING') OR dr.expires_at<=now()+interval '10 seconds'
    OR a.deletion_requested_at IS NOT NULL THEN 'pending'
  WHEN dr.state LIKE '%FAIL%' OR EXISTS(
- SELECT 1 FROM panel_instances pi JOIN panel_routing_state rs ON rs.panel_id=pi.id
- JOIN worker_item_failures f ON f.kind='residential_sync' AND f.item_id=pi.id::text
- WHERE pi.droplet_id=dr.id AND pi.enabled AND rs.state='FAILED'
- AND f.failures>=2 AND f.last_failed_at>now()-interval '2 minutes'
- ) OR EXISTS(SELECT 1 FROM user_capacity_snapshots u JOIN panel_instances pi ON pi.id=u.panel_id WHERE pi.droplet_id=dr.id AND u.observed_at>now()-interval '30 seconds' AND COALESCE(u.last_error,'')<>'') OR EXISTS(
-   SELECT 1 FROM deployments dep WHERE dep.droplet_id=dr.id AND dep.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')
+ SELECT 1 FROM deployments dep WHERE dep.droplet_id=dr.id AND dep.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')
  ) THEN 'broken'
- WHEN dr.state='READY' AND a.provider_state='ACTIVE' AND EXISTS(
-   SELECT 1 FROM panel_instances pi JOIN deployments dep ON dep.droplet_id=pi.droplet_id
-   WHERE pi.droplet_id=dr.id AND pi.enabled AND dep.state='PANEL_COMPLETE'
-   AND (EXISTS(SELECT 1 FROM user_capacity_snapshots u WHERE u.panel_id=pi.id AND u.observed_at>now()-interval '30 seconds' AND COALESCE(u.last_error,'')='')
-     OR EXISTS(SELECT 1 FROM panel_inventory_syncs i WHERE i.panel_id=pi.id AND i.state='COMPLETED' AND i.finished_at>now()-interval '30 seconds'))
- ) THEN 'active'
+ WHEN dr.state='READY' AND EXISTS(SELECT 1 FROM observed_servers os WHERE os.account_id=dr.account_id AND os.provider_id=dr.provider_resource_id AND os.state='ready') THEN 'active'
  ELSE 'inactive' END health
  FROM droplets dr JOIN accounts a ON a.id=dr.account_id WHERE dr.state<>'DELETED'
 )
@@ -45,6 +43,7 @@ SELECT json_build_object(
  'broken_servers',(SELECT count(*) FROM live_servers WHERE health='broken'),
  'pending_deletion_servers',(SELECT count(*) FROM live_servers WHERE health='pending'),
  'total_servers',(SELECT count(*) FROM live_servers),
+ 'panel_attention_servers',(SELECT count(DISTINCT pi.droplet_id) FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN panel_routing_state rs ON rs.panel_id=pi.id WHERE dr.state='READY' AND pi.enabled AND rs.state='FAILED'),
  'active_deployments',(SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),
  'live_workers',(SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'),
  'observed_at',now()

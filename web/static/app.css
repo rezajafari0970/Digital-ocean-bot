@@ -14,3 +14,11 @@ aside{position:relative}.userMenu{position:absolute;right:12px;top:12px;backgrou
 html,body{direction:ltr;text-align:left;font-variant-numeric:lining-nums tabular-nums}
 input,select,textarea,button,table,.kv,.proxyMeta,.stat,.badge,.statusBadge{direction:ltr;text-align:left;font-variant-numeric:lining-nums tabular-nums}
 input[type=number],input[inputmode=numeric],input[inputmode=decimal]{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext;font-variant-numeric:lining-nums tabular-nums}
+
+.billingCompact{font-size:.85rem;margin:12px 0;padding:10px 0;border-top:1px solid #303b5d;border-bottom:1px solid #303b5d}
+.billingCompact summary{cursor:pointer;line-height:1.5;overflow-wrap:anywhere}
+.billingCompact .kv{margin-top:10px;gap:6px 12px}
+.billingCompact p{margin:8px 0}
+.deletionProgress{font-size:.85rem;padding:10px;border:1px solid #815d35;border-radius:10px;margin-top:12px}
+.deletionProgress p{margin:6px 0}
+.cleanupStatus details{font-size:.8rem;overflow-wrap:anywhere}

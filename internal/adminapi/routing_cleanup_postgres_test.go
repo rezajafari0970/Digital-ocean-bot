@@ -41,7 +41,7 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 	sqlMust(t, db, "INSERT INTO panel_routing_state(panel_id,revision,state,verified_at) VALUES($1,$2,'APPLIED',now())", panel, rev)
 	proxy, _ := sanaei.UUIDv4()
 	sqlMust(t, db, "INSERT INTO proxies(id,name,type,host,port,status,last_success_at) VALUES($1,'test','socks5','localhost',1080,'healthy',now())", proxy)
-	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,outbound_tag) VALUES($1,'residential-ads-test')", proxy)
+	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,name,type,host,port,status,last_success_at,outbound_tag) VALUES($1,'test','socks5','localhost',1080,'healthy',now(),'residential-ads-test')", proxy)
 	if err := db.QueryRow("SELECT revision FROM residential_routing_control").Scan(&rev); err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +188,7 @@ func TestDurableCleanupLostResponseAndWorkerRestart(t *testing.T) {
 	}
 }
 
-func (panelTestSecrets) GetProxy(context.Context, string, string) ([]byte, error) {
+func (panelTestSecrets) GetResidential(context.Context, string, string) ([]byte, error) {
 	return []byte("test"), nil
 }
 func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
@@ -260,12 +260,12 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	proxy, _ := sanaei.UUIDv4()
 	sqlMust(t, db, "INSERT INTO global_config_policies(policy_key,enabled,ports,target_users_per_inbound,users_per_second,generate_residential,generate_direct) VALUES('reality',true,'[443]',2,1,true,true) ON CONFLICT(policy_key) DO UPDATE SET generate_residential=true,generate_direct=true")
 	sqlMust(t, db, "INSERT INTO proxies(id,name,type,host,port,status,last_success_at) VALUES($1,'residential-test','socks5','127.0.0.1',1080,'healthy',now())", proxy)
-	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,outbound_tag) VALUES($1,'residential-ads-test')", proxy)
+	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,name,type,host,port,status,last_success_at,outbound_tag) VALUES($1,'test','socks5','localhost',1080,'healthy',now(),'residential-ads-test')", proxy)
 	sqlMust(t, db, "UPDATE residential_routing_control SET enabled=true,panel_ids=ARRAY[$1::uuid]", panel)
 	service := residentialsync.Service{DB: db, Secrets: panelTestSecrets{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: time.Second}}}
 	for i, want := range []map[string]int{{"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "BLOCKED": 1}, {"DIRECT": 2}} {
 		if i == 1 {
-			sqlMust(t, db, "UPDATE proxies SET status='down' WHERE id=$1", proxy)
+			sqlMust(t, db, "UPDATE residential_proxies SET status='down' WHERE proxy_id=$1", proxy)
 		}
 		if i == 2 {
 			sqlMust(t, db, "DELETE FROM residential_proxies WHERE proxy_id=$1", proxy)
@@ -335,7 +335,7 @@ func TestRoutingDueLanesKeepRetiredFailuresOutOfServingQueue(t *testing.T) {
 	}
 }
 
-func TestDashboardRepeatedRoutingFailureIsBrokenButRetirementWins(t *testing.T) {
+func TestDashboardProviderAvailabilityIndependentOfRoutingAndPolicy(t *testing.T) {
 	db := adminTestDB(t)
 	account, droplet, panel := seedPanel(t, db, "http://127.0.0.1:1")
 	sqlMust(t, db, "UPDATE accounts SET provider_checked_at=now() WHERE id=$1", account)
@@ -361,8 +361,11 @@ func TestDashboardRepeatedRoutingFailureIsBrokenButRetirementWins(t *testing.T) 
 			}
 		}
 	}
-	check("broken_servers")
-	sqlMust(t, db, "UPDATE worker_item_failures SET last_failed_at=now()-interval '5 minutes'")
+	check("inactive_servers")
+	// Only fresh provider inventory can assert that a server is running.
+	sqlMust(t, db, `INSERT INTO provider_snapshots(id,account_id,provider,data,canonical) SELECT gen_random_uuid(),$1,'digitalocean','{}',jsonb_build_object('Inventory',jsonb_build_object('Servers',jsonb_build_array(jsonb_build_object('ID',provider_resource_id,'State','ready')))) FROM droplets WHERE id=$2`, account, droplet)
+	check("active_servers")
+	sqlMust(t, db, "UPDATE provider_snapshots SET created_at=now()-interval '5 minutes'")
 	check("inactive_servers")
 	sqlMust(t, db, "UPDATE worker_item_failures SET last_failed_at=now()")
 	sqlMust(t, db, "UPDATE droplets SET state='RETIRING' WHERE id=$1", droplet)

@@ -114,7 +114,7 @@ func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) 
 }
 func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, class string) {
 	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
-	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state<>'SUCCEEDED') `
+	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
 	args := []any{}
 	// Class publication requires a fresh running-core proof of the current revision.
 	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `
@@ -127,7 +127,7 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	}
 	// A failed health check hides residential links immediately, ahead of reconciliation.
 	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR EXISTS(
- SELECT 1 FROM residential_proxies rp JOIN proxies pr ON pr.id=rp.proxy_id WHERE rp.proxy_id=rs.selected_proxy_id AND rp.enabled AND pr.status='healthy' AND pr.last_success_at>now()-interval '3 minutes')) `
+ SELECT 1 FROM residential_proxies rp WHERE rp.proxy_id=rs.selected_proxy_id AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes')) `
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)
 		if e != nil || n < 1 || n > 1440 {

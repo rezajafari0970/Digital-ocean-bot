@@ -42,7 +42,7 @@ func (s Service) RunOne(parent context.Context) (err error) {
 	var job, panel string
 	err = s.DB.QueryRowContext(ctx, `SELECT t.job_id::text,t.panel_id::text FROM panel_cleanup_targets t JOIN panel_cleanup_jobs j ON j.id=t.job_id WHERE j.state IN('QUEUED','RUNNING') AND t.state IN('PENDING','RUNNING') ORDER BY j.created_at,t.panel_id LIMIT 1`).Scan(&job, &panel)
 	if errors.Is(err, sql.ErrNoRows) {
-		_, err = s.DB.ExecContext(ctx, `UPDATE panel_cleanup_jobs j SET state='SUCCEEDED',completed_at=now() WHERE state IN('QUEUED','RUNNING') AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state<>'SUCCEEDED')`)
+		_, err = s.DB.ExecContext(ctx, `UPDATE panel_cleanup_jobs j SET state=CASE WHEN EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state='FAILED') THEN 'PAUSED' ELSE 'SUCCEEDED' END,completed_at=CASE WHEN EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state='FAILED') THEN NULL ELSE now() END WHERE state IN('QUEUED','RUNNING') AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state IN('PENDING','RUNNING'))`)
 		return err
 	}
 	if err != nil {
@@ -57,15 +57,27 @@ func (s Service) RunOne(parent context.Context) (err error) {
 				return
 			}
 			defer tx.Rollback()
-			if _, e = tx.ExecContext(c, "UPDATE panel_cleanup_targets SET state='FAILED',last_error='Fresh verification required; retry resumes the saved scope',updated_at=now() WHERE job_id=$1 AND panel_id=$2", job, panel); e != nil {
+			if _, e = tx.ExecContext(c, "UPDATE panel_cleanup_targets SET state='FAILED',last_error='Panel observation or deletion could not be verified. Other panels continue; this panel requires a fresh read on resume.',updated_at=now() WHERE job_id=$1 AND panel_id=$2", job, panel); e != nil {
 				return
 			}
-			if _, e = tx.ExecContext(c, "UPDATE panel_cleanup_jobs SET state='PAUSED' WHERE id=$1", job); e != nil {
+			if _, e = tx.ExecContext(c, "UPDATE panel_cleanup_jobs SET state='RUNNING' WHERE id=$1", job); e != nil {
 				return
 			}
 			_ = tx.Commit()
 		}
 	}()
+	var removed bool
+	if err = s.DB.QueryRowContext(ctx, `SELECT dr.state='DELETED' AND NOT EXISTS(
+ SELECT 1 FROM resources r WHERE r.account_id=dr.account_id AND r.provider_resource_id=dr.provider_resource_id AND r.managed AND r.state<>'deleted')
+ FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id WHERE p.id=$1`, panel).Scan(&removed); err != nil {
+		return err
+	}
+	if removed {
+		if err = s.reconcile(ctx, job, panel, Observed{Clients: map[string]string{}, Inbounds: map[int64]string{}}); err != nil {
+			return err
+		}
+		return s.complete(ctx, job, panel)
+	}
 	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
 		rt, e := s.Runtimes.Acquire(ctx, panel)
 		if e != nil {

@@ -26,18 +26,11 @@ func (s *Server) removeProxy(ctx context.Context, id string, residentialOnly boo
 		if _, err = tx.ExecContext(ctx, "DELETE FROM residential_proxies WHERE proxy_id=$1", id); err != nil {
 			return false, err
 		}
-		// Keep credentials when another feature owns this proxy.
-		var shared bool
-		err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM network_profiles WHERE proxy_id=$1 UNION ALL SELECT 1 FROM account_proxy_pool WHERE proxy_id=$1 UNION ALL SELECT 1 FROM panel_ad_proxies WHERE proxy_id=$1)`, id).Scan(&shared)
-		if err != nil {
+		var retained bool
+		if err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM proxies WHERE id=$1)", id).Scan(&retained); err != nil {
 			return false, err
 		}
-		if !shared {
-			if _, err = tx.ExecContext(ctx, "DELETE FROM proxies WHERE id=$1", id); err != nil {
-				return false, err
-			}
-		}
-		return shared, tx.Commit()
+		return retained, tx.Commit()
 	}
 	rows, err := tx.QueryContext(ctx, `SELECT account_id::text FROM network_profiles WHERE proxy_id=$1 UNION SELECT account_id::text FROM account_proxy_pool WHERE proxy_id=$1 ORDER BY 1`, id)
 	if err != nil {

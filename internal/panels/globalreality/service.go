@@ -63,6 +63,9 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	if dry {
 		return nil
 	}
+	if e = s.ensureNetworkAccess(ctx, p.ID, ports); e != nil {
+		return e
+	}
 	var selectionExists bool
 	if e = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_target_selections WHERE panel_id=$1)`, p.ID).Scan(&selectionExists); e != nil {
 		return e

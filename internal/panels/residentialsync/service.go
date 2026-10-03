@@ -14,7 +14,7 @@ import (
 
 type Secrets interface {
 	sanaei.RuntimeSecrets
-	GetProxy(context.Context, string, string) ([]byte, error)
+	GetResidential(context.Context, string, string) ([]byte, error)
 }
 type Service struct {
 	DB       *sql.DB
@@ -62,9 +62,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if !allowed {
 		return p, 0, errors.New("routing scope closed")
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT pr.id::text,pr.type,pr.host,pr.port,COALESCE(pr.username,''),rp.outbound_tag,COALESCE(pr.secret_ref,'')
- FROM residential_proxies rp JOIN proxies pr ON pr.id=rp.proxy_id
- WHERE rp.enabled AND pr.status='healthy' AND pr.last_success_at>now()-interval '3 minutes'
+	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,'')
+ FROM residential_proxies rp
+ WHERE rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'
  ORDER BY rp.priority,rp.proxy_id`)
 	if err != nil {
 		return p, 0, err
@@ -89,7 +89,7 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	}
 	for _, v := range choices {
 		if v.ref != "" {
-			b, e := s.Secrets.GetProxy(ctx, v.x.ID, v.ref)
+			b, e := s.Secrets.GetResidential(ctx, v.x.ID, v.ref)
 			if e != nil {
 				continue
 			}

@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +15,8 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 )
 
-func adminTestDB(t *testing.T) *sql.DB {
+func adminTestDB(t *testing.T) *sql.DB { return adminTestDBThrough(t, 999999) }
+func adminTestDBThrough(t *testing.T, maxVersion int) *sql.DB {
 	t.Helper()
 	dsn := os.Getenv("BULK_TEST_DATABASE_URL")
 	if dsn == "" {
@@ -52,6 +54,10 @@ func adminTestDB(t *testing.T) *sql.DB {
 		t.Fatal(e)
 	}
 	for _, file := range files {
+		version, _ := strconv.Atoi(strings.Split(filepath.Base(file), "_")[0])
+		if version > maxVersion {
+			continue
+		}
 		raw, e := os.ReadFile(file)
 		if e != nil {
 			t.Fatal(e)
@@ -79,7 +85,7 @@ func TestProxyDeleteSharedResidentialAndFailClosedDetach(t *testing.T) {
 	sqlMust(t, db, `INSERT INTO proxies(id,name,type,host,port) VALUES($1,'test','socks5','localhost',1080)`, proxy)
 	sqlMust(t, db, `INSERT INTO accounts(id,name,provider,secret_ref) VALUES($1,'test','digitalocean','test')`, account)
 	sqlMust(t, db, `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,'proxy_required',$2)`, account, proxy)
-	sqlMust(t, db, `INSERT INTO residential_proxies(proxy_id,outbound_tag,priority,enabled) VALUES($1,'residential-ads-test',1,true)`, proxy)
+	sqlMust(t, db, `INSERT INTO residential_proxies(proxy_id,name,type,host,port,outbound_tag,priority,enabled) VALUES($1,'test','socks5','localhost',1080,'residential-ads-test',1,true)`, proxy)
 	s := Server{DB: db}
 	kept, err := s.removeProxy(context.Background(), proxy, true)
 	if err != nil || !kept {
