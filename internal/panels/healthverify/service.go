@@ -4,18 +4,27 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
 )
 
+type Secrets interface {
+	Get(context.Context, string, string) ([]byte, error)
+}
+
 type Service struct {
-	DB     *sql.DB
-	Runner Runner
-	Repair func(context.Context, string) error
+	DB         *sql.DB
+	Secrets    Secrets
+	Runner     Runner
+	ManagedKey string
+	Repair     func(context.Context, string) error
 }
 
 func (s Service) Run(ctx context.Context) error {
-	if s.DB == nil {
+	if s.DB == nil || s.Secrets == nil || s.ManagedKey == "" {
 		return ErrInvalid
 	}
 	rows, err := s.DB.QueryContext(ctx, `
@@ -86,23 +95,30 @@ ORDER BY COALESCE(pi.health_checked_at,'epoch'),pi.id
 }
 
 func (s Service) runOne(ctx context.Context, panelID string) error {
-	var raw string
+	var accountID, host, uuidRef, publicKey, shortID, sni string
+	var port int
 	err := s.DB.QueryRowContext(ctx, `
-SELECT o.uri
-FROM output_config_snapshots o
-WHERE o.panel_id=$1
-  AND (o.visible_until IS NULL OR o.visible_until>now()+interval '10 seconds')
-ORDER BY o.last_seen_at DESC,o.uri
-LIMIT 1
-`, panelID).Scan(&raw)
+SELECT pi.account_id::text,d.host,rc.uuid_secret_ref,rc.public_key,rc.short_id,rs.server_name,
+(SELECT pii.port FROM panel_inbound_inventory pii WHERE pii.panel_id=pi.id AND pii.present=true AND pii.enabled=true AND pii.protocol='vless' AND pii.security='reality' ORDER BY pii.port LIMIT 1)
+FROM panel_instances pi
+JOIN deployments d ON d.droplet_id=pi.droplet_id
+JOIN reality_credentials rc ON rc.panel_id=pi.id AND rc.managed_key=$2
+JOIN reality_target_selections rs ON rs.panel_id=pi.id
+WHERE pi.id=$1 AND pi.enabled=true
+`, panelID, s.ManagedKey).Scan(&accountID, &host, &uuidRef, &publicKey, &shortID, &sni, &port)
 	if err != nil {
 		return err
 	}
-	client, err := ParseVLESSReality(raw)
+	if uuidRef == "" || host == "" || port < 1 {
+		return ErrInvalid
+	}
+	uuidRaw, err := s.Secrets.Get(ctx, accountID, uuidRef)
 	if err != nil {
 		return err
 	}
-	_, err = Probe(ctx, s.Runner, client)
+	defer credentials.Wipe(uuidRaw)
+	uuid := strings.TrimSpace(string(uuidRaw))
+	_, err = Probe(ctx, s.Runner, RealityClient{UUID: uuid, Host: host, Port: port, SNI: sni, PublicKey: publicKey, ShortID: shortID})
 	return err
 }
 

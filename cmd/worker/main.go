@@ -162,7 +162,8 @@ func main() {
 		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
 		repairer := panelbootstrap.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, ManagedKey: "dob:reality-primary:000001"}
 		health := healthverify.Service{
-			DB: application.DB, Runner: healthverify.LocalRunner{},
+			DB: application.DB, Secrets: application.Container.Secrets, Runner: healthverify.LocalRunner{},
+			ManagedKey: "dob:reality-primary:000001",
 			Repair: func(c context.Context, panelID string) error {
 				return repairer.RepairRuntimePanel(c, readyworker.Panel{ID: panelID})
 			},
