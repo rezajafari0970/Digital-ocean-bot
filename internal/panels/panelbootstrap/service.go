@@ -196,7 +196,7 @@ RETURNING panel_id::text`, panelID).Scan(&claimed)
 
 func (s Service) recordRuntimeRepair(ctx context.Context, panelID string, repairErr error) {
 	if repairErr == nil {
-		_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_success_at=now(),last_error='' WHERE panel_id=$1`, panelID)
+		_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_success_at=now(),last_error='',attempts=0 WHERE panel_id=$1`, panelID)
 		return
 	}
 	_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_error=$2 WHERE panel_id=$1`, panelID, repairErr.Error())

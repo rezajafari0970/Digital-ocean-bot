@@ -12,7 +12,6 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
-	"strings"
 )
 
 type Secrets interface {
@@ -72,23 +71,8 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	if s.Runtimes != nil {
 		runtime, e = s.Runtimes.Acquire(ctx, p.ID)
 		if e != nil {
-			// A freshly provisioned panel can be healthy on loopback while the
-			// host firewall still blocks its public API port. Repair only that
-			// host-level condition, then retry the normal direct API runtime.
-			var accID, dropletID, host, user, keyRef string
-			qerr := s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1`, p.ID).Scan(&accID, &dropletID, &host, &user, &keyRef)
-			if qerr == nil && keyRef != "" {
-				key, kerr := s.Secrets.Get(ctx, accID, keyRef)
-				if kerr == nil {
-					out, _ := s.SSH.Run(ctx, provisioning.Target{AccountID: accID, DropletID: dropletID, Host: host, User: user, KeySecretRef: keyRef}, key, `changed=0; if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -qi '^Status: active'; then ufw --force disable >/dev/null 2>&1 || true; changed=1; fi; if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then systemctl disable --now firewalld >/dev/null 2>&1 || true; changed=1; fi; echo $changed`)
-					credentials.Wipe(key)
-					if strings.TrimSpace(out) == "1" {
-						s.Runtimes.Invalidate(p.ID)
-						s.Runtimes.ResetCircuit(p.ID)
-						runtime, e = s.Runtimes.Acquire(ctx, p.ID)
-					}
-				}
-			}
+			// Do not disable host firewalls as a recovery action. Runtime repair is
+			// deliberately scoped to x-ui/Sanaei state; network policy remains fail-closed.
 			if e != nil {
 				repairer := panelbootstrap.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: "dob:reality-primary:000001"}
 				rerr := repairer.RepairRuntimePanel(ctx, p)
