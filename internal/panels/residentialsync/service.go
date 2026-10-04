@@ -64,21 +64,22 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if !allowed {
 		return p, 0, errors.New("routing scope closed")
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,'')
+	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'
  FROM residential_proxies rp
- WHERE rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'
- ORDER BY rp.priority,rp.proxy_id`)
+ WHERE rp.enabled AND rp.last_success_at>=rp.updated_at
+ ORDER BY (rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes') DESC,rp.priority,rp.proxy_id`)
 	if err != nil {
 		return p, 0, err
 	}
 	type selected struct {
-		x   rp
-		ref string
+		x       rp
+		ref     string
+		healthy bool
 	}
 	var choices []selected
 	for rows.Next() {
 		var x selected
-		if err = rows.Scan(&x.x.ID, &x.x.Type, &x.x.Host, &x.x.Port, &x.x.User, &x.x.Tag, &x.ref); err != nil {
+		if err = rows.Scan(&x.x.ID, &x.x.Type, &x.x.Host, &x.x.Port, &x.x.User, &x.x.Tag, &x.ref, &x.healthy); err != nil {
 			rows.Close()
 			return p, 0, err
 		}
@@ -102,7 +103,16 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		} else if v.x.User != "" {
 			continue
 		}
-		p.Proxies = append(p.Proxies, v.x)
+		if v.healthy {
+			p.HealthyCount++
+		}
+		// A previously verified endpoint remains the only protected egress when
+		// its probe fails. A failed SOCKS/HTTP connection cannot fall back direct.
+		// Output separately requires current health; transient health must not
+		// restart every Xray or withdraw unrelated DIRECT subscriptions.
+		if len(p.Proxies) == 0 {
+			p.Proxies = append(p.Proxies, v.x)
+		}
 	}
 	return p, revision, nil
 }
@@ -201,8 +211,8 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
 	}
-	res, err := s.DB.ExecContext(ctx, `UPDATE panel_routing_state SET state='APPLIED',verified_at=now(),next_check_at=now()+interval '20 seconds',last_error=''
- WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash)
+	res, err := s.DB.ExecContext(ctx, `UPDATE panel_routing_state SET state='APPLIED',verified_at=now(),next_check_at=now()+interval '20 seconds',last_error='',healthy_count=$4
+ WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount)
 	if err != nil {
 		return err
 	}
@@ -233,6 +243,8 @@ func (s Service) checkPolicy(ctx context.Context, panel string, want routePolicy
 	}
 	// Sniffing is fresh observed runtime state, not a saved policy field.
 	want.SniffingBlocked = false
+	want.HealthyCount = 0
+	fresh.HealthyCount = 0
 	a, _ := json.Marshal(want)
 	b, _ := json.Marshal(fresh)
 	if rev != revision || string(a) != string(b) {
@@ -273,7 +285,7 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 		return errors.New("routing revision changed")
 	}
 	if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid)
- ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,last_error=''`, panel, revision, hash, p.Configured, len(p.Proxies), selectedProxy(p)); err != nil {
+ ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p)); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM panel_client_routes WHERE panel_id=$1", panel); err != nil {

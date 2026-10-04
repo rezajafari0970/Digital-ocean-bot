@@ -24,6 +24,7 @@ type routePolicy struct {
 	Harden              bool
 	SniffingBlocked     bool
 	Configured          int
+	HealthyCount        int
 	Proxies             []rp
 }
 type rp struct {

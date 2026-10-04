@@ -87,6 +87,33 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 			t.Fatal("class widened")
 		}
 	}
+	// Health flapping cannot invalidate the fleet revision or DIRECT Output.
+	// Residential publication still closes immediately on a failed probe.
+	for _, healthy := range []bool{false, true, false, true} {
+		status := "down"
+		if healthy {
+			status = "healthy"
+		}
+		sqlMust(t, db, "UPDATE residential_proxies SET status=$2,last_success_at=now() WHERE proxy_id=$1", proxy, status)
+		var current int64
+		if err := db.QueryRow("SELECT revision FROM residential_routing_control").Scan(&current); err != nil || current != rev {
+			t.Fatal("health changed routing intent", current, rev, err)
+		}
+		for _, class := range []string{"DIRECT", "RESIDENTIAL"} {
+			response := httptest.NewRecorder()
+			s.outputSnapshotResponse(response, httptest.NewRequest("GET", "/?route_class="+class, nil))
+			want := "vless://1@panel.test"
+			if class == "RESIDENTIAL" {
+				want = ""
+				if healthy {
+					want = "vless://0@panel.test"
+				}
+			}
+			if response.Code != 200 || strings.TrimSpace(response.Body.String()) != want {
+				t.Fatal("health publication boundary", class, status, response.Code)
+			}
+		}
+	}
 	// Historical/corrupt effective state must not move residential identities
 	// into the never-residential subscription.
 	sqlMust(t, db, "UPDATE panel_client_routes SET effective_class='DIRECT' WHERE panel_id=$1 AND route_class='RESIDENTIAL'", panel)
@@ -299,9 +326,10 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,name,type,host,port,status,last_success_at,outbound_tag) VALUES($1,'test','socks5','localhost',1080,'healthy',now(),'residential-ads-test')", proxy)
 	sqlMust(t, db, "UPDATE residential_routing_control SET enabled=true,panel_ids=ARRAY[$1::uuid]", panel)
 	service := residentialsync.Service{DB: db, Secrets: panelTestSecrets{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: time.Second}}}
-	for i, want := range []map[string]int{{"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "BLOCKED": 1}, {"DIRECT": 1, "BLOCKED": 1}} {
+	for i, want := range []map[string]int{{"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "BLOCKED": 1}} {
 		if i == 1 {
 			sqlMust(t, db, "UPDATE residential_proxies SET status='down' WHERE proxy_id=$1", proxy)
+			sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
 		}
 		if i == 2 {
 			sqlMust(t, db, "DELETE FROM residential_proxies WHERE proxy_id=$1", proxy)
