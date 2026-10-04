@@ -21,6 +21,9 @@ func (s Service) autoEnrollLifecycle(ctx context.Context, p readyworker.Panel, r
 	if err != nil || !eligible {
 		return err
 	}
+	if err = s.retirePolicyScopes(ctx, p.ID); err != nil {
+		return err
+	}
 	var rawPorts []byte
 	if err = s.DB.QueryRowContext(ctx, `SELECT ports FROM global_config_policies WHERE policy_key='reality'`).Scan(&rawPorts); err != nil {
 		return err

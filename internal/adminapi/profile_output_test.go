@@ -22,7 +22,7 @@ func TestProfileOutputExcludesManualAndOtherOwnershipClass(t *testing.T) {
 	}
 	for _, id := range []string{"owned", "manual", "wrong-class", "deleted"} {
 		sqlMust(t, db, `INSERT INTO panel_client_routes(panel_id,client_id,email,route_class,effective_class,revision) VALUES($1,$2,$2,'DIRECT','DIRECT',$3)`, panel, id, rev)
-		sqlMust(t, db, `INSERT INTO output_config_snapshots(panel_id,uri,client_id) VALUES($1,$2,$3)`, panel, "vless://"+id+"@panel.test", id)
+		sqlMust(t, db, `INSERT INTO output_config_snapshots(panel_id,uri,client_id) VALUES($1,$2,$3)`, panel, "vless://"+id+"@panel.test:443", id)
 		if id == "manual" {
 			continue
 		}
@@ -35,9 +35,23 @@ func TestProfileOutputExcludesManualAndOtherOwnershipClass(t *testing.T) {
 		}
 		sqlMust(t, db, `INSERT INTO bulk_user_ownership(generation_id,client_id,email,route_class,state) VALUES($1,$2,$2,$3,$4)`, gen, id, cls, state)
 	}
+	sqlMust(t, db, `INSERT INTO output_config_snapshots(panel_id,uri,client_id) VALUES($1,'vless://owned@panel.test:1212','owned')`, panel)
 	w := httptest.NewRecorder()
 	(&Server{DB: db}).outputSnapshotClass(w, httptest.NewRequest("GET", "/", nil), "DIRECT")
-	if w.Code != 200 || strings.TrimSpace(w.Body.String()) != "vless://owned@panel.test" {
+	if w.Code != 200 || strings.TrimSpace(w.Body.String()) != "vless://owned@panel.test:443" {
 		t.Fatal(w.Code, w.Body.String())
+	}
+}
+
+func TestProfilePortFilterIncludesIPv6AndRejectsRemovedPorts(t *testing.T) {
+	for _, uri := range []string{"vless://id@host.test:443?security=reality", "vless://id@[2001:db8::1]:443#test"} {
+		if !outputProfilePortAllowed(uri, []byte(`[443]`)) {
+			t.Fatal(uri)
+		}
+	}
+	for _, uri := range []string{"vless://id@host.test:1212", "vless://id@host.test", "invalid"} {
+		if outputProfilePortAllowed(uri, []byte(`[443]`)) {
+			t.Fatal(uri)
+		}
 	}
 }

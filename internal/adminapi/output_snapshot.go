@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -157,7 +158,11 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 		args = append(args, n)
 		where += ` AND o.first_seen_at>=now()-($` + strconv.Itoa(len(args)) + `*interval '1 minute') `
 	}
-	q := `SELECT o.uri FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
+	columns := `o.uri,NULL::jsonb`
+	if class != "ALL" {
+		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1)`
+	}
+	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
 	rows, e := s.DB.QueryContext(r.Context(), q, args...)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
@@ -167,7 +172,8 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	var out strings.Builder
 	for rows.Next() {
 		var u string
-		if rows.Scan(&u) == nil {
+		var ports []byte
+		if rows.Scan(&u, &ports) == nil && outputProfilePortAllowed(u, ports) {
 			out.WriteString(u)
 			out.WriteByte('\n')
 		}
@@ -179,4 +185,29 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	_, _ = w.Write([]byte(out.String()))
+}
+
+// URI and profile ports come from the same database statement snapshot.
+func outputProfilePortAllowed(uri string, raw []byte) bool {
+	if len(raw) == 0 {
+		return true
+	}
+	var ports []int
+	if json.Unmarshal(raw, &ports) != nil {
+		return false
+	}
+	u, err := url.Parse(uri)
+	if err != nil || u.Scheme != "vless" {
+		return false
+	}
+	port, err := strconv.Atoi(u.Port())
+	if err != nil {
+		return false
+	}
+	for _, p := range ports {
+		if p == port {
+			return true
+		}
+	}
+	return false
 }
