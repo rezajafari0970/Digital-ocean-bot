@@ -82,8 +82,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   console.log('UI_DASHBOARD PASS');
   if(process.env.DOB_UI_OUTPUT_URL){
    await call('Page.navigate',{url:process.env.DOB_UI_OUTPUT_URL});
-   await waitFor('document.querySelector("#status")?.textContent.includes("verified")');
-   assert.equal(await evaluate('document.querySelector("#copy")!==null'),true);
+   await waitFor('document.querySelector("#configs")?.textContent.startsWith("vless://")');
+   assert.equal(await evaluate('document.querySelector("#copy,#status,h1,button")===null'),true);
+   assert.equal(await evaluate('document.body.innerText.trim()===document.querySelector("#configs").textContent.trim()'),true);
+   assert.equal(await evaluate('document.querySelector("#configs").textContent.trim().split(/\\r?\\n/).every(x=>/^vless:\\/\\/[^\\s]+$/.test(x))'),true);
    console.log('UI_LIVE_OUTPUT_VIEW PASS');
   }
 
