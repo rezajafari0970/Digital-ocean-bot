@@ -136,7 +136,12 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}
 	if p.AdsOnly && p.Residential && (p.Harden || p.Configured > 0) {
 		if err = validateAdSniffing(raws); err != nil {
-			return err
+			if !p.Harden {
+				return err
+			}
+			// Persist and apply a blocking plan instead of merely withholding Output
+			// while old already-shared clients continue using unsafe routing.
+			p.SniffingBlocked = true
 		}
 	}
 	clients, tags, err := planClients(raws, previous, p)
@@ -226,6 +231,8 @@ func (s Service) checkPolicy(ctx context.Context, panel string, want routePolicy
 	if err != nil {
 		return err
 	}
+	// Sniffing is fresh observed runtime state, not a saved policy field.
+	want.SniffingBlocked = false
 	a, _ := json.Marshal(want)
 	b, _ := json.Marshal(fresh)
 	if rev != revision || string(a) != string(b) {

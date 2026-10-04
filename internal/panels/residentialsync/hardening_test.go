@@ -85,3 +85,31 @@ func TestUnobservedInboundCannotInheritDirectDefault(t *testing.T) {
 		}
 	}
 }
+
+func TestInvalidSniffingBlocksResidentialButKeepsDirectIndependent(t *testing.T) {
+	p := routePolicy{Harden: true, SniffingBlocked: true, AdsOnly: true, Residential: true, Direct: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
+	cs, tags := fixtureClients(t, p)
+	next, err := buildSettings(baseSettings(), cs, tags, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cs {
+		expected := directTag
+		if c.Class == "RESIDENTIAL" {
+			expected = blockedTag
+			if c.Effective != "BLOCKED" {
+				t.Fatal("unsafe identity published")
+			}
+		}
+		for _, domain := range []string{"www.google.com", "adservice.google.com", ""} {
+			for _, n := range []string{"tcp", "udp"} {
+				if probeRoute(t, next, c.Email, domain, n) != tagged(next, expected) {
+					t.Fatal("invalid sniffing escaped", c.Class, domain, n)
+				}
+			}
+		}
+	}
+	if err := verifyRunning(context.Background(), &fakeCore{running: next}, next, cs, tags, p); err != nil {
+		t.Fatal(err)
+	}
+}

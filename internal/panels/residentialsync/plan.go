@@ -22,6 +22,7 @@ type routePolicy struct {
 	Residential, Direct bool
 	AdsOnly             bool
 	Harden              bool
+	SniffingBlocked     bool
 	Configured          int
 	Proxies             []rp
 }
@@ -149,7 +150,9 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		if !p.Direct && !p.Residential {
 			out[i].Effective = "BLOCKED"
 		} else if out[i].Class == "RESIDENTIAL" {
-			if p.Configured == 0 && !p.Harden {
+			if p.SniffingBlocked {
+				out[i].Effective = "BLOCKED"
+			} else if p.Configured == 0 && !p.Harden {
 				out[i].Effective = "DIRECT"
 			} else if len(p.Proxies) == 0 {
 				out[i].Effective = "BLOCKED"
@@ -220,6 +223,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		}
 		kept = append(kept, outbound)
 		destination = proxy.Tag
+	}
+	if p.SniffingBlocked {
+		destination = blockedTag
 	}
 	next["outbounds"] = kept
 	routing, ok := next["routing"].(map[string]any)
@@ -310,7 +316,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			fallback := directTag
 			if p.Harden && p.Residential {
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-known-non-ad", "inboundTag": tags, "domain": []string{knownDomainPattern}, "network": "tcp,udp", "outboundTag": directTag})
+				if !p.SniffingBlocked {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-known-non-ad", "inboundTag": tags, "domain": []string{knownDomainPattern}, "network": "tcp,udp", "outboundTag": directTag})
+				}
 				fallback = destination
 				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-opaque-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})

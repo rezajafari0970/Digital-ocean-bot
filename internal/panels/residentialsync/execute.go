@@ -108,12 +108,12 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				base := blockedTag
 				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && !p.Harden && (p.Residential || p.Direct)) {
 					base = directTag
-				} else if (c.Effective == "RESIDENTIAL" || c.Effective == "" && p.Residential) && len(p.Proxies) > 0 {
+				} else if !p.SniffingBlocked && (c.Effective == "RESIDENTIAL" || c.Effective == "" && p.Residential) && len(p.Proxies) > 0 {
 					if network == "tcp" || p.Proxies[0].Type == "socks5" {
 						base = p.Proxies[0].Tag
 					}
 				}
-				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) && (!p.Harden || probe.domain != "") {
+				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) && (!p.Harden || probe.domain != "") && (!p.SniffingBlocked || c.Class == "DIRECT" || !p.Residential && p.Direct) {
 					base = directTag
 				}
 				expected := tagged(desired, base)
@@ -147,7 +147,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		base := blockedTag
 		if !p.Residential && p.Direct {
 			base = directTag
-		} else if p.Residential && len(p.Proxies) > 0 && p.Proxies[0].Type == "socks5" {
+		} else if p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 && p.Proxies[0].Type == "socks5" {
 			base = p.Proxies[0].Tag
 		}
 		form := url.Values{"port": {"53"}, "network": {"udp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
