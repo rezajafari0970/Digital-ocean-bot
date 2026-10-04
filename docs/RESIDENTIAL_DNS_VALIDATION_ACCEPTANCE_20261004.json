@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "status": "DEPLOYED_AND_VERIFIED_WITH_EXPLICIT_LIMITATIONS",
+  "source_revision": "91b97ad66fd41d27b0789429d19d398f2ae78738",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "binaries": {
+    "api": {
+      "revision": "be68fa76e78e6e6eb07c61e0951ba0711065b228",
+      "vcs_modified": false,
+      "sha256": "2b65de596ae81e4b2074e91be0b8aef0124684e772f47d9932b20cc160e6d63d"
+    },
+    "worker": {
+      "revision": "91b97ad66fd41d27b0789429d19d398f2ae78738",
+      "vcs_modified": false,
+      "sha256": "25c5690801e1b0bd95bbdd0ee77f5d70607e4c7026eeec7cecdae234bdeaa15d"
+    }
+  },
+  "services": {
+    "api": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "NRestarts": "0"
+    },
+    "worker": {
+      "ActiveState": "active",
+      "SubState": "running",
+      "NRestarts": "0"
+    }
+  },
+  "production": {
+    "observed_at": "2026-10-04T14:05:56.332356+00:00",
+    "migration": "000147_residential_health_observation",
+    "routing_revision": 504,
+    "routing": [
+      {
+        "state": "APPLIED",
+        "total": 38,
+        "fresh_60s": 38,
+        "oldest_seconds": 33.904807
+      }
+    ],
+    "residential_health": [
+      {
+        "proxy_id": "1507f2c1-1f56-467d-a079-f5b438bdd671",
+        "enabled": true,
+        "status": "down",
+        "last_success_at": "2026-10-04T13:59:43.675517+00:00",
+        "last_checked_at": "2026-10-04T14:05:55.2154+00:00"
+      }
+    ],
+    "global_policy": {
+      "enabled": true,
+      "revision": 23,
+      "target_users_per_inbound": 2,
+      "user_lifetime_seconds": 10800,
+      "user_quota_bytes": 0,
+      "device_limit": 0,
+      "users_per_second": 1,
+      "generate_residential": true,
+      "generate_direct": true
+    },
+    "mutation_gate": {
+      "enabled": true,
+      "kill_switch": false,
+      "concurrency": 1,
+      "panel_id": null,
+      "inbound_id": null
+    },
+    "legacy_bulk_gate": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "serving_route_failures": 0,
+    "mutation_jobs": [
+      {
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "total": 252
+      },
+      {
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "total": 179
+      },
+      {
+        "kind": "CREATE",
+        "state": "FAILED",
+        "total": 2
+      },
+      {
+        "kind": "CREATE",
+        "state": "SUCCEEDED",
+        "total": 3
+      },
+      {
+        "kind": "DELETE",
+        "state": "SUCCEEDED",
+        "total": 262
+      },
+      {
+        "kind": "UPDATE",
+        "state": "SUCCEEDED",
+        "total": 14
+      }
+    ]
+  },
+  "dashboard": {
+    "digitalocean_accounts": 2,
+    "vultr_accounts": 2,
+    "enabled_accounts": 4,
+    "healthy_accounts": 4,
+    "broken_accounts": 0,
+    "unknown_accounts": 0,
+    "pending_deletion_accounts": 0,
+    "active_servers": 38,
+    "inactive_servers": 0,
+    "broken_servers": 0,
+    "pending_deletion_servers": 0,
+    "total_servers": 38,
+    "panel_attention_servers": 0,
+    "active_deployments": 0,
+    "live_workers": 1,
+    "observed_at": "2026-10-04T14:04:20.193675+00:00"
+  },
+  "routing_api": {
+    "enabled": true,
+    "fleet": true,
+    "revision": 504,
+    "total_panels": 38,
+    "scoped_panels": 38,
+    "verified_panels": 38,
+    "failed_panels": 0,
+    "retiring_panels": 0,
+    "configured_proxies": 1,
+    "healthy_proxies": 0
+  },
+  "raw_output_endpoint_evidence": [
+    "GET /api/v1/output?route_class=DIRECT status=200 bytes=11381",
+    "GET /api/v1/output?route_class=RESIDENTIAL status=200 bytes=0"
+  ],
+  "fleet_runtime": {
+    "verified_panels": 38,
+    "protected_route_proofs": 152,
+    "verified_at": "2026-10-04T14:04:05Z",
+    "first_final_read": "One route-test transport timeout; no mutation retried. Fresh DB proved recovery, then complete read-only fleet acceptance passed."
+  },
+  "dns": {
+    "catalog_unique": 123,
+    "active": [
+      "1.1.1.1",
+      "8.8.4.4",
+      "1.0.0.1"
+    ],
+    "catalog_status_counts": {
+      "answered": 65,
+      "ipv6_disabled_by_current_server_policy": 31,
+      "not_verified": 23,
+      "private_address_not_publicly_routable": 4
+    },
+    "all_catalog_entries_enabled": false,
+    "control_probe_at": "2026-10-04T13:01:39Z"
+  },
+  "validation": {
+    "users_per_second_min": 1,
+    "users_per_second_max": 100,
+    "enabled_both_classes_min_target": 2,
+    "saved_policy_revision_unchanged": 23,
+    "real_mobile_browser": "PASS"
+  },
+  "tests": {
+    "focused": "PASS",
+    "race": "PASS",
+    "full": "PASS",
+    "clean_detached_full": "PASS",
+    "installed_xray_tcp_udp_upstream_failure": "PASS",
+    "postgres_health_flap_and_output_isolation": "PASS",
+    "api_browser": "PASS"
+  },
+  "traffic_evidence": {
+    "healthy_production_vless_tcp_udp_quic": "PASS earlier in this rollout; see traffic-canary.log. Includes advertising HTTP/3 response and non-server opaque egress. Not a claim of permanent upstream availability.",
+    "production_upstream_down_fault": "PASS earlier in this rollout; see fault-canary.log. Final health-retention change separately tested with installed Xray and fresh running-core proofs.",
+    "same_canary_panel": "69e68a2a-8a42-4c9f-9f12-302920d729bc"
+  },
+  "evidence_directory": "/root/backups/dob-routing-dns-validation-20261004",
+  "limitations": [
+    "Ads-only classification cannot guarantee recognition of unlisted advertising names, shared domains or ECH inner names. Unknown/no-hostname traffic is protected, but a benign-looking classified outer hostname may be direct. Strict no-server-egress for all potential ads requires all traffic of that subscription to be residential or blocked; that mode was not silently enabled.",
+    "Res1 upstream remains unstable/down at final observation; residential Output is withheld while unhealthy. Safe routing does not repair provider availability.",
+    "HTTP/TLS/QUIC sniffing configuration and validity guards verified; no measured sniffing speed improvement claimed.",
+    "123 DNS addresses are cataloged; only three verified unfiltered IPv4 endpoints are active. Private, filtered, IPv6-disabled and unverified candidates are not blindly enabled.",
+    "20 previously associated cloud resources remain unverified because provider access was blocked in the prior task; no cloud deletion performed in this task."
+  ]
+}

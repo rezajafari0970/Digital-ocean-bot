@@ -1,18 +1,18 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "500098755e5520846c80dff2836c3c591a48a324",
+  "runtime_source_revision": "be68fa76e78e6e6eb07c61e0951ba0711065b228",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T12:14:05.829199+00:00",
+  "verified_at_utc": "2026-10-04T14:05:56.332356+00:00",
   "binaries": {
     "api": {
-      "revision": "500098755e5520846c80dff2836c3c591a48a324",
+      "revision": "be68fa76e78e6e6eb07c61e0951ba0711065b228",
       "vcs_modified": false,
-      "sha256": "07ec7a585dbb6fefa9ac553efb75d8731828e8abad4acc4c8132b04faa367aec"
+      "sha256": "2b65de596ae81e4b2074e91be0b8aef0124684e772f47d9932b20cc160e6d63d"
     },
     "worker": {
-      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+      "revision": "91b97ad66fd41d27b0789429d19d398f2ae78738",
       "vcs_modified": false,
-      "sha256": "51069866d1e9671cacdd67f10c6c7c31c75ebd52d9c0d493087ef92b504c068a"
+      "sha256": "25c5690801e1b0bd95bbdd0ee77f5d70607e4c7026eeec7cecdae234bdeaa15d"
     }
   },
   "services": {
@@ -21,10 +21,10 @@
     "verified_serving_panels": 38,
     "api_worker_auto_restarts": 0
   },
-  "migration": "000146_panel_network_access",
-  "acceptance": "docs/PLAIN_OUTPUT_UDP_CLOUD_ACCEPTANCE_20261004.json",
+  "migration": "000147_residential_health_observation",
+  "acceptance": "docs/RESIDENTIAL_DNS_VALIDATION_ACCEPTANCE_20261004.json",
   "verified": true,
-  "note": "API-only Output update deployed from clean detached source; worker source unchanged. Res1 UDP and advertising HTTP/3 now proven after udp=true plus a new named sticky session. 38 fresh panels and 76 disjoint outputs. External cloud cleanup remains blocked by provider 422 account locks and Vultr 401; no deletion claimed.",
+  "note": "Routing/DNS/validation deployed from clean detached source. 38 fresh APPLIED panels and 152 independent protected-route proofs. Res1 down at final capture; DIRECT Output available and RESIDENTIAL Output withheld. Ads-only classification is not an absolute guarantee for ECH or unlisted domains. Provider-blocked cloud cleanup unchanged.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,9 +41,9 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Restore provider-authorized access for the 20 exact cloud resources, then read-before-delete and fresh absence verification. Residential IP selection remains deferred.",
+  "next_product_step": "Resolve strict no-server-egress versus selective ads-only policy; design and test residential upstream health/IP selection. Provider-authorized access remains necessary for the 20 unverified cloud resources.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "active_lifecycle_scopes": 39,
   "eligible_serving_panels": 38,
-  "worker_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d"
+  "worker_source_revision": "91b97ad66fd41d27b0789429d19d398f2ae78738"
 }
