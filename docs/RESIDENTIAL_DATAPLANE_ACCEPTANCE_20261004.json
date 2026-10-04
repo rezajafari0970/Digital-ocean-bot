@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-04T19:31:28.064536+00:00",
+  "runtime_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
+  "status": "DNS_AND_CREATION_INTERVAL_DEPLOYED_RESIDENTIAL_QUIC_NOT_ACCEPTED",
+  "production_fully_stable": false,
+  "video": {
+    "duration_seconds": 107.066758,
+    "sha256": "7d1770689c154714458c1bce7868cf1089e6c2d4d721c13515025300d4b74df4",
+    "review": "5-second full timeline and dense 1-second phone log section reviewed; no usable audio",
+    "target_panel": "829cbedb-378d-4044-890b-deb6755d2876",
+    "observations": [
+      "Chrome DNS_PROBE_FINISHED_NO_INTERNET",
+      "Successful TLS/sniffed Google connections before failure",
+      "Historical selected client expired near the end; expiry does not explain earlier DNS failure"
+    ]
+  },
+  "confirmed_findings": [
+    "Intermittent Residential UDP DNS timeouts reproduced while Direct passed",
+    "Known ordinary HTTPS used server egress; all traffic was not Residential",
+    "Residential copied credentials expire after the saved 240-second lifetime, measured from creation",
+    "100 configs/second is a fill limit, not ongoing credential creation or connected-user capacity"
+  ],
+  "changes": {
+    "dns": {
+      "providers": [
+        "Cloudflare",
+        "Google",
+        "AliDNS"
+      ],
+      "servers": [
+        "tcp://1.1.1.1:53",
+        "tcp://8.8.8.8:53",
+        "tcp://223.5.5.5:53"
+      ],
+      "client_dns": [
+        "UDP and TCP port53 intercepted for Residential",
+        "A/AAAA resolved via protected built-in TCP pool",
+        "Other query types carried by TCP through the Residential dialerProxy",
+        "No tcp+local or direct fallback"
+      ],
+      "query_strategy": "UseIP"
+    },
+    "creation_interval": {
+      "unit": "seconds per panel/inbound/route class",
+      "range": [
+        0,
+        86400
+      ],
+      "ui_unit": "minutes",
+      "example_six_minutes": 360,
+      "durability": "Clock committed atomically with PLANNED ownership and durable CREATE plan; survives restart; at most one new identity per interval while below target, no catch-up burst",
+      "independent_of": [
+        "lifetime",
+        "connected users",
+        "maximum fill speed"
+      ],
+      "production_values_preserved": true
+    },
+    "migration": "000149_profile_creation_interval"
+  },
+  "production_tests": {
+    "fleet_dns_and_running_route_proof": {
+      "panels": 38,
+      "initial_passed": 37,
+      "concurrent_reconciliation_pending": 1,
+      "pending_panel": "69e68a2a-8a42-4c9f-9f12-302920d729bc",
+      "pending_rechecked_passed": 1,
+      "complete_window_end": "2026-10-04T19:29:18Z",
+      "note": "Sequential observations, not an assertion that all panels were simultaneously APPLIED; freshness/health can withhold Output during reconciliation"
+    },
+    "real_tunnel": {
+      "direct": "HTTPS, Google, BrowserLeaks server IP, DNS UDP/TCP, HTTP3 passed",
+      "residential": "Ordinary HTTPS server IP; Google204; BrowserLeaks200 non-server IP; ads HTTPS404 valid reply; opaque HTTPS non-server IP; DNS UDP/TCP A, AAAA and HTTPS(65) passed with a fresh unexpired credential",
+      "sniffing": "SOCKS client using an IP destination and TLS SNI tested, not only hostname supplied by SOCKS"
+    },
+    "fault_test": "Installed local Xray with a fake SOCKS endpoint rejecting UDP still resolves client UDP DNS via TCP. After proxy failure, uncached DNS fails and the direct sink receives zero connections.",
+    "target_core": "Xray26.9.9 52a412d accepts the exact planned settings; control core26.3.27 d2758a0 also tested",
+    "tests": [
+      "focused Go",
+      "focused race",
+      "full go test ./...",
+      "full tests in clean detached worktree",
+      "git diff --check",
+      "mobile browser regression incl 6-minute form serialization and 3-provider catalog"
+    ],
+    "quic": "Residential HTTP3 failed with ConnectionError during an unexpired credential; Direct HTTP3 succeeded. An earlier baseline Residential HTTP3 request had passed. Reliable upstream UDP/QUIC is not certified.",
+    "new_failed_mutation_jobs": 0,
+    "services": {
+      "api": "active",
+      "worker": "active",
+      "automatic_restarts": 0
+    }
+  },
+  "profiles_at_acceptance": [
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 4,
+      "updated_at": "2026-10-04T16:29:26.892319+00:00",
+      "route_class": "DIRECT",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 0,
+      "target_users_per_inbound": 1,
+      "creation_interval_seconds": 0
+    },
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 5,
+      "updated_at": "2026-10-04T16:30:38.32761+00:00",
+      "route_class": "RESIDENTIAL",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 240,
+      "target_users_per_inbound": 1,
+      "creation_interval_seconds": 0
+    }
+  ],
+  "execution_gate_restored": {
+    "enabled": true,
+    "panel_id": null,
+    "singleton": true,
+    "inbound_id": null,
+    "updated_at": "2026-10-04T19:21:24.560607+00:00",
+    "concurrency": 1,
+    "kill_switch": false
+  },
+  "routing_state_at_snapshot": [
+    {
+      "count": 33,
+      "state": "APPLIED"
+    },
+    {
+      "count": 1,
+      "state": "APPLYING"
+    },
+    {
+      "count": 4,
+      "state": "FAILED"
+    }
+  ],
+  "deployment_recovery": [
+    "Initial deployment encountered a gate-close race; restored after fresh job/gate reads, no blind retry.",
+    "cd66009 rejected by target Xray because proxySettings was removed; runtime rolled back to 2c62eae and Output recovered.",
+    "8425e1b uses streamSettings.sockopt.dialerProxy, validated against the installed target binary before deployment.",
+    "Deployment quiesces the existing executor advisory lock before closing the mutation gate."
+  ],
+  "remaining": [
+    "Residential UDP/QUIC transport instability",
+    "Proxy health changes can switch selected upstream and briefly require routing reconciliation; do not relax Output freshness",
+    "Very short 240-second profile lifetime expires copied static links; refresh a subscription or explicitly change lifetime",
+    "Large concurrent-user capacity has not been load-certified"
+  ],
+  "private_evidence_directory": "/root/backups/dob-residential-dataplane-20261004"
+}

@@ -1,30 +1,30 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+  "runtime_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T18:14:57.285295+00:00",
+  "verified_at_utc": "2026-10-04T19:31:28.064536+00:00",
   "binaries": {
     "api": {
-      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+      "revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
       "vcs_modified": false,
-      "sha256": "eb9c679cc25e991d2ce9bd0a7692ece12349e15c604219ec1a83996b61c1582b"
+      "sha256": "3adecf4e6a1cc491ef6c1fbe112eb5c3aef0f89efb8b8055545995a9d0941b4a"
     },
     "worker": {
-      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+      "revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
       "vcs_modified": false,
-      "sha256": "55c779134a995a97eff0d4302afed7bfbd0e17c4167a9d909f3a932db07e84c2"
+      "sha256": "628c138269ee1b4ca4fdcefc0db07708c3fe66a74725a1da04ba71546dbbdd2a"
     }
   },
   "services": {
     "api": "active",
     "worker": "active",
-    "verified_serving_panels": 38,
+    "verified_serving_panels_over_acceptance_window": 38,
     "api_worker_auto_restarts": 0
   },
-  "migration": "000148_independent_reality_profiles",
-  "acceptance": "docs/BROWSERLEAKS_RATE_ACCEPTANCE_20261004.json",
+  "migration": "000149_profile_creation_interval",
+  "acceptance": "docs/RESIDENTIAL_DATAPLANE_ACCEPTANCE_20261004.json",
   "verified": true,
-  "note": "BrowserLeaks root/subdomains added to protected Residential routing. Direct behavior and saved profile settings preserved. Rate input replaced with valid 1–100 selector. 38-panel independent route proof plus post-final-build sample passed. Routine verification overhead found in canary was removed. UDP route selection is not upstream transport certification.",
+  "note": "DNS and durable creation interval deployed and tested. Residential UDP/QUIC remains unaccepted; refer to explicit limits in latest acceptance.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,10 +41,11 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Observe independent profiles during normal use. Separately design provider-neutral residential capacity/session admission and perform real UDP/QUIC and concurrent-user load tests; blocked historical cloud cleanup still requires provider-authorized access.",
+  "next_product_step": "Provider-neutral Residential UDP/QUIC capability, stability and capacity diagnosis; profile lifetime remains240 seconds unless explicitly changed.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "eligible_serving_panels": 33,
-  "worker_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+  "eligible_serving_panels": 38,
+  "worker_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
   "active_lifecycle_scopes_at_fresh_proof": 32,
-  "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json"
+  "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
+  "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_DATAPLANE_ACCEPTANCE_20261004.json"
 }
