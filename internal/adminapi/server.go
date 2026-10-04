@@ -84,6 +84,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("DELETE /api/v1/residential-proxies/{id}", s.require(s.deleteResidentialProxy, true))
 	m.HandleFunc("POST /api/v1/residential-proxies/{id}/test", s.require(s.testResidentialProxy, true))
 	m.HandleFunc("GET /api/v1/configs", s.require(s.getGlobalConfigs, false))
+	m.HandleFunc("GET /api/v1/configs/dns", s.require(s.getDNSCatalog, false))
 	m.HandleFunc("GET /api/v1/config-capacity", s.require(s.configCapacity, false))
 	m.HandleFunc("POST /api/v1/config-capacity/delete-all-clients", s.require(s.deleteAllCapacityClients, true))
 	m.HandleFunc("POST /api/v1/config-capacity/resume", s.require(s.resumeCapacityAutomation, true))

@@ -26,8 +26,8 @@ func (s *Server) putGlobalConfig(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
-	if len(x.Ports) == 0 || x.TargetUsersPerInbound < 0 || x.TargetUsersPerInbound > 10000 || x.UsersPerSecond > 100 || x.DeviceLimit < 0 || x.UsersPerSecond < 1 || (x.SNISelectionMode != "scored" && x.SNISelectionMode != "manual") {
-		writeJSON(w, 400, map[string]string{"error": "invalid_config"})
+	if field, detail := validateGlobalConfig(x); detail != "" {
+		writeJSON(w, 400, map[string]string{"error": "invalid_config", "field": field, "detail": detail})
 		return
 	}
 	res, direct := true, false
@@ -112,4 +112,21 @@ func (s *Server) getGlobalConfigs(w http.ResponseWriter, r *http.Request) {
 	_ = json.Unmarshal(portsRaw, &ports)
 	_ = json.Unmarshal(snisRaw, &snis)
 	writeJSON(w, 200, []any{map[string]any{"policy_key": "reality", "enabled": enabled, "generate_residential": residential, "generate_direct": direct, "ports": ports, "inbound_count": len(ports), "target_users_per_inbound": target, "user_quota_bytes": quota, "user_lifetime_seconds": life, "device_limit": devices, "users_per_second": rate, "sni_selection_mode": mode, "manual_snis": snis, "revision": rev}})
+}
+
+// Reject invalid policy values before opening a transaction or changing revision.
+func validateGlobalConfig(x globalConfigRequest) (string, string) {
+	switch {
+	case x.UsersPerSecond < 1 || x.UsersPerSecond > 100:
+		return "users_per_second", "Users created per second must be a whole number from 1 to 100."
+	case x.TargetUsersPerInbound < 0 || x.TargetUsersPerInbound > 10000:
+		return "target_users_per_inbound", "Target users per inbound must be from 0 to 10000."
+	case x.DeviceLimit < 0:
+		return "device_limit", "Device limit must be zero or greater."
+	case len(x.Ports) == 0:
+		return "ports", "Enter at least one port."
+	case x.SNISelectionMode != "scored" && x.SNISelectionMode != "manual":
+		return "sni_selection_mode", "Select automatic or manual SNI selection."
+	}
+	return "", ""
 }

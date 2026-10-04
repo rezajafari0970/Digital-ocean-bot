@@ -11,6 +11,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -86,8 +87,8 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 			t.Fatal("class widened")
 		}
 	}
-	// No residential configured may make traffic direct, but must not move
-	// residential identities into the never-residential subscription.
+	// Historical/corrupt effective state must not move residential identities
+	// into the never-residential subscription.
 	sqlMust(t, db, "UPDATE panel_client_routes SET effective_class='DIRECT' WHERE panel_id=$1 AND route_class='RESIDENTIAL'", panel)
 	directOnly := httptest.NewRecorder()
 	s.outputSnapshotResponse(directOnly, httptest.NewRequest("GET", "/?route_class=DIRECT", nil))
@@ -250,8 +251,33 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 						continue
 					}
 				}
-				if _, ok := rule["domain"]; ok && r.Form.Get("domain") != "adservice.google.com" && r.Form.Get("domain") != "pixel.facebook.com" {
+				if tags, ok := rule["inboundTag"].([]any); ok {
+					found := false
+					for _, v := range tags {
+						if v == r.Form.Get("inboundTag") {
+							found = true
+						}
+					}
+					if !found {
+						continue
+					}
+				}
+				if port, ok := rule["port"].(string); ok && port != r.Form.Get("port") {
 					continue
+				}
+				if patterns, ok := rule["domain"].([]any); ok {
+					found := false
+					for _, v := range patterns {
+						pattern, _ := v.(string)
+						if strings.HasPrefix(pattern, "regexp:") {
+							found = found || regexp.MustCompile(strings.TrimPrefix(pattern, "regexp:")).MatchString(r.Form.Get("domain"))
+						} else {
+							found = found || r.Form.Get("domain") == "adservice.google.com" || r.Form.Get("domain") == "pixel.facebook.com"
+						}
+					}
+					if !found {
+						continue
+					}
 				}
 				if network, ok := rule["network"].(string); ok && !strings.Contains(network, r.Form.Get("network")) {
 					continue
@@ -273,7 +299,7 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	sqlMust(t, db, "INSERT INTO residential_proxies(proxy_id,name,type,host,port,status,last_success_at,outbound_tag) VALUES($1,'test','socks5','localhost',1080,'healthy',now(),'residential-ads-test')", proxy)
 	sqlMust(t, db, "UPDATE residential_routing_control SET enabled=true,panel_ids=ARRAY[$1::uuid]", panel)
 	service := residentialsync.Service{DB: db, Secrets: panelTestSecrets{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: time.Second}}}
-	for i, want := range []map[string]int{{"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "BLOCKED": 1}, {"DIRECT": 2}} {
+	for i, want := range []map[string]int{{"DIRECT": 1, "RESIDENTIAL": 1}, {"DIRECT": 1, "BLOCKED": 1}, {"DIRECT": 1, "BLOCKED": 1}} {
 		if i == 1 {
 			sqlMust(t, db, "UPDATE residential_proxies SET status='down' WHERE proxy_id=$1", proxy)
 		}
@@ -294,14 +320,14 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 			}
 		}
 	}
-	if saves != 3 || reloads != 3 {
+	if saves != 2 || reloads != 2 {
 		t.Fatal(saves, reloads)
 	}
 	sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
 	if err := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); err != nil {
 		t.Fatal(err)
 	}
-	if saves != 3 || reloads != 3 {
+	if saves != 2 || reloads != 2 {
 		t.Fatal("unchanged routing restarted")
 	}
 }

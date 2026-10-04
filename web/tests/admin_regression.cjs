@@ -76,7 +76,24 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    console.log('UI_EXPLICIT_RESTORE_SAVED_POLICY PASS');
   }
 
+
   console.log('UI_CLEANUP_STATUS_SURVIVES_NAVIGATION PASS');
+  const policyRevision=await evaluate('cache.configs[0].revision');
+  await evaluate('openConfigForm(cache.configs[0])');
+  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("123 saved")');
+  assert.equal(await evaluate('document.querySelector("[name=users_per_second]").max'),'100');
+  await evaluate('document.querySelector("[name=users_per_second]").value="600"');
+  assert.equal(await evaluate('document.querySelector("[name=users_per_second]").validity.rangeOverflow'),true);
+  await evaluate('document.querySelector("[name=users_per_second]").value="100";document.querySelector("[name=target_users_per_inbound]").value="1";document.querySelector("[name=enabled]").checked=true;document.querySelector("[name=generate_direct]").checked=true;document.querySelector("[name=generate_residential]").checked=true;document.querySelector("#modalForm").requestSubmit()');
+  assert.match(await evaluate('document.querySelector("#modalError").textContent'),/two classes require at least two/);
+  const invalid=await fetch(base+'/api/v1/configs',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({users_per_second:600,ports:[443],target_users_per_inbound:1,sni_selection_mode:'scored'})});
+  assert.equal(invalid.status,400);const detail=await invalid.json();assert.equal(detail.field,'users_per_second');assert.match(detail.detail,/1 to 100/);
+  const policy=await(await fetch(base+'/api/v1/configs',{headers:{Authorization:'Bearer '+token}})).json();
+  assert.equal(policy[0].revision,policyRevision,'invalid edits changed policy');
+  const errorSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'config-validation-mobile.png'),Buffer.from(errorSnap.data,'base64'));
+  await evaluate('document.querySelector("#modal").close()');
+  console.log('UI_CONFIG_VALIDATION_AND_DNS_CATALOG PASS unchanged_revision='+policyRevision);
+
   await evaluate('load("dashboard")');await waitFor('document.querySelectorAll(".stat").length>=10');
   assert.equal(await evaluate('document.querySelector("#content").textContent.includes("Panels needing attention")'),true);
   console.log('UI_DASHBOARD PASS');

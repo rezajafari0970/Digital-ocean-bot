@@ -53,7 +53,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	})
 }
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := routePolicy{AdsOnly: adsOnlyPanel(panel)}
+	p := routePolicy{AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel)}
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)
@@ -134,7 +134,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
-	if p.AdsOnly && p.Residential && p.Configured > 0 {
+	if p.AdsOnly && p.Residential && (p.Harden || p.Configured > 0) {
 		if err = validateAdSniffing(raws); err != nil {
 			return err
 		}
@@ -322,6 +322,21 @@ func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Pa
 // policy. Other panels keep their exact old plan while the canary is tested.
 func adsOnlyPanel(panel string) bool {
 	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_ADS_ONLY_PANELS"))
+	if scope == "" {
+		return true
+	}
+	for _, id := range strings.Split(scope, ",") {
+		if strings.TrimSpace(id) == panel {
+			return true
+		}
+	}
+	return false
+}
+
+// Deployment-only scoped rollout. An unset scope enables the verified policy
+// fleet-wide; a nonmatching panel retains its prior exact plan.
+func hardeningPanel(panel string) bool {
+	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_HARDENING_PANELS"))
 	if scope == "" {
 		return true
 	}

@@ -102,17 +102,18 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				{"pixel.facebook.com", "", "udp", "443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
+				{"", "1.1.1.1", "tcp", "443", "", false},
 			} {
 				network := probe.network
 				base := blockedTag
-				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && (p.Residential || p.Direct)) {
+				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && !p.Harden && (p.Residential || p.Direct)) {
 					base = directTag
 				} else if (c.Effective == "RESIDENTIAL" || c.Effective == "" && p.Residential) && len(p.Proxies) > 0 {
 					if network == "tcp" || p.Proxies[0].Type == "socks5" {
 						base = p.Proxies[0].Tag
 					}
 				}
-				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) {
+				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) && (!p.Harden || probe.domain != "") {
 					base = directTag
 				}
 				expected := tagged(desired, base)
@@ -139,6 +140,29 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 					return errRouteNotApplied
 				}
 			}
+		}
+	}
+
+	if p.Harden {
+		base := blockedTag
+		if !p.Residential && p.Direct {
+			base = directTag
+		} else if p.Residential && len(p.Proxies) > 0 && p.Proxies[0].Type == "socks5" {
+			base = p.Proxies[0].Tag
+		}
+		form := url.Values{"port": {"53"}, "network": {"udp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
+		response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
+		if e = envelope(response, e); e != nil {
+			return e
+		}
+		var result struct {
+			Obj struct {
+				Matched     bool
+				OutboundTag string
+			}
+		}
+		if json.Unmarshal(response.Body, &result) != nil || !result.Obj.Matched || result.Obj.OutboundTag != tagged(desired, base) {
+			return errRouteNotApplied
 		}
 	}
 	return nil

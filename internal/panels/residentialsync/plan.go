@@ -21,6 +21,7 @@ type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
 	Residential, Direct bool
 	AdsOnly             bool
+	Harden              bool
 	Configured          int
 	Proxies             []rp
 }
@@ -148,7 +149,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		if !p.Direct && !p.Residential {
 			out[i].Effective = "BLOCKED"
 		} else if out[i].Class == "RESIDENTIAL" {
-			if p.Configured == 0 {
+			if p.Configured == 0 && !p.Harden {
 				out[i].Effective = "DIRECT"
 			} else if len(p.Proxies) == 0 {
 				out[i].Effective = "BLOCKED"
@@ -199,7 +200,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	kept = append(kept, map[string]any{"tag": directTag, "protocol": "freedom", "settings": map[string]any{}}, map[string]any{"tag": blockedTag, "protocol": "blackhole", "settings": map[string]any{}})
 	destination := blockedTag
-	if p.Configured == 0 {
+	if p.Configured == 0 && !p.Harden {
 		destination = directTag
 	} else if len(p.Proxies) > 0 {
 		proxy := p.Proxies[0]
@@ -253,11 +254,26 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	directUsers := []string{}
 	for _, cl := range clients {
-		if cl.Effective == "DIRECT" {
+		if cl.Effective == "DIRECT" && (!p.Harden || cl.Class == "DIRECT") {
 			directUsers = append(directUsers, cl.Email)
 		}
 	}
 	sort.Strings(directUsers)
+	if p.Harden {
+		// Built-in DNS never uses localhost or a direct local-mode transport.
+		next["dns"] = managedDNS()
+		dnsDestination := destination
+		if !p.Residential && p.Direct {
+			dnsDestination = directTag
+		}
+		if !p.Residential && !p.Direct {
+			dnsDestination = blockedTag
+		}
+		if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && dnsDestination == p.Proxies[0].Tag {
+			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-dns-udp", "inboundTag": []string{dnsTag}, "network": "udp", "outboundTag": blockedTag})
+		}
+		first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-dns", "inboundTag": []string{dnsTag}, "network": "tcp,udp", "outboundTag": dnsDestination})
+	}
 	if len(tags) > 0 {
 		if len(directUsers) > 0 {
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-direct-users", "inboundTag": tags, "user": directUsers, "network": "tcp,udp", "outboundTag": directTag})
@@ -276,9 +292,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
 		} else {
-			// Only matched advertising domains use residential egress. DNS and
-			// every other destination remain direct even while a proxy is down.
-			// Legacy ad/UDP blocking rules below cannot override this scoped policy.
+			// Ad rules precede the known-domain direct rule. Opaque/IP traffic and
+			// DNS queries cannot prove that they are non-advertising: fail closed.
+			// A domain outside the geosite lists can still contain ads; sniffing is
+			// not a guarantee for ECH, misleading hostnames, or incomplete lists.
+			if p.Harden && p.Residential {
+				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-udp", "inboundTag": tags, "port": "53", "network": "udp", "outboundTag": blockedTag})
+				}
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": destination})
+			}
 			if p.Residential {
 				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": adDomains, "network": "udp", "outboundTag": blockedTag})
@@ -286,6 +309,13 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": adDomains, "network": "tcp,udp", "outboundTag": destination})
 			}
 			fallback := directTag
+			if p.Harden && p.Residential {
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-known-non-ad", "inboundTag": tags, "domain": []string{knownDomainPattern}, "network": "tcp,udp", "outboundTag": directTag})
+				fallback = destination
+				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-opaque-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
+				}
+			}
 			if !p.Residential && !p.Direct {
 				fallback = blockedTag
 			}
@@ -293,6 +323,18 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 
 		}
 
+	}
+	if p.Harden {
+		// Newly added/unobserved inbounds must not inherit the original direct
+		// default during the interval before inventory reconciliation.
+		first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-unobserved-inbound", "network": "tcp,udp", "outboundTag": blockedTag})
+		for i, v := range kept {
+			if v.(map[string]any)["tag"] == blockedTag {
+				kept = append([]any{v}, append(kept[:i], kept[i+1:]...)...)
+				break
+			}
+		}
+		next["outbounds"] = kept
 	}
 	routing["rules"] = append(first, rest...)
 	next["routing"] = routing

@@ -7,6 +7,8 @@ import (
 
 func TestAdRoutingRequiresActualInboundSniffing(t *testing.T) {
 	for _, body := range []string{
+		`{"enabled":true,"destOverride":["http","tls","quic"],"domainsExcluded":["adservice.google.com"]}`,
+		`{"enabled":true,"destOverride":["http","tls","quic"],"ipsExcluded":["0.0.0.0/0"]}`,
 		`{}`, `{"enabled":false,"destOverride":["http","tls","quic"]}`,
 		`{"enabled":true,"metadataOnly":true,"destOverride":["http","tls","quic"]}`,
 		`{"enabled":true,"destOverride":["http","tls"]}`,

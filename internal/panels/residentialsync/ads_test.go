@@ -26,7 +26,7 @@ func probeRoute(t *testing.T, setting map[string]any, email, domain, network str
 func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 	for _, kind := range []string{"socks5", "http", "down", "absent"} {
 		t.Run(kind, func(t *testing.T) {
-			p := routePolicy{AdsOnly: true, Residential: true, Direct: true, Configured: 1}
+			p := routePolicy{AdsOnly: true, Harden: true, Residential: true, Direct: true, Configured: 1}
 			if kind == "absent" {
 				p.Configured = 0
 			}
@@ -40,20 +40,20 @@ func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 			}
 			for _, c := range cs {
 				for _, network := range []string{"tcp", "udp"} {
-					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org", ""} {
+					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org"} {
 						got := probeRoute(t, desired, c.Email, domain, network)
 						if got != tagged(desired, directTag) {
 							t.Fatalf("non-ad not direct: %s %s %s", c.Class, domain, network)
 						}
 					}
 					base := directTag
-					if c.Class == "RESIDENTIAL" && p.Configured > 0 {
+					if c.Class == "RESIDENTIAL" {
 						base = blockedTag
 						if len(p.Proxies) > 0 && (network == "tcp" || kind == "socks5") {
 							base = p.Proxies[0].Tag
 						}
 					}
-					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com"} {
+					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com", "", "1.1.1.1", "2001:db8::1"} {
 						if got := probeRoute(t, desired, c.Email, domain, network); got != tagged(desired, base) {
 							t.Fatalf("ad route %s %s %s: %s", kind, c.Class, network, got)
 						}
@@ -71,7 +71,7 @@ func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 	}
 }
 func TestManagedAdsOverrideLegacyAdBlockWithoutTouchingOtherInbound(t *testing.T) {
-	p := routePolicy{AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
+	p := routePolicy{AdsOnly: true, Harden: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
 	cs, tags := fixtureClients(t, p)
 	base := baseSettings()
 	routing := base["routing"].(map[string]any)

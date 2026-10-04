@@ -27,6 +27,11 @@ func validateAdSniffing(raws []json.RawMessage) error {
 		if m["enabled"] != true || m["metadataOnly"] == true {
 			return errors.New("advertising routing requires payload sniffing")
 		}
+		for _, key := range []string{"domainsExcluded", "ipsExcluded"} {
+			if values, ok := m[key].([]any); ok && len(values) > 0 {
+				return errors.New("advertising routing cannot exclude sniffing destinations")
+			}
+		}
 		protocols, ok := m["destOverride"].([]any)
 		if !ok {
 			return errors.New("inbound sniffing protocols missing")
