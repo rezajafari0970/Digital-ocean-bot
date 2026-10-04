@@ -28,6 +28,7 @@ func main() {
 }
 func run() error {
 	base := flag.String("base-url", "http://127.0.0.1:18080", "local production API")
+	localPurge := flag.Bool("fixture-local-purge", false, "exercise explicit local purge on a newly created blocked fixture only")
 	fixtures := flag.Bool("fixture-delete", false, "exercise deletes on newly created disabled test fixtures only")
 	browserScript := flag.String("browser-script", "", "run a local browser acceptance script with an ephemeral session")
 	fixtureBrowser := flag.String("fixture-browser-script", "", "exercise the new fixture account Delete button in a local browser")
@@ -189,7 +190,7 @@ func run() error {
 		}
 		fmt.Println("RESIDENTIAL_API_CREATE_SECRET_ISOLATION_DELETE PASS")
 	}
-	if !*fixtures {
+	if !*fixtures && !*localPurge {
 		return nil
 	}
 	account, _ := sanaei.UUIDv4()
@@ -241,9 +242,32 @@ func run() error {
 	if err != nil || code != 200 {
 		return errors.New("account detail failed")
 	}
+
+	if *localPurge {
+		if *fixtureBrowser == "" {
+			return errors.New("local purge fixture requires actual browser")
+		}
+		tx, err := a.DB.BeginTx(ctx, nil)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+		if _, err = tx.ExecContext(ctx, "UPDATE accounts SET provider_state='LOCKED',runtime_status='DELETE_PENDING',deletion_requested_at=now()-interval '3 minutes' WHERE id=$1 AND NOT enabled", account); err != nil {
+			return err
+		}
+		if _, err = tx.ExecContext(ctx, "INSERT INTO account_deletion_jobs(account_id,next_attempt_at) VALUES($1,now()+interval '1 hour')", account); err != nil {
+			return err
+		}
+		if _, err = tx.ExecContext(ctx, "INSERT INTO droplets(id,account_id,provider_resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')", account, "acceptance-"+account); err != nil {
+			return err
+		}
+		if err = tx.Commit(); err != nil {
+			return err
+		}
+	}
 	if *fixtureBrowser != "" {
 		command := exec.CommandContext(ctx, "node", *fixtureBrowser)
-		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base, "DOB_UI_FIXTURE_ACCOUNT="+account)
+		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base, "DOB_UI_FIXTURE_ACCOUNT="+account, fmt.Sprintf("DOB_UI_EXPECT_LOCAL_PURGE=%t", *localPurge))
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
 		if err = command.Run(); err != nil {
@@ -270,7 +294,7 @@ func run() error {
 		case <-ticker.C:
 		}
 	}
-	for _, table := range []string{"network_profiles", "account_billing_snapshots", "account_deletion_jobs", "secrets", "operations", "resources"} {
+	for _, table := range []string{"network_profiles", "account_billing_snapshots", "account_deletion_jobs", "secrets", "operations", "resources", "droplets", "deployments", "panel_instances"} {
 		if err = a.DB.QueryRowContext(ctx, "SELECT count(*) FROM "+table+" WHERE account_id=$1", account).Scan(&n); err != nil || n != 0 {
 			return fmt.Errorf("fixture data remains in %s", table)
 		}

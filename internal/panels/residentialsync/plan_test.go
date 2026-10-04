@@ -28,11 +28,11 @@ func TestRoutingClassesAndClosedFailure(t *testing.T) {
 		p                    routePolicy
 		direct, res, blocked int
 	}{
-		{"both", routePolicy{Residential: true, Direct: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}, 2, 2, 0},
-		{"down", routePolicy{Residential: true, Direct: true, Configured: 1}, 2, 0, 2},
-		{"absent", routePolicy{Residential: true}, 4, 0, 0},
-		{"direct", routePolicy{Direct: true, Configured: 1}, 4, 0, 0},
-		{"disabledclasses", routePolicy{Configured: 1}, 0, 0, 4},
+		{"both", routePolicy{AdsOnly: true, Residential: true, Direct: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}, 2, 2, 0},
+		{"down", routePolicy{AdsOnly: true, Residential: true, Direct: true, Configured: 1}, 2, 0, 2},
+		{"absent", routePolicy{AdsOnly: true, Residential: true}, 4, 0, 0},
+		{"direct", routePolicy{AdsOnly: true, Direct: true, Configured: 1}, 4, 0, 0},
+		{"disabledclasses", routePolicy{AdsOnly: true, Configured: 1}, 0, 0, 4},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cs, tags := fixtureClients(t, tc.p)
@@ -62,7 +62,7 @@ func TestConflictingClientIdentityRejected(t *testing.T) {
 		`{"id":1,"tag":"tag","protocol":"vless","settings":{"clients":[{"id":"a","email":"x"},{"id":"b","email":"X"}]}}`,
 		`{"id":1,"tag":"tag","protocol":"vless","settings":{"clients":[{"id":"a","email":"regexp:.*"}]}}`,
 	} {
-		if _, _, err := planClients([]json.RawMessage{json.RawMessage(raw)}, nil, routePolicy{Direct: true}); err == nil {
+		if _, _, err := planClients([]json.RawMessage{json.RawMessage(raw)}, nil, routePolicy{AdsOnly: true, Direct: true}); err == nil {
 			t.Fatal("unsafe inventory accepted")
 		}
 	}
@@ -134,6 +134,9 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 					continue
 				}
 			}
+			if _, ok := rule["domain"]; ok && v.Get("domain") != "adservice.google.com" && v.Get("domain") != "pixel.facebook.com" {
+				continue
+			}
 			if n, ok := rule["network"].(string); ok && !strings.Contains(n, v.Get("network")) {
 				continue
 			}
@@ -145,7 +148,7 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 	return sanaei.SessionResponse{}, errors.New("unexpected request")
 }
 func TestLostSaveAndRestartResponsesReconcileWithoutDuplicate(t *testing.T) {
-	p := routePolicy{Residential: true, Direct: true, Configured: 1, Proxies: []rp{{Type: "http", Host: "example.test", Port: 8080, Password: "test", Tag: "residential-ads-test"}}}
+	p := routePolicy{AdsOnly: true, Residential: true, Direct: true, Configured: 1, Proxies: []rp{{Type: "http", Host: "example.test", Port: 8080, Password: "test", Tag: "residential-ads-test"}}}
 	cs, tags := fixtureClients(t, p)
 	base := baseSettings()
 	desired, e := buildSettings(base, cs, tags, p)
@@ -176,7 +179,7 @@ func TestLostSaveAndRestartResponsesReconcileWithoutDuplicate(t *testing.T) {
 	}
 }
 func TestUnobservedTemplateNeverRestartsOrBlindRetries(t *testing.T) {
-	p := routePolicy{Direct: true}
+	p := routePolicy{AdsOnly: true, Direct: true}
 	cs, tags := fixtureClients(t, p)
 	base := baseSettings()
 	desired, _ := buildSettings(base, cs, tags, p)
@@ -192,7 +195,7 @@ func TestUnobservedTemplateNeverRestartsOrBlindRetries(t *testing.T) {
 }
 
 func TestExistingClassesSurviveDeletionAndReplacement(t *testing.T) {
-	p := routePolicy{Direct: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
+	p := routePolicy{AdsOnly: true, Direct: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Tag: "residential-ads-test"}}}
 	previous := map[string]clientRoute{"a": {ID: "a", Email: "a", Class: "DIRECT"}, "b": {ID: "b", Email: "b", Class: "RESIDENTIAL"}}
 	plan := func(ids ...string) []clientRoute {
 		t.Helper()

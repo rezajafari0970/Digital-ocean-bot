@@ -28,8 +28,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   if(fixture){
    assert.match(fixture,/^[0-9a-f-]{36}$/);
    assert.equal(await evaluate('cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+'&&x.name==='+JSON.stringify('acceptance-'+fixture)+')'),true);
-   await evaluate('(()=>{const original=window.confirm;window.confirm=()=>true;document.querySelector('+JSON.stringify('[data-action="delete-account"][data-id="'+fixture+'"]')+').click();window.confirm=original})()');
+   await evaluate('(()=>{const original=window.confirm;window.confirm=message=>{window.lastDeleteConfirmation=message;return true};document.querySelector('+JSON.stringify('[data-action="delete-account"][data-id="'+fixture+'"]')+').click();window.confirm=original})()');
    await waitFor('!cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+')||cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+'&&x.deletion)');
+   if(process.env.DOB_UI_EXPECT_LOCAL_PURGE==='true'){
+    await waitFor('!cache.accounts.some(x=>x.id==='+JSON.stringify(fixture)+')');
+    assert.equal(await evaluate('lastDeleteConfirmation.includes("does NOT confirm deletion of cloud resources")'),true);
+    console.log('UI_EXPLICIT_LOCAL_PURGE_COMPLETED PASS');
+   }
    console.log('UI_ACCOUNT_DELETE_BUTTON_REQUESTED PASS');
    return;
   }

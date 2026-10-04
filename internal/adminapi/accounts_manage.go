@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"net/http"
 )
 
@@ -282,11 +284,42 @@ func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
 	var attempts, remaining int
 	var detail string
 	err := s.DB.QueryRowContext(ctx, `SELECT a.deletion_requested_at,COALESCE(j.attempts,0),
- (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
+ (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining),
  COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker')
  FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail)
 	if err != nil || !requested.Valid {
 		return nil
 	}
 	return map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail}
+}
+
+// purgeAccount only accepts explicit acknowledgement of unverified cloud
+// resources. It is intentionally separate from ordinary provider deletion.
+func (s *Server) purgeAccount(w http.ResponseWriter, r *http.Request) {
+	p, _ := principal(r.Context())
+	if !p.CanAdmin() {
+		writeJSON(w, 403, map[string]string{"error": "forbidden"})
+		return
+	}
+	var req struct {
+		AccountID     string `json:"account_id"`
+		ProviderState string `json:"expected_provider_state"`
+		Remaining     *int   `json:"expected_remaining_servers"`
+		Acknowledge   bool   `json:"acknowledge_cloud_resources_unverified"`
+	}
+	id := r.PathValue("id")
+	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req) != nil || req.AccountID != id || req.Remaining == nil || *req.Remaining < 0 || !req.Acknowledge {
+		writeJSON(w, 400, map[string]string{"error": "explicit_local_purge_acknowledgement_required"})
+		return
+	}
+	err := app.PurgeSavedAccount(r.Context(), s.DB, id, req.ProviderState, *req.Remaining)
+	if errors.Is(err, app.ErrAccountPurgeConflict) {
+		writeJSON(w, 409, map[string]string{"error": "Account changed or cleanup is still settling. Refresh and review the remaining cloud resources."})
+		return
+	}
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	writeJSON(w, 200, map[string]any{"state": "PURGED", "provider_deletion_verified": false, "detail": "Account and associated saved data deleted. Cloud resource deletion could not be verified; check the provider console."})
 }

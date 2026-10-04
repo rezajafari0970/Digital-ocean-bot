@@ -13,9 +13,14 @@ import (
 const directTag = "dob-route-direct"
 const blockedTag = "dob-route-blocked"
 
+// Installed geosite.dat contains these lists. "Google ads" and "Ads" are
+// display names, not valid geosite:google-ads / geosite:ads identifiers.
+var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads"}
+
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
 	Residential, Direct bool
+	AdsOnly             bool
 	Configured          int
 	Proxies             []rp
 }
@@ -240,7 +245,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			continue
 		}
 		outbound, _ := m["outboundTag"].(string)
-		if (apiTag != "" && outbound == apiTag) || blackholes[outbound] {
+		if (apiTag != "" && outbound == apiTag) || (blackholes[outbound] && (!p.AdsOnly || destinationIPGuard(m))) {
 			first = append(first, value)
 		} else {
 			rest = append(rest, value)
@@ -263,12 +268,31 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if !p.Residential && !p.Direct {
 			destination = blockedTag
 		}
-		// HTTP proxying cannot carry UDP. Deny it explicitly instead of allowing an
-		// unmatched UDP packet to use the original first (direct) outbound.
-		if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
-			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
+		if !p.AdsOnly {
+			// HTTP proxying cannot carry UDP. Deny it explicitly instead of allowing an
+			// unmatched UDP packet to use the original first (direct) outbound.
+			if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
+			}
+			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
+		} else {
+			// Only matched advertising domains use residential egress. DNS and
+			// every other destination remain direct even while a proxy is down.
+			// Legacy ad/UDP blocking rules below cannot override this scoped policy.
+			if p.Residential {
+				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": adDomains, "network": "udp", "outboundTag": blockedTag})
+				}
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": adDomains, "network": "tcp,udp", "outboundTag": destination})
+			}
+			fallback := directTag
+			if !p.Residential && !p.Direct {
+				fallback = blockedTag
+			}
+			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": fallback})
+
 		}
-		first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
+
 	}
 	routing["rules"] = append(first, rest...)
 	next["routing"] = routing
@@ -292,4 +316,11 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		}
 	}
 	return next, nil
+}
+
+// Preserve destination-IP deny rules ahead of managed routing, including mixed
+// private CIDRs. Domain/ad and protocol-only rules remain for other inbounds.
+func destinationIPGuard(rule map[string]any) bool {
+	value, ok := rule["ip"]
+	return ok && value != nil
 }

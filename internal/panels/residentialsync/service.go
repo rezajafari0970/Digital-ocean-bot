@@ -9,6 +9,8 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -51,7 +53,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	})
 }
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	var p routePolicy
+	p := routePolicy{AdsOnly: adsOnlyPanel(panel)}
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)
@@ -131,6 +133,11 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	raws, err := rt.Session.Snapshot(ctx)
 	if err != nil {
 		return err
+	}
+	if p.AdsOnly && p.Residential && p.Configured > 0 {
+		if err = validateAdSniffing(raws); err != nil {
+			return err
+		}
 	}
 	clients, tags, err := planClients(raws, previous, p)
 	if err != nil {
@@ -309,4 +316,19 @@ func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Pa
 		return p, false, nil
 	}
 	return p, err == nil, err
+}
+
+// Optional deployment-only canary allowlist. Unset means the complete new
+// policy. Other panels keep their exact old plan while the canary is tested.
+func adsOnlyPanel(panel string) bool {
+	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_ADS_ONLY_PANELS"))
+	if scope == "" {
+		return true
+	}
+	for _, id := range strings.Split(scope, ",") {
+		if strings.TrimSpace(id) == panel {
+			return true
+		}
+	}
+	return false
 }

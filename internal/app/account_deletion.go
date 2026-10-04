@@ -152,10 +152,8 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 	if _, err = tx.ExecContext(ctx, "SET LOCAL lock_timeout='5s'"); err != nil {
 		return err
 	}
-	for _, prefix := range []string{"deployment-admission:", "account-mutation:", "account-proxy:", "account-route:"} {
-		if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", prefix+id); err != nil {
-			return err
-		}
+	if err = lockAccountPurge(ctx, tx, id); err != nil {
+		return err
 	}
 	// A last fresh local read prevents a concurrent lifecycle/recovery commit
 	// from being erased. Account disablement is retained until this transaction.
@@ -171,24 +169,9 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 	if !safe {
 		return errors.New("account deletion precondition changed")
 	}
-	// All account-related non-cascading tables and unlinked worker diagnostics are
-	// removed in the same transaction. Remaining children use verified FK cascades.
-	for _, q := range []string{
-		`DELETE FROM worker_item_failures WHERE account_id=$1 OR item_id IN (SELECT id::text FROM panel_instances WHERE account_id=$1 UNION SELECT id::text FROM droplets WHERE account_id=$1 UNION SELECT id::text FROM deployments WHERE account_id=$1 UNION SELECT id::text FROM operations WHERE account_id=$1)`,
-		"DELETE FROM audit_events WHERE account_id=$1",
-		"DELETE FROM secrets WHERE account_id=$1",
-		"DELETE FROM lifecycle_events WHERE account_id=$1",
-		"DELETE FROM provider_snapshots WHERE account_id=$1",
-		"DELETE FROM resources WHERE account_id=$1",
-		"DELETE FROM droplets WHERE account_id=$1",
-		"DELETE FROM accounts WHERE id=$1",
-	} {
-		if _, err = tx.ExecContext(ctx, q, id); err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
+	return commitAccountPurge(ctx, tx, id)
 }
+
 func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt AccountRuntime) error {
 	reader, ok := rt.Driver.(sshKeyInventory)
 	if !ok {

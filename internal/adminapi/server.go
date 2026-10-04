@@ -64,6 +64,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/accounts/preview", s.require(s.accountPreview, true))
 	m.HandleFunc("PUT /api/v1/accounts/{id}", s.require(s.updateAccount, true))
 	m.HandleFunc("DELETE /api/v1/accounts/{id}", s.require(s.deleteAccount, true))
+	m.HandleFunc("POST /api/v1/accounts/{id}/purge", s.require(s.purgeAccount, true))
 	m.HandleFunc("GET /api/v1/accounts/{id}/options", s.require(s.accountOptions, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/identity", s.require(s.accountIdentity, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/preflight", s.require(s.accountPreflight, true))

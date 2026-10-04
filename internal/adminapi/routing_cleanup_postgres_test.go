@@ -216,7 +216,7 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 		case "/login":
 			result(nil)
 		case "/panel/api/inbounds/list":
-			fmt.Fprint(w, `{"success":true,"obj":[{"id":1,"tag":"in-443-tcp","port":443,"protocol":"vless","settings":{"clients":[{"id":"a","email":"a"},{"id":"b","email":"b"}]}}]}`)
+			fmt.Fprint(w, `{"success":true,"obj":[{"id":1,"tag":"in-443-tcp","port":443,"protocol":"vless","sniffing":{"enabled":true,"destOverride":["http","tls","quic"]},"settings":{"clients":[{"id":"a","email":"a"},{"id":"b","email":"b"}]}}]}`)
 		case "/panel/api/xray/":
 			result(map[string]any{"xraySetting": template})
 		case "/panel/api/xray/update":
@@ -249,6 +249,9 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 					if !match {
 						continue
 					}
+				}
+				if _, ok := rule["domain"]; ok && r.Form.Get("domain") != "adservice.google.com" && r.Form.Get("domain") != "pixel.facebook.com" {
+					continue
 				}
 				if network, ok := rule["network"].(string); ok && !strings.Contains(network, r.Form.Get("network")) {
 					continue

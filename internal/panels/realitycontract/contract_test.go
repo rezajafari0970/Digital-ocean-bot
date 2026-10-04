@@ -39,7 +39,7 @@ func TestPayloadAndURIStaySymmetric(t *testing.T) {
 		t.Fatal(e)
 	}
 	q := parsed.Query()
-	if q.Get("flow") != "xtls-rprx-vision" || q.Get("sni") != "www.cloudflare.com" || q.Get("sid") != "04a54a16" {
+	if q.Get("flow") != "xtls-rprx-vision-udp443" || q.Get("sni") != "www.cloudflare.com" || q.Get("sid") != "04a54a16" {
 		t.Fatalf("client mismatch %v", q)
 	}
 	if parsed.Port() != "18443" {

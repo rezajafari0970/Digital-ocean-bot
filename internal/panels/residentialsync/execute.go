@@ -94,7 +94,16 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 	}
 	for _, tag := range tags {
 		for _, c := range samples {
-			for _, network := range []string{"tcp", "udp"} {
+			for _, probe := range []struct {
+				domain, ip, network, port, protocol string
+				ads                                 bool
+			}{
+				{"adservice.google.com", "", "tcp", "443", "tls", true},
+				{"pixel.facebook.com", "", "udp", "443", "quic", true},
+				{"www.google.com", "", "tcp", "443", "tls", false},
+				{"", "1.1.1.1", "udp", "53", "", false},
+			} {
+				network := probe.network
 				base := blockedTag
 				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && (p.Residential || p.Direct)) {
 					base = directTag
@@ -103,11 +112,19 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = p.Proxies[0].Tag
 					}
 				}
+				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) {
+					base = directTag
+				}
 				expected := tagged(desired, base)
 				if expected == "" {
 					return errors.New("routing proof target missing")
 				}
-				form := url.Values{"ip": {"1.1.1.1"}, "port": {"443"}, "network": {network}, "inboundTag": {tag}, "email": {c.Email}}
+				form := url.Values{"port": {probe.port}, "network": {network}, "inboundTag": {tag}, "email": {c.Email}, "protocol": {probe.protocol}}
+				if probe.domain != "" {
+					form.Set("domain", probe.domain)
+				} else {
+					form.Set("ip", probe.ip)
+				}
 				response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
 				if e = envelope(response, e); e != nil {
 					return e

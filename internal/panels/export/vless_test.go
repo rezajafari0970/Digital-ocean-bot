@@ -16,7 +16,7 @@ func TestRealityURIAlwaysCarriesVisionFlow(t *testing.T) {
 		t.Fatal(e)
 	}
 	q := u.Query()
-	if q.Get("flow") != "xtls-rprx-vision" {
+	if q.Get("flow") != "xtls-rprx-vision-udp443" {
 		t.Fatalf("flow=%q", q.Get("flow"))
 	}
 	for _, k := range []string{"security", "sni", "fp", "pbk", "sid", "type"} {

@@ -33,8 +33,10 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 	if x.Fingerprint == "" {
 		x.Fingerprint = "chrome"
 	}
-	if x.Flow == "" {
-		x.Flow = "xtls-rprx-vision"
+	// URI is a client-side setting. The server keeps ordinary Vision; this
+	// suffix permits QUIC instead of silently rejecting UDP port 443.
+	if x.Flow == "" || x.Flow == "xtls-rprx-vision" {
+		x.Flow = "xtls-rprx-vision-udp443"
 	}
 	q := url.Values{}
 	q.Set("encryption", "none")
