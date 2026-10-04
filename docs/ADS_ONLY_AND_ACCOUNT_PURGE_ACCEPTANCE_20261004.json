@@ -1,0 +1,148 @@
+{
+  "verified_at_utc": "2026-10-04T11:43:40.650242+00:00",
+  "runtime_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+  "source_commits": [
+    "75c5b110e65b3bd1e1680473de92aaaa507f4ea2",
+    "add8e110cfcb3efdb72ebbc47fe9469a5c22693d"
+  ],
+  "status": "ACCEPTED_WITH_UNVERIFIED_CLOUD_RESOURCES_AND_UPSTREAM_UDP_LIMIT",
+  "video": {
+    "filename": "Screenrecorder-2026-10-04-14-16-40-743.mp4",
+    "duration_seconds": 190.46,
+    "visual_review": "190 consecutive one-second frames; detailed transitions",
+    "audio": "Background music; no additional spoken requirements"
+  },
+  "account_deletion": {
+    "normal_delete": "Durable worker verifies managed provider resources absent before purging saved account data.",
+    "explicit_local_purge": "Admin acknowledgement required; blocked disabled account, aged persisted deletion intent, exact provider state and fresh distinct remaining-resource count; serialized against account/provider/panel work.",
+    "fixed_dependencies": [
+      "bulk_lifecycle_scopes",
+      "bulk_scale_runs",
+      "bulk_user_ownership",
+      "scoped execution gates",
+      "residential routing scope arrays",
+      "account-owned data and unlinked diagnostics"
+    ],
+    "fixed_ui": "Raw deletion provider state is returned separately from DISABLED display status.",
+    "requested_accounts_purged": 4,
+    "zero_account_linked_rows_verified_tables": 32,
+    "other_live_accounts_unchanged": 4,
+    "provider_resource_deletion_verified": false,
+    "previously_tracked_cloud_resources_unverified": 20,
+    "scope_note": "Operational PostgreSQL account data, credentials, jobs and statistics were purged. This is not a secure-erasure claim about historical backups or system journals.",
+    "browser_fixture": "Existing fixture recovered after first UI failure; no blind recreation; actual Delete button passed; zero residue"
+  },
+  "routing": {
+    "mode": "RESIDENTIAL=advertising categories only; non-advertising and DNS direct. DIRECT remains its own disjoint identity class.",
+    "domain_rules": [
+      "geosite:category-ads-all",
+      "geosite:category-ads",
+      "geosite:google@ads",
+      "geosite:facebook@ads"
+    ],
+    "labels": {
+      "Google ads": "geosite:google@ads",
+      "Ads": "geosite:category-ads"
+    },
+    "installed_asset_sha256": "e6563deec254fd4323ace7137ac4e881a77cff19e8be0b166961d8c8c59e35be",
+    "invalid_installed_aliases": [
+      "geosite:google-ads",
+      "geosite:ads"
+    ],
+    "networks": [
+      "tcp",
+      "udp"
+    ],
+    "quic": "Client URI flow=xtls-rprx-vision-udp443; server flow remains xtls-rprx-vision.",
+    "required_sniffing": [
+      "http",
+      "tls",
+      "quic"
+    ],
+    "proof": "Content-addressed saved plan and running-core routeTest; real traffic tested separately.",
+    "unavailable_proxy": "Matched ad destinations fail closed; other destinations remain direct; Output excludes unavailable residential routes.",
+    "classification_limit": "Domain categories require a supplied or sniffed hostname. Opaque/ECH/unrecognized direct-IP advertising cannot be universally classified by these lists.",
+    "upstream_udp": {
+      "tested_endpoint": "Res1",
+      "tcp_authentication": true,
+      "socks5_udp_associate_reply": 1,
+      "verified_working": false,
+      "note": "Current upstream rejected the real UDP association. Advertising UDP/QUIC through residential is NOT accepted as working."
+    },
+    "canary_panel": "69e68a2a-8a42-4c9f-9f12-302920d729bc",
+    "fleet_panels_verified": 38,
+    "canary_environment_override_removed": true,
+    "real_traffic": {
+      "both_classes_nonad_egress_server_ip": true,
+      "both_classes_udp_dns": true,
+      "both_classes_quic_tls_h3_handshake_to_google": true,
+      "both_classes_advertising_https_status": 404,
+      "output_class_overlap": 0
+    },
+    "baseline_reproduced": "Old residential non-ad HTTPS exited through proxy and UDP DNS failed. Ordinary Vision blocked UDP443 even for Direct."
+  },
+  "memory": {
+    "fleet_observed": 38,
+    "small_hosts": 3,
+    "missing_headroom_after": 0,
+    "canary_peak_rss_kib": 122768,
+    "canary_min_available_kib": 213028,
+    "incident": "One legacy small host had an Xray OOM during rollout; existing bounded repair installed managed headroom and reconciled successfully.",
+    "proactive_repair_panel": "eb229ecf-2b5d-438f-a793-36f1ed442b8c",
+    "proactive_repair": "Reused committed, journaled memory guard; one additional 453MiB host had zero swap, now 1GiB verified. Serial and exact-panel scoped."
+  },
+  "final_state": {
+    "active_servers": 38,
+    "inactive_servers": 0,
+    "broken_servers": 0,
+    "panel_attention_servers": 0,
+    "pending_deletion_servers": 0,
+    "digitalocean_accounts": 2,
+    "vultr_accounts": 2,
+    "healthy_accounts": 4,
+    "pending_deletion_accounts": 0,
+    "fresh_output_total": 76,
+    "direct_output": 38,
+    "residential_output": 38,
+    "capacity_deficit": 0,
+    "capacity_errors": 0,
+    "enabled_lifecycle_scopes": 39,
+    "eligible_serving_panels": 38
+  },
+  "tests": [
+    "focused PostgreSQL/unit",
+    "race",
+    "full go test ./...",
+    "full clean detached go test ./...",
+    "injected purge rollback",
+    "provider-lock race",
+    "stale purge rejection",
+    "lost response replay",
+    "routing lost-save/restart recovery",
+    "ads/down/absent/direct matrix",
+    "sniffing validation",
+    "actual mobile browser deletion and recovery",
+    "32-table Production purge verification",
+    "real VLESS TCP/DNS/QUIC traffic",
+    "all 38 serving routing proofs",
+    "all 38 host memory observations"
+  ],
+  "binaries": {
+    "api": {
+      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+      "vcs_modified": false,
+      "sha256": "253d09b19c125d73db389b53ee3f9f74a84203fe183456c0412de53a846e9700"
+    },
+    "worker": {
+      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+      "vcs_modified": false,
+      "sha256": "51069866d1e9671cacdd67f10c6c7c31c75ebd52d9c0d493087ef92b504c068a"
+    }
+  },
+  "evidence_directory": "/root/backups/dob-delete-ads-20261004",
+  "deferred": [
+    "Residential IP speed/health selection strategy, as explicitly requested by user.",
+    "Real advertising UDP/QUIC acceptance requires a residential upstream that successfully relays UDP.",
+    "Separate, scoped real quota-exhaustion acceptance remains pending from prior handoff."
+  ]
+}

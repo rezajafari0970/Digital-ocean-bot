@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-04",
-    "runtime_source_revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
-    "status": "ACCEPTED_SOFTWARE_WITH_PROVIDER_ACCESS_BLOCKERS",
+    "runtime_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+    "status": "ACCEPTED_WITH_UNVERIFIED_CLOUD_RESOURCES_AND_UPSTREAM_UDP_LIMIT",
     "active_scopes_at_acceptance": 39,
     "eligible_serving_panels": 38,
-    "acceptance": "docs/PRODUCTION_REGRESSION_ACCEPTANCE_20261004.json",
-    "handoff": "docs/RECOVERY_CONTROLS_20261004.md",
+    "acceptance": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_ACCEPTANCE_20261004.json",
+    "handoff": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_HANDOFF_20261004.md",
     "note": "Earlier knowledge-mastery/volatile-worktree and scale records are historical. Recheck canonical HEAD/origin and live DB. Do not repeat priming or scale canaries. Main durable gate is intentionally enabled at concurrency 1 for saved policy revision 23; legacy bulk gate remains closed."
   }
 }

@@ -1,18 +1,18 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+  "runtime_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T10:24:34.442348+00:00",
+  "verified_at_utc": "2026-10-04T11:43:40.650242+00:00",
   "binaries": {
     "api": {
-      "revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
       "vcs_modified": false,
-      "sha256": "a42ad908ec8741284bec50a37a525e0466be6e93cca4d42e848bc3e378f62aba"
+      "sha256": "253d09b19c125d73db389b53ee3f9f74a84203fe183456c0412de53a846e9700"
     },
     "worker": {
-      "revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
       "vcs_modified": false,
-      "sha256": "71a8760c776ca512b24d83b09d0fa232ec43ce5d57e80fb1a7ca30d574387c10"
+      "sha256": "51069866d1e9671cacdd67f10c6c7c31c75ebd52d9c0d493087ef92b504c068a"
     }
   },
   "services": {
@@ -22,9 +22,9 @@
     "api_worker_auto_restarts": 0
   },
   "migration": "000146_panel_network_access",
-  "acceptance": "docs/PRODUCTION_REGRESSION_ACCEPTANCE_20261004.json",
+  "acceptance": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_ACCEPTANCE_20261004.json",
   "verified": true,
-  "note": "Video regression recovery accepted: 38 serving panels, 76 fresh disjoint configs, real traffic verified, policy revision 23 continuously enabled. Four provider access blockers retain 20 pending servers. Historical scale/lifecycle fields below remain historical. Documentation-only checkpoint commits do not imply binary drift.",
+  "note": "Ads-only residential routing and explicit local account purge accepted. 38 serving panels, 76 disjoint configs, DNS and non-ad QUIC proven. Four requested blocked accounts purged locally; 20 previously tracked cloud resources remain unverified. Current residential upstream rejects UDP. Documentation-only checkpoint commits do not imply runtime drift.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,7 +41,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Resolve the four provider access blockers; prepare separately scoped real quota exhaustion acceptance. Preserve the restored fleet policy and historical audit.",
+  "next_product_step": "Obtain/verify UDP-capable residential upstream for advertising UDP/QUIC. IP speed-selection strategy is explicitly deferred. Preserve policy revision 23 and separate real quota-exhaustion scope.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "active_lifecycle_scopes": 39,
   "eligible_serving_panels": 38
