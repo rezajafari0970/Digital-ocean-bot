@@ -241,8 +241,8 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		// explicitly chain through the same residential outbound.
 		kept = append(kept, map[string]any{
 			"tag": clientDNSTag, "protocol": "dns",
-			"settings":      map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
-			"proxySettings": map[string]any{"tag": destination},
+			"settings":       map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
+			"streamSettings": map[string]any{"sockopt": map[string]any{"dialerProxy": destination}},
 		})
 	}
 	next["outbounds"] = kept
@@ -379,10 +379,12 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	for _, value := range kept {
 		m := value.(map[string]any)
-		if proxy, ok := m["proxySettings"].(map[string]any); ok {
-			tag, _ := proxy["tag"].(string)
-			if replacement, ok := replacements[tag]; ok {
-				proxy["tag"] = replacement
+		if stream, ok := m["streamSettings"].(map[string]any); ok {
+			if sockopt, ok := stream["sockopt"].(map[string]any); ok {
+				tag, _ := sockopt["dialerProxy"].(string)
+				if replacement, ok := replacements[tag]; ok {
+					sockopt["dialerProxy"] = replacement
+				}
 			}
 		}
 	}
