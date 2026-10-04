@@ -9,6 +9,11 @@ import (
 // ReconcileLocalState repairs only relationships that are provable from local
 // persisted state. It never creates or deletes provider resources.
 func (c Container) ReconcileLocalState(ctx context.Context) {
+	if n, err := c.ReconcileFailedProvisioning(ctx); err != nil {
+		log.Printf("terminal provisioning reconcile: %v", err)
+	} else if n > 0 {
+		log.Printf("terminal provisioning retired=%d", n)
+	}
 	// Disabled/deleting accounts must never keep scheduler leases alive.
 	// This also repairs rows created before delete disabled schedules atomically.
 	_, _ = c.DB.ExecContext(ctx, `UPDATE schedules s SET enabled=false,lease_until=NULL,updated_at=now() FROM accounts a WHERE a.id=s.account_id AND a.enabled=false AND (s.enabled=true OR s.lease_until IS NOT NULL)`)

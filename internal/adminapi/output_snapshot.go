@@ -98,6 +98,10 @@ func (s *Server) sharedOutput(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "share route class is fixed", 400)
 		return
 	}
+	if r.URL.Query().Get("view") == "1" {
+		outputBrowserView(w)
+		return
+	}
 	s.outputSnapshotClass(w, r, class)
 }
 func validOutputClass(c string) bool { return c == "ALL" || c == "RESIDENTIAL" || c == "DIRECT" }

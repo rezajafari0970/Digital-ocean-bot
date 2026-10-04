@@ -38,6 +38,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('[...document.querySelectorAll(".billingCompact")].every(x=>x.closest(".accountCard")&&!x.open)'),true);
   const snap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'accounts-mobile.png'),Buffer.from(snap.data,'base64'));
   console.log('UI_ACCOUNT_BILLING_NESTED_COMPACT PASS accounts='+cards);
+  await evaluate('document.querySelector(".billingCompact").open=true;document.querySelectorAll(".accountCard")[1].scrollIntoView()');
+  const before=await evaluate('window.scrollY');
+  await evaluate('refreshAccountsInPlace()');await waitFor('!accountsRefreshBusy');
+  assert.equal(await evaluate('document.querySelector(".billingCompact").open'),true);
+  assert.ok(Math.abs(await evaluate('window.scrollY')-before)<4);
+  console.log('UI_ACCOUNT_REFRESH_PRESERVES_SCROLL_AND_BILLING PASS');
+
   await evaluate('load("residential")');await waitFor('Array.isArray(cache.residential)');
   const resIDs=await evaluate('(cache.residential||[]).map(x=>x.id)');
   await evaluate('load("proxies")');await waitFor('Array.isArray(cache.proxies)');
@@ -47,10 +54,34 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('load("configs")');await waitFor('document.querySelector("[data-action=resume-capacity]")!==null');
   const activeCleanup=await evaluate('cache.cleanup&&!["done","cancelled"].includes(cache.cleanup.status)');
   if(activeCleanup)assert.equal(await evaluate('document.querySelectorAll(".cleanupStatus [data-action=cancel-cleanup]").length'),1);
+  if(activeCleanup){
+   assert.equal(await evaluate('document.querySelector("[data-action=resume-capacity]").disabled'),true);
+   assert.equal(await evaluate('document.querySelectorAll("[data-action=restore-capacity]").length'),1);
+  }
+  await evaluate('toast("Visible acceptance message","error")');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector("#toast")).position'), 'fixed');
+  const restoreRevision=process.env.DOB_UI_RESTORE_REVISION,restoreCleanup=process.env.DOB_UI_RESTORE_CLEANUP;
+  if(restoreRevision){
+   assert.equal(await evaluate('cache.configs[0].revision'),Number(restoreRevision));
+   assert.equal(await evaluate('cache.cleanup.id'),restoreCleanup);
+   assert.equal(await evaluate('cache.cleanup.status'),'paused');
+   assert.equal(await evaluate('cache.configs[0].target_users_per_inbound'),2);
+   await evaluate('(()=>{const original=window.confirm;window.confirm=()=>true;document.querySelector("[data-action=restore-capacity]").click();window.confirm=original})()');
+   await waitFor('cache.configs[0].enabled&&cache.cleanup.status==="cancelled"');
+   console.log('UI_EXPLICIT_RESTORE_SAVED_POLICY PASS');
+  }
+
   console.log('UI_CLEANUP_STATUS_SURVIVES_NAVIGATION PASS');
   await evaluate('load("dashboard")');await waitFor('document.querySelectorAll(".stat").length>=10');
   assert.equal(await evaluate('document.querySelector("#content").textContent.includes("Panels needing attention")'),true);
   console.log('UI_DASHBOARD PASS');
+  if(process.env.DOB_UI_OUTPUT_URL){
+   await call('Page.navigate',{url:process.env.DOB_UI_OUTPUT_URL});
+   await waitFor('document.querySelector("#status")?.textContent.includes("verified")');
+   assert.equal(await evaluate('document.querySelector("#copy")!==null'),true);
+   console.log('UI_LIVE_OUTPUT_VIEW PASS');
+  }
+
  }finally{
   if(ws)ws.close();chrome.kill('SIGTERM');fs.closeSync(log);
   await new Promise(r=>setTimeout(r,500));fs.rmSync(profile,{recursive:true,force:true});

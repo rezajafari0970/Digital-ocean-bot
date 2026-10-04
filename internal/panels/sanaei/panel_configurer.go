@@ -114,7 +114,18 @@ func (p PanelConfigurer) Configure(ctx context.Context, accountID, dropletID str
 }
 
 func panelConfigureCommand(remote string) string {
-	return fmt.Sprintf("set -euo pipefail; f=%s; trap 'rm -f -- \"$f\"' EXIT; . \"$f\"; /usr/local/x-ui/x-ui setting -username \"$XUI_USER\" -password \"$XUI_PASS\" -port \"$XUI_PORT\" -webBasePath \"$XUI_PATH\" >/dev/null; systemctl restart x-ui; systemctl is-active x-ui >/dev/null; sleep 2; systemctl is-active x-ui >/dev/null || { systemctl status x-ui --no-pager >&2 || true; journalctl -u x-ui -n 30 --no-pager >&2 || true; exit 1; }; p=\"${XUI_PATH#/}\"; p=\"${p%%/}\"; curl -fsS --max-time 5 \"http://127.0.0.1:${XUI_PORT}/${p}/csrf-token\" >/dev/null || { systemctl status x-ui --no-pager >&2 || true; journalctl -u x-ui -n 30 --no-pager >&2 || true; exit 1; }", shellQuote(remote))
+	return fmt.Sprintf(`set -euo pipefail; f=%s; trap 'rm -f -- "$f"' EXIT; . "$f"; /usr/local/x-ui/x-ui setting -username "$XUI_USER" -password "$XUI_PASS" -port "$XUI_PORT" -webBasePath "$XUI_PATH" >/dev/null; systemctl restart x-ui; `, shellQuote(remote)) + panelReadinessCommand()
+}
+
+// Cold starts on small instances may outlast two seconds. Readiness polling is
+// read-only and bounded; it never repeats settings or restarts within this wait.
+func panelReadinessCommand() string {
+	return `p="${XUI_PATH#/}"; p="${p%%/}"; for attempt in $(seq 1 15); do
+ if systemctl is-active x-ui >/dev/null 2>&1 && curl -fsS --max-time 2 "http://127.0.0.1:${XUI_PORT}/${p}/csrf-token" >/dev/null 2>&1; then exit 0; fi
+ sleep 1
+done
+echo "panel readiness was not observed within the bounded startup wait" >&2
+exit 1`
 }
 
 func (p PanelConfigurer) RepairCompleted(

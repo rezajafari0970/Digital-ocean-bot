@@ -22,3 +22,8 @@ input[type=number],input[inputmode=numeric],input[inputmode=decimal]{direction:l
 .deletionProgress{font-size:.85rem;padding:10px;border:1px solid #815d35;border-radius:10px;margin-top:12px}
 .deletionProgress p{margin:6px 0}
 .cleanupStatus details{font-size:.8rem;overflow-wrap:anywhere}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));z-index:10000;box-sizing:border-box;max-width:min(92vw,640px);padding:14px 18px;border-radius:12px;background:#20334b;color:#fff;box-shadow:0 8px 30px #0008;white-space:pre-wrap}
+.toast.error{background:#792638}.toast[hidden]{display:none}
+button:disabled{opacity:.5;cursor:not-allowed}
+.cleanupStatus .cardActions{flex-wrap:wrap}

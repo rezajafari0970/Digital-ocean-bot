@@ -176,7 +176,13 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if x.Token != "" {
-		if _, err = tx.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=NULL,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=NULL,runtime_status='ISOLATION_WAIT',runtime_status_detail='credential replaced; provider refresh pending',runtime_status_at=now(),next_build_at=NULL WHERE id=$1`, id, candidateExternalID, candidateEmail); err != nil {
+		if _, err = tx.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=NULL,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=NULL,runtime_status=CASE WHEN deletion_requested_at IS NULL THEN 'ISOLATION_WAIT' ELSE 'DELETE_PENDING' END,runtime_status_detail='credential replaced; provider refresh pending',runtime_status_at=now(),next_build_at=NULL WHERE id=$1`, id, candidateExternalID, candidateEmail); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	if x.Token != "" {
+		if _, err = tx.ExecContext(r.Context(), "UPDATE account_deletion_jobs SET next_attempt_at=now() WHERE account_id=$1", id); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}

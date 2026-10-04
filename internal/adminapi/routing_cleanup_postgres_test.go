@@ -71,7 +71,14 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 		if out.Code != 200 || strings.TrimSpace(out.Body.String()) != expected {
 			t.Fatal(class, out.Code, out.Body.String())
 		}
-		req = httptest.NewRequest("GET", "/?route_class=ALL", nil)
+		viewRequest := httptest.NewRequest("GET", "/?view=1", nil)
+		viewRequest.SetPathValue("token", share["token"])
+		view := httptest.NewRecorder()
+		s.sharedOutput(view, viewRequest)
+		if view.Code != 200 || !strings.Contains(view.Header().Get("Content-Type"), "text/html") || !strings.Contains(view.Body.String(), "output-live.js") {
+			t.Fatal("browser view", view.Code)
+		}
+		req = httptest.NewRequest("GET", "/?route_class=ALL&view=1", nil)
 		req.SetPathValue("token", share["token"])
 		out = httptest.NewRecorder()
 		s.sharedOutput(out, req)

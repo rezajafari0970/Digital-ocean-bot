@@ -25,6 +25,7 @@ func main() {
 	samples := flag.Int("sample-seconds", 0, "read-only one-second resource samples, maximum 120")
 	bulkDelete := flag.Bool("bulk-delete-contract", false, "read-only installed bulkDel contract")
 	clientRoutes := flag.Bool("client-routes", false, "read-only embedded v3 client route inventory")
+	deployment := flag.String("deployment", "", "exact deployment for read-only health; requires -health")
 	health := flag.Bool("health", false, "read-only target service and memory metrics")
 	flag.Parse()
 	if *samples < 0 || *samples > 120 {
@@ -255,7 +256,14 @@ func main() {
 		return
 	}
 	var acc, did, host, user, keyref string
-	e = a.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1`, *panel).Scan(&acc, &did, &host, &user, &keyref)
+	if *deployment != "" {
+		if !*health {
+			panic("deployment inspection requires -health")
+		}
+		e = a.DB.QueryRowContext(ctx, `SELECT account_id::text,droplet_id::text,host,COALESCE(profile_snapshot->>'ssh_user','root'),COALESCE(profile_snapshot->>'ssh_key_secret_ref','') FROM deployments WHERE id=$1`, *deployment).Scan(&acc, &did, &host, &user, &keyref)
+	} else {
+		e = a.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),COALESCE(d.profile_snapshot->>'ssh_key_secret_ref','') FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1`, *panel).Scan(&acc, &did, &host, &user, &keyref)
+	}
 	if e != nil {
 		panic(e)
 	}

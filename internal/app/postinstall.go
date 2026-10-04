@@ -30,5 +30,5 @@ func (c Container) PostInstallWorkflow(ctx context.Context, cfg DeploymentConfig
 		}),
 		Target: cfg.Target, Template: cfg.Template, DatabasePaths: cfg.DatabasePaths,
 	}
-	return workflow.Engine{Store: workflow.SQLStore{DB: c.DB}, Steps: steps, Finalizer: deploymentReadyFinalizer{DB: c.DB, Lifetime: cfg.Profile.Lifetime}, RunLease: workflow.PostgresRunLease{DB: c.DB}, PostInstallOnly: true}, nil
+	return workflow.Engine{Store: workflow.SQLStore{DB: c.DB}, Steps: steps, Finalizer: deploymentReadyFinalizer{DB: c.DB, Lifetime: cfg.Profile.Lifetime}, FailureFinalizer: deploymentFailureFinalizer{DB: c.DB}, RunLease: workflow.PostgresRunLease{DB: c.DB}, PostInstallOnly: true}, nil
 }

@@ -67,3 +67,17 @@ func (s *Server) cancelCleanupJob(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, map[string]string{"status": "cancelled", "detail": "Remaining cleanup cancelled. Completed deletions are unchanged. You can now enable Global Reality."})
 }
+
+func (s *Server) resumeCleanupJob(w http.ResponseWriter, r *http.Request) {
+	p, _ := principal(r.Context())
+	if !p.CanAdmin() {
+		writeJSON(w, 403, map[string]string{"error": "forbidden"})
+		return
+	}
+	err := (cleanup.Store{DB: s.DB}).Resume(r.Context(), r.PathValue("id"))
+	if err != nil {
+		writeJSON(w, 409, map[string]string{"error": "cleanup_not_resumed", "detail": "The saved cleanup changed or an operation is settling. Refresh its status before retrying."})
+		return
+	}
+	writeJSON(w, 200, map[string]string{"status": "running"})
+}

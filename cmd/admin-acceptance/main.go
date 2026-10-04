@@ -89,8 +89,18 @@ func run() error {
 		return resp.StatusCode, raw, e
 	}
 	if *browserScript != "" {
+		code, raw, e := request("POST", "/api/v1/output/share", []byte(`{"route_class":"DIRECT"}`))
+		var share struct{ Token, URL string }
+		if e != nil || code != 200 || json.Unmarshal(raw, &share) != nil || share.Token == "" {
+			return errors.New("browser output fixture failed")
+		}
+		defer func() {
+			c, x := context.WithTimeout(context.Background(), 5*time.Second)
+			defer x()
+			a.DB.ExecContext(c, "DELETE FROM output_share_tokens WHERE token=$1", share.Token)
+		}()
 		command := exec.CommandContext(ctx, "node", *browserScript)
-		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base)
+		command.Env = append(os.Environ(), "DOB_UI_TOKEN="+token, "DOB_UI_BASE="+*base, "DOB_UI_OUTPUT_URL="+*base+share.URL+"?view=1")
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
 		if err = command.Run(); err != nil {

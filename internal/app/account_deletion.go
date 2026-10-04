@@ -63,7 +63,7 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 				detail = "Deletion blocked: provider billing restriction prevents resource cleanup."
 			}
 		}
-		_, _ = c.DB.ExecContext(ctx, `UPDATE account_deletion_jobs SET last_error=$2 WHERE account_id=$1`, id, detail)
+		_, _ = c.DB.ExecContext(ctx, `UPDATE account_deletion_jobs SET last_error=$2,next_attempt_at=now()+($3*interval '1 second') WHERE account_id=$1`, id, detail, deletionRetrySeconds(state))
 		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='DELETE_PENDING',runtime_status_detail=$2,deleted_at=NULL WHERE id=$1 AND deletion_requested_at IS NOT NULL`, id, detail)
 	}
 	return err
@@ -377,4 +377,13 @@ func (c Container) recoverDeletingInventory(ctx context.Context, account string,
 		}
 	}
 	return nil
+}
+
+func deletionRetrySeconds(state string) int {
+	switch state {
+	case "LOCKED", "TOKEN_INVALID", "PERMISSION_DENIED", "BILLING_BLOCKED":
+		return 1800
+	default:
+		return 60
+	}
 }

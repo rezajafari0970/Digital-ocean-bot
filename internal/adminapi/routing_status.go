@@ -8,8 +8,8 @@ import (
 func (s *Server) residentialRoutingStatus(w http.ResponseWriter, r *http.Request) {
 	var raw []byte
 	err := s.DB.QueryRowContext(r.Context(), `WITH panels AS(
- SELECT p.id FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id
- WHERE p.enabled AND dr.state<>'DELETED' AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=p.droplet_id AND d.state='PANEL_COMPLETE')
+ SELECT p.id FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=p.account_id
+ WHERE p.enabled AND dr.state IN('READY','EXPIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND a.enabled AND a.deletion_requested_at IS NULL AND a.provider_state='ACTIVE' AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=p.droplet_id AND d.state='PANEL_COMPLETE')
  ), progress AS(
  SELECT p.id,c.enabled AND(c.fleet OR p.id=ANY(c.panel_ids)) scoped,
  COALESCE(rs.state='APPLIED' AND rs.revision=c.revision AND rs.verified_at>now()-interval '60 seconds',false) verified,
@@ -20,6 +20,7 @@ func (s *Server) residentialRoutingStatus(w http.ResponseWriter, r *http.Request
  'scoped_panels',(SELECT count(*) FROM progress WHERE scoped),
  'verified_panels',(SELECT count(*) FROM progress WHERE scoped AND verified),
  'failed_panels',(SELECT count(*) FROM progress WHERE scoped AND failed),
+ 'retiring_panels',(SELECT count(*) FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=p.account_id WHERE dr.state<>'DELETED' AND (dr.state IN('RETIRING','DELETING') OR a.deletion_requested_at IS NOT NULL)),
  'configured_proxies',(SELECT count(*) FROM residential_proxies),
  'healthy_proxies',(SELECT count(*) FROM residential_proxies rp WHERE rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'))
  FROM residential_routing_control c WHERE singleton`).Scan(&raw)
