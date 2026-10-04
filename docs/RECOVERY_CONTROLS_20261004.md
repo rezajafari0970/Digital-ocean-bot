@@ -34,3 +34,30 @@ Evidence: /root/backups/dob-regression-20261004. Production acceptance is record
 ## External blockers
 
 Three pending DigitalOcean deletions are provider-locked; one Vultr deletion has an invalid token. Twenty tracked provider servers remain. Retain credentials and audit until fresh provider verification becomes possible. A working Delete button does not override provider access restrictions.
+
+## Final production acceptance — 2026-10-04 10:24 UTC
+
+Runtime source: b067c364e91355055c63a00977dec4fa1dceb0df, built from a clean detached checkout. API and Worker are active, modified=false, zero automatic restarts. Latest successful deployment evidence is deploy-memory-atomic.log/status in the evidence directory; the earlier deploy.log records a deliberately failed acceptance check for the Output script path, subsequently fixed.
+
+See PRODUCTION_REGRESSION_ACCEPTANCE_20261004.json for machine-readable evidence. Final observations: 38 active servers, zero inactive/broken servers, 38/38 serving routing proofs, zero panel-attention servers; 76 fresh configs, 38 DIRECT and 38 RESIDENTIAL, no overlap. Both actual VLESS/Reality egress classes passed on the final small-memory replacement.
+
+Saved Reality policy is enabled at revision 23: target=2, rate=1, quota=0, lifetime=10800, both classes enabled. Main durable gate is intentionally enabled, global scope, concurrency=1; legacy bulk gate remains disabled with kill switch set. There are 39 enabled lifecycle scope rows, 38 serving panels, 38 new succeeded BULK_CREATE jobs, no new unresolved jobs. The two historical failed CREATE jobs remain unchanged.
+
+Cleanup 7a105e85-0978-4149-91b1-76baffb5b692 is CANCELLED. Its 38 completed and 15 failed target records remain for audit. Restore was observed committed at 09:39:36 UTC while this recovery was in progress; attribution of that browser action was not established. Production replay of the stale revision and terminal cleanup resume both returned 409 without changing the enabled policy or creating another cleanup.
+
+### Additional causes established during acceptance
+
+- Provider observations sometimes arrived 121–204 seconds apart despite a 120-second dashboard freshness boundary. Worker refresh now starts at age 60 seconds on a 15-second cadence; the freshness boundary and provider error backoffs are unchanged. Twelve consecutive samples showed 38 active/zero inactive servers and maximum provider observation age 71 seconds.
+- Runtime repair used the expired worker context to persist its result. Failed attempts accumulated with an empty error and did not reach the existing retirement policy. Completion now uses bounded independent verification/persistence contexts and an atomic ledger/lifecycle transaction. A fresh successful panel observation reconciles a lost repair response as success.
+- The next replacement reproduced memory pressure: 453 MiB RAM, no swap, two kernel OOM kills of apt-get, and an unresponsive panel API. The final replacement has a root-owned, journaled 1 GiB swap file, responsive API and two freshly verified clients. Memory preparation runs before bootstrap/package steps and panel configuration/repair on qualifying small hosts. Existing unrelated swap/files are preserved; insufficient disk, unsafe paths or missing fstab fail closed.
+- Managed fstab persistence is atomic, preserves unrelated entries, verifies ownership/type and rejects conflicting/duplicate managed entries. Fault tests cover committed swapon with lost response and interruption before fstab replacement. No firewall or safety controls were disabled by this memory repair.
+
+Old problematic droplets 5fb1cc40-ca08-4df6-af77-3a53e3b59ae0 and 81e07bbb-26b8-46d6-9ad4-ba5bce290929 were provider-verified absent. The first replacement 37637c3b-0dbb-4db5-9dff-d5441290946f succeeded. The intermediate second replacement e98c2316-32bc-4cb3-a423-258e76af91b0 reproduced OOM and was retired; final replacement 54e88c88-962c-492f-9901-63ecd11a1270 is PANEL_COMPLETE with panel 69e68a2a-8a42-4c9f-9f12-302920d729bc, healthy routing and real traffic verified.
+
+### Tests and continuation
+
+Focused PostgreSQL recovery tests, race tests, clean full Go test suites, mobile browser regression controls, actual account Delete fixture/purge, Residential/Proxy isolation fixtures, stale request rejection and real traffic passed. Fixture accounts and residential entries were independently confirmed absent afterward. OpenAI review findings on fstab crash consistency and readiness invariants were independently verified and corrected before the final deployment.
+
+The remaining 20 pending servers belong to A1/A2/A3 (DigitalOcean LOCKED: 3/1/1 servers) and New 305$ vv (Vultr TOKEN_INVALID: 15). Restore provider access before verifying absence and purging their records. Do not erase credentials/audit merely to hide these pending operations.
+
+Real quota-exhaustion acceptance was not rerun during this recovery. The existing lifecycle canary requires the fleet policy disabled; do not run it blindly against the recovered live fleet. Prepare a separately scoped acceptance/recovery plan that preserves continuous production creation. Historical 10000-client and earlier lifecycle runs remain historical accepted evidence, not new tests performed today.

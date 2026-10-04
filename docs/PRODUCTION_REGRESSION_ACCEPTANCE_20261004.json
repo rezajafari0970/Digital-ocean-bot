@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "status": "ACCEPTED_SOFTWARE_WITH_PROVIDER_ACCESS_BLOCKERS",
+  "verified_at_utc": "2026-10-04T10:24:34.442348+00:00",
+  "runtime_source_revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "recording": "Screenrecorder-2026-10-04-12-40-28-841.mp4",
+  "recording_duration_seconds": 136.8,
+  "evidence_directory": "/root/backups/dob-regression-20261004",
+  "binaries": {
+    "api": {
+      "revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+      "vcs_modified": false,
+      "sha256": "a42ad908ec8741284bec50a37a525e0466be6e93cca4d42e848bc3e378f62aba"
+    },
+    "worker": {
+      "revision": "b067c364e91355055c63a00977dec4fa1dceb0df",
+      "vcs_modified": false,
+      "sha256": "71a8760c776ca512b24d83b09d0fa232ec43ce5d57e80fb1a7ca30d574387c10"
+    }
+  },
+  "dashboard": {
+    "digitalocean_accounts": 5,
+    "vultr_accounts": 3,
+    "enabled_accounts": 4,
+    "healthy_accounts": 4,
+    "broken_accounts": 0,
+    "unknown_accounts": 0,
+    "pending_deletion_accounts": 4,
+    "active_servers": 38,
+    "inactive_servers": 0,
+    "broken_servers": 0,
+    "pending_deletion_servers": 20,
+    "total_servers": 58,
+    "panel_attention_servers": 0,
+    "active_deployments": 0,
+    "live_workers": 1,
+    "observed_at": "2026-10-04T10:22:11.927637+00:00"
+  },
+  "routing": {
+    "enabled": true,
+    "fleet": true,
+    "revision": 361,
+    "total_panels": 38,
+    "scoped_panels": 38,
+    "verified_panels": 38,
+    "failed_panels": 0,
+    "retiring_panels": 15,
+    "configured_proxies": 1,
+    "healthy_proxies": 1
+  },
+  "database": {
+    "schema": "000146_panel_network_access",
+    "policy": {
+      "enabled": true,
+      "revision": 23,
+      "target_per_inbound": 2,
+      "users_per_second": 1,
+      "quota_bytes": 0,
+      "lifetime_seconds": 10800,
+      "residential": true,
+      "direct": true
+    },
+    "gate": {
+      "enabled": true,
+      "kill_switch": false,
+      "concurrency": 1,
+      "panel_id": null,
+      "inbound_id": null
+    },
+    "legacy_bulk_gate": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "fresh_output": 76,
+    "new_succeeded_bulk_jobs": 38,
+    "new_unsucceeded_jobs": 0,
+    "historical_failed_creates": 2,
+    "enabled_lifecycle_scopes": 39,
+    "unresolved_cleanup_targets": 15,
+    "cleanup_state": "CANCELLED",
+    "acceptance_account_residue": 0
+  },
+  "output": {
+    "direct": 38,
+    "residential": 38,
+    "disjoint": true,
+    "fresh_total": 76,
+    "actual_egress_verified_on_memory_canary": true
+  },
+  "steady_observation": {
+    "samples": 12,
+    "active_min": 38,
+    "active_max": 38,
+    "inactive_max": 0,
+    "policy_always_enabled": true,
+    "provider_max_age_seconds": 71,
+    "note": "This cadence observation preceded final memory repair; the final routing/dashboard observation above includes its successful replacement."
+  },
+  "memory_canary": {
+    "deployment_id": "54e88c88-962c-492f-9901-63ecd11a1270",
+    "panel_id": "69e68a2a-8a42-4c9f-9f12-302920d729bc",
+    "ram_mb": 453,
+    "swap_bytes": 1073741824,
+    "journal_state": "ACTIVE",
+    "verified_users": 2,
+    "deficit": 0,
+    "api_and_both_traffic_classes_verified": true
+  },
+  "tests": [
+    "focused PostgreSQL recovery and cancellation faults",
+    "race tests",
+    "full go test ./... in clean detached builds",
+    "actual mobile browser controls and account deletion fixture",
+    "residential/proxy secret and deletion isolation fixtures",
+    "production stale restore and stale cleanup resume rejection",
+    "actual DIRECT and RESIDENTIAL VLESS/Reality traffic",
+    "committed swapon response loss recovery",
+    "atomic fstab replace interruption recovery",
+    "unmanaged file, missing fstab and duplicate entry rejection"
+  ],
+  "external_blockers": [
+    {
+      "account": "A1",
+      "provider_state": "LOCKED",
+      "pending_servers": 3
+    },
+    {
+      "account": "A2",
+      "provider_state": "LOCKED",
+      "pending_servers": 1
+    },
+    {
+      "account": "A3",
+      "provider_state": "LOCKED",
+      "pending_servers": 1
+    },
+    {
+      "account": "New 305$ vv",
+      "provider_state": "TOKEN_INVALID",
+      "pending_servers": 15
+    }
+  ],
+  "not_run_in_this_recovery": [
+    "real quota exhaustion canary",
+    "replay of historical 10000-client scale run"
+  ],
+  "next_steps": [
+    "Restore provider access for the four pending account deletions, then verify provider absence before purge.",
+    "Run a separately scoped real quota exhaustion acceptance with durable cleanup; preserve the recovered fleet policy.",
+    "Do not rerun historical failed CREATE jobs or completed scale runs without fresh reconciliation."
+  ]
+}
