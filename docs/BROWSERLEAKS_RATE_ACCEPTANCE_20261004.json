@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "status": "BROWSERLEAKS_ROUTING_AND_RATE_SELECTOR_VERIFIED",
+  "verified_at_utc": "2026-10-04T18:14:57.285295+00:00",
+  "runtime_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+  "binaries": {
+    "api": {
+      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+      "vcs_modified": false,
+      "sha256": "eb9c679cc25e991d2ce9bd0a7692ece12349e15c604219ec1a83996b61c1582b"
+    },
+    "worker": {
+      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+      "vcs_modified": false,
+      "sha256": "55c779134a995a97eff0d4302afed7bfbd0e17c4167a9d909f3a932db07e84c2"
+    }
+  },
+  "migration_unchanged": "000148_independent_reality_profiles",
+  "protected_domain": "domain:browserleaks.com",
+  "scope": "Residential clients; root and subdomains; TCP and UDP routing",
+  "direct_class_preserved": true,
+  "no_residential_direct_fallback": true,
+  "creation_rate_selector": {
+    "minimum": 1,
+    "maximum": 100,
+    "unit": "config credentials per second",
+    "saved_values_preserved": true,
+    "concurrent_user_limit": false
+  },
+  "profiles_after_deploy": [
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 4,
+      "updated_at": "2026-10-04T16:29:26.892319+00:00",
+      "route_class": "DIRECT",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 0,
+      "target_users_per_inbound": 1
+    },
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 5,
+      "updated_at": "2026-10-04T16:30:38.32761+00:00",
+      "route_class": "RESIDENTIAL",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 240,
+      "target_users_per_inbound": 1
+    }
+  ],
+  "gate_after_deploy": {
+    "enabled": true,
+    "panel_id": null,
+    "singleton": true,
+    "inbound_id": null,
+    "updated_at": "2026-10-04T18:12:30.930199+00:00",
+    "concurrency": 1,
+    "kill_switch": false
+  },
+  "tests": {
+    "routing_and_failure_isolation": "PASS",
+    "actual_xray_fault_test": "PASS",
+    "focused_race": "PASS",
+    "full_go_test": "PASS",
+    "clean_detached_full_go_test": "PASS",
+    "mobile_browser": "PASS"
+  },
+  "fleet_route_acceptance": {
+    "panels": 38,
+    "route_proofs": 456,
+    "method": "Independent fresh Sanaei settings and running Xray routeTest; both classes, both networks, root/subdomain and ordinary-domain control",
+    "evidence_files": [
+      "fleet-proof-2.log",
+      "target-proof-1.log",
+      "target-proof-2.log"
+    ],
+    "post_final_build_sample": "v2/final-target-proof.log"
+  },
+  "routine_proof_repair": "Initial explicit extra domain probes exceeded the existing readiness deadline on some panels. Final worker retains bounded representative probes with whole-plan content-addressed tags; exhaustive BrowserLeaks verification runs independently.",
+  "final_routing_state_counts": {
+    "APPLIED": 37,
+    "APPLYING": 1
+  },
+  "routing_snapshot_at": "2026-10-04T18:14:03.695823+00:00",
+  "dashboard": {
+    "digitalocean_accounts": 2,
+    "vultr_accounts": 2,
+    "enabled_accounts": 4,
+    "healthy_accounts": 4,
+    "broken_accounts": 0,
+    "unknown_accounts": 0,
+    "pending_deletion_accounts": 0,
+    "active_servers": 38,
+    "inactive_servers": 0,
+    "broken_servers": 0,
+    "pending_deletion_servers": 0,
+    "total_servers": 38,
+    "panel_attention_servers": 0,
+    "active_deployments": 0,
+    "live_workers": 1,
+    "observed_at": "2026-10-04T18:14:03.750114+00:00"
+  },
+  "routing_api": {
+    "enabled": true,
+    "fleet": true,
+    "revision": 518,
+    "total_panels": 38,
+    "scoped_panels": 38,
+    "verified_panels": 35,
+    "failed_panels": 0,
+    "retiring_panels": 0,
+    "configured_proxies": 2,
+    "healthy_proxies": 2
+  },
+  "evidence_directory": "/root/backups/dob-browserleaks-rate-20261004",
+  "limits": [
+    "Running-router UDP selection is not proof of upstream UDP/QUIC transport support.",
+    "This change does not claim browser WebRTC/DNS traffic that bypasses the configured client tunnel is covered.",
+    "No 30000-concurrent-user load test or change to provider cloud cleanup was performed."
+  ]
+}

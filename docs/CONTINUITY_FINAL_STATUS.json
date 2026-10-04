@@ -36,13 +36,13 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-04",
-    "runtime_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
-    "worker_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
-    "status": "INDEPENDENT_PROFILES_DEPLOYED_AND_VERIFIED",
+    "runtime_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+    "worker_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+    "status": "BROWSERLEAKS_ROUTING_AND_RATE_SELECTOR_VERIFIED",
     "active_scopes_at_fresh_proof": 32,
     "eligible_serving_panels_at_later_capture": 33,
-    "acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
-    "handoff": "docs/INDEPENDENT_REALITY_PROFILES_HANDOFF_20261004.md",
-    "note": "Read current canonical HEAD/origin and live policy before work; user edits occurred during this release and were preserved. Migration148; both services clean revision1ed067b. Main gate enabled concurrency1, legacy bulk gate closed. Direct and Residential policy rows independent; same443 listener shared. Master revision39 at capture; Direct revision4, Residential revision5. Docs-only checkpoint will be newer than binaries. Historical knowledge and scale claims are not fresh evidence."
+    "acceptance": "docs/BROWSERLEAKS_RATE_ACCEPTANCE_20261004.json",
+    "handoff": "docs/BROWSERLEAKS_RATE_HANDOFF_20261004.md",
+    "note": "Latest addition: BrowserLeaks protected routing and a valid rate dropdown. Independent profile architecture from the preceding checkpoint remains active. Verify production and current profiles rather than restoring historical settings. Main gate restored enabled concurrency1 after deploy. No migration or upstream UDP certification."
   }
 }

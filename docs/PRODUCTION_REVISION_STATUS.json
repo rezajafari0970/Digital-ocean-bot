@@ -1,30 +1,30 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+  "runtime_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T16:57:35.058537+00:00",
+  "verified_at_utc": "2026-10-04T18:14:57.285295+00:00",
   "binaries": {
     "api": {
-      "revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
       "vcs_modified": false,
-      "sha256": "fb277358f834bc6b0223661afa57e491f887a82302bddf33a84b3fdbcd1db54c"
+      "sha256": "eb9c679cc25e991d2ce9bd0a7692ece12349e15c604219ec1a83996b61c1582b"
     },
     "worker": {
-      "revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+      "revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
       "vcs_modified": false,
-      "sha256": "29db28fed547a2be5ecce32337cfa2476255ef4bf8f87e6016eaf24f35377fa8"
+      "sha256": "55c779134a995a97eff0d4302afed7bfbd0e17c4167a9d909f3a932db07e84c2"
     }
   },
   "services": {
     "api": "active",
     "worker": "active",
-    "verified_serving_panels": 32,
+    "verified_serving_panels": 38,
     "api_worker_auto_restarts": 0
   },
   "migration": "000148_independent_reality_profiles",
-  "acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
+  "acceptance": "docs/BROWSERLEAKS_RATE_ACCEPTANCE_20261004.json",
   "verified": true,
-  "note": "Independent Direct/Residential profiles deployed from a clean detached commit. Fresh 32/32 requested scopes matched at 2026-10-04T16:52:37.581726+00:00. Later fleet membership changed during rotation. User edits retained: Direct no expiry, Residential 240 seconds, each target 1 on port 443. Manual clients preserved; typed outputs exclude manual and removed-port entries.",
+  "note": "BrowserLeaks root/subdomains added to protected Residential routing. Direct behavior and saved profile settings preserved. Rate input replaced with valid 1–100 selector. 38-panel independent route proof plus post-final-build sample passed. Routine verification overhead found in canary was removed. UDP route selection is not upstream transport certification.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -44,6 +44,7 @@
   "next_product_step": "Observe independent profiles during normal use. Separately design provider-neutral residential capacity/session admission and perform real UDP/QUIC and concurrent-user load tests; blocked historical cloud cleanup still requires provider-authorized access.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 33,
-  "worker_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
-  "active_lifecycle_scopes_at_fresh_proof": 32
+  "worker_source_revision": "3d362e5a3e6a8de55c0443cfd5f87bc444871502",
+  "active_lifecycle_scopes_at_fresh_proof": 32,
+  "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json"
 }
