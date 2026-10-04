@@ -36,13 +36,13 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-04",
-    "runtime_source_revision": "be68fa76e78e6e6eb07c61e0951ba0711065b228",
-    "status": "ROUTING_DNS_VALIDATION_VERIFIED_UPSTREAM_UNSTABLE_AND_CLASSIFICATION_LIMIT_EXPLICIT",
-    "active_scopes_at_acceptance": 39,
-    "eligible_serving_panels": 38,
-    "acceptance": "docs/RESIDENTIAL_DNS_VALIDATION_ACCEPTANCE_20261004.json",
-    "handoff": "docs/RESIDENTIAL_DNS_VALIDATION_HANDOFF_20261004.md",
-    "note": "Historical knowledge/scale records are not current evidence. Recheck HEAD/origin and DB. Migration 147 separates health observations from routing intent. Global Reality revision 23 unchanged; main gate enabled concurrency 1, legacy bulk gate closed. Res1 down at final observation; protected traffic has no direct fallback and residential Output is withheld. Universal ads classification and external upstream availability are not claimed.",
-    "worker_source_revision": "91b97ad66fd41d27b0789429d19d398f2ae78738"
+    "runtime_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+    "worker_source_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+    "status": "INDEPENDENT_PROFILES_DEPLOYED_AND_VERIFIED",
+    "active_scopes_at_fresh_proof": 32,
+    "eligible_serving_panels_at_later_capture": 33,
+    "acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
+    "handoff": "docs/INDEPENDENT_REALITY_PROFILES_HANDOFF_20261004.md",
+    "note": "Read current canonical HEAD/origin and live policy before work; user edits occurred during this release and were preserved. Migration148; both services clean revision1ed067b. Main gate enabled concurrency1, legacy bulk gate closed. Direct and Residential policy rows independent; same443 listener shared. Master revision39 at capture; Direct revision4, Residential revision5. Docs-only checkpoint will be newer than binaries. Historical knowledge and scale claims are not fresh evidence."
   }
 }

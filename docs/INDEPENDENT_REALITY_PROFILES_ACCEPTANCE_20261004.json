@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "status": "INDEPENDENT_PROFILES_DEPLOYED_AND_VERIFIED",
+  "verified_at_utc": "2026-10-04T16:57:35.058537+00:00",
+  "runtime_revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "binaries": {
+    "api": {
+      "revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+      "vcs_modified": false,
+      "sha256": "fb277358f834bc6b0223661afa57e491f887a82302bddf33a84b3fdbcd1db54c"
+    },
+    "worker": {
+      "revision": "1ed067b5446366781df3a4a345f6b6063cca88a5",
+      "vcs_modified": false,
+      "sha256": "29db28fed547a2be5ecce32337cfa2476255ef4bf8f87e6016eaf24f35377fa8"
+    }
+  },
+  "services": {
+    "api": {
+      "state": "active",
+      "auto_restarts": 0,
+      "memory_bytes": 15396864
+    },
+    "worker": {
+      "state": "active",
+      "auto_restarts": 0,
+      "memory_bytes": 23154688
+    }
+  },
+  "migration": "000148_independent_reality_profiles",
+  "profiles_at_capture": [
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 4,
+      "updated_at": "2026-10-04T16:29:26.892319+00:00",
+      "route_class": "DIRECT",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 0,
+      "target_users_per_inbound": 1
+    },
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 5,
+      "updated_at": "2026-10-04T16:30:38.32761+00:00",
+      "route_class": "RESIDENTIAL",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 240,
+      "target_users_per_inbound": 1
+    }
+  ],
+  "master_at_capture": {
+    "ports": [
+      443
+    ],
+    "enabled": true,
+    "revision": 39
+  },
+  "db_observed_at": "2026-10-04T16:54:23.47573+00:00",
+  "execution_gate": {
+    "enabled": true,
+    "panel_id": null,
+    "singleton": true,
+    "inbound_id": null,
+    "updated_at": "2026-10-04T16:45:09.241035+00:00",
+    "concurrency": 1,
+    "kill_switch": false
+  },
+  "legacy_bulk_gate": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "recent_jobs_since": "2026-10-04T16:43:56Z",
+  "recent_jobs": [
+    {
+      "kind": "BULK_CREATE",
+      "count": 107,
+      "state": "SUCCEEDED",
+      "max_attempts": 1
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 2,
+      "state": "PENDING",
+      "max_attempts": 0
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 59,
+      "state": "SUCCEEDED",
+      "max_attempts": 1
+    },
+    {
+      "kind": "UPDATE",
+      "count": 13,
+      "state": "SUCCEEDED",
+      "max_attempts": 1
+    }
+  ],
+  "fresh_fleet_proof": {
+    "observed_at": "2026-10-04T16:52:37.581726+00:00",
+    "scope_count": 32,
+    "matched": 32,
+    "pending": 0,
+    "physical_clients_per_inbound": 3,
+    "owned_clients_per_class": 1,
+    "port": 443,
+    "checks": [
+      "fresh Sanaei API",
+      "exact UUID/email ownership match",
+      "class-specific quota",
+      "class-specific HWID limit",
+      "expiry anchored to ownership creation",
+      "fresh APPLIED routing"
+    ],
+    "evidence": "/root/backups/dob-independent-profiles-20261004/fleet-profile-proof-2.log"
+  },
+  "scoped_mutation_canary": {
+    "panel": "cf7bccb1-755a-42ee-abe8-1f2dae41b2dd",
+    "inbound": 1,
+    "new_owned_clients_created_and_deleted": 2,
+    "independent_quotas_verified": true,
+    "baseline_identities_restored": true,
+    "outside_jobs": 0,
+    "initial_canary_runtime_revision": "ce2b89e324cda67fdf40134af18472285266251e",
+    "current_release_live_policy_proof": "/root/backups/dob-independent-profiles-20261004/scoped-profile-proof.log",
+    "evidence": "/root/backups/dob-independent-profiles-20261004/canary.log"
+  },
+  "tests": {
+    "focused_pg": "PASS",
+    "focused_race": "PASS",
+    "full_go_test": "PASS",
+    "clean_detached_full_go_test": "PASS",
+    "actual_xray_config_validation": "PASS",
+    "mobile_ui": "PASS",
+    "independent_profile_form_validation": "PASS",
+    "class_share_boundary": "PASS",
+    "manual_identity_preservation": "PASS",
+    "unknown_outcome_missing_subset_retry": "PASS",
+    "concurrent_profile_revision_fencing": "PASS",
+    "per_class_durable_rate": "PASS",
+    "removed_port_output_filter": "PASS",
+    "removed_scope_admission_release": "PASS"
+  },
+  "dashboard_at_api_capture": {
+    "digitalocean_accounts": 2,
+    "vultr_accounts": 2,
+    "enabled_accounts": 4,
+    "healthy_accounts": 2,
+    "broken_accounts": 2,
+    "unknown_accounts": 0,
+    "pending_deletion_accounts": 0,
+    "active_servers": 30,
+    "inactive_servers": 4,
+    "broken_servers": 0,
+    "pending_deletion_servers": 3,
+    "total_servers": 37,
+    "panel_attention_servers": 0,
+    "active_deployments": 2,
+    "live_workers": 1,
+    "observed_at": "2026-10-04T16:53:46.023044+00:00"
+  },
+  "routing_at_api_capture": {
+    "enabled": true,
+    "fleet": true,
+    "revision": 508,
+    "total_panels": 33,
+    "scoped_panels": 33,
+    "verified_panels": 32,
+    "failed_panels": 0,
+    "retiring_panels": 0,
+    "configured_proxies": 1,
+    "healthy_proxies": 1
+  },
+  "eligible_panels_at_later_db_capture": 33,
+  "scope_status_at_db_capture": [
+    {
+      "count": 14,
+      "enabled": false,
+      "last_error": "policy_port_removed"
+    },
+    {
+      "count": 35,
+      "enabled": true,
+      "last_error": ""
+    }
+  ],
+  "excluded_ready_panels": [
+    {
+      "scopes": [
+        {
+          "error": "",
+          "expiry": "2026-10-04T16:49:15.278875+00:00",
+          "enabled": true,
+          "inbound": 1
+        },
+        {
+          "error": "policy_port_removed",
+          "expiry": "2026-10-04T16:49:15.278875+00:00",
+          "enabled": false,
+          "inbound": 2
+        }
+      ],
+      "panel_id": "372ca1bf-b3fb-492c-99e8-a9d4beaace38",
+      "inventory": [
+        {
+          "port": 443,
+          "inbound": 1,
+          "present": true
+        },
+        {
+          "port": 1212,
+          "inbound": 2,
+          "present": true
+        }
+      ],
+      "expires_at": "2026-10-04T16:49:25.278875+00:00",
+      "last_seen_at": "2026-10-03T17:56:58.813704+00:00",
+      "droplet_state": "READY",
+      "provider_state": "ACTIVE",
+      "account_enabled": true,
+      "deployment_state": "PANEL_COMPLETE"
+    },
+    {
+      "scopes": [
+        {
+          "error": "policy_port_removed",
+          "expiry": "2026-10-04T16:45:14.990577+00:00",
+          "enabled": false,
+          "inbound": 2
+        },
+        {
+          "error": "",
+          "expiry": "2026-10-04T16:45:14.990577+00:00",
+          "enabled": true,
+          "inbound": 1
+        }
+      ],
+      "panel_id": "a8e5ee74-f029-431e-8ea7-2b46a7e28c91",
+      "inventory": [
+        {
+          "port": 443,
+          "inbound": 1,
+          "present": true
+        },
+        {
+          "port": 1212,
+          "inbound": 2,
+          "present": true
+        }
+      ],
+      "expires_at": "2026-10-04T16:45:24.990577+00:00",
+      "last_seen_at": "2026-10-03T17:56:54.534688+00:00",
+      "droplet_state": "READY",
+      "provider_state": "ACTIVE",
+      "account_enabled": true,
+      "deployment_state": "PANEL_COMPLETE"
+    }
+  ],
+  "evidence_directory": "/root/backups/dob-independent-profiles-20261004",
+  "limitations": [
+    "Fleet membership and health change during normal provider rotation; the 32/32 fresh proof and later API/DB snapshots are time-specific.",
+    "Short-lived Residential clients have an observed deletion/replacement interval; zero-gap service was not asserted.",
+    "Same address and port share listener SNI, keys and transport; client identities, limits and route classes are separate.",
+    "Manual/default clients remain on the panel but do not satisfy owned profile targets and are excluded from typed Output links.",
+    "Maximum configured creation rate remains 100 credentials/sec per profile; this is not a concurrent-user limit.",
+    "No 30000 concurrent-user load test or upstream UDP/QUIC availability certification was performed.",
+    "Previously unverified provider-blocked cloud cleanup and universal advertisement classification are not marked resolved."
+  ]
+}
