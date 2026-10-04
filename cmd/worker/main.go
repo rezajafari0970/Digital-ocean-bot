@@ -204,17 +204,18 @@ func main() {
 	}()
 
 	// Capacity refresh coordinator: one full provider refresh per account only
-	// when the shared snapshot is older than 90s. Runs before the 2m safety gate.
+	// when the shared snapshot is older than 60s. The 15s cadence leaves room for network latency before
+	// the unchanged 2m freshness/safety boundary. Provider backoff still applies.
 	go func() {
-		t := time.NewTicker(30 * time.Second)
+		t := time.NewTicker(15 * time.Second)
 		defer t.Stop()
-		application.Container.RefreshProviderSnapshots(ctx, 90*time.Second)
+		application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-t.C:
-				application.Container.RefreshProviderSnapshots(ctx, 90*time.Second)
+				application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
 			}
 		}
 	}()
