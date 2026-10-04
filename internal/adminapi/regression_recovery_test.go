@@ -109,7 +109,7 @@ func TestCleanupCancellationWaitsForMutationAndUnblocksPolicy(t *testing.T) {
 	}
 	// Global save is allowed only after cancellation, not by bypassing its guard.
 	s := Server{DB: db}
-	req := httptest.NewRequest("PUT", "/", strings.NewReader(`{"enabled":true,"ports":[443],"target_users_per_inbound":2,"users_per_second":1,"sni_selection_mode":"scored","user_quota_expression":"0","user_lifetime_expression":"180"}`))
+	req := httptest.NewRequest("PUT", "/", strings.NewReader(`{"route_class":"RESIDENTIAL","profile_revision":0,"enabled":true,"ports":[443],"target_users_per_inbound":2,"users_per_second":1,"sni_selection_mode":"scored","user_quota_expression":"0","user_lifetime_expression":"180"}`))
 	w := httptest.NewRecorder()
 	s.putGlobalConfig(w, req)
 	if w.Code != 200 {

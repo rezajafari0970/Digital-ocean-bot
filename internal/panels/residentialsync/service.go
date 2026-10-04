@@ -64,6 +64,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if !allowed {
 		return p, 0, errors.New("routing scope closed")
 	}
+	if err = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_config_profiles)`).Scan(&p.Explicit); err != nil {
+		return p, 0, err
+	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'
  FROM residential_proxies rp
  WHERE rp.enabled AND rp.last_success_at>=rp.updated_at
@@ -131,6 +134,28 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		if err = rows.Scan(&c.ID, &c.Email, &c.Class, &c.Effective); err != nil {
 			rows.Close()
 			return err
+		}
+		previous[c.ID] = c
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	// A newly observed client must use the class committed before its POST.
+	rows, err = s.DB.QueryContext(ctx, `SELECT o.client_id,o.email,o.route_class FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND o.route_class<>'' AND o.state IN('PLANNED','ACTIVE','DELETE_PENDING')`, panel)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var c clientRoute
+		if err = rows.Scan(&c.ID, &c.Email, &c.Class); err != nil {
+			rows.Close()
+			return err
+		}
+		if old, ok := previous[c.ID]; ok && (old.Email != c.Email || old.Class != c.Class) {
+			rows.Close()
+			return errors.New("durable route identity conflict")
 		}
 		previous[c.ID] = c
 	}

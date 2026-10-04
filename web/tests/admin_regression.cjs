@@ -72,7 +72,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    assert.equal(await evaluate('cache.cleanup.status'),'paused');
    assert.equal(await evaluate('cache.configs[0].target_users_per_inbound'),2);
    await evaluate('(()=>{const original=window.confirm;window.confirm=()=>true;document.querySelector("[data-action=restore-capacity]").click();window.confirm=original})()');
-   await waitFor('cache.configs[0].enabled&&cache.cleanup.status==="cancelled"');
+   await waitFor('cache.configs[0].master_enabled&&cache.cleanup.status==="cancelled"');
    console.log('UI_EXPLICIT_RESTORE_SAVED_POLICY PASS');
   }
 
@@ -85,8 +85,24 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("[name=users_per_second]").value="600"');
   await evaluate('document.querySelector("#modalForm").requestSubmit()');
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/1 to 100/);
-  await evaluate('document.querySelector("[name=users_per_second]").value="100";document.querySelector("[name=target_users_per_inbound]").value="1";document.querySelector("[name=enabled]").checked=true;document.querySelector("[name=generate_direct]").checked=true;document.querySelector("[name=generate_residential]").checked=true;document.querySelector("#modalForm").requestSubmit()');
-  assert.match(await evaluate('document.querySelector("#modalError").textContent'),/two classes require at least two/);
+  assert.equal(await evaluate('document.querySelector("[name=generate_direct],[name=generate_residential]")===null'),true);
+  assert.equal(await evaluate('document.querySelectorAll(".configProfile").length'),2);
+  assert.equal(await evaluate('(()=>{const h=document.querySelector(".modalHead").getBoundingClientRect(),b=document.querySelector("#modalSubmit").getBoundingClientRect();return h.top>=0&&b.bottom<=innerHeight})()'),true);
+  await evaluate('window.originalProfileAPI=api;window.profileSaves=[];api=async(p,o)=>{if(p==="/api/v1/configs"&&o?.method==="PUT"){window.profileSaves.push(JSON.parse(o.body));return {}}return window.originalProfileAPI(p,o)}');
+  for(const cls of ['DIRECT','RESIDENTIAL']){
+   await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==='+JSON.stringify(cls)+'))');
+   await evaluate('document.querySelector("[name=users_per_second]").value="1";document.querySelector("[name=target_users_per_inbound]").value="1";document.querySelector("[name=enabled]").checked=true;document.querySelector("#modalForm").requestSubmit()');
+   await waitFor('!document.querySelector("#modal").open');
+  }
+  assert.deepEqual(await evaluate('window.profileSaves.map(x=>[x.route_class,x.target_users_per_inbound,x.users_per_second])'),[['DIRECT',1,1],['RESIDENTIAL',1,1]]);
+  await evaluate('api=window.originalProfileAPI');
+  await evaluate('openConfigForm()');
+  assert.equal(await evaluate('document.querySelectorAll("[data-profile-choice]").length'),2);
+  await evaluate('document.querySelector("[data-profile-choice=RESIDENTIAL]").click()');
+  assert.match(await evaluate('document.querySelector("#modalTitle").textContent'),/Residential/);
+  await evaluate('document.querySelector("[name=users_per_second]").value="10000";document.querySelector("#modalForm").requestSubmit()');
+  assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);
+  console.log('UI_INDEPENDENT_PROFILE_FORMS_AND_MOBILE_LAYOUT PASS');
   const invalid=await fetch(base+'/api/v1/configs',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({users_per_second:600,ports:[443],target_users_per_inbound:1,sni_selection_mode:'scored'})});
   assert.equal(invalid.status,400);const detail=await invalid.json();assert.equal(detail.field,'users_per_second');assert.match(detail.detail,/1 to 100/);
   const policy=await(await fetch(base+'/api/v1/configs',{headers:{Authorization:'Bearer '+token}})).json();

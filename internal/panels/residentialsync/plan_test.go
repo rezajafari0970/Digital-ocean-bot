@@ -14,6 +14,26 @@ import (
 func baseSettings() map[string]any {
 	return map[string]any{"api": map[string]any{"tag": "api"}, "unknown": json.Number("9007199254740993"), "outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}, map[string]any{"tag": "blocked", "protocol": "blackhole"}}, "routing": map[string]any{"rules": []any{map[string]any{"type": "field", "inboundTag": []any{"api"}, "outboundTag": "api"}}}}
 }
+
+func TestExplicitProfileClassesNeverRebalancedOrDowngraded(t *testing.T) {
+	raw := json.RawMessage(`{"id":1,"tag":"inbound-443","protocol":"vless","settings":{"clients":[{"id":"d","email":"direct@test"},{"id":"r","email":"res@test"},{"id":"new","email":"unknown@test"}]}}`)
+	previous := map[string]clientRoute{"d": {ID: "d", Email: "direct@test", Class: "DIRECT"}, "r": {ID: "r", Email: "res@test", Class: "RESIDENTIAL"}}
+	for _, res := range []bool{true, false} {
+		clients, _, err := planClients([]json.RawMessage{raw}, previous, routePolicy{Explicit: true, Direct: true, Residential: res, AdsOnly: true, Harden: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, c := range clients {
+			if c.ID == "d" {
+				if c.Class != "DIRECT" || c.Effective != "DIRECT" {
+					t.Fatal(c)
+				}
+			} else if c.Class != "RESIDENTIAL" || c.Effective != "BLOCKED" {
+				t.Fatal("residential/unknown identity leaked direct", c)
+			}
+		}
+	}
+}
 func fixtureClients(t *testing.T, p routePolicy) ([]clientRoute, []string) {
 	t.Helper()
 	raw := json.RawMessage(`{"id":1,"tag":"actual-inbound-tag","protocol":"vless","settings":{"clients":[{"id":"a","email":"a@test"},{"id":"b","email":"b@test"},{"id":"c","email":"c@test"},{"id":"d","email":"d@test"}]}}`)

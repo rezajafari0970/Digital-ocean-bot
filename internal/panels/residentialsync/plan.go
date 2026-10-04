@@ -19,6 +19,7 @@ var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "ge
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	Explicit            bool
 	Residential, Direct bool
 	AdsOnly             bool
 	Harden              bool
@@ -125,6 +126,11 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		old, known := previous[id]
 		known = known && old.Email == cl.Email && (old.Class == "DIRECT" || old.Class == "RESIDENTIAL")
 		switch {
+		case p.Explicit && known:
+			cl.Class = old.Class
+		case p.Explicit:
+			// Unknown identities remain protected; never infer Direct by count.
+			cl.Class = "RESIDENTIAL"
 		case p.Direct && !p.Residential:
 			cl.Class = "DIRECT"
 		case p.Direct && p.Residential && known:

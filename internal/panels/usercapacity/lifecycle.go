@@ -41,7 +41,7 @@ func (s Service) reconcileLifecycle(ctx context.Context, p readyworker.Panel, rt
 	err = rt.WithMutation(ctx, func(c context.Context) error {
 		for _, id := range ids {
 			did, e := j.PlanLifecycle(c, rt, id, func(c context.Context, rate, n int) (int, error) {
-				return s.durableAllowance(c, p.ID, id, rate, n, time.Now())
+				return s.durableAllowance(c, p.ID, id, rate, n, time.Now(), clientops.ProfileRateClass(c))
 			})
 			if e != nil {
 				reportCtx, reportCancel := context.WithTimeout(context.WithoutCancel(c), 5*time.Second)

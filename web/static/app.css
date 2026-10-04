@@ -27,3 +27,5 @@ input[type=number],input[inputmode=numeric],input[inputmode=decimal]{direction:l
 .toast.error{background:#792638}.toast[hidden]{display:none}
 button:disabled{opacity:.5;cursor:not-allowed}
 .cleanupStatus .cardActions{flex-wrap:wrap}
+
+.profileForm{display:flex;flex-direction:column;max-height:90vh;max-height:90dvh;overflow:hidden}.profileForm #modalFields{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}.profileForm .modalHead,.profileForm .actions,.profileForm #modalError{flex-shrink:0}.profileForm .modalHead h3{margin:8px 0 16px}.profileForm #modalError{font-size:.85rem;margin:8px 0 0;max-height:5em;overflow:auto}.configProfile{margin-bottom:12px}.profileForm .checkRow{display:flex;gap:10px;align-items:center}.profileForm .checkRow input{width:auto;margin:0}

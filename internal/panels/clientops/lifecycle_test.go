@@ -19,12 +19,13 @@ const lifePanel = "33333333-3333-4333-8333-333333333333"
 const lifeGeneration = "44444444-4444-4444-8444-444444444444"
 
 type lifeServer struct {
-	mu                                    sync.Mutex
-	clients                               map[string]sanaei.Client
-	used                                  map[string]int64
-	postCreates, postUpdates, postDeletes int
-	deleteSizes                           []int
-	loseUpdate, partialDelete             bool
+	mu                                       sync.Mutex
+	clients                                  map[string]sanaei.Client
+	used                                     map[string]int64
+	postCreates, postUpdates, postDeletes    int
+	deleteSizes                              []int
+	loseUpdate, partialDelete, partialCreate bool
+	createSizes                              []int
 }
 
 func (s *lifeServer) serve(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +62,11 @@ func (s *lifeServer) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.postCreates++
+		s.createSizes = append(s.createSizes, len(items))
+		originalN := len(items)
+		if s.partialCreate {
+			items = items[:1]
+		}
 		for _, it := range items {
 			if _, ok := s.clients[it.Client.Email]; ok {
 				w.WriteHeader(409)
@@ -68,7 +74,13 @@ func (s *lifeServer) serve(w http.ResponseWriter, r *http.Request) {
 			}
 			s.clients[it.Client.Email] = it.Client
 		}
-		obj(map[string]any{"created": len(items), "skipped": []any{}})
+		if s.partialCreate {
+			s.partialCreate = false
+			conn, _, _ := w.(http.Hijacker).Hijack()
+			conn.Close()
+			return
+		}
+		obj(map[string]any{"created": originalN, "skipped": []any{}})
 	case strings.Contains(r.URL.Path, "clients/update/"):
 		var m map[string]any
 		if json.NewDecoder(r.Body).Decode(&m) != nil {

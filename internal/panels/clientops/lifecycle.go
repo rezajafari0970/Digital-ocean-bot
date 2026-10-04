@@ -13,6 +13,8 @@ import (
 )
 
 type LifecyclePolicy struct {
+	Class                              string
+	Revision                           int64
 	Target                             int
 	Quota                              int64
 	Lifetime, DeviceLimit, Rate, Chunk int
@@ -84,6 +86,9 @@ func (j Journal) PlanLifecycle(ctx context.Context, rt *sanaei.PanelRuntime, inb
 		if err != nil || !wanted {
 			return false, err
 		}
+	}
+	if scope.Global {
+		return j.planProfiles(ctx, tx, rt, inbound, scope, observed, port, allowance)
 	}
 	now := time.Now()
 	active := 0
@@ -330,7 +335,12 @@ func (e Executor) lifecycleFence(ctx context.Context, job Job, generation string
 				return nil, ErrLifecycleSuperseded
 			}
 		}
-		if live != planned.Policy {
+		if useGlobal {
+			if err = checkProfilePolicy(ctx, tx, job, live); err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+		} else if live != planned.Policy {
 			tx.Rollback()
 			return nil, ErrLifecycleSuperseded
 		}
@@ -348,10 +358,19 @@ func (e Executor) lifecycleFence(ctx context.Context, job Job, generation string
 		}
 		clients = p.Clients
 	}
+	var plannedClass struct{ Policy LifecyclePolicy }
+	_ = json.Unmarshal(job.Payload, &plannedClass)
 	for _, cl := range clients {
 		if !validBulkEmail(marker, cl) {
 			tx.Rollback()
 			return nil, ErrClientConflict
+		}
+		if useGlobal && plannedClass.Policy.Class != "" {
+			var cls string
+			if err = tx.QueryRowContext(ctx, `SELECT route_class FROM bulk_user_ownership WHERE generation_id=$1 AND client_id=$2 FOR SHARE`, generation, cl.ID).Scan(&cls); err != nil || cls != plannedClass.Policy.Class {
+				tx.Rollback()
+				return nil, ErrClientConflict
+			}
 		}
 		var valid bool
 		err = tx.QueryRowContext(ctx, `SELECT true FROM bulk_user_ownership WHERE generation_id=$1 AND client_id=$2 AND email=$3 AND (($4='UPDATE' AND state='ACTIVE') OR ($4='BULK_CREATE' AND state IN ('PLANNED','ACTIVE') AND mutation_job_id=$5) OR ($4='BULK_DELETE' AND state IN ('DELETE_PENDING','DELETED'))) FOR SHARE`, generation, cl.ID, cl.Email, string(job.Kind), job.ID).Scan(&valid)
@@ -367,9 +386,16 @@ func (e Executor) lifecycleFence(ctx context.Context, job Job, generation string
 }
 
 func (e Executor) lifecycleDeleteGuard(ctx context.Context, rt *sanaei.PanelRuntime, job Job, p BulkPayload, present []sanaei.Client) error {
-	obs, _, err := LifecycleInventory(ctx, rt, job.InboundID)
+	obs, port, err := LifecycleInventory(ctx, rt, job.InboundID)
 	if err != nil {
 		return err
+	}
+	var useGlobal bool
+	if err = e.Journal.DB.QueryRowContext(ctx, `SELECT use_global_policy FROM bulk_lifecycle_scopes WHERE panel_id=$1 AND inbound_id=$2`, job.PanelID, job.InboundID).Scan(&useGlobal); err != nil {
+		return err
+	}
+	if useGlobal {
+		return e.profileDeleteGuard(ctx, rt, job, p, present, obs, port)
 	}
 	now := time.Now()
 	active := 0

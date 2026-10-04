@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configprofiles"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"time"
 )
@@ -22,11 +23,12 @@ func (s Service) observeBulkCapacity(ctx context.Context, panelID string, in raw
 	if err := json.Unmarshal(b, &settings); err != nil {
 		return err
 	}
-	var target int
-	if err := s.DB.QueryRowContext(ctx, `SELECT target_users_per_inbound FROM global_config_policies WHERE policy_key='reality'`).Scan(&target); err != nil {
+	profiles, err := configprofiles.Read(ctx, s.DB, false)
+	if err != nil {
 		return err
 	}
-	target, _, err := s.effectiveTargetRate(ctx, panelID, int64(in.ID), target, 0)
+	target := configprofiles.Target(profiles, in.Port)
+	target, _, err = s.effectiveTargetRate(ctx, panelID, int64(in.ID), target, 0)
 	if err != nil {
 		return err
 	}
