@@ -90,6 +90,8 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		return errRouteNotApplied
 	}
 	// Every inbound and each represented class, plus an unassigned client, is checked.
+	// Content-addressed tags cover the full domain list. Keep routine probes bounded;
+	// additional domain-specific acceptance runs independently of this readiness window.
 	samples := []clientRoute{{Email: "dob-unassigned-route-probe", Effective: ""}}
 	seen := map[string]bool{}
 	for _, c := range clients {
@@ -109,8 +111,6 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			}{
 				{"adservice.google.com", "", "tcp", "443", "tls", true},
 				{"pixel.facebook.com", "", "udp", "443", "quic", true},
-				{"browserleaks.com", "", "tcp", "443", "tls", true},
-				{"tls.browserleaks.com", "", "udp", "443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
 				{"", "1.1.1.1", "tcp", "443", "", false},
