@@ -3,10 +3,12 @@ package residentialsync
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestDNSHasNoLocalOrDirectFallbackWhenResidentialAbsent(t *testing.T) {
@@ -111,5 +113,39 @@ func TestInvalidSniffingBlocksResidentialButKeepsDirectIndependent(t *testing.T)
 	}
 	if err := verifyRunning(context.Background(), &fakeCore{running: next}, next, cs, tags, p); err != nil {
 		t.Fatal(err)
+	}
+}
+
+type startingCore struct {
+	*fakeCore
+	remaining int
+}
+
+func (f *startingCore) Do(ctx context.Context, req sanaei.SessionRequest) (sanaei.SessionResponse, error) {
+	if req.Path == "panel/api/xray/routeTest" && f.remaining > 0 {
+		f.remaining--
+		return sanaei.SessionResponse{StatusCode: 200, Body: []byte(`{"success":false,"msg":"Something went wrong (rpc error: code = Unavailable desc = connection refused)"}`)}, nil
+	}
+	return f.fakeCore.Do(ctx, req)
+}
+func TestRunningProcessBeforeRouteAPIIsReadyDoesNotRestartAgain(t *testing.T) {
+	p := routePolicy{Harden: true, AdsOnly: true, Residential: true, Direct: true}
+	cs, tags := fixtureClients(t, p)
+	desired, err := buildSettings(baseSettings(), cs, tags, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &startingCore{fakeCore: &fakeCore{saved: desired, running: desired}, remaining: 2}
+	if err = applyAndVerify(context.Background(), f, desired, desired, "", cs, tags, p); err != nil {
+		t.Fatal(err)
+	}
+	if f.saves != 0 || f.restarts != 0 {
+		t.Fatal("readiness caused duplicate mutation")
+	}
+	f.remaining = 100
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	if err = verifyWhenReady(ctx, f, desired, cs, tags, p); !errors.Is(err, errRouteAPIStarting) {
+		t.Fatal("not fail closed", err)
 	}
 }

@@ -8,17 +8,26 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/url"
 	"strings"
+	"time"
 )
 
 var errRouteNotApplied = errors.New("running routing differs from plan")
+var errRouteAPIStarting = errors.New("Xray route API not ready")
 
 func envelope(resp sanaei.SessionResponse, err error) error {
 	if err != nil {
 		return err
 	}
-	var result struct{ Success bool }
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 || json.Unmarshal(resp.Body, &result) != nil || !result.Success {
-		return errors.New("panel operation not confirmed")
+	var result struct {
+		Success bool
+		Msg     string
+	}
+	decoded := json.Unmarshal(resp.Body, &result) == nil
+	if decoded && !result.Success && strings.Contains(result.Msg, "rpc error: code = Unavailable") {
+		return errRouteAPIStarting
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 || !decoded || !result.Success {
+		return fmt.Errorf("panel operation not confirmed (HTTP %d)", resp.StatusCode)
 	}
 	return nil
 }
@@ -43,7 +52,7 @@ func applyAndVerify(ctx context.Context, exec sanaei.SessionExecutor, current, d
 	}
 	// Content-addressed outbound tags prove which complete plan the running core loaded.
 	// They also resolve a lost restart response without restarting a second time.
-	if err := verifyRunning(ctx, exec, desired, clients, tags, p); err == nil {
+	if err := verifyWhenReady(ctx, exec, desired, clients, tags, p); err == nil {
 		return nil
 	} else if !errors.Is(err, errRouteNotApplied) {
 		return err
@@ -54,7 +63,7 @@ func applyAndVerify(ctx context.Context, exec sanaei.SessionExecutor, current, d
 		}
 	}
 	_, _ = exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/server/restartXrayService", TimeoutSeconds: 15})
-	if err := verifyRunning(ctx, exec, desired, clients, tags, p); err != nil {
+	if err := verifyWhenReady(ctx, exec, desired, clients, tags, p); err != nil {
 		return fmt.Errorf("running routing not verified: %w", err)
 	}
 	return nil
@@ -166,4 +175,25 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		}
 	}
 	return nil
+}
+
+// The panel reports process=running before Xray binds its gRPC route API.
+// A temporary RPC refusal is not evidence that the saved plan failed.
+// Poll reads only; never repeat save/restart merely because readiness lags.
+func verifyWhenReady(ctx context.Context, exec sanaei.SessionExecutor, desired map[string]any, clients []clientRoute, tags []string, p routePolicy) error {
+	readyCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	defer cancel()
+	for {
+		err := verifyRunning(readyCtx, exec, desired, clients, tags, p)
+		if !errors.Is(err, errRouteAPIStarting) {
+			return err
+		}
+		timer := time.NewTimer(200 * time.Millisecond)
+		select {
+		case <-readyCtx.Done():
+			timer.Stop()
+			return err
+		case <-timer.C:
+		}
+	}
 }
