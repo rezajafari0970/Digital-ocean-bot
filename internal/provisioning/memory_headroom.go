@@ -28,6 +28,12 @@ m=memory()
 if not ROOT.exists() and not ROOT.is_symlink() and (m['MemTotal']>=768*1024 or m.get('SwapTotal',0)>=512*1024):
  print('memory headroom already sufficient')
  raise SystemExit(0)
+# Unsupported/missing fstab must fail before activating swap.
+fd=os.open(FSTAB,os.O_RDONLY|os.O_NOFOLLOW)
+try:
+ fs=os.fstat(fd)
+ require(stat.S_ISREG(fs.st_mode) and fs.st_uid==0 and not fs.st_mode&0o022,'unsafe fstab')
+finally:os.close(fd)
 ROOT.mkdir(mode=0o700,exist_ok=True)
 st=ROOT.lstat()
 require(stat.S_ISDIR(st.st_mode) and st.st_uid==0 and stat.S_IMODE(st.st_mode)==0o700,'unsafe memory directory')
@@ -77,17 +83,31 @@ with os.fdopen(lockfd,'r+') as lock:
  require(active(swap),'swap activation not observed')
  safe_file(swap)
  require(swap.stat().st_size==SIZE,'active swap size changed')
- # Preserve unrelated fstab records and append our exact entry once.
- require(not FSTAB.is_symlink(),'unexpected fstab link')
- with FSTAB.open('r+') as f:
+ # Replace the complete fstab atomically; a crash cannot leave a partial line.
+ fd=os.open(FSTAB,os.O_RDONLY|os.O_NOFOLLOW)
+ with os.fdopen(fd,'r') as f:
   fcntl.flock(f,fcntl.LOCK_EX)
+  before=os.fstat(f.fileno())
+  require(stat.S_ISREG(before.st_mode) and before.st_uid==0 and not before.st_mode&0o022,'unsafe fstab')
   raw=f.read()
   entries=[line.split() for line in raw.splitlines() if line.strip() and not line.lstrip().startswith('#')]
+  desired=[str(swap),'none','swap','sw,nofail','0','0']
   own=[line for line in entries if line[0]==str(swap)]
   if own:
-   require(len(own)==1 and len(own[0])>=4 and own[0][1:4]==['none','swap','sw,nofail'],'unexpected managed fstab entry')
+   require(own==[desired],'unexpected managed fstab entry')
   else:
-   f.seek(0,2);f.write(('' if not raw or raw.endswith('\n') else '\n')+str(swap)+' none swap sw,nofail 0 0\n');f.flush();os.fsync(f.fileno())
+   new=raw+('' if not raw or raw.endswith('\n') else '\n')+' '.join(desired)+'\n'
+   fd,name=tempfile.mkstemp(prefix='.dob-fstab-',dir=FSTAB.parent)
+   try:
+    os.fchmod(fd,stat.S_IMODE(before.st_mode));os.fchown(fd,before.st_uid,before.st_gid)
+    with os.fdopen(fd,'w') as updated:
+     updated.write(new);updated.flush();os.fsync(updated.fileno())
+    current=FSTAB.lstat()
+    require((current.st_dev,current.st_ino,current.st_mtime_ns,current.st_size)==(before.st_dev,before.st_ino,before.st_mtime_ns,before.st_size),'fstab changed concurrently')
+    os.replace(name,FSTAB)
+    fd=os.open(FSTAB.parent,os.O_RDONLY);os.fsync(fd);os.close(fd)
+   finally:
+    if os.path.exists(name):os.unlink(name)
  save('ACTIVE')
  print('bounded memory headroom verified')
 PYMEMORY`
@@ -110,7 +130,12 @@ try:
  assert state=={'version':1,'size':1024**3,'state':'ACTIVE'}
  assert (root/'swap').stat().st_size==1024**3
  assert any(line.split() and line.split()[0]==str(root/'swap') for line in pathlib.Path('/proc/swaps').read_text().splitlines()[1:])
- assert any(line.split()==[str(root/'swap'),'none','swap','sw,nofail','0','0'] for line in pathlib.Path('/etc/fstab').read_text().splitlines())
+ fstab=pathlib.Path('/etc/fstab')
+ s=fstab.lstat()
+ assert stat.S_ISREG(s.st_mode) and s.st_uid==0 and not s.st_mode&0o022
+ fd=os.open(fstab,os.O_RDONLY|os.O_NOFOLLOW)
+ with os.fdopen(fd,'r') as f:entries=[line.split() for line in f.read().splitlines() if line.strip() and not line.lstrip().startswith('#')]
+ assert [line for line in entries if line[0]==str(root/'swap')]==[[str(root/'swap'),'none','swap','sw,nofail','0','0']]
 except Exception:sys.exit(1)
 PYMEMORYCHECK`
 }
