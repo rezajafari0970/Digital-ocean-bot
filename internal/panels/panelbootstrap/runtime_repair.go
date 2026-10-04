@@ -48,6 +48,6 @@ WHERE pi.id=$1 AND pi.enabled=true`, p.ID).
 		Uploader: s.SSH,
 	}
 	repairErr := repair.RepairCompleted(ctx, acc, did, target)
-	s.recordRuntimeRepair(ctx, p.ID, repairErr)
+	repairErr = s.recordRuntimeRepair(ctx, p.ID, repairErr)
 	return repairErr
 }

@@ -68,7 +68,7 @@ WHERE pi.id=$1 AND pi.enabled=true
 		}
 		repair := sanaei.PanelConfigurer{DB: s.DB, Secrets: s.Secrets, Runner: s.SSH, Uploader: s.SSH}
 		repairErr := repair.RepairCompleted(ctx, acc, did, target)
-		s.recordRuntimeRepair(ctx, p.ID, repairErr)
+		repairErr = s.recordRuntimeRepair(ctx, p.ID, repairErr)
 		if repairErr != nil {
 			return repairErr
 		}
@@ -194,19 +194,50 @@ RETURNING panel_id::text`, panelID).Scan(&claimed)
 	return err == nil, err
 }
 
-func (s Service) recordRuntimeRepair(ctx context.Context, panelID string, repairErr error) {
+// An SSH timeout is an unknown outcome. Read the panel again before counting
+// it as a failed repair; persistence must survive the expired worker deadline.
+func (s Service) recordRuntimeRepair(ctx context.Context, panelID string, repairErr error) error {
+	if repairErr != nil {
+		verifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
+		rt, observedErr := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Secrets, Timeout: 5 * time.Second}).Open(verifyCtx, panelID)
+		if observedErr == nil {
+			_, observedErr = rt.Session.Snapshot(verifyCtx)
+		}
+		cancel()
+		if observedErr == nil {
+			repairErr = nil
+		}
+	}
+	persistCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+	defer cancel()
+	tx, err := s.DB.BeginTx(persistCtx, nil)
+	if err != nil {
+		return errors.Join(repairErr, err)
+	}
+	defer tx.Rollback()
 	if repairErr == nil {
-		_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_success_at=now(),last_error='',attempts=0 WHERE panel_id=$1`, panelID)
-		return
+		_, err = tx.ExecContext(persistCtx, "UPDATE panel_runtime_repairs SET last_success_at=now(),last_error='',attempts=0 WHERE panel_id=$1", panelID)
+	} else {
+		_, err = tx.ExecContext(persistCtx, "UPDATE panel_runtime_repairs SET last_error=$2 WHERE panel_id=$1", panelID, repairErr.Error())
+		if err == nil {
+			var attempts int
+			err = tx.QueryRowContext(persistCtx, "SELECT attempts FROM panel_runtime_repairs WHERE panel_id=$1", panelID).Scan(&attempts)
+			if err == nil && attempts >= 3 {
+				var accountID, dropletID string
+				err = tx.QueryRowContext(persistCtx, `UPDATE droplets d SET state='RETIRING',updated_at=now() FROM panel_instances p WHERE p.id=$1 AND p.droplet_id=d.id AND d.state IN ('READY','EXPIRING') RETURNING d.account_id::text,d.id::text`, panelID).Scan(&accountID, &dropletID)
+				if errors.Is(err, sql.ErrNoRows) {
+					err = nil
+				} else if err == nil {
+					_, err = tx.ExecContext(persistCtx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, accountID, dropletID)
+				}
+			}
+		}
 	}
-	_, _ = s.DB.ExecContext(ctx, `UPDATE panel_runtime_repairs SET last_error=$2 WHERE panel_id=$1`, panelID, repairErr.Error())
-	var attempts int
-	if err := s.DB.QueryRowContext(ctx, `SELECT attempts FROM panel_runtime_repairs WHERE panel_id=$1`, panelID).Scan(&attempts); err != nil || attempts < 3 {
-		return
+	if err != nil {
+		return errors.Join(repairErr, err)
 	}
-	var accountID, dropletID string
-	err := s.DB.QueryRowContext(ctx, `UPDATE droplets d SET state='RETIRING',updated_at=now() FROM panel_instances p WHERE p.id=$1 AND p.droplet_id=d.id AND d.state IN ('READY','EXPIRING') RETURNING d.account_id::text,d.id::text`, panelID).Scan(&accountID, &dropletID)
-	if err == nil {
-		_, _ = s.DB.ExecContext(ctx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, accountID, dropletID)
+	if err = tx.Commit(); err != nil {
+		return errors.Join(repairErr, err)
 	}
+	return repairErr
 }
