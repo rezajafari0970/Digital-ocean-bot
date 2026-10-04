@@ -40,7 +40,7 @@ func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 			}
 			for _, c := range cs {
 				for _, network := range []string{"tcp", "udp"} {
-					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org"} {
+					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org", "notbrowserleaks.com", "browserleaks.com.example.org"} {
 						got := probeRoute(t, desired, c.Email, domain, network)
 						if got != tagged(desired, directTag) {
 							t.Fatalf("non-ad not direct: %s %s %s", c.Class, domain, network)
@@ -53,7 +53,7 @@ func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 							base = p.Proxies[0].Tag
 						}
 					}
-					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com", "", "1.1.1.1", "2001:db8::1"} {
+					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com", "browserleaks.com", "tls.browserleaks.com", "a.b.browserleaks.com", "", "1.1.1.1", "2001:db8::1"} {
 						if got := probeRoute(t, desired, c.Email, domain, network); got != tagged(desired, base) {
 							t.Fatalf("ad route %s %s %s: %s", kind, c.Class, network, got)
 						}

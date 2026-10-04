@@ -298,7 +298,10 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 						pattern, _ := v.(string)
 						if strings.HasPrefix(pattern, "regexp:") {
 							found = found || regexp.MustCompile(strings.TrimPrefix(pattern, "regexp:")).MatchString(r.Form.Get("domain"))
-						} else {
+						} else if strings.HasPrefix(pattern, "domain:") {
+							suffix := strings.TrimPrefix(pattern, "domain:")
+							found = found || r.Form.Get("domain") == suffix || strings.HasSuffix(r.Form.Get("domain"), "."+suffix)
+						} else if strings.HasPrefix(pattern, "geosite:") {
 							found = found || r.Form.Get("domain") == "adservice.google.com" || r.Form.Get("domain") == "pixel.facebook.com"
 						}
 					}

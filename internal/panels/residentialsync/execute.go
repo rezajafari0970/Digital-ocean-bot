@@ -109,6 +109,8 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			}{
 				{"adservice.google.com", "", "tcp", "443", "tls", true},
 				{"pixel.facebook.com", "", "udp", "443", "quic", true},
+				{"browserleaks.com", "", "tcp", "443", "tls", true},
+				{"tls.browserleaks.com", "", "udp", "443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
 				{"", "1.1.1.1", "tcp", "443", "", false},

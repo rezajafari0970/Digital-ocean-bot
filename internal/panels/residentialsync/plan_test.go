@@ -164,7 +164,10 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 					pattern, _ := value.(string)
 					if strings.HasPrefix(pattern, "regexp:") {
 						matched = matched || regexp.MustCompile(strings.TrimPrefix(pattern, "regexp:")).MatchString(v.Get("domain"))
-					} else {
+					} else if strings.HasPrefix(pattern, "domain:") {
+						suffix := strings.TrimPrefix(pattern, "domain:")
+						matched = matched || v.Get("domain") == suffix || strings.HasSuffix(v.Get("domain"), "."+suffix)
+					} else if strings.HasPrefix(pattern, "geosite:") {
 						matched = matched || v.Get("domain") == "adservice.google.com" || v.Get("domain") == "pixel.facebook.com"
 					}
 				}

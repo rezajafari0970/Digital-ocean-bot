@@ -81,7 +81,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   const policyRevision=await evaluate('cache.configs[0].revision');
   await evaluate('openConfigForm(cache.configs[0])');
   await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("123 saved")');
-  assert.equal(await evaluate('document.querySelector("[name=users_per_second]").max'),'100');
+  assert.equal(await evaluate('document.querySelector("[name=users_per_second]").tagName'),'SELECT');
+  assert.equal(await evaluate('document.querySelector("[name=users_per_second]").value'),String(await evaluate('cache.configs[0].users_per_second')));
+  assert.deepEqual(await evaluate('[...document.querySelector("[name=users_per_second]").options].map(x=>Number(x.value))'),Array.from({length:100},(_,i)=>i+1));
+  assert.equal(await evaluate('[...document.querySelector("[name=users_per_second]").options].some(x=>x.value==="10000")'),false);
   await evaluate('document.querySelector("[name=users_per_second]").value="600"');
   await evaluate('document.querySelector("#modalForm").requestSubmit()');
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/1 to 100/);
@@ -102,6 +105,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.match(await evaluate('document.querySelector("#modalTitle").textContent'),/Residential/);
   await evaluate('document.querySelector("[name=users_per_second]").value="10000";document.querySelector("#modalForm").requestSubmit()');
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);
+  await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
+  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("123 saved")');
+  assert.equal(await evaluate('document.querySelector("#modalFields a")?.href'),'https://browserleaks.com/ip');
+  assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("browserleaks.com and its subdomains")'),true);
+  assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');
+  await evaluate('document.querySelector("[name=users_per_second]").scrollIntoView({block:"center"})');
+  console.log('UI_BROWSERLEAKS_LINK_AND_RATE_SELECTOR PASS');
   console.log('UI_INDEPENDENT_PROFILE_FORMS_AND_MOBILE_LAYOUT PASS');
   const invalid=await fetch(base+'/api/v1/configs',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({users_per_second:600,ports:[443],target_users_per_inbound:1,sni_selection_mode:'scored'})});
   assert.equal(invalid.status,400);const detail=await invalid.json();assert.equal(detail.field,'users_per_second');assert.match(detail.detail,/1 to 100/);

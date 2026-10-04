@@ -89,7 +89,7 @@ func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
 			if !ready {
 				t.Fatal("core listener unavailable")
 			}
-			for _, target := range []string{sink.URL, "http://adservice.google.com:" + portText} {
+			for _, target := range []string{sink.URL, "http://adservice.google.com:" + portText, "http://browserleaks.com:" + portText} {
 				// The direct control is an IP request; protected tests also cover ads.
 				if kind == "direct-control" && target != sink.URL {
 					continue

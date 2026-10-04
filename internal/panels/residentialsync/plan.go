@@ -15,7 +15,8 @@ const blockedTag = "dob-route-blocked"
 
 // Installed geosite.dat contains these lists. "Google ads" and "Ads" are
 // display names, not valid geosite:google-ads / geosite:ads identifiers.
-var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads"}
+// BrowserLeaks is an explicit diagnostic destination, including its subdomains.
+var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads", "domain:browserleaks.com"}
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
