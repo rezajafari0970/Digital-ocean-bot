@@ -1,13 +1,13 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+  "runtime_source_revision": "500098755e5520846c80dff2836c3c591a48a324",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T11:43:40.650242+00:00",
+  "verified_at_utc": "2026-10-04T12:14:05.829199+00:00",
   "binaries": {
     "api": {
-      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+      "revision": "500098755e5520846c80dff2836c3c591a48a324",
       "vcs_modified": false,
-      "sha256": "253d09b19c125d73db389b53ee3f9f74a84203fe183456c0412de53a846e9700"
+      "sha256": "07ec7a585dbb6fefa9ac553efb75d8731828e8abad4acc4c8132b04faa367aec"
     },
     "worker": {
       "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
@@ -22,9 +22,9 @@
     "api_worker_auto_restarts": 0
   },
   "migration": "000146_panel_network_access",
-  "acceptance": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_ACCEPTANCE_20261004.json",
+  "acceptance": "docs/PLAIN_OUTPUT_UDP_CLOUD_ACCEPTANCE_20261004.json",
   "verified": true,
-  "note": "Ads-only residential routing and explicit local account purge accepted. 38 serving panels, 76 disjoint configs, DNS and non-ad QUIC proven. Four requested blocked accounts purged locally; 20 previously tracked cloud resources remain unverified. Current residential upstream rejects UDP. Documentation-only checkpoint commits do not imply runtime drift.",
+  "note": "API-only Output update deployed from clean detached source; worker source unchanged. Res1 UDP and advertising HTTP/3 now proven after udp=true plus a new named sticky session. 38 fresh panels and 76 disjoint outputs. External cloud cleanup remains blocked by provider 422 account locks and Vultr 401; no deletion claimed.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,8 +41,9 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Obtain/verify UDP-capable residential upstream for advertising UDP/QUIC. IP speed-selection strategy is explicitly deferred. Preserve policy revision 23 and separate real quota-exhaustion scope.",
+  "next_product_step": "Restore provider-authorized access for the 20 exact cloud resources, then read-before-delete and fresh absence verification. Residential IP selection remains deferred.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "active_lifecycle_scopes": 39,
-  "eligible_serving_panels": 38
+  "eligible_serving_panels": 38,
+  "worker_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d"
 }

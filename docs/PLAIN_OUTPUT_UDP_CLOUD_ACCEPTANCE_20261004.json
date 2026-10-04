@@ -1,0 +1,200 @@
+{
+  "verified_at_utc": "2026-10-04T12:14:05.829199+00:00",
+  "status": "OUTPUT_AND_UDP_ACCEPTED_CLOUD_CLEANUP_BLOCKED_BY_PROVIDER",
+  "api_source_revision": "500098755e5520846c80dff2836c3c591a48a324",
+  "binaries": {
+    "api": {
+      "revision": "500098755e5520846c80dff2836c3c591a48a324",
+      "vcs_modified": false,
+      "sha256": "07ec7a585dbb6fefa9ac553efb75d8731828e8abad4acc4c8132b04faa367aec"
+    },
+    "worker": {
+      "revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
+      "vcs_modified": false,
+      "sha256": "51069866d1e9671cacdd67f10c6c7c31c75ebd52d9c0d493087ef92b504c068a"
+    }
+  },
+  "output": {
+    "browser_visible_content": "Only one complete VLESS URI per line; no heading, count, button, status or error text.",
+    "refresh_seconds": 1,
+    "raw_subscription": "text/plain preserved",
+    "freshness_and_class_filters": "unchanged",
+    "on_failure": "clear previous lines and retry without displaying stale credentials or errors",
+    "mobile_browser_verified": true
+  },
+  "residential": {
+    "id": "1507f2c1-1f56-467d-a079-f5b438bdd671",
+    "name": "Res1",
+    "root_cause": "Existing sticky assignment rejected UDP. Adding udp=true without a new session still returned reply 1. A fresh named session with udp=true returned reply 0 and relayed UDP.",
+    "saved_selectors": ";udp=true;session=dobudp20261004",
+    "protocols_verified": [
+      "SOCKS5 UDP ASSOCIATE",
+      "UDP DNS request and response",
+      "QUIC HTTP/3 request and response to adservice.google.com",
+      "TCP HTTPS"
+    ],
+    "non_ad_egress": "server IP, proven for both Output classes",
+    "account_proxies_unchanged": true,
+    "routing_revision": 376,
+    "fresh_applied_panels": 38,
+    "canary_panel": "69e68a2a-8a42-4c9f-9f12-302920d729bc",
+    "provider_instructions": [
+      "https://help.proxyrack.com/en/articles/8433702-target-udp-ips",
+      "https://help.proxyrack.com/en/articles/5977249-create-multiple-sessions-on-a-sticky-port"
+    ],
+    "limitation": "End-to-end data traffic tested on one production panel; all 38 running route proofs verified. No claim of every advertising domain or perpetual upstream availability."
+  },
+  "cloud_cleanup": {
+    "mutations_sent": 0,
+    "resources_unverified": 20,
+    "readback": [
+      {
+        "account_http": 200,
+        "account_id": "e00f359d-5fcc-40d5-9ee0-41ac6797b92f",
+        "account_result": "readable",
+        "checked_at": "2026-10-04T12:06:31.932906124Z",
+        "inventory_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "inventory_http": 422,
+        "inventory_result": "provider_denied",
+        "provider": "digitalocean",
+        "provider_account_status": "locked",
+        "provider_deleted_verified": false,
+        "resource:603494829_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "resource:603494829_http": 422,
+        "resource:603494829_result": "provider_denied",
+        "route": "saved_account_proxy",
+        "tracked": 1
+      },
+      {
+        "account_http": 200,
+        "account_id": "8bd87d60-6a64-4b53-9a23-b4f419474469",
+        "account_result": "readable",
+        "checked_at": "2026-10-04T12:06:33.081133361Z",
+        "inventory_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "inventory_http": 422,
+        "inventory_result": "provider_denied",
+        "provider": "digitalocean",
+        "provider_account_status": "locked",
+        "provider_deleted_verified": false,
+        "resource:603495134_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "resource:603495134_http": 422,
+        "resource:603495134_result": "provider_denied",
+        "route": "saved_account_proxy",
+        "tracked": 1
+      },
+      {
+        "account_http": 200,
+        "account_id": "e9754c66-7fd8-4314-9c0e-a667e7a2c615",
+        "account_result": "readable",
+        "checked_at": "2026-10-04T12:06:34.439284669Z",
+        "inventory_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "inventory_http": 422,
+        "inventory_result": "provider_denied",
+        "provider": "digitalocean",
+        "provider_account_status": "locked",
+        "provider_deleted_verified": false,
+        "resource:603164797_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "resource:603164797_http": 422,
+        "resource:603164797_result": "provider_denied",
+        "resource:603205870_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "resource:603205870_http": 422,
+        "resource:603205870_result": "provider_denied",
+        "resource:603211921_detail": "There is currently a lock on the account, please log in to the control panel and contact support.",
+        "resource:603211921_http": 422,
+        "resource:603211921_result": "provider_denied",
+        "route": "saved_account_proxy",
+        "tracked": 3
+      },
+      {
+        "account_detail": "Unauthorized.",
+        "account_http": 401,
+        "account_id": "cab4df5b-47b7-4efb-933f-ca43baa14346",
+        "account_result": "unauthorized",
+        "checked_at": "2026-10-04T12:06:36.096933196Z",
+        "inventory_detail": "Unauthorized.",
+        "inventory_http": 401,
+        "inventory_result": "unauthorized",
+        "provider": "vultr",
+        "provider_deleted_verified": false,
+        "route": "saved_account_proxy",
+        "tracked": 15
+      }
+    ],
+    "scope_manifest": [
+      {
+        "account_id": "e00f359d-5fcc-40d5-9ee0-41ac6797b92f",
+        "provider": "digitalocean",
+        "resource_ids": [
+          "603494829"
+        ]
+      },
+      {
+        "account_id": "8bd87d60-6a64-4b53-9a23-b4f419474469",
+        "provider": "digitalocean",
+        "resource_ids": [
+          "603495134"
+        ]
+      },
+      {
+        "account_id": "e9754c66-7fd8-4314-9c0e-a667e7a2c615",
+        "provider": "digitalocean",
+        "resource_ids": [
+          "603164797",
+          "603205870",
+          "603211921"
+        ]
+      },
+      {
+        "account_id": "cab4df5b-47b7-4efb-933f-ca43baa14346",
+        "provider": "vultr",
+        "resource_ids": [
+          "0567c02c-ec07-4f55-abc4-5a1d33327c31",
+          "1313637b-4a0a-4d71-bc91-e7602228e149",
+          "21484e6a-c908-4085-9d81-490848214533",
+          "363fa22c-e97a-4fe1-9516-4b81bbb3f090",
+          "39b4cc16-728e-4d6e-993e-fe99af8d23ce",
+          "3c7bf49a-91c8-45be-84e6-0fc07a8fbecc",
+          "61fd8bfb-3309-4ce1-96c2-47011b2e2a77",
+          "626f94ba-307e-4904-a943-ef24a0a9e9bd",
+          "888b5b94-2704-4370-bbbc-a07ec9e01a78",
+          "8b7525be-7a48-4614-8384-c79dabb5bc93",
+          "8bdfd8ab-745f-4bae-92af-c5e74649a7f6",
+          "ae49f15f-3996-4914-af9e-fe70665c8727",
+          "c831d924-7b6a-4450-924e-85d35a2e2055",
+          "e42808c4-6a63-46e8-adfd-047e79c717e1",
+          "eb704793-61ad-4d38-bc8f-db5492ebfcfb"
+        ]
+      }
+    ],
+    "digitalocean": "Three accounts report status=locked; inventory and each of the five exact droplet reads return HTTP 422 with an account-lock message. Provider explicitly requires account access/support resolution.",
+    "vultr": "Saved credential returns HTTP 401 Unauthorized for account and inventory; 15 tracked instances cannot be verified.",
+    "next_required": "Unlock the three DigitalOcean accounts and supply a valid authorized Vultr credential on the server. Then fresh-read exact resources before scoped deletion and absence checks.",
+    "local_accounts_restored": false,
+    "temporary_recovered_encrypted_copy_removed": true,
+    "historical_backup_erasure_verified": false
+  },
+  "production": {
+    "active_servers": 38,
+    "broken_servers": 0,
+    "output_direct": 38,
+    "output_residential": 38,
+    "policy_enabled": true,
+    "policy_revision": 23,
+    "main_mutation_gate": "enabled, concurrency 1",
+    "legacy_bulk_gate": "closed"
+  },
+  "tests": [
+    "Node output refresh/fault/hidden-tab tests",
+    "focused admin PostgreSQL tests",
+    "focused race tests",
+    "full go test ./...",
+    "clean detached full go test ./...",
+    "actual mobile browser only-URI assertion",
+    "real upstream UDP and HTTP/3",
+    "real VLESS canary both classes and ad/non-ad HTTP/3",
+    "24 running-core canary route probes",
+    "all 38 fresh routing proofs"
+  ],
+  "evidence_directory": "/root/backups/dob-plain-udp-cloud-20261004",
+  "handoff": "docs/PLAIN_OUTPUT_UDP_CLOUD_HANDOFF_20261004.md"
+}

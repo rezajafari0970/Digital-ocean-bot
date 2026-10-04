@@ -36,12 +36,13 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-04",
-    "runtime_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d",
-    "status": "ACCEPTED_WITH_UNVERIFIED_CLOUD_RESOURCES_AND_UPSTREAM_UDP_LIMIT",
+    "runtime_source_revision": "500098755e5520846c80dff2836c3c591a48a324",
+    "status": "OUTPUT_AND_UDP_ACCEPTED_CLOUD_CLEANUP_BLOCKED_BY_PROVIDER",
     "active_scopes_at_acceptance": 39,
     "eligible_serving_panels": 38,
-    "acceptance": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_ACCEPTANCE_20261004.json",
-    "handoff": "docs/ADS_ONLY_AND_ACCOUNT_PURGE_HANDOFF_20261004.md",
-    "note": "Earlier knowledge-mastery/volatile-worktree and scale records are historical. Recheck canonical HEAD/origin and live DB. Do not repeat priming or scale canaries. Main durable gate is intentionally enabled at concurrency 1 for saved policy revision 23; legacy bulk gate remains closed."
+    "acceptance": "docs/PLAIN_OUTPUT_UDP_CLOUD_ACCEPTANCE_20261004.json",
+    "handoff": "docs/PLAIN_OUTPUT_UDP_CLOUD_HANDOFF_20261004.md",
+    "note": "Earlier knowledge-mastery/volatile-worktree and scale records are historical. Recheck canonical HEAD/origin and live DB. Do not repeat priming or scale canaries. Main durable gate is intentionally enabled at concurrency 1 for saved policy revision 23; legacy bulk gate remains closed.",
+    "worker_source_revision": "add8e110cfcb3efdb72ebbc47fe9469a5c22693d"
   }
 }
