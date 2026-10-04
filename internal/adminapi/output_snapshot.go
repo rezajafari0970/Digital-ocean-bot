@@ -126,6 +126,13 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	if class != "ALL" {
 		args = append(args, class)
 		where += " AND (" + scoped + ") AND (" + proof + ") AND cr.effective_class=$1 AND cr.route_class=$1 "
+		// Profile links publish only clients whose immutable ownership carries
+		// that profile. Preserved manual/default clients retain their own limits.
+		where += ` AND (NOT EXISTS(SELECT 1 FROM reality_config_profiles) OR EXISTS(
+         SELECT 1 FROM bulk_user_ownership own JOIN bulk_user_generations gen ON gen.id=own.generation_id
+         JOIN reality_config_profiles profile ON profile.route_class=own.route_class
+         WHERE gen.panel_id=p.id AND own.client_id=o.client_id AND own.email=cr.email
+         AND own.state='ACTIVE' AND own.route_class=$1)) `
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
 	}

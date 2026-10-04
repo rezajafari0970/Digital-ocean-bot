@@ -126,7 +126,11 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 	now := time.Now()
 	active := map[string]int{}
 	reasons := map[string]string{}
-	total := 0
+	total, preserved := 0, 0
+	managed := map[string]bool{}
+	for _, o := range owned {
+		managed[o.ID] = true
+	}
 	for id, c := range observed {
 		reason, e := c.InactiveReason(now)
 		if e != nil {
@@ -138,11 +142,15 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 			if cls == "" {
 				cls = "RESIDENTIAL"
 			}
-			active[cls]++
+			if managed[id] {
+				active[cls]++
+			} else {
+				preserved++
+			}
 			total++
 		}
 	}
-	target := configprofiles.Target(profiles, port)
+	target := configprofiles.Target(profiles, port) + preserved
 	deficit := 0
 	for cls, p := range byClass {
 		if p.Create {
@@ -302,6 +310,24 @@ func (e Executor) profileDeleteGuard(ctx context.Context, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
+	managed := map[string]bool{}
+	rows, err := e.Journal.DB.QueryContext(ctx, `SELECT client_id FROM bulk_user_ownership WHERE generation_id=$1 AND state IN('ACTIVE','DELETE_PENDING')`, p.GenerationID)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		managed[id] = true
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
 	active := map[string]int{}
 	now := time.Now()
 	for id, c := range obs {
@@ -309,7 +335,7 @@ func (e Executor) profileDeleteGuard(ctx context.Context, rt *sanaei.PanelRuntim
 		if e != nil {
 			return e
 		}
-		if reason == "" {
+		if reason == "" && managed[id] {
 			cls := classes[id]
 			if cls == "" {
 				cls = "RESIDENTIAL"

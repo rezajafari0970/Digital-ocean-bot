@@ -196,9 +196,6 @@ func run(panel string, inbound int64, dir string, execute bool) (result error) {
 			for _, o := range own {
 				counts[o.Class]++
 			}
-			for id := range manual {
-				counts[routes[id]]++
-			}
 			ready := pending == 0
 			for _, p := range wanted {
 				ready = ready && counts[p.Class] == p.Target
@@ -298,21 +295,21 @@ func readOwned(ctx context.Context, db *sql.DB, gen string) ([]owned, error) {
 	return result, rows.Err()
 }
 func validateBaseline(obs map[string]clientops.LifecycleClient, own []owned, profiles []configprofiles.Profile, port int, routes map[string]string) error {
-	if len(obs) != 2 || len(own) < 1 || len(own) > 2 || len(profiles) != 2 || len(routes) != 2 {
-		return errors.New("canary requires two classified baseline clients, at least one owned, and two profiles")
+	if len(obs) < 2 || len(obs) > 3 || len(own) != 2 || len(profiles) != 2 || len(routes) != len(obs) {
+		return errors.New("canary requires one owned baseline client per class, at most one preserved manual client, and two profiles")
 	}
 	counts := map[string]int{}
-	for id, c := range obs {
+	for _, c := range obs {
 		if !c.Client.Enable || c.Client.TotalGB != 0 || c.Client.ExpiryTime != 0 || c.Client.LimitHWID != 0 || c.Traffic == nil || c.Traffic.Up != 0 || c.Traffic.Down != 0 {
 			return errors.New("baseline identity, limits or unused traffic precondition failed")
 		}
-		counts[routes[id]]++
 	}
 	for _, o := range own {
 		c, ok := obs[o.ID]
 		if !ok || c.Client.Email != o.Email || routes[o.ID] != o.Class {
 			return errors.New("owned baseline class mismatch")
 		}
+		counts[o.Class]++
 	}
 	for _, p := range profiles {
 		if !p.Enabled || !p.Applies(port) || p.Target != 1 || p.Quota != 0 || p.Lifetime != 0 || p.DeviceLimit != 0 || counts[p.Class] != 1 {

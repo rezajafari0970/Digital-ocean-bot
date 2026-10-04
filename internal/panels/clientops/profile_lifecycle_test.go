@@ -23,7 +23,7 @@ func profileFixture(t *testing.T) (*sql.DB, Journal, *sanaei.PanelRuntime, *life
  UPDATE global_config_policies SET enabled=true,target_users_per_inbound=3;
  UPDATE bulk_lifecycle_scopes SET use_global_policy=true;
  INSERT INTO reality_config_profiles(route_class,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second) VALUES
- ('DIRECT','[443]',1,101,600,2,1),('RESIDENTIAL','[443]',2,202,1200,3,10);`)
+ ('DIRECT','[443]',1,101,600,2,1),('RESIDENTIAL','[443]',1,202,1200,3,10);`)
 	if err != nil {
 		t.Fatal(err)
 	}
