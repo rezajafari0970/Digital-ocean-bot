@@ -139,6 +139,10 @@ func TestLocalPurgeAPIRequiresExplicitCloudAcknowledgement(t *testing.T) {
 	db := adminTestDB(t)
 	a, _, _ := seedPurgeDependencies(t, db)
 	s := Server{DB: db}
+	progress := s.accountDeletionProgress(context.Background(), a).(map[string]any)
+	if progress["provider_state"] != "LOCKED" {
+		t.Fatal("deletion loses raw provider blocker", progress)
+	}
 	call := func(ack bool, role auth.Role) *httptest.ResponseRecorder {
 		raw, _ := json.Marshal(map[string]any{"account_id": a, "expected_provider_state": "LOCKED", "expected_remaining_servers": 1, "acknowledge_cloud_resources_unverified": ack})
 		req := httptest.NewRequest("POST", "/api/v1/accounts/"+a+"/purge", strings.NewReader(string(raw)))

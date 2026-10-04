@@ -282,15 +282,15 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
 	var requested sql.NullTime
 	var attempts, remaining int
-	var detail string
+	var detail, providerState string
 	err := s.DB.QueryRowContext(ctx, `SELECT a.deletion_requested_at,COALESCE(j.attempts,0),
  (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining),
- COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker')
- FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail)
+ COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker'),a.provider_state
+ FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail, &providerState)
 	if err != nil || !requested.Valid {
 		return nil
 	}
-	return map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail}
+	return map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail, "provider_state": providerState}
 }
 
 // purgeAccount only accepts explicit acknowledgement of unverified cloud
