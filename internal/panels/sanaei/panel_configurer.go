@@ -114,7 +114,7 @@ func (p PanelConfigurer) Configure(ctx context.Context, accountID, dropletID str
 }
 
 func panelConfigureCommand(remote string) string {
-	return fmt.Sprintf(`set -euo pipefail; f=%s; trap 'rm -f -- "$f"' EXIT; . "$f"; /usr/local/x-ui/x-ui setting -username "$XUI_USER" -password "$XUI_PASS" -port "$XUI_PORT" -webBasePath "$XUI_PATH" >/dev/null; systemctl restart x-ui; `, shellQuote(remote)) + panelReadinessCommand()
+	return provisioning.MemoryHeadroomCommand() + "\n" + fmt.Sprintf(`set -euo pipefail; f=%s; trap 'rm -f -- "$f"' EXIT; . "$f"; /usr/local/x-ui/x-ui setting -username "$XUI_USER" -password "$XUI_PASS" -port "$XUI_PORT" -webBasePath "$XUI_PATH" >/dev/null; systemctl restart x-ui; `, shellQuote(remote)) + panelReadinessCommand()
 }
 
 // Cold starts on small instances may outlast two seconds. Readiness polling is
