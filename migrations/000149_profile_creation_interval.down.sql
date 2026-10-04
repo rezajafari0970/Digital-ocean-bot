@@ -1,0 +1,2 @@
+DROP TABLE config_creation_schedule;
+ALTER TABLE reality_config_profiles DROP COLUMN creation_interval_seconds;

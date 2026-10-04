@@ -13,12 +13,12 @@ import (
 )
 
 type LifecyclePolicy struct {
-	Class                              string
-	Revision                           int64
-	Target                             int
-	Quota                              int64
-	Lifetime, DeviceLimit, Rate, Chunk int
-	Create                             bool
+	Class                                                string
+	Revision                                             int64
+	Target                                               int
+	Quota                                                int64
+	Lifetime, DeviceLimit, Rate, Chunk, CreationInterval int
+	Create                                               bool
 }
 type lifecycleScope struct {
 	Generation, Marker string

@@ -80,7 +80,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   console.log('UI_CLEANUP_STATUS_SURVIVES_NAVIGATION PASS');
   const policyRevision=await evaluate('cache.configs[0].revision');
   await evaluate('openConfigForm(cache.configs[0])');
-  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("123 saved")');
+  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("3 saved")');
   assert.equal(await evaluate('document.querySelector("[name=users_per_second]").tagName'),'SELECT');
   assert.equal(await evaluate('document.querySelector("[name=users_per_second]").value'),String(await evaluate('cache.configs[0].users_per_second')));
   assert.deepEqual(await evaluate('[...document.querySelector("[name=users_per_second]").options].map(x=>Number(x.value))'),Array.from({length:100},(_,i)=>i+1));
@@ -97,7 +97,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('document.querySelector("[name=users_per_second]").value="1";document.querySelector("[name=target_users_per_inbound]").value="1";document.querySelector("[name=enabled]").checked=true;document.querySelector("#modalForm").requestSubmit()');
    await waitFor('!document.querySelector("#modal").open');
   }
-  assert.deepEqual(await evaluate('window.profileSaves.map(x=>[x.route_class,x.target_users_per_inbound,x.users_per_second])'),[['DIRECT',1,1],['RESIDENTIAL',1,1]]);
+  await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
+  await evaluate('document.querySelector("[name=creation_interval_minutes]").value="6";document.querySelector("[name=lifetime_expr]").value="6";document.querySelector("#modalForm").requestSubmit()');
+  await waitFor('!document.querySelector("#modal").open');
+  assert.equal(await evaluate('window.profileSaves[2].creation_interval_seconds'),360);
+  assert.equal(await evaluate('window.profileSaves[2].user_lifetime_expression'),'6');
+  console.log('UI_SIX_MINUTE_CREATION_INTERVAL PASS');
+  assert.deepEqual(await evaluate('window.profileSaves.slice(0,2).map(x=>[x.route_class,x.target_users_per_inbound,x.users_per_second])'),[['DIRECT',1,1],['RESIDENTIAL',1,1]]);
   await evaluate('api=window.originalProfileAPI');
   await evaluate('openConfigForm()');
   assert.equal(await evaluate('document.querySelectorAll("[data-profile-choice]").length'),2);
@@ -106,7 +112,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("[name=users_per_second]").value="10000";document.querySelector("#modalForm").requestSubmit()');
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);
   await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
-  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("123 saved")');
+  await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("3 saved")');
   assert.equal(await evaluate('document.querySelector("#modalFields a")?.href'),'https://browserleaks.com/ip');
   assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("browserleaks.com and its subdomains")'),true);
   assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');

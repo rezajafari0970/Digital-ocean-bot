@@ -18,7 +18,7 @@ func ProfileRateClass(ctx context.Context) string {
 	return v
 }
 func profilePolicy(p configprofiles.Profile, s lifecycleScope) LifecyclePolicy {
-	return LifecyclePolicy{Class: p.Class, Revision: p.Revision, Target: p.Target, Quota: p.Quota, Lifetime: p.Lifetime, DeviceLimit: p.DeviceLimit, Rate: p.Rate, Chunk: s.Policy.Chunk, Create: s.Policy.Create && p.Enabled}
+	return LifecyclePolicy{Class: p.Class, Revision: p.Revision, Target: p.Target, Quota: p.Quota, Lifetime: p.Lifetime, DeviceLimit: p.DeviceLimit, Rate: p.Rate, CreationInterval: p.CreationInterval, Chunk: s.Policy.Chunk, Create: s.Policy.Create && p.Enabled}
 }
 
 // Class is durable before POST. Unknown manual clients are conservatively
@@ -236,6 +236,21 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 		if n <= 0 {
 			return false, ErrClientConflict
 		}
+		// Same transaction as ownership and journal insertion. The existing
+		// panel/inbound advisory lock also serializes independent worker processes.
+		if pol.CreationInterval > 0 {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO config_creation_schedule(panel_id,inbound_id,route_class) VALUES($1,$2,$3) ON CONFLICT DO NOTHING`, rt.PanelID, inbound, pol.Class); err != nil {
+				return false, err
+			}
+			var last sql.NullTime
+			if err = tx.QueryRowContext(ctx, `SELECT last_planned_at FROM config_creation_schedule WHERE panel_id=$1 AND inbound_id=$2 AND route_class=$3 FOR UPDATE`, rt.PanelID, inbound, pol.Class).Scan(&last); err != nil {
+				return false, err
+			}
+			if last.Valid && now.Before(last.Time.Add(time.Duration(pol.CreationInterval)*time.Second)) {
+				continue
+			}
+			n = 1 // No catch-up burst after downtime.
+		}
 		n, err = allowance(context.WithValue(ctx, profileRateKey{}, pol.Class), pol.Rate, n)
 		if err != nil {
 			return false, err
@@ -268,6 +283,9 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 			if _, err = tx.ExecContext(ctx, `INSERT INTO bulk_user_ownership(generation_id,client_id,email,state,mutation_job_id,created_at,route_class) VALUES($1,$2,$3,'PLANNED',$4,$5,$6)`, scope.Generation, c.ID, c.Email, jobID, now, pol.Class); err != nil {
 				return false, err
 			}
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO config_creation_schedule(panel_id,inbound_id,route_class,last_planned_at) VALUES($1,$2,$3,$4) ON CONFLICT(panel_id,inbound_id,route_class) DO UPDATE SET last_planned_at=excluded.last_planned_at`, rt.PanelID, inbound, pol.Class, now); err != nil {
+			return false, err
 		}
 		return true, tx.Commit()
 	}

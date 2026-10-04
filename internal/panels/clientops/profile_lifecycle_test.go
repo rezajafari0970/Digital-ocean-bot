@@ -27,6 +27,13 @@ func profileFixture(t *testing.T) (*sql.DB, Journal, *sanaei.PanelRuntime, *life
 	if err != nil {
 		t.Fatal(err)
 	}
+	intervalDDL, err := os.ReadFile("../../../migrations/000149_profile_creation_interval.up.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(string(intervalDDL)); err != nil {
+		t.Fatal(err)
+	}
 	return db, j, rt, state
 }
 func TestProfileLifecycleIndependentPlanUpdateShrinkAndReplacement(t *testing.T) {

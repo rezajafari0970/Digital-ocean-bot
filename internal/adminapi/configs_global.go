@@ -8,19 +8,20 @@ import (
 )
 
 type globalConfigRequest struct {
-	RouteClass             string   `json:"route_class"`
-	ProfileRevision        int64    `json:"profile_revision"`
-	GenerateResidential    *bool    `json:"generate_residential"`
-	GenerateDirect         *bool    `json:"generate_direct"`
-	Enabled                bool     `json:"enabled"`
-	Ports                  []int    `json:"ports"`
-	TargetUsersPerInbound  int      `json:"target_users_per_inbound"`
-	UserQuotaExpression    string   `json:"user_quota_expression"`
-	UserLifetimeExpression string   `json:"user_lifetime_expression"`
-	DeviceLimit            int      `json:"device_limit"`
-	UsersPerSecond         int      `json:"users_per_second"`
-	SNISelectionMode       string   `json:"sni_selection_mode"`
-	ManualSNIs             []string `json:"manual_snis"`
+	RouteClass              string   `json:"route_class"`
+	ProfileRevision         int64    `json:"profile_revision"`
+	GenerateResidential     *bool    `json:"generate_residential"`
+	GenerateDirect          *bool    `json:"generate_direct"`
+	Enabled                 bool     `json:"enabled"`
+	Ports                   []int    `json:"ports"`
+	TargetUsersPerInbound   int      `json:"target_users_per_inbound"`
+	UserQuotaExpression     string   `json:"user_quota_expression"`
+	UserLifetimeExpression  string   `json:"user_lifetime_expression"`
+	DeviceLimit             int      `json:"device_limit"`
+	UsersPerSecond          int      `json:"users_per_second"`
+	CreationIntervalSeconds *int     `json:"creation_interval_seconds"`
+	SNISelectionMode        string   `json:"sni_selection_mode"`
+	ManualSNIs              []string `json:"manual_snis"`
 }
 
 func (s *Server) putGlobalConfig(w http.ResponseWriter, r *http.Request) {
@@ -99,9 +100,16 @@ func (s *Server) putGlobalConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	current := int64(0)
+	interval := 0
+	if x.CreationIntervalSeconds != nil {
+		interval = *x.CreationIntervalSeconds
+	}
 	for _, p := range profiles {
 		if p.Class == x.RouteClass {
 			current = p.Revision
+			if x.CreationIntervalSeconds == nil {
+				interval = p.CreationInterval
+			}
 			continue
 		}
 		if x.Enabled && p.Enabled {
@@ -118,8 +126,8 @@ func (s *Server) putGlobalConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ports, _ := json.Marshal(x.Ports)
-	_, e = tx.ExecContext(r.Context(), `INSERT INTO reality_config_profiles(route_class,enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
- ON CONFLICT(route_class) DO UPDATE SET enabled=excluded.enabled,ports=excluded.ports,target_users_per_inbound=excluded.target_users_per_inbound,user_quota_bytes=excluded.user_quota_bytes,user_lifetime_seconds=excluded.user_lifetime_seconds,device_limit=excluded.device_limit,users_per_second=excluded.users_per_second,revision=reality_config_profiles.revision+1,updated_at=now()`, x.RouteClass, x.Enabled, ports, x.TargetUsersPerInbound, quota, life, x.DeviceLimit, x.UsersPerSecond)
+	_, e = tx.ExecContext(r.Context(), `INSERT INTO reality_config_profiles(route_class,enabled,ports,target_users_per_inbound,user_quota_bytes,user_lifetime_seconds,device_limit,users_per_second,creation_interval_seconds) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+ ON CONFLICT(route_class) DO UPDATE SET enabled=excluded.enabled,ports=excluded.ports,target_users_per_inbound=excluded.target_users_per_inbound,user_quota_bytes=excluded.user_quota_bytes,user_lifetime_seconds=excluded.user_lifetime_seconds,device_limit=excluded.device_limit,users_per_second=excluded.users_per_second,creation_interval_seconds=excluded.creation_interval_seconds,revision=reality_config_profiles.revision+1,updated_at=now()`, x.RouteClass, x.Enabled, ports, x.TargetUsersPerInbound, quota, life, x.DeviceLimit, x.UsersPerSecond, interval)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -185,6 +193,8 @@ func (s *Server) getGlobalConfigs(w http.ResponseWriter, r *http.Request) {
 
 func validateGlobalConfig(x globalConfigRequest) (string, string) {
 	switch {
+	case x.CreationIntervalSeconds != nil && (*x.CreationIntervalSeconds < 0 || *x.CreationIntervalSeconds > 86400):
+		return "creation_interval_seconds", "Creation interval must be from 0 to 86400 seconds. Zero fills available capacity immediately."
 	case x.UsersPerSecond < 1 || x.UsersPerSecond > 100:
 		return "users_per_second", "Configs created per second must be a whole number from 1 to 100. This does not limit user connections."
 	case x.TargetUsersPerInbound < 0 || x.TargetUsersPerInbound > 10000:

@@ -17,6 +17,11 @@ func TestIndependentProfilesMigrationAndAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	sqlMust(t, db, string(raw))
+	intervalDDL, err := os.ReadFile("../../migrations/000149_profile_creation_interval.up.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlMust(t, db, string(intervalDDL))
 	var n, total, revision int
 	if err = db.QueryRow(`SELECT count(*),sum(target_users_per_inbound) FROM reality_config_profiles`).Scan(&n, &total); err != nil || n != 2 || total != 2 {
 		t.Fatal(n, total, err)
@@ -26,7 +31,8 @@ func TestIndependentProfilesMigrationAndAPI(t *testing.T) {
 		t.Fatal("migration changed live policy")
 	}
 	s := Server{DB: db}
-	body := globalConfigRequest{RouteClass: "RESIDENTIAL", ProfileRevision: 1, Enabled: true, Ports: []int{443}, TargetUsersPerInbound: 1, UserQuotaExpression: "100", UserLifetimeExpression: "30", DeviceLimit: 2, UsersPerSecond: 1, SNISelectionMode: "scored"}
+	interval := 360
+	body := globalConfigRequest{CreationIntervalSeconds: &interval, RouteClass: "RESIDENTIAL", ProfileRevision: 1, Enabled: true, Ports: []int{443}, TargetUsersPerInbound: 1, UserQuotaExpression: "100", UserLifetimeExpression: "30", DeviceLimit: 2, UsersPerSecond: 1, SNISelectionMode: "scored"}
 	save := func(x globalConfigRequest) int {
 		b, _ := json.Marshal(x)
 		w := httptest.NewRecorder()
@@ -45,6 +51,7 @@ func TestIndependentProfilesMigrationAndAPI(t *testing.T) {
 	if code := save(body); code != 409 {
 		t.Fatal("stale form accepted", code)
 	}
+	body.CreationIntervalSeconds = nil // Older API clients preserve the saved interval.
 	body.ProfileRevision = 2
 	body.SNISelectionMode = "manual"
 	body.ManualSNIs = []string{"example.com"}
@@ -67,6 +74,10 @@ func TestIndependentProfilesMigrationAndAPI(t *testing.T) {
 	}
 	if counts[200] != 1 || counts[409] != 1 {
 		t.Fatal("concurrent edits lost update", counts)
+	}
+	var savedInterval int
+	if err = db.QueryRow(`SELECT creation_interval_seconds FROM reality_config_profiles WHERE route_class='RESIDENTIAL'`).Scan(&savedInterval); err != nil || savedInterval != 360 {
+		t.Fatal(savedInterval, err)
 	}
 	// Disabling one profile while the shared master is paused cannot rearm it.
 	sqlMust(t, db, `UPDATE global_config_policies SET enabled=false WHERE policy_key='reality'`)
