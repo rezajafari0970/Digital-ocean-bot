@@ -235,6 +235,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if p.SniffingBlocked {
 		destination = blockedTag
 	}
+	if p.Harden && p.Residential && p.AdsOnly {
+		// Accept the client's UDP/TCP DNS framing, but resolve through protected
+		// TCP upstreams. A/AAAA use the bounded built-in pool; other query types
+		// explicitly chain through the same residential outbound.
+		kept = append(kept, map[string]any{
+			"tag": clientDNSTag, "protocol": "dns",
+			"settings":      map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
+			"proxySettings": map[string]any{"tag": destination},
+		})
+	}
 	next["outbounds"] = kept
 	routing, ok := next["routing"].(map[string]any)
 	if !ok {
@@ -311,10 +321,11 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			// A domain outside the geosite lists can still contain ads; sniffing is
 			// not a guarantee for ECH, misleading hostnames, or incomplete lists.
 			if p.Harden && p.Residential {
-				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-udp", "inboundTag": tags, "port": "53", "network": "udp", "outboundTag": blockedTag})
+				dnsDestination := blockedTag
+				if !p.SniffingBlocked && len(p.Proxies) > 0 {
+					dnsDestination = clientDNSTag
 				}
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": destination})
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": dnsDestination})
 			}
 			if p.Residential {
 				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
@@ -364,6 +375,15 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if managedTag(tag) {
 			replacements[tag] = tag + "-" + fingerprint
 			m["tag"] = replacements[tag]
+		}
+	}
+	for _, value := range kept {
+		m := value.(map[string]any)
+		if proxy, ok := m["proxySettings"].(map[string]any); ok {
+			tag, _ := proxy["tag"].(string)
+			if replacement, ok := replacements[tag]; ok {
+				proxy["tag"] = replacement
+			}
 		}
 	}
 	for _, value := range routing["rules"].([]any) {

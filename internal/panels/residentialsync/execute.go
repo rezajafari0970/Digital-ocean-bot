@@ -127,6 +127,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) && (!p.Harden || probe.domain != "") && (!p.SniffingBlocked || c.Class == "DIRECT" || !p.Residential && p.Direct) {
 					base = directTag
 				}
+				if probe.port == "53" && p.Harden && p.AdsOnly && p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 && c.Effective != "DIRECT" {
+					base = clientDNSTag
+				}
 				expected := tagged(desired, base)
 				if expected == "" {
 					return errors.New("routing proof target missing")
@@ -158,10 +161,10 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		base := blockedTag
 		if !p.Residential && p.Direct {
 			base = directTag
-		} else if p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 && p.Proxies[0].Type == "socks5" {
+		} else if p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 {
 			base = p.Proxies[0].Tag
 		}
-		form := url.Values{"port": {"53"}, "network": {"udp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
+		form := url.Values{"port": {"53"}, "network": {"tcp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
 		response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
 		if e = envelope(response, e); e != nil {
 			return e
