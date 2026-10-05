@@ -1,0 +1,31 @@
+{
+  "goal": "Implement reversible residential performance configuration experiments with durable per-panel baselines, admin preview/start/keep/promote/rollback controls, automatic deadline rollback, native Xray tuning and observable verification. Preserve current users, credentials, pool membership and exact Ads scope.",
+  "context": "Use existing canonical source and per-panel config lock. Start only one fresh verified canary; return current settings on timeout or explicit rollback. Persist experiment intent and baseline before mutations, use operation UUIDs for response loss, immutable target config, optimistic version checks and crash-safe reconciliation. Restore only owned tuning fields; never restore whole stale inbound/client snapshots. Keep current source as exact default behavior when no experiment. Native controls: fast share and fast group size, 10s-min observatory interval, bounded timeout/maxRTT, leastLoad costs, direct cached IPv4 DNS with TCP or direct routed DoH, managed outbound IPv4 resolution strategy and bounded TCP options. Global routing/policy fields use presence-aware snapshots and conflict-aware rollback; no client deletion, traffic scope expansion or global gates changes. Existing inbound Reality/sniffing/keepalive remain intact. Distinguish native capabilities from advanced capacity/passive-failure/UDP validation which require data-plane development; do not create inert UI controls or claim unsupported behavior. Test real installed Xray including applied profile and rollback, PostgreSQL lost response/concurrent rollback/supersession, browser controls and full/race suites. Deploy 1->verified reviewable test, keep rollback button accessible and no fleet promotion unless canary verified. Record original unresolved fleet verification as separate limitation.",
+  "allowed_paths": [
+    "internal/panels/residentialsync",
+    "internal/residentialperf",
+    "internal/adminapi",
+    "migrations",
+    "web",
+    "cmd/worker",
+    "cmd/residential-routing-acceptance",
+    "docs/development-jobs/residential-performance-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-residential-performance-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(residential): reversible performance profiles with durable rollback"
+}

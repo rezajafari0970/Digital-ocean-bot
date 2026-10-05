@@ -3,6 +3,7 @@ package residentialsync
 import (
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"strings"
 )
 
@@ -90,15 +91,36 @@ func configurePool(next map[string]any, p routePolicy) error {
 			expected := len(candidates)
 			if kind == "fast" {
 				expected = (expected + 2) / 3
+				if p.Performance != nil && p.Performance.FastCount > 0 {
+					expected = min(p.Performance.FastCount, len(candidates))
+				}
 			}
 			tag := poolPrefix + network + "-" + kind
-			balancers = append(balancers, map[string]any{"tag": tag, "selector": candidates, "fallbackTag": blockedTag, "strategy": map[string]any{"type": "leastLoad", "settings": map[string]any{"expected": expected, "maxRTT": "3s"}}})
+			settings := map[string]any{"expected": expected, "maxRTT": "3s"}
+			if p.Performance != nil {
+				settings["maxRTT"] = residentialperf.DurationMS(p.Performance.MaxRTT)
+				var costs []any
+				for _, proxy := range p.Proxies {
+					if v, ok := p.Performance.Costs[proxy.ID]; ok {
+						costs = append(costs, map[string]any{"match": proxy.Tag, "value": v, "regexp": false})
+					}
+				}
+				if len(costs) > 0 {
+					settings["costs"] = costs
+				}
+			}
+			balancers = append(balancers, map[string]any{"tag": tag, "selector": candidates, "fallbackTag": blockedTag, "strategy": map[string]any{"type": "leastLoad", "settings": settings}})
 			internal = append(internal, map[string]any{"type": "field", "ruleTag": tag, "inboundTag": []string{poolPrefix + "in-" + network + "-" + kind}, "network": network, "balancerTag": tag})
 		}
 		lanes := []string{}
-		for i := 0; i < 5; i++ {
+		laneCount, fastLanes := 5, 4
+		if p.Performance != nil {
+			laneCount = 10
+			fastLanes = p.Performance.FastShare / 10
+		}
+		for i := 0; i < laneCount; i++ {
 			kind := "fast"
-			if i == 4 {
+			if i >= fastLanes {
 				kind = "all"
 			}
 			tag := fmt.Sprintf("%slane-%s-%d", poolPrefix, network, i)
@@ -167,6 +189,11 @@ func configurePool(next map[string]any, p routePolicy) error {
 	if len(tcp) > 0 {
 		next["burstObservatory"] = map[string]any{"subjectSelector": tcp, "pingConfig": map[string]any{"destination": "https://connectivitycheck.gstatic.com/generate_204", "interval": "10s", "sampling": 1, "timeout": "3s", "httpMethod": "HEAD"}}
 	}
+	if p.Performance != nil && len(tcp) > 0 {
+		ping := next["burstObservatory"].(map[string]any)["pingConfig"].(map[string]any)
+		ping["interval"] = fmt.Sprintf("%ds", p.Performance.ProbeInterval)
+		ping["timeout"] = residentialperf.DurationMS(p.Performance.ProbeTimeout)
+	}
 	return nil
 }
 func fingerprintPool(next map[string]any, replacements map[string]string) {
@@ -186,6 +213,16 @@ func fingerprintPool(next map[string]any, replacements map[string]string) {
 			continue
 		}
 		m["fallbackTag"] = replace(m["fallbackTag"])
+		if strategy, ok := m["strategy"].(map[string]any); ok {
+			if settings, ok := strategy["settings"].(map[string]any); ok {
+				if costs, ok := settings["costs"].([]any); ok {
+					for _, v := range costs {
+						cost := v.(map[string]any)
+						cost["match"] = replace(cost["match"])
+					}
+				}
+			}
+		}
 		if ss, ok := m["selector"].([]string); ok {
 			for i, s := range ss {
 				ss[i] = replace(s).(string)
@@ -209,8 +246,10 @@ func poolHasUDP(p routePolicy) bool {
 	return false
 }
 func poolLaneMatches(desired map[string]any, network, tag string) bool {
-	for i := 0; i < 5; i++ {
-		if tag == tagged(desired, fmt.Sprintf("%slane-%s-%d", poolPrefix, network, i)) {
+	for _, v := range desired["outbounds"].([]any) {
+		o := v.(map[string]any)
+		t, _ := o["tag"].(string)
+		if t == tag && strings.HasPrefix(t, poolPrefix+"lane-"+network+"-") && o["protocol"] == "loopback" {
 			return true
 		}
 	}

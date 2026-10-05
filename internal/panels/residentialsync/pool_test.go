@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"golang.org/x/net/proxy"
 )
 
@@ -87,16 +88,17 @@ func TestPoolPlanScopeFingerprintAndUDP(t *testing.T) {
 }
 
 type poolFixture struct {
-	listener net.Listener
-	udp      *net.UDPConn
-	down     atomic.Bool
-	checks   atomic.Int64
-	failed   atomic.Int64
-	tcpHits  atomic.Int64
-	udpHits  atomic.Int64
-	delay    time.Duration
-	label    string
-	gate     <-chan struct{}
+	listener   net.Listener
+	udp        *net.UDPConn
+	down       atomic.Bool
+	checks     atomic.Int64
+	failed     atomic.Int64
+	tcpHits    atomic.Int64
+	targetType atomic.Int64
+	udpHits    atomic.Int64
+	delay      time.Duration
+	label      string
+	gate       <-chan struct{}
 }
 
 func newPoolFixture(t *testing.T, label string, delay time.Duration, gate <-chan struct{}) *poolFixture {
@@ -219,6 +221,7 @@ func (f *poolFixture) serve(c net.Conn) {
 	if f.down.Load() {
 		return
 	}
+	f.targetType.Store(int64(head[3]))
 	f.tcpHits.Add(1)
 	fmt.Fprintf(c, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", len(f.label), f.label)
 }
@@ -427,5 +430,80 @@ func TestPoolPreservesSanaeiAPIRuleBeforeFingerprint(t *testing.T) {
 	next, e := buildSettings(observed, nil, []string{"in"}, p)
 	if e != nil || settingsHash(next) != settingsHash(first) {
 		t.Fatal("readback/reconcile not stable", e)
+	}
+}
+
+func TestInstalledCorePerformanceApplyAndRollback(t *testing.T) {
+	binaryPath := os.Getenv("XRAY_TEST_BINARY")
+	if binaryPath == "" {
+		t.Skip("installed core required")
+	}
+	fast := newPoolFixture(t, "fast", 10*time.Millisecond, nil)
+	p := routePolicy{PoolEnabled: true, Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{ID: "11111111-1111-4111-8111-111111111111", Type: "socks5", Host: "127.0.0.1", Port: fast.listener.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-test"}}}
+	base := map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"domainStrategy": "IPIfNonMatch", "rules": []any{}}}
+	before, e := buildSettings(base, nil, []string{"in"}, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	baseline := residentialperf.Capture(before)
+	p.PerformanceBaseline = &baseline
+	config := residentialperf.Balanced()
+	config.FastCount = 1
+	config.FastShare = 70
+	config.DNSMode = "doh"
+	config.RoutingStrategy = "AsIs"
+	config.Costs = map[string]float64{p.Proxies[0].ID: 1.25}
+	p.Performance = &config
+	tuned, e := buildSettings(before, nil, []string{"in"}, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	again, e := buildSettings(tuned, nil, []string{"in"}, p)
+	if e != nil || settingsHash(tuned) != settingsHash(again) {
+		t.Fatal("performance not idempotent", e)
+	}
+	p.Performance = nil
+	restored, e := buildSettings(tuned, nil, []string{"in"}, p)
+	if e != nil || settingsHash(before) != settingsHash(restored) {
+		t.Fatal("rollback differs", e)
+	}
+	for name, setting := range map[string]map[string]any{"tuned": tuned, "restored": restored} {
+		t.Run(name, func(t *testing.T) {
+			setting["burstObservatory"].(map[string]any)["pingConfig"].(map[string]any)["destination"] = "http://127.0.0.1:1/probe"
+			setting["dns"].(map[string]any)["hosts"] = map[string]any{"adservice.google.com": "127.0.0.1"}
+			l, e := net.Listen("tcp4", "127.0.0.1:0")
+			if e != nil {
+				t.Fatal(e)
+			}
+			port := l.Addr().(*net.TCPAddr).Port
+			l.Close()
+			address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+			setting["log"] = map[string]any{"loglevel": "none"}
+			setting["inbounds"] = []any{map[string]any{"tag": "in", "listen": "127.0.0.1", "port": port, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}}}
+			file := filepath.Join(t.TempDir(), "core.json")
+			raw, _ := json.Marshal(setting)
+			os.WriteFile(file, raw, 0600)
+			if out, e := exec.Command(binaryPath, "run", "-test", "-config", file).CombinedOutput(); e != nil {
+				t.Fatalf("core rejected: %v %s", e, out)
+			}
+			ctx, cancel := context.WithCancel(context.Background())
+			cmd := exec.CommandContext(ctx, binaryPath, "run", "-config", file)
+			if e = cmd.Start(); e != nil {
+				cancel()
+				t.Fatal(e)
+			}
+			defer func() { cancel(); cmd.Wait() }()
+			poolWait(t, "performance data plane", func() bool { v, e := poolRequest(address); return e == nil && v == "fast" })
+			if fast.targetType.Load() != 3 {
+				t.Fatal("destination name semantics changed", fast.targetType.Load())
+			}
+			if name == "restored" && fast.targetType.Load() != 3 {
+				t.Fatal("rollback kept destination resolution", fast.targetType.Load())
+			}
+			value, e := poolUDPRequest(address)
+			if e != nil || value != "fast" {
+				t.Fatal("UDP not preserved", e)
+			}
+		})
 	}
 }

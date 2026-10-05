@@ -1,0 +1,5 @@
+ALTER TABLE panel_routing_state DROP COLUMN performance_generation;
+DROP TABLE residential_performance_operations;
+DROP TABLE residential_performance_targets;
+DROP TABLE residential_performance_panels;
+DROP TABLE residential_performance_experiments;

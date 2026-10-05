@@ -9,6 +9,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"net/url"
 	"os"
 	"os/exec"
@@ -102,6 +103,10 @@ func run() error {
 	passed, failed := 0, 0
 	for _, id := range ids {
 		verify := func(ctx context.Context) (int, error) {
+			assignment, e := (residentialperf.Store{DB: a.DB}).Load(ctx, id)
+			if e != nil {
+				return 0, e
+			}
 			rt, e := m.Acquire(ctx, id)
 			if e != nil {
 				return 0, fmt.Errorf("runtime unavailable")
@@ -134,7 +139,11 @@ func run() error {
 			if !ok || len(servers) != 2 {
 				return 0, fmt.Errorf("DNS pool count")
 			}
-			for i, wanted := range []string{"tcp://1.1.1.1:53", "tcp://8.8.8.8:53"} {
+			wantedDNS := []string{"tcp://1.1.1.1:53", "tcp://8.8.8.8:53"}
+			if assignment.Config != nil && assignment.Config.DNSMode == "doh" {
+				wantedDNS = []string{"https://1.1.1.1/dns-query", "https://8.8.8.8/dns-query"}
+			}
+			for i, wanted := range wantedDNS {
 				if servers[i] != wanted {
 					return 0, fmt.Errorf("DNS differs from approved providers")
 				}
@@ -148,7 +157,7 @@ func run() error {
 				return 0, fmt.Errorf("rules missing")
 			}
 			protected, direct, blocked, clientDNS := "", "", "", ""
-			poolAllowed, e := poolTargets(setting)
+			poolAllowed, e := poolTargets(setting, assignment.Config)
 			if e != nil {
 				return 0, e
 			}

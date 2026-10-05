@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"os"
 	"strings"
 	"time"
@@ -117,12 +118,29 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 			p.Proxies = append(p.Proxies, v.x)
 		}
 	}
+	assignment, e := (residentialperf.Store{DB: s.DB}).Load(ctx, panel)
+	if e != nil {
+		return p, 0, e
+	}
+	p.Performance = assignment.Config
+	p.PerformanceGeneration = assignment.Generation
+	p.PerformanceBaseline = assignment.Baseline
 	return p, revision, nil
 }
-func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntime) error {
+func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntime) (retErr error) {
 	p, revision, err := s.policy(ctx, panel)
 	if err != nil {
 		return err
+	}
+	perf := residentialperf.Store{DB: s.DB}
+	if p.PerformanceGeneration > 0 {
+		defer func() {
+			if retErr != nil {
+				c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+				defer cancel()
+				perf.Failed(c, panel, p.PerformanceGeneration, retErr)
+			}
+		}()
 	}
 	previous := map[string]clientRoute{}
 	rows, err := s.DB.QueryContext(ctx, "SELECT client_id,email,route_class,effective_class FROM panel_client_routes WHERE panel_id=$1", panel)
@@ -187,6 +205,13 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
+	if p.PerformanceGeneration > 0 && (p.Performance != nil || p.PerformanceBaseline != nil) {
+		a, e := perf.Prepare(ctx, panel, p.PerformanceGeneration, residentialperf.Capture(current))
+		if e != nil {
+			return e
+		}
+		p.PerformanceBaseline = a.Baseline
+	}
 	desired, err := buildSettings(current, clients, tags, p)
 	if err != nil {
 		return err
@@ -204,6 +229,11 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
+	}
+	if p.PerformanceGeneration > 0 {
+		if e := perf.Plan(ctx, panel, p.PerformanceGeneration, residentialperf.Capture(desired)); e != nil {
+			return e
+		}
 	}
 	// The executor always reads the template and running routes before a retry.
 	if err = applyAndVerify(ctx, rt.Session.Exec, current, desired, testURL, clients, tags, p, func() error {
@@ -236,8 +266,21 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
 	}
-	res, err := s.DB.ExecContext(ctx, `UPDATE panel_routing_state SET state='APPLIED',verified_at=now(),next_check_at=now()+interval '20 seconds',last_error='',healthy_count=$4
- WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount)
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err = residentialperf.Lock(ctx, tx); err != nil {
+		return err
+	}
+	if p.PerformanceGeneration > 0 {
+		if err = perf.AppliedTx(ctx, tx, panel, p.PerformanceGeneration); err != nil {
+			return err
+		}
+	}
+	res, err := tx.ExecContext(ctx, `UPDATE panel_routing_state SET performance_generation=$5,state='APPLIED',verified_at=now(),next_check_at=now()+interval '20 seconds',last_error='',healthy_count=$4
+ WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$5 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount, p.PerformanceGeneration)
 	if err != nil {
 		return err
 	}
@@ -245,7 +288,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if n != 1 {
 		return fmt.Errorf("routing revision changed during apply")
 	}
-	return nil
+	return tx.Commit()
 }
 func routeMap(cs []clientRoute) map[string]clientRoute {
 	m := map[string]clientRoute{}
@@ -268,6 +311,8 @@ func (s Service) checkPolicy(ctx context.Context, panel string, want routePolicy
 	}
 	// Sniffing is fresh observed runtime state, not a saved policy field.
 	want.SniffingBlocked = false
+	want.PerformanceBaseline = nil
+	fresh.PerformanceBaseline = nil
 	want.HealthyCount = 0
 	fresh.HealthyCount = 0
 	a, _ := json.Marshal(want)

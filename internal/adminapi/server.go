@@ -77,6 +77,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("PUT /api/v1/proxies/{id}", s.require(s.updateProxy, true))
 	m.HandleFunc("DELETE /api/v1/proxies/{id}", s.require(s.deleteProxy, true))
 	m.HandleFunc("GET /api/v1/proxies/{id}", s.require(s.proxyDetails, false))
+	m.HandleFunc("GET /api/v1/residential-performance", s.require(s.residentialPerformanceStatus, false))
+	m.HandleFunc("POST /api/v1/residential-performance", s.require(s.residentialPerformanceAction, true))
 	m.HandleFunc("GET /api/v1/residential-routing", s.require(s.residentialRoutingStatus, false))
 	m.HandleFunc("GET /api/v1/residential-proxies", s.require(s.residentialProxies, false))
 	m.HandleFunc("POST /api/v1/residential-proxies", s.require(s.createResidentialProxy, true))

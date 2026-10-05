@@ -19,6 +19,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residential"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
@@ -493,6 +494,7 @@ func main() {
 		}
 	}
 
+	go (residentialperf.Store{DB: application.DB}).Run(ctx)
 	go func() { _ = (residential.Monitor{DB: application.DB, Secrets: application.Container.Secrets}).Run(ctx) }()
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {

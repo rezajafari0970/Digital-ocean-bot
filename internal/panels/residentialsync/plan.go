@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"sort"
 	"strings"
 )
@@ -27,15 +28,18 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
-	PoolEnabled         bool
-	Explicit            bool
-	Residential, Direct bool
-	AdsOnly             bool
-	Harden              bool
-	SniffingBlocked     bool
-	Configured          int
-	HealthyCount        int
-	Proxies             []rp
+	Performance           *residentialperf.Config
+	PerformanceGeneration int64
+	PerformanceBaseline   *residentialperf.Fields
+	PoolEnabled           bool
+	Explicit              bool
+	Residential, Direct   bool
+	AdsOnly               bool
+	Harden                bool
+	SniffingBlocked       bool
+	Configured            int
+	HealthyCount          int
+	Proxies               []rp
 }
 type rp struct {
 	ID, Type, Host, User, Tag, Password string
@@ -199,6 +203,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	outs, ok := next["outbounds"].([]any)
 	if !ok {
 		return nil, errors.New("outbound inventory unavailable")
+	}
+	if p.PerformanceBaseline != nil {
+		residentialperf.Restore(next, *p.PerformanceBaseline)
 	}
 	kept := []any{}
 	blackholes := map[string]bool{}
@@ -372,6 +379,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			return nil, err
 		}
 		kept = next["outbounds"].([]any)
+	}
+	if err := residentialperf.Apply(next, p.Performance); err != nil {
+		return nil, err
 	}
 	// Fingerprint the entire desired plan, including credentials and client membership.
 	// Runtime TestRoute returns this content-addressed tag only after the plan loads.

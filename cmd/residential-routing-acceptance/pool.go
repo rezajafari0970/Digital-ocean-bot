@@ -2,12 +2,38 @@ package main
 
 import (
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"strings"
+	"time"
 )
 
 // Validate the saved two-stage pool without emitting endpoint credentials.
-func poolTargets(setting map[string]any) (map[string][]string, error) {
+func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (map[string][]string, error) {
 	targets := map[string][]string{}
+	var c *residentialperf.Config
+	if len(profile) > 0 {
+		c = profile[0]
+	}
+	interval, timeout, maxRTT := 10*time.Second, 3*time.Second, 3*time.Second
+	laneCount, fastLanes := 5, 4
+	if c != nil {
+		if e := c.Validate(); e != nil {
+			return nil, e
+		}
+		interval = time.Duration(c.ProbeInterval) * time.Second
+		timeout = time.Duration(c.ProbeTimeout) * time.Millisecond
+		maxRTT = time.Duration(c.MaxRTT) * time.Millisecond
+		laneCount = 10
+		fastLanes = c.FastShare / 10
+	}
+	duration := func(v any, want time.Duration) bool {
+		x, ok := v.(string)
+		if !ok {
+			return false
+		}
+		d, e := time.ParseDuration(x)
+		return e == nil && d == want
+	}
 	outs := map[string]map[string]any{}
 	blocked := ""
 	raw, ok := setting["outbounds"].([]any)
@@ -43,7 +69,7 @@ func poolTargets(setting map[string]any) (map[string][]string, error) {
 		return nil, fmt.Errorf("pool observatory missing")
 	}
 	ping, ok := obs["pingConfig"].(map[string]any)
-	if !ok || ping["sampling"] != float64(1) || ping["interval"] != "10s" || ping["timeout"] != "3s" || ping["destination"] != "https://connectivitycheck.gstatic.com/generate_204" {
+	if !ok || ping["sampling"] != float64(1) || !duration(ping["interval"], interval) || !duration(ping["timeout"], timeout) || ping["destination"] != "https://connectivitycheck.gstatic.com/generate_204" {
 		return nil, fmt.Errorf("observation policy differs")
 	}
 	observed := map[string]bool{}
@@ -58,7 +84,7 @@ func poolTargets(setting map[string]any) (map[string][]string, error) {
 		}
 		strategy, _ := outer["strategy"].(map[string]any)
 		lanes, _ := outer["selector"].([]any)
-		if len(lanes) != 5 || strategy["type"] != "random" || outer["fallbackTag"] != blocked {
+		if len(lanes) != laneCount || strategy["type"] != "random" || outer["fallbackTag"] != blocked {
 			return nil, fmt.Errorf("weighted lane configuration differs")
 		}
 		fast, all := 0, 0
@@ -79,8 +105,8 @@ func poolTargets(setting map[string]any) (map[string][]string, error) {
 			}
 			targets["@pool:"+network] = append(targets["@pool:"+network], tag)
 		}
-		if fast != 4 || all != 1 {
-			return nil, fmt.Errorf("80/20 weights differ")
+		if fast != fastLanes || all != laneCount-fastLanes {
+			return nil, fmt.Errorf("profile weights differ")
 		}
 		for _, kind := range []string{"fast", "all"} {
 			b := pool["dob-route-pool-"+network+"-"+kind]
@@ -90,8 +116,11 @@ func poolTargets(setting map[string]any) (map[string][]string, error) {
 			expected := len(selectors)
 			if kind == "fast" {
 				expected = (expected + 2) / 3
+				if c != nil && c.FastCount > 0 {
+					expected = min(c.FastCount, len(selectors))
+				}
 			}
-			if len(selectors) == 0 || strategy["type"] != "leastLoad" || settings["expected"] != float64(expected) || settings["maxRTT"] != "3s" || b["fallbackTag"] != blocked {
+			if len(selectors) == 0 || strategy["type"] != "leastLoad" || settings["expected"] != float64(expected) || !duration(settings["maxRTT"], maxRTT) || b["fallbackTag"] != blocked {
 				return nil, fmt.Errorf("healthy selection differs")
 			}
 			key := "@inner:" + network + ":" + kind
