@@ -1,0 +1,41 @@
+{
+  "goal": "Make UpCloud buildable server counts and create permission state consistent across account list/detail and prevent successful read refresh from forgetting definitive create rejection.",
+  "context": "Current production Upcloud 11 account b367ce76-f411-4c3e-8fc3-ca84061d8114 has fresh per-plan resource budgets 2 each for 1xCPU-2GB,1xCPU-1GB,DEV-1xCPU-1GB-10GB; desired5 current0. Last CREATE failed HTTP403 TRIAL_FIREWALL; refresh clears permission rejection and list says Yes while dashboard derives inconsistent runtimeMeta No/Ready. Official UpCloud firewall docs restrict trial inbound22/80/443 etc and outbound53/80/443 etc; do not bypass provider restrictions, turn firewall on to conceal incompatible app deployment, or make paid cloud probes. Add durable UpCloud definitive-create-denial block and safe code, backfill latest failed create evidence, enforce at shared capacity/pre-create scheduling, retain across observation/discovery/preflight and explicit admin recovery after resolving provider restriction. Shared list/dashboard status calculation with freshness, actual provider usage not registry counts, desired and pending reservations, 0 while blocked, unknown stays unknown. Expose per-plan additional resource budget distinctly from currently eligible build count; minima across shared resource quotas never sum. Compare DO/Vultr existing semantics, regressions for missing/zero/stale/disabled/targetreached/activebuilds/trial, recovery stale version/auth/admin/audit, migration idempotence; full/race/isolated PostgreSQL/browser. Bounded changes, preserve network/proxies/residential permanent profile/gates. No live cloud create/delete. Must test real saved-account readback list/detail/status and fresh quota. Source 9ceb62e runtime46e928d migration153. Use clean frozen build reversible deploy, commit/push evidence. Investigate storage quota units against current authoritative OpenAPI before changing calculations.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/app",
+    "internal/capacity",
+    "internal/providers/errors.go",
+    "internal/providers/upcloud",
+    "migrations/000154_upcloud_create_block.up.sql",
+    "migrations/000154_upcloud_create_block.down.sql",
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/upcloud.cjs",
+    "docs/development-jobs/upcloud-capacity-status-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-capacity-status-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): persist create restrictions and show consistent build capacity",
+  "contract_evidence": {
+    "source": "https://developers.upcloud.com/api/1.3/upcloud-openapi.json",
+    "storage_units": "accountResourceLimits storage_maxiops/storage_standard/storage_total explicitly GiB; existing calculation retained",
+    "trial_mode": "accountDetails optional trial_mode accountBoolean01 integer 0/1; explicit 1 now classifies trial_restricted; missing remains unknown, no invented paid-state proof",
+    "trial_ports_source": "https://upcloud.com/docs/products/networking/firewall/",
+    "live_error": "Definitive CREATE deployment failure HTTP403/TRIAL_FIREWALL; operation.error_message empty, backfill from deployments evidence only, skip later successful creates"
+  }
+}

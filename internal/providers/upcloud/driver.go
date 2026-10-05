@@ -53,11 +53,18 @@ func (d *Driver) account(ctx context.Context) (accountData, error) {
 	if x.Account.Username == "" {
 		return accountData{}, unavailable("account", "missing account identity")
 	}
+	if x.Account.TrialMode != nil && *x.Account.TrialMode > 1 {
+		return accountData{}, normalize("account", &responseError{Code: "INVALID_TRIAL_MODE", Status: http.StatusOK})
+	}
 	return x.Account, nil
 }
 func accountModel(a accountData) providers.Account {
 	sum := sha256.Sum256([]byte("upcloud-account:" + a.Username))
-	return providers.Account{ID: "upcloud-" + hex.EncodeToString(sum[:16]), Status: "active"}
+	status := "active"
+	if a.TrialMode != nil && *a.TrialMode == 1 {
+		status = "trial_restricted"
+	}
+	return providers.Account{ID: "upcloud-" + hex.EncodeToString(sum[:16]), Status: status}
 }
 func (d *Driver) Account(ctx context.Context) (providers.Account, error) {
 	a, e := d.account(ctx)

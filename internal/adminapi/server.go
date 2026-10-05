@@ -67,6 +67,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/accounts/{id}/purge", s.require(s.purgeAccount, true))
 	m.HandleFunc("GET /api/v1/accounts/{id}/options", s.require(s.accountOptions, false))
 	m.HandleFunc("POST /api/v1/accounts/{id}/identity", s.require(s.accountIdentity, true))
+	m.HandleFunc("POST /api/v1/accounts/{id}/create-block/release", s.require(s.releaseAccountCreateBlock, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/preflight", s.require(s.accountPreflight, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/console-session", s.require(s.createVultrBrowserTicket, true))
 	m.HandleFunc("GET /vultr-browser/{path...}", s.vultrBrowserProxy)

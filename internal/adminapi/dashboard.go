@@ -33,36 +33,20 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var runtimeMeta map[string]any
-	_ = json.Unmarshal([]byte(runtimeDetail), &runtimeMeta)
-	providerState := "ACTIVE"
-	providerReason := "Ready"
-	canCreate := runtimeStatus == "READY"
-	if v, ok := runtimeMeta["provider_state"].(string); ok && v != "" {
-		providerState = v
+	build, buildErr := s.accountBuildState(r.Context(), id)
+	if buildErr != nil {
+		writeJSON(w, 500, errorBody())
+		return
 	}
-	if v, ok := runtimeMeta["provider_error"].(string); ok && v != "" {
-		providerReason = v
-	}
-	if v, ok := runtimeMeta["can_create"].(bool); ok {
-		canCreate = v && runtimeStatus == "READY"
-	}
-	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": providerState, "provider_reason": providerReason, "can_create": canCreate}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
+	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": build.State, "provider_reason": build.Reason, "can_create": build.SchedulerCanBuild, "provider_can_create": build.ProviderCanCreate, "scheduler_can_build": build.SchedulerCanBuild, "scheduler_reason": build.SchedulerReason, "create_block": build.Block}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	d.Billing = s.accountBilling(r.Context(), id)
 	var total, managed, active int
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state<>'deleted'),count(*) FILTER(WHERE state<>'deleted' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1 AND type='server'`, id).Scan(&total, &managed, &active)
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
-	var limit int
-	var limitKnown bool
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,0),COALESCE((canonical->'Capacity'->>'LimitKnown')::boolean,false) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&limit, &limitKnown)
-	available := limit - active
-	if available < 0 {
-		available = 0
-	}
-	var providerDroplets int
+	limit, limitKnown, providerDroplets := build.Limit, build.LimitKnown, build.InUse
 	var lastRefresh sql.NullTime
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((canonical->'Capacity'->>'ComputeInUse')::int,0),created_at FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&providerDroplets, &lastRefresh)
+	_ = s.DB.QueryRowContext(r.Context(), "SELECT created_at FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1", id).Scan(&lastRefresh)
 	var lastCreated sql.NullTime
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT max(created_at) FROM droplets WHERE account_id=$1`, id).Scan(&lastCreated)
 	var managedDroplets int
@@ -83,12 +67,12 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	var desiredServers int
 	_ = s.DB.QueryRowContext(r.Context(), `SELECT desired_server_count FROM accounts WHERE id=$1`, id).Scan(&desiredServers)
-	desiredRemaining := desiredServers - managedDroplets
+	desiredRemaining := build.DesiredRemaining
 	if desiredRemaining < 0 {
 		desiredRemaining = 0
 	}
 	evidence := s.capacityEvidenceForAccount(id, provider)
-	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "lower_bound": evidence.LowerBound, "evidence_source": evidence.Source, "probe_in_flight": evidence.ProbeInFlight, "probe_after": evidence.ProbeAfter, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
+	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "buildable_now": build.Buildable, "pending_builds": build.Pending, "plan_available": build.PlanAvailable, "lower_bound": evidence.LowerBound, "evidence_source": evidence.Source, "probe_in_flight": evidence.ProbeInFlight, "probe_after": evidence.ProbeAfter, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
 	if lastRefresh.Valid {
 		d.Capacity["limit_known"] = limitKnown
 		d.Capacity["provider_servers"] = providerDroplets

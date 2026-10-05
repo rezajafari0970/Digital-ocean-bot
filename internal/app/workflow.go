@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
@@ -48,6 +49,9 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		return nil
 	}
 	executor.OnCreateError = func(cbCtx context.Context, createErr error) {
+		if blockErr := capacity.RecordCreateBlock(cbCtx, c.DB, accountID, createErr); blockErr != nil {
+			log.Printf("create restriction persistence account=%s: %v", accountID, blockErr)
+		}
 		class := providers.Class(createErr)
 		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorRateLimited || class == providers.ErrorTransport || class == providers.ErrorUnavailable || class == providers.ErrorAmbiguousOutcome {
 			state := ClassifyAccountProviderError(createErr, runtime.Config.Network.Mode == network.RouteProxyRequired)

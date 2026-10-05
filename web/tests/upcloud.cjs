@@ -20,7 +20,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.enable');await call('Runtime.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'if(location.origin==='+JSON.stringify(base)+'){localStorage.setItem("token",'+JSON.stringify(token)+')}'});
-  const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('page evaluation failed');return r.result.value};
+  const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('page evaluation failed: '+(r.exceptionDetails.exception?.description||r.exceptionDetails.text));return r.result.value};
 
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+12000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression)}
@@ -75,6 +75,24 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate("document.querySelector('#modalFields [name=region]').value='es-mad1';document.querySelector('#modalFields [name=region]').dispatchEvent(new Event('change'))");
   assert.ok((await evaluate("['size','size2','size3'].map(n=>document.querySelector('#modalFields [name='+n+']').options[0].textContent)")).every(x=>x.includes('EUR 0.01/h')));
   assert.equal(await evaluate("document.querySelector('#modalFields [name=size2]').value"),'DEV-1xCPU-1GB');
+
+  await evaluate("document.querySelector('#modal').close()");
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await evaluate("window.blockFixture={version:4,code:'TRIAL_FIREWALL',blocked_at:new Date().toISOString()};window.countFixture={id:'capacity-fixture',name:'UpCloud trial',provider:'upcloud',provider_state:'ACTIVE',enabled:true,provider_can_create:false,scheduler_can_build:false,provider_reason:'UpCloud trial firewall restriction (TRIAL_FIREWALL). Resolve with UpCloud.',scheduler_reason:'Provider restriction',create_block:blockFixture,capacity_state:'RESOURCE_BUDGET',capacity_limit_known:true,capacity_freshness:'fresh',provider_freshness:'fresh',droplet_limit:2,droplet_available:2,provider_droplets:0,desired_server_count:5,desired_remaining:5,buildable_now:0,pending_builds:0,plan_available:{'1xCPU-1GB':2,'DEV-1xCPU-1GB-10GB':2}};document.querySelector('#content').innerHTML=accountCard(countFixture)");
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('TRIAL_FIREWALL')"),true);
+  assert.equal(await evaluate("document.querySelector('[data-action=account-create-retry]').dataset.version"),'4');
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('Can build now\\n0')"),true);
+  await evaluate("document.querySelector('details.section').open=true");
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('2 additional')"),true);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+  snap=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});fs.writeFileSync(path.join(root,'upcloud-capacity-list-mobile.png'),Buffer.from(snap.data,'base64'));
+  await evaluate("window.fetch=async(url,opt)=>url==='/api/v1/accounts/capacity-fixture/dashboard'?new Response(JSON.stringify({account:countFixture,capacity:{capacity_state:'RESOURCE_BUDGET',server_limit:2,provider_servers:0,managed_servers:0,desired_servers:5,desired_remaining:5,available:2,buildable_now:0,pending_builds:0,plan_available:countFixture.plan_available,data_available:true,data_status:'fresh',last_refresh:new Date().toISOString()}}),{status:200}):window.oldFixtureFetch(url,opt);accountDash('capacity-fixture')");
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('Can build now\\n0')"),true);
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('Resource-derived total capacity')"),true);
+  assert.equal(await evaluate("document.querySelector('#content').innerText.includes('TRIAL_FIREWALL')"),true);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+  snap=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});fs.writeFileSync(path.join(root,'upcloud-capacity-detail-mobile.png'),Buffer.from(snap.data,'base64'));
+  assert.ok(await evaluate("accountCard({...countFixture,create_block:null,buildable_now:null,capacity_state:'UNKNOWN',capacity_limit_known:false}).includes('Unknown')"));
   console.log('UPCLOUD_PROVIDER_FORM_CATALOG_MOBILE_DESKTOP_STALE_PREVIEW_RESET PASS');
  }finally{
   if(ws)ws.close();chrome.kill('SIGTERM');fs.closeSync(log);

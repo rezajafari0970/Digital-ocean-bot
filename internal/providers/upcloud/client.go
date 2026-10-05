@@ -165,7 +165,7 @@ func normalize(op string, err error) error {
 	if e.status != 0 {
 		message = e.Error()
 	}
-	result := &providers.Error{Class: class, Operation: op, StatusCode: e.status, RetryAfter: e.retry, Message: message, Cause: err}
+	result := &providers.Error{Class: class, Operation: op, StatusCode: e.status, Code: e.code, RetryAfter: e.retry, Message: message, Cause: err}
 	if e.status != 0 {
 		return withDiagnostic(result, apiDiagnostic(e.status, e.code))
 	}
@@ -200,9 +200,10 @@ func labelValue(xs []label, key string) string {
 }
 
 type accountData struct {
-	Username string         `json:"username"`
-	Credits  json.Number    `json:"credits"`
-	Limits   resourceLimits `json:"resource_limits"`
+	Username  string         `json:"username"`
+	TrialMode *number        `json:"trial_mode"`
+	Credits   json.Number    `json:"credits"`
+	Limits    resourceLimits `json:"resource_limits"`
 }
 type planData struct {
 	Name   string `json:"name"`

@@ -66,54 +66,16 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		if capacityDelta.Valid {
 			cd = capacityDelta.Int64
 		}
-		providerState := providerStateDB
-		if providerState == "" {
-			providerState = "UNKNOWN"
+		build, buildErr := s.accountBuildState(r.Context(), id)
+		if buildErr != nil {
+			writeJSON(w, 500, errorBody())
+			return
 		}
-		canCreate := enabled && providerState == "ACTIVE" && providerErrorState == "" && providerFreshness == "fresh" && capacityFreshness == "fresh" && (!limitKnown || dropletLimit > providerDroplets) && runtimeStatus == "READY"
-		var providerMeta map[string]any
-		_ = json.Unmarshal([]byte(providerStateDetail), &providerMeta)
-		if !enabled {
-			providerState = "DISABLED"
-			canCreate = false
-		} else if runtimeStatus != "READY" {
-			canCreate = false
-		}
-		providerName := provider
-		if provider == "digitalocean" {
-			providerName = "DigitalOcean"
-		} else if provider == "vultr" {
-			providerName = "Vultr"
-		} else if provider == "upcloud" {
-			providerName = "UpCloud"
-		}
-		providerReason := "Ready to create servers"
-		if !enabled {
-			providerReason = "Account disabled in panel"
-		} else if providerState == "LOCKED" {
-			providerReason = providerName + " account is locked"
-		} else if providerState == "TOKEN_INVALID" {
-			providerReason = providerName + " credential is invalid"
-		} else if providerState == "PERMISSION_DENIED" {
-			providerReason = providerName + " permission denied"
-		} else if providerState == "BILLING_BLOCKED" {
-			providerReason = providerName + " billing blocked; update the provider billing profile"
-		} else if providerState == "RATE_LIMITED" {
-			providerReason = providerName + " rate limited"
-		} else if providerErrorState != "" {
-			providerReason = providerErrorState + ": " + providerErrorDetail
-		} else if providerFreshness != "fresh" {
-			providerReason = "Provider state is " + providerFreshness
-		} else if capacityFreshness != "fresh" {
-			providerReason = "Capacity snapshot is " + capacityFreshness
-		} else if dropletLimit > 0 && providerDroplets >= dropletLimit {
-			providerReason = "Droplet limit reached"
-		} else if runtimeStatus != "READY" {
-			providerReason = runtimeStatus
-		}
-		if v, ok := providerMeta["provider_error"].(string); ok && v != "" && providerState != "ACTIVE" {
-			providerReason = v
-		}
+		providerState, providerReason := build.State, build.Reason
+		providerCanCreate, schedulerCanBuild := build.ProviderCanCreate, build.SchedulerCanBuild
+		canCreate, schedulerReason := schedulerCanBuild, build.SchedulerReason
+		providerFreshness, capacityFreshness = build.ProviderFreshness, build.CapacityFreshness
+		dropletLimit, providerDroplets, limitKnown = build.Limit, build.InUse, build.LimitKnown
 		var proxyIDs []string
 		pr, _ := s.DB.QueryContext(r.Context(), `SELECT proxy_id::text FROM account_proxy_pool WHERE account_id=$1 AND enabled=true ORDER BY priority,proxy_id`, id)
 		if pr != nil {
@@ -127,18 +89,9 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		}
 		var managedActive int
 		_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'`, id).Scan(&managedActive)
-		desiredRemaining := max(0, desired-managedActive)
-		providerCanCreate := canCreate
-		schedulerCanBuild := providerCanCreate && desiredRemaining > 0
-		schedulerReason := "Ready to build"
-		if desiredRemaining <= 0 {
-			schedulerReason = "Desired target reached"
-		} else if !providerCanCreate {
-			schedulerReason = providerReason
-		}
-		canCreate = schedulerCanBuild
+		desiredRemaining := build.DesiredRemaining
 		evidence := s.capacityEvidenceForAccount(id, provider)
-		out = append(out, map[string]any{"id": id, "name": name, "email": email, "provider": provider, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "proxy_ids": proxyIDs, "billing": s.accountBilling(r.Context(), id), "deletion": s.accountDeletionProgress(r.Context(), id), "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "capacity_lower_bound": evidence.LowerBound, "capacity_source": evidence.Source, "capacity_probe_in_flight": evidence.ProbeInFlight, "capacity_probe_after": evidence.ProbeAfter, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_can_create": providerCanCreate, "scheduler_can_build": schedulerCanBuild, "provider_reason": providerReason, "scheduler_reason": schedulerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "capacity_limit_known": limitKnown, "provider_droplets": providerDroplets, "managed_servers": managedActive, "droplet_available": func() any {
+		out = append(out, map[string]any{"id": id, "name": name, "email": email, "provider": provider, "region": region, "network": mode, "proxy": proxy, "enabled": enabled, "added_at": created.UTC().Format("2006-01-02 15:04:05"), "regions": json.RawMessage(regions), "built_regions": json.RawMessage(builtRegionsRaw), "sizes": json.RawMessage(sizes), "images": json.RawMessage(images), "image": image, "lifetime_min_seconds": lifetimeMin, "lifetime_max_seconds": lifetimeMax, "interval_seconds": interval, "batch_size": batch, "build_spacing_minutes": spacingMinutes, "build_spacing_max_minutes": spacingMaxMinutes, "max_concurrent": concurrent, "lifetime_seconds": lifetime, "proxy_id": proxyID, "proxy_ids": proxyIDs, "billing": s.accountBilling(r.Context(), id), "deletion": s.accountDeletionProgress(r.Context(), id), "runtime_status": runtimeStatus, "runtime_status_detail": runtimeDetail, "desired_server_count": desired, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "buildable_now": build.Buildable, "pending_builds": build.Pending, "plan_available": build.PlanAvailable, "create_block": build.Block, "capacity_lower_bound": evidence.LowerBound, "capacity_source": evidence.Source, "capacity_probe_in_flight": evidence.ProbeInFlight, "capacity_probe_after": evidence.ProbeAfter, "fallback_any_region": fallbackAnyRegion, "provider_state": providerState, "can_create": canCreate, "provider_can_create": providerCanCreate, "scheduler_can_build": schedulerCanBuild, "provider_reason": providerReason, "scheduler_reason": schedulerReason, "provider_checked_at": providerChecked, "provider_observed_at": providerObserved, "provider_freshness": providerFreshness, "provider_error_state": providerErrorState, "capacity_checked_at": capacityChecked, "capacity_freshness": capacityFreshness, "droplet_limit": dropletLimit, "capacity_limit_known": limitKnown, "provider_droplets": providerDroplets, "managed_servers": managedActive, "droplet_available": func() any {
 			if !limitKnown {
 				return nil
 			}

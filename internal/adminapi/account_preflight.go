@@ -2,6 +2,7 @@ package adminapi
 
 import (
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"net/http"
 
@@ -17,7 +18,7 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var enabled bool
 	var regionsRaw, sizesRaw []byte
-	var image, mode, proxyStatus string
+	var image, mode, proxyStatus, accountStatus string
 	var interval, batch, maxConcurrent, lifetime, desired int
 	err := s.DB.QueryRowContext(r.Context(), `SELECT a.enabled,a.preferred_regions,a.preferred_sizes,COALESCE(a.preferred_image,''),a.auto_interval_seconds,a.auto_batch_size,a.auto_max_concurrent,a.server_lifetime_seconds,a.desired_server_count,COALESCE(n.mode,''),COALESCE(p.status,'') FROM accounts a LEFT JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id WHERE a.id=$1`, id).Scan(&enabled, &regionsRaw, &sizesRaw, &image, &interval, &batch, &maxConcurrent, &lifetime, &desired, &mode, &proxyStatus)
 	if err != nil {
@@ -48,6 +49,8 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 		} else {
 			account, identityErr = ar.Account(r.Context())
 		}
+		accountStatus = account.Status
+		checks["provider_account_active"] = identityErr == nil && account.Status == "active"
 		if identityErr == nil {
 			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.ID, account.Email)
 		}
@@ -60,6 +63,16 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	providerError := ""
 	if err != nil {
 		providerError = err.Error()
+	}
+	if accountStatus == "trial_restricted" {
+		providerError = capacity.CreateBlockReason("TRIAL_FIREWALL")
+	}
+	block, blockErr := capacity.ReadCreateBlock(r.Context(), s.DB, id)
+	checks["create_permission"] = blockErr == nil && block == nil
+	if block != nil {
+		providerError = capacity.CreateBlockReason(block.Code)
+	} else if blockErr != nil {
+		providerError = "Create permission could not be checked"
 	}
 	ready := true
 	for _, ok := range checks {

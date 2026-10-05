@@ -29,6 +29,7 @@ type Error struct {
 	Class      ErrorClass
 	Operation  string
 	StatusCode int
+	Code       string // Bounded provider code; never a raw response.
 	RetryAfter time.Duration
 	Message    string
 	Cause      error
