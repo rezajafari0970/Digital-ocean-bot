@@ -1,0 +1,67 @@
+{
+  "runtime_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+  "migration": 152,
+  "verified_at_utc": "2026-10-05T16:58:23.988167+00:00",
+  "orchestrator_status": "COMPLETE",
+  "tests": {
+    "race_postgresql": "PASS",
+    "full_go": "PASS",
+    "installed_xray_faults_and_rollback": "PASS",
+    "legacy_timed_browser": "PASS",
+    "permanent_mobile_desktop_browser": "PASS",
+    "production_ui_readonly": "PASS"
+  },
+  "features": [
+    "select_all_clear_selection",
+    "permanent_null_deadline",
+    "all_current_and_future_scope",
+    "durable_future_admission",
+    "rollback_closes_inheritance",
+    "pending_runtime_proof",
+    "legacy_timed_compatibility"
+  ],
+  "future_admission_verification": "Isolated PostgreSQL restart and concurrent rollback tests; no synthetic production cloud resources",
+  "canary": {
+    "panel_id": "a962430f-5760-4df2-9cb0-1c0cc2c3fd5d",
+    "applied": {
+      "id": "c2403121-d876-4cfb-aaeb-64777264e564",
+      "state": "KEPT",
+      "mode": "permanent",
+      "scope": "selected",
+      "deadline": null,
+      "target": "a962430f-5760-4df2-9cb0-1c0cc2c3fd5d",
+      "target_state": "APPLIED",
+      "generation": 1,
+      "applied_generation": 1,
+      "verified_at": "2026-10-05T16:53:43.550989+00:00",
+      "last_error": ""
+    },
+    "rollback": {
+      "id": "c2403121-d876-4cfb-aaeb-64777264e564",
+      "state": "ROLLED_BACK",
+      "mode": "permanent",
+      "scope": "selected",
+      "deadline": null,
+      "target_state": "RESTORED",
+      "generation": 2,
+      "applied_generation": 2,
+      "profile": null,
+      "verified_at": "2026-10-05T16:55:36.454908+00:00",
+      "last_error": ""
+    },
+    "tuned_route_proofs": 38,
+    "restored_route_proofs": 38
+  },
+  "current_publication_state": "NO_ACTIVE_PUBLICATION",
+  "global_production_activation": false,
+  "profiles_and_client_gate_and_endpoint_snapshot_unchanged": true,
+  "endpoint_snapshot_count": 12,
+  "current_controller_metadata": {
+    "revision": 598,
+    "eligible": 27,
+    "verified": 26
+  },
+  "independent_fleet_rerun": false,
+  "app_ad_load_benchmark": false,
+  "evidence_directory": "/root/backups/dob-residential-fleet-20261005"
+}
