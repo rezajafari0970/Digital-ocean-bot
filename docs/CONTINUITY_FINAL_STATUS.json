@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
-    "worker_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
-    "web_static_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
-    "status": "PERMANENT_FLEET_PUBLISH_DEPLOYED_CANARY_RESTORED_NO_GLOBAL_ACTIVATION",
-    "acceptance": "docs/RESIDENTIAL_FLEET_ACCEPTANCE_20261005.json",
-    "handoff": "docs/RESIDENTIAL_FLEET_HANDOFF_20261005.md",
-    "note": "Migration 152 adds permanent/no-timer and global future-server inheritance. UI defaults Permanent + All current/future with Select all/Clear selection. Publish and automatic enrollment serialize with rollback, which stops future admission before restoration. Tests and production mobile UI passed. Permanent selected live canary passed 38+38 route proofs applied/restored; no active publication remains. User has not globally activated settings. Preserve old scope/classes/proxies/gates and prior timeout evidence. Read new handoff before downgrade."
+    "api_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+    "worker_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+    "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+    "status": "DEPLOYED_CONTRACT_DB_UI_VERIFIED_LIVE_UPCLOUD_UNTESTED",
+    "acceptance": "docs/UPCLOUD_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_HANDOFF_20261005.md",
+    "note": "Read UpCloud handoff. Existing active permanent fleet profile preserved. No UpCloud cloud lifecycle live proof; token absent. Clean current provider resources before downgrade."
   }
 }

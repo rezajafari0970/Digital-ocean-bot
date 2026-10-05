@@ -1,0 +1,178 @@
+{
+  "verified_at_utc": "2026-10-05T18:26:31.087859+00:00",
+  "runtime_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+  "implementation_commit": "0f86bbc",
+  "status": "DEPLOYED_CONTRACT_DB_UI_VERIFIED_LIVE_UPCLOUD_UNTESTED",
+  "migration": "000153_upcloud_cleanup",
+  "binaries": {
+    "api": {
+      "sha256": "7e090e42e9f22d6a63976bb9db1c4af6b3fa7c2bbe7da6cee6bcd37e9d06bc81",
+      "revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+      "vcs_modified": false
+    },
+    "worker": {
+      "sha256": "126073b54f1b26d5d91333cd237af4309c281fafa866d16dc7d368150e087df2",
+      "revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+      "vcs_modified": false
+    }
+  },
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "providers": [
+    "digitalocean",
+    "upcloud",
+    "vultr"
+  ],
+  "api_checks": {
+    "/api/v1/accounts": {
+      "status": 200,
+      "type": "list"
+    },
+    "account_resources": {
+      "status": 200,
+      "type": "list"
+    },
+    "/api/v1/proxies": {
+      "status": 200,
+      "type": "list"
+    },
+    "/api/v1/residential-proxies": {
+      "status": 200,
+      "type": "list"
+    },
+    "/api/v1/residential-performance": {
+      "status": 200,
+      "type": "dict"
+    },
+    "/api/v1/configs": {
+      "status": 200,
+      "type": "list"
+    }
+  },
+  "tests": {
+    "full_go": "PASS",
+    "race_postgresql": "PASS",
+    "upcloud_fault_contract": "PASS",
+    "four_browser_scenarios": "PASS",
+    "production_mobile_form": "PASS",
+    "migration_checksum": "PASS",
+    "configuration_preserved": true
+  },
+  "covered_failures": [
+    "create committed response lost with exact owner/identity adoption and no repeated POST",
+    "incomplete/malformed/duplicate/paginated inventory rejected",
+    "quota exhaustion and missing usage fail closed",
+    "disabled/deleting account stop restricted to persisted owned cleanup",
+    "stop and delete response loss recovered across reconstructed driver",
+    "owned detached storage cleanup; foreign or reattached storage preserved",
+    "PostgreSQL journal concurrency and immutable ownership",
+    "401/402/403/429/5xx redacted provider errors",
+    "redirect refusal retaining account transport",
+    "stale provider preview invalidated after provider/credential/proxy change"
+  ],
+  "production_cloud_account_count_at_acceptance": 0,
+  "live_upcloud_create_verified": false,
+  "live_upcloud_delete_verified": false,
+  "prior_production_source": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+  "configuration": {
+    "profiles": [
+      {
+        "ports": [
+          443
+        ],
+        "enabled": true,
+        "revision": 5,
+        "updated_at": "2026-10-05T04:37:19.965507+00:00",
+        "route_class": "DIRECT",
+        "device_limit": 0,
+        "user_quota_bytes": 0,
+        "users_per_second": 100,
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 1,
+        "creation_interval_seconds": 60
+      },
+      {
+        "ports": [
+          443
+        ],
+        "enabled": true,
+        "revision": 8,
+        "updated_at": "2026-10-05T06:06:43.473648+00:00",
+        "route_class": "RESIDENTIAL",
+        "device_limit": 0,
+        "user_quota_bytes": 0,
+        "users_per_second": 100,
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 1,
+        "creation_interval_seconds": 60
+      }
+    ],
+    "gate": [
+      {
+        "enabled": true,
+        "panel_id": null,
+        "singleton": true,
+        "inbound_id": null,
+        "updated_at": "2026-10-05T06:32:21.173117+00:00",
+        "concurrency": 1,
+        "kill_switch": false
+      }
+    ],
+    "routing_control": [
+      {
+        "fleet": true,
+        "enabled": true,
+        "revision": 598,
+        "panel_ids": [],
+        "singleton": true
+      }
+    ],
+    "publication": [
+      {
+        "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+        "spec": {
+          "dns_mode": "tcp",
+          "buffer_kb": 64,
+          "fast_count": 13,
+          "fast_share": 80,
+          "max_rtt_ms": 3000,
+          "tcp_options": true,
+          "gateway_ipv4": true,
+          "tcp_fast_open": true,
+          "probe_timeout_ms": 3000,
+          "routing_strategy": "preserve",
+          "tcp_user_timeout_ms": 20000,
+          "keepalive_idle_seconds": 30,
+          "probe_interval_seconds": 10,
+          "keepalive_interval_seconds": 20
+        },
+        "state": "KEPT",
+        "deadline": null,
+        "duration_mode": "permanent",
+        "publish_scope": "fleet"
+      }
+    ],
+    "endpoint_configuration_hash": "af1fbe1cc93dab65edec8d29ad0c0246"
+  },
+  "evidence_directory": "/root/backups/dob-upcloud-20261005",
+  "original_failures_preserved": [
+    "initial PostgreSQL fixtures lacked generated row IDs; corrected and complete suite passed",
+    "browser reload fixture referenced script variable before load; readiness guarded and final complete suite passed",
+    "deploy-attempt-1 acceptance called nonexistent global resource endpoint; automatic prior-runtime restoration succeeded",
+    "deploy-attempt-2 acceptance assumed generic dirty migration column; automatic restoration succeeded; corrected native checksum check passes"
+  ],
+  "rollback": {
+    "script": "/root/backups/dob-upcloud-20261005/rollback.sh",
+    "automatic_binary_restore_exercised": true,
+    "prerequisite": "Clean all live UpCloud accounts and pending owned storage manifests with current driver before downgrade. Preserve active residential publication. Additive migration may remain."
+  },
+  "limits": [
+    "No UpCloud credential was available, so no live provider creation, SSH bootstrap, panel activation, or deletion was performed.",
+    "Plan prices and invoice settlement state are not invented; UI reports unavailable/unknown. Billing summary uses returned account currency.",
+    "Resource-budget capacity is conservative across selected plans, not a provider-issued fixed server limit.",
+    "No new independent fleet route matrix or app AdMob loading proof is claimed.",
+    "External manual VM deletion before cleanup journaling and out-of-band ownership changes need operator reconciliation; incomplete inventory is never treated as deletion."
+  ]
+}

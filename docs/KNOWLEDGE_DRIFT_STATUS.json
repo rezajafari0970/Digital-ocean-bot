@@ -74,5 +74,11 @@
       "status": "current-source"
     }
   ],
-  "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale."
+  "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
+  "latest_product_frontier": {
+    "revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+    "handoff": "docs/UPCLOUD_HANDOFF_20261005.md",
+    "inspected_live_source": true,
+    "note": "Earlier artifact assessments are historical; use current source and this handoff for third-provider integration and durable disk cleanup."
+  }
 }

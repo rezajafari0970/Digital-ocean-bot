@@ -1,41 +1,28 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+  "runtime_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-05T16:58:23.988167+00:00",
+  "verified_at_utc": "2026-10-05T18:26:31.087859+00:00",
   "binaries": {
     "api": {
-      "sha256": "1ea53fbe434b4d6c9ba061ac06e55b5ce87531095ccf1f65eaa3dda3b0fffeea",
-      "revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+      "sha256": "7e090e42e9f22d6a63976bb9db1c4af6b3fa7c2bbe7da6cee6bcd37e9d06bc81",
+      "revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
       "vcs_modified": false
     },
     "worker": {
-      "sha256": "fe6c81d380e11aeddabd84b23efef39f697c88964762c73ffc2032122543fcb8",
-      "revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+      "sha256": "126073b54f1b26d5d91333cd237af4309c281fafa866d16dc7d368150e087df2",
+      "revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
       "vcs_modified": false
     }
   },
   "services": {
     "api": "active",
-    "worker": "active",
-    "saved_scope_passed": 38,
-    "route_matrix_passed_over_window": 32,
-    "pending_panel_ids": [
-      "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
-      "829cbedb-378d-4044-890b-deb6755d2876",
-      "92764f7e-bada-4196-8602-eb75a259390d",
-      "c40de783-08d6-44be-8f4e-9395cedebd5c",
-      "df8b457d-5273-48ef-8526-bcb19b9c3917",
-      "e766135b-08d9-4c74-96d4-f1d4424a4b5e"
-    ],
-    "kernel_memory_mitigated": 21,
-    "pool_enabled_panels": 38,
-    "route_matrix_passed_over_initial_window": 38
+    "worker": "active"
   },
-  "migration": "000152_residential_permanent_publish",
-  "acceptance": "docs/RESIDENTIAL_FLEET_ACCEPTANCE_20261005.json",
+  "migration": "000153_upcloud_cleanup",
+  "acceptance": "docs/UPCLOUD_ACCEPTANCE_20261005.json",
   "verified": false,
-  "note": "Permanent/all-current-and-future publication and Select all/Clear selection deployed. Future admission/rollback races passed PostgreSQL tests. Live permanent selected canary passed 38 route proofs tuned and 38 restored. No global profile activated; user chooses Publish permanently. Existing profiles, gates and 12-endpoint snapshot retained. Current controller metadata is not a new independent fleet proof.",
+  "note": "UpCloud driver and UI deployed; contract/PostgreSQL/race/browser and production readback passed. No live UpCloud account exists, so real cloud lifecycle remains untested. Active user permanent fleet profile and endpoint/profile/gate configuration preserved. Historical network/fleet evidence is not a fresh route proof.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -52,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "User previews desired settings and publishes permanently to all current/future servers; monitor per-server pending/verified results and app ad-load behavior.",
+  "next_product_step": "User adds UpCloud account token in panel; bounded real provider lifecycle acceptance remains pending.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
+  "worker_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
-  "verification_status": "PERMANENT_FLEET_PUBLISH_DEPLOYED_CANARY_RESTORED_NO_GLOBAL_ACTIVATION",
+  "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+  "verification_status": "DEPLOYED_CONTRACT_DB_UI_VERIFIED_LIVE_UPCLOUD_UNTESTED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+  "previous_runtime_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -74,17 +61,45 @@
     "verified": 26
   },
   "current_performance_experiment": {
-    "id": "c2403121-d876-4cfb-aaeb-64777264e564",
-    "state": "ROLLED_BACK",
-    "mode": "permanent",
-    "scope": "selected",
+    "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+    "spec": {
+      "dns_mode": "tcp",
+      "buffer_kb": 64,
+      "fast_count": 13,
+      "fast_share": 80,
+      "max_rtt_ms": 3000,
+      "tcp_options": true,
+      "gateway_ipv4": true,
+      "tcp_fast_open": true,
+      "probe_timeout_ms": 3000,
+      "routing_strategy": "preserve",
+      "tcp_user_timeout_ms": 20000,
+      "keepalive_idle_seconds": 30,
+      "probe_interval_seconds": 10,
+      "keepalive_interval_seconds": 20
+    },
+    "state": "KEPT",
     "deadline": null,
-    "target_state": "RESTORED",
-    "generation": 2,
-    "applied_generation": 2,
-    "profile": null,
-    "verified_at": "2026-10-05T16:55:36.454908+00:00",
-    "last_error": ""
+    "duration_mode": "permanent",
+    "publish_scope": "fleet"
   },
-  "latest_residential_fleet_acceptance": "docs/RESIDENTIAL_FLEET_ACCEPTANCE_20261005.json"
+  "latest_residential_fleet_acceptance": "docs/RESIDENTIAL_FLEET_ACCEPTANCE_20261005.json",
+  "latest_upcloud_acceptance": "docs/UPCLOUD_ACCEPTANCE_20261005.json",
+  "historical_services_evidence": {
+    "api": "active",
+    "worker": "active",
+    "saved_scope_passed": 38,
+    "route_matrix_passed_over_window": 32,
+    "pending_panel_ids": [
+      "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
+      "829cbedb-378d-4044-890b-deb6755d2876",
+      "92764f7e-bada-4196-8602-eb75a259390d",
+      "c40de783-08d6-44be-8f4e-9395cedebd5c",
+      "df8b457d-5273-48ef-8526-bcb19b9c3917",
+      "e766135b-08d9-4c74-96d4-f1d4424a4b5e"
+    ],
+    "kernel_memory_mitigated": 21,
+    "pool_enabled_panels": 38,
+    "route_matrix_passed_over_initial_window": 38
+  }
 }
