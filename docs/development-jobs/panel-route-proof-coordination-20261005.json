@@ -1,0 +1,27 @@
+{
+  "goal": "Coordinate independent read-only route acceptance with the existing per-panel cross-process config lock, preventing concurrent TestRoute calls from invalidating Sanaei shared gRPC clients.",
+  "context": "Observed Worker-active acceptance gRPC Canceled/client connection closing; quiet Worker proof passed in two seconds; upstream MHSanaei/3x-ui XrayService.TestRoute stores Init/Close on a shared xrayAPI field. Existing residentialsync already holds sanaei.WithConfigLock across its checks. Reuse that existing lock for the entire acceptance snapshot and matrix, including the existing bounded single retry. Do not change traffic, UDP/DNS, timeouts, gates, credentials, or panel binaries. Different panels stay independent. Unknown/error API envelopes must be classified unavailable, not an actual outbound mismatch. Real PostgreSQL concurrency tests must prove blocking/cancellation and per-panel independence. This only changes the CLI acceptance command; deployed API/Worker remain a282d17.",
+  "allowed_paths": [
+    "cmd/residential-routing-acceptance/main.go",
+    "cmd/residential-routing-acceptance/proof.go",
+    "cmd/residential-routing-acceptance/proof_test.go",
+    "docs/development-jobs/panel-route-proof-coordination-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-panel-recovery-20261005/test-proof.sh -race"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(acceptance): coordinate route proofs with panel reconciliation"
+}

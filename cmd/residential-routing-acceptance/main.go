@@ -101,7 +101,7 @@ func run() error {
 	}
 	passed, failed := 0, 0
 	for _, id := range ids {
-		verify := func() (int, error) {
+		verify := func(ctx context.Context) (int, error) {
 			rt, e := m.Acquire(ctx, id)
 			if e != nil {
 				return 0, fmt.Errorf("runtime unavailable")
@@ -258,14 +258,11 @@ func run() error {
 				if e != nil {
 					return fmt.Errorf("route proof unavailable")
 				}
-				var result struct {
-					Success bool
-					Obj     struct {
-						Matched     bool
-						OutboundTag string
-					}
+				matches, e := routeProofMatches(response, expected)
+				if e != nil {
+					return e
 				}
-				if json.Unmarshal(response.Body, &result) != nil || !result.Success || !result.Obj.Matched || result.Obj.OutboundTag != expected {
+				if !matches {
 					return fmt.Errorf("runtime differs network=%s destination=%s%s port=%s", form.Get("network"), form.Get("domain"), form.Get("ip"), form.Get("port"))
 				}
 				count++
@@ -307,10 +304,7 @@ func run() error {
 			}
 			return count, nil
 		}
-		count, err := verify()
-		if err != nil {
-			count, err = verify()
-		}
+		count, err := verifyUnderConfigLock(ctx, a.DB, id, verify)
 		if err != nil {
 			failed++
 			fmt.Printf("ADS_UDP_DNS_PENDING panel=%s reason=%v\n", id, err)
