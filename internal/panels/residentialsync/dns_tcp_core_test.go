@@ -10,126 +10,93 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 )
 
-func TestInstalledCoreResidentialUDPDNSIsBlockedBeforeResolver(t *testing.T) {
+// Actual installed Xray: UDP/TCP client DNS, cached A, IPv4 policy, non-A
+// forwarding and resolver fallback all work while the residential proxy fails.
+func TestInstalledCoreManagedDNSDirectCacheAndFallback(t *testing.T) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("installed Xray required")
 	}
-	var directHits, proxyTCP, proxyUDP atomic.Int64
-	var available atomic.Bool
-	available.Store(true)
-	sink, err := net.Listen("tcp4", "127.0.0.1:0")
+	var resolverHits, proxyHits atomic.Int64
+	resolver, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer sink.Close()
+	defer resolver.Close()
 	go func() {
 		for {
-			c, e := sink.Accept()
-			if e != nil {
-				return
-			}
-			directHits.Add(1)
-			c.Close()
-		}
-	}()
-	upstream, err := net.Listen("tcp4", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer upstream.Close()
-	go func() {
-		for {
-			conn, e := upstream.Accept()
+			c, e := resolver.Accept()
 			if e != nil {
 				return
 			}
 			go func(c net.Conn) {
 				defer c.Close()
 				c.SetDeadline(time.Now().Add(8 * time.Second))
-				head := make([]byte, 2)
-				if _, e := io.ReadFull(c, head); e != nil {
-					return
-				}
-				methods := make([]byte, int(head[1]))
-				if _, e := io.ReadFull(c, methods); e != nil {
-					return
-				}
-				c.Write([]byte{5, 0})
-				request := make([]byte, 4)
-				if _, e := io.ReadFull(c, request); e != nil {
-					return
-				}
-				if request[1] != 1 {
-					proxyUDP.Add(1)
-					c.Write([]byte{5, 7, 0, 1, 0, 0, 0, 0, 0, 0})
-					return
-				}
-				n := 0
-				switch request[3] {
-				case 1:
-					n = 4
-				case 4:
-					n = 16
-				case 3:
-					b := make([]byte, 1)
-					if _, e := io.ReadFull(c, b); e != nil {
-						return
-					}
-					n = int(b[0])
-				default:
-					return
-				}
-				target := make([]byte, n+2)
-				if _, e := io.ReadFull(c, target); e != nil {
-					return
-				}
-				if !available.Load() {
-					c.Write([]byte{5, 5, 0, 1, 0, 0, 0, 0, 0, 0})
-					return
-				}
-				proxyTCP.Add(1)
-				c.Write([]byte{5, 0, 0, 1, 127, 0, 0, 1, 0, 0})
 				for {
-					size := make([]byte, 2)
-					if _, e := io.ReadFull(c, size); e != nil {
+					var size [2]byte
+					if _, e := io.ReadFull(c, size[:]); e != nil {
 						return
 					}
-					q := make([]byte, int(binary.BigEndian.Uint16(size)))
-					if _, e := io.ReadFull(c, q); e != nil || len(q) < 16 || !available.Load() {
+					q := make([]byte, binary.BigEndian.Uint16(size[:]))
+					if _, e := io.ReadFull(c, q); e != nil || len(q) < 17 {
 						return
 					}
-					answer := append([]byte(nil), q...)
-					answer[2] = 0x81
-					answer[3] = 0x80
-					answer[6] = 0
-					answer[7] = 0
-					if binary.BigEndian.Uint16(q[len(q)-4:]) == 1 {
-						answer[7] = 1
-						answer = append(answer, 0xc0, 0x0c, 0, 1, 0, 1, 0, 0, 0, 5, 0, 4, 198, 51, 100, 7)
-					}
-					binary.BigEndian.PutUint16(size, uint16(len(answer)))
-					if _, e := c.Write(append(size, answer...)); e != nil {
+					resolverHits.Add(1)
+					a := append([]byte(nil), q...)
+					a[2] = 0x81
+					a[3] = 0x80
+					a[6] = 0
+					a[7] = 0
+					typ := binary.BigEndian.Uint16(q[len(q)-4:])
+					if typ == 1 {
+						a[7] = 1
+						a = append(a, 0xc0, 0x0c, 0, 1, 0, 1, 0, 0, 0, 60, 0, 4, 198, 51, 100, 7)
+					} else if typ == 65 {
+						a[3] = 0x83
+					} // distinguish forwarded NXDOMAIN from synthetic empty response
+					binary.BigEndian.PutUint16(size[:], uint16(len(a)))
+					if _, e := c.Write(append(size[:], a...)); e != nil {
 						return
 					}
 				}
-			}(conn)
+			}(c)
 		}
 	}()
-	policy := routePolicy{Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: upstream.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-dns-test"}}}
-	setting, err := buildSettings(baseSettings(), nil, []string{"dns-test-inbound"}, policy)
+	proxy, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Observe any unexpected DNS connection caused by the blocked datagram.
-	// Use its loopback address instead of sending fault tests to public DNS.
-	dns := setting["dns"].(map[string]any)
-	dns["servers"] = []string{"tcp://" + sink.Addr().String()}
+	defer proxy.Close()
+	go func() {
+		for {
+			c, e := proxy.Accept()
+			if e != nil {
+				return
+			}
+			proxyHits.Add(1)
+			c.Close()
+		}
+	}()
+	p := routePolicy{Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: proxy.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-failed"}}}
+	setting, err := buildSettings(baseSettings(), nil, []string{"dns-test-inbound"}, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	setting["dns"].(map[string]any)["servers"] = []string{"tcp://127.0.0.1:1", "tcp://" + resolver.Addr().String()}
+	for _, v := range setting["outbounds"].([]any) {
+		o := v.(map[string]any)
+		if o["protocol"] == "dns" {
+			s := o["settings"].(map[string]any)
+			s["address"] = "127.0.0.1"
+			s["port"] = resolver.Addr().(*net.TCPAddr).Port
+		}
+	}
 	listener, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -137,7 +104,6 @@ func TestInstalledCoreResidentialUDPDNSIsBlockedBeforeResolver(t *testing.T) {
 	port := listener.Addr().(*net.TCPAddr).Port
 	listener.Close()
 	setting["inbounds"] = []any{map[string]any{"listen": "127.0.0.1", "port": port, "tag": "dns-test-inbound", "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}}}
-	// baseSettings carries a test API rule but no API listener is needed here.
 	delete(setting, "api")
 	setting["log"] = map[string]any{"loglevel": "none"}
 	file := filepath.Join(t.TempDir(), "xray.json")
@@ -164,48 +130,90 @@ func TestInstalledCoreResidentialUDPDNSIsBlockedBeforeResolver(t *testing.T) {
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	query := func(name string, typ byte) ([]byte, error) {
-		control, e := net.DialTimeout("tcp", address, time.Second)
+	query := func(network, name string, typ uint16) ([]byte, error) {
+		c, e := net.DialTimeout("tcp", address, time.Second)
 		if e != nil {
 			return nil, e
 		}
-		defer control.Close()
-		control.SetDeadline(time.Now().Add(3 * time.Second))
-		control.Write([]byte{5, 1, 0})
-		buf := make([]byte, 2)
-		if _, e = io.ReadFull(control, buf); e != nil {
+		defer c.Close()
+		c.SetDeadline(time.Now().Add(5 * time.Second))
+		c.Write([]byte{5, 1, 0})
+		var auth [2]byte
+		if _, e = io.ReadFull(c, auth[:]); e != nil {
 			return nil, e
 		}
-		control.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
-		bound := make([]byte, 10)
-		if _, e = io.ReadFull(control, bound); e != nil {
+		command := byte(1)
+		if network == "udp" {
+			command = 3
+		}
+		target := []byte{5, command, 0, 1, 9, 9, 9, 9, 0, 53}
+		if command == 3 {
+			target = []byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0}
+		}
+		c.Write(target)
+		var bound [10]byte
+		if _, e = io.ReadFull(c, bound[:]); e != nil {
 			return nil, e
 		}
-		udp, e := net.DialUDP("udp4", nil, &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: int(binary.BigEndian.Uint16(bound[8:]))})
+		q := []byte{0x42, 0x71, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0}
+		for _, label := range strings.Split(name, ".") {
+			q = append(q, byte(len(label)))
+			q = append(q, []byte(label)...)
+		}
+		q = append(q, 0, byte(typ>>8), byte(typ), 0, 1)
+		if network == "tcp" {
+			framed := []byte{byte(len(q) >> 8), byte(len(q))}
+			c.Write(append(framed, q...))
+			var size [2]byte
+			if _, e = io.ReadFull(c, size[:]); e != nil {
+				return nil, e
+			}
+			a := make([]byte, binary.BigEndian.Uint16(size[:]))
+			_, e = io.ReadFull(c, a)
+			return a, e
+		}
+		u, e := net.DialUDP("udp4", nil, &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: int(binary.BigEndian.Uint16(bound[8:]))})
 		if e != nil {
 			return nil, e
 		}
-		defer udp.Close()
-		q := []byte{0x42, 0x71, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, byte(len(name))}
-		q = append(q, []byte(name)...)
-		q = append(q, 7, 'e', 'x', 'a', 'm', 'p', 'l', 'e', 0, 0, typ, 0, 1)
-		// UDP DNS must be denied before any resolver or upstream connection.
+		defer u.Close()
+		u.SetDeadline(time.Now().Add(5 * time.Second))
 		packet := append([]byte{0, 0, 0, 1, 9, 9, 9, 9, 0, 53}, q...)
-		udp.SetDeadline(time.Now().Add(2 * time.Second))
-		udp.Write(packet)
+		u.Write(packet)
 		response := make([]byte, 4096)
-		n, e := udp.Read(response)
+		n, e := u.Read(response)
 		if e != nil {
 			return nil, e
 		}
-		return response[:n], nil
+		if n < 22 {
+			return nil, io.ErrUnexpectedEOF
+		}
+		return response[10:n], nil
 	}
-	for _, typ := range []byte{1, 65} {
-		if _, e := query("probe", typ); e == nil {
-			t.Fatalf("residential UDP DNS type %d was allowed", typ)
+	for _, network := range []string{"udp", "tcp"} {
+		a, e := query(network, "cached.example", 1)
+		if e != nil || len(a) < 12 || a[3]&15 != 0 || binary.BigEndian.Uint16(a[6:8]) == 0 {
+			t.Fatalf("DNS A %s: %v %x", network, e, a)
 		}
 	}
-	if proxyTCP.Load() != 0 || proxyUDP.Load() != 0 || directHits.Load() != 0 {
-		t.Fatal("blocked UDP DNS generated upstream traffic", proxyTCP.Load(), proxyUDP.Load(), directHits.Load())
+	firstHits := resolverHits.Load()
+	if firstHits != 1 {
+		t.Fatalf("cache/fallback expected exactly one live resolver query, got %d", firstHits)
+	}
+	for _, network := range []string{"udp", "tcp"} {
+		a, e := query(network, "nonip.example", 65)
+		if e != nil || len(a) < 12 || a[3]&15 != 3 {
+			t.Fatalf("DNS HTTPS not forwarded %s: %v %x", network, e, a)
+		}
+		a, e = query(network, "cached.example", 28)
+		if e != nil || len(a) < 12 || a[3]&15 != 0 || binary.BigEndian.Uint16(a[6:8]) != 0 {
+			t.Fatalf("IPv4-only AAAA %s: %v %x", network, e, a)
+		}
+	}
+	if proxyHits.Load() != 0 {
+		t.Fatal("DNS depended on residential upstream")
+	}
+	if resolverHits.Load() != 3 {
+		t.Fatalf("unexpected DNS requests: %d", resolverHits.Load())
 	}
 }

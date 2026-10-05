@@ -23,7 +23,7 @@ func probeRoute(t *testing.T, setting map[string]any, email, domain, network str
 	}
 	return v.Obj.OutboundTag
 }
-func TestAdsOnlyTCPRoutingAndResidentialUDPDenied(t *testing.T) {
+func TestAdsOnlyTCPUDPRoutingAndHTTPProtectedUDPDenied(t *testing.T) {
 	for _, kind := range []string{"socks5", "http", "down", "absent"} {
 		t.Run(kind, func(t *testing.T) {
 			p := routePolicy{AdsOnly: true, Harden: true, Residential: true, Direct: true, Configured: 1}
@@ -43,9 +43,6 @@ func TestAdsOnlyTCPRoutingAndResidentialUDPDenied(t *testing.T) {
 					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org", "notbrowserleaks.com", "browserleaks.com.example.org", "", "1.1.1.1", "2001:db8::1"} {
 						got := probeRoute(t, desired, c.Email, domain, network)
 						want := directTag
-						if c.Class == "RESIDENTIAL" && network == "udp" {
-							want = blockedTag
-						}
 						if got != tagged(desired, want) {
 							t.Fatalf("non-ad not direct: %s %s %s", c.Class, domain, network)
 						}
@@ -53,7 +50,7 @@ func TestAdsOnlyTCPRoutingAndResidentialUDPDenied(t *testing.T) {
 					base := directTag
 					if c.Class == "RESIDENTIAL" {
 						base = blockedTag
-						if len(p.Proxies) > 0 && network == "tcp" {
+						if len(p.Proxies) > 0 && (network == "tcp" || kind == "socks5") {
 							base = p.Proxies[0].Tag
 						}
 					}
@@ -64,11 +61,11 @@ func TestAdsOnlyTCPRoutingAndResidentialUDPDenied(t *testing.T) {
 					}
 				}
 			}
-			// Residential UDP denial must cover every destination; Direct matched first.
+			// HTTP UDP denial is domain-scoped; ordinary UDP remains direct.
 			for _, v := range desired["routing"].(map[string]any)["rules"].([]any) {
 				r := v.(map[string]any)
-				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] != nil {
-					t.Fatal("incomplete residential UDP block")
+				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] == nil {
+					t.Fatal("overbroad residential UDP block")
 				}
 			}
 		})

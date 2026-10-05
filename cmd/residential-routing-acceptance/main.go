@@ -131,10 +131,10 @@ func run() error {
 				return 0, fmt.Errorf("DNS missing")
 			}
 			servers, ok := dns["servers"].([]any)
-			if !ok || len(servers) != 3 {
+			if !ok || len(servers) != 2 {
 				return 0, fmt.Errorf("DNS pool count")
 			}
-			for i, wanted := range []string{"tcp://1.1.1.1:53", "tcp://8.8.8.8:53", "tcp://223.5.5.5:53"} {
+			for i, wanted := range []string{"tcp://1.1.1.1:53", "tcp://8.8.8.8:53"} {
 				if servers[i] != wanted {
 					return 0, fmt.Errorf("DNS differs from approved providers")
 				}
@@ -147,7 +147,10 @@ func run() error {
 			if !ok {
 				return 0, fmt.Errorf("rules missing")
 			}
-			protected, direct, blocked := "", "", ""
+			protected, direct, blocked, clientDNS := "", "", "", ""
+			if dns["queryStrategy"] != "UseIPv4" || dns["disableCache"] != false {
+				return 0, fmt.Errorf("DNS IPv4/cache policy differs")
+			}
 			for _, item := range rules {
 				r, ok := item.(map[string]any)
 				if !ok {
@@ -156,7 +159,7 @@ func run() error {
 				if r["ruleTag"] == "dob-route-residential-ads" {
 					domains, _ := r["domain"].([]any)
 					wanted := []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads", "domain:browserleaks.com"}
-					if len(domains) != 5 || r["network"] != "tcp" {
+					if len(domains) != 5 || r["network"] != "tcp,udp" {
 						return 0, fmt.Errorf("Ads-only scope differs")
 					}
 					for i, d := range wanted {
@@ -169,17 +172,20 @@ func run() error {
 				if r["ruleTag"] == "dob-route-default" {
 					direct, _ = r["outboundTag"].(string)
 				}
-				if r["ruleTag"] == "dob-route-residential-udp" {
+				if r["ruleTag"] == "dob-route-unobserved-inbound" {
 					blocked, _ = r["outboundTag"].(string)
-					if r["domain"] != nil || r["network"] != "udp" {
-						return 0, fmt.Errorf("UDP denial differs")
-					}
 				}
-				if r["ruleTag"] == "dob-route-client-dns" || r["ruleTag"] == "dob-route-known-non-ad" {
+				if r["ruleTag"] == "dob-route-client-dns" {
+					clientDNS, _ = r["outboundTag"].(string)
+				}
+				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] == nil {
+					return 0, fmt.Errorf("overbroad UDP block")
+				}
+				if r["ruleTag"] == "dob-route-known-non-ad" {
 					return 0, fmt.Errorf("obsolete rule retained")
 				}
 			}
-			if !strings.HasPrefix(protected, "residential-ads-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") {
+			if !strings.HasPrefix(protected, "residential-ads-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-") {
 				return 0, fmt.Errorf("class route unavailable")
 			}
 
@@ -275,8 +281,8 @@ func run() error {
 					} {
 						expected := direct
 						if cls == "RESIDENTIAL" {
-							if network == "udp" {
-								expected = blocked
+							if dest.port == "53" {
+								expected = clientDNS
 							} else if dest.ad {
 								expected = protected
 							}
@@ -307,13 +313,13 @@ func run() error {
 		}
 		if err != nil {
 			failed++
-			fmt.Printf("ADS_TCP_ONLY_PENDING panel=%s reason=%v\n", id, err)
+			fmt.Printf("ADS_UDP_DNS_PENDING panel=%s reason=%v\n", id, err)
 		} else {
 			passed++
-			fmt.Printf("ADS_TCP_ONLY_PASS panel=%s route_proofs=%d\n", id, count)
+			fmt.Printf("ADS_UDP_DNS_PASS panel=%s route_proofs=%d\n", id, count)
 		}
 	}
-	fmt.Printf("ADS_TCP_ONLY_FLEET_PROOF panels=%d passed=%d pending=%d at=%s\n", len(ids), passed, failed, time.Now().UTC().Format(time.RFC3339))
+	fmt.Printf("ADS_UDP_DNS_FLEET_PROOF panels=%d passed=%d pending=%d at=%s\n", len(ids), passed, failed, time.Now().UTC().Format(time.RFC3339))
 	if failed > 0 {
 		return fmt.Errorf("some serving panels not yet verified")
 	}

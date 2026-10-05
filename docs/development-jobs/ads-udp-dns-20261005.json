@@ -1,0 +1,30 @@
+{
+  "goal": "Restore category-only Ads TCP/UDP residential routing and working managed IPv4 DNS for the latest user-authorized policy. Preserve direct identities, fail-closed matched Ads, settings locks, original errors, freshness and unknown-field preservation. Current upstream is down; never claim transport acceptance merely from route API.",
+  "context": "Baseline 8dc5e8d; current Ads-only implementation blocks all residential UDP before DNS. Current selected upstream socks5 is down and TCP HTTPS fails. Output already exports xtls-rprx-vision-udp443. Plan: restore scoped client DNS outbound using installed-compatible DNS protocol; A from bounded cached direct TCP Cloudflare/Google resolvers; AAAA handled consistently IPv4-only, other qtypes forwarded directly. DNS TCP/UDP input accepted for residential identities only, Direct unchanged. Ads categories + temporary BrowserLeaks tcp,udp through SOCKS; HTTP ads UDP blocked with domain-scoped rule. Other UDP direct. No provider-credential or app-source changes without source. Measure installed-core DNS responses/cache/fallback and protected UDP outage behavior. Canary before fleet. Report unresolved upstream honestly.",
+  "allowed_paths": [
+    "internal/panels/residentialsync",
+    "cmd/residential-routing-acceptance/main.go",
+    "web/static/app.js",
+    "docs/development-jobs/ads-udp-dns-20261005.json",
+    "docs/ADS_UDP_DNS_HANDOFF_20261005.md",
+    "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
+    "internal/panels/resolverpolicy"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 1200,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-ads-udp-dns-20261005/test.sh -race"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(routing): restore Ads UDP and direct managed client DNS"
+}

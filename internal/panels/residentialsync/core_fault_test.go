@@ -21,7 +21,7 @@ import (
 
 // This test runs the installed core, not the in-memory route matcher. A local
 // sink proves category-only routing and detects Ads escaping a failed proxy.
-func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
+func TestInstalledCoreAdsFailClosedAndOtherTCPUDPDirect(t *testing.T) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("set XRAY_TEST_BINARY for installed-core fault acceptance")
@@ -107,7 +107,7 @@ func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
 					t.Fatal("non-Ad TCP did not remain direct", target, e)
 				}
 			}
-			// Actual SOCKS UDP relay; an opaque datagram must not reach the local sink.
+			// Actual SOCKS UDP relay: non-ad UDP reaches direct; Ads never escape.
 			control, e := net.DialTimeout("tcp", address, time.Second)
 			if e != nil {
 				t.Fatal(e)
@@ -133,15 +133,32 @@ func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
 			packet := []byte{0, 0, 0, 1, 127, 0, 0, 1, byte(udpPort >> 8), byte(udpPort)}
 			packet = append(packet, []byte("opaque-no-hostname")...)
 			conn.Write(packet)
-			udp.SetReadDeadline(time.Now().Add(350 * time.Millisecond))
+			udp.SetReadDeadline(time.Now().Add(1500 * time.Millisecond))
 			buf := make([]byte, 100)
 			n, _, e := udp.ReadFrom(buf)
+			if e != nil || n == 0 {
+				t.Fatal("non-ad UDP direct failed", e)
+			}
+			conn.Close()
+			conn, e = net.DialUDP("udp4", nil, remote)
+			if e != nil {
+				t.Fatal(e)
+			}
+			defer conn.Close()
+			domain := "adservice.google.com"
+			packet = []byte{0, 0, 0, 3, byte(len(domain))}
+			packet = append(packet, []byte(domain)...)
+			packet = append(packet, byte(udpPort>>8), byte(udpPort))
+			packet = append(packet, []byte("protected-ad-datagram")...)
+			conn.Write(packet)
+			udp.SetReadDeadline(time.Now().Add(1500 * time.Millisecond))
+			n, _, e = udp.ReadFrom(buf)
 			if kind == "direct-control" {
 				if e != nil || n == 0 {
-					t.Fatal("UDP direct control failed", e)
+					t.Fatal("direct control Ads UDP failed", e)
 				}
 			} else if e == nil {
-				t.Fatal("opaque UDP leaked")
+				t.Fatal("Ads UDP escaped failed residential upstream")
 			}
 			want := int64(1)
 			if kind == "direct-control" {

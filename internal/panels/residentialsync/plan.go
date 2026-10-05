@@ -242,6 +242,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if p.SniffingBlocked {
 		destination = blockedTag
 	}
+	if p.Harden && p.Residential && p.AdsOnly {
+		// Accept client UDP/TCP DNS without depending on residential health.
+		// A queries use the cached IPv4 pool; other query types retain real
+		// responses through direct TCP forwarding (never the residential proxy).
+		kept = append(kept, map[string]any{
+			"tag": clientDNSTag, "protocol": "dns",
+			"settings":       map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
+			"streamSettings": map[string]any{"sockopt": map[string]any{"dialerProxy": directTag}},
+		})
+	}
 	next["outbounds"] = kept
 	routing, ok := next["routing"].(map[string]any)
 	if !ok {
@@ -313,18 +323,26 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
 		} else {
-			// Only TCP matched by the Ads lists uses residential egress.
-			// Explicit Direct identities matched above keep TCP and UDP.
-			// All remaining residential UDP (including DNS/QUIC) is denied.
+			if p.Harden && p.Residential {
+				dnsDestination := clientDNSTag
+				if p.SniffingBlocked {
+					dnsDestination = blockedTag
+				}
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": dnsDestination})
+			}
 			if p.Residential {
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp", "outboundTag": destination})
+				// HTTP cannot carry UDP: block only matched protected domains.
+				// Never send matched Ads UDP to the non-ad direct fallback.
+				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": residentialDomains(), "network": "udp", "outboundTag": blockedTag})
+				}
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
 			}
 			fallback := directTag
 			if (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
 				fallback = blockedTag
 			}
-			// DNS, ordinary domains and opaque/IP TCP are direct. List matching
+			// Ordinary domains and opaque/IP TCP/UDP are direct. List matching
 			// cannot classify ads absent from geosite or hidden by encryption.
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": fallback})
 

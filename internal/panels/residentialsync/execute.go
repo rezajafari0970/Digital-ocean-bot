@@ -131,10 +131,14 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 					switch {
 					case explicitDirect || (!p.Residential && p.Direct):
 						base = directTag
-					case !p.Residential || p.SniffingBlocked || network == "udp":
+					case !p.Residential || p.SniffingBlocked:
 						base = blockedTag
+					case p.Harden && probe.port == "53":
+						base = clientDNSTag
 					case !probe.ads:
 						base = directTag
+					case len(p.Proxies) > 0 && network == "udp" && p.Proxies[0].Type != "socks5":
+						base = blockedTag
 					case len(p.Proxies) > 0:
 						base = p.Proxies[0].Tag
 					default:

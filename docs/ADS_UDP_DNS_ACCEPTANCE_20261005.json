@@ -1,0 +1,34 @@
+{
+  "status": "SOURCE_TESTED_CANARY_PENDING",
+  "baseline": "8dc5e8d4f063a2699ce46e143a1ba4b06c6a74d7",
+  "tests": {
+    "installed_core_dns": true,
+    "installed_core_ads_udp_fail_closed": true,
+    "race": true,
+    "full_go": true
+  },
+  "dns": {
+    "providers": [
+      "1.1.1.1",
+      "8.8.8.8"
+    ],
+    "ipv4_only": true,
+    "residential_udp_tcp_inputs": true,
+    "direct_identity_unchanged": true
+  },
+  "production": {
+    "changed": false,
+    "canary": false,
+    "fleet": false
+  },
+  "upstream": {
+    "observed_status": "down",
+    "ads_tcp_success": false,
+    "udp_capability_confirmed": false
+  },
+  "app": {
+    "modified": false,
+    "ad_display_verified": false
+  },
+  "evidence_directory": "/root/backups/dob-ads-udp-dns-20261005"
+}

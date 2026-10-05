@@ -1,12 +1,11 @@
 {
-  "observed_at": "2026-10-04T18:39:05Z",
-  "source": "Actual Direct and Residential VLESS configs on the filmed target; www.google.com A queries over TCP/53 and UDP/53",
+  "observed_at": "2026-10-05T10:50:15Z",
+  "source": "Control-server IPv4 UDP/TCP queries for googleads.g.doubleclick.net; each provider answered three bounded probes. Fleet evidence recorded separately.",
   "active": [
     "1.1.1.1",
-    "8.8.8.8",
-    "223.5.5.5"
+    "8.8.8.8"
   ],
-  "note": "Only Cloudflare, Google and AliDNS are configured. Built-in and Residential client DNS use TCP through the residential route; no direct fallback.",
+  "note": "Cloudflare and Google only. Cached IPv4 built-in DNS and intercepted residential UDP/TCP client DNS use direct server egress, independent of residential upstream health. Direct identity routes are preserved.",
   "resolvers": [
     {
       "address": "1.1.1.1",
@@ -19,14 +18,6 @@
     {
       "address": "8.8.8.8",
       "provider": "Google",
-      "profile": "unfiltered",
-      "family": 4,
-      "status": "answered",
-      "active": true
-    },
-    {
-      "address": "223.5.5.5",
-      "provider": "AliDNS",
       "profile": "unfiltered",
       "family": 4,
       "status": "answered",
