@@ -1,0 +1,29 @@
+{
+  "goal": "Add UpCloud as a complete third provider alongside DigitalOcean and Vultr through the existing shared proxy, scheduler, provisioning, Sanaei, Reality, residential and expiry lifecycle.",
+  "context": "User explicitly requests full parity and live deployment. Official API https://developers.upcloud.com/1.3 uses bearer API tokens, resource_limits for cores/memory/public_ipv4/storage, Ubuntu templates, raw SSH public keys in create login_user, IPv4-only networking, unique durable labels for create adoption after ambiguous response. Delete requires stopped server and storages deletion; ensure idempotent read-before-retry and do not leave billable owned disks. Preserve DO/Vultr behavior and active permanent fleet residential profile. Shared driver interfaces/registry are authoritative. No UpCloud account/credential supplied yet: implement and verify contract/fault/PostgreSQL/UI; no fake live provider success, no unsolicited paid canary. Use bounded timeouts, same account egress gateway (never bypass proxy), redacted credentials, no browser login. Compute multi-resource plan-aware capacity and label estimate appropriately; do not invent exact limits or saturate probe. Source based on canonical 8ee857c. Manual reviewed implementation with OpenAI planning. Tests must cover pagination completeness, unknown creates adoption, async stop/delete, notfound, 401/403/429/5xx, capacity and parity regressions.",
+  "allowed_paths": [
+    "internal",
+    "web",
+    "migrations",
+    "cmd",
+    "tools/upcloud-acceptance.py",
+    "docs/development-jobs/upcloud-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(providers): integrate UpCloud with shared lifecycle"
+}

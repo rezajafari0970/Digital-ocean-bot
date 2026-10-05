@@ -36,15 +36,19 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 		return err
 	}
 	sshDriver, ok := runtime.Driver.(providers.SSHKeyDriver)
-	if !ok {
+	if !ok && !runtime.Driver.Capabilities().InlineSSHKeys {
 		return ErrProviderComputeUnsupported
 	}
 	if err = runtime.CheckMutationGeneration(ctx); err != nil {
 		return err
 	}
 	authorizedKey := string(ssh.MarshalAuthorizedKey(pub))
-	created, createErr := sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), authorizedKey)
-	fallbackAuthorizedKey := false
+	var created providers.SSHKey
+	var createErr error
+	fallbackAuthorizedKey := runtime.Driver.Capabilities().InlineSSHKeys
+	if !fallbackAuthorizedKey {
+		created, createErr = sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), authorizedKey)
+	}
 	if createErr != nil {
 		if runtime.Config.Provider == "digitalocean" && providers.IsClass(createErr, providers.ErrorPermissionDenied) {
 			fallbackAuthorizedKey = true

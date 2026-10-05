@@ -173,6 +173,9 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 }
 
 func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt AccountRuntime) error {
+	if rt.Driver.Capabilities().InlineSSHKeys {
+		return nil
+	}
 	reader, ok := rt.Driver.(sshKeyInventory)
 	if !ok {
 		return errors.New("SSH inventory unavailable")

@@ -142,7 +142,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	meta, _ := s.Container.Providers.Metadata(driver.Name())
-	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "policy": meta, "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
+	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "policy": meta, "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "limit_known": capacity.LimitKnown, "capacity_source": capacity.Source, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
 }
 func writeProviderPreviewError(w http.ResponseWriter, err error, exitIP string) {
 	switch providers.Class(err) {

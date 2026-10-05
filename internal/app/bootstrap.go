@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/upcloud"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/vultr"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 )
@@ -46,6 +47,10 @@ func Bootstrap(ctx context.Context) (*Application, error) {
 		return nil, err
 	}
 	if err := registry.Register(vultr.Factory{}); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := registry.Register(upcloud.Factory{}); err != nil {
 		db.Close()
 		return nil, err
 	}

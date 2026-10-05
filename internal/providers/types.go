@@ -20,10 +20,12 @@ type Account struct {
 }
 
 type Capacity struct {
-	ComputeLimit int
-	LimitKnown   bool
-	ComputeInUse int
-	ObservedAt   time.Time
+	Source        string         `json:",omitempty"`
+	PlanAvailable map[string]int `json:",omitempty"`
+	ComputeLimit  int
+	LimitKnown    bool
+	ComputeInUse  int
+	ObservedAt    time.Time
 }
 
 type Region struct {

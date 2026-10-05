@@ -20,7 +20,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.enable');await call('Runtime.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'if(location.origin==='+JSON.stringify(base)+'){localStorage.setItem("token",'+JSON.stringify(token)+')}'});
-  const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('page evaluation failed');return r.result.value};
+  const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('page evaluation failed: '+expression+' '+JSON.stringify(r.exceptionDetails));return r.result.value};
 
   await call('Browser.grantPermissions',{origin:base,permissions:['clipboardReadWrite','clipboardSanitizedWrite']}).catch(()=>{});
   await call('Page.navigate',{url:base+'/admin/#residential'});
@@ -41,9 +41,9 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelector("[data-performance=keep]").disabled'),true);
   assert.equal(await evaluate('document.querySelector("[data-performance=rollback]").disabled'),false);
   await call('Page.reload');
-  await waitFor('performanceStatus?.experiment?.state==="RUNNING"');
+  await waitFor('typeof performanceStatus!=="undefined"&&performanceStatus?.experiment?.state==="RUNNING"');
   await evaluate('document.querySelector("[data-performance=rollback]").click()');
-  await waitFor('performanceStatus?.experiment?.state==="ROLLING_BACK"');
+  await waitFor('typeof performanceStatus!=="undefined"&&performanceStatus?.experiment?.state==="ROLLING_BACK"');
   assert.ok(await evaluate('document.querySelector("#residentialPerformance").textContent.includes("ROLLBACK_PENDING")'));
   await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
   const desktop=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'performance-rollback-desktop.png'),Buffer.from(desktop.data,'base64'));

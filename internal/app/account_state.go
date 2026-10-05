@@ -41,6 +41,8 @@ func ClassifyAccountProviderError(err error, proxyRequired bool) string {
 		return ProviderStateProxyError
 	}
 	switch providers.Class(err) {
+	case providers.ErrorBilling:
+		return ProviderStateBillingBlocked
 	case providers.ErrorAccountLocked:
 		return ProviderStateLocked
 	case providers.ErrorAuthentication:

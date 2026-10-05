@@ -84,6 +84,8 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 			providerName = "DigitalOcean"
 		} else if provider == "vultr" {
 			providerName = "Vultr"
+		} else if provider == "upcloud" {
+			providerName = "UpCloud"
 		}
 		providerReason := "Ready to create servers"
 		if !enabled {

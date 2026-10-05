@@ -10,6 +10,7 @@ type ErrorClass string
 
 const (
 	ErrorUnknown          ErrorClass = "unknown"
+	ErrorBilling          ErrorClass = "billing"
 	ErrorAuthentication   ErrorClass = "authentication"
 	ErrorPermissionDenied ErrorClass = "permission_denied"
 	ErrorAccountLocked    ErrorClass = "account_locked"

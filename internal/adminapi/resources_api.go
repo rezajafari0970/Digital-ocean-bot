@@ -27,6 +27,9 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 			if provider == "vultr" {
 				return "Vultr"
 			}
+			if provider == "upcloud" {
+				return "UpCloud"
+			}
 			if provider == "digitalocean" {
 				return "DigitalOcean"
 			}

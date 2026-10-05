@@ -48,6 +48,12 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "state": state, "detail": err.Error()})
 		return
 	}
+	if runtime.Config.Provider == "upcloud" {
+		if err := s.Container.SyncUpCloudResources(r.Context(), id, obs.Inventory); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "inventory_store_failed"})
+			return
+		}
+	}
 	canonical, _ := json.Marshal(obs)
 	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4)`, id, runtime.Config.Provider, []byte(`{}`), canonical); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "snapshot_store_failed"})

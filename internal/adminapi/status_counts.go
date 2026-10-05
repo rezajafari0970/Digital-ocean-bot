@@ -33,6 +33,7 @@ WITH provider_inventory AS (
 SELECT json_build_object(
  'digitalocean_accounts',(SELECT count(*) FROM live_accounts WHERE provider='digitalocean'),
  'vultr_accounts',(SELECT count(*) FROM live_accounts WHERE provider='vultr'),
+ 'upcloud_accounts',(SELECT count(*) FROM live_accounts WHERE provider='upcloud'),
  'enabled_accounts',(SELECT count(*) FROM live_accounts WHERE enabled),
  'healthy_accounts',(SELECT count(*) FROM live_accounts WHERE health='healthy'),
  'broken_accounts',(SELECT count(*) FROM live_accounts WHERE health='broken'),

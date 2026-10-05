@@ -82,7 +82,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				return
 			}
 			var obs providers.Observation
-			if rt.Config.Provider == "vultr" {
+			if rt.Config.Provider == "vultr" || rt.Config.Provider == "upcloud" {
 				var previous providers.Observation
 				var previousCanonical []byte
 				hasPrevious := false
@@ -116,6 +116,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			if rt.Config.Provider == "vultr" {
 				if syncErr := c.syncVultrResourceRegistry(ctx, id, obs.Inventory.Servers); syncErr != nil {
 					log.Printf("vultr resource registry sync account=%s: %v", id, syncErr)
+				}
+			}
+			if rt.Config.Provider == "upcloud" {
+				if err := c.SyncUpCloudResources(ctx, id, obs.Inventory); err != nil {
+					log.Printf("upcloud inventory persistence account=%s: %v", id, err)
+					return
 				}
 			}
 			// Vultr's public API exposes current instances but not the account's

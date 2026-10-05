@@ -346,7 +346,7 @@ func terminalDeploymentStateForCreateRecovery(state string) bool {
 
 func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d workflow.Deployment, err error) (bool, error) {
 	class := providers.Class(err)
-	permanent := class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorInvalidRequest || class == providers.ErrorImageUnavailable
+	permanent := class == providers.ErrorBilling || class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorInvalidRequest || class == providers.ErrorImageUnavailable
 	if !permanent && d.CurrentStep == "create" && d.ProviderID == "" {
 		var providerState string
 		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, d.AccountID).Scan(&providerState); qerr == nil {

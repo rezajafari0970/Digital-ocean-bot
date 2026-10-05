@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -57,7 +58,17 @@ func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, err
 		release()
 		return nil, err
 	}
-	if req.Method != http.MethodDelete && (deleting || !enabled) {
+	cleanupStop := false
+	if req.Method == http.MethodPost && (deleting || !enabled) && req.URL.Scheme == "https" && req.URL.Host == "api.upcloud.com" && strings.HasPrefix(req.URL.Path, "/1.3/server/") && strings.HasSuffix(req.URL.Path, "/stop") {
+		id := strings.TrimSuffix(strings.TrimPrefix(req.URL.Path, "/1.3/server/"), "/stop")
+		if id != "" && !strings.Contains(id, "/") {
+			if err = conn.QueryRowContext(req.Context(), "SELECT EXISTS(SELECT 1 FROM provider_cleanup_manifests m JOIN accounts a ON a.id=m.account_id WHERE m.account_id=$1 AND a.provider='upcloud' AND m.provider='upcloud' AND m.server_id=$2 AND m.completed_at IS NULL)", f.account, id).Scan(&cleanupStop); err != nil {
+				release()
+				return nil, err
+			}
+		}
+	}
+	if req.Method != http.MethodDelete && !cleanupStop && (deleting || !enabled) {
 		release()
 		return nil, errors.New("provider mutation blocked: account disabled or deleting")
 	}

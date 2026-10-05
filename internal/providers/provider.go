@@ -6,11 +6,12 @@ import (
 )
 
 type Capabilities struct {
-	Account   bool
-	Catalog   bool
-	Compute   bool
-	SSHKeys   bool
-	Inventory bool
+	Account       bool
+	Catalog       bool
+	Compute       bool
+	SSHKeys       bool
+	Inventory     bool
+	InlineSSHKeys bool
 }
 
 type Driver interface {
@@ -63,6 +64,8 @@ type OpenRequest struct {
 	AccountID   string
 	HTTPClient  *http.Client
 	Credentials CredentialSource
+	PlanIDs     []string
+	Cleanup     CleanupJournal
 }
 
 type Factory interface {

@@ -11,6 +11,8 @@ type BillingReader interface {
 	Billing(context.Context) (Billing, error)
 }
 type Billing struct {
+	BalanceLabel       string    `json:"balance_label,omitempty"`
+	MonthToDate        string    `json:"month_to_date,omitempty"`
 	Currency           string    `json:"currency"`
 	Balance            string    `json:"balance"`
 	PendingCharges     string    `json:"pending_charges"`

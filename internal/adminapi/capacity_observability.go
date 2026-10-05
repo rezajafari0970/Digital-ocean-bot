@@ -24,6 +24,14 @@ func deriveCapacityEvidence(source string, lowerBound int, probeInFlight bool, p
 }
 
 func (s *Server) capacityEvidenceForAccount(accountID, provider string) capacityEvidence {
+	if provider == "upcloud" {
+		var known bool
+		err := s.DB.QueryRow("SELECT COALESCE((canonical->'Capacity'->>'LimitKnown')::boolean,false) FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1", accountID).Scan(&known)
+		if err != nil || !known {
+			return capacityEvidence{State: "UNKNOWN"}
+		}
+		return capacityEvidence{State: "RESOURCE_BUDGET", Source: "upcloud_resource_budget"}
+	}
 	if provider != "vultr" {
 		return capacityEvidence{State: "EXACT"}
 	}

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -169,7 +170,18 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 	}
 	guarded.Transport = providerMutationFence{base: base, db: c.DB, account: cfg.ID}
 	client = &guarded
-	return r.Open(ctx, cfg.Provider, providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef}})
+	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef}}
+	if cfg.Provider == "upcloud" {
+		var raw []byte
+		if err := c.DB.QueryRowContext(ctx, "SELECT preferred_sizes FROM accounts WHERE id=$1", cfg.ID).Scan(&raw); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(raw, &req.PlanIDs); err != nil {
+			return nil, err
+		}
+		req.Cleanup = providers.SQLCleanupJournal{DB: c.DB}
+	}
+	return r.Open(ctx, cfg.Provider, req)
 }
 
 func computeDriver(rt AccountRuntime) (providers.ComputeDriver, error) {
