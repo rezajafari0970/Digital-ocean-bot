@@ -76,9 +76,9 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
-    "handoff": "docs/UPCLOUD_NULL_QUOTAS_HANDOFF_20261005.md",
+    "revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+    "handoff": "docs/UPCLOUD_QUOTA_DIAGNOSTICS_HANDOFF_20261005.md",
     "inspected_live_source": true,
-    "note": "Current UpCloud quota decoder supersedes prior strict-all-number map; only documented nullable Dev keys accepted, selected unknown quota remains fail-closed."
+    "note": "User authenticated retries still fail HTTP200 account INVALID_NUMBER on runtime 5aa7fef. Prior nullable-Dev fix did not resolve the actual failure. Added safe quota field/shape evidence, no parser relaxation. Actual offending field/value remains unknown until another panel Validate."
   }
 }

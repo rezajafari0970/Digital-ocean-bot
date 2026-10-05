@@ -107,3 +107,7 @@ Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANC
 ## UpCloud nullable quota continuation (2026-10-05)
 - Read docs/UPCLOUD_NULL_QUOTAS_HANDOFF_20261005.md and docs/UPCLOUD_NULL_QUOTAS_ACCEPTANCE_20261005.json. Runtime 5aa7fef66b5ff3e644663b8468d4a724585aa6dd; static/migration unchanged.
 - User trace identified account HTTP200 INVALID_NUMBER. Two documented nullable Dev quota fields reproduced the incompatibility; parser corrected with selected-plan fail-closed protection. Tests/deployment/config readback pass. Authenticated user retry remains required.
+
+## UpCloud quota diagnostics continuation (2026-10-05)
+- Read docs/UPCLOUD_QUOTA_DIAGNOSTICS_HANDOFF_20261005.md and docs/UPCLOUD_QUOTA_DIAGNOSTICS_ACCEPTANCE_20261005.json. Runtime 4ada688681d03283dc0712c2fb5cc6798f91b3c0; static/migration unchanged.
+- Prior nullable-Dev fix did not resolve authenticated user preview. Added safe per-field/type diagnostics with all issues in correlated log. Tests/deploy pass; actual root fix awaits one authenticated retry. Do not claim the null-Dev hypothesis was confirmed.

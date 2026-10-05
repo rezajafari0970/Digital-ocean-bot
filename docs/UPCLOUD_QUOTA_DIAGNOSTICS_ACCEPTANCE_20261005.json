@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-05T21:28:28.156653+00:00",
+  "status": "DEPLOYED_QUOTA_FIELD_DIAGNOSTICS_ACTUAL_CAUSE_PENDING_USER_RETRY",
+  "runtime_revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+  "previous_runtime_revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+  "binaries": {
+    "api": {
+      "revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+      "sha256": "ef438e00a578a13df44978a0553e360ead0b1cbec9bf929544ebfa0d0b150447",
+      "vcs_modified": false
+    },
+    "worker": {
+      "revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+      "sha256": "f329d3bc94aa85ce079af3c8346f58a171ff072a2937d5a054c283f1ca892acf",
+      "vcs_modified": false
+    }
+  },
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "migration": "000153_upcloud_cleanup",
+  "static_unchanged": true,
+  "configuration_preserved": true,
+  "preserved_publications": [
+    {
+      "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "spec": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "state": "KEPT",
+      "deadline": null,
+      "duration_mode": "permanent",
+      "publish_scope": "fleet"
+    }
+  ],
+  "failure_evidence": [
+    {
+      "request_id": "d6cbab5416e7982f",
+      "time_utc": "2026-10-05T21:14:03Z",
+      "elapsed_ms": 2877
+    },
+    {
+      "request_id": "37682fd15a53aa98",
+      "time_utc": "2026-10-05T21:14:17Z",
+      "elapsed_ms": 8035
+    }
+  ],
+  "failure_common": {
+    "stage": "account",
+    "operation": "account",
+    "diagnostic": "INVALID_NUMBER",
+    "http_status": 200,
+    "runtime": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd"
+  },
+  "change": "Collect sorted bounded quota errors (max64): app-owned allowlisted field names plus type/shape enum only. Unknown field names become OTHER_FIELD. Preserve metadata through HTTP normalization to admin JSON and journal. Revalidate vocabulary at export. Current strict parser and nullable Dev exceptions unchanged.",
+  "tests": {
+    "focused": "PASS",
+    "race_and_real_postgresql": "PASS",
+    "full_go": "PASS",
+    "mobile_browser": "PASS",
+    "orchestrator": "COMPLETE",
+    "redaction_and_bounded_diagnostics": "PASS"
+  },
+  "live_invalid_synthetic_token_probe": {
+    "detail": "UpCloud rejected the API token. Stage: account; operation: account; reason: AUTHENTICATION_FAILED; HTTP 401; ref: 197d6a726d2d1b6b.",
+    "diagnostic": "AUTHENTICATION_FAILED",
+    "error": "provider_credential_invalid",
+    "operation": "account",
+    "provider_status": 401,
+    "quota_issues": null,
+    "request_id": "197d6a726d2d1b6b",
+    "stage": "account"
+  },
+  "authenticated_user_preview_confirmed": false,
+  "root_cause_fixed": false,
+  "upcloud_cloud_lifecycle_confirmed": false,
+  "limitations": "User authenticated retries still fail HTTP200 account INVALID_NUMBER on runtime 5aa7fef. Prior nullable-Dev fix did not resolve the actual failure. Added safe quota field/shape evidence, no parser relaxation. Actual offending field/value remains unknown until another panel Validate.",
+  "evidence_directory": "/root/backups/dob-upcloud-quota-diagnostics-20261005",
+  "rollback": {
+    "binaries": [
+      "/root/backups/dob-upcloud-quota-diagnostics-20261005/api.before",
+      "/root/backups/dob-upcloud-quota-diagnostics-20261005/worker.before"
+    ],
+    "runtime_revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+    "schema_or_configuration_change_required": false
+  }
+}
