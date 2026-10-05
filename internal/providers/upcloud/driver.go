@@ -356,10 +356,13 @@ func (d *Driver) capacity(ctx context.Context, a accountData, inUse int) (provid
 		for k, per := range needs {
 			limit, lok := a.Limits[k]
 			used, uok := usage[k]
+			if lok && limit == nil {
+				return out, normalize("capacity_limits", &responseError{Code: "UNKNOWN_PLAN_QUOTA", Status: http.StatusOK})
+			}
 			if !lok || !uok || per <= 0 {
 				return out, unavailable("capacity", "missing resource quota or usage: "+k)
 			}
-			slots = min(slots, max(int64(0), int64(limit-used))/int64(per))
+			slots = min(slots, max(int64(0), int64(*limit-used))/int64(per))
 		}
 		out.PlanAvailable[id] = int(slots)
 		remaining = min(remaining, slots)

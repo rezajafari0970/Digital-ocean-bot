@@ -1,0 +1,26 @@
+{
+  "goal": "Fix UpCloud account preview INVALID_NUMBER for documented nullable Dev plan quota fields without weakening resource capacity safety.",
+  "context": "User authenticated request ab50daf03fb50a00 at 2026-10-05T20:53:49Z: stage account, operation account, HTTP200, INVALID_NUMBER,2163ms. Only number in account response parsed by custom number is resource_limits; all currently map[string]number. Official current https://developers.upcloud.com/api/1.3/upcloud-openapi.json components.schemas.accountResourceLimits explicitly permits integer|null for cloud_server_dev_1xcpu_1gb_10gb_plans and cloud_server_dev_1xcpu_1gb_plans; remaining quotas require nonnegative integers. Preserve null distinctly for these two keys using resourceLimits map pointers plus custom UnmarshalJSON. Other null/negative/fractional/malformed/overflow values must still reject. Runtime capacity must fail closed if a selected plan requires a null quota; regular plans ignore unrelated nullable quotas. Keep zero as known zero. Add actual fixture Account/Capacity/Catalog and handler regressions as useful, plus selected-plan capacity tests. No user token retained or requested, no raw response logging. Evidence proves actual failure class and schema mismatch, not exact live key/value; user will retry validation. Run orchestrator planning, race+PostgreSQL and full suite, reversible binary deployment and config comparison. Keep DO/Vultr, route/secret/proxy, active permanent residential profile, schema/static unchanged. No cloud mutations.",
+  "allowed_paths": [
+    "internal/providers/upcloud",
+    "internal/adminapi/account_preview_flow_test.go",
+    "docs/development-jobs/upcloud-null-quotas-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-null-quotas-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): accept documented nullable Dev plan quotas safely"
+}

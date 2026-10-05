@@ -234,12 +234,15 @@ func TestCapacityUsesSelectedPlansAndQuotaUnits(t *testing.T) {
 		return 200, usage, nil
 	}, nil)
 	d.planIDs = []string{"1xCPU-1GB", "2xCPU-4GB"}
-	a := accountData{Limits: map[string]number{"cores": 10, "memory": 16384, "public_ipv4": 10, "storage_total": 500, "storage_maxiops": 250}}
+	var a accountData
+	if err := json.Unmarshal([]byte(`{"resource_limits":{"cores":10,"memory":16384,"public_ipv4":10,"storage_total":500,"storage_maxiops":250}}`), &a); err != nil {
+		t.Fatal(err)
+	}
 	cap, e := d.capacity(context.Background(), a, 3)
 	if e != nil || !cap.LimitKnown || cap.ComputeLimit != 6 || cap.PlanAvailable["1xCPU-1GB"] != 6 || cap.PlanAvailable["2xCPU-4GB"] != 3 {
 		t.Fatal(cap, e)
 	}
-	a.Limits["storage_maxiops"] = 100
+	*a.Limits["storage_maxiops"] = 100
 	cap, e = d.capacity(context.Background(), a, 3)
 	if e != nil || cap.ComputeLimit != 3 {
 		t.Fatal("zero remaining", cap, e)

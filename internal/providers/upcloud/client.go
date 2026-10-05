@@ -200,9 +200,9 @@ func labelValue(xs []label, key string) string {
 }
 
 type accountData struct {
-	Username string            `json:"username"`
-	Credits  json.Number       `json:"credits"`
-	Limits   map[string]number `json:"resource_limits"`
+	Username string         `json:"username"`
+	Credits  json.Number    `json:"credits"`
+	Limits   resourceLimits `json:"resource_limits"`
 }
 type planData struct {
 	Name   string `json:"name"`
