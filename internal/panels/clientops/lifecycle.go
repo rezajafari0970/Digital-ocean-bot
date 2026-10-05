@@ -462,7 +462,15 @@ func (j Journal) LifecycleInbounds(ctx context.Context, panel string) ([]int64, 
 // reconciled its immutable identities; only freshly absent PLANNED rows abort.
 var ErrLifecycleSuperseded = errors.New("lifecycle plan superseded before POST")
 
+// ErrLifecycleExpired is only returned after a complete fresh reconciliation,
+// before POST. Observed clients are confirmed; only absent PLANNED rows abort.
+var ErrLifecycleExpired = errors.New("lifecycle planned lifetime elapsed before POST")
+
 func (j Journal) supersedeLifecycle(ctx context.Context, job Job) error {
+	return j.retireLifecycle(ctx, job, "policy superseded before POST", "SUPERSEDED_BEFORE_POST")
+}
+
+func (j Journal) retireLifecycle(ctx context.Context, job Job, reason, phase string) error {
 	if !isLifecycle(job.Payload) || (job.Kind != KindBulkCreate && job.Kind != KindUpdate) {
 		return ErrInvalidRequest
 	}
@@ -472,7 +480,7 @@ func (j Journal) supersedeLifecycle(ctx context.Context, job Job) error {
 	}
 	defer tx.Rollback()
 	var id string
-	err = tx.QueryRowContext(ctx, `UPDATE client_mutation_jobs SET state='OBSOLETE',completed_at=now(),next_retry_at=NULL,last_error='policy superseded before POST',result=result||jsonb_build_object('phase','SUPERSEDED_BEFORE_POST'),updated_at=now() WHERE id=$1 AND state='RUNNING' AND attempts=$2 RETURNING id::text`, job.ID, job.Attempts).Scan(&id)
+	err = tx.QueryRowContext(ctx, `UPDATE client_mutation_jobs SET state='OBSOLETE',completed_at=now(),next_retry_at=NULL,last_error=$3,result=result||jsonb_build_object('phase',$4::text),updated_at=now() WHERE id=$1 AND state='RUNNING' AND attempts=$2 RETURNING id::text`, job.ID, job.Attempts, reason, phase).Scan(&id)
 	if err != nil {
 		return err
 	}

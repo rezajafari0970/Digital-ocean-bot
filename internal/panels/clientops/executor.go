@@ -332,6 +332,8 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 	switch {
 	case errors.Is(execErr, ErrLifecycleSuperseded):
 		return true, e.Journal.supersedeLifecycle(finishCtx, job)
+	case errors.Is(execErr, ErrLifecycleExpired):
+		return true, e.Journal.retireLifecycle(finishCtx, job, "planned lifetime elapsed before POST", "LIFETIME_ELAPSED_BEFORE_POST")
 	case execErr == nil:
 		return true, e.Journal.Succeed(finishCtx, job.ID)
 	case errors.Is(execErr, ErrUnsupportedKind),

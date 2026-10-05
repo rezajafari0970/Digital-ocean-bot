@@ -303,6 +303,12 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 	}
 	for _, c := range missing {
 		if c.ExpiryTime > 0 && c.ExpiryTime <= time.Now().Add(10*time.Second).UnixMilli() {
+			// Both fresh views have proved the remaining immutable identities
+			// absent. Retire the lifecycle plan; never POST expired credentials
+			// or turn a stale queue item into a fleet-wide mutation failure.
+			if p.Lifecycle {
+				return ErrLifecycleExpired
+			}
 			return fmt.Errorf("%w: planned lifetime elapsed", ErrClientConflict)
 		}
 	}
