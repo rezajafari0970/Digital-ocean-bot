@@ -36,12 +36,13 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "runtime_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
-    "worker_source_revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
-    "status": "RESIDENTIAL_TCP_DNS_HTTP3_AND_LIFECYCLE_RECOVERED",
-    "eligible_serving_panels_at_capture": 38,
-    "acceptance": "docs/RESIDENTIAL_RECOVERY_ACCEPTANCE_20261005.json",
-    "handoff": "docs/RESIDENTIAL_RECOVERY_HANDOFF_20261005.md",
-    "note": "Live evidence supersedes previous UDP failure. Preserve saved60s creation interval and240s Residential lifetime; no load-capacity guarantee."
+    "api_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
+    "worker_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+    "web_static_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+    "status": "ADS_TCP_ONLY_DEPLOYED_AND_VERIFIED",
+    "eligible_serving_panels_at_capture": 37,
+    "acceptance": "docs/ADS_TCP_ONLY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/ADS_TCP_ONLY_HANDOFF_20261005.md",
+    "note": "Current user instruction supersedes prior broad residential routing. Ads TCP only; no BrowserLeaks exception; DNS and other TCP direct; residential UDP denied; Direct unchanged. No config-generation policy edits in this change."
   }
 }

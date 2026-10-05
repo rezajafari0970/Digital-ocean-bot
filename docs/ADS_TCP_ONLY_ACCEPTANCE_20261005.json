@@ -1,0 +1,75 @@
+{
+  "verified_at_utc": "2026-10-05T08:43:51.570970+00:00",
+  "source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+  "worker_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+  "policy": {
+    "residential": "Ads categories TCP only",
+    "categories": [
+      "category-ads-all",
+      "category-ads",
+      "google@ads",
+      "facebook@ads"
+    ],
+    "residential_udp": "blocked, including QUIC and UDP DNS",
+    "other_tcp": "direct, including DNS, BrowserLeaks and opaque/IP traffic",
+    "matched_ads_proxy_failure": "blocked, no direct fallback",
+    "direct_clients": "unchanged TCP and UDP",
+    "dns": [
+      "tcp://1.1.1.1:53",
+      "tcp://8.8.8.8:53",
+      "tcp://223.5.5.5:53"
+    ]
+  },
+  "tests": {
+    "focused": true,
+    "race": true,
+    "full": true,
+    "clean_detached_full": true,
+    "installed_xray_packet_faults": true,
+    "production_ui_and_output_classes": true
+  },
+  "production": {
+    "services": {
+      "api": "active",
+      "worker": "active"
+    },
+    "binaries": {
+      "api": {
+        "revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
+        "vcs_modified": false,
+        "sha256": "ee3d2dbf6086ef5a45fa092c11d1a02dd69311f5425cf22d13898baa4f5679c4"
+      },
+      "worker": {
+        "revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+        "vcs_modified": false,
+        "sha256": "2d478a4c9f3c86e91ee547439698f8701d075e415428635fc5fa934228886eb0"
+      }
+    },
+    "routing_state": {
+      "serving": 37,
+      "applied": 37,
+      "fresh_60s": 37
+    },
+    "panels_verified_over_window": 37,
+    "unique_route_proofs": 962,
+    "canary_panel": "f537821f-9179-4693-8a81-f522e9190a8c",
+    "initial_fleet_passed": 36,
+    "initial_fleet_pending": 1,
+    "fresh_read_recheck_passed": 1,
+    "profiles_unchanged": true,
+    "mutation_gate_unchanged": true
+  },
+  "real_reality_connection": {
+    "non_ad_tcp": "HTTP200; egress=server",
+    "google": "HTTP204",
+    "browserleaks": "HTTP200",
+    "ads": "TCP/TLS transport success; HTTP404 from adservice.google.com, not proof of ad playback",
+    "opaque_ip_tcp": "HTTP200; egress=server"
+  },
+  "limits": [
+    "Category lists and sniffing cannot classify every advertisement or hidden hostname.",
+    "Residential UDP DNS is intentionally blocked; clients must use TCP DNS/DoH.",
+    "No concurrent-user or provider-capacity guarantee."
+  ],
+  "evidence_directory": "/root/backups/dob-ads-tcp-only-20261005"
+}
