@@ -119,3 +119,7 @@ Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANC
 ## UpCloud server-list query continuation (2026-10-05)
 - Read docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md and docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json. Runtime b44d3716e104bbc916caf311d29189940151c36f; static/migration unchanged.
 - Account passes; next observed failure is capacity/list_servers HTTP400. Corrected inverted sort_by/order_by per current OpenAPI; contract fixtures and rollout pass. Full authenticated preview remains pending user retry.
+
+## UpCloud regional prices and image labels (2026-10-05)
+- Read docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md and docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json. Runtime and changedstatic 46e928d234b4e0c3ee0698a2823863efe3c57103; migration153 unchanged.
+- User screenshot confirms authenticated preview success. Added optional region/currency pricing and full distinct image labels; tests/rollout pass; live newprice response pending.

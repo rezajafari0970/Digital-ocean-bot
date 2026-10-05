@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-05T22:04:35.932129+00:00",
+  "status": "DEPLOYED_REGIONAL_PRICE_AND_IMAGE_LABELS_LIVE_PRICE_PENDING",
+  "runtime_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+  "previous_runtime_revision": "b44d3716e104bbc916caf311d29189940151c36f",
+  "binaries": {
+    "api": {
+      "revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+      "sha256": "7c485450946408f71d685cc7ab6a4024715961bf2c93fe70bbb07aa7a9f218af",
+      "vcs_modified": false
+    },
+    "worker": {
+      "revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+      "sha256": "a44cdf52902a9da3e51eceb7f344aeb491449a36f9fa8d72e92755fc01b09c92",
+      "vcs_modified": false
+    }
+  },
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "static_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+  "static_hashes": {
+    "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
+    "app.js": "d04c173a992287d97dbf454ef59fc02bba72a7e7ce4943ef69161463eda6f0c9",
+    "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
+    "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
+    "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
+    "vultr-console.js": "51b39c3f45e321b8a7f0cdd3a42ceed4a23e0923240dea2e95d3c3bab2446b67",
+    "index.html": "5bf14957e08702b5e9d8ac5ca018842a6c9e46d437f4391b3224016fd8bb5dd8",
+    "residential_performance.js": "600704ec9b30250aa86f320e9347b649541fcbf4e28e76165bc89f7b5b5892f9"
+  },
+  "only_static_app_and_index_changed": true,
+  "migration": "000153_upcloud_cleanup",
+  "configuration_preserved": true,
+  "preserved_publications": [
+    {
+      "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "spec": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "state": "KEPT",
+      "deadline": null,
+      "duration_mode": "permanent",
+      "publish_scope": "fleet"
+    }
+  ],
+  "authenticated_catalog_preview_user_screenshot_confirmed": true,
+  "authenticated_price_enrichment_confirmed": false,
+  "upcloud_cloud_lifecycle_confirmed": false,
+  "sources": [
+    "https://developers.upcloud.com/api/1.3/price",
+    "https://developers.upcloud.com/1.3/4-pricing/",
+    "https://github.com/UpCloudLtd/upcloud-cli/blob/3313774ed86afbfb80cf19537a5486274c62b8a8/internal/commands/server/plan_list.go"
+  ],
+  "changes": [
+    "Optional GET /price through existing account transport, shared 8s deadline, exact plan/zone mapping, no retries or direct fallback.",
+    "Currency from price response or bounded account/details lookup; never assumed USD. API amount must be1 and price positive finite; divide by100 per official CLI, monthly estimate672hours.",
+    "Unavailable/malformed/ambiguous price remains unavailable and does not reject valid catalog. No global UpCloud scalar price assigned.",
+    "New/Edit forms display primary-region currency/hourly/monthly estimate; all3plan selectors update preserving valid selections; region, tax and extras note.",
+    "Ubuntu labels show full title, actual template type and architecture, append IDs only on label collisions; actual IDs/variants retained. New defaults match version metadata."
+  ],
+  "tests": {
+    "focused_upcloud_price_and_catalog": "PASS",
+    "currency_fallback_and_escaped_username": "PASS",
+    "null_bad_nonfinite_wrong_amount_duplicate_zone_http_timeout": "PASS",
+    "full_go": "PASS",
+    "race_and_isolated_postgresql": "PASS",
+    "mobile_desktop_new_and_edit_forms": "PASS",
+    "three_plan_refresh_preserves_selection": "PASS",
+    "same_version_image_identity_and_metadata_defaults": "PASS",
+    "DO_Vultr_scalar_price_compatibility": "PASS",
+    "orchestrator": "COMPLETE"
+  },
+  "live_invalid_synthetic_token_probe": {
+    "detail": "UpCloud rejected the API token. Stage: account; operation: account; reason: AUTHENTICATION_FAILED; HTTP 401; ref: 21311177925633af.",
+    "diagnostic": "AUTHENTICATION_FAILED",
+    "error": "provider_credential_invalid",
+    "operation": "account",
+    "provider_status": 401,
+    "quota_issues": null,
+    "request_id": "21311177925633af",
+    "stage": "account"
+  },
+  "limitations": "User screenshots at 2026-10-06 01:23 Tehran confirm authenticated catalog preview after b44d371. Catalog pricing was not implemented and image labels hid variant names. Regional optional pricing and distinct full image labels now implemented/tested/deployed. Live authenticated new price response and cloud lifecycle remain unconfirmed; no saved UpCloud account at baseline.",
+  "evidence_directory": "/root/backups/dob-upcloud-catalog-display-20261005",
+  "rollback": {
+    "api": "/root/backups/dob-upcloud-catalog-display-20261005/api.before",
+    "worker": "/root/backups/dob-upcloud-catalog-display-20261005/worker.before",
+    "static_directory": "/root/backups/dob-upcloud-catalog-display-20261005/static.before",
+    "runtime_revision": "b44d3716e104bbc916caf311d29189940151c36f",
+    "schema_or_configuration_change_required": false
+  }
+}

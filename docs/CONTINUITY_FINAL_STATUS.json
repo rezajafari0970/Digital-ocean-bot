@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
-    "worker_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
-    "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-    "status": "DEPLOYED_SERVER_SORT_QUERY_FIX_AUTHENTICATED_PREVIEW_PENDING",
-    "acceptance": "docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md",
-    "note": "Account parsing now passes in user trace 84ebfb01b8b8f3db; capacity/list_servers returns HTTP400. Current OpenAPI confirms sorting parameters were inverted. Corrected and reproduced before/after in contract fixtures. Authenticated complete preview and live UpCloud lifecycle remain unconfirmed."
+    "api_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+    "worker_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+    "web_static_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+    "status": "DEPLOYED_REGIONAL_PRICE_AND_IMAGE_LABELS_LIVE_PRICE_PENDING",
+    "acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md",
+    "note": "User screenshots at 2026-10-06 01:23 Tehran confirm authenticated catalog preview after b44d371. Catalog pricing was not implemented and image labels hid variant names. Regional optional pricing and distinct full image labels now implemented/tested/deployed. Live authenticated new price response and cloud lifecycle remain unconfirmed; no saved UpCloud account at baseline."
   }
 }

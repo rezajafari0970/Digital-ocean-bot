@@ -76,9 +76,9 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "b44d3716e104bbc916caf311d29189940151c36f",
-    "handoff": "docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md",
+    "revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
+    "handoff": "docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md",
     "inspected_live_source": true,
-    "note": "Account parsing now passes in user trace 84ebfb01b8b8f3db; capacity/list_servers returns HTTP400. Current OpenAPI confirms sorting parameters were inverted. Corrected and reproduced before/after in contract fixtures. Authenticated complete preview and live UpCloud lifecycle remain unconfirmed."
+    "note": "User screenshots at 2026-10-06 01:23 Tehran confirm authenticated catalog preview after b44d371. Catalog pricing was not implemented and image labels hid variant names. Regional optional pricing and distinct full image labels now implemented/tested/deployed. Live authenticated new price response and cloud lifecycle remain unconfirmed; no saved UpCloud account at baseline."
   }
 }
