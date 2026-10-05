@@ -35,13 +35,13 @@
   ],
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
-    "date": "2026-10-04",
-    "runtime_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
-    "worker_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
-    "status": "DNS_AND_CREATION_INTERVAL_DEPLOYED_RESIDENTIAL_QUIC_NOT_ACCEPTED",
+    "date": "2026-10-05",
+    "runtime_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
+    "worker_source_revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
+    "status": "RESIDENTIAL_TCP_DNS_HTTP3_AND_LIFECYCLE_RECOVERED",
     "eligible_serving_panels_at_capture": 38,
-    "acceptance": "docs/RESIDENTIAL_DATAPLANE_ACCEPTANCE_20261004.json",
-    "handoff": "docs/RESIDENTIAL_DATAPLANE_HANDOFF_20261004.md",
-    "note": "DNS pool restricted and protected TCP resolver deployed. Durable creation interval available; existing profile values preserved. Actual Residential HTTP3 remains unstable. Verify current production and credential expiry before any new test."
+    "acceptance": "docs/RESIDENTIAL_RECOVERY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/RESIDENTIAL_RECOVERY_HANDOFF_20261005.md",
+    "note": "Live evidence supersedes previous UDP failure. Preserve saved60s creation interval and240s Residential lifetime; no load-capacity guarantee."
   }
 }

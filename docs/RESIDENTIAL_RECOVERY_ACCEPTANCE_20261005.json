@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-05T05:58:23.327264+00:00",
+  "status": "RESIDENTIAL_TCP_DNS_HTTP3_AND_LIFECYCLE_RECOVERED",
+  "api_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
+  "worker_source_revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
+  "commits": [
+    "917c900482f45ef76d30c06740815efe5eb8bce4",
+    "1eb5c786a537da42952049a57ec5916ed6df24db",
+    "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85"
+  ],
+  "findings": [
+    "Main mutation gate had fail-closed at 2026-10-04 19:38:16Z after inbound/global client policy disagreement; four-minute Residential credentials expired without replacement.",
+    "Fresh dual-view inventory agreed. Added bounded fresh dual reads for this typed projection disagreement only; persistent disagreement and identity conflicts still fail closed.",
+    "Fleet resume encountered a ten-hour-old unsubmitted CREATE whose absolute lifetime had elapsed. Fresh absence was proved, PLANNED ownership aborted, job marked OBSOLETE retaining its audit. Future lifecycle plans retire only after fresh per-client reconciliation, before POST.",
+    "Original sticky endpoint rejected UDP association. A separate UDP-selected session passed TCP, UDP DNS, and real HTTP3, including through native Xray and the actual VLESS/Reality panel tunnel.",
+    "Serial running-route verification let proof age reach139 seconds: only25/38 fresh at one snapshot. Eight disjoint serving lanes plus one retirement lane now preserve the unchanged60-second publication requirement."
+  ],
+  "upstream_change": {
+    "scope": "Residential records only; account proxies unchanged",
+    "provider_specific_account_configuration_only": true,
+    "old_port": 10000,
+    "new_port": 10001,
+    "udp_selection": true,
+    "new_session_isolated_from_original": true,
+    "production_code_provider_neutral": true,
+    "protocol_note": "Installed target Xray ClientHandshake sends RFC1928 zero UDP association address. An early raw probe using destination address was discarded for Xray-equivalence; final native-core and full-tunnel tests are authoritative."
+  },
+  "acceptance": {
+    "panels_verified_over_window": 38,
+    "proofs_per_panel": 12,
+    "initial_fleet_passed": 34,
+    "concurrent_plan_changes_rechecked_passed": 4,
+    "plain_output_snapshot": {
+      "at": "2026-10-05T05:54:56Z",
+      "direct": 38,
+      "residential": 38,
+      "shared_identities": 0
+    },
+    "real_residential_tunnel": [
+      "ordinary HTTPS uses server IP",
+      "Google204",
+      "BrowserLeaks200 non-server IP",
+      "opaque HTTPS non-server IP",
+      "adservice.google.com HTTP3 h3 response404",
+      "UDP/TCP DNS A,AAAA,HTTPS65",
+      "TLS SNI sniffing when SOCKS supplies destination IP"
+    ],
+    "http3_limit": "HTTP404 proves working authenticated HTTP3 transport to the advertising endpoint; it does not prove successful ad playback, targeting, or completion.",
+    "monitor": {
+      "duration_minutes": 6,
+      "max_sampled_proof_age_seconds": 27,
+      "new_failed_mutation_jobs": 0,
+      "mutation_gate_stayed_enabled": true
+    },
+    "tests": [
+      "focused Go",
+      "focused race",
+      "full go test ./...",
+      "full tests in clean detached worktrees",
+      "real-core DNS fail-closed tests",
+      "isolated PostgreSQL expiry/partial-recovery/conflict tests",
+      "38-panel disjoint-lane concurrency test",
+      "production scoped Worker canaries",
+      "fresh inventory manual/Direct preservation",
+      "real tunnel and per-class Output acceptance"
+    ],
+    "test_note": "An existing profile lifecycle test failed once during an initial run;20 focused repeats and subsequent focused/race/full/clean runs passed. No test guard was weakened."
+  },
+  "production_state": {
+    "at": "2026-10-05T05:58:23.162995+00:00",
+    "profiles": [
+      {
+        "class": "DIRECT",
+        "enabled": true,
+        "revision": 5,
+        "lifetime_seconds": 0,
+        "creation_interval_seconds": 60
+      },
+      {
+        "class": "RESIDENTIAL",
+        "enabled": true,
+        "revision": 6,
+        "lifetime_seconds": 240,
+        "creation_interval_seconds": 60
+      }
+    ],
+    "bulk_gate": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "live_routing": {
+      "total": 38,
+      "applied": 38,
+      "fresh_applied": 38,
+      "max_proof_age_seconds": 21
+    },
+    "mutation_gate": {
+      "enabled": true,
+      "panel_id": null,
+      "inbound_id": null,
+      "updated_at": "2026-10-05T05:51:32.941677+00:00",
+      "concurrency": 1,
+      "kill_switch": false
+    },
+    "routing_control": {
+      "fleet": true,
+      "enabled": true,
+      "revision": 522
+    },
+    "recent_failed_jobs": 0,
+    "residential_endpoints": [
+      {
+        "id": "83280097-66e0-46db-9a90-fa36c04e9db6",
+        "port": 10001,
+        "status": "healthy",
+        "enabled": true,
+        "udp_selector": true
+      },
+      {
+        "id": "84afb2ca-793a-4548-aa16-73c11ad51a5b",
+        "port": 10001,
+        "status": "healthy",
+        "enabled": true,
+        "udp_selector": true
+      }
+    ],
+    "completed_since_recovery": [
+      {
+        "kind": "BULK_CREATE",
+        "succeeded": 153
+      },
+      {
+        "kind": "BULK_DELETE",
+        "succeeded": 149
+      }
+    ]
+  },
+  "binaries": {
+    "api": {
+      "revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
+      "vcs_modified": false,
+      "sha256": "ee3d2dbf6086ef5a45fa092c11d1a02dd69311f5425cf22d13898baa4f5679c4"
+    },
+    "worker": {
+      "revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
+      "vcs_modified": false,
+      "sha256": "f666385d8e4593d0a3ed82f81a19559371c63066864094e09b47cc2d23afe958"
+    }
+  },
+  "operational_limits": [
+    "Provider UDP capability was repeatedly observed, not guaranteed permanently; health monitor currently checks HTTP and does not continuously certify UDP.",
+    "Four-minute Residential lifetime and60-second creation interval were preserved. Interval is a minimum between new credentials while below target; copied static links expire at their absolute lifetime.",
+    "Output intentionally withholds expired or unverified credentials during replacement; instantaneous counts may be below38 without a fleet failure.",
+    "No30k-concurrent-user load or sustained provider-capacity certification was performed. Two saved Residential records currently use the same upstream account/session, not independent failure domains.",
+    "Category/domain sniffing does not identify every possible advertisement or encrypted hostname; no claim of universal ad classification."
+  ],
+  "private_evidence_directory": "/root/backups/dob-residential-quic-20261005"
+}

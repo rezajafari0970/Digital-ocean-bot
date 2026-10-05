@@ -1,18 +1,18 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
+  "runtime_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-04T19:31:28.064536+00:00",
+  "verified_at_utc": "2026-10-05T05:58:23.327264+00:00",
   "binaries": {
     "api": {
-      "revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
+      "revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
       "vcs_modified": false,
-      "sha256": "3adecf4e6a1cc491ef6c1fbe112eb5c3aef0f89efb8b8055545995a9d0941b4a"
+      "sha256": "ee3d2dbf6086ef5a45fa092c11d1a02dd69311f5425cf22d13898baa4f5679c4"
     },
     "worker": {
-      "revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
+      "revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
       "vcs_modified": false,
-      "sha256": "628c138269ee1b4ca4fdcefc0db07708c3fe66a74725a1da04ba71546dbbdd2a"
+      "sha256": "f666385d8e4593d0a3ed82f81a19559371c63066864094e09b47cc2d23afe958"
     }
   },
   "services": {
@@ -22,9 +22,9 @@
     "api_worker_auto_restarts": 0
   },
   "migration": "000149_profile_creation_interval",
-  "acceptance": "docs/RESIDENTIAL_DATAPLANE_ACCEPTANCE_20261004.json",
+  "acceptance": "docs/RESIDENTIAL_RECOVERY_ACCEPTANCE_20261005.json",
   "verified": true,
-  "note": "DNS and durable creation interval deployed and tested. Residential UDP/QUIC remains unaccepted; refer to explicit limits in latest acceptance.",
+  "note": "Residential TCP/DNS/HTTP3 and lifecycle recovered; Worker-only final deploy adds bounded routing lanes. See acceptance limits: no concurrent-user capacity certification.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,11 +41,11 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Provider-neutral Residential UDP/QUIC capability, stability and capacity diagnosis; profile lifetime remains240 seconds unless explicitly changed.",
+  "next_product_step": "Provider-neutral continuous UDP capability and measured capacity; independent upstream failure domains.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 38,
-  "worker_source_revision": "8425e1bebd4aff0b0e3031615ac0d646ecd7ae44",
+  "worker_source_revision": "11f97fa235b93e0aff9f75a0e3f86549eeb2ce85",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
-  "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_DATAPLANE_ACCEPTANCE_20261004.json"
+  "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_RECOVERY_ACCEPTANCE_20261005.json"
 }
