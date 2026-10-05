@@ -99,7 +99,7 @@ func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
 			}
 			for _, target := range []string{sink.URL, "http://adservice.google.com:" + portText, "http://browserleaks.com:" + portText} {
 				_, e := exec.Command("curl", "--silent", "--max-time", "2", "--proxy", "socks5h://"+address, "--noproxy", "", target).CombinedOutput()
-				blocked := kind != "direct-control" && strings.Contains(target, "adservice.google.com")
+				blocked := kind != "direct-control" && (strings.Contains(target, "adservice.google.com") || strings.Contains(target, "browserleaks.com"))
 				if blocked && e == nil {
 					t.Fatal("Ads escaped failed residential proxy")
 				}
@@ -143,7 +143,7 @@ func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
 			} else if e == nil {
 				t.Fatal("opaque UDP leaked")
 			}
-			want := int64(2)
+			want := int64(1)
 			if kind == "direct-control" {
 				want = 3
 			}

@@ -113,7 +113,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);
   await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
   await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("3 saved")');
-  assert.equal(await evaluate('document.querySelector("#modalFields a[href*=browserleaks]")'),null);
+  assert.equal(await evaluate('document.querySelector("#modalFields a[href*=browserleaks]")?.href'),"https://browserleaks.com/ip");
   assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("Only TCP traffic matching Ads categories")'),true);
   assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');
   await evaluate('document.querySelector("[name=users_per_second]").scrollIntoView({block:"center"})');

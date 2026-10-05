@@ -17,6 +17,14 @@ const blockedTag = "dob-route-blocked"
 // display names, not valid geosite:google-ads / geosite:ads identifiers.
 var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads"}
 
+// Temporary user-requested diagnostic exception, separate from Ads categories.
+// domain: includes the apex and subdomains, never lookalike suffixes.
+var residentialTestDomains = []string{"domain:browserleaks.com"}
+
+func residentialDomains() []string {
+	return append(append([]string{}, adDomains...), residentialTestDomains...)
+}
+
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
 	Explicit            bool
@@ -310,7 +318,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			// All remaining residential UDP (including DNS/QUIC) is denied.
 			if p.Residential {
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": adDomains, "network": "tcp", "outboundTag": destination})
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp", "outboundTag": destination})
 			}
 			fallback := directTag
 			if (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
