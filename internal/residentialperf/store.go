@@ -24,6 +24,8 @@ type Request struct {
 	Minutes         int      `json:"minutes"`
 	BaseRevision    int64    `json:"base_revision"`
 	BasePlan        string   `json:"base_plan"`
+	Mode            string   `json:"mode,omitempty"`
+	Scope           string   `json:"scope,omitempty"`
 }
 type Receipt struct {
 	ExperimentID string `json:"experiment_id"`
@@ -67,9 +69,34 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		q.PanelIDs[i] = id
 	}
 	sort.Strings(q.PanelIDs)
+	mode, scope := q.Mode, q.Scope
+	if mode == "" {
+		mode = "timed"
+	}
+	if scope == "" {
+		scope = "selected"
+	}
 	if q.Action == "start" {
-		if len(q.PanelIDs) != 1 || q.Config == nil || q.Minutes < 5 || q.Minutes > 60 || q.BaseRevision < 1 || q.BasePlan == "" {
-			return out, bad("start requires one canary, configuration and a 5–60 minute deadline")
+		if q.Config == nil || q.BaseRevision < 1 || len(q.PanelIDs) > 1000 {
+			return out, bad("configuration, reviewed revision and at most 1000 selected servers required")
+		}
+		if mode != "timed" && mode != "permanent" {
+			return out, bad("mode must be timed or permanent")
+		}
+		if scope != "selected" && scope != "fleet" {
+			return out, bad("scope must be selected or fleet")
+		}
+		if scope == "selected" && len(q.PanelIDs) == 0 {
+			return out, bad("select at least one server")
+		}
+		if scope == "fleet" && (mode != "permanent" || len(q.PanelIDs) > 0) {
+			return out, bad("fleet scope requires permanent mode and a server-resolved target list")
+		}
+		if mode == "timed" && (q.Minutes < 5 || q.Minutes > 60) {
+			return out, bad("timed tests require a 5–60 minute deadline")
+		}
+		if mode == "permanent" && q.Minutes != 0 {
+			return out, bad("permanent publication has no timer")
 		}
 		if e := q.Config.Validate(); e != nil {
 			return out, bad(e.Error())
@@ -77,6 +104,7 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	} else if !UUID.MatchString(q.ExperimentID) {
 		return out, bad("experiment_id must be a UUID")
 	}
+
 	digest := fmt.Sprintf("%x", sha256.Sum256(raw(q)))
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
@@ -107,8 +135,26 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		if busy {
 			return out, conflict("roll back the existing profile before starting a different test")
 		}
-		if e = eligible(ctx, tx, q.PanelIDs[0], q.Minutes, q.BaseRevision, q.BasePlan); e != nil {
+		var revision int64
+		if e = tx.QueryRowContext(ctx, "SELECT revision FROM residential_routing_control WHERE singleton FOR SHARE").Scan(&revision); e != nil {
 			return out, e
+		}
+		if revision != q.BaseRevision {
+			return out, conflict("routing settings changed; refresh before publishing")
+		}
+		for _, id := range q.PanelIDs {
+			if mode == "timed" {
+				plan := ""
+				if len(q.PanelIDs) == 1 {
+					plan = q.BasePlan
+				}
+				e = eligible(ctx, tx, id, q.Minutes, q.BaseRevision, plan)
+			} else {
+				e = publishable(ctx, tx, id)
+			}
+			if e != nil {
+				return out, e
+			}
 		}
 		for id := range q.Config.Costs {
 			var ok bool
@@ -120,16 +166,26 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 			}
 		}
 		q.ExperimentID = q.RequestID
-		_, e = tx.ExecContext(ctx, "INSERT INTO residential_performance_experiments(id,spec,state,deadline) VALUES($1,$2,'RUNNING',now()+$3*interval '1 minute')", q.ExperimentID, string(raw(q.Config)), q.Minutes)
-		if e == nil {
-			e = attach(ctx, tx, q.ExperimentID, q.PanelIDs[0], q.Config)
+		_, e = tx.ExecContext(ctx, `INSERT INTO residential_performance_experiments(id,spec,state,deadline,duration_mode,publish_scope)
+ VALUES($1,$2,CASE WHEN $4='permanent' THEN 'KEPT' ELSE 'RUNNING' END,CASE WHEN $4='permanent' THEN NULL ELSE now()+$3*interval '1 minute' END,$4,$5)`, q.ExperimentID, string(raw(q.Config)), q.Minutes, mode, scope)
+		if e != nil {
+			return out, e
+		}
+		if scope == "fleet" {
+			e = enrollFleet(ctx, tx, q.ExperimentID, q.Config)
+		} else {
+			for _, id := range q.PanelIDs {
+				if e = attach(ctx, tx, q.ExperimentID, id, q.Config); e != nil {
+					break
+				}
+			}
 		}
 	} else {
 		var state string
 		var version int64
 		var spec []byte
 		var expired bool
-		e = tx.QueryRowContext(ctx, "SELECT state,version,spec,deadline<=now() FROM residential_performance_experiments WHERE id=$1 FOR UPDATE", q.ExperimentID).Scan(&state, &version, &spec, &expired)
+		e = tx.QueryRowContext(ctx, "SELECT state,version,spec,COALESCE(deadline<=now(),false) FROM residential_performance_experiments WHERE id=$1 FOR UPDATE", q.ExperimentID).Scan(&state, &version, &spec, &expired)
 		if errors.Is(e, sql.ErrNoRows) {
 			return out, bad("experiment not found")
 		}
@@ -142,6 +198,23 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		switch q.Action {
 		case "rollback":
 			e = rollback(ctx, tx, q.ExperimentID, "requested")
+		case "publish":
+			if state != "RUNNING" && state != "KEPT" {
+				return out, conflict("only an open profile can be published")
+			}
+			if state == "RUNNING" && expired {
+				return out, conflict("the test deadline expired; wait for rollback")
+			}
+			if q.Scope != "fleet" || q.Config != nil || len(q.PanelIDs) > 0 {
+				return out, bad("publish keeps the current profile and targets all current and future servers")
+			}
+			_, e = tx.ExecContext(ctx, "UPDATE residential_performance_experiments SET state='KEPT',duration_mode='permanent',publish_scope='fleet',deadline=NULL,version=version+1,reason='published permanently',updated_at=now() WHERE id=$1", q.ExperimentID)
+			if e == nil {
+				var c Config
+				if e = json.Unmarshal(spec, &c); e == nil {
+					e = enrollFleet(ctx, tx, q.ExperimentID, &c)
+				}
+			}
 		case "keep", "promote":
 			if state != "RUNNING" || expired {
 				return out, conflict("only an unexpired running experiment can be kept or promoted")
@@ -157,8 +230,8 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 			if q.Action == "keep" {
 				_, e = tx.ExecContext(ctx, "UPDATE residential_performance_experiments SET state='KEPT',version=version+1,updated_at=now() WHERE id=$1", q.ExperimentID)
 			} else {
-				if len(q.PanelIDs) < 1 || len(q.PanelIDs) > 64 {
-					return out, bad("select 1–64 eligible servers")
+				if len(q.PanelIDs) < 1 || len(q.PanelIDs) > 1000 {
+					return out, bad("select 1–1000 eligible servers")
 				}
 				var c Config
 				if e = json.Unmarshal(spec, &c); e != nil {
@@ -421,6 +494,9 @@ func (s Store) Tick(ctx context.Context) error {
 		if e = rollback(ctx, tx, id, "test deadline expired"); e != nil {
 			return e
 		}
+	}
+	if e = enrollPublished(ctx, tx); e != nil {
+		return e
 	}
 	_, e = tx.ExecContext(ctx, `UPDATE residential_performance_targets t SET state='RETIRED' WHERE state IN('PENDING','ROLLBACK_PENDING','APPLIED') AND NOT EXISTS(SELECT 1 FROM panel_instances p JOIN droplets d ON d.id=p.droplet_id WHERE p.id=t.panel_id AND d.state<>'DELETED')`)
 	if e != nil {

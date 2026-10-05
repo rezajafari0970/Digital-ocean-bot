@@ -1,0 +1,28 @@
+{
+  "goal": "Implement permanent residential performance publishing to selected/all current servers and automatic inheritance by future servers, with explicit publish preview and durable manual rollback.",
+  "context": "User explicitly removes single-canary-only UX and timed-only restriction. Add visible Select all / Clear selection and Permanent (no deadline) option defaulting to all current and future. Preserve existing timed API/UI compatibility and old experiment state. One open profile remains; existing running/kept profile can be promoted to permanent fleet without losing baselines. Persist fleet scope/duration mode, enroll future panels under same advisory lock as rollback; stop inheritance atomically before rollback and restore all targets including future admissions. Pending/offline/gated servers must never be labelled verified. No routing category expansion: keep exactly google@ads and temporary browserleaks, UDP, direct DNS choices, current client classes and all accounts. Settings are shared by existing/future users through server routes; never rewrite client identities. No disabling auth/gates, stale snapshot replay, or provider changes. Use fresh canonical source. Test PostgreSQL restart/lost response/multi-server/permanent deadline/auto-enrollment/rollback races and real UI mobile Select all/preview/publish; full Go and race/core regression. Deploy feature with no unsolicited global activation; live canary permanent selected scope and verify rollback, then user can publish the exact chosen settings globally.",
+  "allowed_paths": [
+    "internal/residentialperf",
+    "internal/adminapi",
+    "migrations",
+    "web",
+    "docs/development-jobs/residential-fleet-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-residential-fleet-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(residential): permanent fleet publishing and future-server inheritance"
+}
