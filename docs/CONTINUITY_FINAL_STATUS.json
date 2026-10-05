@@ -43,6 +43,16 @@
     "eligible_serving_panels_at_capture": 38,
     "acceptance": "docs/BROWSERLEAKS_TEMPORARY_ACCEPTANCE_20261005.json",
     "handoff": "docs/BROWSERLEAKS_TEMPORARY_HANDOFF_20261005.md",
-    "note": "Latest instruction adds BrowserLeaks temporarily to Residential TCP. DNS and other TCP remain direct, UDP denied, Direct unchanged. 37 panels runtime-confirmed; one panel route API unconfirmed. Do not hide pending acceptance."
+    "note": "Latest instruction adds BrowserLeaks temporarily to Residential TCP. DNS and other TCP remain direct, UDP denied, Direct unchanged. 37 panels runtime-confirmed; one panel route API unconfirmed. Do not hide pending acceptance.",
+    "latest_diagnostic": {
+      "date": "2026-10-05",
+      "status": "CURRENT_UPSTREAM_LATENCY_AND_TRANSFER_FAILURE_REPRODUCED_APP_ERROR_UNRESOLVED",
+      "report": "docs/AD_LATENCY_DIAGNOSTIC_20261005.md",
+      "product_changes": false,
+      "enabled_proxy_records": 4,
+      "distinct_endpoint_credentials": 1,
+      "visible_panels": 38,
+      "note": "Current endpoint replaced prior ProxyRack configuration. Do not use old capacity evidence. No speed fix or app ad-playback success claimed."
+    }
   }
 }
