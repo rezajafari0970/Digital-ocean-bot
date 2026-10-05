@@ -452,38 +452,45 @@ func main() {
 		}
 	}()
 
-	// One serial lane for serving panels and one for retiring/expired panels.
-	// A disconnected retired fleet must not stall live running-router proofs.
+	// Eight disjoint serving lanes keep running-router proofs inside the
+	// publication freshness window. Retirement has its own single lane.
+	// Client mutation execution remains independently gated at concurrency=1.
 	for _, serving := range []bool{true, false} {
-		go func(serving bool) {
-			t := time.NewTicker(time.Second)
-			defer t.Stop()
-			syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
-			failures := worker.FailureStore{DB: application.DB}
-			for {
-				p, found, err := syncer.NextDuePanel(ctx, serving)
-				if err != nil {
-					log.Printf("residential sync discovery: %v", err)
-				}
-				if err == nil && found {
-					panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-					err = syncer.ReconcilePanel(panelCtx, p, false)
-					cancel()
+		lanes := 1
+		if serving {
+			lanes = 8
+		}
+		for shard := 0; shard < lanes; shard++ {
+			go func(serving bool, shard, lanes int) {
+				t := time.NewTicker(time.Second)
+				defer t.Stop()
+				syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
+				failures := worker.FailureStore{DB: application.DB}
+				for {
+					p, found, err := syncer.NextDuePanelShard(ctx, serving, shard, lanes)
 					if err != nil {
-						failures.Fail(ctx, "residential_sync", p.ID, "", err)
-						log.Printf("residential sync panel %s: %v", p.ID, err)
-					} else {
-						failures.Clear(ctx, "residential_sync", p.ID)
+						log.Printf("residential sync discovery: %v", err)
 					}
-					continue
+					if err == nil && found {
+						panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+						err = syncer.ReconcilePanel(panelCtx, p, false)
+						cancel()
+						if err != nil {
+							failures.Fail(ctx, "residential_sync", p.ID, "", err)
+							log.Printf("residential sync panel %s: %v", p.ID, err)
+						} else {
+							failures.Clear(ctx, "residential_sync", p.ID)
+						}
+						continue
+					}
+					select {
+					case <-ctx.Done():
+						return
+					case <-t.C:
+					}
 				}
-				select {
-				case <-ctx.Done():
-					return
-				case <-t.C:
-				}
-			}
-		}(serving)
+			}(serving, shard, lanes)
+		}
 	}
 
 	go func() { _ = (residential.Monitor{DB: application.DB, Secrets: application.Container.Secrets}).Run(ctx) }()

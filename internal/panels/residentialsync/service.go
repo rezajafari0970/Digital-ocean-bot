@@ -340,11 +340,20 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 	return nil
 }
 
-// NextDuePanel selects one task without a fleet-wide completion barrier.
-// The independent lanes share the existing panel/config lock and together run
-// at most two requests. Backoff and freshness are evaluated in the database.
+// NextDuePanel preserves the unsharded selection used by isolated callers.
 func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Panel, bool, error) {
+	return s.NextDuePanelShard(ctx, serving, 0, 1)
+}
+
+// NextDuePanelShard partitions independent panels into bounded serial lanes.
+// A panel belongs to exactly one lane; existing cross-process config locks and
+// per-runtime mutation locks still serialize its writes. Retired panels keep
+// their own lane, so neither fleet size nor retired timeouts starve live proofs.
+func (s Service) NextDuePanelShard(ctx context.Context, serving bool, shard, lanes int) (readyworker.Panel, bool, error) {
 	var p readyworker.Panel
+	if lanes < 1 || lanes > 8 || shard < 0 || shard >= lanes {
+		return p, false, errors.New("invalid routing proof lane")
+	}
 	err := s.DB.QueryRowContext(ctx, `SELECT p.id::text FROM panel_instances p
  JOIN droplets dr ON dr.id=p.droplet_id CROSS JOIN residential_routing_control c
  LEFT JOIN panel_routing_state r ON r.panel_id=p.id
@@ -352,10 +361,11 @@ func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Pa
  WHERE c.enabled AND (c.fleet OR p.id=ANY(c.panel_ids))
  AND p.enabled AND dr.state<>'DELETED'
  AND ((dr.state IN ('READY','EXPIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()))=$1)
+ AND mod(hashtextextended(p.id::text,941) & 2147483647,$3::bigint)=$2::bigint
  AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=p.droplet_id AND d.state='PANEL_COMPLETE')
  AND (r.panel_id IS NULL OR r.revision<>c.revision OR r.next_check_at<=now())
  AND (f.next_retry_at IS NULL OR f.next_retry_at<=now())
- ORDER BY COALESCE(r.next_check_at,'-infinity'::timestamptz),p.id LIMIT 1`, serving).Scan(&p.ID)
+ ORDER BY COALESCE(r.next_check_at,'-infinity'::timestamptz),p.id LIMIT 1`, serving, shard, lanes).Scan(&p.ID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return p, false, nil
 	}
