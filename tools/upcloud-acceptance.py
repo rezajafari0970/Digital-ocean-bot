@@ -15,6 +15,9 @@ def snapshot():
       "publication":json.loads(sql("SELECT COALESCE(jsonb_agg(x ORDER BY id),'[]'::jsonb) FROM (SELECT id,spec,state,duration_mode,publish_scope,deadline FROM residential_performance_experiments WHERE state IN('RUNNING','KEPT','ROLLING_BACK'))x")),
       "endpoint_configuration_hash":sql("SELECT md5(COALESCE(jsonb_agg(jsonb_build_array(proxy_id,name,type,host,port,username,secret_ref,enabled,outbound_tag) ORDER BY proxy_id)::text,'')) FROM residential_proxies"),
     }
+def check_migration():
+    expected=hashlib.sha256((pathlib.Path(__file__).resolve().parents[1]/"migrations/000153_upcloud_cleanup.up.sql").read_bytes()).hexdigest()
+    assert sql("SELECT checksum FROM schema_migrations WHERE version='000153_upcloud_cleanup'")==expected,"migration checksum mismatch"
 def read_api(outdir):
     user=str(uuid.uuid4()); token=secrets.token_hex(32); digest=hashlib.sha256(token.encode()).hexdigest()
     sql("BEGIN; INSERT INTO admin_users(id,username,password_hash,role) VALUES('"+user+"','upcloud-acceptance-"+user+"','!','admin'); INSERT INTO admin_sessions(id,user_id,token_hash,expires_at) VALUES(gen_random_uuid(),'"+user+"',decode('"+digest+"','hex'),now()+interval '2 minutes'); COMMIT;")
@@ -51,7 +54,7 @@ if a.phase=="after":
     baseline=json.loads((out/"before-configuration.json").read_text())
     assert value==baseline,"configuration changed: review before publishing acceptance"
     read_api(out)
-    assert sql("SELECT version::text||':'||dirty::text FROM schema_migrations")=="153:false"
+    check_migration()
     print("UPCLOUD_REGISTERED_ALL_EXISTING_PROVIDERS_CONFIGURATION_PRESERVED_MIGRATION153 PASS")
 else:
     print("BASELINE_SAVED; active UpCloud accounts:",sql("SELECT count(*) FROM accounts WHERE provider='upcloud' AND deleted_at IS NULL"))
