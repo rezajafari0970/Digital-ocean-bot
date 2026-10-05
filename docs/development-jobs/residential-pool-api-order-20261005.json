@@ -1,0 +1,26 @@
+{
+  "goal": "Fix residential pool compatibility with Sanaei save-time API rule normalization; preserve exact plan fingerprints and safe staged rollback.",
+  "context": "Canary 10d4ca10 rejected exact template readback and automatically rolled back. Full 34-route old policy proof passed and API/worker are active. Official Sanaei SaveXraySetting calls EnsureStatsRouting which moves its api rule to index zero. configurePool currently prepends four internal loopback rules ahead of that API rule, so saved settings order changes and content-addressed plan hash mismatches. Preserve the API rule first, put internal pool rules immediately after it, and test save-time normalization/idempotence on a real base with api routing. Do not weaken readback or route proof comparisons; no production proxies/credentials, routing domains, DNS, UDP or profile/gate changes. Keep failed canary evidence.",
+  "allowed_paths": [
+    "internal/panels/residentialsync/pool.go",
+    "internal/panels/residentialsync/pool_test.go",
+    "docs/development-jobs/residential-pool-api-order-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-residential-pool-20261005/test-order.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(residential): preserve Sanaei API routing priority in pool plans"
+}

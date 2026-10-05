@@ -396,3 +396,36 @@ func TestInstalledCorePoolFaultDistributionRecovery(t *testing.T) {
 	}
 	t.Log("unknown exclusion, TCP/UDP distribution, failure withdrawal, recovery and all-down blocking verified")
 }
+
+func TestPoolPreservesSanaeiAPIRuleBeforeFingerprint(t *testing.T) {
+	p := routePolicy{PoolEnabled: true, Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: 1, Tag: "residential-ads-test"}}}
+	first, e := buildSettings(baseSettings(), nil, []string{"in"}, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	rules := first["routing"].(map[string]any)["rules"].([]any)
+	if rules[0].(map[string]any)["outboundTag"] != "api" {
+		t.Fatal("Sanaei would rewrite API rule ordering")
+	}
+	if !strings.HasPrefix(rules[1].(map[string]any)["ruleTag"].(string), poolPrefix) {
+		t.Fatal("pool stage must follow API")
+	}
+	// Model the panel's EnsureStatsRouting normalizer, then re-read/rebuild.
+	raw, _ := json.Marshal(first)
+	observed, _ := decodeObject(raw)
+	rs := observed["routing"].(map[string]any)["rules"].([]any)
+	for i, v := range rs {
+		if v.(map[string]any)["outboundTag"] == "api" {
+			rs = append([]any{v}, append(rs[:i], rs[i+1:]...)...)
+			break
+		}
+	}
+	observed["routing"].(map[string]any)["rules"] = rs
+	if settingsHash(first) != settingsHash(observed) {
+		t.Fatal("save-time normalization changed fingerprint")
+	}
+	next, e := buildSettings(observed, nil, []string{"in"}, p)
+	if e != nil || settingsHash(next) != settingsHash(first) {
+		t.Fatal("readback/reconcile not stable", e)
+	}
+}

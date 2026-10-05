@@ -142,7 +142,26 @@ func configurePool(next map[string]any, p routePolicy) error {
 		}
 		rules = append(rules, m)
 	}
-	routing["rules"] = append(internal, rules...)
+	// Sanaei hoists its API rule during SaveXraySetting. Preserve that same
+	// priority before fingerprinting, otherwise exact readback differs although
+	// the data-plane pool itself is valid. Never relax the hash comparison.
+	apiTag := "api"
+	if api, ok := next["api"].(map[string]any); ok {
+		if tag, ok := api["tag"].(string); ok && tag != "" {
+			apiTag = tag
+		}
+	}
+	prefix := []any{}
+	remaining := []any{}
+	for _, v := range rules {
+		m := v.(map[string]any)
+		if m["outboundTag"] == apiTag {
+			prefix = append(prefix, v)
+		} else {
+			remaining = append(remaining, v)
+		}
+	}
+	routing["rules"] = append(append(prefix, internal...), remaining...)
 	routing["balancers"] = balancers
 	next["outbounds"] = outs
 	if len(tcp) > 0 {
