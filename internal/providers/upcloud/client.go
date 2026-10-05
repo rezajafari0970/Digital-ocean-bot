@@ -116,7 +116,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 		if err := json.Unmarshal(b, out); err != nil {
 			var re *responseError
 			if errors.As(err, &re) {
-				return &responseError{Code: re.Code, Status: res.StatusCode}
+				return &responseError{Code: re.Code, Status: res.StatusCode, QuotaIssues: append([]string(nil), re.QuotaIssues...)}
 			}
 			return &responseError{Code: "INVALID_JSON", Status: res.StatusCode}
 		}

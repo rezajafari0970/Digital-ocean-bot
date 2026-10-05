@@ -68,11 +68,12 @@ func writeStagedProviderPreviewError(w http.ResponseWriter, err error, c preview
 	// All metadata is generated locally or bounded; never log err.Error(), raw
 	// provider responses, token, proxy credentials or request/response headers.
 	elapsed := time.Since(c.Started).Milliseconds()
-	log.Printf("provider_preview_failed provider=upcloud request_id=%s stage=%s class=%s operation=%s provider_status=%d diagnostic=%s elapsed_ms=%d", id, stage, previewCode(string(class)), operation, status, code, elapsed)
+	quotaIssues := upcloud.QuotaIssues(err)
+	log.Printf("provider_preview_failed provider=upcloud request_id=%s stage=%s class=%s operation=%s provider_status=%d diagnostic=%s elapsed_ms=%d quota_issues=%v", id, stage, previewCode(string(class)), operation, status, code, elapsed, quotaIssues)
 	detail += fmt.Sprintf(" Stage: %s; operation: %s; reason: %s", stage, operation, code)
 	if status != 0 {
 		detail += fmt.Sprintf("; HTTP %d", status)
 	}
 	detail += "; ref: " + id + "."
-	writeJSON(w, httpStatus, map[string]any{"error": errorCode, "detail": detail, "request_id": id, "stage": stage, "operation": operation, "provider_status": status, "diagnostic": code})
+	writeJSON(w, httpStatus, map[string]any{"error": errorCode, "detail": detail, "request_id": id, "stage": stage, "operation": operation, "provider_status": status, "diagnostic": code, "quota_issues": quotaIssues})
 }

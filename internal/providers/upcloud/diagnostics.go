@@ -16,8 +16,9 @@ var safeDiagnostic = regexp.MustCompile("^[A-Za-z0-9_.-]{1,96}$")
 
 // responseError contains only application-owned codes, never provider bodies.
 type responseError struct {
-	Code   string
-	Status int
+	Code        string
+	Status      int
+	QuotaIssues []string
 }
 
 func (e *responseError) Error() string { return "UpCloud response validation failed: " + e.Code }

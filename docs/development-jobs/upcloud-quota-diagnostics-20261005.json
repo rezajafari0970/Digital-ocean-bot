@@ -1,0 +1,27 @@
+{
+  "goal": "Identify actual UpCloud account quota parse failure safely after authenticated user retry still reports INVALID_NUMBER on deployed nullable-Dev fix.",
+  "context": "Runtime 5aa7fef. Production traces d6cbab5416e7982f at21:14:03 UTC HTTP200 account INVALID_NUMBER 2877ms and37682fd15a53aa98 at21:14:17 8035ms confirm prior null-Dev compatibility patch did not resolve user's actual account. No saved UpCloud account; complete token and actual response not available. Do not infer exact offending field or change parsing rules speculatively. Enrich resourceLimits failures with bounded app-owned diagnostics naming allowlisted quota fields and value shape/category only (NULL, DECIMAL_NUMBER, NEGATIVE_INTEGER, etc.), never raw key/value, account/credits/token/body. Collect bounded sorted safe diagnostics for all invalid quota fields into error metadata; preserve through client HTTP status normalization and staged admin JSON/journal. Existing UI detail already shows reason/ref. Keep strict number acceptance and nullable two Dev key rules exactly as currently deployed, plus fail-closed capacity. Add provider real decoder/client and admin staged redaction/metadata tests. User must retry once to produce actual field evidence; no promise root cause fixed. Mandatory OpenAI API orchestrator planning, real PostgreSQL race/full Go tests, reversible deploy/config comparison/canonical checkpoint/handoff. No external cloud mutations or route/gate/schema/static changes.",
+  "allowed_paths": [
+    "internal/providers/upcloud",
+    "internal/adminapi/account_preview_diagnostics.go",
+    "internal/adminapi/account_preview_diagnostics_test.go",
+    "docs/development-jobs/upcloud-quota-diagnostics-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-quota-diagnostics-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): identify invalid quota fields without exposing response values"
+}

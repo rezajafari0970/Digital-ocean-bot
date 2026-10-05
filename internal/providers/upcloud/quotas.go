@@ -3,6 +3,7 @@ package upcloud
 import (
 	"bytes"
 	"encoding/json"
+	"sort"
 )
 
 // UpCloud's accountResourceLimits schema permits null only for these two Dev
@@ -20,6 +21,7 @@ func (limits *resourceLimits) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	next := make(resourceLimits, len(raw))
+	var issues []string
 	for key, value := range raw {
 		if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
 			switch key {
@@ -27,14 +29,23 @@ func (limits *resourceLimits) UnmarshalJSON(b []byte) error {
 				next[key] = nil
 				continue
 			default:
-				return &responseError{Code: "INVALID_NUMBER"}
+				issues = append(issues, quotaIssue(key, value))
+				continue
 			}
 		}
 		var n number
 		if err := json.Unmarshal(value, &n); err != nil {
-			return err
+			issues = append(issues, quotaIssue(key, value))
+			continue
 		}
 		next[key] = &n
+	}
+	if len(issues) > 0 {
+		sort.Strings(issues)
+		if len(issues) > 64 {
+			issues = issues[:64]
+		}
+		return &responseError{Code: issues[0], QuotaIssues: issues}
 	}
 	*limits = next
 	return nil
