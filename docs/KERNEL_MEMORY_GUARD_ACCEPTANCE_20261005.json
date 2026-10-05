@@ -1,0 +1,2158 @@
+{
+  "schema_version": 1,
+  "status": "VERIFIED",
+  "verified_at_utc": "2026-10-05T13:10:37.270229+00:00",
+  "runtime_source_revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+  "acceptance_tool_source_revision": "69fcef4f444afeac5f48e98b7b2f81bc37b8a87f",
+  "incident": {
+    "panel_id": "cf65a8f5-fce6-4b62-a5aa-51fccd518c35",
+    "oom_at_utc": "2026-10-05T11:49:31Z",
+    "xui_restart_at_utc": "2026-10-05T11:49:35Z",
+    "killed_process": "xray-linux-amd6",
+    "kernel": "7.0.0-38-generic",
+    "diagnosis": "Phantom CMA allocation under default-enabled Kexec Handover, matching Ubuntu bug 2163395. OOM killed Xray and stopped the panel unit.",
+    "cma_total_before_kib": 0,
+    "cma_free_observed_before_kib": 292680,
+    "zone_free_at_oom_kib": 1238088,
+    "zone_free_cma_at_oom_kib": 1237420,
+    "mitigation": "Persist kho=off in owned GRUB drop-in and regenerate/read back boot entries; serial controlled reboot and activation proof."
+  },
+  "primary_references": [
+    "https://www.mail-archive.com/ubuntu-bugs@lists.ubuntu.com/msg6300333.html",
+    "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+  ],
+  "initial_audit": {
+    "panels": 38,
+    "kernel_counts": {
+      "5.15.0-198-generic": 17,
+      "7.0.0-38-generic": 15,
+      "7.0.0-31-generic": 6
+    },
+    "susceptible": 21,
+    "unaffected": 17,
+    "observed_cma_anomaly": 12
+  },
+  "maintenance": {
+    "version": 1,
+    "panels": {
+      "cf65a8f5-fce6-4b62-a5aa-51fccd518c35": {
+        "phase": "VERIFIED",
+        "boot_before": "3828d1c0-d2c5-4ac2-aaa7-7e2bf8ef626c",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "3828d1c0-d2c5-4ac2-aaa7-7e2bf8ef626c",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 340056
+        },
+        "scheduled_at": "2026-10-05T12:13:00.476005+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "fd98657a-ec4b-4768-83a9-fc74100ff6be",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:13:34.870127+00:00",
+        "duration_seconds": 35.41,
+        "route_proofs": 34
+      },
+      "1e98574c-15be-4805-b078-4028805adc3d": {
+        "phase": "VERIFIED",
+        "boot_before": "bbfaaddd-1877-4b02-93b4-3094b687e32f",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "bbfaaddd-1877-4b02-93b4-3094b687e32f",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 163236
+        },
+        "scheduled_at": "2026-10-05T12:18:25.121606+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "99a62fcf-e8b6-4737-b3e2-2656e650c6d0",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:18:59.267185+00:00",
+        "duration_seconds": 35.32,
+        "route_proofs": 34
+      },
+      "0f92f5c1-9ea4-44d1-87ee-3b9fc6deaab5": {
+        "phase": "VERIFIED",
+        "boot_before": "f68f2bb5-1cfc-4045-8ff4-0b6a3c9d3b61",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "f68f2bb5-1cfc-4045-8ff4-0b6a3c9d3b61",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 103152
+        },
+        "scheduled_at": "2026-10-05T12:19:04.650567+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "b39e6131-3e7e-4484-9dd3-5c0e79206ae0",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:19:45.267704+00:00",
+        "duration_seconds": 45.99,
+        "route_proofs": 34
+      },
+      "0686428f-dc6f-4d04-8ea6-1d24e8372e1a": {
+        "phase": "VERIFIED",
+        "boot_before": "2c41c1ca-3c88-4f11-ac1f-08e911c079af",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "2c41c1ca-3c88-4f11-ac1f-08e911c079af",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:19:50.610655+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "d8cd83aa-afe7-439d-b633-459cf2557904",
+          "boot_changed": true,
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:20:43.927986+00:00",
+        "duration_seconds": 58.65,
+        "route_proofs": 34
+      },
+      "5bdd1788-2ff1-4c68-ac0d-a90826f6bff8": {
+        "phase": "VERIFIED",
+        "boot_before": "28fd0983-97bb-4096-9c6e-8cabda3c710a",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "28fd0983-97bb-4096-9c6e-8cabda3c710a",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 113268
+        },
+        "scheduled_at": "2026-10-05T12:20:45.469083+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "e0df56eb-4aa0-4e52-9972-ab21e2cc5243",
+          "boot_changed": true,
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:21:14.392381+00:00",
+        "duration_seconds": 30.46,
+        "route_proofs": 34
+      },
+      "42b1b843-8a7d-4965-9cd6-df0070dd7d5b": {
+        "phase": "VERIFIED",
+        "boot_before": "b13b95c6-23c3-4c6c-826c-1d1879c5dba6",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "b13b95c6-23c3-4c6c-826c-1d1879c5dba6",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:21:19.875019+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "b7a80aeb-b90a-4b4b-a244-a168d9dc3cdd",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:22:07.423556+00:00",
+        "duration_seconds": 53.03,
+        "route_proofs": 34
+      },
+      "7018e989-f8f2-4e57-873b-c39436ddd092": {
+        "phase": "VERIFIED",
+        "boot_before": "2533dd89-becc-4ccd-9f31-a9ad42d3ba9e",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "2533dd89-becc-4ccd-9f31-a9ad42d3ba9e",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:22:09.416060+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "de697f72-7d08-4f30-b2a5-fada7f83690e",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:22:43.665054+00:00",
+        "duration_seconds": 36.24,
+        "route_proofs": 34
+      },
+      "829cbedb-378d-4044-890b-deb6755d2876": {
+        "phase": "VERIFIED",
+        "boot_before": "a2d82c4b-cbb3-45b4-b287-04c697b7f388",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "a2d82c4b-cbb3-45b4-b287-04c697b7f388",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 43168
+        },
+        "scheduled_at": "2026-10-05T12:22:46.136058+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "db654268-25f3-4298-bb76-b9d95ec01fa7",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:23:40.093184+00:00",
+        "duration_seconds": 56.42,
+        "route_proofs": 34
+      },
+      "64c47a76-6e63-4160-b73b-7e267278330a": {
+        "phase": "VERIFIED",
+        "boot_before": "7ca0a4d5-8cc4-45a3-8344-ffccd9b65eaa",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "7ca0a4d5-8cc4-45a3-8344-ffccd9b65eaa",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 226692
+        },
+        "scheduled_at": "2026-10-05T12:23:46.756233+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "7eabfba7-b833-4a12-aa27-947cd5b48fad",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:24:48.992986+00:00",
+        "duration_seconds": 68.9,
+        "route_proofs": 34
+      },
+      "7d842cca-5728-4fcb-a298-6dfd228af131": {
+        "phase": "VERIFIED",
+        "boot_before": "7a1a0bea-a8f1-48ad-897a-912fe0e603aa",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "7a1a0bea-a8f1-48ad-897a-912fe0e603aa",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:24:57.173078+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "9e81f024-91a4-4f07-b0aa-817646b88b72",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "last_error": "post-boot route matrix unconfirmed",
+        "stopped_at": "2026-10-05T12:26:34.103780+00:00",
+        "verified_at": "2026-10-05T12:28:53.279949+00:00",
+        "duration_seconds": 6.86,
+        "route_proofs": 34
+      },
+      "a091721b-ff4e-476c-b8c7-e81f8507d747": {
+        "phase": "VERIFIED",
+        "boot_before": "50f1a657-daf7-4ed2-8d3f-a5bd21ed809a",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "50f1a657-daf7-4ed2-8d3f-a5bd21ed809a",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 137356
+        },
+        "scheduled_at": "2026-10-05T12:28:57.361773+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "72839b44-c11c-423d-8374-00d66d9beced",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:29:38.765015+00:00",
+        "duration_seconds": 45.48,
+        "route_proofs": 34
+      },
+      "b84ce5dd-7d2b-4ca5-bf18-5521a36556fd": {
+        "phase": "VERIFIED",
+        "boot_before": "3a72a259-63c7-446b-b907-9c02dc20f7a4",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "3a72a259-63c7-446b-b907-9c02dc20f7a4",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 960
+        },
+        "scheduled_at": "2026-10-05T12:29:43.069869+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "b89dc1b8-51ae-42b9-a7fd-e89e05e2de56",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:30:45.304480+00:00",
+        "duration_seconds": 66.53,
+        "route_proofs": 34
+      },
+      "b9a3b755-61fc-46d3-aecc-936360ac6ad9": {
+        "phase": "VERIFIED",
+        "boot_before": "824a5691-ed99-48f5-bb12-ac0815145acf",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "824a5691-ed99-48f5-bb12-ac0815145acf",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 521856
+        },
+        "scheduled_at": "2026-10-05T12:30:48.518107+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "bacc2725-05fc-48e5-9dc3-05fe2b7b3f1d",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:31:31.545109+00:00",
+        "duration_seconds": 46.23,
+        "route_proofs": 34
+      },
+      "c774985c-433e-4aab-9bba-99bfe449f994": {
+        "phase": "VERIFIED",
+        "boot_before": "20481775-4f3e-4745-b301-52a265b6a8b3",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "20481775-4f3e-4745-b301-52a265b6a8b3",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 644
+        },
+        "scheduled_at": "2026-10-05T12:31:38.095343+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "c928895a-a507-4d8d-9d3c-6dadf33d98cd",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:32:40.576889+00:00",
+        "duration_seconds": 69.03,
+        "route_proofs": 34
+      },
+      "c40de783-08d6-44be-8f4e-9395cedebd5c": {
+        "phase": "VERIFIED",
+        "boot_before": "cd7f9e50-6f6e-43f4-80fa-b22cf37765e7",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "cd7f9e50-6f6e-43f4-80fa-b22cf37765e7",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 319080
+        },
+        "scheduled_at": "2026-10-05T12:32:49.421119+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "e8ce7bc1-9e09-4a36-8cee-871ad0e821fb",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:34:38.253723+00:00",
+        "duration_seconds": 117.67,
+        "route_proofs": 34
+      },
+      "cf7bccb1-755a-42ee-abe8-1f2dae41b2dd": {
+        "phase": "VERIFIED",
+        "boot_before": "4b01e8b9-1fae-4090-b782-a9baad554e3b",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "4b01e8b9-1fae-4090-b782-a9baad554e3b",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 318180
+        },
+        "scheduled_at": "2026-10-05T12:34:41.443657+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "a7b33f82-3614-47cb-a01d-3885fec16118",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:35:26.033423+00:00",
+        "duration_seconds": 47.78,
+        "route_proofs": 34
+      },
+      "e2087659-5760-4aa8-bc8f-685fb9a0bcb3": {
+        "phase": "VERIFIED",
+        "boot_before": "436bebbd-4d29-4e2b-a271-78c7d8a91133",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "436bebbd-4d29-4e2b-a271-78c7d8a91133",
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:35:28.566865+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "b65db6a7-4582-4a2c-b8f5-f591b38875d1",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:36:02.578550+00:00",
+        "duration_seconds": 36.54,
+        "route_proofs": 34
+      },
+      "e5eaa766-e751-413a-9b4c-549ff3f37565": {
+        "phase": "VERIFIED",
+        "boot_before": "7ed21678-39b7-4ce5-9c8a-669c290cf9c5",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "7ed21678-39b7-4ce5-9c8a-669c290cf9c5",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 138004
+        },
+        "scheduled_at": "2026-10-05T12:36:05.219389+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "bdd3ead0-86d0-4123-bf42-8c9ce3f77f40",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:36:55.128935+00:00",
+        "duration_seconds": 52.54,
+        "route_proofs": 34
+      },
+      "d21eb338-a902-462b-9873-ba467781fca3": {
+        "phase": "VERIFIED",
+        "boot_before": "8c87e27b-6bf5-49e9-a652-dd383afe9d03",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "8c87e27b-6bf5-49e9-a652-dd383afe9d03",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:37:01.767279+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "9c9bdf87-a71f-4b8c-bdb9-ebaa71837e6f",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "last_error": "post-boot route matrix unconfirmed",
+        "stopped_at": "2026-10-05T12:38:15.400445+00:00",
+        "verified_at": "2026-10-05T12:39:46.700331+00:00",
+        "duration_seconds": 4.2,
+        "route_proofs": 34
+      },
+      "f537821f-9179-4693-8a81-f522e9190a8c": {
+        "phase": "VERIFIED",
+        "boot_before": "ef618a19-3455-4106-8388-a429730e125e",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "ef618a19-3455-4106-8388-a429730e125e",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "scheduled_at": "2026-10-05T12:39:50.326331+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "239d76a1-2f93-4dfb-861b-8975db63387e",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "last_error": "post-boot route matrix unconfirmed",
+        "stopped_at": "2026-10-05T12:41:41.617572+00:00",
+        "verified_at": "2026-10-05T12:52:25.813739+00:00",
+        "duration_seconds": 2.74,
+        "route_proofs": 34
+      },
+      "ef4b1677-9635-46a4-86e5-1bf79e7e0b6e": {
+        "phase": "VERIFIED",
+        "boot_before": "f48edd29-6085-4204-9c32-eb45b4b3314a",
+        "staged": {
+          "prepared": true,
+          "reboot_required": true,
+          "boot_id": "f48edd29-6085-4204-9c32-eb45b4b3314a",
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 131616
+        },
+        "scheduled_at": "2026-10-05T12:52:39.224608+00:00",
+        "schedule_response": "kernel memory guard: prepared\nREBOOT_SCHEDULE_RETURN_CODE 0\n",
+        "activation": {
+          "active": true,
+          "boot_id": "c62290cb-f6e1-4e4a-8a15-f507f0dd0fe2",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "verified_at": "2026-10-05T12:53:42.955225+00:00",
+        "duration_seconds": 77.14,
+        "route_proofs": 34
+      }
+    },
+    "updated_at": "2026-10-05T12:53:42.955271+00:00"
+  },
+  "final_verification": {
+    "started_at": "2026-10-05T13:06:52.270824+00:00",
+    "eligible_panels": [
+      "024a75e3-893d-4642-81a3-30d4f8641302",
+      "0686428f-dc6f-4d04-8ea6-1d24e8372e1a",
+      "0f92f5c1-9ea4-44d1-87ee-3b9fc6deaab5",
+      "10d4ca10-3fdb-423d-b9b6-8cf6179581e2",
+      "1e98574c-15be-4805-b078-4028805adc3d",
+      "42b1b843-8a7d-4965-9cd6-df0070dd7d5b",
+      "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
+      "5bdd1788-2ff1-4c68-ac0d-a90826f6bff8",
+      "61ed6ca4-ef73-4282-a842-6b06d14a2f3e",
+      "64c47a76-6e63-4160-b73b-7e267278330a",
+      "66ed5535-a835-4755-9260-6839ea58b124",
+      "7018e989-f8f2-4e57-873b-c39436ddd092",
+      "7d842cca-5728-4fcb-a298-6dfd228af131",
+      "829cbedb-378d-4044-890b-deb6755d2876",
+      "92764f7e-bada-4196-8602-eb75a259390d",
+      "92a61494-37a9-4a07-9522-8f152c5b0d27",
+      "9cf16b21-0d46-43dc-9a4b-578b50737681",
+      "a091721b-ff4e-476c-b8c7-e81f8507d747",
+      "b41dd4b1-d989-458b-b00f-618a94ce76fc",
+      "b84ce5dd-7d2b-4ca5-bf18-5521a36556fd",
+      "b9a3b755-61fc-46d3-aecc-936360ac6ad9",
+      "c36b99c1-acef-426f-b10b-7d864fbaf6a1",
+      "c40de783-08d6-44be-8f4e-9395cedebd5c",
+      "c4f17923-58da-41ce-ac21-5df33bf46611",
+      "c774985c-433e-4aab-9bba-99bfe449f994",
+      "cc0567da-0a01-4b26-99bc-e73ed81d4ddb",
+      "cf65a8f5-fce6-4b62-a5aa-51fccd518c35",
+      "cf7bccb1-755a-42ee-abe8-1f2dae41b2dd",
+      "d21eb338-a902-462b-9873-ba467781fca3",
+      "df8b457d-5273-48ef-8526-bcb19b9c3917",
+      "e2087659-5760-4aa8-bc8f-685fb9a0bcb3",
+      "e5eaa766-e751-413a-9b4c-549ff3f37565",
+      "e766135b-08d9-4c74-96d4-f1d4424a4b5e",
+      "e8eb2b07-f086-499b-98b9-9a04c25ce42b",
+      "ef4b1677-9635-46a4-86e5-1bf79e7e0b6e",
+      "f19ead96-e932-4a0b-ac6c-a083a896781a",
+      "f537821f-9179-4693-8a81-f522e9190a8c",
+      "fc547fda-42cc-44c2-84bc-b6d29c91a019"
+    ],
+    "rows": [
+      {
+        "panel": "024a75e3-893d-4642-81a3-30d4f8641302",
+        "started_at": "2026-10-05T13:06:52.272855+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "8383a147-2c6e-40ba-a1c4-ebab71a2648b",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "8383a147-2c6e-40ba-a1c4-ebab71a2648b",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:06:55.822789+00:00"
+      },
+      {
+        "panel": "0686428f-dc6f-4d04-8ea6-1d24e8372e1a",
+        "started_at": "2026-10-05T13:06:52.274019+00:00",
+        "audit": {
+          "kernel": "7.0.0-31-generic",
+          "boot_id": "d8cd83aa-afe7-439d-b633-459cf2557904",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "d8cd83aa-afe7-439d-b633-459cf2557904",
+          "boot_changed": true,
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "d8cd83aa-afe7-439d-b633-459cf2557904",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:07.986811+00:00"
+      },
+      {
+        "panel": "0f92f5c1-9ea4-44d1-87ee-3b9fc6deaab5",
+        "started_at": "2026-10-05T13:06:52.275050+00:00",
+        "audit": {
+          "kernel": "7.0.0-34-generic",
+          "boot_id": "b39e6131-3e7e-4484-9dd3-5c0e79206ae0",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "b39e6131-3e7e-4484-9dd3-5c0e79206ae0",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "b39e6131-3e7e-4484-9dd3-5c0e79206ae0",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:04.812771+00:00"
+      },
+      {
+        "panel": "10d4ca10-3fdb-423d-b9b6-8cf6179581e2",
+        "started_at": "2026-10-05T13:06:55.822853+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "74e27812-f1e3-4e60-86bd-5a9c8241e427",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "74e27812-f1e3-4e60-86bd-5a9c8241e427",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:06:57.464873+00:00"
+      },
+      {
+        "panel": "1e98574c-15be-4805-b078-4028805adc3d",
+        "started_at": "2026-10-05T13:06:57.464934+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "99a62fcf-e8b6-4737-b3e2-2656e650c6d0",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "99a62fcf-e8b6-4737-b3e2-2656e650c6d0",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "99a62fcf-e8b6-4737-b3e2-2656e650c6d0",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:00.925254+00:00"
+      },
+      {
+        "panel": "42b1b843-8a7d-4965-9cd6-df0070dd7d5b",
+        "started_at": "2026-10-05T13:07:00.925317+00:00",
+        "audit": {
+          "kernel": "7.0.0-34-generic",
+          "boot_id": "b7a80aeb-b90a-4b4b-a244-a168d9dc3cdd",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "b7a80aeb-b90a-4b4b-a244-a168d9dc3cdd",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "b7a80aeb-b90a-4b4b-a244-a168d9dc3cdd",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:16.440535+00:00"
+      },
+      {
+        "panel": "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
+        "started_at": "2026-10-05T13:07:04.812986+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "e4c9c6e7-1641-4d9f-918e-9a64c1ec2211",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "e4c9c6e7-1641-4d9f-918e-9a64c1ec2211",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:07.623715+00:00"
+      },
+      {
+        "panel": "5bdd1788-2ff1-4c68-ac0d-a90826f6bff8",
+        "started_at": "2026-10-05T13:07:07.623769+00:00",
+        "audit": {
+          "kernel": "7.0.0-31-generic",
+          "boot_id": "e0df56eb-4aa0-4e52-9972-ab21e2cc5243",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "e0df56eb-4aa0-4e52-9972-ab21e2cc5243",
+          "boot_changed": true,
+          "kernel": "7.0.0-31-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "e0df56eb-4aa0-4e52-9972-ab21e2cc5243",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:09.486120+00:00"
+      },
+      {
+        "panel": "61ed6ca4-ef73-4282-a842-6b06d14a2f3e",
+        "started_at": "2026-10-05T13:07:07.986899+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "d6d853fe-8c52-484e-9d9e-e5b2ed071026",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "d6d853fe-8c52-484e-9d9e-e5b2ed071026",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:13.742982+00:00"
+      },
+      {
+        "panel": "64c47a76-6e63-4160-b73b-7e267278330a",
+        "started_at": "2026-10-05T13:07:09.486165+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "7eabfba7-b833-4a12-aa27-947cd5b48fad",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "7eabfba7-b833-4a12-aa27-947cd5b48fad",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "7eabfba7-b833-4a12-aa27-947cd5b48fad",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:31.044340+00:00"
+      },
+      {
+        "panel": "66ed5535-a835-4755-9260-6839ea58b124",
+        "started_at": "2026-10-05T13:07:13.743023+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "604cd204-9b69-4866-99bd-1ff4cfe877cc",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "604cd204-9b69-4866-99bd-1ff4cfe877cc",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:16.297852+00:00"
+      },
+      {
+        "panel": "7018e989-f8f2-4e57-873b-c39436ddd092",
+        "started_at": "2026-10-05T13:07:16.297892+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "de697f72-7d08-4f30-b2a5-fada7f83690e",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "de697f72-7d08-4f30-b2a5-fada7f83690e",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "de697f72-7d08-4f30-b2a5-fada7f83690e",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:18.320190+00:00"
+      },
+      {
+        "panel": "7d842cca-5728-4fcb-a298-6dfd228af131",
+        "started_at": "2026-10-05T13:07:16.440614+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "9e81f024-91a4-4f07-b0aa-817646b88b72",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "9e81f024-91a4-4f07-b0aa-817646b88b72",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "9e81f024-91a4-4f07-b0aa-817646b88b72",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:30.210133+00:00"
+      },
+      {
+        "panel": "829cbedb-378d-4044-890b-deb6755d2876",
+        "started_at": "2026-10-05T13:07:18.320237+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "db654268-25f3-4298-bb76-b9d95ec01fa7",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "db654268-25f3-4298-bb76-b9d95ec01fa7",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "db654268-25f3-4298-bb76-b9d95ec01fa7",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:23.257381+00:00"
+      },
+      {
+        "panel": "92764f7e-bada-4196-8602-eb75a259390d",
+        "started_at": "2026-10-05T13:07:23.257439+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "b0f77089-03a4-4a8c-a4d7-c6564454ded6",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "b0f77089-03a4-4a8c-a4d7-c6564454ded6",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:56.014622+00:00",
+        "initial_error": "routing unconfirmed",
+        "route_proofs": 34,
+        "route_rechecked_at": "2026-10-05T13:09:26Z",
+        "route_recheck_evidence": "coordinated-recheck-92764f7e.log"
+      },
+      {
+        "panel": "92a61494-37a9-4a07-9522-8f152c5b0d27",
+        "started_at": "2026-10-05T13:07:30.210180+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "611ae9ab-3142-4e89-9b98-bfa76346607f",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "611ae9ab-3142-4e89-9b98-bfa76346607f",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:33.033756+00:00"
+      },
+      {
+        "panel": "9cf16b21-0d46-43dc-9a4b-578b50737681",
+        "started_at": "2026-10-05T13:07:31.044402+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "ddde10ab-cde2-4dee-b6e3-c584d10bdf3f",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "ddde10ab-cde2-4dee-b6e3-c584d10bdf3f",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:34.085783+00:00"
+      },
+      {
+        "panel": "a091721b-ff4e-476c-b8c7-e81f8507d747",
+        "started_at": "2026-10-05T13:07:33.033804+00:00",
+        "audit": {
+          "kernel": "7.0.0-34-generic",
+          "boot_id": "72839b44-c11c-423d-8374-00d66d9beced",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "72839b44-c11c-423d-8374-00d66d9beced",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "72839b44-c11c-423d-8374-00d66d9beced",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:40.942491+00:00"
+      },
+      {
+        "panel": "b41dd4b1-d989-458b-b00f-618a94ce76fc",
+        "started_at": "2026-10-05T13:07:34.085842+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "90a01d8d-cf24-4b59-8a8c-cf6a0c8e1dd5",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "90a01d8d-cf24-4b59-8a8c-cf6a0c8e1dd5",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:35.627772+00:00"
+      },
+      {
+        "panel": "b84ce5dd-7d2b-4ca5-bf18-5521a36556fd",
+        "started_at": "2026-10-05T13:07:35.627812+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "b89dc1b8-51ae-42b9-a7fd-e89e05e2de56",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "b89dc1b8-51ae-42b9-a7fd-e89e05e2de56",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "b89dc1b8-51ae-42b9-a7fd-e89e05e2de56",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:40.474943+00:00"
+      },
+      {
+        "panel": "b9a3b755-61fc-46d3-aecc-936360ac6ad9",
+        "started_at": "2026-10-05T13:07:40.474991+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "bacc2725-05fc-48e5-9dc3-05fe2b7b3f1d",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "bacc2725-05fc-48e5-9dc3-05fe2b7b3f1d",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "bacc2725-05fc-48e5-9dc3-05fe2b7b3f1d",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:43.726354+00:00"
+      },
+      {
+        "panel": "c36b99c1-acef-426f-b10b-7d864fbaf6a1",
+        "started_at": "2026-10-05T13:07:40.942540+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "77e83eed-0dc7-4985-b8ec-ac848d966c33",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "77e83eed-0dc7-4985-b8ec-ac848d966c33",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:42.548398+00:00"
+      },
+      {
+        "panel": "c40de783-08d6-44be-8f4e-9395cedebd5c",
+        "started_at": "2026-10-05T13:07:42.548455+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "e8ce7bc1-9e09-4a36-8cee-871ad0e821fb",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "e8ce7bc1-9e09-4a36-8cee-871ad0e821fb",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "e8ce7bc1-9e09-4a36-8cee-871ad0e821fb",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:15.753153+00:00"
+      },
+      {
+        "panel": "c4f17923-58da-41ce-ac21-5df33bf46611",
+        "started_at": "2026-10-05T13:07:43.726399+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "e70da664-a12e-434d-a456-e8e2138a8c72",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "e70da664-a12e-434d-a456-e8e2138a8c72",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:47.240645+00:00"
+      },
+      {
+        "panel": "c774985c-433e-4aab-9bba-99bfe449f994",
+        "started_at": "2026-10-05T13:07:47.240710+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "c928895a-a507-4d8d-9d3c-6dadf33d98cd",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "c928895a-a507-4d8d-9d3c-6dadf33d98cd",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "c928895a-a507-4d8d-9d3c-6dadf33d98cd",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:52.851673+00:00"
+      },
+      {
+        "panel": "cc0567da-0a01-4b26-99bc-e73ed81d4ddb",
+        "started_at": "2026-10-05T13:07:52.851742+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "f53a187a-d0f2-4f44-bf31-95308929363a",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "f53a187a-d0f2-4f44-bf31-95308929363a",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:59.877213+00:00"
+      },
+      {
+        "panel": "cf65a8f5-fce6-4b62-a5aa-51fccd518c35",
+        "started_at": "2026-10-05T13:07:56.014696+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "fd98657a-ec4b-4768-83a9-fc74100ff6be",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "fd98657a-ec4b-4768-83a9-fc74100ff6be",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "fd98657a-ec4b-4768-83a9-fc74100ff6be",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:07:58.160677+00:00"
+      },
+      {
+        "panel": "cf7bccb1-755a-42ee-abe8-1f2dae41b2dd",
+        "started_at": "2026-10-05T13:07:58.160723+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "a7b33f82-3614-47cb-a01d-3885fec16118",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "a7b33f82-3614-47cb-a01d-3885fec16118",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "a7b33f82-3614-47cb-a01d-3885fec16118",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:01.662853+00:00"
+      },
+      {
+        "panel": "d21eb338-a902-462b-9873-ba467781fca3",
+        "started_at": "2026-10-05T13:07:59.877260+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "9c9bdf87-a71f-4b8c-bdb9-ebaa71837e6f",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "9c9bdf87-a71f-4b8c-bdb9-ebaa71837e6f",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "9c9bdf87-a71f-4b8c-bdb9-ebaa71837e6f",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:05.263201+00:00"
+      },
+      {
+        "panel": "df8b457d-5273-48ef-8526-bcb19b9c3917",
+        "started_at": "2026-10-05T13:08:01.662897+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "09bbadae-9c5b-4c06-8476-884b0c9296c6",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "09bbadae-9c5b-4c06-8476-884b0c9296c6",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:04.750427+00:00"
+      },
+      {
+        "panel": "e2087659-5760-4aa8-bc8f-685fb9a0bcb3",
+        "started_at": "2026-10-05T13:08:04.750478+00:00",
+        "audit": {
+          "kernel": "7.0.0-34-generic",
+          "boot_id": "b65db6a7-4582-4a2c-b8f5-f591b38875d1",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "b65db6a7-4582-4a2c-b8f5-f591b38875d1",
+          "boot_changed": true,
+          "kernel": "7.0.0-34-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "b65db6a7-4582-4a2c-b8f5-f591b38875d1",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:07.999401+00:00"
+      },
+      {
+        "panel": "e5eaa766-e751-413a-9b4c-549ff3f37565",
+        "started_at": "2026-10-05T13:08:05.263250+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "bdd3ead0-86d0-4123-bf42-8c9ce3f77f40",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "bdd3ead0-86d0-4123-bf42-8c9ce3f77f40",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "bdd3ead0-86d0-4123-bf42-8c9ce3f77f40",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:07.600902+00:00"
+      },
+      {
+        "panel": "e766135b-08d9-4c74-96d4-f1d4424a4b5e",
+        "started_at": "2026-10-05T13:08:07.600934+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "03bc09d8-7d13-48a7-8c3a-64942f956e93",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "03bc09d8-7d13-48a7-8c3a-64942f956e93",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:19.529188+00:00"
+      },
+      {
+        "panel": "e8eb2b07-f086-499b-98b9-9a04c25ce42b",
+        "started_at": "2026-10-05T13:08:07.999484+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "e534d50a-ca94-42ab-8ebf-909beaa4b289",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "e534d50a-ca94-42ab-8ebf-909beaa4b289",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:11.148319+00:00"
+      },
+      {
+        "panel": "ef4b1677-9635-46a4-86e5-1bf79e7e0b6e",
+        "started_at": "2026-10-05T13:08:11.148395+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "c62290cb-f6e1-4e4a-8a15-f507f0dd0fe2",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "c62290cb-f6e1-4e4a-8a15-f507f0dd0fe2",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "c62290cb-f6e1-4e4a-8a15-f507f0dd0fe2",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:33.040653+00:00"
+      },
+      {
+        "panel": "f19ead96-e932-4a0b-ac6c-a083a896781a",
+        "started_at": "2026-10-05T13:08:15.753209+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "1277dbfd-00e3-429a-82b0-4116001b633c",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "1277dbfd-00e3-429a-82b0-4116001b633c",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:18.962137+00:00"
+      },
+      {
+        "panel": "f537821f-9179-4693-8a81-f522e9190a8c",
+        "started_at": "2026-10-05T13:08:18.962187+00:00",
+        "audit": {
+          "kernel": "7.0.0-38-generic",
+          "boot_id": "239d76a1-2f93-4dfb-861b-8975db63387e",
+          "affected": true,
+          "kho_disabled": true,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": true
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "activation": {
+          "active": true,
+          "boot_id": "239d76a1-2f93-4dfb-861b-8975db63387e",
+          "boot_changed": true,
+          "kernel": "7.0.0-38-generic",
+          "cma_total_kib": 0,
+          "cma_free_kib": 0
+        },
+        "os": {
+          "boot_id": "239d76a1-2f93-4dfb-861b-8975db63387e",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "ActiveState": "active",
+            "Result": "success",
+            "NRestarts": "0"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:22.525757+00:00"
+      },
+      {
+        "panel": "fc547fda-42cc-44c2-84bc-b6d29c91a019",
+        "started_at": "2026-10-05T13:08:19.529279+00:00",
+        "audit": {
+          "kernel": "5.15.0-198-generic",
+          "boot_id": "091c721a-8a1e-4861-8907-f1bb6ed73111",
+          "affected": false,
+          "kho_disabled": false,
+          "cma_total_kib": 0,
+          "cma_free_kib": 0,
+          "prepared": false
+        },
+        "health": {
+          "api_ready": true,
+          "xray": "running",
+          "inbounds": 1
+        },
+        "os": {
+          "boot_id": "091c721a-8a1e-4861-8907-f1bb6ed73111",
+          "oom_lines_this_boot": 0,
+          "xui": {
+            "Result": "success",
+            "NRestarts": "0",
+            "ActiveState": "active"
+          }
+        },
+        "route_proofs": 34,
+        "passed": true,
+        "completed_at": "2026-10-05T13:08:21.006892+00:00"
+      }
+    ],
+    "completed_at": "2026-10-05T13:09:26Z",
+    "passed": 38,
+    "pending": [],
+    "initial_completed_at": "2026-10-05T13:08:33.041015+00:00",
+    "initial_passed": 37,
+    "initial_evidence": "coordinated-verification.initial.json",
+    "proof_tool_source_revision": "69fcef4f444afeac5f48e98b7b2f81bc37b8a87f",
+    "read_only_rechecks": [
+      {
+        "panel": "92764f7e-bada-4196-8602-eb75a259390d",
+        "passed": true,
+        "route_proofs": 34,
+        "at": "2026-10-05T13:09:26Z",
+        "evidence": "coordinated-recheck-92764f7e.log"
+      }
+    ],
+    "verification_mode": "Coordinated initial full-fleet run plus one bounded read-only recheck; all original failures preserved."
+  },
+  "binaries": {
+    "api": {
+      "revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+      "sha256": "f99d9240a078d140e24bec419f6399b8334f02a53fb71206d0152baa28c7d08a",
+      "vcs_modified": false
+    },
+    "worker": {
+      "revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+      "sha256": "8687a39532acb8a4c353f7a62f10624b2661768e7ee37c526cc5ef440103486f",
+      "vcs_modified": false
+    }
+  },
+  "readiness": {
+    "status": "ready",
+    "checks": [
+      {
+        "name": "database",
+        "ok": true
+      }
+    ],
+    "at": "2026-10-05T13:10:37.268607453Z"
+  },
+  "maintenance_rechecks": [
+    {
+      "panel_id": "7d842cca-5728-4fcb-a298-6dfd228af131",
+      "fresh_proof_at": "2026-10-05T12:28:14Z",
+      "route_proofs": 34,
+      "initial_result": "Post-boot route matrix unconfirmed; controller halted progression.",
+      "fresh_result": "Fresh read-only matrix passed with Worker active; resume revalidated without another node reboot or routing mutation.",
+      "fresh_evidence": "readonly-route-recheck-7d842cca.log",
+      "original_evidence": [
+        "route-after-7d842cca-5728-4fcb-a298-6dfd228af131.log.before-readonly-recheck"
+      ]
+    },
+    {
+      "panel_id": "d21eb338-a902-462b-9873-ba467781fca3",
+      "fresh_proof_at": "2026-10-05T12:39:12Z",
+      "route_proofs": 34,
+      "initial_result": "Post-boot route matrix unconfirmed; controller halted progression.",
+      "fresh_result": "Fresh read-only matrix passed with Worker active; resume revalidated without another node reboot or routing mutation.",
+      "fresh_evidence": "readonly-route-recheck-d21eb338.log",
+      "original_evidence": [
+        "route-after-d21eb338-a902-462b-9873-ba467781fca3.log.before-readonly-recheck-d21eb338"
+      ]
+    },
+    {
+      "panel_id": "f537821f-9179-4693-8a81-f522e9190a8c",
+      "fresh_proof_at": "2026-10-05T12:52:03Z",
+      "route_proofs": 34,
+      "initial_result": "Post-boot route matrix unconfirmed; controller halted progression.",
+      "fresh_result": "Fresh read-only matrix passed with Worker active; resume revalidated without another node reboot or routing mutation.",
+      "fresh_evidence": "readonly-route-recheck-f537821f.log",
+      "original_evidence": [
+        "route-after-f537821f-9179-4693-8a81-f522e9190a8c.log.before-readonly-recheck-f537821f"
+      ]
+    }
+  ],
+  "secondary_management_observation": {
+    "panel_id": "f537821f-9179-4693-8a81-f522e9190a8c",
+    "symptoms": [
+      "HTTP route-test timeout",
+      "gRPC code=Canceled: client connection is closing",
+      "elevated I/O wait and swap usage under live traffic"
+    ],
+    "oom_after_boot": false,
+    "core_process_restart_observed": false,
+    "controlled_worker_pause_started": "2026-10-05T12:50:18Z",
+    "controlled_worker_pause_ended": "2026-10-05T12:50:20Z",
+    "quiesced_full_matrix_passed": true,
+    "worker_active_fresh_matrix_passed": true,
+    "interpretation": "Independent acceptance initially lacked the worker config lock, allowing overlapping TestRoute calls against the shared Sanaei gRPC client. Acceptance now takes the existing per-panel cross-process lock and distinguishes unavailable RPC evidence from an actual route mismatch. This removes that known source of interference; observed resource pressure is not a measured capacity limit.",
+    "evidence": [
+      "route-diagnostic-f537821f-second.log",
+      "route-diagnostic-f537821f-quiesced.log",
+      "route-diagnostic-f537821f-resumed.log",
+      "readonly-route-recheck-f537821f.log.initial-failed",
+      "load-f537821f.log",
+      "core-f537821f.log"
+    ]
+  },
+  "validation": {
+    "focused_fault_tests": "PASS",
+    "focused_race_tests": "PASS",
+    "full_go_tests": "PASS",
+    "clean_build": "PASS",
+    "orchestrator": "COMPLETE",
+    "coordinated_proof_postgres_race_tests": "PASS",
+    "coordinated_proof_full_go_tests": "PASS",
+    "profiles_unchanged": true,
+    "client_execution_gate_unchanged": true
+  },
+  "residential_domains": [
+    "geosite:google@ads",
+    "domain:browserleaks.com"
+  ],
+  "routing_networks": [
+    "tcp",
+    "udp"
+  ],
+  "dns": "managed cached UseIPv4, server-direct; unchanged",
+  "evidence_directory": "/root/backups/dob-panel-recovery-20261005",
+  "prior_incident_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
+  "limits": [
+    "Runtime route probes verify routing decisions, not successful residential upstream authentication or ad display.",
+    "Earlier upstream AUTH_REJECTED was not repaired or retested in this task.",
+    "No fresh provider-created 7.0 droplet was forced solely for this acceptance; bootstrap and readiness have fault tests and the same guard was exercised on existing real servers.",
+    "This addresses the observed kernel failure mode, not a guarantee against every future network or memory failure."
+  ]
+}

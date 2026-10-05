@@ -1,0 +1,41 @@
+# Panel OOM recovery and kernel memory guard — 2026-10-05
+
+This is the latest checkpoint for the user's request to investigate the unavailable panel and prevent the same failure across the fleet. It supersedes the pending runtime verification in GOOGLE_ADS_ONLY_HANDOFF_20261005.md. Original failure evidence remains unchanged.
+
+## Diagnosis
+
+Panel `cf65a8f5-fce6-4b62-a5aa-51fccd518c35` lost Xray to the kernel OOM killer at 11:49:31 UTC; the x-ui service stopped and restarted at 11:49:35 UTC. This aligns with login timeouts and connection refusal in the previous acceptance. Kernel 7.0.0-38-generic reported CmaTotal=0 but CmaFree=292680 KiB during diagnosis. At the OOM event, a zone reported 1238088 KiB free, of which 1237420 KiB was phantom CMA. Swap was available. This matches the reported default-enabled Kexec Handover/CMA kernel defect, not merely a short HTTP timeout.
+
+Primary evidence: [Ubuntu bug 2163395 report](https://www.mail-archive.com/ubuntu-bugs@lists.ubuntu.com/msg6300333.html) and [official kernel parameter documentation](https://docs.kernel.org/admin-guide/kernel-parameters.html). `kho=off` disables Kexec Handover. We did not replace the kernel, disable OOM protection, remove crashkernel reservations, or increase swap to conceal the defect.
+
+## Repair and prevention
+
+Product source and clean deployed API/Worker: `a282d17a82e6de268901c0e041abcef7ddd989bc`. Web static remains the unchanged 14fc055 source. No migration. The new bootstrap-kernel-memory-guard step follows cloud-init/prerequisites and precedes installer activation. It detects susceptible 7.0 KHO-default kernels or an observed supported CMA anomaly, writes an owned GRUB drop-in, preserves unrelated boot arguments, regenerates and reads back every Linux boot entry, and journals progress atomically. Unaffected kernels are a no-op. Unmanaged or contradictory boot configuration is refused.
+
+The guard never reboots by itself. Existing installer readiness now includes required guard activation and uses the existing bounded reboot remediation path. Fault tests cover interrupted generation, lost/nonzero response with successful readback, unknown files, symlinks, explicit enablement, corrupt journals, idempotency, unchanged boot rejection and actual boot/off/CMA activation predicates.
+
+The initial fleet audit covered 38 serving panels: 21 susceptible 7.0 kernels and 17 unaffected 5.15 kernels. The original failed panel was the canary, then the remaining 20 were maintained one at a time. Each reboot required fresh eligibility, more than one READY server in its account, sufficient expiry horizon, pinned SSH, no conflicting reboot in flight, validated boot configuration and a durable one-shot reboot intent. Progress stopped on unconfirmed state; no blind reboot retry or audit/job reset was used.
+
+During maintenance, 3 post-boot route matrices were initially unconfirmed, so the controller halted each time. Full fresh read-only matrices subsequently passed without another node reboot or routing mutation; the controller resumed and revalidated those hosts without replaying their reboots. Panel IDs, proof times and the original failures are preserved in the acceptance JSON and evidence logs. The generic route errors do not establish a persistent policy mismatch or DNS root cause.
+
+All 21 maintained servers have a changed boot identity, active kho=off, CmaTotal=0 and CmaFree=0, an authenticated healthy panel API, running Xray, and all 34 route probes passed. A fresh final audit covered 38 currently eligible panels: 21 mitigated and 17 unaffected. All 38 passed health and the 34-probe matrix. No OOM journal lines occurred in the mitigated servers' current boots through the final observation window. The coordinated initial run passed 37/38, then one bounded fresh read-only recheck completed the remaining panel at 13:09:26 UTC; the initial result remains preserved. Detailed per-host times and proofs are in `docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json`.
+
+The acceptance CLI is separately built from clean source `69fcef4f444afeac5f48e98b7b2f81bc37b8a87f`. It now takes the existing `sanaei.WithConfigLock` across its snapshot, matrix and bounded retry, coordinating with the Worker’s reconciliation. Different panels remain independent, cancellation is honored, and unavailable RPC envelopes are no longer labeled as confirmed routing differences. Real PostgreSQL concurrency/cancellation tests and race tests passed. The earlier uncoordinated final run (34/38) and its rechecks remain archived under `before-coordinated-final`; they were not rewritten into passes.
+
+Focused fault tests, focused race tests and full Go tests passed. AI OS Development Orchestrator completed using the existing OpenAI API environment. Clean detached binaries were verified and deployed, API/Worker are active and readiness passes. Profile and client execution-gate snapshots remained identical across deployment.
+
+An additional management-path observation occurred on `f537821f-9179-4693-8a81-f522e9190a8c`: its first standalone read-only recheck also failed. OOM remained absent and the same Xray process kept running, but I/O wait/swap and open socket counts were high. The exact route-test error included gRPC Canceled / client connection closing. A controlled Worker pause from 12:50:18 to 12:50:20 UTC allowed the full matrix to pass; Worker was automatically restored, and separate fresh matrices passed with Worker active. A two-minute auto-resume watchdog and shell cleanup protected the diagnostic. Review found that the independent acceptance command did not take the Worker’s existing per-panel config lock. Current upstream Sanaei source (`d1b60799ecd46616c2c62afc8e166b1480e7bc84`, `XrayService.TestRoute`) uses a shared mutable gRPC client with per-call Init/Close, making overlapping checks hazardous. The acceptance command now coordinates using the existing lock. Resource pressure remains an observation, not proof of a unique performance bottleneck. No request timeout, routing policy, socket limit, traffic permission or server capacity was changed to make the test pass. Original failures and observations are retained.
+
+## Preserved policy and limits
+
+Residential remains exactly `geosite:google@ads` plus temporary `domain:browserleaks.com`. TCP/UDP and direct cached IPv4 DNS are unchanged. Credentials, gates, old failed jobs, kernel version and OOM protections were not changed. Runtime route proofs establish routing decisions; they do not prove residential upstream login, HTTP/3 performance or actual AdMob rendering. Earlier AUTH_REJECTED and Asho cold-start timing remain separate unresolved observations.
+
+No new provider-created server was forced only for acceptance. The new provisioning guard has automated fault/readiness coverage and its real boot activation was verified on 21 existing servers. This mitigation addresses the observed failure mode, not every possible future outage.
+
+## Resume and rollback evidence
+
+Evidence root: `/root/backups/dob-panel-recovery-20261005`. `maintenance-state.json` preserves per-host state; `maintain.py` and the pinned-SSH `kernel-maintenance` helper implement resumable serial maintenance. Do not restart completed reboots or remove their one-shot intents. Original logs, complete test logs, built binaries, binary rollback copies, before/after profile/gate snapshots and final read-only verification logs are retained. Guard state and original GRUB backup on each affected host are under `/var/lib/digital-ocean-bot-kernel-memory`; the owned drop-in is `/etc/default/grub.d/99-dob-kho.cfg`.
+
+The new CLI is the authority for follow-up route proofs; do not run the old uncoordinated acceptance binary against an active Worker. Invoke the development orchestrator with explicit `DEV_JOB`; it has no `--help` parser. One unintended help invocation entered default `proxy-control-plane` PLAN and was interrupted before source changes; its ledger is retained and must not be resumed. See `orchestrator-help-interruption.json`.
+
+If a later check becomes unconfirmed, inspect current boot/CMA/API evidence before any mutation. Keep the KHO mitigation in place until a validated fixed kernel replaces the vulnerable behavior. Do not disable it merely to roll back an application binary.

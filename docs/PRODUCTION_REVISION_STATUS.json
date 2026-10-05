@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+  "runtime_source_revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-05T11:51:18.347823+00:00",
+  "verified_at_utc": "2026-10-05T13:10:37.270229+00:00",
   "binaries": {
     "api": {
-      "revision": "14fc055e2df887551f3e311991db9467d92363f6",
-      "sha256": "558edcba8e646494863b9fadab8485a50f7ad5743df6febce9a9e29bf1fb88ca",
+      "revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+      "sha256": "f99d9240a078d140e24bec419f6399b8334f02a53fb71206d0152baa28c7d08a",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "14fc055e2df887551f3e311991db9467d92363f6",
-      "sha256": "451738d42ee1ebf96bf0f66452f4acfadaf7f8c4c34f88a3d2fd032d2c565164",
+      "revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+      "sha256": "8687a39532acb8a4c353f7a62f10624b2661768e7ee37c526cc5ef440103486f",
       "vcs_modified": false
     }
   },
@@ -19,15 +19,14 @@
     "api": "active",
     "worker": "active",
     "saved_scope_passed": 38,
-    "route_matrix_passed_over_window": 37,
-    "pending_panel_ids": [
-      "cf65a8f5-fce6-4b62-a5aa-51fccd518c35"
-    ]
+    "route_matrix_passed_over_window": 38,
+    "pending_panel_ids": [],
+    "kernel_memory_mitigated": 21
   },
   "migration": "000149_profile_creation_interval",
-  "acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
-  "verified": false,
-  "note": "Only google@ads plus temporary BrowserLeaks are residential. Saved exact scope verified 38/38; full runtime matrix 37/38 with one unavailable fresh inbound read. Earlier upstream AUTH_REJECTED was not retested. No AdMob display claim.",
+  "acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
+  "verified": true,
+  "note": "Original unavailable panel repaired after kernel phantom-CMA diagnosis. All 21 susceptible servers mitigated; fresh 38/38 health and runtime routing matrices passed. Exact Google Ads plus temporary BrowserLeaks scope preserved. Earlier upstream AUTH_REJECTED remains separate and untested.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -44,14 +43,17 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Correct existing residential upstream authorization, then actual Ads TCP/UDP/HTTP3 acceptance; investigate slow panel route API and cold tunnel/app SDK delays.",
+  "next_product_step": "Resolve existing residential upstream authorization, then actual Ads TCP/UDP/HTTP3 acceptance and app SDK cold-start timing. Kernel OOM incident is repaired and guarded in provisioning.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 38,
-  "worker_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+  "worker_source_revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
-  "verification_status": "GOOGLE_ADS_ONLY_SAVED_SCOPE_VERIFIED_RUNTIME_PARTIAL",
-  "latest_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json"
+  "verification_status": "KERNEL_MEMORY_GUARD_AND_CURRENT_FLEET_ROUTES_VERIFIED",
+  "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
+  "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
+  "acceptance_tool_source_revision": "69fcef4f444afeac5f48e98b7b2f81bc37b8a87f",
+  "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json"
 }

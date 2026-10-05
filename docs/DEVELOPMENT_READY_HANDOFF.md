@@ -73,3 +73,8 @@ Read docs/ADS_UDP_DNS_HANDOFF_20261005.md and docs/ADS_UDP_DNS_ACCEPTANCE_202610
 ## Google Ads only continuation (2026-10-05)
 
 Read docs/GOOGLE_ADS_ONLY_HANDOFF_20261005.md and docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json. User explicitly narrows residential to exactly `geosite:google@ads` plus temporary `domain:browserleaks.com`. Product runtime 14fc055e2df887551f3e311991db9467d92363f6. Saved list verified 38/38; full runtime matrix 37/38, with one pending fresh API read. Preserve existing UDP and direct IPv4 DNS. Earlier upstream AUTH_REJECTED was not repaired or retested.
+
+
+## Latest kernel OOM recovery (2026-10-05)
+
+Read docs/KERNEL_MEMORY_GUARD_HANDOFF_20261005.md and docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json first for the current frontier. This supersedes the one pending runtime panel above without rewriting its original failure evidence. Runtime API/Worker a282d17a82e6de268901c0e041abcef7ddd989bc includes a guarded, journaled KHO/CMA mitigation in bootstrap and activation readiness. All 21 susceptible existing servers were individually rebooted and verified; fresh 38/38 current panels pass API/Xray health and all 34 routing probes. Preserve google@ads plus temporary BrowserLeaks, TCP/UDP and direct IPv4 DNS. Do not replay completed maintenance. Earlier upstream AUTH_REJECTED and actual app ad-display/performance remain separate, untested limitations.

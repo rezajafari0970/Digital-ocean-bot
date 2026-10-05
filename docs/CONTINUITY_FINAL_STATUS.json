@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
-    "worker_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+    "api_source_revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
+    "worker_source_revision": "a282d17a82e6de268901c0e041abcef7ddd989bc",
     "web_static_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
-    "status": "GOOGLE_ADS_ONLY_DEPLOYED_RUNTIME_PARTIAL",
-    "acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
-    "handoff": "docs/GOOGLE_ADS_ONLY_HANDOFF_20261005.md",
-    "note": "Latest user narrows residential to google@ads plus temporary BrowserLeaks only. TCP/UDP and direct IPv4 DNS remain enabled. Saved scope 38/38; full runtime 37/38. One API read remains unconfirmed; prior upstream authentication blocker is separate."
+    "status": "KERNEL_MEMORY_GUARD_DEPLOYED_FLEET_VERIFIED",
+    "acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
+    "handoff": "docs/KERNEL_MEMORY_GUARD_HANDOFF_20261005.md",
+    "note": "Unavailable panel recovered: phantom CMA/KHO OOM killed Xray. All 21 susceptible kernels mitigated by persisted kho=off and individually verified after reboot. Fresh 38/38 current panel health and 34-probe routing matrices pass. Future provisioning guard deployed. Exact google@ads plus temporary BrowserLeaks, TCP/UDP and direct IPv4 DNS preserved; prior upstream AUTH_REJECTED remains untested."
   }
 }
