@@ -111,3 +111,7 @@ Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANC
 ## UpCloud quota diagnostics continuation (2026-10-05)
 - Read docs/UPCLOUD_QUOTA_DIAGNOSTICS_HANDOFF_20261005.md and docs/UPCLOUD_QUOTA_DIAGNOSTICS_ACCEPTANCE_20261005.json. Runtime 4ada688681d03283dc0712c2fb5cc6798f91b3c0; static/migration unchanged.
 - Prior nullable-Dev fix did not resolve authenticated user preview. Added safe per-field/type diagnostics with all issues in correlated log. Tests/deploy pass; actual root fix awaits one authenticated retry. Do not claim the null-Dev hypothesis was confirmed.
+
+## UpCloud extension null fix continuation (2026-10-05)
+- Read docs/UPCLOUD_EXTENSION_QUOTA_HANDOFF_20261005.md and docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json. Runtime 1ae912189edcac45437b1ede21f17743cd3f6942; static/migration unchanged.
+- Live trace confirms one additional null quota rejected at account. Preserve nil extension quotas/usage, retaining strict required-budget checks. Regression/tests/deployment pass; full authenticated preview requires user retry.

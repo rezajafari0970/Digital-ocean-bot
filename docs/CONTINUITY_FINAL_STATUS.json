@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
-    "worker_source_revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+    "api_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
+    "worker_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
     "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-    "status": "DEPLOYED_QUOTA_FIELD_DIAGNOSTICS_ACTUAL_CAUSE_PENDING_USER_RETRY",
-    "acceptance": "docs/UPCLOUD_QUOTA_DIAGNOSTICS_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_QUOTA_DIAGNOSTICS_HANDOFF_20261005.md",
-    "note": "User authenticated retries still fail HTTP200 account INVALID_NUMBER on runtime 5aa7fef. Prior nullable-Dev fix did not resolve the actual failure. Added safe quota field/shape evidence, no parser relaxation. Actual offending field/value remains unknown until another panel Validate."
+    "status": "DEPLOYED_CONFIRMED_EXTENSION_NULL_FIX_AUTHENTICATED_PREVIEW_PENDING",
+    "acceptance": "docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_EXTENSION_QUOTA_HANDOFF_20261005.md",
+    "note": "Live traces identified exactly one additional unrecognized null quota. Reproduced and fixed this rejection while preserving null presence and selected-plan fail-closed checks. Actual raw key remains private/unknown. Authenticated full preview success awaits user retry; no saved UpCloud account at baseline."
   }
 }
