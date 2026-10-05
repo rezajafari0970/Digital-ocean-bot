@@ -1,0 +1,29 @@
+{
+  "goal": "Complete UpCloud catalog display with region/account-currency pricing and distinct full Ubuntu image names.",
+  "context": "User screenshots after runtime b44d371 confirm authenticated Account/Capacity/Catalog preview now opens, no HTTP400. Source omits /price entirely and UI collapses image labels to family+version. Implement optional bounded pricing enrichment via existing account transport GET /price, exact server_plan_+plan.Name and zone.name mapping, amount must1, positive finite decimal strict values. Official UpCloud CLI internal/commands/server/plan_list.go getPlanCost divides price by100; monthly estimates use28*24hours. Current schema prices.currency; if absent resolve currency via account and /account/details/{escaped username}, parsing onlycurrency; never assumeUSD. Optional8sec total budget, no retry/directfallback; missing/malformed prices do not block otherwise validcatalog and neverdisplayzero/free. Add optional PricesByRegion map toPlan with Currency,Hourly,MonthlyEstimate; retain existing scalar pricing DO/Vultr. UI show selected primary-region price in all3plan selectors, propercurrency/hourly andapproxmonthly672h; regionchange updates all3preservingvalidselected IDs, explicit region/tax/extras context. Full image title+architecture and actual template_type ifprovided; preserve distinct IDs/variants, only appendIDwhenlabelsotherwiseidentical, no arbitraryversiondedupe. All3OSselectorsdefault bymetadataVersion so case/fullnamesdontbreak defaults. Test price schema/units/region/currency/unknowns/HTTPfail, browser sameversionvariants &preserveIDs/defaults/regionchange, full/race/isolatedPG. Canonical userworkflow OpenAI orchestrator, cleanbuild, reversible APIworker AND static deploy, configcompare, commit/push/handoff. No cloudcreates/deletes, no secrets, unchanged routes/gates/residentialprofile. No savedUpCloudaccount atbaseline, fullnewprice APIliveconfirmation pendinguser.",
+  "allowed_paths": [
+    "internal/providers/types.go",
+    "internal/providers/upcloud",
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/upcloud.cjs",
+    "docs/development-jobs/upcloud-catalog-display-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-catalog-display-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): show regional prices and distinguish Ubuntu templates"
+}

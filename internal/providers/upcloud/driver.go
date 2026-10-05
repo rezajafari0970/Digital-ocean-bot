@@ -121,7 +121,11 @@ func templateImage(x storageData) providers.Image {
 			}
 		}
 	}
-	return providers.Image{ID: x.ID, Name: x.Title, Family: "ubuntu", Version: ver, Architecture: "x86_64", Available: ver != "" && x.ID != "" && x.Type == "template" && x.Access == "public" && x.State == "online"}
+	title := x.Title
+	if x.TemplateType != "" {
+		title += " (" + x.TemplateType + ")"
+	}
+	return providers.Image{ID: x.ID, Name: title, Family: "ubuntu", Version: ver, Architecture: "x86_64", Available: ver != "" && x.ID != "" && x.Type == "template" && x.Access == "public" && x.State == "online"}
 }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	type zone struct {
@@ -172,6 +176,10 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	}
 	if len(out.Regions) == 0 || len(out.Plans) == 0 || len(out.Images) == 0 {
 		return providers.Catalog{}, withDiagnostic(unavailable("catalog", "no compatible public zones, plans or Ubuntu templates"), fmt.Sprintf("NO_CATALOG_z%d_p%d_i%d", len(out.Regions), len(out.Plans), len(out.Images)))
+	}
+	d.enrichPrices(ctx, &out)
+	if err := ctx.Err(); err != nil {
+		return providers.Catalog{}, err
 	}
 	return out, nil
 }

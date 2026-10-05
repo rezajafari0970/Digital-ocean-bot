@@ -30,6 +30,8 @@ func extensionFixture(t *testing.T, limit, used any) *Driver {
 			}}}, nil
 		case "/1.3/zone":
 			return 200, map[string]any{"zones": map[string]any{"zone": []any{map[string]any{"id": "fi-hel1", "description": "Helsinki", "public": "yes"}}}}, nil
+		case "/1.3/price":
+			return 503, map[string]any{}, nil
 		case "/1.3/storage/template":
 			return 200, map[string]any{"storages": map[string]any{"storage": []any{templateJSON().(map[string]any)["storage"]}}}, nil
 		default:

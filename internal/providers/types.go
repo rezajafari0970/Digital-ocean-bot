@@ -42,8 +42,16 @@ type Plan struct {
 	DiskGB           int
 	PriceHourly      float64
 	PriceMonthly     float64
+	PricesByRegion   map[string]PlanPrice `json:",omitempty"`
 	Available        bool
 	AvailableRegions []string
+}
+
+// PlanPrice is region-specific display metadata; it does not authorize spending.
+type PlanPrice struct {
+	Currency        string
+	Hourly          float64
+	MonthlyEstimate float64
 }
 
 type Image struct {
