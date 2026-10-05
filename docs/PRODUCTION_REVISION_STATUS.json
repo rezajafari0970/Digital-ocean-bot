@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+  "runtime_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-05T14:40:22.229499+00:00",
+  "verified_at_utc": "2026-10-05T16:26:30.515889+00:00",
   "binaries": {
     "api": {
-      "sha256": "6a548f0b0999e5589607eaaeec70064e7d7d303cb554f9d682d0f2ad93f59fb1",
-      "revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+      "sha256": "cebfcc5b2930ef45dfbcaa7d442ce46adae1a769c694f61bb2a71b7db01a67d6",
+      "revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
       "vcs_modified": false
     },
     "worker": {
-      "sha256": "90fd43900375a7be8bda5c378e5526150c2385749bc0d5ee96a354a58ded072d",
-      "revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+      "sha256": "166f5506b1e123589703a0ef1ac26caf49741e297bcd1d9e90c2e2a5e1b3481b",
+      "revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
       "vcs_modified": false
     }
   },
@@ -32,10 +32,10 @@
     "pool_enabled_panels": 38,
     "route_matrix_passed_over_initial_window": 38
   },
-  "migration": "000150_residential_pool",
-  "acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
+  "migration": "000151_residential_performance",
+  "acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "verified": false,
-  "note": "Bulk SOCKS management and native latency-weighted health pools deployed fleet-wide. Initial 38/38 running matrices passed over the rollout window. External live import/edit then installed 11 endpoints at revision 594; latest independent matrices pass 32/38, with six unconfirmed even after direct diagnostics. Preserve truthful pending states and original failure evidence.",
+  "note": "Reversible bounded native tuning is deployed. One canary passed 38 route proofs with the profile and 38 after explicit rollback; current tuning profile is null. Current controller metadata is 24/24 fresh, not an independent rerun of the historical fleet. Preserve earlier unresolved evidence.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -52,18 +52,39 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Investigate unresolved server runtime/API timeouts after live pool changes; verify remaining six matrices without blind restarts or relaxing fingerprints. Measure actual provider UDP and app AdMob display separately.",
+  "next_product_step": "User timed profile test and app ad-load measurement. No automatic fleet-wide performance promotion.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "eligible_serving_panels": 38,
-  "worker_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+  "eligible_serving_panels": 24,
+  "worker_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
-  "verification_status": "RESIDENTIAL_POOL_DEPLOYED_POST_IMPORT_FLEET_VERIFICATION_PARTIAL",
+  "web_static_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+  "verification_status": "PERFORMANCE_PROFILE_AND_ROLLBACK_CANARY_VERIFIED_DEFAULTS_RESTORED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
-  "acceptance_tool_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+  "acceptance_tool_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
-  "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json"
+  "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
+  "previous_runtime_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+  "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
+  "current_controller_snapshot": {
+    "revision": 598,
+    "eligible": 24,
+    "verified": 24,
+    "unverified_ids": null
+  },
+  "current_performance_experiment": {
+    "id": "b2718145-8cb5-4c35-bb93-a4e497149589",
+    "state": "ROLLED_BACK",
+    "version": 3,
+    "reason": "requested",
+    "target_state": "RESTORED",
+    "generation": 2,
+    "applied_generation": 2,
+    "profile": null,
+    "baseline_released": true,
+    "verified_at": "2026-10-05T16:23:15.513174+00:00",
+    "last_error": ""
+  }
 }

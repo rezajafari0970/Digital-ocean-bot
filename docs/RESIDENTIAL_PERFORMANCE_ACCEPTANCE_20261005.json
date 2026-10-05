@@ -1,0 +1,52 @@
+{
+  "runtime_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+  "migration": 151,
+  "verified_at_utc": "2026-10-05T16:26:30.515889+00:00",
+  "orchestrator_status": "COMPLETE",
+  "tests": {
+    "race_postgresql": "PASS",
+    "full_go": "PASS",
+    "installed_xray_tcp_udp_faults": "PASS",
+    "installed_xray_profile_restore": "PASS",
+    "browser_mobile_desktop_lost_response_reload": "PASS",
+    "production_ui": "PASS"
+  },
+  "canary": {
+    "panel_id": "0ae83b7e-97a6-4a22-abbf-715619b65a6d",
+    "experiment_id": "b2718145-8cb5-4c35-bb93-a4e497149589",
+    "tuned_route_proofs": 38,
+    "restored_route_proofs": 38,
+    "rollback": {
+      "id": "b2718145-8cb5-4c35-bb93-a4e497149589",
+      "state": "ROLLED_BACK",
+      "version": 3,
+      "reason": "requested",
+      "target_state": "RESTORED",
+      "generation": 2,
+      "applied_generation": 2,
+      "profile": null,
+      "baseline_released": true,
+      "verified_at": "2026-10-05T16:23:15.513174+00:00",
+      "last_error": ""
+    }
+  },
+  "current_tuning_state": "ROLLED_BACK_NO_ACTIVE_PROFILE",
+  "fleet_controller_metadata": {
+    "revision": 598,
+    "eligible": 24,
+    "verified": 24,
+    "unverified_ids": null
+  },
+  "independent_fleet_rerun": false,
+  "profiles_and_client_gate_unchanged": true,
+  "endpoint_snapshot_count_retained": 12,
+  "unsupported_target_ipv4_removed": true,
+  "ad_load_or_provider_udp_benchmark": false,
+  "evidence_directory": "/root/backups/dob-residential-performance-20261005",
+  "limitations": [
+    "Offline servers remain rollback pending until verified.",
+    "Operator routing gates remain authoritative.",
+    "Deadline execution depends on a running worker; state survives restart.",
+    "Historical fleet timeouts are not independently cleared by this canary."
+  ]
+}
