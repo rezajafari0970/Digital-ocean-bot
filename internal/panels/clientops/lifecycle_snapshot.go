@@ -3,6 +3,7 @@ package clientops
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"time"
@@ -34,7 +35,29 @@ func (c LifecycleClient) InactiveReason(now time.Time) (string, error) {
 
 // One fresh inbound/global pair supplies identity, policy and global traffic.
 // Missing global records, duplicate identities and cross-inbound sharing fail closed.
+var errLifecyclePolicyDisagreement = fmt.Errorf("%w: inbound/global policy disagreement", ErrVerify)
+
+// The v3 client record and inbound projection can change between our two reads
+// (for example when the panel disables an expired client). Re-read both views;
+// never merge conflicting values or retry any mutation. Persistent disagreement
+// still returns ErrVerify and retains the worker's fail-closed behavior.
 func LifecycleInventory(ctx context.Context, rt *sanaei.PanelRuntime, inbound int64) (map[string]LifecycleClient, int, error) {
+	for attempt := 0; ; attempt++ {
+		clients, port, err := lifecycleInventoryOnce(ctx, rt, inbound)
+		if !errors.Is(err, errLifecyclePolicyDisagreement) || attempt >= 2 {
+			return clients, port, err
+		}
+		timer := time.NewTimer(time.Duration(attempt+1) * 100 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, 0, ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
+func lifecycleInventoryOnce(ctx context.Context, rt *sanaei.PanelRuntime, inbound int64) (map[string]LifecycleClient, int, error) {
 	rt.Session.Invalidate()
 	raws, err := rt.Session.Snapshot(ctx)
 	if err != nil {
@@ -102,7 +125,7 @@ func LifecycleInventory(ctx context.Context, rt *sanaei.PanelRuntime, inbound in
 		}
 		emails[c.Email] = true
 		if c.Email != g.Email || c.Enable != g.Enable || c.TotalGB != g.TotalGB || c.ExpiryTime != g.ExpiryTime {
-			return nil, 0, fmt.Errorf("%w: inbound/global policy disagreement", ErrVerify)
+			return nil, 0, errLifecyclePolicyDisagreement
 		}
 		c.LimitHWID = g.LimitHWID
 		out[c.ID] = LifecycleClient{c, g.Traffic}
