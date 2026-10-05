@@ -313,6 +313,16 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 					continue
 				}
 				tag, _ = rule["outboundTag"].(string)
+				if balance, ok := rule["balancerTag"].(string); ok {
+					for _, v := range running["routing"].(map[string]any)["balancers"].([]any) {
+						b := v.(map[string]any)
+						if b["tag"] == balance {
+							selectors := b["selector"].([]any)
+							tag = selectors[0].(string)
+							break
+						}
+					}
+				}
 				break
 			}
 			result(map[string]any{"matched": tag != "", "outboundTag": tag})

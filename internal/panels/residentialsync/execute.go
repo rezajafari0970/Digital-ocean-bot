@@ -137,7 +137,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = clientDNSTag
 					case !probe.ads:
 						base = directTag
-					case len(p.Proxies) > 0 && network == "udp" && p.Proxies[0].Type != "socks5":
+					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && p.Proxies[0].Type != "socks5") || (p.PoolEnabled && !poolHasUDP(p))):
 						base = blockedTag
 					case len(p.Proxies) > 0:
 						base = p.Proxies[0].Tag
@@ -165,7 +165,11 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						OutboundTag string
 					}
 				}
-				if json.Unmarshal(response.Body, &result) != nil || !result.Obj.Matched || result.Obj.OutboundTag != expected {
+				matches := json.Unmarshal(response.Body, &result) == nil && result.Obj.Matched && result.Obj.OutboundTag == expected
+				if p.PoolEnabled && len(p.Proxies) > 0 && base == p.Proxies[0].Tag {
+					matches = result.Obj.Matched && poolLaneMatches(desired, network, result.Obj.OutboundTag)
+				}
+				if !matches {
 					return errRouteNotApplied
 				}
 			}
@@ -194,6 +198,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			return errRouteNotApplied
 		}
 	}
+	if p.PoolEnabled {
+		return verifyPoolOutcomes(ctx, exec, desired, p)
+	}
 	return nil
 }
 
@@ -216,4 +223,41 @@ func verifyWhenReady(ctx context.Context, exec sanaei.SessionExecutor, desired m
 		case <-timer.C:
 		}
 	}
+}
+
+// Probe the second routing stage as well: the first stage only returns loopback
+// lanes. A blackhole outcome is a valid loaded plan when local probes are down.
+func verifyPoolOutcomes(ctx context.Context, exec sanaei.SessionExecutor, desired map[string]any, p routePolicy) error {
+	for _, network := range []string{"tcp", "udp"} {
+		if len(p.Proxies) == 0 || network == "udp" && !poolHasUDP(p) {
+			continue
+		}
+		for _, kind := range []string{"fast", "all"} {
+			form := url.Values{"inboundTag": {poolPrefix + "in-" + network + "-" + kind}, "network": {network}, "port": {"443"}, "ip": {"1.1.1.1"}}
+			response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
+			if e = envelope(response, e); e != nil {
+				return e
+			}
+			var result struct {
+				Obj struct {
+					Matched     bool
+					OutboundTag string
+				}
+			}
+			if json.Unmarshal(response.Body, &result) != nil || !result.Obj.Matched {
+				return errRouteNotApplied
+			}
+			matches := result.Obj.OutboundTag == tagged(desired, blockedTag)
+			for _, x := range p.Proxies {
+				if network == "udp" && x.Type != "socks5" {
+					continue
+				}
+				matches = matches || result.Obj.OutboundTag == tagged(desired, x.Tag)
+			}
+			if !matches {
+				return errRouteNotApplied
+			}
+		}
+	}
+	return nil
 }

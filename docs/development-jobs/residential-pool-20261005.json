@@ -1,0 +1,30 @@
+{
+  "goal": "Add atomic bulk SOCKS residential management with exact unique names, selected/all delete and credential export; implement real per-connection health-aware distributed routing biased toward the fastest healthy endpoints.",
+  "context": "Keep exact geosite:google@ads plus temporary domain:browserleaks.com, direct cached IPv4 DNS, UDP and all client/profile/generation/account policies. Existing router chooses one endpoint even when down. Use native Xray local burst observatory (10s interval, 1 sample, 3s timeout), leastLoad known-alive selection, fail-closed blackhole fallback, 80 percent fast lane and 20 percent all-healthy exploration via random loopback lanes; separate SOCKS-only UDP candidates. No probe observation should trigger fleet Xray restarts. Unknown/unavailable endpoints receive no production traffic before local probe success. Health transitions measured using installed core fault tests including failure/recovery and distribution; latency is not bandwidth. Bound central checks concurrently and expose timestamps and observation errors. Bulk import host:port:user:password preserves password colons and exact names, offers editable preview generated from case-preserved prefix, rejects case-insensitive duplicate names and payload errors before any write. Store encrypted secrets transactionally; idempotency survives response loss; never log credentials. Bulk delete operates on explicitly confirmed IDs and preserves shared account proxies; export admin-only no-store. Never create user example endpoints or delete production fixtures. Use isolated PostgreSQL and local browser fixtures. Keep existing cross-process panel lock and content-addressed route proofs, extend verification for load-balancer loopback outcomes. Canary before full production rollout; rollback on failure.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/residential",
+    "internal/panels/residentialsync",
+    "migrations",
+    "web",
+    "cmd/residential-routing-acceptance",
+    "docs/development-jobs/residential-pool-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-residential-pool-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(residential): bulk SOCKS management and adaptive healthy proxy pools"
+}

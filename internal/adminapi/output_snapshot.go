@@ -139,7 +139,7 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	}
 	// A failed health check hides residential links immediately, ahead of reconciliation.
 	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR EXISTS(
- SELECT 1 FROM residential_proxies rp WHERE rp.proxy_id=rs.selected_proxy_id AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes')) `
+ SELECT 1 FROM residential_proxies rp WHERE (rs.pool_enabled OR rp.proxy_id=rs.selected_proxy_id) AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes')) `
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)
 		if e != nil || n < 1 || n > 1440 {

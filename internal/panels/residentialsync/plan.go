@@ -27,6 +27,7 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	PoolEnabled         bool
 	Explicit            bool
 	Residential, Direct bool
 	AdsOnly             bool
@@ -363,6 +364,15 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	routing["rules"] = append(first, rest...)
 	next["routing"] = routing
+	if !p.PoolEnabled {
+		removeManagedPool(next)
+	}
+	if p.PoolEnabled {
+		if err := configurePool(next, p); err != nil {
+			return nil, err
+		}
+		kept = next["outbounds"].([]any)
+	}
 	// Fingerprint the entire desired plan, including credentials and client membership.
 	// Runtime TestRoute returns this content-addressed tag only after the plan loads.
 	fingerprint := settingsHash(map[string]any{"settings": next, "clients": clients, "tags": tags})[:16]
@@ -392,6 +402,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if replacement, ok := replacements[tag]; ok {
 			m["outboundTag"] = replacement
 		}
+	}
+	if p.PoolEnabled {
+		fingerprintPool(next, replacements)
 	}
 	return next, nil
 }

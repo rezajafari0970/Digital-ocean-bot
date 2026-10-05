@@ -53,7 +53,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	})
 }
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := routePolicy{AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel)}
+	p := routePolicy{AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel)}
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)
@@ -67,10 +67,10 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if err = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_config_profiles)`).Scan(&p.Explicit); err != nil {
 		return p, 0, err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'
+	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)
  FROM residential_proxies rp
- WHERE rp.enabled AND rp.last_success_at>=rp.updated_at
- ORDER BY (rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes') DESC,rp.priority,rp.proxy_id`)
+ WHERE rp.enabled AND ($1 OR rp.last_success_at>=rp.updated_at)
+ ORDER BY CASE WHEN $1 THEN false ELSE COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false) END DESC,rp.priority,rp.proxy_id`, p.PoolEnabled)
 	if err != nil {
 		return p, 0, err
 	}
@@ -113,7 +113,7 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		// its probe fails. A failed SOCKS/HTTP connection cannot fall back direct.
 		// Output separately requires current health; transient health must not
 		// restart every Xray or withdraw unrelated DIRECT subscriptions.
-		if len(p.Proxies) == 0 {
+		if p.PoolEnabled || len(p.Proxies) == 0 {
 			p.Proxies = append(p.Proxies, v.x)
 		}
 	}
@@ -256,7 +256,7 @@ func routeMap(cs []clientRoute) map[string]clientRoute {
 }
 
 func selectedProxy(p routePolicy) string {
-	if len(p.Proxies) > 0 {
+	if !p.PoolEnabled && len(p.Proxies) > 0 {
 		return p.Proxies[0].ID
 	}
 	return ""
@@ -309,8 +309,8 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 	if fresh != revision {
 		return errors.New("routing revision changed")
 	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid)
- ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p)); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7)
+ ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM panel_client_routes WHERE panel_id=$1", panel); err != nil {
@@ -391,6 +391,19 @@ func adsOnlyPanel(panel string) bool {
 // fleet-wide; a nonmatching panel retains its prior exact plan.
 func hardeningPanel(panel string) bool {
 	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_HARDENING_PANELS"))
+	if scope == "" {
+		return true
+	}
+	for _, id := range strings.Split(scope, ",") {
+		if strings.TrimSpace(id) == panel {
+			return true
+		}
+	}
+	return false
+}
+
+func poolPanel(panel string) bool {
+	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_POOL_PANELS"))
 	if scope == "" {
 		return true
 	}

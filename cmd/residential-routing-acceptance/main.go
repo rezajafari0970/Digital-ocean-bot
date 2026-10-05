@@ -148,6 +148,11 @@ func run() error {
 				return 0, fmt.Errorf("rules missing")
 			}
 			protected, direct, blocked, clientDNS := "", "", "", ""
+			poolAllowed, e := poolTargets(setting)
+			if e != nil {
+				return 0, e
+			}
+			poolScope := map[string]bool{}
 			if dns["queryStrategy"] != "UseIPv4" || dns["disableCache"] != false {
 				return 0, fmt.Errorf("DNS IPv4/cache policy differs")
 			}
@@ -156,10 +161,11 @@ func run() error {
 				if !ok {
 					continue
 				}
-				if r["ruleTag"] == "dob-route-residential-ads" {
+				if r["ruleTag"] == "dob-route-residential-ads" || r["ruleTag"] == "dob-route-residential-ads-tcp" || r["ruleTag"] == "dob-route-residential-ads-udp" {
 					domains, _ := r["domain"].([]any)
 					wanted := []string{"geosite:google@ads", "domain:browserleaks.com"}
-					if len(domains) != len(wanted) || r["network"] != "tcp,udp" {
+					netw, _ := r["network"].(string)
+					if len(domains) != len(wanted) || (netw != "tcp,udp" && netw != "tcp" && netw != "udp") {
 						return 0, fmt.Errorf("Ads-only scope differs")
 					}
 					for i, d := range wanted {
@@ -168,6 +174,14 @@ func run() error {
 						}
 					}
 					protected, _ = r["outboundTag"].(string)
+					if netw == "tcp" || netw == "udp" {
+						poolScope[netw] = true
+						if r["balancerTag"] == "dob-route-pool-"+netw {
+							protected = "@pool"
+						} else if len(poolAllowed["@pool:"+netw]) > 1 {
+							return 0, fmt.Errorf("pool routing bypass")
+						}
+					}
 				}
 				if r["ruleTag"] == "dob-route-default" {
 					direct, _ = r["outboundTag"].(string)
@@ -185,10 +199,16 @@ func run() error {
 					return 0, fmt.Errorf("obsolete rule retained")
 				}
 			}
-			if !strings.HasPrefix(protected, "residential-ads-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-") {
+			if len(poolAllowed) > 0 {
+				protected = "@pool"
+			}
+			if protected != "@pool" && !strings.HasPrefix(protected, "residential-ads-") && !strings.HasPrefix(protected, "dob-route-blocked-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-") {
 				return 0, fmt.Errorf("class route unavailable")
 			}
 
+			if len(poolAllowed) > 0 && (!poolScope["tcp"] || !poolScope["udp"]) {
+				return 0, fmt.Errorf("pool protocol scope incomplete")
+			}
 			rt.Session.Invalidate()
 			inbounds, e := rt.Session.Snapshot(ctx)
 			if e != nil {
@@ -258,7 +278,20 @@ func run() error {
 				if e != nil {
 					return fmt.Errorf("route proof unavailable")
 				}
-				matches, e := routeProofMatches(response, expected)
+				wanted := []string{expected}
+				if expected == "@pool" {
+					wanted = poolAllowed["@pool:"+form.Get("network")]
+				} else if strings.HasPrefix(expected, "@inner:") {
+					wanted = poolAllowed[expected]
+				}
+				matches := false
+				for _, candidate := range wanted {
+					ok, err := routeProofMatches(response, candidate)
+					if err != nil {
+						return err
+					}
+					matches = matches || ok
+				}
 				if e != nil {
 					return e
 				}
@@ -301,6 +334,16 @@ func run() error {
 			}
 			if e = check(url.Values{"inboundTag": {"dob-unobserved-inbound"}, "network": {"tcp"}, "port": {"443"}, "domain": {"adservice.google.com"}}, blocked); e != nil {
 				return 0, e
+			}
+			for _, network := range []string{"tcp", "udp"} {
+				for _, kind := range []string{"fast", "all"} {
+					key := "@inner:" + network + ":" + kind
+					if len(poolAllowed[key]) > 0 {
+						if e = check(url.Values{"inboundTag": {"dob-route-pool-in-" + network + "-" + kind}, "network": {network}, "port": {"443"}, "ip": {"1.1.1.1"}}, key); e != nil {
+							return 0, e
+						}
+					}
+				}
 			}
 			return count, nil
 		}
