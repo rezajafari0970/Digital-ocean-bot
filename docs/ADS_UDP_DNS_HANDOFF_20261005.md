@@ -1,6 +1,6 @@
 # Ads UDP and managed DNS — 2026-10-05
 
-Status: source and installed-core tests passed; production canary pending.
+Status: deployed; managed DNS and ordinary UDP/HTTP3 accepted on a real Reality tunnel. Ads remain blocked by upstream AUTH_REJECTED.
 
 Latest user authorization supersedes the earlier blanket Residential UDP denial: enable UDP, keep only Ads plus the temporary BrowserLeaks exception on Residential, and keep ordinary traffic and DNS direct from the VPN server.
 
@@ -15,3 +15,14 @@ Evidence: /root/backups/dob-ads-udp-dns-20261005. Focused race, installed-core f
 First UDP fixture reused a socket/destination and its direct positive control failed; the fixture now uses a separate source socket per destination. Original failure log is retained. No pass was claimed from a failing positive control.
 
 AI OS Development Orchestrator/API plan used; initial plan retry was caused by a manifest missing an explicit race command. The manifest now runs actual -race tests; no gate bypass occurred.
+
+## Production outcome
+
+- API and Worker are clean builds of e5ec5e8beb5dd533885b252d2757ec1dba02a356; both active. No migration or provider/account credential change.
+- Independent saved/running route matrix: 36/38 panels passed across the verification window. Pending: 7d842cca-5728-4fcb-a298-6dfd228af131, d21eb338-a902-462b-9873-ba467781fca3. This is not a claim that every periodic freshness check succeeds.
+- Successful real canary: 024a75e3-893d-4642-81a3-30d4f8641302. Residential DNS A/AAAA/HTTPS65 over UDP and TCP all responded. AAAA answers empty per IPv4 policy; HTTPS65 returned real answers. Ordinary Google HTTP3 and HTTPS passed. Ads HTTPS and HTTP3 failed, consistent with independently reproduced SOCKS AUTH_REJECTED.
+- First production canary was automatically rolled back. Its DNS test used reserved 192.0.2.53, correctly blocked by the existing destination-IP guard; later API probes proved blocked for that target and managed DNS for public 9.9.9.9. A cold Direct UDP query also timed out. Original failed logs remain; the successful run changed the test target and records cold start separately.
+- Cold controls took 7.17 and 6.13 seconds; warm Residential non-ad HTTPS took 0.084 seconds. These are bounded diagnostic samples, not evidence of a sustained maximum-speed improvement.
+- Both profile lifetimes remain zero, targets one per inbound and creation intervals 60 seconds. Gate and profile snapshots compare equal before/after.
+- Latest source should continue from this handoff and acceptance JSON. Do not restore old all-UDP blocking or all-traffic Residential policy. Do not bypass authentication, invent provider settings, force health green, or expose secrets.
+- Next: correct the current upstream authorization through its actual provider/account settings, then repeat Ads TCP/UDP/HTTP3 on the same endpoint. Investigate slow panel route API/cold tunnel latency and Asho SDK timing separately.

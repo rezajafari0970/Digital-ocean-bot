@@ -65,3 +65,7 @@ This checkpoint supersedes earlier statements that fleet generation must remain 
 - Evidence, original failures, staged hashes, health checks and deployment rollback binaries: /root/backups/dob-lifecycle-20261003. /tmp remains unsuitable for builds; use disk-backed GOTMPDIR.
 - To stop execution, close the main and old bulk gates and disable lifecycle auto_enroll/global creation. Retain scopes, ownership and jobs for fresh-read reconciliation. Never run a second executor, reset audit rows, or replay completed canaries as recovery.
 - Next operational work: observe finite-budget/expiry boundaries and independently reconcile the excluded historical panel if requested. The four requested lifecycle features are accepted for eligible v3 scopes; do not restart the earlier 10000 configured-client experiment.
+
+## Latest Ads UDP / DNS continuation (2026-10-05)
+
+Read docs/ADS_UDP_DNS_HANDOFF_20261005.md and docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json before routing work. API/Worker deployed from clean source e5ec5e8beb5dd533885b252d2757ec1dba02a356. Latest user re-enabled UDP. Managed cached IPv4 DNS is server-direct and working over real Reality; Ads TCP/UDP remain residential and fail closed. Current upstream returns AUTH_REJECTED; slow panel API and cold tunnel latency remain separately unresolved. No AdMob display success or maximum-speed claim.

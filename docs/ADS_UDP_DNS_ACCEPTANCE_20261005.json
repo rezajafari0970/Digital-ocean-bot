@@ -1,5 +1,5 @@
 {
-  "status": "SOURCE_TESTED_CANARY_PENDING",
+  "status": "DEPLOYED_DNS_UDP_VERIFIED_UPSTREAM_AUTH_REJECTED",
   "baseline": "8dc5e8d4f063a2699ce46e143a1ba4b06c6a74d7",
   "tests": {
     "installed_core_dns": true,
@@ -17,18 +17,86 @@
     "direct_identity_unchanged": true
   },
   "production": {
-    "changed": false,
-    "canary": false,
-    "fleet": false
+    "changed": true,
+    "canary": true,
+    "canary_panel": "024a75e3-893d-4642-81a3-30d4f8641302",
+    "first_canary_rolled_back": true,
+    "fleet_deployed": true,
+    "route_matrix_panels": 38,
+    "route_matrix_passed_over_window": 36,
+    "pending_panel_ids": [
+      "7d842cca-5728-4fcb-a298-6dfd228af131",
+      "d21eb338-a902-462b-9873-ba467781fca3"
+    ],
+    "latest_snapshot": {
+      "at": "2026-10-05T11:11:27.797298+00:00",
+      "routing": [
+        {
+          "state": "APPLIED",
+          "panels": 34,
+          "fresh": 34
+        },
+        {
+          "state": "FAILED",
+          "panels": 4,
+          "fresh": 0
+        }
+      ],
+      "upstream": [
+        {
+          "proxy_id": "ca78ed2f-0649-4d79-8430-f4ac11233445",
+          "type": "socks5",
+          "status": "down",
+          "last_success_at": "2026-10-05T10:22:07.430669+00:00"
+        }
+      ]
+    },
+    "profiles_and_mutation_gate_preserved": true,
+    "binary_provenance": {
+      "api": {
+        "revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
+        "sha256": "b42c7e5d79eeb542348e4c543045b40641952f09ae26091d1d452876c9945438",
+        "vcs_modified": false
+      },
+      "worker": {
+        "revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
+        "sha256": "3e32e362acb7cb508aa7e250be00ea850d860e85a42340be725f808e7c65b863",
+        "vcs_modified": false
+      }
+    }
   },
   "upstream": {
+    "proxy_id": "ca78ed2f-0649-4d79-8430-f4ac11233445",
     "observed_status": "down",
+    "raw_socks_auth_result": "AUTH_REJECTED",
     "ads_tcp_success": false,
-    "udp_capability_confirmed": false
+    "udp_capability_confirmed": false,
+    "credentials_modified": false
   },
   "app": {
     "modified": false,
     "ad_display_verified": false
   },
-  "evidence_directory": "/root/backups/dob-ads-udp-dns-20261005"
+  "evidence_directory": "/root/backups/dob-ads-udp-dns-20261005",
+  "verified_at_utc": "2026-10-05T11:11:27.829724+00:00",
+  "runtime_source_revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
+  "dataplane": {
+    "real_reality_dns_tcp_udp": true,
+    "real_reality_ipv4_aaaa_empty": true,
+    "real_reality_https65_answers": true,
+    "real_reality_non_ad_http3": true,
+    "ads_tcp_http3": false,
+    "cold_control_seconds": [
+      7.171485,
+      6.131989
+    ],
+    "residential_non_ad_control_seconds": 0.083578,
+    "not_a_capacity_benchmark": true
+  },
+  "unresolved": [
+    "Current upstream rejects SOCKS authentication. Provider access/credentials/subscription must be corrected before Ads transport acceptance.",
+    "Slow panel route APIs still affect periodic freshness; independent route proofs do not manually mark DB healthy.",
+    "Cold tunnel setup took 6-7 seconds in the successful canary; no maximum-speed or app-ad-display acceptance.",
+    "Asho source/SDK timing and actual device Private DNS were not modified or validated."
+  ]
 }
