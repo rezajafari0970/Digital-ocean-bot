@@ -2,6 +2,8 @@ package adminapi
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
@@ -30,7 +32,18 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
 		return
 	}
+	var randomID [8]byte
+	if _, err := rand.Read(randomID[:]); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	previewID := hex.EncodeToString(randomID[:])
+	started := time.Now()
 	var x previewAccount
+	previewExitIP := ""
+	fail := func(err error, stage string) {
+		writeStagedProviderPreviewError(w, err, previewDiagnosticContext{Provider: x.Provider, Stage: stage, RequestID: previewID, Started: started, ExitIP: previewExitIP})
+	}
 	if json.NewDecoder(r.Body).Decode(&x) != nil || strings.TrimSpace(x.Token) == "" {
 		writeJSON(w, 400, map[string]string{"error": "token_required"})
 		return
@@ -44,7 +57,6 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	var client *http.Client
 	var closeFn func()
-	previewExitIP := ""
 	if x.ProxyID != "" {
 		var px network.Proxy
 		var user, ref, adapter string
@@ -106,17 +118,17 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	account, err := ar.Account(r.Context())
 	if err != nil {
-		writeProviderPreviewError(w, err, previewExitIP)
+		fail(err, "account")
 		return
 	}
 	capacity, capErr := ar.Capacity(r.Context())
 	if capErr != nil {
-		writeProviderPreviewError(w, capErr, previewExitIP)
+		fail(capErr, "capacity")
 		return
 	}
 	catalog, err := cr.Catalog(r.Context())
 	if err != nil {
-		writeProviderPreviewError(w, err, previewExitIP)
+		fail(err, "catalog")
 		return
 	}
 	regions := catalog.Regions

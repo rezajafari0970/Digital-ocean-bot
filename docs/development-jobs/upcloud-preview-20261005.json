@@ -1,0 +1,26 @@
+{
+  "goal": "Diagnose and correct misleading UpCloud account preview failure while preserving strict proxy egress and all deployed configuration.",
+  "context": "User submitted screenshot: UpCloud account validation via DataImpulse SOCKS5 says Could not reach provider. Live same selected gateway/sticky preview session answered api.ipify.org 200 in 1.2s and UpCloud unauthenticated endpoints 401 in 0.12-1.0s. No saved UpCloud account/token; previous submitted token is not retained; do not read secrets into logs or ask to paste token. Current source maps malformed JSON/list schema errors and catalog unavailable into the same misleading transport message and logs no stage. Implement safe stage/class/operation/status/reason/request-id/elapsed diagnostics in UI and journal, never raw bodies, URLs, credentials or arbitrary provider error strings. Separate valid HTTP response schema failures from transport without altering retry/create ambiguity safety. Catalog empty diagnostics count only. Preserve original route/gateway, no direct fallback, no network mutations/canary. User must retry validation after rollout to identify authenticated failing stage; be honest that original root is not recoverable from historical logs. Do not speculate schema acceptance changes. Retain UpCloud storage ownership/gates and permanent residential publication. Existing project user requires orchestrator/OpenAI API planning, tests, reversible deploy and handoff.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/providers/upcloud",
+    "docs/development-jobs/upcloud-preview-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-preview-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): expose safe staged preview failure diagnostics"
+}

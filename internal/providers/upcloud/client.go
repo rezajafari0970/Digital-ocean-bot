@@ -80,10 +80,10 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 	defer res.Body.Close()
 	b, err := io.ReadAll(io.LimitReader(res.Body, maxBody+1))
 	if err != nil {
-		return err
+		return &responseError{Code: "RESPONSE_READ_FAILED", Status: res.StatusCode}
 	}
 	if len(b) > maxBody {
-		return errors.New("UpCloud response exceeds size limit")
+		return &responseError{Code: "RESPONSE_TOO_LARGE", Status: res.StatusCode}
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		// Raw provider/proxy error bodies can echo secrets; persist only safe codes.
@@ -111,10 +111,14 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 	}
 	if out != nil {
 		if len(bytes.TrimSpace(b)) == 0 {
-			return errors.New("UpCloud returned an empty response")
+			return &responseError{Code: "EMPTY_RESPONSE", Status: res.StatusCode}
 		}
 		if err := json.Unmarshal(b, out); err != nil {
-			return errors.New("UpCloud returned malformed JSON")
+			var re *responseError
+			if errors.As(err, &re) {
+				return &responseError{Code: re.Code, Status: res.StatusCode}
+			}
+			return &responseError{Code: "INVALID_JSON", Status: res.StatusCode}
 		}
 	}
 	return nil
@@ -128,6 +132,10 @@ func normalize(op string, err error) error {
 		return err
 	}
 	class := providers.ErrorTransport
+	var response *responseError
+	if errors.As(err, &response) {
+		return withDiagnostic(&providers.Error{Class: providers.ErrorUnavailable, Operation: op, StatusCode: response.Status, Message: "UpCloud returned an unusable response", Cause: err}, response.Code)
+	}
 	var e apiError
 	if errors.As(err, &e) {
 		switch {
@@ -157,7 +165,11 @@ func normalize(op string, err error) error {
 	if e.status != 0 {
 		message = e.Error()
 	}
-	return &providers.Error{Class: class, Operation: op, StatusCode: e.status, RetryAfter: e.retry, Message: message, Cause: err}
+	result := &providers.Error{Class: class, Operation: op, StatusCode: e.status, RetryAfter: e.retry, Message: message, Cause: err}
+	if e.status != 0 {
+		return withDiagnostic(result, apiDiagnostic(e.status, e.code))
+	}
+	return result
 }
 
 // UpCloud encodes numeric fields as either JSON strings or integers.
@@ -167,7 +179,7 @@ func (n *number) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
 	v, e := strconv.ParseInt(s, 10, 64)
 	if e != nil || v < 0 || v > 1<<50 {
-		return errors.New("invalid UpCloud integer")
+		return &responseError{Code: "INVALID_NUMBER"}
 	}
 	*n = number(v)
 	return nil

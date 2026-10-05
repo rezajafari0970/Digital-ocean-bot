@@ -81,15 +81,15 @@ func list[T any](ctx context.Context, c *Client, path, outer, inner string) ([]T
 	}
 	var nested map[string]json.RawMessage
 	if e := json.Unmarshal(envelope[outer], &nested); e != nil {
-		return nil, errors.New("UpCloud: missing list envelope")
+		return nil, &responseError{Code: "MISSING_LIST_ENVELOPE", Status: http.StatusOK}
 	}
 	b := nested[inner]
 	if len(b) == 0 || strings.TrimSpace(string(b)) == "null" {
-		return nil, errors.New("UpCloud: missing list")
+		return nil, &responseError{Code: "MISSING_LIST", Status: http.StatusOK}
 	}
 	var out []T
 	if e := json.Unmarshal(b, &out); e != nil || out == nil {
-		return nil, errors.New("UpCloud: invalid list")
+		return nil, &responseError{Code: "INVALID_LIST", Status: http.StatusOK}
 	}
 	return out, nil
 }
@@ -171,7 +171,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		}
 	}
 	if len(out.Regions) == 0 || len(out.Plans) == 0 || len(out.Images) == 0 {
-		return providers.Catalog{}, unavailable("catalog", "no compatible public zones, plans or Ubuntu templates")
+		return providers.Catalog{}, withDiagnostic(unavailable("catalog", "no compatible public zones, plans or Ubuntu templates"), fmt.Sprintf("NO_CATALOG_z%d_p%d_i%d", len(out.Regions), len(out.Plans), len(out.Images)))
 	}
 	return out, nil
 }
