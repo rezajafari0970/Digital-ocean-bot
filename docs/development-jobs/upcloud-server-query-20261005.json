@@ -1,0 +1,25 @@
+{
+  "goal": "Correct UpCloud list_servers HTTP400 caused by swapped sorting query parameters.",
+  "context": "User live trace 84ebfb01b8b8f3db at 2026-10-05 21:41:39 UTC passes account then fails capacity/list_servers HTTP400. Current driver sends order_by=title&sort_by=asc; current official OpenAPI at https://developers.upcloud.com/api/1.3/upcloud-openapi.json parameters listServersSortBy enumerates title,zone,size,cores,memory,popularity; listServersOrderBy enumerates asc,desc. This contradicts legacy prose docs and is a concrete contract mismatch. Correct to sort_by=title&order_by=asc preserving limit100 offset0+actual page lengths, terminal empty page, duplicate/missing-ID rejection, pagination bound, error classification and fail-closed partial inventory. Add strict contract fixtures that reject inverted params with400, success pages including short/full/empty and later400 returning no partial data. No retries/fallback, no token capture/request, proxy or network changes. Preserve previous null quota fixes, DO/Vultr, residential permanent profile, gates, schema/static. Full/race/isolatedPostgres/browser tests, OpenAI orchestrator, clean build reversible deploy/readback, checkpoint/push/current handoffs. Authenticated successful preview still needs user retry because no saved UpCloud account.",
+  "allowed_paths": [
+    "internal/providers/upcloud",
+    "docs/development-jobs/upcloud-server-query-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-server-query-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): align server list sorting with current API contract"
+}

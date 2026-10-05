@@ -179,7 +179,7 @@ func (d *Driver) rawServers(ctx context.Context) ([]serverData, error) {
 	out := []serverData{}
 	seen := map[string]bool{}
 	for offset := 0; offset < 20000; {
-		xs, e := list[serverData](ctx, d.client, fmt.Sprintf("/server?limit=100&offset=%d&order_by=title&sort_by=asc", offset), "servers", "server")
+		xs, e := list[serverData](ctx, d.client, fmt.Sprintf("/server?limit=100&offset=%d&sort_by=title&order_by=asc", offset), "servers", "server")
 		if e != nil {
 			return nil, normalize("list_servers", e)
 		}
