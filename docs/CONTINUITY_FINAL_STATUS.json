@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
-    "worker_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
-    "web_static_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
-    "status": "RESIDENTIAL_POOL_DEPLOYED_POST_IMPORT_FLEET_VERIFICATION_PARTIAL",
-    "acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-    "handoff": "docs/RESIDENTIAL_POOL_HANDOFF_20261005.md",
-    "note": "Exact-name idempotent bulk import, selected/all copy/delete, and native 80/20 healthy latency pools are deployed. Automated tests and initial 38/38 routing proof passed. External import/edit created 11 endpoints; latest revision 594 proof passes 32/38, six unresolved. Direct diagnostics also encounter deadlines; do not relabel as an HTTP-only issue or force APPLIED. Current endpoint health fluctuates; previous Test AUTH_REJECTED is historical. Preserve Ads+temporary BrowserLeaks, direct IPv4 DNS, UDP, gates/profiles and inherited kernel guard."
+    "api_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+    "worker_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+    "web_static_source_revision": "9e98182911beeb4c2b8b4598b350e4c8cc8e9130",
+    "status": "PERFORMANCE_PROFILE_AND_ROLLBACK_CANARY_VERIFIED_DEFAULTS_RESTORED",
+    "acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
+    "handoff": "docs/RESIDENTIAL_PERFORMANCE_HANDOFF_20261005.md",
+    "note": "Migration 151: bounded native tuning, timed one-server experiment, verified promotion/keep and durable rollback. Full/race/PostgreSQL/native-core/browser tests pass. Live canary 38 route proofs tuned plus 38 restored; experiment ROLLED_BACK and previous profile active. All 12 snapshot endpoints, Reality policies and client gate retained. Current 24/24 controller metadata belongs to a changed lifecycle population, not an independent rerun of old six-server failures. Destination targetStrategy ForceIPv4 was removed as ineffective in installed core. Offline or gated restoration remains pending; worker resumes durable deadlines after restart. App ad-load performance and provider UDP still require separate measurement."
   }
 }
