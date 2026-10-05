@@ -1,0 +1,63 @@
+{
+  "status": "DEPLOYED_EXACT_SCOPE_VERIFIED_RUNTIME_PARTIAL",
+  "verified_at_utc": "2026-10-05T11:51:18.347823+00:00",
+  "runtime_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+  "residential_domains": [
+    "geosite:google@ads",
+    "domain:browserleaks.com"
+  ],
+  "temporary_exception": "browserleaks.com apex and subdomains",
+  "removed_categories": [
+    "geosite:category-ads-all",
+    "geosite:category-ads",
+    "geosite:facebook@ads"
+  ],
+  "networks": [
+    "tcp",
+    "udp"
+  ],
+  "dns_policy_changed": false,
+  "direct_identity_policy_changed": false,
+  "credentials_changed": false,
+  "profiles_and_mutation_gate_preserved": true,
+  "tests": {
+    "focused_race": true,
+    "installed_core_faults": true,
+    "full_go": true,
+    "javascript_syntax": true,
+    "diff_check": true
+  },
+  "production": {
+    "deployed": true,
+    "saved_scope_panels": 38,
+    "saved_scope_passed": 38,
+    "route_matrix_passed_over_window": 37,
+    "route_proofs_per_passed_panel": 34,
+    "runtime_pending_panel_ids": [
+      "cf65a8f5-fce6-4b62-a5aa-51fccd518c35"
+    ],
+    "pending_reason": "Initial runtime route response unconfirmed; bounded read-only recheck failed to obtain a fresh inbound snapshot. Saved exact scope is verified; do not mark all runtime checks green.",
+    "api": "active",
+    "worker": "active",
+    "binaries": {
+      "api": {
+        "revision": "14fc055e2df887551f3e311991db9467d92363f6",
+        "sha256": "558edcba8e646494863b9fadab8485a50f7ad5743df6febce9a9e29bf1fb88ca",
+        "vcs_modified": false
+      },
+      "worker": {
+        "revision": "14fc055e2df887551f3e311991db9467d92363f6",
+        "sha256": "451738d42ee1ebf96bf0f66452f4acfadaf7f8c4c34f88a3d2fd032d2c565164",
+        "vcs_modified": false
+      }
+    }
+  },
+  "evidence_directory": "/root/backups/dob-google-ads-only-20261005",
+  "ad_display_verified": false,
+  "upstream_auth_retested": false,
+  "prior_network_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
+  "limitations": [
+    "Prior upstream AUTH_REJECTED remains an unresolved earlier observation; no credential or provider change was made.",
+    "Fleet saved scope acceptance is separate from complete runtime routing and periodic freshness."
+  ]
+}

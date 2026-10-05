@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
-    "worker_source_revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
-    "web_static_source_revision": "e5ec5e8beb5dd533885b252d2757ec1dba02a356",
-    "status": "DNS_UDP_DEPLOYED_UPSTREAM_AUTH_REJECTED",
-    "acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-    "handoff": "docs/ADS_UDP_DNS_HANDOFF_20261005.md",
-    "note": "Latest user explicitly re-enabled UDP. Only Ads plus temporary BrowserLeaks use residential; DNS and other traffic direct from server. Current proxy is not the old ProxyRack endpoint; it rejects SOCKS authentication. Source and runtime evidence are authoritative."
+    "api_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+    "worker_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+    "web_static_source_revision": "14fc055e2df887551f3e311991db9467d92363f6",
+    "status": "GOOGLE_ADS_ONLY_DEPLOYED_RUNTIME_PARTIAL",
+    "acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/GOOGLE_ADS_ONLY_HANDOFF_20261005.md",
+    "note": "Latest user narrows residential to google@ads plus temporary BrowserLeaks only. TCP/UDP and direct IPv4 DNS remain enabled. Saved scope 38/38; full runtime 37/38. One API read remains unconfirmed; prior upstream authentication blocker is separate."
   }
 }

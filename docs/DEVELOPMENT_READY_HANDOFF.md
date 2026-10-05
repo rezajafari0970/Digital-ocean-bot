@@ -69,3 +69,7 @@ This checkpoint supersedes earlier statements that fleet generation must remain 
 ## Latest Ads UDP / DNS continuation (2026-10-05)
 
 Read docs/ADS_UDP_DNS_HANDOFF_20261005.md and docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json before routing work. API/Worker deployed from clean source e5ec5e8beb5dd533885b252d2757ec1dba02a356. Latest user re-enabled UDP. Managed cached IPv4 DNS is server-direct and working over real Reality; Ads TCP/UDP remain residential and fail closed. Current upstream returns AUTH_REJECTED; slow panel API and cold tunnel latency remain separately unresolved. No AdMob display success or maximum-speed claim.
+
+## Google Ads only continuation (2026-10-05)
+
+Read docs/GOOGLE_ADS_ONLY_HANDOFF_20261005.md and docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json. User explicitly narrows residential to exactly `geosite:google@ads` plus temporary `domain:browserleaks.com`. Product runtime 14fc055e2df887551f3e311991db9467d92363f6. Saved list verified 38/38; full runtime matrix 37/38, with one pending fresh API read. Preserve existing UDP and direct IPv4 DNS. Earlier upstream AUTH_REJECTED was not repaired or retested.
