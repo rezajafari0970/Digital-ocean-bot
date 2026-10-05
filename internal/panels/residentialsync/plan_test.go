@@ -168,7 +168,14 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 						suffix := strings.TrimPrefix(pattern, "domain:")
 						matched = matched || v.Get("domain") == suffix || strings.HasSuffix(v.Get("domain"), "."+suffix)
 					} else if strings.HasPrefix(pattern, "geosite:") {
-						matched = matched || v.Get("domain") == "adservice.google.com" || v.Get("domain") == "pixel.facebook.com"
+						switch pattern {
+						case "geosite:google@ads":
+							matched = matched || v.Get("domain") == "adservice.google.com"
+						case "geosite:facebook@ads":
+							matched = matched || v.Get("domain") == "pixel.facebook.com"
+						case "geosite:category-ads", "geosite:category-ads-all":
+							matched = matched || v.Get("domain") == "adservice.google.com" || v.Get("domain") == "pixel.facebook.com"
+						}
 					}
 				}
 				if !matched {

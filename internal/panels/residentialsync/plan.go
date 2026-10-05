@@ -13,9 +13,9 @@ import (
 const directTag = "dob-route-direct"
 const blockedTag = "dob-route-blocked"
 
-// Installed geosite.dat contains these lists. "Google ads" and "Ads" are
-// display names, not valid geosite:google-ads / geosite:ads identifiers.
-var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads"}
+// User-selected category: only Google advertising domains.
+// Do not widen to all-ad or other-provider categories.
+var adDomains = []string{"geosite:google@ads"}
 
 // Temporary user-requested diagnostic exception, separate from Ads categories.
 // domain: includes the apex and subdomains, never lookalike suffixes.

@@ -1,0 +1,27 @@
+{
+  "goal": "Restrict residential categories to exactly geosite:google@ads plus temporary domain:browserleaks.com as explicitly requested by user. Apply persistently to current and future panels.",
+  "context": "Current list has category-ads-all, category-ads, google@ads, facebook@ads. Narrow only this list; preserve TCP/UDP, cached direct IPv4 DNS, direct identities, fail-closed matched domains, locks, private destination guards and unknown fields. Update runtime probes so Facebook ads are direct, acceptance exact list two entries, UI explanation and existing fake-core fixtures. Test focused race and full suite, installed Xray fault tests. Use single-panel canary through existing ReconcilePanel while Worker inactive; then Worker normal fleet rollout. Upstream AUTH_REJECTED is separate and not addressed or bypassed by narrowing categories.",
+  "allowed_paths": [
+    "internal/panels/residentialsync",
+    "cmd/residential-routing-acceptance/main.go",
+    "web/static/app.js",
+    "docs/development-jobs/google-ads-only-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "python3 /root/backups/dob-google-ads-only-20261005/patch.py"
+    ],
+    "test": [
+      "bash /root/backups/dob-google-ads-only-20261005/test.sh -race"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(routing): restrict residential scope to Google ads and BrowserLeaks"
+}

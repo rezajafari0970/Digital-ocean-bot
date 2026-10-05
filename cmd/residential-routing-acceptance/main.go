@@ -158,8 +158,8 @@ func run() error {
 				}
 				if r["ruleTag"] == "dob-route-residential-ads" {
 					domains, _ := r["domain"].([]any)
-					wanted := []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads", "domain:browserleaks.com"}
-					if len(domains) != 5 || r["network"] != "tcp,udp" {
+					wanted := []string{"geosite:google@ads", "domain:browserleaks.com"}
+					if len(domains) != len(wanted) || r["network"] != "tcp,udp" {
 						return 0, fmt.Errorf("Ads-only scope differs")
 					}
 					for i, d := range wanted {
@@ -277,7 +277,7 @@ func run() error {
 						domain, ip, port string
 						ad               bool
 					}{
-						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", true}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
+						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", false}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
 					} {
 						expected := direct
 						if cls == "RESIDENTIAL" {
