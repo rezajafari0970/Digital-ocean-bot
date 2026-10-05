@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-    "worker_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
+    "api_source_revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+    "worker_source_revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
     "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-    "status": "DEPLOYED_CONTRACT_DB_UI_VERIFIED_LIVE_UPCLOUD_UNTESTED",
-    "acceptance": "docs/UPCLOUD_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_HANDOFF_20261005.md",
-    "note": "Read UpCloud handoff. Existing active permanent fleet profile preserved. No UpCloud cloud lifecycle live proof; token absent. Clean current provider resources before downgrade."
+    "status": "DEPLOYED_SAFE_DIAGNOSTICS_AUTHENTICATED_USER_RETRY_NEEDED",
+    "acceptance": "docs/UPCLOUD_PREVIEW_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md",
+    "note": "Read UpCloud handoff. Existing active permanent fleet profile preserved. No UpCloud cloud lifecycle live proof; token absent. Clean current provider resources before downgrade. Safe staged diagnostics added; original user preview failure needs a fresh token validation attempt; synthetic 401 is not a user-token rejection."
   }
 }

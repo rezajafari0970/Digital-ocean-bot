@@ -1,0 +1,45 @@
+{
+  "verified_at_utc": "2026-10-05T20:51:11.129242+00:00",
+  "runtime_source_revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+  "status": "DEPLOYED_SAFE_DIAGNOSTICS_AUTHENTICATED_USER_RETRY_NEEDED",
+  "binaries": {
+    "api": {
+      "sha256": "e21b98cd4b3c0843a8ee38da16d5af9e8941245516d3017ac70be5c8e537f657",
+      "revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+      "vcs_modified": false
+    },
+    "worker": {
+      "sha256": "83e9df3a278cc0a3e920767d8aca28c75fa7749343b752854ee3aeff337fd510",
+      "revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+      "vcs_modified": false
+    }
+  },
+  "migration_unchanged": "000153_upcloud_cleanup",
+  "configuration_preserved": true,
+  "test_status": "full Go, race, isolated PostgreSQL, provider fault/redaction, staged preview flow, mobile browser PASS",
+  "live_evidence": {
+    "same_selected_proxy": true,
+    "anonymous_upcloud_http_status": 401,
+    "anonymous_first_api_response_ms": 1025,
+    "synthetic_invalid_token_receipt": {
+      "detail": "UpCloud rejected the API token. Stage: account; operation: account; reason: AUTHENTICATION_FAILED; HTTP 401; ref: bf3359dc98d1438d.",
+      "diagnostic": "AUTHENTICATION_FAILED",
+      "error": "provider_credential_invalid",
+      "operation": "account",
+      "provider_status": 401,
+      "request_id": "bf3359dc98d1438d",
+      "stage": "account"
+    },
+    "journal_correlation_verified": true,
+    "first_deploy_proxy_health_gate_blocked": true,
+    "automatic_rollback_exercised": true,
+    "second_deploy_verified": true
+  },
+  "root_cause_status": "Historical failed validation has no recorded stage and the unsaved token was not retained. Exact original root cause is unconfirmed. A selected-proxy unhealthy/healthy state transition was observed, not proven causal for the screenshot.",
+  "limits": [
+    "No user UpCloud token was read, retained, printed or requested in chat.",
+    "No valid authenticated UpCloud account/catalog or cloud lifecycle acceptance performed.",
+    "No proxy fallback, proxy status override or residential/network configuration change."
+  ],
+  "evidence_directory": "/root/backups/dob-upcloud-preview-20261005"
+}
