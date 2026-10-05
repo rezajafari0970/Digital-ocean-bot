@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
+  "runtime_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-05T21:38:37.048157+00:00",
+  "verified_at_utc": "2026-10-05T21:48:59.496584+00:00",
   "binaries": {
     "api": {
-      "revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
-      "sha256": "0e5ad7137b3a9d5cf65e72cd91d86568203c5c64f97fd4baf8606f5122cfa63d",
+      "revision": "b44d3716e104bbc916caf311d29189940151c36f",
+      "sha256": "f1f949b1beb58d58fe1a035b271518f4d2ff51b9e4dae3f77b1d4102fe68aa19",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
-      "sha256": "669fddb2dab632f6185fbc6d4125a731da841bd6bd729f5c7bcbb36bdd930f49",
+      "revision": "b44d3716e104bbc916caf311d29189940151c36f",
+      "sha256": "2730520bed6c8c6d2ab5cfde7d7fb57fbdaf92dc6fd3be378699c9794dc7577d",
       "vcs_modified": false
     }
   },
@@ -20,9 +20,9 @@
     "worker": "active"
   },
   "migration": "000153_upcloud_cleanup",
-  "acceptance": "docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json",
+  "acceptance": "docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json",
   "verified": false,
-  "note": "Live traces identified exactly one additional unrecognized null quota. Reproduced and fixed this rejection while preserving null presence and selected-plan fail-closed checks. Actual raw key remains private/unknown. Authenticated full preview success awaits user retry; no saved UpCloud account at baseline.",
+  "note": "Account parsing now passes in user trace 84ebfb01b8b8f3db; capacity/list_servers returns HTTP400. Current OpenAPI confirms sorting parameters were inverted. Corrected and reproduced before/after in contract fixtures. Authenticated complete preview and live UpCloud lifecycle remain unconfirmed.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "User retries UpCloud Validate to confirm full authenticated preview after confirmed extra-null-quota fix.",
+  "next_product_step": "User retries Validate to confirm authenticated UpCloud preview after server-list sorting contract correction.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
+  "worker_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-  "verification_status": "DEPLOYED_CONFIRMED_EXTENSION_NULL_FIX_AUTHENTICATED_PREVIEW_PENDING",
+  "verification_status": "DEPLOYED_SERVER_SORT_QUERY_FIX_AUTHENTICATED_PREVIEW_PENDING",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "4ada688681d03283dc0712c2fb5cc6798f91b3c0",
+  "previous_runtime_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -105,5 +105,6 @@
   "latest_upcloud_preview_acceptance": "docs/UPCLOUD_PREVIEW_ACCEPTANCE_20261005.json",
   "latest_upcloud_null_quotas_acceptance": "docs/UPCLOUD_NULL_QUOTAS_ACCEPTANCE_20261005.json",
   "latest_upcloud_quota_diagnostics_acceptance": "docs/UPCLOUD_QUOTA_DIAGNOSTICS_ACCEPTANCE_20261005.json",
-  "latest_upcloud_extension_quota_acceptance": "docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json"
+  "latest_upcloud_extension_quota_acceptance": "docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json",
+  "latest_upcloud_server_query_acceptance": "docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json"
 }

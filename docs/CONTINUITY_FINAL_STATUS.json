@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
-    "worker_source_revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
+    "api_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
+    "worker_source_revision": "b44d3716e104bbc916caf311d29189940151c36f",
     "web_static_source_revision": "cb131196167337612de85fc44d3005ffa9eae7ee",
-    "status": "DEPLOYED_CONFIRMED_EXTENSION_NULL_FIX_AUTHENTICATED_PREVIEW_PENDING",
-    "acceptance": "docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_EXTENSION_QUOTA_HANDOFF_20261005.md",
-    "note": "Live traces identified exactly one additional unrecognized null quota. Reproduced and fixed this rejection while preserving null presence and selected-plan fail-closed checks. Actual raw key remains private/unknown. Authenticated full preview success awaits user retry; no saved UpCloud account at baseline."
+    "status": "DEPLOYED_SERVER_SORT_QUERY_FIX_AUTHENTICATED_PREVIEW_PENDING",
+    "acceptance": "docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md",
+    "note": "Account parsing now passes in user trace 84ebfb01b8b8f3db; capacity/list_servers returns HTTP400. Current OpenAPI confirms sorting parameters were inverted. Corrected and reproduced before/after in contract fixtures. Authenticated complete preview and live UpCloud lifecycle remain unconfirmed."
   }
 }

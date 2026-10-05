@@ -115,3 +115,7 @@ Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANC
 ## UpCloud extension null fix continuation (2026-10-05)
 - Read docs/UPCLOUD_EXTENSION_QUOTA_HANDOFF_20261005.md and docs/UPCLOUD_EXTENSION_QUOTA_ACCEPTANCE_20261005.json. Runtime 1ae912189edcac45437b1ede21f17743cd3f6942; static/migration unchanged.
 - Live trace confirms one additional null quota rejected at account. Preserve nil extension quotas/usage, retaining strict required-budget checks. Regression/tests/deployment pass; full authenticated preview requires user retry.
+
+## UpCloud server-list query continuation (2026-10-05)
+- Read docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md and docs/UPCLOUD_SERVER_QUERY_ACCEPTANCE_20261005.json. Runtime b44d3716e104bbc916caf311d29189940151c36f; static/migration unchanged.
+- Account passes; next observed failure is capacity/list_servers HTTP400. Corrected inverted sort_by/order_by per current OpenAPI; contract fixtures and rollout pass. Full authenticated preview remains pending user retry.

@@ -76,9 +76,9 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "1ae912189edcac45437b1ede21f17743cd3f6942",
-    "handoff": "docs/UPCLOUD_EXTENSION_QUOTA_HANDOFF_20261005.md",
+    "revision": "b44d3716e104bbc916caf311d29189940151c36f",
+    "handoff": "docs/UPCLOUD_SERVER_QUERY_HANDOFF_20261005.md",
     "inspected_live_source": true,
-    "note": "Live traces identified exactly one additional unrecognized null quota. Reproduced and fixed this rejection while preserving null presence and selected-plan fail-closed checks. Actual raw key remains private/unknown. Authenticated full preview success awaits user retry; no saved UpCloud account at baseline."
+    "note": "Account parsing now passes in user trace 84ebfb01b8b8f3db; capacity/list_servers returns HTTP400. Current OpenAPI confirms sorting parameters were inverted. Corrected and reproduced before/after in contract fixtures. Authenticated complete preview and live UpCloud lifecycle remain unconfirmed."
   }
 }
