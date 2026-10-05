@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Local readback for provider rollout; never creates cloud resources."""
-import argparse, hashlib, json, os, pathlib, secrets, subprocess, urllib.request, uuid
+import argparse, hashlib, json, os, pathlib, secrets, subprocess, urllib.request, urllib.error, uuid
 def sql(query):
     p=subprocess.run(["psql",os.environ["DATABASE_URL"],"-XAt","-v","ON_ERROR_STOP=1","-c",query],capture_output=True,text=True)
     if p.returncode: raise RuntimeError("local acceptance SQL failed")
@@ -21,16 +21,22 @@ def read_api(outdir):
     try:
         def get(path):
             req=urllib.request.Request("http://127.0.0.1:18080"+path,headers={"Authorization":"Bearer "+token})
-            with urllib.request.urlopen(req,timeout=15) as res:
-                assert res.status==200
-                return json.load(res)
+            try:
+                with urllib.request.urlopen(req,timeout=15) as res:
+                    assert res.status==200
+                    return json.load(res)
+            except urllib.error.HTTPError as e:
+                raise RuntimeError("local API check failed: "+path+" status="+str(e.code)) from None
         providers=get("/api/v1/providers")
         by={x["name"]:x for x in providers}
         assert all(by[x]["status"]=="ready" for x in ["digitalocean","vultr","upcloud"])
         assert "ucat_" in by["upcloud"]["credential_label"]
         result={"providers":providers,"api_checks":{}}
-        for path in ["/api/v1/accounts","/api/v1/proxies","/api/v1/residential-proxies","/api/v1/residential-performance","/api/v1/resources","/api/v1/configs"]:
+        for path in ["/api/v1/accounts","/api/v1/proxies","/api/v1/residential-proxies","/api/v1/residential-performance","/api/v1/configs"]:
             val=get(path);result["api_checks"][path]={"status":200,"type":type(val).__name__}
+            if path=="/api/v1/accounts" and val:
+                resource_path="/api/v1/accounts/"+str(uuid.UUID(val[0]["id"]))+"/resources"
+                resources=get(resource_path);result["api_checks"]["account_resources"]={"status":200,"type":type(resources).__name__}
         (outdir/"api-readback.json").write_text(json.dumps(result,indent=2)+"\n")
         script=os.environ.get("UPCLOUD_BROWSER_SCRIPT")
         if script:
