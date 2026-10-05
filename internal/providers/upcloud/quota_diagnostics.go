@@ -12,19 +12,10 @@ import (
 // Names and shapes are application-owned vocabulary. Unknown keys and values
 // may contain secrets; they must never be interpolated into diagnostics.
 func quotaDiagnosticName(key string) string {
-	switch key {
-	case "cores", "memory", "public_ipv4", "public_ipv6", "storage_total",
-		"storage_maxiops", "storage_standard", "storage_hdd", "storage_ssd",
-		"cloud_server_dev_1xcpu_1gb_10gb_plans", "cloud_server_dev_1xcpu_1gb_plans",
-		"managed_databases", "network_peerings", "file_storages",
-		"managed_container_registries", "managed_kubernetes", "tags", "networks",
-		"network_gateways_essentials", "network_gateways", "load_balancers_essentials",
-		"load_balancers", "gpus", "detached_interfaces", "detached_floating_ips",
-		"managed_object_storages", "ntp_excess_gib", "routers":
+	if known, _ := resourceQuotaNullability(key); known {
 		return strings.ToUpper(key)
-	default:
-		return "OTHER_FIELD"
 	}
+	return "OTHER_FIELD"
 }
 
 var quotaNumericSyntax = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(.[0-9]+)?([eE][+-]?[0-9]+)?$`)

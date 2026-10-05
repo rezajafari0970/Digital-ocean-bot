@@ -247,6 +247,12 @@ func TestCapacityUsesSelectedPlansAndQuotaUnits(t *testing.T) {
 	if e != nil || cap.ComputeLimit != 3 {
 		t.Fatal("zero remaining", cap, e)
 	}
+	savedCores := a.Limits["cores"]
+	delete(a.Limits, "cores")
+	if missing, err := d.capacity(context.Background(), a, 3); err == nil || missing.LimitKnown {
+		t.Fatal("missing limit accepted", missing, err)
+	}
+	a.Limits["cores"] = savedCores
 	delete(usage, "memory")
 	if _, e = d.capacity(context.Background(), a, 3); e == nil {
 		t.Fatal("missing usage accepted")

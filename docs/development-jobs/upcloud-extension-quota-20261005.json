@@ -1,0 +1,25 @@
+{
+  "goal": "Fix confirmed UpCloud preview failure caused by an additional unrecognized null quota, preserving fail-closed selected-plan capacity.",
+  "context": "Authenticated live traces 611a4eddb6ea2e22 (21:30:37 UTC) and c7a50ce4ec0ce473 (21:31:04,2888ms) on clean runtime4ada688 both report HTTP200 account diagnostic INVALID_QUOTA_OTHER_FIELD_NULL with exactly one quota_issues entry. Therefore actual observed failure is an extension quota null outside known schema fields, not known core/memory/storage null or nonnumeric data. Preserve presence as nil for unrecognized null quotas so unrelated extra quota cannot block Account/preview. Centralize known quota nullability schema (26 strict fields + two nullable Dev fields) and use it for diagnostic allowlisting; unknown raw names never exposed. Keep known mandatory quota null and all negative/fractional/nonnumeric/overflow rejection unchanged. Selected dynamic plan quota if present nil must still fail closed; never delete unknown keys or treat null as absent/unlimited/zero. Apply same nullable-preserving map to usage; if a needed usage entry is nil, fail closed, unrelated extension null usage should not block budgets. Add regressions full Account->Capacity->Catalog preview and ordinary-plan capacity with extension null; selected future plan quota/usage nil rejects; known zero stillzero; missing requiredquota/usage rejects. Do not request/read token, raw account body, or guess unknown key. No saved UpCloud account; live user must retry for success proof. Full/race/real PostgreSQL tests, orchestrator OpenAI planning, reversible deploy + configcomparison + canonical handoff/push. Keep residential profile, DO/Vultr routes/gates/schema/static unchanged.",
+  "allowed_paths": [
+    "internal/providers/upcloud",
+    "docs/development-jobs/upcloud-extension-quota-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-upcloud-extension-quota-20261005/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(upcloud): preserve additional null quotas without blocking account preview"
+}

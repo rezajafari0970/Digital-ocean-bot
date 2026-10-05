@@ -72,7 +72,7 @@ func TestQuotaDiagnosticsSurviveHTTPNormalization(t *testing.T) {
 func TestQuotaDiagnosticsAreBounded(t *testing.T) {
 	limits := map[string]any{}
 	for i := 0; i < 200; i++ {
-		limits[fmt.Sprintf("secret-key-%d", i)] = nil
+		limits[fmt.Sprintf("secret-key-%d", i)] = true
 	}
 	raw, _ := json.Marshal(limits)
 	var q resourceLimits
@@ -82,7 +82,7 @@ func TestQuotaDiagnosticsAreBounded(t *testing.T) {
 		t.Fatalf("len=%d partial=%v", len(issues), q)
 	}
 	for _, s := range issues {
-		if s != "INVALID_QUOTA_OTHER_FIELD_NULL" || !safeDiagnostic.MatchString(s) {
+		if s != "INVALID_QUOTA_OTHER_FIELD_BOOLEAN" || !safeDiagnostic.MatchString(s) {
 			t.Fatal(s)
 		}
 	}

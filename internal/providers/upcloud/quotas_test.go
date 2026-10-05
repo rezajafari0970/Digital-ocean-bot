@@ -127,7 +127,7 @@ func TestRegularPlanCapacityIgnoresUnrelatedNullableDevQuotas(t *testing.T) {
 }
 
 func TestQuotaInvalidNumbersStillFailClosed(t *testing.T) {
-	for _, key := range []string{"cores", "memory", "public_ipv4", "storage_total", "storage_maxiops", "cloud_server_dev_1xcpu_1gb_plans", "cloud_server_dev_1xcpu_1gb_10gb_plans"} {
+	for _, key := range []string{"cores", "memory", "public_ipv4", "storage_total", "storage_maxiops", "cloud_server_dev_1xcpu_1gb_plans", "cloud_server_dev_1xcpu_1gb_10gb_plans", "unknown_future_field"} {
 		for _, raw := range []string{"-1", "1.5", `"not-a-number"`, "1125899906842625", "{}", "true"} {
 			var a accountData
 			if err := json.Unmarshal([]byte(`{"username":"fixture","resource_limits":{"`+key+`":`+raw+`}}`), &a); err == nil {
@@ -135,7 +135,7 @@ func TestQuotaInvalidNumbersStillFailClosed(t *testing.T) {
 			}
 		}
 	}
-	for _, key := range []string{"cores", "memory", "public_ipv4", "storage_total", "storage_maxiops", "unknown_future_field"} {
+	for _, key := range []string{"cores", "memory", "public_ipv4", "storage_total", "storage_maxiops"} {
 		var a accountData
 		if err := json.Unmarshal([]byte(`{"username":"fixture","resource_limits":{"`+key+`":null}}`), &a); err == nil {
 			t.Fatalf("unexpected nullable quota accepted: %s", key)
