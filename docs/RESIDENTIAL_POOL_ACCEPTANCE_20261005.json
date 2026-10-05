@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-05T14:49:14.318966+00:00",
+  "runtime_source_revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+  "product_commits": [
+    "3351972",
+    "7d41d441ff6be4077bdd72f30de65b1739714abe"
+  ],
+  "migration": "000150_residential_pool",
+  "binaries": {
+    "api": {
+      "sha256": "6a548f0b0999e5589607eaaeec70064e7d7d303cb554f9d682d0f2ad93f59fb1",
+      "revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+      "vcs_modified": false
+    },
+    "worker": {
+      "sha256": "90fd43900375a7be8bda5c378e5526150c2385749bc0d5ee96a354a58ded072d",
+      "revision": "7d41d441ff6be4077bdd72f30de65b1739714abe",
+      "vcs_modified": false
+    }
+  },
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "readiness": {
+    "status": "ready",
+    "checks": [
+      {
+        "name": "database",
+        "ok": true
+      }
+    ],
+    "at": "2026-10-05T14:40:22.311196989Z"
+  },
+  "features": {
+    "atomic_idempotent_bulk_socks_import": true,
+    "batch_limit": 100,
+    "case_preserved_names": true,
+    "case_insensitive_name_uniqueness": true,
+    "copy_all_and_selected": true,
+    "delete_all_and_selected_reviewed_ids": true,
+    "encrypted_credentials": true,
+    "server_local_health_selection": true,
+    "fast_lane_weight": 0.8,
+    "all_healthy_lane_weight": 0.2,
+    "fast_group_size": "ceil(configured candidates / 3)",
+    "native_probe_interval": "10s randomized",
+    "native_probe_timeout": "3s",
+    "all_down_behavior": "block residential; no direct fallback"
+  },
+  "scope": [
+    "geosite:google@ads",
+    "domain:browserleaks.com"
+  ],
+  "preserved": {
+    "profiles_unchanged_across_rollout": true,
+    "gate_unchanged_across_rollout": true,
+    "scope_dropin_removed": true
+  },
+  "tests": {
+    "full_go": "PASS",
+    "focused_race": "PASS",
+    "isolated_postgresql": "PASS",
+    "desktop_mobile_browser": "PASS",
+    "production_read_only_admin": "PASS",
+    "real_xray_tcp_distribution": {
+      "fast": 108,
+      "slow": 12
+    },
+    "real_xray_udp_distribution": {
+      "fast": 108,
+      "slow": 12
+    },
+    "real_xray_recovery_distribution": {
+      "fast": 90,
+      "slow": 10
+    },
+    "unknown_down_exclusion_and_all_down_blocking": "PASS"
+  },
+  "rollout": {
+    "stages": [
+      1,
+      6,
+      38
+    ],
+    "pool_enabled_panels": 38,
+    "first_canary": "ROLLED_BACK on strict saved-template normalization mismatch; fixed API-first rule ordering",
+    "initial_runtime_matrices_passed_over_window": 38,
+    "probes_per_matrix": 38,
+    "last_initial_http_pass_at": "2026-10-05T14:39:13Z",
+    "historical_evidence_preserved": true
+  },
+  "latest_external_live_edit": {
+    "observed": true,
+    "agent_imports_or_deletes": 0,
+    "bulk_import_ledger_rows_at_observation": 1,
+    "endpoints": 11,
+    "names": "ads1 through ads11",
+    "control_revision": 594,
+    "snapshot": {
+      "at": "2026-10-05T14:44:01.925270+00:00",
+      "control": {
+        "enabled": true,
+        "fleet": true,
+        "revision": 594
+      },
+      "health": [
+        {
+          "status": "down",
+          "count": 3
+        },
+        {
+          "status": "healthy",
+          "count": 8
+        }
+      ],
+      "routing": [
+        {
+          "revision": 594,
+          "state": "APPLIED",
+          "count": 31,
+          "latest_verified_at": "2026-10-05T14:44:01.65979+00:00"
+        },
+        {
+          "revision": 594,
+          "state": "FAILED",
+          "count": 7,
+          "latest_verified_at": "2026-10-05T14:41:08.218274+00:00"
+        }
+      ]
+    },
+    "post_import_http_passed": 32,
+    "post_import_total": 38,
+    "post_import_finished_at": "2026-10-05T14:43:39.071464+00:00",
+    "pending_panel_ids": [
+      "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
+      "829cbedb-378d-4044-890b-deb6755d2876",
+      "92764f7e-bada-4196-8602-eb75a259390d",
+      "c40de783-08d6-44be-8f4e-9395cedebd5c",
+      "df8b457d-5273-48ef-8526-bcb19b9c3917",
+      "e766135b-08d9-4c74-96d4-f1d4424a4b5e"
+    ],
+    "direct_followup": {
+      "started_at": "2026-10-05T14:46:32.502952+00:00",
+      "panels": {
+        "49ff99be-045e-4eb9-b3e9-a5d2248b99ee": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:46:51.259807+00:00"
+        },
+        "829cbedb-378d-4044-890b-deb6755d2876": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:47:06.971801+00:00"
+        },
+        "92764f7e-bada-4196-8602-eb75a259390d": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:47:01.766933+00:00"
+        },
+        "c40de783-08d6-44be-8f4e-9395cedebd5c": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:47:15.234272+00:00"
+        },
+        "df8b457d-5273-48ef-8526-bcb19b9c3917": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:47:17.398255+00:00"
+        },
+        "e766135b-08d9-4c74-96d4-f1d4424a4b5e": {
+          "passed": false,
+          "error": "direct matrix unavailable; see private diagnostic log",
+          "exit_code": 1,
+          "checked_at": "2026-10-05T14:47:27.705944+00:00"
+        }
+      },
+      "finished_at": "2026-10-05T14:47:27.706731+00:00",
+      "passed": 0,
+      "total": 6
+    },
+    "status": "FEATURES_DEPLOYED_POST_IMPORT_FLEET_VERIFICATION_PARTIAL"
+  },
+  "limitations": [
+    "Six latest full route matrices remain unconfirmed after external endpoint changes; direct gRPC also timed out on five, and one diagnostic artifact download timed out. This is not proven to be only an HTTP panel defect.",
+    "Central health observations and per-server native observations can differ; live endpoint checks fluctuate between healthy and timeout.",
+    "Latency is not bandwidth; TCP probes do not certify live provider UDP support.",
+    "Periodic exclusion is not instantaneous, existing flows are not migrated, and one healthy path necessarily receives all traffic.",
+    "No actual AdMob display or maximum-speed acceptance."
+  ],
+  "evidence_directory": "/root/backups/dob-residential-pool-20261005/v2",
+  "handoff": "docs/RESIDENTIAL_POOL_HANDOFF_20261005.md"
+}
