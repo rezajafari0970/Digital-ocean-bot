@@ -1,0 +1,29 @@
+{
+  "goal": "Prevent recurrence of the observed Xray/panel OOM caused by phantom CMA/Kexec Handover on affected Ubuntu 7.0 cloud kernels. Preserve exact Google Ads-only plus temporary BrowserLeaks routing, DNS and all client/gate/account policies.",
+  "context": "Evidence: target cf65a8f5 OOM at 2026-10-05 11:49:31Z, CmaTotal=0 CmaFree>0 (317272 KiB), kernel7.0.0-38; 21/38 fleet hosts have7.0 KHO enabled by default,17 use5.15. Ubuntu bug2163395 and kernel documentation support disabling unused KHO with kho=off at boot. Implement a narrowly applicable idempotent boot guard, atomic dedicated GRUB drop-in, regenerate/validate boot entries without touching existing kernel/root/console arguments, journal pending boot ID for restart-safe recovery, readiness flags until changed boot ID and kho=off/CMA healthy. Current hosts require bounded serial maintenance reboot and API verification; future hosts use bootstrap plus existing installer reboot path. Do not tune RAM blindly, disable OOM, change DNS, bypass existing gates, reboot unaffected hosts, reset prior reboot jobs, or assume HTTP200 equals a successful route test. Tests must exercise interrupted config generation, unmanaged/conflicting config refusal, unaffected kernel no-op, pending boot recovery, idempotence and readiness. Credentials remain server-side.",
+  "allowed_paths": [
+    "internal/provisioning/kernel_memory_guard.go",
+    "internal/provisioning/kernel_memory_guard_test.go",
+    "internal/provisioning/bootstrap_plan.go",
+    "internal/provisioning/bootstrap_plan_test.go",
+    "internal/provisioning/readiness.go",
+    "docs/development-jobs/panel-kernel-memory-20261005.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 120,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-panel-recovery-20261005/test.sh -race"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(provisioning): guard affected kernels against phantom CMA OOM"
+}

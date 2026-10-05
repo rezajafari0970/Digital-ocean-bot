@@ -83,7 +83,7 @@ func (c ReadinessCollector) Collect(ctx context.Context, runID string, t Target,
 	s.DNSOK = run("dns", "getent hosts deb.debian.org >/dev/null 2>&1 && echo ok") == "ok"
 	s.OutboundHTTPSOK = run("https", "if command -v curl >/dev/null; then curl -fsSIL --max-time 8 https://deb.debian.org >/dev/null && echo ok; elif command -v wget >/dev/null; then wget -q --spider --timeout=8 https://deb.debian.org && echo ok; else exit 1; fi") == "ok"
 	s.TimeSync = run("time_sync", "if command -v timedatectl >/dev/null; then timedatectl show -p NTPSynchronized --value 2>/dev/null || true; else echo unknown; fi")
-	s.RebootRequired = run("reboot_required", "test -f /var/run/reboot-required && echo yes || echo no") == "yes"
+	s.RebootRequired = run("reboot_required", KernelMemoryRebootRequiredCommand()) != "no"
 	_ = packageLock
 	issues := DecideReadiness(s)
 	// Only low-risk, idempotent remediation is automatic. We never kill lock
