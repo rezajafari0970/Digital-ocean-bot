@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func TestInstalledCoreDNSUDPUsesProtectedTCPAndNeverDirect(t *testing.T) {
+func TestInstalledCoreResidentialUDPDNSIsBlockedBeforeResolver(t *testing.T) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("installed Xray required")
@@ -126,7 +126,7 @@ func TestInstalledCoreDNSUDPUsesProtectedTCPAndNeverDirect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// The real resolver would reply if any DNS packet escaped the protected route.
+	// Observe any unexpected DNS connection caused by the blocked datagram.
 	// Use its loopback address instead of sending fault tests to public DNS.
 	dns := setting["dns"].(map[string]any)
 	dns["servers"] = []string{"tcp://" + sink.Addr().String()}
@@ -189,7 +189,7 @@ func TestInstalledCoreDNSUDPUsesProtectedTCPAndNeverDirect(t *testing.T) {
 		q := []byte{0x42, 0x71, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, byte(len(name))}
 		q = append(q, []byte(name)...)
 		q = append(q, 7, 'e', 'x', 'a', 'm', 'p', 'l', 'e', 0, 0, typ, 0, 1)
-		// Arbitrary client resolver must be intercepted. The approved pool is used.
+		// UDP DNS must be denied before any resolver or upstream connection.
 		packet := append([]byte{0, 0, 0, 1, 9, 9, 9, 9, 0, 53}, q...)
 		udp.SetDeadline(time.Now().Add(2 * time.Second))
 		udp.Write(packet)
@@ -201,19 +201,11 @@ func TestInstalledCoreDNSUDPUsesProtectedTCPAndNeverDirect(t *testing.T) {
 		return response[:n], nil
 	}
 	for _, typ := range []byte{1, 65} {
-		response, e := query("probe", typ)
-		if e != nil || len(response) < 22 {
-			t.Fatalf("UDP client DNS type %d through TCP-only proxy: %v", typ, e)
+		if _, e := query("probe", typ); e == nil {
+			t.Fatalf("residential UDP DNS type %d was allowed", typ)
 		}
 	}
-	if proxyTCP.Load() == 0 || proxyUDP.Load() != 0 || directHits.Load() != 0 {
-		t.Fatal("DNS transport incorrect", proxyTCP.Load(), proxyUDP.Load(), directHits.Load())
-	}
-	available.Store(false)
-	if _, e := query("fault", 1); e == nil {
-		t.Fatal("failed proxy unexpectedly resolved uncached name")
-	}
-	if directHits.Load() != 0 {
-		t.Fatal("DNS leaked directly after upstream failure")
+	if proxyTCP.Load() != 0 || proxyUDP.Load() != 0 || directHits.Load() != 0 {
+		t.Fatal("blocked UDP DNS generated upstream traffic", proxyTCP.Load(), proxyUDP.Load(), directHits.Load())
 	}
 }

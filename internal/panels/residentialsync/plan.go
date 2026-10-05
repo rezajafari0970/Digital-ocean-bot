@@ -15,8 +15,7 @@ const blockedTag = "dob-route-blocked"
 
 // Installed geosite.dat contains these lists. "Google ads" and "Ads" are
 // display names, not valid geosite:google-ads / geosite:ads identifiers.
-// BrowserLeaks is an explicit diagnostic destination, including its subdomains.
-var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads", "domain:browserleaks.com"}
+var adDomains = []string{"geosite:category-ads-all", "geosite:category-ads", "geosite:google@ads", "geosite:facebook@ads"}
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
@@ -160,7 +159,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		} else if out[i].Class == "RESIDENTIAL" {
 			if p.SniffingBlocked {
 				out[i].Effective = "BLOCKED"
-			} else if p.Configured == 0 && !p.Harden {
+			} else if p.Configured == 0 && !p.Harden && !p.AdsOnly {
 				out[i].Effective = "DIRECT"
 			} else if len(p.Proxies) == 0 {
 				out[i].Effective = "BLOCKED"
@@ -211,7 +210,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	kept = append(kept, map[string]any{"tag": directTag, "protocol": "freedom", "settings": map[string]any{}}, map[string]any{"tag": blockedTag, "protocol": "blackhole", "settings": map[string]any{}})
 	destination := blockedTag
-	if p.Configured == 0 && !p.Harden {
+	if p.Configured == 0 && !p.Harden && !p.AdsOnly {
 		destination = directTag
 	} else if len(p.Proxies) > 0 {
 		proxy := p.Proxies[0]
@@ -234,16 +233,6 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	if p.SniffingBlocked {
 		destination = blockedTag
-	}
-	if p.Harden && p.Residential && p.AdsOnly {
-		// Accept the client's UDP/TCP DNS framing, but resolve through protected
-		// TCP upstreams. A/AAAA use the bounded built-in pool; other query types
-		// explicitly chain through the same residential outbound.
-		kept = append(kept, map[string]any{
-			"tag": clientDNSTag, "protocol": "dns",
-			"settings":       map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
-			"streamSettings": map[string]any{"sockopt": map[string]any{"dialerProxy": destination}},
-		})
 	}
 	next["outbounds"] = kept
 	routing, ok := next["routing"].(map[string]any)
@@ -278,16 +267,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	}
 	directUsers := []string{}
 	for _, cl := range clients {
-		if cl.Effective == "DIRECT" && (!p.Harden || cl.Class == "DIRECT") {
+		if cl.Effective == "DIRECT" && (!p.Harden && !p.AdsOnly || cl.Class == "DIRECT") {
 			directUsers = append(directUsers, cl.Email)
 		}
 	}
 	sort.Strings(directUsers)
 	if p.Harden {
-		// Built-in DNS never uses localhost or a direct local-mode transport.
+		// The bounded TCP resolver pool is direct in category-only mode.
 		next["dns"] = managedDNS()
 		dnsDestination := destination
-		if !p.Residential && p.Direct {
+		if p.AdsOnly || !p.Residential && p.Direct {
 			dnsDestination = directTag
 		}
 		if !p.Residential && !p.Direct {
@@ -316,36 +305,19 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
 		} else {
-			// Ad rules precede the known-domain direct rule. Opaque/IP traffic and
-			// DNS queries cannot prove that they are non-advertising: fail closed.
-			// A domain outside the geosite lists can still contain ads; sniffing is
-			// not a guarantee for ECH, misleading hostnames, or incomplete lists.
-			if p.Harden && p.Residential {
-				dnsDestination := blockedTag
-				if !p.SniffingBlocked && len(p.Proxies) > 0 {
-					dnsDestination = clientDNSTag
-				}
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": dnsDestination})
-			}
+			// Only TCP matched by the Ads lists uses residential egress.
+			// Explicit Direct identities matched above keep TCP and UDP.
+			// All remaining residential UDP (including DNS/QUIC) is denied.
 			if p.Residential {
-				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": adDomains, "network": "udp", "outboundTag": blockedTag})
-				}
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": adDomains, "network": "tcp,udp", "outboundTag": destination})
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": adDomains, "network": "tcp", "outboundTag": destination})
 			}
 			fallback := directTag
-			if p.Harden && p.Residential {
-				if !p.SniffingBlocked {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-known-non-ad", "inboundTag": tags, "domain": []string{knownDomainPattern}, "network": "tcp,udp", "outboundTag": directTag})
-				}
-				fallback = destination
-				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-opaque-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
-				}
-			}
-			if !p.Residential && !p.Direct {
+			if (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
 				fallback = blockedTag
 			}
+			// DNS, ordinary domains and opaque/IP TCP are direct. List matching
+			// cannot classify ads absent from geosite or hidden by encryption.
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": fallback})
 
 		}

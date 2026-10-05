@@ -13,14 +13,15 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 )
 
 // This test runs the installed core, not the in-memory route matcher. A local
-// sink detects any actual packet that incorrectly escapes a failed proxy.
-func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
+// sink proves category-only routing and detects Ads escaping a failed proxy.
+func TestInstalledCoreAdsFailClosedOtherTCPDirectAndUDPBlocked(t *testing.T) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("set XRAY_TEST_BINARY for installed-core fault acceptance")
@@ -29,7 +30,6 @@ func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
 	sink := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { hits.Add(1); fmt.Fprint(w, "sink") }))
 	defer sink.Close()
 	_, portText, _ := net.SplitHostPort(sink.Listener.Addr().String())
-	sinkPort, _ := strconv.Atoi(portText)
 	udp, err := net.ListenPacket("udp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -58,6 +58,14 @@ func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
 			}
 			proxyPort := listener.Addr().(*net.TCPAddr).Port
 			listener.Close()
+			// Resolve fixture domains using test-only static hosts, never public DNS.
+			for _, v := range setting["outbounds"].([]any) {
+				o := v.(map[string]any)
+				if o["protocol"] == "freedom" {
+					o["settings"] = map[string]any{"domainStrategy": "UseIPv4"}
+				}
+			}
+			setting["dns"].(map[string]any)["hosts"] = map[string]any{"adservice.google.com": "127.0.0.1", "browserleaks.com": "127.0.0.1"}
 			setting["log"] = map[string]any{"loglevel": "none"}
 			setting["inbounds"] = []any{map[string]any{"tag": "actual-inbound-tag", "listen": "127.0.0.1", "port": proxyPort, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}, "sniffing": map[string]any{"enabled": true, "destOverride": []string{"http", "tls", "quic"}, "metadataOnly": false}}}
 			file := filepath.Join(t.TempDir(), "core.json")
@@ -90,16 +98,13 @@ func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
 				t.Fatal("core listener unavailable")
 			}
 			for _, target := range []string{sink.URL, "http://adservice.google.com:" + portText, "http://browserleaks.com:" + portText} {
-				// The direct control is an IP request; protected tests also cover ads.
-				if kind == "direct-control" && target != sink.URL {
-					continue
-				}
 				_, e := exec.Command("curl", "--silent", "--max-time", "2", "--proxy", "socks5h://"+address, "--noproxy", "", target).CombinedOutput()
-				if kind == "direct-control" && e != nil {
-					t.Fatal("direct control failed", e)
+				blocked := kind != "direct-control" && strings.Contains(target, "adservice.google.com")
+				if blocked && e == nil {
+					t.Fatal("Ads escaped failed residential proxy")
 				}
-				if kind != "direct-control" && e == nil {
-					t.Fatal("protected TCP request unexpectedly succeeded")
+				if !blocked && e != nil {
+					t.Fatal("non-Ad TCP did not remain direct", target, e)
 				}
 			}
 			// Actual SOCKS UDP relay; an opaque datagram must not reach the local sink.
@@ -138,13 +143,14 @@ func TestInstalledCoreNeverFallsBackOnOpaqueTraffic(t *testing.T) {
 			} else if e == nil {
 				t.Fatal("opaque UDP leaked")
 			}
+			want := int64(2)
 			if kind == "direct-control" {
-				if hits.Load() != before+1 {
-					t.Fatal("TCP control did not reach sink")
-				}
-			} else if hits.Load() != before {
-				t.Fatal("TCP leaked to direct sink", sinkPort)
+				want = 3
 			}
+			if hits.Load() != before+want {
+				t.Fatal("unexpected direct sink traffic", hits.Load()-before, want)
+			}
+
 		})
 	}
 }

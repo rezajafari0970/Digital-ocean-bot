@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestDNSHasNoLocalOrDirectFallbackWhenResidentialAbsent(t *testing.T) {
+func TestBuiltinDNSTCPDirectEvenWhenResidentialAbsent(t *testing.T) {
 	for _, configured := range []int{0, 1} {
 		p := routePolicy{Harden: true, AdsOnly: true, Residential: true, Direct: true, Configured: configured}
 		cs, tags := fixtureClients(t, p)
@@ -24,15 +24,15 @@ func TestDNSHasNoLocalOrDirectFallbackWhenResidentialAbsent(t *testing.T) {
 			t.Fatal("local DNS bypass")
 		}
 		f := fakeCore{running: desired}
-		form := url.Values{"inboundTag": {dnsTag}, "network": {"udp"}, "ip": {"1.1.1.1"}, "port": {"53"}}
+		form := url.Values{"inboundTag": {dnsTag}, "network": {"tcp"}, "ip": {"1.1.1.1"}, "port": {"53"}}
 		response, err := f.Do(context.Background(), routeRequest(form))
 		if err != nil {
 			t.Fatal(err)
 		}
 		var result struct{ Obj struct{ OutboundTag string } }
 		json.Unmarshal(response.Body, &result)
-		if result.Obj.OutboundTag != tagged(desired, blockedTag) {
-			t.Fatal("DNS escaped residential", string(response.Body))
+		if result.Obj.OutboundTag != tagged(desired, directTag) {
+			t.Fatal("DNS incorrectly depends on residential", string(response.Body))
 		}
 	}
 }

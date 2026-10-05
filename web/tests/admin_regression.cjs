@@ -113,11 +113,11 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);
   await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
   await waitFor('document.querySelector("#dnsCatalog")?.textContent.includes("3 saved")');
-  assert.equal(await evaluate('document.querySelector("#modalFields a")?.href'),'https://browserleaks.com/ip');
-  assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("browserleaks.com and its subdomains")'),true);
+  assert.equal(await evaluate('document.querySelector("#modalFields a[href*=browserleaks]")'),null);
+  assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("Only TCP traffic matching Ads categories")'),true);
   assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');
   await evaluate('document.querySelector("[name=users_per_second]").scrollIntoView({block:"center"})');
-  console.log('UI_BROWSERLEAKS_LINK_AND_RATE_SELECTOR PASS');
+  console.log('UI_ADS_TCP_ONLY_DESCRIPTION_AND_RATE_SELECTOR PASS');
   console.log('UI_INDEPENDENT_PROFILE_FORMS_AND_MOBILE_LAYOUT PASS');
   const invalid=await fetch(base+'/api/v1/configs',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({users_per_second:600,ports:[443],target_users_per_inbound:1,sni_selection_mode:'scored'})});
   assert.equal(invalid.status,400);const detail=await invalid.json();assert.equal(detail.field,'users_per_second');assert.match(detail.detail,/1 to 100/);

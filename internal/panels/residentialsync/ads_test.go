@@ -23,7 +23,7 @@ func probeRoute(t *testing.T, setting map[string]any, email, domain, network str
 	}
 	return v.Obj.OutboundTag
 }
-func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
+func TestAdsOnlyTCPRoutingAndResidentialUDPDenied(t *testing.T) {
 	for _, kind := range []string{"socks5", "http", "down", "absent"} {
 		t.Run(kind, func(t *testing.T) {
 			p := routePolicy{AdsOnly: true, Harden: true, Residential: true, Direct: true, Configured: 1}
@@ -40,31 +40,35 @@ func TestAdsOnlyRoutingAllNetworksAndFailureIsolation(t *testing.T) {
 			}
 			for _, c := range cs {
 				for _, network := range []string{"tcp", "udp"} {
-					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org", "notbrowserleaks.com", "browserleaks.com.example.org"} {
+					for _, domain := range []string{"www.google.com", "www.facebook.com", "api.ipify.org", "notbrowserleaks.com", "browserleaks.com.example.org", "browserleaks.com", "tls.browserleaks.com", "", "1.1.1.1", "2001:db8::1"} {
 						got := probeRoute(t, desired, c.Email, domain, network)
-						if got != tagged(desired, directTag) {
+						want := directTag
+						if c.Class == "RESIDENTIAL" && network == "udp" {
+							want = blockedTag
+						}
+						if got != tagged(desired, want) {
 							t.Fatalf("non-ad not direct: %s %s %s", c.Class, domain, network)
 						}
 					}
 					base := directTag
 					if c.Class == "RESIDENTIAL" {
 						base = blockedTag
-						if len(p.Proxies) > 0 && (network == "tcp" || kind == "socks5") {
+						if len(p.Proxies) > 0 && network == "tcp" {
 							base = p.Proxies[0].Tag
 						}
 					}
-					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com", "browserleaks.com", "tls.browserleaks.com", "a.b.browserleaks.com", "", "1.1.1.1", "2001:db8::1"} {
+					for _, domain := range []string{"adservice.google.com", "pixel.facebook.com"} {
 						if got := probeRoute(t, desired, c.Email, domain, network); got != tagged(desired, base) {
 							t.Fatalf("ad route %s %s %s: %s", kind, c.Class, network, got)
 						}
 					}
 				}
 			}
-			// The plan must carry domain-scoped UDP blocking only, never global UDP denial.
+			// Residential UDP denial must cover every destination; Direct matched first.
 			for _, v := range desired["routing"].(map[string]any)["rules"].([]any) {
 				r := v.(map[string]any)
-				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] == nil {
-					t.Fatal("global UDP block")
+				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] != nil {
+					t.Fatal("incomplete residential UDP block")
 				}
 			}
 		})
@@ -80,7 +84,7 @@ func TestManagedAdsOverrideLegacyAdBlockWithoutTouchingOtherInbound(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := probeRoute(t, next, cs[0].Email, "adservice.google.com", "udp"); !strings.HasPrefix(got, "residential-ads-") {
+	if got := probeRoute(t, next, cs[0].Email, "adservice.google.com", "tcp"); !strings.HasPrefix(got, "residential-ads-") {
 		t.Fatal("legacy ad block won", got)
 	}
 	rules := next["routing"].(map[string]any)["rules"].([]any)

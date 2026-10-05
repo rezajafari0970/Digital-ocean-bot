@@ -113,6 +113,8 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				{"pixel.facebook.com", "", "udp", "443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
+				{"browserleaks.com", "", "tcp", "443", "tls", false},
+				{"", "1.1.1.1", "tcp", "53", "", false},
 				{"", "1.1.1.1", "tcp", "443", "", false},
 			} {
 				network := probe.network
@@ -124,11 +126,20 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = p.Proxies[0].Tag
 					}
 				}
-				if p.AdsOnly && !probe.ads && (p.Residential || p.Direct) && (!p.Harden || probe.domain != "") && (!p.SniffingBlocked || c.Class == "DIRECT" || !p.Residential && p.Direct) {
-					base = directTag
-				}
-				if probe.port == "53" && p.Harden && p.AdsOnly && p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 && c.Effective != "DIRECT" {
-					base = clientDNSTag
+				if p.AdsOnly {
+					explicitDirect := c.Effective == "DIRECT" && (!p.Harden && !p.AdsOnly || c.Class == "DIRECT")
+					switch {
+					case explicitDirect || (!p.Residential && p.Direct):
+						base = directTag
+					case !p.Residential || p.SniffingBlocked || network == "udp":
+						base = blockedTag
+					case !probe.ads:
+						base = directTag
+					case len(p.Proxies) > 0:
+						base = p.Proxies[0].Tag
+					default:
+						base = blockedTag
+					}
 				}
 				expected := tagged(desired, base)
 				if expected == "" {
@@ -159,7 +170,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 
 	if p.Harden {
 		base := blockedTag
-		if !p.Residential && p.Direct {
+		if p.AdsOnly && (p.Residential || p.Direct) || !p.Residential && p.Direct {
 			base = directTag
 		} else if p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 {
 			base = p.Proxies[0].Tag
