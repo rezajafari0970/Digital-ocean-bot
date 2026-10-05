@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-05T21:11:53.540026+00:00",
+  "status": "DEPLOYED_NULLABLE_QUOTA_FIX_AUTHENTICATED_USER_RETRY_NEEDED",
+  "runtime_revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+  "previous_runtime_revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+  "binaries": {
+    "api": {
+      "revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+      "sha256": "d298485b02354c5adb3013160f7e375d224180160028f81ae208014db78ab630",
+      "vcs_modified": false
+    },
+    "worker": {
+      "revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+      "sha256": "f59b38d330150c2f06a972b9ab20410209d03f44915d06d40c90b5b50a7717a1",
+      "vcs_modified": false
+    }
+  },
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "migration": "000153_upcloud_cleanup",
+  "static_unchanged": true,
+  "configuration_preserved": true,
+  "preserved_publications": [
+    {
+      "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "spec": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "state": "KEPT",
+      "deadline": null,
+      "duration_mode": "permanent",
+      "publish_scope": "fleet"
+    }
+  ],
+  "failure_evidence": {
+    "request_id": "ab50daf03fb50a00",
+    "time_utc": "2026-10-05T20:53:49Z",
+    "stage": "account",
+    "operation": "account",
+    "diagnostic": "INVALID_NUMBER",
+    "http_status": 200,
+    "elapsed_ms": 2163
+  },
+  "primary_source": "https://developers.upcloud.com/api/1.3/upcloud-openapi.json#/components/schemas/accountResourceLimits",
+  "change": "Only two documented Dev quotas accept null, represented distinctly from zero. Selected null quota fails closed with UNKNOWN_PLAN_QUOTA; unrelated null Dev quotas no longer prevent preview or ordinary-plan capacity. Other invalid numbers remain rejected. Existing numeric strings remain supported.",
+  "tests": {
+    "pre_fix_regression": "FAILED as expected with INVALID_NUMBER",
+    "post_fix_provider": "PASS",
+    "race_and_real_postgresql": "PASS",
+    "full_go": "PASS",
+    "mobile_browser": "PASS",
+    "orchestrator": "COMPLETE"
+  },
+  "live_invalid_synthetic_token_probe": {
+    "detail": "UpCloud rejected the API token. Stage: account; operation: account; reason: AUTHENTICATION_FAILED; HTTP 401; ref: ff2bcc27ecb823b1.",
+    "diagnostic": "AUTHENTICATION_FAILED",
+    "error": "provider_credential_invalid",
+    "operation": "account",
+    "provider_status": 401,
+    "request_id": "ff2bcc27ecb823b1",
+    "stage": "account"
+  },
+  "authenticated_user_preview_confirmed": false,
+  "upcloud_cloud_lifecycle_confirmed": false,
+  "limitations": "Authenticated screenshot trace confirms account HTTP200 response parsing failure INVALID_NUMBER. Documented nullable Dev quota schema incompatibility reproduced and fixed. Exact original live field/value not retained; user must retry to confirm their full preview. No cloud lifecycle canary.",
+  "evidence_directory": "/root/backups/dob-upcloud-null-quotas-20261005",
+  "rollback": {
+    "binaries": [
+      "/root/backups/dob-upcloud-null-quotas-20261005/api.before",
+      "/root/backups/dob-upcloud-null-quotas-20261005/worker.before"
+    ],
+    "runtime_revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
+    "schema_or_configuration_change_required": false
+  }
+}

@@ -103,3 +103,7 @@ Read docs/UPCLOUD_HANDOFF_20261005.md and docs/UPCLOUD_ACCEPTANCE_20261005.json.
 ## Latest UpCloud preview diagnostics (2026-10-05 UTC)
 
 Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANCE_20261005.json. API/worker 88f8b50f5d0d3107069c2e495d6b5cc71cb2416b; static/migration unchanged. Misleading generic transport message replaced by safe staged diagnostics for UpCloud, preserving retry/create ambiguity. Tests and selected-proxy synthetic invalid-token HTTP 401 with UI/journal correlation pass. Original screenshot's root cause remains unconfirmed because old preview had no stage logging and unsaved token was not retained. Proxy health gate briefly became unhealthy then healthy. User should refresh and retry validation; inspect reference without reading/logging token. Existing permanent residential publication and settings preserved.
+
+## UpCloud nullable quota continuation (2026-10-05)
+- Read docs/UPCLOUD_NULL_QUOTAS_HANDOFF_20261005.md and docs/UPCLOUD_NULL_QUOTAS_ACCEPTANCE_20261005.json. Runtime 5aa7fef66b5ff3e644663b8468d4a724585aa6dd; static/migration unchanged.
+- User trace identified account HTTP200 INVALID_NUMBER. Two documented nullable Dev quota fields reproduced the incompatibility; parser corrected with selected-plan fail-closed protection. Tests/deployment/config readback pass. Authenticated user retry remains required.

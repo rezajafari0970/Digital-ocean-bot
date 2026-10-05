@@ -76,9 +76,9 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "88f8b50f5d0d3107069c2e495d6b5cc71cb2416b",
-    "handoff": "docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md",
+    "revision": "5aa7fef66b5ff3e644663b8468d4a724585aa6dd",
+    "handoff": "docs/UPCLOUD_NULL_QUOTAS_HANDOFF_20261005.md",
     "inspected_live_source": true,
-    "note": "Use current source for safe staged diagnostics; historical failure root remains unknown."
+    "note": "Current UpCloud quota decoder supersedes prior strict-all-number map; only documented nullable Dev keys accepted, selected unknown quota remains fail-closed."
   }
 }
