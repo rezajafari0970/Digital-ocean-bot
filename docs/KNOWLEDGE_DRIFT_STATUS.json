@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "b962dbf1a3712f7d98825cbd4b981b58c6575f86",
+  "git_head": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
   "ready": true,
   "artifacts": [
     {
@@ -76,9 +76,9 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
-    "handoff": "docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md",
+    "revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+    "handoff": "docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md",
     "inspected_live_source": true,
-    "note": "User screenshots at 2026-10-06 01:23 Tehran confirm authenticated catalog preview after b44d371. Catalog pricing was not implemented and image labels hid variant names. Regional optional pricing and distinct full image labels now implemented/tested/deployed. Live authenticated new price response and cloud lifecycle remain unconfirmed; no saved UpCloud account at baseline."
+    "note": "Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified."
   }
 }

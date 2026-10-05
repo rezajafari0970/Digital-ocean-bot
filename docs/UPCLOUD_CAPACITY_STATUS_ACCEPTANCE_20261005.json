@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "status": "DEPLOYED_CAPACITY_STATUS_VERIFIED_UPCLOUD_TRIAL_CREATE_BLOCKED",
+  "verified_at_utc": "2026-10-05T22:46:56.349699+00:00",
+  "runtime_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+  "migration": "000154_upcloud_create_block",
+  "binaries": {
+    "api": {
+      "revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+      "sha256": "43c5e45d1d9453a0ec846965a89e6f37faa12a6f11a37e1b49488179033d921d",
+      "vcs_modified": false
+    },
+    "worker": {
+      "revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+      "sha256": "6a9e981b13b361a42e00ff3e99b6f36cad15933237355ad71acc80890a75ec80",
+      "vcs_modified": false
+    }
+  },
+  "static_hashes": {
+    "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
+    "app.js": "89cbd79b1ca5ca1fd1bed369a15d93f97e8f7c3ffced8f90dd6c63191369e0e2",
+    "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
+    "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
+    "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
+    "vultr-console.js": "51b39c3f45e321b8a7f0cdd3a42ceed4a23e0923240dea2e95d3c3bab2446b67",
+    "index.html": "c53dcb1b373e870c1823ce345d34dfa3952df232ce043398593c95419604f79e",
+    "residential_performance.js": "600704ec9b30250aa86f320e9347b649541fcbf4e28e76165bc89f7b5b5892f9"
+  },
+  "tests": {
+    "orchestrator": "COMPLETE",
+    "race": "PASS: UpCloud/adminapi/capacity/app with isolated PostgreSQL",
+    "full_go_suite": "PASS",
+    "browser": "PASS: desktop/mobile existing forms, regional price/image regression, new count/block/list/detail display",
+    "faults": "audit creation failure retains block; failed audit during release rolls back release; stale version rejected; non-admin rejected; known trial cannot release",
+    "migration": "backfill, repeated application and guarded downgrade verified in isolated PostgreSQL"
+  },
+  "live_api": {
+    "providers": [
+      {
+        "name": "digitalocean",
+        "display_name": "DigitalOcean",
+        "credential_label": "API token",
+        "status": "ready",
+        "defaults": {
+          "regions": [
+            "fra1",
+            "nyc1",
+            "sfo2",
+            "sgp1",
+            "nyc3"
+          ],
+          "plans": [
+            "s-1vcpu-512mb-10gb",
+            "s-1vcpu-2gb",
+            "s-1vcpu-1gb"
+          ],
+          "images": {
+            "family": "ubuntu",
+            "versions": [
+              "26.04",
+              "22.04",
+              "24.04"
+            ]
+          },
+          "lifetime_min_minutes": 90,
+          "lifetime_max_minutes": 120,
+          "desired_servers": 5,
+          "build_spacing_min_minutes": 1,
+          "build_spacing_max_minutes": 3,
+          "max_concurrent": 1,
+          "fallback_any_region": true
+        }
+      },
+      {
+        "name": "upcloud",
+        "display_name": "UpCloud",
+        "credential_label": "API token (ucat_\u2026)",
+        "status": "ready",
+        "defaults": {
+          "regions": null,
+          "plans": null,
+          "images": {
+            "family": "ubuntu",
+            "versions": [
+              "26.04",
+              "24.04",
+              "22.04"
+            ]
+          },
+          "lifetime_min_minutes": 90,
+          "lifetime_max_minutes": 120,
+          "desired_servers": 5,
+          "build_spacing_min_minutes": 1,
+          "build_spacing_max_minutes": 3,
+          "max_concurrent": 1,
+          "fallback_any_region": true
+        }
+      },
+      {
+        "name": "vultr",
+        "display_name": "Vultr",
+        "credential_label": "API key",
+        "status": "ready",
+        "defaults": {
+          "regions": null,
+          "plans": null,
+          "images": {
+            "family": "ubuntu",
+            "versions": [
+              "26.04",
+              "24.04",
+              "22.04"
+            ]
+          },
+          "lifetime_min_minutes": 90,
+          "lifetime_max_minutes": 120,
+          "desired_servers": 5,
+          "build_spacing_min_minutes": 1,
+          "build_spacing_max_minutes": 3,
+          "max_concurrent": 1,
+          "fallback_any_region": true
+        }
+      }
+    ],
+    "api_checks": {
+      "/api/v1/accounts": {
+        "status": 200,
+        "type": "list"
+      },
+      "account_resources": {
+        "status": 200,
+        "type": "NoneType"
+      },
+      "/api/v1/proxies": {
+        "status": 200,
+        "type": "list"
+      },
+      "/api/v1/residential-proxies": {
+        "status": 200,
+        "type": "list"
+      },
+      "/api/v1/residential-performance": {
+        "status": 200,
+        "type": "dict"
+      },
+      "/api/v1/configs": {
+        "status": 200,
+        "type": "list"
+      }
+    },
+    "account_capacity_readback": [
+      {
+        "id": "b367ce76-f411-4c3e-8fc3-ca84061d8114",
+        "provider": "upcloud",
+        "capacity_state": "RESOURCE_BUDGET",
+        "capacity_freshness": "fresh",
+        "buildable_now": 0,
+        "droplet_available": 2,
+        "provider_droplets": 0,
+        "plan_available": {
+          "1xCPU-1GB": 2,
+          "1xCPU-2GB": 2,
+          "DEV-1xCPU-1GB-10GB": 2
+        },
+        "pending_builds": 0,
+        "provider_can_create": false,
+        "scheduler_can_build": false,
+        "provider_reason": "UpCloud trial firewall restriction (TRIAL_FIREWALL). This deployment requires ports unavailable during the trial. Resolve the trial restriction with UpCloud, then enable a retry.",
+        "create_block": {
+          "version": 1,
+          "code": "TRIAL_FIREWALL",
+          "blocked_at": "2026-10-05T22:38:09.388111Z"
+        }
+      },
+      {
+        "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+        "provider": "vultr",
+        "capacity_state": "PROVEN_LOWER_BOUND",
+        "capacity_freshness": "fresh",
+        "buildable_now": 0,
+        "droplet_available": null,
+        "provider_droplets": 15,
+        "plan_available": null,
+        "pending_builds": 0,
+        "provider_can_create": true,
+        "scheduler_can_build": false,
+        "provider_reason": "Ready to create servers",
+        "create_block": null
+      },
+      {
+        "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+        "provider": "digitalocean",
+        "capacity_state": "EXACT",
+        "capacity_freshness": "fresh",
+        "buildable_now": 0,
+        "droplet_available": 1,
+        "provider_droplets": 2,
+        "plan_available": null,
+        "pending_builds": 1,
+        "provider_can_create": false,
+        "scheduler_can_build": false,
+        "provider_reason": "Server capacity is full or reserved by pending builds",
+        "create_block": null
+      },
+      {
+        "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+        "provider": "vultr",
+        "capacity_state": "PROVEN_LOWER_BOUND",
+        "capacity_freshness": "fresh",
+        "buildable_now": 0,
+        "droplet_available": null,
+        "provider_droplets": 17,
+        "plan_available": null,
+        "pending_builds": 0,
+        "provider_can_create": true,
+        "scheduler_can_build": false,
+        "provider_reason": "Ready to create servers",
+        "create_block": null
+      },
+      {
+        "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+        "provider": "digitalocean",
+        "capacity_state": "EXACT",
+        "capacity_freshness": "fresh",
+        "buildable_now": 0,
+        "droplet_available": 0,
+        "provider_droplets": 3,
+        "plan_available": null,
+        "pending_builds": 0,
+        "provider_can_create": false,
+        "scheduler_can_build": false,
+        "provider_reason": "Server capacity is full or reserved by pending builds",
+        "create_block": null
+      }
+    ],
+    "cloud_mutations_initiated_by_acceptance": false
+  },
+  "live_provider_refresh": {
+    "http": 200,
+    "refreshed": true,
+    "cached": null,
+    "elapsed_seconds": 7.722,
+    "latest": {
+      "capacity": {
+        "Source": "upcloud_resource_budget",
+        "LimitKnown": true,
+        "ObservedAt": "2026-10-05T22:43:51.138228727Z",
+        "ComputeInUse": 0,
+        "ComputeLimit": 2,
+        "PlanAvailable": {
+          "1xCPU-1GB": 2,
+          "1xCPU-2GB": 2,
+          "DEV-1xCPU-1GB-10GB": 2
+        }
+      },
+      "snapshot_at": "2026-10-05T22:43:56.436904+00:00",
+      "account_status": "active"
+    },
+    "dashboard": {
+      "provider_state": "ACTIVE",
+      "provider_can_create": false,
+      "scheduler_can_build": false,
+      "provider_reason": "UpCloud trial firewall restriction (TRIAL_FIREWALL). This deployment requires ports unavailable during the trial. Resolve the trial restriction with UpCloud, then enable a retry.",
+      "create_block": {
+        "version": 1,
+        "code": "TRIAL_FIREWALL",
+        "blocked_at": "2026-10-05T22:38:09.388111Z"
+      },
+      "capacity": {
+        "buildable_now": 0,
+        "available": 2,
+        "plan_available": {
+          "1xCPU-1GB": 2,
+          "1xCPU-2GB": 2,
+          "DEV-1xCPU-1GB-10GB": 2
+        },
+        "data_status": "fresh",
+        "last_refresh": "2026-10-05T22:43:56.436904Z"
+      }
+    }
+  },
+  "configuration_preserved": true,
+  "permanent_residential_publication_preserved": [
+    {
+      "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "spec": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "state": "KEPT",
+      "deadline": null,
+      "duration_mode": "permanent",
+      "publish_scope": "fleet"
+    }
+  ],
+  "cloud_mutations_initiated_by_acceptance": false,
+  "vendor_restriction": "TRIAL_FIREWALL",
+  "initial_refresh_attempt": {
+    "http": 409,
+    "exact_runtime_reason_not_captured": true,
+    "followup": "successful bounded retry after read-only network identity health check; no control/gate bypass"
+  },
+  "contract_sources": [
+    "https://developers.upcloud.com/api/1.3/upcloud-openapi.json",
+    "https://upcloud.com/docs/products/networking/firewall/"
+  ],
+  "limitations": [
+    "No successful live UpCloud create/provision/Sanaei/Reality/expiry/delete cycle claimed. Vendor restriction unresolved.",
+    "Optional trial_mode0/1 handled when supplied; absent flag does not clear an actual create denial.",
+    "Resource budgets are per selected plan over shared quotas, not additive and not a guarantee of provider regional admission.",
+    "No new fleet/AdMob performance proof."
+  ],
+  "evidence_directory": "/root/backups/dob-upcloud-capacity-status-20261005",
+  "rollback": "Previous binaries/static saved in evidence directory. Migration154 is additive; down migration refuses active create blocks. Before older worker rollback, pause only blocked UpCloud accounts because older workers lack this guard. Deployment rollback script preserves blocks and does that pause automatically."
+}

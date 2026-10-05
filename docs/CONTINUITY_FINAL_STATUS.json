@@ -36,12 +36,12 @@
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
     "date": "2026-10-05",
-    "api_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
-    "worker_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
-    "web_static_source_revision": "46e928d234b4e0c3ee0698a2823863efe3c57103",
-    "status": "DEPLOYED_REGIONAL_PRICE_AND_IMAGE_LABELS_LIVE_PRICE_PENDING",
-    "acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md",
-    "note": "User screenshots at 2026-10-06 01:23 Tehran confirm authenticated catalog preview after b44d371. Catalog pricing was not implemented and image labels hid variant names. Regional optional pricing and distinct full image labels now implemented/tested/deployed. Live authenticated new price response and cloud lifecycle remain unconfirmed; no saved UpCloud account at baseline."
+    "api_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+    "worker_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+    "web_static_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+    "status": "DEPLOYED_CAPACITY_STATUS_VERIFIED_UPCLOUD_TRIAL_CREATE_BLOCKED",
+    "acceptance": "docs/UPCLOUD_CAPACITY_STATUS_ACCEPTANCE_20261005.json",
+    "handoff": "docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md",
+    "note": "Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified."
   }
 }

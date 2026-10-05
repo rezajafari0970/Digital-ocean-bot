@@ -123,3 +123,8 @@ Read docs/UPCLOUD_PREVIEW_HANDOFF_20261005.md and docs/UPCLOUD_PREVIEW_ACCEPTANC
 ## UpCloud regional prices and image labels (2026-10-05)
 - Read docs/UPCLOUD_CATALOG_DISPLAY_HANDOFF_20261005.md and docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json. Runtime and changedstatic 46e928d234b4e0c3ee0698a2823863efe3c57103; migration153 unchanged.
 - User screenshot confirms authenticated preview success. Added optional region/currency pricing and full distinct image labels; tests/rollout pass; live newprice response pending.
+
+
+## Latest UpCloud capacity continuation (2026-10-05)
+
+Read docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md and docs/UPCLOUD_CAPACITY_STATUS_ACCEPTANCE_20261005.json. Runtime d384c8b054f57c4b24cbea57bc58e05c5317fd04, migration154. Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified. Successful live Refresh and list/detail parity verified; full/race/PostgreSQL/fault/migration/browser gates pass. Existing profiles/gates/account settings and permanent residential publication preserved. Before older-worker rollback pause blocked UpCloud accounts; never drop their durable denial evidence to bypass the guard.
