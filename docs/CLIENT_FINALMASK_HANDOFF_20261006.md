@@ -1,0 +1,13 @@
+# Client FinalMask deployment handoff
+
+- Scope: client Output exports for panel `810ac959-2fb9-44a9-b5f1-f832cd7416c4`, server `209.222.30.208`, DIRECT and RESIDENTIAL. No server-side Reality inbound/outbound mutation, new-server inheritance or fleet publication.
+- New additive migration: 155, output profile and idempotent operation tables. Profiles are keyed by panel UUID, not IP. Disable (`off`) restores unmodified snapshots on next subscription refresh.
+- Admin-only `GET /api/v1/output/client-transport` and `PUT /api/v1/output/client-transport/{panel_id}`. Write body: preset, expected_revision, operation_id UUID. Explicit JSON decode, bounded presets, row lock, optimistic revision, replay detection and transactional audit.
+- `/api/v1/output` and existing `/share/output/{token}` overlay `fm` at read time. `format=xray-json` exports an array of complete Xray clients, retaining the same eligibility/class/expiry/health filters.
+- GUI: Output → Client FinalMask. Apply selected server or Rollback selected server. Copy Xray JSON Link beside each route-class share. Imported clients must refresh/reconnect after either action.
+- Rollback of binary release: restore backed-up API and app.js/index.html; restart API only. Migration is additive and safely ignored by previous API. Worker remains unchanged at its current version. No cloud or panel services require restart.
+- Evidence directory (root only): `/root/backups/dob-client-finalmask-20261006`. Never publish target URI/config files or temporary admin tokens.
+- Pre-release gates passed: race tests for adminapi/clienttransport with isolated PostgreSQL, full repository suite using the installed 26.3.27 fixture core, native profile validation on 26.3.27 and 26.9.9, mobile browser Apply/JSON share/Rollback flow. All 16 live candidate probe requests returned HTTP 200.
+- The full suite initially run with 26.9.9 failed an existing loopback UDP fixture in residentialsync. That unrelated fixture assumes the installed core's private-destination behavior. Full suite was rerun unchanged with its normal installed 26.3.27 core and passed; this is not reported as a 26.9.9 full-suite pass. Native FinalMask and real-server connectivity were separately tested with 26.9.9.
+- Keep SNI/public key/short IDs/flow, ads routing, temporary BrowserLeaks exception, direct DNS and UDP policy unchanged. Local control-origin connectivity does not prove Iranian cellular DPI evasion or Android app support.
+- Post-deploy activation and readback evidence will be recorded separately in `CLIENT_FINALMASK_ACCEPTANCE_20261006.json`.

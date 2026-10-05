@@ -1,0 +1,35 @@
+{
+  "goal": "Add reversible per-panel client-side FinalMask to Output and subscription links for target 209.222.30.208, both Direct and Residential. User explicitly selected phone/client output, not server outbounds or Reality inbounds.",
+  "context": "Source19e2501 runtime d384c8b migration154. Use read-time URI fm overlay so output snapshots, first_seen and visible_until remain unchanged. Preserve class token restrictions, immutable ownership, health, expiry and cleanup predicates. Panel UUID binding avoids IP reuse; no future/fleet inheritance. Three bounded presets TCP-only, TLS-record-only, layered, positive100-200 byte lengths, delay<=1ms, split3-6. Select validated baseline only after real Xray26.9.9 client tests and actual target probes. Test legacy client26.3.27 compatibility; don't assume plural accepted; inspect exact source. No input arbitrary JSON. Auth+CSRF admin APIs, optimistic revision, durable audit, idempotent retries, per-panel lock and rollback=disabled; UI Output selection and one-click rollback current profile. Raw JSON fallback through format=xray-json same eligibility and class scope if implemented. Keep chrome, currentRealitykeys/SNI/flowUDP443. No server xrayConfig mutations/restart, no provider create/delete, no production residential changes. User requests comprehensive primary-source research: officialdocs, XTLS issues6453/6509/6724/6725/6729, PR6334, shareproposal716, v2rayNG importsource, BPB primarymaintainer reports. No absolute antiblocking/latency guarantees; Iran cellular test still required. Need isolated PostgreSQL/race/fullGo/browser/native-core tests, reversible cleanbuildAPI/static deploy then exacttarget activation and readback bothclasses/shared/json asapplicable; beforeconfig hash matches after. Stop unexpectedexternalchanges, keep canonical authoritative and pushhandoff.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/panels/export",
+    "internal/clienttransport",
+    "migrations/000155_output_client_transport.up.sql",
+    "migrations/000155_output_client_transport.down.sql",
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/client-finalmask.cjs",
+    "docs/development-jobs/client-finalmask-20261006.json",
+    "docs/CLIENT_FINALMASK_RESEARCH_20261006.md",
+    "docs/CLIENT_FINALMASK_HANDOFF_20261006.md",
+    "docs/CLIENT_FINALMASK_ACCEPTANCE_20261006.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-client-finalmask-20261006/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(output): add reversible per-server client FinalMask profiles"
+}
