@@ -23,9 +23,8 @@
     "first_canary_rolled_back": true,
     "fleet_deployed": true,
     "route_matrix_panels": 38,
-    "route_matrix_passed_over_window": 36,
+    "route_matrix_passed_over_window": 37,
     "pending_panel_ids": [
-      "7d842cca-5728-4fcb-a298-6dfd228af131",
       "d21eb338-a902-462b-9873-ba467781fca3"
     ],
     "latest_snapshot": {
@@ -63,6 +62,15 @@
         "sha256": "3e32e362acb7cb508aa7e250be00ea850d860e85a42340be725f808e7c65b863",
         "vcs_modified": false
       }
+    },
+    "last_additional_route_proof": {
+      "panel": "7d842cca-5728-4fcb-a298-6dfd228af131",
+      "at_utc": "2026-10-05T11:12:08Z",
+      "route_proofs": 34,
+      "read_only": true,
+      "diagnostic_request_timeout_seconds": 15,
+      "production_timeouts_changed": false,
+      "evidence": "/root/backups/dob-ads-udp-dns-20261005/slow-read-7d842cca-5728-4fcb-a298-6dfd228af131.log"
     }
   },
   "upstream": {

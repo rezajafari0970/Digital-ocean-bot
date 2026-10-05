@@ -18,11 +18,19 @@
   "services": {
     "api": "active",
     "worker": "active",
-    "route_matrix_passed_over_window": 36,
+    "route_matrix_passed_over_window": 37,
     "pending_panel_ids": [
-      "7d842cca-5728-4fcb-a298-6dfd228af131",
       "d21eb338-a902-462b-9873-ba467781fca3"
-    ]
+    ],
+    "last_additional_route_proof": {
+      "panel": "7d842cca-5728-4fcb-a298-6dfd228af131",
+      "at_utc": "2026-10-05T11:12:08Z",
+      "route_proofs": 34,
+      "read_only": true,
+      "diagnostic_request_timeout_seconds": 15,
+      "production_timeouts_changed": false,
+      "evidence": "/root/backups/dob-ads-udp-dns-20261005/slow-read-7d842cca-5728-4fcb-a298-6dfd228af131.log"
+    }
   },
   "migration": "000149_profile_creation_interval",
   "acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
