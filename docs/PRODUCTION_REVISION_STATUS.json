@@ -2,7 +2,7 @@
   "schema_version": 2,
   "runtime_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-05T08:43:51.570970+00:00",
+  "verified_at_utc": "2026-10-05T09:26:18.491714+00:00",
   "binaries": {
     "api": {
       "revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
@@ -10,9 +10,9 @@
       "sha256": "ee3d2dbf6086ef5a45fa092c11d1a02dd69311f5425cf22d13898baa4f5679c4"
     },
     "worker": {
-      "revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+      "revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
       "vcs_modified": false,
-      "sha256": "2d478a4c9f3c86e91ee547439698f8701d075e415428635fc5fa934228886eb0"
+      "sha256": "3b9a18089a7b6d7c0ed07c8c658aa3eae2814de36e06527cae6f85971d1f1a88"
     }
   },
   "services": {
@@ -22,9 +22,9 @@
     "api_worker_auto_restarts": 0
   },
   "migration": "000149_profile_creation_interval",
-  "acceptance": "docs/ADS_TCP_ONLY_ACCEPTANCE_20261005.json",
-  "verified": true,
-  "note": "User changed residential policy to Ads TCP only. Residential UDP blocked; all other TCP direct. API binary unchanged; worker and web static updated.",
+  "acceptance": "docs/BROWSERLEAKS_TEMPORARY_ACCEPTANCE_20261005.json",
+  "verified": false,
+  "note": "Temporary BrowserLeaks TCP exception deployed. Real Reality test showed residential IP. One panel route API remains unconfirmed; periodic verification also has API timeouts. No claim that entire fleet health is clean.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -41,12 +41,13 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Config creation interval and Output strategy require user approval; do not restore protected DNS/opaque traffic or UDP.",
+  "next_product_step": "Investigate slow panel route APIs, especially 49ff99be-045e-4eb9-b3e9-a5d2248b99ee; read before any mutation. Preserve Ads TCP-only policy with temporary BrowserLeaks exception.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "eligible_serving_panels": 37,
-  "worker_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
+  "eligible_serving_panels": 38,
+  "worker_source_revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
-  "latest_residential_dataplane_acceptance": "docs/ADS_TCP_ONLY_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551"
+  "latest_residential_dataplane_acceptance": "docs/BROWSERLEAKS_TEMPORARY_ACCEPTANCE_20261005.json",
+  "web_static_source_revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
+  "verification_status": "DEPLOYED_BROWSERLEAKS_37_OF_38_RUNTIME_VERIFIED"
 }

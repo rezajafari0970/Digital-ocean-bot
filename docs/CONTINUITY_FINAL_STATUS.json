@@ -37,12 +37,12 @@
   "production_continuation": {
     "date": "2026-10-05",
     "api_source_revision": "1eb5c786a537da42952049a57ec5916ed6df24db",
-    "worker_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
-    "web_static_source_revision": "8d95254d0ce69ea35b5e2de39f36dca9323bb551",
-    "status": "ADS_TCP_ONLY_DEPLOYED_AND_VERIFIED",
-    "eligible_serving_panels_at_capture": 37,
-    "acceptance": "docs/ADS_TCP_ONLY_ACCEPTANCE_20261005.json",
-    "handoff": "docs/ADS_TCP_ONLY_HANDOFF_20261005.md",
-    "note": "Current user instruction supersedes prior broad residential routing. Ads TCP only; no BrowserLeaks exception; DNS and other TCP direct; residential UDP denied; Direct unchanged. No config-generation policy edits in this change."
+    "worker_source_revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
+    "web_static_source_revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
+    "status": "BROWSERLEAKS_TEMPORARY_TCP_DEPLOYED_ONE_PANEL_API_UNCONFIRMED",
+    "eligible_serving_panels_at_capture": 38,
+    "acceptance": "docs/BROWSERLEAKS_TEMPORARY_ACCEPTANCE_20261005.json",
+    "handoff": "docs/BROWSERLEAKS_TEMPORARY_HANDOFF_20261005.md",
+    "note": "Latest instruction adds BrowserLeaks temporarily to Residential TCP. DNS and other TCP remain direct, UDP denied, Direct unchanged. 37 panels runtime-confirmed; one panel route API unconfirmed. Do not hide pending acceptance."
   }
 }

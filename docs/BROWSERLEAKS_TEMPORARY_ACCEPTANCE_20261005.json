@@ -1,0 +1,38 @@
+{
+  "verified_at_utc": "2026-10-05T09:26:18.491714+00:00",
+  "source_revision": "f8b18ef1c3da62b71889d799abed39f7dced10c6",
+  "temporary_exception": "domain:browserleaks.com (apex and subdomains), TCP only",
+  "baseline": "Ads TCP-only routing; Residential UDP blocked; DNS and other TCP direct; Direct unchanged",
+  "expiry": "No automatic removal time requested. Temporary test-domain list is separate from Ads categories.",
+  "tests": {
+    "focused": true,
+    "race": true,
+    "full": true,
+    "clean_detached_full": true,
+    "installed_xray_fault": true,
+    "ui_link": true,
+    "real_reality_browserleaks_http200_residential_egress": true
+  },
+  "production": {
+    "services": {
+      "api": "active",
+      "worker": "active"
+    },
+    "selected_canary": "f537821f-9179-4693-8a81-f522e9190a8c",
+    "canary_route_proofs": 34,
+    "panels_full_matrix_verified": 35,
+    "panels_additional_focused_browserleaks_verified": 2,
+    "panels_browserleaks_runtime_verified": 37,
+    "fleet_panels": 38,
+    "panel_routing_state_at_capture": {
+      "APPLIED": 32,
+      "APPLYING": 1,
+      "FAILED": 5
+    },
+    "unconfirmed_browserleaks_panel": "49ff99be-045e-4eb9-b3e9-a5d2248b99ee",
+    "unconfirmed_reason": "Panel route API timeouts and success=false; no claim of runtime acceptance for this panel. Saved template contains the intended exception.",
+    "profiles_unchanged": true,
+    "execution_gate_unchanged": true
+  },
+  "evidence_directory": "/root/backups/dob-browserleaks-test-20261005"
+}
