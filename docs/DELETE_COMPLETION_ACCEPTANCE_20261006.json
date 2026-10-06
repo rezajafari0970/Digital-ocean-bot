@@ -1,6 +1,6 @@
 {
-  "status": "DEPLOYED_STRANDED_COMPLETION_REPAIRED_BACKFILL_OBSERVING",
-  "updated_at": "2026-10-06T21:04:11.454502+00:00",
+  "status": "DEPLOYED_LOCAL_COMPLETION_FIXED_PROVIDER_CREDIT_BLOCKS_BACKFILL",
+  "updated_at": "2026-10-06T21:06:14.102062+00:00",
   "deployment": "WORKER_ONLY_VERIFIED",
   "baseline_worker": "b5ca9644e71b517e999da426c0b78d713f7a597f",
   "evidence": "/root/backups/dob-hardening-20261006/delete-completion-*",
@@ -91,5 +91,122 @@
   "configuration_comparison": "Exact before/after snapshot equal at21:02:38 UTC; subsequent external account additions must be preserved.",
   "evidence_directory": "/root/backups/dob-delete-completion-20261006",
   "related_gate_evidence": "/root/backups/dob-hardening-20261006",
-  "next": "Observe natural backfill and gradual expiry drain; never reset operations or bypass current account network/provider gates."
+  "next": "Correct provider credit/permission classification with separate create-block semantics; preserve needed deletion cleanup and unknown-outcome reconciliation. Account owner must fund the original Vultr232 before successful replacement can be expected.",
+  "closing": {
+    "at": "2026-10-06T21:06:14.102062+00:00",
+    "tehran": "2026-10-07T00:36:14.102988+03:30",
+    "dashboard": {
+      "digitalocean_accounts": 2,
+      "vultr_accounts": 5,
+      "upcloud_accounts": 1,
+      "enabled_accounts": 8,
+      "healthy_accounts": 4,
+      "broken_accounts": 1,
+      "limited_accounts": 3,
+      "unknown_accounts": 0,
+      "pending_deletion_accounts": 0,
+      "active_servers": 28,
+      "inactive_servers": 5,
+      "broken_servers": 0,
+      "degraded_servers": 0,
+      "pending_deletion_servers": 21,
+      "total_servers": 54,
+      "panel_attention_servers": 0,
+      "active_deployments": 6,
+      "live_workers": 1,
+      "observed_at": "2026-10-06T21:06:13.877922+00:00"
+    },
+    "account_counts": [
+      {
+        "name": "S1",
+        "retiring": 0,
+        "provisioning": 0,
+        "expired_ready": 1,
+        "runtime_status": "PROVIDER_BLOCKED",
+        "unexpired_ready": 2,
+        "desired_server_count": 3
+      },
+      {
+        "name": "Sara vul",
+        "retiring": 1,
+        "provisioning": 1,
+        "expired_ready": 1,
+        "runtime_status": "READY",
+        "unexpired_ready": 13,
+        "desired_server_count": 17
+      },
+      {
+        "name": "Sara vul 2",
+        "retiring": 1,
+        "provisioning": 1,
+        "expired_ready": 3,
+        "runtime_status": "READY",
+        "unexpired_ready": 10,
+        "desired_server_count": 15
+      },
+      {
+        "name": "Sor oc",
+        "retiring": 0,
+        "provisioning": 0,
+        "expired_ready": 0,
+        "runtime_status": "PROVIDER_BLOCKED",
+        "unexpired_ready": 3,
+        "desired_server_count": 3
+      },
+      {
+        "name": "Upcloud 113",
+        "retiring": 0,
+        "provisioning": 0,
+        "expired_ready": 0,
+        "runtime_status": "ISOLATION_WAIT",
+        "unexpired_ready": 0,
+        "desired_server_count": 5
+      },
+      {
+        "name": "Vultr 232",
+        "retiring": 0,
+        "provisioning": 0,
+        "expired_ready": 0,
+        "runtime_status": "READY",
+        "unexpired_ready": 2,
+        "desired_server_count": 15
+      },
+      {
+        "name": "Vultr232",
+        "retiring": 1,
+        "provisioning": 0,
+        "expired_ready": 13,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "unexpired_ready": 0,
+        "desired_server_count": 15
+      },
+      {
+        "name": "Vultr524",
+        "retiring": 0,
+        "provisioning": 1,
+        "expired_ready": 0,
+        "runtime_status": "READY",
+        "unexpired_ready": 0,
+        "desired_server_count": 15
+      }
+    ],
+    "remaining_block": [
+      {
+        "name": "Vultr232",
+        "provider_error_state": "TRANSPORT_ERROR",
+        "provider_error_detail": "provider transport: vultr http 400: Server add failed: Your account does not have any additional credit - please add funds!"
+      }
+    ],
+    "stranded_completed_deletes": [
+      {
+        "count": 0
+      }
+    ]
+  },
+  "backfill_result": "Scheduler resumed. First natural replacement failed; subsequent retry observed. Provider HTTP400 explicitly reports no additional credit. No replacement READY proof for the original Vultr232 account.",
+  "remaining_defects": [
+    "Vultr credit exhaustion incorrectly classified as TRANSPORT_ERROR; not fixed in this atomic-completion patch",
+    "Original account14 expired resources remain queued while replacement cannot be funded",
+    "Native x-ui expiry-triggered Xray restarts remain open"
+  ]
 }

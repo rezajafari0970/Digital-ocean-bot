@@ -87,7 +87,8 @@
     "snapshot": "docs/DELETE_COMPLETION_SOURCE_SNAPSHOT_20261006.json",
     "handoff": "docs/DELETE_COMPLETION_20261006.md",
     "acceptance": "docs/DELETE_COMPLETION_ACCEPTANCE_20261006.json",
-    "status": "DEPLOYED_STRANDED_COMPLETION_REPAIRED",
-    "note": "Frozen source brains/holdouts retained. Current production is split API8e75d91/workerbb74ff2. Native x-ui restart objective remains open."
+    "status": "DEPLOYED_LOCAL_COMPLETION_FIXED_EXTERNAL_CREDIT_BLOCK",
+    "note": "Frozen source brains/holdouts retained. Current production is split API8e75d91/workerbb74ff2. Native x-ui restart objective remains open.",
+    "open_followup": "Original Vultr232 HTTP400 insufficient credit mislabeled TRANSPORT_ERROR; avoid confusing new Vultr 232 account. Native x-ui expiry restarts still open."
   }
 }
