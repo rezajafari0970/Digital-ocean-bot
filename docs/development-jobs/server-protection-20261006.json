@@ -1,0 +1,44 @@
+{
+  "goal": "Implement production Server Protection in Config: durable administrator enable/disable, current/future fleet convergence, lightweight local resource guardian with reversible early admission, bounded recovery, truthful per-node status and rollback. Fix SSH cancellation gaps. Preserve all existing provider, identity, routing and config lifecycles.",
+  "context": "User authorized implementation and Config toggle following researched strategy. HEAD baebc9bd, product baseline d384c8b, migration156. No Asho source is available in this repository; do not claim client failover, per-user admission or measured 50ms as implemented. Build a standalone Go local agent, file-based policy/status, monotonic version, singleton flock; sample resources locally every250ms; SSH only for infrequent reconciliation using pinned keys and bounded cancellation. Agent owns only nftables inet dob_guardian table and own systemd unit/files; never flush other rules, edit Xray JSON, UUIDs, DNS, sysctl or force reboot. Act only on freshly parsed public VLESS TCP inbound ports, excluding SSH22 and panel port; critical pressure rejects NEW TCP SYN only, retains established connections. nft blocked set elements have 15s timeout renewed only under fresh pressure to avoid permanent lockout after crash. Missing capability = explicit unsupported, never success. Hysteresis and bounded restart only genuinely inactive x-ui, not panel-network failure; serialize with existing guardian. Durable enable/disable revision via CAS/idempotency, disable reconciles every ever-assigned living panel; stale replies can't mark current version applied. Defaults off, enable scope fleet or selected for canary; future servers inherit fleet only. UI auto-updates status without jumping and shows desired vs verified states, metrics age, restrictions, disabled/pending. Integrate fresh critical health into Output selection only with clearly defined stale/off behavior. Test policy races, SSH silent handshake and session cancellation, nft namespace packet behavior, agent crash/expiry, duplicate controller/agent fencing, live canary enable-disable restoration. No synthetic overload on live user servers. Full go test and focused race/PostgreSQL/browser. Use disk-backed build temp. No live cloud create/delete, no credential output, no reintroduction FinalMask/P3/P4/P6.",
+  "allowed_paths": [
+    "internal/serverprotection",
+    "cmd/server-guardian",
+    "internal/provisioning/ssh.go",
+    "internal/provisioning/ssh_guard_test.go",
+    "internal/panels/serverguardian/service.go",
+    "cmd/worker/main.go",
+    "internal/adminapi/server_protection.go",
+    "internal/adminapi/server_protection_test.go",
+    "internal/adminapi/server_protection_browser_test.go",
+    "internal/adminapi/server.go",
+    "internal/adminapi/output_snapshot.go",
+    "web/static/server_protection.js",
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/server-protection.cjs",
+    "migrations/000157_server_protection.up.sql",
+    "migrations/000157_server_protection.down.sql",
+    "docs",
+    "tools/server-protection-acceptance.sh",
+    "internal/provisioning/upload.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/server-protection-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "bash tools/server-protection-acceptance.sh -race fault",
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(protection): add reversible fleet resource guardian and Config controls"
+}

@@ -43,7 +43,7 @@ func (s SSHClient) WaitStages(ctx context.Context, t Target, key []byte, observe
 	var last error
 	for {
 		started := time.Now()
-		err := s.probeStages(ctx, t, key, stages)
+		err := s.probeStages(waitCtx, t, key, stages)
 		if observe != nil {
 			observe(err, time.Since(started))
 		}
@@ -77,6 +77,8 @@ func (s SSHClient) probeStages(ctx context.Context, t Target, key []byte, observ
 		return fmt.Errorf("%w: %v", ErrSSHNotReady, err)
 	}
 	defer client.Close()
+	stopCancel := context.AfterFunc(ctx, func() { _ = client.Close() })
+	defer stopCancel()
 	start := time.Now()
 	session, err := client.NewSession()
 	emitStage(observe, StageSession, start, err)
@@ -105,11 +107,13 @@ func (s SSHClient) RunDetailedObserved(ctx context.Context, t Target, key []byte
 		return CommandResult{}, err
 	}
 	defer client.Close()
+	stopCancel := context.AfterFunc(ctx, func() { _ = client.Close() })
+	defer stopCancel()
 	start := time.Now()
 	session, err := client.NewSession()
 	emitStage(observe, StageSession, start, err)
 	if err != nil {
-		return CommandResult{}, fmt.Errorf("ssh session: %w", err)
+		return CommandResult{}, fmt.Errorf("ssh session: %w", errors.Join(err, ctx.Err()))
 	}
 	defer session.Close()
 	var stdout, stderr bytes.Buffer
@@ -148,27 +152,46 @@ func (s SSHClient) connectStages(ctx context.Context, t Target, key []byte, obse
 	if timeout <= 0 {
 		timeout = 8 * time.Second
 	}
+	handshakeCtx, cancelHandshake := context.WithTimeout(ctx, timeout)
+	defer cancelHandshake()
 	hostKeyCallback := func(_ string, _ net.Addr, _ ssh.PublicKey) error { return ErrHostKeyVerifierMissing }
 	if s.HostKeys != nil {
 		hostKeyCallback = func(_ string, _ net.Addr, key ssh.PublicKey) error {
-			return s.HostKeys.VerifyOrPin(ctx, t, ssh.FingerprintSHA256(key))
+			return s.HostKeys.VerifyOrPin(handshakeCtx, t, ssh.FingerprintSHA256(key))
 		}
 	}
 	config := &ssh.ClientConfig{User: t.User, Auth: []ssh.AuthMethod{ssh.PublicKeys(signer)}, HostKeyCallback: hostKeyCallback, Timeout: timeout}
 	addr := net.JoinHostPort(t.Host, fmt.Sprintf("%d", port))
 	dialer := net.Dialer{Timeout: timeout}
 	start := time.Now()
-	conn, err := dialer.DialContext(ctx, "tcp", addr)
+	conn, err := dialer.DialContext(handshakeCtx, "tcp", addr)
 	emitStage(observe, StageTCP, start, err)
 	if err != nil {
 		return nil, fmt.Errorf("ssh tcp dial: %w", err)
 	}
+	// ClientConfig.Timeout only bounds TCP dialing. Bound the complete
+	// handshake too, including a peer that accepts TCP but never speaks SSH.
+	deadline, _ := handshakeCtx.Deadline()
+	if err = conn.SetDeadline(deadline); err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	stopHandshake := context.AfterFunc(handshakeCtx, func() { _ = conn.Close() })
+	defer stopHandshake()
 	start = time.Now()
 	cc, chans, reqs, err := ssh.NewClientConn(conn, addr, config)
 	emitStage(observe, StageHandshake, start, err)
 	if err != nil {
-		conn.Close()
-		return nil, fmt.Errorf("ssh handshake: %w", err)
+		_ = conn.Close()
+		return nil, fmt.Errorf("ssh handshake: %w", errors.Join(err, handshakeCtx.Err()))
+	}
+	if !stopHandshake() || handshakeCtx.Err() != nil {
+		_ = cc.Close()
+		return nil, fmt.Errorf("ssh handshake canceled: %w", handshakeCtx.Err())
+	}
+	if err = conn.SetDeadline(time.Time{}); err != nil {
+		_ = cc.Close()
+		return nil, err
 	}
 	return ssh.NewClient(cc, chans, reqs), nil
 }

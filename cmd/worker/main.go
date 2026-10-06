@@ -21,6 +21,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residential"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/serverprotection"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
 	"os"
@@ -127,8 +128,10 @@ func main() {
 	} else if n > 0 {
 		log.Printf("rolling reboot plan queued=%d mode=dry-run", n)
 	}
-	// Fleet resource guardian starts in observe-only mode. It records x-ui,
-	// memory, disk, package-lock and DB health without mutating server state.
+	// The local protection controller is inert until its Config policy is enabled.
+	go (serverprotection.Controller{DB: application.DB, Secrets: application.Container.Secrets,
+		SSH: provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run(ctx)
+	// Existing periodic diagnostics retain their recovery fallback on unmanaged nodes.
 	go func() {
 		g := serverguardian.Service{
 			DB: application.DB, Secrets: application.Container.Secrets,

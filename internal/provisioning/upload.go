@@ -60,6 +60,8 @@ func (s SSHClient) Upload(ctx context.Context, target Target, privateKey []byte,
 		return err
 	}
 	defer client.Close()
+	stopCancel := context.AfterFunc(ctx, func() { _ = client.Close() })
+	defer stopCancel()
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
