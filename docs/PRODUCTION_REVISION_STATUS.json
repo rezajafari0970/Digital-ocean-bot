@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+  "runtime_source_revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T13:31:27.339128+00:00",
+  "verified_at_utc": "2026-10-06T14:09:56.708654+00:00",
   "binaries": {
     "api": {
-      "revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
-      "sha256": "47513bad7e9d60142689c937eb2b5863586705eba62c5bf10b8d6ddf899f32dd",
+      "revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+      "sha256": "4f1fd76343e7373baa374539b1d938831af3570e5a94e15756921a6ac087e046",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
-      "sha256": "e05eda42ff1753a95ce452e3e5a9dd15b4cdc3fc4975508a761bbfc9fb0572e2",
+      "revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+      "sha256": "e0e05cc29fa09f933507647982f4edbeeb05d0faec3726f9a624cd58bfc77183",
       "vcs_modified": false
     }
   },
@@ -20,9 +20,9 @@
     "worker": "active"
   },
   "migration": "000158_account_rule_application",
-  "acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
+  "acceptance": "docs/DELETE_RESUME_ACCEPTANCE_20261006.json",
   "verified": false,
-  "note": "Optional existing-server rule application deployed; 4 accounts remain OFF, no rollout queued, all37 existing expiry timestamps unchanged. Existing protection, permanent residential publication, account/proxy/config settings preserved. Real cloud replacement with this feature was not triggered for acceptance.",
+  "note": "Planned DELETE recovery is live; two old retirements confirmed deleted, both replacement builds started automatically. First replacement WAITING_INSTALLER with SSH readiness timeout; complete provisioning not verified. Current user settings and strict proxy protections preserved.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "User may choose Apply rule changes to existing servers in Accounts > Edit and Save; default OFF preserves existing lifetime.",
+  "next_product_step": "Investigate/observe replacement installer readiness (SSH_CONNECT_TIMEOUT); do not replay confirmed deletions or bypass network gates.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+  "worker_source_revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
-  "verification_status": "DEPLOYED_ACCOUNT_RULE_APPLICATION_DEFAULT_OFF_VERIFIED",
+  "web_static_source_revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+  "verification_status": "DEPLOYED_PLANNED_DELETE_RECOVERY_TWO_LIVE_DELETIONS_CONFIRMED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+  "previous_runtime_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -110,7 +110,7 @@
   "latest_upcloud_catalog_display_acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
   "static_hashes": {
     "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
-    "app.js": "3fa60cc01a48463bff87c5dcb661fd6e4cb1ac07ba220ffad6d8b44c9ea95db9",
+    "app.js": "94aee3228486328de99cf867546c393901b38844ff2eb1b2741c9f63d4442cf0",
     "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
     "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
     "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
@@ -129,15 +129,16 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Account deletion shared paths, isolated three-provider race/fault/browser acceptance and production runtime/static/config readback. Upcloud 11 already absent before patch; no new real cloud deletion tested. Existing fleet protection was already enabled and remains unchanged.",
+  "verification_scope": "Two stuck retirements provider-confirmed deleted with one attempt each. Both automatic replacement deployments have provider IDs. Installation/readiness remains unverified; first replacement readiness logged SSH_CONNECT_TIMEOUT.",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
     "visible_accounts": 4,
-    "apply_to_existing_on": 0,
+    "apply_to_existing_on": 4,
     "pending_rule_replacements": 0,
-    "existing_expiries_preserved": 37,
     "migration": 158,
-    "at_utc": "2026-10-06T13:31:27.339128+00:00"
-  }
+    "at_utc": "2026-10-06T14:09:56.6968+00:00",
+    "note": "User enabled toggles after initial default-OFF acceptance; do not restore OFF."
+  },
+  "latest_delete_resume_acceptance": "docs/DELETE_RESUME_ACCEPTANCE_20261006.json"
 }

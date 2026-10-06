@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-06T14:09:56.708654+00:00",
+  "runtime_commit": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+  "deployment": {
+    "commit": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+    "at": "2026-10-06T14:03:58.169106+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "4f1fd76343e7373baa374539b1d938831af3570e5a94e15756921a6ac087e046",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "e0e05cc29fa09f933507647982f4edbeeb05d0faec3726f9a624cd58bfc77183",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "94aee3228486328de99cf867546c393901b38844ff2eb1b2741c9f63d4442cf0"
+  },
+  "source_snapshot": "docs/DELETE_RESUME_SOURCE_SNAPSHOT_20261006.json",
+  "tests": {
+    "full_go": "PASS",
+    "fault_injection": "PASS",
+    "focused_race": "PASS",
+    "postgres_12_concurrent_claims": "PASS",
+    "source_review": "PASS"
+  },
+  "settings_preserved": true,
+  "schema_migration": 158,
+  "live": {
+    "at": "2026-10-06T14:09:56.6968+00:00",
+    "proxy": [
+      {
+        "name": "dataimpulse",
+        "status": "healthy",
+        "checked": "2026-10-06T14:09:47.416391+00:00"
+      }
+    ],
+    "account": {
+      "ready": 12,
+      "desired": 15,
+      "managed": 15,
+      "provider_error": null,
+      "provider_state": "ACTIVE",
+      "runtime_status": "READY"
+    },
+    "targets": [
+      {
+        "id": "2ccf555e-753c-401d-b567-b684661ff435",
+        "state": "DELETED",
+        "updated": "2026-10-06T14:04:40.315481+00:00",
+        "backfill": false,
+        "provider_id": "21a67cf3-cb5a-4e8c-a4b5-6b1d7daeefb9",
+        "replacement_deployment": "284fb33c-3961-4cfe-91cd-33e5dc93c3c1"
+      },
+      {
+        "id": "35488714-4981-4aa7-a24b-da4dd3011404",
+        "state": "DELETED",
+        "updated": "2026-10-06T14:08:26.306404+00:00",
+        "backfill": false,
+        "provider_id": "23c0ea89-362d-4c96-a6b0-b17731c9994e",
+        "replacement_deployment": "e335a2f0-9f2a-45b4-84e3-f460c4efd818"
+      }
+    ],
+    "operations": [
+      {
+        "id": "ddd828cc-3275-4eac-8295-c2d21da9e6ee",
+        "state": "succeeded",
+        "attempt": 1,
+        "updated": "2026-10-06T14:04:33.623484+00:00",
+        "error_code": null,
+        "resource_id": "21a67cf3-cb5a-4e8c-a4b5-6b1d7daeefb9"
+      },
+      {
+        "id": "c7d61519-facd-44b6-909e-532cf6ca6b2c",
+        "state": "succeeded",
+        "attempt": 1,
+        "updated": "2026-10-06T14:05:09.403018+00:00",
+        "error_code": null,
+        "resource_id": "23c0ea89-362d-4c96-a6b0-b17731c9994e"
+      }
+    ],
+    "new_deployments": [
+      {
+        "id": "e335a2f0-9f2a-45b4-84e3-f460c4efd818",
+        "state": "PROVISIONING",
+        "created": "2026-10-06T14:08:26.306404+00:00",
+        "droplet": "cd42c0f6-cca2-4567-9c45-26d50fac751e",
+        "updated": "2026-10-06T14:09:20.266183+00:00",
+        "provider_id": "5e1693b0-af19-48e3-b9b7-2a66ee153691"
+      },
+      {
+        "id": "284fb33c-3961-4cfe-91cd-33e5dc93c3c1",
+        "state": "INSTALL_FAILED",
+        "created": "2026-10-06T14:04:40.315481+00:00",
+        "droplet": "3597cde4-2725-4c55-9a70-e3082544aab0",
+        "updated": "2026-10-06T14:09:35.78867+00:00",
+        "provider_id": "9fad3907-5d3f-4f49-a435-882b9132a361"
+      }
+    ]
+  },
+  "scope": "Two stuck retirements provider-confirmed deleted with one attempt each. Both automatic replacement deployments have provider IDs. Installation/readiness remains unverified; first replacement readiness logged SSH_CONNECT_TIMEOUT.",
+  "backup": "/root/backups/dob-delete-resume-20261006",
+  "limitations": [
+    "Replacement installation is not yet complete; this is not full provisioning or fleet-health acceptance.",
+    "Proxy degradation still legitimately blocks account traffic; no direct fallback or health override was introduced."
+  ]
+}
