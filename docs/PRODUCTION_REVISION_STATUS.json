@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
+  "runtime_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T17:41:30.592860+00:00",
+  "verified_at_utc": "2026-10-06T21:57:32.385932+00:00",
   "binaries": {
     "api": {
-      "revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
-      "sha256": "bc91dda9dc27ca06fbee5a7531bfeecaf4da01f633b27c304bd2bb2234117077",
+      "revision": "fc971058a555718cdd178cd226b038c65b79383f",
+      "sha256": "b4b729018d8be70ac8051d96c104966ec6f744078494c4a73e66a3d19efd2090",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "bb74ff2424cf7c6c5c5b7fa1052504a1faacf97a",
-      "sha256": "58cbf37a370deb592ecf3457fe9ab0070b3e1c1a92a2429eb19934d7a5c7848a",
+      "revision": "fc971058a555718cdd178cd226b038c65b79383f",
+      "sha256": "318efe21cbc5a0ebf15a0910cd58e6874dece3e26c2958c291c563c9c58d1678",
       "vcs_modified": false
     }
   },
@@ -19,10 +19,10 @@
     "api": "active",
     "worker": "active"
   },
-  "migration": "000159_verified_protection_receipts",
-  "acceptance": "docs/FLEET_HARDENING_ACCEPTANCE_20261006.json",
+  "migration": "000160_upcloud_trial_compatible",
+  "acceptance": "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
   "verified": false,
-  "note": "API remains8e75d91; worker nowbb74ff2; static/schema159 unchanged. Prior routing fingerprint b5ca964 fleet rollout finalized with scoped turnover proof and open upstream x-ui restarts.",
+  "note": "API/worker fc97105; static1384d16; guardian8e75d91. Two UpCloud trial servers READY with locked firewall and native/listener proofs. Overall full traffic/residential objective remains open.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,15 +39,15 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Vultr232 (no space) HTTP400 insufficient additional credit is mislabeled TRANSPORT_ERROR. Correct billing/create-error classification without blocking legitimate cleanup or resetting unknown outcomes; account funding required for replacement. Separately address native x-ui expiry restarts. Vultr 232 (with space) is a separate newly added account with2 READY; do not conflate it with the original incident.",
+  "next_product_step": "User client traffic test on UpCloud443; current12 residential endpoints incompatible with Trial outbound ports and protected routes blocked. Separate pending native x-ui expiry restarts and original Vultr232 billing-error classification. Keep provider restrictions/settings/lifetimes.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "bb74ff2424cf7c6c5c5b7fa1052504a1faacf97a",
+  "worker_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
-  "verification_status": "DELETE_COMPLETION_FIXED_BACKFILL_BLOCKED_BY_VULTR_CREDIT",
+  "web_static_source_revision": "1384d16474f41c462031bb7a34df0037f7f0b5f5",
+  "verification_status": "TRIAL_TWO_SERVERS_READY_RESIDENTIAL_UNAVAILABLE",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
@@ -110,7 +110,7 @@
   "latest_upcloud_catalog_display_acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
   "static_hashes": {
     "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
-    "app.js": "0fddf67f915da18f26931692af3b1d3b99179881525b12b954b2a4cddf2e293b",
+    "app.js": "e1b1470d25198b878ade351acffec4bcb2bbbe59e89b8eed9b4b1a5e17744c2b",
     "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
     "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
     "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
@@ -243,5 +243,133 @@
     "active_deployments": 6,
     "live_workers": 1,
     "observed_at": "2026-10-06T21:06:13.877922+00:00"
+  },
+  "latest_upcloud_trial_acceptance": "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
+  "upcloud_trial_current": {
+    "created": true,
+    "currently_ready": 2,
+    "panel_verified": true,
+    "panel_port": 3389,
+    "reality_listener_and_tcp443_verified": true,
+    "full_client_traffic_verified": false,
+    "native_route_proofs": {
+      "e8b83162-6edf-419d-8807-9dc69ba9778a": {
+        "passed": 34
+      },
+      "e83bed21-1660-4ab0-a843-914d90f35ef6": {
+        "status": "PENDING_BOTH_OBSERVED_CLASSES",
+        "reason": "Only RESIDENTIAL client observed; DIRECT class not yet generated by existing policy. Settings/rule checks passed before this prerequisite; no route-test pass claimed."
+      }
+    },
+    "residential": "NO_COMPATIBLE_ENDPOINTS_0_OF_12_PROTECTED_ROUTES_BLOCKED",
+    "providers": [
+      {
+        "id": "000d2a9b-ba54-469f-8ee1-54aacb74a0b6",
+        "firewall": "on",
+        "state": "started",
+        "addresses": [
+          {
+            "access": "utility",
+            "address": "10.4.12.65",
+            "family": "IPv4"
+          },
+          {
+            "access": "public",
+            "address": "212.147.228.165",
+            "family": "IPv4",
+            "part_of_plan": "yes"
+          }
+        ],
+        "via_account_proxy": true
+      },
+      {
+        "id": "003cef37-eb2c-453f-a06b-159ba2470eeb",
+        "firewall": "on",
+        "state": "started",
+        "addresses": [
+          {
+            "access": "utility",
+            "address": "10.2.12.108",
+            "family": "IPv4"
+          },
+          {
+            "access": "public",
+            "address": "83.136.250.142",
+            "family": "IPv4",
+            "part_of_plan": "yes"
+          }
+        ],
+        "via_account_proxy": true
+      }
+    ],
+    "listeners": [
+      {
+        "at_utc": "2026-10-06T21:52:43Z",
+        "full_client_traffic_verified": false,
+        "inbounds": [
+          {
+            "port": 443,
+            "enabled": true,
+            "protocol": "vless",
+            "security": "reality"
+          }
+        ],
+        "panel_id": "e8b83162-6edf-419d-8807-9dc69ba9778a",
+        "tcp443": true
+      },
+      {
+        "at_utc": "2026-10-06T21:56:24Z",
+        "full_client_traffic_verified": false,
+        "inbounds": [
+          {
+            "port": 443,
+            "enabled": true,
+            "protocol": "vless",
+            "security": "reality"
+          }
+        ],
+        "panel_id": "e83bed21-1660-4ab0-a843-914d90f35ef6",
+        "tcp443": true
+      }
+    ],
+    "account": [
+      {
+        "name": "Upcloud 113",
+        "enabled": true,
+        "provider_state": "ACTIVE",
+        "runtime_detail": "{\"can_create\":false,\"droplet_limit\":2,\"provider_account_status\":\"active\",\"provider_droplets\":2,\"provider_state\":\"cannot_create\"}",
+        "runtime_status": "PROVIDER_BLOCKED",
+        "upcloud_trial_compatible": true
+      }
+    ],
+    "droplets": [
+      {
+        "id": "47fc5e3c-95c4-44a9-9787-551ce6a66be4",
+        "state": "READY",
+        "expires_at": "2026-10-06T22:48:19.148317+00:00",
+        "provider_resource_id": "000d2a9b-ba54-469f-8ee1-54aacb74a0b6"
+      },
+      {
+        "id": "7083c7ff-509f-4a11-92fc-f34b00bea412",
+        "state": "READY",
+        "expires_at": "2026-10-06T22:53:46.88183+00:00",
+        "provider_resource_id": "003cef37-eb2c-453f-a06b-159ba2470eeb"
+      }
+    ],
+    "panels": [
+      {
+        "id": "e8b83162-6edf-419d-8807-9dc69ba9778a",
+        "port": 3389,
+        "state": "COMPLETED",
+        "enabled": true
+      },
+      {
+        "id": "e83bed21-1660-4ab0-a843-914d90f35ef6",
+        "port": 3389,
+        "state": "COMPLETED",
+        "enabled": true
+      }
+    ],
+    "snapshot_at_utc": "2026-10-06T21:57:32.058491+00:00"
   }
 }
