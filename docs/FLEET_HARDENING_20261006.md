@@ -42,3 +42,7 @@ Full Go suite, focused race + isolated PostgreSQL fault tests, and opt-in guardi
 Build only from a clean release worktree after orchestrator CHECKPOINT. Back up production binaries/static/manifest and database; install API/worker atomically; verify running executable hashes. Roll guardian binaries 1 → 6 → all after receipt/process/listener checks. Do not reset user controls to old snapshots; an independently changed operator setting is not an excuse to overwrite it.
 
 Evidence and rollback: /root/backups/dob-hardening-20261006. Binary rollback restores the previous API/worker/static/guardian artifacts and removes only the temporary rollout override. Keep migration159 and evidence; never restore a stale database over ongoing lifecycle/provider operations.
+
+## Completed deployment evidence
+
+Runtime 8e75d91c0f12573229abbbf51362995a45203f5a deployed with migration159. See ACCEPTANCE JSON for exact timestamps, account population, provider restrictions, rollback attempts and proof boundaries. All binaries were built from the clean release worktree; the subsequent upgrade-script safety fix only affects future operator deployments. Existing operator settings were compared exactly and preserved.

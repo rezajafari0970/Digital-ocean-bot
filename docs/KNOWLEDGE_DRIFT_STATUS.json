@@ -85,7 +85,9 @@
     "source_baseline": "bc3651e",
     "snapshot": "docs/FLEET_HARDENING_SOURCE_SNAPSHOT_20261006.json",
     "handoff": "docs/FLEET_HARDENING_20261006.md",
-    "status": "SOURCE_REVIEW_AND_DEPLOYMENT_PENDING",
-    "note": "Frozen historical brains/holdouts are not regenerated. Use this delta plus live acceptance for current behavior."
+    "status": "DEPLOYED_WITH_SCOPED_ACCEPTANCE",
+    "note": "Frozen historical brains/holdouts are not regenerated. Use this delta plus live acceptance for current behavior.",
+    "source_revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
+    "acceptance": "docs/FLEET_HARDENING_ACCEPTANCE_20261006.json"
   }
 }

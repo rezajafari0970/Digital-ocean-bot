@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "SOURCE_ACCEPTED_DEPLOYMENT_PENDING",
+  "status": "DEPLOYED_WITH_VERIFIED_SCOPE_AND_EXTERNAL_LIMITS",
   "source_baseline": "bc3651ec0d0df9b1a8f47c0f4b256ed69e267898",
   "tests": [
     "full Go",
@@ -8,7 +8,7 @@
     "isolated network/mount nft fault tests"
   ],
   "evidence_directory": "/root/backups/dob-hardening-20261006",
-  "production_changed": false,
+  "production_changed": true,
   "external_dependencies": [
     "client failover source",
     "HA controller/database infrastructure",
@@ -24,5 +24,191 @@
   "test_logs": [
     "test-05.log",
     "orchestrator-test.log"
-  ]
+  ],
+  "runtime_source_revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
+  "at_utc": "2026-10-06T17:41:30.592860+00:00",
+  "migration": 159,
+  "deployment": {
+    "commit": "8e75d91c0f12573229abbbf51362995a45203f5a",
+    "at": "2026-10-06T17:30:44.920002+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "bc91dda9dc27ca06fbee5a7531bfeecaf4da01f633b27c304bd2bb2234117077",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "e0999135b9a688ea3c44084cbf265a32a031f19fe32371c90f31acb14dde4322",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "0fddf67f915da18f26931692af3b1d3b99179881525b12b954b2a4cddf2e293b"
+  },
+  "readyz": {
+    "status": "ready",
+    "checks": [
+      {
+        "name": "database",
+        "ok": true
+      },
+      {
+        "name": "worker_progress",
+        "ok": true
+      }
+    ],
+    "at": "2026-10-06T17:38:05.658935139Z"
+  },
+  "settings_preserved": true,
+  "rollback_directory": "/root/backups/dob-hardening-20261006",
+  "guardian_rollout": {
+    "stages": [
+      1,
+      6,
+      "all"
+    ],
+    "upgrade_override_removed": true,
+    "future_installation_enabled": true,
+    "six_same_xui_pids": true,
+    "inventory_sample_count": 43,
+    "new_binary_confirmed": 42,
+    "ssh_unavailable": [
+      {
+        "host": "199.247.24.101",
+        "lifecycle": "DELETING"
+      }
+    ],
+    "new_node_listener_proof": {
+      "host": "199.247.7.40",
+      "xui": "active",
+      "process_fd_known": true
+    },
+    "note": "A READY node initially lacked eligible VLESS config; subsequent natural convergence verified Xray/ports. One SSH-unavailable node was already DELETING; never claimed upgraded."
+  },
+  "live_snapshot": {
+    "at": "2026-10-06T17:38:05.326454+00:00",
+    "dashboard": {
+      "digitalocean_accounts": 2,
+      "vultr_accounts": 3,
+      "upcloud_accounts": 1,
+      "enabled_accounts": 6,
+      "healthy_accounts": 3,
+      "broken_accounts": 0,
+      "limited_accounts": 3,
+      "unknown_accounts": 0,
+      "pending_deletion_accounts": 0,
+      "active_servers": 18,
+      "inactive_servers": 2,
+      "broken_servers": 0,
+      "degraded_servers": 20,
+      "pending_deletion_servers": 5,
+      "total_servers": 45,
+      "panel_attention_servers": 20,
+      "active_deployments": 4,
+      "live_workers": 1,
+      "observed_at": "2026-10-06T17:38:05.35981+00:00"
+    },
+    "accounts": [
+      {
+        "name": "S1",
+        "ready": 3,
+        "provider": "digitalocean",
+        "retiring": 0,
+        "provisioning": 0,
+        "provider_state": "ACTIVE",
+        "runtime_status": "PROVIDER_BLOCKED",
+        "desired_server_count": 3,
+        "provider_error_state": null
+      },
+      {
+        "name": "Sara vul",
+        "ready": 15,
+        "provider": "vultr",
+        "retiring": 1,
+        "provisioning": 1,
+        "provider_state": "ACTIVE",
+        "runtime_status": "READY",
+        "desired_server_count": 17,
+        "provider_error_state": null
+      },
+      {
+        "name": "Sara vul 2",
+        "ready": 12,
+        "provider": "vultr",
+        "retiring": 1,
+        "provisioning": 1,
+        "provider_state": "ACTIVE",
+        "runtime_status": "READY",
+        "desired_server_count": 15,
+        "provider_error_state": null
+      },
+      {
+        "name": "Sor oc",
+        "ready": 3,
+        "provider": "digitalocean",
+        "retiring": 0,
+        "provisioning": 0,
+        "provider_state": "ACTIVE",
+        "runtime_status": "PROVIDER_BLOCKED",
+        "desired_server_count": 3,
+        "provider_error_state": null
+      },
+      {
+        "name": "Upcloud 113",
+        "ready": 0,
+        "provider": "upcloud",
+        "retiring": 0,
+        "provisioning": 0,
+        "provider_state": "ACTIVE",
+        "runtime_status": "READY",
+        "desired_server_count": 5,
+        "provider_error_state": null
+      },
+      {
+        "name": "Vultr232",
+        "ready": 8,
+        "provider": "vultr",
+        "retiring": 0,
+        "provisioning": 0,
+        "provider_state": "ACTIVE",
+        "runtime_status": "READY",
+        "desired_server_count": 15,
+        "provider_error_state": null
+      }
+    ],
+    "database_connections": [
+      {
+        "count": 1,
+        "state": "active"
+      },
+      {
+        "count": 22,
+        "state": "idle"
+      }
+    ]
+  },
+  "production_incidents": [
+    {
+      "attempt": 1,
+      "cause": "Migration copied from restrictive-umask worktree retained mode600; service could not read it",
+      "result": "Readiness rejected release; automatic binary rollback restored prior runtime; brief management outage. Corrected with explicit install ownership/mode and service-user read preflight."
+    },
+    {
+      "attempt": 2,
+      "cause": "Remote shell PATH omitted /usr/sbin/runuser",
+      "result": "Preflight stopped publication; automatic rollback. Added explicit deployment PATH. Third attempt passed."
+    }
+  ],
+  "limits": [
+    "S1 and Sor oc provider canonical warning; no software bypass",
+    "Upcloud 113 durable TRIAL_FIREWALL create block",
+    "Proxy egress identity/network can still defer admission",
+    "Resource pressure remains dynamic; degraded is not equivalent to stopped Xray",
+    "No client source failover, controller/database HA or public management TLS migration",
+    "No guaranteed50ms end-to-end recovery or seamless session migration"
+  ],
+  "live_boot_proof": "Natural builds admitted after release reached PANEL_COMPLETE and received guardian. Old two SSH failures were retired by previous runtime at17:15/17:17; do not attribute those to new15min budget.",
+  "test_only": [
+    "New initial SSH15min expiration and boot circuit fault paths",
+    "Missing-Xray recovery and nft crash/lease faults"
+  ],
+  "frozen_knowledge_preserved": true
 }

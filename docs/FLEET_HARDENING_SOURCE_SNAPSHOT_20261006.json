@@ -116,6 +116,13 @@
     "tools/fleet-hardening-acceptance.sh": "7cfb030be09845c8d67702c428ea76240a91c52699ee8ed40a7d78c47ddbe5a1",
     "web/static/app.js": "0fddf67f915da18f26931692af3b1d3b99179881525b12b954b2a4cddf2e293b"
   },
-  "deployment": "PENDING",
-  "handoff": "docs/FLEET_HARDENING_20261006.md"
+  "deployment": "DEPLOYED",
+  "handoff": "docs/FLEET_HARDENING_20261006.md",
+  "runtime_source_revision": "8e75d91c0f12573229abbbf51362995a45203f5a",
+  "acceptance": "docs/FLEET_HARDENING_ACCEPTANCE_20261006.json",
+  "post_release_script_delta": {
+    "path": "deploy/upgrade.sh",
+    "sha256": "3e61b460318c8226d5b36a9c1b5785ac8ad6488e3285db2c2330618661770874",
+    "note": "Explicit PATH and service-readable migrations; all builds finish before stopping services. Does not change running Go binaries."
+  }
 }
