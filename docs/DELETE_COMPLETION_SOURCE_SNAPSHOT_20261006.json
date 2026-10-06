@@ -16,5 +16,7 @@
     "observed": "succeeded delete since18:45:43 but local DELETING;14 later expired READY; this proves a durable/local completion gap, not which exact interruption/race occurred"
   },
   "frozen_brains": "retained unchanged",
-  "scope": "worker completion logic; no schema or x-ui configuration change"
+  "scope": "worker completion logic; no schema or x-ui configuration change",
+  "source_revision": "bb74ff2424cf7c6c5c5b7fa1052504a1faacf97a",
+  "deployment_acceptance": "docs/DELETE_COMPLETION_ACCEPTANCE_20261006.json"
 }

@@ -1,7 +1,7 @@
 {
-  "status": "SOURCE_ACCEPTED_LIVE_PENDING",
-  "updated_at": "2026-10-06T21:01:58.658812+00:00",
-  "deployment": "NOT_YET_DEPLOYED",
+  "status": "DEPLOYED_STRANDED_COMPLETION_REPAIRED_BACKFILL_OBSERVING",
+  "updated_at": "2026-10-06T21:04:11.454502+00:00",
+  "deployment": "WORKER_ONLY_VERIFIED",
   "baseline_worker": "b5ca9644e71b517e999da426c0b78d713f7a597f",
   "evidence": "/root/backups/dob-hardening-20261006/delete-completion-*",
   "limitations": [
@@ -19,5 +19,77 @@
     "Local completed receipt discovery for provider LOCKED/BILLING_BLOCKED",
     "Preserve explicit RouteDirect behavior; all current accounts proxy_required"
   ],
-  "initial_fixture_failure": "Test fixture omitted deployment provider_id; corrected fixture and reran. Original log retained."
+  "initial_fixture_failure": "Test fixture omitted deployment provider_id; corrected fixture and reran. Original log retained.",
+  "source_revision": "bb74ff2424cf7c6c5c5b7fa1052504a1faacf97a",
+  "rollout": {
+    "at": "2026-10-06T21:02:19.472794+00:00",
+    "pid": 378878,
+    "worker_sha256": "58cbf37a370deb592ecf3457fe9ab0070b3e1c1a92a2429eb19934d7a5c7848a",
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-06T21:02:19.471224532Z"
+    }
+  },
+  "live_proof": {
+    "at": "2026-10-06T21:02:38.930730+00:00",
+    "target": [
+      {
+        "id": "a7d55aa7-4bb8-4f3b-a1db-6e0341803dd7",
+        "state": "DELETED",
+        "attempt": 1,
+        "operation_state": "succeeded",
+        "backfill_required": true,
+        "operation_updated_at": "2026-10-06T18:45:43.202383+00:00"
+      }
+    ],
+    "orphaned_completed_deletes": [],
+    "queue": [
+      {
+        "state": "EXPIRING",
+        "total": 1,
+        "expired": 1
+      },
+      {
+        "state": "READY",
+        "total": 13,
+        "expired": 13
+      }
+    ],
+    "recent_builds": [
+      {
+        "id": "582b2066-0e64-41fe-9780-992c401809d6",
+        "state": "PANEL_COMPLETE",
+        "lifecycle": "READY",
+        "created_at": "2026-10-06T18:38:07.710633+00:00"
+      },
+      {
+        "id": "8bbfc3cd-beb9-40a5-9eaa-fceb1eb5b3bd",
+        "state": "PANEL_COMPLETE",
+        "lifecycle": "READY",
+        "created_at": "2026-10-06T18:29:52.354244+00:00"
+      },
+      {
+        "id": "e0a6ee23-d489-432d-9f2e-42e5bee709ef",
+        "state": "PANEL_COMPLETE",
+        "lifecycle": "READY",
+        "created_at": "2026-10-06T18:25:29.530156+00:00"
+      }
+    ],
+    "config_preserved": true,
+    "api_sha256": "bc91dda9dc27ca06fbee5a7531bfeecaf4da01f633b27c304bd2bb2234117077"
+  },
+  "configuration_comparison": "Exact before/after snapshot equal at21:02:38 UTC; subsequent external account additions must be preserved.",
+  "evidence_directory": "/root/backups/dob-delete-completion-20261006",
+  "related_gate_evidence": "/root/backups/dob-hardening-20261006",
+  "next": "Observe natural backfill and gradual expiry drain; never reset operations or bypass current account network/provider gates."
 }
