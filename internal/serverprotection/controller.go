@@ -214,6 +214,11 @@ if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libe
 		if !strings.HasPrefix(stage, "/var/tmp/dob-guardian.") || strings.ContainsAny(stage, " \n\r'") {
 			return st, fmt.Errorf("invalid guardian staging path")
 		}
+		defer func() {
+			cleanupCtx, done := context.WithTimeout(context.Background(), 4*time.Second)
+			defer done()
+			_, _ = c.SSH.Run(cleanupCtx, provisioning.Target{AccountID: t.Account, DropletID: t.Droplet, Host: t.Host, User: t.User, KeySecretRef: t.KeyRef}, key, "rm -f -- "+quote(stage))
+		}()
 		target := provisioning.Target{AccountID: t.Account, DropletID: t.Droplet, Host: t.Host, User: t.User, KeySecretRef: t.KeyRef}
 		if err = c.SSH.Upload(ctx, target, key, artifact, stage, 0600); err != nil {
 			return st, err
@@ -221,7 +226,7 @@ if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libe
 	}
 	out, e = c.remote(ctx, t, key, installCommand(t.Policy, stage, hash))
 	if e != nil {
-		return st, e
+		return st, fmt.Errorf("guardian installation: %w: %.300s", e, strings.TrimSpace(out))
 	}
 	if e = json.Unmarshal([]byte(strings.TrimSpace(out)), &st); e != nil {
 		return st, fmt.Errorf("invalid guardian status receipt")
@@ -269,7 +274,8 @@ umask 077
 mkdir -p /etc/dob-server-guardian /var/lib/dob-server-guardian /run/dob-server-guardian /usr/local/libexec
 exec 9>/run/lock/dob-server-guardian-install.lock
 flock -w 5 9
-unit_changed=0\nunit=/etc/systemd/system/dob-server-guardian.service
+unit_changed=0
+unit=/etc/systemd/system/dob-server-guardian.service
 for path in "$unit" "$unit.new" /etc/dob-server-guardian /var/lib/dob-server-guardian /run/dob-server-guardian /usr/local/libexec/dob-server-guardian /usr/local/libexec/dob-server-guardian.new; do
  if [ -L "$path" ]; then printf 'unsafe guardian symlink\n' >&2; exit 1; fi
 done
@@ -282,6 +288,8 @@ else
 fi
 if [ -e "$unit" ] && ! head -n 1 "$unit" | grep -Fxq '# Managed by digital-ocean-bot server-protection v1'; then printf 'foreign guardian unit\n' >&2; exit 1; fi
 `
+	// Fence a delayed installer before replacing an existing binary or unit.
+	script += "if [ -x " + BinaryPath + " ]; then printf %s " + quote(base64.StdEncoding.EncodeToString(raw)) + " | base64 -d | " + BinaryPath + " configure; fi\n"
 	if stage != "" {
 		script += "stage=" + quote(stage) + "\ntrap 'rm -f -- \"$stage\"' EXIT\nprintf '%s  %s\\n' " + quote(hash) + " \"$stage\" | sha256sum -c - >/dev/null\ninstall -m 0755 \"$stage\" /usr/local/libexec/dob-server-guardian.new\nmv /usr/local/libexec/dob-server-guardian.new /usr/local/libexec/dob-server-guardian\n"
 	}
@@ -289,7 +297,7 @@ if [ -e "$unit" ] && ! head -n 1 "$unit" | grep -Fxq '# Managed by digital-ocean
 	script += "printf %s " + quote(base64.StdEncoding.EncodeToString(raw)) + " | base64 -d | " + BinaryPath + " configure\n"
 	if p.Enabled {
 		if stage != "" {
-			script += "systemctl restart " + UnitName + " >/dev/null 2>&1\n"
+			script += "unit_changed=1\n"
 		}
 		script += "if [ \"$unit_changed\" = 1 ]; then systemctl restart " + UnitName + " >/dev/null 2>&1; fi\n"
 		script += "systemctl enable --now " + UnitName + " >/dev/null 2>&1\n" + BinaryPath + " wait-status " + strconv.FormatInt(p.Revision, 10) + "\n"

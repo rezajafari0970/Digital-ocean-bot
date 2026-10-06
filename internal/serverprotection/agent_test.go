@@ -2,8 +2,10 @@ package serverprotection
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -168,5 +170,41 @@ func TestAgentNamespaceLifecycleFault(t *testing.T) {
 	if string(calls) != "start\n" {
 		t.Fatal("disable policy bypassed")
 	}
-	t.Log("AGENT_ACTUAL_START_SINGLETON_CRASH_DETECTION_POLICY_FENCING_DISABLE_CLEANUP_BOUNDED_RECOVERY PASS")
+	// Execute the exact emitted installer, including unit-only update and disable.
+	os.WriteFile(bin+"/systemctl", []byte("#!/bin/sh\necho \"$1\" >> /run/install-calls\n"), 0700)
+	fixture := []byte("#!/bin/sh\ncase \"$1\" in\nconfigure) cat > /etc/dob-server-guardian/policy.json;;\nwait-status|status) cat /etc/dob-server-guardian/policy.json;;\ncleanup) true;;\n*) exit 1;;\nesac\n")
+	stage := t.TempDir() + "/payload"
+	os.WriteFile(stage, fixture, 0600)
+	hash := fmt.Sprintf("%x", sha256.Sum256(fixture))
+	p.Revision++
+	p.Enabled = true
+	install := func(stage string) {
+		t.Helper()
+		out, e := exec.Command("sh", "-c", installCommand(p, stage, hash)).CombinedOutput()
+		if e != nil {
+			t.Fatalf("actual installer %v %s", e, out)
+		}
+	}
+	os.MkdirAll("/etc/systemd/system", 0755)
+	install(stage)
+	unitPath := "/etc/systemd/system/" + UnitName
+	// /etc is private. Normally systemd supplies this directory.
+	raw, e := os.ReadFile(unitPath)
+	if e != nil || string(raw) != Unit {
+		t.Fatal("unit not installed", e)
+	}
+	os.WriteFile(unitPath, append(raw, []byte("\n# prior unit version\n")...), 0600)
+	install("")
+	calls, _ = os.ReadFile("/run/install-calls")
+	if strings.Count(string(calls), "restart\n") != 2 {
+		t.Fatal("unit-only restart or duplicate restart", string(calls))
+	}
+	p.Revision++
+	p.Enabled = false
+	install("")
+	calls, _ = os.ReadFile("/run/install-calls")
+	if !strings.Contains(string(calls), "disable\n") {
+		t.Fatal("disable unit missing")
+	}
+	t.Log("AGENT_ACTUAL_START_SINGLETON_CRASH_DETECTION_POLICY_FENCING_DISABLE_CLEANUP_BOUNDED_RECOVERY_INSTALLER PASS")
 }
