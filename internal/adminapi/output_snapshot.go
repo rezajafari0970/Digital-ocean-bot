@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/lib/pq"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/clienttransport"
 	"io"
 	"net/http"
 	"net/url"
@@ -119,11 +118,6 @@ func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) 
 	s.outputSnapshotClass(w, r, class)
 }
 func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, class string) {
-	format := r.URL.Query().Get("format")
-	if format != "" && format != "xray-json" {
-		http.Error(w, "invalid output format", 400)
-		return
-	}
 	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
 	args := []any{}
@@ -168,8 +162,7 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	if class != "ALL" {
 		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1)`
 	}
-	columns += `,COALESCE(ct.preset,'off')`
-	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id LEFT JOIN output_client_transport_profiles ct ON ct.panel_id=p.id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
+	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
 	rows, e := s.DB.QueryContext(r.Context(), q, args...)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
@@ -177,46 +170,16 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	}
 	defer rows.Close()
 	var out strings.Builder
-	configs := []map[string]any{}
-	omitted := 0
 	for rows.Next() {
-		var u, preset string
+		var u string
 		var ports []byte
-		if rows.Scan(&u, &ports, &preset) != nil {
-			writeJSON(w, 500, errorBody())
-			return
-		}
-		if outputProfilePortAllowed(u, ports) {
-			var err error
-			u, err = clienttransport.Apply(u, preset)
-			if err != nil {
-				// A malformed target must not break other servers in the subscription.
-				omitted++
-				continue
-			}
-			if format == "xray-json" {
-				cfg, err := clienttransport.XrayJSON(u)
-				if err != nil {
-					omitted++
-					continue
-				}
-				configs = append(configs, cfg)
-				continue
-			}
+		if rows.Scan(&u, &ports) == nil && outputProfilePortAllowed(u, ports) {
 			out.WriteString(u)
 			out.WriteByte('\n')
 		}
 	}
 	if rows.Err() != nil {
 		writeJSON(w, 500, errorBody())
-		return
-	}
-	if omitted > 0 {
-		w.Header().Set("X-Output-Omitted-Invalid", strconv.Itoa(omitted))
-	}
-	w.Header().Set("Cache-Control", "no-store")
-	if format == "xray-json" {
-		writeJSON(w, 200, configs)
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")

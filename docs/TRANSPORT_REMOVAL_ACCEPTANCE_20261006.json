@@ -1,0 +1,779 @@
+{
+  "removed_at": "2026-10-06T01:01:02.323242+00:00",
+  "scope": [
+    "Client FinalMask UI and admin endpoints",
+    "URI fm and optional Xray JSON export overlays",
+    "All persisted transport profiles and operation rows",
+    "P3 sing-box record-fragment pilot files and binaries",
+    "P4 Xray MASQUE research/binaries",
+    "P6 Samizdat research/binaries/tests"
+  ],
+  "api_runtime_source": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+  "worker_unchanged": true,
+  "application_source_equals_pre_feature": true,
+  "migration": "000156_remove_output_transport",
+  "profile_tables_absent": true,
+  "persisted_fm_links": 0,
+  "production_output": {
+    "checked_at": "2026-10-06T00:55:21.978Z",
+    "classes": {
+      "DIRECT": {
+        "links": 30,
+        "servers": 30,
+        "finalmask_links": 0
+      },
+      "RESIDENTIAL": {
+        "links": 30,
+        "servers": 30,
+        "finalmask_links": 0
+      }
+    },
+    "retired_route_status": {
+      "GET": 404,
+      "PUT": 405
+    },
+    "shared_direct": {
+      "links": 30,
+      "servers": 30,
+      "finalmask_links": 0
+    },
+    "ui_removed": true
+  },
+  "fleet": {
+    "checked_at": "2026-10-06T00:56:16.29407737Z",
+    "servers": [
+      {
+        "panel": "b4d41e32-3b4b-4a5e-a71d-8bdac77e2ae2",
+        "host": "104.238.159.221",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "73a070c31c5b9b71fbbae5f3c3f3a67451fe2ffc90e5923d9328d992a789e8e9",
+          "template": "9e92759f7e6260093894ddcbb544ae952aa4d4cde14064427b671f152d88b554"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "4537e4513bd7cbf282df3605d42c96618024227f1be963a8407ccc6b80166628"
+        },
+        "errors": []
+      },
+      {
+        "panel": "b73f0e21-f773-44a2-bbfc-bc31816e10f6",
+        "host": "104.238.190.26",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "2f5223ada0529e272df84592a2a1a9c4bcab4987c318aa0496f0b3631ec6c5da",
+          "template": "4ecfbd5dab6b71d771e6251b8abf63c5e7919fecebe3d8fb83fd8cc86024b459"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "1cb521d0e2a5cb8168ab03e23bd50777e04dc176fba43de6dfad75d2e5c9cf3c"
+        },
+        "errors": []
+      },
+      {
+        "panel": "ce6753b4-4953-49bf-bb82-4de2213984da",
+        "host": "136.244.101.182",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "e6be35ce31c1ef82e5cbc67e8c73751a7b868dce3a00af20b2d7aad564040ccf",
+          "template": "d4114140f38d7d6a95c2ed8a00676227c8592ec8114760ff3aabce2993be79f8"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "f556a9162793a4ae14bd5e0c5618d1f5dfe76ed4b51defeeb40b328e64cb41ea"
+        },
+        "errors": []
+      },
+      {
+        "panel": "7018e989-f8f2-4e57-873b-c39436ddd092",
+        "host": "136.244.119.208",
+        "state": "EXPIRING",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "30e002a4b378bad4d662d5bd15a38b631931880ffacc456a219552f5889cf45a",
+          "template": "ea50db7bb21ad045ef98156c27c5d3bf71e6f602207cc94e64ec6b3713817cce"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "db55e187a5241b657e1a7b997e329e527239e87689c4db788440c063ecbae50a"
+        },
+        "errors": []
+      },
+      {
+        "panel": "60dfdb0a-c0b9-47df-acdc-36650f2775ab",
+        "host": "136.244.97.208",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "3ea98eba00b46c7e75a0b9b8d46063f43206aad163f7b27fda1e0ee2b1846e3c",
+          "template": "0d3abe2cef0c12049816575876db5ac6447f9fd0c014dbf9b754c77f954ec174"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "e18dcdcdbff1f83aa2a8b5238836b71e41779a401330ba52479f7b2f43b68fa8"
+        },
+        "errors": []
+      },
+      {
+        "panel": "ef4b1677-9635-46a4-86e5-1bf79e7e0b6e",
+        "host": "139.180.180.206",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "78c7463ad41d70e0c6f3d353e4fe093becaaab2a2e91d1513941d6962b1fe2d6",
+          "template": "188ea59e28760561ea63283cc819229e7f5b95ee59bc6d19d351ed28e81de886"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "3254451b243a806b308a7a2ae0e05b1edb2c678b0b04ec0a6f4cc2701d239e01"
+        },
+        "errors": []
+      },
+      {
+        "panel": "1d44a08f-71cc-4dc3-8899-fa344585371f",
+        "host": "140.82.33.244",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "0fd4fe2574f202ba0669192dd356f78a4f6dde7e0fe13adddae8c1ba20da74b1",
+          "template": "0b7e3915cb4d83d89d3e5c39d8a486ec914217b7a1870d44af1c43fbd273461c"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "a708e9b4ef8d094df8dd45082aebe96a1e743c0372f37d4372d8c907ee34cc83"
+        },
+        "errors": []
+      },
+      {
+        "panel": "e5eaa766-e751-413a-9b4c-549ff3f37565",
+        "host": "140.82.36.21",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "d2647e1681d48a61b7cf0972c2d94745f8141dedfa14a62103cbd3eebb055a89",
+          "template": "06fd3e8ca55b580fc998055bfa0d1d3309cdbe7ab2731115bb62698edb73ca10"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "99bb72185397e53529931b6f5d286c9fa20961542de8631f920bfc73f14eeb7f"
+        },
+        "errors": []
+      },
+      {
+        "panel": "95eeb68e-5e07-4926-ba48-e4be5a7f565e",
+        "host": "140.82.54.194",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "0be100d1f17cce5bf622348b6230f10034ebc8bc8f9afc372f22ead24b4cc25c",
+          "template": "523839230d8a96b96b90dcffc4d9afabd41bba4c9e0a2b3827d826707053643e"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "4eaf08c0e094d8853f05d5867b522a805324a7e3a95d40467b44f4f9c2aaf008"
+        },
+        "errors": []
+      },
+      {
+        "panel": "b6a8eb9b-95a0-472a-970d-8ea074807715",
+        "host": "159.223.186.163",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "1913765fe7c13dc3266ad62892539a6059cd1a226b7fbcb0d8f732bbb55389b1",
+          "template": "6bb825f4413eb63dbd5c8465b28880ee1e90a41197075479ca869efe1d65c6ce"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "738976504da9882ded0401b5e6cf264fe5dd7e60b34d8311e49584c2d91937ad"
+        },
+        "errors": []
+      },
+      {
+        "panel": "0686428f-dc6f-4d04-8ea6-1d24e8372e1a",
+        "host": "159.223.89.65",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "ce38671ab02042c46abf69864cc945e4d799d03028835457a48429f7a03f4f54",
+          "template": "25bef31617dc98ce9a2fc9215495b0ba5b761017332fb6371009319d60043d41"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "c512f4a90a9d4bd26a251265c2a94389fe30b8eb6f60cb8c7b0b05f7129fe7bc"
+        },
+        "errors": []
+      },
+      {
+        "panel": "6d9adfd7-8d9b-4988-9adf-bbe9d7766cdb",
+        "host": "188.166.225.28",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "0698b719ee4229381027bce7088afddf1ad90b1561d8a2d27d2f90b30c40a7e3",
+          "template": "58d1632a70239495a5d1f3bd177ea8da555d99231e0505bc567c7f4b7c9a5cf0"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "d15e7b08b224237bb5fb7c2639033f3abedbef6eaf207dfc7ee1194af13137ce"
+        },
+        "errors": []
+      },
+      {
+        "panel": "0ae83b7e-97a6-4a22-abbf-715619b65a6d",
+        "host": "192.248.165.92",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "ae98a423f4c372640f8cccb5799ac1117b4c6905e92436b1d67783f94f994368",
+          "template": "f0b8a52df3dac5ca43547c61b246736d293166a6469454b8d0fa4c9b0bec6e32"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "1b94b338d3ef15c48d64d75686e9da4b96b223f32b7f907c62769902c4731240"
+        },
+        "errors": []
+      },
+      {
+        "panel": "f537821f-9179-4693-8a81-f522e9190a8c",
+        "host": "192.248.176.5",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "e2c6f70c98f2d387afe732b9ae27af93158d3abcbd530b14c5db53d0d5409caf",
+          "template": "874c93093e621c6fe943070e8cd886a9ac7fa6f18829123a37f1b3d0062d40c3"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "bcdca361e37e857c0f57ad1d4cbdbc1578ff15bb68e45b296b792aba45770720"
+        },
+        "errors": []
+      },
+      {
+        "panel": "cf65a8f5-fce6-4b62-a5aa-51fccd518c35",
+        "host": "199.247.10.47",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "12b6a361c6321bba0ca175e9843e3cd4cdf7e251ac8aa95c10660ff3952630b5",
+          "template": "cfaf2203e52ceceebc2c20d660127b71e29402b0611aefdb6c886e7ba3da9b2f"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "25c7df8a63ce6227edb4595c6fb07d089a819bb40186dbee5c96aa252875f158"
+        },
+        "errors": []
+      },
+      {
+        "panel": "34237657-8dda-4292-8035-595574c6271c",
+        "host": "199.247.24.101",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "2372d7eb54dc4997980f4d4a32b2ab128ec73b6f70b2c52ddd3fe162440bcbea",
+          "template": "2c217e153c51dd14957a6135dc6f49b88c230ba664ffbb69e43103dfd29e3184"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "8f16d0905f7daebb0091b4c7ddf188816405692132e1e3100b6612be887db06c"
+        },
+        "errors": []
+      },
+      {
+        "panel": "75b7926d-a572-4bdd-b69c-e69f676e93cd",
+        "host": "206.189.80.201",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "59e1c3671bc75de202e729948588293717a40f2114acfc14a3709f02ee4f9db5",
+          "template": "0f3c52d5f5eec04761260b5553ea8c4d7bf67ef726f8b07df7015e40182917b7"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "dde2e8257a9b442a5cb31571ac5eacf60d3dee4725bdb43b7f494605ec09b7cc"
+        },
+        "errors": []
+      },
+      {
+        "panel": "810ac959-2fb9-44a9-b5f1-f832cd7416c4",
+        "host": "209.222.30.208",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "a504128bb7879e086d4425e3e0b06b0ec5c62691256dd05c7c105131c2533db3",
+          "template": "fdee11b03e8459b0e44a0e268ce011936fd780e82ebb3017d19ec2c95714767f"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "63b69802a43173833e5e4c9e5baaf95283aaba53f0960a132ed8568f141af5d4"
+        },
+        "errors": []
+      },
+      {
+        "panel": "af1473f3-e749-46ef-bfe6-c7fe2c025235",
+        "host": "209.250.226.191",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "34b92ac6eddb27c437cd2b12252c8c6c776722fcc456ff70db11c3381bd2019e",
+          "template": "5bee59afe1cd510dae1fb8c3ab12f30b8bb4dd1275357a1e04213ccf98cb478c"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "972dd4f4f33d08ca1fe3e4dce1e05c3f2567b62024fbbb5a414433f36b859268"
+        },
+        "errors": []
+      },
+      {
+        "panel": "b84ce5dd-7d2b-4ca5-bf18-5521a36556fd",
+        "host": "209.250.229.61",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "18acfb3260850580275876b012073f329b13736674bb0d274564e2e5e4a26090",
+          "template": "95f462a2670e8bf7dbbf5ef3ee74b2d1c9ff197875612598fe8a64f66005a88b"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "2c153ad7e131a2a0db59ec9b34e1901388ac38a313db74aa98cff4c57e729046"
+        },
+        "errors": []
+      },
+      {
+        "panel": "c26c25c6-1f95-45e3-a90a-963daedb0491",
+        "host": "217.69.7.180",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "46c916afecffd565f40c457691782e82fe99a04d5c009fe39fca57d933ed2b84",
+          "template": "c6a81953111e61499275aacdfc813d6a66cadf4654882ddd92d815c420a6727f"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "5241651c8957e507f311bee7a865dc89b61021032930d1b97138d6894f99d484"
+        },
+        "errors": []
+      },
+      {
+        "panel": "eb465345-e8eb-4dec-ab1a-1892651832ab",
+        "host": "45.32.146.113",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "4161d8131e1f88880aa78b3f1af1137db2d9bc4cead660e3b3b53dca43fcfe49",
+          "template": "444019befe1be7b0833bd0a4498b83fcbda56feeb78be2cf6d2a9e971f74083d"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "1c912110fa457a3d61cf8df9fc3b7eaf9f33703bfca7b3829a6b6abb67dc89e2"
+        },
+        "errors": []
+      },
+      {
+        "panel": "4805209d-2da4-404c-a152-951e650aadae",
+        "host": "45.32.235.214",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "bbe659ac6bc70b756c99ea447e57f1efe98d472f006304c80452938d28b07c77",
+          "template": "29d617c4495eff7ec9ac80ffff12bcd24c2158a0a7d3e3b211bce8802e1046a3"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "d88c1f540de17d33fd1f1d4306f117cc992783383890a9e3f0b2e7323bdcdb7c"
+        },
+        "errors": []
+      },
+      {
+        "panel": "49990dee-fb9e-4a49-9949-ab8645819c90",
+        "host": "45.77.136.173",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "31426afa6fd93767f3ca26d5a9fcf3b4b9676bb577321a9fea4cbb213604501c",
+          "template": "258cf0a46eaccab74465b832550e3161a20d4774e3c5bd153946f90f6b1589d3"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "509c7ffeeedaeeef8a04fe9e592c05ea4d7e354e0b1cfc895234f5d786e589d5"
+        },
+        "errors": []
+      },
+      {
+        "panel": "a962430f-5760-4df2-9cb0-1c0cc2c3fd5d",
+        "host": "70.34.209.142",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "8f79f81216b013c27555846d59aaf3cec2f646d1beecb4d9e3886c9847a41cd6",
+          "template": "e15c75ff71747e98b1474e0b3d976d04742a3a89a3411308c0529d8dac8c49db"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "3bfab8a73d78211db5b79e77e956874bc86bfe251ba5ec39fbc262b3bf0c95bd"
+        },
+        "errors": []
+      },
+      {
+        "panel": "e52db3fa-718b-40fc-934b-5d5aeab2250b",
+        "host": "78.141.217.130",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "f6357d3cc9c32da5aa335d1a3fb2b5793fb089709e79ddaacfab91d863b0cc21",
+          "template": "69206c80c643a5f34cb3781f1393aef5eebc2574b87ec518f47ca97e86668b54"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "09b21e57f1f1428d0370487d15612b704f0007bdaf7e0462ce95e5fb0e96fc63"
+        },
+        "errors": []
+      },
+      {
+        "panel": "081825c2-ebcc-4cc8-8b8a-cc1424eb8c69",
+        "host": "78.141.233.123",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "f3ceda3ed25a606db120d8851c43d08d97eaf0cf6d4e9bdbeb56699d7451ad4e",
+          "template": "f9753f573ba2d52f7398b3d9b459370eb174035b3302ad3cda0e36e502f22047"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "1cfe941da7a0152952a9cb4137d7b2867e8c9ea442da9ab448a5eb5086e5e467"
+        },
+        "errors": []
+      },
+      {
+        "panel": "28d13f2c-4d0e-4f1d-96fd-1e7baa12549d",
+        "host": "78.141.243.11",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "048c79fd0d6b8f7ed67b3704a0baf4ca53d18a023cf5f0a366aa04022bf20b54",
+          "template": "580ab426dfe1bc0b0267d7993c08cb50401d347279814fae3544012880d66251"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "f0ad3e7d3f7ff753eee2b35b54fa4c99b227bf87923b04b45f20d32892c6f08b"
+        },
+        "errors": []
+      },
+      {
+        "panel": "353261ee-dd37-4e6a-9791-40297ac3e66a",
+        "host": "95.179.140.167",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "2f53c895fd637cce09a2b929aa7038a26020d9a60d8c63d3ad6f2db2f6a72fcf",
+          "template": "1c16bb6b5158b6b401f7c182bfa36ff7390a1d5700b2c25446db7e616c8d0bd3"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "fbdeeb7addc7a9f7277a22adc064658cb75a59fe3a25c7afd47b0e7304db302b"
+        },
+        "errors": []
+      },
+      {
+        "panel": "7ac789a2-183b-4e3c-a4a2-392509565867",
+        "host": "95.179.162.52",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "487331246518d4f02d7215881de06c39427ab5a76d38443ed3b20e7334aff2b9",
+          "template": "82f2b5b70d6cd7ffff05805aa3712c3c80638f69a80d80d4d6f5848670739007"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "f138b86883d82870a6176446778397d166303e2b53a5a9fef9fa3289a87d77c0"
+        },
+        "errors": []
+      },
+      {
+        "panel": "ac938439-3bc8-4346-b605-86a52b6f5dce",
+        "host": "95.179.183.24",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "25fdd1cf1615bc0bc1b49333532b7a502b4b01e15c4f97233c3c717b688b71bd",
+          "template": "956065342de568092d84cfaf088599527288864c885daed1d06a2e83583c2086"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "91a6eb07ea3d085e0970843870a3a5edf32f05683a7f99b7393af4ccb2e084aa"
+        },
+        "errors": []
+      },
+      {
+        "panel": "8dd3a394-da72-4bc6-893f-1f8482b35b7d",
+        "host": "95.179.237.157",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "e9928cbe873573171cc6e56fe970c6255d899c8f692eb5c11b5189419d398b5a",
+          "template": "265de588c322f764b585e388886bd15150d581f5c2bacafcb5ffe41f44c5fa4e"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "ca455f29bc80e0d059c54430b71b2c81072bf3c1d70992e8c150203e1f4d60fc"
+        },
+        "errors": []
+      },
+      {
+        "panel": "3e0c9336-81c2-4fa8-bc58-a5e96cd4efcc",
+        "host": "95.179.237.208",
+        "state": "READY",
+        "api_ok": true,
+        "ssh_ok": true,
+        "config_hits": [],
+        "hashes": {
+          "runtime": "c89019851b87bfcaf98d181602a0f760f2f89a9b71b50760954831d0238fc88c",
+          "template": "615d1b921b6bfa8a8d6a7bc42911373d28ac3279da93fe32a32145a561d64c2f"
+        },
+        "ssh": {
+          "paths": [],
+          "processes": [],
+          "units": [],
+          "x_ui_state": "active",
+          "xray_config_sha256": "845fd62b9b8724facfa496e41f7dd11ad38cbbba49d8e410e1dcd59f37cb1eb2"
+        },
+        "errors": []
+      },
+      {
+        "panel": "6acba466-f43e-4e15-a45c-db2b616f001c",
+        "host": "95.179.245.113",
+        "state": "READY",
+        "api_ok": false,
+        "ssh_ok": false,
+        "config_hits": [],
+        "hashes": {},
+        "ssh": null,
+        "errors": [
+          "SANAEI_READ_FAILED_AFTER_RETRY",
+          "PINNED_SSH_READ_FAILED"
+        ]
+      }
+    ]
+  },
+  "target_209_222_30_208_config_unchanged": true,
+  "unrelated_account_proxy_routing_publication_profiles_unchanged": true,
+  "validation": [
+    "Migration integration: no feature tables, populated migration155, and repeated removal",
+    "go test -race -count=1 -p 2 ./internal/adminapi ./internal/migrate",
+    "node --check web/static/app.js",
+    "Production readyz and existing APIs",
+    "Both current output classes and shared Direct subscription",
+    "Retired GET route404 and PUT405",
+    "33 direct authenticated Sanaei and pinned SSH audits"
+  ],
+  "ai_os_plan_response": "resp_0040ce2780df73f2006ac445ff171887d185ae7bd871a7ab90",
+  "artifact_removal": {
+    "removed_artifact_directories": [
+      "/root/backups/dob-client-finalmask-20261006",
+      "/root/backups/dob-finalmask-209-222-30-208-20261005",
+      "/root/backups/dob-transport-pilots-20261006"
+    ],
+    "removed_worktrees": [
+      "dob-client-finalmask-20261006",
+      "dob-client-finalmask-freeze-20261006",
+      "dob-transport-pilots-20261006"
+    ],
+    "removed_local_branches": [
+      "feat/client-finalmask-20261006",
+      "feat/transport-pilots-20261006"
+    ]
+  },
+  "retained_history": "Historical migration155 checksum files, Git commits and audit_events are retained as non-executable history; migration156 removes all operational feature tables.",
+  "peer_audit": {
+    "host": "95.179.245.113",
+    "via": "209.222.30.208",
+    "tcp_checks": [
+      {
+        "port": 22,
+        "reachable": true
+      },
+      {
+        "port": 2053,
+        "reachable": true
+      },
+      {
+        "port": 443,
+        "reachable": false,
+        "error": "TimeoutError"
+      }
+    ],
+    "outcome": "target pinned SSH failed; no complete authenticated runtime/file audit",
+    "changes_on_target": false
+  },
+  "fleet_summary": {
+    "total": 34,
+    "fully_verified": 33,
+    "unverified": [
+      "95.179.245.113"
+    ],
+    "experiment_hits_on_verified": 0
+  }
+}

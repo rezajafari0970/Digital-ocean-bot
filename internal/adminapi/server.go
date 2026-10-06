@@ -99,8 +99,6 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/config-capacity/cleanup/{id}/cancel", s.require(s.cancelCleanupJob, true))
 	m.HandleFunc("POST /api/v1/config-capacity/cleanup/{id}/resume", s.require(s.resumeCleanupJob, true))
 	m.HandleFunc("GET /api/v1/config-capacity/cleanup/{id}", s.require(s.cleanupJobStatus, false))
-	m.HandleFunc("GET /api/v1/output/client-transport", s.require(s.outputClientTransportStatus, false))
-	m.HandleFunc("PUT /api/v1/output/client-transport/{id}", s.require(s.putOutputClientTransport, true))
 	m.HandleFunc("GET /api/v1/output", s.require(s.outputConfigs, false))
 	m.HandleFunc("POST /api/v1/output/share", s.require(s.createOutputShare, true))
 	m.HandleFunc("GET /share/output/{token}", s.sharedOutput)

@@ -1,0 +1,30 @@
+{
+  "goal": "Completely remove FinalMask and all later P3/P4/P6 transport experiments from project, control server and fleet as explicitly requested; preserve every pre-FinalMask capability.",
+  "context": "User canceled experimentation. Runtime API42732ed with two profile rows, one active. Restore verified pristine d384c8b API and pre-FinalMask static; preserve identical worker. Revert feature and evidence commits without history rewrite. Retain immutable migration155 checksum history and add156 dropping both feature tables, no automatic restoration of deleted feature. Remove UI/routes/output overlays/JSON extension/tests/research/pilot source/worktrees/downloads/configs/binaries. Read all managed panels runtime/template via Sanaei API; inspect experiment processes/files via pinned SSH only if needed. No cloud resource creation/deletion. Save redacted deletion verification; no credentials in output. Preserve accounts, client identities, residential global publication, routes, performance and Reality. Run focused race tests, migration integration and output readback; report unreachable servers honestly. Existing phone imports require refresh.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/clienttransport",
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/client-finalmask.cjs",
+    "migrations",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-remove-finalmask-20261006/test.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "revert(output): remove FinalMask and retire transport experiments"
+}
