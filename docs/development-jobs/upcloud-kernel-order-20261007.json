@@ -1,0 +1,33 @@
+{
+  "goal": "Repair kernel guard drop-in ordering against UpCloud vendor GRUB_CMDLINE_LINUX override while retaining all boot verification and immutable deployment snapshots.",
+  "context": "Live trial mode source1384d16 successfully created two IPv4 UpCloud servers with locked provider firewall on. First bootstrap fails generated GRUB entries do not confirm kho=off. Read-only audit proves /etc/default/grub.d/upcloud_cmdline.cfg lexically follows 99-dob-kho.cfg and reassigns CMDLINE. Fix retains known legacy99 dropin and adds explicit owned zz-dob-kho.cfg with idempotent off append to avoid duplicate flags; scan other unmanaged KHO settings, refuse unknown files/symlinks. New helper accepts previously prepared known legacy state only when GRUB valid. Test real shell glob source order, failed legacy PREPARING recovery, unknown latefile, duplicate/conflict, preserve unrelated args, old pinned check compatibility. Existing immutable snapshots stay unchanged. Bounded operator repair may run new guard for exact newly created trial server(s), then verify original pinned precheck succeeds and allow normal workflow resume; never falsify completion or reset attempts manually. Use existing domain retry if exhausted. No uncontrolled reboot. No proxy/desired/provider firewall/settings changes. Main implementer only with server OpenAI plan/review.",
+  "allowed_paths": [
+    "internal/provisioning/kernel_memory_guard.go",
+    "internal/provisioning/kernel_memory_guard_test.go",
+    "docs/development-jobs/upcloud-kernel-order-20261007.json",
+    "docs/UPCLOUD_TRIAL_HANDOFF_20261007.md",
+    "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
+    "docs/UPCLOUD_TRIAL_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "python3 -c \"from pathlib import Path; b=Path('/root/backups/dob-upcloud-trial-20261007'); assert all((b/n).read_text().strip()=='0' for n in ['kernel-focused.exit','kernel-full.exit'])\" # regression fault tests"
+    ],
+    "verify": [
+      "git diff --check",
+      "python3 -c \"import json; from pathlib import Path; p=Path('/root/backups/dob-upcloud-trial-20261007/kernel-review.json'); assert json.loads(json.loads(p.read_text())['text'])['verdict']=='PASS'\""
+    ]
+  },
+  "commit_message": "fix(provisioning): preserve kernel guard after vendor GRUB defaults"
+}

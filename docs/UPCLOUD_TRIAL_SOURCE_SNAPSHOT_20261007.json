@@ -32,5 +32,12 @@
     "internal/panels/residentialsync/trial_postgres_test.go": "fdf347a3196e02ce9ed44085f3f6788bb52c3d7af7c13496563f34a155b3b096",
     "internal/panels/globalreality/network_access.go": "7ecc4e325e4b31d241ba26f4eb3c5caa7ebae12bd3343710ccd3f80b1bffb4dc",
     "cmd/upcloud-trial-enable/main.go": "5a086e72c29132c5ac2262ab3986f7a9a6bd349529704d36fc06a48c0abe98d3"
+  },
+  "kernel_order_followup": {
+    "base_revision": "1384d16474f41c462031bb7a34df0037f7f0b5f5",
+    "files": {
+      "internal/provisioning/kernel_memory_guard.go": "1e37715f81fb5bd58f810b1d471ce182761154cbf00d118a0cec07668b2d28ee",
+      "internal/provisioning/kernel_memory_guard_test.go": "51aec011e9337d4155c95b67ba4a5811a3c01c5c55b5f86a5b0e8f238af77690"
+    }
   }
 }

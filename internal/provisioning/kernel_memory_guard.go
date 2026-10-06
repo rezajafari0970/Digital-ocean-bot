@@ -17,6 +17,7 @@ func kernelMemoryGuard(mode string) string {
 const kernelMemoryGuardPython = `import fcntl,json,os,pathlib,re,shlex,stat,subprocess,tempfile
 ROOT=pathlib.Path('/var/lib/digital-ocean-bot-kernel-memory')
 DROP=pathlib.Path('/etc/default/grub.d/99-dob-kho.cfg')
+LATE=DROP.with_name('zz-dob-kho.cfg')
 GRUB=pathlib.Path('/boot/grub/grub.cfg')
 BOOT=pathlib.Path('/proc/sys/kernel/random/boot_id')
 CMDLINE=pathlib.Path('/proc/cmdline')
@@ -25,6 +26,9 @@ KERNEL=pathlib.Path('/proc/sys/kernel/osrelease')
 CONFIG=pathlib.Path('/boot/config-'+KERNEL.read_text().strip())
 OWNER_UID=0
 EXPECTED='# Managed by Digital-ocean-bot: Ubuntu phantom CMA / KHO mitigation.\nGRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} kho=off"\n'
+# Keep the original artifact for pinned legacy prechecks. The late,
+# idempotent append survives provider defaults without duplicating the option.
+LATE_EXPECTED='# Managed by Digital-ocean-bot: preserve KHO guard after provider defaults.\ncase " ${GRUB_CMDLINE_LINUX} " in\n *" kho=off "*) ;;\n *) GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} kho=off" ;;\nesac\n'
 def require(ok,message):
  if not ok: raise RuntimeError(message)
 def safe(path,directory=False):
@@ -62,6 +66,8 @@ def prepared():
  safe(state);v=json.loads(state.read_text())
  require(v.get('version')==1 and v.get('phase') in ['PREPARING','PREPARED'],'unknown mitigation journal')
  safe(DROP)
+ if not LATE.exists() and not LATE.is_symlink():return False
+ safe(LATE);require(LATE.read_text()==LATE_EXPECTED,'unmanaged late KHO drop-in refused')
  return v['phase']=='PREPARED' and DROP.read_text()==EXPECTED and valid_grub()
 mem=memory();kernel=KERNEL.read_text().strip();boot=BOOT.read_text().strip()
 cfg=CONFIG.read_text() if CONFIG.is_file() else ''
@@ -102,7 +108,12 @@ require(not options or off,'explicit KHO enablement requires operator review')
 require(supported or ROOT.exists(),'kernel capability not confirmed')
 safe(DROP.parent,True);safe(GRUB)
 for candidate in [DROP.parent.parent/'grub',*DROP.parent.glob('*.cfg')]:
- if candidate==DROP or not candidate.is_file():continue
+ if candidate in [DROP,LATE]:continue
+ if not candidate.exists() and not candidate.is_symlink():continue
+ safe(candidate)
+ # A later override can erase the mitigation again; require explicit review.
+ if candidate.parent==DROP.parent and candidate.name>LATE.name:
+  require(not re.search(r'^\s*(?:export\s+)?GRUB_CMDLINE_LINUX(?:_DEFAULT)?=',candidate.read_text(),re.M),'later boot command-line override requires review')
  for line in candidate.read_text().splitlines():
   if line.lstrip().startswith('#'):continue
   values=re.findall(r'kho=([a-zA-Z0-9]+)',line)
@@ -110,6 +121,8 @@ for candidate in [DROP.parent.parent/'grub',*DROP.parent.glob('*.cfg')]:
 # Never overwrite an operator-owned drop-in, even after an interrupted run.
 if DROP.exists() or DROP.is_symlink():
  safe(DROP);require(DROP.read_text()==EXPECTED,'unmanaged KHO drop-in refused')
+if LATE.exists() or LATE.is_symlink():
+ safe(LATE);require(LATE.read_text()==LATE_EXPECTED,'unmanaged late KHO drop-in refused')
 if ROOT.exists() or ROOT.is_symlink():safe(ROOT,True)
 else:ROOT.mkdir(mode=0o700)
 safe(ROOT,True)
@@ -128,12 +141,13 @@ with os.fdopen(fd,'a+') as f:
  if not backup.exists():atomic(backup,GRUB.read_text())
  else:safe(backup)
  if not DROP.exists():atomic(DROP,EXPECTED,0o644)
+ if not LATE.exists():atomic(LATE,LATE_EXPECTED,0o644)
  if not valid_grub():
   v['phase']='PREPARING';atomic(state,json.dumps(v)+'\n')
   completed=subprocess.run(['update-grub'],capture_output=True,text=True,timeout=90)
   # Read-back resolves a lost/nonzero response; never reboot on unchecked output.
   require(valid_grub(),'generated GRUB entries do not confirm kho=off')
-  require(unrelated_entries()==v['boot_entries_before'],'unrelated boot entry changed during generation')
+ require(unrelated_entries()==v['boot_entries_before'],'unrelated boot entry changed during generation')
  v['phase']='PREPARED';v['boot_id_prepared']=boot
  atomic(state,json.dumps(v)+'\n')
  require(prepared(),'mitigation read-back failed')

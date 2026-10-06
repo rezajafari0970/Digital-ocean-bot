@@ -189,3 +189,127 @@ func TestBootstrapKernelGuardBeforeInstallerAndReadiness(t *testing.T) {
 		t.Fatal("missing activation readiness")
 	}
 }
+
+func TestKernelMemoryGuardVendorOrdering(t *testing.T) {
+	for _, vendor := range []bool{false, true} {
+		for _, interrupted := range []bool{false, true} {
+			name := "standard"
+			if vendor {
+				name = "upcloud"
+			}
+			t.Run(name+strconv.FormatBool(interrupted), func(t *testing.T) {
+				f := newKernelGuardFixture(t)
+				base := filepath.Join(f.dir, "grub")
+				f.write(t, base, "GRUB_CMDLINE_LINUX=\"console=ttyS1\"\n", 0600)
+				if vendor {
+					f.write(t, filepath.Join(filepath.Dir(f.drop), "upcloud_cmdline.cfg"), "GRUB_CMDLINE_LINUX=\"console=ttyS1\"\n", 0600)
+				}
+				generator := "#!/bin/sh\nset -e\necho called >> '" + f.log + "'\n. '" + base + "'\nfor x in '" + filepath.Dir(f.drop) + "'/*.cfg; do [ ! -e \"$x\" ] || . \"$x\"; done\nprintf '%s\\n' \"linux /boot/vmlinuz-test root=UUID=keep ro $GRUB_CMDLINE_LINUX\" > '" + f.grub + "'\n"
+				f.write(t, f.update, generator, 0700)
+				if interrupted {
+					if err := os.Mkdir(f.root, 0700); err != nil {
+						t.Fatal(err)
+					}
+					f.write(t, f.drop, "# Managed by Digital-ocean-bot: Ubuntu phantom CMA / KHO mitigation.\nGRUB_CMDLINE_LINUX=\"${GRUB_CMDLINE_LINUX} kho=off\"\n", 0644)
+					state := map[string]any{"version": 1, "phase": "PREPARING", "boot_id_before": "boot-before", "kernel_before": "7.0.0-test", "initially_disabled": false, "boot_entries_before": [][]string{{"linux", "/boot/vmlinuz-test", "root=UUID=keep", "ro", "console=ttyS1"}}}
+					b, _ := json.Marshal(state)
+					f.write(t, filepath.Join(f.root, "state.json"), string(b), 0600)
+					f.write(t, filepath.Join(f.root, "grub.before"), "linux /boot/vmlinuz-test root=UUID=keep ro console=ttyS1\n", 0600)
+					if out, err := exec.Command(f.update).CombinedOutput(); err != nil {
+						t.Fatal(string(out), err)
+					}
+					generated, _ := os.ReadFile(f.grub)
+					if vendor && strings.Contains(string(generated), "kho=") {
+						t.Fatal("fixture did not reproduce vendor override")
+					}
+				}
+				if out, err := f.run(t, "prepare"); err != nil {
+					t.Fatal(out, err)
+				}
+				if out, err := f.run(t, "check"); err != nil {
+					t.Fatal(out, err)
+				}
+				// Re-run the actual shell source sequence, proving durability beyond one generation.
+				for i := 0; i < 2; i++ {
+					if out, err := exec.Command(f.update).CombinedOutput(); err != nil {
+						t.Fatal(string(out), err)
+					}
+					generated, _ := os.ReadFile(f.grub)
+					if strings.TrimSpace(string(generated)) != "linux /boot/vmlinuz-test root=UUID=keep ro console=ttyS1 kho=off" {
+						t.Fatal("duplicate or unrelated options", string(generated))
+					}
+					if out, err := f.run(t, "prepare"); err != nil {
+						t.Fatal(out, err)
+					}
+				}
+				raw, _ := os.ReadFile(filepath.Join(f.root, "state.json"))
+				var v map[string]any
+				if json.Unmarshal(raw, &v) != nil || v["phase"] != "PREPARED" || v["boot_id_before"] != "boot-before" {
+					t.Fatal("journal replaced", string(raw))
+				}
+			})
+		}
+	}
+}
+
+func TestKernelMemoryGuardRefusesLateOwnershipAndConflicts(t *testing.T) {
+	for _, kind := range []string{"late_file", "late_symlink", "vendor_symlink", "later_override", "duplicate", "conflicting", "changed_unrelated"} {
+		t.Run(kind, func(t *testing.T) {
+			f := newKernelGuardFixture(t)
+			late := filepath.Join(filepath.Dir(f.drop), "zz-dob-kho.cfg")
+			switch kind {
+			case "late_file":
+				f.write(t, late, "# operator owned\n", 0600)
+			case "late_symlink":
+				if err := os.Symlink(f.cmdline, late); err != nil {
+					t.Fatal(err)
+				}
+			case "vendor_symlink":
+				if err := os.Symlink(f.cmdline, filepath.Join(filepath.Dir(f.drop), "upcloud_cmdline.cfg")); err != nil {
+					t.Fatal(err)
+				}
+			case "later_override":
+				f.write(t, filepath.Join(filepath.Dir(f.drop), "zzz-vendor.cfg"), "GRUB_CMDLINE_LINUX=\"console=ttyS1\"\n", 0600)
+			case "duplicate", "conflicting":
+				args := "kho=off kho=off"
+				if kind == "conflicting" {
+					args = "kho=on kho=off"
+				}
+				f.write(t, f.update, "#!/bin/sh\nprintf '%s\\n' 'linux /boot/vmlinuz-test root=UUID=keep ro console=ttyS1 "+args+"' > '"+f.grub+"'\n", 0700)
+			case "changed_unrelated":
+				f.generator(t, true, false)
+				if _, err := f.run(t, "prepare"); err == nil {
+					t.Fatal("failed generation accepted")
+				}
+				f.write(t, f.grub, "linux /boot/vmlinuz-test root=UUID=changed ro console=ttyS1 kho=off\n", 0600)
+			}
+			if out, err := f.run(t, "prepare"); err == nil {
+				t.Fatal("unsafe state accepted", out)
+			}
+			state, _ := os.ReadFile(filepath.Join(f.root, "state.json"))
+			if strings.Contains(string(state), `"phase": "PREPARED"`) {
+				t.Fatal("false completion", string(state))
+			}
+		})
+	}
+}
+
+func TestKernelMemoryGuardMissingLateArtifactRepairsLegacyState(t *testing.T) {
+	f := newKernelGuardFixture(t)
+	if out, err := f.run(t, "prepare"); err != nil {
+		t.Fatal(out, err)
+	}
+	late := filepath.Join(filepath.Dir(f.drop), "zz-dob-kho.cfg")
+	if err := os.Remove(late); err != nil {
+		t.Fatal(err)
+	}
+	if out, err := f.run(t, "check"); err == nil {
+		t.Fatal("legacy artifact alone passed new readiness", out)
+	}
+	if out, err := f.run(t, "prepare"); err != nil {
+		t.Fatal(out, err)
+	}
+	if out, err := f.run(t, "check"); err != nil {
+		t.Fatal("late artifact not restored", out, err)
+	}
+}
