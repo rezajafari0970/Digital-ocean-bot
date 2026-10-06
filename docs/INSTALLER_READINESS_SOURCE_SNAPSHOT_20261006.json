@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-06T15:01:56.216138+00:00",
+  "base": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
+  "files": {
+    "internal/provisioning/readiness.go": "e4b9fb386ba1482c22c4438f0491a839087152e0d4b5a8f0de9c5fdc1b15b6d0",
+    "internal/provisioning/readiness_disconnect_test.go": "dd4f00055c74362801b47abb42eb08628500e578b2db504aecc568c3549585c1",
+    "tools/installer-readiness-acceptance.sh": "52062ee715e50e22370ae627bcc62e5d8f4c93b7f36a9495a94627aeaec64a0b"
+  },
+  "full_race_fault_tests": "PASS",
+  "live_deployment": "pending",
+  "source_review": {
+    "verdict": "PASS",
+    "response_id": "resp_060a8569f95e87d8006ac50dc7ae2887d183655a6dac6a1585"
+  }
+}

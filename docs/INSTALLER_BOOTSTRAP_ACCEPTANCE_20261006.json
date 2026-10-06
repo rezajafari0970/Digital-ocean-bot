@@ -1,0 +1,519 @@
+{
+  "runtime_revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
+  "at_utc": "2026-10-06T15:01:56.176927+00:00",
+  "deploy": {
+    "commit": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
+    "at": "2026-10-06T14:44:20.944128+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "b5d71beb100823bd00feb3267bed942bc616af473c7f334fbda06ff62176539d",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "d52d0f3c9e92aa21b8eb77b6919679c338af4de79d07f929d79b6729fd8d72ff",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "94aee3228486328de99cf867546c393901b38844ff2eb1b2741c9f63d4442cf0"
+  },
+  "schema": 158,
+  "full_go_tests": "PASS",
+  "race_fault_isolated_postgres_tests": "PASS",
+  "source_review": "PASS",
+  "config_preservation": "PASS",
+  "live_targets": [
+    {
+      "id": "457c49b0-8246-4256-99a0-2685b23f9928",
+      "account": "Sor oc",
+      "host": "46.101.148.252",
+      "state": "PANEL_COMPLETE",
+      "created_at": "2026-10-06T14:39:36.134805+00:00",
+      "updated_at": "2026-10-06T14:51:25.962703+00:00",
+      "last_error": null,
+      "resource_state": "READY",
+      "ready_at": "2026-10-06T14:51:25.959629+00:00",
+      "provision_state": "COMPLETED",
+      "current_step": "done",
+      "provision_error": null,
+      "steps": [
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-verify-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:49:16.128249+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-health-service-x-ui",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:49:16.350551+00:00"
+        },
+        {
+          "step": "bootstrap-host-firewall-off",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:47.162181+00:00"
+        },
+        {
+          "step": "bootstrap-verify",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:47.481712+00:00"
+        },
+        {
+          "step": "ssh",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:40:56.238561+00:00"
+        },
+        {
+          "step": "readiness",
+          "attempts": 2,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:33.83407+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-artifact-sanaei-installer-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:48:15.934563+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:49:15.896682+00:00"
+        },
+        {
+          "step": "bootstrap-memory-headroom",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:34.334427+00:00"
+        },
+        {
+          "step": "bootstrap-package-index",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:43.618084+00:00"
+        },
+        {
+          "step": "bootstrap-cloud-init",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:34.678841+00:00"
+        },
+        {
+          "step": "bootstrap-package-state",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:35.098503+00:00"
+        },
+        {
+          "step": "bootstrap-prerequisites",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:43.959511+00:00"
+        },
+        {
+          "step": "bootstrap-kernel-memory-guard",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:46.431068+00:00"
+        }
+      ],
+      "readiness": {
+        "status": "READY",
+        "os_version": "26.04",
+        "reboot_required": false,
+        "created_at": "2026-10-06T14:48:14.31258+00:00"
+      },
+      "repairs": [
+        {
+          "at": "2026-10-06T14:44:20.683096+00:00",
+          "message": "BOOTSTRAP_CHECKPOINT_REPAIRED:readiness"
+        },
+        {
+          "at": "2026-10-06T14:46:48.179067+00:00",
+          "message": "BOOTSTRAP_REPAIR_REBOOT;boot_id=96b0e4b3-1a0c-46d1-a070-803719b1bf8d;BOOTSTRAP_REPAIR_PENDING;previous_scheduled_at=2026-10-06 14:41:54.856075+00"
+        }
+      ],
+      "reboots": [
+        {
+          "state": "SCHEDULED",
+          "at": "2026-10-06T14:46:48.179067+00:00",
+          "marker": "BOOTSTRAP_REPAIR_REBOOT;boot_id=96b0e4b3-1a0c-46d1-a070-803719b1bf8d;BOOTSTRAP_REPAIR_PENDING;previous_scheduled_at=2026-10-06 14:41:54.856075+00"
+        }
+      ]
+    },
+    {
+      "id": "b6378913-ed69-45d0-ae26-279f7be0ed41",
+      "account": "Sara vul 2",
+      "host": "192.248.172.175",
+      "state": "PANEL_COMPLETE",
+      "created_at": "2026-10-06T14:41:18.026424+00:00",
+      "updated_at": "2026-10-06T14:51:31.062705+00:00",
+      "last_error": null,
+      "resource_state": "READY",
+      "ready_at": "2026-10-06T14:51:31.056032+00:00",
+      "provision_state": "COMPLETED",
+      "current_step": "done",
+      "provision_error": null,
+      "steps": [
+        {
+          "step": "bootstrap-prerequisites",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:46:12.775714+00:00"
+        },
+        {
+          "step": "bootstrap-kernel-memory-guard",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:46:15.975681+00:00"
+        },
+        {
+          "step": "bootstrap-host-firewall-off",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:46:17.831622+00:00"
+        },
+        {
+          "step": "bootstrap-verify",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:46:18.327701+00:00"
+        },
+        {
+          "step": "bootstrap-memory-headroom",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:55.470177+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-artifact-sanaei-installer-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:49:24.623792+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:50:08.933962+00:00"
+        },
+        {
+          "step": "ssh",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:43:02.057097+00:00"
+        },
+        {
+          "step": "readiness",
+          "attempts": 2,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:54.623193+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-verify-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:50:09.365708+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-health-service-x-ui",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:50:09.797572+00:00"
+        },
+        {
+          "step": "bootstrap-cloud-init",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:56.298252+00:00"
+        },
+        {
+          "step": "bootstrap-package-state",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:57.121344+00:00"
+        },
+        {
+          "step": "bootstrap-package-index",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:46:11.936944+00:00"
+        }
+      ],
+      "readiness": {
+        "status": "READY",
+        "os_version": "26.04",
+        "reboot_required": false,
+        "created_at": "2026-10-06T14:49:23.335346+00:00"
+      },
+      "repairs": [
+        {
+          "at": "2026-10-06T14:44:20.767754+00:00",
+          "message": "BOOTSTRAP_CHECKPOINT_REPAIRED:readiness"
+        },
+        {
+          "at": "2026-10-06T14:46:55.047189+00:00",
+          "message": "BOOTSTRAP_REPAIR_REBOOT;boot_id=e47b0d73-71f5-489a-8272-aae89f669441;BOOTSTRAP_REPAIR_PENDING;previous_scheduled_at=2026-10-06 14:43:32.024984+00"
+        }
+      ],
+      "reboots": [
+        {
+          "state": "SCHEDULED",
+          "at": "2026-10-06T14:46:55.047189+00:00",
+          "marker": "BOOTSTRAP_REPAIR_REBOOT;boot_id=e47b0d73-71f5-489a-8272-aae89f669441;BOOTSTRAP_REPAIR_PENDING;previous_scheduled_at=2026-10-06 14:43:32.024984+00"
+        }
+      ]
+    },
+    {
+      "id": "8a995b59-a167-436e-81be-2ca19ed6017a",
+      "account": "Sara vul 2",
+      "host": "45.63.97.160",
+      "state": "PANEL_COMPLETE",
+      "created_at": "2026-10-06T14:43:20.832727+00:00",
+      "updated_at": "2026-10-06T14:51:22.586954+00:00",
+      "last_error": null,
+      "resource_state": "READY",
+      "ready_at": "2026-10-06T14:51:22.583289+00:00",
+      "provision_state": "COMPLETED",
+      "current_step": "done",
+      "provision_error": null,
+      "steps": [
+        {
+          "step": "ssh",
+          "attempts": 2,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:02.343689+00:00"
+        },
+        {
+          "step": "readiness",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:09.786753+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-artifact-sanaei-installer-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:47:32.781296+00:00"
+        },
+        {
+          "step": "bootstrap-memory-headroom",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:10.636254+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:48:09.859259+00:00"
+        },
+        {
+          "step": "bootstrap-cloud-init",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:11.327258+00:00"
+        },
+        {
+          "step": "bootstrap-package-state",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:12.029687+00:00"
+        },
+        {
+          "step": "bootstrap-package-index",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:23.47193+00:00"
+        },
+        {
+          "step": "bootstrap-prerequisites",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:24.134025+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-sanaei-verify-v3.8.5",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:48:10.220664+00:00"
+        },
+        {
+          "step": "bootstrap-kernel-memory-guard",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:27.044058+00:00"
+        },
+        {
+          "step": "installer-g1-sanaei-xui-v3-health-service-x-ui",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:48:10.616485+00:00"
+        },
+        {
+          "step": "bootstrap-host-firewall-off",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:28.851951+00:00"
+        },
+        {
+          "step": "bootstrap-verify",
+          "attempts": 1,
+          "terminal": false,
+          "error": null,
+          "next_retry": null,
+          "finished": "2026-10-06T14:45:29.285736+00:00"
+        }
+      ],
+      "readiness": {
+        "status": "READY",
+        "os_version": "26.04",
+        "reboot_required": false,
+        "created_at": "2026-10-06T14:47:31.371009+00:00"
+      },
+      "repairs": null,
+      "reboots": [
+        {
+          "state": "SCHEDULED",
+          "at": "2026-10-06T14:46:24.826833+00:00",
+          "marker": "INSTALLER_REBOOT;boot_id=eeb98a7a-42c4-4f29-9dc3-750a33ca0fc0"
+        }
+      ]
+    }
+  ],
+  "all_observed_builds": [
+    {
+      "id": "4a8e4ea2-a549-4f36-85a8-108ec87516cf",
+      "account": "S1",
+      "host": null,
+      "state": "WAITING_RESOURCE",
+      "resource_state": null
+    },
+    {
+      "id": "5ad55938-b2c1-46d5-b8e8-17d49caeb1ce",
+      "account": "S1",
+      "host": "168.144.102.191",
+      "state": "INSTALL_FAILED",
+      "resource_state": "DELETED"
+    },
+    {
+      "id": "d805d1f6-9ce8-4a39-a987-5e734c4ad5ad",
+      "account": "Sara vul 2",
+      "host": "95.179.194.137",
+      "state": "PANEL_COMPLETE",
+      "resource_state": "READY"
+    },
+    {
+      "id": "8a995b59-a167-436e-81be-2ca19ed6017a",
+      "account": "Sara vul 2",
+      "host": "45.63.97.160",
+      "state": "PANEL_COMPLETE",
+      "resource_state": "READY"
+    },
+    {
+      "id": "b6378913-ed69-45d0-ae26-279f7be0ed41",
+      "account": "Sara vul 2",
+      "host": "192.248.172.175",
+      "state": "PANEL_COMPLETE",
+      "resource_state": "READY"
+    },
+    {
+      "id": "457c49b0-8246-4256-99a0-2685b23f9928",
+      "account": "Sor oc",
+      "host": "46.101.148.252",
+      "state": "PANEL_COMPLETE",
+      "resource_state": "READY"
+    }
+  ],
+  "kernel_and_service_proof": "DEPLOYMENT 457c49b0-8246-4256-99a0-2685b23f9928 HOST 46.101.148.252 STATE PANEL_COMPLETE\nTue Oct  6 14:58:06 UTC 2026\nactive\nState  Recv-Q Send-Q Local Address:Port Peer Address:Port\nLISTEN 0      4096               *:2053            *:*   \nLISTEN 0      4096               *:443             *:*   \n{\"kernel\": \"7.0.0-31-generic\", \"boot_id\": \"5b6dcc0f-5516-4857-b66f-5d84cbc7649b\", \"affected\": true, \"kho_disabled\": true, \"cma_total_kib\": 0, \"cma_free_kib\": 0, \"prepared\": true}\n{\"active\": true, \"boot_id\": \"5b6dcc0f-5516-4857-b66f-5d84cbc7649b\", \"boot_changed\": true, \"kernel\": \"7.0.0-31-generic\", \"cma_total_kib\": 0, \"cma_free_kib\": 0}\nno\n\nSSH error: <nil>\nDEPLOYMENT 8a995b59-a167-436e-81be-2ca19ed6017a HOST 45.63.97.160 STATE PANEL_COMPLETE\nTue Oct  6 02:58:06 PM UTC 2026\nactive\nState  Recv-Q Send-Q Local Address:Port Peer Address:Port\nLISTEN 0      4096               *:2053            *:*   \nLISTEN 0      4096               *:443             *:*   \n{\"kernel\": \"7.0.0-38-generic\", \"boot_id\": \"dad33978-8875-415e-bcf5-021ab980a5a0\", \"affected\": true, \"kho_disabled\": true, \"cma_total_kib\": 0, \"cma_free_kib\": 0, \"prepared\": true}\n{\"active\": true, \"boot_id\": \"dad33978-8875-415e-bcf5-021ab980a5a0\", \"boot_changed\": true, \"kernel\": \"7.0.0-38-generic\", \"cma_total_kib\": 0, \"cma_free_kib\": 0}\nno\n\nSSH error: <nil>\nDEPLOYMENT b6378913-ed69-45d0-ae26-279f7be0ed41 HOST 192.248.172.175 STATE PANEL_COMPLETE\nTue Oct  6 02:58:06 PM UTC 2026\nactive\nState  Recv-Q Send-Q Local Address:Port Peer Address:Port\nLISTEN 0      4096               *:443             *:*   \nLISTEN 0      4096               *:2053            *:*   \n{\"kernel\": \"7.0.0-38-generic\", \"boot_id\": \"c3fca63a-0b0c-460f-afbb-5ec6dbb93b79\", \"affected\": true, \"kho_disabled\": true, \"cma_total_kib\": 0, \"cma_free_kib\": 0, \"prepared\": true}\n{\"active\": true, \"boot_id\": \"c3fca63a-0b0c-460f-afbb-5ec6dbb93b79\", \"boot_changed\": true, \"kernel\": \"7.0.0-38-generic\", \"cma_total_kib\": 0, \"cma_free_kib\": 0}\nno\n\nSSH error: <nil>\n",
+  "automatic_recovery": true,
+  "manual_sql_state_override": false,
+  "backup_rollback": "/root/backups/dob-installer-bootstrap-20261006",
+  "scope": "Two pre-release premature WAITING_INSTALLER deployments recovered end-to-end, plus one interrupted pre-release build progressed under corrected ordering. Natural builds only; no synthetic cloud mutations. This is not blanket fleet/provider availability certification."
+}

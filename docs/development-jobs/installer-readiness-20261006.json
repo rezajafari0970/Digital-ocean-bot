@@ -1,0 +1,27 @@
+{
+  "goal": "Treat transient SSH disconnects during installer readiness as retryable, including a disconnect after successful early probes; prevent false permanent failure and deletion during an intentional reboot.",
+  "context": "Live observation after bootstrap fix7a19f0b: S1 deployment5ad55938 had reboot scheduled14:51:15Z, OS readiness failed SSH_DISCONNECTED14:51:18Z, classified nonretryable by ReadinessCollector explicit whitelist and finalized/deleted. DiagnosticRetryable already regards SSH_DISCONNECTED transient. Add shared narrow SSH retry classification; preserve permanent host-key/config errors, real root/package/disk errors, original bounded attempt/backoff. For mid-collection transient loss stop further probes/remediation and return BLOCKED retryable instead of interpreting blank root/package results as permanent. No false READY. Tests simulate connection reset/broken pipe/EOF and recovery after reboot, mid-probe loss, permanent key failure, no unsafe automatic remediation; full suite/race and prior installer bootstrap isolated DB regressions. No cloud resources created for tests. Fix applies existing workflow future replacements naturally. API plan/review followed by atomic deployment with rollback; settings unchanged.",
+  "allowed_paths": [
+    "internal/provisioning/readiness.go",
+    "internal/provisioning/readiness_disconnect_test.go",
+    "tools/installer-readiness-acceptance.sh",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/installer-readiness-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(provisioning): retry SSH loss during reboot readiness"
+}

@@ -1,0 +1,9 @@
+# Readiness transport loss during reboot
+
+Live follow-up to bootstrap repair: S1 deployment5ad55938-b2c1-46d5-b8e8-17d49caeb1ce scheduled an intentional reboot at14:51:15.861653Z; at14:51:18.069990Z its OS readiness probe returned SSH_DISCONNECTED. The readiness-specific whitelist omitted that transient code even though shared diagnostics considered it retryable. The installer finalized this as a permanent failure and normal lifecycle cleanup deleted the VM. No attempt is made to revive that deleted identity.
+
+The explicit boot/SSH retry classification now includes SSH_DISCONNECTED and is shared across readiness probes. Any known transport loss halts the collection immediately, records BLOCKED with a retryable transport issue, and preserves the original attempt/backoff budgets. Missing observations do not become root/disk/package failures or a positive reboot-required flag. Host-key errors stay permanent and stop further probes. Transport loss during idempotent package remediation/recheck is handled consistently. Actual semantic readiness failures and host identity verification remain enforced.
+
+Tests cover reset-by-peer, broken pipe and unexpected EOF at OS/architecture/root/package/reboot probes; immediate stop with no extra probes/remediation; healthy next collection; missing reboot observation; host-key failure; package remediation/recheck failure. Full Go plus focused race and prior isolated PostgreSQL bootstrap/concurrency regressions pass. Final source review PASS. Plain and wrapped EOF handling is scoped to readiness; global mutation-outcome diagnostics were not weakened.
+
+No schema or operator configuration changes. Atomic backup/release/rollback: /root/backups/dob-installer-readiness-20261006. Prior corrected bootstrap deployment remains part of this release. Final acceptance records the real replacement and readiness state; fixture results are not represented as live provider proof.
