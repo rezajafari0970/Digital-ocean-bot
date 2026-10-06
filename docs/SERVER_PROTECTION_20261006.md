@@ -37,3 +37,9 @@ Review corrections cover table-handle fencing, deployment eligibility withdrawal
 ## Explicit boundaries
 
 This release implements server resource admission and bounded recovery. It does not guarantee uninterrupted hardware/provider/network availability, prevent overload caused solely by existing flows, migrate live TCP sessions, provide app-side automatic failover, or enforce per-user admission. Asho app source is not in this repository. Network rates and swap use are observed; no unmeasured bandwidth ceiling, forced reboot, swap tuning or kernel OOM exemption is applied.
+
+## Deployment result
+
+Runtime source 1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd is installed in API/worker; migration 157 is applied. The actual systemd canary at 209.222.30.208 passed enable and disable, with x-ui PID 5551, zero x-ui restarts, and the same Xray configuration hash throughout. The guardian sample used approximately 7 MiB of memory. Canary testing exposed and resolved installer newline handling and nft 1.0.2 JSON-comment compatibility; executable installer and legacy-owner tests now cover them.
+
+Final control is OFF, fleet scope, revision 4. The previously assigned canary has verified DISABLED at its current node generation. Enabling “All current and future servers” requests fleet inheritance; no fleet-wide activation or new cloud resource creation was performed. Detailed evidence is in SERVER_PROTECTION_ACCEPTANCE_20261006.json. The local rollback script at /root/backups/dob-server-protection-20261006/rollback.sh refuses binary rollback until the policy is OFF and living assigned nodes have verified cleanup.

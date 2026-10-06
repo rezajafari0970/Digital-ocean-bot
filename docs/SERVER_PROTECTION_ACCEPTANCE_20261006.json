@@ -1,0 +1,75 @@
+{
+  "verified_at_utc": "2026-10-06T02:46:52.284227+00:00",
+  "runtime_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
+  "migration": "000157_server_protection",
+  "result": "DEPLOYED_CANARY_ENABLE_DISABLE_VERIFIED_DEFAULT_OFF",
+  "control": {
+    "singleton": true,
+    "enabled": false,
+    "scope": "fleet",
+    "panel_ids": [],
+    "revision": 4,
+    "updated_at": "2026-10-06T02:43:05.034674+00:00"
+  },
+  "canary": {
+    "host": "209.222.30.208",
+    "panel_id": "810ac959-2fb9-44a9-b5f1-f832cd7416c4",
+    "enable_state": "APPLIED",
+    "local_state": "WARM",
+    "disable_state": "DISABLED",
+    "final_node_state": "DISABLED",
+    "xui_pid_before": 5551,
+    "xui_pid_after": 5551,
+    "xui_restart_count": 0,
+    "xray_config_sha256_unchanged": "63b69802a43173833e5e4c9e5baaf95283aaba53f0960a132ed8568f141af5d4",
+    "guardian_memory_sample_bytes": 7323648,
+    "nft_actuation_sample_ms": 28.323,
+    "sample_age_ms": 360,
+    "nft_version": "1.0.2",
+    "kernel": "5.15.0-198-generic"
+  },
+  "checks": {
+    "full_go_suite": true,
+    "race_core": true,
+    "ssh_faults": true,
+    "postgres_revision_concurrency_rollback": true,
+    "browser_mobile_desktop_lost_response_two_admin_conflict": true,
+    "nft_established_flow_preservation": true,
+    "nft_lease_renewal_expiry": true,
+    "nft_foreign_table_replacement_fencing": true,
+    "agent_singleton_actual_crash_detection": true,
+    "bounded_recovery_and_installer_execution": true,
+    "actual_systemd_canary": true,
+    "unrelated_configuration_snapshot_preserved": true,
+    "live_static_hashes_and_auth_guard": true,
+    "legacy_nft_ownership_compatibility": true
+  },
+  "followup_fixes": [
+    {
+      "commit": "61bcc5a9c62be5cc0c223a40c67c1908260d1ea5",
+      "reason": "Canary exposed a literal newline in the installer. Exact installer execution, staging cleanup and an early stale-policy fence added."
+    },
+    {
+      "commit": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
+      "reason": "Ubuntu nft 1.0.2 omits JSON table comments. Text ownership fallback verifies the same table handle; foreign ownership remains rejected."
+    }
+  ],
+  "log_sha256": {
+    "protection-final-all.log": "7fa51547045fdde740138061ba5c80a79d062557c4224421e82b99542b018bb1",
+    "protection-final-core.log": "e0ea705998c55ce78a9554ffe59b4d4e84bce2b27b563b9e810ff5e6f6645cd3",
+    "protection-browser-final.log": "1a9e44c2ce8edc7d04e54849c64b69ddc01c2d5637252621cf0348be5eb504d6",
+    "protection-installer-corrected.log": "45eeb3fc846fbc30befe78e698cba0335592fb07bb27ef91e6015da933d4c738"
+  },
+  "api_plan_id": "resp_01817ae5f2b7c45e006ac44f4f838887d1a2e0d3ac9ac986fc",
+  "api_review_id": "resp_04a05ba263285624006ac45b44b13487d196d68c82f45bb67c",
+  "evidence_directory": "/root/backups/dob-server-protection-20261006",
+  "binary_rollback_script": "/root/backups/dob-server-protection-20261006/rollback.sh",
+  "limitations": [
+    "Only one production canary was enabled; fleet is currently OFF.",
+    "New eligible servers inherit only after enabling fleet scope.",
+    "No app-side failover, live TCP migration or per-user admission is implemented.",
+    "250 ms sampling is not a 50 ms detection or availability guarantee.",
+    "Existing-flow overload, hardware/provider failures and a hung process that remains active are not fully remediated by this layer.",
+    "The pre-existing unverified host 95.179.245.113 was not enabled or repaired by this canary."
+  ]
+}
