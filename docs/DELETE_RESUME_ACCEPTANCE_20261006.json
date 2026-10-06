@@ -98,10 +98,17 @@
       }
     ]
   },
-  "scope": "Two stuck retirements provider-confirmed deleted with one attempt each. Both automatic replacement deployments have provider IDs. Installation/readiness remains unverified; first replacement readiness logged SSH_CONNECT_TIMEOUT.",
+  "scope": "Two old retirements provider-confirmed deleted, one DELETE attempt each; both automatic replacements received provider IDs. First replacement INSTALL_FAILED: installer reboot remediation exhausted. Second was provisioning at final lifecycle snapshot; installation readiness is not fully verified.",
   "backup": "/root/backups/dob-delete-resume-20261006",
   "limitations": [
     "Replacement installation is not yet complete; this is not full provisioning or fleet-health acceptance.",
     "Proxy degradation still legitimately blocks account traffic; no direct fallback or health override was introduced."
-  ]
+  ],
+  "remaining_installer_issue": {
+    "deployment": "284fb33c-3961-4cfe-91cd-33e5dc93c3c1",
+    "state": "INSTALL_FAILED",
+    "error": "installer reboot remediation exhausted",
+    "observed_at_utc": "2026-10-06T14:09:35.795422Z",
+    "latest_readiness": "Ubuntu 26.04; SSH and package/DNS/HTTPS checks passed; reboot_required=yes remained after remediation. Earlier SSH_CONNECT_TIMEOUT was transient, not the final failure reason."
+  }
 }
