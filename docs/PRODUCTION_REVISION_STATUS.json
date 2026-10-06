@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
+  "runtime_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T02:46:52.284227+00:00",
+  "verified_at_utc": "2026-10-06T08:58:35.367234+00:00",
   "binaries": {
     "api": {
-      "revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
-      "sha256": "10f14fb8a54f2c0174c84f3b3df62edae513630f7a385c0a412707d1c480967c",
+      "revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+      "sha256": "6970f77275fc69ebe0233d55459f23e44868e1cf1920a94fe5e48245c9a5732b",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
-      "sha256": "d5cb581c4c562af4c8d50196c7af5b221b925a49fe8380bc53c096c03d1f29bd",
+      "revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+      "sha256": "a02c0bcf6cc0ec7afc9559dc056c9d97d6bbebc7885f80a26e42a905edabe726",
       "vcs_modified": false
     }
   },
@@ -20,9 +20,9 @@
     "worker": "active"
   },
   "migration": "000157_server_protection",
-  "acceptance": "docs/UPCLOUD_CAPACITY_STATUS_ACCEPTANCE_20261005.json",
+  "acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "verified": false,
-  "note": "Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified. Server protection deployed with verified canary enable/disable; currently OFF. No Xray configuration or client identity was changed by the canary.",
+  "note": "Account deletion reliability deployed. Upcloud 11 deletion completed before this patch. Current pending account-deletion jobs:0. Prior paid UpCloud lifecycle remains unverified. Guardian binaries and Xray configs are unchanged; fleet protection control preserved from pre-deploy snapshot.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "User resolves UpCloud TRIAL_FIREWALL restriction, refreshes, explicitly enables retry; then observe a normally scheduled paid lifecycle. No new cloud mutation was initiated by acceptance.",
+  "next_product_step": "Observe ordinary user-requested deletions through durable progress. Keep provider-absence safety; no test cloud deletion required.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
+  "worker_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
-  "verification_status": "DEPLOYED_CANARY_ENABLE_DISABLE_VERIFIED_DEFAULT_OFF",
+  "web_static_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+  "verification_status": "DEPLOYED_ACCOUNT_DELETION_RELIABILITY_VERIFIED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
+  "previous_runtime_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -110,7 +110,7 @@
   "latest_upcloud_catalog_display_acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
   "static_hashes": {
     "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
-    "app.js": "d474df926a6abbeb515d25a2fa5ac7830b9c4aed86e7980c0c2a35d1212bf4c2",
+    "app.js": "3fa60cc01a48463bff87c5dcb661fd6e4cb1ac07ba220ffad6d8b44c9ea95db9",
     "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
     "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
     "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
@@ -123,11 +123,12 @@
   "previous_verification_status": "DEPLOYED_CAPACITY_STATUS_VERIFIED_UPCLOUD_TRIAL_CREATE_BLOCKED",
   "latest_server_protection_acceptance": "docs/SERVER_PROTECTION_ACCEPTANCE_20261006.json",
   "server_protection": {
-    "enabled": false,
+    "enabled": true,
     "scope": "fleet",
-    "revision": 4,
+    "revision": 9,
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Runtime and server-protection canary only. Prior provider, lifecycle and residential snapshots retain their prior evidence dates; paid UpCloud lifecycle remains unverified."
+  "verification_scope": "Account deletion shared paths, isolated three-provider race/fault/browser acceptance and production runtime/static/config readback. Upcloud 11 already absent before patch; no new real cloud deletion tested. Existing fleet protection was already enabled and remains unchanged.",
+  "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json"
 }

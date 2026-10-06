@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "status": "DEPLOYED_VERIFIED",
+  "at_utc": "2026-10-06T08:58:35.367234+00:00",
+  "runtime_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+  "migration": "000157_server_protection (unchanged)",
+  "incident": {
+    "account": "Upcloud 11",
+    "completed_before_patch": true,
+    "live_readback": {
+      "pending_jobs": 0,
+      "visible_accounts": 4,
+      "incident_account_rows": 0
+    }
+  },
+  "tests": {
+    "full_go_suite": "PASS",
+    "race_postgres_all_three_providers": "PASS",
+    "mobile_desktop_browser": "PASS",
+    "lost_response_duplicate_poll_race": "PASS",
+    "locked_prefix_33": "PASS",
+    "provider_presence_timeout_credentials": "PASS",
+    "unknown_create_and_bounded_admission": "PASS",
+    "distinct_inventory_count": "PASS",
+    "request_transaction_rollback_and_account_isolation": "PASS"
+  },
+  "engineering": {
+    "job": "account-deletion-20261006",
+    "plan_response": "resp_08b9687b9d197744006ac4b386551087d1af16aaa84641296f",
+    "source_reviews": [
+      "resp_0903a67d0ceb0953006ac4b5acd5b087d1a47ff58acf31fbb7",
+      "resp_02f3f939db8a740c006ac4b6d8d4bc87d1a1b70f7c3878bf63"
+    ],
+    "review_disposition": "All concrete changed-code findings addressed and tested; see handoff for managed-resource fast-path scope.",
+    "evidence": "/root/backups/dob-account-deletion-20261006/engineering-evidence.json"
+  },
+  "deployment": {
+    "commit": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+    "at": "2026-10-06T08:57:15.122766+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "6970f77275fc69ebe0233d55459f23e44868e1cf1920a94fe5e48245c9a5732b",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "a02c0bcf6cc0ec7afc9559dc056c9d97d6bbebc7885f80a26e42a905edabe726",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "3fa60cc01a48463bff87c5dcb661fd6e4cb1ac07ba220ffad6d8b44c9ea95db9"
+  },
+  "unchanged_config_snapshot": true,
+  "server_protection_control_preserved": {
+    "scope": "fleet",
+    "enabled": true,
+    "revision": 9
+  },
+  "backup": "/root/backups/dob-account-deletion-20261006",
+  "rollback_script": "/root/backups/dob-account-deletion-20261006/rollback.sh",
+  "no_live_destructive_acceptance": true,
+  "limitations": [
+    "Provider access failures and unresolved create outcomes remain pending; credentials retained.",
+    "No paid UpCloud live lifecycle was exercised.",
+    "Binary rollback cannot restore an account already legitimately purged."
+  ]
+}
