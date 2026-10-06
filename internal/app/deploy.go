@@ -111,6 +111,9 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 	if err != nil {
 		return d, err
 	}
+	if _, err = tx.ExecContext(ctx, `UPDATE deployments SET build_rules_revision=COALESCE((SELECT revision FROM account_rule_application WHERE account_id=$2),0) WHERE id=$1`, d.ID, accountID); err != nil {
+		return d, err
+	}
 	if replacementDropletID != "" {
 		res, qerr := tx.ExecContext(ctx, `UPDATE droplets
 			SET replacement_deployment_id=$3,updated_at=now()

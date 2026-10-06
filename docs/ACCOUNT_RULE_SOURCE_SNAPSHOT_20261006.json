@@ -1,0 +1,18 @@
+{
+  "base_revision": "4a63cc8ac1910d47f7062cfba7372f3a09ad57ee",
+  "at_utc": "2026-10-06T13:29:38.969887+00:00",
+  "files": {
+    "internal/app/account_rule_application.go": "dc3e11ef73a937aaf88b63ca9ff2525ac4aa6101778ad13746f5f988ed6e62d7",
+    "internal/app/deploy.go": "f5cec9b3524905d1ffb5ba599c0d2a0004f4cc5e7b71b55448c7c8512b7bb25b",
+    "internal/app/lifecycle.go": "e5417a590205bb1326afdc38709185cf803631b1032331f9ac5f31a0218fbfb2",
+    "internal/adminapi/accounts_manage.go": "f2268ffaeebf915430723a3350b32f605768e4eadb31bae71473122edc16fcad",
+    "internal/adminapi/resources.go": "4d7839a65a4ec01c6104cd06cf255720bf1ecc8bc11ee041a87dbe486db07c57",
+    "internal/adminapi/account_rule_application_test.go": "de0196576cdf09c338f5ea629af6b1420ff45f65b1e2f142b571c376a06fff41",
+    "internal/adminapi/account_rule_application_browser_test.go": "92d1ca2359b2b31a1aa51b9ee941480b5a2449ff40ee2d0a9a8d3a864ba62369",
+    "cmd/worker/main.go": "3311ef02c0c3745f7d632e240c3efca3ba963507b490a5b856f893115cd31063",
+    "web/static/app.js": "4487cd88d100ad10937d6e54900dea98b3bf1ee11612a244c98d9e13bd6160a4",
+    "web/tests/account-rule-application.cjs": "376d93271ffe418dca68c55095761f93181b63c3ceaa72d427c27996afe441b9",
+    "migrations/000158_account_rule_application.up.sql": "2cf79cc3c958db4a4f6cdf08995b4b1666a4f3f94607f85fc60cb7dffb1cafb5",
+    "migrations/000158_account_rule_application.down.sql": "2eb509c87853ab6621b3455f9d393b4c262f537c66f4c20e2ebd647c5fb0ec82"
+  }
+}

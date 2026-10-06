@@ -12,6 +12,7 @@ import (
 )
 
 type accountUpdate struct {
+	ApplyToExisting        bool     `json:"apply_to_existing"`
 	Name                   string   `json:"name"`
 	Token                  string   `json:"token"`
 	Regions                []string `json:"regions"`
@@ -131,6 +132,11 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	beforeRules, oldDesired, err := app.AccountBuildRulesTx(r.Context(), tx, id)
+	if err != nil {
+		writeJSON(w, 404, map[string]string{"error": "not_found"})
+		return
+	}
 	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_region=COALESCE(NULLIF($11,''),preferred_region),preferred_sizes=$4,preferred_images=$5,preferred_image=COALESCE(NULLIF($6,''),preferred_image),server_lifetime_seconds=$7,server_lifetime_min_seconds=$7,server_lifetime_max_seconds=$8,auto_interval_seconds=$9,auto_batch_size=$10,auto_max_concurrent=$12,desired_server_count=$13,fallback_any_region=$14,build_spacing_minutes=$15,build_spacing_max_minutes=$16,next_build_at=NULL,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, images, func() string {
 		if len(x.Images) > 0 {
 			return x.Images[0]
@@ -190,6 +196,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 500, errorBody())
 			return
 		}
+	}
+	if err = app.SaveAccountRuleApplicationTx(r.Context(), tx, id, beforeRules, oldDesired, x.ApplyToExisting); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
 	}
 	var previousToken []byte
 	var credentialRef, providerForCredential string

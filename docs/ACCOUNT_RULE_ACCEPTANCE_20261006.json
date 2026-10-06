@@ -1,0 +1,19 @@
+{
+  "status": "SOURCE_TESTS_VERIFIED_PENDING_DEPLOY",
+  "migration": 158,
+  "default": "OFF",
+  "test_database": "isolated bulk_test schema per test",
+  "full_go_tests": "PASS",
+  "focused_race_postgres_tests": "PASS",
+  "browser_mobile_desktop": "PASS",
+  "source_api_review": {
+    "id": "resp_0fddbac79cb08b8f006ac4f6b77cf887d18adddf484bc170cd",
+    "text": "PASS"
+  },
+  "tests_log_sha256": "72aa5be5d795df25b62e4b998aa7181f2707c5a07de66fca83ace7d1b08a7ccc",
+  "cloud_mutations_for_acceptance": false,
+  "limitations": [
+    "Fixture tests do not prove live provider replacement end-to-end.",
+    "An already admitted deletion must reconcile even after switch OFF."
+  ]
+}

@@ -497,6 +497,20 @@ func main() {
 			log.Printf("proxy monitor stopped: %v", err)
 		}
 	}()
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for {
+			if err := application.Container.ProcessAccountRuleApplications(ctx); err != nil && ctx.Err() == nil {
+				log.Printf("account rule application: %v", err)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
 	failures := worker.FailureStore{DB: application.DB}
 	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100}
 	// Lifecycle runs independently from provider/deployment recovery so slow or

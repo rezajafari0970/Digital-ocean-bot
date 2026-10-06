@@ -1,0 +1,33 @@
+{
+  "goal": "Add opt-in apply-to-existing control to account Edit. Saving future-only must preserve all existing expiries. ON spec change queues paced owned-server replacement; desired-only growth never rotates, desired shrink ON retires exact excess earliest expiry, OFF waits natural expiry. Shared provider-neutral durable reconciliation, idempotent and failure-safe.",
+  "context": "Canonical 4a63cc8 runtime43e8c66 migration157. Latest user rejects automatic rotation on every Save. Default OFF. Desired changes separate from immutable build spec (regions/plans/images/fallback/lifetime). Only ON plus actual spec change starts rollout; ON desired-only shrink removes excess only, OFF cancels unstarted rollout. Preserve old expires_at. Persist rules revision on deployment reservation under deployment-admission lock; new builds always latest. Existing scheduler handles desired deficit and backfill. Add durable per-account control/revision/target/waiting/next action, owned READY earliest expiry claims. No unrelated cloud mutations during tests. Existing provider/proxy/create-denial gates respected; test PostgreSQL, duplicate Save, concurrent claims, no premature delete when replacement unready, future-only lifetime, desired +/-1, restart, rollback. New toggle remains OFF across deployment. Use local source and server API plan; no delegation.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/app",
+    "cmd/worker/main.go",
+    "migrations/000158_account_rule_application.up.sql",
+    "migrations/000158_account_rule_application.down.sql",
+    "web/static/app.js",
+    "web/tests/account-rule-application.cjs",
+    "tools/account-rule-acceptance.sh",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/account-rule-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "bash tools/account-rule-acceptance.sh verify",
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(accounts): make existing-server rule application opt-in"
+}

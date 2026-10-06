@@ -217,6 +217,15 @@ processLifecycle:
 		}
 		return runtime.CheckMutationGeneration(ctx)
 	}
+	if item.State == droplets.Retiring {
+		allowed, err := c.AdmitAccountRuleRetirement(ctx, item.AccountID, item.ID)
+		if err != nil {
+			return err
+		}
+		if !allowed {
+			return nil
+		}
+	}
 	engine := droplets.LifecycleEngine{Store: droplets.LifecycleStore{DB: c.DB}, Executor: executor}
 	if err := engine.Process(ctx, item); err != nil {
 		return slowCleanupProviderError(providerState, err)
@@ -239,6 +248,11 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 		return err
 	}
 	shouldBackfill := accountEnabled && priorState == "DELETING" && replacementID == ""
+	if shouldBackfill {
+		if _, err = tx.ExecContext(ctx, `UPDATE schedules SET next_run_at=now() WHERE account_id=$1 AND enabled`, accountID); err != nil {
+			return err
+		}
+	}
 	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',backfill_required=CASE WHEN $3 THEN true ELSE backfill_required END,updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID, shouldBackfill); err != nil {
 		return err
 	}
