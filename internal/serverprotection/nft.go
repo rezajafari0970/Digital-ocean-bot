@@ -58,7 +58,15 @@ func (n NFT) ownedTable(ctx context.Context) (uint64, bool, error) {
 	for _, x := range v.NFTables {
 		if x.Table != nil && x.Table.Name == "dob_guardian" && x.Table.Family == "inet" {
 			if x.Table.Comment != nftOwner {
-				return 0, false, errors.New("foreign dob_guardian table; not modified")
+				// nft 1.0.2 omits table comments in JSON while retaining them
+				// in text output. Tie that fallback proof to the same handle.
+				if x.Table.Comment != "" {
+					return 0, false, errors.New("foreign dob_guardian table; not modified")
+				}
+				raw, err := runCommand(ctx, n.Path, []string{"-a", "list", "table", "inet", "dob_guardian"}, "")
+				if err != nil || !legacyTableOwner(raw, x.Table.Handle) {
+					return 0, false, errors.New("foreign dob_guardian table; not modified")
+				}
 			}
 			if x.Table.Handle == 0 {
 				return 0, false, errors.New("nft table handle missing")
@@ -67,6 +75,14 @@ func (n NFT) ownedTable(ctx context.Context) (uint64, bool, error) {
 		}
 	}
 	return 0, false, errors.New("nft table ownership not verified")
+}
+func legacyTableOwner(raw []byte, handle uint64) bool {
+	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	if handle == 0 || len(lines) < 2 {
+		return false
+	}
+	return strings.TrimSpace(lines[0]) == fmt.Sprintf("table inet dob_guardian { # handle %d", handle) &&
+		strings.TrimSpace(lines[1]) == "comment "+strconv.Quote(nftOwner)
 }
 func (n NFT) Apply(ctx context.Context, ports []int, block bool) error {
 	handle, present, err := n.ownedTable(ctx)

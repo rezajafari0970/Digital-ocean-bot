@@ -1,6 +1,7 @@
 package serverprotection
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -74,5 +75,15 @@ func TestParsePortsProtectsManagementAndLocalServices(t *testing.T) {
 	}
 	if _, e = ParsePorts(strings.NewReader("{"), nil); e == nil {
 		t.Fatal("malformed accepted")
+	}
+}
+
+func TestLegacyNFTOwnerProof(t *testing.T) {
+	good := "table inet dob_guardian { # handle 8\n\tcomment " + strconv.Quote(nftOwner) + "\n}\n"
+	if !legacyTableOwner([]byte(good), 8) {
+		t.Fatal("legacy ownership proof rejected")
+	}
+	if legacyTableOwner([]byte(good), 9) || legacyTableOwner([]byte(strings.Replace(good, nftOwner, "foreign", 1)), 8) || legacyTableOwner([]byte("table inet dob_guardian { # handle 8\nchain x {\n comment "+strconv.Quote(nftOwner)+"\n}"), 8) {
+		t.Fatal("foreign or replaced table accepted")
 	}
 }
