@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_TESTED_LIVE_PENDING",
+  "updated_at": "2026-10-06T18:29:11.090691+00:00",
+  "focused": "PASS",
+  "full_go": "PASS",
+  "race": "PASS",
+  "installed_core": "PASS",
+  "independent_review": "PASS",
+  "review_response": "resp_04a819bf143a330c006ac53d52865c87d1aa1a270439da31af",
+  "live_turnover": "PENDING",
+  "limitations": [
+    "No unconditional uptime guarantee",
+    "Initial fingerprint cutover may reload Xray once",
+    "External provider restrictions unchanged"
+  ]
+}

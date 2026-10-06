@@ -1,0 +1,29 @@
+{
+  "goal": "Stop unnecessary Xray restarts during residential client turnover by fingerprinting effective router configuration rather than redundant full client metadata; retain strict native running-route proofs, direct-user isolation, credentials, DNS/UDP, rollback and canary rollout.",
+  "context": "Follow-up to deployed8e75d91. Live3 nodes repeated Xray restarts and CPU admission pressure. Residential lifetime600s, creation60s, direct lifetime0. buildSettings fingerprint includes clients although residential/default routing is membership independent. Preserve full settings and inbound tag fingerprint, remove redundant clients only behind temporary stable-fingerprint panel allowlist. New behavior all by default after rollout; none selects legacy for rollback. Initial cutover changes tags and can require one managed reload. Do not change quotas/lifetime/guardian thresholds or bypass proofs. Full tests, focused race, native core and live canary turnover proof; keep frozen knowledge unchanged.",
+  "allowed_paths": [
+    "internal/panels/residentialsync",
+    "docs/development-jobs/routing-fingerprint-20261006.json",
+    "docs/ROUTING_FINGERPRINT_20261006.md",
+    "docs/ROUTING_FINGERPRINT_ACCEPTANCE_20261006.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [],
+    "test": [
+      "env -u BULK_TEST_DATABASE_URL -u DOB_E2E_DSN go test -p 2 ./...",
+      "go test -race ./internal/panels/residentialsync -count=1"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix: keep residential routing stable across client turnover"
+}

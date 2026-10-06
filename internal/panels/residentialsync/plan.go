@@ -28,6 +28,7 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	StableFingerprint     bool
 	Performance           *residentialperf.Config
 	PerformanceGeneration int64
 	PerformanceBaseline   *residentialperf.Fields
@@ -383,9 +384,14 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if err := residentialperf.Apply(next, p.Performance); err != nil {
 		return nil, err
 	}
-	// Fingerprint the entire desired plan, including credentials and client membership.
+	// Fingerprint effective routes and credentials. Direct membership is already
+	// encoded in next; residential-only turnover does not change routing.
 	// Runtime TestRoute returns this content-addressed tag only after the plan loads.
-	fingerprint := settingsHash(map[string]any{"settings": next, "clients": clients, "tags": tags})[:16]
+	fingerprintInput := map[string]any{"settings": next, "tags": tags}
+	if !p.StableFingerprint {
+		fingerprintInput["clients"] = clients // Exact legacy rollback path.
+	}
+	fingerprint := settingsHash(fingerprintInput)[:16]
 	replacements := map[string]string{}
 	for _, value := range kept {
 		m := value.(map[string]any)

@@ -54,7 +54,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	})
 }
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := routePolicy{AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel)}
+	p := routePolicy{AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)
@@ -160,6 +160,11 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
+	// Preserve persisted membership before merging pending ownership records.
+	savedClients := make(map[string]clientRoute, len(previous))
+	for id, c := range previous {
+		savedClients[id] = c
+	}
 	// A newly observed client must use the class committed before its POST.
 	rows, err = s.DB.QueryContext(ctx, `SELECT o.client_id,o.email,o.route_class FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND o.route_class<>'' AND o.state IN('PLANNED','ACTIVE','DELETE_PENDING')`, panel)
 	if err != nil {
@@ -221,7 +226,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM panel_routing_state WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND state='APPLIED')", panel, revision, hash).Scan(&unchanged); err != nil {
 		return err
 	}
-	if !unchanged {
+	if !unchanged || !sameRouteMembership(savedClients, clients) {
 		if err = s.persistPlan(ctx, panel, revision, hash, p, clients); err != nil {
 			return err
 		}
@@ -451,6 +456,39 @@ func poolPanel(panel string) bool {
 	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_POOL_PANELS"))
 	if scope == "" {
 		return true
+	}
+	for _, id := range strings.Split(scope, ",") {
+		if strings.TrimSpace(id) == panel {
+			return true
+		}
+	}
+	return false
+}
+
+// Membership receipts must advance even when the effective routing plan is stable.
+func sameRouteMembership(saved map[string]clientRoute, planned []clientRoute) bool {
+	if len(saved) != len(planned) {
+		return false
+	}
+	seen := make(map[string]bool, len(planned))
+	for _, c := range planned {
+		old, ok := saved[c.ID]
+		if !ok || old != c || seen[c.ID] {
+			return false
+		}
+		seen[c.ID] = true
+	}
+	return true
+}
+
+// Deployment-only canary scope; "none" restores the exact legacy fingerprint.
+func stablePlanPanel(panel string) bool {
+	scope := strings.TrimSpace(os.Getenv("DOB_ROUTING_STABLE_PLAN_PANELS"))
+	if scope == "" || scope == "all" {
+		return true
+	}
+	if scope == "none" || panel == "" {
+		return false
 	}
 	for _, id := range strings.Split(scope, ",") {
 		if strings.TrimSpace(id) == panel {
