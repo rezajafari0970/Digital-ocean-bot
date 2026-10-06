@@ -1,0 +1,34 @@
+{
+  "goal": "Prevent recovery from skipping incomplete bootstrap steps into installer activation, fixing repeated Ubuntu26 KHO reboot exhaustion. Resume immutable provision checkpoints before installer; recover previously premature WAITING_INSTALLER without bypassing failed steps or resetting state blindly.",
+  "context": "Confirmed production 2026-10-06: RecoverDeployment branch checks only d.CurrentStep provision and InstallerPlaceholderName nonempty, then unconditionally overwrites deployment+provision run WAITING_INSTALLER, discarding current readiness/bootstrap checkpoints. Failed replacements have zero kernel guard events though snapshot includes guard. SSH two current owned waiting VMs: kernel7.0.0-38, affected true, prepared false, no kho=off even after reboot. Fix remove unconditional shortcut. Add guard before installer activation that confirms actual provision placeholder checkpoint AND durable successful preceding step records. Run normal Engine Execute for incomplete bootstrap using original snapshot and pinned SSH; do not reset current checkpoint or failed attempts; terminal failures normal finalizer. Existing bogus WAITING_INSTALLER overwritten checkpoints require resume first uncompleted prerequisite from durable step evidence, never re-execute completed side effects; transaction/CAS needed if repairing. Investigate code to choose minimal safe implementation. Preserve custom plans, true legacy placeholder after presteps, selected installer behavior, attempt budgets, backoff, failed/deleted resources; no new cloud creates for tests. Existing pre-prepare accidental reboot record may require bounded recovery only after proven bootstrap correction; no arbitrary timer reset. Full Go + race isolated PostgreSQL fault regressions and source API review. No operator settings/lifetime/Desired/proxy/guardian/residential changes. Deploy atomically with rollback and observe ready replacements + kernel proof.",
+  "allowed_paths": [
+    "internal/app/recovery.go",
+    "internal/app/installer_activation.go",
+    "internal/app/installer_bootstrap.go",
+    "internal/app/installer_bootstrap_test.go",
+    "internal/app/installer_bootstrap_postgres_test.go",
+    "internal/provisioning/engine.go",
+    "internal/provisioning/engine_test.go",
+    "internal/provisioning/installer_checkpoint.go",
+    "internal/provisioning/installer_checkpoint_test.go",
+    "tools/installer-bootstrap-acceptance.sh",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/installer-bootstrap-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(provisioning): complete bootstrap before installer recovery"
+}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
@@ -81,6 +83,35 @@ func (c Container) installerReadiness(ctx context.Context, d workflow.Deployment
 	return (provisioning.ReadinessCollector{SSH: ssh, Recorder: store}).Collect(ctx, runID, target, key, nil)
 }
 func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) error {
+	release, err := (workflow.PostgresRunLease{DB: c.DB}).Acquire(ctx, d.ID)
+	if err != nil {
+		return err
+	}
+	defer release()
+	// Re-read under the same lease used by the initial provisioning worker.
+	d, err = (workflow.SQLStore{DB: c.DB}).Get(ctx, d.ID, d.AccountID)
+	if err != nil {
+		return err
+	}
+	if d.State != workflow.WaitingInstaller {
+		return nil
+	}
+	cfg, snap, err := c.DeploymentConfigFromSnapshot(ctx, d.ID)
+	if err != nil {
+		return err
+	}
+	eligible, err := c.reconcileInstallerBootstrap(ctx, d, cfg.Provision)
+	if errors.Is(err, provisioning.ErrStepTerminal) {
+		return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", err.Error())
+	}
+	if err != nil || !eligible {
+		return err
+	}
+	if frozen, ferr := (RecoveryHandler{Container: c}).freezeExhaustedInstallerRecovery(ctx, d); ferr != nil {
+		return ferr
+	} else if frozen {
+		return nil
+	}
 	ref, generation, ok, err := c.deploymentInstallerRef(ctx, d.ID, snap)
 	if err != nil || !ok {
 		return err
@@ -101,6 +132,7 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	if err != nil {
 		return err
 	}
+	defer wipe(key)
 	ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: c.DB}}
 	ready, err := c.installerReadiness(ctx, d, runID, target, key, ssh)
 	if err != nil {
@@ -168,28 +200,81 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 var ErrInstallerRebootScheduled = errors.New("installer reboot remediation scheduled")
 var ErrInstallerRebootExhausted = errors.New("installer reboot remediation exhausted")
 
-func (c Container) remediateInstallerReboot(ctx context.Context, d workflow.Deployment, generation int, target provisioning.Target, key []byte, ssh provisioning.SSHClient) error {
+var installerBootIDPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
+
+func installerRebootBootID(marker string) string {
+	for _, part := range strings.Split(marker, ";") {
+		if strings.HasPrefix(part, "boot_id=") {
+			id := strings.TrimPrefix(part, "boot_id=")
+			if installerBootIDPattern.MatchString(id) {
+				return id
+			}
+		}
+	}
+	return ""
+}
+func installerRebootCommand(bootID string) string {
+	// The command reconciles a durable reboot intent. Even if a worker dies
+	// before dispatch or loses the response, it cannot reboot a subsequent boot.
+	return `if test "$(cat /proc/sys/kernel/random/boot_id)" = "` + bootID + `"; then systemctl reboot --no-block; fi`
+}
+func (c Container) remediateInstallerReboot(ctx context.Context, d workflow.Deployment, generation int, target provisioning.Target, key []byte, ssh provisioning.CommandRunner) error {
 	var scheduledAt time.Time
-	err := c.DB.QueryRowContext(ctx, `SELECT scheduled_at FROM installer_reboot_remediations WHERE deployment_id=$1 AND generation=$2 AND state='SCHEDULED'`, d.ID, generation).Scan(&scheduledAt)
-	if err == nil {
-		if time.Since(scheduledAt) < 3*time.Minute {
+	var state, marker string
+	err := c.DB.QueryRowContext(ctx, `SELECT scheduled_at,state,last_error FROM installer_reboot_remediations WHERE deployment_id=$1 AND generation=$2`, d.ID, generation).Scan(&scheduledAt, &state, &marker)
+	fresh := errors.Is(err, sql.ErrNoRows)
+	if err != nil && !fresh {
+		return err
+	}
+	repair := strings.HasPrefix(marker, bootstrapRepairPending+";")
+	if fresh || repair {
+		probeCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+		bootID, probeErr := ssh.Run(probeCtx, target, key, "cat /proc/sys/kernel/random/boot_id")
+		cancel()
+		if probeErr != nil {
+			return probeErr
+		}
+		bootID = strings.TrimSpace(bootID)
+		if !installerBootIDPattern.MatchString(bootID) {
+			return errors.New("invalid reboot boot ID")
+		}
+		if repair {
+			claimed, claimErr := c.claimBootstrapRepairReboot(ctx, d, generation, bootID)
+			if claimErr != nil {
+				return claimErr
+			}
+			if !claimed {
+				return errInstallerBootstrapEvidence
+			}
+		} else {
+			res, insertErr := c.DB.ExecContext(ctx, `INSERT INTO installer_reboot_remediations(deployment_id,generation,state,last_error) VALUES($1,$2,'SCHEDULED',$3) ON CONFLICT(deployment_id,generation) DO NOTHING`, d.ID, generation, "INSTALLER_REBOOT;boot_id="+bootID)
+			if insertErr != nil {
+				return insertErr
+			}
+			n, rowsErr := res.RowsAffected()
+			if rowsErr != nil {
+				return rowsErr
+			}
+			if n != 1 {
+				return ErrInstallerRebootScheduled
+			}
+		}
+		marker = "INSTALLER_REBOOT;boot_id=" + bootID
+	} else {
+		if time.Since(scheduledAt) >= 3*time.Minute {
+			return ErrInstallerRebootExhausted
+		}
+		// Historical entries have no boot proof; do not replay their command.
+		if state != "SCHEDULED" || installerRebootBootID(marker) == "" {
 			return ErrInstallerRebootScheduled
 		}
-		return ErrInstallerRebootExhausted
 	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	res, err := c.DB.ExecContext(ctx, `INSERT INTO installer_reboot_remediations(deployment_id,generation,state) VALUES($1,$2,'SCHEDULED') ON CONFLICT(deployment_id,generation) DO NOTHING`, d.ID, generation)
-	if err != nil {
-		return err
-	}
-	n, _ := res.RowsAffected()
-	if n != 1 {
-		return ErrInstallerRebootScheduled
-	}
-	if _, err = ssh.Run(ctx, target, key, "systemctl reboot --no-block"); err != nil {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE installer_reboot_remediations SET state='FAILED',last_error=$3 WHERE deployment_id=$1 AND generation=$2`, d.ID, generation, err.Error())
+	bootID := installerRebootBootID(marker)
+	sendCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	if _, err = ssh.Run(sendCtx, target, key, installerRebootCommand(bootID)); err != nil {
+		// Keep the original boot proof on ambiguous SSH loss. Retry reconciles that
+		// boot only, within the original budget; it does not grant another reboot.
 		return err
 	}
 	return ErrInstallerRebootScheduled

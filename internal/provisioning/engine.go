@@ -120,6 +120,18 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			}
 			return run, ErrInstallerNotConfigured
 		}
+		// A durable successful finish may precede a crashed checkpoint write.
+		// Repaired historical runs can also contain completed steps after a gap.
+		// Do not repeat those side effects or consume their attempt budget.
+		if cs, ok := e.Store.(StepCompletionStore); ok {
+			done, completionErr := cs.StepCompleted(ctx, run.ID, step.name)
+			if completionErr != nil {
+				return run, completionErr
+			}
+			if done {
+				continue
+			}
+		}
 		maxAttempts := DefaultStepPolicies["ssh"].MaxAttempts
 		if step.readiness {
 			maxAttempts = DefaultStepPolicies["readiness"].MaxAttempts
@@ -297,7 +309,9 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			}
 			return run, err
 		}
-		_ = e.Store.FinishStep(ctx, run.ID, step.name, nil, false)
+		if err := e.Store.FinishStep(ctx, run.ID, step.name, nil, false); err != nil {
+			return run, err
+		}
 		if e.Events != nil {
 			_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: "COMPLETED", Attempt: stepAttempt, Duration: duration, Diagnostic: Diagnostic{StdoutTail: result.Stdout, StderrTail: result.Stderr, ExitCode: result.ExitCode, Signal: result.Signal}})
 		}

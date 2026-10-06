@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-06T14:42:36.594459+00:00",
+  "base_commit": "fdc1204bdd2ded0deb5a4eeadbed2049075844e9",
+  "files": {
+    "internal/app/recovery.go": "3dbadc0ed109956823ffea2e827132edad30e4b005e1394ce6329b632d663073",
+    "internal/app/installer_activation.go": "a88010b384453043757047f2ea20d98086b3534973ac65d17670da648ff8be0b",
+    "internal/app/installer_bootstrap.go": "11b3f70b07d88004960e9cf40f6324ec81b1dbe357ff5aa1da68a395c0d72b71",
+    "internal/app/installer_bootstrap_test.go": "16f5f6449b6b6ba049bad8f6d55e864b06ac761ad56723865979ac4ac859c71a",
+    "internal/app/installer_bootstrap_postgres_test.go": "85ddcbd7af697e3126ddc481b1eac2a087f998ea0b913d2d49fbd8ed46069226",
+    "internal/provisioning/engine.go": "6c066f87faa77915474df17ac767461cd58ec41704ce488520f2bb4a17686fc0",
+    "internal/provisioning/installer_checkpoint.go": "dcc57963834511f72f5b70ad8b4c45ebf9835c3c723b904ce3c43030ad3c899a",
+    "internal/provisioning/installer_checkpoint_test.go": "bdfcf5d7aaf095bc01051fc00b7af64a1883a603a3f7d6068eae33cc54b1bbfa",
+    "tools/installer-bootstrap-acceptance.sh": "658b1e9d58f0b89511463127f8df4d9266beae7a90e268a5b5a5ffbb54a6aad7"
+  },
+  "test_gate": "full Go, focused race and isolated PostgreSQL fault/concurrency PASS",
+  "live_deploy": "pending",
+  "source_review": {
+    "verdict": "PASS",
+    "response_id": "resp_055319a1aa06d12c006ac508a4980c87d18dc541236fefd9a9"
+  }
+}
