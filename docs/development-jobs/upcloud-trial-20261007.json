@@ -1,0 +1,61 @@
+{
+  "goal": "Implement an explicitly enabled per-account UpCloud trial-compatible deployment mode using only provider-permitted ports, preserving the immutable trial firewall and all existing provider/network/expiry guards. User authorized implementation and actual free-trial creation.",
+  "context": "Canonical HEAD be45c862992a279da377db5b2c2ea1181ff386fc. Upcloud 113 id63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe has TRIAL_FIREWALL blockv6 and no server. Create currently sends firewall off. New opt-in boolean false by default, pinned into deployment snapshot and passed to create request, firewall on without any firewall-rule mutation; panel defaults3389 from immutable snapshot, Reality443 remains global. Explicit authenticated admin transition atomically enables mode, releases ONLY exact version TRIAL_FIREWALL and audits compatibility authorization (not claiming trial removed); reject all other denial codes, stale versions, already-enabled mode retry, in-flight creates, disabled/deleting/non-UpCloud accounts. Original resolve-restriction flow unchanged. Known trial account status admits only opted-in account across capacity/preflight/discovery/build views. Ordinary refresh never clears denial; repeated 403 blocks again. No change to desired5, selected plans, proxies, routes or account identity. Live discovery found all12 residential endpoints on prohibited outbound ports3106..4630 and10000; do NOT relabel/direct-fallback/tunnel around restrictions. Live trial may prove creation+panel+443 while ads remain fail-closed and explicitly unverified/unavailable. Show restricted mode and residential port incompatibility accurately. Official UpCloud standard inbound22/80/443/3389; outbound53/80/443/123 and networking doc8080. Existing strictIPv4 stays. Run isolatedPostgres/fault/race/full suite; deploy with backup and review real first creation before broad claims. Use server OpenAI adapter for plan and review, single main implementer.",
+  "allowed_paths": [
+    "internal/providers/types.go",
+    "internal/providers/upcloud/mutations.go",
+    "internal/providers/upcloud/trial_compatible_test.go",
+    "internal/droplets/model.go",
+    "internal/droplets/executor.go",
+    "internal/workflow/profile.go",
+    "internal/workflow/profile_store.go",
+    "internal/app/profile.go",
+    "internal/app/provider_refresh.go",
+    "internal/capacity/service.go",
+    "internal/capacity/create_block.go",
+    "internal/capacity/upcloud_trial.go",
+    "internal/adminapi/upcloud_trial.go",
+    "internal/adminapi/upcloud_trial_test.go",
+    "internal/adminapi/account_build_status.go",
+    "internal/adminapi/account_preflight.go",
+    "internal/adminapi/discovery.go",
+    "internal/adminapi/resources.go",
+    "internal/adminapi/dashboard.go",
+    "internal/adminapi/server.go",
+    "internal/panels/sanaei/panel_configurer.go",
+    "migrations/000160_upcloud_trial_compatible.up.sql",
+    "migrations/000160_upcloud_trial_compatible.down.sql",
+    "web/static/app.js",
+    "docs/development-jobs/upcloud-trial-20261007.json",
+    "docs/UPCLOUD_TRIAL_HANDOFF_20261007.md",
+    "docs/UPCLOUD_TRIAL_SOURCE_SNAPSHOT_20261007.json",
+    "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "internal/providers/trial.go",
+    "internal/providers/trial_test.go",
+    "internal/panels/residentialsync/service.go",
+    "internal/panels/residentialsync/trial_postgres_test.go",
+    "internal/panels/globalreality/network_access.go",
+    "cmd/upcloud-trial-enable/main.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "python3 -c \"from pathlib import Path; p=Path('/root/backups/dob-upcloud-trial-20261007'); assert all((p/n).read_text().strip()=='0' for n in ['focused-approved.exit','full-approved.exit'])\" # full Go and isolated PostgreSQL -race/fault evidence"
+    ],
+    "verify": [
+      "git diff --check",
+      "python3 -c \"import json; from pathlib import Path; p=Path('/root/backups/dob-upcloud-trial-20261007/review-approved.json'); assert json.loads(json.loads(p.read_text())['text'])['verdict']=='PASS'\""
+    ]
+  },
+  "commit_message": "feat(upcloud): add explicit trial-compatible deployment mode"
+}

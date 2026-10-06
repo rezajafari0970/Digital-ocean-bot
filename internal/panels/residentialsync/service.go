@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"os"
 	"strings"
@@ -68,6 +69,10 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if err = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM reality_config_profiles)`).Scan(&p.Explicit); err != nil {
 		return p, 0, err
 	}
+	var trial bool
+	if err = s.DB.QueryRowContext(ctx, `SELECT COALESCE((SELECT (d.profile_snapshot->>'upcloud_trial_compatible')::boolean FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id AND d.account_id=pi.account_id WHERE pi.id=$1 ORDER BY d.created_at DESC,d.id DESC LIMIT 1),false)`, panel).Scan(&trial); err != nil {
+		return p, 0, err
+	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)
  FROM residential_proxies rp
  WHERE rp.enabled AND ($1 OR rp.last_success_at>=rp.updated_at)
@@ -86,6 +91,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		if err = rows.Scan(&x.x.ID, &x.x.Type, &x.x.Host, &x.x.Port, &x.x.User, &x.x.Tag, &x.ref, &x.healthy); err != nil {
 			rows.Close()
 			return p, 0, err
+		}
+		if trial && !providers.UpCloudTrialProxyPortAllowed(x.x.Port) {
+			continue
 		}
 		choices = append(choices, x)
 	}

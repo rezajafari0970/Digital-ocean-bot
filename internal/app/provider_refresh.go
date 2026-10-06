@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"log"
 	"time"
@@ -157,8 +158,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				}
 			}
 			providerState := "active"
-			canCreate := obs.Account.Status == "active" && providers.CanCreateCapacity(obs.Capacity)
-			if obs.Account.Status != "active" {
+			accountAllowed, statusErr := capacity.AccountStatusAllowsCreate(ctx, c.DB, id, obs.Account.Status)
+			if statusErr != nil {
+				return
+			}
+			canCreate := accountAllowed && providers.CanCreateCapacity(obs.Capacity)
+			if !accountAllowed {
 				providerState = "disabled"
 			} else if !providers.CanCreateCapacity(obs.Capacity) {
 				providerState = "cannot_create"

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 )
 
@@ -59,7 +60,12 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, map[string]string{"error": "snapshot_store_failed"})
 		return
 	}
-	canCreate := obs.Account.Status == "active" && providers.CanCreateCapacity(obs.Capacity)
+	accountAllowed, statusErr := capacity.AccountStatusAllowsCreate(r.Context(), s.DB, id, obs.Account.Status)
+	if statusErr != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	canCreate := accountAllowed && providers.CanCreateCapacity(obs.Capacity)
 	detail, _ := json.Marshal(map[string]any{"provider_state": "ACTIVE", "provider_error": "", "can_create": canCreate, "server_limit": obs.Capacity.ComputeLimit, "limit_known": obs.Capacity.LimitKnown, "provider_servers": obs.Capacity.ComputeInUse})
 	status := "READY"
 	if !canCreate {

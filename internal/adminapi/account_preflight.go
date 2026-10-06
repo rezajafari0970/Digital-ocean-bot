@@ -50,7 +50,11 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 			account, identityErr = ar.Account(r.Context())
 		}
 		accountStatus = account.Status
-		checks["provider_account_active"] = identityErr == nil && account.Status == "active"
+		allowed, statusErr := capacity.AccountStatusAllowsCreate(r.Context(), s.DB, id, account.Status)
+		checks["provider_account_active"] = identityErr == nil && statusErr == nil && allowed
+		if identityErr == nil && statusErr != nil {
+			identityErr = statusErr
+		}
 		if identityErr == nil {
 			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.ID, account.Email)
 		}
@@ -64,7 +68,7 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		providerError = err.Error()
 	}
-	if accountStatus == "trial_restricted" {
+	if accountStatus == "trial_restricted" && !checks["provider_account_active"] {
 		providerError = capacity.CreateBlockReason("TRIAL_FIREWALL")
 	}
 	block, blockErr := capacity.ReadCreateBlock(r.Context(), s.DB, id)

@@ -65,7 +65,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if profile.SSHAuthorizedKey != "" {
 		authorized = []string{profile.SSHAuthorizedKey}
 	}
-	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
+	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{UpCloudTrialCompatible: profile.UpCloudTrialCompatible, Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {
 		if e.OnCreateError != nil {
 			e.OnCreateError(ctx, err)

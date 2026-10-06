@@ -82,14 +82,15 @@ type Server struct {
 }
 
 type CreateServerRequest struct {
-	Name              string
-	RegionID          string
-	PlanID            string
-	ImageID           string
-	SSHKeyRefs        []string
-	SSHAuthorizedKeys []string
-	Tags              []string
-	Identity          string
+	UpCloudTrialCompatible bool
+	Name                   string
+	RegionID               string
+	PlanID                 string
+	ImageID                string
+	SSHKeyRefs             []string
+	SSHAuthorizedKeys      []string
+	Tags                   []string
+	Identity               string
 }
 
 type MutationOutcome string

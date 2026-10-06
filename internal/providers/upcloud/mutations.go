@@ -56,6 +56,11 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 	iface := func(kind string) map[string]any {
 		return map[string]any{"type": kind, "ip_addresses": map[string]any{"ip_address": []any{map[string]any{"family": "IPv4"}}}}
 	}
+	firewall := "off"
+	if r.UpCloudTrialCompatible {
+		// Keep the provider's immutable trial rules intact. Never mutate rules.
+		firewall = "on"
+	}
 	// Explicit IPv4 interfaces prevent default IPv6 allocation. Guest hardening
 	// and Sanaei activation remain in the common provisioning path.
 	body := map[string]any{"server": map[string]any{
@@ -64,7 +69,7 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 		"login_user":      map[string]any{"username": "root", "create_password": "no", "ssh_keys": map[string]any{"ssh_key": keys}},
 		"networking":      map[string]any{"interfaces": map[string]any{"interface": []any{iface("public"), iface("utility")}}},
 		"storage_devices": map[string]any{"storage_device": []any{map[string]any{"action": "clone", "storage": r.ImageID, "size": int(plan.Disk), "tier": plan.Tier, "title": r.Name + "-root", "address": "virtio:0", "type": "disk", "labels": labels}}},
-		"firewall":        "off", // Shared guest provisioning manages service access, as for DO/Vultr.
+		"firewall":        firewall,
 		"metadata":        "yes", "simple_backup": "no", "remote_access_enabled": "no", "password_delivery": "none",
 	}}
 	var out struct {

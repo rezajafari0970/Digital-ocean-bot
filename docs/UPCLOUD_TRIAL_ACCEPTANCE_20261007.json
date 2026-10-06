@@ -1,0 +1,18 @@
+{
+  "status": "PREDEPLOY_TESTED_LIVE_PENDING",
+  "at_utc": "2026-10-06T21:37:05.129285+00:00",
+  "tests": {
+    "full_go": "PASS",
+    "isolated_postgresql_race_fault": "PASS",
+    "javascript_syntax": "PASS",
+    "server_openai_review": "PASS"
+  },
+  "evidence_directory": "/root/backups/dob-upcloud-trial-20261007",
+  "live": {
+    "created": false,
+    "panel_verified": false,
+    "reality_verified": false,
+    "residential": "NO_COMPATIBLE_ENDPOINTS_0_OF_12"
+  },
+  "scope": "Explicit UpCloud account opt-in; firewall on; pinned panel3389; client80/443; strict IPv4; incompatible residential endpoints excluded, no direct fallback. Other provider behavior preserved."
+}

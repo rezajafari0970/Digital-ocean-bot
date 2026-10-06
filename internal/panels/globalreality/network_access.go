@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"strings"
 )
@@ -54,13 +55,24 @@ PYNETWORK`
 func (s Service) ensureNetworkAccess(ctx context.Context, panel string, ports []int) error {
 	var acc, did, host, user, ref string
 	var panelPort int
+	var trial bool
 	err := s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,pi.droplet_id::text,d.host,COALESCE(d.profile_snapshot->>'ssh_user','root'),
- COALESCE(d.profile_snapshot->>'ssh_key_secret_ref',''),x.port FROM panel_instances pi
- JOIN deployments d ON d.droplet_id=pi.droplet_id JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation
+ COALESCE(d.profile_snapshot->>'ssh_key_secret_ref',''),x.port,COALESCE((d.profile_snapshot->>'upcloud_trial_compatible')::boolean,false) FROM panel_instances pi
+ JOIN LATERAL(SELECT d.* FROM deployments d WHERE d.droplet_id=pi.droplet_id AND d.account_id=pi.account_id ORDER BY d.created_at DESC,d.id DESC LIMIT 1) d ON true JOIN xui_panel_deployments x ON x.droplet_id=pi.droplet_id AND x.generation=d.postinstall_generation
  JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id
- WHERE pi.id=$1 AND pi.enabled AND a.enabled AND a.deletion_requested_at IS NULL AND dr.state='READY'`, panel).Scan(&acc, &did, &host, &user, &ref, &panelPort)
+ WHERE pi.id=$1 AND pi.enabled AND a.enabled AND a.deletion_requested_at IS NULL AND dr.state='READY'`, panel).Scan(&acc, &did, &host, &user, &ref, &panelPort, &trial)
 	if err != nil {
 		return err
+	}
+	if trial {
+		if panelPort != providers.UpCloudTrialPanelPort {
+			return errors.New("UpCloud trial panel ledger has an incompatible management port")
+		}
+		for _, port := range ports {
+			if !providers.UpCloudTrialClientPortAllowed(port) {
+				return errors.New("UpCloud trial permits client ports 80/443; selected port is incompatible")
+			}
+		}
 	}
 	command, err := networkAccessCommand(panelPort, ports)
 	if err != nil {

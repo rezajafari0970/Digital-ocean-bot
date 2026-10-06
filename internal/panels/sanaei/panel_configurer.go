@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 )
 
@@ -48,8 +49,12 @@ func (p PanelConfigurer) Configure(ctx context.Context, accountID, dropletID str
 	user, port, path, ref := panelDefaults(dropletID)
 	var state string
 	var generation int
-	if err := p.DB.QueryRowContext(ctx, `SELECT postinstall_generation FROM deployments WHERE account_id=$1 AND droplet_id=$2 ORDER BY created_at DESC LIMIT 1`, accountID, dropletID).Scan(&generation); err != nil {
+	var trial bool
+	if err := p.DB.QueryRowContext(ctx, `SELECT postinstall_generation,COALESCE((profile_snapshot->>'upcloud_trial_compatible')::boolean,false) FROM deployments WHERE account_id=$1 AND droplet_id=$2 ORDER BY created_at DESC,id DESC LIMIT 1`, accountID, dropletID).Scan(&generation, &trial); err != nil {
 		return err
+	}
+	if trial {
+		port = providers.UpCloudTrialPanelPort
 	}
 	err := p.DB.QueryRowContext(ctx, `SELECT username,password_secret_ref,port,web_path,state FROM xui_panel_deployments WHERE droplet_id=$1 AND generation=$2`, dropletID, generation).Scan(&user, &ref, &port, &path, &state)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -65,6 +70,9 @@ func (p PanelConfigurer) Configure(ctx context.Context, accountID, dropletID str
 	}
 	if err != nil {
 		return err
+	}
+	if trial && port != providers.UpCloudTrialPanelPort {
+		return errors.New("trial panel ledger port conflicts with immutable deployment mode")
 	}
 	if state == "COMPLETED" {
 		return nil
@@ -158,6 +166,7 @@ func (p PanelConfigurer) RepairCompleted(
 		port      int
 		webPath   string
 		state     string
+		trial     bool
 	)
 
 	err := p.DB.QueryRowContext(
@@ -169,14 +178,15 @@ p.username,
 p.password_secret_ref,
 p.port,
 p.web_path,
-p.state
+p.state,
+COALESCE((d.profile_snapshot->>'upcloud_trial_compatible')::boolean,false)
 FROM deployments d
 JOIN xui_panel_deployments p
   ON p.droplet_id=d.droplet_id
  AND p.generation=d.postinstall_generation
 WHERE d.account_id=$1
   AND d.droplet_id=$2
-ORDER BY d.created_at DESC
+ORDER BY d.created_at DESC,d.id DESC
 LIMIT 1
 `,
 		accountID,
@@ -188,12 +198,16 @@ LIMIT 1
 		&port,
 		&webPath,
 		&state,
+		&trial,
 	)
 
 	if err != nil {
 		return err
 	}
 
+	if trial && port != providers.UpCloudTrialPanelPort {
+		return errors.New("trial panel repair requires its pinned management port")
+	}
 	_ = generation
 
 	if state != "COMPLETED" {

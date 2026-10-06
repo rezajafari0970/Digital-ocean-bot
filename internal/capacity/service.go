@@ -54,7 +54,13 @@ func Read(ctx context.Context, q Querier, accountID string, maxAge time.Duration
 		return x, ErrSnapshotMissing
 	}
 	if accountStatus == "trial_restricted" {
-		return x, ErrCreateBlocked
+		allowed, err := AccountStatusAllowsCreate(ctx, q, accountID, accountStatus)
+		if err != nil {
+			return x, err
+		}
+		if !allowed {
+			return x, ErrCreateBlocked
+		}
 	}
 	return x, nil
 }

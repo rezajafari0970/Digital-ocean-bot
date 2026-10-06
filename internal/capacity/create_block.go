@@ -20,7 +20,7 @@ type CreateBlock struct {
 
 func CreateBlockReason(code string) string {
 	if code == "TRIAL_FIREWALL" {
-		return "UpCloud trial firewall restriction (TRIAL_FIREWALL). This deployment requires ports unavailable during the trial. Resolve the trial restriction with UpCloud, then enable a retry."
+		return "UpCloud trial firewall restriction (TRIAL_FIREWALL). The standard deployment disables a firewall locked during the trial. Use the restricted trial-compatible deployment option, or resolve the restriction with UpCloud before retrying."
 	}
 	return "UpCloud rejected server creation (" + code + "). Resolve the provider permission restriction, then enable a retry."
 }

@@ -10,6 +10,8 @@ import (
 )
 
 type accountBuildState struct {
+	TrialCompatible                                     bool
+	TrialProxyCandidates                                int
 	Enabled                                             bool
 	State, Reason, ProviderFreshness, CapacityFreshness string
 	ProviderCanCreate, SchedulerCanBuild                bool
@@ -31,8 +33,8 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
  (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
  (SELECT count(*) FROM deployments WHERE account_id=a.id AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
  (SELECT count(*) FROM operations WHERE account_id=a.id AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND state IN ('planned','running','verifying','unknown')),
- ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status','')
- FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus)
+ ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END
+ FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &x.TrialCompatible, &x.TrialProxyCandidates)
 	if err != nil {
 		return x, err
 	}
@@ -78,10 +80,10 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 		x.Reason = "Account disabled in panel"
 	case x.Block != nil:
 		x.Reason = capacity.CreateBlockReason(x.Block.Code)
-	case accountStatus == "trial_restricted":
+	case accountStatus == "trial_restricted" && !x.TrialCompatible:
 		x.State = "TRIAL_RESTRICTED"
 		x.Reason = capacity.CreateBlockReason("TRIAL_FIREWALL")
-	case accountStatus != "" && accountStatus != "active" && x.State == "ACTIVE" && errorState == "":
+	case accountStatus != "" && accountStatus != "active" && !(accountStatus == "trial_restricted" && x.TrialCompatible) && x.State == "ACTIVE" && errorState == "":
 		x.State = "PROVIDER_WARNING"
 		x.Reason = "Provider account status: " + accountStatus
 	case x.State != "ACTIVE":
@@ -116,7 +118,7 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 		}
 	}
 	// Unknown/stale capacity stays unknown. A definitive block is a known zero.
-	knownBlocked := accountStatus == "trial_restricted" || !x.Enabled || x.Block != nil || (x.State != "ACTIVE" && x.State != "UNKNOWN" && x.State != "") || errorState != "" || x.DesiredRemaining == 0
+	knownBlocked := (accountStatus == "trial_restricted" && !x.TrialCompatible) || !x.Enabled || x.Block != nil || (x.State != "ACTIVE" && x.State != "UNKNOWN" && x.State != "") || errorState != "" || x.DesiredRemaining == 0
 	if knownBlocked {
 		n := 0
 		x.Buildable = &n

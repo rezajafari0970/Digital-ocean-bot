@@ -34,6 +34,6 @@ func (s ProfileStore) AttachSnapshot(ctx context.Context, deploymentID string, p
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,profile_snapshot=$2 WHERE id=$1 AND profile_snapshot='{}'::jsonb`, deploymentID, raw)
+	_, err = s.DB.ExecContext(ctx, `UPDATE deployments d SET lock_version=d.lock_version+1,profile_snapshot=jsonb_set($2::jsonb,'{upcloud_trial_compatible}',to_jsonb(a.provider='upcloud' AND a.upcloud_trial_compatible),true) FROM accounts a WHERE d.id=$1 AND a.id=d.account_id AND d.profile_snapshot='{}'::jsonb`, deploymentID, raw)
 	return err
 }
