@@ -1,0 +1,35 @@
+{
+  "goal": "Fix account deletion end-to-end for every provider: truthful durable progress and completion, idempotent retries, fair worker claiming, retained cleanup network, regression and browser fault acceptance.",
+  "context": "Canonical HEAD7f5d7dc, runtime1eb7acd, migration157. User recording shows Upcloud11 with zero tracked servers, attempts3, waiting for in-flight work. Live read confirms account now purged and no active deletion jobs; do not claim it is still stuck. Root observed UX issue: fixed2min settle +60s retry is not explained or timed, generic accepted toast no completion, poll races/reset scroll. Verified source defects: repeat DELETE after purge404; worker selects oldest job BEFORE advisory-lock so locked head starves others and misses due recheck; canceled context prevents recording timeout; proxy keeper stops on last droplet even while deletion job still needs final provider/SSH checks. Fix these shared paths without reducing required provider-absence safety or deleting credentials prematurely. Keep fixed2min safety settle, schedule exactly boundary; persisted next_attempt and structured progress incl pending operations/keys, retry time and local purge eligibility. UI must distinguish queued/settling/cleanup/blocked and completion, preserve position, handle lost response and duplicate clicks. Explicit local-only purge remains acknowledged separate path, never automatic. Protect unrelated accounts, scoped gates, config/client/residential settings. Fake providers and isolated BULK_TEST database only for tests. No live cloud creates/deletes just for testing; no pending real account jobs currently to expedite. Use AI OS and source-grounded OpenAI review; keep test outputs. Tests race/fault, PostgreSQL all3provider identities, lock head, timeout, duplicate, transaction rollback, mobile/desktop browser completion. Build disk tmp, deploy exact clean source with backup rollback. No transport experiments.",
+  "allowed_paths": [
+    "internal/app/account_deletion.go",
+    "internal/app/account_network_maintenance.go",
+    "internal/adminapi/accounts_manage.go",
+    "internal/adminapi/account_deletion_test.go",
+    "internal/adminapi/account_deletion_browser_test.go",
+    "internal/adminapi/account_purge_test.go",
+    "cmd/worker/main.go",
+    "web/static/app.js",
+    "web/tests/account-deletion.cjs",
+    "tools/account-deletion-acceptance.sh",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/account-deletion-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "bash tools/account-deletion-acceptance.sh verify-fault",
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(accounts): make durable deletion progress reliable across providers"
+}

@@ -164,18 +164,10 @@ func main() {
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		run := func() {
-			rows, err := application.DB.QueryContext(ctx, `SELECT a.id::text FROM accounts a JOIN network_profiles np ON np.account_id=a.id WHERE np.mode='proxy_required' AND (a.enabled=true OR (a.deletion_requested_at IS NOT NULL AND EXISTS(SELECT 1 FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED')))`)
+			ids, err := application.Container.AccountNetworkMaintenanceIDs(ctx)
 			if err != nil {
 				return
 			}
-			var ids []string
-			for rows.Next() {
-				var id string
-				if rows.Scan(&id) == nil {
-					ids = append(ids, id)
-				}
-			}
-			rows.Close()
 			sem := make(chan struct{}, 64)
 			var wg sync.WaitGroup
 			for _, id := range ids {

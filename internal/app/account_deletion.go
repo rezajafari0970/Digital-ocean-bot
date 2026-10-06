@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -18,40 +17,23 @@ type sshKeyInventory interface {
 // ProcessAccountDeletions is bounded and worker-only. Requests persist until
 // provider absence is established; transport/auth failures never erase credentials.
 func (c Container) ProcessAccountDeletions(ctx context.Context) error {
-	var id string
-	err := c.DB.QueryRowContext(ctx, `SELECT account_id::text FROM account_deletion_jobs WHERE next_attempt_at<=now() ORDER BY requested_at LIMIT 1`).Scan(&id)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil
-	}
-	if err != nil {
+	// Also bound callers outside the periodic worker. Earlier deadlines win.
+	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	defer cancel()
+	id, release, err := c.claimAccountDeletion(ctx)
+	if err != nil || id == "" {
 		return err
 	}
-	conn, err := c.DB.Conn(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	var locked bool
-	if err = conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,713))", id).Scan(&locked); err != nil || !locked {
-		return err
-	}
-	defer func() {
-		unlock, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
-		if _, e := conn.ExecContext(unlock, "SELECT pg_advisory_unlock(hashtextextended($1,713))", id); e != nil {
-			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
-		}
-	}()
-	_, err = c.DB.ExecContext(ctx, `UPDATE account_deletion_jobs SET attempts=attempts+1,next_attempt_at=now()+interval '1 minute' WHERE account_id=$1`, id)
-	if err != nil {
-		return err
-	}
+	defer release()
 	err = c.finishAccountDeletion(ctx, id)
 	if err != nil {
+		// A timed-out provider call must still leave a current, bounded status.
+		persist, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
 		// Error codes shown in the UI contain no provider credentials or URLs.
 		detail := "Provider cleanup pending; " + deletionErrorCode(err)
 		var state string
-		if e := c.DB.QueryRowContext(ctx, "SELECT provider_state FROM accounts WHERE id=$1", id).Scan(&state); e == nil {
+		if e := c.DB.QueryRowContext(persist, "SELECT provider_state FROM accounts WHERE id=$1", id).Scan(&state); e == nil {
 			switch state {
 			case "TOKEN_INVALID":
 				detail = "Deletion blocked: provider token is invalid. Update the API credential to verify and delete remaining servers."
@@ -63,12 +45,111 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 				detail = "Deletion blocked: provider billing restriction prevents resource cleanup."
 			}
 		}
-		_, _ = c.DB.ExecContext(ctx, `UPDATE account_deletion_jobs SET last_error=$2,next_attempt_at=now()+($3*interval '1 second') WHERE account_id=$1`, id, detail, deletionRetrySeconds(state))
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='DELETE_PENDING',runtime_status_detail=$2,deleted_at=NULL WHERE id=$1 AND deletion_requested_at IS NOT NULL`, id, detail)
+		tx, saveErr := c.DB.BeginTx(persist, nil)
+		if saveErr != nil {
+			return errors.Join(err, fmt.Errorf("persist deletion status: %w", saveErr))
+		}
+		defer tx.Rollback()
+		_, saveErr = tx.ExecContext(persist, `UPDATE account_deletion_jobs SET last_error=$2,next_attempt_at=CASE WHEN $4 THEN GREATEST(now(),requested_at+interval '2 minutes') ELSE now()+($3*interval '1 second') END WHERE account_id=$1`, id, detail, deletionRetrySeconds(state), errors.Is(err, errDeletionSettling))
+		if saveErr == nil {
+			_, saveErr = tx.ExecContext(persist, `UPDATE accounts SET runtime_status='DELETE_PENDING',runtime_status_detail=$2,deleted_at=NULL WHERE id=$1 AND deletion_requested_at IS NOT NULL`, id, detail)
+		}
+		if saveErr == nil {
+			saveErr = tx.Commit()
+		}
+		if saveErr != nil {
+			return errors.Join(err, fmt.Errorf("persist deletion status: %w", saveErr))
+		}
 	}
 	return err
 }
+
+var errDeletionSettling = errors.New("waiting for in-flight account work to settle")
+
+// Claim fairly, skipping another worker's locked account. Recheck the due time
+// under the session lock: a candidate may already have been processed.
+func (c Container) claimAccountDeletion(ctx context.Context) (string, func(), error) {
+	conn, err := c.DB.Conn(ctx)
+	if err != nil {
+		return "", nil, err
+	}
+	unlock := func(id string) {
+		cleanup, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		if _, e := conn.ExecContext(cleanup, "SELECT pg_advisory_unlock(hashtextextended($1,713))", id); e != nil {
+			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+		}
+	}
+	type candidate struct {
+		id             string
+		due, requested time.Time
+	}
+	var last candidate
+	var after any
+	for {
+		// Keyset pagination also skips a whole page of locked candidates. The
+		// caller's work deadline bounds the scan, not a starvation-prone prefix.
+		rows, e := conn.QueryContext(ctx, `SELECT account_id::text,next_attempt_at,requested_at FROM account_deletion_jobs
+ WHERE next_attempt_at<=now() AND ($1::timestamptz IS NULL OR (next_attempt_at,requested_at,account_id)>($1::timestamptz,$2::timestamptz,NULLIF($3,'')::uuid))
+ ORDER BY next_attempt_at,requested_at,account_id LIMIT 32`, after, last.requested, last.id)
+		if e != nil {
+			conn.Close()
+			return "", nil, e
+		}
+		var candidates []candidate
+		for rows.Next() {
+			var v candidate
+			if e = rows.Scan(&v.id, &v.due, &v.requested); e != nil {
+				rows.Close()
+				conn.Close()
+				return "", nil, e
+			}
+			candidates = append(candidates, v)
+		}
+		e = rows.Err()
+		rows.Close()
+		if e != nil || len(candidates) == 0 {
+			conn.Close()
+			return "", nil, e
+		}
+		for _, v := range candidates {
+			id := v.id
+			var locked bool
+			if err = conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,713))", id).Scan(&locked); err != nil {
+				// An interrupted response can hide a successfully acquired lock.
+				_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+				conn.Close()
+				return "", nil, err
+			}
+			if !locked {
+				continue
+			}
+			res, e := conn.ExecContext(ctx, `UPDATE account_deletion_jobs SET attempts=attempts+1,next_attempt_at=now()+interval '1 minute' WHERE account_id=$1 AND next_attempt_at<=now()`, id)
+			if e != nil {
+				unlock(id)
+				conn.Close()
+				return "", nil, e
+			}
+			n, e := res.RowsAffected()
+			if e != nil {
+				unlock(id)
+				conn.Close()
+				return "", nil, e
+			}
+			if n == 1 {
+				return id, func() { unlock(id); conn.Close() }, nil
+			}
+			unlock(id)
+		}
+		last = candidates[len(candidates)-1]
+		after = last.due
+	}
+}
+
 func deletionErrorCode(err error) string {
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return "verification interrupted or timed out; automatic retry scheduled"
+	}
 	if errors.Is(err, ErrNetworkNotReady) {
 		return "account network not ready"
 	}
@@ -107,7 +188,7 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 			return err
 		}
 		if !settled {
-			return errors.New("waiting for in-flight account work to settle")
+			return errDeletionSettling
 		}
 
 		rt, err := c.CleanupRuntime(ctx, id)

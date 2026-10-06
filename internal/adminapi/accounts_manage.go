@@ -7,6 +7,8 @@ import (
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type accountUpdate struct {
@@ -218,33 +220,42 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	r = r.WithContext(ctx)
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	defer tx.Rollback()
-	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "deployment-admission:"+id); err != nil {
+	if _, err = tx.ExecContext(ctx, "SET LOCAL lock_timeout='2s'"); err != nil {
 		writeJSON(w, 500, errorBody())
+		return
+	}
+	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "deployment-admission:"+id); err != nil {
+		w.Header().Set("Retry-After", "3")
+		writeJSON(w, 503, map[string]string{"error": "account_busy", "detail": "Account work is settling. Retry deletion shortly."})
 		return
 	}
 	if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "account-mutation:"+id); err != nil {
-		writeJSON(w, 500, errorBody())
+		w.Header().Set("Retry-After", "3")
+		writeJSON(w, 503, map[string]string{"error": "account_busy", "detail": "Account work is settling. Retry deletion shortly."})
 		return
 	}
 	var live int
-	if err = tx.QueryRowContext(r.Context(), `SELECT GREATEST((SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM resources WHERE account_id=$1 AND managed=true AND state<>'deleted'))`, id).Scan(&live); err != nil {
+	if err = tx.QueryRowContext(r.Context(), `SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=$1 AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=$1 AND managed AND state<>'deleted') remaining`, id).Scan(&live); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status='DELETE_PENDING',runtime_status_detail='deletion requested; cleanup and data purge pending',deleted_at=NULL,updated_at=now() WHERE id=$1`, id)
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET enabled=false,deletion_requested_at=COALESCE(deletion_requested_at,now()),runtime_status='DELETE_PENDING',runtime_status_detail=CASE WHEN deletion_requested_at IS NULL THEN 'deletion requested; cleanup and data purge pending' ELSE runtime_status_detail END,deleted_at=NULL,updated_at=now() WHERE id=$1`, id)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	n, _ := res.RowsAffected()
 	if n == 0 {
-		writeJSON(w, 404, map[string]string{"error": "not_found"})
+		writeJSON(w, 200, map[string]any{"state": "ABSENT", "detail": "Account is already absent from this panel."})
 		return
 	}
 	if _, err = tx.ExecContext(r.Context(), `UPDATE schedules SET enabled=false,lease_until=NULL,updated_at=now() WHERE account_id=$1`, id); err != nil {
@@ -264,7 +275,7 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if _, err = tx.ExecContext(r.Context(), `INSERT INTO account_deletion_jobs(account_id) VALUES($1) ON CONFLICT(account_id) DO UPDATE SET next_attempt_at=now()`, id); err != nil {
+	if _, err = tx.ExecContext(r.Context(), `INSERT INTO account_deletion_jobs(account_id,requested_at) SELECT id,deletion_requested_at FROM accounts WHERE id=$1 ON CONFLICT(account_id) DO UPDATE SET next_attempt_at=now()`, id); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
@@ -276,21 +287,56 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "detail": "Deletion requested. Managed provider resources must be verified absent before saved account data is purged."})
+	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "deletion": s.accountDeletionProgress(r.Context(), id), "detail": "Deletion requested. Managed provider resources must be verified absent before saved account data is purged."})
 }
 
 func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
-	var requested sql.NullTime
-	var attempts, remaining int
+	var requested, next sql.NullTime
+	var attempts, remaining, operations, deployments, keys int
 	var detail, providerState string
+	var ever bool
+	var now time.Time
 	err := s.DB.QueryRowContext(ctx, `SELECT a.deletion_requested_at,COALESCE(j.attempts,0),
  (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining),
- COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker'),a.provider_state
- FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail, &providerState)
+ COALESCE(NULLIF(j.last_error,''),a.runtime_status_detail,'Waiting for worker'),a.provider_state,
+ j.next_attempt_at,now(),
+ (SELECT count(*) FROM operations WHERE account_id=a.id AND state NOT IN ('succeeded','failed')),
+ (SELECT count(*) FROM deployments WHERE account_id=a.id AND state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY')),
+ (SELECT count(*) FROM account_deletion_keys WHERE account_id=a.id AND state<>'SUCCEEDED'),
+ EXISTS(SELECT 1 FROM droplets WHERE account_id=a.id) OR EXISTS(SELECT 1 FROM resources WHERE account_id=a.id) OR EXISTS(SELECT 1 FROM deployments WHERE account_id=a.id) OR EXISTS(SELECT 1 FROM operations WHERE account_id=a.id)
+ FROM accounts a LEFT JOIN account_deletion_jobs j ON j.account_id=a.id WHERE a.id=$1`, id).Scan(&requested, &attempts, &remaining, &detail, &providerState, &next, &now, &operations, &deployments, &keys, &ever)
 	if err != nil || !requested.Valid {
 		return nil
 	}
-	return map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail, "provider_state": providerState}
+	phase := "VERIFYING"
+	settleUntil := requested.Time.Add(2 * time.Minute)
+	settling := ever && now.Before(settleUntil)
+	switch {
+	case remaining > 0 || operations > 0 || deployments > 0 || keys > 0:
+		phase = "CLEANUP"
+	case settling:
+		phase = "SETTLING"
+		detail = "Safety wait for earlier provider requests to settle. Cleanup continues automatically; no extra click is needed."
+	case attempts == 0:
+		phase = "QUEUED"
+	}
+	if phase == "VERIFYING" && strings.Contains(detail, "waiting for in-flight") {
+		detail = "Safety wait completed. Final provider verification is scheduled."
+	}
+	blocked := providerState == "LOCKED" || providerState == "TOKEN_INVALID" || providerState == "PERMISSION_DENIED" || providerState == "BILLING_BLOCKED"
+	if strings.HasPrefix(detail, "Deletion blocked:") {
+		phase = "BLOCKED"
+	}
+	out := map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail, "provider_state": providerState,
+		"phase": phase, "server_now": now, "pending_operations": operations, "pending_deployments": deployments, "pending_keys": keys,
+		"local_purge_allowed": blocked && !now.Before(settleUntil)}
+	if next.Valid {
+		out["next_attempt_at"] = next.Time
+	}
+	if settling {
+		out["settle_until"] = settleUntil
+	}
+	return out
 }
 
 // purgeAccount only accepts explicit acknowledgement of unverified cloud
