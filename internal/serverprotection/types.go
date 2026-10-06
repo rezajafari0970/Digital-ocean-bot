@@ -44,6 +44,8 @@ type Metrics struct {
 	CPUHotCorePercent  float64 `json:"cpu_hot_core_percent"`
 	CPUStealPercent    float64 `json:"cpu_steal_percent"`
 	FDPercent          float64 `json:"fd_percent"`
+	ProcessFDPercent   float64 `json:"process_fd_percent"`
+	ProcessFDKnown     bool    `json:"process_fd_known"`
 	ConntrackPercent   float64 `json:"conntrack_percent"`
 	DiskFreeMB         float64 `json:"disk_free_mb"`
 	DiskFreePercent    float64 `json:"disk_free_percent"`

@@ -9,6 +9,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/upcloud"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/vultr"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
+	"time"
 )
 
 type Application struct {
@@ -18,6 +19,17 @@ type Application struct {
 }
 
 func Bootstrap(ctx context.Context) (*Application, error) {
+	return bootstrap(ctx, 24)
+}
+
+// Worker leases hold connections while bounded network work runs. Keep a
+// separate, larger budget so lease holders can still execute SQL. With one
+// API and one worker this reserves at most 88 of the default 100 connections.
+func BootstrapWorker(ctx context.Context) (*Application, error) {
+	return bootstrap(ctx, 64)
+}
+
+func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {
 	cfg, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -26,6 +38,12 @@ func Bootstrap(ctx context.Context) (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
+	// API and worker have separate pools. Leave headroom within PostgreSQL's
+	// connection budget for migrations, operators and bounded advisory leases.
+	db.SetMaxOpenConns(maxOpen)
+	db.SetMaxIdleConns(8)
+	db.SetConnMaxIdleTime(2 * time.Minute)
+	db.SetConnMaxLifetime(30 * time.Minute)
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
 		return nil, err

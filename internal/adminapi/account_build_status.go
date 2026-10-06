@@ -81,6 +81,9 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	case accountStatus == "trial_restricted":
 		x.State = "TRIAL_RESTRICTED"
 		x.Reason = capacity.CreateBlockReason("TRIAL_FIREWALL")
+	case accountStatus != "" && accountStatus != "active" && x.State == "ACTIVE" && errorState == "":
+		x.State = "PROVIDER_WARNING"
+		x.Reason = "Provider account status: " + accountStatus
 	case x.State != "ACTIVE":
 		x.Reason = strings.ReplaceAll(x.State, "_", " ")
 		if e, ok := meta["provider_error"].(string); ok && e != "" {

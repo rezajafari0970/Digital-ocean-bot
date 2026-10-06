@@ -176,7 +176,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			if existing != "" {
 				return nil
 			}
-			_, qerr := c.startDeployment(ctx, item.AccountID, item.ProfileID, false, item.ID)
+			_, qerr := c.prepareDeployment(ctx, item.AccountID, item.ProfileID, false, item.ID, true)
 			return qerr
 		}
 		if !terminalFailed {

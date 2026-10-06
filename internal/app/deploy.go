@@ -24,6 +24,10 @@ func (c Container) StartDeployment(ctx context.Context, accountID, profileID str
 }
 
 func (c Container) startDeployment(ctx context.Context, accountID, profileID string, consumeBackfill bool, replacementDropletID string) (workflow.Deployment, error) {
+	return c.prepareDeployment(ctx, accountID, profileID, consumeBackfill, replacementDropletID, false)
+}
+
+func (c Container) prepareDeployment(ctx context.Context, accountID, profileID string, consumeBackfill bool, replacementDropletID string, enqueue bool) (workflow.Deployment, error) {
 	if err := c.MaintainStickyIdentity(ctx, accountID); err != nil {
 		return workflow.Deployment{}, err
 	}
@@ -68,8 +72,15 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 		return workflow.Deployment{}, ErrDatabaseTemplateUnavailable
 	}
 	var enabled bool
+	var maxConcurrent, activeBuilds int
 	var runtimeStatus, providerState, providerError string
-	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
+	if err = tx.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,''),auto_max_concurrent FROM accounts WHERE id=$1`, accountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError, &maxConcurrent); err != nil || !enabled || runtimeStatus != "READY" || providerState != ProviderStateActive || providerError != "" {
+		return workflow.Deployment{}, ErrCapacityUnavailable
+	}
+	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets v WHERE v.id=d.droplet_id AND v.state<>'DELETED'))`, accountID).Scan(&activeBuilds); err != nil {
+		return workflow.Deployment{}, err
+	}
+	if maxConcurrent > 0 && activeBuilds >= maxConcurrent {
 		return workflow.Deployment{}, ErrCapacityUnavailable
 	}
 	var desired, managed, preCreate int
@@ -145,9 +156,6 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 			return d, ErrCapacityUnavailable
 		}
 	}
-	if err = tx.Commit(); err != nil {
-		return d, err
-	}
 	effective := profile.Config
 	var regions, sizes, images []string
 	_ = json.Unmarshal(regionsRaw, &regions)
@@ -213,6 +221,10 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 			}
 		}
 		images = filtered
+		quarantined, qerr := bootImageQuarantine(ctx, tx, accountID, effective.Region, effective.Size)
+		if qerr != nil {
+			return d, qerr
+		}
 		good := make(map[string]bool, len(images))
 		bad := make(map[string]bool, len(images))
 		rows, qerr := c.DB.QueryContext(ctx, "SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200", accountID, pq.Array(images))
@@ -234,6 +246,9 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 		proven := make([]string, 0, len(images))
 		neutral := make([]string, 0, len(images))
 		for _, image := range images {
+			if quarantined[image] {
+				continue
+			}
 			if good[image] {
 				proven = append(proven, image)
 			} else if !bad[image] {
@@ -245,7 +260,7 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 		} else if len(neutral) > 0 {
 			effective.Image = neutral[rand.Intn(len(neutral))]
 		} else {
-			return d, &providers.Error{Class: providers.ErrorImageUnavailable, Operation: "select_image", Message: "all configured available images are quarantined"}
+			return d, &providers.Error{Class: providers.ErrorImageUnavailable, Operation: "select_image", Message: "all configured available images are unavailable or in a one-hour boot-failure cooldown for this region and plan"}
 		}
 	}
 	if lifetimeMin > 0 {
@@ -269,7 +284,22 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 			effective.InstallSteps = append([]provisioning.ScriptStep(nil), defaultProvisionPlan().Scripts...)
 		}
 	}
-	if err := profiles.AttachSnapshot(ctx, d.ID, effective); err != nil {
+	// The immutable selection and its reservation become visible atomically.
+	// A crash before this commit leaves neither an incomplete job nor a slot.
+	if err := (workflow.ProfileStore{DB: tx}).AttachSnapshot(ctx, d.ID, effective); err != nil {
+		return d, err
+	}
+	// Hold the same lease as recovery while preparing the external SSH identity.
+	release, err := (workflow.PostgresRunLease{DB: c.DB}).Acquire(ctx, d.ID)
+	if err != nil {
+		return d, err
+	}
+	defer func() {
+		if release != nil {
+			release()
+		}
+	}()
+	if err = tx.Commit(); err != nil {
 		return d, err
 	}
 	// Every deployment receives its own SSH key pair before the provider
@@ -281,6 +311,9 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 	if err := c.ensureDeploymentSSHIdentity(ctx, accountID, d, &snap); err != nil {
 		return d, err
 	}
+	if enqueue {
+		return (workflow.SQLStore{DB: c.DB}).Get(ctx, d.ID, accountID)
+	}
 	cfg, _, err := c.DeploymentConfigFromSnapshot(ctx, d.ID)
 	if err != nil {
 		return d, err
@@ -289,5 +322,7 @@ func (c Container) startDeployment(ctx context.Context, accountID, profileID str
 	if err != nil {
 		return d, err
 	}
+	release()
+	release = nil
 	return engine.Run(ctx, workflow.Request{DeploymentID: d.ID, AccountID: accountID, ProfileID: profileID, ClientCount: profile.Config.ClientCount, InboundID: profile.Config.InboundID, EmailPrefix: profile.Config.EmailPrefix})
 }

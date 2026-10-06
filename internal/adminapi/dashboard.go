@@ -3,6 +3,7 @@ package adminapi
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -41,16 +42,28 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": build.State, "provider_reason": build.Reason, "can_create": build.SchedulerCanBuild, "provider_can_create": build.ProviderCanCreate, "scheduler_can_build": build.SchedulerCanBuild, "scheduler_reason": build.SchedulerReason, "create_block": build.Block}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	d.Billing = s.accountBilling(r.Context(), id)
 	var total, managed, active int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state<>'deleted'),count(*) FILTER(WHERE state<>'deleted' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1 AND type='server'`, id).Scan(&total, &managed, &active)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state<>'deleted'),count(*) FILTER(WHERE state<>'deleted' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1 AND type='server'`, id).Scan(&total, &managed, &active); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
 
 	limit, limitKnown, providerDroplets := build.Limit, build.LimitKnown, build.InUse
 	var lastRefresh sql.NullTime
-	_ = s.DB.QueryRowContext(r.Context(), "SELECT created_at FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1", id).Scan(&lastRefresh)
+	if err := s.DB.QueryRowContext(r.Context(), "SELECT created_at FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1", id).Scan(&lastRefresh); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	var lastCreated sql.NullTime
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT max(created_at) FROM droplets WHERE account_id=$1`, id).Scan(&lastCreated)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT max(created_at) FROM droplets WHERE account_id=$1`, id).Scan(&lastCreated); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	var managedDroplets int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id).Scan(&managedDroplets)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id).Scan(&managedDroplets); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	providerAvailable := limit - providerDroplets
 	if providerAvailable < 0 {
 		providerAvailable = 0
@@ -66,7 +79,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	var desiredServers int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT desired_server_count FROM accounts WHERE id=$1`, id).Scan(&desiredServers)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT desired_server_count FROM accounts WHERE id=$1`, id).Scan(&desiredServers); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	desiredRemaining := build.DesiredRemaining
 	if desiredRemaining < 0 {
 		desiredRemaining = 0
@@ -95,13 +111,22 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	var mode, status string
 	var proxyID sql.NullString
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT n.mode,n.proxy_id::text,COALESCE(p.status,'') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&mode, &proxyID, &status)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT n.mode,n.proxy_id::text,COALESCE(p.status,'') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&mode, &proxyID, &status); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	d.Network = map[string]any{"mode": mode, "proxy_id": proxyID.String, "proxy_status": status, "isolation_status": "unknown"}
 	var proxyAdapter string
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(p.adapter,'generic') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&proxyAdapter)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(p.adapter,'generic') FROM network_profiles n LEFT JOIN proxies p ON p.id=n.proxy_id WHERE n.account_id=$1`, id).Scan(&proxyAdapter); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	d.Network["egress_mode"] = proxyAdapter
 	var poolSize, healthyPool int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE ap.enabled),count(*) FILTER(WHERE ap.enabled AND p.status='healthy') FROM account_proxy_pool ap JOIN proxies p ON p.id=ap.proxy_id WHERE ap.account_id=$1`, id).Scan(&poolSize, &healthyPool)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE ap.enabled),count(*) FILTER(WHERE ap.enabled AND p.status='healthy') FROM account_proxy_pool ap JOIN proxies p ON p.id=ap.proxy_id WHERE ap.account_id=$1`, id).Scan(&poolSize, &healthyPool); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	d.Network["proxy_pool_size"] = poolSize
 	d.Network["healthy_proxy_count"] = healthyPool
 	var opKind, opState, opResource string
@@ -130,7 +155,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(host(exit_ip),''),COALESCE(subnet_key,''),COALESCE(asn,''),COALESCE(country,''),COALESCE(country_code,''),timezone,locale,COALESCE(preferred_country,''),COALESCE(preferred_country_code,''),COALESCE(sticky_session,''),fallback_active,last_health_at,last_health_ok,rotation_started_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&exitIP, &subnet, &asn, &country, &countryCode, &timezone, &locale, &preferredCountry, &preferredCode, &stickySession, &fallbackActive, &lastHealth, &lastHealthOK, &rotationStarted); err == nil {
 		isolation := "isolated"
 		var collision bool
-		_ = s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND ((exit_ip IS NOT NULL AND exit_ip=$2::inet) OR (subnet_key<>'' AND subnet_key=$3)))`, id, exitIP, subnet).Scan(&collision)
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND ((exit_ip IS NOT NULL AND exit_ip=NULLIF($2,'')::inet) OR (subnet_key<>'' AND subnet_key=$3)))`, id, exitIP, subnet).Scan(&collision); err != nil && !errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, 500, errorBody())
+			return
+		}
 		if collision {
 			isolation = "collision"
 		}
@@ -155,17 +183,35 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	var circuit string
 	var failures int
 	var retry sql.NullTime
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT circuit_state,consecutive_failures,retry_after FROM account_runtime_state WHERE account_id=$1`, id).Scan(&circuit, &failures, &retry)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT circuit_state,consecutive_failures,retry_after FROM account_runtime_state WHERE account_id=$1`, id).Scan(&circuit, &failures, &retry); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if d.Runtime == nil {
 		d.Runtime = map[string]any{}
 	}
 	d.Runtime["circuit"] = circuit
 	d.Runtime["failures"] = failures
 	d.Runtime["retry_after"] = retry.Time
+	bootStore := s.Container
+	bootStore.DB = s.DB
+	bootCircuits, err := bootStore.BootFailureCircuits(r.Context(), id)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	d.Runtime["boot_circuits"] = bootCircuits
 	var running, ready int
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE state='READY') FROM deployments WHERE account_id=$1`, id).Scan(&running, &ready)
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE d.state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE d.state IN ('READY','PANEL_COMPLETE') AND dr.state='READY') FROM deployments d LEFT JOIN droplets dr ON dr.id=d.droplet_id WHERE d.account_id=$1 AND (dr.id IS NULL OR dr.state<>'DELETED')`, id).Scan(&running, &ready); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	d.Deployments = map[string]any{"active_now": running, "ready_now": ready}
-	rowsFail, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,current_step,attempt,COALESCE(last_error,''),updated_at FROM deployments WHERE account_id=$1 AND state='FAILED' AND updated_at > now()-interval '24 hours' ORDER BY updated_at DESC LIMIT 10`, id)
+	rowsFail, historyErr := s.DB.QueryContext(r.Context(), `SELECT id::text,current_step,attempt,COALESCE(last_error,''),updated_at FROM deployments WHERE account_id=$1 AND state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK') AND updated_at > now()-interval '24 hours' ORDER BY updated_at DESC LIMIT 10`, id)
+	if historyErr != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if rowsFail != nil {
 		defer rowsFail.Close()
 		history := []map[string]any{}
@@ -173,30 +219,54 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 			var did, step, msg string
 			var attempt int
 			var at time.Time
-			if rowsFail.Scan(&did, &step, &attempt, &msg, &at) == nil {
-				history = append(history, map[string]any{"id": did, "step": step, "attempt": attempt, "error": msg, "updated_at": at})
+			if err := rowsFail.Scan(&did, &step, &attempt, &msg, &at); err != nil {
+				writeJSON(w, 500, errorBody())
+				return
 			}
+			history = append(history, map[string]any{"id": did, "step": step, "attempt": attempt, "error": msg, "updated_at": at})
+		}
+		if rowsFail.Err() != nil {
+			writeJSON(w, 500, errorBody())
+			return
 		}
 		d.Deployments["failure_history"] = history
 	}
 	var snap []byte
-	if s.DB.QueryRowContext(r.Context(), `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap) == nil {
+	snapshotErr := s.DB.QueryRowContext(r.Context(), `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&snap)
+	if snapshotErr != nil && !errors.Is(snapshotErr, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if snapshotErr == nil {
 		var obs providers.Observation
-		if json.Unmarshal(snap, &obs) == nil {
+		if err := json.Unmarshal(snap, &obs); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		} else {
 			type managedServerInfo struct {
 				State     string
 				ExpiresAt sql.NullTime
 			}
 			managedIDs := map[string]managedServerInfo{}
-			rows, _ := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id,state,expires_at FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
+			rows, err := s.DB.QueryContext(r.Context(), `SELECT provider_resource_id,state,expires_at FROM droplets WHERE account_id=$1 AND state <> 'DELETED'`, id)
+			if err != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
 			if rows != nil {
 				defer rows.Close()
 				for rows.Next() {
 					var pid, lifecycleState string
 					var expiresAt sql.NullTime
-					if rows.Scan(&pid, &lifecycleState, &expiresAt) == nil {
-						managedIDs[pid] = managedServerInfo{State: lifecycleState, ExpiresAt: expiresAt}
+					if err := rows.Scan(&pid, &lifecycleState, &expiresAt); err != nil {
+						writeJSON(w, 500, errorBody())
+						return
 					}
+					managedIDs[pid] = managedServerInfo{State: lifecycleState, ExpiresAt: expiresAt}
+				}
+				if rows.Err() != nil {
+					writeJSON(w, 500, errorBody())
+					return
 				}
 			}
 			for _, x := range obs.Inventory.Servers {

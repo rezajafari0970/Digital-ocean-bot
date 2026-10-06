@@ -328,7 +328,8 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 	defer cancel()
 	execErr := e.execute(runCtx, job)
 
-	finishCtx := context.WithoutCancel(ctx)
+	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer finishCancel()
 	switch {
 	case errors.Is(execErr, ErrLifecycleSuperseded):
 		return true, e.Journal.supersedeLifecycle(finishCtx, job)

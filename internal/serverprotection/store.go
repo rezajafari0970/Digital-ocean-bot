@@ -162,6 +162,8 @@ func (s Store) Receipt(ctx context.Context, panel string, p Policy, st Status, r
 	}
 	raw, _ := json.Marshal(st)
 	res, e := s.DB.ExecContext(ctx, `UPDATE server_protection_nodes SET state=$4,status=$5,last_error=$6,checked_at=now(),next_check_at=now()+interval '15 seconds',updated_at=now(),
+ verified_status=CASE WHEN $6='' THEN $5::jsonb ELSE verified_status END,
+ verified_at=CASE WHEN $6='' THEN now() ELSE verified_at END,
  applied_revision=CASE WHEN $6='' THEN $2 ELSE applied_revision END
  WHERE panel_id=$1 AND desired_revision=$2 AND desired_enabled=$3`, panel, p.Revision, p.Enabled, state, string(raw), msg)
 	if e != nil {

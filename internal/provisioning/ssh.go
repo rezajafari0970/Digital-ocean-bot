@@ -35,7 +35,7 @@ func (s SSHClient) WaitObserved(ctx context.Context, t Target, key []byte, obser
 func (s SSHClient) WaitStages(ctx context.Context, t Target, key []byte, observe ProbeObserver, stages StageObserver) error {
 	waitTimeout := s.Timeout
 	if waitTimeout <= 0 {
-		waitTimeout = 3 * time.Minute
+		waitTimeout = 30 * time.Second
 	}
 	waitCtx, cancel := context.WithTimeout(ctx, waitTimeout)
 	defer cancel()

@@ -11,8 +11,10 @@ import (
 )
 
 type Sampler struct {
-	previous map[string]float64
-	at       time.Time
+	previous  map[string]float64
+	at        time.Time
+	processAt time.Time
+	process   processHealth
 }
 
 func number(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
@@ -130,6 +132,12 @@ func (s *Sampler) Read(now time.Time) (Metrics, error) {
 			m.FDPercent = ratio(number(f[0])-number(f[1]), number(f[2]))
 		}
 	}
+	if now.Sub(s.processAt) >= 2*time.Second {
+		s.process, _ = managedProcesses("/proc")
+		s.processAt = now
+	}
+	m.ProcessFDPercent = s.process.fdPercent
+	m.ProcessFDKnown = s.process.fdKnown
 	count, ok := readNumber("/proc/sys/net/netfilter/nf_conntrack_count")
 	max, ok2 := readNumber("/proc/sys/net/netfilter/nf_conntrack_max")
 	m.ConntrackSupported = ok && ok2 && max > 0

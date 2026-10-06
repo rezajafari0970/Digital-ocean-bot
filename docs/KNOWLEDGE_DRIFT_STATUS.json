@@ -82,9 +82,10 @@
     "note": "Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified."
   },
   "latest_development_delta": {
-    "source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
-    "snapshot": "docs/ACCOUNT_RULE_SOURCE_SNAPSHOT_20261006.json",
-    "handoff": "docs/ACCOUNT_RULE_APPLICATION_20261006.md",
-    "note": "Historical frozen knowledge metrics are unchanged; current implementation is grounded in this source delta and acceptance."
+    "source_baseline": "bc3651e",
+    "snapshot": "docs/FLEET_HARDENING_SOURCE_SNAPSHOT_20261006.json",
+    "handoff": "docs/FLEET_HARDENING_20261006.md",
+    "status": "SOURCE_REVIEW_AND_DEPLOYMENT_PENDING",
+    "note": "Frozen historical brains/holdouts are not regenerated. Use this delta plus live acceptance for current behavior."
   }
 }

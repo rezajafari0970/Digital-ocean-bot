@@ -20,6 +20,7 @@ type Worker struct {
 	Failures  FailureStore
 	Interval  time.Duration
 	Batch     int
+	Progress  func(time.Time)
 }
 
 func (w Worker) Run(ctx context.Context) error {
@@ -29,9 +30,15 @@ func (w Worker) Run(ctx context.Context) error {
 	}
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
+	dispatcher := NewDispatcher(6, 2)
+	defer dispatcher.Wait()
 	for {
-		if err := w.Once(ctx); err != nil {
-			return err
+		if err := w.round(ctx, func(key, account string, fn func()) { dispatcher.Submit(ctx, key, account, fn) }); err != nil {
+			if ctx.Err() == nil {
+				log.Printf("recovery discovery: %v", err)
+			}
+		} else if w.Progress != nil {
+			w.Progress(time.Now())
 		}
 		select {
 		case <-ctx.Done():
@@ -41,42 +48,53 @@ func (w Worker) Run(ctx context.Context) error {
 	}
 }
 func (w Worker) Once(ctx context.Context) error {
+	return w.round(ctx, func(_, _ string, fn func()) { fn() })
+}
+func (w Worker) round(ctx context.Context, submit func(string, string, func())) error {
 	w.Failures.ClearResolved(ctx)
 	ops, err := w.Store.Operations(ctx, w.Batch)
 	if err != nil {
 		return err
 	}
 	for _, x := range ops {
+		x := x
 		if !w.Failures.Due(ctx, "operation", x.ID) {
 			continue
 		}
-		if err := w.Handler.RecoverOperation(ctx, x); err != nil {
-			w.Failures.Fail(ctx, "operation", x.ID, x.AccountID, err)
-			log.Printf("recovery operation %s account=%s: %v", x.ID, x.AccountID, err)
-			continue
-		}
-		w.Failures.Clear(ctx, "operation", x.ID)
+		submit("operation:"+x.ID, x.AccountID, func() {
+			if err := w.Handler.RecoverOperation(ctx, x); err != nil {
+				w.Failures.Fail(ctx, "operation", x.ID, x.AccountID, err)
+				log.Printf("recovery operation %s account=%s: %v", x.ID, x.AccountID, err)
+				return
+			}
+			w.Failures.Clear(ctx, "operation", x.ID)
+		})
 	}
 	if w.Lifecycle != nil {
-		_ = w.Lifecycle.Once(ctx)
+		if err := w.Lifecycle.Once(ctx); err != nil {
+			return err
+		}
 	}
 	deployments, err := w.Store.Deployments(ctx, w.Batch)
 	if err != nil {
 		return err
 	}
 	for _, x := range deployments {
+		x := x
 		due := w.Failures.Due(ctx, "deployment", x.ID)
 		if !due {
 			if b, ok := w.Handler.(BackoffBypasser); !ok || !b.BypassDeploymentBackoff(ctx, x) {
 				continue
 			}
 		}
-		if err := w.Handler.RecoverDeployment(ctx, x); err != nil {
-			w.Failures.Fail(ctx, "deployment", x.ID, x.AccountID, err)
-			log.Printf("recovery deployment %s account=%s: %v", x.ID, x.AccountID, err)
-			continue
-		}
-		w.Failures.Clear(ctx, "deployment", x.ID)
+		submit("deployment:"+x.ID, x.AccountID, func() {
+			if err := w.Handler.RecoverDeployment(ctx, x); err != nil {
+				w.Failures.Fail(ctx, "deployment", x.ID, x.AccountID, err)
+				log.Printf("recovery deployment %s account=%s: %v", x.ID, x.AccountID, err)
+				return
+			}
+			w.Failures.Clear(ctx, "deployment", x.ID)
+		})
 	}
 	return nil
 }

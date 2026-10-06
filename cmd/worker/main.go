@@ -27,6 +27,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
@@ -34,7 +35,7 @@ import (
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-	application, err := app.Bootstrap(ctx)
+	application, err := app.BootstrapWorker(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,13 +45,14 @@ func main() {
 	}
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
+	var recoveryProgress, schedulerProgress, lifecycleProgress atomic.Int64
 	heartbeat := worker.Heartbeat{DB: application.DB, WorkerID: fmt.Sprintf("%s:%d", host, os.Getpid()), Kind: "production"}
 	go func() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
 			beatCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker"})
+			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker", "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load()})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -130,7 +132,8 @@ func main() {
 	}
 	// The local protection controller is inert until its Config policy is enabled.
 	go (serverprotection.Controller{DB: application.DB, Secrets: application.Container.Secrets,
-		SSH: provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run(ctx)
+		UpgradePanels: serverprotection.ParseUpgradePanels(os.Getenv("DOB_GUARDIAN_UPGRADE_PANELS")),
+		SSH:           provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run(ctx)
 	// Existing periodic diagnostics retain their recovery fallback on unmanaged nodes.
 	go func() {
 		g := serverguardian.Service{
@@ -168,7 +171,8 @@ func main() {
 			if err != nil {
 				return
 			}
-			sem := make(chan struct{}, 64)
+			// Keep advisory-lease holders below the worker connection budget.
+			sem := make(chan struct{}, 4)
 			var wg sync.WaitGroup
 			for _, id := range ids {
 				id := id
@@ -265,7 +269,7 @@ func main() {
 			Timeout:  30 * time.Second,
 		}
 		run := func() {
-			if _, err := exec.RunOne(ctx); err != nil {
+			if _, err := exec.Drain(ctx); err != nil && ctx.Err() == nil {
 				if gateErr := exec.Journal.FailCloseGate(ctx); gateErr != nil {
 					log.Printf("client mutation executor fail-close: %v (original: %v)", gateErr, err)
 					return
@@ -490,6 +494,7 @@ func main() {
 	}
 
 	go (residentialperf.Store{DB: application.DB}).Run(ctx)
+	go application.Container.RunObservationRetention(ctx)
 	go func() { _ = (residential.Monitor{DB: application.DB, Secrets: application.Container.Secrets}).Run(ctx) }()
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	go func() {
@@ -519,8 +524,12 @@ func main() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
-			if err := lw.Once(ctx); err != nil && ctx.Err() == nil {
-				log.Printf("lifecycle worker: %v", err)
+			if err := lw.Once(ctx); err != nil {
+				if ctx.Err() == nil {
+					log.Printf("lifecycle worker: %v", err)
+				}
+			} else {
+				lifecycleProgress.Store(time.Now().Unix())
 			}
 			select {
 			case <-ctx.Done():
@@ -529,13 +538,19 @@ func main() {
 			}
 		}
 	}()
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Failures: failures, Interval: 10 * time.Second, Batch: 100}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		engine := scheduler.Engine{DB: application.DB, Store: scheduler.SQLStore{DB: application.DB}, Leases: scheduler.LeaseStore{DB: application.DB}, Starter: app.ScheduledStarter{Container: application.Container}}
 		for {
-			_ = engine.RunDue(ctx, time.Now().UTC())
+			if err := engine.RunDue(ctx, time.Now().UTC()); err != nil {
+				if ctx.Err() == nil {
+					log.Printf("scheduler: %v", err)
+				}
+			} else {
+				schedulerProgress.Store(time.Now().Unix())
+			}
 			select {
 			case <-ctx.Done():
 				return

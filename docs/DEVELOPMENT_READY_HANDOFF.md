@@ -162,3 +162,10 @@ Read docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md and docs/UPCLOUD_CAPACITY_
 - During initial live verification, S1 builds5ad55938 and4a8e4ea2 were falsely finalized on SSH_DISCONNECTED immediately after scheduled reboot under7a19f0b. Both were already deleted by normal lifecycle; do not revive or replay. Replacement5b8df545 (24.144.121.130) now PANEL_COMPLETE/READY.
 - Readiness-specific SSH_DISCONNECTED and plain/wrapped EOF now retry within existing budgets; collection stops immediately before false semantic diagnoses or automatic remediation, and host-key failures remain permanent. Global mutation outcome classification is unchanged.
 - Final readback 2026-10-06T15:06:48.965661+00:00: S1 3/3, Sara vul17/17, Sara vul2 15/15, Sor oc3/3 READY; zero provisioning/retiring. Three earlier repaired/sample servers retain kernel and service proof. No new live EOF interruption deliberately caused: that fault path is fixture-tested. All user account/routing/residential/guardian settings unchanged.
+
+
+## Fleet hardening continuation (2026-10-06)
+- Read docs/FLEET_HARDENING_20261006.md, paired SOURCE_SNAPSHOT and ACCEPTANCE JSON. This source checkpoint does not itself mean deployed; acceptance records actual rollout state. Migration159 is additive.
+- Preserve operator controls including the newly added Vultr232 account, Desired/Lifetime/apply-existing switches, all routing/publication/profiles and execution gates. Do not restore historical all4 snapshots.
+- Bounded and fair recovery, initial SSH budget/boot circuits, durable admission snapshots, sticky guardian receipts, Xray process/listener proof, per-process FD pressure, truthful dashboard/history, queue draining, observation retention and worker-progress readiness. External client/HA/TLS/surge dependencies remain explicit.
+- Temporary guardian binary rollout scope uses DOB_GUARDIAN_UPGRADE_PANELS; empty=all, none=no binary changes. Existing policy reconciliation remains active. Rollback evidence /root/backups/dob-hardening-20261006.

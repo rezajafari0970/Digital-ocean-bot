@@ -164,16 +164,48 @@ func TestServerProtectionOutputFreshnessAndAuthorization(t *testing.T) {
 		t.Fatal("fresh protected node published")
 	}
 	sqlMust(t, db, "UPDATE server_protection_nodes SET checked_at=now()-interval '20 seconds'")
-	if count() != 1 {
-		t.Fatal("stale receipt removed baseline")
+	if count() != 0 {
+		t.Fatal("stale blocked receipt republished node")
 	}
-	sqlMust(t, db, "UPDATE server_protection_nodes SET checked_at=now(),state='ERROR'")
-	if count() != 1 {
-		t.Fatal("failed receipt affected output")
+	if e := store.Receipt(ctx, panel, p, serverprotection.Status{}, errors.New("SSH unavailable")); e != nil {
+		t.Fatal(e)
 	}
-	sqlMust(t, db, "UPDATE server_protection_control SET enabled=false")
+	if count() != 0 {
+		t.Fatal("failed poll erased verified admission")
+	}
+	st.State = "READY"
+	st.AdmissionBlocked = false
+	st.XUIState = "active_xray_failed"
+	if e := store.Receipt(ctx, panel, p, st, nil); e != nil {
+		t.Fatal(e)
+	}
+	if count() != 0 {
+		t.Fatal("active panel with failed Xray published")
+	}
+	st.XUIState = "active"
+	if e := store.Receipt(ctx, panel, p, st, nil); e != nil {
+		t.Fatal(e)
+	}
 	if count() != 1 {
-		t.Fatal("off altered output")
+		t.Fatal("healthy Xray receipt did not release output")
+	}
+	st.State = "CRITICAL"
+	st.AdmissionBlocked = true
+	if e := store.Receipt(ctx, panel, p, st, nil); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := store.Change(ctx, serverprotection.Request{RequestID: perfUUID(), ExpectedRevision: 2, Enabled: false, Scope: "fleet"}); e != nil {
+		t.Fatal(e)
+	}
+	if count() != 0 {
+		t.Fatal("disable intent is not proof of cleanup")
+	}
+	p = protectionPolicy(t, db, panel)
+	if e := store.Receipt(ctx, panel, p, protectionReceipt(p), nil); e != nil {
+		t.Fatal(e)
+	}
+	if count() != 1 {
+		t.Fatal("verified cleanup did not release output")
 	}
 	server := Server{DB: db}
 	r := httptest.NewRequest("GET", "/api/v1/server-protection", nil)

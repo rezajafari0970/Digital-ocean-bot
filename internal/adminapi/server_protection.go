@@ -7,16 +7,13 @@ import (
 	"net/http"
 )
 
-// Do not remove configurations on an old or unverified observation.
+// Last verified blocked admission is sticky until a valid open/disabled receipt.
+// Neither a failed/stale poll nor a requested policy change proves recovery.
 const serverProtectionOutputPredicate = `
  AND NOT EXISTS(
- SELECT 1 FROM server_protection_nodes pn CROSS JOIN server_protection_control pc
- WHERE pn.panel_id=p.id AND pc.enabled AND pn.desired_enabled
- AND (pc.scope='fleet' OR p.id=ANY(pc.panel_ids))
- AND pn.control_revision=pc.revision AND pn.applied_revision=pn.desired_revision
- AND pn.state='APPLIED' AND pn.checked_at>now()-interval '15 seconds'
- AND pn.status->>'admission_blocked'='true'
- AND pn.status->>'state' IN ('CRITICAL','RECOVERING')) `
+ SELECT 1 FROM server_protection_nodes pn WHERE pn.panel_id=p.id
+ AND (pn.verified_status->>'admission_blocked'='true'
+ OR (pn.verified_status->>'enabled'='true' AND pn.verified_status->>'xui_state' IN ('failed','inactive','active_xray_failed')))) `
 
 func (s *Server) serverProtectionStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
@@ -41,6 +38,8 @@ func (s *Server) serverProtectionStatus(w http.ResponseWriter, r *http.Request) 
  'verified',COALESCE(n.control_revision=c.revision AND n.applied_revision=n.desired_revision
  AND n.state=CASE WHEN n.desired_enabled THEN 'APPLIED' ELSE 'DISABLED' END
  AND n.checked_at>now()-interval '60 seconds',false),
+ 'last_verified_at',n.verified_at,'last_verified_status',COALESCE(n.verified_status,'{}'::jsonb),
+ 'output_withheld',COALESCE(n.verified_status->>'admission_blocked'='true' OR (n.verified_status->>'enabled'='true' AND n.verified_status->>'xui_state' IN ('failed','inactive','active_xray_failed')),false),
  'status',COALESCE(n.status,'{}'::jsonb)) ORDER BY p.id)
  FROM panel_instances p JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id
  JOIN deployments dp ON dp.droplet_id=d.id LEFT JOIN server_protection_nodes n ON n.panel_id=p.id

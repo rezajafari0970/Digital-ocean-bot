@@ -2,10 +2,12 @@ package vultr
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -26,6 +28,10 @@ func TestMutationContracts(t *testing.T) {
 			if x.Region != "ewr" || x.Plan != "vc2" || x.OSID != 2284 || x.EnableIPv6 || x.UserData == "" || len(x.SSHKeyIDs) != 1 || x.SSHKeyIDs[0] != "k1" || !containsString(x.Tags, "identity-1") {
 				t.Fatalf("create=%+v", x)
 			}
+			cloud, err := base64.StdEncoding.DecodeString(x.UserData)
+			if err != nil || !strings.Contains(string(cloud), "users:\n  - default\n  - name: root\n    ssh_authorized_keys:") || !strings.Contains(string(cloud), "ssh_pwauth: false") {
+				t.Fatalf("bad root bootstrap: %s %v", cloud, err)
+			}
 			createSeen = true
 			w.WriteHeader(202)
 			_, _ = w.Write([]byte(`{"instance":{"id":"v1","status":"pending","region":"ewr","plan":"vc2","label":"n","tags":["identity-1"]}}`))
@@ -36,14 +42,14 @@ func TestMutationContracts(t *testing.T) {
 		case r.Method == "POST" && r.URL.Path == "/ssh-keys":
 			var x map[string]string
 			_ = json.NewDecoder(r.Body).Decode(&x)
-			if x["name"] != "k" || x["ssh_key"] != "ssh-ed25519 AAA" {
+			if x["name"] != "k" || x["ssh_key"] != "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f" {
 				t.Fatalf("key=%v", x)
 			}
 			keySeen = true
 			w.WriteHeader(201)
-			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAA"}}`))
+			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"}}`))
 		case r.Method == "GET" && r.URL.Path == "/ssh-keys/k1":
-			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAAATEST unit@test"}}`))
+			_, _ = w.Write([]byte(`{"ssh_key":{"id":"k1","name":"k","ssh_key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f unit@test"}}`))
 		case r.Method == "DELETE" && r.URL.Path == "/ssh-keys/k1":
 			w.WriteHeader(204)
 		default:
@@ -66,7 +72,7 @@ func TestMutationContracts(t *testing.T) {
 	if err = d.DeleteServer(ctx, "v1"); err != nil {
 		t.Fatal(err)
 	}
-	k, err := d.CreateSSHKey(ctx, "k", "ssh-ed25519 AAA")
+	k, err := d.CreateSSHKey(ctx, "k", "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f")
 	if err != nil || k.ID != "k1" || !keySeen {
 		t.Fatalf("key=%+v err=%v", k, err)
 	}

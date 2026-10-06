@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE_ACCEPTED_DEPLOYMENT_PENDING",
+  "source_baseline": "bc3651ec0d0df9b1a8f47c0f4b256ed69e267898",
+  "tests": [
+    "full Go",
+    "focused race and isolated PostgreSQL",
+    "isolated network/mount nft fault tests"
+  ],
+  "evidence_directory": "/root/backups/dob-hardening-20261006",
+  "production_changed": false,
+  "external_dependencies": [
+    "client failover source",
+    "HA controller/database infrastructure",
+    "public management TLS/access migration",
+    "authorized replacement surge headroom"
+  ],
+  "note": "Final review and live rollout proof are recorded after completion. No synthetic paid resources.",
+  "test_result": "PASS",
+  "source_review": {
+    "verdict": "PASS",
+    "response_id": "resp_0c755dd48fcf7698006ac52dfbdfe087d18437b9cf6111385b"
+  },
+  "test_logs": [
+    "test-05.log",
+    "orchestrator-test.log"
+  ]
+}

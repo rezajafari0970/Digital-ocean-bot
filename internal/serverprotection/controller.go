@@ -29,7 +29,28 @@ type Controller struct {
 	Secrets     Secrets
 	SSH         provisioning.SSHClient
 	ArtifactDir string
+	// Nil upgrades all nodes. A non-nil allowlist stages binary upgrades only;
+	// existing agents still receive enable/disable policy and status polling.
+	UpgradePanels map[string]bool
 }
+
+func ParseUpgradePanels(raw string) map[string]bool {
+	if strings.TrimSpace(raw) == "" {
+		return nil
+	}
+	panels := map[string]bool{}
+	for _, p := range strings.Split(raw, ",") {
+		if p = strings.TrimSpace(p); p != "" && p != "none" {
+			panels[p] = true
+		}
+	}
+	return panels
+}
+
+func (c Controller) upgradeAllowed(panel string) bool {
+	return c.UpgradePanels == nil || c.UpgradePanels[panel]
+}
+
 type nodeTarget struct {
 	Panel, Account, Droplet, Host, User, KeyRef, URL string
 	Policy                                           Policy
@@ -204,7 +225,10 @@ if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libe
 	hash := fmt.Sprintf("%x", sha256.Sum256(b))
 	b = nil
 	stage := ""
-	if fields[1] != hash {
+	if fields[1] == "missing" && !c.upgradeAllowed(t.Panel) {
+		return st, fmt.Errorf("guardian initial installation pending staged rollout")
+	}
+	if fields[1] != hash && c.upgradeAllowed(t.Panel) {
 		// mktemp creates an owned non-symlink staging file; SCP never writes a fixed public path.
 		raw, err := c.SSH.Run(ctx, provisioning.Target{AccountID: t.Account, DropletID: t.Droplet, Host: t.Host, User: t.User, KeySecretRef: t.KeyRef}, key, "umask 077; mktemp /var/tmp/dob-guardian.XXXXXXXXXXXX")
 		if err != nil {

@@ -215,6 +215,30 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 	if err != nil {
 		return err
 	}
+	if stopped, err := h.expireInitialSSH(ctx, d); err != nil || stopped {
+		return err
+	}
+	// Identity preparation is covered by the execution lease too: two recovery
+	// runners must never upload different keys for the same reserved deployment.
+	release, err := (workflow.PostgresRunLease{DB: h.Container.DB}).Acquire(ctx, d.ID)
+	if errors.Is(err, workflow.ErrDeploymentBusy) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if release != nil {
+			release()
+		}
+	}()
+	d, err = store.Get(ctx, item.ID, item.AccountID)
+	if err != nil {
+		return err
+	}
+	if terminalDeploymentStateForCreateRecovery(string(d.State)) {
+		return nil
+	}
 	cfg, snap, err := h.Container.DeploymentConfigFromSnapshot(ctx, d.ID)
 	if err != nil {
 		return err
@@ -236,6 +260,8 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 			return err
 		}
 	}
+	release()
+	release = nil
 	if d.State == workflow.InstallComplete || d.State == workflow.ImportingDatabase || d.State == workflow.DatabaseComplete || d.State == workflow.ConfiguringPanel {
 		if err := h.Container.RequirePostInstallCapabilities(ctx, d.ID); err != nil {
 			return err

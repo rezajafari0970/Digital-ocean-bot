@@ -1,0 +1,35 @@
+{
+  "goal": "Implement the evidence-based production hardening audit (2026-10-06) across Digital-ocean-bot, preserving current operator configuration and owned-resource safety. Fix sticky verified admission/output; truthful health/account status; bounded fair recovery; bounded provisioning; failure circuit by account/region/image; faster durable client queue; process FD and actual Xray health; retention/pool bounds. Treat optional surge and client failover as explicit capability gaps: never violate Desired/provider capacity, fake migration of TCP sessions, or bypass proxy/host-key/mutation gates.",
+  "context": "Baseline bc3651e, runtime5628300, schema158. No product source dirty. Read-only audit evidence /root/backups/dob-audit-20261006. 2 owned Vultr guests reject matching API-verified key; a panel was stale20h. Guardian rejects new TCP but no client migration; last blocked state must persist across failed reads and disable intent until cleanup receipt. Main already runs lifecycle separately: preserve that, avoid duplicate worker. User authorized fixes throughout project and deploy with rollback. API planning/review only; implementation done by interactive agent. Need full Go, race and isolated PostgreSQL fault regression tests and bounded rollout. Preserve external operator settings and primary/failover identities. No claim of universal zero downtime.",
+  "allowed_paths": [
+    "cmd",
+    "internal",
+    "migrations",
+    "web",
+    "deploy",
+    "tools/fleet-hardening-acceptance.sh",
+    "docs/development-jobs/fleet-hardening-20261006.json",
+    "docs/FLEET_HARDENING_20261006.md",
+    "docs/FLEET_HARDENING_ACCEPTANCE_20261006.json",
+    "docs/FLEET_HARDENING_SOURCE_SNAPSHOT_20261006.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [],
+    "test": [
+      "bash tools/fleet-hardening-acceptance.sh",
+      "go test -race ./internal/worker ./internal/serverprotection"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix: harden fleet admission, recovery, and service health"
+}

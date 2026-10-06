@@ -21,7 +21,7 @@ func (e *Engine) Evaluate(m Metrics, now time.Time) (string, string, bool) {
 		reason = "memory pressure"
 	case m.CPUHotCorePercent >= 95 && m.CPUPSI >= 20:
 		reason = "CPU queue pressure"
-	case m.FDPercent >= 90:
+	case m.FDPercent >= 90 || (m.ProcessFDKnown && m.ProcessFDPercent >= 90):
 		reason = "file descriptor pressure"
 	case m.ConntrackSupported && m.ConntrackPercent >= 90:
 		reason = "connection table pressure"

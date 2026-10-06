@@ -2,11 +2,10 @@ package workflow
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 )
 
-type ProfileStore struct{ DB *sql.DB }
+type ProfileStore struct{ DB DBTX }
 
 func (s ProfileStore) Get(ctx context.Context, id string) (PersistentProfile, error) {
 	var p PersistentProfile

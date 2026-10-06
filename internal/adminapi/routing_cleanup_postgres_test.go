@@ -428,7 +428,7 @@ func TestDashboardProviderAvailabilityIndependentOfRoutingAndPolicy(t *testing.T
 		if err := json.Unmarshal(raw, &m); err != nil {
 			t.Fatal(err)
 		}
-		for _, key := range []string{"active_servers", "inactive_servers", "broken_servers", "pending_deletion_servers"} {
+		for _, key := range []string{"active_servers", "inactive_servers", "broken_servers", "pending_deletion_servers", "degraded_servers"} {
 			expected := float64(0)
 			if key == want {
 				expected = 1
@@ -438,10 +438,21 @@ func TestDashboardProviderAvailabilityIndependentOfRoutingAndPolicy(t *testing.T
 			}
 		}
 	}
-	check("inactive_servers")
+	check("degraded_servers")
 	// Only fresh provider inventory can assert that a server is running.
 	sqlMust(t, db, `INSERT INTO provider_snapshots(id,account_id,provider,data,canonical) SELECT gen_random_uuid(),$1,'digitalocean','{}',jsonb_build_object('Inventory',jsonb_build_object('Servers',jsonb_build_array(jsonb_build_object('ID',provider_resource_id,'State','ready')))) FROM droplets WHERE id=$2`, account, droplet)
+	check("degraded_servers")
+	sqlMust(t, db, "UPDATE panel_routing_state SET state='APPLIED' WHERE panel_id=$1", panel)
+	check("inactive_servers")
+	sqlMust(t, db, "INSERT INTO panel_inventory_syncs(panel_id,state,finished_at) VALUES($1,'COMPLETED',now())", panel)
 	check("active_servers")
+	sqlMust(t, db, "INSERT INTO panel_inventory_syncs(panel_id,state,finished_at) VALUES($1,'FAILED',now()+interval '1 second')", panel)
+	check("inactive_servers")
+	sqlMust(t, db, "UPDATE panel_routing_state SET state='FAILED' WHERE panel_id=$1", panel)
+	sqlMust(t, db, "UPDATE panel_instances SET enabled=false WHERE id=$1", panel)
+	check("inactive_servers")
+	sqlMust(t, db, "UPDATE panel_instances SET enabled=true WHERE id=$1", panel)
+	sqlMust(t, db, "UPDATE panel_routing_state SET state='APPLIED' WHERE panel_id=$1", panel)
 	sqlMust(t, db, "UPDATE provider_snapshots SET created_at=now()-interval '5 minutes'")
 	check("inactive_servers")
 	sqlMust(t, db, "UPDATE worker_item_failures SET last_failed_at=now()")

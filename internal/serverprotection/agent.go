@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -360,13 +361,51 @@ func checkRecovery(ctx context.Context, allow bool) (string, string) {
 	if e != nil {
 		return "unknown", "systemd state unavailable"
 	}
-	if state == "active" || state == "activating" || state == "deactivating" {
+	if state == "activating" || state == "deactivating" {
 		return state, ""
+	}
+	action := "start"
+	if state == "active" {
+		p, err := readPolicy(PolicyPath)
+		if err != nil || !p.Enabled {
+			return state, "protection disabled"
+		}
+		ports, err := LivePorts(p)
+		if err != nil {
+			return "unknown", "managed port configuration unavailable"
+		}
+		healthy, err := xrayListeners("/proc", ports)
+		if err != nil {
+			return "unknown", "Xray listener observation unavailable"
+		}
+		if healthy {
+			_ = os.Remove(StateDir + "/xray-missing.json")
+			return state, "Xray managed listeners verified"
+		}
+		state = "active_xray_failed"
+		processes, err := managedProcesses("/proc")
+		if err != nil {
+			return "unknown", "Xray process observation unavailable"
+		}
+		if len(processes.xrayPIDs) > 0 {
+			return state, "Xray process exists with incomplete listeners; automatic restart withheld"
+		}
+		if !allow {
+			return state, "repair withheld until resources recover"
+		}
+		ready, err := xrayFailureMature(time.Now())
+		if err != nil {
+			return state, "Xray recovery observation ledger unavailable"
+		}
+		if !ready {
+			return state, "waiting for 60 seconds of confirmed missing Xray listeners"
+		}
+		action = "restart"
 	}
 	if !allow {
 		return state, "repair withheld until protection is ready and resources recover"
 	}
-	if state != "failed" && state != "inactive" {
+	if state != "failed" && state != "inactive" && state != "active_xray_failed" {
 		return state, "no automatic action"
 	}
 	if _, e = os.Stat("/etc/x-ui/x-ui.db"); e != nil {
@@ -385,6 +424,30 @@ func checkRecovery(ctx context.Context, allow bool) (string, string) {
 	p, e := readPolicy(PolicyPath)
 	if e != nil || !p.Enabled {
 		return state, "protection disabled"
+	}
+	if action == "restart" {
+		ports, err := LivePorts(p)
+		if err != nil {
+			return state, "cannot recheck managed listeners"
+		}
+		healthy, err := xrayListeners("/proc", ports)
+		if err != nil || healthy {
+			return state, "Xray changed; repair withheld"
+		}
+		processes, err := managedProcesses("/proc")
+		if err != nil || len(processes.xrayPIDs) > 0 {
+			return state, "Xray process changed; repair withheld"
+		}
+		// A restart is permitted only with a valid owned configuration. Never
+		// repeatedly restart a panel whose generated Xray config is invalid.
+		binary := "/usr/local/x-ui/bin/xray-linux-" + runtime.GOARCH
+		info, err := os.Lstat(binary)
+		if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0022 != 0 {
+			return state, "trusted Xray binary unavailable"
+		}
+		if _, err = runCommand(ctx, binary, []string{"run", "-test", "-config", XrayConfig}, ""); err != nil {
+			return state, "Xray configuration validation failed; repair withheld"
+		}
 	}
 	var attempts []int64
 	b, e := os.ReadFile(StateDir + "/restarts.json")
@@ -407,8 +470,32 @@ func checkRecovery(ctx context.Context, allow bool) (string, string) {
 	if e = atomicJSON(StateDir+"/restarts.json", append(recent, now)); e != nil {
 		return state, "cannot persist recovery intent"
 	}
-	if _, e = runCommand(ctx, "systemctl", []string{"start", "--no-block", "x-ui"}, ""); e != nil {
+	if _, e = runCommand(ctx, "systemctl", []string{action, "--no-block", "x-ui"}, ""); e != nil {
 		return state, "recovery request failed"
 	}
-	return state, "inactive service start requested"
+	return state, "bounded service " + action + " requested"
+}
+
+type xrayFailureWindow struct{ First, Last time.Time }
+
+func (w *xrayFailureWindow) observe(now time.Time) bool {
+	if w.First.IsZero() || now.Before(w.Last) || now.Sub(w.Last) > 15*time.Second {
+		w.First = now
+	}
+	w.Last = now
+	return now.Sub(w.First) >= 60*time.Second
+}
+func xrayFailureMature(now time.Time) (bool, error) {
+	var w xrayFailureWindow
+	raw, err := os.ReadFile(StateDir + "/xray-missing.json")
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	if err == nil {
+		if err = json.Unmarshal(raw, &w); err != nil {
+			return false, err
+		}
+	}
+	ready := w.observe(now)
+	return ready, atomicJSON(StateDir+"/xray-missing.json", w)
 }

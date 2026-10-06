@@ -15,7 +15,7 @@ var ErrStepTerminal = errors.New("provision step terminal failure")
 type StepPolicy struct{ MaxAttempts int }
 
 var DefaultStepPolicies = map[string]StepPolicy{
-	"ssh": {MaxAttempts: 12}, "readiness": {MaxAttempts: 3}, "bootstrap": {MaxAttempts: 5},
+	"ssh": {MaxAttempts: 30}, "readiness": {MaxAttempts: 3}, "bootstrap": {MaxAttempts: 5},
 	"panel": {MaxAttempts: 5}, "verify": {MaxAttempts: 8},
 }
 
@@ -55,11 +55,21 @@ func (s SQLStore) FinishStep(ctx context.Context, runID, step string, stepErr er
 			if attempts < 1 {
 				attempts = 1
 			}
-			next = time.Now().Add(time.Duration(1<<min(attempts, 6)) * time.Minute)
+			next = time.Now().Add(stepRetryDelay(step, attempts))
 		}
 	}
 	_, err := s.DB.ExecContext(ctx, `UPDATE provision_step_attempts SET last_finished_at=now(),last_error=NULLIF($3,''),next_retry_at=$4,terminal=$5 WHERE run_id=$1 AND step=$2`, runID, step, msg, next, terminal)
 	return err
+}
+
+func stepRetryDelay(step string, attempts int) time.Duration {
+	if attempts < 1 {
+		attempts = 1
+	}
+	if step == "ssh" {
+		return time.Duration(1<<min(attempts-1, 2)) * 15 * time.Second
+	}
+	return time.Duration(1<<min(attempts, 6)) * time.Minute
 }
 
 func (s SQLStore) StepInterrupted(ctx context.Context, runID, step string) (bool, error) {

@@ -9,6 +9,6 @@ func (s ScheduledStarter) PrepareScheduledAccount(ctx context.Context, accountID
 }
 
 func (s ScheduledStarter) StartScheduledDeployment(ctx context.Context, accountID, profileID string, consumeBackfill bool) error {
-	_, err := s.Container.startDeployment(ctx, accountID, profileID, consumeBackfill, "")
+	_, err := s.Container.prepareDeployment(ctx, accountID, profileID, consumeBackfill, "", true)
 	return err
 }
