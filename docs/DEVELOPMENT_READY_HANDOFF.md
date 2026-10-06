@@ -132,3 +132,11 @@ Read docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md and docs/UPCLOUD_CAPACITY_
 ## Account deletion continuation (2026-10-06)
 - Read docs/ACCOUNT_DELETION_20261006.md and docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json. Runtime API/worker/static source 43e8c661b6c22f41254c443abbc16c2cee6679d1, migration157 unchanged. Shared durable deletion/UI reliability fixes passed full Go and focused race/PostgreSQL/mobile/desktop acceptance. Upcloud11 was already purged before the patch; live pending jobs0. Backup/rollback under /root/backups/dob-account-deletion-20261006.
 - Current protection control was already enabled/fleet/revision9 by this rollout and is preserved; earlier OFF evidence is historical. No live cloud resources were created/deleted for acceptance; no Xray/config/identity changes.
+
+
+## Optional account rule application (2026-10-06)
+- Read docs/ACCOUNT_RULE_APPLICATION_20261006.md and docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json. Clean API/worker/static source bd592fb83b03496d2c26ead6de1b67117efb11e1, additive migration158.
+- Accounts > Edit has a saved default-OFF Apply rule changes to existing servers checkbox. OFF preserves existing expiries; ON immutable spec changes queue paced one-at-a-time replacements. Desired-only increase never rotates; ON decrease retires exact excess earliest expiry, OFF waits natural expiry. Timing-only changes do not rotate.
+- Deployment reservations capture rules revision. Shared admission/lifecycle locks, unstarted cancellation on OFF, stale-worker fence, durable provider-confirmed delete/backfill, and readiness-before-next-retirement preserve the hard Desired ceiling. Already-admitted deletion outcomes must reconcile after OFF.
+- Full Go and focused race/PostgreSQL/mobile/desktop tests pass; server OpenAI source review PASS after two corrected findings. Runtime/static hash verification and config readback pass. All4 accounts OFF, pending new rollouts0, all37 pre-existing expiry timestamps unchanged at acceptance. No cloud create/delete for feature testing. Do not represent fixture coverage as live provider replacement E2E.
+- Backup/rollback: /root/backups/dob-account-rule-20261006. Disable/cancel unstarted intents with this version and settle admitted work before binary downgrade; retain additive schema/evidence. Earlier FinalMask/transport experiments remain removed.

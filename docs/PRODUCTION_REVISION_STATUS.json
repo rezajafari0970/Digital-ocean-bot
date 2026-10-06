@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+  "runtime_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T08:58:35.367234+00:00",
+  "verified_at_utc": "2026-10-06T13:31:27.339128+00:00",
   "binaries": {
     "api": {
-      "revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
-      "sha256": "6970f77275fc69ebe0233d55459f23e44868e1cf1920a94fe5e48245c9a5732b",
+      "revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+      "sha256": "47513bad7e9d60142689c937eb2b5863586705eba62c5bf10b8d6ddf899f32dd",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
-      "sha256": "a02c0bcf6cc0ec7afc9559dc056c9d97d6bbebc7885f80a26e42a905edabe726",
+      "revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+      "sha256": "e05eda42ff1753a95ce452e3e5a9dd15b4cdc3fc4975508a761bbfc9fb0572e2",
       "vcs_modified": false
     }
   },
@@ -19,10 +19,10 @@
     "api": "active",
     "worker": "active"
   },
-  "migration": "000157_server_protection",
-  "acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
+  "migration": "000158_account_rule_application",
+  "acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "verified": false,
-  "note": "Account deletion reliability deployed. Upcloud 11 deletion completed before this patch. Current pending account-deletion jobs:0. Prior paid UpCloud lifecycle remains unverified. Guardian binaries and Xray configs are unchanged; fleet protection control preserved from pre-deploy snapshot.",
+  "note": "Optional existing-server rule application deployed; 4 accounts remain OFF, no rollout queued, all37 existing expiry timestamps unchanged. Existing protection, permanent residential publication, account/proxy/config settings preserved. Real cloud replacement with this feature was not triggered for acceptance.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Observe ordinary user-requested deletions through durable progress. Keep provider-absence safety; no test cloud deletion required.",
+  "next_product_step": "User may choose Apply rule changes to existing servers in Accounts > Edit and Save; default OFF preserves existing lifetime.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
+  "worker_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
-  "verification_status": "DEPLOYED_ACCOUNT_DELETION_RELIABILITY_VERIFIED",
+  "web_static_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+  "verification_status": "DEPLOYED_ACCOUNT_RULE_APPLICATION_DEFAULT_OFF_VERIFIED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "1eb7acd98dde47dd3cfa7a4b43408687dc07a7bd",
+  "previous_runtime_source_revision": "43e8c661b6c22f41254c443abbc16c2cee6679d1",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -130,5 +130,14 @@
     "client_failover_implemented": false
   },
   "verification_scope": "Account deletion shared paths, isolated three-provider race/fault/browser acceptance and production runtime/static/config readback. Upcloud 11 already absent before patch; no new real cloud deletion tested. Existing fleet protection was already enabled and remains unchanged.",
-  "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json"
+  "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
+  "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
+  "account_rule_application": {
+    "visible_accounts": 4,
+    "apply_to_existing_on": 0,
+    "pending_rule_replacements": 0,
+    "existing_expiries_preserved": 37,
+    "migration": 158,
+    "at_utc": "2026-10-06T13:31:27.339128+00:00"
+  }
 }

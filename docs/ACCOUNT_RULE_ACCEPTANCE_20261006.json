@@ -1,5 +1,5 @@
 {
-  "status": "SOURCE_TESTS_VERIFIED_PENDING_DEPLOY",
+  "status": "DEPLOYED_DEFAULT_OFF_VERIFIED",
   "migration": 158,
   "default": "OFF",
   "test_database": "isolated bulk_test schema per test",
@@ -15,5 +15,30 @@
   "limitations": [
     "Fixture tests do not prove live provider replacement end-to-end.",
     "An already admitted deletion must reconcile even after switch OFF."
-  ]
+  ],
+  "runtime_source_revision": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+  "production": {
+    "commit": "bd592fb83b03496d2c26ead6de1b67117efb11e1",
+    "at": "2026-10-06T13:31:26.901971+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "47513bad7e9d60142689c937eb2b5863586705eba62c5bf10b8d6ddf899f32dd",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "e05eda42ff1753a95ce452e3e5a9dd15b4cdc3fc4975508a761bbfc9fb0572e2",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "4487cd88d100ad10937d6e54900dea98b3bf1ee11612a244c98d9e13bd6160a4"
+  },
+  "rule_readback": {
+    "visible_accounts": 4,
+    "apply_to_existing_on": 0,
+    "pending_rule_replacements": 0,
+    "existing_expiries_preserved": 37,
+    "migration": 158,
+    "at_utc": "2026-10-06T13:31:27.339128+00:00"
+  },
+  "backup_rollback_directory": "/root/backups/dob-account-rule-20261006"
 }
