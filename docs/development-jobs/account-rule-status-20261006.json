@@ -1,0 +1,28 @@
+{
+  "goal": "Correct account rule toggle status and Save feedback when ON has no pending replacement. Frontend-only change; derive work from existing persisted intent fields; no server operations, SQL or backend change.",
+  "context": "Live four accounts have apply_to_existing=true, revision=0, replacement_revision=null, shrink_pending=false, waiting_droplet_id=null, status=FUTURE_ONLY. This means only toggle was enabled and no spec change queued. Show ON / No replacement queued, explain enabling alone does not replace. Save feedback must use refreshed account state or explicitly say status unavailable. Pending/replacement/started deletion statuses remain visible; hide stale next_action_at if no pending intent. Preserve Desired semantics, all saved settings, backend API/worker and actual servers. Test unknown state, ON idle, active rollout, OFF admitted deletion and HTML escaping. Independent lifecycle network stalls are diagnostic only.",
+  "allowed_paths": [
+    "web/static/app.js",
+    "web/tests/account-rule-status.cjs",
+    "docs/development-jobs/account-rule-status-20261006.json",
+    "docs/ACCOUNT_RULE_STATUS_20261006.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 120,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "node web/tests/account-rule-status.cjs"
+    ],
+    "verify": [
+      "node --check web/static/app.js",
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(accounts): show actual pending rule work in status and save feedback"
+}
