@@ -1,0 +1,13 @@
+# Planned DELETE recovery
+
+Root cause confirmed in production: Sara vul 2 retirement 2ccf555e-753c-401d-b567-b684661ff435 has lifecycle DELETE operation ddd828cc-3275-4eac-8295-c2d21da9e6ee, planned/attempt0 since 2026-10-05T16:51:34Z. Executor.Delete treated an existing planned operation as a completed no-op. LifecycleEngine advanced only verifying/succeeded, while background recovery did not select planned. The earliest retirement monopolized the account's lifecycle slot. Intermittent proxy degradation caused genuine network-not-ready errors, but healthy periods could not repair the persistent planned no-op.
+
+The shared executor now resumes planned/attempt0, including the empty resource identity left by a crash between SQL Reserve and Update. It validates account, delete kind, idempotency key and provider resource before proceeding. Unknown-empty identity and anomalous planned attempts are rejected. Optimistic version update to running must succeed before the provider DELETE; concurrent losers do not call the provider. Existing unknown DELETE retry, network/egress/generation checks, and running/verifying recovery are unchanged. DELETE is idempotent; this does not claim globally exactly-once delivery after an ambiguous response.
+
+No CREATE change, direct fallback, proxy health override, expiry rewrite, Desired modification, toggle modification or schema migration. Actual provider absence remains required before ConfirmDeleted and scheduler backfill. Already-authorized retirement intents resume naturally after deployment.
+
+Validation includes injected interruptions at resource persistence and running claim; denied network and recovery; account/kind/key/resource mismatch; no replay of running/verifying/succeeded/failed; post-provider database failure; and PostgreSQL 12-way concurrent claims on planned with/without stored resource and unknown. Real LifecycleEngine progression stops at DELETING awaiting confirmation. Tests use an isolated bulk_test database/schema and fake provider. Full Go suite and focused race suite are run by tools/delete-resume-acceptance.sh.
+
+Source review: first review misattributed existing unknown DELETE retry to this change; original source establishes it was pre-existing. Added its useful proposed guard rejecting planned attempts >0. Follow-up compares original/current source directly.
+
+Deployment/rollback directory: /root/backups/dob-delete-resume-20261006. Rollback restores previous worker/API binaries; it cannot undo provider deletions already admitted. Retain operation journal and reconcile ambiguous outcomes; do not reset states or erase evidence.

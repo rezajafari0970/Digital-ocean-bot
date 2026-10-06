@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-06T14:03:05.345738+00:00",
+  "scope": "Planned DELETE resumption, attempt0, no schema or configuration changes",
+  "files": {
+    "internal/droplets/executor.go": "38b74966f0f730e68be3ad8e979551cddf6dec1df45fb437a900dac5effea1f3",
+    "internal/droplets/delete_resume_test.go": "1cfe6052b6a42ea44c5eff6b414040e8b4c74ed07f3ff23328fcd02fbf4c4b77",
+    "internal/droplets/delete_resume_postgres_test.go": "b9208fdff4dcb9d20af113f018197788147116dfdcef4d1d25bd74b76cd47b22",
+    "tools/delete-resume-acceptance.sh": "31ebfef606c983fab84db9e3df57d63d90cd89398225a84a5b9e3a5ca9d52498"
+  },
+  "source_review": "PASS",
+  "tests": "AI OS TEST and VERIFY passed; full Go suite plus focused race/PostgreSQL 12-way concurrency and injected interruption tests"
+}

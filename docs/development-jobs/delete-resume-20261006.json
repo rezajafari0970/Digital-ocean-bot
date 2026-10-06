@@ -1,0 +1,28 @@
+{
+  "goal": "Recover idempotent DELETE operations stranded in planned after reserve/update failure or process interruption, restoring lifecycle progress without bypassing proxy, egress, generation or provider checks.",
+  "context": "Production Sara vul 2 lifecycle-delete:2ccf555e-753c-401d-b567-b684661ff435 is planned attempt0 resource21a67cf3-cb5a-4e8c-a4b5-6b1d7daeefb9 since Oct5. Executor.Delete returns any existing state except unknown without action; lifecycle only advances verifying/succeeded. Thus permanent no-op despite healthy periods. RecoveryStore excludes planned. Fix shared Executor.Delete resume both planned and unknown (planned empty resource from SQL reserve crash is also recoverable), ensure stored account/kind/resource identity matches intended delete, preserve optimistic-lock claim BEFORE provider call, running/verifying/succeeded/failed are not replayed. No broad state resets, no direct fallback, no CREATE behavior change. Lifecycle retry naturally resumes existing authorized retirement intents after deploy; existing confirmed deletion and scheduler backfill authoritative. Need fault injection around reservation/resource-update/running-transition and network health; PostgreSQL concurrent resume exact one provider call, zero mutation denied or identity mismatch. Add focused tests using isolated bulk_test DB/schema with migrations. Full go test and focused race. No real cloud creates for tests; observe actual existing cleanup after deploy. Default expiry/Desired/toggle rules unchanged.",
+  "allowed_paths": [
+    "internal/droplets/executor.go",
+    "internal/droplets/delete_resume_test.go",
+    "internal/droplets/delete_resume_postgres_test.go",
+    "tools/delete-resume-acceptance.sh",
+    "docs"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/delete-resume-acceptance.sh -race fault"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(lifecycle): resume reserved planned deletes after interruption"
+}

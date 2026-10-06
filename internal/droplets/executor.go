@@ -115,16 +115,31 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID stri
 	if err != nil {
 		return op, err
 	}
-	if !fresh {
-		if reserved.State != jobs.OperationUnknown || reserved.ResourceID != providerID {
-			return reserved, nil
-		}
-	} else {
+	// A reservation can survive a crash before it reaches running. Returning
+	// planned forever strands the lifecycle queue even after network recovery.
+	// Bind only a planned empty identity; unknown outcomes must retain theirs.
+	if providerID == "" || reserved.AccountID != op.AccountID || reserved.Kind != "DELETE_DROPLET" ||
+		reserved.IdempotencyKey != op.IdempotencyKey ||
+		(reserved.ResourceID != "" && reserved.ResourceID != providerID) {
+		return reserved, fmt.Errorf("%w: delete operation identity mismatch", jobs.ErrOperationConflict)
+	}
+	if reserved.State == jobs.OperationPlanned && reserved.Attempt != 0 {
+		return reserved, fmt.Errorf("%w: planned delete already has attempts", jobs.ErrOperationConflict)
+	}
+	if !fresh && reserved.State != jobs.OperationPlanned && reserved.State != jobs.OperationUnknown {
+		return reserved, nil
+	}
+	if !fresh && reserved.State == jobs.OperationUnknown && reserved.ResourceID == "" {
+		return reserved, fmt.Errorf("%w: unknown delete has no resource identity", jobs.ErrOperationConflict)
+	}
+	if fresh || reserved.ResourceID == "" {
 		reserved.ResourceID = providerID
 		if err := e.Operations.Update(ctx, &reserved); err != nil {
 			return reserved, err
 		}
 	}
+	// Update(running) below is the optimistic-lock claim. A concurrent loser
+	// must return before the provider call; running/verifying are never replayed.
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
