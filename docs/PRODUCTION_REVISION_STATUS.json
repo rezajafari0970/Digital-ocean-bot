@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
+  "runtime_source_revision": "5628300b76e38e1fc6088028d881abab95a690e9",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T15:01:56.176927+00:00",
+  "verified_at_utc": "2026-10-06T15:07:57.710877+00:00",
   "binaries": {
     "api": {
-      "revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
-      "sha256": "b5d71beb100823bd00feb3267bed942bc616af473c7f334fbda06ff62176539d",
+      "revision": "5628300b76e38e1fc6088028d881abab95a690e9",
+      "sha256": "d8b7b14fca7ae82e6457fdaaa5fdbe54c59b3faa985ec49a0d1bf1e626d1b7af",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
-      "sha256": "d52d0f3c9e92aa21b8eb77b6919679c338af4de79d07f929d79b6729fd8d72ff",
+      "revision": "5628300b76e38e1fc6088028d881abab95a690e9",
+      "sha256": "0a851661e7286579852d730b2e5b71cea4983dad554e87e23466b4f0403a2621",
       "vcs_modified": false
     }
   },
@@ -20,9 +20,9 @@
     "worker": "active"
   },
   "migration": "000158_account_rule_application",
-  "acceptance": "docs/INSTALLER_BOOTSTRAP_ACCEPTANCE_20261006.json",
+  "acceptance": "docs/INSTALLER_READINESS_ACCEPTANCE_20261006.json",
   "verified": false,
-  "note": "Installer recovery bootstrap skip fixed. Two premature waiting deployments automatically repaired; three observed servers PANEL_COMPLETE/READY, x-ui active, TCP443/2053 listening, KHO disabled with changed boot and no reboot required. Account/residential/guardian settings preserved. Broader historical fleet verification remains distinct.",
+  "note": "Bootstrap skip and readiness SSH disconnect classification fixed. Live target servers PANEL_COMPLETE/READY; sampled kernel, x-ui and443/2053 proven. All four Desired counts matched3/17/15/3, no provision/retirement pending at final readback. Strict settings and boot/host-key evidence preserved. Global verified=false retains broader historical fleet-scope limits.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Observe normal lifecycle operation; preserve boot and provision journals. No remaining blocker from the diagnosed bootstrap-skip incident.",
+  "next_product_step": "Normal lifecycle observation; diagnosed bootstrap and transient SSH readiness blockers resolved. Do not replay historical deleted S1 identities or reset attempt journals.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
+  "worker_source_revision": "5628300b76e38e1fc6088028d881abab95a690e9",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
-  "verification_status": "DEPLOYED_BOOTSTRAP_RECOVERY_THREE_LIVE_READY_KERNEL_AND_PORTS_PROVEN",
+  "web_static_source_revision": "5628300b76e38e1fc6088028d881abab95a690e9",
+  "verification_status": "DEPLOYED_BOOTSTRAP_AND_READINESS_RECOVERY_ALL_DESIRED_COUNTS_READY",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "e29dd72eb9828bea1d700324511c9534edd7a23a",
+  "previous_runtime_source_revision": "7a19f0b13814840a7fcf7ef81b75806bf2fac7cf",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -129,7 +129,7 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Two pre-release premature WAITING_INSTALLER deployments recovered end-to-end, plus one interrupted pre-release build progressed under corrected ordering. Natural builds only; no synthetic cloud mutations. This is not blanket fleet/provider availability certification.",
+  "verification_scope": "Bootstrapping and two premature waiting recoveries were proved end-to-end under7a19f0b, including x-ui and TCP443/2053. Final5628300 adds tested transient SSH/EOF handling and preserves those successes; all38 resources now READY and account Desired totals matched. No live disconnect was deliberately injected and no active build remained at final publication. EOF recovery itself is fault-fixture evidence, not a claimed new live incident. Existing broader fleet/client availability verification is not implied.",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
@@ -141,5 +141,36 @@
     "note": "User enabled toggles after initial default-OFF acceptance; do not restore OFF."
   },
   "latest_delete_resume_acceptance": "docs/DELETE_RESUME_ACCEPTANCE_20261006.json",
-  "latest_installer_bootstrap_acceptance": "docs/INSTALLER_BOOTSTRAP_ACCEPTANCE_20261006.json"
+  "latest_installer_bootstrap_acceptance": "docs/INSTALLER_BOOTSTRAP_ACCEPTANCE_20261006.json",
+  "latest_installer_readiness_acceptance": "docs/INSTALLER_READINESS_ACCEPTANCE_20261006.json",
+  "current_account_counts": [
+    {
+      "name": "S1",
+      "desired_server_count": 3,
+      "ready": 3,
+      "provisioning": 0,
+      "retiring": 0
+    },
+    {
+      "name": "Sara vul",
+      "desired_server_count": 17,
+      "ready": 17,
+      "provisioning": 0,
+      "retiring": 0
+    },
+    {
+      "name": "Sara vul 2",
+      "desired_server_count": 15,
+      "ready": 15,
+      "provisioning": 0,
+      "retiring": 0
+    },
+    {
+      "name": "Sor oc",
+      "desired_server_count": 3,
+      "ready": 3,
+      "provisioning": 0,
+      "retiring": 0
+    }
+  ]
 }

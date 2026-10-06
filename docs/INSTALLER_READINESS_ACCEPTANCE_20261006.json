@@ -1,0 +1,110 @@
+{
+  "runtime_revision": "5628300b76e38e1fc6088028d881abab95a690e9",
+  "at_utc": "2026-10-06T15:07:57.710877+00:00",
+  "deploy": {
+    "commit": "5628300b76e38e1fc6088028d881abab95a690e9",
+    "at": "2026-10-06T15:05:59.356866+00:00",
+    "binaries": {
+      "digital-ocean-bot-api": {
+        "sha256": "d8b7b14fca7ae82e6457fdaaa5fdbe54c59b3faa985ec49a0d1bf1e626d1b7af",
+        "vcs_modified": false
+      },
+      "digital-ocean-bot-worker": {
+        "sha256": "0a851661e7286579852d730b2e5b71cea4983dad554e87e23466b4f0403a2621",
+        "vcs_modified": false
+      }
+    },
+    "static_sha256": "94aee3228486328de99cf867546c393901b38844ff2eb1b2741c9f63d4442cf0"
+  },
+  "live": {
+    "at": "2026-10-06T15:06:48.965661+00:00",
+    "targets": [
+      {
+        "id": "2d627aaf-4931-465c-9f4d-9d1c58d24189",
+        "account": "Sara vul 2",
+        "host": "95.179.234.60",
+        "state": "PANEL_COMPLETE",
+        "resource_state": "READY",
+        "updated_at": "2026-10-06T15:03:07.67322+00:00",
+        "last_error": null
+      },
+      {
+        "id": "5b8df545-df07-485f-884c-d5a592a23153",
+        "account": "S1",
+        "host": "24.144.121.130",
+        "state": "PANEL_COMPLETE",
+        "resource_state": "READY",
+        "updated_at": "2026-10-06T15:03:14.720498+00:00",
+        "last_error": null
+      },
+      {
+        "id": "457c49b0-8246-4256-99a0-2685b23f9928",
+        "account": "Sor oc",
+        "host": "46.101.148.252",
+        "state": "PANEL_COMPLETE",
+        "resource_state": "READY",
+        "updated_at": "2026-10-06T14:51:25.962703+00:00",
+        "last_error": null
+      },
+      {
+        "id": "8a995b59-a167-436e-81be-2ca19ed6017a",
+        "account": "Sara vul 2",
+        "host": "45.63.97.160",
+        "state": "PANEL_COMPLETE",
+        "resource_state": "READY",
+        "updated_at": "2026-10-06T14:51:22.586954+00:00",
+        "last_error": null
+      },
+      {
+        "id": "b6378913-ed69-45d0-ae26-279f7be0ed41",
+        "account": "Sara vul 2",
+        "host": "192.248.172.175",
+        "state": "PANEL_COMPLETE",
+        "resource_state": "READY",
+        "updated_at": "2026-10-06T14:51:31.062705+00:00",
+        "last_error": null
+      }
+    ],
+    "counts": [
+      {
+        "name": "S1",
+        "desired_server_count": 3,
+        "ready": 3,
+        "provisioning": 0,
+        "retiring": 0
+      },
+      {
+        "name": "Sara vul",
+        "desired_server_count": 17,
+        "ready": 17,
+        "provisioning": 0,
+        "retiring": 0
+      },
+      {
+        "name": "Sara vul 2",
+        "desired_server_count": 15,
+        "ready": 15,
+        "provisioning": 0,
+        "retiring": 0
+      },
+      {
+        "name": "Sor oc",
+        "desired_server_count": 3,
+        "ready": 3,
+        "provisioning": 0,
+        "retiring": 0
+      }
+    ]
+  },
+  "schema": 158,
+  "full_go_suite": "PASS",
+  "focused_race_fault_and_isolated_postgres": "PASS",
+  "source_review": {
+    "verdict": "PASS",
+    "response_id": "resp_060a8569f95e87d8006ac50dc7ae2887d183655a6dac6a1585"
+  },
+  "settings_preserved": true,
+  "rollback_directory": "/root/backups/dob-installer-readiness-20261006",
+  "bootstrap_live_evidence": "docs/INSTALLER_BOOTSTRAP_ACCEPTANCE_20261006.json",
+  "verification_scope": "Bootstrapping and two premature waiting recoveries were proved end-to-end under7a19f0b, including x-ui and TCP443/2053. Final5628300 adds tested transient SSH/EOF handling and preserves those successes; all38 resources now READY and account Desired totals matched. No live disconnect was deliberately injected and no active build remained at final publication. EOF recovery itself is fault-fixture evidence, not a claimed new live incident. Existing broader fleet/client availability verification is not implied."
+}
