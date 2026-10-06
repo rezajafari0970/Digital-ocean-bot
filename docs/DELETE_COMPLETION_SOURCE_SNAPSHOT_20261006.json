@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-06T21:01:58.658812+00:00",
+  "baseline_revision": "b5ca9644e71b517e999da426c0b78d713f7a597f",
+  "files": {
+    "internal/app/lifecycle.go": "37f97c43d9527c02bf59ff08a02394762a7cbce8eaf03cd2c9120e95532e49fb",
+    "internal/app/recovery.go": "0486315ab6f135ac0707df08e9c5defe4f36239938431af01e9b48ac7d5fe506",
+    "internal/app/delete_completion.go": "0a740f1e58345df15db3622f024bc7747427708c741ea6b95ac5d0a2f9144f2d",
+    "internal/app/delete_completion_postgres_test.go": "1f856772b8a74585c7c3a5c11f4aee757c117b253155f33432c71d5245e11694",
+    "internal/droplets/lifecycle.go": "abc6e5ed884f73c1b27dd7aeef77df2ff9d46d5c8a6c140abffb8ec628cad2e1"
+  },
+  "incident": {
+    "account": "Vultr232",
+    "droplet": "a7d55aa7-4bb8-4f3b-a1db-6e0341803dd7",
+    "operation": "8c574aea-da5e-4496-bf2d-e4595a2fa4a3",
+    "provider_resource": "1bb667a2-ad18-44f4-a01e-bfdcbee1bd79",
+    "observed": "succeeded delete since18:45:43 but local DELETING;14 later expired READY; this proves a durable/local completion gap, not which exact interruption/race occurred"
+  },
+  "frozen_brains": "retained unchanged",
+  "scope": "worker completion logic; no schema or x-ui configuration change"
+}

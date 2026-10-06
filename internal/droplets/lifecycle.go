@@ -31,7 +31,10 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 			ROW_NUMBER() OVER (PARTITION BY d.account_id ORDER BY CASE d.state WHEN 'DELETING' THEN 0 WHEN 'RETIRING' THEN 1 WHEN 'EXPIRING' THEN 2 ELSE 3 END,COALESCE(d.expires_at,d.updated_at),d.created_at,d.id) AS rn
 		FROM droplets d JOIN accounts a ON a.id=d.account_id
 		WHERE (d.state IN ('RETIRING','DELETING') OR (d.state IN ('READY','EXPIRING') AND d.expires_at IS NOT NULL AND d.expires_at <= $1::timestamptz))
-		  AND NOT (d.state IN ('RETIRING','DELETING') AND a.provider_state IN ('LOCKED','BILLING_BLOCKED'))
+		  AND (NOT (d.state IN ('RETIRING','DELETING') AND a.provider_state IN ('LOCKED','BILLING_BLOCKED'))
+		    OR EXISTS(SELECT 1 FROM operations o WHERE o.account_id=d.account_id
+		      AND o.resource_id=d.provider_resource_id AND o.kind='DELETE_DROPLET'
+		      AND o.idempotency_key='lifecycle-delete:'||d.id::text AND o.state='succeeded'))
 	) SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM due WHERE rn=1 ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)
 	if err != nil {
 		return nil, err

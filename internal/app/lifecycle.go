@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
@@ -10,6 +12,14 @@ import (
 )
 
 func (c Container) ProcessLifecycle(ctx context.Context, item droplets.LifecycleItem) error {
+	// Provider-confirmed completion is a local durable receipt. Replay it before
+	// preparing any network runtime; a lost local commit must not block this
+	// account's entire expiry queue or send another provider DELETE.
+	if item.State == droplets.Retiring || item.State == droplets.Deleting {
+		if done, err := c.reconcileCompletedDelete(ctx, item); err != nil || done {
+			return err
+		}
+	}
 	var providerState string
 	_ = c.DB.QueryRowContext(ctx, "SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1", item.AccountID).Scan(&providerState)
 	providerLocked := providerState == ProviderStateLocked
@@ -239,21 +249,46 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 		return err
 	}
 	defer tx.Rollback()
-	var priorState, replacementID string
-	var accountEnabled bool
-	if err = tx.QueryRowContext(ctx, `SELECT
-		COALESCE((SELECT state FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 LIMIT 1),''),
-		COALESCE((SELECT replacement_deployment_id::text FROM droplets WHERE account_id=$1 AND provider_resource_id=$2 LIMIT 1),''),
-		COALESCE((SELECT enabled FROM accounts WHERE id=$1),false)`, accountID, providerID).Scan(&priorState, &replacementID, &accountEnabled); err != nil {
+	if err = confirmDeletedTx(ctx, tx, accountID, providerID); err != nil {
 		return err
 	}
-	shouldBackfill := accountEnabled && priorState == "DELETING" && replacementID == ""
+	return tx.Commit()
+}
+
+func confirmDeletedTx(ctx context.Context, tx *sql.Tx, accountID, providerID string) error {
+	var priorState, replacementID string
+	var accountEnabled bool
+	err := tx.QueryRowContext(ctx, `SELECT d.state,COALESCE(d.replacement_deployment_id::text,''),a.enabled
+		FROM droplets d JOIN accounts a ON a.id=d.account_id
+		WHERE d.account_id=$1 AND d.provider_resource_id=$2 FOR UPDATE OF d`, accountID, providerID).Scan(&priorState, &replacementID, &accountEnabled)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		var managed bool
+		if qerr := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM resources
+			WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true)`, accountID, providerID).Scan(&managed); qerr != nil {
+			return qerr
+		}
+		if !managed {
+			return errors.New("delete confirmation has no managed local target")
+		}
+	}
+	if err == nil && priorState == "DELETED" {
+		return nil // A duplicate receipt must not repeatedly wake the scheduler.
+	}
+	if err == nil && priorState != "RETIRING" && priorState != "DELETING" {
+		return errors.New("delete confirmation conflicts with current lifecycle state")
+	}
+	// Recovery may observe provider absence before the lifecycle worker's
+	// RETIRING -> DELETING CAS. Both states have an admitted delete intent.
+	shouldBackfill := accountEnabled && (priorState == "RETIRING" || priorState == "DELETING") && replacementID == ""
 	if shouldBackfill {
 		if _, err = tx.ExecContext(ctx, `UPDATE schedules SET next_run_at=now() WHERE account_id=$1 AND enabled`, accountID); err != nil {
 			return err
 		}
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',backfill_required=CASE WHEN $3 THEN true ELSE backfill_required END,updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('DELETING','DELETED')`, accountID, providerID, shouldBackfill); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE droplets SET state='DELETED',backfill_required=CASE WHEN $3 THEN true ELSE backfill_required END,updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND state IN ('RETIRING','DELETING')`, accountID, providerID, shouldBackfill); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE resources SET state='deleted',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true`, accountID, providerID); err != nil {
@@ -286,5 +321,5 @@ func (c Container) ConfirmDeleted(ctx context.Context, accountID, providerID str
 	if _, err = tx.ExecContext(ctx, `UPDATE accounts SET provider_checked_at=NULL,updated_at=now() WHERE id=$1 AND enabled=true`, accountID); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }

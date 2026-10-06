@@ -176,3 +176,6 @@ Read docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md and docs/UPCLOUD_CAPACITY_
 
 ## 2026-10-06 stable routing follow-up
 Source tests/review pass for residential turnover fingerprint and independent membership receipts. Live canary pending; see ROUTING_FINGERPRINT_20261006.md. Preserve operator settings; use scoped deployment selector and worker-only rollback.
+
+## Delete completion continuation — 2026-10-06
+Read docs/DELETE_COMPLETION_20261006.md and paired SOURCE_SNAPSHOT/ACCEPTANCE JSON. Source fixes atomic operation/lifecycle completion and exact historical succeeded-receipt replay. Initial incident: Vultr232 first DELETING already succeeded at provider;14 further expired READY blocked behind it. Tests/full Go/race/isolated PostgreSQL and final source review PASS. This source checkpoint alone is not deployment evidence. No user configuration changes. Routing fingerprint b5ca964 had already reached fleet: documentation now records scoped turnover proof and unresolved native x-ui expiration restarts.

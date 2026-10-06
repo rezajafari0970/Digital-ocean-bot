@@ -1,0 +1,23 @@
+{
+  "status": "SOURCE_ACCEPTED_LIVE_PENDING",
+  "updated_at": "2026-10-06T21:01:58.658812+00:00",
+  "deployment": "NOT_YET_DEPLOYED",
+  "baseline_worker": "b5ca9644e71b517e999da426c0b78d713f7a597f",
+  "evidence": "/root/backups/dob-hardening-20261006/delete-completion-*",
+  "limitations": [
+    "Remaining expired resources must drain through ordinary guarded lifecycle and original spacing",
+    "x-ui expiry-triggered restarts and external provider restrictions remain separate"
+  ],
+  "full_go": "PASS",
+  "isolated_postgres_race": "PASS",
+  "focused_existing_regressions": "PASS",
+  "review": "PASS",
+  "review_response": "resp_03aa58fe0c9af4ed006ac5617f5e5087d19c6d2af9adba3f98",
+  "new_test_groups": 8,
+  "review_refinements": [
+    "Exact lifecycle target/key validation and owned-resource-only fallback",
+    "Local completed receipt discovery for provider LOCKED/BILLING_BLOCKED",
+    "Preserve explicit RouteDirect behavior; all current accounts proxy_required"
+  ],
+  "initial_fixture_failure": "Test fixture omitted deployment provider_id; corrected fixture and reran. Original log retained."
+}

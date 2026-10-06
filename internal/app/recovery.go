@@ -167,17 +167,20 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 	if item.Kind == "DELETE_DROPLET" && !exists {
 		state = "succeeded"
 	}
-	result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
-	if err != nil {
-		return err
-	}
-	if n, _ := result.RowsAffected(); n != 1 {
-		return errors.New("operation changed during recovery")
-	}
 	if item.Kind == "DELETE_DROPLET" && state == "succeeded" {
-		if err := h.Container.ConfirmDeleted(ctx, item.AccountID, providerID); err != nil {
+		if err := h.Container.completeRecoveredDelete(ctx, item.ID, item.AccountID, providerID, version); err != nil {
 			return err
 		}
+	} else {
+		result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
+		if err != nil {
+			return err
+		}
+		if n, _ := result.RowsAffected(); n != 1 {
+			return errors.New("operation changed during recovery")
+		}
+	}
+	if item.Kind == "DELETE_DROPLET" && state == "succeeded" {
 		// The per-deployment public key is no longer needed by Vultr once the
 		// server is gone. Remove it best-effort to avoid accumulating provider
 		// SSH-key objects; deletion does not affect authorized_keys on the gone VM.

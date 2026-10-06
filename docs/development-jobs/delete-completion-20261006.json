@@ -1,0 +1,36 @@
+{
+  "goal": "Atomically commit provider-confirmed deletion with local lifecycle completion and resume already-succeeded deletes stranded in DELETING without issuing another cloud DELETE.",
+  "context": "Live Vultr232 account fe09ed2f-ae76-4405-9caf-9b64f16768e2: droplet a7d55aa7-4bb8-4f3b-a1db-6e0341803dd7 DELETING, matching DELETE_DROPLET operation 8c574aea-da5e-4496-bf2d-e4595a2fa4a3 succeeded since18:45:43 UTC, provider occupancy14 local15 and 14 other expired READY queued. RecoverOperation currently commits succeeded then calls ConfirmDeleted separately; ConfirmDeleted only handles DELETING, so failure or RETIRING/DELETING race strands completion. Lifecycle DELETING merely initializes runtime then no-op, so no replay. Preserve fail-closed proxy/identity gates for every network request, Desired, spacing, immutable evidence and all user controls. Add local exact operation/account/provider reconciliation using durable succeeded evidence; no provider mutation when replaying. Make fresh delete success and local state one transaction with version fence. Handle confirmation while RETIRING before the lifecycle CAS. Test rollback fault, already completed replay without runtime, concurrency, wrong account/provider/unsucceeded rejection and guard active READY states. Use isolated PostgreSQL only. Also finish factual previous fingerprint rollout docs with current proof and explicit residual upstream restarts; no x-ui settings changes. Build clean worker release, backup and atomic worker-only replacement, readiness/hash/config verification. No synthetic paid cloud resources, no manual status/operation reset.",
+  "allowed_paths": [
+    "internal/app/lifecycle.go",
+    "internal/app/delete_completion.go",
+    "internal/app/delete_completion_postgres_test.go",
+    "internal/app/recovery.go",
+    "docs/development-jobs/delete-completion-20261006.json",
+    "docs/DELETE_COMPLETION_20261006.md",
+    "docs/DELETE_COMPLETION_SOURCE_SNAPSHOT_20261006.json",
+    "docs/DELETE_COMPLETION_ACCEPTANCE_20261006.json",
+    "docs/ROUTING_FINGERPRINT_20261006.md",
+    "docs/ROUTING_FINGERPRINT_ACCEPTANCE_20261006.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "internal/droplets/lifecycle.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [],
+    "test": [
+      "env -u BULK_TEST_DATABASE_URL -u DOB_E2E_DSN go test -p 2 ./...",
+      "go test -race ./internal/app -run 'TestDeleteCompletion' -count=1"
+    ],
+    "verify": [
+      "git diff --check"
+    ]
+  },
+  "commit_message": "fix(lifecycle): atomically reconcile confirmed server deletion"
+}
