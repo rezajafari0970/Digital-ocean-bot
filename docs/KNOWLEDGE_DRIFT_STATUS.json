@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "git_head": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
   "ready": true,
   "artifacts": [
     {
@@ -352,6 +352,12 @@
         "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
+    },
+    {
+      "artifact": "docs/RECOVERY_LEDGER_FIX_SOURCE_SNAPSHOT_20261007.json",
+      "source_commit": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+      "status": "current-delta-reviewed-tested-deployed",
+      "acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json"
     }
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
@@ -393,7 +399,7 @@
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
   "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-  "current_frontier": "PHASE12_REAUDIT_COMPLETE_TWO_HIGH_FINDINGS_OPEN",
+  "current_frontier": "RECOVERY_LEDGER_FIXED_DEPLOYED_NATIVE_VERIFIED",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
   "openai_review": "REVISE_TWO_REPRODUCED_FINDINGS",
@@ -402,9 +408,12 @@
   "source_snapshot_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
   "latest_audit_verdict": "REVISE",
-  "open_reaudit_findings": [
+  "open_reaudit_findings": [],
+  "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00",
+  "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
+  "closed_reaudit_findings": [
     "PH12-001",
     "PH12-002"
   ],
-  "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00"
+  "latest_recovery_fix_at": "2026-10-07T09:17:13.931255+00:00"
 }

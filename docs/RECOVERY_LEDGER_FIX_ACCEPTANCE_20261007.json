@@ -1,6 +1,6 @@
 {
   "at_utc": "2026-10-07T09:13:39.248631+00:00",
-  "status": "TESTED_REVIEWED_NOT_YET_DEPLOYED",
+  "status": "DEPLOYED_NATIVE_VERIFIED",
   "review": {
     "status": "PASS",
     "review_response_id": "resp_0e8f2dd945d9accd006ac60c004f9087d195d0f5e75bf6202d",
@@ -53,5 +53,652 @@
     "The running full test and race-suite results and native production verification results were not provided.",
     "Arbitrary PostgreSQL commit outcomes and remote side effects cannot provide exactly-once guarantees; the implementation appropriately relies on durable checkpoints, conservative backoff, and native mutation fences instead."
   ],
-  "production_fault_injection": false
+  "production_fault_injection": false,
+  "runtime_revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+  "verified_at_utc": "2026-10-07T09:17:13.931255+00:00",
+  "deployment": {
+    "at_utc": "2026-10-07T09:16:24.915929+00:00",
+    "started_at": "2026-10-07T09:16:11.512049+00:00",
+    "revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+    "services": {
+      "digital-ocean-bot-worker": {
+        "pid": "1698218",
+        "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35",
+        "restarts": "0",
+        "memory_current": "9666560"
+      },
+      "digital-ocean-bot-worker-panels": {
+        "pid": "1698219",
+        "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35",
+        "restarts": "0",
+        "memory_current": "23875584"
+      },
+      "digital-ocean-bot-api": {
+        "pid": "1698208",
+        "sha256": "8af2c929e03170488208c7ea49688aca408025ec989c662668cc97b503483a3b",
+        "restarts": "0",
+        "memory_current": "11370496"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T09:16:23.986415665Z"
+    },
+    "configuration_preserved": true,
+    "static_preserved": true,
+    "schema": "162",
+    "roles": "control/panels"
+  },
+  "exact_artifact_systemd_fixture": {
+    "at_utc": "2026-10-07T09:14:15.573327+00:00",
+    "schema": "role_process_55788767740241d3b5bba66cbc7bceed",
+    "units": {
+      "control": "dob-role-fixture-control-bc7bceed",
+      "panels": "dob-role-fixture-panels-bc7bceed"
+    },
+    "production_services_changed": false,
+    "before": {
+      "control": {
+        "pid": "1695019",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "1695021",
+        "restarts": "0"
+      }
+    },
+    "after": {
+      "control": {
+        "pid": "1695019",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "1695113",
+        "restarts": "1"
+      }
+    },
+    "heartbeat": [
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 0,
+          "InUse": 2,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "role": "control"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 2,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 3,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 3,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      }
+    ],
+    "peer_survived": true,
+    "automatic_role_restart": "PASS",
+    "duplicate_process_rejected": true,
+    "status": "PASS"
+  },
+  "native_output": {
+    "details": [
+      {
+        "panel": "6bae7df7-8201-445e-a534-8debe9ef58ed",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "4445b3b9-54d1-4da0-b90b-0c25dc8c9202",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "9ebf1214-4aa1-4cce-be2e-585048400d7d",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "e8459132-ed6d-4e46-ae33-948117ce9956",
+        "published": 1,
+        "native_valid": 1,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "3085f9ad-7d9e-4539-83ca-504d346dfc0a",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "f7f0e944-d9b7-49a0-bdbf-76429f66096f",
+        "published": 1,
+        "native_valid": 1,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "bdf0033c-7f24-4f0f-b39d-9f23879b4a82",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "de432be2-2392-41fe-831e-013254c0075b",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "30a50581-b3c9-4ebe-97e6-143ca53b7734",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "045839c6-0374-4412-ba12-8f38846acdfc",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "473fc80a-5e20-44bc-98dc-fb758a24cd8e",
+        "published": 11,
+        "native_valid": 11,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "d67cad97-44bb-4827-94de-6a62f788ff9f",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "62d9c75f-0584-4012-9de1-fba363b1148e",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "00c35c3c-3168-4a42-a392-6469ceeaa663",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "9f788a0e-0ed8-4f69-a2a7-1bd118dee7df",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8647603b-2a09-419f-94ad-fc303bf62e79",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8d2cbf15-c128-448f-bf58-b5099253651d",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "3b885098-92ce-4d15-86f1-4542b62f1ec5",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "556be5e0-253d-423d-a48f-2c5a8e7b4715",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "ce533316-74f0-448a-a26b-b171de334d1b",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "e90e4a61-360e-488d-94b7-73665c5ec935",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "195fdbac-71aa-4a76-8147-fc8a89d0c885",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "e2582376-3b11-4fe3-b4c2-335112196872",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "790cb530-be39-489e-8d35-e4bb29e1e0c0",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "713dd037-8381-4c53-b6dc-b61ffb9e3298",
+        "published": 3,
+        "native_valid": 3,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "5684f71a-19fd-491a-95ba-aac582cfda2d",
+        "published": 11,
+        "native_valid": 11,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "e72069f0-2371-4eb6-bbd2-13e407d53694",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "d657cf2c-b8bb-4859-ac58-e5672939ece9",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "011ed610-ea5b-4b16-adb2-d06c52a5467a",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "51dd06a4-1366-4268-8064-e0c161b0d567",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "aee696ac-be16-403f-b140-b5a2d3aa8886",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "e43ef39a-0f2b-477b-aa8a-b104003d2461",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "2e35f6a5-3ef7-4d22-b9ea-c2ef2fd62f38",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      }
+    ],
+    "finished_at": "2026-10-07T09:16:49.627983836Z",
+    "matched_snapshots": 304,
+    "native_unverified": 0,
+    "native_valid": 304,
+    "panels": 33,
+    "published_unique": 304,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {
+      "DIRECT": 35,
+      "RESIDENTIAL": 280
+    },
+    "shares_before": {
+      "DIRECT": 33,
+      "RESIDENTIAL": 271
+    },
+    "started_at": "2026-10-07T09:16:46.493229321Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
+  },
+  "native_flow": {
+    "at_utc": "2026-10-07T09:16:42.721675+00:00",
+    "since": "2026-10-07T09:16:11.512049+00:00",
+    "gates": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+        "last_failure_code": "EXECUTOR_INTERNAL_FAILURE"
+      }
+    ],
+    "jobs": [
+      {
+        "n": 20,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T09:16:41.561634+00:00",
+        "max_attempts": 1
+      },
+      {
+        "n": 19,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T09:16:39.568751+00:00",
+        "max_attempts": 1
+      }
+    ],
+    "expired_owned": [
+      {
+        "deleted_after_deploy": 20,
+        "lived_at_least_595_seconds": 20
+      }
+    ],
+    "replacements": [
+      {
+        "panel_id": "00c35c3c-3168-4a42-a392-6469ceeaa663",
+        "created_at": "2026-10-07T09:16:35.747156+00:00",
+        "delete_job": "e729fd2c-2c14-479c-a536-7734535d513b",
+        "deleted_at": "2026-10-07T09:16:24.403763+00:00",
+        "inbound_id": 1,
+        "created_job": "0c996967-d57a-4f46-b9ae-dea12c4fd4b9"
+      },
+      {
+        "panel_id": "045839c6-0374-4412-ba12-8f38846acdfc",
+        "created_at": "2026-10-07T09:16:37.929577+00:00",
+        "delete_job": "66846ea5-64e2-45f2-9366-72a790f4d0ac",
+        "deleted_at": "2026-10-07T09:16:25.345614+00:00",
+        "inbound_id": 1,
+        "created_job": "3f5bb485-1cfa-4a5c-bf38-b4fd92b5efbd"
+      }
+    ],
+    "checkpoints": [
+      {
+        "kind": "deployment",
+        "pending": 3,
+        "oldest_seconds": 24.561907
+      }
+    ],
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "module_exit": 0,
+      "ambiguous_retry": 0
+    }
+  },
+  "final_check": {
+    "at_utc": "2026-10-07T09:17:13.931255+00:00",
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "1698208",
+        "NRestarts": "0",
+        "MemoryCurrent": "10866688",
+        "MemoryMax": "infinity",
+        "sha256": "8af2c929e03170488208c7ea49688aca408025ec989c662668cc97b503483a3b"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "1698218",
+        "NRestarts": "0",
+        "MemoryCurrent": "10936320",
+        "MemoryMax": "536870912",
+        "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "1698219",
+        "NRestarts": "0",
+        "MemoryCurrent": "24109056",
+        "MemoryMax": "536870912",
+        "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T09:17:14.005036541Z"
+    },
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "concurrency": 1,
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00"
+      }
+    ],
+    "checkpoints": [
+      {
+        "n": 1,
+        "kind": "deployment",
+        "oldest_seconds": 9.732602
+      }
+    ],
+    "role_progress": [
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 3,
+          "InUse": 12,
+          "WaitCount": 5,
+          "WaitDuration": 29523556,
+          "MaxIdleClosed": 72,
+          "OpenConnections": 15,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "admission": null,
+        "worker_id": "serverprojects.ptr.network:1698219",
+        "last_seen_at": "2026-10-07T09:17:12.122003+00:00",
+        "recovery_scan": "0",
+        "lifecycle_scan": "0"
+      },
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 4,
+          "InUse": 7,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 11,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "admission": null,
+        "worker_id": "serverprojects.ptr.network:1698218",
+        "last_seen_at": "2026-10-07T09:17:12.420184+00:00",
+        "recovery_scan": "1791364622",
+        "lifecycle_scan": "1791364622"
+      }
+    ],
+    "schema": [
+      {
+        "version": "000162_worker_recovery_checkpoints",
+        "checksum": "25a4e4d37ef7fd159209ce60cb8f3e282a4a594ab56d87f387508d3cef4d77eb"
+      }
+    ],
+    "upcloud": [
+      {
+        "n": 2,
+        "name": "Upcloud 113",
+        "state": "READY",
+        "provider_state": "ACTIVE",
+        "desired_server_count": 5
+      }
+    ],
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "unexpected_module_exit": 0,
+      "failure_ledger_write_error": 0,
+      "failure_ledger_clear_error": 0,
+      "recovery_completion_pending": 0,
+      "checkpoint_reconcile_error": 0
+    },
+    "source_hashes_match": true
+  },
+  "orchestration": {
+    "job": "recovery-ledger-fix-20261007",
+    "phase": "COMPLETE",
+    "actual_api_review": "PASS"
+  },
+  "rollout_attempts": [
+    {
+      "attempt": 1,
+      "result": "GUARDED_ROLLBACK",
+      "reason": "Readiness initially used still-fresh prior-process heartbeat; mandatory current-PID assertion refused the rollout. Reviewed rollback proved zero checkpoints and restored baseline split binaries."
+    },
+    {
+      "attempt": 2,
+      "result": "DEPLOYED",
+      "change": "Deployment wait now requires fresh heartbeat of BOTH new PIDs before accepting readiness."
+    }
+  ]
 }

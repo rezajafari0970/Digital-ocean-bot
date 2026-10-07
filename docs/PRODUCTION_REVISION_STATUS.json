@@ -1,22 +1,22 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "runtime_source_revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-07T08:39:00.786977+00:00",
+  "verified_at_utc": "2026-10-07T09:17:13.931255+00:00",
   "binaries": {
     "api": {
-      "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-      "sha256": "2ae2c9ed6180d5e4214f681c37cc5b568b9b3c961088094ac44d9583419464f1",
+      "revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+      "sha256": "8af2c929e03170488208c7ea49688aca408025ec989c662668cc97b503483a3b",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-      "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24",
+      "revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+      "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35",
       "vcs_modified": false
     },
     "worker-panels": {
-      "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-      "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24",
+      "revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+      "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35",
       "vcs_modified": false
     }
   },
@@ -25,10 +25,10 @@
     "worker": "active",
     "worker-panels": "active"
   },
-  "migration": "000161_client_mutation_panel_health",
-  "acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
+  "migration": "000162_worker_recovery_checkpoints",
+  "acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json",
   "verified": true,
-  "note": "Runtime and live native flow verified; fresh audit reproduced two HIGH inherited recovery-ledger fault-path defects. No product/runtime change in audit.",
+  "note": "PH12-001/002 closed with checked admission/durable atomic completion; lifecycle equivalent and bounded cleanup fixed. Native bounded verification passes.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -45,21 +45,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Repair PH12-001/002 with checked recovery ledger read/write, bounded admission fencing and truthful async task progress.",
+  "next_product_step": "Living-but-stuck progress supervision, queue fairness and independent health evidence; preserve durable recovery and policy fences.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "worker_source_revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "RUNTIME_VERIFIED_PHASE12_REAUDIT_FINDINGS_OPEN",
+  "verification_status": "DEPLOYED_RECOVERY_LEDGER_NATIVE_VERIFIED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "previous_runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -960,10 +960,7 @@
   },
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
   "latest_audit_verdict": "REVISE",
-  "open_reaudit_findings": [
-    "PH12-001",
-    "PH12-002"
-  ],
+  "open_reaudit_findings": [],
   "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00",
   "latest_native_output_audit": {
     "finished_at": "2026-10-07T08:36:07.352095506Z",
@@ -987,5 +984,190 @@
     "still_published_invalid": 0,
     "transitioned_out": 0,
     "unmatched_snapshots": 0
+  },
+  "latest_recovery_ledger_fix_acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json",
+  "closed_reaudit_findings": [
+    "PH12-001",
+    "PH12-002"
+  ],
+  "recovery_ledger_fix": {
+    "revision": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+    "final_check": {
+      "at_utc": "2026-10-07T09:17:13.931255+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1698208",
+          "NRestarts": "0",
+          "MemoryCurrent": "10866688",
+          "MemoryMax": "infinity",
+          "sha256": "8af2c929e03170488208c7ea49688aca408025ec989c662668cc97b503483a3b"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1698218",
+          "NRestarts": "0",
+          "MemoryCurrent": "10936320",
+          "MemoryMax": "536870912",
+          "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1698219",
+          "NRestarts": "0",
+          "MemoryCurrent": "24109056",
+          "MemoryMax": "536870912",
+          "sha256": "47b991d28ac7246a3472364c8e686ec25631dbe3867954bd83dbb1d13631dd35"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-07T09:17:14.005036541Z"
+      },
+      "gate": [
+        {
+          "enabled": true,
+          "updated_at": "2026-10-07T06:23:13.912198+00:00",
+          "concurrency": 1,
+          "kill_switch": false,
+          "last_failure_at": "2026-10-07T05:28:43.90601+00:00"
+        }
+      ],
+      "checkpoints": [
+        {
+          "n": 1,
+          "kind": "deployment",
+          "oldest_seconds": 9.732602
+        }
+      ],
+      "role_progress": [
+        {
+          "kind": "production-panels",
+          "pool": {
+            "Idle": 3,
+            "InUse": 12,
+            "WaitCount": 5,
+            "WaitDuration": 29523556,
+            "MaxIdleClosed": 72,
+            "OpenConnections": 15,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 40
+          },
+          "admission": null,
+          "worker_id": "serverprojects.ptr.network:1698219",
+          "last_seen_at": "2026-10-07T09:17:12.122003+00:00",
+          "recovery_scan": "0",
+          "lifecycle_scan": "0"
+        },
+        {
+          "kind": "production-control",
+          "pool": {
+            "Idle": 4,
+            "InUse": 7,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 11,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 24
+          },
+          "admission": null,
+          "worker_id": "serverprojects.ptr.network:1698218",
+          "last_seen_at": "2026-10-07T09:17:12.420184+00:00",
+          "recovery_scan": "1791364622",
+          "lifecycle_scan": "1791364622"
+        }
+      ],
+      "schema": [
+        {
+          "version": "000162_worker_recovery_checkpoints",
+          "checksum": "25a4e4d37ef7fd159209ce60cb8f3e282a4a594ab56d87f387508d3cef4d77eb"
+        }
+      ],
+      "upcloud": [
+        {
+          "n": 2,
+          "name": "Upcloud 113",
+          "state": "READY",
+          "provider_state": "ACTIVE",
+          "desired_server_count": 5
+        }
+      ],
+      "log_counts": {
+        "new_global_failclose": 0,
+        "panic": 0,
+        "ownership_lost": 0,
+        "unexpected_module_exit": 0,
+        "failure_ledger_write_error": 0,
+        "failure_ledger_clear_error": 0,
+        "recovery_completion_pending": 0,
+        "checkpoint_reconcile_error": 0
+      },
+      "source_hashes_match": true
+    },
+    "native_output_summary": {
+      "finished_at": "2026-10-07T09:16:49.627983836Z",
+      "matched_snapshots": 304,
+      "native_unverified": 0,
+      "native_valid": 304,
+      "panels": 33,
+      "published_unique": 304,
+      "read_only_database": true,
+      "remote_operations": "login and fresh inbound inventory only; no config mutations",
+      "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+      "shares_after": {
+        "DIRECT": 35,
+        "RESIDENTIAL": 280
+      },
+      "shares_before": {
+        "DIRECT": 33,
+        "RESIDENTIAL": 271
+      },
+      "started_at": "2026-10-07T09:16:46.493229321Z",
+      "still_published_invalid": 0,
+      "transitioned_out": 0,
+      "unmatched_snapshots": 0
+    },
+    "native_jobs": [
+      {
+        "n": 20,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T09:16:41.561634+00:00",
+        "max_attempts": 1
+      },
+      {
+        "n": 19,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T09:16:39.568751+00:00",
+        "max_attempts": 1
+      }
+    ],
+    "rollback_contract": "stop both workers; prove zero checkpoints before old artifact startup"
   }
 }
