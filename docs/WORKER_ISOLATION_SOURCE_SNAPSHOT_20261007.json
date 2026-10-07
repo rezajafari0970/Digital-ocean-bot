@@ -1,8 +1,8 @@
 {
-  "at_utc": "2026-10-07T08:13:10.563171+00:00",
-  "status": "TEST_REVIEW_PASS_READY_FOR_DEPLOY",
+  "at_utc": "2026-10-07T08:18:50.474410362Z",
+  "status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
   "base_commit": "6c2be58a1bd9a78d1d99d1dfa35ac5380dc4dd8d",
-  "production_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "production_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
   "sha256": {
     "cmd/worker/main.go": "88579b420ab08f28ff91eb81686f99e93824fc8aa574cd5704e87c8f0c9d0652",
     "cmd/worker/main_test.go": "e9a06296f0053038078a8ebe5f2e3bef650a3370689523bd8abec94074fe0a5e",
@@ -27,5 +27,10 @@
     "internal/serverprotection/controller.go": "cef89c6e2efb7d3f29c1ac9572bd03ee1dca7b7fc8c0e0dc1ef11a8a90db88ba"
   },
   "fixture_binary_sha256": "779f4dd7718bea4c9a1f763c9895de345570c07af9ced37727368b2ac95912b0",
-  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
+  "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
+  "deployed_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "previous_production_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "api_sha256": "2ae2c9ed6180d5e4214f681c37cc5b568b9b3c961088094ac44d9583419464f1",
+  "worker_sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24",
+  "vcs_modified": false
 }

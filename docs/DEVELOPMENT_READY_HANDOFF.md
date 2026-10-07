@@ -1,12 +1,18 @@
 # Development Ready Handoff
 
-## Current frontier — phase1 verified, phase2 draft NOT DEPLOYED
-Draft source checkpoint: c72193d5c25b15e87be9ccf360eb4b3df867908c.
-Read docs/WORKER_ISOLATION_20261007.md and its ACCEPTANCE/SOURCE_SNAPSHOT. Production remains clean caf3f0d API/worker, static0c7721d/schema161. User Resume at06:23:13Z is complete; do not ask for it again. Native600-second expiry/delete/refill and both UpCloud READY replacements are verified.06:40Z actual shares Direct58/Residential446; no new global failure. Numbers are sampled, not permanent guarantees.
+## Current frontier — phase2 deployed and native progress verified
+Runtime/source checkpoint: 951ea1a5852e716d09f4362e75f1a4ba51ca3c7a. API plus control and panels worker services are active. Static0c7721d/schema161 unchanged. All five readiness checks passed through 2026-10-07T08:18:50.474410362Z; source and running binary hashes are verified. Read docs/WORKER_ISOLATION_20261007.md and its ACCEPTANCE/SOURCE_SNAPSHOT.
 
-Phase2 source implements explicit all/control/panels module registration, independent role processes/DB budgets/resource limits/readiness, supervised module lifetime and PostgreSQL role ownership, preserving all native panel runtimes together and all durable mutation guards. PG/race/HTTP/fullGo and actual empty-fixture systemd crash/restart/peer survival pass. NO production restart/topology/configuration change was made.
+The user's credit recharge resolved the API blocker. Genuine OpenAI review found two issues (startup ownership-monitor gap and DB admission reserve); both are corrected, final review PASS, real PG/race/HTTP/full-Go/systemd isolation tests PASS. Development Orchestrator worker-isolation-20261007 is COMPLETE. No recharge or additional Resume is pending; the actual client gate remains enabled from06:23:13Z.
 
-Server OpenAI API returned HTTP429 credit_balance_exhausted (insufficient_quota). Orchestrator job worker-isolation-20261007 remains PLAN/RETRYABLE, not COMPLETE; source review is not PASS. Restore credit, resume its genuine plan/review, examine busy-fleet DB lease headroom, then reviewed clean-build/canary deployment. Prepared review and verify scripts/evidence: /root/backups/dob-worker-isolation-20261007. Do not mutate gates, fabricate auth, clear quarantine, rearm finite budgets, or interpret this draft's Git revision as deployed. Existing production caf3f0d must remain the rollback baseline. No re-priming; use source snapshots and current evidence.
+Production after rollout:37 create and36 delete jobs succeeded by08:18:24Z; same-scope replacement continued. Public HTTP200 shares at08:18:29Z had Direct53/Residential379 lines. Six production-only samples had zero pool waits, advancing control scans and mutation successes96 to136. Both UpCloud servers were READY at observation; Desired5 unchanged. Samples are bounded evidence, not indefinite uptime/mobile traffic proof.
+
+All account/rule/profile/gate/routing/proxy/protection settings were preserved; only worker service topology and binaries intentionally changed. Previous caf3f0d binaries/topology are the rollback baseline in /root/backups/dob-worker-isolation-20261007. Stop BOTH split workers before any old all-role startup. Do not clear quarantine, rearm budgets or fabricate auth. Canonical checkout remains detached intentionally because the named branch is held in an older archive; push HEAD normally to checkpoint/final-e2e-20260929 without resetting that archive.
+
+Next scope: living-but-stuck module progress supervision, queue fairness and independent health evidence. Roles still share host/database/network; no blanket self-repair guarantee. Continue from source snapshots and live facts without re-priming.
+
+## Historical frontiers
+The following entries preserve earlier observations and are superseded by the current frontier above. Old Resume/recharge requests and earlier shared-worker limitations are historical, not current actions.
 
 ## Modular recovery frontier — 2026-10-07
 Read docs/MODULAR_RECOVERY_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT JSON. Clean API/worker revision caf3f0de76d142b7e8ded2923a429b00fd4ba50c is deployed; static0c7721d/schema161 unchanged. Native HTTP fault, PostgreSQL/race/full Go and final server OpenAI review PASS. Config hashes and actual running binary hashes verified; all4 readiness checks pass.
@@ -17,7 +23,7 @@ At 2026-10-07T06:17:18.545926+00:00, main gate remains exactly the existing05:28
 
 Remaining architecture scope: shared worker process/memory/DB pool and global client executor lock; no forced goroutine abandonment; common proxy-health evidence and wider fairness/process supervision remain future work. Provider locks/billing/trial restrictions and expired/exhausted budgets still require their legitimate resolution. Evidence, original failures, clean freeze and rollback: /root/backups/dob-modular-recovery-20261007.
 
-## Current frontier — UI recovery and verified client replacement, 2026-10-07
+## Historical frontier — UI recovery and verified client replacement, 2026-10-07
 Static source `0c7721d4521beed9ba0b7a4f6fba12114b580cc1` is deployed; runtime API/worker remains00a4b185929185224c38719bd8c1ec9a71dc35c6, schema161. The user clicked authenticated Resume at04:59:18Z. Main gate stayed enabled; native client creation,600-second expiry deletion/replacement and actual class shares are verified. Latest observation05:16:32Z: Direct56/Residential443,996 succeeded bulk creates,344 succeeded bulk deletes,53 panel/inbound scopes with same-scope replacement. Counts vary with fleet lifecycle. No Resume action remains pending.
 
 Configs null-innerHTML refresh race is fixed. View-scoped GET timeout/abort/identity fences, single-flight polling, retained last-good status,5..30second retry, online/visibility wake and account callback guards prevent the tested stale/hung response cases. Empty snapshot counts are unavailable, not fabricated zero. Browser390x844 fault tests, PostgreSQL/API race, full Go and final OpenAI review PASS. Static deployment preserves settings and running binaries; actual configured admin HTML/static hashes verified. Read `docs/UI_REFRESH_RECOVERY_20261007.md`, its SOURCE_SNAPSHOT and ACCEPTANCE JSON. A tab already open only needs one reload for new JavaScript.

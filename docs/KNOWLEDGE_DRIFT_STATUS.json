@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
+  "git_head": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
   "ready": true,
   "artifacts": [
     {
@@ -356,20 +356,20 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-    "runtime_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
-    "handoff": "docs/UI_REFRESH_RECOVERY_20261007.md",
+    "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+    "runtime_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+    "handoff": "docs/WORKER_ISOLATION_20261007.md",
     "inspected_live_source": true,
-    "note": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED"
+    "note": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED"
   },
   "latest_development_delta": {
-    "source_baseline": "8b5e5d13586bb3e261ee87b755d6f1045bb8095c",
-    "source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-    "snapshot": "docs/UI_REFRESH_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
-    "handoff": "docs/UI_REFRESH_RECOVERY_20261007.md",
-    "acceptance": "docs/UI_REFRESH_RECOVERY_ACCEPTANCE_20261007.json",
-    "status": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED",
-    "open_followup": "Separate provider/fleet issues; no pending authenticated resume. Existing tab reload only."
+    "source_baseline": "6c2be58a1bd9a78d1d99d1dfa35ac5380dc4dd8d",
+    "source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+    "snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
+    "handoff": "docs/WORKER_ISOLATION_20261007.md",
+    "acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
+    "status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
+    "open_followup": "Living-but-stuck module supervision and independent health evidence; no pending Resume or recharge."
   },
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
@@ -388,13 +388,16 @@
     "verified_at": "2026-10-07T06:19:41.564699+00:00",
     "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
     "remaining_action": "AUTHENTICATED_CONFIGS_RESUME_AND_NATIVE_OUTPUT_VERIFICATION",
-    "upcloud": "DELETE_CONFIRMED_AUTOMATIC_BACKFILL_CREATE_VERIFYING"
+    "upcloud": "DELETE_CONFIRMED_AUTOMATIC_BACKFILL_CREATE_VERIFYING",
+    "historical_observation": true,
+    "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
-  "current_frontier": "PHASE1_NATIVE_VERIFIED_PHASE2_DRAFT_TESTED_NOT_DEPLOYED",
+  "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "current_frontier": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "BLOCKED_CREDIT_EXHAUSTED",
-  "current_native_evidence_at": "2026-10-07T06:40:27.813873+00:00",
-  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
+  "openai_review": "PASS",
+  "current_native_evidence_at": "2026-10-07T08:18:50.474410362Z",
+  "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
+  "source_snapshot_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a"
 }

@@ -1,7 +1,6 @@
 {
-  "status": "TEST_REVIEW_PASS_READY_FOR_REVERSIBLE_DEPLOY",
-  "at_utc": "2026-10-07T06:44:32.783422+00:00",
-  "production_revision_unchanged": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
+  "at_utc": "2026-10-07T08:18:50.474410362Z",
   "static_unchanged": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
   "schema_unchanged": 161,
   "phase1_native_cycle": {
@@ -192,15 +191,15 @@
       "class": "DIRECT",
       "token_created_at": "2026-10-07T06:11:26.948007+00:00",
       "http_status": 200,
-      "vless_lines": 58,
-      "response_bytes": 17492
+      "vless_lines": 53,
+      "response_bytes": 15994
     },
     {
       "class": "RESIDENTIAL",
-      "token_created_at": "2026-10-07T06:36:15.625122+00:00",
+      "token_created_at": "2026-10-07T06:50:42.869746+00:00",
       "http_status": 200,
-      "vless_lines": 446,
-      "response_bytes": 134560
+      "vless_lines": 379,
+      "response_bytes": 114368
     }
   ],
   "phase2_tests": {
@@ -294,14 +293,13 @@
     "credit_recharged_by_user": true
   },
   "configuration_changed": false,
-  "production_services_restarted": false,
-  "production_phase2_verified": false,
+  "production_services_restarted": true,
+  "production_phase2_verified": true,
   "remaining": [
-    "clean build and reversible split deployment",
-    "actual native work/readiness/pool verification"
+    "Living-but-stuck per-module supervision and queue fairness are future scope.",
+    "Host, database and network remain shared; mobile end-to-end traffic is not verified here."
   ],
   "evidence_directory": "/root/backups/dob-worker-isolation-20261007",
-  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
   "reviewed_at_utc": "2026-10-07T08:13:10.563171+00:00",
   "source_review": {
     "verdict": "PASS",
@@ -323,5 +321,310 @@
     "control_held_test_envelope": 5,
     "panels_held_test_envelope": 2
   },
-  "db_baseline_sampling_note": "Includes concurrent isolated test database activity; not production-only saturation."
+  "db_baseline_sampling_note": "Includes concurrent isolated test database activity; not production-only saturation.",
+  "previous_production_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "production_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "worker_topology_changed": true,
+  "deployment": {
+    "at_utc": "2026-10-07T08:17:09.804787+00:00",
+    "started_at": "2026-10-07T08:16:55.965178+00:00",
+    "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+    "services": {
+      "digital-ocean-bot-worker": {
+        "pid": "1609865",
+        "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24",
+        "restarts": "0",
+        "memory_current": "10317824"
+      },
+      "digital-ocean-bot-worker-panels": {
+        "pid": "1609866",
+        "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24",
+        "restarts": "0",
+        "memory_current": "16510976"
+      },
+      "digital-ocean-bot-api": {
+        "pid": "1609881",
+        "sha256": "2ae2c9ed6180d5e4214f681c37cc5b568b9b3c961088094ac44d9583419464f1",
+        "restarts": "0",
+        "memory_current": "11821056"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T08:17:09.039485267Z"
+    },
+    "configuration_preserved": true,
+    "static_preserved": true,
+    "schema_preserved": true,
+    "roles": "control/panels"
+  },
+  "phase2_native_observation": {
+    "at_utc": "2026-10-07T08:18:24.776225+00:00",
+    "since": "2026-10-07T08:16:55.965178+00:00",
+    "gates": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+        "last_failure_code": "EXECUTOR_INTERNAL_FAILURE"
+      }
+    ],
+    "jobs": [
+      {
+        "n": 23,
+        "kind": "BULK_CREATE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "n": 1,
+        "kind": "BULK_CREATE",
+        "state": "RUNNING",
+        "latest": null,
+        "max_attempts": 1
+      },
+      {
+        "n": 37,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T08:18:24.477351+00:00",
+        "max_attempts": 1
+      },
+      {
+        "n": 27,
+        "kind": "BULK_DELETE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "n": 36,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T08:18:24.049606+00:00",
+        "max_attempts": 1
+      }
+    ],
+    "expired_owned": [
+      {
+        "deleted_after_deploy": 51,
+        "lived_at_least_595_seconds": 51
+      }
+    ],
+    "replacements": [
+      {
+        "panel_id": "4a1b7e19-253c-4c36-b29d-6f040607f305",
+        "created_at": "2026-10-07T08:17:55.573281+00:00",
+        "delete_job": "d57b7c0d-39f0-4abf-b918-98cc37a13596",
+        "deleted_at": "2026-10-07T08:17:04.867589+00:00",
+        "inbound_id": 1,
+        "created_job": "6fc8ad84-02a2-4e76-888e-1d4993996e64"
+      },
+      {
+        "panel_id": "09d10dda-7c00-4de8-bc7f-fafc1df80e39",
+        "created_at": "2026-10-07T08:17:44.397783+00:00",
+        "delete_job": "7c21f360-544b-4f95-8b0d-31c26fba7dd0",
+        "deleted_at": "2026-10-07T08:17:07.318735+00:00",
+        "inbound_id": 1,
+        "created_job": "8c5d8562-cd23-4d15-9225-5ce1bd3d3cab"
+      },
+      {
+        "panel_id": "8cc3c871-6a41-4954-985e-45f0314f6ea9",
+        "created_at": "2026-10-07T08:17:31.112165+00:00",
+        "delete_job": "f966990b-d7cc-4020-b918-ce0d3be57fd6",
+        "deleted_at": "2026-10-07T08:17:10.789894+00:00",
+        "inbound_id": 1,
+        "created_job": "0cbb9421-d975-4af1-83a8-908ffbcf61c9"
+      },
+      {
+        "panel_id": "25df159f-73a8-48a6-b993-e3a290065d51",
+        "created_at": "2026-10-07T08:17:52.622941+00:00",
+        "delete_job": "33bf9049-fefb-478d-9d47-1b63068763af",
+        "deleted_at": "2026-10-07T08:17:13.500345+00:00",
+        "inbound_id": 1,
+        "created_job": "86048530-09e9-4af7-88bd-0e88359cc625"
+      },
+      {
+        "panel_id": "5bc6ad63-cf50-4644-9ac6-8de068ec5348",
+        "created_at": "2026-10-07T08:17:54.594981+00:00",
+        "delete_job": "5fc1b655-55e6-4e15-a6a6-9ca9bff993fb",
+        "deleted_at": "2026-10-07T08:17:17.876263+00:00",
+        "inbound_id": 1,
+        "created_job": "9cd087be-3672-428f-9dac-9f7c98cf6c7d"
+      },
+      {
+        "panel_id": "b61b4cee-2d56-4e4a-a2be-d4f57b193e64",
+        "created_at": "2026-10-07T08:18:08.011382+00:00",
+        "delete_job": "1758d4bb-db7b-4db1-b9e8-e85b59218eae",
+        "deleted_at": "2026-10-07T08:17:21.727547+00:00",
+        "inbound_id": 1,
+        "created_job": "80e93979-7905-4af1-9794-b40d328e3584"
+      },
+      {
+        "panel_id": "5c5556f7-edc9-4de4-8966-dbc8e1982fd5",
+        "created_at": "2026-10-07T08:17:55.745277+00:00",
+        "delete_job": "89123704-cae7-49c7-a8bd-cc4f723804a5",
+        "deleted_at": "2026-10-07T08:17:22.19588+00:00",
+        "inbound_id": 1,
+        "created_job": "9dfa7d2c-6e89-4b14-a623-5de9b43aeda7"
+      },
+      {
+        "panel_id": "5d2981c6-9233-4748-b972-90111f699da7",
+        "created_at": "2026-10-07T08:17:54.240689+00:00",
+        "delete_job": "3f4e7c62-4afe-4aa4-a376-4575a1182ccd",
+        "deleted_at": "2026-10-07T08:17:22.498093+00:00",
+        "inbound_id": 1,
+        "created_job": "78639172-c72d-4d1f-80bc-2c50abbe273b"
+      }
+    ],
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "1609881",
+        "NRestarts": "0",
+        "MemoryCurrent": "12599296",
+        "TasksCurrent": "10",
+        "MemoryMax": "infinity"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "1609865",
+        "NRestarts": "0",
+        "MemoryCurrent": "11980800",
+        "TasksCurrent": "10",
+        "MemoryMax": "536870912"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "1609866",
+        "NRestarts": "0",
+        "MemoryCurrent": "29593600",
+        "TasksCurrent": "10",
+        "MemoryMax": "536870912"
+      }
+    },
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "module_exit": 0,
+      "ambiguous_retry": 0
+    },
+    "scope": "Postdeployment native create/delete/refill progress, including expiry of clients born before deployment. This short window alone is not a complete newly-born 600-second client cycle."
+  },
+  "postdeployment_resources": {
+    "from": "2026-10-07T08:18:24.980932069Z",
+    "through": "2026-10-07T08:18:50.474410362Z",
+    "samples": 6,
+    "all_readiness_checks_pass": true,
+    "roles": {
+      "control": {
+        "pool_limit": 24,
+        "peak_in_use": 8,
+        "peak_open": 9,
+        "wait_count_max": 0,
+        "wait_duration_max": 0,
+        "work_limit": 3,
+        "waiting_min": 10,
+        "waiting_max": 14,
+        "stalled_lanes_max": 0
+      },
+      "panels": {
+        "pool_limit": 40,
+        "peak_in_use": 18,
+        "peak_open": 18,
+        "wait_count_max": 0,
+        "wait_duration_max": 0,
+        "work_limit": 10,
+        "waiting_min": 9,
+        "waiting_max": 19,
+        "stalled_lanes_max": 0
+      }
+    },
+    "production_database": {
+      "connections": 38,
+      "active": 5,
+      "idle_tx": 2,
+      "lock_waiters": 2
+    },
+    "control_scans_advanced": {
+      "recovery_scan_unix": true,
+      "lifecycle_scan_unix": true,
+      "scheduler_scan_unix": true
+    },
+    "client_successes_first_last": [
+      96,
+      136
+    ],
+    "scope": "Six production-only samples after isolated tests stopped; admission waiters are separate from SQL pool waits. Transient DB lock waiters are reported, not hidden. This is bounded observation, not an indefinite saturation guarantee."
+  },
+  "current_live_gate": {
+    "enabled": true,
+    "panel_id": null,
+    "singleton": true,
+    "inbound_id": null,
+    "updated_at": "2026-10-07T06:23:13.912198+00:00",
+    "concurrency": 1,
+    "kill_switch": false,
+    "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+    "last_failure_code": "EXECUTOR_INTERNAL_FAILURE",
+    "last_failure_job_id": "eb7010c2-94ab-4158-8eb2-4fd3d0ef2bb1",
+    "last_failure_panel_id": "c7f3a75d-db31-4387-92c5-6e199a9883a5"
+  },
+  "current_upcloud_lifecycle": [
+    {
+      "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+      "name": "Upcloud 113",
+      "owned": true,
+      "state": "READY",
+      "enabled": true,
+      "droplet_id": "82de2b78-a3e1-4eed-ad97-e257308b81cc",
+      "expires_at": "2026-10-07T08:29:35.766829+00:00",
+      "backfill_required": false,
+      "desired_server_count": 5
+    },
+    {
+      "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+      "name": "Upcloud 113",
+      "owned": true,
+      "state": "READY",
+      "enabled": true,
+      "droplet_id": "5a37004e-5f2e-4e14-a502-92c2d18ab19a",
+      "expires_at": "2026-10-07T08:41:31.135601+00:00",
+      "backfill_required": false,
+      "desired_server_count": 5
+    }
+  ],
+  "unauthenticated_capacity_status": 401,
+  "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
+  "configuration_preservation_scope": "Accounts/rules, profiles, protection, gates, routing, publication and proxy settings exactly compared before/after rollout. Systemd role topology intentionally changed.",
+  "orchestrator": {
+    "job": "worker-isolation-20261007",
+    "phase": "COMPLETE",
+    "last_good_commit": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a"
+  }
 }
