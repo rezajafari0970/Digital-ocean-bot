@@ -1,0 +1,43 @@
+{
+  "goal": "Fix independently reproduced PH12-001 and PH12-002 in recovery worker admission, durable completion/backoff and truthful progress; test, review, deploy and verify native production.",
+  "context": "Baseline canonical d7ab5f1, runtime951ea1a, static0c7721d, schema161. Use DueChecked, never bypass on ledger read error, checked resolved pruning. Durable pending recovery checkpoint recorded BEFORE handler execution; completion atomically persists FailChecked-equivalent/ClearChecked-equivalent outcome and removes checkpoint. Persistence failure leaves durable checkpoint and blocks replay; later safe reconciliation writes interrupted-outcome backoff before removing checkpoint, without calling remote handler. Session item lock held through execution/reconciliation to distinguish live owner; real durable provider/operation fences still govern mutations. Checkpoint+handler+completion admission inside shared control3 budget; worst-case connection allowance conservatively6 per admitted control job with24 cap. Reaper bounded, skip in-process active items, no abandon or overlap; shared role owner still authoritative. Async ledger errors reset recovery scan readiness immediately through generation-guarded progress, cannot be hidden by concurrent successful scan; subsequent successful persisted reconciliation/scanning restores automatically. Missing/failed table refuses work. Normal remote error with persisted backoff is handled not global failure. Tests real isolated PostgreSQL for read fault with valid bypass, INSERT/UPDATE/DELETE failure, no replay until durable completion, crash/restart pending checkpoint reconciliation, session loss/owner, cancellation, concurrency, healthy peer and readiness; full suite/race/native HTTP uncertainty. Additive migration162 if needed, no gate/profile/quarantine/finite-budget/route changes. Production reversible rollout must preserve split topology and not roll back to old checkpoint-unaware code with unresolved checkpoint rows. Independent actual OpenAI API source review, no blanket arbitrary bug repair. Independent review also found equivalent lifecycle completion defect; extend shared checkpoint runner to lifecycle with separately filtered reaper and admission, latch failed active keys before health restoration, and test actual rollback launcher database gate with pending/unreadable/empty isolated DB. Follow-up review found legacy unbounded RecoverOperation deferred DB bookkeeping; bound both queries to one5second WithoutCancel context and test actual handler under locked table after original native error.",
+  "allowed_paths": [
+    "internal/worker",
+    "internal/observability/health_test.go",
+    "cmd/worker/main.go",
+    "cmd/worker/main_test.go",
+    "migrations/000162_worker_recovery_checkpoints.up.sql",
+    "migrations/000162_worker_recovery_checkpoints.down.sql",
+    "docs/development-jobs/recovery-ledger-fix-20261007.json",
+    "docs/RECOVERY_LEDGER_FIX_20261007.md",
+    "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json",
+    "docs/RECOVERY_LEDGER_FIX_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "tools/recovery-ledger-acceptance.sh",
+    "tools/recovery-ledger-rollback.py",
+    "internal/app/recovery.go",
+    "internal/app/recovery_cleanup_test.go",
+    "tools/recovery-ledger-rollback-test.py"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/recovery-ledger-acceptance.sh > /root/backups/dob-recovery-ledger-fix-20261007/acceptance.log 2>&1",
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/worker ./internal/observability > /root/backups/dob-recovery-ledger-fix-20261007/race.log 2>&1"
+    ],
+    "verify": [
+      "bash tools/recovery-ledger-acceptance.sh > /root/backups/dob-recovery-ledger-fix-20261007/acceptance-final.log 2>&1",
+      "python3 /root/backups/dob-recovery-ledger-fix-20261007/verify-review.py"
+    ]
+  },
+  "commit_message": "fix(worker): persist recovery admission and checked completion"
+}

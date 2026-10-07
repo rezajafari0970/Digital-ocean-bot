@@ -22,9 +22,11 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		if retErr == nil || !versionLoaded {
 			return
 		}
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		defer cleanupCancel()
 		if item.Kind == "DELETE_DROPLET" {
 			var providerState string
-			if err := h.Container.DB.QueryRowContext(context.Background(), `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState); err == nil {
+			if err := h.Container.DB.QueryRowContext(cleanupCtx, `SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState); err == nil {
 				retErr = slowCleanupProviderError(providerState, retErr)
 			}
 		}
@@ -32,7 +34,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		if code == "" {
 			code = "recovery_retry"
 		}
-		_, _ = h.Container.DB.ExecContext(context.Background(), `UPDATE operations SET updated_at=now(),error_code=$3,error_message=$4 WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying') AND lock_version=$5`, item.ID, item.AccountID, code, retErr.Error(), version)
+		_, _ = h.Container.DB.ExecContext(cleanupCtx, `UPDATE operations SET updated_at=now(),error_code=$3,error_message=$4 WHERE id=$1 AND account_id=$2 AND state IN ('planned','running','unknown','verifying') AND lock_version=$5`, item.ID, item.AccountID, code, retErr.Error(), version)
 	}()
 	if item.Kind != "CREATE_DROPLET" && item.Kind != "DELETE_DROPLET" {
 		return nil

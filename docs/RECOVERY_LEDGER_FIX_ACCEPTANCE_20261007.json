@@ -1,0 +1,57 @@
+{
+  "at_utc": "2026-10-07T09:13:39.248631+00:00",
+  "status": "TESTED_REVIEWED_NOT_YET_DEPLOYED",
+  "review": {
+    "status": "PASS",
+    "review_response_id": "resp_0e8f2dd945d9accd006ac60c004f9087d195d0f5e75bf6202d",
+    "product_matches_review": true,
+    "post_review_test_fixture_correction": [
+      "internal/app/recovery_cleanup_test.go"
+    ],
+    "review": {
+      "verdict": "PASS",
+      "findings": [],
+      "coverage_gaps": [
+        "No deterministic test injects PostgreSQL commit-result uncertainty after COMMIT for checkpoint completion; production verification can confirm conservative reconciliation behavior but should not claim fault-injected coverage.",
+        "No stress test exercises reconciliation with more than 100 mixed active and orphan checkpoints while the SQL pool is saturated.",
+        "No end-to-end test shown combines role-session loss during an active native handler with process replacement and subsequent checkpoint reconciliation.",
+        "Rollback tests are described but the supplied source does not include the real-system test harness or service-unit definitions needed to independently verify launcher wiring."
+      ],
+      "limitations": [
+        "Review is limited to the supplied source and cannot validate external systemd unit configuration, deployment entrypoint wiring, database constraints from earlier migrations, or provider-side mutation-fence implementations.",
+        "The running full test and race-suite results and native production verification results were not provided.",
+        "Arbitrary PostgreSQL commit outcomes and remote side effects cannot provide exactly-once guarantees; the implementation appropriately relies on durable checkpoints, conservative backoff, and native mutation fences instead."
+      ]
+    },
+    "acceptance_sha256": "fa2ffdbc2b2358aede30ecfa7c925b2f8976b63ec06e9850f664edb4ad841443"
+  },
+  "fault_matrix": [
+    "ledger read/prune/checkpoint absence refuse before bypass/native call",
+    "failure INSERT/UPDATE/CLEAR/checkpoint DELETE rollback atomically",
+    "checkpoint INSERT failure refuses native work",
+    "restart reconstruction and interrupted backoff with no installer bypass",
+    "live session/backend loss/unlock and concurrent item execution",
+    "async fault invalidates readiness; active failed key and older scan cannot hide it",
+    "lifecycle uses shared durable protocol with separately filtered reaper",
+    "parent cancellation persists completion; lanes joined",
+    "actual handler deferred cleanup under table lock returns within5seconds preserving original error",
+    "actual rollback launcher blocks pending and unreadable ledger; permits zero rows"
+  ],
+  "gates": {
+    "postgres_race_http_full_go": "PASS",
+    "api_source_review": "PASS",
+    "rollback_launcher_pg": "PASS",
+    "full_phase1_phase2_acceptance": "PASS"
+  },
+  "evidence_directory": "/root/backups/dob-recovery-ledger-fix-20261007",
+  "limitations": [
+    "No deterministic test injects PostgreSQL commit-result uncertainty after COMMIT for checkpoint completion; production verification can confirm conservative reconciliation behavior but should not claim fault-injected coverage.",
+    "No stress test exercises reconciliation with more than 100 mixed active and orphan checkpoints while the SQL pool is saturated.",
+    "No end-to-end test shown combines role-session loss during an active native handler with process replacement and subsequent checkpoint reconciliation.",
+    "Rollback tests are described but the supplied source does not include the real-system test harness or service-unit definitions needed to independently verify launcher wiring.",
+    "Review is limited to the supplied source and cannot validate external systemd unit configuration, deployment entrypoint wiring, database constraints from earlier migrations, or provider-side mutation-fence implementations.",
+    "The running full test and race-suite results and native production verification results were not provided.",
+    "Arbitrary PostgreSQL commit outcomes and remote side effects cannot provide exactly-once guarantees; the implementation appropriately relies on durable checkpoints, conservative backoff, and native mutation fences instead."
+  ],
+  "production_fault_injection": false
+}

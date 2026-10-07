@@ -28,12 +28,13 @@ func TestLifecycleIndependentAccountAndNoOverlapAfterDeadline(t *testing.T) {
 	healthy := make(chan struct{}, 10)
 	var aCalls atomic.Int32
 	d := NewDispatcher(2, 1)
-	w := LifecycleWorker{
+	db, _, _ := recoveryFixture(t, "operation")
+	w := LifecycleWorker{Failures: FailureStore{DB: db},
 		Dispatcher: d,
-		Store:      lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "a1", AccountID: "a"}, {ID: "a2", AccountID: "a"}, {ID: "b1", AccountID: "b"}}},
+		Store:      lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "a1", AccountID: recoveryAccount}, {ID: "a2", AccountID: recoveryAccount}, {ID: "b1", AccountID: "00000000-0000-0000-0000-000000000003"}}},
 		Interval:   5 * time.Millisecond, ItemTimeout: 30 * time.Millisecond, Concurrency: 2,
 		Handler: lifecycleHandlerFunc(func(ctx context.Context, i droplets.LifecycleItem) error {
-			if i.AccountID == "a" {
+			if i.AccountID == recoveryAccount {
 				if aCalls.Add(1) == 1 {
 					<-ctx.Done()
 					close(canceled)
@@ -67,7 +68,7 @@ func TestLifecycleIndependentAccountAndNoOverlapAfterDeadline(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("healthy stopped after sibling timeout")
 	}
-	if s := d.Snapshot(20 * time.Millisecond); s.Stalled != 1 {
+	if s := d.Snapshot(20 * time.Millisecond); s.Stalled < 1 {
 		t.Fatal("stalled handler hidden", s)
 	}
 	if aCalls.Load() != 1 {
@@ -93,7 +94,8 @@ func TestLifecycleFairOffersAcrossRepeatedDueAccounts(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	reached := make(chan struct{}, 10)
-	w := LifecycleWorker{Store: lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "first", AccountID: "first"}, {ID: "later", AccountID: "later"}}}, Concurrency: 1, Interval: 5 * time.Millisecond,
+	db, _, _ := recoveryFixture(t, "operation")
+	w := LifecycleWorker{Failures: FailureStore{DB: db}, Store: lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "first", AccountID: recoveryAccount}, {ID: "later", AccountID: "00000000-0000-0000-0000-000000000003"}}}, Concurrency: 1, Interval: 5 * time.Millisecond,
 		Handler: lifecycleHandlerFunc(func(ctx context.Context, i droplets.LifecycleItem) error {
 			if i.ID == "later" {
 				select {

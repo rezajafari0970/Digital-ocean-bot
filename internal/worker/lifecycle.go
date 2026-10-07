@@ -25,6 +25,7 @@ type LifecycleWorker struct {
 	Concurrency int
 	Progress    func(time.Time)
 	Dispatcher  *Dispatcher
+	Admit       func(context.Context, func(context.Context) error) error
 }
 
 func (w LifecycleWorker) timeout() time.Duration {
@@ -34,35 +35,35 @@ func (w LifecycleWorker) timeout() time.Duration {
 	return 90 * time.Second
 }
 func (w LifecycleWorker) process(ctx context.Context, item droplets.LifecycleItem) error {
-	itemCtx, cancel := context.WithTimeout(ctx, w.timeout())
-	err := w.Handler.ProcessLifecycle(itemCtx, item)
-	if err == nil {
-		err = itemCtx.Err()
+	return runCheckpointedRecovery(ctx, w.Failures.DB, "lifecycle", RecoveryItem{ID: item.ID, AccountID: item.AccountID},
+		func(ctx context.Context) (bool, error) { return w.Failures.DueChecked(ctx, "lifecycle", item.ID) },
+		func(ctx context.Context) error {
+			itemCtx, cancel := context.WithTimeout(ctx, w.timeout())
+			defer cancel()
+			err := w.Handler.ProcessLifecycle(itemCtx, item)
+			if err == nil {
+				err = itemCtx.Err()
+			}
+			return err
+		}, w.Admit)
+}
+func (w LifecycleWorker) reconcile(ctx context.Context, active func(string) bool) error {
+	if w.Failures.DB == nil || w.Store == nil || w.Handler == nil {
+		return errors.New("lifecycle worker configuration required")
 	}
-	cancel()
-	// The handler has returned before the lane can be released. Do not abandon
-	// an uncooperative driver or permit a second call while it is still running.
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
-	defer finishCancel()
-	if err != nil {
-		if ledgerErr := w.Failures.FailChecked(finishCtx, "lifecycle", item.ID, item.AccountID, err); ledgerErr != nil {
-			return errors.Join(err, ledgerErr)
-		}
-		return err
-	}
-	return w.Failures.ClearChecked(finishCtx, "lifecycle", item.ID)
+	return reconcileRecoveryCheckpoints(ctx, w.Failures.DB, active, "lifecycle")
 }
 func (w LifecycleWorker) discover(ctx context.Context) ([]droplets.LifecycleItem, error) {
 	scanCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	return w.Store.Due(scanCtx, time.Now().UTC(), w.Batch)
 }
-func (w LifecycleWorker) submitRound(ctx context.Context, d *Dispatcher, offset int) (int, error) {
+func (w LifecycleWorker) submitRound(ctx context.Context, d *Dispatcher, offset int, progress *recoveryProgress) (int, error) {
 	scanCtx, scanCancel := context.WithTimeout(ctx, 5*time.Second)
 	defer scanCancel()
+	if err := w.reconcile(scanCtx, d.Active); err != nil {
+		return offset, err
+	}
 	items, err := w.discover(scanCtx)
 	if err != nil {
 		return offset, err
@@ -83,8 +84,11 @@ func (w LifecycleWorker) submitRound(ctx context.Context, d *Dispatcher, offset 
 			continue
 		}
 		d.Submit(ctx, "lifecycle:"+item.ID, item.AccountID, func() {
-			if err := w.process(ctx, item); err != nil && ctx.Err() == nil {
-				log.Printf("lifecycle item %s account=%s state=%s: %v", item.ID, item.AccountID, item.State, err)
+			if err := w.process(ctx, item); err != nil {
+				progress.fail("lifecycle:" + item.ID)
+				if ctx.Err() == nil {
+					log.Printf("lifecycle item %s account=%s state=%s: %v", item.ID, item.AccountID, item.State, err)
+				}
 			}
 		})
 	}
@@ -109,14 +113,18 @@ func (w LifecycleWorker) Run(ctx context.Context) error {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	offset := 0
+	progress := recoveryProgress{publish: w.Progress}
 	for {
+		generation := progress.start(d.Active)
 		var err error
-		offset, err = w.submitRound(ctx, d, offset)
-		if err != nil && ctx.Err() == nil {
-			log.Printf("lifecycle discovery: %v", err)
-		}
-		if err == nil && w.Progress != nil {
-			w.Progress(time.Now())
+		offset, err = w.submitRound(ctx, d, offset, &progress)
+		if err != nil {
+			progress.fail("")
+			if ctx.Err() == nil {
+				log.Printf("lifecycle discovery: %v", err)
+			}
+		} else {
+			progress.success(generation)
 		}
 		select {
 		case <-ctx.Done():
@@ -128,10 +136,17 @@ func (w LifecycleWorker) Run(ctx context.Context) error {
 
 // Once is retained for synchronous bounded callers and deterministic tests.
 func (w LifecycleWorker) Once(ctx context.Context) error {
+	reconcileCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	err := w.reconcile(reconcileCtx, nil)
+	cancel()
+	if err != nil {
+		return err
+	}
 	items, err := w.discover(ctx)
 	if err != nil {
 		return err
 	}
+	var outcomes error
 	for _, item := range items {
 		due, err := w.Failures.DueChecked(ctx, "lifecycle", item.ID)
 		if err != nil {
@@ -140,12 +155,10 @@ func (w LifecycleWorker) Once(ctx context.Context) error {
 		if !due {
 			continue
 		}
-		if err := w.process(ctx, item); err != nil && ctx.Err() == nil {
-			log.Printf("lifecycle item %s account=%s state=%s: %v", item.ID, item.AccountID, item.State, err)
-		}
+		outcomes = errors.Join(outcomes, w.process(ctx, item))
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 	}
-	return nil
+	return outcomes
 }

@@ -602,7 +602,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	failures := worker.FailureStore{DB: application.DB}
 	lw := worker.LifecycleWorker{
 		Dispatcher: lifecycleLanes,
-		Store:      droplets.LifecycleStore{DB: application.DB}, Handler: worker.AdmittedLifecycle{Handler: application.Container, Budget: controlWork}, Failures: failures, Batch: 100,
+		Store:      droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Admit: controlWork.Do, Failures: failures, Batch: 100,
 		Concurrency: 6, ItemTimeout: 90 * time.Second, Interval: 10 * time.Second,
 		Progress: func(t time.Time) { lifecycleProgress.Store(t.Unix()) },
 	}
@@ -613,7 +613,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: worker.AdmittedRecovery{Handler: app.RecoveryHandler{Container: application.Container}, Budget: controlWork}, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Admit: controlWork.Do, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
 	modules.Add(worker.RoleControl, "scheduler", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()

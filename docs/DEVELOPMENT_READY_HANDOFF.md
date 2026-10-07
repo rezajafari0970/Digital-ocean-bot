@@ -1,6 +1,9 @@
 # Development Ready Handoff
 
-## Current frontier — phase1/phase2 re-audit complete; two HIGH defects open
+## Current frontier — recovery ledger correction reviewed, deployment pending
+Read docs/RECOVERY_LEDGER_FIX_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT. PH12-001/002 plus analogous lifecycle persistence and bounded deferred-operation cleanup are corrected in the candidate. Genuine API review PASS, PostgreSQL/race/full-phase acceptance PASS. Runtime remains951ea1a/schema161 until the deployment record is written. Next: commit clean freeze, exact-artifact isolated systemd fixture, guarded rollout, native output verification. Never rollback old workers across nonempty checkpoints. Evidence /root/backups/dob-recovery-ledger-fix-20261007.
+
+## Historical frontier — phase1/phase2 re-audit found two HIGH defects
 Read docs/PHASE12_REAUDIT_20261007.md and JSON before any new implementation. Runtime951ea1a remains active and source/runtime hashes match. Existing acceptance and exact deployed-binary isolated systemd restart fixture PASS, but new real-PG fault probes reproduced PH12-001 (failure-ledger read errors can reach deployment bypass and fake healthy scan) and PH12-002 (failure/backoff writes are best-effort, allowing repeated recovery without durable delay). Both are UNFIXED, inherited legacy recovery caller defects. Current audit verdict REVISE; earlier PASS is historical coverage, not closure of these findings.
 
 No production restart/product edit/gate/policy change during this audit. All five readiness checks were green through08:39UTC; native398 published configs/45 panels checked valid,212 post-phase2-born clients completed600-second expiry/deletion, current worker pool waits0. Readiness does not detect the two selective ledger faults. UpCloud newest replacement was PROVISIONING at08:37UTC, not yet READY-confirmed.

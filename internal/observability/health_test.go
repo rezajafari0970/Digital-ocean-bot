@@ -48,3 +48,16 @@ func TestLifecycleLaneReadinessDoesNotHideUncooperativeHandler(t *testing.T) {
 		}
 	}
 }
+
+func TestRecoveryPersistenceFailureInvalidatesControlReadiness(t *testing.T) {
+	now := time.Now()
+	for _, recovery := range []int64{now.Unix(), 0, now.Unix()} {
+		raw, err := json.Marshal(map[string]int64{"recovery_scan_unix": recovery, "scheduler_scan_unix": now.Unix(), "lifecycle_scan_unix": now.Unix()})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := controlProgressReady(raw, now); got != (recovery > 0) {
+			t.Fatalf("recovery=%d ready=%v", recovery, got)
+		}
+	}
+}

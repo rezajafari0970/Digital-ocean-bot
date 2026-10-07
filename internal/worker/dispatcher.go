@@ -72,3 +72,11 @@ func (d *Dispatcher) Snapshot(maxAge time.Duration) DispatcherSnapshot {
 	}
 	return s
 }
+
+// Active includes queued admission and completion, not just native handler time.
+func (d *Dispatcher) Active(key string) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	_, ok := d.active[key]
+	return ok
+}

@@ -13,7 +13,7 @@ func TestAdmissionReservesNestedSQLAndSupervisionHeadroom(t *testing.T) {
 	for _, tt := range []struct {
 		role        Role
 		slots, held int
-	}{{RoleControl, 3, 5}, {RolePanels, 10, 2}} {
+	}{{RoleControl, 3, 6}, {RolePanels, 10, 2}} {
 		t.Run(string(tt.role), func(t *testing.T) {
 			db := failureLedgerFixture(t)
 			db.SetMaxOpenConns(tt.role.ConnectionBudget())
