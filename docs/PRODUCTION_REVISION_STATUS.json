@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
+  "runtime_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-06T21:57:32.385932+00:00",
+  "verified_at_utc": "2026-10-07T04:55:48.445771+00:00",
   "binaries": {
     "api": {
-      "revision": "fc971058a555718cdd178cd226b038c65b79383f",
-      "sha256": "b4b729018d8be70ac8051d96c104966ec6f744078494c4a73e66a3d19efd2090",
+      "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+      "sha256": "78edd2f5e1bd3cb6df8e1d3cda0ef3d34b643b565cf02ae9229667b5301ab4b3",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "fc971058a555718cdd178cd226b038c65b79383f",
-      "sha256": "318efe21cbc5a0ebf15a0910cd58e6874dece3e26c2958c291c563c9c58d1678",
+      "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+      "sha256": "6ceb7d1dc95d54a23b38cc64bca6556aa0819f2ab7646cdc8a45477ee154e7f3",
       "vcs_modified": false
     }
   },
@@ -19,10 +19,10 @@
     "api": "active",
     "worker": "active"
   },
-  "migration": "000160_upcloud_trial_compatible",
-  "acceptance": "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
+  "migration": "000161_client_mutation_panel_health",
+  "acceptance": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json",
   "verified": false,
-  "note": "API/worker fc97105; static1384d16; guardian8e75d91. Two UpCloud trial servers READY with locked firewall and native/listener proofs. Overall full traffic/residential objective remains open.",
+  "note": "Clean client failure isolation runtime/static deployed. Readiness, hashes and operator configuration preservation verified. Global gate remains closed from original incident; automatic creation/output recovery awaits authenticated resume.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,21 +39,21 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Deploy tested client failure isolation checkpoint with migration161; use existing authenticated Resume automatic clients, then verify native client creation and actual Residential replacement cycle. No live recovery claimed before this.",
+  "next_product_step": "Authenticated Configs > Config Capacity > Resume automatic clients, then native lifecycle job/output proof across a600-second Residential replacement cycle. Do not directly rewrite gate, reset budgets, clear quarantine, or retry historical failures.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
+  "worker_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
-  "web_static_source_revision": "1384d16474f41c462031bb7a34df0037f7f0b5f5",
-  "verification_status": "TRIAL_TWO_SERVERS_READY_RESIDENTIAL_UNAVAILABLE",
+  "web_static_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "verification_status": "DEPLOYED_CONFIG_PRESERVED_AWAITING_AUTHENTICATED_RESUME",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "5628300b76e38e1fc6088028d881abab95a690e9",
+  "previous_runtime_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_controller_snapshot": {
     "revision": 598,
@@ -110,7 +110,7 @@
   "latest_upcloud_catalog_display_acceptance": "docs/UPCLOUD_CATALOG_DISPLAY_ACCEPTANCE_20261005.json",
   "static_hashes": {
     "output-live.js": "9495be45bab7a533b0e9c353b2b53518fd7a0ce0bfa1d9af15df8a4504b6129f",
-    "app.js": "e1b1470d25198b878ade351acffec4bcb2bbbe59e89b8eed9b4b1a5e17744c2b",
+    "app.js": "4903ddf07019b9246f97005f0d60becea5655d93942e28494cbc7cf61f73c57c",
     "app.css": "4ba8484dde52d40741148beb690a3fc1fa11cc68a62884cc547273d57a1d8bd9",
     "residential.js": "b35406c26b181bfb4ffe2d7c46662bdd684206319e7b77642eaf7c68aa46b191",
     "vultr-console.css": "f8f59b4eb8a76a4e4051b41c2f531b483d0e744bd966c70ed04bce321abda7c9",
@@ -120,7 +120,7 @@
     "server_protection.js": "6abc564ba7745c8027659e06c3b6bfc55a228d40d1a35418100c6a589049a5ca"
   },
   "latest_upcloud_capacity_status_acceptance": "docs/UPCLOUD_CAPACITY_STATUS_ACCEPTANCE_20261005.json",
-  "previous_verification_status": "DEPLOYED_CAPACITY_STATUS_VERIFIED_UPCLOUD_TRIAL_CREATE_BLOCKED",
+  "previous_verification_status": "TRIAL_TWO_SERVERS_READY_RESIDENTIAL_UNAVAILABLE",
   "latest_server_protection_acceptance": "docs/SERVER_PROTECTION_ACCEPTANCE_20261006.json",
   "server_protection": {
     "enabled": true,
@@ -129,7 +129,7 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Clean worker binary SHA and service readiness; exact succeeded historical delete reconciled without operation timestamp/attempt change; full Go and isolatedPostgreSQL race/fault/regression tests. Natural backfill and backlog drain still observed separately; no mobile/whole-fleet uptime claim.",
+  "verification_scope": "Deployed source and regression behavior verified; sustained live client replacement and mobile traffic are not yet verified.",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
@@ -391,5 +391,40 @@
     "runtime_changed": false,
     "evidence_directory": "/root/backups/dob-output-global-diagnosis-20261007"
   },
-  "prepared_client_failure_isolation": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json"
+  "latest_client_failure_isolation_acceptance": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json",
+  "client_failure_isolation_current": {
+    "main_gate": [
+      {
+        "enabled": false,
+        "panel_id": null,
+        "singleton": true,
+        "inbound_id": null,
+        "updated_at": "2026-10-06T21:57:16.626276+00:00",
+        "concurrency": 1,
+        "kill_switch": true,
+        "last_failure_at": null,
+        "last_failure_code": "",
+        "last_failure_job_id": "",
+        "last_failure_panel_id": ""
+      }
+    ],
+    "shares": [
+      {
+        "class": "DIRECT",
+        "token_created_at": "2026-10-07T04:51:06.789148+00:00",
+        "http_status": 200,
+        "vless_lines": 1,
+        "response_bytes": 298
+      },
+      {
+        "class": "RESIDENTIAL",
+        "token_created_at": "2026-10-07T04:52:52.439562+00:00",
+        "http_status": 200,
+        "vless_lines": 0,
+        "response_bytes": 0
+      }
+    ],
+    "panel_isolation": [],
+    "at_utc": "2026-10-07T04:56:04.020085+00:00"
+  }
 }

@@ -1,7 +1,9 @@
 # Development Ready Handoff
 
 ## Current frontier — client failure isolation, 2026-10-07
-The confirmed global Output outage is fixed in source: durable per-panel cooldown/quarantine, typed remote error provenance, atomic job outcomes, safe failure metadata, and authenticated Configs/Output status. Read `docs/CLIENT_FAILURE_ISOLATION_20261007.md`, its SOURCE_SNAPSHOT and ACCEPTANCE JSON. Final OpenAI review PASS; real PostgreSQL fault/race and full Go acceptance PASS. Deployment and existing authenticated capacity resume remain pending at this checkpoint. Production still uses fc97105 with schema160 until the deployment record says otherwise. Do not reopen the gate by raw SQL, manufacture admin credentials, reset finite budgets, clear quarantines, or retry historical failures blindly. Original reviews and test failures remain under `/root/backups/dob-client-failure-isolation-20261007`.
+Clean source `00a4b185929185224c38719bd8c1ec9a71dc35c6` is deployed to API, worker and app.js; migration161 applied. Full Go, real PostgreSQL fault/race, native transport race, and final OpenAI review PASS. Before/after operator configuration matches; readiness and running binary hashes verified. Read `docs/CLIENT_FAILURE_ISOLATION_20261007.md`, its SOURCE_SNAPSHOT and ACCEPTANCE JSON.
+
+**Remaining:** Configs > Config Capacity > Resume automatic clients using the user's existing authenticated admin session. Main gate is still closed at the original incident timestamp; actual Direct1/Residential0. The deployment does not itself clear the original global stop. Browser navigation is blocked and no legitimate admin session is available to this operator. Never manufacture tokens/admins or raw-rewrite gates. After authenticated resume, verify native lifecycle creation and actual class shares through one600-second replacement cycle. Do not reset finite budgets, clear quarantines or blindly retry historical failed jobs. Separate UpCloud capacity/port limits and earlier provider issues remain open. Evidence and rollback: `/root/backups/dob-client-failure-isolation-20261007`.
 
 ## Authority
 - Repository: `/root/projects/Digital-ocean-bot-canonical-e2e`

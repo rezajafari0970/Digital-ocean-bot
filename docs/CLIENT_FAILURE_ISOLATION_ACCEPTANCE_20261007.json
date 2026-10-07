@@ -1,18 +1,88 @@
 {
-  "status": "SOURCE_TESTS_AND_REVIEW_PASSED_NOT_DEPLOYED",
-  "at_utc": "2026-10-07T04:54:29.654921+00:00",
+  "status": "DEPLOYED_CONFIG_PRESERVED_AWAITING_AUTHENTICATED_RESUME",
+  "at_utc": "2026-10-07T04:57:19.567760+00:00",
   "baseline_revision": "c494fbc1c275852a0b81be90ae62b19c19377904",
   "full_go": true,
   "isolated_postgresql_and_race": "PASS",
   "evidence": "/root/backups/dob-client-failure-isolation-20261007",
   "original_failure": "review-1 REVISE: delay inbound/inventory/rejection quarantine until3 attempts; corrected and tested",
-  "production_changed": false,
-  "operator_resume": "pending existing authenticated domain action; never raw gate rewrite",
-  "live_replacement_cycle": "pending",
+  "production_changed": true,
+  "operator_resume": "PENDING: existing Configs > Config Capacity > Resume automatic clients; authenticated admin session is unavailable to this operator, browser access blocked",
+  "live_replacement_cycle": "NOT_RUN: main gate remains disabled/kill_switch true from original incident",
   "browser": "Cloud browser cannot reach control panel: ERR_BLOCKED_BY_CLIENT. No login session available.",
   "openai_review": "PASS",
   "review_evidence": "review-final.json",
   "race_native_transport": "PASS",
   "latest_acceptance": "acceptance-final3.log",
-  "ui_verification": "node --check and isolated status rendering/escaping PASS; browser visual acceptance unavailable"
+  "ui_verification": "node --check and isolated status rendering/escaping PASS; browser visual acceptance unavailable",
+  "source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "deployment": {
+    "at_utc": "2026-10-07T04:55:48.445771+00:00",
+    "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+    "hashes": {
+      "api": "78edd2f5e1bd3cb6df8e1d3cda0ef3d34b643b565cf02ae9229667b5301ab4b3",
+      "worker": "6ceb7d1dc95d54a23b38cc64bca6556aa0819f2ab7646cdc8a45477ee154e7f3"
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T04:55:48.283438261Z"
+    },
+    "migration161_present": true,
+    "static_sha256": "4903ddf07019b9246f97005f0d60becea5655d93942e28494cbc7cf61f73c57c"
+  },
+  "configuration_comparison": "PASS: accounts, rules, profiles, main gate, protection, routing, publication, proxy endpoint configuration preserved",
+  "public_output": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T04:51:06.789148+00:00",
+      "http_status": 200,
+      "vless_lines": 1,
+      "response_bytes": 298
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T04:52:52.439562+00:00",
+      "http_status": 200,
+      "vless_lines": 0,
+      "response_bytes": 0
+    }
+  ],
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "unauthenticated_capacity_status": 401,
+  "post_deploy_log_check": {
+    "panic": 0,
+    "migration failed": 0,
+    "execution gate fail-closed": 0,
+    "fatal": 0,
+    "client mutation executor:": 0
+  },
+  "main_gate": [
+    {
+      "enabled": false,
+      "panel_id": null,
+      "singleton": true,
+      "inbound_id": null,
+      "updated_at": "2026-10-06T21:57:16.626276+00:00",
+      "concurrency": 1,
+      "kill_switch": true,
+      "last_failure_at": null,
+      "last_failure_code": "",
+      "last_failure_job_id": "",
+      "last_failure_panel_id": ""
+    }
+  ],
+  "scope": "Source regression and deployment verified; current automatic client creation and sustained output recovery remain unverified until authenticated resume."
 }
