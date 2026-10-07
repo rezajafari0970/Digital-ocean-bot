@@ -1,0 +1,26 @@
+{
+  "goal": "Close newly evidenced phase3 repair completion supervision gap, then re-audit phases1/2/3 and current production; preserve provider blockers honestly.",
+  "context": "Runtime dacc332 schema163; source7ec3a59. One real panels-only restart at2026-10-07T16:37:58Z due global-reality/task_work; API/control survived. Source panelbootstrap.recordRuntimeRepair intentionally survives caller cancellation with bounded20s native fresh readback and3s durable persistence, but no explicit supervision phases. A valid20s primary plus12s readback can cross30s generic task budget. Reproduce in isolated PG+HTTP with injected clock and real canceled caller, then add independently supervised verify and database stages with margins over native deadlines. Do not remove unknown-outcome readback, change outcomes/retirement thresholds, widen generic budget, clear gates or provider restrictions. No subagents. Actual OpenAI API plan and full scoped source review, race/full-Go and retained PG/HTTP/isolation/systemd gates required. Do not claim historical restart uniquely caused by this without stack evidence. Deploy only approved clean committed build; preserve account/operator changes observed on continuation; three Vultr accounts are DELETE_PENDING disabled, two enabledTOKEN_INVALID, DO provider statuswarning, Upcloud capacity2.",
+  "allowed_paths": [
+    "internal/panels/panelbootstrap/service.go",
+    "internal/panels/panelbootstrap/repair_supervision_test.go",
+    "docs/development-jobs/phase123-closure-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 2400,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-phase123-closure-20261008/acceptance-race-fault.sh"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-phase123-closure-20261008/review.py"
+    ]
+  },
+  "commit_message": "fix(panel): supervise bounded repair readback and persistence separately"
+}
