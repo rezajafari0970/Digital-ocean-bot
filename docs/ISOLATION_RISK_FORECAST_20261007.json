@@ -1,0 +1,391 @@
+{
+  "status": "FORECAST_REVIEWED_NOT_IMPLEMENTED",
+  "at_utc": "2026-10-07T05:27:04.883963+00:00",
+  "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
+  "evidence_directory": "/root/backups/dob-isolation-risk-audit-20261007",
+  "source_hashes": {
+    "cmd/worker/main.go": "f24d5895a6c9d74104b1816216634906ada5b173f82f7d4e8dcc620ced2d93f8",
+    "internal/panels/clientops/drain.go": "2fd3bacf10b902182f7858fcff20f9b6c0a915a3b7045e9109984cada45f2bb9",
+    "internal/panels/clientops/lock.go": "692cc2bb28df450a3726efc6128ee23d6e079b7954a6e6d18df1898cd391c7da",
+    "internal/panels/clientops/gate.go": "88e5503ae9d6d431eb95860ba5037f96d2acf5a8cfb7b119597eb00d4eb213be",
+    "internal/panels/clientops/panel_failure.go": "bb60c87bee70db4237fd42fd4ccfe222b6e3aaceca184d8405df2e2b97570df4",
+    "internal/panels/clientops/executor.go": "672d1576613af8dc62665ead50eae74f27b860d818dc22d17ef963c0c5b6c180",
+    "internal/panels/clientops/journal.go": "6fa716a49300cf392f14445facb6bad3972d9d8dec514dea52c144f9c86d477b",
+    "internal/worker/worker.go": "9a69c3d19841fa3eeddbd04845604714fd45a07e18fd04a9fdb7c92d9c112ad6",
+    "internal/worker/dispatcher.go": "c0774828b60a9ba872e9c7760bdc835fe186876643298bfa762e3925e8f77da3",
+    "internal/worker/lifecycle.go": "42076ad6775817af3a2120928624f22b8bae1364576261143fded8400b1737c4",
+    "internal/app/bootstrap.go": "d8f3c87d7567ef28b8507181ec3e1294d24d5201c2c12ec37f68bf743b6fd811",
+    "internal/app/lifecycle.go": "37f97c43d9527c02bf59ff08a02394762a7cbce8eaf03cd2c9120e95532e49fb",
+    "internal/app/lifecycle_capacity_policy.go": "a460ca63cb0ee494e2bd91b19a42491f119309dafdafc26f11dbf68b4678ad65",
+    "internal/app/recovery.go": "0486315ab6f135ac0707df08e9c5defe4f36239938431af01e9b48ac7d5fe506",
+    "internal/network/monitor.go": "1e11772f20e9684d1919b53f7773b5f7402de38cd817fefef386ad9c1db69ae2",
+    "internal/residential/monitor.go": "fa16590f3cace705f42efdac22041eb4f979d9a2b254e3fad920f17b5a94b02f",
+    "internal/observability/health.go": "b048bdf123eefb6b58c194fc203b6305b276fe751443b03081cc226b044fb0e9"
+  },
+  "runtime_changed": false,
+  "configuration_changed": false,
+  "current_live_facts": {
+    "retry_column_collision": [
+      {
+        "table_name": "provision_step_attempts",
+        "column_name": "next_retry_at"
+      },
+      {
+        "table_name": "provision_runs",
+        "column_name": "next_retry_at"
+      }
+    ],
+    "current_gates": [
+      {
+        "enabled": true,
+        "concurrency": 1,
+        "kill_switch": false
+      }
+    ],
+    "scope_budgets": [
+      {
+        "total": 486,
+        "expired_enabled": 298,
+        "exhausted_enabled": 0,
+        "lowest_active_budget": 9197
+      }
+    ],
+    "queue": [
+      {
+        "jobs": 49,
+        "state": "PENDING",
+        "oldest_age_seconds": 35279
+      },
+      {
+        "jobs": 1,
+        "state": "RUNNING",
+        "oldest_age_seconds": 22
+      }
+    ],
+    "isolation": []
+  },
+  "old_pending_scope_guards": [
+    {
+      "jobs": 1,
+      "kind": "BULK_CREATE",
+      "automatic": true,
+      "possible_guard": "SCOPE_EXPIRED",
+      "oldest_age_seconds": 26918
+    },
+    {
+      "jobs": 1,
+      "kind": "BULK_DELETE",
+      "automatic": true,
+      "possible_guard": "SCOPE_EXPIRED",
+      "oldest_age_seconds": 35315
+    }
+  ],
+  "systemd_observation": {
+    "api": {
+      "active": true,
+      "restart": "on-failure",
+      "watchdog_usec": 0,
+      "memory_max": "infinity"
+    },
+    "worker": {
+      "active": true,
+      "restart": "on-failure",
+      "watchdog_usec": 0,
+      "memory_max": "infinity"
+    }
+  },
+  "source_review": {
+    "confirmed_exposures": [
+      {
+        "id": "global_client_lock_remote_io",
+        "boundary": "process_and_database_global",
+        "present_code": true,
+        "evidence": "Executor.RunOne acquires the single session advisory lock before Reconcile, Claim, runtime acquisition, mutation, verification, and journal completion. Lifecycle verification can use a detached 45-second context after the nominal 30-second execution context.",
+        "risk": "One slow panel or verification can block all client mutations across workers and manual executors; the 5-second Drain budget is checked only between jobs and cannot bound one RunOne call.",
+        "incident_observed": false
+      },
+      {
+        "id": "non_lifecycle_remote_failure_global_gate",
+        "boundary": "global_client_mutation_gate",
+        "present_code": true,
+        "evidence": "Panel-scoped classifyPanelFailure and recordPanelFailure are invoked only when isLifecycle(job.Payload). Equivalent manual or other non-lifecycle remote errors return from RunOne, terminate Drain, and cause main.go to call FailCloseGateWithFailure.",
+        "risk": "A remote failure attributable to one panel can stop unrelated panels and accounts.",
+        "incident_observed": false
+      },
+      {
+        "id": "intentional_internal_failure_global_stop",
+        "boundary": "global_client_mutation_gate",
+        "present_code": true,
+        "evidence": "Unknown errors, SQL failures, and internal invariants are deliberately not panel-classified and propagate to global fail-close.",
+        "risk": "Large blast radius, but this is currently a deliberate safety policy rather than an accidental lifecycle bug.",
+        "incident_observed": false
+      },
+      {
+        "id": "authorization_budget_consumed_before_mutation",
+        "boundary": "inbound_lifecycle_scope_or_bulk_gate",
+        "present_code": true,
+        "evidence": "Claim decrements remaining_operations or remaining_batches before execution. runtimeUnavailable can decrement job attempts as a pre-mutation deferral, but recordPanelFailure does not refund the authorization budget. Auto-enrollment refuses existing scopes and exhausted budgets.",
+        "risk": "Repeated safe pre-mutation deferrals can exhaust finite authorization without performing the intended work; recovery requires explicit operator authorization.",
+        "incident_observed": false
+      },
+      {
+        "id": "serial_lifecycle_root_context",
+        "boundary": "worker_lifecycle_loop",
+        "present_code": true,
+        "evidence": "LifecycleWorker.Once processes up to 100 due items serially using the worker root context, with no per-item deadline in the supplied code.",
+        "risk": "One stalled provider or network call can delay all later expiry and deletion items and can leave heartbeat lifecycle progress stale.",
+        "incident_observed": false
+      },
+      {
+        "id": "proxy_monitor_serial_and_correlated_endpoint",
+        "boundary": "global_proxy_health_observation",
+        "present_code": true,
+        "evidence": "network.Monitor checks every proxy serially with an 8-second timeout and defaults all checks to api.ipify.org. The residential monitor also defaults to the same endpoint, although it uses bounded concurrency.",
+        "risk": "A large proxy set stretches observation age; endpoint or DNS failure can correlate health failures across otherwise independent proxies.",
+        "incident_observed": false
+      },
+      {
+        "id": "capacity_wait_precedes_capacity_break",
+        "boundary": "account_lifecycle_capacity",
+        "present_code": true,
+        "evidence": "ProcessLifecycle returns early when managedNow < desiredNow before reading the provider capacity snapshot and considering the oldest-expiring capacity-breaker path.",
+        "risk": "When the local desired deficit cannot be backfilled because provider occupancy is at its ceiling, an expiring resource may wait indefinitely instead of retiring to free a provider slot. The supplied logic is provider-neutral; an UpCloud-specific occurrence is not established here.",
+        "incident_observed": false
+      },
+      {
+        "id": "retry_query_scan_suppression",
+        "boundary": "deployment_recovery_item",
+        "present_code": true,
+        "evidence": "RecoverDeployment selects unqualified next_retry_at from joined provision_step_attempts and provision_runs and ignores the Scan error.",
+        "risk": "Schema ambiguity or scan failure silently disables the intended retry deferral, allowing premature recovery attempts.",
+        "incident_observed": false
+      },
+      {
+        "id": "worker_single_process_failure_domain",
+        "boundary": "worker_process",
+        "present_code": true,
+        "evidence": "Lifecycle, recovery, scheduling, client mutation, panel reconciliation, capacity, proxy monitoring, residential synchronization, and maintenance goroutines share one process and one 64-connection DB pool.",
+        "risk": "OOM, an unhandled panic, descriptor exhaustion, or process-wide stalls affect all worker subsystems. systemd Restart=on-failure helps only after process exit; WatchdogUSec=0 does not detect a live hang, and MemoryMax=infinity supplies no cgroup memory containment.",
+        "incident_observed": false
+      },
+      {
+        "id": "database_failure_ambiguous_completion",
+        "boundary": "shared_control_plane",
+        "present_code": true,
+        "evidence": "Remote mutations and later journal completion are separate steps. A DB outage after remote success can prevent Succeed, verification persistence, and even durable global fail-close.",
+        "risk": "Writes cannot safely continue, and output cannot be declared globally verified until exact-scope reconciliation restores durable evidence.",
+        "incident_observed": false
+      },
+      {
+        "id": "queue_fairness_and_retry_pressure",
+        "boundary": "worker_and_client_queues",
+        "present_code": true,
+        "evidence": "Client claims are globally ordered by created_at and id under one executor. Recovery dispatcher admission is bounded but rejected submissions are merely reconsidered on later scans; no explicit fair scheduler across accounts is shown.",
+        "risk": "Large or repeatedly retried workloads can increase tail latency for other accounts. Existing per-account recovery concurrency limits reduce domination but do not prove fairness.",
+        "incident_observed": false
+      },
+      {
+        "id": "resource_and_time_common_failures",
+        "boundary": "host_process_database_and_supply",
+        "present_code": true,
+        "evidence": "No supplied mechanism establishes memory limits, disk-space admission, watchdog-based stall recovery, clock-skew bounds, retry-storm control across all subsystems, or guaranteed replacement supply before expiry.",
+        "risk": "OOM, disk exhaustion, stalled progress, cascading retries, clock skew around expiry and retry timestamps, and replacement-supply deficits remain high-priority forecast scenarios.",
+        "incident_observed": false
+      }
+    ],
+    "existing_protections": [
+      {
+        "protection": "ownership_and_exact_scope_idempotency",
+        "evidence": "Account, panel, inbound, client, kind, payload, and idempotency key are validated; conflicting reuse is rejected. Provider create recovery uses durable identities and adoption rather than ambiguous POST replay."
+      },
+      {
+        "protection": "no_ambiguous_post_replay",
+        "evidence": "Unknown provider creates are reconciled by identity; deletes are treated as idempotent and reissued only after observation and mutation-generation checks."
+      },
+      {
+        "protection": "atomic_admission_fences",
+        "evidence": "Claims transactionally check global gates, exact panel/inbound scope, account and deployment state, inventory presence, lifecycle authorization, expiry, and panel health."
+      },
+      {
+        "protection": "panel_quarantine_and_cooldown",
+        "evidence": "Known lifecycle remote failures are committed with panel health atomically; quarantine is sticky and claim paths do not bypass it."
+      },
+      {
+        "protection": "finite_budget_non_refund",
+        "evidence": "Code intentionally does not refund operator budgets or automatically rearm existing scopes. This safety invariant must remain even if separate deferral accounting is introduced."
+      },
+      {
+        "protection": "bounded_selected_concurrency",
+        "evidence": "Recovery uses six global and two per-account lanes; several panel loops use semaphores; residential monitoring uses 16 workers; client mutation concurrency remains one."
+      },
+      {
+        "protection": "durable_recovery_and_cas",
+        "evidence": "Stale client runners are reconciled, operation and deployment state use lock versions or guarded transitions, and provider-confirmed deletion receipts are replayable."
+      },
+      {
+        "protection": "network_and_policy_fail_closed",
+        "evidence": "Mutation paths check account network identity, mutation generation, provider/account state, authorization, and policy. No supplied code authorizes direct fallback when protected proxies are down."
+      },
+      {
+        "protection": "database_pool_separation",
+        "evidence": "API and worker use distinct 24 and 64 connection pools, preserving some PostgreSQL headroom, though worker subsystems still share one pool and process."
+      },
+      {
+        "protection": "heartbeat_progress_metadata",
+        "evidence": "Worker heartbeat records recovery, scheduler, and lifecycle scan timestamps every ten seconds, enabling external stale-progress detection if such alerting exists."
+      }
+    ],
+    "forecast_scenarios": [
+      {
+        "scenario": "single_panel_timeout_blocks_global_mutations",
+        "isolation_target": "panel",
+        "safe_recovery": "Keep the global lock and gate until the exact job outcome is reconciled. Classify only provably panel-attributable remote failures into panel cooldown or quarantine; unknown, SQL, and invariant failures remain globally fail-closed.",
+        "measurable_test": "Inject a 30-second mutation plus 45-second lifecycle verification on panel A; verify no second job starts while the lock is held, the measured Drain duration can exceed five seconds, and a known panel error blocks A without closing unrelated authorized panels."
+      },
+      {
+        "scenario": "database_loss_after_remote_mutation",
+        "isolation_target": "operation_and_inbound",
+        "safe_recovery": "Stop new writes, retain the RUNNING or unknown ledger state, restore DB availability, then perform exact panel/inbound/client observation before deciding success, retry, conflict, or quarantine. Never infer universal verification from process survival.",
+        "measurable_test": "Fail DB commits immediately after a successful remote response; assert no duplicate ambiguous POST occurs and execution remains blocked until exact-scope reconciliation."
+      },
+      {
+        "scenario": "all_proxies_report_down",
+        "isolation_target": "account_and_provider_network_route",
+        "safe_recovery": "Pause protected mutations for affected routes, preserve pending durable intent, and require healthy authorized proxy evidence before resumption. Never fall back to direct egress.",
+        "measurable_test": "Block the common test endpoint while proxy tunnels remain otherwise reachable; verify protected traffic does not use direct networking and endpoint correlation is distinguishable from proxy-specific failure."
+      },
+      {
+        "scenario": "provider_ceiling_with_local_desired_deficit",
+        "isolation_target": "account_and_provider",
+        "safe_recovery": "Use fresh provider capacity evidence and an account-scoped single-retirement claim to decide whether the oldest expiring managed resource must retire before backfill. Do not increase general lifecycle concurrency.",
+        "measurable_test": "Set managed below desired while provider in-use equals limit; verify exactly one eligible oldest expiring resource can enter retirement and later backfill, with no oversupply or duplicate retirement."
+      },
+      {
+        "scenario": "worker_oom_or_unhandled_panic",
+        "isolation_target": "process_then_host",
+        "safe_recovery": "Use memory containment, external progress monitoring, and process separation for high-risk subsystems where justified. Recover only at narrow task boundaries with durable state cleanup; do not blanket-recover arbitrary panics.",
+        "measurable_test": "Force memory pressure and a panic in a disposable subsystem; verify bounded host impact, systemd restart after exit, stale leases age out, and no mutation is replayed without reconciliation."
+      },
+      {
+        "scenario": "disk_or_database_storage_exhaustion",
+        "isolation_target": "database_and_host",
+        "safe_recovery": "Fail closed for mutations, alert before critical reserve is exhausted, preserve audit and journal writes, and resume only after storage health and durable state are verified.",
+        "measurable_test": "Exhaust a test volume during claim, remote execution, and completion phases; verify each phase yields a deterministic unknown or pending state and no output is falsely marked verified."
+      },
+      {
+        "scenario": "queue_starvation_and_retry_cascade",
+        "isolation_target": "account_provider_and_operation",
+        "safe_recovery": "Add observable age and fair-share admission while retaining ownership leases and per-account limits. Apply scoped backoff and jitter rather than increasing blanket concurrency.",
+        "measurable_test": "Load one account with thousands of retriable items and another with one due item; assert a bounded service-time objective for the second account and bounded retry rate per provider."
+      },
+      {
+        "scenario": "clock_skew_and_expiry_supply_deficit",
+        "isolation_target": "host_account_and_inbound",
+        "safe_recovery": "Prefer database time for durable eligibility, monitor host-to-DB skew, reserve explicit safety margins, and surface insufficient replacement supply rather than deleting or extending authorization implicitly.",
+        "measurable_test": "Skew worker time around scope expiry, next_retry_at, and droplet expiry; assert no expired authorization is consumed, no premature retry occurs, and unresolved replacement deficits become measurable stalled states."
+      }
+    ],
+    "priorities": [
+      {
+        "rank": 1,
+        "action": "Separate known panel-attributable remote failures from global internal failures for every client-mutation origin, while preserving global fail-close for SQL, unknown, and invariant errors.",
+        "granularity": "panel_with_operation_and_inbound_evidence"
+      },
+      {
+        "rank": 2,
+        "action": "Define DB-outage behavior and exact-scope reconciliation for remote-success/local-commit-failure cases.",
+        "granularity": "operation_inbound_panel"
+      },
+      {
+        "rank": 3,
+        "action": "Add external stale-progress supervision and memory containment; consider process separation for client mutations, lifecycle, and general recovery rather than shared-process expansion.",
+        "granularity": "process_and_host"
+      },
+      {
+        "rank": 4,
+        "action": "Correct the provider-ceiling versus desired-deficit decision ordering under the existing account-scoped retirement claim.",
+        "granularity": "account_and_provider"
+      },
+      {
+        "rank": 5,
+        "action": "Bound lifecycle work per item and expose oldest-due age, without simply increasing concurrency.",
+        "granularity": "lifecycle_operation_and_account"
+      },
+      {
+        "rank": 6,
+        "action": "Remove correlated proxy-health dependence through multiple controlled observation endpoints or endpoint-specific health classification; retain prohibition on direct fallback.",
+        "granularity": "proxy_provider_and_account"
+      },
+      {
+        "rank": 7,
+        "action": "Fix and test the qualified retry-time query and error handling.",
+        "granularity": "deployment_operation"
+      },
+      {
+        "rank": 8,
+        "action": "Add capacity planning and alerts for OOM, disk, DB connections, queue age/fairness, retry rate, clock skew, and expiry replacement deficit.",
+        "granularity": "process_host_database_provider_and_account"
+      }
+    ],
+    "corrections": [
+      {
+        "overclaim": "The five-second Drain budget bounds mutation execution.",
+        "correction": "It only prevents starting another iteration after the budget is observed; one RunOne can exceed it substantially."
+      },
+      {
+        "overclaim": "Panel isolation now covers remote client-mutation failures generally.",
+        "correction": "The supplied panel failure path is restricted to lifecycle payloads; manual and other non-lifecycle jobs can still close the global gate."
+      },
+      {
+        "overclaim": "The capacity issue is proven UpCloud-specific.",
+        "correction": "The ordering exposure is visible in provider-neutral lifecycle code. An UpCloud incident or provider-specific trigger is not demonstrated by the supplied source."
+      },
+      {
+        "overclaim": "Separate API and worker pools isolate worker subsystems.",
+        "correction": "They isolate API pool pressure from worker pool pressure, but all worker goroutines share the same process and 64-connection pool."
+      },
+      {
+        "overclaim": "systemd restart and heartbeat provide hang recovery.",
+        "correction": "Restart=on-failure handles process exit; WatchdogUSec=0 means systemd does not detect a live stalled process. Heartbeat data helps only if externally evaluated."
+      },
+      {
+        "overclaim": "Fresh provider observation makes all recovery outcomes authoritative.",
+        "correction": "Authority is operation-specific. DB unavailability or a missing durable completion still requires exact-scope reconciliation and cannot justify declaring all output verified."
+      },
+      {
+        "overclaim": "The fixed per-panel lifecycle and stale UI races establish broad immunity.",
+        "correction": "Those incidents are user-reported historical context. The supplied source confirms current backend boundaries only, contains no UI DOM source, and cannot establish exhaustive immunity or non-recurrence."
+      },
+      {
+        "overclaim": "The unqualified retry query is proven to fail in production.",
+        "correction": "The unqualified column and ignored Scan error are confirmed code exposures; actual SQL ambiguity depends on the deployed schema, and no observed failure is supplied."
+      },
+      {
+        "overclaim": "Removing locks or increasing concurrency is the direct remedy.",
+        "correction": "The locks preserve serialization and ownership invariants. Remediation should shorten or partition only provably safe critical sections and improve scoped isolation, reconciliation, fairness, and observability."
+      }
+    ]
+  },
+  "review_corrections_from_fresh_evidence": [
+    "Deployed schema confirms next_retry_at exists in both joined provisioning tables, so the unqualified query is ambiguous; Scan errors are ignored.",
+    "Readiness evaluates recovery, scheduler and lifecycle scans; it does not establish client-mutation or Output collector progress.",
+    "Two old pending automatic jobs currently have expired scopes; this is stale-ledger evidence, not proof they are blocking current eligible claims.",
+    "No enabled unexpired scope is budget-exhausted in this sample.",
+    "Existing global mutation lock is an intentional safety boundary. Do not remove it or change concurrency without exact-scope locking, fenced durable recovery and fault/race acceptance."
+  ],
+  "required_fault_matrix": [
+    "temporary vs permanent vs ambiguous mutation outcome",
+    "single client/inbound/panel/account/provider failure",
+    "all proxies unreachable vs common health endpoint outage",
+    "database loss before claim/after remote success/before completion",
+    "worker termination/restart and stuck executor with fresh outer heartbeat",
+    "memory/disk/connection exhaustion in disposable test environment",
+    "queue fairness and oldest eligible work age",
+    "stale inventory/missing inbound/ownership conflict",
+    "expiry supply deficit/provider ceiling and desired mismatch",
+    "clock skew and expired authorization",
+    "configuration revision change and account deletion during work",
+    "old UI response/session expiry/read timeout (prior fix retained)"
+  ],
+  "target_acceptance": "No new claim that all future failures can be predicted. Each failure must affect the smallest provably safe scope; healthy domains must make bounded progress. Unknown remote effects are observed before retry; shared DB failure blocks writes. Protected traffic never falls back directly. No auto-clear quarantine, budget reset or auth bypass."
+}

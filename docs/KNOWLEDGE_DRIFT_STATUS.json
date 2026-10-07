@@ -371,5 +371,11 @@
     "status": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED",
     "open_followup": "Separate provider/fleet issues; no pending authenticated resume. Existing tab reload only."
   },
-  "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source."
+  "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
+  "latest_risk_forecast": {
+    "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
+    "artifact": "docs/ISOLATION_RISK_FORECAST_20261007.json",
+    "status": "REVIEWED_NOT_IMPLEMENTED",
+    "at_utc": "2026-10-07T05:27:04.883963+00:00"
+  }
 }

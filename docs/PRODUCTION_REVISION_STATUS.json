@@ -39,7 +39,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "No further Resume click needed. Existing tab reload for new JS. Continue separate evidence-backed provider/lifecycle follow-ups: UpCloud expiry/capacity deadlock and trial proxy limits, app recovery ambiguous next_retry_at, x-ui expiry restarts, Vultr232 billing classification.",
+  "next_product_step": "Implement source-reviewed isolation forecast in bounded steps: all mutation origins remote-failure isolation and progress supervision first; then fenced queue/process/resource containment, correlated proxy health, provider-capacity deadlock and retry SQL correction. Forecast is not deployed remediation. Existing current UI/runtime acceptance remains unchanged.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
   "worker_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
@@ -438,5 +438,6 @@
     "status": "PASS",
     "browser_fault_tests": 15,
     "configuration_preserved": true
-  }
+  },
+  "latest_isolation_risk_forecast": "docs/ISOLATION_RISK_FORECAST_20261007.json"
 }

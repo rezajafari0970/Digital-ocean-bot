@@ -7,6 +7,9 @@ Configs null-innerHTML refresh race is fixed. View-scoped GET timeout/abort/iden
 
 Future work must use actual evidence; do not promise indefinite uptime, automatically clear quarantine, reset finite budgets or fabricate admin tokens. Separate provider/fleet issues remain: UpCloud trial endpoint restrictions/expiry capacity deadlock, app recovery ambiguous next_retry_at, earlier x-ui expiry restarts and Vultr232 credit classification. Evidence/rollback: `/root/backups/dob-ui-refresh-recovery-20261007`.
 
+## Next development scope — isolation risk forecast, 2026-10-07
+Read `docs/ISOLATION_RISK_FORECAST_20261007.json`. This is a source-reviewed forecast, not deployed remediation. Main current exposures: known remote errors from non-lifecycle/manual client jobs can still close the global gate; global mutation serialization spans remote I/O; worker subsystems share process/DB resources; readiness does not directly measure client-mutation or Output progress; proxy health has a correlated default endpoint; account lifecycle can wait below Desired before detecting a full provider ceiling; provisioning retry query is schema-confirmed ambiguous and its error is ignored. Preserve unknown-outcome reconciliation, ownership, finite budgets, quarantine and operator policy. First implementation scope should classify all mutation origins with scoped remote failure handling and explicit progress supervision; do not just remove the executor lock or increase concurrency. Current live build gate is enabled, no active budget is exhausted, and two old PENDING jobs have expired scopes. No production changes in this audit. Follow with bounded task/process isolation, independent health evidence, capacity deadlock/retry query fixes, and fault matrix acceptance.
+
 ## Authority
 - Repository: `/root/projects/Digital-ocean-bot-canonical-e2e`
 - Branch: `checkpoint/final-e2e-20260929`
