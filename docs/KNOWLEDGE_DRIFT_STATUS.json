@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "git_head": "dacc3329b5e2969415fa7051e34356e39d549c61",
+  "git_head": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
   "ready": true,
   "artifacts": [
     {
       "artifact": "docs/FULL_SOURCE_KNOWLEDGE.json",
       "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
-      "head_distance": 454,
+      "head_distance": 474,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -41,7 +41,7 @@
     {
       "artifact": "docs/SEMANTIC_KNOWLEDGE.json",
       "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
-      "head_distance": 454,
+      "head_distance": 474,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -76,7 +76,7 @@
     {
       "artifact": "docs/DEEP_REQUIREMENTS_BRAIN.json",
       "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5",
-      "head_distance": 452,
+      "head_distance": 472,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -111,7 +111,7 @@
     {
       "artifact": "docs/FUNCTION_BEHAVIOR_BRAIN.json",
       "source_commit": "5fcf10b508f4f085a3bec82a4ed5f38d3cd63b37",
-      "head_distance": 451,
+      "head_distance": 471,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -146,7 +146,7 @@
     {
       "artifact": "docs/COLUMN_BEHAVIOR_BRAIN.json",
       "source_commit": "5ec0fbc2c4c293d04841de677ad603373db25eaa",
-      "head_distance": 450,
+      "head_distance": 470,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -181,7 +181,7 @@
     {
       "artifact": "docs/TEST_BEHAVIOR_BRAIN.json",
       "source_commit": "4dc328f72436257057da58dd24553864b75d6f10",
-      "head_distance": 449,
+      "head_distance": 469,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -216,7 +216,7 @@
     {
       "artifact": "docs/STATE_TRANSITION_BRAIN.json",
       "source_commit": "d4835948fc7ab79e041823b919159332a6dbcfd2",
-      "head_distance": 448,
+      "head_distance": 468,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -251,7 +251,7 @@
     {
       "artifact": "docs/FRONTEND_ACTION_STATE_BRAIN.json",
       "source_commit": "ccfa4e72955080f80b7e7d508efa18d58696f1e1",
-      "head_distance": 447,
+      "head_distance": 467,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -286,7 +286,7 @@
     {
       "artifact": "docs/INCIDENT_REGRESSION_BRAIN.json",
       "source_commit": "4eb0f2c31d2ca6a38e0fc8310556ad5a8154be21",
-      "head_distance": 446,
+      "head_distance": 466,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -321,7 +321,7 @@
     {
       "artifact": "docs/BLIND_KNOWLEDGE_CHALLENGE.json",
       "source_commit": "7753b590b248953d1ddbef4a1ec1f2b7f16622cd",
-      "head_distance": 444,
+      "head_distance": 464,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -357,24 +357,26 @@
       "artifact": "docs/RECOVERY_LEDGER_FIX_SOURCE_SNAPSHOT_20261007.json",
       "source_commit": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
       "status": "current-delta-reviewed-tested-deployed",
-      "acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json"
+      "acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json",
+      "head_distance": 9
     },
     {
       "artifact": "docs/PHASE3_SUPERVISION_SOURCE_SNAPSHOT_20261007.json",
       "source_commit": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
       "status": "current-delta-reviewed-tested-deployed",
-      "acceptance": "docs/PHASE3_SUPERVISION_ACCEPTANCE_20261007.json"
+      "acceptance": "docs/PHASE3_SUPERVISION_ACCEPTANCE_20261007.json",
+      "head_distance": 7
     }
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
-    "runtime_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
-    "handoff": "docs/PHASE123_AUDIT_20261007.md",
+    "revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "runtime_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "handoff": "docs/PHASE123_CLOSURE_20261008.md",
     "inspected_live_source": true,
-    "note": "DEPLOYED_PHASE3_HEALTHY_WITH_TEN_OPEN_AUDIT_FINDINGS"
+    "note": "Two new bounded findings and three review safety gaps closed; provider restrictions remain. Two S1 native output/SSH timeout issues remain operational blockers, exact remote cause unproven."
   },
-  "latest_development_delta": "docs/PHASE123_REMEDIATION_BRAIN_DELTA_20261007.json",
+  "latest_development_delta": "docs/PHASE123_CLOSURE_20261008_BRAIN_DELTA.json",
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
     "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
@@ -396,18 +398,18 @@
     "historical_observation": true,
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
-  "current_frontier": "Phase123 remediated; account auth/billing/fairness next",
+  "runtime_source_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+  "current_frontier": "docs/PHASE123_CLOSURE_20261008.md",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "REVISE_SOURCE_AND_ISOLATED_FAULT_EVIDENCE",
-  "current_native_evidence_at": "2026-10-07T13:08:38.675427376Z",
+  "openai_review": "resp_0e1b7d879be8562a006ac6b42c2a2887d1ad9d566e5e7888c0",
+  "current_native_evidence_at": "2026-10-07T21:32:07.54777821Z",
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
-  "source_snapshot_revision": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
+  "source_snapshot_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
-  "latest_audit_verdict": "PASS_WITH_DOCUMENTED_OPERATIONAL_BLOCKERS",
+  "latest_audit_verdict": "PASS_IN_TESTED_SCOPE_WITH_OPERATIONAL_BLOCKERS",
   "open_reaudit_findings": [],
-  "latest_reaudit_at": "2026-10-07T10:54:26.710171+00:00",
+  "latest_reaudit_at": "2026-10-07T21:32:07.616876+00:00",
   "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
   "closed_reaudit_findings": [
     "PH12-001",
@@ -418,7 +420,7 @@
   "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00",
   "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
   "open_phase123_findings": [],
-  "latest_phase123_reaudit": "docs/PHASE123_FINAL_REAUDIT_20261007.json",
+  "latest_phase123_reaudit": "docs/PHASE123_CLOSURE_20261008_ACCEPTANCE.json",
   "closed_phase123_findings": [
     "PH123-001",
     "PH123-002",
@@ -430,5 +432,6 @@
     "PH123-008",
     "PH123-009",
     "PH123-010"
-  ]
+  ],
+  "git_head_scope": "Compiled product revision; subsequent documentation checkpoint does not change runtime source."
 }

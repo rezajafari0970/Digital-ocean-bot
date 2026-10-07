@@ -1,0 +1,595 @@
+{
+  "at_utc": "2026-10-07T21:32:07.616876+00:00",
+  "runtime_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+  "schema": 163,
+  "frontend_unchanged": true,
+  "new_findings_closed": [
+    {
+      "id": "PH123-C01",
+      "phase": 3,
+      "issue": "Panel repair completion native readback/persistence charged to generic task deadline.",
+      "fix": "Explicit supervised completion phases preserve parent identity with bounded20s native readback and3s persistence, plus5s supervisor margins. Repair outcome and retirement policy preserved.",
+      "evidence": [
+        "reproducer-before.log",
+        "review-result.json",
+        "acceptance-command.json"
+      ],
+      "status": "CLOSED"
+    },
+    {
+      "id": "PH123-C02",
+      "phase": 1,
+      "issue": "Historical unassigned backfill debt prevented all expired-server rotation at a full native provider ceiling.",
+      "fix": "One oldest expired owned server may retire only with exact fresh single-row canonical capacity+inventory proof at ceiling, no unsettled creates/builds/retirements, all ownership/account/admission locks preserved. Existing debt and Desired remain unchanged. Ambiguous timestamps, mismatched clocks, update/substitution races fail closed.",
+      "evidence_directory": "/root/backups/dob-capacity-backfill-20261008",
+      "status": "CLOSED"
+    }
+  ],
+  "new_protocol": {
+    "repair_completion": "Native20s/3s, supervised25s/8s; no detached task or discarded error.",
+    "debt_exception": "One selected canonical row supplies native capacity and inventory, latest timestamp ties reject; native clocks within1s and persisted within30s; <=2min age, newer than lastdelete; exact owned READY/EXPIRING IDs, no unresolved CREATE incl known IDs. Debt retained."
+  },
+  "production": {
+    "deployment": {
+      "at_utc": "2026-10-07T21:07:05.364073+00:00",
+      "started_at": "2026-10-07T21:06:53.387194+00:00",
+      "revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+      "previous_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+      "services": {
+        "digital-ocean-bot-worker": {
+          "pid": "2338119",
+          "sha256": "8416349bf77ea00d7757bda040da20d4789796067a5b3fc6129042ed9d69c872",
+          "restarts": "0"
+        },
+        "digital-ocean-bot-worker-panels": {
+          "pid": "2338120",
+          "sha256": "8416349bf77ea00d7757bda040da20d4789796067a5b3fc6129042ed9d69c872",
+          "restarts": "0"
+        },
+        "digital-ocean-bot-api": {
+          "pid": "2338117",
+          "sha256": "50d0e0d1eb0c3a4acdeaa5b8b136b1e968c65ce9bd909f5525bef76164993ecd",
+          "restarts": "0"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-07T21:07:04.783169378Z"
+      },
+      "configuration_preserved": true,
+      "static_preserved": true,
+      "units_preserved": true,
+      "schema": "000163_recovery_reconciliation"
+    },
+    "observation": {
+      "status": "PASS",
+      "samples": 31,
+      "seconds": 300.77,
+      "started_at": "2026-10-07T21:25:12.857743+00:00",
+      "finished_at": "2026-10-07T21:30:13.623836+00:00",
+      "unchanged_pids_and_restart_counts": true,
+      "same_processes_through_final_utc": "2026-10-07T21:32:07.616876+00:00",
+      "seconds_until_final": 1502.25
+    },
+    "upcloud_cycle": {
+      "fresh_native_ids_confirmed": true,
+      "old_expired_deleted": [
+        "cd9728c6-eea9-4ba9-a421-b1169f3acb9b",
+        "6fe88b6b-cc4c-4c6d-822d-eb3703c3c54c"
+      ],
+      "new_ready": [
+        {
+          "id": "6ff85ec5-c066-4fc9-b13f-c96dbfa5e405",
+          "state": "READY",
+          "ready_at": "2026-10-07T21:18:08.895853+00:00",
+          "created_at": "2026-10-07T21:10:49.569992+00:00",
+          "expires_at": "2026-10-07T22:18:20.895853+00:00",
+          "updated_at": "2026-10-07T21:18:08.895853+00:00",
+          "backfill_required": false,
+          "provider_resource_id": "00570437-318c-42a3-9674-a796d1a98568",
+          "replacement_deployment_id": null
+        },
+        {
+          "id": "8fdb847a-8d92-4083-94a7-cbc59d97e0df",
+          "state": "READY",
+          "ready_at": "2026-10-07T21:30:29.555791+00:00",
+          "created_at": "2026-10-07T21:23:02.363389+00:00",
+          "expires_at": "2026-10-07T22:30:51.555791+00:00",
+          "updated_at": "2026-10-07T21:30:29.555791+00:00",
+          "backfill_required": false,
+          "provider_resource_id": "00d12aee-bd08-4b83-b56f-0ea6e75ff2c9",
+          "replacement_deployment_id": null
+        }
+      ],
+      "both_original_expired_replaced": true,
+      "evidence": {
+        "at_utc": "2026-10-07T21:32:05.524090+00:00",
+        "droplets": [
+          {
+            "id": "cd9728c6-eea9-4ba9-a421-b1169f3acb9b",
+            "state": "DELETED",
+            "ready_at": "2026-10-07T17:34:55.716069+00:00",
+            "created_at": "2026-10-07T17:33:40.646753+00:00",
+            "expires_at": "2026-10-07T18:37:24.716069+00:00",
+            "updated_at": "2026-10-07T21:21:36.871952+00:00",
+            "backfill_required": false,
+            "provider_resource_id": "00083856-10c9-455e-bc80-84796f77ee2a",
+            "replacement_deployment_id": "5e8bebe9-fae8-4cbc-8207-3033319b02cb"
+          },
+          {
+            "id": "6fe88b6b-cc4c-4c6d-822d-eb3703c3c54c",
+            "state": "DELETED",
+            "ready_at": "2026-10-07T17:53:04.905544+00:00",
+            "created_at": "2026-10-07T17:45:54.565573+00:00",
+            "expires_at": "2026-10-07T18:53:05.905544+00:00",
+            "updated_at": "2026-10-07T21:19:25.929146+00:00",
+            "backfill_required": true,
+            "provider_resource_id": "00a3119e-3ef4-443c-a4eb-4f4b2733d08f",
+            "replacement_deployment_id": null
+          },
+          {
+            "id": "6ff85ec5-c066-4fc9-b13f-c96dbfa5e405",
+            "state": "READY",
+            "ready_at": "2026-10-07T21:18:08.895853+00:00",
+            "created_at": "2026-10-07T21:10:49.569992+00:00",
+            "expires_at": "2026-10-07T22:18:20.895853+00:00",
+            "updated_at": "2026-10-07T21:18:08.895853+00:00",
+            "backfill_required": false,
+            "provider_resource_id": "00570437-318c-42a3-9674-a796d1a98568",
+            "replacement_deployment_id": null
+          },
+          {
+            "id": "8fdb847a-8d92-4083-94a7-cbc59d97e0df",
+            "state": "READY",
+            "ready_at": "2026-10-07T21:30:29.555791+00:00",
+            "created_at": "2026-10-07T21:23:02.363389+00:00",
+            "expires_at": "2026-10-07T22:30:51.555791+00:00",
+            "updated_at": "2026-10-07T21:30:29.555791+00:00",
+            "backfill_required": false,
+            "provider_resource_id": "00d12aee-bd08-4b83-b56f-0ea6e75ff2c9",
+            "replacement_deployment_id": null
+          }
+        ],
+        "deployments": [
+          {
+            "id": "0b4579f0-672a-4455-a052-cbb70b9edc9c",
+            "state": "PANEL_COMPLETE",
+            "attempt": 5,
+            "created_at": "2026-10-07T21:09:12.937205+00:00",
+            "updated_at": "2026-10-07T21:18:08.895853+00:00",
+            "current_step": "panel_complete"
+          },
+          {
+            "id": "5e8bebe9-fae8-4cbc-8207-3033319b02cb",
+            "state": "PANEL_COMPLETE",
+            "attempt": 6,
+            "created_at": "2026-10-07T21:21:36.871952+00:00",
+            "updated_at": "2026-10-07T21:30:29.555791+00:00",
+            "current_step": "panel_complete"
+          }
+        ],
+        "operations": [
+          {
+            "id": "8f43b541-821d-4ee7-a755-cb460f9f7ddb",
+            "kind": "DELETE_DROPLET",
+            "state": "succeeded",
+            "attempt": 4,
+            "created_at": "2026-10-07T21:06:54.033938+00:00",
+            "error_code": null,
+            "updated_at": "2026-10-07T21:08:07.389214+00:00",
+            "resource_id": "00083856-10c9-455e-bc80-84796f77ee2a"
+          },
+          {
+            "id": "a574b5f1-6c10-446c-a975-320305288bd0",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "attempt": 1,
+            "created_at": "2026-10-07T21:09:18.273952+00:00",
+            "error_code": null,
+            "updated_at": "2026-10-07T21:09:46.020476+00:00",
+            "resource_id": "00570437-318c-42a3-9674-a796d1a98568"
+          },
+          {
+            "id": "abc4d782-56a5-44d0-8f83-1b418417a8b9",
+            "kind": "DELETE_DROPLET",
+            "state": "succeeded",
+            "attempt": 4,
+            "created_at": "2026-10-07T21:18:15.684992+00:00",
+            "error_code": null,
+            "updated_at": "2026-10-07T21:19:25.929146+00:00",
+            "resource_id": "00a3119e-3ef4-443c-a4eb-4f4b2733d08f"
+          },
+          {
+            "id": "b1061b49-b69a-4dd4-8414-760cf74d329b",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "attempt": 1,
+            "created_at": "2026-10-07T21:21:47.434934+00:00",
+            "error_code": null,
+            "updated_at": "2026-10-07T21:22:22.36298+00:00",
+            "resource_id": "00d12aee-bd08-4b83-b56f-0ea6e75ff2c9"
+          }
+        ],
+        "events": [
+          {
+            "state": "RETIRING",
+            "created_at": "2026-10-07T21:06:53.790887+00:00",
+            "resource_id": "cd9728c6-eea9-4ba9-a421-b1169f3acb9b"
+          },
+          {
+            "state": "DELETING",
+            "created_at": "2026-10-07T21:07:41.808123+00:00",
+            "resource_id": "cd9728c6-eea9-4ba9-a421-b1169f3acb9b"
+          },
+          {
+            "state": "EXPIRING",
+            "created_at": "2026-10-07T21:08:19.860046+00:00",
+            "resource_id": "6fe88b6b-cc4c-4c6d-822d-eb3703c3c54c"
+          },
+          {
+            "state": "RETIRING",
+            "created_at": "2026-10-07T21:18:15.610739+00:00",
+            "resource_id": "6fe88b6b-cc4c-4c6d-822d-eb3703c3c54c"
+          },
+          {
+            "state": "DELETING",
+            "created_at": "2026-10-07T21:19:00.41697+00:00",
+            "resource_id": "6fe88b6b-cc4c-4c6d-822d-eb3703c3c54c"
+          }
+        ],
+        "snapshot": [
+          {
+            "capacity": {
+              "Source": "upcloud_resource_budget",
+              "LimitKnown": true,
+              "ObservedAt": "2026-10-07T21:31:48.970972636Z",
+              "ComputeInUse": 2,
+              "ComputeLimit": 2,
+              "PlanAvailable": {
+                "1xCPU-1GB": 0,
+                "DEV-1xCPU-1GB": 0,
+                "DEV-1xCPU-2GB": 0
+              }
+            },
+            "created_at": "2026-10-07T21:31:50.245299+00:00",
+            "native_ids": [
+              "00570437-318c-42a3-9674-a796d1a98568",
+              "00d12aee-bd08-4b83-b56f-0ea6e75ff2c9"
+            ],
+            "inventory_at": "2026-10-07T21:31:48.970972325Z"
+          }
+        ],
+        "panels": [
+          {
+            "id": "fcc07df5-4123-4a18-8a72-996c71a5d12b",
+            "enabled": true,
+            "created_at": "2026-10-07T21:18:13.648099+00:00",
+            "droplet_id": "6ff85ec5-c066-4fc9-b13f-c96dbfa5e405",
+            "last_seen_at": "2026-10-07T21:18:35.264405+00:00"
+          },
+          {
+            "id": "0686c24d-adbc-423f-8bdb-5486ebdf763d",
+            "enabled": true,
+            "created_at": "2026-10-07T21:30:33.674525+00:00",
+            "droplet_id": "8fdb847a-8d92-4083-94a7-cbc59d97e0df",
+            "last_seen_at": "2026-10-07T21:31:31.028456+00:00"
+          }
+        ]
+      }
+    },
+    "provider_blockers": {
+      "vultr": [
+        {
+          "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+          "name": "Sara vul",
+          "enabled": false,
+          "provider": "vultr",
+          "backfill_debt": 0,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "runtime_status": "DELETE_PENDING",
+          "pending_retirement": 16,
+          "provider_checked_at": "2026-10-07T20:10:39.507724+00:00",
+          "desired_server_count": 17,
+          "deletion_requested_at": "2026-10-07T20:14:47.525568+00:00",
+          "capacity_detail": {}
+        },
+        {
+          "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+          "name": "Sara vul 2",
+          "enabled": true,
+          "provider": "vultr",
+          "backfill_debt": 0,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 14,
+          "runtime_status": "PROVIDER_TOKEN_INVALID",
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-07T21:28:55.612392+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": null,
+          "capacity_detail": {
+            "can_create": false,
+            "provider_state": "TOKEN_INVALID"
+          }
+        },
+        {
+          "id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+          "name": "Vultr 232",
+          "enabled": false,
+          "provider": "vultr",
+          "backfill_debt": 0,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "runtime_status": "DELETE_PENDING",
+          "pending_retirement": 14,
+          "provider_checked_at": "2026-10-07T20:12:10.374226+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": "2026-10-07T20:14:59.67482+00:00",
+          "capacity_detail": {}
+        },
+        {
+          "id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+          "name": "Vultr232",
+          "enabled": true,
+          "provider": "vultr",
+          "backfill_debt": 0,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 13,
+          "runtime_status": "PROVIDER_TOKEN_INVALID",
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-07T21:30:43.427774+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": null,
+          "capacity_detail": {
+            "can_create": false,
+            "provider_state": "TOKEN_INVALID"
+          }
+        },
+        {
+          "id": "ba4e9677-92be-443d-abf0-32493a243a73",
+          "name": "Vultr524",
+          "enabled": false,
+          "provider": "vultr",
+          "backfill_debt": 0,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "runtime_status": "DELETE_PENDING",
+          "pending_retirement": 14,
+          "provider_checked_at": "2026-10-07T20:14:53.569427+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": "2026-10-07T20:14:53.111325+00:00",
+          "capacity_detail": {}
+        }
+      ],
+      "digitalocean": [
+        {
+          "id": "188a2610-2482-4be6-88f2-36c880877705",
+          "name": "Alii",
+          "enabled": false,
+          "provider": "digitalocean",
+          "backfill_debt": 0,
+          "provider_state": "BILLING_BLOCKED",
+          "recorded_ready": 0,
+          "runtime_status": "DELETED",
+          "pending_retirement": 0,
+          "provider_checked_at": "2026-10-02T03:55:33.154287+00:00",
+          "desired_server_count": 5,
+          "deletion_requested_at": "2026-10-02T03:56:28.143949+00:00",
+          "capacity_detail": {}
+        },
+        {
+          "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+          "name": "S1",
+          "enabled": true,
+          "provider": "digitalocean",
+          "backfill_debt": 0,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 3,
+          "runtime_status": "PROVIDER_BLOCKED",
+          "pending_retirement": 0,
+          "provider_checked_at": "2026-10-07T21:31:45.416321+00:00",
+          "desired_server_count": 3,
+          "deletion_requested_at": null,
+          "capacity_detail": {
+            "can_create": false,
+            "droplet_limit": 3,
+            "provider_account_status": "warning",
+            "provider_droplets": 3,
+            "provider_state": "disabled"
+          }
+        },
+        {
+          "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+          "name": "Sor oc",
+          "enabled": true,
+          "provider": "digitalocean",
+          "backfill_debt": 0,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 3,
+          "runtime_status": "PROVIDER_BLOCKED",
+          "pending_retirement": 0,
+          "provider_checked_at": "2026-10-07T21:31:55.939727+00:00",
+          "desired_server_count": 3,
+          "deletion_requested_at": null,
+          "capacity_detail": {
+            "can_create": false,
+            "droplet_limit": 3,
+            "provider_account_status": "warning",
+            "provider_droplets": 3,
+            "provider_state": "disabled"
+          }
+        }
+      ],
+      "upcloud": [
+        {
+          "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+          "name": "Upcloud 113",
+          "enabled": true,
+          "provider": "upcloud",
+          "backfill_debt": 1,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 2,
+          "runtime_status": "PROVIDER_BLOCKED",
+          "pending_retirement": 0,
+          "provider_checked_at": "2026-10-07T21:31:50.248629+00:00",
+          "desired_server_count": 5,
+          "deletion_requested_at": null,
+          "capacity_detail": {
+            "can_create": false,
+            "droplet_limit": 2,
+            "provider_account_status": "active",
+            "provider_droplets": 2,
+            "provider_state": "cannot_create"
+          }
+        }
+      ],
+      "s1_native_output": {
+        "mid_at": "2026-10-07T21:24:11.184437045Z",
+        "final_at": "2026-10-07T21:32:07.54777821Z",
+        "lost_panels": [
+          "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+          "57996ef9-e962-4f08-9e36-32e22b5eb059"
+        ],
+        "rows": [
+          {
+            "panel": "57996ef9-e962-4f08-9e36-32e22b5eb059",
+            "ready": "2026-10-07T21:20:36.819509+00:00",
+            "state": "READY",
+            "account": "S1",
+            "enabled": true,
+            "expires": "2026-10-07T22:21:54.819509+00:00",
+            "last_seen": "2026-10-07T21:21:04.987796+00:00"
+          },
+          {
+            "panel": "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+            "ready": "2026-10-07T21:21:19.203544+00:00",
+            "state": "READY",
+            "account": "S1",
+            "enabled": true,
+            "expires": "2026-10-07T22:22:04.203544+00:00",
+            "last_seen": "2026-10-07T21:21:54.965229+00:00"
+          }
+        ],
+        "health": [],
+        "repairs": [
+          {
+            "attempts": 2,
+            "panel_id": "57996ef9-e962-4f08-9e36-32e22b5eb059",
+            "error_present": true,
+            "last_attempt_at": "2026-10-07T21:30:33.698419+00:00",
+            "last_success_at": null
+          },
+          {
+            "attempts": 2,
+            "panel_id": "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+            "error_present": true,
+            "last_attempt_at": "2026-10-07T21:31:03.675272+00:00",
+            "last_success_at": null
+          }
+        ],
+        "columns": [
+          {
+            "columns": "id,panel_id,state,observed_count,changed_count,missing_count,started_at,finished_at,error_code",
+            "table_name": "panel_inventory_syncs"
+          },
+          {
+            "columns": "panel_id,plan_hash,verified_at",
+            "table_name": "panel_network_access"
+          },
+          {
+            "columns": "panel_id,enabled,stage,added_at,updated_at",
+            "table_name": "reality_rollout_panels"
+          }
+        ],
+        "failure_diagnosis": [
+          {
+            "panel_id": "57996ef9-e962-4f08-9e36-32e22b5eb059",
+            "reason_categories": [
+              "context deadline exceeded",
+              "ssh"
+            ],
+            "sanitized_reason": "ssh command failed: remote command outcome unknown\ncontext deadline exceeded"
+          },
+          {
+            "panel_id": "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+            "reason_categories": [
+              "context deadline exceeded",
+              "ssh"
+            ],
+            "sanitized_reason": "ssh command failed: remote command outcome unknown\ncontext deadline exceeded"
+          }
+        ],
+        "latest_inventory": [
+          {
+            "state": "COMPLETED",
+            "panel_id": "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+            "error_code": "",
+            "started_at": "2026-10-07T21:25:23.81038+00:00",
+            "finished_at": "2026-10-07T21:25:23.810448+00:00"
+          },
+          {
+            "state": "COMPLETED",
+            "panel_id": "57996ef9-e962-4f08-9e36-32e22b5eb059",
+            "error_code": "",
+            "started_at": "2026-10-07T21:25:13.677181+00:00",
+            "finished_at": "2026-10-07T21:25:13.677241+00:00"
+          }
+        ],
+        "rollout": [],
+        "output_snapshot_freshness": [
+          {
+            "records": 4,
+            "panel_id": "193ddef3-7aa9-4cda-837e-efb7d5a9c658",
+            "latest_seen": "2026-10-07T21:28:59.710171+00:00",
+            "fresh_records": 0
+          }
+        ],
+        "followup_at_utc": "2026-10-07T21:36:23.389080+00:00",
+        "finding": "Two S1 panels lost published output eligibility. Native repair attempts record unknown SSH command outcome/context deadline exceeded. Output snapshots require freshness within15seconds; exact underlying remote/network cause has not been established. No global execution gate trip or worker restart observed. Do not conflate this with proof of provider billing restriction."
+      }
+    }
+  },
+  "historical_correction": "panels automatically restarted once on previous dacc332 at16:38:15UTC; earlier zero-restart records only describe earlier observation windows.",
+  "review_ids": [
+    "resp_09e1cdab56c482ff006ac6b041bc9087d1adf95f69fd915568",
+    "resp_0e1b7d879be8562a006ac6b42c2a2887d1ad9d566e5e7888c0"
+  ],
+  "next_phase": {
+    "number": 4,
+    "started": false,
+    "scope": [
+      "Explainable per-account/provider eligibility and distinct authentication, billing, ceiling and retirement blockers.",
+      "Fair scheduling among eligible accounts with independent provider/account resource budgets.",
+      "Retained safety gates plus acceptance showing one blocked provider does not delay healthy accounts."
+    ],
+    "prerequisites": [
+      "Vultr official account/API access evidence needed to resolve401.",
+      "Investigate two S1 remote SSH timeout/unknown-outcome failures; do not bypass output freshness or unknown-outcome gates."
+    ]
+  },
+  "no_repriming": true,
+  "superseded_job": "capacity-backfill-20261008: replaced by capacity-backfill-fix-20261008; ledger was not rewritten or falsely marked complete.",
+  "rollback": "Stop both producers and API, restore saved dacc332 binaries+manifest together; schema163 and existing notify units remain. Same recovery contract; never erase checkpoints/restart ledgers or bypass guards."
+}

@@ -14,6 +14,20 @@
   "source_drift_ready": true,
   "uncommitted_product_source": [],
   "volatile_or_knowledge_worktree_entries": [
+    "?? .local/",
+    "?? tools/__pycache__/"
+  ],
+  "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
+  "production_continuation": {
+    "runtime_source_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "schema": 163,
+    "at_utc": "2026-10-07T21:32:07.616876+00:00",
+    "handoff": "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "reaudit": "docs/PHASE123_CLOSURE_20261008_ACCEPTANCE.json",
+    "brain_delta": "docs/PHASE123_CLOSURE_20261008_BRAIN_DELTA.json",
+    "state": "Phase123 scoped closure deployed; Upcloud two cycles verified; Vultr authentication and two S1 SSH/output issues remain; phase4 not started"
+  },
+  "historical_worktree_entries": [
     " M .audit/provider-step2/chunk-progress.json",
     " M docs/FRESH_CHAT_MASTERY_STATUS.json",
     " M docs/KNOWLEDGE_DRIFT_STATUS.json",
@@ -33,14 +47,5 @@
     "?? tools/grade-fresh-session-exam-v2.py",
     "?? tools/new-chat-bootstrap.sh"
   ],
-  "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
-  "production_continuation": {
-    "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
-    "schema": 163,
-    "at_utc": "2026-10-07T13:14:00.995524+00:00",
-    "handoff": "docs/DEVELOPMENT_READY_HANDOFF.md",
-    "reaudit": "docs/PHASE123_FINAL_REAUDIT_20261007.json",
-    "brain_delta": "docs/PHASE123_REMEDIATION_BRAIN_DELTA_20261007.json",
-    "state": "Phase123 corrected and deployed; provider auth/billing/fairness next"
-  }
+  "latest_continuity_note": "This turn updated live/source evidence and deltas; historical mastery scores were not re-run."
 }

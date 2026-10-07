@@ -1,0 +1,38 @@
+{
+  "runtime_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+  "reviewed_source_hashes": {
+    "internal/app/lifecycle_capacity_recovery.go": "87b37dbfc90ceecd1c4124880c8cad3a47d13339c46cd326d41986275e49d923",
+    "internal/app/lifecycle_capacity_recovery_test.go": "a93fca9316c02370c960b6212bb61724d9023bfa8de30751e4443805fd4f2a8a",
+    "internal/app/lifecycle.go": "e043a963cd2021221252a971279a028af7632d60d358a33944f90daf1fc5b288",
+    "internal/app/deploy.go": "037633bd3cc6c6ad783d8b3a9845f3c24e5e56ee3815f927a3f4760d43e2b87a",
+    "internal/app/consistency.go": "e620aacf4f2e45410b1d0550916cf04b9a6cdec21571286eb62c31c5ea4106a7",
+    "internal/capacity/service.go": "d055afcad98fd04409ae369e2a59ba748df8ef1df84d8579b0a478dd78c4e807",
+    "internal/capacity/create_block.go": "ba73b26a8c341bb2c57f2de074fe44d5d80b9482de96f406fa19d118a59fb6fc",
+    "internal/droplets/lifecycle.go": "ff4be045ec3b8db97fbd88ff6a9ac168e39676d7668a694b9568b36f7faa0b67",
+    "internal/providers/types.go": "dd25a02ec1c45a3cbc014b418d4616d4db79b0b4d405dd0559201e31b1731d5f",
+    "internal/providers/upcloud/driver.go": "82b58d14dfebfec54217d07ae6410428a1b4f87812a4769ad4f2269bd10f5f5d",
+    "internal/panels/panelbootstrap/service.go": "ea0a76fd8ddca9698c76bd68697a0ca58a709ca382554a59d99ec32891f77e40",
+    "internal/panels/panelbootstrap/repair_supervision_test.go": "38d3bbb986985caf75fa32df5f8f196633ffd1e6651a6653af18b95c45f17116",
+    "internal/panels/panelbootstrap/runtime_repair_test.go": "a600f0a34d0cddbd29c2488f1c95959c88af7bdd5eee94b8358ad6388b893ac5",
+    "internal/panels/panelbootstrap/runtime_repair.go": "7c69bf4f52c6ceefe943d1b651b4aaec743588e748560aa54c31c9b01b7b83bc",
+    "internal/panels/globalreality/service.go": "829021b087ac18229b845090e19464d2b04a2d0a742d0df93530f08fe9d45d96",
+    "internal/supervision/registry.go": "4426ea1eca06ca777139918c3bef50367e00bd0e4ba015ef98e76f78aa5577a4",
+    "internal/worker/work_budget.go": "b74927fb574248b92eaff995aa3f5cb7c81c02e96a6c63036df6e673e5dee914",
+    "cmd/worker/supervision.go": "6e34fadbdb0439c69cde050ffb814763d40b284634707084cd9e793cbaeb79c3"
+  },
+  "build": {
+    "revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "binaries": {
+      "api": {
+        "sha256": "50d0e0d1eb0c3a4acdeaa5b8b136b1e968c65ce9bd909f5525bef76164993ecd",
+        "go_build_info": "/root/backups/dob-phase123-closure-20261008/bin/api: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/api\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261007210619-045f1abf1af4\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=045f1abf1af4b9fe73498dd46547cf6db0713a2a\n\tbuild\tvcs.time=2026-10-07T21:06:19Z\n\tbuild\tvcs.modified=false"
+      },
+      "worker": {
+        "sha256": "8416349bf77ea00d7757bda040da20d4789796067a5b3fc6129042ed9d69c872",
+        "go_build_info": "/root/backups/dob-phase123-closure-20261008/bin/worker: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/worker\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261007210619-045f1abf1af4\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=045f1abf1af4b9fe73498dd46547cf6db0713a2a\n\tbuild\tvcs.time=2026-10-07T21:06:19Z\n\tbuild\tvcs.modified=false"
+      }
+    }
+  },
+  "frozen_clean_checkout": "/root/projects/dob-phase123-closure-freeze-20261008",
+  "at_utc": "2026-10-07T21:32:07.616876+00:00"
+}
