@@ -1,6 +1,7 @@
 # Development Ready Handoff
 
 ## Current frontier — phase1 verified, phase2 draft NOT DEPLOYED
+Draft source checkpoint: c72193d5c25b15e87be9ccf360eb4b3df867908c.
 Read docs/WORKER_ISOLATION_20261007.md and its ACCEPTANCE/SOURCE_SNAPSHOT. Production remains clean caf3f0d API/worker, static0c7721d/schema161. User Resume at06:23:13Z is complete; do not ask for it again. Native600-second expiry/delete/refill and both UpCloud READY replacements are verified.06:40Z actual shares Direct58/Residential446; no new global failure. Numbers are sampled, not permanent guarantees.
 
 Phase2 source implements explicit all/control/panels module registration, independent role processes/DB budgets/resource limits/readiness, supervised module lifetime and PostgreSQL role ownership, preserving all native panel runtimes together and all durable mutation guards. PG/race/HTTP/fullGo and actual empty-fixture systemd crash/restart/peer survival pass. NO production restart/topology/configuration change was made.

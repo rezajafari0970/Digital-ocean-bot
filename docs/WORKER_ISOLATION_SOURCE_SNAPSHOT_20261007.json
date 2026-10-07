@@ -23,5 +23,6 @@
     "tools/worker-isolation-acceptance.sh": "724f7e83a0ce23c8ad32c2688769de11cc0340b671b25eeca0151ed05b934192",
     "tools/worker-isolation-process-fixture.py": "2fb53f451ebbe6ccfbb82db541ab4dcb5c2452469ab407702148b69e291ca073"
   },
-  "fixture_binary_sha256": "1e338a4bd7e0d05355872a7ff58aaf8ebf9872150402446a9b44139e3e5541aa"
+  "fixture_binary_sha256": "1e338a4bd7e0d05355872a7ff58aaf8ebf9872150402446a9b44139e3e5541aa",
+  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
 }

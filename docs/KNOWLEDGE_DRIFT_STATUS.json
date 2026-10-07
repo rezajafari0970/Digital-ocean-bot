@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "PENDING_PHASE2_DRAFT_CHECKPOINT",
+  "git_head": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
   "ready": true,
   "artifacts": [
     {
@@ -395,5 +395,6 @@
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
   "openai_review": "BLOCKED_CREDIT_EXHAUSTED",
-  "current_native_evidence_at": "2026-10-07T06:40:27.813873+00:00"
+  "current_native_evidence_at": "2026-10-07T06:40:27.813873+00:00",
+  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
 }

@@ -308,5 +308,6 @@
     "clean build and reversible split deployment",
     "observe native creation/expiry/replacement and pool/readiness under load"
   ],
-  "evidence_directory": "/root/backups/dob-worker-isolation-20261007"
+  "evidence_directory": "/root/backups/dob-worker-isolation-20261007",
+  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
 }
