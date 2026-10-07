@@ -2,7 +2,7 @@
   "schema_version": 2,
   "runtime_source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-07T10:15:14.285478+00:00",
+  "verified_at_utc": "2026-10-07T10:47:49.602892+00:00",
   "binaries": {
     "api": {
       "revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
@@ -53,7 +53,7 @@
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DEPLOYED_PHASE3_SUPERVISION_NATIVE_VERIFIED",
+  "verification_status": "DEPLOYED_PHASE3_HEALTHY_WITH_TEN_OPEN_AUDIT_FINDINGS",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
@@ -1660,5 +1660,42 @@
       }
     ],
     "rollback_contract": "restore both checkpoint-aware50f9ffb binaries AND matching simple units; retain schema162"
+  },
+  "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
+  "open_phase123_findings": [
+    "PH123-001",
+    "PH123-002",
+    "PH123-003",
+    "PH123-004",
+    "PH123-005",
+    "PH123-006",
+    "PH123-007",
+    "PH123-008",
+    "PH123-009",
+    "PH123-010"
+  ],
+  "audit_production_changed": false,
+  "latest_phase123_native_summary": {
+    "finished_at": "2026-10-07T10:47:53.791038688Z",
+    "matched_snapshots": 422,
+    "native_unverified": 0,
+    "native_valid": 422,
+    "panels": 47,
+    "published_unique": 422,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {
+      "DIRECT": 44,
+      "RESIDENTIAL": 348
+    },
+    "shares_before": {
+      "DIRECT": 47,
+      "RESIDENTIAL": 375
+    },
+    "started_at": "2026-10-07T10:47:50.242676488Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
   }
 }

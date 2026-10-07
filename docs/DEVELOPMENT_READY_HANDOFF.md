@@ -1,6 +1,15 @@
 # Development Ready Handoff
 
-## Current frontier — phase3 progress supervision deployed and native-verified
+## Current frontier — phase1/2/3 audit has ten OPEN findings
+Read docs/PHASE123_AUDIT_20261007.md and paired JSON/SOURCE_SNAPSHOT first. Verdict REVISE:3HIGH/7MEDIUM. Production remains ac1d91e, schema162/static0c7721d, currently healthy. This audit makes NO product/runtime/config/gate change. Earlier PASS records are bounded historical coverage, not closure of these defects.
+
+Priorities: orphan checkpoint after account purge can poison unrelated recovery; pre-admission capacity waves can falsely expire root supervision; fresh install/standard upgrade do not consistently install split topology. Then checked persistence/UTF8/residential pacing, terminal state writes, async scanner supervision and cross-window fairness. Eight isolated characterization probes reproduce seven findings; packaging selection/source confirms two; one terminal-write finding is static-only. Retained PG/HTTP/race/full-Go and isolated systemd acceptance PASS. Actual server API reviews completed and false positives were triaged.
+
+At10:47UTC all three original production PIDs had NRestarts0, five readiness checks passed, no current-process fault signatures, no deleted-account orphan checkpoint. Native422 configs/47panels checked valid;928 postdeploy-born clients reached >=595s before deletion and1216 delete jobs had later same-scope creates. Counts are point-in-time evidence, not indefinite uptime/mobile traffic proof. Full evidence: /root/backups/dob-phase123-audit-20261007.
+
+Next task is bounded fixes with fault regressions; preserve explicit gates, ownership, unknown-outcome readback, provider restrictions and finite budgets. Reproducer: tools/phase123-audit-repro.sh (isolated bulk_test DB only). Canonical checkout remains intentionally detached; push HEAD to checkpoint/final-e2e-20260929.
+
+## Historical frontier — phase3 progress supervision deployed and native-verified
 API/control/panels runtimeac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff, schema162, static0c7721d preserved. Read docs/PHASE3_SUPERVISION_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT. Actual OpenAI API final source review PASS; retained PG/HTTP/race/full-Go phase1+2 and new phase3 gates PASS. Development Orchestrator job phase3-supervision-20261007 COMPLETE.
 
 Independent supervision watches loop, admitted task and declared native phase progress. It cancels and bounded-joins a failed role, then exits; systemd restarts that role, including external SIGSTOP detection. No goroutine replay/abandoned admission slot. Independent control/panels OS roles keep24/40 pools and3/10 admission. Persistent per-role restart state survives process death and paces repeated failure. READY requires observed modules; heartbeat cannot mask a hung task.

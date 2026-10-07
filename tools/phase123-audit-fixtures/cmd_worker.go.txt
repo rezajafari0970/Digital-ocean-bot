@@ -1,0 +1,71 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
+	"testing"
+	"time"
+)
+
+func TestAuditCapacityFillChargesWholePreAdmissionBatch(t *testing.T) {
+	now := time.Now()
+	r := supervision.New(func() time.Time { return now })
+	policy, ok := modulePolicy("capacity-fill")
+	if !ok {
+		t.Fatal("policy")
+	}
+	ctx, err := r.Register(context.Background(), "capacity-fill", policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, done, err := supervision.Begin(ctx, "work", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer done()
+	// Exact main ordering: root watch -> semaphore8 -> per-panel20s ctx ->
+	// RuntimeManager.Acquire -> only on success WorkBudget.Do. Failed Acquire
+	// never creates a child or suspends the30s root. Four8-second login waves
+	// for32 panels exceed30s although every individual request honors its budget.
+	for wave := 0; wave < 3; wave++ {
+		now = now.Add(8 * time.Second)
+		if err = r.Check(); err != nil {
+			t.Fatal("early", err)
+		}
+	}
+	now = now.Add(7 * time.Second)
+	if err = r.Check(); !errors.Is(err, supervision.ErrStalled) {
+		t.Fatal("false-stall sequence not reproduced", err)
+	}
+	t.Log("CONFIRMED: capacity-fill root expires at31s during fourth bounded8s login wave, before any shared-admission work")
+}
+func TestAuditAsyncLoopDeadlineHiddenByLiveTask(t *testing.T) {
+	now := time.Now()
+	r := supervision.New(func() time.Time { return now })
+	policy, _ := modulePolicy("recovery")
+	ctx, err := r.Register(context.Background(), "recovery", policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	supervision.Pulse(ctx)
+	task, done, err := supervision.Begin(ctx, "work", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer done()
+	_, phase, err := supervision.Begin(task, "execute", 15*time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer phase()
+	supervision.Idle(ctx)
+	now = now.Add(3 * time.Minute)
+	if err = r.Check(); err != nil {
+		t.Fatal("masking not reproduced", err)
+	}
+	if !r.Snapshot().Healthy {
+		t.Fatal("unexpected unhealthy")
+	}
+	t.Log("CONFIRMED: async recovery scanner can stop >1m loop budget while valid15m child keeps registry healthy and watchdog eligible")
+}

@@ -1,0 +1,25 @@
+{
+  "install.sh": {
+    "fresh_host_services": [
+      "digital-ocean-bot-vultr-browser-manager",
+      "digital-ocean-bot-api",
+      "digital-ocean-bot-worker"
+    ],
+    "has_daemon_reload": true,
+    "installs_split_api_config": false,
+    "installs_control_dropin": false,
+    "installs_worker_unit": true
+  },
+  "upgrade.sh": {
+    "fresh_host_services": [
+      "digital-ocean-bot-vultr-browser-manager",
+      "digital-ocean-bot-api",
+      "digital-ocean-bot-worker"
+    ],
+    "has_daemon_reload": false,
+    "installs_split_api_config": false,
+    "installs_control_dropin": false,
+    "installs_worker_unit": false
+  },
+  "worker_execstart": "ExecStart=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker --role=control"
+}

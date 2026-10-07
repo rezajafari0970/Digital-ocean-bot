@@ -1,0 +1,136 @@
+package worker
+
+import (
+	"context"
+	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
+	"testing"
+	"time"
+)
+
+func TestAuditPoisonedCheckpointBlocksUnrelatedAccount(t *testing.T) {
+	db, probe, w := recoveryFixture(t, "operation")
+	ctx := context.Background()
+	const otherAccount = "00000000-0000-0000-0000-000000000004"
+	const otherID = "00000000-0000-0000-0000-000000000003"
+	sqlMust(t, db, "INSERT INTO accounts VALUES('"+otherAccount+"','ACTIVE'); INSERT INTO operations VALUES('"+otherID+"','"+otherAccount+"','CREATE_DROPLET','running',now()-interval '1 minute')")
+	lease, ok, err := acquireRecoveryLease(ctx, db, "operation", recoveryID)
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+	if err = lease.begin(ctx, recoveryAccount); err != nil {
+		t.Fatal(err)
+	}
+	lease.close()
+	sqlMust(t, db, "CREATE FUNCTION audit_poison() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN IF NEW.item_id='"+recoveryID+"' THEN RAISE EXCEPTION 'selective checkpoint persistence fault'; END IF; RETURN NEW; END$$; CREATE TRIGGER audit_poison BEFORE INSERT ON worker_item_failures FOR EACH ROW EXECUTE FUNCTION audit_poison()")
+	for i := 0; i < 3; i++ {
+		if err = w.Once(ctx); err == nil {
+			t.Fatal("fault not exercised")
+		}
+	}
+	if calls(probe) != 0 || checkpointCount(t, db) != 1 {
+		t.Fatal("expected blocked scan not reproduced")
+	}
+	sqlMust(t, db, "DROP TRIGGER audit_poison ON worker_item_failures")
+	if err = w.Once(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if calls(probe) != 1 {
+		t.Fatal("healthy account control did not execute", calls(probe))
+	}
+	t.Log("CONFIRMED: one selectively unwritable orphan prevented healthy account recovery for every scan; healthy account ran after fault removal")
+}
+func TestAuditBackoffRowsConsumeEntireDiscoveryWindow(t *testing.T) {
+	db, p, w := recoveryFixture(t, "operation")
+	sqlMust(t, db, "TRUNCATE operations; INSERT INTO accounts SELECT md5('audit-account-'||i)::uuid,'ACTIVE' FROM generate_series(1,101)i; INSERT INTO operations SELECT md5('audit-op-'||i)::uuid,md5('audit-account-'||i)::uuid,'CREATE_DROPLET','running',now()-interval '1 minute'-(102-i)*interval '1 second' FROM generate_series(1,101)i; INSERT INTO worker_item_failures(kind,item_id,account_id,failures,next_retry_at,last_error) SELECT 'operation',md5('audit-op-'||i)::uuid::text,md5('audit-account-'||i)::uuid,6,now()+interval '60 seconds','temporary failure' FROM generate_series(1,100)i")
+	for i := 0; i < 3; i++ {
+		if err := w.Once(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if calls(p) != 0 {
+		t.Fatal("window starvation not reproduced")
+	}
+	w.Batch = 101
+	if err := w.Once(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if calls(p) != 1 {
+		t.Fatal("ready item absent", calls(p))
+	}
+	t.Log("CONFIRMED: LIMIT100 before durable due filtering hides runnable account101 despite free lanes; LIMIT101 reveals it")
+}
+func TestAuditResidentialUnpersistedBackoffReoffersSamePanel(t *testing.T) {
+	db := failureLedgerFixture(t)
+	ctx := context.Background()
+	sqlMust(t, db, `CREATE TABLE panel_instances(id uuid,droplet_id uuid,enabled bool);
+ CREATE TABLE droplets(id uuid,state text,expires_at timestamptz);
+ CREATE TABLE deployments(droplet_id uuid,state text);
+ CREATE TABLE residential_routing_control(enabled bool,fleet bool,panel_ids uuid[],revision bigint);
+ CREATE TABLE panel_routing_state(panel_id uuid,revision bigint,next_check_at timestamptz);
+ INSERT INTO panel_instances VALUES('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003',true);
+ INSERT INTO droplets VALUES('00000000-0000-0000-0000-000000000003','READY',now()+interval '1 hour');
+ INSERT INTO deployments VALUES('00000000-0000-0000-0000-000000000003','PANEL_COMPLETE');
+ INSERT INTO residential_routing_control VALUES(true,true,'{}',1);
+ CREATE FUNCTION audit_residential_fail() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RAISE EXCEPTION 'selective retry persistence unavailable'; END$$;
+ CREATE TRIGGER audit_residential_fail BEFORE INSERT ON worker_item_failures FOR EACH ROW EXECUTE FUNCTION audit_residential_fail();`)
+	svc := residentialsync.Service{DB: db}
+	failures := FailureStore{DB: db}
+	start := time.Now()
+	for i := 0; i < 3; i++ {
+		panel, found, err := svc.NextDuePanelShard(ctx, true, 0, 1)
+		if err != nil || !found || panel.ID != recoveryID {
+			t.Fatal(panel, found, err)
+		}
+		// ReconcilePanel can fail before its deferred state backoff is installed (initial SQL/scope check).
+		failures.Fail(ctx, "residential_sync", panel.ID, "", errors.New("reconcile initial SQL fault"))
+	}
+	var n int
+	if err := db.QueryRow("SELECT count(*) FROM worker_item_failures").Scan(&n); err != nil || n != 0 {
+		t.Fatal(n, err)
+	}
+	if time.Since(start) > time.Second {
+		t.Fatal("unexpected pacing")
+	}
+	t.Log("CONFIRMED: unchecked Fail returns to immediate continue; same panel offered three times without durable delay")
+}
+
+func TestAuditDeletedAccountCheckpointPoisonsOtherAccounts(t *testing.T) {
+	db, p, w := recoveryFixture(t, "operation")
+	ctx := context.Background()
+	sqlMust(t, db, "ALTER TABLE accounts ADD PRIMARY KEY(id); ALTER TABLE worker_item_failures ADD FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE; INSERT INTO accounts VALUES('00000000-0000-0000-0000-000000000004','ACTIVE'); INSERT INTO operations VALUES('00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000004','CREATE_DROPLET','running',now()-interval '1 minute')")
+	lease, ok, err := acquireRecoveryLease(ctx, db, "operation", recoveryID)
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+	if err = lease.begin(ctx, recoveryAccount); err != nil {
+		t.Fatal(err)
+	}
+	lease.close()
+	sqlMust(t, db, "DELETE FROM operations WHERE account_id='"+recoveryAccount+"'; DELETE FROM accounts WHERE id='"+recoveryAccount+"'")
+	for i := 0; i < 3; i++ {
+		if err = w.Once(ctx); err == nil {
+			t.Fatal("expected real foreign-key failure")
+		}
+	}
+	if calls(p) != 0 || checkpointCount(t, db) != 1 {
+		t.Fatal("orphan poison not reproduced")
+	}
+	t.Logf("CONFIRMED: deleted account's checkpoint survives; real FK blocks three unrelated recovery scans: %v", err)
+}
+func TestAuditUTF8ErrorTruncationBreaksFailurePersistence(t *testing.T) {
+	db := failureLedgerFixture(t)
+	msg := ""
+	for i := 0; i < 700; i++ {
+		msg += "€"
+	}
+	err := (FailureStore{DB: db}).FailChecked(context.Background(), "operation", "utf8", "", errors.New(msg))
+	if err == nil {
+		t.Fatal("expected invalid UTF8 from byte truncation")
+	}
+	var n int
+	if e := db.QueryRow("SELECT count(*) FROM worker_item_failures").Scan(&n); e != nil || n != 0 {
+		t.Fatal(e, n)
+	}
+	t.Logf("CONFIRMED: valid Unicode error becomes unpersistable after byte truncation: %v", err)
+}

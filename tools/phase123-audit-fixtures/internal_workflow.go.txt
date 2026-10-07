@@ -1,0 +1,26 @@
+package workflow
+
+import (
+	"context"
+	"errors"
+	"testing"
+)
+
+type auditFinishFailureStore struct {
+	memStore
+	finishes int
+}
+
+func (s *auditFinishFailureStore) FinishStep(context.Context, string, string, error, ErrorClass) error {
+	s.finishes++
+	return errors.New("audit step persistence failed")
+}
+func TestAuditFinishStepFailuresStillReportReady(t *testing.T) {
+	s := &auditFinishFailureStore{}
+	steps := &stepStub{}
+	d, err := (Engine{Store: s, Steps: steps}).Run(context.Background(), Request{AccountID: "a", ProfileID: "p"})
+	if err != nil || d.State != Ready || s.finishes != 7 || steps.calls != 7 {
+		t.Fatal(d.State, err, s.finishes, steps.calls)
+	}
+	t.Log("CONFIRMED: all seven FinishStep writes failed but Engine ran every step and returned READY, nil")
+}

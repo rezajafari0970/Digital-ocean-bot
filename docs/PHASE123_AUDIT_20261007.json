@@ -1,0 +1,1067 @@
+{
+  "schema_version": 1,
+  "audit_verdict": "REVISE",
+  "audit_status": "FINDINGS_RECORDED",
+  "audited_at_utc": "2026-10-07T10:54:26.710171+00:00",
+  "baseline_commit": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
+  "runtime_source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+  "scope": "Phase1 modular recovery, phase2 worker isolation, phase3 supervision and their persistence/deployment dependencies",
+  "production_changed": false,
+  "product_source_changed": false,
+  "production_snapshot": {
+    "at_utc": "2026-10-07T10:47:49.602892+00:00",
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "1781951",
+        "NRestarts": "0",
+        "MemoryCurrent": "17186816",
+        "MemoryMax": "infinity",
+        "sha256": "4aa8ce89fc1c0109c60f74fb9193388a5719f00385cab332ea3d902cfcc4f471"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "1781953",
+        "NRestarts": "0",
+        "MemoryCurrent": "11661312",
+        "MemoryMax": "536870912",
+        "sha256": "cfa4b3f7a793a187c9adbf023780d19d98838553a8d814f192a84af554cda55a"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "1781954",
+        "NRestarts": "0",
+        "MemoryCurrent": "22061056",
+        "MemoryMax": "536870912",
+        "sha256": "cfa4b3f7a793a187c9adbf023780d19d98838553a8d814f192a84af554cda55a"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T10:47:49.67485634Z"
+    },
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "concurrency": 1,
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00"
+      }
+    ],
+    "checkpoints": [
+      {
+        "n": 1,
+        "kind": "deployment",
+        "oldest_seconds": 48.420077
+      },
+      {
+        "n": 1,
+        "kind": "operation",
+        "oldest_seconds": 0.942309
+      }
+    ],
+    "role_progress": [
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 16,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 3405,
+          "OpenConnections": 16,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "admission": null,
+        "worker_id": "serverprojects.ptr.network:1781954",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1762
+            },
+            {
+              "name": "capacity-fill",
+              "state": "RUNNING",
+              "active": 6,
+              "waiting": 2,
+              "completed": 14512
+            },
+            {
+              "name": "client-mutation",
+              "state": "RUNNING",
+              "active": 2,
+              "waiting": 0,
+              "completed": 1834
+            },
+            {
+              "name": "global-reality",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 9917
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2096
+            },
+            {
+              "name": "panel-registry",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 462
+            },
+            {
+              "name": "residential-monitor",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 773
+            },
+            {
+              "name": "residential-performance",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 984
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 608
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 1036
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 502
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 741
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 645
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 533
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 299
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 826
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 8
+            },
+            {
+              "name": "server-protection",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 985
+            }
+          ],
+          "version": 1
+        },
+        "last_seen_at": "2026-10-07T10:47:43.451381+00:00",
+        "recovery_scan": "0",
+        "lifecycle_scan": "0"
+      },
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 4,
+          "InUse": 7,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 3,
+          "OpenConnections": 11,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "admission": null,
+        "worker_id": "serverprojects.ptr.network:1781953",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 1,
+              "completed": 132
+            },
+            {
+              "name": "account-rules",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 1,
+              "completed": 170
+            },
+            {
+              "name": "billing",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 1,
+              "completed": 136
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 5,
+              "completed": 557
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 7
+            },
+            {
+              "name": "network-identity",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 4,
+              "completed": 697
+            },
+            {
+              "name": "network-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 93
+            },
+            {
+              "name": "recovery",
+              "state": "IDLE",
+              "active": 4,
+              "waiting": 4,
+              "completed": 1238
+            },
+            {
+              "name": "scheduler",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 1,
+              "completed": 151
+            }
+          ],
+          "version": 1
+        },
+        "last_seen_at": "2026-10-07T10:47:43.731166+00:00",
+        "recovery_scan": "1791370053",
+        "lifecycle_scan": "1791370053"
+      }
+    ],
+    "effective_units": {
+      "control": {
+        "Type": "notify",
+        "RestartUSec": "15s",
+        "TimeoutStartUSec": "15min",
+        "TimeoutStopUSec": "1min 30s",
+        "WatchdogUSec": "45s",
+        "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker --role=control ; ignore_errors=no ; start_time=[Wed 2026-10-07 10:09:13 UTC] ; stop_time=[n/a] ; pid=1781953 ; code=(null) ; status=0/0 }",
+        "KillMode": "control-group",
+        "WatchdogSignal": "9"
+      },
+      "panels": {
+        "Type": "notify",
+        "RestartUSec": "15s",
+        "TimeoutStartUSec": "15min",
+        "TimeoutStopUSec": "1min 30s",
+        "WatchdogUSec": "45s",
+        "ExecStart": "{ path=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker ; argv[]=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker --role=panels ; ignore_errors=no ; start_time=[Wed 2026-10-07 10:09:13 UTC] ; stop_time=[n/a] ; pid=1781954 ; code=(null) ; status=0/0 }",
+        "KillMode": "control-group",
+        "WatchdogSignal": "9"
+      }
+    },
+    "schema": [
+      {
+        "version": "000162_worker_recovery_checkpoints",
+        "checksum": "25a4e4d37ef7fd159209ce60cb8f3e282a4a594ab56d87f387508d3cef4d77eb"
+      }
+    ],
+    "upcloud": [
+      {
+        "n": 2,
+        "name": "Upcloud 113",
+        "state": "READY",
+        "provider_state": "ACTIVE",
+        "desired_server_count": 5
+      }
+    ],
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "unexpected_module_exit": 0,
+      "failure_ledger_write_error": 0,
+      "failure_ledger_clear_error": 0,
+      "supervision_stall": 0,
+      "recovery_completion_pending": 0,
+      "checkpoint_reconcile_error": 0
+    },
+    "source_hashes_match": true,
+    "orphan_checkpoint_count": [
+      {
+        "n": 0
+      }
+    ],
+    "native_jobs": [
+      {
+        "n": 1,
+        "kind": "UPDATE",
+        "state": "SUCCEEDED"
+      },
+      {
+        "n": 2,
+        "kind": "BULK_CREATE",
+        "state": "OBSOLETE"
+      },
+      {
+        "n": 8,
+        "kind": "BULK_DELETE",
+        "state": "PENDING"
+      },
+      {
+        "n": 5,
+        "kind": "BULK_CREATE",
+        "state": "PENDING"
+      },
+      {
+        "n": 1573,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED"
+      },
+      {
+        "n": 1,
+        "kind": "BULK_DELETE",
+        "state": "RUNNING"
+      },
+      {
+        "n": 1235,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED"
+      },
+      {
+        "n": 1,
+        "kind": "BULK_DELETE",
+        "state": "OBSOLETE"
+      }
+    ],
+    "postdeploy_expiry": [
+      {
+        "n": 928,
+        "mature_expirations": 928
+      }
+    ],
+    "replacement_count": [
+      {
+        "n": 1216
+      }
+    ]
+  },
+  "native_output_summary": {
+    "finished_at": "2026-10-07T10:47:53.791038688Z",
+    "matched_snapshots": 422,
+    "native_unverified": 0,
+    "native_valid": 422,
+    "panels": 47,
+    "published_unique": 422,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {
+      "DIRECT": 44,
+      "RESIDENTIAL": 348
+    },
+    "shares_before": {
+      "DIRECT": 47,
+      "RESIDENTIAL": 375
+    },
+    "started_at": "2026-10-07T10:47:50.242676488Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
+  },
+  "findings": [
+    {
+      "id": "PH123-001",
+      "severity": "HIGH",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "Deleted-account checkpoint blocks unrelated recovery",
+      "files": [
+        "migrations/000162_worker_recovery_checkpoints.up.sql:1",
+        "migrations/000060_worker_failure_observability.up.sql:1",
+        "internal/app/account_purge.go:91",
+        "internal/worker/recovery_checkpoint.go:130"
+      ],
+      "trigger": "An abandoned recovery checkpoint remains when its account is purged. The checkpoint has no account FK; account purge omits it, while failure rows have an account FK.",
+      "impact": "Reaping the oldest orphan fails with SQLSTATE23503 before unrelated work is discovered. Repeated scans cannot repair it. A selective write failure has the same module-wide blast radius. Panels and the other recovery kind module are not directly stopped by this return.",
+      "evidence": "REAL_POSTGRES",
+      "tests": [
+        "TestAuditDeletedAccountCheckpointPoisonsOtherAccounts",
+        "TestAuditPoisonedCheckpointBlocksUnrelatedAccount"
+      ],
+      "limit": "The FK sequence and actual reconciler were exercised in an isolated schema; the full account-purge API was reviewed, not invoked.",
+      "fix": "Coordinate account purge with live recovery ownership; safely reconcile removed-account checkpoints with explicit terminal evidence. Fence a poisoned item without silently admitting that same item or blocking healthy accounts.",
+      "acceptance": "Purge while pending/live recovery exists; no orphan, no unsafe replay, healthy accounts progress. Inject selective checkpoint persistence errors and restart."
+    },
+    {
+      "id": "PH123-002",
+      "severity": "HIGH",
+      "phases": [
+        2,
+        3
+      ],
+      "title": "Fresh install omits panels role and split API configuration",
+      "files": [
+        "deploy/install.sh:6",
+        "deploy/install.sh:54",
+        "deploy/digital-ocean-bot-worker.service:1",
+        "deploy/api-split-workers.conf:1"
+      ],
+      "trigger": "Fresh host has no enabled/active panels unit. Installer adds panels only if it already existed; base worker now starts --role=control.",
+      "impact": "No panels worker is enabled/restarted. API retains legacy all-role readiness expectations. Config creation and readiness can fail on a standard fresh install.",
+      "evidence": "SOURCE_AND_MOCKED_SELECTION",
+      "tests": [
+        "packaging-probe.json"
+      ],
+      "limit": "Only exact service-selection code was executed with systemctl mocked false; no OS installation was run.",
+      "fix": "Declare and install an explicit coherent topology, including API/control drop-ins and both roles, atomically and idempotently.",
+      "acceptance": "Disposable fresh host: both role heartbeats, all five readiness checks, enabled units, resource limits and real config lifecycle."
+    },
+    {
+      "id": "PH123-003",
+      "severity": "HIGH",
+      "phases": [
+        3
+      ],
+      "title": "Capacity batch accounting can falsely restart the panels role",
+      "files": [
+        "cmd/worker/main.go:536",
+        "cmd/worker/main.go:596",
+        "cmd/worker/supervision.go:58",
+        "internal/supervision/registry.go:136"
+      ],
+      "trigger": "Capacity fill starts a 30-second root work budget, then processes the entire fleet eight at a time. Runtime acquisition is before tracked WorkBudget admission. Multiple bounded slow/failing acquisition waves exceed the root deadline.",
+      "impact": "A progressing fleet batch can be labelled stalled and stop the entire panels role. Cleanup has the analogous 75-second batch versus 60-second per-panel acquisition mismatch.",
+      "evidence": "ACTUAL_REGISTRY_DETERMINISTIC_CLOCK",
+      "tests": [
+        "TestAuditCapacityFillChargesWholePreAdmissionBatch"
+      ],
+      "limit": "Actual module policy and registry with a deterministic four-wave timing model prove deadline expiry; role exit/restart is the source-derived supervisory consequence, not a process restart exercised by this probe. Cleanup is source-derived only.",
+      "fix": "Track acquisition and semaphore waiting explicitly as per-item work and dispatcher progress; use finite batch contracts. Do not merely extend deadlines.",
+      "acceptance": "32 slow-but-bounded panel acquisitions across four waves keep role healthy; one genuinely stuck acquisition is bounded; unrelated modules continue."
+    },
+    {
+      "id": "PH123-004",
+      "severity": "MEDIUM",
+      "phases": [
+        2,
+        3
+      ],
+      "title": "Standard upgrade does not install unit/drop-in changes",
+      "files": [
+        "deploy/upgrade.sh:7",
+        "deploy/upgrade.sh:20"
+      ],
+      "trigger": "Upgrade a legacy or stale-systemd host using the supported upgrade script.",
+      "impact": "Binaries/migrations change but worker topology, Type=notify, watchdog and resource configuration remain stale; no daemon-reload is performed. Current manually deployed production is configured correctly.",
+      "evidence": "SOURCE_AND_MOCKED_SELECTION",
+      "tests": [
+        "packaging-probe.json"
+      ],
+      "limit": "Source/selection proof, not a full disposable-host upgrade.",
+      "fix": "Version deployment assets alongside binaries, verify desired topology and effective units, then restart with rollback-safe ordering.",
+      "acceptance": "Legacy-all and previous-split upgrades converge to expected units/drop-ins; failed activation rolls back coherently."
+    },
+    {
+      "id": "PH123-005",
+      "severity": "MEDIUM",
+      "phases": [
+        3
+      ],
+      "title": "Live async child masks scanner deadline",
+      "files": [
+        "internal/supervision/registry.go:219",
+        "internal/worker/worker.go:79",
+        "internal/worker/lifecycle.go:59",
+        "cmd/worker/supervision.go:84"
+      ],
+      "trigger": "Recovery/lifecycle discovery stops progressing while an admitted long stage remains active. Loop deadline is evaluated only when no work nodes/waiters exist.",
+      "impact": "Registry stays healthy and watchdog-eligible beyond the scanner's loop budget. Separate readiness can become stale, and the child deadline eventually still bounds the task; this is delayed scanner detection, not an unlimited untracked child.",
+      "evidence": "ACTUAL_REGISTRY_DETERMINISTIC_CLOCK",
+      "tests": [
+        "TestAuditAsyncLoopDeadlineHiddenByLiveTask"
+      ],
+      "limit": "Actual registry policy/model, not a forced production scanner stall.",
+      "fix": "Give asynchronous scanner progress its own deadline independent of legitimate child execution; retain separate semantics for synchronous modules.",
+      "acceptance": "Freeze scanner while legitimate 15-minute child runs; fail scanner deadline without treating the healthy child as overdue."
+    },
+    {
+      "id": "PH123-006",
+      "severity": "MEDIUM",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "Backoff rows consume discovery window before eligibility filtering",
+      "files": [
+        "internal/worker/recovery.go:27",
+        "internal/worker/recovery.go:47",
+        "internal/worker/lifecycle.go:65"
+      ],
+      "trigger": "First 100 discovered accounts/items are in future durable backoff; a later account is runnable.",
+      "impact": "Runnable work is repeatedly omitted despite free lanes. Delay during the retry window is proved; permanent starvation was not claimed.",
+      "evidence": "REAL_POSTGRES",
+      "tests": [
+        "TestAuditBackoffRowsConsumeEntireDiscoveryWindow"
+      ],
+      "limit": "Reproduced operation recovery with 101 accounts; deployment/lifecycle share the source-level ordering issue.",
+      "fix": "Apply durable due eligibility before windowing where safe, or use bounded keyset scanning/continuation with fair account selection and preserved read-failure refusal.",
+      "acceptance": ">100 accounts with blocked prefixes, mixed bypass rules, concurrent changes and restarted scanner; healthy items make bounded progress."
+    },
+    {
+      "id": "PH123-007",
+      "severity": "MEDIUM",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "Residential retry persistence failure can immediately reoffer the same panel",
+      "files": [
+        "cmd/worker/main.go:674",
+        "internal/worker/failures.go:31",
+        "internal/panels/residentialsync/service.go:29",
+        "internal/panels/residentialsync/service.go:410"
+      ],
+      "trigger": "Reconcile fails before its deferred routing-state delay is installed, or that delay write also fails; FailureStore.Fail cannot persist retry and only logs the error.",
+      "impact": "The caller continues before the ticker; same panel remains first due, repeatedly consuming its shard without a durable delay.",
+      "evidence": "REAL_POSTGRES_AND_CALLER_SOURCE",
+      "tests": [
+        "TestAuditResidentialUnpersistedBackoffReoffersSamePanel"
+      ],
+      "limit": "Actual selector and failure store with an injected persistence fault, combined with reviewed main-loop control flow; no remote POST was executed.",
+      "fix": "Use checked failure/clear results with bounded retry on persistence failure and explicit unhealthy progress; preserve unknown-mutation fencing.",
+      "acceptance": "Fail initial reconciliation and retry writes; no hot loop, bounded SQL traffic, healthy shard progress and no duplicate remote mutation."
+    },
+    {
+      "id": "PH123-008",
+      "severity": "MEDIUM",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "UTF-8 error truncation breaks durable failure recording",
+      "files": [
+        "internal/worker/failures.go:50"
+      ],
+      "trigger": "A valid multibyte error exceeds 2048 bytes and byte slicing starts inside a rune.",
+      "impact": "PostgreSQL rejects last_error with SQLSTATE22021, so failure count and retry deadline cannot be committed. This can amplify PH123-001/007 paths without a database outage.",
+      "evidence": "REAL_POSTGRES",
+      "tests": [
+        "TestAuditUTF8ErrorTruncationBreaksFailurePersistence"
+      ],
+      "limit": "700 euro characters provide a deterministic valid UTF-8 input; arbitrary invalid bytes/NUL normalization remains part of the fix design.",
+      "fix": "Normalize database-safe text and truncate on valid UTF-8 boundaries while preserving the bounded payload.",
+      "acceptance": "Persian/emoji/mixed Unicode around byte limits, invalid bytes and NUL; failure ledger remains atomic and bounded."
+    },
+    {
+      "id": "PH123-009",
+      "severity": "MEDIUM",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "Workflow advances despite failed step-result persistence",
+      "files": [
+        "internal/workflow/engine.go:138",
+        "internal/workflow/engine.go:148",
+        "internal/workflow/store.go:1"
+      ],
+      "trigger": "A native step returns success while Store.FinishStep fails; special installer-not-configured path also ignores Update errors.",
+      "impact": "Engine can run all seven steps and report READY,nil although none of the step completions was persisted. Durable audit/resume evidence diverges from the reported result. Duplicate native creation was not demonstrated.",
+      "evidence": "ACTUAL_ENGINE_FAULT_STORE",
+      "tests": [
+        "TestAuditFinishStepFailuresStillReportReady"
+      ],
+      "limit": "Actual Engine with faulting store wrapper covers ordinary seven-step FinishStep failures; installer-not-configured Update failure is a static observation. No PostgreSQL commit-response-loss or duplicate native mutation was exercised.",
+      "fix": "Propagate essential persistence errors and reconcile ambiguous commit outcomes before subsequent steps; preserve existing native idempotency/readback.",
+      "acceptance": "FinishStep/Update/event transaction failure and ambiguous commit per step; no false terminal success or unverified replay."
+    },
+    {
+      "id": "PH123-010",
+      "severity": "MEDIUM",
+      "phases": [
+        1,
+        2
+      ],
+      "title": "Terminal recovery freeze can report success after state-write failure",
+      "files": [
+        "internal/app/recovery.go:286",
+        "internal/app/recovery.go:308"
+      ],
+      "trigger": "Provision run is FAILED or create operation failed without a resource, but UPDATE deployments or required finalization fails.",
+      "impact": "Handler discards write errors and returns nil. Checkpoint completion can clear recovery failure evidence while the deployment remains nonterminal and is rediscovered.",
+      "evidence": "SOURCE_CONFIRMED",
+      "tests": [],
+      "limit": "Static control-flow proof only. No dedicated handler fault injection, checkpoint completion or rediscovery cycle was executed for these branches.",
+      "fix": "Make terminal state/finalization durable and checked before acknowledging completion; separate optional event failures from essential state.",
+      "acceptance": "Inject state-write/finalizer failure in both branches; preserve pending evidence, retry conservatively and never report durable completion early."
+    }
+  ],
+  "open_counts": {
+    "HIGH": 3,
+    "MEDIUM": 7,
+    "total": 10
+  },
+  "documentation_correction": {
+    "id": "DOC-001",
+    "severity": "LOW",
+    "status": "CORRECTED_IN_AUDIT_DOCS",
+    "issue": "Knowledge top-level runtime_source_revision and latest pointers referenced older phases although production was ac1d91e; audit updates current metadata without rewriting historical evidence."
+  },
+  "coverage": [
+    {
+      "phase": 1,
+      "scope": "typed native failures, policy deferrals, inventory/ownership, capacity retirement, lifecycle fairness, transactional retry",
+      "result": "retained acceptance PASS; remaining PH123-001/006/007/008/009/010 affect recovery dependencies"
+    },
+    {
+      "phase": 2,
+      "scope": "control/panels partition, role leases, SQL/admission headroom, cancellation, durable checkpoint ownership",
+      "result": "retained PG/race/process acceptance PASS; packaging and cross-account defects remain"
+    },
+    {
+      "phase": 3,
+      "scope": "loop/task/stage deadlines, notify readiness, SIGSTOP watchdog, role restart pacing, joined cancellation",
+      "result": "retained acceptance PASS; PH123-003/005 are deadline-accounting gaps"
+    }
+  ],
+  "evidence": {
+    "directory": "/root/backups/dob-phase123-audit-20261007",
+    "baseline_markers": [
+      "MODULAR_RECOVERY_ACCEPTANCE_PASS",
+      "WORKER_ISOLATION_ACCEPTANCE_PASS",
+      "RECOVERY_LEDGER_ACCEPTANCE_PASS",
+      "PHASE3_SUPERVISION_ACCEPTANCE_PASS"
+    ],
+    "orchestrator_test_exit": 0,
+    "targeted_probe_exit": 0,
+    "targeted_probes": 8,
+    "targeted_pass_means": "recorded defect reproduced, not fixed",
+    "systemd_fixture": {
+      "at_utc": "2026-10-07T10:40:33.649677+00:00",
+      "schema": "supervision_process_cb4d6d6293cd4f3a96f15ed3c19f6326",
+      "production_services_changed": false,
+      "peer_survived": true,
+      "automatic_role_restart": "PASS",
+      "fault": "SIGSTOP",
+      "fixture_watchdog_seconds": 5,
+      "production_watchdog_seconds": 45,
+      "binary_sha256": "8225ec6f1521dbe242c9e62e43edee990f366b29ee26ef11d41d3fad8e724396",
+      "duplicate_process_rejected": true,
+      "status": "PASS"
+    },
+    "reviews": {
+      "supervision": {
+        "response_id": "resp_0e628d259e706099006ac620abcea487d1929b8b435f085bed",
+        "result": {
+          "verdict": "REVISE",
+          "findings": [
+            {
+              "id": "fresh-install-split-incomplete",
+              "severity": "HIGH",
+              "file": "deploy/install.sh",
+              "lines": "6-9,54-64",
+              "issue": "A fresh installation deploys the control-role unit but neither enables the panel worker nor installs the API split-mode drop-in. The panel service is added to SERVICES only if it was already enabled or active before its unit file is installed. The canonical deploy/api-split-workers.conf and deploy/worker-control.conf files are never installed.",
+              "trigger": "Run install.sh on a host with no pre-existing digital-ocean-bot-worker-panels service state. The pre-install enabled/active checks fail, then only digital-ocean-bot-worker is enabled and restarted even though its ExecStart is --role=control.",
+              "impact": "All panel-role modules are absent after a fresh deployment, including client mutation, cleanup, registry, residential synchronization and capacity reconciliation. API worker-health topology can also remain in legacy all-worker mode while only production-control heartbeats exist. This is a deterministic fresh-install defect, not evidence that the current production host necessarily has this topology.",
+              "fix_direction": "Make the desired topology explicit and atomic: install the canonical unit/drop-in files first, enable both control and panel services unconditionally for split mode, install the API split-mode configuration, run daemon-reload, and restart the complete fixed service set. Do not infer desired topology from previous enabled/active state.",
+              "confidence": "high"
+            },
+            {
+              "id": "upgrade-skips-systemd-config",
+              "severity": "MEDIUM",
+              "file": "deploy/upgrade.sh",
+              "lines": "7-10,20-34",
+              "issue": "The upgrade path replaces binaries and migrations but does not install current systemd units or canonical split-worker/API drop-ins and does not run daemon-reload. Its service set also includes the panel worker only when that service was already enabled or active.",
+              "trigger": "Upgrade a legacy, partially configured, or stale deployment whose installed units still run a monolithic worker, lack the panel service, lack current watchdog/resource settings, or lack DOB_WORKER_MODE=split.",
+              "impact": "Source and binary versions can advance while deployed role topology, watchdog policy, resource limits, and API health expectations remain stale. Depending on prior host state, phase-2 role isolation and phase-3 supervision may therefore not actually be deployed. This is conditional on installed configuration and is not proof of a current incident.",
+              "fix_direction": "During upgrade, install the versioned canonical units and required drop-ins, verify their ownership/modes, run systemctl daemon-reload, explicitly enable the intended split services, and restart that complete topology. Preserve operator gates unrelated to worker topology.",
+              "confidence": "high"
+            },
+            {
+              "id": "restart-ledger-permanent-wedge",
+              "severity": "MEDIUM",
+              "file": "internal/supervision/restart.go",
+              "lines": "37-53,114-117",
+              "issue": "Any malformed, truncated, oversized, unsupported-version, or otherwise unreadable restart ledger is treated as a permanent startup error. Enter never quarantines or conservatively reconstructs this pacing-only state, so every subsequent process reads the same poison file and refuses startup.",
+              "trigger": "Leave control.json or panels.json partially written/corrupted, restore an incompatible file, or otherwise make JSON validation fail. Enter returns an error; main waits 30 seconds and exits; systemd restarts it, and the unchanged ledger causes the same failure indefinitely.",
+              "impact": "The affected role remains offline indefinitely, blocking work for every account assigned to that role. Split roles isolate the other role, but corruption of control.json still halts all control-account work and corruption of panels.json halts all panel work. This is conditional on ledger damage, not a demonstrated production incident.",
+              "fix_direction": "While holding the existing role-local flock, atomically rename an invalid ledger to a bounded quarantine filename and initialize a valid state with a conservative cooldown and nonzero attempt history. Keep fail-closed pacing and do not bypass role ownership or provider/operator gates.",
+              "confidence": "high"
+            },
+            {
+              "id": "workflow-ledger-errors-ignored",
+              "severity": "MEDIUM",
+              "file": "internal/workflow/engine.go",
+              "lines": "96-121,138-159",
+              "issue": "Critical durable checkpoint writes are discarded after step execution. FinishStep errors are ignored for installer-not-configured, failed, and successful outcomes; several associated deployment Update and failure-finalizer writes are also ignored. The engine can return the native step result even though its durable outcome/backoff checkpoint was not recorded.",
+              "trigger": "A remote step completes or fails, then Store.FinishStep encounters a transient database/write error. On failure, the engine continues with deployment/error updates and returns the original native error; on success it advances CurrentStep despite the unfinished step ledger. The installer-not-configured branch can return nil even when both checkpoint and state persistence failed.",
+              "impact": "The deployment row and step ledger can diverge. Recovery can encounter a begun-but-unfinished checkpoint, lose the intended failure classification or retry schedule, repeatedly select work without the intended backoff, or advance past a step whose completion ledger was never committed. The exact retry behavior depends on the omitted Store implementation, so this is a durability defect rather than evidence of a current hot-retry incident.",
+              "fix_direction": "Treat FinishStep and state-transition writes as required durable commits. Return a persistence error that preserves the native outcome, and leave a recoverable unknown/checkpoint-pending state rather than reporting success or advancing silently. Use a bounded transaction where ledger and deployment state must move together; retain idempotent reconciliation before any remote replay.",
+              "confidence": "high"
+            }
+          ],
+          "coverage_gaps": [
+            "RecoveryStore, LifecycleWorker, scheduler SQL, FailureStore, clientops Journal, and their migrations were not supplied, so LIMIT-before-due fairness, finite recovery/lifecycle batches, ignored failure-ledger writes, durable checkpoint poisoning by individual accounts, and exact hot-retry behavior could not be fully traced.",
+            "The API service, configuration parsing that populates observability.Health.WorkerMode, and installed-host systemd state were not supplied; the deployment topology defects are source-proven, but current production topology is not established.",
+            "EligibleReadyPanels, residential synchronization selection SQL, residential-performance implementation, and several container methods were omitted, preventing complete verification of query limits and all SQL/session usage against panelWork and controlWork.",
+            "The shared host/database failure domain is an acknowledged architectural limitation and is not reported as a new defect."
+          ],
+          "strengths": [
+            "Role ownership uses a dedicated PostgreSQL session, globally ordered advisory locks, periodic backend/lock verification, and explicit bad-connection disposal on close.",
+            "Unexpected module return or ownership loss cancels the role process instead of restarting remote work in-process, preserving unknown-outcome boundaries.",
+            "WorkBudget acquires admission before handler execution and propagates supervision contexts, while the dispatcher bounds lifecycle concurrency and enforces one lane per account.",
+            "Nested supervision suspends only direct ancestor deadlines and independently checks leaf work stages, reducing false progress from sibling activity.",
+            "Restart state writes use temporary files, fsync, rename, directory fsync, and a role-local flock; healthy history is reset only after five minutes of supervised runtime.",
+            "Split-role database pool budgets retain the previous aggregate worker cap, and role-specific heartbeat kinds prevent split health checks from falling back to a legacy monolith."
+          ]
+        }
+      },
+      "isolation": {
+        "response_id": "resp_007a16f5be1b3731006ac620b1165887d1a98337b8f4564763",
+        "result": {
+          "verdict": "REVISE",
+          "findings": [
+            {
+              "id": "child-work-hidden-from-watchdog",
+              "severity": "HIGH",
+              "file": "internal/worker/worker.go",
+              "lines": "79-103",
+              "issue": "The recovery loop publishes successful progress after discovery, without waiting for or receiving progress from admitted child handlers. Full or hung dispatcher lanes do not make round return an error because rejected Submit results are ignored. The analogous lifecycle loop has the same scan-versus-child behavior.",
+              "trigger": "All six recovery handlers become stuck after admission. Every polling round continues to pulse, scans the same work, silently rejects submissions because the dispatcher is full, calls progress.success, and enters Idle normally.",
+              "impact": "Recovery can stop making child-task progress indefinitely while process supervision and heartbeat data continue to report fresh loop progress. This is a conditional watchdog blind spot, not evidence of a current production stall.",
+              "fix_direction": "Track discovery progress separately from admitted-task progress; consume Submit results; expose oldest active-lane age; and withhold overall healthy progress when saturated lanes exceed an operation-specific bounded age. Use explicit child deadlines or child heartbeats sized above legitimate long workflow durations so healthy long work is not restarted merely for remaining active.",
+              "confidence": "high"
+            },
+            {
+              "id": "limit-before-due-starvation",
+              "severity": "MEDIUM",
+              "file": "internal/worker/worker.go",
+              "lines": "136-169",
+              "issue": "Operations and deployments are fetched with LIMIT before worker_item_failures due filtering. Consequently, backoff-ineligible rows consume the entire discovery batch and prevent later due rows from being considered. Lifecycle discovery applies the same pattern in submitRound.",
+              "trigger": "At least Batch older candidates repeatedly fail and remain among the first limited rows. During each backoff window all are filtered out by recoveryDue, while a due item ordered after the first Batch is never returned; when the older rows become due they consume lanes and fail again, recreating the window.",
+              "impact": "Recovery for unrelated accounts beyond the limited prefix can be delayed without a finite bound. For lifecycle, the same condition can exclude accounts beyond the first 100 discovered rows.",
+              "fix_direction": "Apply failure-ledger eligibility in the discovery SQL before LIMIT, or use bounded keyset pagination that continues until an admitted/offered budget is reached. Preserve account fairness, provider/operator gates, quarantine, and retry delays rather than bypassing them.",
+              "confidence": "high"
+            },
+            {
+              "id": "terminal-freeze-writes-ignored",
+              "severity": "MEDIUM",
+              "file": "internal/app/recovery.go",
+              "lines": "286-311",
+              "issue": "The terminal provision-failure and create-operation-failure paths ignore errors and row counts from the deployment state update, event write, and failure finalizer, then return nil. The checkpoint layer therefore treats the recovery as durably successful even when the intended terminal transition was not persisted.",
+              "trigger": "A provision run is already FAILED, or a create operation is failed with no resource, and the corresponding UPDATE deployments statement fails transiently or affects zero rows. The handler still returns nil; checkpoint completion clears the worker failure entry.",
+              "impact": "The deployment can remain in a recoverable nonterminal state, lose terminal diagnostics/finalization, and be retried on the normal scan cadence without failure-ledger backoff. Blast radius is the affected deployment, with possible repeated DB/provider workflow preparation.",
+              "fix_direction": "Make the terminal state transition and required event/finalization writes checked and preferably transactional. Require the expected CAS/row count; return persistence errors so checkpoint completion records backoff instead of clearing the ledger. Do not weaken native operation or ownership checks.",
+              "confidence": "high"
+            },
+            {
+              "id": "unknown-create-hot-poll",
+              "severity": "MEDIUM",
+              "file": "internal/app/recovery.go",
+              "lines": "74-106",
+              "issue": "For a nonterminal deployment whose stale CREATE_DROPLET operation has no resource_id and no identity match, recovery returns nil. This correctly avoids declaring provider absence conclusive, but nil causes checkpoint completion to clear failure history and supplies no retry delay.",
+              "trigger": "A create request has an unknown outcome, FindServerByIdentity repeatedly returns no matches, the account is not being deleted, and the deployment remains nonterminal. The operation remains stale and is rediscovered approximately every polling interval.",
+              "impact": "Each affected operation can perform an unbacked provider identity lookup about every ten seconds indefinitely, consuming recovery lanes and provider/API capacity while also worsening the limited-prefix starvation condition. This is conditional and does not imply duplicate create calls.",
+              "fix_direction": "Return a typed bounded retry-delay error for the unresolved-absence state so the durable failure ledger paces observations. Keep the operation unknown and retain the read-before-write/tag-adoption invariant; do not infer absence as success or issue an unjournaled replacement create.",
+              "confidence": "high"
+            },
+            {
+              "id": "installer-budget-not-on-shown-path",
+              "severity": "MEDIUM",
+              "file": "internal/app/recovery.go",
+              "lines": "206-282,405-435",
+              "issue": "freezeExhaustedInstallerRecovery defines a 15/30-minute or 64-failure terminal budget, but no call to it appears on the supplied RecoverDeployment path. WAITING_INSTALLER recovery returns directly through activateInstaller, so the shown code does not enforce the declared durable exhaustion budget.",
+              "trigger": "A WAITING_INSTALLER deployment repeatedly fails installer activation while its worker_item_failures row exceeds the time or count threshold. Unless an unsupplied activateInstaller implementation invokes this helper, retries continue under the ordinary capped backoff.",
+              "impact": "A deployment can remain in installer recovery indefinitely and continue periodic remote work instead of reaching INSTALL_FAILED. The defect is conditional on the helper having no caller outside the supplied source.",
+              "fix_direction": "Invoke the exhaustion check at a deterministic point after loading the current deployment and failure ledger, before another installer mutation is admitted. Persist the terminal installer state through checked writes; retain operator/provider gates and do not classify interrupted checkpoint reconciliation as installer exhaustion.",
+              "confidence": "medium"
+            }
+          ],
+          "coverage_gaps": [
+            "Installer/upgrade scripts, canonical systemd unit files, and deployed role arguments were not supplied, so install/upgrade drift against the control/panels role split and watchdog/restart settings could not be verified.",
+            "The implementations of configureSupervision, supervision.RestartGate, Modules.Run, WorkBudget, Role.ConnectionBudget, and systemd notification thresholds were not supplied. The child-progress finding is established from the shown worker loops, but exact restart timing and pool headroom cannot be fully quantified.",
+            "Client mutation Journal.Claim, gate budget-decrement logic, and the relevant gate migrations were not supplied, so finite remaining_batches accounting at claim time could not be independently verified. The shown post-fence behavior was not reported as a bug because comments establish claim-based finite authorization.",
+            "The worker_item_failures schema and account deletion DDL were not supplied. Therefore a durable checkpoint whose account no longer satisfies failure-ledger constraints could not be proven to poison reconciliation, although reconciliation currently aborts the module on the first persistent per-row error.",
+            "The implementation of activateInstaller was not supplied, leaving medium confidence that freezeExhaustedInstallerRecovery has no indirect caller.",
+            "The known shared-host/shared-database architectural limit was excluded as requested and is not presented as a new defect."
+          ],
+          "strengths": [
+            "Recovery handlers are fenced by both per-item PostgreSQL advisory ownership and a durable checkpoint, and durable completion updates the failure ledger and removes the checkpoint in one transaction.",
+            "Interrupted checkpoints are reconciled without rerunning the remote handler, preserving unknown-outcome safety.",
+            "DELETE recovery uses provider observation and idempotent reissue rather than treating an uncertain response as success; CREATE recovery uses stable identity adoption and rejects multiple matches.",
+            "Bulk client mutations persist immutable intent before POST, perform fresh readback after lost responses, and restrict deletion to recorded ownership identities.",
+            "Panel failure classification distinguishes proven pre-mutation runtime unavailability from errors after entering the mutation boundary, avoiding unsafe budget refunds.",
+            "Lifecycle retirement revalidates current managed ownership and provider target under account-scoped locks before deletion admission."
+          ]
+        }
+      },
+      "triage": {
+        "response_id": "resp_079eac70a2400e8c006ac62432321087d1b180b8e850f40845",
+        "result": {
+          "verdict": "REVISE",
+          "accepted_ids": [
+            "PH123-001",
+            "PH123-002",
+            "PH123-003",
+            "PH123-004",
+            "PH123-005",
+            "PH123-006",
+            "PH123-007",
+            "PH123-008",
+            "PH123-009",
+            "PH123-010"
+          ],
+          "corrections": [
+            {
+              "id": "PH123-003",
+              "field": "title/impact/limit",
+              "correction": "The deterministic registry probe proves that the capacity-fill module reaches its root deadline at 31 seconds during the fourth bounded acquisition wave and is marked stalled/cancelled. It did not exercise a full worker process, watchdog notification path, systemd exit, or actual role restart. Describe restart as the expected supervisory consequence, not directly executed evidence. The analogous cleanup timing claim is source-derived and was not part of the named probe."
+            },
+            {
+              "id": "PH123-009",
+              "field": "limit",
+              "correction": "The executed probe covers ignored FinishStep failures on the ordinary seven-step success path. The installer-not-configured branch's ignored FinishStep and Update errors are static source observations, not exercised by that probe."
+            },
+            {
+              "id": "PH123-010",
+              "field": "evidence/limit",
+              "correction": "Keep this explicitly classified as static proof only. No handler fault fixture, PostgreSQL failure injection, checkpoint-completion run, or rediscovery cycle was executed. Do not present the downstream checkpoint clearing and rediscovery behavior as runtime-confirmed."
+            },
+            {
+              "id": "PH123-002",
+              "field": "evidence/limit",
+              "correction": "Packaging evidence is limited to mocked service-selection behavior. It does not prove the complete fresh-host installation, effective systemd configuration, API lifecycle, or readiness failure on a real OS."
+            },
+            {
+              "id": "PH123-004",
+              "field": "evidence/limit",
+              "correction": "Packaging evidence is limited to source and mocked selection. It does not establish the complete behavior of a disposable-host upgrade or effective post-upgrade systemd state."
+            },
+            {
+              "id": "PH123-009",
+              "field": "impact",
+              "correction": "Retain the explicit boundary that no duplicate native/provider mutation was demonstrated. The probe proves false READY success and failed step-result persistence, not duplicate side effects or commit-response-loss behavior."
+            }
+          ],
+          "rejected_prior_findings": [
+            {
+              "finding": "Admitted recovery/lifecycle children are hidden from watchdog supervision.",
+              "reason": "Rejected. WorkBudget.Do exposes admission waiting through supervision.Waiting and wraps admitted execution in supervision.Work, which creates a checked registry node. PH123-005 is instead the distinct async-scanner issue where a valid tracked child suppresses evaluation of the scanner loop deadline."
+            },
+            {
+              "finding": "The installer exhaustion helper is unused.",
+              "reason": "Rejected. activateInstaller directly invokes freezeExhaustedInstallerRecovery after reconcileInstallerBootstrap and before installer selection/execution."
+            }
+          ],
+          "limitations": [
+            "Production is reported healthy; these results do not establish a current production incident.",
+            "This is audit triage, not implementation or remediation validation.",
+            "PH123-001, PH123-006, PH123-007, and PH123-008 have the stated real-PostgreSQL probe coverage; PH123-007 did not execute a remote POST.",
+            "PH123-003 and PH123-005 used the actual registry with an injected deterministic clock, not a full HTTP worker process or live systemd watchdog reproduction.",
+            "PH123-009 used the actual engine with a faulting store wrapper, not PostgreSQL ambiguous-commit or native-side-effect testing.",
+            "PH123-010 remains static-only.",
+            "A corrupt restart ledger remains an intentional fail-closed recoverability limitation; the audit does not support recommending an unsafe bypass.",
+            "Shared host, database, and network failure domains, along with finite operator and provider gates, remain deployment constraints outside these isolated proofs."
+          ]
+        }
+      }
+    }
+  },
+  "rejected_review_hypotheses": [
+    {
+      "claim": "Admitted recovery children are invisible to watchdog",
+      "reason": "WorkBudget tracks admitted work separately; retained ignored-handler and SQL-stall supervision tests pass. PH123-005 instead concerns the independent scanner."
+    },
+    {
+      "claim": "Installer exhaustion helper has no caller",
+      "reason": "activateInstaller invokes freezeExhaustedInstallerRecovery before installer/SSH work."
+    },
+    {
+      "claim": "Unknown-create no-op polling proves unsafe native replay",
+      "reason": "Native operation reservation/adoption guards remain; polling alone is not proof of a duplicate create. Not counted as a confirmed bug."
+    }
+  ],
+  "limitations": [
+    {
+      "id": "L1",
+      "scope": "Restart ledger corruption",
+      "detail": "Unreadable/invalid restart state intentionally refuses startup and is not automatically repaired. Automatic retry alone cannot heal persistent corruption. Design conservative quarantine/repair with preserved forensic evidence and maximum pacing before promising self-repair."
+    },
+    {
+      "id": "L2",
+      "scope": "Shared infrastructure",
+      "detail": "Roles share host, PostgreSQL, network and some health evidence; global client mutation concurrency stays one. Process separation is not complete infrastructure independence."
+    },
+    {
+      "id": "L3",
+      "scope": "Required authority gates",
+      "detail": "Operator pause, provider billing/trial, unknown remote mutation, ownership, quarantine and exhausted budgets are intentionally not auto-cleared."
+    },
+    {
+      "id": "L4",
+      "scope": "Unexercised integration faults",
+      "detail": "No production fault injection. Disposable full install/upgrade, PostgreSQL COMMIT response-loss, real 15-minute SSH stage, real 45-second watchdog and forced 75/90-second shutdown with uncooperative driver remain distinct tests; current fixture watchdog is accelerated to five seconds."
+    },
+    {
+      "id": "L5",
+      "scope": "Native output proof",
+      "detail": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane."
+    },
+    {
+      "id": "L6",
+      "scope": "Audit completeness",
+      "detail": "This is a bounded source/test/live audit, not proof that every future bug is absent. Remaining source hypotheses (runtime mutation-gate cache growth, exact healthy reset anchoring and no-op polling policies) were not promoted to confirmed defects without sufficient impact reproduction."
+    }
+  ],
+  "fix_order": [
+    "PH123-001",
+    "PH123-003",
+    "PH123-002",
+    "PH123-004",
+    "PH123-008",
+    "PH123-007",
+    "PH123-009",
+    "PH123-010",
+    "PH123-005",
+    "PH123-006"
+  ],
+  "next_step": "Fix the ten open findings in bounded source/test checkpoints before expanding the next architecture phase. Preserve existing gates and rollback contracts."
+}

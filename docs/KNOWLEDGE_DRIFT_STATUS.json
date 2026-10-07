@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+  "git_head": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
   "ready": true,
   "artifacts": [
     {
@@ -368,20 +368,20 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-    "runtime_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-    "handoff": "docs/WORKER_ISOLATION_20261007.md",
+    "revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+    "runtime_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+    "handoff": "docs/PHASE123_AUDIT_20261007.md",
     "inspected_live_source": true,
-    "note": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED"
+    "note": "DEPLOYED_PHASE3_HEALTHY_WITH_TEN_OPEN_AUDIT_FINDINGS"
   },
   "latest_development_delta": {
-    "source_baseline": "6c2be58a1bd9a78d1d99d1dfa35ac5380dc4dd8d",
-    "source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-    "snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
-    "handoff": "docs/WORKER_ISOLATION_20261007.md",
-    "acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-    "status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
-    "open_followup": "PH12-001 and PH12-002 remediation before broader watchdog work; see latest re-audit."
+    "source_baseline": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
+    "source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+    "snapshot": "docs/PHASE123_AUDIT_SOURCE_SNAPSHOT_20261007.json",
+    "handoff": "docs/PHASE123_AUDIT_20261007.md",
+    "acceptance": "docs/PHASE123_AUDIT_20261007.json",
+    "status": "AUDITED_WITH_TEN_OPEN_FINDINGS",
+    "open_followup": "Fix PH123-001 through PH123-010 with bounded fault regressions"
   },
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
@@ -404,18 +404,18 @@
     "historical_observation": true,
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-  "current_frontier": "PHASE3_SUPERVISION_DEPLOYED_NATIVE_VERIFIED",
+  "runtime_source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+  "current_frontier": "PHASE123_AUDIT_TEN_OPEN_FINDINGS",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "REVISE_TWO_REPRODUCED_FINDINGS",
-  "current_native_evidence_at": "2026-10-07T08:18:50.474410362Z",
+  "openai_review": "REVISE_SOURCE_AND_ISOLATED_FAULT_EVIDENCE",
+  "current_native_evidence_at": "2026-10-07T10:47:49.602892+00:00",
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
-  "source_snapshot_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "source_snapshot_revision": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
   "latest_audit_verdict": "REVISE",
   "open_reaudit_findings": [],
-  "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00",
+  "latest_reaudit_at": "2026-10-07T10:54:26.710171+00:00",
   "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
   "closed_reaudit_findings": [
     "PH12-001",
@@ -423,5 +423,18 @@
   ],
   "latest_recovery_fix_at": "2026-10-07T09:17:13.931255+00:00",
   "latest_phase3_supervision": "docs/PHASE3_SUPERVISION_20261007.md",
-  "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00"
+  "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00",
+  "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
+  "open_phase123_findings": [
+    "PH123-001",
+    "PH123-002",
+    "PH123-003",
+    "PH123-004",
+    "PH123-005",
+    "PH123-006",
+    "PH123-007",
+    "PH123-008",
+    "PH123-009",
+    "PH123-010"
+  ]
 }

@@ -1,0 +1,33 @@
+{
+  "goal": "Audit phases1/2/3 completely against deployed ac1d91e: source review, current production readback, retained native PG/HTTP/race/full-Go acceptance, independent server OpenAI API review, isolated fault reproductions and evidence-ranked report. No product fix or production deployment in this audit.",
+  "context": "Canonical HEAD337b6cf, control/panels ac1d91e active schema162. Preserve all gates, provider/ownership/unknown outcome/quarantine/finite budgets. Inspect packaging install/upgrade topology; shared-budget headroom/fairness; loop vs task/stage supervision; restart pacing; role lease/cancel; orphan checkpoint reconciliation and poisoned rows; truthful readiness; native output current proof. Use isolated worktree and bulk_test PostgreSQL random schemas only for fault injection. Do not change production services. Report verified defects separately from test gaps and shared host/DB limitations. Prior phases PASS does not prove completeness. Mandatory actual OpenAI API review and orchestrator gates.",
+  "allowed_paths": [
+    "docs/development-jobs/phase123-audit-20261007.json",
+    "docs/PHASE123_AUDIT_20261007.md",
+    "docs/PHASE123_AUDIT_20261007.json",
+    "docs/PHASE123_AUDIT_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "tools/phase123-audit-repro.sh",
+    "tools/phase123-audit-fixtures"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1500,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-phase123-audit-20261007/acceptance.sh > /root/backups/dob-phase123-audit-20261007/acceptance.log 2>&1",
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/supervision ./internal/worker ./internal/observability > /root/backups/dob-phase123-audit-20261007/race.log 2>&1"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-phase123-audit-20261007/verify.py"
+    ]
+  },
+  "commit_message": "docs: record phase1 2 3 source and fault audit findings"
+}
