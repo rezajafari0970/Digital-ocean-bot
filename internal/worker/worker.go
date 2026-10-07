@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"sync"
 	"time"
@@ -79,6 +80,7 @@ func (w Worker) Run(ctx context.Context) error {
 	defer dispatcher.Wait()
 	progress := recoveryProgress{publish: w.Progress}
 	for {
+		supervision.Pulse(ctx)
 		generation := progress.start(dispatcher.Active)
 		err := w.round(ctx, dispatcher.Active, func(key, account string, fn func() error) {
 			dispatcher.Submit(ctx, key, account, func() {
@@ -98,6 +100,7 @@ func (w Worker) Run(ctx context.Context) error {
 		} else {
 			progress.success(generation)
 		}
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

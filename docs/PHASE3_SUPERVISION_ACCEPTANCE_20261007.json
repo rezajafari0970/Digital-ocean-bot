@@ -1,0 +1,544 @@
+{
+  "status": "REVIEWED_TESTED_NOT_DEPLOYED",
+  "evidence_directory": "/root/backups/dob-phase3-supervision-20261007",
+  "actual_api_review": {
+    "verdict": "PASS",
+    "findings": [],
+    "coverage_gaps": [
+      "No executed test or acceptance output was supplied; production rollout remains contingent on successful completion of tools/phase3-supervision-acceptance.sh and retained PG/HTTP/race acceptance suites.",
+      "The process fixture uses a transient WatchdogSec=5 unit rather than exercising the deployed unit files at WatchdogSec=45; systemd-analyze verification does not prove runtime behavior of the exact production units.",
+      "Valid 10\u201315 minute installer protection is covered with an injected clock and stub runner, not a real long-running SSH process under the actual worker binary, admission budget, systemd watchdog, and cancellation stack.",
+      "The process fixture exercises SIGSTOP replacement but not SIGTERM shutdown with the 75-second application join, 90-second systemd deadline, and a module that ignores cancellation.",
+      "Maximum restart cooldown, malformed-ledger 30-second fail-closed behavior, future-clock capping, and healthy reset after five minutes are not exercised end-to-end under systemd; coverage is primarily unit-level.",
+      "Remote unknown-outcome handling is demonstrated for a canceled PostgreSQL sleep, but no equivalent process-level SSH or HTTP mutation fixture verifies checkpoint persistence and absence of replay after forced termination.",
+      "The fixture checks role-local restart isolation and fresh replacement heartbeat, but does not query application readiness throughout startup, role failure, stale-heartbeat expiry, and replacement convergence."
+    ],
+    "limitations": [
+      "This is a static source review only; tests were not assumed to pass and no runtime artifacts, race reports, systemd fixture result, binary hash, or database acceptance logs were available for validation.",
+      "The supplied source does not include every implementation reached by module handlers, BootstrapWorkerBudget, deployment installers, HTTP/SSH clients, or deployment/upgrade scripts, so preservation of all native timeout and pool-usage bounds cannot be independently proven here.",
+      "PASS indicates no production-blocking defect was identified in the supplied supervision, restart, ownership, readiness, admission, and systemd wiring; it is not a substitute for the mandatory isolated-binary and retained acceptance gates."
+    ]
+  },
+  "actual_api_review_id": "resp_0017b7c2c360aa8a006ac6195af19c87d1836d55efe33a4e8a",
+  "tests": "PostgreSQL/HTTP/race/full-Go/phase1+2/phase3 PASS",
+  "candidate_process_fixture": {
+    "at_utc": "2026-10-07T10:05:08.209104+00:00",
+    "schema": "supervision_process_06d0d0e580ee4c6aa648301720b33675",
+    "units": {
+      "control": "dob-supervision-fixture-control-20b33675",
+      "panels": "dob-supervision-fixture-panels-20b33675"
+    },
+    "production_services_changed": false,
+    "before": {
+      "control": {
+        "pid": "1774504",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "1774564",
+        "restarts": "0"
+      }
+    },
+    "after": {
+      "control": {
+        "pid": "1774504",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "1774877",
+        "restarts": "1"
+      }
+    },
+    "heartbeat": [
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 0,
+          "InUse": 2,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "role": "control"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 1,
+          "InUse": 1,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 3,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 3,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      }
+    ],
+    "peer_survived": true,
+    "automatic_role_restart": "PASS",
+    "fault": "SIGSTOP",
+    "fixture_watchdog_seconds": 5,
+    "production_watchdog_seconds": 45,
+    "effective": {
+      "control": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase3-supervision-20261007/acceptance-process/worker.fixture ; argv[]=/root/backups/dob-phase3-supervision-20261007/acceptance-process/worker.fixture --role=control --state-dir=/root/backups/dob-phase3-supervision-20261007/acceptance-process/supervision_process_06d0d0e580ee4c6aa648301720b33675/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 10:05:08 UTC] ; stop_time=[n/a] ; pid=1774504 ; code=(null) ; status=0/0 }"
+      },
+      "panels": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase3-supervision-20261007/acceptance-process/worker.fixture ; argv[]=/root/backups/dob-phase3-supervision-20261007/acceptance-process/worker.fixture --role=panels --state-dir=/root/backups/dob-phase3-supervision-20261007/acceptance-process/supervision_process_06d0d0e580ee4c6aa648301720b33675/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 10:05:17 UTC] ; stop_time=[n/a] ; pid=1774877 ; code=(null) ; status=0/0 }"
+      }
+    },
+    "supervision": [
+      {
+        "kind": "production-control",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "account-rules",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "billing",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "network-identity",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "network-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "recovery",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "scheduler",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": false,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "capacity-fill",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "client-mutation",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "global-reality",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-registry",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-monitor",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-protection",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "capacity-fill",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 10
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "global-reality",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "panel-registry",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "residential-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "server-protection",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      }
+    ],
+    "panel_restart_ledger": {
+      "version": 1,
+      "attempts": 2,
+      "last_start_unix": 1791367517,
+      "next_start_unix": 1791367532
+    },
+    "binary_sha256": "f325ad0e21cf128348f2a4ed97c7bad56ba6aa9e421b9c043d933d05afa1f17f",
+    "duplicate_process_rejected": true,
+    "status": "PASS"
+  },
+  "exact_committed_binary_fixture": "pending",
+  "prior_runtime": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+  "schema": "162 unchanged",
+  "production_changed": false
+}

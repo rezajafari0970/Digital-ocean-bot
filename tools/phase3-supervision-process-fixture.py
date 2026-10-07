@@ -5,7 +5,7 @@ b=Path(os.environ['DOB_ISOLATION_EVIDENCE_DIR'])
 u=urllib.parse.urlsplit(os.environ['DATABASE_URL'])._replace(path='/dob_bulk_test_20261003')
 assert 'bulk_test' in u.path
 admin=urllib.parse.urlunsplit(u)
-schema='role_process_'+uuid.uuid4().hex
+schema='supervision_process_'+uuid.uuid4().hex
 work=b/schema;work.mkdir(mode=0o700)
 def sql(dsn,query):
  parsed=urllib.parse.urlsplit(dsn);opts=urllib.parse.parse_qs(parsed.query);path=opts.pop('search_path',None)
@@ -26,7 +26,7 @@ for src in (r/'migrations').glob('*.sql'):
 envfile=work/'test.env'
 envfile.write_text('DATABASE_URL='+dsn+'\nMASTER_KEY_FILE='+str(work/'master.key')+'\nMASTER_KEY_VERSION=1\n')
 envfile.chmod(0o600)
-units={role:'dob-role-fixture-'+role+'-'+schema[-8:] for role in ['control','panels']}
+units={role:'dob-supervision-fixture-'+role+'-'+schema[-8:] for role in ['control','panels']}
 def prop(role,key):
  return subprocess.check_output(['systemctl','show',units[role],'-p',key,'--value'],text=True).strip()
 def run(cmd):
@@ -43,18 +43,26 @@ def wait(predicate,label,timeout=45):
 facts={'at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'schema':schema,'units':units,'production_services_changed':False}
 try:
  for role,unit in units.items():
-  run(['systemd-run','--unit='+unit,'--property=Type=simple','--property=Restart=on-failure','--property=RestartSec=1','--property=MemoryMax=512M','--property=TasksMax=256','--property=KillMode=control-group','--property=TimeoutStopSec=10','--property=IPAddressDeny=any','--property=IPAddressAllow=127.0.0.0/8','--property=WorkingDirectory='+str(work),'--property=EnvironmentFile='+str(envfile),str(b/'worker.fixture'),'--role='+role,'--state-dir='+str(work/'state')])
+  run(['systemd-run','--unit='+unit,'--property=Type=notify','--property=NotifyAccess=main','--property=WatchdogSec=5','--property=WatchdogSignal=SIGKILL','--property=TimeoutStartSec=60','--property=Restart=on-failure','--property=RestartSec=1','--property=MemoryMax=512M','--property=TasksMax=256','--property=KillMode=control-group','--property=TimeoutStopSec=10','--property=IPAddressDeny=any','--property=IPAddressAllow=127.0.0.0/8','--property=WorkingDirectory='+str(work),'--property=EnvironmentFile='+str(envfile),str(b/'worker.fixture'),'--role='+role,'--state-dir='+str(work/'state')])
  wait(lambda:sql(dsn,"SELECT count(DISTINCT kind) FROM worker_heartbeats WHERE last_seen_at>now()-interval '20 seconds' AND kind IN ('production-control','production-panels')")=='2','both roles heartbeat')
  assert sql(dsn,'SELECT count(*) FROM accounts')=='0'
  facts['before']={role:{'pid':prop(role,'MainPID'),'restarts':prop(role,'NRestarts')} for role in units}
  control_pid=facts['before']['control']['pid'];panel_pid=facts['before']['panels']['pid']
- run(['systemctl','kill','--kill-whom=main','--signal=SIGKILL',units['panels']])
- wait(lambda:prop('panels','ActiveState')=='active' and prop('panels','MainPID') not in ('0',panel_pid) and int(prop('panels','NRestarts'))>=1,'automatic panel role restart')
+ run(['systemctl','kill','--kill-whom=main','--signal=SIGSTOP',units['panels']])
+ wait(lambda:prop('panels','ActiveState')=='active' and prop('panels','MainPID') not in ('0',panel_pid) and int(prop('panels','NRestarts'))>=1,'external watchdog replaces stopped role')
  assert prop('control','MainPID')==control_pid
  wait(lambda:sql(dsn,"SELECT count(*) FROM worker_heartbeats WHERE kind='production-panels' AND worker_id LIKE '%:"+prop('panels','MainPID')+"' AND last_seen_at>now()-interval '20 seconds'")=='1','replacement heartbeat')
  facts['after']={role:{'pid':prop(role,'MainPID'),'restarts':prop(role,'NRestarts')} for role in units}
  facts['heartbeat']=json.loads(sql(dsn,"SELECT jsonb_agg(t) FROM (SELECT kind,metadata->>'role' AS role,metadata->'database_pool' AS pool FROM worker_heartbeats WHERE last_seen_at>now()-interval '20 seconds' ORDER BY kind,last_seen_at)t"))
  facts['peer_survived']=True;facts['automatic_role_restart']='PASS'
+ facts['fault']='SIGSTOP';facts['fixture_watchdog_seconds']=5;facts['production_watchdog_seconds']=45
+ facts['effective']={role:{key:prop(role,key) for key in ['Type','WatchdogUSec','ExecStart']} for role in units}
+ assert all(v['Type']=='notify' and '--role='+role in v['ExecStart'] for role,v in facts['effective'].items())
+ wait(lambda:sql(dsn,"SELECT count(DISTINCT kind) FROM worker_heartbeats WHERE last_seen_at>now()-interval '20 seconds' AND metadata->'supervision'->>'healthy'='true' AND kind IN ('production-control','production-panels')")=='2','both independent supervisors healthy')
+ facts['supervision']=json.loads(sql(dsn,"SELECT jsonb_agg(t) FROM (SELECT kind,metadata->'supervision' AS supervision FROM worker_heartbeats WHERE last_seen_at>now()-interval '20 seconds' ORDER BY kind,last_seen_at)t"))
+ facts['panel_restart_ledger']=json.loads((work/'state/panels.json').read_text())
+ assert facts['panel_restart_ledger']['attempts']>=2
+ facts['binary_sha256']=__import__('hashlib').sha256((b/'worker.fixture').read_bytes()).hexdigest()
  # Duplicate role fails before any module can enter the database.
  duplicate=subprocess.run([str(b/'worker.fixture'),'--role=control','--state-dir='+str(work/'duplicate-state')],cwd=work,env={'PATH':os.environ['PATH'],'DATABASE_URL':dsn,'MASTER_KEY_FILE':str(work/'master.key')},capture_output=True,text=True,timeout=10)
  assert duplicate.returncode!=0 and 'worker role already owned' in duplicate.stderr
@@ -67,5 +75,5 @@ finally:
   subprocess.run(['systemctl','reset-failed',unit],capture_output=True)
  sql(admin,'DROP SCHEMA '+schema+' CASCADE')
  envfile.unlink(missing_ok=True);(work/'master.key').unlink(missing_ok=True)
- (b/'systemd-fixture-result.json').write_text(json.dumps(facts,indent=2)+'\n')
+ (b/'phase3-systemd-fixture-result.json').write_text(json.dumps(facts,indent=2)+'\n')
 print(json.dumps(facts,indent=2))

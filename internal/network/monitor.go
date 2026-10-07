@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"time"
 )
@@ -25,7 +26,9 @@ func (m Monitor) Run(ctx context.Context) error {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
+		supervision.Pulse(ctx)
 		m.runOnce(ctx)
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -55,6 +58,7 @@ func (m Monitor) runOnce(ctx context.Context) {
 	}
 	rows.Close()
 	for _, x := range list {
+		supervision.Pulse(ctx)
 		password := []byte(nil)
 		if x.ref != "" {
 			password, err = m.Secrets.GetProxy(ctx, x.p.ID, x.ref)

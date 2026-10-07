@@ -3,6 +3,7 @@ package provisioning
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"time"
 )
 
@@ -28,7 +29,12 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 		timeout = 10 * time.Minute
 	}
 	run := func(phase, cmd string) (CommandResult, error) {
-		phaseCtx, cancel := context.WithTimeout(ctx, timeout)
+		stageCtx, finish, err := supervision.Begin(ctx, phase, timeout+10*time.Second)
+		if err != nil {
+			return CommandResult{}, err
+		}
+		defer finish()
+		phaseCtx, cancel := context.WithTimeout(stageCtx, timeout)
 		defer cancel()
 		start := time.Now()
 		res, err := r.SSH.RunDetailedObserved(phaseCtx, t, key, cmd, stages)

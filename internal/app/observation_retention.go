@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"time"
 )
@@ -40,6 +41,8 @@ func (c Container) RunObservationRetention(ctx context.Context) {
 	timer := time.NewTicker(5 * time.Minute)
 	defer timer.Stop()
 	for {
+		supervision.Pulse(ctx)
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return

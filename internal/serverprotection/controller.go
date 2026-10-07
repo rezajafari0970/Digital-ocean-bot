@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"net/url"
 	"os"
@@ -59,11 +60,13 @@ type nodeTarget struct {
 
 func (c Controller) Run(ctx context.Context) {
 	for {
+		supervision.Pulse(ctx)
 		rctx, cancel := context.WithTimeout(ctx, 90*time.Second)
 		if e := c.Round(rctx); e != nil && ctx.Err() == nil {
 			log.Printf("server protection reconciliation: %v", e)
 		}
 		cancel()
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return

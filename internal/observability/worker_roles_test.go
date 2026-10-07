@@ -48,7 +48,7 @@ func TestSplitReadinessRequiresBothFreshRoleProcesses(t *testing.T) {
 	ctx := context.Background()
 	h := Health{DB: db, RequireWorker: true, WorkerMode: "split"}
 	now := time.Now().Unix()
-	raw, _ := json.Marshal(map[string]any{"recovery_scan_unix": now, "scheduler_scan_unix": now, "lifecycle_scan_unix": now, "lifecycle_lanes": map[string]int{"in_flight": 0, "stalled": 0}, "client_mutation": map[string]any{"state": "GATED", "finished_unix": now}})
+	raw, _ := json.Marshal(map[string]any{"modules": []string{"fixture"}, "supervision": map[string]any{"version": 1, "healthy": true, "modules": []map[string]any{{"name": "fixture", "state": "IDLE"}}}, "recovery_scan_unix": now, "scheduler_scan_unix": now, "lifecycle_scan_unix": now, "lifecycle_lanes": map[string]int{"in_flight": 0, "stalled": 0}, "client_mutation": map[string]any{"state": "GATED", "finished_unix": now}})
 	put := func(id, kind string) {
 		run("INSERT INTO worker_heartbeats VALUES($1,$2,now(),$3) ON CONFLICT(worker_id) DO UPDATE SET last_seen_at=now(),metadata=excluded.metadata", id, kind, string(raw))
 	}
@@ -94,6 +94,12 @@ func TestSplitReadinessRequiresBothFreshRoleProcesses(t *testing.T) {
 	ready(false)
 	put("control", "production-control")
 	ready(true)
+	run("UPDATE worker_heartbeats SET metadata=jsonb_set(metadata,'{supervision,modules,0,state}','\"STALLED\"') WHERE worker_id='control'")
+	ready(false)
+	put("control", "production-control")
+	run("UPDATE worker_heartbeats SET metadata=metadata-'supervision' WHERE worker_id='panels'")
+	ready(false)
+	put("panels", "production-panels")
 	h.WorkerMode = "typo"
 	ready(false)
 	h.WorkerMode = "all"

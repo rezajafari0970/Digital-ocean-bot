@@ -5,14 +5,18 @@ Wants=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
+Type=notify
+NotifyAccess=main
+WatchdogSec=45
+WatchdogSignal=SIGKILL
+TimeoutStartSec=15min
 User=digitaloceanbot
 Group=digitaloceanbot
 WorkingDirectory=/opt/digital-ocean-bot
 EnvironmentFile=/etc/digital-ocean-bot/env
 ExecStart=/opt/digital-ocean-bot/bin/digital-ocean-bot-worker --role=panels
 Restart=on-failure
-RestartSec=5
+RestartSec=15
 TimeoutStopSec=90
 KillMode=control-group
 MemoryHigh=256M

@@ -65,9 +65,9 @@ func (h Health) Readiness(ctx context.Context) Report {
 			}
 			r.Checks = append(r.Checks, c)
 		}
-		add("worker_progress", controlErr == nil && controlProgressReady(control, now), "control worker heartbeat or recovery/scheduler/lifecycle progress stale")
+		add("worker_progress", controlErr == nil && controlProgressReady(control, now) && supervisionReady(control), "control worker heartbeat or recovery/scheduler/lifecycle progress stale")
 		if h.WorkerMode == "split" {
-			add("panel_worker_progress", panelErr == nil, "panel worker heartbeat unavailable")
+			add("panel_worker_progress", panelErr == nil && supervisionReady(panel), "panel worker heartbeat or supervised progress unavailable")
 		}
 		add("lifecycle_account_lanes", controlErr == nil && lifecycleLanesReady(control), "lifecycle lane progress unavailable or deadline not honored")
 		add("client_mutation_progress", panelErr == nil && clientProgressReady(panel, now), "client mutation scan unavailable, failed or stalled")
@@ -137,4 +137,41 @@ func controlProgressReady(raw []byte, now time.Time) bool {
 		return v > now.Add(-age).Unix() && v <= now.Add(30*time.Second).Unix()
 	}
 	return fresh(m.Recovery, 2*time.Minute) && fresh(m.Scheduler, 5*time.Minute) && fresh(m.Lifecycle, 5*time.Minute)
+}
+
+// A fresh heartbeat cannot substitute for the complete registered module set.
+func supervisionReady(raw []byte) bool {
+	var m struct {
+		Modules     []string `json:"modules"`
+		Supervision struct {
+			Version int  `json:"version"`
+			Healthy bool `json:"healthy"`
+			Modules []struct {
+				Name    string `json:"name"`
+				State   string `json:"state"`
+				Active  int    `json:"active"`
+				Waiting int    `json:"waiting"`
+			} `json:"modules"`
+		} `json:"supervision"`
+	}
+	if json.Unmarshal(raw, &m) != nil || m.Supervision.Version != 1 || !m.Supervision.Healthy || len(m.Modules) == 0 || len(m.Supervision.Modules) != len(m.Modules) {
+		return false
+	}
+	names := map[string]bool{}
+	for _, n := range m.Modules {
+		if n == "" || names[n] {
+			return false
+		}
+		names[n] = true
+	}
+	for _, x := range m.Supervision.Modules {
+		if !names[x.Name] || x.Active < 0 || x.Waiting < 0 {
+			return false
+		}
+		if x.State != "IDLE" && x.State != "RUNNING" && x.State != "WAITING" {
+			return false
+		}
+		delete(names, x.Name)
+	}
+	return len(names) == 0
 }

@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"time"
 
@@ -115,6 +116,7 @@ func (w LifecycleWorker) Run(ctx context.Context) error {
 	offset := 0
 	progress := recoveryProgress{publish: w.Progress}
 	for {
+		supervision.Pulse(ctx)
 		generation := progress.start(d.Active)
 		var err error
 		offset, err = w.submitRound(ctx, d, offset, &progress)
@@ -126,6 +128,7 @@ func (w LifecycleWorker) Run(ctx context.Context) error {
 		} else {
 			progress.success(generation)
 		}
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

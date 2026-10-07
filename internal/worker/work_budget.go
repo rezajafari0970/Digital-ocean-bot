@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"sync/atomic"
 )
 
@@ -21,6 +22,8 @@ func NewWorkBudget(limit int) *WorkBudget {
 	return &WorkBudget{slots: make(chan struct{}, limit)}
 }
 func (b *WorkBudget) Do(ctx context.Context, fn func(context.Context) error) error {
+	endWait := supervision.Waiting(ctx)
+	defer endWait()
 	b.waiting.Add(1)
 	select {
 	case b.slots <- struct{}{}:
@@ -29,11 +32,12 @@ func (b *WorkBudget) Do(ctx context.Context, fn func(context.Context) error) err
 		b.waiting.Add(-1)
 		return ctx.Err()
 	}
+	endWait()
 	defer func() { <-b.slots }()
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return fn(ctx)
+	return supervision.Work(ctx, fn)
 }
 func (b *WorkBudget) Snapshot() map[string]int64 {
 	return map[string]int64{"limit": int64(cap(b.slots)), "active": int64(len(b.slots)), "waiting": b.waiting.Load()}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
@@ -23,10 +24,12 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/scheduler"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/serverprotection"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -37,17 +40,32 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	roleFlag := flag.String("role", "all", "worker modules: all, control, panels")
+	stateDir := flag.String("state-dir", "/var/lib/digital-ocean-bot/worker-supervision", "per-role restart state directory")
 	flag.Parse()
 	role, err := worker.ParseRole(*roleFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
-	application, err := app.BootstrapWorkerBudget(ctx, role.ConnectionBudget())
+	gate := &supervision.RestartGate{Path: filepath.Join(*stateDir, string(role)+".json")}
+	defer gate.Close()
+	if err := gate.Enter(ctx); err != nil {
+		log.Printf("worker restart admission unavailable: %v", err)
+		select {
+		case <-ctx.Done():
+		case <-time.After(30 * time.Second):
+		}
+		log.Fatal("worker startup refused")
+	}
+	bootCtx, bootCancel := context.WithTimeout(ctx, 3*time.Minute)
+	defer bootCancel()
+	forceStartup := time.AfterFunc(3*time.Minute+15*time.Second, func() { log.Fatal("worker startup progress deadline exceeded") })
+	defer forceStartup.Stop()
+	application, err := app.BootstrapWorkerBudget(bootCtx, role.ConnectionBudget())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer application.Close()
-	leaseCtx, leaseCancel := context.WithTimeout(ctx, 5*time.Second)
+	leaseCtx, leaseCancel := context.WithTimeout(bootCtx, 5*time.Second)
 	roleLease, err := worker.AcquireRole(leaseCtx, application.DB, role)
 	leaseCancel()
 	if err != nil {
@@ -57,34 +75,57 @@ func main() {
 	// Ownership supervision starts before migrations or any startup repair.
 	watchCtx, stopWatch := context.WithCancel(ctx)
 	defer stopWatch()
+	ownershipFailure := make(chan error, 1)
 	go func() {
 		if err := roleLease.Run(watchCtx); err != nil && watchCtx.Err() == nil {
-			log.Fatal("worker role ownership lost during startup or execution")
+			ownershipFailure <- fmt.Errorf("worker role ownership lost: %w", err)
+			bootCancel()
 		}
 	}()
 
-	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
+	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(bootCtx); err != nil {
 		log.Fatal(err)
 	}
 	if role.Owns(worker.RoleControl) {
 		// Repair only locally provable state links before any scheduler/lifecycle work.
-		application.Container.ReconcileLocalState(ctx)
-		if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
+		application.Container.ReconcileLocalState(bootCtx)
+		if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(bootCtx); err != nil {
 			log.Printf("rolling reboot deferred reconcile: %v", err)
 		} else if n > 0 {
 			log.Printf("rolling reboot obsolete=%d", n)
 		}
 		// Persist the rolling-reboot plan only. Execution remains disabled until
 		// the dry-run queue is reviewed and explicitly enabled.
-		if n, err := (rollingreboot.Service{DB: application.DB, Enabled: false, MinReadyPerAccount: 2}).Plan(ctx); err != nil {
+		if n, err := (rollingreboot.Service{DB: application.DB, Enabled: false, MinReadyPerAccount: 2}).Plan(bootCtx); err != nil {
 			log.Printf("rolling reboot plan: %v", err)
 		} else if n > 0 {
 			log.Printf("rolling reboot plan queued=%d mode=dry-run", n)
 		}
 	}
+	if bootCtx.Err() != nil {
+		log.Fatal("worker startup deadline exceeded")
+	}
+	forceStartup.Stop()
+	bootCancel()
 	modules := buildModules(application, role, roleLease)
+	modules.Failure = ownershipFailure
+	started := time.Now()
+	reset := false
+	modules.Ready = func() error { return supervision.Notify("READY=1") }
+	modules.Tick = func(s supervision.Snapshot) error {
+		if !s.Healthy {
+			return supervision.ErrStalled
+		}
+		if !reset && time.Since(started) >= 5*time.Minute {
+			if err := gate.Healthy(); err != nil {
+				return err
+			}
+			reset = true
+		}
+		return supervision.Notify("WATCHDOG=1")
+	}
 	log.Printf("worker started role=%s modules=%v db_budget=%d", role, modules.Names(role), role.ConnectionBudget())
-	if err := modules.Run(ctx, role); err != nil && ctx.Err() == nil {
+	if err := modules.Run(ctx, role); err != nil && (!errors.Is(err, context.Canceled) || ctx.Err() == nil) {
 		log.Fatal(err)
 	}
 }
@@ -105,12 +146,21 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
+			supervision.Pulse(ctx)
 			beatCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := heartbeat.Beat(beatCtx, map[string]any{"role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "panel_work": panelWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lifecycleLanes.Snapshot(2 * time.Minute)})
+			supervised := modules.Supervisor.Snapshot()
+			lanes := lifecycleLanes.Snapshot(0)
+			for _, m := range supervised.Modules {
+				if m.Name == "lifecycle" && m.State == "STALLED" {
+					lanes.Stalled = 1
+				}
+			}
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "panel_work": panelWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
 			}
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -124,6 +174,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		t := time.NewTicker(5 * time.Minute)
 		defer t.Stop()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -141,11 +193,13 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
+			supervision.Pulse(ctx)
 			jobCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
 			if err := controlWork.Do(jobCtx, func(ctx context.Context) error { return application.Container.ProcessAccountDeletions(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("account deletion remains pending")
 			}
 			cancel()
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -157,11 +211,13 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for {
+			supervision.Pulse(ctx)
 			billingCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 			if err := controlWork.Do(billingCtx, func(ctx context.Context) error { return application.Container.RefreshOneBillingAccount(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("billing observation persistence failed")
 			}
 			cancel()
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -173,7 +229,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		t := time.NewTicker(24 * time.Hour)
 		defer t.Stop()
 		for {
+			supervision.Pulse(ctx)
 			_ = controlWork.Do(ctx, func(ctx context.Context) error { application.Container.SyncCatalogs(ctx); return ctx.Err() })
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -193,6 +251,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			Repair: true,
 		}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			c, cancel := context.WithTimeout(ctx, 2*time.Minute)
 			defer cancel()
 			if err := g.Run(c); err != nil && c.Err() == nil {
@@ -203,6 +267,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		t := time.NewTicker(5 * time.Minute)
 		defer t.Stop()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -218,6 +284,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			ids, err := application.Container.AccountNetworkMaintenanceIDs(ctx)
 			if err != nil {
 				return
@@ -245,6 +317,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 		run()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -265,6 +339,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			return ctx.Err()
 		})
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -282,12 +358,20 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer t.Stop()
 		store := panels.SQLStore{DB: application.DB}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			if _, err := store.ReconcileInstances(ctx); err != nil {
 				log.Printf("panel instance reconcile: %v", err)
 			}
 		}
 		run()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -306,6 +390,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		t := time.NewTicker(5 * time.Second)
 		defer t.Stop()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -321,6 +407,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer ticker.Stop()
 		exec := clientops.Executor{Journal: clientops.Journal{DB: application.DB}, Runtimes: sanaeiRuntimes, Timeout: 30 * time.Second, Observe: clientProgress.Observe}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			clientProgress.Start()
 			gateCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 			gate, err := exec.Journal.Gate(gateCtx)
@@ -356,6 +448,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			clientProgress.Finish(state, err)
 		}
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -370,6 +464,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer ticker.Stop()
 		executor := cleanup.Service{DB: application.DB, Runtimes: sanaeiRuntimes}
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -389,6 +485,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
 		reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, Runtimes: sanaeiRuntimes}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			panels, err := source.EligibleReadyPanels(ctx)
 			if err != nil {
 				log.Printf("global reality discovery: %v", err)
@@ -418,6 +520,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 		run()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -435,6 +539,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			panels, err := source.EligibleReadyPanels(ctx)
 			if err != nil {
 				log.Printf("user capacity discovery: %v", err)
@@ -471,6 +581,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 		run()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -487,6 +599,12 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
 		run := func() {
+			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+			if watchErr != nil {
+				return
+			}
+			defer finish()
+
 			panels, err := source.EligibleReadyPanels(ctx)
 			if err != nil {
 				log.Printf("user capacity cleanup discovery: %v", err)
@@ -521,6 +639,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 		run()
 		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -546,6 +666,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
 				failures := worker.FailureStore{DB: application.DB}
 				for {
+					supervision.Pulse(ctx)
 					p, found, err := syncer.NextDuePanelShard(ctx, serving, shard, lanes)
 					if err != nil {
 						log.Printf("residential sync discovery: %v", err)
@@ -562,6 +683,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 						}
 						continue
 					}
+					supervision.Idle(ctx)
 					select {
 					case <-ctx.Done():
 						return
@@ -589,9 +711,11 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for {
+			supervision.Pulse(ctx)
 			if err := controlWork.Do(ctx, func(ctx context.Context) error { return application.Container.ProcessAccountRuleApplications(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("account rule application: %v", err)
 			}
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -619,6 +743,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer ticker.Stop()
 		engine := scheduler.Engine{DB: application.DB, Store: scheduler.SQLStore{DB: application.DB}, Leases: scheduler.LeaseStore{DB: application.DB}, Starter: app.ScheduledStarter{Container: application.Container}}
 		for {
+			supervision.Pulse(ctx)
 			if err := controlWork.Do(ctx, func(ctx context.Context) error { return engine.RunDue(ctx, time.Now().UTC()) }); err != nil {
 				if ctx.Err() == nil {
 					log.Printf("scheduler: %v", err)
@@ -626,6 +751,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			} else {
 				schedulerProgress.Store(time.Now().Unix())
 			}
+			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
 				return
@@ -638,5 +764,6 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			log.Printf("recovery worker stopped: %v", err)
 		}
 	})
+	configureSupervision(&modules)
 	return modules
 }

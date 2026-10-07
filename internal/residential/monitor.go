@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"net"
 	"strings"
 	"sync"
@@ -97,6 +98,7 @@ func (m Monitor) Run(ctx context.Context) error {
 	tick := time.NewTicker(10 * time.Second)
 	defer tick.Stop()
 	for {
+		supervision.Pulse(ctx)
 		rows, err := m.DB.QueryContext(ctx, `SELECT proxy_id::text FROM residential_proxies WHERE enabled AND (last_checked_at IS NULL OR last_checked_at<now()-CASE WHEN status='healthy' THEN interval '30 seconds' ELSE interval '10 seconds' END) ORDER BY last_checked_at NULLS FIRST LIMIT 256`)
 		if err == nil {
 			var ids []string
@@ -115,7 +117,7 @@ func (m Monitor) Run(ctx context.Context) error {
 					defer wg.Done()
 					for id := range jobs {
 						if ctx.Err() == nil {
-							_, _ = m.Check(ctx, id)
+							_ = supervision.Work(ctx, func(ctx context.Context) error { _, err := m.Check(ctx, id); return err })
 						}
 					}
 				}()
@@ -130,6 +132,7 @@ func (m Monitor) Run(ctx context.Context) error {
 			wg.Wait()
 
 		}
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
+	"time"
 )
 
 var ErrStepUnavailable = errors.New("workflow step unavailable")
@@ -117,13 +119,22 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			return d, err
 		}
 		_ = e.Store.Event(ctx, d.ID, step.name, d.State, "")
-		stepCtx := ctx
+		budget := policy.Timeout + 10*time.Second
+		if policy.Timeout <= 0 {
+			budget = 3 * time.Minute
+		}
+		stageCtx, finish, stageErr := supervision.Begin(ctx, step.name, budget)
+		if stageErr != nil {
+			return d, stageErr
+		}
+		stepCtx := stageCtx
 		cancel := func() {}
 		if policy.Timeout > 0 {
-			stepCtx, cancel = context.WithTimeout(ctx, policy.Timeout)
+			stepCtx, cancel = context.WithTimeout(stageCtx, policy.Timeout)
 		}
 		d, err = step.fn(stepCtx, d)
 		cancel()
+		finish()
 		if errors.Is(err, provisioning.ErrInstallerNotConfigured) {
 			_ = e.Store.FinishStep(ctx, d.ID, step.name, nil, ErrorClass(""))
 			d.State = WaitingInstaller

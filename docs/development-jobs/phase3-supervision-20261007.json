@@ -1,0 +1,51 @@
+{
+  "goal": "Phase3 modular role-local stall supervision, task/phase progress, bounded cancellation and safe independent process recovery with persistent restart pacing; fault test, actual API review, clean deploy and native verification.",
+  "context": "Baseline86be69f source / runtime50f9ffb, schema162, splitcontrol/panels. Preserve durable BEFORE-handler recovery checkpoints, native unknown-outcome/ownership/scope/quarantine/provider/finite-budget/policy gates and actual operator settings. Never restart a goroutine in-process or discard an unfinished handler then free its slot. New generic internal/supervision package independent of app/driver imports: registry with explicit module policies, loop progress and independently watched admitted tasks; task/stage context propagation; stage budgets use existing script step deadlines, so legitimate10-15minute installation is not killed by short generic timeout. Watcher uses monotonic memory clock and no DB, records due cancellation, cancels relevant module context; only after cooperative shutdown or grace expiry return role-fatal error, cancel/join role bounded then main exits; other OS role remains alive. Plain heartbeat cannot refresh task/loop progress. WorkBudget tracking starts AFTER admission; waiting is observable and not billed as execution. Stage nesting suspends only ancestor budget while independently monitored child advances; every sibling remains checked. Expose bounded metadata in role heartbeat (no secrets/IDs/rawerrors), readiness fails for canceled/stalled registered module even if legacy scans fresh. Explicit startup and shutdown bounds. Persistent per-role file restart ledger in existing writable state directory, atomic fsync; capped exponential cooldown survives restart and avoids storm, resets after sustained healthy progress; no runtime safety gate changes. Wire all actual module loops with true cycle/idle progress; leaf script runner stage budgets and selected provider/client/lifecycle steps. Exact same product binary isolated systemd fixture must use isolated state directory, empty nonproduction database. Fault tests include ignored cancellation, hung task while scans continue, loop deadlock, legitimate long phase, slow admission vs execution, sibling/peer independence, registry malformed/clock cases, PostgreSQL lock+restart reconciliation and actual HTTP uncertain outcome. Keep control3/panels10 and24/40 API24 caps. Existing role ownership loss fail-fast persists. Developer/user require tests/race/fullGo/actual server OpenAIAPI plan/review and Production handoff. No production fault injection or universal zero-failure claim. Actual workflow StepPolicy deadlines also bracket each step; nested script phases honor declared timeouts. External systemd notify watchdog covers SIGSTOP/global runtime stalls. Type=notify WatchdogSec45s, startup allows capped restart cooldown, isolated exact-binary fixture uses private state-dir.",
+  "allowed_paths": [
+    "internal/supervision",
+    "internal/worker",
+    "internal/observability",
+    "internal/provisioning/script_runner.go",
+    "internal/provisioning/script_runner_test.go",
+    "internal/network/monitor.go",
+    "internal/residential/monitor.go",
+    "internal/residentialperf/store.go",
+    "internal/app/observation_retention.go",
+    "internal/serverprotection/controller.go",
+    "cmd/worker",
+    "deploy/worker-control.conf",
+    "deploy/digital-ocean-bot-worker.service",
+    "deploy/digital-ocean-bot-worker-panels.service",
+    "tools/worker-isolation-process-fixture.py",
+    "tools/phase3-supervision-acceptance.sh",
+    "tools/phase3-supervision-process-fixture.py",
+    "docs/development-jobs/phase3-supervision-20261007.json",
+    "docs/PHASE3_SUPERVISION_20261007.md",
+    "docs/PHASE3_SUPERVISION_ACCEPTANCE_20261007.json",
+    "docs/PHASE3_SUPERVISION_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "internal/workflow/engine.go",
+    "internal/workflow/engine_supervision_test.go",
+    "internal/app/prepared_queue_test.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1200,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/supervision > /root/backups/dob-phase3-supervision-20261007/race.log 2>&1",
+      "bash tools/phase3-supervision-acceptance.sh > /root/backups/dob-phase3-supervision-20261007/acceptance.log 2>&1"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-phase3-supervision-20261007/verify-review.py"
+    ]
+  },
+  "commit_message": "feat(worker): supervise progress and pace isolated process recovery"
+}

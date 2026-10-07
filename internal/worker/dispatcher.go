@@ -66,7 +66,7 @@ func (d *Dispatcher) Snapshot(maxAge time.Duration) DispatcherSnapshot {
 	defer d.mu.Unlock()
 	s := DispatcherSnapshot{InFlight: len(d.active)}
 	for _, started := range d.started {
-		if time.Since(started) > maxAge {
+		if maxAge > 0 && time.Since(started) > maxAge {
 			s.Stalled++
 		}
 	}

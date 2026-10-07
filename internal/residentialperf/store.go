@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"sort"
 	"strings"
@@ -512,9 +513,11 @@ func (s Store) Run(ctx context.Context) {
 	t := time.NewTicker(5 * time.Second)
 	defer t.Stop()
 	for {
+		supervision.Pulse(ctx)
 		if e := s.Tick(ctx); e != nil && ctx.Err() == nil {
 			log.Print("residential performance deadline reconciliation pending")
 		}
+		supervision.Idle(ctx)
 		select {
 		case <-ctx.Done():
 			return
