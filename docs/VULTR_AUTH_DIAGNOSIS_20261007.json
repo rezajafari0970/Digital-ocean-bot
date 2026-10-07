@@ -1,0 +1,284 @@
+{
+  "observed_at": "2026-10-07T14:30:13.240868+00:00",
+  "status": "DIAGNOSED_AUTHENTICATION_REJECTION_PROVIDER_CONSOLE_CONFIRMATION_REQUIRED",
+  "runtime_source": "dacc3329b5e2969415fa7051e34356e39d549c61",
+  "accounts": [
+    {
+      "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+      "name": "Sara vul",
+      "provider_state": "TOKEN_INVALID",
+      "provider_checked_at": "2026-10-07T14:30:04.908675+00:00",
+      "credential_updated_at": "2026-09-29T23:23:19.718707+00:00",
+      "last_successful_snapshot": "2026-10-07T12:23:44.72305+00:00",
+      "first_401_in_journal_since_1000utc": "2026-10-07T12:29:54.297642+00:00"
+    },
+    {
+      "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+      "name": "Sara vul 2",
+      "provider_state": "TOKEN_INVALID",
+      "provider_checked_at": "2026-10-07T14:28:12.590999+00:00",
+      "credential_updated_at": "2026-10-01T23:02:07.316134+00:00",
+      "last_successful_snapshot": "2026-10-07T12:24:44.502706+00:00",
+      "first_401_in_journal_since_1000utc": "2026-10-07T12:25:47.630383+00:00"
+    },
+    {
+      "id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+      "name": "Vultr 232",
+      "provider_state": "TOKEN_INVALID",
+      "provider_checked_at": "2026-10-07T14:25:39.395448+00:00",
+      "credential_updated_at": "2026-10-06T21:01:07.567217+00:00",
+      "last_successful_snapshot": "2026-10-07T12:26:12.608827+00:00",
+      "first_401_in_journal_since_1000utc": "2026-10-07T12:31:25.309209+00:00"
+    },
+    {
+      "id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+      "name": "Vultr232",
+      "provider_state": "TOKEN_INVALID",
+      "provider_checked_at": "2026-10-07T14:27:38.627704+00:00",
+      "credential_updated_at": "2026-10-06T16:39:18.636672+00:00",
+      "last_successful_snapshot": "2026-10-07T12:25:46.051157+00:00",
+      "first_401_in_journal_since_1000utc": "2026-10-07T12:31:22.581190+00:00"
+    },
+    {
+      "id": "ba4e9677-92be-443d-abf0-32493a243a73",
+      "name": "Vultr524",
+      "provider_state": "TOKEN_INVALID",
+      "provider_checked_at": "2026-10-07T14:28:14.545486+00:00",
+      "credential_updated_at": "2026-10-06T21:02:46.400631+00:00",
+      "last_successful_snapshot": "2026-10-07T12:25:49.447644+00:00",
+      "first_401_in_journal_since_1000utc": "2026-10-07T12:31:23.643125+00:00"
+    }
+  ],
+  "probes": [
+    {
+      "account": "Sara vul",
+      "account_id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+      "configured_route": "proxy_required",
+      "credential_embedded_whitespace": false,
+      "credential_has_bearer_prefix": false,
+      "credential_length": 36,
+      "duplicate_of_previous_key": false,
+      "external_operations": "GET /v2/account and GET /v2/instances?per_page=1 only",
+      "finished_at": "2026-10-07T14:25:19.687921299Z",
+      "proxy_healthy": true,
+      "proxy_port": 10001,
+      "proxy_type": "socks5",
+      "responses": [
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:18.086112491Z",
+          "path": "/account",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        },
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:19.382833253Z",
+          "path": "/instances?per_page=1",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        }
+      ],
+      "started_at": "2026-10-07T14:25:18.073404211Z"
+    },
+    {
+      "account": "Sara vul 2",
+      "account_id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+      "configured_route": "proxy_required",
+      "credential_embedded_whitespace": false,
+      "credential_has_bearer_prefix": false,
+      "credential_length": 36,
+      "duplicate_of_previous_key": false,
+      "external_operations": "GET /v2/account and GET /v2/instances?per_page=1 only",
+      "finished_at": "2026-10-07T14:25:22.170409203Z",
+      "proxy_healthy": true,
+      "proxy_port": 10009,
+      "proxy_type": "socks5",
+      "responses": [
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:19.695823636Z",
+          "path": "/account",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        },
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:21.815227369Z",
+          "path": "/instances?per_page=1",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        }
+      ],
+      "started_at": "2026-10-07T14:25:19.688065199Z"
+    },
+    {
+      "account": "Vultr 232",
+      "account_id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+      "configured_route": "proxy_required",
+      "credential_embedded_whitespace": false,
+      "credential_has_bearer_prefix": false,
+      "credential_length": 36,
+      "duplicate_of_previous_key": false,
+      "external_operations": "GET /v2/account and GET /v2/instances?per_page=1 only",
+      "finished_at": "2026-10-07T14:25:24.579702915Z",
+      "proxy_healthy": true,
+      "proxy_port": 10007,
+      "proxy_type": "socks5",
+      "responses": [
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:22.178112105Z",
+          "path": "/account",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        },
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:24.232789805Z",
+          "path": "/instances?per_page=1",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        }
+      ],
+      "started_at": "2026-10-07T14:25:22.170523697Z"
+    },
+    {
+      "account": "Vultr232",
+      "account_id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+      "configured_route": "proxy_required",
+      "credential_embedded_whitespace": false,
+      "credential_has_bearer_prefix": false,
+      "credential_length": 36,
+      "duplicate_of_previous_key": false,
+      "external_operations": "GET /v2/account and GET /v2/instances?per_page=1 only",
+      "finished_at": "2026-10-07T14:25:26.409353226Z",
+      "proxy_healthy": true,
+      "proxy_port": 10002,
+      "proxy_type": "socks5",
+      "responses": [
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:24.908555877Z",
+          "path": "/account",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        },
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:26.171972615Z",
+          "path": "/instances?per_page=1",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        }
+      ],
+      "started_at": "2026-10-07T14:25:24.57982818Z"
+    },
+    {
+      "account": "Vultr524",
+      "account_id": "ba4e9677-92be-443d-abf0-32493a243a73",
+      "configured_route": "proxy_required",
+      "credential_embedded_whitespace": false,
+      "credential_has_bearer_prefix": false,
+      "credential_length": 36,
+      "duplicate_of_previous_key": false,
+      "external_operations": "GET /v2/account and GET /v2/instances?per_page=1 only",
+      "finished_at": "2026-10-07T14:25:29.034451021Z",
+      "proxy_healthy": true,
+      "proxy_port": 10004,
+      "proxy_type": "socks5",
+      "responses": [
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:26.457025562Z",
+          "path": "/account",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        },
+        {
+          "authorization_present": true,
+          "bearer_matches_stored": true,
+          "content_type": "application/json",
+          "final_host": "api.vultr.com",
+          "observed_at": "2026-10-07T14:25:28.614857864Z",
+          "path": "/instances?per_page=1",
+          "provider_error": "Unauthorized.",
+          "server": "nginx",
+          "status": 401,
+          "tls_verified": true
+        }
+      ],
+      "started_at": "2026-10-07T14:25:26.409521753Z"
+    }
+  ],
+  "confirmed": [
+    "All ten authenticated GET requests returned origin JSON 401 Unauthorized over verified TLS.",
+    "Existing account-specific proxy_required runtime, route guards, IPv4 transport and credentials were used; no direct fallback.",
+    "Five different nonempty credentials decrypt successfully, have no embedded whitespace or Bearer prefix; Authorization format is correct.",
+    "Credential update timestamps precede today; failures began before the 13:03 UTC phase123 deployment.",
+    "401 is mapped to authentication and TOKEN_INVALID by existing Vultr driver; this label does not independently prove manual revocation.",
+    "No evidence from these responses identifies billing, server limit or rate-limit failures."
+  ],
+  "not_proven": [
+    "Whether API was disabled, the key revoked/regenerated, provider account restricted, an IP allowlist rejected access, or provider-side authentication malfunction occurred.",
+    "Current console state, API access log, key match against the key currently in Vultr, and exact remote reason."
+  ],
+  "operations": "10 provider GET requests only; normal runtime admission/observation bookkeeping. No provider writes, credential edits, account reset, policy/gate/proxy edits, or deployment.",
+  "next_steps": [
+    "Inspect Account > API for one affected account: API enabled state, current key match without sharing full secret, Access Control and provider account notices/access logs.",
+    "If a key changed, update only that account through the existing authenticated credential-edit flow. If API is disabled, restore intended access in Vultr. If an allowlist is involved, authorize only the intended fixed account egress; do not allow all networks.",
+    "Verify GET /account and /instances become 200, then let the normal five-minute provider probe restore observed account state. Recheck pending lifecycle work without resetting gates or blindly replaying mutations."
+  ],
+  "services": "Id=digital-ocean-bot-api.service\nActiveState=active\nMainPID=2055976\nNRestarts=0\n\nId=digital-ocean-bot-worker.service\nActiveState=active\nMainPID=2056027\nNRestarts=0\n\nId=digital-ocean-bot-worker-panels.service\nActiveState=active\nMainPID=2056028\nNRestarts=0\n",
+  "evidence_directory": "/root/backups/dob-vultr-auth-diagnosis-20261007",
+  "sources": [
+    "https://docs.vultr.com/platform/other/api/manage-api-access-control",
+    "https://docs.vultr.com/support/platform/api/is-there-an-expiry-for-vultr-api-keys"
+  ],
+  "diagnostic_source_sha256": "c502c0c1f7d936ca931e2bd713149ed91f0a273ec10c09ae415532e741a25a6a"
+}
