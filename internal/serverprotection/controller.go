@@ -25,6 +25,7 @@ type Secrets interface {
 	Get(context.Context, string, string) ([]byte, error)
 }
 type Controller struct {
+	Admit       func(context.Context, func(context.Context) error) error
 	DB          *sql.DB
 	Secrets     Secrets
 	SSH         provisioning.SSHClient
@@ -134,7 +135,15 @@ func (c Controller) Round(ctx context.Context) error {
 			return ctx.Err()
 		}
 		wg.Add(1)
-		go func(t nodeTarget) { defer wg.Done(); defer func() { <-sem }(); c.reconcile(ctx, t) }(t)
+		go func(t nodeTarget) {
+			defer wg.Done()
+			defer func() { <-sem }()
+			if c.Admit != nil {
+				_ = c.Admit(ctx, func(ctx context.Context) error { c.reconcile(ctx, t); return ctx.Err() })
+			} else {
+				c.reconcile(ctx, t)
+			}
+		}(t)
 	}
 	wg.Wait()
 	return ctx.Err()

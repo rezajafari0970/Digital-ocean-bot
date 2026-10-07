@@ -19,7 +19,8 @@
     "docs/PRODUCTION_REVISION_STATUS.json",
     "tools/worker-isolation-process-fixture.py",
     "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
-    "docs/MODULAR_RECOVERY_20261007.md"
+    "docs/MODULAR_RECOVERY_20261007.md",
+    "internal/serverprotection/controller.go"
   ],
   "ai_council": false,
   "api_implement": false,

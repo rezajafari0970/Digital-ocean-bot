@@ -1,11 +1,11 @@
 {
-  "at_utc": "2026-10-07T06:44:32.783422+00:00",
-  "status": "DRAFT_TESTED_AWAITING_OPENAI_REVIEW_NOT_DEPLOYED",
+  "at_utc": "2026-10-07T08:13:10.563171+00:00",
+  "status": "TEST_REVIEW_PASS_READY_FOR_DEPLOY",
   "base_commit": "6c2be58a1bd9a78d1d99d1dfa35ac5380dc4dd8d",
   "production_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
   "sha256": {
-    "cmd/worker/main.go": "9bad54586ca1277df23e55944ce4f5bb9d3575c5b84e8162b26390be688cff74",
-    "cmd/worker/main_test.go": "1f7e72941498075962441676afb2b803249ae483c4163192503e4dd4c654b255",
+    "cmd/worker/main.go": "88579b420ab08f28ff91eb81686f99e93824fc8aa574cd5704e87c8f0c9d0652",
+    "cmd/worker/main_test.go": "e9a06296f0053038078a8ebe5f2e3bef650a3370689523bd8abec94074fe0a5e",
     "internal/worker/modules.go": "8c5a5235429049054e4d662a10819460a0744be4f9c875df4134f9d7fc430f3c",
     "internal/worker/modules_test.go": "6ee4a74c12b76b364eef9da489510aaffd43b84d64668c499cfb2281e5bb63e5",
     "internal/worker/role_lease.go": "86d683be23498eea5f89e8ae6b6c70c88a759c45d9984e8586d491532ca26dfd",
@@ -21,8 +21,11 @@
     "deploy/worker-control.conf": "3edfa4b0a3ee102b8d71740c6f3c01cb9c376bd56b68644e6463f06087c0d508",
     "deploy/api-split-workers.conf": "0073c44608335e7d3e9473d58f5b97954e4fcb2a18dae09faeb220c03711c1b1",
     "tools/worker-isolation-acceptance.sh": "724f7e83a0ce23c8ad32c2688769de11cc0340b671b25eeca0151ed05b934192",
-    "tools/worker-isolation-process-fixture.py": "2fb53f451ebbe6ccfbb82db541ab4dcb5c2452469ab407702148b69e291ca073"
+    "tools/worker-isolation-process-fixture.py": "2fb53f451ebbe6ccfbb82db541ab4dcb5c2452469ab407702148b69e291ca073",
+    "internal/worker/work_budget.go": "4587eb1b42023bac8cfbd71ee6dfa1dda3e35099835ae252b12103d9dc7ade2f",
+    "internal/worker/work_budget_test.go": "c075db78492bb3e18ab63ac9a252e0c07ea2c36c5b78586d49408431a0d87a35",
+    "internal/serverprotection/controller.go": "cef89c6e2efb7d3f29c1ac9572bd03ee1dca7b7fc8c0e0dc1ef11a8a90db88ba"
   },
-  "fixture_binary_sha256": "1e338a4bd7e0d05355872a7ff58aaf8ebf9872150402446a9b44139e3e5541aa",
+  "fixture_binary_sha256": "779f4dd7718bea4c9a1f763c9895de345570c07af9ced37727368b2ac95912b0",
   "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
 }

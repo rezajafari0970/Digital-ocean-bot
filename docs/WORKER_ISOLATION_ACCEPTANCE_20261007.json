@@ -1,5 +1,5 @@
 {
-  "status": "DRAFT_IMPLEMENTED_TESTED_NOT_DEPLOYED",
+  "status": "TEST_REVIEW_PASS_READY_FOR_REVERSIBLE_DEPLOY",
   "at_utc": "2026-10-07T06:44:32.783422+00:00",
   "production_revision_unchanged": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
   "static_unchanged": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
@@ -205,32 +205,32 @@
   ],
   "phase2_tests": {
     "fault_postgresql_race_full_go": "PASS",
-    "test_log": "/root/backups/dob-worker-isolation-20261007/acceptance-initial.log",
+    "test_log": "/root/backups/dob-worker-isolation-20261007/orchestrator-test.log",
     "real_worker_systemd_isolation": {
-      "at_utc": "2026-10-07T06:41:52.562786+00:00",
-      "schema": "role_process_f0868d79ed214cb18286da54c12c0815",
+      "at_utc": "2026-10-07T08:13:13.607684+00:00",
+      "schema": "role_process_718219867cd84c03b39ea8c98a540a65",
       "units": {
-        "control": "dob-role-fixture-control-c12c0815",
-        "panels": "dob-role-fixture-panels-c12c0815"
+        "control": "dob-role-fixture-control-8a540a65",
+        "panels": "dob-role-fixture-panels-8a540a65"
       },
       "production_services_changed": false,
       "before": {
         "control": {
-          "pid": "1462401",
+          "pid": "1603760",
           "restarts": "0"
         },
         "panels": {
-          "pid": "1462407",
+          "pid": "1603762",
           "restarts": "0"
         }
       },
       "after": {
         "control": {
-          "pid": "1462401",
+          "pid": "1603760",
           "restarts": "0"
         },
         "panels": {
-          "pid": "1462563",
+          "pid": "1603883",
           "restarts": "1"
         }
       },
@@ -239,11 +239,11 @@
           "kind": "production-control",
           "pool": {
             "Idle": 0,
-            "InUse": 2,
+            "InUse": 5,
             "WaitCount": 0,
             "WaitDuration": 0,
             "MaxIdleClosed": 0,
-            "OpenConnections": 2,
+            "OpenConnections": 5,
             "MaxIdleTimeClosed": 0,
             "MaxLifetimeClosed": 0,
             "MaxOpenConnections": 24
@@ -254,11 +254,11 @@
           "kind": "production-panels",
           "pool": {
             "Idle": 0,
-            "InUse": 2,
+            "InUse": 4,
             "WaitCount": 0,
             "WaitDuration": 0,
             "MaxIdleClosed": 0,
-            "OpenConnections": 2,
+            "OpenConnections": 4,
             "MaxIdleTimeClosed": 0,
             "MaxLifetimeClosed": 0,
             "MaxOpenConnections": 40
@@ -288,26 +288,40 @@
     }
   },
   "openai_review": {
-    "status": "BLOCKED_CREDIT_EXHAUSTED",
-    "diagnostic": {
-      "status": 429,
-      "error_code": "credit_balance_exhausted",
-      "error_type": "insufficient_quota",
-      "retry_after": null
-    },
-    "source_review_completed": false,
+    "status": "PASS",
+    "source_review_completed": true,
     "orchestrator_job": "worker-isolation-20261007",
-    "orchestrator_phase": "PLAN_RETRYABLE"
+    "credit_recharged_by_user": true
   },
   "configuration_changed": false,
   "production_services_restarted": false,
   "production_phase2_verified": false,
   "remaining": [
-    "restore API credit and complete plan/source review",
-    "review busy-fleet DB lease headroom",
     "clean build and reversible split deployment",
-    "observe native creation/expiry/replacement and pool/readiness under load"
+    "actual native work/readiness/pool verification"
   ],
   "evidence_directory": "/root/backups/dob-worker-isolation-20261007",
-  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c"
+  "draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
+  "reviewed_at_utc": "2026-10-07T08:13:10.563171+00:00",
+  "source_review": {
+    "verdict": "PASS",
+    "findings": [],
+    "limitations": [
+      "Static review only; no tests, builds, systemd verification, or PostgreSQL saturation scenarios were executed.",
+      "Implementations of several invoked services and helpers were not included, so their internal connection-holding behavior could not be independently verified beyond the supplied call-site wiring.",
+      "Preservation of split topology depends on the existing systemd drop-ins and enablement state outside the shown scripts; those installed host states were not available for inspection."
+    ]
+  },
+  "source_review_evidence": "/root/backups/dob-worker-isolation-20261007/review-final.json",
+  "initial_review": "/root/backups/dob-worker-isolation-20261007/review-initial.json",
+  "admission": {
+    "control_jobs": 3,
+    "panels_jobs": 10,
+    "control_pool": 24,
+    "panels_pool": 40,
+    "api_pool": 24,
+    "control_held_test_envelope": 5,
+    "panels_held_test_envelope": 2
+  },
+  "db_baseline_sampling_note": "Includes concurrent isolated test database activity; not production-only saturation."
 }
