@@ -21,31 +21,32 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 	}
 	var providerState string
-	_ = c.DB.QueryRowContext(ctx, "SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1", item.AccountID).Scan(&providerState)
-	providerLocked := providerState == ProviderStateLocked
-	if providerLocked {
-		// A locked provider account is never eligible for replacement or serving.
-		// Move READY/EXPIRING resources toward retirement locally; physical DELETE
-		// still uses the normal account network/gate and requires provider confirmation.
-		_, _ = c.DB.ExecContext(ctx, "UPDATE resources SET state='retiring',updated_at=now() WHERE account_id=$1 AND provider_resource_id=$2 AND managed=true AND state<>'deleted'", item.AccountID, item.ProviderID)
-		if item.State == droplets.Ready || item.State == droplets.Expiring {
-			ok, err := (droplets.LifecycleStore{DB: c.DB}).Transition(ctx, item.ID, item.State, droplets.Retiring)
-			if err != nil {
-				return err
-			}
-			if ok {
-				item.State = droplets.Retiring
-				if err = (droplets.LifecycleStore{DB: c.DB}).Event(ctx, item, droplets.Retiring); err != nil {
-					return err
-				}
-			}
+	if err := c.DB.QueryRowContext(ctx, "SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1", item.AccountID).Scan(&providerState); err != nil {
+		return err
+	}
+	if providerState == ProviderStateLocked || providerState == ProviderStateBillingBlocked {
+		// Provider-confirmed receipts were reconciled above. Unconfirmed remote
+		// deletion waits for provider permission, including stale discovery items.
+		if providerState == ProviderStateLocked && (item.State == droplets.Ready || item.State == droplets.Expiring) {
+			_, err := c.transitionLockedProviderLifecycle(ctx, item)
+			return err
 		}
+		return nil
+	}
+
+	if item.State == droplets.Ready {
+		_, err := c.transitionExpiredLifecycle(ctx, item, droplets.Expiring)
+		return err
 	}
 	if item.State == droplets.Expiring && item.ReplacementDeploymentID != "" {
 		var replacementState string
-		_ = c.DB.QueryRowContext(ctx, "SELECT state FROM deployments WHERE id=$1 AND account_id=$2", item.ReplacementDeploymentID, item.AccountID).Scan(&replacementState)
+		if err := c.DB.QueryRowContext(ctx, "SELECT state FROM deployments WHERE id=$1 AND account_id=$2", item.ReplacementDeploymentID, item.AccountID).Scan(&replacementState); err != nil {
+			return err
+		}
 		if replacementState == "FAILED" || replacementState == "INSTALL_FAILED" || replacementState == "INSTALL_ROLLED_BACK" {
-			_, _ = c.DB.ExecContext(ctx, "UPDATE droplets SET replacement_deployment_id=NULL,updated_at=now() WHERE id=$1 AND replacement_deployment_id=$2", item.ID, item.ReplacementDeploymentID)
+			if _, err := c.DB.ExecContext(ctx, "UPDATE droplets SET replacement_deployment_id=NULL,updated_at=now() WHERE id=$1 AND replacement_deployment_id=$2", item.ID, item.ReplacementDeploymentID); err != nil {
+				return err
+			}
 			item.ReplacementDeploymentID = ""
 		}
 	}
@@ -58,26 +59,47 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			if err != nil {
 				return err
 			}
-			if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "lifecycle-excess:"+item.AccountID); err != nil {
+			// Match deployment admission / operator retirement lock order.
+			for _, prefix := range []string{"deployment-admission:", "lifecycle-excess:"} {
+				if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, prefix+item.AccountID); err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+			if err = lockManagedPopulationTx(ctx, tx, item.AccountID); err != nil {
 				tx.Rollback()
 				return err
 			}
-			var desired, managed, retiring int
-			if err = tx.QueryRowContext(ctx, `SELECT a.desired_server_count,
-				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED'),
-				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state IN ('RETIRING','DELETING'))
-				FROM accounts a WHERE a.id=$1`, item.AccountID).Scan(&desired, &managed, &retiring); err != nil {
+			eligible, err := lifecycleExpiryEligibleTx(ctx, tx, item)
+			if err != nil || !eligible {
 				tx.Rollback()
 				return err
+			}
+			var desired, managed, retiring, pendingDeployments int
+			if err = tx.QueryRowContext(ctx, `SELECT a.desired_server_count,
+				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=d.account_id AND own.provider_resource_id=d.provider_resource_id AND own.managed AND own.state<>'deleted')),
+				(SELECT count(*) FROM droplets d WHERE d.account_id=a.id AND d.state IN ('RETIRING','DELETING') AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=d.account_id AND own.provider_resource_id=d.provider_resource_id AND own.managed AND own.state<>'deleted')),
+ (SELECT count(*) FROM deployments pending WHERE pending.account_id=a.id AND pending.state NOT IN ('READY','PANEL_COMPLETE','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK') AND (pending.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets live WHERE live.id=pending.droplet_id AND live.state<>'DELETED')))
+				FROM accounts a WHERE a.id=$1`, item.AccountID).Scan(&desired, &managed, &retiring, &pendingDeployments); err != nil {
+				tx.Rollback()
+				return err
+			}
+			if pendingDeployments > 0 {
+				tx.Rollback()
+				return nil
 			}
 			claimed := false
 			if desired > 0 && managed > desired && retiring < managed-desired {
-				res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)
+				res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING' AND expires_at<=now()`, item.ID)
 				if qerr != nil {
 					tx.Rollback()
 					return qerr
 				}
-				n, _ := res.RowsAffected()
+				n, rowErr := res.RowsAffected()
+				if rowErr != nil {
+					tx.Rollback()
+					return rowErr
+				}
 				claimed = n == 1
 			} else if desired > 0 && managed >= desired && retiring == 0 {
 				// Hard Desired is a strict ceiling. At the ceiling, replacement-first
@@ -85,15 +107,35 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				// StartDeployment admission. Retire exactly one oldest EXPIRING
 				// server first; the scheduler then backfills the freed slot.
 				var oldest string
-				_ = tx.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' ORDER BY expires_at NULLS LAST,created_at,id LIMIT 1`, item.AccountID).Scan(&oldest)
+				if err = tx.QueryRowContext(ctx, `SELECT id::text FROM droplets WHERE account_id=$1 AND state='EXPIRING' AND expires_at<=now() AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=droplets.account_id AND own.provider_resource_id=droplets.provider_resource_id AND own.managed AND own.state<>'deleted') ORDER BY expires_at,created_at,id LIMIT 1`, item.AccountID).Scan(&oldest); err != nil {
+					tx.Rollback()
+					return err
+				}
 				if shouldDeleteFirstAtDesired(desired, managed, retiring, oldest == item.ID) {
-					res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING'`, item.ID)
+					res, qerr := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND state='EXPIRING' AND expires_at<=now()`, item.ID)
 					if qerr != nil {
 						tx.Rollback()
 						return qerr
 					}
-					n, _ := res.RowsAffected()
+					n, rowErr := res.RowsAffected()
+					if rowErr != nil {
+						tx.Rollback()
+						return rowErr
+					}
 					claimed = n == 1
+				}
+			}
+			if !claimed && desired > 0 && managed < desired && retiring == 0 {
+				claimed, err = claimCapacityRetirementTx(ctx, tx, item)
+				if err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+			if claimed {
+				if _, err = tx.ExecContext(ctx, `INSERT INTO lifecycle_events(id,account_id,resource_id,state) VALUES(gen_random_uuid(),$1,$2,'RETIRING')`, item.AccountID, item.ID); err != nil {
+					tx.Rollback()
+					return err
 				}
 			}
 			if err = tx.Commit(); err != nil {
@@ -101,7 +143,6 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			}
 			if claimed {
 				item.State = droplets.Retiring
-				_ = (droplets.LifecycleStore{DB: c.DB}).Event(ctx, item, droplets.Retiring)
 				goto processLifecycle
 			}
 			// At/above the hard Desired ceiling, another retirement/deletion is
@@ -115,7 +156,9 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		// before deletion creates a capacity deadlock (especially at the limit).
 		// Only healthy/nonterminal service resources require replacement-first.
 		var deploymentState string
-		_ = c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE droplet_id=$1 ORDER BY updated_at DESC LIMIT 1`, item.ID).Scan(&deploymentState)
+		if err := c.DB.QueryRowContext(ctx, `SELECT state FROM deployments WHERE droplet_id=$1 ORDER BY updated_at DESC LIMIT 1`, item.ID).Scan(&deploymentState); err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
 		terminalFailed := deploymentState == "FAILED" || deploymentState == "INSTALL_FAILED" || deploymentState == "INSTALL_ROLLED_BACK"
 		if !terminalFailed && item.ProfileID == "" {
 			return nil
@@ -129,7 +172,7 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			var desiredNow, managedNow int
 			if err := c.DB.QueryRowContext(ctx, `SELECT
 				(SELECT desired_server_count FROM accounts WHERE id=$1),
-				(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED')`, item.AccountID).Scan(&desiredNow, &managedNow); err != nil {
+				(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=droplets.account_id AND own.provider_resource_id=droplets.provider_resource_id AND own.managed AND own.state<>'deleted'))`, item.AccountID).Scan(&desiredNow, &managedNow); err != nil {
 				return err
 			}
 			if shouldWaitForDeficitBackfill(desiredNow, managedNow) {
@@ -147,7 +190,9 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				return nil
 			}
 			var providerState, providerError string
-			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'UNKNOWN'),COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState, &providerError)
+			if err := c.DB.QueryRowContext(ctx, `SELECT COALESCE(provider_state,'UNKNOWN'),COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, item.AccountID).Scan(&providerState, &providerError); err != nil {
+				return err
+			}
 			cap, capErr := capacity.Read(ctx, c.DB, item.AccountID, 2*time.Minute)
 			limit, inUse, pending := cap.Limit, cap.InUse, cap.Pending
 			if providerState != "ACTIVE" || providerError != "" {
@@ -203,6 +248,13 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 		}
 	}
 processLifecycle:
+	if item.State == droplets.Expiring {
+		claimed, err := c.transitionExpiredLifecycle(ctx, item, droplets.Retiring)
+		if err != nil || !claimed {
+			return err
+		}
+		item.State = droplets.Retiring
+	}
 	runtime, err := c.runtimeForLifecycle(ctx, item.AccountID)
 	if err != nil {
 		return err
@@ -228,7 +280,7 @@ processLifecycle:
 		return runtime.CheckMutationGeneration(ctx)
 	}
 	if item.State == droplets.Retiring {
-		allowed, err := c.AdmitAccountRuleRetirement(ctx, item.AccountID, item.ID)
+		allowed, err := c.AdmitLifecycleRetirement(ctx, item.AccountID, item.ID, item.ProviderID)
 		if err != nil {
 			return err
 		}

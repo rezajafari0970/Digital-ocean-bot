@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"sync"
+	"time"
 )
 
 // Dispatcher keeps slow work in bounded lanes across polling rounds. Identity
@@ -10,6 +11,7 @@ import (
 type Dispatcher struct {
 	mu                sync.Mutex
 	active            map[string]string
+	started           map[string]time.Time
 	accounts          map[string]int
 	limit, perAccount int
 	wg                sync.WaitGroup
@@ -22,7 +24,7 @@ func NewDispatcher(limit, perAccount int) *Dispatcher {
 	if perAccount < 1 {
 		perAccount = 1
 	}
-	return &Dispatcher{active: map[string]string{}, accounts: map[string]int{}, limit: limit, perAccount: perAccount}
+	return &Dispatcher{active: map[string]string{}, started: map[string]time.Time{}, accounts: map[string]int{}, limit: limit, perAccount: perAccount}
 }
 func (d *Dispatcher) Submit(ctx context.Context, key, account string, fn func()) bool {
 	d.mu.Lock()
@@ -35,14 +37,38 @@ func (d *Dispatcher) Submit(ctx context.Context, key, account string, fn func())
 		return false
 	}
 	d.active[key] = account
+	d.started[key] = time.Now()
 	d.accounts[account]++
 	d.wg.Add(1)
 	d.mu.Unlock()
 	go func() {
 		defer d.wg.Done()
-		defer func() { d.mu.Lock(); delete(d.active, key); d.accounts[account]--; d.mu.Unlock() }()
+		defer func() {
+			d.mu.Lock()
+			delete(d.active, key)
+			delete(d.started, key)
+			d.accounts[account]--
+			d.mu.Unlock()
+		}()
 		fn()
 	}()
 	return true
 }
 func (d *Dispatcher) Wait() { d.wg.Wait() }
+
+type DispatcherSnapshot struct {
+	InFlight int `json:"in_flight"`
+	Stalled  int `json:"stalled"`
+}
+
+func (d *Dispatcher) Snapshot(maxAge time.Duration) DispatcherSnapshot {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	s := DispatcherSnapshot{InFlight: len(d.active)}
+	for _, started := range d.started {
+		if time.Since(started) > maxAge {
+			s.Stalled++
+		}
+	}
+	return s
+}

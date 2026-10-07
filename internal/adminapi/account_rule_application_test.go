@@ -31,6 +31,7 @@ func ruleFixture(t *testing.T, db *sql.DB, provider string, n int) (string, []st
 		d := perfUUID()
 		sqlMust(t, db, `INSERT INTO droplets(id,account_id,provider_resource_id,state,expires_at)
   VALUES($1,$2,$3,'READY',now()+make_interval(mins=>$4))`, d, a, "fixture-"+d, 60+i)
+		sqlMust(t, db, `INSERT INTO resources(id,account_id,provider,provider_resource_id,type,state,managed) VALUES(gen_random_uuid(),$1,$2,$3,'server','active',true)`, a, provider, "fixture-"+d)
 		ids = append(ids, d)
 	}
 	return a, ids
@@ -176,6 +177,7 @@ func TestAccountRuleApplicationRolloutDuplicateRestartAndOff(t *testing.T) {
 	d, p := perfUUID(), perfUUID()
 	sqlMust(t, db, "INSERT INTO deployment_profiles(id,account_id,name,config) VALUES($1,$2,'replacement','{}')", p, a)
 	sqlMust(t, db, "INSERT INTO droplets(id,account_id,provider_resource_id,state,expires_at) VALUES($1,$2,$3,'READY',now()+interval '155 minutes')", d, a, "fixture-"+d)
+	sqlMust(t, db, `INSERT INTO resources(id,account_id,provider,provider_resource_id,type,state,managed) VALUES(gen_random_uuid(),$1,'digitalocean',$2,'server','active',true)`, a, "fixture-"+d)
 	sqlMust(t, db, "INSERT INTO deployments(id,account_id,profile_id,droplet_id,state,current_step,build_rules_revision) VALUES(gen_random_uuid(),$1,$2,$3,'PANEL_COMPLETE','done',1)", a, p, d)
 	ruleTick(t, db, a)
 	if ruleCount(t, db, a, "RETIRING") != 1 {
@@ -339,5 +341,53 @@ func TestAccountRuleApplicationCompoundGrowthDoesNotRetireAndCadenceOnlyDoesNotR
 	ruleTick(t, db, a)
 	if ruleCount(t, db, a, "RETIRING") != 0 {
 		t.Fatal("cadence-only change rotated servers")
+	}
+}
+
+func TestAccountRuleApplicationRequiresCurrentManagedOwnership(t *testing.T) {
+	db := adminTestDB(t)
+	for _, phase := range []string{"before_selection", "before_admission"} {
+		t.Run(phase, func(t *testing.T) {
+			a, ids := ruleFixture(t, db, "digitalocean", 1)
+			ruleSave(t, db, a, true, 1, 9000, 9600)
+			if phase == "before_admission" {
+				ruleTick(t, db, a)
+			}
+			sqlMust(t, db, "UPDATE resources SET managed=false WHERE account_id=$1", a)
+			if phase == "before_selection" {
+				ruleTick(t, db, a)
+				if ruleCount(t, db, a, "RETIRING") != 0 {
+					t.Fatal("unowned resource selected")
+				}
+			}
+			allowed, err := (app.Container{DB: db}).AdmitAccountRuleRetirement(context.Background(), a, ids[0])
+			if err != nil || allowed {
+				t.Fatal("unowned resource admitted", allowed, err)
+			}
+		})
+	}
+}
+
+func TestAccountRuleApplicationDoesNotCountUnownedSiblingAsServingCapacity(t *testing.T) {
+	db := adminTestDB(t)
+	for _, kind := range []string{"shrink", "replace"} {
+		t.Run(kind, func(t *testing.T) {
+			a, ids := ruleFixture(t, db, "digitalocean", 3)
+			desired := 3
+			if kind == "shrink" {
+				desired = 2
+			}
+			ruleSave(t, db, a, false, 3, 9000, 9600)
+			min, max := 9000, 9600
+			if kind == "replace" {
+				min, max = 12000, 12600
+			}
+			ruleSave(t, db, a, true, desired, min, max)
+			sqlMust(t, db, "UPDATE resources SET managed=false WHERE account_id=$1 AND provider_resource_id=$2", a, "fixture-"+ids[2])
+			ruleTick(t, db, a)
+			if ruleCount(t, db, a, "RETIRING") != 0 {
+				t.Fatal("unowned sibling authorized retirement")
+			}
+		})
 	}
 }

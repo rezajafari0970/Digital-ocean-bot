@@ -21,6 +21,7 @@ type Executor struct {
 	Journal  Journal
 	Runtimes *sanaei.RuntimeManager
 	Timeout  time.Duration
+	Observe  func(string)
 }
 
 func (e Executor) timeout() time.Duration {
@@ -64,12 +65,26 @@ func clientFromInbound(raw json.RawMessage, clientID string) (sanaei.Client, boo
 		return sanaei.Client{}, false, ErrInboundMissing
 	}
 	var settings struct {
-		Clients []sanaei.Client `json:"clients"`
+		Clients json.RawMessage `json:"clients"`
 	}
 	if err := json.Unmarshal(settingsBytes, &settings); err != nil {
 		return sanaei.Client{}, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 	}
-	for _, c := range settings.Clients {
+	var clients []sanaei.Client
+	if len(settings.Clients) == 0 || string(settings.Clients) == "null" {
+		return sanaei.Client{}, false, sanaei.ErrInventoryRejected
+	}
+	if err := json.Unmarshal(settings.Clients, &clients); err != nil {
+		return sanaei.Client{}, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
+	}
+	seen := map[string]bool{}
+	for _, c := range clients {
+		if c.ID == "" || seen[c.ID] {
+			return sanaei.Client{}, false, sanaei.ErrInventoryRejected
+		}
+		seen[c.ID] = true
+	}
+	for _, c := range clients {
 		if c.ID == clientID {
 			return c, true, nil
 		}
@@ -170,12 +185,17 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 	}
 	rt, err := e.Runtimes.Acquire(ctx, job.PanelID)
 	if err != nil {
-		if errors.Is(err, sanaei.ErrRuntimeCircuitOpen) || errors.Is(err, sanaei.ErrAPIRequest) {
+		if errors.Is(err, sanaei.ErrRuntimeCircuitOpen) || errors.Is(err, sanaei.ErrRuntimeBusy) || errors.Is(err, sanaei.ErrAPIRequest) {
 			return &runtimeUnavailable{cause: err}
 		}
 		return err
 	}
-	return rt.WithMutation(ctx, func(c context.Context) error { return e.executeRuntime(c, rt, job) })
+	entered := false
+	err = rt.WithMutation(ctx, func(c context.Context) error { entered = true; return e.executeRuntime(c, rt, job) })
+	if !entered && errors.Is(err, sanaei.ErrRuntimeBusy) {
+		return &runtimeUnavailable{cause: err}
+	}
+	return err
 }
 
 // executeRuntime is called with the runtime mutation lock held by execute.
@@ -314,15 +334,17 @@ func (e Executor) RunOne(ctx context.Context) (worked bool, resultErr error) {
 	if e.Journal.DB == nil || e.Runtimes == nil {
 		return false, ErrInvalidRequest
 	}
-	unlock, acquired, err := e.Journal.executorLock(ctx)
+	claimCtx, claimCancel := context.WithTimeout(ctx, 5*time.Second)
+	defer claimCancel()
+	unlock, acquired, err := e.Journal.executorLock(claimCtx)
 	if err != nil || !acquired {
 		return false, err
 	}
 	defer unlock()
-	if err := e.Journal.Reconcile(ctx); err != nil {
+	if err := e.Journal.Reconcile(claimCtx); err != nil {
 		return false, err
 	}
-	job, ok, err := e.Journal.Claim(ctx)
+	job, ok, err := e.Journal.Claim(claimCtx)
 	if err != nil || !ok {
 		return ok, err
 	}
@@ -332,15 +354,27 @@ func (e Executor) RunOne(ctx context.Context) (worked bool, resultErr error) {
 			resultErr = &ExecutionFailure{PanelID: job.PanelID, JobID: job.ID, Cause: resultErr}
 		}
 	}()
+	if e.Observe != nil {
+		e.Observe("ATTEMPT")
+	}
 	runCtx, cancel := context.WithTimeout(ctx, e.timeout())
 	defer cancel()
 	execErr := e.execute(runCtx, job)
 
 	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finishCancel()
-	if execErr != nil && isLifecycle(job.Payload) {
+	// Isolation is a property of the proven failure boundary, not the job origin.
+	// A handled remote failure remains visible in the durable job/health ledger.
+	if errors.Is(execErr, ErrExecutionGated) {
+		// The scope/policy can change after Claim. This is an expected admission
+		// refusal, not an internal fault and never permission to widen the gate.
+		// Authorization is claim-based. This sentinel is not proof of a pre-POST
+		// failure, so neither the attempt nor its finite authorization is refunded.
+		return true, e.observed("POLICY_DEFERRED", e.Journal.Retry(finishCtx, job.ID, "EXECUTION_SCOPE_UNAVAILABLE", 30*time.Second))
+	}
+	if execErr != nil {
 		if failure, known := classifyPanelFailure(execErr, job.Attempts); known {
-			return true, e.Journal.recordPanelFailure(finishCtx, job, failure)
+			return true, e.observed("ISOLATED", e.Journal.recordPanelFailure(finishCtx, job, failure))
 		}
 	}
 	switch {
@@ -349,7 +383,7 @@ func (e Executor) RunOne(ctx context.Context) (worked bool, resultErr error) {
 	case errors.Is(execErr, ErrLifecycleExpired):
 		return true, e.Journal.retireLifecycle(finishCtx, job, "planned lifetime elapsed before POST", "LIFETIME_ELAPSED_BEFORE_POST")
 	case execErr == nil:
-		return true, e.Journal.Succeed(finishCtx, job.ID)
+		return true, e.observed("SUCCEEDED", e.Journal.Succeed(finishCtx, job.ID))
 	case errors.Is(execErr, ErrUnsupportedKind),
 		errors.Is(execErr, ErrClientConflict),
 		errors.Is(execErr, ErrInvalidRequest):
@@ -408,4 +442,12 @@ func updateSatisfiedEverywhere(ctx context.Context, rt *sanaei.PanelRuntime, cli
 		return false, err
 	}
 	return mapPatchSatisfied(global, patch), nil
+}
+
+// Report completion only after its durable write succeeds.
+func (e Executor) observed(outcome string, err error) error {
+	if err == nil && e.Observe != nil {
+		e.Observe(outcome)
+	}
+	return err
 }

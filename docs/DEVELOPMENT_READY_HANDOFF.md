@@ -1,5 +1,9 @@
 # Development Ready Handoff
 
+## Modular recovery frontier — 2026-10-07
+Read docs/MODULAR_RECOVERY_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT JSON. Source tests (native HTTP faults, real PostgreSQL, race, full Go) and final server OpenAI review PASS; deployment pending. This supersedes the earlier live-enabled observation: at05:28:43Z a lifecycle BULK_DELETE on a retiring panel returned ErrExecutionGated and globally closed the gate. Job eb7010c2-94ab-4158-8eb2-4fd3d0ef2bb1 subsequently OBSOLETE; Direct32/Residential0 at05:55Z. New source scopes typed policy refusal and native panel failures, adds independent6/account1 lifecycle lanes, progress/stall readiness, atomic retry ledger, ownership/exact-target/expiry/provider guards and full-ceiling below-Desired retirement. No budget refund, quarantine reset, blind POST, provider restriction bypass or raw gate reopening. Existing closed gate needs authenticated Resume after deployment; do not claim Output is restored before native share verification. Residual global client lock and shared worker process remain explicit. Evidence /root/backups/dob-modular-recovery-20261007.
+
+
 ## Current frontier — UI recovery and verified client replacement, 2026-10-07
 Static source `0c7721d4521beed9ba0b7a4f6fba12114b580cc1` is deployed; runtime API/worker remains00a4b185929185224c38719bd8c1ec9a71dc35c6, schema161. The user clicked authenticated Resume at04:59:18Z. Main gate stayed enabled; native client creation,600-second expiry deletion/replacement and actual class shares are verified. Latest observation05:16:32Z: Direct56/Residential443,996 succeeded bulk creates,344 succeeded bulk deletes,53 panel/inbound scopes with same-scope replacement. Counts vary with fleet lifecycle. No Resume action remains pending.
 

@@ -1,0 +1,27 @@
+{
+  "at_utc": "2026-10-07T06:13:40.188003+00:00",
+  "status": "TESTS_AND_REVIEW_PASS_PENDING_DEPLOYMENT",
+  "test_log": "/root/backups/dob-modular-recovery-20261007/acceptance-provider-guards.log",
+  "test_exit": "0",
+  "source_snapshot": "docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
+  "live_incident": {
+    "at_utc": "2026-10-07T05:28:43Z",
+    "safe_code": "EXECUTION_SCOPE_UNAVAILABLE_MISCLASSIFIED_GLOBAL",
+    "job_id": "eb7010c2-94ab-4158-8eb2-4fd3d0ef2bb1",
+    "gate": "CLOSED",
+    "authenticated_resume": "REQUIRED_AFTER_FIX"
+  },
+  "production": "NOT_DEPLOYED",
+  "limitations": [
+    "shared worker process and DB resources",
+    "global client lock/concurrency1 retained",
+    "no forced abandonment of uncancellable operations",
+    "provider/payment/trial policies unchanged",
+    "no automatic quarantine or finite-budget reset"
+  ],
+  "source_review": "PASS",
+  "source_review_evidence": "/root/backups/dob-modular-recovery-20261007/review-final.json",
+  "fault_tests": "PASS",
+  "postgresql_race": "PASS",
+  "full_go": "PASS"
+}

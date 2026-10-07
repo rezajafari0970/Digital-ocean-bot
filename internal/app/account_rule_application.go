@@ -61,8 +61,8 @@ func SaveAccountRuleApplicationTx(ctx context.Context, tx *sql.Tx, id, before st
  WHERE p.account_id=$1 AND d.id=p.waiting_droplet_id AND d.state='RETIRING'
  AND NOT p.retirement_started AND a.deletion_requested_at IS NULL
  AND (NOT p.apply_to_existing OR
- (SELECT count(*) FROM droplets live WHERE live.account_id=$1 AND live.state<>'DELETED') < a.desired_server_count OR
- (p.waiting_reason='SHRINK' AND (SELECT count(*) FROM droplets live WHERE live.account_id=$1 AND live.state<>'DELETED') <= a.desired_server_count))
+ (SELECT count(*) FROM droplets live WHERE live.account_id=$1 AND live.state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=live.account_id AND own.provider_resource_id=live.provider_resource_id AND own.managed AND own.state<>'deleted')) < a.desired_server_count OR
+ (p.waiting_reason='SHRINK' AND (SELECT count(*) FROM droplets live WHERE live.account_id=$1 AND live.state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=live.account_id AND own.provider_resource_id=live.provider_resource_id AND own.managed AND own.state<>'deleted')) <= a.desired_server_count))
  RETURNING d.id
  ) UPDATE account_rule_application SET waiting_droplet_id=NULL,waiting_reason='',retirement_started=false
  WHERE account_id=$1 AND waiting_droplet_id IN (SELECT id FROM cancelled)`, id); err != nil {
@@ -153,13 +153,16 @@ func (c Container) ProcessAccountRuleApplication(ctx context.Context, id string)
 		}
 		return tx.Commit()
 	}
+	if err = lockManagedPopulationTx(ctx, tx, id); err != nil {
+		return err
+	}
 	var managed, ready, retiring, pending, old int
 	err = tx.QueryRowContext(ctx, `SELECT
- (SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),
- (SELECT count(*) FROM droplets WHERE account_id=$1 AND state='READY'),
- (SELECT count(*) FROM droplets WHERE account_id=$1 AND state IN ('RETIRING','DELETING')),
+ (SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=droplets.account_id AND own.provider_resource_id=droplets.provider_resource_id AND own.managed AND own.state<>'deleted')),
+ (SELECT count(*) FROM droplets WHERE account_id=$1 AND state='READY' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=droplets.account_id AND own.provider_resource_id=droplets.provider_resource_id AND own.managed AND own.state<>'deleted')),
+ (SELECT count(*) FROM droplets WHERE account_id=$1 AND state IN ('RETIRING','DELETING') AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=droplets.account_id AND own.provider_resource_id=droplets.provider_resource_id AND own.managed AND own.state<>'deleted')),
  (SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND (droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets WHERE id=deployments.droplet_id AND state<>'DELETED'))),
- (SELECT count(*) FROM droplets d WHERE d.account_id=$1 AND d.state<>'DELETED'
+ (SELECT count(*) FROM droplets d WHERE d.account_id=$1 AND d.state<>'DELETED' AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=d.account_id AND own.provider_resource_id=d.provider_resource_id AND own.managed AND own.state<>'deleted')
  AND COALESCE((SELECT max(build_rules_revision) FROM deployments WHERE droplet_id=d.id),0)<$2)
  + (SELECT count(*) FROM deployments WHERE account_id=$1 AND droplet_id IS NULL AND build_rules_revision<$2
  AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE'))`, id, revision.Int64).Scan(&managed, &ready, &retiring, &pending, &old)
@@ -231,12 +234,12 @@ func (c Container) ProcessAccountRuleApplication(ctx context.Context, id string)
 		}
 	}
 	var candidate, previousState string
-	err = tx.QueryRowContext(ctx, `SELECT d.id::text,d.state FROM droplets d
+	err = tx.QueryRowContext(ctx, `SELECT d.id::text,d.state FROM droplets d JOIN resources r ON r.account_id=d.account_id AND r.provider_resource_id=d.provider_resource_id AND r.managed AND r.state<>'deleted'
  WHERE d.account_id=$1 AND (d.state='READY' OR ($2 AND d.state='EXPIRING'))
  AND (NOT $2 OR d.state='EXPIRING' OR $4 > (SELECT desired_server_count FROM accounts WHERE id=$1)) AND COALESCE(d.provider_resource_id,'')<>''
  AND d.replacement_deployment_id IS NULL
  AND ($2 OR COALESCE((SELECT max(build_rules_revision) FROM deployments WHERE droplet_id=d.id),0)<$3)
- ORDER BY d.expires_at NULLS LAST,d.created_at,d.id LIMIT 1 FOR UPDATE OF d`, id, shrinkNow, revision.Int64, ready).Scan(&candidate, &previousState)
+ ORDER BY d.expires_at NULLS LAST,d.created_at,d.id LIMIT 1 FOR UPDATE OF d FOR SHARE OF r`, id, shrinkNow, revision.Int64, ready).Scan(&candidate, &previousState)
 	if err == sql.ErrNoRows {
 		return finish("WAITING_WORK", "Waiting for an eligible owned server.")
 	}
@@ -247,7 +250,7 @@ func (c Container) ProcessAccountRuleApplication(ctx context.Context, id string)
 	if !shrinkNow && (ready < desired || !revision.Valid) {
 		return finish("WAITING_CAPACITY", "No server can be retired for this request yet.")
 	}
-	res, err := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state=$3`, candidate, id, previousState)
+	res, err := tx.ExecContext(ctx, `UPDATE droplets SET state='RETIRING',updated_at=now() WHERE id=$1 AND account_id=$2 AND state=$3 AND EXISTS(SELECT 1 FROM resources r WHERE r.account_id=droplets.account_id AND r.provider_resource_id=droplets.provider_resource_id AND r.managed AND r.state<>'deleted')`, candidate, id, previousState)
 	if err != nil {
 		return err
 	}
@@ -292,6 +295,17 @@ func (c Container) ProcessAccountRuleApplication(ctx context.Context, id string)
 // item cannot delete a server restored by a concurrent OFF Save. Once admitted,
 // ordinary provider outcome reconciliation must complete even if OFF is saved.
 func (c Container) AdmitAccountRuleRetirement(ctx context.Context, accountID, dropletID string) (bool, error) {
+	return c.admitRetirement(ctx, accountID, dropletID, "")
+}
+
+// Lifecycle callers must bind authorization to the exact provider deletion target.
+func (c Container) AdmitLifecycleRetirement(ctx context.Context, accountID, dropletID, providerID string) (bool, error) {
+	if providerID == "" {
+		return false, nil
+	}
+	return c.admitRetirement(ctx, accountID, dropletID, providerID)
+}
+func (c Container) admitRetirement(ctx context.Context, accountID, dropletID, providerID string) (bool, error) {
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return false, err
@@ -303,7 +317,10 @@ func (c Container) AdmitAccountRuleRetirement(ctx context.Context, accountID, dr
 		}
 	}
 	var state string
-	if err = tx.QueryRowContext(ctx, `SELECT state FROM droplets WHERE id=$1 AND account_id=$2 FOR UPDATE`, dropletID, accountID).Scan(&state); err != nil {
+	if err = tx.QueryRowContext(ctx, `SELECT d.state FROM droplets d JOIN accounts a ON a.id=d.account_id JOIN resources r ON r.account_id=d.account_id AND r.provider_resource_id=d.provider_resource_id WHERE a.provider_state NOT IN ('LOCKED','BILLING_BLOCKED') AND d.id=$1 AND d.account_id=$2 AND ($3='' OR d.provider_resource_id=$3) AND r.managed AND r.state<>'deleted' FOR UPDATE OF d FOR SHARE OF r`, dropletID, accountID, providerID).Scan(&state); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
 		return false, err
 	}
 	if state != "RETIRING" {

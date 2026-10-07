@@ -111,6 +111,7 @@ func bulkObserved(raws []json.RawMessage, inboundID int64, wanted []sanaei.Clien
 		wantedIDs[c.ID] = true
 		wantedEmails[c.Email] = true
 	}
+	var identities inventoryIdentities
 	found := false
 	ids := map[string]sanaei.Client{}
 	emails := map[string]string{}
@@ -145,6 +146,9 @@ func bulkObserved(raws []json.RawMessage, inboundID int64, wanted []sanaei.Clien
 			return nil, nil, sanaei.ErrInventoryRejected
 		}
 		for _, c := range *settings.Clients {
+			if e := identities.check(in.ID, c); e != nil {
+				return nil, nil, e
+			}
 			if !wantedIDs[c.ID] && !wantedEmails[c.Email] {
 				continue
 			}

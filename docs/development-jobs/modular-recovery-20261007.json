@@ -1,0 +1,50 @@
+{
+  "goal": "Deploy bounded, modular recovery: isolate typed remote client failures for every queued origin, remove provider-ceiling lifecycle deadlock safely, fix provisioning retry ambiguity, and give independent lifecycle account lanes and measured module progress without weakening durable mutation safety.",
+  "context": "Continue canonical a6b1826 and docs/ISOLATION_RISK_FORECAST_20261007.json. Main implementer handles code; use OpenAI adapter only for plan/review (no delegated agents). Existing driver/plugin interfaces remain authority. Extend RunOne typed panel COOLDOWN/QUARANTINED handling to manual/bulk queued jobs; no nil/malformed inventory proves absence. Keep direct guarded-canary behavior and journal outcome observable. Preserve global client concurrency1/executor lock, finite budgets, policy/auth, ownership, no blind ambiguous POST, quarantine never auto-cleared. Fix psa.next_retry_at qualification and propagate SQL errors except true absent row. Capacity: below Desired but full fresh provider capacity may atomically retire exactly one oldest expired managed server under account lock, with no active retirement/pending create/backfill; stale/unknown/zero/error/disabled capacity cannot authorize delete. Keep Desired and scheduler ownership. Lifecycle use existing bounded dispatcher per-account1, configurable cooperative deadline, no overlapping same key, cancellation then join, failure ledger safe read/write and retry. Add reusable module progress snapshots to production heartbeat and readiness for client mutation loop: report scan/completion separately, gated/idle isn't work success, failed DB/gate isn't healthy mutation. Never promise complete isolation or indefinite uptime; remaining shared process/lock risks recorded. Fault/race/Postgres tests, full Go, source review, clean checkpoint, staged deployment/config preservation/readback. Live no test cloud fixtures or destructive fault injection.",
+  "allowed_paths": [
+    "internal/panels/clientops",
+    "internal/app/lifecycle.go",
+    "internal/app/lifecycle_capacity_recovery.go",
+    "internal/app/lifecycle_capacity_recovery_test.go",
+    "internal/app/recovery.go",
+    "internal/app/recovery_retry_test.go",
+    "internal/worker",
+    "internal/observability/health.go",
+    "internal/observability/health_test.go",
+    "cmd/worker/main.go",
+    "tools/modular-recovery-acceptance.sh",
+    "docs/development-jobs/modular-recovery-20261007.json",
+    "docs/MODULAR_RECOVERY_20261007.md",
+    "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
+    "docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "internal/panels/sanaei/runtime.go",
+    "internal/panels/sanaei/runtime_manager.go",
+    "internal/panels/sanaei/runtime_wait_test.go",
+    "internal/app/account_rule_application.go",
+    "internal/adminapi/account_rule_application_test.go",
+    "internal/adminapi/account_rule_application_browser_test.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/modular-recovery-acceptance.sh # fault and -race"
+    ],
+    "verify": [
+      "git diff --check",
+      "python3 -c \"from pathlib import Path; assert Path('/root/backups/dob-modular-recovery-20261007/acceptance.exit').read_text().strip()=='0'\"",
+      "python3 -c \"import json; from pathlib import Path; assert json.loads(json.loads(Path('/root/backups/dob-modular-recovery-20261007/review-final.json').read_text())['text'])['verdict']=='PASS'\"",
+      "python3 -c \"import json,hashlib; from pathlib import Path; s=json.loads(Path('docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json').read_text()); assert all(hashlib.sha256(Path(p).read_bytes()).hexdigest()==h for p,h in s['product_sha256'].items())\""
+    ]
+  },
+  "commit_message": "fix(recovery): isolate remote failures and unblock account lifecycle"
+}

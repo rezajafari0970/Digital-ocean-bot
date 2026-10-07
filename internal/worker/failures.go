@@ -4,52 +4,75 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 )
 
 type FailureStore struct{ DB *sql.DB }
 
 func (s FailureStore) Due(ctx context.Context, kind, itemID string) bool {
+	due, err := s.DueChecked(ctx, kind, itemID)
+	return err == nil && due
+}
+func (s FailureStore) DueChecked(ctx context.Context, kind, itemID string) (bool, error) {
 	if s.DB == nil {
-		return true
+		return true, nil
 	}
 	var next sql.NullTime
 	err := s.DB.QueryRowContext(ctx, `SELECT next_retry_at FROM worker_item_failures WHERE kind=$1 AND item_id=$2`, kind, itemID).Scan(&next)
-	if err != nil || !next.Valid {
-		return true
+	if errors.Is(err, sql.ErrNoRows) {
+		return true, nil
 	}
-	return !time.Now().Before(next.Time)
+	if err != nil {
+		return false, err
+	}
+	return !next.Valid || !time.Now().Before(next.Time), nil
 }
-
-func (s FailureStore) Fail(ctx context.Context, kind, itemID, accountID string, err error) {
-	if s.DB == nil || err == nil {
-		return
+func (s FailureStore) Fail(ctx context.Context, kind, itemID, accountID string, cause error) {
+	if err := s.FailChecked(ctx, kind, itemID, accountID, cause); err != nil {
+		log.Printf("worker failure ledger write failed: %v", err)
 	}
-	msg := err.Error()
+}
+func (s FailureStore) FailChecked(ctx context.Context, kind, itemID, accountID string, cause error) error {
+	if s.DB == nil || cause == nil {
+		return nil
+	}
+	msg := cause.Error()
 	if len(msg) > 2048 {
 		msg = msg[len(msg)-2048:]
 	}
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 	var failures int
-	_ = s.DB.QueryRowContext(ctx, `INSERT INTO worker_item_failures(kind,item_id,account_id,failures,last_error,first_failed_at,last_failed_at)
-VALUES($1,$2,NULLIF($3,'')::uuid,1,$4,now(),now())
-ON CONFLICT(kind,item_id) DO UPDATE SET failures=worker_item_failures.failures+1,last_error=EXCLUDED.last_error,last_failed_at=now()
-RETURNING failures`, kind, itemID, accountID, msg).Scan(&failures)
-	if failures < 1 {
-		failures = 1
+	err = tx.QueryRowContext(ctx, `INSERT INTO worker_item_failures(kind,item_id,account_id,failures,last_error,first_failed_at,last_failed_at) VALUES($1,$2,NULLIF($3,'')::uuid,1,$4,now(),now()) ON CONFLICT(kind,item_id) DO UPDATE SET failures=LEAST(worker_item_failures.failures+1,1000000),last_error=EXCLUDED.last_error,last_failed_at=now() RETURNING failures`, kind, itemID, accountID, msg).Scan(&failures)
+	if err != nil {
+		return err
 	}
 	delay := time.Duration(1<<minFailure(failures, 6)) * time.Second
-	if hinted, ok := boundedRetryDelay(err); ok {
+	if hinted, ok := boundedRetryDelay(cause); ok {
 		delay = hinted
 	}
 	seconds := int((delay + time.Second - 1) / time.Second)
-	_, _ = s.DB.ExecContext(ctx, `UPDATE worker_item_failures SET next_retry_at=now()+($3 * interval '1 second') WHERE kind=$1 AND item_id=$2`, kind, itemID, seconds)
-}
-
-func (s FailureStore) Clear(ctx context.Context, kind, itemID string) {
-	if s.DB == nil {
-		return
+	_, err = tx.ExecContext(ctx, `UPDATE worker_item_failures SET next_retry_at=now()+($3 * interval '1 second') WHERE kind=$1 AND item_id=$2`, kind, itemID, seconds)
+	if err != nil {
+		return err
 	}
-	_, _ = s.DB.ExecContext(ctx, `DELETE FROM worker_item_failures WHERE kind=$1 AND item_id=$2`, kind, itemID)
+	return tx.Commit()
+}
+func (s FailureStore) Clear(ctx context.Context, kind, itemID string) {
+	if err := s.ClearChecked(ctx, kind, itemID); err != nil {
+		log.Printf("worker failure ledger clear failed: %v", err)
+	}
+}
+func (s FailureStore) ClearChecked(ctx context.Context, kind, itemID string) error {
+	if s.DB == nil {
+		return nil
+	}
+	_, err := s.DB.ExecContext(ctx, "DELETE FROM worker_item_failures WHERE kind=$1 AND item_id=$2", kind, itemID)
+	return err
 }
 
 func (s FailureStore) ClearResolved(ctx context.Context) {

@@ -78,6 +78,7 @@ func (j Journal) ReserveBulkDelete(ctx context.Context, account, panel string, i
 func bulkDeleteObserved(raws []json.RawMessage, inbound int64, wanted []sanaei.Client) (present, absent []sanaei.Client, err error) {
 	ids, emails := map[string]sanaei.Client{}, map[string]string{}
 	locations := map[string]int64{}
+	var identities inventoryIdentities
 	found := false
 	wantedIDs, wantedEmails := map[string]bool{}, map[string]bool{}
 	for _, c := range wanted {
@@ -116,6 +117,9 @@ func bulkDeleteObserved(raws []json.RawMessage, inbound int64, wanted []sanaei.C
 			return
 		}
 		for _, c := range settings.Clients {
+			if e := identities.check(in.ID, c); e != nil {
+				return nil, nil, e
+			}
 			if !wantedIDs[c.ID] && !wantedEmails[c.Email] {
 				continue
 			}

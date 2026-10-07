@@ -288,11 +288,15 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 				_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
 				return nil
 			}
-			var pn sql.NullTime
-			_ = h.Container.DB.QueryRowContext(ctx, `SELECT next_retry_at FROM provision_step_attempts psa JOIN provision_runs pr ON pr.id=psa.run_id WHERE pr.account_id=$1 AND pr.droplet_id=$2 AND psa.step=$3`, item.AccountID, d.DropletID, innerStep).Scan(&pn)
+			pn, err := provisionStepRetryAt(ctx, h.Container.DB, item.AccountID, d.DropletID, innerStep)
+			if err != nil {
+				return err
+			}
 			if pn.Valid && time.Now().Before(pn.Time) {
 				return nil
 			}
+		} else if !errors.Is(qerr, sql.ErrNoRows) {
+			return qerr
 		}
 	}
 	if d.CurrentStep == "create" {
@@ -427,4 +431,14 @@ func (h RecoveryHandler) freezeExhaustedInstallerRecovery(ctx context.Context, d
 		lastErr = "installer recovery budget exhausted"
 	}
 	return true, h.Container.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", "recovery budget exhausted: "+lastErr)
+}
+
+// A missing step is not a retry delay. A failed read cannot authorize execution.
+func provisionStepRetryAt(ctx context.Context, db *sql.DB, account, droplet, step string) (sql.NullTime, error) {
+	var next sql.NullTime
+	err := db.QueryRowContext(ctx, `SELECT psa.next_retry_at FROM provision_step_attempts psa JOIN provision_runs pr ON pr.id=psa.run_id WHERE pr.account_id=$1 AND pr.droplet_id=$2 AND psa.step=$3`, account, droplet, step).Scan(&next)
+	if errors.Is(err, sql.ErrNoRows) {
+		return sql.NullTime{}, nil
+	}
+	return next, err
 }

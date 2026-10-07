@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -25,10 +26,18 @@ func (r *PanelRuntime) WithMutation(ctx context.Context, fn func(context.Context
 	if r == nil || r.mutationMu == nil || fn == nil {
 		return errors.New("sanaei runtime mutation config")
 	}
-	r.mutationMu.Lock()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for !r.mutationMu.TryLock() {
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("%w: %w", ErrRuntimeBusy, ctx.Err())
+		case <-ticker.C:
+		}
+	}
 	defer r.mutationMu.Unlock()
 	if err := ctx.Err(); err != nil {
-		return err
+		return fmt.Errorf("%w: %w", ErrRuntimeBusy, err)
 	}
 	return fn(ctx)
 }

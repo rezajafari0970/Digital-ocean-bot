@@ -151,16 +151,26 @@ func clientMapFromInbound(raw json.RawMessage, clientID string) (map[string]any,
 	}
 	items, ok := settings["clients"].([]any)
 	if !ok {
-		return nil, false, ErrClientConflict
+		return nil, false, sanaei.ErrInventoryRejected
 	}
+	seen := map[string]bool{}
+	var found map[string]any
 	for _, item := range items {
 		m, ok := item.(map[string]any)
 		if !ok {
-			continue
+			return nil, false, sanaei.ErrInventoryRejected
 		}
-		if id, _ := m["id"].(string); id == clientID {
-			return m, true, nil
+		id, _ := m["id"].(string)
+		if id == "" || seen[id] {
+			return nil, false, sanaei.ErrInventoryRejected
 		}
+		seen[id] = true
+		if id == clientID {
+			found = m
+		}
+	}
+	if found != nil {
+		return found, true, nil
 	}
 	return nil, false, nil
 }

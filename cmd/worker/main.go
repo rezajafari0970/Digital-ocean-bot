@@ -46,13 +46,15 @@ func main() {
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
 	var recoveryProgress, schedulerProgress, lifecycleProgress atomic.Int64
+	var clientProgress worker.ModuleProgress
+	lifecycleLanes := worker.NewDispatcher(6, 1)
 	heartbeat := worker.Heartbeat{DB: application.DB, WorkerID: fmt.Sprintf("%s:%d", host, os.Getpid()), Kind: "production"}
 	go func() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
 			beatCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker", "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load()})
+			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker", "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lifecycleLanes.Snapshot(2 * time.Minute)})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -258,30 +260,46 @@ func main() {
 		}
 	}()
 
-	// Durable client mutations are always serialized. The database execution gate
-	// is checked atomically by Claim; its production default is OFF + kill-switch ON.
+	// Durable client mutations retain global concurrency1 and the advisory lock.
 	go func() {
-		t := time.NewTicker(time.Second)
-		defer t.Stop()
-		exec := clientops.Executor{
-			Journal:  clientops.Journal{DB: application.DB},
-			Runtimes: sanaeiRuntimes,
-			Timeout:  30 * time.Second,
-		}
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		exec := clientops.Executor{Journal: clientops.Journal{DB: application.DB}, Runtimes: sanaeiRuntimes, Timeout: 30 * time.Second, Observe: clientProgress.Observe}
 		run := func() {
-			if _, err := exec.Drain(ctx); err != nil && ctx.Err() == nil {
-				if gateErr := exec.Journal.FailCloseGateWithFailure(ctx, err); gateErr != nil {
-					log.Printf("client mutation executor fail-close: %v (original: %v)", gateErr, err)
-					return
-				}
-				log.Printf("client mutation executor: %v; execution gate fail-closed", err)
+			clientProgress.Start()
+			gateCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+			gate, err := exec.Journal.Gate(gateCtx)
+			cancel()
+			if err != nil {
+				clientProgress.Finish("FAILED", err)
+				return
 			}
+			if !gate.Enabled || gate.KillSwitch || gate.Concurrency != 1 {
+				clientProgress.Finish("GATED", nil)
+				return
+			}
+			n, err := exec.Drain(ctx)
+			if err != nil && ctx.Err() == nil {
+				finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+				gateErr := exec.Journal.FailCloseGateWithFailure(finishCtx, err)
+				finishCancel()
+				if gateErr != nil {
+					log.Printf("client mutation executor fail-close: %v (original: %v)", gateErr, err)
+				} else {
+					log.Printf("client mutation executor: %v; execution gate fail-closed", err)
+				}
+			}
+			state := "IDLE"
+			if n > 0 {
+				state = "COMPLETED"
+			}
+			clientProgress.Finish(state, err)
 		}
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-t.C:
+			case <-ticker.C:
 				run()
 			}
 		}
@@ -517,27 +535,19 @@ func main() {
 		}
 	}()
 	failures := worker.FailureStore{DB: application.DB}
-	lw := &worker.LifecycleWorker{Store: droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100}
-	// Lifecycle runs independently from provider/deployment recovery so slow or
-	// unknown provider operations cannot starve expiry and deletion processing.
+	lw := worker.LifecycleWorker{
+		Dispatcher: lifecycleLanes,
+		Store:      droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Failures: failures, Batch: 100,
+		Concurrency: 6, ItemTimeout: 90 * time.Second, Interval: 10 * time.Second,
+		Progress: func(t time.Time) { lifecycleProgress.Store(t.Unix()) },
+	}
+	// One bounded lane per account; slow provider work cannot occupy all lanes.
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
-		defer ticker.Stop()
-		for {
-			if err := lw.Once(ctx); err != nil {
-				if ctx.Err() == nil {
-					log.Printf("lifecycle worker: %v", err)
-				}
-			} else {
-				lifecycleProgress.Store(time.Now().Unix())
-			}
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-			}
+		if err := lw.Run(ctx); err != nil && ctx.Err() == nil {
+			log.Printf("lifecycle worker stopped: %v", err)
 		}
 	}()
+
 	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)

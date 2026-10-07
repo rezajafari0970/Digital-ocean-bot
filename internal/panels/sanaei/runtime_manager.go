@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var ErrRuntimeBusy = errors.New("sanaei runtime busy before mutation")
+
 var ErrRuntimeCircuitOpen = errors.New("sanaei runtime circuit open")
 
 type runtimeEntry struct {
@@ -96,7 +98,7 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 				m.mu.Unlock()
 				select {
 				case <-ctx.Done():
-					return nil, ctx.Err()
+					return nil, fmt.Errorf("%w: %w", ErrRuntimeBusy, ctx.Err())
 				case <-ch:
 					continue
 				}
@@ -135,12 +137,16 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		close(e.wait)
 		if err != nil {
 			delete(m.entries, panelID)
-			c := m.circuits[panelID]
-			c.failures++
-			if delay := circuitDelay(c.failures); delay > 0 {
-				c.until = time.Now().Add(delay)
+			// SQL, secret-store and local invariant failures must never
+			// acquire panel-transport provenance through the circuit breaker.
+			if errors.Is(err, ErrAPIRequest) {
+				c := m.circuits[panelID]
+				c.failures++
+				if delay := circuitDelay(c.failures); delay > 0 {
+					c.until = time.Now().Add(delay)
+				}
+				m.circuits[panelID] = c
 			}
-			m.circuits[panelID] = c
 		} else {
 			delete(m.circuits, panelID)
 		}
