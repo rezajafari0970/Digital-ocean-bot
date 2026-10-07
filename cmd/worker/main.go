@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
@@ -35,26 +36,70 @@ import (
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-	application, err := app.BootstrapWorker(ctx)
+	roleFlag := flag.String("role", "all", "worker modules: all, control, panels")
+	flag.Parse()
+	role, err := worker.ParseRole(*roleFlag)
+	if err != nil {
+		log.Fatal(err)
+	}
+	application, err := app.BootstrapWorkerBudget(ctx, role.ConnectionBudget())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer application.Close()
+	leaseCtx, leaseCancel := context.WithTimeout(ctx, 5*time.Second)
+	roleLease, err := worker.AcquireRole(leaseCtx, application.DB, role)
+	leaseCancel()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer roleLease.Close()
 	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
+	if role.Owns(worker.RoleControl) {
+		// Repair only locally provable state links before any scheduler/lifecycle work.
+		application.Container.ReconcileLocalState(ctx)
+		if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
+			log.Printf("rolling reboot deferred reconcile: %v", err)
+		} else if n > 0 {
+			log.Printf("rolling reboot obsolete=%d", n)
+		}
+		// Persist the rolling-reboot plan only. Execution remains disabled until
+		// the dry-run queue is reviewed and explicitly enabled.
+		if n, err := (rollingreboot.Service{DB: application.DB, Enabled: false, MinReadyPerAccount: 2}).Plan(ctx); err != nil {
+			log.Printf("rolling reboot plan: %v", err)
+		} else if n > 0 {
+			log.Printf("rolling reboot plan queued=%d mode=dry-run", n)
+		}
+	}
+	modules := buildModules(application, role, roleLease)
+	log.Printf("worker started role=%s modules=%v db_budget=%d", role, modules.Names(role), role.ConnectionBudget())
+	if err := modules.Run(ctx, role); err != nil && ctx.Err() == nil {
+		log.Fatal(err)
+	}
+}
+
+func buildModules(application *app.Application, role worker.Role, roleLease *worker.RoleLease) worker.Modules {
+	var modules worker.Modules
+	modules.Add(worker.RoleAll, "role-ownership", func(ctx context.Context) {
+		if err := roleLease.Run(ctx); err != nil && ctx.Err() == nil {
+			log.Printf("worker role ownership lost")
+		}
+	})
+
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
 	var recoveryProgress, schedulerProgress, lifecycleProgress atomic.Int64
 	var clientProgress worker.ModuleProgress
 	lifecycleLanes := worker.NewDispatcher(6, 1)
-	heartbeat := worker.Heartbeat{DB: application.DB, WorkerID: fmt.Sprintf("%s:%d", host, os.Getpid()), Kind: "production"}
-	go func() {
+	heartbeat := worker.Heartbeat{DB: application.DB, WorkerID: fmt.Sprintf("%s:%d", host, os.Getpid()), Kind: role.HeartbeatKind()}
+	modules.Add(worker.RoleAll, "heartbeat", func(ctx context.Context) {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
 			beatCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-			err := heartbeat.Beat(beatCtx, map[string]any{"role": "worker", "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lifecycleLanes.Snapshot(2 * time.Minute)})
+			err := heartbeat.Beat(beatCtx, map[string]any{"role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lifecycleLanes.Snapshot(2 * time.Minute)})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -65,17 +110,10 @@ func main() {
 			case <-ticker.C:
 			}
 		}
-	}()
-	// Repair only locally provable state links before any scheduler/lifecycle work.
-	application.Container.ReconcileLocalState(ctx)
-	if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
-		log.Printf("rolling reboot deferred reconcile: %v", err)
-	} else if n > 0 {
-		log.Printf("rolling reboot obsolete=%d", n)
-	}
+	})
 	// Keep local repair self-healing even without a process restart. This clears
 	// stale Vultr probe claims, disabled-account leases and provable orphan links.
-	go func() {
+	modules.Add(worker.RoleControl, "local-repair", func(ctx context.Context) {
 		t := time.NewTicker(5 * time.Minute)
 		defer t.Stop()
 		for {
@@ -91,8 +129,8 @@ func main() {
 				}
 			}
 		}
-	}()
-	go func() {
+	})
+	modules.Add(worker.RoleControl, "account-deletion", func(ctx context.Context) {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -107,8 +145,8 @@ func main() {
 			case <-ticker.C:
 			}
 		}
-	}()
-	go func() {
+	})
+	modules.Add(worker.RoleControl, "billing", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -123,21 +161,14 @@ func main() {
 			case <-ticker.C:
 			}
 		}
-	}()
-	go application.Container.RunDailyCatalogSync(ctx)
-	// Persist the rolling-reboot plan only. Execution remains disabled until
-	// the dry-run queue is reviewed and explicitly enabled.
-	if n, err := (rollingreboot.Service{DB: application.DB, Enabled: false, MinReadyPerAccount: 2}).Plan(ctx); err != nil {
-		log.Printf("rolling reboot plan: %v", err)
-	} else if n > 0 {
-		log.Printf("rolling reboot plan queued=%d mode=dry-run", n)
-	}
+	})
+	modules.Add(worker.RoleControl, "catalog", application.Container.RunDailyCatalogSync)
 	// The local protection controller is inert until its Config policy is enabled.
-	go (serverprotection.Controller{DB: application.DB, Secrets: application.Container.Secrets,
+	modules.Add(worker.RolePanels, "server-protection", (serverprotection.Controller{DB: application.DB, Secrets: application.Container.Secrets,
 		UpgradePanels: serverprotection.ParseUpgradePanels(os.Getenv("DOB_GUARDIAN_UPGRADE_PANELS")),
-		SSH:           provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run(ctx)
+		SSH:           provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run)
 	// Existing periodic diagnostics retain their recovery fallback on unmanaged nodes.
-	go func() {
+	modules.Add(worker.RolePanels, "server-guardian", func(ctx context.Context) {
 		g := serverguardian.Service{
 			DB: application.DB, Secrets: application.Container.Secrets,
 			SSH:    provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}},
@@ -161,11 +192,11 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 	// Sticky proxy identity keeper: preserve each account's current exit IPv4.
 	// On failure retry the previous session every 10s for two minutes, then
 	// rotate within the preferred country until five minutes, then allow fallback.
-	go func() {
+	modules.Add(worker.RoleControl, "network-identity", func(ctx context.Context) {
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		run := func() {
@@ -203,12 +234,12 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
 	// Capacity refresh coordinator: one full provider refresh per account only
 	// when the shared snapshot is older than 60s. The 15s cadence leaves room for network latency before
 	// the unchanged 2m freshness/safety boundary. Provider backoff still applies.
-	go func() {
+	modules.Add(worker.RoleControl, "provider-capacity", func(ctx context.Context) {
 		t := time.NewTicker(15 * time.Second)
 		defer t.Stop()
 		application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
@@ -220,9 +251,9 @@ func main() {
 				application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
 			}
 		}
-	}()
+	})
 	// Panel registry: materialize every completed READY Sanaei deployment into panel_instances.
-	go func() {
+	modules.Add(worker.RolePanels, "panel-registry", func(ctx context.Context) {
 		t := time.NewTicker(5 * time.Second)
 		defer t.Stop()
 		store := panels.SQLStore{DB: application.DB}
@@ -240,14 +271,14 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
 	// Shared fast Sanaei runtime cache for high-frequency panel work.
 	sanaeiRuntimes := &sanaei.RuntimeManager{
 		Factory: sanaei.RuntimeFactory{DB: application.DB, Secrets: application.Container.Secrets, Timeout: 8 * time.Second},
 		TTL:     5 * time.Second,
 	}
-	go func() {
+	modules.Add(worker.RolePanels, "sanaei-cache", func(ctx context.Context) {
 		t := time.NewTicker(5 * time.Second)
 		defer t.Stop()
 		for {
@@ -258,10 +289,10 @@ func main() {
 				sanaeiRuntimes.PurgeExpired()
 			}
 		}
-	}()
+	})
 
 	// Durable client mutations retain global concurrency1 and the advisory lock.
-	go func() {
+	modules.Add(worker.RolePanels, "client-mutation", func(ctx context.Context) {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		exec := clientops.Executor{Journal: clientops.Journal{DB: application.DB}, Runtimes: sanaeiRuntimes, Timeout: 30 * time.Second, Observe: clientProgress.Observe}
@@ -303,9 +334,9 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
-	go func() {
+	modules.Add(worker.RolePanels, "panel-cleanup", func(ctx context.Context) {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		executor := cleanup.Service{DB: application.DB, Runtimes: sanaeiRuntimes}
@@ -319,10 +350,10 @@ func main() {
 				}
 			}
 		}
-	}()
+	})
 
 	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
-	go func() {
+	modules.Add(worker.RolePanels, "global-reality", func(ctx context.Context) {
 		t := time.NewTicker(10 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
@@ -365,11 +396,11 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
 	// User capacity fast fill: time-budgeted per inbound; the one-second cadence
 	// makes users_per_second match its configured wall-clock meaning.
-	go func() {
+	modules.Add(worker.RolePanels, "capacity-fill", func(ctx context.Context) {
 		t := time.NewTicker(1 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
@@ -418,10 +449,10 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
 	// User capacity cleanup: expensive full snapshot on a slower cadence.
-	go func() {
+	modules.Add(worker.RolePanels, "capacity-cleanup", func(ctx context.Context) {
 		t := time.NewTicker(60 * time.Second)
 		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
@@ -468,7 +499,7 @@ func main() {
 				run()
 			}
 		}
-	}()
+	})
 
 	// Eight disjoint serving lanes keep running-router proofs inside the
 	// publication freshness window. Retirement has its own single lane.
@@ -479,7 +510,8 @@ func main() {
 			lanes = 8
 		}
 		for shard := 0; shard < lanes; shard++ {
-			go func(serving bool, shard, lanes int) {
+			serving, shard, lanes := serving, shard, lanes
+			modules.Add(worker.RolePanels, fmt.Sprintf("residential-sync-%t-%d", serving, shard), func(ctx context.Context) {
 				t := time.NewTicker(time.Second)
 				defer t.Stop()
 				syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
@@ -507,20 +539,24 @@ func main() {
 					case <-t.C:
 					}
 				}
-			}(serving, shard, lanes)
+			})
 		}
 	}
 
-	go (residentialperf.Store{DB: application.DB}).Run(ctx)
-	go application.Container.RunObservationRetention(ctx)
-	go func() { _ = (residential.Monitor{DB: application.DB, Secrets: application.Container.Secrets}).Run(ctx) }()
+	modules.Add(worker.RolePanels, "residential-performance", (residentialperf.Store{DB: application.DB}).Run)
+	modules.Add(worker.RoleControl, "observation-retention", application.Container.RunObservationRetention)
+	modules.Add(worker.RolePanels, "residential-monitor", func(ctx context.Context) {
+		if err := (residential.Monitor{DB: application.DB, Secrets: application.Container.Secrets}).Run(ctx); err != nil && ctx.Err() == nil {
+			log.Printf("residential monitor stopped")
+		}
+	})
 	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
-	go func() {
+	modules.Add(worker.RoleControl, "network-monitor", func(ctx context.Context) {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {
 			log.Printf("proxy monitor stopped: %v", err)
 		}
-	}()
-	go func() {
+	})
+	modules.Add(worker.RoleControl, "account-rules", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -533,7 +569,7 @@ func main() {
 			case <-ticker.C:
 			}
 		}
-	}()
+	})
 	failures := worker.FailureStore{DB: application.DB}
 	lw := worker.LifecycleWorker{
 		Dispatcher: lifecycleLanes,
@@ -542,14 +578,14 @@ func main() {
 		Progress: func(t time.Time) { lifecycleProgress.Store(t.Unix()) },
 	}
 	// One bounded lane per account; slow provider work cannot occupy all lanes.
-	go func() {
+	modules.Add(worker.RoleControl, "lifecycle", func(ctx context.Context) {
 		if err := lw.Run(ctx); err != nil && ctx.Err() == nil {
 			log.Printf("lifecycle worker stopped: %v", err)
 		}
-	}()
+	})
 
 	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
-	go func() {
+	modules.Add(worker.RoleControl, "scheduler", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		engine := scheduler.Engine{DB: application.DB, Store: scheduler.SQLStore{DB: application.DB}, Leases: scheduler.LeaseStore{DB: application.DB}, Starter: app.ScheduledStarter{Container: application.Container}}
@@ -567,9 +603,11 @@ func main() {
 			case <-ticker.C:
 			}
 		}
-	}()
-	log.Printf("worker started")
-	if err := w.Run(ctx); err != nil && ctx.Err() == nil {
-		log.Fatal(err)
-	}
+	})
+	modules.Add(worker.RoleControl, "recovery", func(ctx context.Context) {
+		if err := w.Run(ctx); err != nil && ctx.Err() == nil {
+			log.Printf("recovery worker stopped: %v", err)
+		}
+	})
+	return modules
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+  "git_head": "PENDING_PHASE2_DRAFT_CHECKPOINT",
   "ready": true,
   "artifacts": [
     {
@@ -389,5 +389,11 @@
     "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
     "remaining_action": "AUTHENTICATED_CONFIGS_RESUME_AND_NATIVE_OUTPUT_VERIFICATION",
     "upcloud": "DELETE_CONFIRMED_AUTOMATIC_BACKFILL_CREATE_VERIFYING"
-  }
+  },
+  "runtime_source_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "current_frontier": "PHASE1_NATIVE_VERIFIED_PHASE2_DRAFT_TESTED_NOT_DEPLOYED",
+  "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
+  "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
+  "openai_review": "BLOCKED_CREDIT_EXHAUSTED",
+  "current_native_evidence_at": "2026-10-07T06:40:27.813873+00:00"
 }

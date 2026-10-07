@@ -1,0 +1,43 @@
+{
+  "goal": "Audit deployed phase1 using native generation/expiry and UpCloud evidence, then implement phase2 bounded control/panels process isolation with explicit worker module registry, role ownership, supervised module lifetime, fixed aggregate DB budget, separate readiness and reversible systemd deployment.",
+  "context": "Authoritative canonical HEAD6c2be58, runtimecaf3f0d, static0c7721d/schema161. User resumed06:23Z: fresh shares Direct55 Residential109, UpCloud first replacement READY. Do not alter mutation gates, auth, scopes, budgets, profiles, proxies, provider policy or routing. Keep all panel-native work/shared Sanaei runtimes in one panels process and cloud control/recovery in another. Legacy default all role remains supported. Require an explicit API split-worker mode so a healthy process cannot hide a missing peer; no opportunistic legacy fallback in split mode. Add role session ownership to reject all+split/duplicate role overlap, preserve every existing durable operation/account/client lease. Stop service on role-connection failure or unexpected module return; no blind replay/panic swallowing. Add bounded process resource limits and restart independent of peer. Aggregate worker DB max64 plus API24 remains88, inspect lease headroom. Shutdown joins modules; systemd final termination bounds uncooperative code. Tests real isolated PostgreSQL, module subprocess crash/isolation/restart, all role combinations, missing/stale/malformed heartbeat and unchanged client fault acceptance. No live destructive fault injections. Documentation current authoritative fields must reflect actual runtime, older docs are history. Use source-reviewed evidence, no guarantees all unknown bugs healed.",
+  "allowed_paths": [
+    "cmd/worker",
+    "internal/worker",
+    "internal/app/bootstrap.go",
+    "internal/app/prepared_queue_test.go",
+    "internal/observability",
+    "internal/adminapi/server.go",
+    "deploy",
+    "tools/worker-isolation-acceptance.sh",
+    "docs/development-jobs/worker-isolation-20261007.json",
+    "docs/WORKER_ISOLATION_20261007.md",
+    "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
+    "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "tools/worker-isolation-process-fixture.py",
+    "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
+    "docs/MODULAR_RECOVERY_20261007.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/worker ./internal/observability",
+      "bash tools/worker-isolation-acceptance.sh",
+      "set -a; . /etc/digital-ocean-bot/env; set +a; GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go build -o /root/backups/dob-worker-isolation-20261007/worker.fixture ./cmd/worker && DOB_ISOLATION_EVIDENCE_DIR=/root/backups/dob-worker-isolation-20261007 python3 tools/worker-isolation-process-fixture.py"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-worker-isolation-20261007/verify-review.py"
+    ]
+  },
+  "commit_message": "feat(worker): isolate control and panel module processes"
+}

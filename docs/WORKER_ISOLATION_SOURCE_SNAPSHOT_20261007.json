@@ -1,0 +1,27 @@
+{
+  "at_utc": "2026-10-07T06:44:32.783422+00:00",
+  "status": "DRAFT_TESTED_AWAITING_OPENAI_REVIEW_NOT_DEPLOYED",
+  "base_commit": "6c2be58a1bd9a78d1d99d1dfa35ac5380dc4dd8d",
+  "production_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "sha256": {
+    "cmd/worker/main.go": "9bad54586ca1277df23e55944ce4f5bb9d3575c5b84e8162b26390be688cff74",
+    "cmd/worker/main_test.go": "1f7e72941498075962441676afb2b803249ae483c4163192503e4dd4c654b255",
+    "internal/worker/modules.go": "8c5a5235429049054e4d662a10819460a0744be4f9c875df4134f9d7fc430f3c",
+    "internal/worker/modules_test.go": "6ee4a74c12b76b364eef9da489510aaffd43b84d64668c499cfb2281e5bb63e5",
+    "internal/worker/role_lease.go": "86d683be23498eea5f89e8ae6b6c70c88a759c45d9984e8586d491532ca26dfd",
+    "internal/worker/role_lease_test.go": "8cf32da9a7eab0724e0e64868567de549be043fc6ce9a02c7fe93874e8d6b8fb",
+    "internal/app/bootstrap.go": "f2f8f9029c24fcec6f4a76cd988342f7be1790e4543b9046b60ecee2f17d5766",
+    "internal/app/prepared_queue_test.go": "53df1b2a42f0a75de934ca805e419b95e51cc649cec408f7e3bbf2ce56d05156",
+    "internal/observability/health.go": "2ab9967807ccd32c4c47103a1293e05a6b63ba316cf021fdafaa942b40741a11",
+    "internal/observability/worker_roles_test.go": "d3a8dec1b5c45f1d7dfbbffb43d99fba146c985f37c1bc60bdfe17a50a46ed15",
+    "internal/adminapi/server.go": "90f2bcec60792429e621fcd7bd0236c0011943ff31613968259be9cb413d63de",
+    "deploy/install.sh": "400d5d0d23cb62bcb99a90b69e89fbc7bb4d32427dba77392d5d0580c16fbb35",
+    "deploy/upgrade.sh": "f0c408b94032e73517fbc60655998618232461a628692ec75b3818fb9b503254",
+    "deploy/digital-ocean-bot-worker-panels.service": "2ee79fcee5f3e5db9399bd75db695cd4c813811e8517496c1927c4413e2830bb",
+    "deploy/worker-control.conf": "3edfa4b0a3ee102b8d71740c6f3c01cb9c376bd56b68644e6463f06087c0d508",
+    "deploy/api-split-workers.conf": "0073c44608335e7d3e9473d58f5b97954e4fcb2a18dae09faeb220c03711c1b1",
+    "tools/worker-isolation-acceptance.sh": "724f7e83a0ce23c8ad32c2688769de11cc0340b671b25eeca0151ed05b934192",
+    "tools/worker-isolation-process-fixture.py": "2fb53f451ebbe6ccfbb82db541ab4dcb5c2452469ab407702148b69e291ca073"
+  },
+  "fixture_binary_sha256": "1e338a4bd7e0d05355872a7ff58aaf8ebf9872150402446a9b44139e3e5541aa"
+}

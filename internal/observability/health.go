@@ -20,6 +20,7 @@ type Report struct {
 type Health struct {
 	DB            *sql.DB
 	RequireWorker bool
+	WorkerMode    string
 }
 
 func (h Health) Readiness(ctx context.Context) Report {
@@ -40,37 +41,38 @@ func (h Health) Readiness(ctx context.Context) Report {
 	}
 	r.Checks = append(r.Checks, c)
 	if ok && h.RequireWorker {
-		var workerOK bool
-		err = h.DB.QueryRowContext(checkCtx, `SELECT EXISTS(SELECT 1 FROM worker_heartbeats WHERE kind='production' AND last_seen_at>now()-interval '30 seconds'
- AND (metadata->>'recovery_scan_unix')::bigint>extract(epoch FROM now()-interval '2 minutes')
- AND (metadata->>'scheduler_scan_unix')::bigint>extract(epoch FROM now()-interval '5 minutes')
- AND (metadata->>'lifecycle_scan_unix')::bigint>extract(epoch FROM now()-interval '5 minutes'))`).Scan(&workerOK)
-		if err != nil {
-			workerOK = false
-		}
-		check := Check{Name: "worker_progress", OK: workerOK}
-		if !workerOK {
-			check.Message = "worker heartbeat or recovery/scheduler/lifecycle progress stale"
+		controlKind, panelKind := "production", "production"
+		switch h.WorkerMode {
+		case "", "all":
+		case "split":
+			controlKind, panelKind = "production-control", "production-panels"
+		default:
 			r.Status = "not_ready"
+			r.Checks = append(r.Checks, Check{Name: "worker_topology", OK: false, Message: "invalid worker mode"})
+			return r
 		}
-		r.Checks = append(r.Checks, check)
-		var metadata []byte
-		err = h.DB.QueryRowContext(checkCtx, `SELECT metadata FROM worker_heartbeats WHERE kind='production' AND last_seen_at>now()-interval '30 seconds' ORDER BY last_seen_at DESC LIMIT 1`).Scan(&metadata)
-		progressOK := err == nil && clientProgressReady(metadata, time.Now())
-		lanesOK := err == nil && lifecycleLanesReady(metadata)
-		lanesCheck := Check{Name: "lifecycle_account_lanes", OK: lanesOK}
-		if !lanesOK {
-			lanesCheck.Message = "lifecycle lane progress unavailable or deadline not honored"
-			r.Status = "not_ready"
+		now := time.Now()
+		control, controlErr := h.workerMetadata(checkCtx, controlKind)
+		panel, panelErr := control, controlErr
+		if panelKind != controlKind {
+			panel, panelErr = h.workerMetadata(checkCtx, panelKind)
 		}
-		r.Checks = append(r.Checks, lanesCheck)
-		progressCheck := Check{Name: "client_mutation_progress", OK: progressOK}
-		if !progressOK {
-			progressCheck.Message = "client mutation scan unavailable, failed or stalled"
-			r.Status = "not_ready"
+		add := func(name string, good bool, message string) {
+			c := Check{Name: name, OK: good}
+			if !good {
+				c.Message = message
+				r.Status = "not_ready"
+			}
+			r.Checks = append(r.Checks, c)
 		}
-		r.Checks = append(r.Checks, progressCheck)
+		add("worker_progress", controlErr == nil && controlProgressReady(control, now), "control worker heartbeat or recovery/scheduler/lifecycle progress stale")
+		if h.WorkerMode == "split" {
+			add("panel_worker_progress", panelErr == nil, "panel worker heartbeat unavailable")
+		}
+		add("lifecycle_account_lanes", controlErr == nil && lifecycleLanesReady(control), "lifecycle lane progress unavailable or deadline not honored")
+		add("client_mutation_progress", panelErr == nil && clientProgressReady(panel, now), "client mutation scan unavailable, failed or stalled")
 	}
+
 	return r
 }
 
@@ -110,4 +112,29 @@ func lifecycleLanesReady(metadata []byte) bool {
 		return false
 	}
 	return m.Lanes.InFlight >= 0 && m.Lanes.Stalled == 0
+}
+
+// Select one fresh process consistently. Split mode deliberately cannot fall
+// back to a legacy monolith when a required role disappears.
+func (h Health) workerMetadata(ctx context.Context, kind string) ([]byte, error) {
+	var metadata []byte
+	err := h.DB.QueryRowContext(ctx, `SELECT metadata FROM worker_heartbeats
+ WHERE kind=$1 AND last_seen_at>now()-interval '30 seconds'
+ AND last_seen_at<=now()+interval '30 seconds'
+ ORDER BY last_seen_at DESC,worker_id DESC LIMIT 1`, kind).Scan(&metadata)
+	return metadata, err
+}
+func controlProgressReady(raw []byte, now time.Time) bool {
+	var m struct {
+		Recovery  int64 `json:"recovery_scan_unix"`
+		Scheduler int64 `json:"scheduler_scan_unix"`
+		Lifecycle int64 `json:"lifecycle_scan_unix"`
+	}
+	if json.Unmarshal(raw, &m) != nil {
+		return false
+	}
+	fresh := func(v int64, age time.Duration) bool {
+		return v > now.Add(-age).Unix() && v <= now.Add(30*time.Second).Unix()
+	}
+	return fresh(m.Recovery, 2*time.Minute) && fresh(m.Scheduler, 5*time.Minute) && fresh(m.Lifecycle, 5*time.Minute)
 }

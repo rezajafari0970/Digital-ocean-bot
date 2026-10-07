@@ -3,6 +3,10 @@ set -euo pipefail
 [ "$(id -u)" -eq 0 ] || { echo 'run as root'; exit 1; }
 SRC="${SRC:-$(cd "$(dirname "$0")/.." && pwd)}"
 APP=/opt/digital-ocean-bot
+SERVICES=(digital-ocean-bot-vultr-browser-manager digital-ocean-bot-api digital-ocean-bot-worker)
+if systemctl is-enabled --quiet digital-ocean-bot-worker-panels 2>/dev/null || systemctl is-active --quiet digital-ocean-bot-worker-panels 2>/dev/null; then
+  SERVICES+=(digital-ocean-bot-worker-panels)
+fi
 BUILD_COMMIT="$(git -C "$SRC" rev-parse HEAD 2>/dev/null || echo unknown)"
 BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 LDFLAGS="-s -w -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.Commit=$BUILD_COMMIT -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.BuildTime=$BUILD_TIME"
@@ -19,11 +23,17 @@ install -d -o root -g digitaloceanbot -m 0755 "$APP/web/static"
 cp -a "$SRC/migrations" "$APP/"
 cp -a "$SRC/web/static/." "$APP/web/static/"
 cd "$SRC"
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api" ./cmd/api
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker" ./cmd/worker
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session" ./cmd/vultr-browser-session
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-manager" ./cmd/vultr-browser-manager
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-input-bridge" ./cmd/vultr-input-bridge
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api.new" ./cmd/api
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker.new" ./cmd/worker
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session.new" ./cmd/vultr-browser-session
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-manager.new" ./cmd/vultr-browser-manager
+go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-input-bridge.new" ./cmd/vultr-input-bridge
+for service in "${SERVICES[@]}"; do
+  if systemctl cat "$service" >/dev/null 2>&1; then systemctl stop "$service"; fi
+done
+for binary in digital-ocean-bot-api digital-ocean-bot-worker vultr-browser-session vultr-browser-manager vultr-input-bridge; do
+  mv "$APP/bin/$binary.new" "$APP/bin/$binary"
+done
 chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
 if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
@@ -43,12 +53,13 @@ EOF
 fi
 install -m 0644 "$SRC/deploy/digital-ocean-bot-api.service" /etc/systemd/system/
 install -m 0644 "$SRC/deploy/digital-ocean-bot-worker.service" /etc/systemd/system/
+install -m 0644 "$SRC/deploy/digital-ocean-bot-worker-panels.service" /etc/systemd/system/
 install -m 0644 "$SRC/deploy/digital-ocean-bot-vultr-browser-manager.service" /etc/systemd/system/
 systemctl daemon-reload
 API_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-api" | awk '{print $1}')"
 WORKER_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-worker" | awk '{print $1}')"
 printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s"}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$API_SHA" "$WORKER_SHA" > "$APP/build-manifest.json"
-systemctl enable digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-vultr-browser-manager
+systemctl enable "${SERVICES[@]}"
 # Always restart: enable --now does not restart already-active services after replacing binaries.
-systemctl restart digital-ocean-bot-vultr-browser-manager digital-ocean-bot-api digital-ocean-bot-worker
+systemctl restart "${SERVICES[@]}"
 systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker || true

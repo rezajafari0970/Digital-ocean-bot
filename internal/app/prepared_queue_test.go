@@ -52,7 +52,7 @@ func TestPreparedReadinessNeedsWorkerProgress(t *testing.T) {
 	if h.Readiness(ctx).Status == "ready" {
 		t.Fatal("missing worker accepted")
 	}
-	execBootstrap(t, db, `INSERT INTO worker_heartbeats(worker_id,kind,last_seen_at,metadata) VALUES('fixture','production',now(),jsonb_build_object('recovery_scan_unix',extract(epoch FROM now())::bigint,'scheduler_scan_unix',extract(epoch FROM now())::bigint,'lifecycle_scan_unix',extract(epoch FROM now())::bigint))`)
+	execBootstrap(t, db, `INSERT INTO worker_heartbeats(worker_id,kind,last_seen_at,metadata) VALUES('fixture','production',now(),jsonb_build_object('recovery_scan_unix',extract(epoch FROM now())::bigint,'scheduler_scan_unix',extract(epoch FROM now())::bigint,'lifecycle_scan_unix',extract(epoch FROM now())::bigint,'lifecycle_lanes',jsonb_build_object('in_flight',0,'stalled',0),'client_mutation',jsonb_build_object('state','IDLE','finished_unix',extract(epoch FROM now())::bigint)))`)
 	if h.Readiness(ctx).Status != "ready" {
 		t.Fatal("fresh worker rejected")
 	}

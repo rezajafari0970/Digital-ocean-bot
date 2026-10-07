@@ -1,142 +1,10 @@
 {
-  "at_utc": "2026-10-07T06:18:40.521363+00:00",
-  "status": "DEPLOYED_NATIVE_GENERATION_EXPIRY_REPLACEMENT_VERIFIED",
-  "test_log": "/root/backups/dob-modular-recovery-20261007/acceptance-provider-guards.log",
-  "test_exit": "0",
-  "source_snapshot": "docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
-  "live_incident": {
-    "at_utc": "2026-10-07T05:28:43Z",
-    "safe_code": "EXECUTION_SCOPE_UNAVAILABLE_MISCLASSIFIED_GLOBAL",
-    "job_id": "eb7010c2-94ab-4158-8eb2-4fd3d0ef2bb1",
-    "gate": "CLOSED",
-    "authenticated_resume": "COMPLETED_2026_10_07_06_23_13Z"
-  },
-  "production": {
-    "at_utc": "2026-10-07T06:14:52.561161+00:00",
-    "revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
-    "hashes": {
-      "api": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
-      "worker": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add"
-    },
-    "readyz": {
-      "status": "ready",
-      "checks": [
-        {
-          "name": "database",
-          "ok": true
-        },
-        {
-          "name": "worker_progress",
-          "ok": true
-        },
-        {
-          "name": "lifecycle_account_lanes",
-          "ok": true
-        },
-        {
-          "name": "client_mutation_progress",
-          "ok": true
-        }
-      ],
-      "at": "2026-10-07T06:14:52.478132482Z"
-    },
-    "schema": 161,
-    "static_preserved": true
-  },
-  "limitations": [
-    "shared worker process and DB resources",
-    "global client lock/concurrency1 retained",
-    "no forced abandonment of uncancellable operations",
-    "provider/payment/trial policies unchanged",
-    "no automatic quarantine or finite-budget reset"
-  ],
-  "source_review": "PASS",
-  "source_review_evidence": "/root/backups/dob-modular-recovery-20261007/review-final.json",
-  "fault_tests": "PASS",
-  "postgresql_race": "PASS",
-  "full_go": "PASS",
-  "configuration_preserved": true,
-  "live_verified_at": "2026-10-07T06:40:27.813873+00:00",
-  "live_shares": [
-    {
-      "class": "DIRECT",
-      "token_created_at": "2026-10-07T06:11:26.948007+00:00",
-      "http_status": 200,
-      "vless_lines": 58,
-      "response_bytes": 17492
-    },
-    {
-      "class": "RESIDENTIAL",
-      "token_created_at": "2026-10-07T06:36:15.625122+00:00",
-      "http_status": 200,
-      "vless_lines": 446,
-      "response_bytes": 134560
-    }
-  ],
-  "live_worker": [
-    {
-      "metadata": {
-        "role": "worker",
-        "client_mutation": {
-          "state": "RUNNING",
-          "attempts": 1313,
-          "failures": 0,
-          "isolated": 0,
-          "succeeded": 1308,
-          "started_unix": 1791355221,
-          "finished_unix": 1791355221,
-          "policy_deferred": 0,
-          "last_attempt_unix": 1791355221,
-          "last_success_unix": 1791355221
-        },
-        "lifecycle_lanes": {
-          "stalled": 0,
-          "in_flight": 0
-        },
-        "recovery_scan_unix": 1791355212,
-        "lifecycle_scan_unix": 1791355212,
-        "scheduler_scan_unix": 1791355212
-      },
-      "worker_id": "serverprojects.ptr.network:1400447",
-      "last_seen_at": "2026-10-07T06:40:22.344182+00:00"
-    }
-  ],
-  "post_deploy_log_summary": {
-    "at_utc": "2026-10-07T06:17:18.472656+00:00",
-    "new_global_executor_failures": 0,
-    "panic_lines": 0,
-    "ambiguous_retry_sql_lines": 0,
-    "lifecycle_errors": 6
-  },
-  "upcloud_capacity_recovery": {
-    "local_retirement_claim": "VERIFIED_ONE_OLDEST",
-    "provider_deletion": "SUCCEEDED_AFTER_AUTOMATIC_RECONCILIATION",
-    "delete_operation": {
-      "id": "861c4a56-4c36-410c-9f14-b56fec007127",
-      "kind": "DELETE_DROPLET",
-      "state": "succeeded",
-      "attempt": 3,
-      "created_at": "2026-10-07T06:14:52.733861+00:00",
-      "updated_at": "2026-10-07T06:17:25.652738+00:00"
-    },
-    "backfill": "CREATE_VERIFYING_ATTEMPT_1",
-    "create_operation": {
-      "id": "e93656db-5c7f-4196-ab8b-5b03c48b4b55",
-      "kind": "CREATE_DROPLET",
-      "state": "verifying",
-      "attempt": 1,
-      "created_at": "2026-10-07T06:18:54.356459+00:00",
-      "updated_at": "2026-10-07T06:19:08.533993+00:00"
-    },
-    "ready_replacement": "BOTH_REPLACEMENTS_READY_PANEL_COMPLETE",
-    "remaining_old_server": "SECOND_DELETION_AND_REPLACEMENT_COMPLETED",
-    "desired_preserved": 5,
-    "visible_upcloud_snapshots_at_06_37": 16
-  },
-  "runtime_client_work": "ENABLED_AUTHENTICATED_RESUME_06_23_NATIVE_CYCLE_VERIFIED",
-  "remaining_action": "No Resume remains pending. Phase2 draft awaits server OpenAI credit/source review and deployment.",
-  "phase1_followup_evidence": "/root/backups/dob-worker-isolation-20261007/phase1-live-cycle.json",
-  "native_followup": {
+  "status": "DRAFT_IMPLEMENTED_TESTED_NOT_DEPLOYED",
+  "at_utc": "2026-10-07T06:44:32.783422+00:00",
+  "production_revision_unchanged": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "static_unchanged": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+  "schema_unchanged": 161,
+  "phase1_native_cycle": {
     "at_utc": "2026-10-07T06:37:02.751939+00:00",
     "gate": [
       {
@@ -318,5 +186,127 @@
       ],
       "at": "2026-10-07T06:37:03.201216254Z"
     }
-  }
+  },
+  "latest_public_shares": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T06:11:26.948007+00:00",
+      "http_status": 200,
+      "vless_lines": 58,
+      "response_bytes": 17492
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T06:36:15.625122+00:00",
+      "http_status": 200,
+      "vless_lines": 446,
+      "response_bytes": 134560
+    }
+  ],
+  "phase2_tests": {
+    "fault_postgresql_race_full_go": "PASS",
+    "test_log": "/root/backups/dob-worker-isolation-20261007/acceptance-initial.log",
+    "real_worker_systemd_isolation": {
+      "at_utc": "2026-10-07T06:41:52.562786+00:00",
+      "schema": "role_process_f0868d79ed214cb18286da54c12c0815",
+      "units": {
+        "control": "dob-role-fixture-control-c12c0815",
+        "panels": "dob-role-fixture-panels-c12c0815"
+      },
+      "production_services_changed": false,
+      "before": {
+        "control": {
+          "pid": "1462401",
+          "restarts": "0"
+        },
+        "panels": {
+          "pid": "1462407",
+          "restarts": "0"
+        }
+      },
+      "after": {
+        "control": {
+          "pid": "1462401",
+          "restarts": "0"
+        },
+        "panels": {
+          "pid": "1462563",
+          "restarts": "1"
+        }
+      },
+      "heartbeat": [
+        {
+          "kind": "production-control",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 24
+          },
+          "role": "control"
+        },
+        {
+          "kind": "production-panels",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 40
+          },
+          "role": "panels"
+        },
+        {
+          "kind": "production-panels",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 40
+          },
+          "role": "panels"
+        }
+      ],
+      "peer_survived": true,
+      "automatic_role_restart": "PASS",
+      "duplicate_process_rejected": true,
+      "status": "PASS"
+    }
+  },
+  "openai_review": {
+    "status": "BLOCKED_CREDIT_EXHAUSTED",
+    "diagnostic": {
+      "status": 429,
+      "error_code": "credit_balance_exhausted",
+      "error_type": "insufficient_quota",
+      "retry_after": null
+    },
+    "source_review_completed": false,
+    "orchestrator_job": "worker-isolation-20261007",
+    "orchestrator_phase": "PLAN_RETRYABLE"
+  },
+  "configuration_changed": false,
+  "production_services_restarted": false,
+  "production_phase2_verified": false,
+  "remaining": [
+    "restore API credit and complete plan/source review",
+    "review busy-fleet DB lease headroom",
+    "clean build and reversible split deployment",
+    "observe native creation/expiry/replacement and pool/readiness under load"
+  ],
+  "evidence_directory": "/root/backups/dob-worker-isolation-20261007"
 }

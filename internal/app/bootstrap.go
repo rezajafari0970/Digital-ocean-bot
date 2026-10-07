@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
@@ -26,7 +27,15 @@ func Bootstrap(ctx context.Context) (*Application, error) {
 // separate, larger budget so lease holders can still execute SQL. With one
 // API and one worker this reserves at most 88 of the default 100 connections.
 func BootstrapWorker(ctx context.Context) (*Application, error) {
-	return bootstrap(ctx, 64)
+	return BootstrapWorkerBudget(ctx, 64)
+}
+
+// Each role has an explicit share of the existing64-connection worker budget.
+func BootstrapWorkerBudget(ctx context.Context, maxOpen int) (*Application, error) {
+	if maxOpen < 1 || maxOpen > 64 {
+		return nil, fmt.Errorf("invalid worker connection budget")
+	}
+	return bootstrap(ctx, maxOpen)
 }
 
 func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {

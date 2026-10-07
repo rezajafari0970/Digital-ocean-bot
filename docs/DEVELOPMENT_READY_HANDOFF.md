@@ -1,5 +1,12 @@
 # Development Ready Handoff
 
+## Current frontier — phase1 verified, phase2 draft NOT DEPLOYED
+Read docs/WORKER_ISOLATION_20261007.md and its ACCEPTANCE/SOURCE_SNAPSHOT. Production remains clean caf3f0d API/worker, static0c7721d/schema161. User Resume at06:23:13Z is complete; do not ask for it again. Native600-second expiry/delete/refill and both UpCloud READY replacements are verified.06:40Z actual shares Direct58/Residential446; no new global failure. Numbers are sampled, not permanent guarantees.
+
+Phase2 source implements explicit all/control/panels module registration, independent role processes/DB budgets/resource limits/readiness, supervised module lifetime and PostgreSQL role ownership, preserving all native panel runtimes together and all durable mutation guards. PG/race/HTTP/fullGo and actual empty-fixture systemd crash/restart/peer survival pass. NO production restart/topology/configuration change was made.
+
+Server OpenAI API returned HTTP429 credit_balance_exhausted (insufficient_quota). Orchestrator job worker-isolation-20261007 remains PLAN/RETRYABLE, not COMPLETE; source review is not PASS. Restore credit, resume its genuine plan/review, examine busy-fleet DB lease headroom, then reviewed clean-build/canary deployment. Prepared review and verify scripts/evidence: /root/backups/dob-worker-isolation-20261007. Do not mutate gates, fabricate auth, clear quarantine, rearm finite budgets, or interpret this draft's Git revision as deployed. Existing production caf3f0d must remain the rollback baseline. No re-priming; use source snapshots and current evidence.
+
 ## Modular recovery frontier — 2026-10-07
 Read docs/MODULAR_RECOVERY_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT JSON. Clean API/worker revision caf3f0de76d142b7e8ded2923a429b00fd4ba50c is deployed; static0c7721d/schema161 unchanged. Native HTTP fault, PostgreSQL/race/full Go and final server OpenAI review PASS. Config hashes and actual running binary hashes verified; all4 readiness checks pass.
 

@@ -1,17 +1,17 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "runtime_source_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-07T05:16:33.802942+00:00",
+  "verified_at_utc": "2026-10-07T06:40:27.813873+00:00",
   "binaries": {
     "api": {
-      "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
-      "sha256": "78edd2f5e1bd3cb6df8e1d3cda0ef3d34b643b565cf02ae9229667b5301ab4b3",
+      "revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+      "sha256": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
-      "sha256": "6ceb7d1dc95d54a23b38cc64bca6556aa0819f2ab7646cdc8a45477ee154e7f3",
+      "revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+      "sha256": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add",
       "vcs_modified": false
     }
   },
@@ -20,9 +20,9 @@
     "worker": "active"
   },
   "migration": "000161_client_mutation_panel_health",
-  "acceptance": "docs/UI_REFRESH_RECOVERY_ACCEPTANCE_20261007.json",
-  "verified": false,
-  "note": "UI read recovery and actual600-second client expiry/replacement verified; runtime00a4b18, static0c7721d, schema161. Global gate enabled after user authenticated resume. Separate provider/fleet issues remain open.",
+  "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
+  "verified": true,
+  "note": "caf3f0d runtime verified; authenticated Resume complete, native expiry/replacement and both UpCloud READY replacements observed. Phase2 draft blocked on exhausted server OpenAI API credit; no deployment.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -39,15 +39,15 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Implement source-reviewed isolation forecast in bounded steps: all mutation origins remote-failure isolation and progress supervision first; then fenced queue/process/resource containment, correlated proxy health, provider-capacity deadlock and retry SQL correction. Forecast is not deployed remediation. Existing current UI/runtime acceptance remains unchanged.",
+  "next_product_step": "Restore API credit; review tested phase2 role isolation and DB lease headroom, then reversible deployment.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
-  "worker_source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "worker_source_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
   "active_lifecycle_scopes_at_fresh_proof": 32,
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED",
+  "verification_status": "DEPLOYED_PHASE1_NATIVE_CYCLE_VERIFIED_PHASE2_DRAFT_NOT_DEPLOYED",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
@@ -129,7 +129,7 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Real mobile Chromium read/race/fault behavior, isolated PostgreSQL/API race, full Go, deployed static hashes/readiness/config preservation, native lifecycle create/delete and actual Output shares through600-second replacement. Not full mobile data-plane or whole-project availability proof.",
+  "verification_scope": "Phase1 actual runtime hashes/readiness/native600-second expiry-delete-refill/public shares and UpCloud replacements. Phase2 is tested code only, no production proof.",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
@@ -451,5 +451,204 @@
     "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
     "remaining_action": "AUTHENTICATED_CONFIGS_RESUME_AND_NATIVE_OUTPUT_VERIFICATION",
     "upcloud": "DELETE_CONFIRMED_AUTOMATIC_BACKFILL_CREATE_VERIFYING"
+  },
+  "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
+  "current_worker_topology": "all",
+  "phase2_deployed": false,
+  "current_live_gate": {
+    "enabled": true,
+    "panel_id": null,
+    "singleton": true,
+    "inbound_id": null,
+    "updated_at": "2026-10-07T06:23:13.912198+00:00",
+    "concurrency": 1,
+    "kill_switch": false,
+    "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+    "last_failure_code": "EXECUTOR_INTERNAL_FAILURE",
+    "last_failure_job_id": "eb7010c2-94ab-4158-8eb2-4fd3d0ef2bb1",
+    "last_failure_panel_id": "c7f3a75d-db31-4387-92c5-6e199a9883a5"
+  },
+  "phase1_followup": {
+    "at_utc": "2026-10-07T06:37:02.751939+00:00",
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "concurrency": 1,
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+        "last_failure_code": "EXECUTOR_INTERNAL_FAILURE"
+      }
+    ],
+    "jobs": [
+      {
+        "jobs": 1,
+        "kind": "BULK_CREATE",
+        "state": "OBSOLETE",
+        "latest": "2026-10-07T06:24:33.590999+00:00",
+        "max_attempts": 0
+      },
+      {
+        "jobs": 12,
+        "kind": "BULK_CREATE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "jobs": 1,
+        "kind": "BULK_CREATE",
+        "state": "RUNNING",
+        "latest": null,
+        "max_attempts": 1
+      },
+      {
+        "jobs": 832,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T06:36:58.318963+00:00",
+        "max_attempts": 1
+      },
+      {
+        "jobs": 24,
+        "kind": "BULK_DELETE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "jobs": 166,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T06:37:01.628052+00:00",
+        "max_attempts": 1
+      }
+    ],
+    "owned_expiry": [
+      {
+        "latest": "2026-10-07T06:37:01.625147+00:00",
+        "oldest": "2026-10-07T06:23:32.300676+00:00",
+        "lived_at_least_595s": 159,
+        "deleted_after_resume": 159
+      }
+    ],
+    "replacement_pairs": [
+      {
+        "panel_id": "1a499381-d354-4fef-9684-f182073d0ec4",
+        "created_at": "2026-10-07T06:34:05.515915+00:00",
+        "delete_job": "38548be9-092c-4fa0-b55e-0aac5b3284fa",
+        "deleted_at": "2026-10-07T06:33:35.664907+00:00",
+        "inbound_id": 1,
+        "next_create": "511b0b6c-5229-44ec-b989-fc107e52c8bd"
+      },
+      {
+        "panel_id": "01bfa94c-4dae-4765-9dff-cf6f0b0a7844",
+        "created_at": "2026-10-07T06:34:04.05343+00:00",
+        "delete_job": "c5a9535d-9ff4-4fa6-a5f9-fe3d6eb48a9e",
+        "deleted_at": "2026-10-07T06:33:35.811197+00:00",
+        "inbound_id": 1,
+        "next_create": "f02397c6-b70c-4ad3-af9c-40a8ec5db2f0"
+      },
+      {
+        "panel_id": "22290905-817c-47b3-bee9-b177f6d393bf",
+        "created_at": "2026-10-07T06:34:05.195211+00:00",
+        "delete_job": "16524f37-67eb-430d-86c3-da1c64ef0674",
+        "deleted_at": "2026-10-07T06:33:36.044954+00:00",
+        "inbound_id": 1,
+        "next_create": "b443e867-43a9-41e8-80cb-958c00d38e57"
+      },
+      {
+        "panel_id": "465cb5cb-56c7-43bf-a329-fde6219a6784",
+        "created_at": "2026-10-07T06:34:22.987403+00:00",
+        "delete_job": "c4bcd321-0069-44fe-80dd-acc1136b2a40",
+        "deleted_at": "2026-10-07T06:33:37.208871+00:00",
+        "inbound_id": 1,
+        "next_create": "e8523b2c-f723-4ff1-97d9-8148f042f8fa"
+      },
+      {
+        "panel_id": "59ac4fc5-0a28-4f8c-ba80-9a15d25b9809",
+        "created_at": "2026-10-07T06:34:06.512781+00:00",
+        "delete_job": "72ef99d9-ba7f-46b8-a2a8-090d3897a182",
+        "deleted_at": "2026-10-07T06:33:37.412229+00:00",
+        "inbound_id": 1,
+        "next_create": "e929f489-b4a3-496d-8be8-9615c28d8af4"
+      },
+      {
+        "panel_id": "5ba51689-e122-4871-85e6-02906204c34a",
+        "created_at": "2026-10-07T06:34:06.758465+00:00",
+        "delete_job": "23801a8c-888d-4b17-bdbe-8be4835f5d29",
+        "deleted_at": "2026-10-07T06:33:37.681832+00:00",
+        "inbound_id": 1,
+        "next_create": "496a143c-62d6-4f6b-ac2b-e91ad732f1dd"
+      },
+      {
+        "panel_id": "5e497bc3-ef94-4e51-884f-a05ed29b5b61",
+        "created_at": "2026-10-07T06:34:06.616979+00:00",
+        "delete_job": "501473c9-df64-4136-8347-611a9f4fd6c2",
+        "deleted_at": "2026-10-07T06:33:37.875514+00:00",
+        "inbound_id": 1,
+        "next_create": "962e20ee-fce3-415e-bc1c-443563cbb676"
+      },
+      {
+        "panel_id": "6aaca93e-2ae6-4118-a773-384885c05c8a",
+        "created_at": "2026-10-07T06:34:06.323085+00:00",
+        "delete_job": "d91a100d-588e-45f0-8a19-a47327bf25ba",
+        "deleted_at": "2026-10-07T06:33:38.404714+00:00",
+        "inbound_id": 1,
+        "next_create": "2852bdd9-9701-4ebf-95cb-ccdfe919e609"
+      }
+    ],
+    "upcloud": [
+      {
+        "id": "822b89ca-bfb0-47f7-b6ff-5e32896f6551",
+        "state": "READY",
+        "panel_id": "6b3c8a2a-b8b2-4444-a276-9aa1e88b41cb",
+        "expires_at": "2026-10-07T07:21:48.178758+00:00",
+        "deployment_state": "PANEL_COMPLETE"
+      },
+      {
+        "id": "466ac3bd-859c-40aa-af48-aac55f725a73",
+        "state": "READY",
+        "panel_id": "ec4806a2-1cdd-443a-bf2e-9c11f5efc1bf",
+        "expires_at": "2026-10-07T07:32:34.810379+00:00",
+        "deployment_state": "PANEL_COMPLETE"
+      }
+    ],
+    "upcloud_output": [
+      {
+        "fresh_visible": 16
+      }
+    ],
+    "running_hashes": {
+      "api": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
+      "worker": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add"
+    },
+    "log_counts": {
+      "global_fail_close": 0,
+      "panic": 0,
+      "ambiguous_retry": 0
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T06:37:03.201216254Z"
+    }
   }
 }
