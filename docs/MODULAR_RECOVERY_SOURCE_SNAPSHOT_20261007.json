@@ -1,7 +1,7 @@
 {
   "at_utc": "2026-10-07T06:13:40.188003+00:00",
   "baseline": "a6b1826e44b418e6dab85188a97b23fe8d829b30",
-  "status": "TESTED_REVIEWED",
+  "status": "DEPLOYED_CLEAN_BUILD",
   "product_sha256": {
     "cmd/worker/main.go": "36602d8c93877eafa403495b00b146c27c4afcb2ba7e97b7cec23f300f1b567f",
     "internal/adminapi/account_rule_application_test.go": "8bb6cea3ee9bdc39b42aa425b74b2f56e019e3fa70d4c09695b842c03a214616",
@@ -32,5 +32,10 @@
     "tools/modular-recovery-acceptance.sh": "0795eef03a56557e60eb0513f069a186a9e1dd024f8834e7903c1bda534166dc"
   },
   "migration": 161,
-  "evidence_directory": "/root/backups/dob-modular-recovery-20261007"
+  "evidence_directory": "/root/backups/dob-modular-recovery-20261007",
+  "runtime_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+  "hashes": {
+    "api": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
+    "worker": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add"
+  }
 }

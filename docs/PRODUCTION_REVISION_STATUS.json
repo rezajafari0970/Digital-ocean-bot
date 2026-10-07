@@ -441,10 +441,15 @@
   },
   "latest_isolation_risk_forecast": "docs/ISOLATION_RISK_FORECAST_20261007.json",
   "modular_recovery_20261007": {
-    "status": "TESTED_PENDING_DEPLOYMENT",
+    "status": "DEPLOYED_RUNTIME_VERIFIED_AWAITING_AUTHENTICATED_RESUME",
+    "runtime_revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+    "api_sha256": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
+    "worker_sha256": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add",
+    "static_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+    "schema": 161,
+    "verified_at": "2026-10-07T06:17:18.545926+00:00",
     "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
-    "source_snapshot": "docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
-    "incident_gate_closed_at": "2026-10-07T05:28:43Z",
-    "resume": "AUTHENTICATED_REQUIRED_AFTER_DEPLOY"
+    "remaining_action": "AUTHENTICATED_CONFIGS_RESUME_AND_NATIVE_OUTPUT_VERIFICATION",
+    "upcloud": "ONE_RETIRING_PROVIDER_DELETE_TIMEOUT_UNCONFIRMED"
   }
 }

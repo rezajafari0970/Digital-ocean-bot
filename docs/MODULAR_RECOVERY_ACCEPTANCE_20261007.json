@@ -1,6 +1,6 @@
 {
-  "at_utc": "2026-10-07T06:13:40.188003+00:00",
-  "status": "TESTS_AND_REVIEW_PASS_PENDING_DEPLOYMENT",
+  "at_utc": "2026-10-07T06:18:40.521363+00:00",
+  "status": "DEPLOYED_RUNTIME_VERIFIED_AWAITING_AUTHENTICATED_RESUME",
   "test_log": "/root/backups/dob-modular-recovery-20261007/acceptance-provider-guards.log",
   "test_exit": "0",
   "source_snapshot": "docs/MODULAR_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
@@ -11,7 +11,38 @@
     "gate": "CLOSED",
     "authenticated_resume": "REQUIRED_AFTER_FIX"
   },
-  "production": "NOT_DEPLOYED",
+  "production": {
+    "at_utc": "2026-10-07T06:14:52.561161+00:00",
+    "revision": "caf3f0de76d142b7e8ded2923a429b00fd4ba50c",
+    "hashes": {
+      "api": "e115fab043aab6d442be7271655941a5e5c9eaad8ec1f1b20c439fe99a020bd9",
+      "worker": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add"
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T06:14:52.478132482Z"
+    },
+    "schema": 161,
+    "static_preserved": true
+  },
   "limitations": [
     "shared worker process and DB resources",
     "global client lock/concurrency1 retained",
@@ -23,5 +54,66 @@
   "source_review_evidence": "/root/backups/dob-modular-recovery-20261007/review-final.json",
   "fault_tests": "PASS",
   "postgresql_race": "PASS",
-  "full_go": "PASS"
+  "full_go": "PASS",
+  "configuration_preserved": true,
+  "live_verified_at": "2026-10-07T06:17:18.545926+00:00",
+  "live_shares": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T06:11:26.948007+00:00",
+      "http_status": 200,
+      "vless_lines": 14,
+      "response_bytes": 4222
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T06:15:13.57083+00:00",
+      "http_status": 200,
+      "vless_lines": 0,
+      "response_bytes": 0
+    }
+  ],
+  "live_worker": [
+    {
+      "metadata": {
+        "role": "worker",
+        "client_mutation": {
+          "state": "GATED",
+          "attempts": 0,
+          "failures": 0,
+          "isolated": 0,
+          "succeeded": 0,
+          "started_unix": 1791353831,
+          "finished_unix": 1791353831,
+          "policy_deferred": 0,
+          "last_attempt_unix": 0,
+          "last_success_unix": 0
+        },
+        "lifecycle_lanes": {
+          "stalled": 0,
+          "in_flight": 0
+        },
+        "recovery_scan_unix": 1791353822,
+        "lifecycle_scan_unix": 1791353822,
+        "scheduler_scan_unix": 1791353827
+      },
+      "worker_id": "serverprojects.ptr.network:1400447",
+      "last_seen_at": "2026-10-07T06:17:12.344268+00:00"
+    }
+  ],
+  "post_deploy_log_summary": {
+    "at_utc": "2026-10-07T06:17:18.472656+00:00",
+    "new_global_executor_failures": 0,
+    "panic_lines": 0,
+    "ambiguous_retry_sql_lines": 0,
+    "lifecycle_errors": 6
+  },
+  "upcloud_capacity_recovery": {
+    "local_retirement_claim": "VERIFIED_ONE_OLDEST",
+    "provider_deletion": "UNCONFIRMED_NATIVE_REQUEST_TIMEOUT_UNKNOWN_OPERATION",
+    "backfill": "NOT_YET_OBSERVED",
+    "desired_preserved": 5
+  },
+  "runtime_client_work": "GATED_EXISTING_05_28_FAILURE_NOT_REOPENED",
+  "remaining_action": "Use existing authenticated Configs Resume, then observe native client generation and classified shares over an expiry/replacement cycle. Do not raw-update gate or fabricate auth."
 }

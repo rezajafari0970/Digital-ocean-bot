@@ -37,3 +37,6 @@ Further process/resource partitioning, independent proxy-health evidence, cross-
 
 ## Deployment and rollback
 No schema or static-UI change. Build API/worker from a clean detached checkpoint; back up binaries/manifest and configuration hashes. Verify running binary hashes, readiness, module metadata and natural lifecycle progression. Preserve all account, routing, proxy, profile, budget and execution-gate settings. Rollback restores both binaries/manifest; if the gate changed concurrently, do not overwrite user intent or blindly start an older worker.
+
+## Deployment result
+API/worker caf3f0de76d142b7e8ded2923a429b00fd4ba50c deployed at 2026-10-07T06:14:52.561161+00:00; actual process hashes, all readiness checks, unchanged static/schema and configuration equality verified. The existing client gate remains closed, so new client creation and Residential Output recovery await authenticated Resume. UpCloud progressed from the diagnosed capacity deadlock to exactly one owned retirement intent; native provider deletion is still unconfirmed after a request timeout. No successful replacement or full user traffic is claimed. See the latest acceptance JSON before continuing.
