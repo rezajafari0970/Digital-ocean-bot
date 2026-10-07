@@ -1,6 +1,18 @@
 # Development Ready Handoff
 
-## Current frontier — durable recovery ledger correction deployed and verified
+## Current frontier — phase3 progress supervision deployed and native-verified
+API/control/panels runtimeac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff, schema162, static0c7721d preserved. Read docs/PHASE3_SUPERVISION_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT. Actual OpenAI API final source review PASS; retained PG/HTTP/race/full-Go phase1+2 and new phase3 gates PASS. Development Orchestrator job phase3-supervision-20261007 COMPLETE.
+
+Independent supervision watches loop, admitted task and declared native phase progress. It cancels and bounded-joins a failed role, then exits; systemd restarts that role, including external SIGSTOP detection. No goroutine replay/abandoned admission slot. Independent control/panels OS roles keep24/40 pools and3/10 admission. Persistent per-role restart state survives process death and paces repeated failure. READY requires observed modules; heartbeat cannot mask a hung task.
+
+The exact committed binary passed SIGSTOP/watchdog replacement, unchanged control PID, new healthy panels heartbeat and duplicate role rejection in an empty isolated PostgreSQL fixture. Production currently has notify units with45-second watchdog and90-second stop deadline. At2026-10-07T10:15:14.285478+00:00, runtime hashes matched, five readiness checks passed, roles retained original PIDs with no automatic restarts during34 samples over5minutes, and healthy restart ledgers reset. Fresh native inventory verified290 configs across37 panels. No current-process supervision/ownership/checkpoint/global-gate fault signature appeared.
+
+First rollout hit the stopped-unit WatchdogUSec=infinity assertion and automatically restored50f9ffb; isolated reproduction confirmed this is runtime state, so the assertion now runs after startup. Second attempt deployed the SAME reviewed artifact. Evidence and backups: /root/backups/dob-phase3-supervision-20261007. Roll back both producers together to checkpoint-aware50f9ffb with their MATCHING original simple units; retain schema162 and restart ledgers. Never run the old non-notifying binary with notify units or checkpoint-unaware code with unresolved checkpoints.
+
+No account/profile/gate/proxy/routing/protection reset or new Resume. Operator/provider/ownership/quarantine/finite-budget/unknown-outcome fences remain authoritative. Common host, DB and network remain shared; injected-clock long-phase coverage and accelerated fixture watchdog are recorded limitations. Next bounded work: queue fairness, per-account/provider resource isolation and recovery decision diagnostics. Canonical checkout stays detached intentionally; push HEAD to checkpoint/final-e2e-20260929.
+
+
+## Historical frontier — durable recovery ledger correction
 Runtime/API/worker50f9ffb6ac20012c0e57e068fbde2aef0905833b, schema162; static0c7721d unchanged. Read docs/RECOVERY_LEDGER_FIX_20261007.md and paired ACCEPTANCE/SOURCE_SNAPSHOT. PH12-001/002 are CLOSED; equivalent lifecycle completion, failed-active-key health race and unbounded deferred recovery bookkeeping are also corrected. Actual API review PASS; final PostgreSQL/race/full-Go/phase1+2/rollback-launcher tests PASS; exact built worker systemd isolation/restart fixture PASS. Development Orchestrator job recovery-ledger-fix-20261007 COMPLETE.
 
 At2026-10-07T09:17:13.931255+00:00, API/control/panels were active, actual hashes matched, no automatic restart or new current-process error signature, five readiness checks PASS.304 output configs matched fresh native inventory across33panels;35Direct/280Residential on later share sample;20 new create and19 new delete jobs succeeded by09:16:42Z. Existing client expiry/replacement continued. UpCloud113 had2READY servers/Desired5. Bounded observation, no mobile traffic or indefinite-uptime guarantee.

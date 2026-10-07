@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
+  "git_head": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
   "ready": true,
   "artifacts": [
     {
@@ -358,6 +358,12 @@
       "source_commit": "50f9ffb6ac20012c0e57e068fbde2aef0905833b",
       "status": "current-delta-reviewed-tested-deployed",
       "acceptance": "docs/RECOVERY_LEDGER_FIX_ACCEPTANCE_20261007.json"
+    },
+    {
+      "artifact": "docs/PHASE3_SUPERVISION_SOURCE_SNAPSHOT_20261007.json",
+      "source_commit": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+      "status": "current-delta-reviewed-tested-deployed",
+      "acceptance": "docs/PHASE3_SUPERVISION_ACCEPTANCE_20261007.json"
     }
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
@@ -399,7 +405,7 @@
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
   "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-  "current_frontier": "RECOVERY_LEDGER_FIXED_DEPLOYED_NATIVE_VERIFIED",
+  "current_frontier": "PHASE3_SUPERVISION_DEPLOYED_NATIVE_VERIFIED",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
   "openai_review": "REVISE_TWO_REPRODUCED_FINDINGS",
@@ -415,5 +421,7 @@
     "PH12-001",
     "PH12-002"
   ],
-  "latest_recovery_fix_at": "2026-10-07T09:17:13.931255+00:00"
+  "latest_recovery_fix_at": "2026-10-07T09:17:13.931255+00:00",
+  "latest_phase3_supervision": "docs/PHASE3_SUPERVISION_20261007.md",
+  "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00"
 }

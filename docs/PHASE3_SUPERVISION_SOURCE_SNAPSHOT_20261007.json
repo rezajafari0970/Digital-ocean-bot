@@ -1,6 +1,6 @@
 {
   "baseline": "86be69f229e8736c0928389764cb76848bf8f738",
-  "status": "reviewed-tested-candidate",
+  "status": "reviewed-tested-deployed",
   "files_sha256": {
     "cmd/worker/main.go": "6fca8059133b7c0aadd30182b8a438c0cac2a87171e4721bc534b9132027a73d",
     "cmd/worker/supervision.go": "89b76a6406c21389a6d31ff9a754c6936df0b5f7264bde2ba31dfb742da1d514",
@@ -34,5 +34,7 @@
     "tools/phase3-supervision-process-fixture.py": "69af7f746e75b8a6bc90a9b40823db32b839dde4ac2e0e143330ce75ca13b409",
     "tools/worker-isolation-process-fixture.py": "5ca8b9f8c138511dd102f490b3cc63cf1fdf5660c2f13291628161a167c23e6f"
   },
-  "actual_api_review_id": "resp_0017b7c2c360aa8a006ac6195af19c87d1836d55efe33a4e8a"
+  "actual_api_review_id": "resp_0017b7c2c360aa8a006ac6195af19c87d1836d55efe33a4e8a",
+  "source_commit": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+  "acceptance": "docs/PHASE3_SUPERVISION_ACCEPTANCE_20261007.json"
 }

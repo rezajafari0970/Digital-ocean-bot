@@ -1,5 +1,5 @@
 # Phase 3: isolated worker progress supervision
-Status: candidate. Runtime remains50f9ffb until deployment acceptance is recorded.
+Status: deployed and native-verified. API/control/panels revisionac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff, deployed2026-10-07T10:09:25.434477+00:00, final readback2026-10-07T10:15:14.285478+00:00.
 
 ## Contract
 The independent internal/supervision package tracks module loop progress, declared idle intervals, admission waiting, and separately timed work/stages. A heartbeat cannot refresh an unrelated loop or task deadline. Work accounting starts after shared admission; queued children suspend the ancestor budget while occupying no execution slot. Native workflow and SSH script phase deadlines remain authoritative. Explicit nested phase budgets pause only their ancestors; siblings remain independently watched.
@@ -27,3 +27,11 @@ Install deploy/worker-control.conf at the existing control60-worker-isolation.co
 Rollback stops BOTH producers, restores checkpoint-aware50f9ffb binaries with their matching simple-type units, reloads systemd and starts the old roles. Schema162 and restart ledgers remain. Never pair old binaries with notify units; never roll back to checkpoint-unaware code over unresolved rows.
 
 Evidence: /root/backups/dob-phase3-supervision-20261007. See paired acceptance/source snapshot for executed results, review IDs, exact hashes and bounded native output observations.
+
+## Production acceptance
+- Both worker roles run the exact committed and isolated-fixture-tested binary. API and workers have clean VCS build metadata; process hashes match artifacts. All five readiness checks passed.
+- A34-sample observation window spanning over5minutes recorded stable role PIDs, zero automatic restarts and healthy readiness. Both persistent restart ledgers reset after the healthy startup period.
+- Fresh native inventory verified290 output configurations across37 panels. No unmatched snapshots, invalid still-published configurations or unavailable native inventory were observed. Actual create/delete/replacement counts and current share counts are in the paired acceptance JSON.
+- Account, profile, policy gate, proxy, routing and protection snapshots match before/after. Schema162 and static assets preserved. No Resume or policy reset was used.
+- The first rollout automatically restored50f9ffb because a runtime watchdog assertion was evaluated while the units were stopped. An isolated reproduction proved stopped WatchdogUSec=infinity transitions to45s on activation. Moving that assertion after startup allowed the SAME binaries to deploy. Original rollback evidence is retained.
+- Source review PASS had no findings; its explicit limits remain recorded. Runtime evidence closes the actual-test, artifact, installed-role, readiness and sustained-health observations, without claiming a production failure injection or universal self-repair.
