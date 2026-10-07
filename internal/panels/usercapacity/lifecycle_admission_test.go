@@ -50,7 +50,7 @@ func admissionTestDB(t *testing.T) *sql.DB {
 	if _, err = db.Exec(fixture); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle", "000137_bulk_lifecycle_admission"} {
+	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle", "000137_bulk_lifecycle_admission", "000161_client_mutation_panel_health"} {
 		b, e := os.ReadFile(filepath.Join("../../../migrations", name+".up.sql"))
 		if e != nil {
 			t.Fatal(e)
@@ -102,6 +102,8 @@ func TestAdmissionPostgresGuardsConcurrencyAndNoRearm(t *testing.T) {
 		}
 	}
 	for _, tc := range []struct{ before, after string }{
+		{"INSERT INTO client_mutation_panel_health(panel_id,state,failures,retry_after,reason_code) VALUES('55555555-5555-4555-8555-555555555555','COOLDOWN',1,now()+interval '1 minute','RUNTIME_UNAVAILABLE')", "DELETE FROM client_mutation_panel_health"},
+		{"INSERT INTO client_mutation_panel_health(panel_id,state,failures,reason_code) VALUES('55555555-5555-4555-8555-555555555555','QUARANTINED',1,'VERIFICATION_FAILED')", "DELETE FROM client_mutation_panel_health"},
 		{"UPDATE bulk_lifecycle_control SET auto_enroll=false", "UPDATE bulk_lifecycle_control SET auto_enroll=true"},
 		{"UPDATE client_mutation_execution_gate SET kill_switch=true", "UPDATE client_mutation_execution_gate SET kill_switch=false"},
 		{"UPDATE client_mutation_execution_gate SET panel_id='55555555-5555-4555-8555-555555555555',inbound_id=2", "UPDATE client_mutation_execution_gate SET panel_id=NULL,inbound_id=NULL"},

@@ -1,5 +1,8 @@
 # Development Ready Handoff
 
+## Current frontier — client failure isolation, 2026-10-07
+The confirmed global Output outage is fixed in source: durable per-panel cooldown/quarantine, typed remote error provenance, atomic job outcomes, safe failure metadata, and authenticated Configs/Output status. Read `docs/CLIENT_FAILURE_ISOLATION_20261007.md`, its SOURCE_SNAPSHOT and ACCEPTANCE JSON. Final OpenAI review PASS; real PostgreSQL fault/race and full Go acceptance PASS. Deployment and existing authenticated capacity resume remain pending at this checkpoint. Production still uses fc97105 with schema160 until the deployment record says otherwise. Do not reopen the gate by raw SQL, manufacture admin credentials, reset finite budgets, clear quarantines, or retry historical failures blindly. Original reviews and test failures remain under `/root/backups/dob-client-failure-isolation-20261007`.
+
 ## Authority
 - Repository: `/root/projects/Digital-ocean-bot-canonical-e2e`
 - Branch: `checkpoint/final-e2e-20260929`

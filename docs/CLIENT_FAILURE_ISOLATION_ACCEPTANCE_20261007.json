@@ -1,0 +1,18 @@
+{
+  "status": "SOURCE_TESTS_AND_REVIEW_PASSED_NOT_DEPLOYED",
+  "at_utc": "2026-10-07T04:54:29.654921+00:00",
+  "baseline_revision": "c494fbc1c275852a0b81be90ae62b19c19377904",
+  "full_go": true,
+  "isolated_postgresql_and_race": "PASS",
+  "evidence": "/root/backups/dob-client-failure-isolation-20261007",
+  "original_failure": "review-1 REVISE: delay inbound/inventory/rejection quarantine until3 attempts; corrected and tested",
+  "production_changed": false,
+  "operator_resume": "pending existing authenticated domain action; never raw gate rewrite",
+  "live_replacement_cycle": "pending",
+  "browser": "Cloud browser cannot reach control panel: ERR_BLOCKED_BY_CLIENT. No login session available.",
+  "openai_review": "PASS",
+  "review_evidence": "review-final.json",
+  "race_native_transport": "PASS",
+  "latest_acceptance": "acceptance-final3.log",
+  "ui_verification": "node --check and isolated status rendering/escaping PASS; browser visual acceptance unavailable"
+}

@@ -41,6 +41,10 @@ func (g ExecutionGate) Allows(job Job) bool {
 var ErrExecutionGated = errors.New("client mutation execution gated")
 
 func (j Journal) FailCloseGate(ctx context.Context) error {
+	return j.FailCloseGateWithFailure(ctx, nil)
+}
+
+func (j Journal) FailCloseGateWithFailure(ctx context.Context, failure error) error {
 	if j.DB == nil {
 		return ErrInvalidRequest
 	}
@@ -52,7 +56,15 @@ func (j Journal) FailCloseGate(ctx context.Context) error {
 	if _, err = tx.ExecContext(ctx, `UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true,remaining_batches=0,updated_at=now() WHERE singleton`); err != nil {
 		return err
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,concurrency=1,updated_at=now() WHERE singleton`); err != nil {
+	code, panel, job := "EXPLICIT_GATE_CLOSURE", "", ""
+	if failure != nil {
+		code = "EXECUTOR_INTERNAL_FAILURE"
+		var target *ExecutionFailure
+		if errors.As(failure, &target) {
+			panel, job = target.PanelID, target.JobID
+		}
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,concurrency=1,updated_at=now(),last_failure_code=$1,last_failure_at=now(),last_failure_panel_id=$2,last_failure_job_id=$3 WHERE singleton`, code, panel, job); err != nil {
 		return err
 	}
 	return tx.Commit()

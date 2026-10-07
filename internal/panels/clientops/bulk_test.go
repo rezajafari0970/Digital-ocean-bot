@@ -21,6 +21,9 @@ import (
 func TestBulkObservedRecoveryAndConflicts(t *testing.T) {
 	c := sanaei.Client{ID: "u1", Email: "planned", Enable: true, TotalGB: 100, LimitHWID: 2}
 	snapshot := func(clients []sanaei.Client) []json.RawMessage {
+		if clients == nil {
+			clients = []sanaei.Client{}
+		}
 		b, _ := json.Marshal(map[string]any{"id": 1, "enable": true, "settings": map[string]any{"clients": clients}})
 		return []json.RawMessage{b}
 	}
@@ -91,7 +94,7 @@ func bulkTestDB(t *testing.T) *sql.DB {
 	if _, err = db.Exec(fixture); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle"} {
+	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle", "000161_client_mutation_panel_health"} {
 		b, e := os.ReadFile(filepath.Join("../../../migrations", name+".up.sql"))
 		if e != nil {
 			t.Fatal(e)

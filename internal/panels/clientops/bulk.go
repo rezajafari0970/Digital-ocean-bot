@@ -122,7 +122,7 @@ func bulkObserved(raws []json.RawMessage, inboundID int64, wanted []sanaei.Clien
 			Settings json.RawMessage `json:"settings"`
 		}
 		if err := json.Unmarshal(raw, &in); err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 		if in.ID == inboundID {
 			if !in.Enable {
@@ -136,12 +136,15 @@ func bulkObserved(raws []json.RawMessage, inboundID int64, wanted []sanaei.Clien
 			b = []byte(encoded)
 		}
 		var settings struct {
-			Clients []sanaei.Client `json:"clients"`
+			Clients *[]sanaei.Client `json:"clients"`
 		}
 		if err := json.Unmarshal(b, &settings); err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
-		for _, c := range settings.Clients {
+		if settings.Clients == nil {
+			return nil, nil, sanaei.ErrInventoryRejected
+		}
+		for _, c := range *settings.Clients {
 			if !wantedIDs[c.ID] && !wantedEmails[c.Email] {
 				continue
 			}
@@ -317,7 +320,7 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 	}
 	// Persist intent before the only POST. On a crash the same payload is read
 	// back; no new client identities can be minted by recovery.
-	if _, err = e.Journal.DB.ExecContext(ctx, `UPDATE client_mutation_jobs SET result=jsonb_build_object('phase','VERIFY_REQUIRED','submitted',$2::int),updated_at=now() WHERE id=$1 AND state='RUNNING'`, job.ID, len(missing)); err != nil {
+	if _, err = e.Journal.DB.ExecContext(ctx, `UPDATE client_mutation_jobs SET result=result||jsonb_build_object('phase','VERIFY_REQUIRED','submitted',$2::int),updated_at=now() WHERE id=$1 AND state='RUNNING'`, job.ID, len(missing)); err != nil {
 		return err
 	}
 	release, err := e.bulkPostFence(ctx, job, p)
@@ -342,10 +345,13 @@ func (e Executor) executeBulk(ctx context.Context, rt *sanaei.PanelRuntime, job 
 		report["verify_error"] = verifyErr.Error()
 		report["phase"] = "VERIFY_REQUIRED"
 	}
+	if p.Lifecycle {
+		sanitizeLifecycleReport(report, result.Created, len(result.Skipped), postErr, verifyErr)
+	}
 	b, _ := json.Marshal(report)
 	reportCtx, reportCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer reportCancel()
-	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, b); err != nil {
+	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=CASE WHEN payload->>'Lifecycle'='true' THEN (result-'response'-'post_error'-'verify_error')||$2::jsonb ELSE $2::jsonb END WHERE id=$1 AND state='RUNNING'`, job.ID, b); err != nil {
 		return err
 	}
 	if verifyErr != nil {

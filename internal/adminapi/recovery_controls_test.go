@@ -185,3 +185,55 @@ func TestRoutingSummaryExcludesRetiringAccounts(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 }
+
+func TestCapacityIsolationStatusAndResumePreserveQuarantine(t *testing.T) {
+	db := adminTestDB(t)
+	ctx := context.Background()
+	account, _, panel := seedPanel(t, db, "http://panel.test")
+	sqlMust(t, db, "UPDATE accounts SET enabled=true WHERE id=$1", account)
+	sqlMust(t, db, "INSERT INTO global_config_policies(policy_key,enabled,ports,target_users_per_inbound,users_per_second) VALUES('reality',true,'[443]',2,1) ON CONFLICT(policy_key) DO UPDATE SET enabled=true")
+	sqlMust(t, db, "UPDATE bulk_lifecycle_control SET enabled=true,auto_enroll=true")
+	var generation string
+	if err := db.QueryRow("INSERT INTO bulk_user_generations(panel_id,inbound_id,purpose,marker) VALUES($1,1,'POLICY','quarantine-test') RETURNING id::text", panel).Scan(&generation); err != nil {
+		t.Fatal(err)
+	}
+	sqlMust(t, db, "INSERT INTO bulk_lifecycle_scopes(panel_id,inbound_id,generation_id,enabled,use_global_policy,allow_create,max_batch_size,remaining_operations,expires_at) VALUES($1,1,$2,false,true,true,10,7,now()+interval '1 hour')", panel, generation)
+	sqlMust(t, db, "INSERT INTO client_mutation_panel_health(panel_id,state,failures,reason_code) VALUES($1,'QUARANTINED',3,'VERIFICATION_FAILED')", panel)
+	sqlMust(t, db, "UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,last_failure_code='EXECUTOR_INTERNAL_FAILURE',last_failure_at=now()")
+	s := Server{DB: db}
+	request := httptest.NewRequest("GET", "/", nil)
+	status, err := s.capacityAutomationStatus(request)
+	if err != nil || status["running"] != false || status["quarantined_panels"] != 1 {
+		t.Fatal(status, err)
+	}
+	denied := httptest.NewRecorder()
+	s.resumeCapacityAutomation(denied, httptest.NewRequest("POST", "/", nil))
+	if denied.Code != 403 {
+		t.Fatal("unauthorized resume", denied.Code)
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = resumeCapacityTx(ctx, tx); err != nil {
+		tx.Rollback()
+		t.Fatal(err)
+	}
+	if err = tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	var enabled bool
+	var budget int
+	if err = db.QueryRow("SELECT enabled,remaining_operations FROM bulk_lifecycle_scopes WHERE panel_id=$1", panel).Scan(&enabled, &budget); err != nil || enabled || budget != 7 {
+		t.Fatal(enabled, budget, err)
+	}
+	status, err = s.capacityAutomationStatus(request)
+	if err != nil || status["running"] != true || status["quarantined_panels"] != 1 {
+		t.Fatal(status, err)
+	}
+	recorder := httptest.NewRecorder()
+	s.configCapacity(recorder, request)
+	if recorder.Code != 200 || !strings.Contains(recorder.Body.String(), "\"automation\"") || !strings.Contains(recorder.Body.String(), "QUARANTINED") {
+		t.Fatal(recorder.Code, recorder.Body.String())
+	}
+}

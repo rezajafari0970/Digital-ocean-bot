@@ -3,6 +3,7 @@ package sanaei
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -330,5 +331,37 @@ func TestResilientStillRetriesSafeRead(t *testing.T) {
 	resp, err := session.Do(context.Background(), SessionRequest{Method: http.MethodGet, Path: "panel/api/inbounds/list"})
 	if err != nil || resp.StatusCode != http.StatusOK || calls.Load() != 2 {
 		t.Fatalf("status=%d calls=%d err=%v", resp.StatusCode, calls.Load(), err)
+	}
+}
+
+func TestResilientLostMutationResponseKeepsRemoteProvenanceWithoutRetry(t *testing.T) {
+	var posts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		posts.Add(1)
+		conn, _, _ := w.(http.Hijacker).Hijack()
+		conn.Close()
+	}))
+	defer server.Close()
+	session := &ResilientSession{Client: &APIClient{BaseURL: server.URL, HTTP: server.Client()}, Policy: fastPolicy()}
+	_, err := session.Do(context.Background(), SessionRequest{Method: http.MethodPost, Path: "/committed"})
+	if !errors.Is(err, ErrSessionRequest) || posts.Load() != 1 {
+		t.Fatal("lost response was untyped or repeated", err, posts.Load())
+	}
+}
+
+func TestResilientCancelledBackoffKeepsRemoteProvenance(t *testing.T) {
+	called := make(chan struct{}, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(503); called <- struct{}{} }))
+	defer server.Close()
+	session := &ResilientSession{Client: &APIClient{BaseURL: server.URL, HTTP: server.Client()}, Policy: RetryPolicy{MaxAttempts: 4, BaseDelay: time.Second, MaxDelay: time.Second}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { _, err := session.Do(ctx, SessionRequest{Method: http.MethodGet, Path: "/read"}); done <- err }()
+	<-called
+	cancel()
+	err := <-done
+	if !errors.Is(err, ErrSessionRequest) || !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
 	}
 }

@@ -38,7 +38,7 @@ func AddClientsSession(ctx context.Context, exec SessionExecutor, inboundID int,
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: addClient http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(body))
+		return fmt.Errorf("%w: addClient http=%d body=%q", panelResponseError(ErrMutationRequest), resp.StatusCode, string(body))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
@@ -46,7 +46,7 @@ func AddClientsSession(ctx context.Context, exec SessionExecutor, inboundID int,
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: addClient invalid json body=%q", ErrMutationRequest, string(body))
+		return fmt.Errorf("%w: addClient invalid json body=%q", panelResponseError(ErrMutationRequest), string(body))
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
@@ -71,7 +71,7 @@ func DeleteClientSession(ctx context.Context, exec SessionExecutor, inboundID in
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: delClient http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(body))
+		return fmt.Errorf("%w: delClient http=%d body=%q", panelResponseError(ErrMutationRequest), resp.StatusCode, string(body))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
@@ -79,7 +79,7 @@ func DeleteClientSession(ctx context.Context, exec SessionExecutor, inboundID in
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: delClient invalid json body=%q", ErrMutationRequest, string(body))
+		return fmt.Errorf("%w: delClient invalid json body=%q", panelResponseError(ErrMutationRequest), string(body))
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
@@ -109,7 +109,7 @@ func DeleteClientByEmailSession(ctx context.Context, exec SessionExecutor, email
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: clients/del http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(body))
+		return fmt.Errorf("%w: clients/del http=%d body=%q", panelResponseError(ErrMutationRequest), resp.StatusCode, string(body))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
@@ -117,7 +117,7 @@ func DeleteClientByEmailSession(ctx context.Context, exec SessionExecutor, email
 		if len(body) > 512 {
 			body = body[:512]
 		}
-		return fmt.Errorf("%w: clients/del invalid json body=%q", ErrMutationRequest, string(body))
+		return fmt.Errorf("%w: clients/del invalid json body=%q", panelResponseError(ErrMutationRequest), string(body))
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
@@ -153,7 +153,7 @@ func UpdateClientByEmailSession(ctx context.Context, exec SessionExecutor, curre
 		if len(b) > 512 {
 			b = b[:512]
 		}
-		return fmt.Errorf("%w: clients/update http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(b))
+		return fmt.Errorf("%w: clients/update http=%d body=%q", panelResponseError(ErrMutationRequest), resp.StatusCode, string(b))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
@@ -161,7 +161,7 @@ func UpdateClientByEmailSession(ctx context.Context, exec SessionExecutor, curre
 		if len(b) > 512 {
 			b = b[:512]
 		}
-		return fmt.Errorf("%w: clients/update invalid json body=%q", ErrMutationRequest, string(b))
+		return fmt.Errorf("%w: clients/update invalid json body=%q", panelResponseError(ErrMutationRequest), string(b))
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
@@ -189,11 +189,11 @@ func AddClientV3Session(ctx context.Context, exec SessionExecutor, inboundID int
 		if len(b) > 512 {
 			b = b[:512]
 		}
-		return fmt.Errorf("%w: clients/add http=%d body=%q", ErrMutationRequest, resp.StatusCode, string(b))
+		return fmt.Errorf("%w: clients/add http=%d body=%q", panelResponseError(ErrMutationRequest), resp.StatusCode, string(b))
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(resp.Body, &envelope) != nil {
-		return ErrMutationRequest
+		return panelResponseError(ErrMutationRequest)
 	}
 	if !envelope.Success {
 		return fmt.Errorf("%w: http=%d msg=%q", ErrMutationRejected, resp.StatusCode, envelope.Msg)
@@ -217,7 +217,7 @@ func GetClientByEmailSession(ctx context.Context, exec SessionExecutor, email st
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("%w: clients/get http=%d", ErrMutationRequest, resp.StatusCode)
+		return nil, fmt.Errorf("%w: clients/get http=%d", panelResponseError(ErrMutationRequest), resp.StatusCode)
 	}
 	var env struct {
 		Success bool   `json:"success"`
@@ -262,7 +262,7 @@ func BulkCreateClientsSession(ctx context.Context, exec SessionExecutor, inbound
 		return out, fmt.Errorf("%w: bulkCreate http=%d", ErrAddClientUnsupported, resp.StatusCode)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return out, fmt.Errorf("%w: bulkCreate http=%d", ErrMutationRequest, resp.StatusCode)
+		return out, fmt.Errorf("%w: bulkCreate http=%d", panelResponseError(ErrMutationRequest), resp.StatusCode)
 	}
 	var envelope struct {
 		Success bool              `json:"success"`
@@ -270,14 +270,14 @@ func BulkCreateClientsSession(ctx context.Context, exec SessionExecutor, inbound
 		Obj     *BulkCreateResult `json:"obj"`
 	}
 	if json.Unmarshal(resp.Body, &envelope) != nil {
-		return out, ErrMutationRequest
+		return out, panelResponseError(ErrMutationRequest)
 	}
 	if envelope.Obj == nil {
-		return out, ErrMutationRequest
+		return out, panelResponseError(ErrMutationRequest)
 	}
 	out = *envelope.Obj
 	if out.Created < 0 || out.Created > len(clients) || len(out.Skipped) > len(clients) {
-		return out, ErrMutationRequest
+		return out, panelResponseError(ErrMutationRequest)
 	}
 	if !envelope.Success {
 		return out, fmt.Errorf("%w: bulkCreate msg=%q", ErrMutationRejected, envelope.Msg)
@@ -324,18 +324,18 @@ func BulkDeleteClientsSession(ctx context.Context, exec SessionExecutor, emails 
 		return out, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return out, fmt.Errorf("%w: bulkDel http=%d", ErrMutationRequest, resp.StatusCode)
+		return out, fmt.Errorf("%w: bulkDel http=%d", panelResponseError(ErrMutationRequest), resp.StatusCode)
 	}
 	var envelope struct {
 		Success bool              `json:"success"`
 		Obj     *BulkDeleteResult `json:"obj"`
 	}
 	if json.Unmarshal(resp.Body, &envelope) != nil || envelope.Obj == nil {
-		return out, ErrMutationRequest
+		return out, panelResponseError(ErrMutationRequest)
 	}
 	out = *envelope.Obj
 	if out.Deleted < 0 || out.Deleted > len(emails) || len(out.Skipped) > len(emails) {
-		return out, ErrMutationRequest
+		return out, panelResponseError(ErrMutationRequest)
 	}
 	if !envelope.Success {
 		return out, ErrMutationRejected

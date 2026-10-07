@@ -2,6 +2,7 @@ package clientops
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -82,7 +83,7 @@ func patchSatisfied(c sanaei.Client, p ClientPatch) bool {
 func patchInboundClient(raw json.RawMessage, clientID string, patch ClientPatch) (map[string]any, error) {
 	var doc map[string]any
 	if err := json.Unmarshal(raw, &doc); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 	}
 	settingsRaw, ok := doc["settings"]
 	if !ok {
@@ -92,7 +93,7 @@ func patchInboundClient(raw json.RawMessage, clientID string, patch ClientPatch)
 	switch v := settingsRaw.(type) {
 	case string:
 		if err := json.Unmarshal([]byte(v), &settings); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 	case map[string]any:
 		settings = v
@@ -108,11 +109,11 @@ func patchInboundClient(raw json.RawMessage, clientID string, patch ClientPatch)
 	for i, item := range clients {
 		b, err := json.Marshal(item)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 		var c sanaei.Client
 		if err := json.Unmarshal(b, &c); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 		if c.ID != clientID {
 			continue
@@ -131,7 +132,7 @@ func patchInboundClient(raw json.RawMessage, clientID string, patch ClientPatch)
 func clientMapFromInbound(raw json.RawMessage, clientID string) (map[string]any, bool, error) {
 	var doc map[string]any
 	if err := json.Unmarshal(raw, &doc); err != nil {
-		return nil, false, err
+		return nil, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 	}
 	sr, ok := doc["settings"]
 	if !ok {
@@ -141,7 +142,7 @@ func clientMapFromInbound(raw json.RawMessage, clientID string) (map[string]any,
 	switch v := sr.(type) {
 	case string:
 		if err := json.Unmarshal([]byte(v), &settings); err != nil {
-			return nil, false, err
+			return nil, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 	case map[string]any:
 		settings = v

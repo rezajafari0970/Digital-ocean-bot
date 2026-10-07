@@ -48,7 +48,7 @@ func clientFromInbound(raw json.RawMessage, clientID string) (sanaei.Client, boo
 		Settings any `json:"settings"`
 	}
 	if err := json.Unmarshal(raw, &in); err != nil {
-		return sanaei.Client{}, false, err
+		return sanaei.Client{}, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 	}
 	var settingsBytes []byte
 	switch v := in.Settings.(type) {
@@ -58,7 +58,7 @@ func clientFromInbound(raw json.RawMessage, clientID string) (sanaei.Client, boo
 		var err error
 		settingsBytes, err = json.Marshal(v)
 		if err != nil {
-			return sanaei.Client{}, false, err
+			return sanaei.Client{}, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 	default:
 		return sanaei.Client{}, false, ErrInboundMissing
@@ -67,7 +67,7 @@ func clientFromInbound(raw json.RawMessage, clientID string) (sanaei.Client, boo
 		Clients []sanaei.Client `json:"clients"`
 	}
 	if err := json.Unmarshal(settingsBytes, &settings); err != nil {
-		return sanaei.Client{}, false, err
+		return sanaei.Client{}, false, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 	}
 	for _, c := range settings.Clients {
 		if c.ID == clientID {
@@ -170,6 +170,9 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 	}
 	rt, err := e.Runtimes.Acquire(ctx, job.PanelID)
 	if err != nil {
+		if errors.Is(err, sanaei.ErrRuntimeCircuitOpen) || errors.Is(err, sanaei.ErrAPIRequest) {
+			return &runtimeUnavailable{cause: err}
+		}
 		return err
 	}
 	return rt.WithMutation(ctx, func(c context.Context) error { return e.executeRuntime(c, rt, job) })
@@ -307,7 +310,7 @@ func (e Executor) executeRuntime(ctx context.Context, rt *sanaei.PanelRuntime, j
 	return ErrVerify
 }
 
-func (e Executor) RunOne(ctx context.Context) (bool, error) {
+func (e Executor) RunOne(ctx context.Context) (worked bool, resultErr error) {
 	if e.Journal.DB == nil || e.Runtimes == nil {
 		return false, ErrInvalidRequest
 	}
@@ -324,12 +327,22 @@ func (e Executor) RunOne(ctx context.Context) (bool, error) {
 		return ok, err
 	}
 
+	defer func() {
+		if resultErr != nil {
+			resultErr = &ExecutionFailure{PanelID: job.PanelID, JobID: job.ID, Cause: resultErr}
+		}
+	}()
 	runCtx, cancel := context.WithTimeout(ctx, e.timeout())
 	defer cancel()
 	execErr := e.execute(runCtx, job)
 
 	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finishCancel()
+	if execErr != nil && isLifecycle(job.Payload) {
+		if failure, known := classifyPanelFailure(execErr, job.Attempts); known {
+			return true, e.Journal.recordPanelFailure(finishCtx, job, failure)
+		}
+	}
 	switch {
 	case errors.Is(execErr, ErrLifecycleSuperseded):
 		return true, e.Journal.supersedeLifecycle(finishCtx, job)

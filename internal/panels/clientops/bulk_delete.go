@@ -90,6 +90,7 @@ func bulkDeleteObserved(raws []json.RawMessage, inbound int64, wanted []sanaei.C
 			Settings json.RawMessage `json:"settings"`
 		}
 		if err = json.Unmarshal(raw, &in); err != nil {
+			err = fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 			return
 		}
 		if in.ID == inbound {
@@ -104,13 +105,14 @@ func bulkDeleteObserved(raws []json.RawMessage, inbound int64, wanted []sanaei.C
 		if json.Unmarshal(b, &fields) != nil || fields == nil {
 			return nil, nil, ErrVerify
 		}
-		if in.ID == inbound && (len(fields["clients"]) == 0 || string(fields["clients"]) == "null") {
+		if len(fields["clients"]) == 0 || string(fields["clients"]) == "null" {
 			return nil, nil, ErrVerify
 		}
 		var settings struct {
 			Clients []sanaei.Client `json:"clients"`
 		}
 		if err = json.Unmarshal(b, &settings); err != nil {
+			err = fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 			return
 		}
 		for _, c := range settings.Clients {
@@ -221,7 +223,7 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 	if err = e.bulkPreflight(ctx, job, p); err != nil {
 		return err
 	}
-	if _, err = e.Journal.DB.ExecContext(ctx, `UPDATE client_mutation_jobs SET result=jsonb_build_object('phase','VERIFY_REQUIRED','submitted',$2::int),updated_at=now() WHERE id=$1 AND state='RUNNING'`, job.ID, len(emails)); err != nil {
+	if _, err = e.Journal.DB.ExecContext(ctx, `UPDATE client_mutation_jobs SET result=result||jsonb_build_object('phase','VERIFY_REQUIRED','submitted',$2::int),updated_at=now() WHERE id=$1 AND state='RUNNING'`, job.ID, len(emails)); err != nil {
 		return err
 	}
 	release, err := e.bulkPostFence(ctx, job, p)
@@ -252,12 +254,15 @@ func (e Executor) executeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime
 		report["phase"] = "VERIFY_REQUIRED"
 		report["verify_error"] = verifyErr.Error()
 	}
+	if p.Lifecycle {
+		sanitizeLifecycleReport(report, result.Deleted, len(result.Skipped), postErr, verifyErr)
+	}
 	raw, _ := json.Marshal(report)
 	// A read deadline must not erase the diagnostic needed for read-before-write
 	// recovery. This bounded DB-only context cannot send another provider POST.
 	reportCtx, reportCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer reportCancel()
-	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=$2 WHERE id=$1 AND state='RUNNING'`, job.ID, raw); err != nil {
+	if _, err = e.Journal.DB.ExecContext(reportCtx, `UPDATE client_mutation_jobs SET result=CASE WHEN payload->>'Lifecycle'='true' THEN (result-'response'-'post_error'-'verify_error')||$2::jsonb ELSE $2::jsonb END WHERE id=$1 AND state='RUNNING'`, job.ID, raw); err != nil {
 		return err
 	}
 	if verifyErr != nil {

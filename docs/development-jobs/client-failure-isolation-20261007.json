@@ -1,0 +1,55 @@
+{
+  "goal": "Prevent one automatic lifecycle client's transient or unsafe panel error from persistently stopping client creation across the fleet; restore and verify classified Output with all existing ownership/outcome safeguards.",
+  "context": "Confirmed incident: per-panel Sanaei circuit retry30s escaped RunOne durable retry and main.go closed global gate indefinitely. Implement durable per-panel COOLDOWN and QUARANTINED state with additive migration161. For lifecycle jobs only, known pre-mutation runtime API/circuit unavailability gets bounded30..120s durable cooldown, returns jobPENDING and cancels only the claim attempt (record separate deferral counter; do not refund or reset finite scope budgets). Claim excludes cooling/quarantined panels so healthy work continues. Known remote mutation/verification failure keeps original read-before-retry with bounded attempts; exhausted/conflicting outcomes become FAILED plus panelQUARANTINED atomically, never auto reopened. Other internal/DB/invariant errors still globally fail-close with persistent safe reason/panel/job. Preserve old explicit canary error behavior. Avoid broad error swallowing; errors.Is typed known remote/lifecycle sentinels only. Success can clear only COOLDOWN, never quarantine. Admission refuses blocked panels; existing policy/cleanup/expired ownership guards remain unchanged. Expose automation state and per-panel cooldown/quarantine counts in authenticated Configs/Output UI; public plain subscription format remains URI-only and no private error details leak. Implement through canonical source, isolated realPostgres fault/race/full Go tests, OpenAI source review, clean build/rollback deployment, then existing authenticated capacity resume with user authorization; no raw gate rewrite, admin impersonation, blind failedjob retry or test cloud resources. Record native API-derived generated clients and actual class share bodies over replacement cycle; refresh checkpoints. Main implementer with server OpenAI plan/review.",
+  "allowed_paths": [
+    "internal/panels/clientops",
+    "internal/panels/sanaei/runtime.go",
+    "internal/panels/sanaei/runtime_manager.go",
+    "internal/panels/sanaei/runtime_manager_test.go",
+    "internal/panels/usercapacity/lifecycle_admission.go",
+    "internal/adminapi/config_capacity.go",
+    "internal/adminapi/capacity_resume.go",
+    "internal/adminapi/capacity_restore.go",
+    "internal/adminapi/recovery_controls_test.go",
+    "internal/adminapi/output_snapshot.go",
+    "internal/adminapi/server.go",
+    "cmd/worker/main.go",
+    "web/static/app.js",
+    "web/static/output-live.js",
+    "migrations/000161_client_mutation_panel_health.up.sql",
+    "migrations/000161_client_mutation_panel_health.down.sql",
+    "tools/client-failure-isolation-acceptance.sh",
+    "docs/development-jobs/client-failure-isolation-20261007.json",
+    "docs/CLIENT_FAILURE_ISOLATION_20261007.md",
+    "docs/CLIENT_FAILURE_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
+    "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "internal/panels/usercapacity/lifecycle_admission_test.go",
+    "internal/panels/sanaei/resilient.go",
+    "internal/panels/sanaei/resilient_test.go",
+    "internal/panels/sanaei/raw_list.go",
+    "internal/panels/sanaei/mutation.go",
+    "internal/panels/sanaei/client_mutation.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/client-failure-isolation-acceptance.sh # fault and -race"
+    ],
+    "verify": [
+      "git diff --check",
+      "python3 -c \"from pathlib import Path; b=Path('/root/backups/dob-client-failure-isolation-20261007'); assert all((b/n).read_text().strip()=='0' for n in ['acceptance-final.exit','sanaei-race.exit'])\"",
+      "python3 -c \"import json; from pathlib import Path; assert json.loads(json.loads(Path('/root/backups/dob-client-failure-isolation-20261007/review-final.json').read_text())['text'])['verdict']=='PASS'\""
+    ]
+  },
+  "commit_message": "fix(clients): isolate panel failures from fleet automation"
+}

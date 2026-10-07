@@ -51,7 +51,7 @@ func LifecycleInventory(ctx context.Context, rt *sanaei.PanelRuntime, inbound in
 		select {
 		case <-ctx.Done():
 			timer.Stop()
-			return nil, 0, ctx.Err()
+			return nil, 0, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, ctx.Err())
 		case <-timer.C:
 		}
 	}
@@ -76,7 +76,7 @@ func lifecycleInventoryOnce(ctx context.Context, rt *sanaei.PanelRuntime, inboun
 			Stream   json.RawMessage `json:"streamSettings"`
 		}
 		if err = json.Unmarshal(raw, &in); err != nil {
-			return nil, 0, err
+			return nil, 0, fmt.Errorf("%w: %w", sanaei.ErrInventoryRejected, err)
 		}
 		if in.ID != inbound {
 			continue

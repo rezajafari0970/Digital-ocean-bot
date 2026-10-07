@@ -179,7 +179,7 @@ func (j Journal) Reconcile(ctx context.Context) error {
 	return err
 }
 
-const claimSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id JOIN client_mutation_execution_gate g ON g.singleton=true WHERE g.enabled=true AND g.kill_switch=false AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND (CASE WHEN m.payload->>'Lifecycle'='true' THEN EXISTS(SELECT 1 FROM bulk_lifecycle_scopes ls JOIN bulk_lifecycle_control lc ON lc.singleton WHERE lc.enabled AND ls.enabled AND ls.panel_id=m.panel_id AND ls.inbound_id=m.inbound_id AND ls.generation_id::text=m.payload->>'GenerationID' AND ls.remaining_operations>0 AND ls.expires_at>now() AND COALESCE(jsonb_array_length(m.payload->'Clients'),1)<=ls.max_batch_size) ELSE (m.kind NOT IN ('BULK_CREATE','BULK_DELETE') OR EXISTS(SELECT 1 FROM bulk_client_execution_gate bg WHERE bg.singleton AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.remaining_batches>0 AND bg.expires_at>now() AND jsonb_array_length(m.payload->'Clients')<=bg.max_batch_size)) END) AND m.state='PENDING' AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) ORDER BY m.created_at,m.id FOR UPDATE OF m SKIP LOCKED LIMIT 1"
+const claimSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id JOIN client_mutation_execution_gate g ON g.singleton=true WHERE g.enabled=true AND g.kill_switch=false AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=m.panel_id) AND (g.inbound_id IS NULL OR g.inbound_id=m.inbound_id) AND (CASE WHEN m.payload->>'Lifecycle'='true' THEN EXISTS(SELECT 1 FROM bulk_lifecycle_scopes ls JOIN bulk_lifecycle_control lc ON lc.singleton WHERE lc.enabled AND ls.enabled AND ls.panel_id=m.panel_id AND ls.inbound_id=m.inbound_id AND ls.generation_id::text=m.payload->>'GenerationID' AND ls.remaining_operations>0 AND ls.expires_at>now() AND COALESCE(jsonb_array_length(m.payload->'Clients'),1)<=ls.max_batch_size) ELSE (m.kind NOT IN ('BULK_CREATE','BULK_DELETE') OR EXISTS(SELECT 1 FROM bulk_client_execution_gate bg WHERE bg.singleton AND bg.enabled AND NOT bg.kill_switch AND bg.panel_id=m.panel_id AND bg.inbound_id=m.inbound_id AND bg.remaining_batches>0 AND bg.expires_at>now() AND jsonb_array_length(m.payload->'Clients')<=bg.max_batch_size)) END) AND NOT EXISTS(SELECT 1 FROM client_mutation_panel_health ph WHERE ph.panel_id=m.panel_id AND (ph.state='QUARANTINED' OR ph.retry_after>now())) AND m.state='PENDING' AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) ORDER BY m.created_at,m.id FOR UPDATE OF m SKIP LOCKED LIMIT 1"
 
 func (j Journal) Claim(ctx context.Context) (Job, bool, error) {
 	if j.DB == nil {
@@ -236,7 +236,12 @@ func (j Journal) Claim(ctx context.Context) (Job, bool, error) {
 }
 
 func (j Journal) Succeed(ctx context.Context, id string) error {
-	res, err := j.DB.ExecContext(ctx,
+	tx, err := j.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	res, err := tx.ExecContext(ctx,
 		"UPDATE client_mutation_jobs SET state='SUCCEEDED',completed_at=now(),next_retry_at=NULL,last_error='',updated_at=now() WHERE id=$1 AND state='RUNNING'",
 		id,
 	)
@@ -250,7 +255,10 @@ func (j Journal) Succeed(ctx context.Context, id string) error {
 	if n != 1 {
 		return ErrInvalidRequest
 	}
-	return nil
+	if _, err = tx.ExecContext(ctx, "DELETE FROM client_mutation_panel_health WHERE panel_id=(SELECT panel_id FROM client_mutation_jobs WHERE id=$1) AND state='COOLDOWN' AND last_job_id=$1", id); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (j Journal) Retry(ctx context.Context, id, reason string, delay time.Duration) error {
@@ -289,7 +297,7 @@ func (j Journal) ClaimID(ctx context.Context, id string) (Job, bool, error) {
 		return Job{}, false, err
 	}
 	defer tx.Rollback()
-	const claimIDSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE m.id=$1 AND m.payload->>'Lifecycle' IS DISTINCT FROM 'true' AND m.kind NOT IN ('BULK_CREATE','BULK_DELETE') AND m.state='PENDING' AND m.attempts=0 AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) FOR UPDATE OF m SKIP LOCKED"
+	const claimIDSQL = "SELECT m.id::text,m.account_id::text,m.panel_id::text,m.inbound_id,m.client_id,m.kind,m.idempotency_key,m.payload,m.state,m.attempts,m.next_retry_at,m.last_error,m.created_at,m.updated_at,m.completed_at FROM client_mutation_jobs m JOIN panel_instances p ON p.id=m.panel_id JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE m.id=$1 AND m.payload->>'Lifecycle' IS DISTINCT FROM 'true' AND m.kind NOT IN ('BULK_CREATE','BULK_DELETE') AND NOT EXISTS(SELECT 1 FROM client_mutation_panel_health ph WHERE ph.panel_id=m.panel_id AND (ph.state='QUARANTINED' OR ph.retry_after>now())) AND m.state='PENDING' AND m.attempts=0 AND (m.next_retry_at IS NULL OR m.next_retry_at<=now()) AND p.enabled=true AND a.enabled=true AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND EXISTS (SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=m.panel_id AND i.remote_id=m.inbound_id AND i.present=true AND i.enabled=true) FOR UPDATE OF m SKIP LOCKED"
 	job, err := scanJob(tx.QueryRowContext(ctx, claimIDSQL, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return Job{}, false, nil

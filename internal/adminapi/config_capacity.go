@@ -40,5 +40,56 @@ func (s *Server) configCapacity(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, 200, map[string]any{"target": target, "active": active, "expired": expired, "quota_exhausted": quota, "deficit": deficit, "created_last_cycle": created, "inbounds": items})
+	rows.Close()
+	automation, err := s.capacityAutomationStatus(r)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	writeJSON(w, 200, map[string]any{"automation": automation, "target": target, "active": active, "expired": expired, "quota_exhausted": quota, "deficit": deficit, "created_last_cycle": created, "inbounds": items})
+}
+
+// capacityAutomationStatus is authenticated operator metadata. Public Output
+// remains a URI-only subscription with unchanged visibility/ownership guards.
+func (s *Server) capacityAutomationStatus(r *http.Request) (map[string]any, error) {
+	var enabled, kill, lifecycle, autoEnroll, policy bool
+	var code, panel, job string
+	var failureAt any
+	err := s.DB.QueryRowContext(r.Context(), `SELECT g.enabled,g.kill_switch,c.enabled,c.auto_enroll,
+ EXISTS(SELECT 1 FROM global_config_policies WHERE policy_key='reality' AND enabled),
+ g.last_failure_code,g.last_failure_at,g.last_failure_panel_id,g.last_failure_job_id
+ FROM client_mutation_execution_gate g CROSS JOIN bulk_lifecycle_control c WHERE g.singleton AND c.singleton`).Scan(&enabled, &kill, &lifecycle, &autoEnroll, &policy, &code, &failureAt, &panel, &job)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.DB.QueryContext(r.Context(), `SELECT h.panel_id::text,h.state,h.reason_code,h.retry_after,h.updated_at
+ FROM client_mutation_panel_health h JOIN panel_instances p ON p.id=h.panel_id JOIN droplets d ON d.id=p.droplet_id
+ WHERE p.enabled AND d.state IN('READY','EXPIRING') AND(d.expires_at IS NULL OR d.expires_at>now())
+ ORDER BY h.updated_at DESC LIMIT 200`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	issues := []map[string]any{}
+	cooldown, quarantined := 0, 0
+	for rows.Next() {
+		var id, state, reason string
+		var retry, updated any
+		if err := rows.Scan(&id, &state, &reason, &retry, &updated); err != nil {
+			return nil, err
+		}
+		if state == "QUARANTINED" {
+			quarantined++
+		} else {
+			cooldown++
+		}
+		issues = append(issues, map[string]any{"panel_id": id, "state": state, "reason": reason, "retry_after": retry, "updated_at": updated})
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return map[string]any{"running": enabled && !kill && lifecycle && autoEnroll && policy,
+		"gate_enabled": enabled && !kill, "policy_enabled": policy, "lifecycle_enabled": lifecycle && autoEnroll,
+		"last_failure_code": code, "last_failure_at": failureAt, "last_failure_panel_id": panel, "last_failure_job_id": job,
+		"cooldown_panels": cooldown, "quarantined_panels": quarantined, "panels": issues}, nil
 }

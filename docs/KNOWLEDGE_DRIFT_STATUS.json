@@ -82,12 +82,13 @@
     "note": "TRIAL_TWO_SERVERS_READY_RESIDENTIAL_UNAVAILABLE; no full phone traffic or residential egress claimed. Frozen source brains remain historical; use exact new snapshot and live code."
   },
   "latest_development_delta": {
-    "source_baseline": "be45c862992a279da377db5b2c2ea1181ff386fc",
-    "source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
-    "snapshot": "docs/UPCLOUD_TRIAL_SOURCE_SNAPSHOT_20261007.json",
-    "handoff": "docs/UPCLOUD_TRIAL_HANDOFF_20261007.md",
-    "acceptance": "docs/UPCLOUD_TRIAL_ACCEPTANCE_20261007.json",
-    "status": "TRIAL_TWO_SERVERS_READY_RESIDENTIAL_UNAVAILABLE",
-    "open_followup": "Actual client connection; compatible residential service endpoint needed. Upstream x-ui expiry restarts and original Vultr232 insufficient-credit classification remain separate."
-  }
+    "source_baseline": "c494fbc1c275852a0b81be90ae62b19c19377904",
+    "source_revision": "source checkpoint containing this snapshot",
+    "snapshot": "docs/CLIENT_FAILURE_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
+    "handoff": "docs/CLIENT_FAILURE_ISOLATION_20261007.md",
+    "acceptance": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json",
+    "status": "SOURCE_TESTS_AND_REVIEW_PASSED_NOT_DEPLOYED",
+    "open_followup": "Clean build/deploy, authenticated capacity resume, actual Residential replacement-cycle proof."
+  },
+  "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source."
 }

@@ -71,7 +71,7 @@ func AddInbound(
 		response.StatusCode >= 300 {
 
 		return nil,
-			ErrMutationRequest
+			panelResponseError(ErrMutationRequest)
 	}
 
 	var envelope mutationEnvelope
@@ -82,7 +82,7 @@ func AddInbound(
 	); err != nil {
 
 		return nil,
-			ErrMutationRequest
+			panelResponseError(ErrMutationRequest)
 	}
 
 	if !envelope.Success {
@@ -109,11 +109,11 @@ func DeleteInbound(
 		return err
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return ErrMutationRequest
+		return panelResponseError(ErrMutationRequest)
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(response.Body, &envelope) != nil {
-		return ErrMutationRequest
+		return panelResponseError(ErrMutationRequest)
 	}
 	if !envelope.Success {
 		return ErrMutationRejected
@@ -144,11 +144,11 @@ func UpdateInbound(
 		return nil, err
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, ErrMutationRequest
+		return nil, panelResponseError(ErrMutationRequest)
 	}
 	var envelope mutationEnvelope
 	if json.Unmarshal(response.Body, &envelope) != nil {
-		return nil, ErrMutationRequest
+		return nil, panelResponseError(ErrMutationRequest)
 	}
 	if !envelope.Success {
 		return nil, ErrMutationRejected
@@ -216,7 +216,7 @@ func UpdateInboundRaw(
 		response.StatusCode >= 300 {
 
 		return nil,
-			ErrMutationRequest
+			panelResponseError(ErrMutationRequest)
 	}
 
 	var envelope mutationEnvelope
@@ -228,7 +228,7 @@ func UpdateInboundRaw(
 		); err != nil {
 
 		return nil,
-			ErrMutationRequest
+			panelResponseError(ErrMutationRequest)
 	}
 
 	if !envelope.Success {

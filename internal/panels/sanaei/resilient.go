@@ -3,6 +3,7 @@ package sanaei
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"net"
@@ -151,7 +152,14 @@ func (s *ResilientSession) delay(
 func (s *ResilientSession) Do(
 	ctx context.Context,
 	req SessionRequest,
-) (SessionResponse, error) {
+) (response SessionResponse, resultErr error) {
+	// This boundary performs only native panel HTTP. Preserve its provenance
+	// so cancellation/read errors cannot be mistaken for SQL or journal faults.
+	defer func() {
+		if resultErr != nil && !errors.Is(resultErr, ErrSessionRequest) {
+			resultErr = fmt.Errorf("%w: %w", ErrSessionRequest, resultErr)
+		}
+	}()
 	if s == nil ||
 		s.Client == nil ||
 		s.Client.HTTP == nil {
@@ -306,3 +314,7 @@ func ReadAllBounded(
 
 	return data, nil
 }
+
+var ErrPanelResponse = errors.New("invalid panel response")
+
+func panelResponseError(err error) error { return fmt.Errorf("%w: %w", ErrPanelResponse, err) }

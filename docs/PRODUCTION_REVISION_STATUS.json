@@ -39,7 +39,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Repair global client-executor closure on pre-mutation per-panel temporary circuit errors; preserve uncertainty/conflict guards and perform controlled capacity resume plus native/profile Output verification. Read docs/OUTPUT_GLOBAL_DIAGNOSIS_20261007.md. Separate UpCloud expired-server capacity deadlock, trial proxy ports, native x-ui restarts and Vultr232 billing classification remain open.",
+  "next_product_step": "Deploy tested client failure isolation checkpoint with migration161; use existing authenticated Resume automatic clients, then verify native client creation and actual Residential replacement cycle. No live recovery claimed before this.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
   "worker_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
@@ -390,5 +390,6 @@
     "confirmed_trigger": "sanaei runtime circuit open: retry in 30s; execution gate fail-closed",
     "runtime_changed": false,
     "evidence_directory": "/root/backups/dob-output-global-diagnosis-20261007"
-  }
+  },
+  "prepared_client_failure_isolation": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json"
 }

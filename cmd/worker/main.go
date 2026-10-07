@@ -270,7 +270,7 @@ func main() {
 		}
 		run := func() {
 			if _, err := exec.Drain(ctx); err != nil && ctx.Err() == nil {
-				if gateErr := exec.Journal.FailCloseGate(ctx); gateErr != nil {
+				if gateErr := exec.Journal.FailCloseGateWithFailure(ctx, err); gateErr != nil {
 					log.Printf("client mutation executor fail-close: %v (original: %v)", gateErr, err)
 					return
 				}

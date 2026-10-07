@@ -48,7 +48,7 @@ func (s *Server) resumeCapacityAutomation(w http.ResponseWriter, r *http.Request
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, 200, map[string]string{"state": "enabled", "detail": "Automatic clients resumed with existing policy, scope limits and remaining budgets. Any execution error closes the gate again."})
+	writeJSON(w, 200, map[string]string{"state": "enabled", "detail": "Automatic clients resumed with existing policy, scope limits and remaining budgets. Unavailable panels wait independently; quarantined panels require review. Internal execution failures stop automation."})
 }
 
 var errScopedExecutionGate = errors.New("scoped execution gate cannot be widened")
@@ -74,6 +74,7 @@ func resumeCapacityTx(ctx context.Context, tx *sql.Tx) error {
  AND(dr.expires_at IS NULL OR dr.expires_at>now()+interval '60 seconds')
  AND (sc.last_error<>'policy_port_removed' OR EXISTS(SELECT 1 FROM panel_inbound_inventory i CROSS JOIN global_config_policies pol WHERE i.panel_id=sc.panel_id AND i.remote_id=sc.inbound_id AND i.present AND pol.policy_key='reality' AND pol.ports @> to_jsonb(ARRAY[i.port])))
  AND NOT EXISTS(SELECT 1 FROM client_mutation_jobs j WHERE j.panel_id=sc.panel_id AND j.inbound_id=sc.inbound_id AND j.state='FAILED')
+ AND NOT EXISTS(SELECT 1 FROM client_mutation_panel_health ph WHERE ph.panel_id=sc.panel_id AND (ph.state='QUARANTINED' OR ph.retry_after>now()))
  ORDER BY sc.panel_id,sc.inbound_id
  LIMIT GREATEST(0,(SELECT max_active_scopes FROM bulk_lifecycle_control WHERE singleton)-(SELECT count(*) FROM bulk_lifecycle_scopes WHERE enabled AND expires_at>now()))
  )`)

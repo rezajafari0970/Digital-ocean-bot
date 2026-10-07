@@ -16,8 +16,12 @@ import (
 // authorization. Expiry, account state, historical errors and the global cap
 // are rechecked transactionally after the network observation.
 func (s Service) autoEnrollLifecycle(ctx context.Context, p readyworker.Panel, rt *sanaei.PanelRuntime) error {
+	blocked, err := (clientops.Journal{DB: s.DB}).PanelBlocked(ctx, p.ID)
+	if err != nil || blocked {
+		return err
+	}
 	var eligible bool
-	err := s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_lifecycle_control c CROSS JOIN client_mutation_execution_gate g CROSS JOIN global_config_policies pol WHERE c.enabled AND c.auto_enroll AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=$1) AND pol.policy_key='reality' AND pol.enabled)`, p.ID).Scan(&eligible)
+	err = s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_lifecycle_control c CROSS JOIN client_mutation_execution_gate g CROSS JOIN global_config_policies pol WHERE c.enabled AND c.auto_enroll AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=$1) AND pol.policy_key='reality' AND pol.enabled)`, p.ID).Scan(&eligible)
 	if err != nil || !eligible {
 		return err
 	}
@@ -105,7 +109,7 @@ func (s Service) admitLifecycleScope(ctx context.Context, panel string, inbound 
 		return err
 	}
 	var allowed bool
-	err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_lifecycle_control c CROSS JOIN client_mutation_execution_gate g CROSS JOIN global_config_policies pol JOIN panel_instances p ON p.id=$1 JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE c.enabled AND c.auto_enroll AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=p.id) AND (g.inbound_id IS NULL OR g.inbound_id=$2) AND pol.policy_key='reality' AND pol.enabled AND pol.ports @> to_jsonb(ARRAY[$3::integer]) AND p.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND (d.expires_at IS NULL OR d.expires_at>now()+interval '60 seconds') AND (SELECT count(*) FROM bulk_lifecycle_scopes WHERE enabled AND expires_at>now())<c.max_active_scopes) AND NOT EXISTS(SELECT 1 FROM client_mutation_jobs WHERE panel_id=$1 AND inbound_id=$2 AND state IN ('PENDING','RUNNING','FAILED'))`, panel, inbound, port).Scan(&allowed)
+	err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_lifecycle_control c CROSS JOIN client_mutation_execution_gate g CROSS JOIN global_config_policies pol JOIN panel_instances p ON p.id=$1 JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE c.enabled AND c.auto_enroll AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=p.id) AND (g.inbound_id IS NULL OR g.inbound_id=$2) AND pol.policy_key='reality' AND pol.enabled AND pol.ports @> to_jsonb(ARRAY[$3::integer]) AND p.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN ('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND (d.expires_at IS NULL OR d.expires_at>now()+interval '60 seconds') AND (SELECT count(*) FROM bulk_lifecycle_scopes WHERE enabled AND expires_at>now())<c.max_active_scopes) AND NOT EXISTS(SELECT 1 FROM client_mutation_jobs WHERE panel_id=$1 AND inbound_id=$2 AND state IN ('PENDING','RUNNING','FAILED')) AND NOT EXISTS(SELECT 1 FROM client_mutation_panel_health WHERE panel_id=$1 AND (state='QUARANTINED' OR retry_after>now()))`, panel, inbound, port).Scan(&allowed)
 	if err != nil || !allowed {
 		return err
 	}
