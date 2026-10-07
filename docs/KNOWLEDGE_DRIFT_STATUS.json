@@ -369,7 +369,7 @@
     "handoff": "docs/WORKER_ISOLATION_20261007.md",
     "acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
     "status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
-    "open_followup": "Living-but-stuck module supervision and independent health evidence; no pending Resume or recharge."
+    "open_followup": "PH12-001 and PH12-002 remediation before broader watchdog work; see latest re-audit."
   },
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
@@ -393,11 +393,18 @@
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
   "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
-  "current_frontier": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
+  "current_frontier": "PHASE12_REAUDIT_COMPLETE_TWO_HIGH_FINDINGS_OPEN",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "PASS",
+  "openai_review": "REVISE_TWO_REPRODUCED_FINDINGS",
   "current_native_evidence_at": "2026-10-07T08:18:50.474410362Z",
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
-  "source_snapshot_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a"
+  "source_snapshot_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
+  "latest_audit_verdict": "REVISE",
+  "open_reaudit_findings": [
+    "PH12-001",
+    "PH12-002"
+  ],
+  "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00"
 }

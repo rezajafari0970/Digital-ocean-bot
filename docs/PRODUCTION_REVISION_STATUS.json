@@ -2,7 +2,7 @@
   "schema_version": 2,
   "runtime_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-07T08:18:50.474410362Z",
+  "verified_at_utc": "2026-10-07T08:39:00.786977+00:00",
   "binaries": {
     "api": {
       "revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
@@ -28,7 +28,7 @@
   "migration": "000161_client_mutation_panel_health",
   "acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
   "verified": true,
-  "note": "Split control/panels deployed from reviewed clean source; native progress, output, role ownership, resource headroom and configuration preservation verified in bounded observation.",
+  "note": "Runtime and live native flow verified; fresh audit reproduced two HIGH inherited recovery-ledger fault-path defects. No product/runtime change in audit.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -45,7 +45,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Bounded supervision for living-but-stuck modules and independent health evidence; no pending Resume or credit recharge.",
+  "next_product_step": "Repair PH12-001/002 with checked recovery ledger read/write, bounded admission fencing and truthful async task progress.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
   "worker_source_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
@@ -53,7 +53,7 @@
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DEPLOYED_SPLIT_NATIVE_PROGRESS_VERIFIED",
+  "verification_status": "RUNTIME_VERIFIED_PHASE12_REAUDIT_FINDINGS_OPEN",
   "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
@@ -957,5 +957,35 @@
         "desired_server_count": 5
       }
     ]
+  },
+  "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
+  "latest_audit_verdict": "REVISE",
+  "open_reaudit_findings": [
+    "PH12-001",
+    "PH12-002"
+  ],
+  "latest_reaudit_at": "2026-10-07T08:39:00.786977+00:00",
+  "latest_native_output_audit": {
+    "finished_at": "2026-10-07T08:36:07.352095506Z",
+    "matched_snapshots": 398,
+    "native_unverified": 0,
+    "native_valid": 398,
+    "panels": 45,
+    "published_unique": 398,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {
+      "DIRECT": 44,
+      "RESIDENTIAL": 346
+    },
+    "shares_before": {
+      "DIRECT": 45,
+      "RESIDENTIAL": 353
+    },
+    "started_at": "2026-10-07T08:36:03.43361554Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
   }
 }

@@ -1,0 +1,1015 @@
+{
+  "status": "AUDIT_COMPLETE_REMEDIATION_REQUIRED",
+  "runtime_revision": "951ea1a5852e716d09f4362e75f1a4ba51ca3c7a",
+  "audit_source_head": "79a0dd55cbdd6383057f40744179599a7e926406",
+  "at_utc": "2026-10-07T08:39:00.786977+00:00",
+  "phase1_verdict": "LIVE_NATIVE_FLOW_VERIFIED_TWO_HIGH_RECOVERY_ERROR_PATH_DEFECTS",
+  "phase2_verdict": "DEPLOYED_PROCESS_ISOLATION_VERIFIED_WITH_DECLARED_SHARED_FAILURE_DOMAINS",
+  "findings": [
+    {
+      "id": "PH12-001",
+      "severity": "HIGH",
+      "status": "REPRODUCED_UNFIXED",
+      "phase": "phase1 recovery; inherited by phase2 control role",
+      "file": "internal/worker/worker.go",
+      "lines": [
+        61,
+        84,
+        86
+      ],
+      "title": "Retry-ledger read failure can authorize deployment bypass and still report a healthy recovery scan",
+      "sequence": "Due collapses DueChecked SQL error into false. Operation is silently skipped; deployment calls the real BypassDeploymentBackoff implementation. WAITING_INSTALLER with selected installer_ref returns true, so one recovery callback runs despite failed authoritative ledger read. round returns nil, allowing Run to refresh recovery_scan_unix.",
+      "reproduction": {
+        "bypass_calls": 1,
+        "deployments_submitted": 1,
+        "ledger_read_failed": true,
+        "operations_submitted": 0,
+        "round_error_returned": false
+      },
+      "impact": "Incorrect recovery admission and misleading progress under a selective ledger read failure. No duplicate remote create was attempted or claimed.",
+      "repair": "Use DueChecked on both branches; propagate ledger errors and do not call bypass unless a successful read establishes a genuine not-due state. Add worker-round and progress regressions.",
+      "history": "Problematic compatibility/bypass call sites date from September26, before both audited releases."
+    },
+    {
+      "id": "PH12-002",
+      "severity": "HIGH",
+      "status": "REPRODUCED_UNFIXED",
+      "phase": "phase1 recovery; inherited by phase2 control role",
+      "file": "internal/worker/worker.go",
+      "lines": [
+        66,
+        70,
+        92,
+        96
+      ],
+      "title": "Recovery backoff write failure is only logged, permitting rediscovery without recorded delay",
+      "sequence": "Fail/Clear wrappers discard checked persistence errors. An isolated trigger rejects the failure write; the callback fails in two consecutive rounds, both round calls return nil and zero failure rows persist. Production polling would revisit at its normal cadence instead of durable backoff.",
+      "reproduction": {
+        "deployments_executed_two_immediate_rounds": 2,
+        "persisted_failure_rows": 0,
+        "round1_error_returned": false,
+        "round2_error_returned": false
+      },
+      "impact": "Lost durable error/backoff and false healthy recovery progress under persistence failure. Existing provider/operation fences still apply; this is not proof of duplicate provider mutation.",
+      "repair": "Use FailChecked/ClearChecked, surface asynchronous persistence failures to progress/supervision and retain a bounded item admission fence until persistence/reconciliation succeeds. Do not fail-open or globally reset gates.",
+      "history": "Asynchronous best-effort callers date from October6, before both audited releases."
+    }
+  ],
+  "production_mutations_by_audit": false,
+  "production_services_restarted_by_audit": false,
+  "runtime_changes": false,
+  "tests": {
+    "existing_acceptance": "PASS",
+    "isolated_postgresql_and_race": "PASS",
+    "full_go_suite": "PASS (ordinary full-suite cache retained; targeted fault/race suites rerun with count=1)",
+    "recorded_top_level_passes": 216,
+    "recorded_skips": [
+      "--- SKIP: TestAccountRuleApplicationBrowser (0.00s)"
+    ],
+    "new_adversarial_reproductions": "TWO DEFECTS REPRODUCED; these are not passing correctness tests",
+    "exact_deployed_binary_systemd_fixture": {
+      "at_utc": "2026-10-07T08:33:35.907410+00:00",
+      "schema": "role_process_5ef49e436cd545ba9fb723ce3846dd68",
+      "units": {
+        "control": "dob-role-fixture-control-3846dd68",
+        "panels": "dob-role-fixture-panels-3846dd68"
+      },
+      "production_services_changed": false,
+      "before": {
+        "control": {
+          "pid": "1633218",
+          "restarts": "0"
+        },
+        "panels": {
+          "pid": "1633220",
+          "restarts": "0"
+        }
+      },
+      "after": {
+        "control": {
+          "pid": "1633218",
+          "restarts": "0"
+        },
+        "panels": {
+          "pid": "1633327",
+          "restarts": "1"
+        }
+      },
+      "heartbeat": [
+        {
+          "kind": "production-control",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 24
+          },
+          "role": "control"
+        },
+        {
+          "kind": "production-panels",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 40
+          },
+          "role": "panels"
+        },
+        {
+          "kind": "production-panels",
+          "pool": {
+            "Idle": 0,
+            "InUse": 2,
+            "WaitCount": 0,
+            "WaitDuration": 0,
+            "MaxIdleClosed": 0,
+            "OpenConnections": 2,
+            "MaxIdleTimeClosed": 0,
+            "MaxLifetimeClosed": 0,
+            "MaxOpenConnections": 40
+          },
+          "role": "panels"
+        }
+      ],
+      "peer_survived": true,
+      "automatic_role_restart": "PASS",
+      "duplicate_process_rejected": true,
+      "status": "PASS"
+    }
+  },
+  "native_output": {
+    "details": [
+      {
+        "panel": "c2c5348a-e71a-493c-a13e-839cd73dd5f7",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "30a50581-b3c9-4ebe-97e6-143ca53b7734",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "bdf0033c-7f24-4f0f-b39d-9f23879b4a82",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "1e01fbe5-425b-4786-b8cd-33f8f1f5dcf4",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "34047bb4-ff35-45e2-9c62-57cfea914a3a",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "a108a432-bd15-484c-b723-f58ca1d15090",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "410a7742-4a07-472b-ac56-e43141844f82",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "2492e053-cced-4428-80ec-26ce030ad9c9",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "c53fa0ec-86a2-4b88-b6a8-78682a97b43d",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "59fcd55d-5ed1-4973-bd51-5b64279e1a3d",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "2fd830de-b405-4fea-9276-256f8fae90be",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "1c40d98c-8d32-43c2-9fd3-be99c74bf53b",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "de432be2-2392-41fe-831e-013254c0075b",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "4a1b7e19-253c-4c36-b29d-6f040607f305",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "5c5556f7-edc9-4de4-8966-dbc8e1982fd5",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "25df159f-73a8-48a6-b993-e3a290065d51",
+        "published": 1,
+        "native_valid": 1,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8558e99d-d9d7-4608-9e28-9547ccc8745b",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "6078f3be-3df7-4be0-9b1c-dadd55741527",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "556be5e0-253d-423d-a48f-2c5a8e7b4715",
+        "published": 6,
+        "native_valid": 6,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "9ebf1214-4aa1-4cce-be2e-585048400d7d",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "6bae7df7-8201-445e-a534-8debe9ef58ed",
+        "published": 6,
+        "native_valid": 6,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "0713584a-cd40-475b-846f-55e7d7df30d7",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "4445b3b9-54d1-4da0-b90b-0c25dc8c9202",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8cc3c871-6a41-4954-985e-45f0314f6ea9",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "3b885098-92ce-4d15-86f1-4542b62f1ec5",
+        "published": 6,
+        "native_valid": 6,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "622cd9cd-c631-48b9-8747-b888cc6b9fc9",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "045839c6-0374-4412-ba12-8f38846acdfc",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "70faec8e-a87e-42e7-8e47-023912c6086b",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "f96518f7-36af-43ac-a20c-09a864821f5f",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "9f788a0e-0ed8-4f69-a2a7-1bd118dee7df",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "a3d9a33a-b9de-4aa8-b29c-15b311e4473e",
+        "published": 8,
+        "native_valid": 8,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "668efd6c-ab6d-4512-b688-f9c36b3000c7",
+        "published": 8,
+        "native_valid": 8,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "529f3531-1dcf-4229-9489-4329ee7bf34a",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "126f8d45-bfda-4743-8bb2-f64b227f612c",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "5d2981c6-9233-4748-b972-90111f699da7",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "790cb530-be39-489e-8d35-e4bb29e1e0c0",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "99c21e24-1ef4-41a5-aeb7-7632dd40575d",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8f3696cd-4997-400b-aae8-72e13697b84d",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "7c351c57-526a-4066-9ab9-55df4089484a",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "4397b247-c253-4245-9649-1038d2b8e969",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "3e860014-0285-40b7-936f-a647fc37517c",
+        "published": 10,
+        "native_valid": 10,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "8c717a27-538d-4b7a-bcdb-fdf856cf510d",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "c2fc7477-7acf-425f-be32-7e4de0a1483f",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "20c2dc14-d12c-4352-8a3a-1456d81ccbe7",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      },
+      {
+        "panel": "ac276e80-bd8a-4bcc-b839-35eb42b28905",
+        "published": 9,
+        "native_valid": 9,
+        "transitioned_out_before_recheck": 0,
+        "still_published_invalid": 0,
+        "native_unverified": 0
+      }
+    ],
+    "finished_at": "2026-10-07T08:36:07.352095506Z",
+    "matched_snapshots": 398,
+    "native_unverified": 0,
+    "native_valid": 398,
+    "panels": 45,
+    "published_unique": 398,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {
+      "DIRECT": 44,
+      "RESIDENTIAL": 346
+    },
+    "shares_before": {
+      "DIRECT": 45,
+      "RESIDENTIAL": 353
+    },
+    "started_at": "2026-10-07T08:36:03.43361554Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
+  },
+  "newborn_expiry": [
+    {
+      "deleted": 212,
+      "route_class": "RESIDENTIAL",
+      "max_lifetime": "00:11:06.667048",
+      "min_lifetime": "00:10:13.45651",
+      "earlier_deletions": 0,
+      "created_after_deploy": 719,
+      "completed_600_second_cycle": 212
+    },
+    {
+      "deleted": 0,
+      "route_class": "DIRECT",
+      "max_lifetime": null,
+      "min_lifetime": null,
+      "earlier_deletions": 0,
+      "created_after_deploy": 10,
+      "completed_600_second_cycle": 0
+    }
+  ],
+  "native_replacement_scopes": [
+    {
+      "scopes": 59,
+      "replacements": 618
+    }
+  ],
+  "jobs_at_0833": [
+    {
+      "kind": "BULK_CREATE",
+      "count": 2,
+      "state": "OBSOLETE",
+      "max_attempts": 0,
+      "oldest_idle_seconds": 254.276156
+    },
+    {
+      "kind": "BULK_CREATE",
+      "count": 16,
+      "state": "PENDING",
+      "max_attempts": 0,
+      "oldest_idle_seconds": 827.515028
+    },
+    {
+      "kind": "BULK_CREATE",
+      "count": 711,
+      "state": "SUCCEEDED",
+      "max_attempts": 1,
+      "oldest_idle_seconds": 971.0791
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 2,
+      "state": "OBSOLETE",
+      "max_attempts": 0,
+      "oldest_idle_seconds": 235.672795
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 15,
+      "state": "PENDING",
+      "max_attempts": 0,
+      "oldest_idle_seconds": 334.926553
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 1,
+      "state": "RUNNING",
+      "max_attempts": 1,
+      "oldest_idle_seconds": 0.088038
+    },
+    {
+      "kind": "BULK_DELETE",
+      "count": 646,
+      "state": "SUCCEEDED",
+      "max_attempts": 1,
+      "oldest_idle_seconds": 970.869701
+    }
+  ],
+  "initial_native_observation": {
+    "at_utc": "2026-10-07T08:28:23.092928+00:00",
+    "since": "2026-10-07T08:16:55.965178+00:00",
+    "gates": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+        "last_failure_code": "EXECUTOR_INTERNAL_FAILURE"
+      }
+    ],
+    "jobs": [
+      {
+        "n": 31,
+        "kind": "BULK_CREATE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "n": 1,
+        "kind": "BULK_CREATE",
+        "state": "RUNNING",
+        "latest": null,
+        "max_attempts": 1
+      },
+      {
+        "n": 454,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T08:28:21.56073+00:00",
+        "max_attempts": 1
+      },
+      {
+        "n": 15,
+        "kind": "BULK_DELETE",
+        "state": "PENDING",
+        "latest": null,
+        "max_attempts": 0
+      },
+      {
+        "n": 465,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "latest": "2026-10-07T08:28:21.36846+00:00",
+        "max_attempts": 1
+      }
+    ],
+    "expired_owned": [
+      {
+        "deleted_after_deploy": 480,
+        "lived_at_least_595_seconds": 480
+      }
+    ],
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "1609881",
+        "NRestarts": "0",
+        "MemoryCurrent": "12398592",
+        "TasksCurrent": "11",
+        "MemoryMax": "infinity"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "1609865",
+        "NRestarts": "0",
+        "MemoryCurrent": "11223040",
+        "TasksCurrent": "10",
+        "MemoryMax": "536870912"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "1609866",
+        "NRestarts": "0",
+        "MemoryCurrent": "32182272",
+        "TasksCurrent": "11",
+        "MemoryMax": "536870912"
+      }
+    },
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "module_exit": 0,
+      "ambiguous_retry": 0
+    }
+  },
+  "pretest_pool_samples": {
+    "control": {
+      "cap": 24,
+      "peak_in_use": 6,
+      "peak_open": 10,
+      "wait_count_max": 0,
+      "wait_duration_max": 0,
+      "stalled_lanes_max": 0
+    },
+    "panels": {
+      "cap": 40,
+      "peak_in_use": 14,
+      "peak_open": 16,
+      "wait_count_max": 0,
+      "wait_duration_max": 0,
+      "stalled_lanes_max": 0
+    }
+  },
+  "latest_live_at": "2026-10-07T08:37:42.482620+00:00",
+  "latest_public_shares": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T06:11:26.948007+00:00",
+      "http_status": 200,
+      "vless_lines": 47,
+      "response_bytes": 14163
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T06:50:42.869746+00:00",
+      "http_status": 200,
+      "vless_lines": 385,
+      "response_bytes": 115956
+    }
+  ],
+  "latest_upcloud_lifecycle": [
+    {
+      "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+      "name": "Upcloud 113",
+      "owned": true,
+      "state": "READY",
+      "enabled": true,
+      "droplet_id": "5a37004e-5f2e-4e14-a502-92c2d18ab19a",
+      "expires_at": "2026-10-07T08:41:31.135601+00:00",
+      "backfill_required": false,
+      "desired_server_count": 5
+    },
+    {
+      "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+      "name": "Upcloud 113",
+      "owned": true,
+      "state": "PROVISIONING",
+      "enabled": true,
+      "droplet_id": "04b0986f-24a1-44f3-b40e-900416cb7ce0",
+      "expires_at": null,
+      "backfill_required": false,
+      "desired_server_count": 5
+    }
+  ],
+  "final_runtime": {
+    "at_utc": "2026-10-07T08:39:00.786977+00:00",
+    "old_pending": [
+      {
+        "n": 4,
+        "kind": "BULK_CREATE",
+        "reason": "SCOPE_EXPIRED_DISABLED_EXHAUSTED_OR_REPLACED",
+        "max_age_seconds": 1383.78545
+      },
+      {
+        "n": 6,
+        "kind": "BULK_DELETE",
+        "reason": "SCOPE_EXPIRED_DISABLED_EXHAUSTED_OR_REPLACED",
+        "max_age_seconds": 46920.113847
+      }
+    ],
+    "residential_failure_history": [
+      {
+        "count": 1,
+        "classification": "CURRENT_SERVER"
+      },
+      {
+        "count": 792,
+        "classification": "RETIRED_OR_MISSING"
+      }
+    ],
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "DropInPaths": "/etc/systemd/system/digital-ocean-bot-api.service.d/60-worker-isolation.conf",
+        "Restart": "on-failure",
+        "TimeoutStopUSec": "1min 30s",
+        "MainPID": "1609881",
+        "NRestarts": "0",
+        "MemoryCurrent": "12066816",
+        "MemoryMax": "infinity",
+        "sha256": "2ae2c9ed6180d5e4214f681c37cc5b568b9b3c961088094ac44d9583419464f1"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "DropInPaths": "/etc/systemd/system/digital-ocean-bot-worker.service.d/60-worker-isolation.conf",
+        "Restart": "on-failure",
+        "TimeoutStopUSec": "1min 30s",
+        "MainPID": "1609865",
+        "NRestarts": "0",
+        "MemoryCurrent": "11415552",
+        "MemoryMax": "536870912",
+        "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "DropInPaths": "",
+        "Restart": "on-failure",
+        "TimeoutStopUSec": "1min 30s",
+        "MainPID": "1609866",
+        "NRestarts": "0",
+        "MemoryCurrent": "30134272",
+        "MemoryMax": "536870912",
+        "sha256": "acf548f6e34d4a72e4a72feec0636c631fa67ec3540940ee272a693b07a1ce24"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T08:39:00.983761249Z"
+    },
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T06:23:13.912198+00:00",
+        "concurrency": 1,
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00"
+      }
+    ],
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "unexpected_module_exit": 0,
+      "ambiguous_retry": 0,
+      "failure_ledger_write_error": 4,
+      "failure_ledger_clear_error": 0
+    },
+    "product_diff_from_runtime": "",
+    "source_hashes_match": true
+  },
+  "ledger_log_provenance": {
+    "all_matching_errors": [
+      {
+        "at_utc": "2026-10-07T08:16:55.979613+00:00",
+        "unit": "digital-ocean-bot-worker.service",
+        "pid": "1400447",
+        "causes": [
+          "context canceled"
+        ],
+        "sqlstates": [],
+        "message_sha256": "e67edc5ec7cf1f4ed1ca6bb3fcf7d84875ff8adec3813101f65ddd4c8f449d01"
+      },
+      {
+        "at_utc": "2026-10-07T08:16:55.985787+00:00",
+        "unit": "digital-ocean-bot-worker.service",
+        "pid": "1400447",
+        "causes": [
+          "context canceled"
+        ],
+        "sqlstates": [],
+        "message_sha256": "e67edc5ec7cf1f4ed1ca6bb3fcf7d84875ff8adec3813101f65ddd4c8f449d01"
+      },
+      {
+        "at_utc": "2026-10-07T08:16:55.987172+00:00",
+        "unit": "digital-ocean-bot-worker.service",
+        "pid": "1400447",
+        "causes": [
+          "context canceled"
+        ],
+        "sqlstates": [],
+        "message_sha256": "e67edc5ec7cf1f4ed1ca6bb3fcf7d84875ff8adec3813101f65ddd4c8f449d01"
+      },
+      {
+        "at_utc": "2026-10-07T08:16:55.987342+00:00",
+        "unit": "digital-ocean-bot-worker.service",
+        "pid": "1400447",
+        "causes": [
+          "context canceled"
+        ],
+        "sqlstates": [],
+        "message_sha256": "e67edc5ec7cf1f4ed1ca6bb3fcf7d84875ff8adec3813101f65ddd4c8f449d01"
+      }
+    ],
+    "current_runtime_pid_matches": 0,
+    "explanation": "Four context-canceled ledger messages belong to the old worker PID1400447 during08:16:55 rollout stop; none belongs to current split workers. The two new SQL-fault reproductions are isolated test evidence, not a claim those faults are occurring in live workers."
+  },
+  "source_review": {
+    "verdict": "REVISE",
+    "findings": [
+      {
+        "severity": "HIGH",
+        "file": "internal/worker/worker.go",
+        "line": 61,
+        "issue": "Failure-ledger read errors are silently treated as not due, yet the recovery round returns success and refreshes readiness progress; deployment work can additionally be authorized through the backoff-bypass path. A realistic sequence is that recovery discovery succeeds while worker_item_failures reads fail, operations are silently skipped, a deployment's bypass checks succeed, that deployment runs, and recovery_scan_unix remains fresh despite loss of the authoritative retry ledger.",
+        "evidence": "Operation and deployment admission call FailureStore.Due, which collapses every DueChecked error to false. For deployments, false then invokes BypassDeploymentBackoff at lines 84-88 without distinguishing an actual future retry from a failed ledger read. round returns nil, and Run records progress at lines 40-42. DueChecked itself correctly exposes read errors, but this caller discards them.",
+        "fix": "Use DueChecked for both operation and deployment paths. Propagate any ledger read error from the round, and permit BypassDeploymentBackoff only when DueChecked succeeded and returned a known not-due result. Add a test where the failure table/read fails while bypass conditions otherwise hold, asserting no submission and no progress update."
+      },
+      {
+        "severity": "HIGH",
+        "file": "internal/worker/worker.go",
+        "line": 65,
+        "issue": "Recovery failure/backoff persistence is best-effort rather than authoritative. After a remote or workflow failure, a ledger write failure is only logged; the task exits and can be rediscovered without durable backoff, causing repeated recovery attempts under a damaged ledger.",
+        "evidence": "The asynchronous operation and deployment handlers call FailureStore.Fail and Clear at lines 66-70 and 92-96. Those wrappers discard FailChecked/ClearChecked errors after logging. LifecycleWorker uses the checked methods and returns joined errors, showing the stricter pattern is available but not used by phase1 recovery.",
+        "fix": "Use FailChecked and ClearChecked in recovery handlers and surface persistence failures to worker supervision/readiness through a bounded task-result channel. Do not mark the round healthy or resubmit an item until its ledger state can be read and the failure/backoff write is confirmed."
+      },
+      {
+        "severity": "HIGH",
+        "file": "cmd/worker/main.go",
+        "line": 60,
+        "issue": "Role-ownership supervision terminates with log.Fatal from a goroutine, bypassing cancellation, module joins, lease cleanup, database cleanup, and deferred reconciliation. A transient role-check timeout or actual session loss can therefore cut off in-flight provider or panel calls without the promised joined shutdown path.",
+        "evidence": "The ownership watcher calls log.Fatal at lines 61-63. log.Fatal invokes os.Exit, so the deferred stopWatch, roleLease.Close, application.Close, and normal Modules.Run shutdown logic do not execute. The same abrupt path is used at line 88 when Modules.Run reports an unexpected module return.",
+        "fix": "Report ownership loss over an error channel, immediately cancel the shared worker context, wait for Modules.Run to join selected modules, then return from main through normal cleanup. Preserve the existing systemd stop deadline as the outer bound for handlers that do not honor cancellation."
+      },
+      {
+        "severity": "HIGH",
+        "file": "internal/worker/modules.go",
+        "line": 112,
+        "issue": "An unexpected module return cancels peers only via a deferred cancel and returns without waiting for them. The caller then uses log.Fatal, so live handlers are abandoned rather than joined. For example, if residential-monitor returns while another panel handler is inside a bounded POST or SSH call, the process exits before that handler completes its cancellation path.",
+        "evidence": "The normal ctx.Done branch explicitly calls wg.Wait at lines 115-117, but the stopped-module branch at lines 113-114 returns immediately. The existing test checks that a peer observes cancellation but does not check that Run waits for the peer to return on this branch.",
+        "fix": "On an unexpected return, call cancel explicitly, wait for the module WaitGroup, and only then return the module error. Extend the supervision test with a peer that observes cancellation but blocks briefly, asserting Run does not return before release."
+      },
+      {
+        "severity": "HIGH",
+        "file": "deploy/install.sh",
+        "line": 54,
+        "issue": "The installer does not deploy or activate the supplied split-worker and split-API drop-ins, and it does not enable the panels service on a fresh installation. A fresh install therefore starts the base worker with its default all role, leaves the panels worker absent, and leaves API readiness in legacy mode; later enabling only the panels unit conflicts with the all-role advisory lock instead of producing the intended control/panels topology.",
+        "evidence": "Lines 54-57 install only the base API/worker unit files. deploy/worker-control.conf and deploy/api-split-workers.conf are never installed. SERVICES includes digital-ocean-bot-worker-panels only when that service was already enabled or active before installation, which cannot establish split mode on a fresh host. The base worker service ExecStart has no role flag and lacks the 90-second/resource-cap settings unless worker-control.conf is separately installed.",
+        "fix": "Make split topology an explicit atomic deployment mode: install the control and API split drop-ins into their systemd drop-in directories, include and enable both worker units, and validate that the resulting worker commands are exactly control and panels before restart. Keep a separately explicit monolithic mode rather than inferring topology from prior service state."
+      }
+    ],
+    "coverage_gaps": [
+      "Host, database, and network isolation are explicitly deferred and were not established by the provided source.",
+      "There is no watchdog for every living-but-stuck handler. Lifecycle lanes expose stalls, but equivalent per-handler proof is absent for recovery and several panel modules, so readiness is not universal healing evidence.",
+      "Global client-mutation concurrency remains intentionally one; queue-wide fairness and independent proxy-health evidence remain deferred.",
+      "The sources for serverguardian.Service, residential.Monitor, residentialperf.Store, worker executorLock, Heartbeat.Beat, Role-aware Modules dependencies, migration serialization, and several container/runtime methods are absent. Their nested SQL-connection and network call graphs therefore cannot be verified here. In particular, server-guardian, residential-performance, and residential-monitor are not visibly wrapped by panelWork, but the missing implementations prevent concluding whether they hold pinned SQL leases.",
+      "The synthetic work-budget saturation test proves only its modeled held-connection counts. It does not independently establish real nested maxima for provider runtimes, proxy keepers, panel configuration locks, server protection, client executor locks, or omitted module implementations.",
+      "Readiness intentionally checks scanner/selected-module signals rather than successful mutations. It cannot detect every live but wedged panel module, recovery handler, provider call, or SSH driver.",
+      "The exact API service unit, API connection-pool wiring beyond Bootstrap defaults, and installed drop-in layout are not included, so API24 and the live split-mode configuration cannot be independently derived from source alone.",
+      "Remote provider and panel fault behavior was not injected into production; the supplied isolated tests cover selected uncertainty and race paths but not all provider-specific response, timeout, or crash boundaries."
+    ],
+    "limitations": [
+      "No commands were executed. Conclusions are based only on the supplied numbered source, tests, and stated runtime facts.",
+      "The reported live PIDs, restart time, readiness checks, and client/public-output progress show current liveness but do not prove the omitted nested call graphs, failure paths, binary provenance, or shutdown behavior.",
+      "HEAD 79a0dd5 is stated to be docs-only relative to deployed source, but no binary hash-to-source attestation or installed unit/drop-in contents were supplied for independent verification.",
+      "The independently rerun PostgreSQL, race, full-Go, and systemd fixture results were described as in progress rather than supplied as completed evidence, so they were not treated as proof of correctness.",
+      "Known policy gates, finite budgets, quarantine, ownership fences, and uncertainty reconciliation were treated as constraints and not bypassed or generalized into claims of universal recovery."
+    ]
+  },
+  "review_adjudication": [
+    {
+      "review_findings": [
+        1,
+        2
+      ],
+      "decision": "ACCEPT",
+      "basis": "Independently reproduced against real PostgreSQL in isolated schema with actual Worker.Once and actual RecoveryHandler.BypassDeploymentBackoff; recovery callbacks are local probes, no external mutation."
+    },
+    {
+      "review_findings": [
+        3,
+        4
+      ],
+      "decision": "NOT_A_NEW_IMPLEMENTED_SCOPE_DEFECT",
+      "basis": "Deployed contract intentionally fail-stops the process on ownership loss, panic or unexpected module return. Only normal signal shutdown promises join. Waiting indefinitely after ownership loss could preserve an unsafe old actor; systemd TimeoutStopSec does not automatically bound an internally canceled but still running process. Fault exits rely on existing durable uncertainty reconciliation. Combined crash-during-real-provider-POST acceptance is still a coverage gap; do not replace this path with unbounded join."
+    },
+    {
+      "review_findings": [
+        5
+      ],
+      "decision": "OUTSIDE_SELECTED_INSTALLATION_CONTRACT",
+      "basis": "Fresh legacy all-role installation is explicitly retained by design. Production split topology was deliberately installed through control/API drop-ins plus enabled panels service and is observed correctly. A first-class split installation selector is a future usability improvement, not evidence this deployed topology is missing."
+    }
+  ],
+  "scope_limits": [
+    "Per-role separation shares host/PostgreSQL/network.",
+    "No universal living-but-stuck-handler watchdog; shared admission within a role and queue fairness remain incomplete.",
+    "Current scanner readiness can miss authoritative recovery-ledger faults (PH12-001/002).",
+    "Synthetic pool test models held-connection envelopes, not all providers at arbitrary fleet load. Source checks of provider refresh show sequential accounts; guardian/monitor make short SQL reads around network work; performance uses one SQL-only transaction. No observed pool exhaustion, but not a universal maximum proof.",
+    "Exact binary process fixture has empty accounts; crash/restart and native HTTP uncertainty tests are separate, not a crash-during-every-provider-POST end-to-end proof.",
+    "Native output audit checks identity/enabled/expiry, not mobile traffic, byte quotas, device limits or complete routing data plane.",
+    "Ten old pending jobs were blocked by expired/disabled/exhausted/replaced scopes, not arbitrarily resumed.792 residential failure rows refer to retired/missing servers; retention/diagnostic cleanup is a separate follow-up.",
+    "UpCloud replacement observed PROVISIONING at08:37:42; READY completion not yet proved for that newest server. Desired5 preserved."
+  ],
+  "evidence_directory": "/root/backups/dob-phase12-reaudit-20261007",
+  "reproduction_source_sha256": "819da94bdecb9fe2dd1edf150f2a4975d50684d31038ff3caa09c9c7a18cb1a3",
+  "native_observer_source_sha256": "1a6522f857509fa439ea2ab670185974cf14b39a19425a1e019fc28b0e7071c3"
+}

@@ -1,6 +1,14 @@
 # Development Ready Handoff
 
-## Current frontier — phase2 deployed and native progress verified
+## Current frontier — phase1/phase2 re-audit complete; two HIGH defects open
+Read docs/PHASE12_REAUDIT_20261007.md and JSON before any new implementation. Runtime951ea1a remains active and source/runtime hashes match. Existing acceptance and exact deployed-binary isolated systemd restart fixture PASS, but new real-PG fault probes reproduced PH12-001 (failure-ledger read errors can reach deployment bypass and fake healthy scan) and PH12-002 (failure/backoff writes are best-effort, allowing repeated recovery without durable delay). Both are UNFIXED, inherited legacy recovery caller defects. Current audit verdict REVISE; earlier PASS is historical coverage, not closure of these findings.
+
+No production restart/product edit/gate/policy change during this audit. All five readiness checks were green through08:39UTC; native398 published configs/45 panels checked valid,212 post-phase2-born clients completed600-second expiry/deletion, current worker pool waits0. Readiness does not detect the two selective ledger faults. UpCloud newest replacement was PROVISIONING at08:37UTC, not yet READY-confirmed.
+
+Next concrete work: checked read admission before any backoff bypass; checked asynchronous failure/clear persistence with bounded per-item fencing and truthful progress. Preserve unknown-outcome, scope/ownership/provider guards and explicit operator policy. Repro source/evidence at /root/backups/dob-phase12-reaudit-20261007. Orchestrator audit completion means report/test workflow complete, not product approval.
+
+## Prior frontier — phase2 deployment evidence
+
 Runtime/source checkpoint: 951ea1a5852e716d09f4362e75f1a4ba51ca3c7a. API plus control and panels worker services are active. Static0c7721d/schema161 unchanged. All five readiness checks passed through 2026-10-07T08:18:50.474410362Z; source and running binary hashes are verified. Read docs/WORKER_ISOLATION_20261007.md and its ACCEPTANCE/SOURCE_SNAPSHOT.
 
 The user's credit recharge resolved the API blocker. Genuine OpenAI review found two issues (startup ownership-monitor gap and DB admission reserve); both are corrected, final review PASS, real PG/race/HTTP/full-Go/systemd isolation tests PASS. Development Orchestrator worker-isolation-20261007 is COMPLETE. No recharge or additional Resume is pending; the actual client gate remains enabled from06:23:13Z.

@@ -1,0 +1,31 @@
+{
+  "goal": "Independently re-audit deployed phase1 modular recovery and phase2 worker isolation against live source, isolated fault/race tests and read-only native production evidence; report defects and limits without claiming total self-healing.",
+  "context": "Canonical checkout HEAD79a0dd5, runtime951ea1a, static0c7721d/schema161. Existing user request is detailed reinspection of both phases. No service restart, gate change, provider mutation, new billing action or product deployment in this audit. Preserve existing production state. Use real API source review and actual tests; source snapshots are historical except phase2 exact hashes verified. Native production observer runs separately before tests. Review residual shared host/DB, shared per-role admission and noncooperative modules honestly. Record actual new-born600-second expiry and output if present; never claim it from earlier-born clients. Detailed source-grounded audit report and handoff only. Test crashes confined to isolated worker fixture/schema, no live fault injection.",
+  "allowed_paths": [
+    "docs/development-jobs/phase12-reaudit-20261007.json",
+    "docs/PHASE12_REAUDIT_20261007.md",
+    "docs/PHASE12_REAUDIT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/worker ./internal/observability > /root/backups/dob-phase12-reaudit-20261007/race.log 2>&1",
+      "bash tools/worker-isolation-acceptance.sh > /root/backups/dob-phase12-reaudit-20261007/acceptance.log 2>&1",
+      "set -a; . /etc/digital-ocean-bot/env; set +a; DOB_ISOLATION_EVIDENCE_DIR=/root/backups/dob-phase12-reaudit-20261007 python3 tools/worker-isolation-process-fixture.py > /root/backups/dob-phase12-reaudit-20261007/process-fixture.log 2>&1"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-phase12-reaudit-20261007/verify-audit.py"
+    ]
+  },
+  "commit_message": "docs: re-audit phase1 recovery and phase2 worker isolation"
+}
