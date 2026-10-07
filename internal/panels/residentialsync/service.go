@@ -408,6 +408,9 @@ func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Pa
 // per-runtime mutation locks still serialize its writes. Retired panels keep
 // their own lane, so neither fleet size nor retired timeouts starve live proofs.
 func (s Service) NextDuePanelShard(ctx context.Context, serving bool, shard, lanes int) (readyworker.Panel, bool, error) {
+	return s.NextDuePanelShardAfter(ctx, serving, shard, lanes, "")
+}
+func (s Service) NextDuePanelShardAfter(ctx context.Context, serving bool, shard, lanes int, after string) (readyworker.Panel, bool, error) {
 	var p readyworker.Panel
 	if lanes < 1 || lanes > 8 || shard < 0 || shard >= lanes {
 		return p, false, errors.New("invalid routing proof lane")
@@ -423,7 +426,8 @@ func (s Service) NextDuePanelShard(ctx context.Context, serving bool, shard, lan
  AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=p.droplet_id AND d.state='PANEL_COMPLETE')
  AND (r.panel_id IS NULL OR r.revision<>c.revision OR r.next_check_at<=now())
  AND (f.next_retry_at IS NULL OR f.next_retry_at<=now())
- ORDER BY COALESCE(r.next_check_at,'-infinity'::timestamptz),p.id LIMIT 1`, serving, shard, lanes).Scan(&p.ID)
+ ORDER BY CASE WHEN $4='' OR p.id>NULLIF($4,'')::uuid THEN 0 ELSE 1 END,
+ CASE WHEN $4='' THEN COALESCE(r.next_check_at,'-infinity'::timestamptz) END,p.id LIMIT 1`, serving, shard, lanes, after).Scan(&p.ID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return p, false, nil
 	}

@@ -46,6 +46,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	processOwner, err := worker.AcquireProcessRole(filepath.Join(*stateDir, "ownership"), role)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer processOwner.Close()
 	gate := &supervision.RestartGate{Path: filepath.Join(*stateDir, string(role)+".json")}
 	defer gate.Close()
 	if err := gate.Enter(ctx); err != nil {
@@ -109,14 +114,14 @@ func main() {
 	bootCancel()
 	modules := buildModules(application, role, roleLease)
 	modules.Failure = ownershipFailure
-	started := time.Now()
+	started := time.Time{}
 	reset := false
-	modules.Ready = func() error { return supervision.Notify("READY=1") }
+	modules.Ready = func() error { started = time.Now(); return supervision.Notify("READY=1") }
 	modules.Tick = func(s supervision.Snapshot) error {
 		if !s.Healthy {
 			return supervision.ErrStalled
 		}
-		if !reset && time.Since(started) >= 5*time.Minute {
+		if !reset && !started.IsZero() && time.Since(started) >= 5*time.Minute {
 			if err := gate.Healthy(); err != nil {
 				return err
 			}
@@ -550,34 +555,19 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				log.Printf("user capacity discovery: %v", err)
 				return
 			}
-			sem := make(chan struct{}, 8)
-			var wg sync.WaitGroup
-			for _, panel := range panels {
-				panel := panel
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					select {
-					case sem <- struct{}{}:
-						defer func() { <-sem }()
-					case <-ctx.Done():
-						return
-					}
-					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-					defer cancel()
-					runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
-					if err != nil {
-						if cctx.Err() == nil {
-							log.Printf("user capacity fast runtime %s: %v", panel.ID, err)
-						}
-						return
-					}
-					if err = panelWork.Do(cctx, func(ctx context.Context) error { _, e := capacity.FastFillFromPolicy(ctx, panel, runtime); return e }); err != nil && cctx.Err() == nil {
-						log.Printf("user capacity fast fill %s: %v", panel.ID, err)
-					}
-				}()
-			}
-			wg.Wait()
+			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelWork.Do, func(ctx context.Context, index int) error {
+				panel := panels[index]
+				cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+				defer cancel()
+				runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
+				if err == nil {
+					_, err = capacity.FastFillFromPolicy(cctx, panel, runtime)
+				}
+				if err != nil && ctx.Err() == nil {
+					log.Printf("user capacity fast fill %s: %v", panel.ID, err)
+				}
+				return err
+			})
 		}
 		run()
 		for {
@@ -610,32 +600,19 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				log.Printf("user capacity cleanup discovery: %v", err)
 				return
 			}
-			sem := make(chan struct{}, 8)
-			done := make(chan struct{}, len(panels))
-			for _, panel := range panels {
-				p := panel
-				go func() {
-					defer func() { done <- struct{}{} }()
-					select {
-					case sem <- struct{}{}:
-						defer func() { <-sem }()
-					case <-ctx.Done():
-						return
-					}
-					cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
-					defer cancel()
-					runtime, err := sanaeiRuntimes.Acquire(cctx, p.ID)
-					if err == nil {
-						err = panelWork.Do(cctx, func(ctx context.Context) error { return capacity.ReconcileRuntimeFromPolicy(ctx, p, runtime) })
-					}
-					if err != nil && ctx.Err() == nil {
-						log.Printf("user capacity cleanup %s: %v", p.ID, err)
-					}
-				}()
-			}
-			for range panels {
-				<-done
-			}
+			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelWork.Do, func(ctx context.Context, index int) error {
+				panel := panels[index]
+				cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+				defer cancel()
+				runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
+				if err == nil {
+					err = capacity.ReconcileRuntimeFromPolicy(cctx, panel, runtime)
+				}
+				if err != nil && ctx.Err() == nil {
+					log.Printf("user capacity cleanup %s: %v", panel.ID, err)
+				}
+				return err
+			})
 		}
 		run()
 		for {
@@ -665,21 +642,39 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				defer t.Stop()
 				syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
 				failures := worker.FailureStore{DB: application.DB}
+				after := ""
 				for {
 					supervision.Pulse(ctx)
-					p, found, err := syncer.NextDuePanelShard(ctx, serving, shard, lanes)
+					p, found, err := syncer.NextDuePanelShardAfter(ctx, serving, shard, lanes, after)
 					if err != nil {
 						log.Printf("residential sync discovery: %v", err)
 					}
 					if err == nil && found {
+						after = p.ID
+						claimCtx, claimCancel := context.WithTimeout(ctx, 3*time.Second)
+						claimed, claimErr := failures.ReserveOutcome(claimCtx, "residential_sync", p.ID, "", 90*time.Second)
+						claimCancel()
+						if claimErr != nil {
+							log.Printf("residential sync reservation %s: %v", p.ID, claimErr)
+							supervision.Idle(ctx)
+							select {
+							case <-ctx.Done():
+								return
+							case <-t.C:
+							}
+							continue
+						}
+						if !claimed {
+							continue
+						}
 						panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
 						err = panelWork.Do(panelCtx, func(ctx context.Context) error { return syncer.ReconcilePanel(ctx, p, false) })
 						cancel()
+						if persistErr := failures.RecordOutcome(ctx, "residential_sync", p.ID, "", err); persistErr != nil {
+							log.Printf("residential sync persistence %s: %v", p.ID, persistErr)
+						}
 						if err != nil {
-							failures.Fail(ctx, "residential_sync", p.ID, "", err)
 							log.Printf("residential sync panel %s: %v", p.ID, err)
-						} else {
-							failures.Clear(ctx, "residential_sync", p.ID)
 						}
 						continue
 					}

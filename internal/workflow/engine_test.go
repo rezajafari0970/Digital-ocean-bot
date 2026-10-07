@@ -108,3 +108,19 @@ func TestDatabaseCompleteResumesAtPanelOnly(t *testing.T) {
 		t.Fatalf("got state=%s calls=%d", d.State, steps.calls)
 	}
 }
+
+func (s *memStore) Finalize(ctx context.Context, d *Deployment, step, message string, apply func(context.Context, DBTX) error) error {
+	if apply != nil {
+		if err := apply(ctx, nil); err != nil {
+			return err
+		}
+	}
+	return s.Update(ctx, d)
+}
+
+func (s *memStore) AdmitStep(ctx context.Context, d *Deployment, step string, max int) error {
+	if _, err := s.BeginStep(ctx, d.ID, step, max); err != nil {
+		return err
+	}
+	return s.Update(ctx, d)
+}

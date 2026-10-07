@@ -1,0 +1,49 @@
+{
+  "at_utc": "2026-10-07T13:00:22.879025+00:00",
+  "status": "SOURCE_PASS_RUNTIME_PENDING",
+  "closed_audit_ids": [
+    "PH123-001",
+    "PH123-002",
+    "PH123-003",
+    "PH123-004",
+    "PH123-005",
+    "PH123-006",
+    "PH123-007",
+    "PH123-008",
+    "PH123-009",
+    "PH123-010"
+  ],
+  "remaining_confirmed_findings": [],
+  "independent_review": {
+    "response_id": "resp_029a4be631125ff6006ac640e5fdb487d1a7294bff85abb394",
+    "verdict": "PASS",
+    "open_findings": [],
+    "closed_audit_ids": [
+      "PH123-001",
+      "PH123-002",
+      "PH123-003",
+      "PH123-004",
+      "PH123-005",
+      "PH123-006",
+      "PH123-007",
+      "PH123-008",
+      "PH123-009",
+      "PH123-010"
+    ],
+    "coverage_limits": [
+      "Review was limited to the supplied source and tests; the full repository and full test suite were not independently executed.",
+      "PostgreSQL fault-injection and deployment fixture results were assessed from source rather than rerun during this review.",
+      "Deployment fixtures mock systemd, process environments, PostgreSQL administration, builds, and filesystem ownership; they do not constitute a disposable-host installation test.",
+      "Whole-host power-loss atomicity, shared infrastructure failure, and multi-host active/active operation are outside the stated guarantees."
+    ]
+  },
+  "limits": [
+    "No guarantee of permanent absence of faults; external provider, PostgreSQL, host, disk and network failures remain possible.",
+    "Host role fence assumes the supported single worker host and shared canonical state directory; multi-host active/active fencing is not implemented.",
+    "Unresolved item persistence stays fenced and exposes degraded readiness; healthy accounts continue, and readiness alone does not restart a healthy scanner.",
+    "Operator pauses, provider/trial restrictions, quarantine, ownership/unknown outcomes and finite budgets remain authoritative.",
+    "Install/upgrade scenarios execute complete shell scripts with mocked OS commands, not disposable real OS installations. The real systemd fixture separately validates the exact worker process contract.",
+    "Release rollback retains initialized database, credentials and data intentionally for safe retry; it restores the complete managed runtime artifact set, not database bootstrap side effects or whole-host power-loss atomicity.",
+    "Native readback checks configuration identity/enabled/expiry; it does not prove mobile traffic or the complete residential data plane."
+  ]
+}

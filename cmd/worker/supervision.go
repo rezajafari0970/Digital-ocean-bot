@@ -76,12 +76,14 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "account-rules":
 		p.Idle = 5 * time.Second
 	case "lifecycle":
+		p.AsyncLoop = true
 		p.Work = 110 * time.Second
 		p.Idle = 10 * time.Second
 	case "scheduler":
 		p.Work = 15 * time.Minute
 		p.Idle = 5 * time.Second
 	case "recovery":
+		p.AsyncLoop = true
 		p.Work = 3 * time.Minute
 		p.Idle = 10 * time.Second
 	default:

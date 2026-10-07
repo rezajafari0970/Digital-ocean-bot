@@ -1,0 +1,57 @@
+{
+  "goal": "Fix all PH123-001..010 with regression tests, rerun phases1/2/3 from scratch, actual server OpenAI API independent final source re-audit, deploy approved clean binary only with rollback and native production verification, report remaining findings honestly.",
+  "context": "Baseline f4dadf1; production ac1d91e schema162. Preserve explicit operator/provider/ownership/quarantine/finite-budget/unknown-outcome guards. Canonical checkout intentionally detached. Fix poisoned/orphan checkpoints with account purge ownership fencing and per-item reconciliation; eligibility before LIMIT without installer bypass regression; tracked pre-admission panel batch progress and independent async scanner liveness; checked UTF8-safe persistence/workflow terminal outcomes; residential durable retry; coherent fresh/upgrade split systemd topology. Fault injection ONLY isolated bulk_test DB, temporary files/units; never production. Product/code checkpoint before deploy. No subagents. Review all changes through actual OpenAI API; uncorrected confirmed findings cannot be reported closed. Update Brain delta/source snapshots/handoff/status. Source report docs/PHASE123_AUDIT_20261007.md.",
+  "allowed_paths": [
+    "cmd/worker",
+    "internal/worker",
+    "internal/supervision",
+    "internal/droplets/lifecycle.go",
+    "internal/workflow",
+    "internal/app/account_purge.go",
+    "internal/app/account_purge_test.go",
+    "internal/app/recovery.go",
+    "internal/app/recovery_terminal_test.go",
+    "internal/app/installer_activation.go",
+    "deploy",
+    "migrations/000163_recovery_reconciliation.up.sql",
+    "migrations/000163_recovery_reconciliation.down.sql",
+    "tools/phase123-remediation-acceptance.sh",
+    "tools/phase123-deploy-fixture.py",
+    "tools/phase3-supervision-acceptance.sh",
+    "docs/development-jobs/phase123-remediation-20261007.json",
+    "docs/PHASE123_REMEDIATION_20261007.md",
+    "docs/PHASE123_REMEDIATION_ACCEPTANCE_20261007.json",
+    "docs/PHASE123_REMEDIATION_SOURCE_SNAPSHOT_20261007.json",
+    "docs/PHASE123_FINAL_REAUDIT_20261007.md",
+    "docs/PHASE123_FINAL_REAUDIT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "internal/app/deployment_ready.go",
+    "internal/panels/residentialsync/service.go",
+    "internal/app/workflow_remediation_test.go",
+    "internal/testharness/store.go",
+    "internal/adminapi/recovery_controls_test.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 2400,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "GOTMPDIR=/root/buildtmp/dob-modular-recovery /usr/local/go/bin/go test -race ./internal/supervision ./internal/workflow > /root/backups/dob-phase123-remediation-20261007/core-race.log 2>&1",
+      "bash tools/phase123-remediation-acceptance.sh > /root/backups/dob-phase123-remediation-20261007/acceptance.log 2>&1"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-phase123-remediation-20261007/capture-source.py",
+      "bash /root/backups/dob-phase123-remediation-20261007/run-focused.sh",
+      "bash tools/phase123-remediation-acceptance.sh > /root/backups/dob-phase123-remediation-20261007/final-acceptance.log 2>&1",
+      "python3 /root/backups/dob-phase123-remediation-20261007/verify.py"
+    ]
+  },
+  "commit_message": "fix: isolate recovery faults and correct phase1 2 3 supervision and deployment"
+}

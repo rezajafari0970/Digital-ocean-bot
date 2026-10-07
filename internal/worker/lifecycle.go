@@ -17,16 +17,17 @@ type LifecycleSource interface {
 	Due(context.Context, time.Time, int) ([]droplets.LifecycleItem, error)
 }
 type LifecycleWorker struct {
-	Store       LifecycleSource
-	Handler     LifecycleHandler
-	Failures    FailureStore
-	Batch       int
-	Interval    time.Duration
-	ItemTimeout time.Duration
-	Concurrency int
-	Progress    func(time.Time)
-	Dispatcher  *Dispatcher
-	Admit       func(context.Context, func(context.Context) error) error
+	checkpointCursor *pendingRecovery
+	Store            LifecycleSource
+	Handler          LifecycleHandler
+	Failures         FailureStore
+	Batch            int
+	Interval         time.Duration
+	ItemTimeout      time.Duration
+	Concurrency      int
+	Progress         func(time.Time)
+	Dispatcher       *Dispatcher
+	Admit            func(context.Context, func(context.Context) error) error
 }
 
 func (w LifecycleWorker) timeout() time.Duration {
@@ -52,7 +53,10 @@ func (w LifecycleWorker) reconcile(ctx context.Context, active func(string) bool
 	if w.Failures.DB == nil || w.Store == nil || w.Handler == nil {
 		return errors.New("lifecycle worker configuration required")
 	}
-	return reconcileRecoveryCheckpoints(ctx, w.Failures.DB, active, "lifecycle")
+	if w.checkpointCursor == nil {
+		w.checkpointCursor = &pendingRecovery{}
+	}
+	return reconcileRecoveryCheckpoints(ctx, w.Failures.DB, active, "lifecycle", w.checkpointCursor)
 }
 func (w LifecycleWorker) discover(ctx context.Context) ([]droplets.LifecycleItem, error) {
 	scanCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -62,15 +66,16 @@ func (w LifecycleWorker) discover(ctx context.Context) ([]droplets.LifecycleItem
 func (w LifecycleWorker) submitRound(ctx context.Context, d *Dispatcher, offset int, progress *recoveryProgress) (int, error) {
 	scanCtx, scanCancel := context.WithTimeout(ctx, 5*time.Second)
 	defer scanCancel()
-	if err := w.reconcile(scanCtx, d.Active); err != nil {
-		return offset, err
+	reconcileErr := w.reconcile(scanCtx, d.Active)
+	if reconcileErr != nil && !errors.Is(reconcileErr, ErrRecoveryCheckpointPending) {
+		return offset, reconcileErr
 	}
 	items, err := w.discover(scanCtx)
 	if err != nil {
 		return offset, err
 	}
 	if len(items) == 0 {
-		return 0, nil
+		return 0, reconcileErr
 	}
 	start := offset % len(items)
 	for i := 0; i < len(items); i++ {
@@ -95,9 +100,10 @@ func (w LifecycleWorker) submitRound(ctx context.Context, d *Dispatcher, offset 
 	}
 	// Rotate the first offered account each round; persistently due older items
 	// must not monopolize all free lanes inside the bounded discovery window.
-	return (start + 1) % len(items), nil
+	return (start + 1) % len(items), reconcileErr
 }
 func (w LifecycleWorker) Run(ctx context.Context) error {
+	w.checkpointCursor = &pendingRecovery{}
 	interval := w.Interval
 	if interval <= 0 {
 		interval = 10 * time.Second
@@ -142,14 +148,15 @@ func (w LifecycleWorker) Once(ctx context.Context) error {
 	reconcileCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	err := w.reconcile(reconcileCtx, nil)
 	cancel()
-	if err != nil {
+	if err != nil && !errors.Is(err, ErrRecoveryCheckpointPending) {
 		return err
 	}
+	reconcileErr := err
 	items, err := w.discover(ctx)
 	if err != nil {
 		return err
 	}
-	var outcomes error
+	outcomes := reconcileErr
 	for _, item := range items {
 		due, err := w.Failures.DueChecked(ctx, "lifecycle", item.ID)
 		if err != nil {

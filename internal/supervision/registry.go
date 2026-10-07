@@ -13,7 +13,11 @@ import (
 var ErrStalled = errors.New("worker progress deadline exceeded")
 var ErrProtocol = errors.New("invalid supervision contract")
 
-type Policy struct{ Loop, Work, Idle time.Duration }
+type Policy struct {
+	Loop, Work, Idle time.Duration
+	// AsyncLoop has an independent discovery loop; child activity cannot renew it.
+	AsyncLoop bool
+}
 
 func (p Policy) Valid() bool {
 	return p.Loop > 0 && p.Work > 0 && p.Idle >= 0 && p.Loop <= 24*time.Hour && p.Work <= 24*time.Hour && p.Idle <= 24*time.Hour
@@ -71,13 +75,18 @@ func (r *Registry) Register(ctx context.Context, name string, p Policy) (context
 	r.modules[name] = &module{name: name, policy: p, cancel: cancel, due: r.now().Add(p.Loop), nodes: map[uint64]*node{}}
 	return context.WithValue(c, contextKey{}, binding{r: r, name: name}), nil
 }
+func (r *Registry) asyncLoop(name string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.modules[name].policy.AsyncLoop
+}
 func lookup(ctx context.Context) (binding, bool) {
 	b, ok := ctx.Value(contextKey{}).(binding)
 	return b, ok
 }
 func Pulse(ctx context.Context) {
 	b, ok := lookup(ctx)
-	if !ok {
+	if !ok || (b.parent != 0 && b.r.asyncLoop(b.name)) {
 		return
 	}
 	b.r.mu.Lock()
@@ -89,7 +98,7 @@ func Pulse(ctx context.Context) {
 }
 func Idle(ctx context.Context) {
 	b, ok := lookup(ctx)
-	if !ok {
+	if !ok || (b.parent != 0 && b.r.asyncLoop(b.name)) {
 		return
 	}
 	b.r.mu.Lock()
@@ -128,7 +137,9 @@ func Waiting(ctx context.Context) func() {
 				}
 			}
 			m.started = true
-			m.due = b.r.now().Add(m.policy.Loop)
+			if !m.policy.AsyncLoop {
+				m.due = b.r.now().Add(m.policy.Loop)
+			}
 		})
 	}
 }
@@ -169,7 +180,9 @@ func Begin(ctx context.Context, phase string, budget time.Duration) (context.Con
 	m.started = true
 	m.nodes[id] = &node{id: id, parent: b.parent, phase: phase, budget: budget, deadline: r.now().Add(budget)}
 	m.idle = false
-	m.due = r.now().Add(m.policy.Loop)
+	if !m.policy.AsyncLoop {
+		m.due = r.now().Add(m.policy.Loop)
+	}
 	var once sync.Once
 	finish := func() {
 		once.Do(func() {
@@ -183,7 +196,9 @@ func Begin(ctx context.Context, phase string, budget time.Duration) (context.Con
 			}
 			delete(m.nodes, id)
 			m.completed++
-			m.due = r.now().Add(m.policy.Loop)
+			if !m.policy.AsyncLoop {
+				m.due = r.now().Add(m.policy.Loop)
+			}
 			if n.parent != 0 {
 				if p := m.nodes[n.parent]; p != nil {
 					p.children--
@@ -216,7 +231,7 @@ func reason(m *module, now time.Time) string {
 			return "task_" + n.phase
 		}
 	}
-	if len(m.nodes) == 0 && m.waiting == 0 && !now.Before(m.due) {
+	if (m.policy.AsyncLoop || (len(m.nodes) == 0 && m.waiting == 0)) && !now.Before(m.due) {
 		return "loop"
 	}
 	return ""

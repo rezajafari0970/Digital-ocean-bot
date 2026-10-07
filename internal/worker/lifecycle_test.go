@@ -29,6 +29,7 @@ func TestLifecycleIndependentAccountAndNoOverlapAfterDeadline(t *testing.T) {
 	var aCalls atomic.Int32
 	d := NewDispatcher(2, 1)
 	db, _, _ := recoveryFixture(t, "operation")
+	sqlMust(t, db, "INSERT INTO accounts VALUES('00000000-0000-0000-0000-000000000003','ACTIVE')")
 	w := LifecycleWorker{Failures: FailureStore{DB: db},
 		Dispatcher: d,
 		Store:      lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "a1", AccountID: recoveryAccount}, {ID: "a2", AccountID: recoveryAccount}, {ID: "b1", AccountID: "00000000-0000-0000-0000-000000000003"}}},
@@ -95,6 +96,7 @@ func TestLifecycleFairOffersAcrossRepeatedDueAccounts(t *testing.T) {
 	defer cancel()
 	reached := make(chan struct{}, 10)
 	db, _, _ := recoveryFixture(t, "operation")
+	sqlMust(t, db, "INSERT INTO accounts VALUES('00000000-0000-0000-0000-000000000003','ACTIVE')")
 	w := LifecycleWorker{Failures: FailureStore{DB: db}, Store: lifecycleSourceStub{[]droplets.LifecycleItem{{ID: "first", AccountID: recoveryAccount}, {ID: "later", AccountID: "00000000-0000-0000-0000-000000000003"}}}, Concurrency: 1, Interval: 5 * time.Millisecond,
 		Handler: lifecycleHandlerFunc(func(ctx context.Context, i droplets.LifecycleItem) error {
 			if i.ID == "later" {

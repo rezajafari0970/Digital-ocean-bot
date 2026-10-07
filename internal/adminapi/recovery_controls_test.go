@@ -132,6 +132,9 @@ func TestPostInstallFailureRetiresAndCrashRecoveryPreservesReadyServers(t *testi
 	if err := db.QueryRow("SELECT id::text,profile_id::text FROM deployments WHERE droplet_id=$1", drop).Scan(&dep, &profile); err != nil {
 		t.Fatal(err)
 	}
+	// seedPanel is an Output fixture; supply the run that the real initial
+	// post-install pipeline always owns before exercising terminal finalization.
+	sqlMust(t, db, "INSERT INTO provision_runs(id,account_id,droplet_id,state,current_step) VALUES(gen_random_uuid(),$1,$2,'WAITING_INSTALLER','panel')", account, drop)
 	sqlMust(t, db, "UPDATE droplets SET state='PROVISIONING',expires_at=NULL WHERE id=$1", drop)
 	sqlMust(t, db, "UPDATE deployments SET state='CONFIGURING_PANEL',current_step='panel' WHERE id=$1", dep)
 	engine, err := c.PostInstallWorkflow(ctx, app.DeploymentConfig{})

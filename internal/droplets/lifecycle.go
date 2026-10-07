@@ -35,7 +35,10 @@ func (s LifecycleStore) Due(ctx context.Context, now time.Time, limit int) ([]Li
 		    OR EXISTS(SELECT 1 FROM operations o WHERE o.account_id=d.account_id
 		      AND o.resource_id=d.provider_resource_id AND o.kind='DELETE_DROPLET'
 		      AND o.idempotency_key='lifecycle-delete:'||d.id::text AND o.state='succeeded'))
-	) SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM due WHERE rn=1 ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)
+	) SELECT id::text,account_id::text,COALESCE(provider_resource_id,''),COALESCE(profile_id::text,''),COALESCE(replacement_deployment_id::text,''),state,COALESCE(ready_at,created_at),COALESCE(expires_at,updated_at),updated_at FROM due WHERE rn=1
+ AND NOT EXISTS(SELECT 1 FROM worker_item_failures f WHERE f.kind='lifecycle' AND f.item_id=due.id::text AND f.next_retry_at>$1::timestamptz)
+ AND NOT EXISTS(SELECT 1 FROM worker_recovery_checkpoints c WHERE c.kind='lifecycle' AND c.item_id=due.id::text)
+ ORDER BY COALESCE(expires_at,updated_at) LIMIT $2`, now, limit)
 	if err != nil {
 		return nil, err
 	}

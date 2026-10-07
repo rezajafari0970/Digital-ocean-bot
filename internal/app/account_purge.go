@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 )
 
 var ErrAccountPurgeConflict = errors.New("account purge preconditions changed")
@@ -54,6 +55,9 @@ func localPurgeAllowed(state string) bool {
 	return false
 }
 func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
+	if err := worker.FenceRecoveryAccountPurge(ctx, tx, id); err != nil {
+		return errors.Join(ErrAccountPurgeConflict, err)
+	}
 	for _, prefix := range []string{"deployment-admission:", "account-mutation:", "account-proxy:", "account-route:"} {
 		if _, err := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", prefix+id); err != nil {
 			return err
@@ -89,7 +93,11 @@ func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 // Children without cascading FKs must be deleted before their parents. Scoped
 // gates are closed before SET NULL can accidentally widen their scope to fleet.
 func commitAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
+	if err := worker.FenceRecoveryAccountPurge(ctx, tx, id); err != nil {
+		return errors.Join(ErrAccountPurgeConflict, err)
+	}
 	queries := []string{
+		`DELETE FROM worker_recovery_checkpoints WHERE account_id=$1`,
 		`UPDATE residential_routing_control SET panel_ids=ARRAY(SELECT x FROM unnest(panel_ids) x WHERE x NOT IN(SELECT id FROM panel_instances WHERE account_id=$1)) WHERE panel_ids && ARRAY(SELECT id FROM panel_instances WHERE account_id=$1)`,
 		`UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,remaining_batches=0,updated_at=now() WHERE panel_id IN(SELECT id FROM panel_instances WHERE account_id=$1)`,
 

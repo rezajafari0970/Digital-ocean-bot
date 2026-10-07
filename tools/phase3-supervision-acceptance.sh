@@ -19,7 +19,7 @@ bash tools/recovery-ledger-acceptance.sh
 python3 -m py_compile tools/phase3-supervision-process-fixture.py
 # Execute the process fault contract before PASS. A frozen committed build is
 # exercised again after checkpoint; both runs record the actual binary hash.
-export DOB_ISOLATION_EVIDENCE_DIR=/root/backups/dob-phase3-supervision-20261007/acceptance-process
+export DOB_ISOLATION_EVIDENCE_DIR=${DOB_ISOLATION_EVIDENCE_DIR:-/root/backups/dob-phase3-supervision-20261007/acceptance-process}
 mkdir -p "$DOB_ISOLATION_EVIDENCE_DIR"
 chmod 700 "$DOB_ISOLATION_EVIDENCE_DIR"
 go build -trimpath -o "$DOB_ISOLATION_EVIDENCE_DIR/worker.fixture" ./cmd/worker

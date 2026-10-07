@@ -31,7 +31,12 @@ func (c Container) deploymentInstallerRef(ctx context.Context, deploymentID stri
 	return ref, generation, false, nil
 }
 func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.Deployment, state workflow.State, step, msg string) error {
-	res, err := c.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)
+	tx, err := c.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	res, err := tx.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state=$3,current_step=$4,last_error=$5,updated_at=now() WHERE id=$1 AND account_id=$2 AND state='WAITING_INSTALLER'`, d.ID, d.AccountID, state, step, msg)
 	if err != nil {
 		return err
 	}
@@ -43,15 +48,17 @@ func (c Container) setInstallerDeploymentState(ctx context.Context, d workflow.D
 		return workflow.ErrDeploymentVersionConflict
 	}
 	if state == workflow.InstallFailed || state == workflow.InstallRolledBack {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE provision_runs SET state='FAILED',current_step=$3,last_error=$4,next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2 AND state<>'FAILED'`, d.AccountID, d.DropletID, step, msg)
-		if ferr := (deploymentFailureFinalizer{DB: c.DB}).MarkFailed(ctx, d); ferr != nil {
-			return ferr
+		if _, err = tx.ExecContext(ctx, `UPDATE provision_runs SET state='FAILED',current_step=$3,last_error=$4,next_retry_at=NULL,updated_at=now() WHERE account_id=$1 AND droplet_id=$2 AND state<>'FAILED'`, d.AccountID, d.DropletID, step, msg); err != nil {
+			return err
+		}
+		if err = (deploymentFailureFinalizer{DB: tx}).MarkFailed(ctx, d); err != nil {
+			return err
 		}
 	}
-	if err == nil {
-		_ = (workflow.SQLStore{DB: c.DB}).Event(ctx, d.ID, "installer", state, msg)
+	if err = (workflow.SQLStore{DB: tx}).Event(ctx, d.ID, "installer", state, msg); err != nil {
+		return err
 	}
-	return err
+	return tx.Commit()
 }
 func (c Container) installerTarget(ctx context.Context, d workflow.Deployment, snap workflow.ProfileSnapshot) (provisioning.Target, []byte, error) {
 	if d.Host != "" {
@@ -138,11 +145,7 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 	if err != nil {
 		var re *provisioning.ReadinessError
 		if errors.As(err, &re) && !re.Retryable {
-			_ = c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", err.Error())
-			d.State = workflow.InstallFailed
-			d.LastError = err.Error()
-			_ = (deploymentFailureFinalizer{DB: c.DB}).MarkFailed(ctx, d)
-			return nil
+			return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", err.Error())
 		}
 		return err
 	}
@@ -153,8 +156,7 @@ func (c Container) activateInstaller(ctx context.Context, d workflow.Deployment,
 		if errors.Is(err, provisioning.ErrInstallerIncompatible) && ready.RebootRequired {
 			remErr := c.remediateInstallerReboot(ctx, d, generation, target, key, ssh)
 			if errors.Is(remErr, ErrInstallerRebootExhausted) {
-				_ = c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", remErr.Error())
-				return nil
+				return c.setInstallerDeploymentState(ctx, d, workflow.InstallFailed, "installer_failed", remErr.Error())
 			}
 			return remErr
 		}

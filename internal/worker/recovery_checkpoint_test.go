@@ -47,6 +47,14 @@ func recoveryFixture(t *testing.T, kind string) (*sql.DB, *recoveryProbe, Worker
 	if _, e = db.Exec(string(up)); e != nil {
 		t.Fatal(e)
 	}
+	sqlMust(t, db, "CREATE TABLE deployment_step_attempts(deployment_id uuid)")
+	nextMigration, e := os.ReadFile("../../migrations/000163_recovery_reconciliation.up.sql")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = db.Exec(string(nextMigration)); e != nil {
+		t.Fatal(e)
+	}
 	fixture := `CREATE TABLE accounts(id uuid,provider_state text);
  CREATE TABLE operations(id uuid,account_id uuid,kind text,state text,updated_at timestamptz);
  CREATE TABLE deployments(id uuid,account_id uuid,state text,current_step text,profile_snapshot jsonb,installer_generation int,updated_at timestamptz);
@@ -176,6 +184,8 @@ func TestRecoveryCompletionFaultPreservesDurableFenceAndAtomicBackoff(t *testing
 				}
 			}
 			sqlMust(t, db, "DROP TRIGGER reject_recovery_write ON "+table)
+			// Advance the durable reaper retry deadline after repairing the injected fault.
+			sqlMust(t, db, "UPDATE worker_recovery_checkpoints SET reconcile_after=now()")
 			if fault == "checkpoint_insert" {
 				if e := w.Once(context.Background()); e != nil {
 					t.Fatal(e)
@@ -285,7 +295,14 @@ func TestRecoveryAsyncPersistenceFailureInvalidatesProgressUntilReconciled(t *te
 		t.Fatal("async fault hidden or replayed")
 	}
 	sqlMust(t, db, "DROP TRIGGER reject_async ON worker_item_failures")
-	waitRecovery(t, func() bool { return stamp.Load() > 0 && checkpointCount(t, db) == 0 })
+	// Advance the durable reaper retry deadline after repairing the injected fault.
+	sqlMust(t, db, "UPDATE worker_recovery_checkpoints SET reconcile_after=now()")
+	waitRecovery(t, func() bool {
+		// A concurrently finishing failed reap may still publish its retry timestamp.
+		// Advance only this isolated fixture clock until reconciliation commits.
+		sqlMust(t, db, "UPDATE worker_recovery_checkpoints SET reconcile_after=now()")
+		return stamp.Load() > 0 && checkpointCount(t, db) == 0
+	})
 	if calls(p) != 1 {
 		t.Fatal("recovery replayed before persisted backoff")
 	}

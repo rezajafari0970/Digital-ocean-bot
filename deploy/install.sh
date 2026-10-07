@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 [ "$(id -u)" -eq 0 ] || { echo 'run as root'; exit 1; }
 SRC="${SRC:-$(cd "$(dirname "$0")/.." && pwd)}"
 APP=/opt/digital-ocean-bot
-SERVICES=(digital-ocean-bot-vultr-browser-manager digital-ocean-bot-api digital-ocean-bot-worker)
-if systemctl is-enabled --quiet digital-ocean-bot-worker-panels 2>/dev/null || systemctl is-active --quiet digital-ocean-bot-worker-panels 2>/dev/null; then
-  SERVICES+=(digital-ocean-bot-worker-panels)
-fi
+source "$SRC/deploy/service-topology.sh"
+dob_preflight_service_topology
+dob_acquire_deploy_lock
 BUILD_COMMIT="$(git -C "$SRC" rev-parse HEAD 2>/dev/null || echo unknown)"
 BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 LDFLAGS="-s -w -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.Commit=$BUILD_COMMIT -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.BuildTime=$BUILD_TIME"
@@ -16,50 +15,41 @@ DB_NAME=${DB_NAME:-digital_ocean_bot}
 DB_USER=${DB_USER:-digitaloceanbot}
 
 id -u digitaloceanbot >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin digitaloceanbot
-install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$APP/bin" "$DATA" "$DATA/templates"
+dob_stage_runtime
+dob_prepare_stage_permissions
+install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$DATA" "$DATA/templates"
 install -d -o digitaloceanbot -g digitaloceanbot -m 0700 "$DATA/browser-sessions"
 install -d -o root -g digitaloceanbot -m 0750 "$ETC"
-install -d -o root -g digitaloceanbot -m 0755 "$APP/web/static"
-cp -a "$SRC/migrations" "$APP/"
-cp -a "$SRC/web/static/." "$APP/web/static/"
-cd "$SRC"
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-api.new" ./cmd/api
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/digital-ocean-bot-worker.new" ./cmd/worker
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-session.new" ./cmd/vultr-browser-session
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-browser-manager.new" ./cmd/vultr-browser-manager
-go build -trimpath -ldflags="$LDFLAGS" -o "$APP/bin/vultr-input-bridge.new" ./cmd/vultr-input-bridge
-for service in "${SERVICES[@]}"; do
-  if systemctl cat "$service" >/dev/null 2>&1; then systemctl stop "$service"; fi
-done
-for binary in digital-ocean-bot-api digital-ocean-bot-worker vultr-browser-session vultr-browser-manager vultr-input-bridge; do
-  mv "$APP/bin/$binary.new" "$APP/bin/$binary"
-done
-chown root:digitaloceanbot "$APP/bin/"*; chmod 0750 "$APP/bin/"*
 
-if [ ! -f "$ETC/master.key" ]; then umask 077; openssl rand -base64 32 > "$ETC/master.key"; chown root:digitaloceanbot "$ETC/master.key"; chmod 0640 "$ETC/master.key"; fi
-if [ ! -f "$ETC/env" ]; then
-  DB_PASS=$(openssl rand -hex 24)
+# Atomic, validated bootstrap artifacts precede all SQL and runtime changes.
+python3 "$SRC/deploy/bootstrap.py" "$ETC" "$DB_NAME" "$DB_USER" "$(id -g digitaloceanbot)"
+if [ -f "$ETC/bootstrap.pending" ]; then
+  mapfile -t DB_IDENTITY < "$ETC/bootstrap.pending"
+  DB_NAME=${DB_IDENTITY[0]}; DB_USER=${DB_IDENTITY[1]}
+  [[ "$DB_NAME" =~ ^[A-Za-z_][A-Za-z0-9_]*$ && "$DB_USER" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || exit 1
+  DATABASE_URL=$(python3 "$SRC/deploy/bootstrap.py" --database-url "$ETC")
+  DB_PASS=${DATABASE_URL#postgres://$DB_USER:}
+  DB_PASS=${DB_PASS%%@*}
+  [[ "$DB_PASS" =~ ^[a-f0-9]{48}$ ]] || { echo 'Bootstrap credential format mismatch'; exit 1; }
+  test "$DATABASE_URL" = "postgres://$DB_USER:$DB_PASS@127.0.0.1:5432/$DB_NAME?sslmode=disable"
   sudo -u postgres psql -v ON_ERROR_STOP=1 <<SQL
 DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='$DB_USER') THEN CREATE ROLE $DB_USER LOGIN PASSWORD '$DB_PASS'; END IF; END \$\$;
 SELECT 'CREATE DATABASE $DB_NAME OWNER $DB_USER' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname='$DB_NAME')\gexec
 SQL
-  cat > "$ETC/env" <<EOF
-DATABASE_URL=postgres://$DB_USER:$DB_PASS@127.0.0.1:5432/$DB_NAME?sslmode=disable
-MASTER_KEY_FILE=$ETC/master.key
-MASTER_KEY_VERSION=1
-HTTP_ADDR=127.0.0.1:18080
-EOF
-  chown root:digitaloceanbot "$ETC/env"; chmod 0640 "$ETC/env"
+  psql "$DATABASE_URL" -XAt -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null
+  rm -f "$ETC/bootstrap.pending"
 fi
-install -m 0644 "$SRC/deploy/digital-ocean-bot-api.service" /etc/systemd/system/
-install -m 0644 "$SRC/deploy/digital-ocean-bot-worker.service" /etc/systemd/system/
-install -m 0644 "$SRC/deploy/digital-ocean-bot-worker-panels.service" /etc/systemd/system/
-install -m 0644 "$SRC/deploy/digital-ocean-bot-vultr-browser-manager.service" /etc/systemd/system/
-systemctl daemon-reload
-API_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-api" | awk '{print $1}')"
-WORKER_SHA="$(sha256sum "$APP/bin/digital-ocean-bot-worker" | awk '{print $1}')"
-printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s"}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$API_SHA" "$WORKER_SHA" > "$APP/build-manifest.json"
+# Bootstrap state is retained on release failure for a retry with the same
+# master key/database identity. Never delete credentials for an existing DB.
+dob_backup_runtime
+trap dob_rollback_runtime ERR
+dob_stop_runtime_readers
+dob_publish_runtime
+
+dob_install_service_topology
 systemctl enable "${SERVICES[@]}"
 # Always restart: enable --now does not restart already-active services after replacing binaries.
 systemctl restart "${SERVICES[@]}"
-systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker || true
+dob_verify_service_topology
+trap - ERR
+echo "Deployment verified. Rollback artifacts: $DOB_BACKUP"

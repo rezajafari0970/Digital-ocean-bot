@@ -1,0 +1,843 @@
+{
+  "status": "SOURCE_REAUDIT_AND_ACCEPTANCE_PASS_AWAITING_DEPLOYMENT",
+  "production_changed": false,
+  "verified_at_utc": "2026-10-07T13:00:22.879025+00:00",
+  "baseline": "f4dadf1754122081d7bc850bcb0f69427c7312e2",
+  "runtime_before": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
+  "migration": 163,
+  "closed_findings": [
+    {
+      "id": "PH123-001",
+      "area": "Checkpoint/account isolation",
+      "correction": "Removed-account reconciliation, purge fence, per-row250ms/round2s bounds, retained keyset cursor under completion+diagnostic faults."
+    },
+    {
+      "id": "PH123-002",
+      "area": "Fresh installation",
+      "correction": "Always install/enable both roles and API/control drop-ins; validate effective topology."
+    },
+    {
+      "id": "PH123-003",
+      "area": "Capacity liveness",
+      "correction": "Bounded batches admit before runtime acquisition and track each native task."
+    },
+    {
+      "id": "PH123-004",
+      "area": "Upgrade convergence",
+      "correction": "Shared unit topology install/reload, matching rollback assets, unresolved-work rollback refusal and preflight override conflict detection."
+    },
+    {
+      "id": "PH123-005",
+      "area": "Scanner liveness",
+      "correction": "Independent async scan deadlines; child progress cannot extend scan lifetime."
+    },
+    {
+      "id": "PH123-006",
+      "area": "Discovery fairness",
+      "correction": "Due filters precede limits; keyset deferred bypass cursor, same-round deduplication and oldest-per-account retirement rule."
+    },
+    {
+      "id": "PH123-007",
+      "area": "Residential failure handling",
+      "correction": "Checked outcome, durable preclaim, cancellable pacing and circular panel selection."
+    },
+    {
+      "id": "PH123-008",
+      "area": "UTF8 persistence",
+      "correction": "Normalize invalid UTF8/NUL and truncate to2048 bytes on rune boundary."
+    },
+    {
+      "id": "PH123-009",
+      "area": "Workflow persistence",
+      "correction": "Checked completion, generation-scoped durable successful results, atomic admission/attempt/start event and all terminal state/resource/event writes."
+    },
+    {
+      "id": "PH123-010",
+      "area": "Recovery terminal branches",
+      "correction": "Terminal deployment/resource/event transaction and checked installer failure persistence."
+    }
+  ],
+  "open_findings": [],
+  "independent_review": {
+    "response_id": "resp_029a4be631125ff6006ac640e5fdb487d1a7294bff85abb394",
+    "verdict": "PASS",
+    "open_findings": [],
+    "closed_audit_ids": [
+      "PH123-001",
+      "PH123-002",
+      "PH123-003",
+      "PH123-004",
+      "PH123-005",
+      "PH123-006",
+      "PH123-007",
+      "PH123-008",
+      "PH123-009",
+      "PH123-010"
+    ],
+    "coverage_limits": [
+      "Review was limited to the supplied source and tests; the full repository and full test suite were not independently executed.",
+      "PostgreSQL fault-injection and deployment fixture results were assessed from source rather than rerun during this review.",
+      "Deployment fixtures mock systemd, process environments, PostgreSQL administration, builds, and filesystem ownership; they do not constitute a disposable-host installation test.",
+      "Whole-host power-loss atomicity, shared infrastructure failure, and multi-host active/active operation are outside the stated guarantees."
+    ]
+  },
+  "focused_race_passes": 163,
+  "full_acceptance_log_sha256": "db09b150ebdf8bae7c374c539be2ce6e87e74bcd944e88229cff4e8d4107f4f3",
+  "focused_log_sha256": "9393127d12730420fe634640d8939a70a580ef11f7e038ca99978c2fb0959195",
+  "packaging": {
+    "status": "PASS",
+    "cases": [
+      {
+        "case": "fresh",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": true,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": true,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": true,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": "exec",
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": "unset",
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": "envfile",
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": true,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "fresh",
+        "activation_failure": false,
+        "build_failure": true,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": true,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": true,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "fresh",
+        "activation_failure": true,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": true,
+        "build_failure": false,
+        "rollback_failure": "enable",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": true,
+        "build_failure": false,
+        "rollback_failure": "start",
+        "false_enable": false,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": true,
+        "browser_exit": false,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      },
+      {
+        "case": "legacy-upgrade",
+        "activation_failure": false,
+        "build_failure": false,
+        "rollback_failure": "",
+        "false_enable": false,
+        "browser_exit": true,
+        "overlap": false,
+        "publish_failure": false,
+        "pending_checkpoint": false,
+        "conflicting_override": false,
+        "status": "PASS",
+        "scope": "full shell execution with redirected paths and mocked OS commands"
+      }
+    ],
+    "production_services_changed": false
+  },
+  "isolated_systemd_fixture": {
+    "at_utc": "2026-10-07T13:00:11.420098+00:00",
+    "schema": "supervision_process_f123257508dc45a3ac4a21d698950e24",
+    "units": {
+      "control": "dob-supervision-fixture-control-98950e24",
+      "panels": "dob-supervision-fixture-panels-98950e24"
+    },
+    "production_services_changed": false,
+    "before": {
+      "control": {
+        "pid": "2053353",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2053396",
+        "restarts": "0"
+      }
+    },
+    "after": {
+      "control": {
+        "pid": "2053353",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2053575",
+        "restarts": "1"
+      }
+    },
+    "heartbeat": [
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 1,
+          "InUse": 8,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 9,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "role": "control"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 18,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 18,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 2,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      }
+    ],
+    "peer_survived": true,
+    "automatic_role_restart": "PASS",
+    "fault": "SIGSTOP",
+    "fixture_watchdog_seconds": 5,
+    "production_watchdog_seconds": 45,
+    "effective": {
+      "control": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase123-remediation-20261007/acceptance-process/worker.fixture ; argv[]=/root/backups/dob-phase123-remediation-20261007/acceptance-process/worker.fixture --role=control --state-dir=/root/backups/dob-phase123-remediation-20261007/acceptance-process/supervision_process_f123257508dc45a3ac4a21d698950e24/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 13:00:11 UTC] ; stop_time=[n/a] ; pid=2053353 ; code=(null) ; status=0/0 }"
+      },
+      "panels": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase123-remediation-20261007/acceptance-process/worker.fixture ; argv[]=/root/backups/dob-phase123-remediation-20261007/acceptance-process/worker.fixture --role=panels --state-dir=/root/backups/dob-phase123-remediation-20261007/acceptance-process/supervision_process_f123257508dc45a3ac4a21d698950e24/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 13:00:20 UTC] ; stop_time=[n/a] ; pid=2053575 ; code=(null) ; status=0/0 }"
+      }
+    },
+    "supervision": [
+      {
+        "kind": "production-control",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "account-rules",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "billing",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "network-identity",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "network-monitor",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "recovery",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "scheduler",
+              "state": "WAITING",
+              "active": 0,
+              "waiting": 1,
+              "completed": 2
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "capacity-fill",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "global-reality",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-registry",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-monitor",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-protection",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": false,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "capacity-fill",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "client-mutation",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "global-reality",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-registry",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-monitor",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-protection",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      }
+    ],
+    "panel_restart_ledger": {
+      "version": 1,
+      "attempts": 2,
+      "last_start_unix": 1791378020,
+      "next_start_unix": 1791378035
+    },
+    "binary_sha256": "b488c0ff25fe768d183bed1f99d083b8ee206b5c4e47a48c0aea16919f350756",
+    "duplicate_process_rejected": true,
+    "status": "PASS"
+  },
+  "limits": [
+    "No guarantee of permanent absence of faults; external provider, PostgreSQL, host, disk and network failures remain possible.",
+    "Host role fence assumes the supported single worker host and shared canonical state directory; multi-host active/active fencing is not implemented.",
+    "Unresolved item persistence stays fenced and exposes degraded readiness; healthy accounts continue, and readiness alone does not restart a healthy scanner.",
+    "Operator pauses, provider/trial restrictions, quarantine, ownership/unknown outcomes and finite budgets remain authoritative.",
+    "Install/upgrade scenarios execute complete shell scripts with mocked OS commands, not disposable real OS installations. The real systemd fixture separately validates the exact worker process contract.",
+    "Release rollback retains initialized database, credentials and data intentionally for safe retry; it restores the complete managed runtime artifact set, not database bootstrap side effects or whole-host power-loss atomicity.",
+    "Native readback checks configuration identity/enabled/expiry; it does not prove mobile traffic or the complete residential data plane."
+  ],
+  "evidence_directory": "/root/backups/dob-phase123-remediation-20261007"
+}

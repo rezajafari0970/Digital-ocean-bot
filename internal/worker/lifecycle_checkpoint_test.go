@@ -55,6 +55,8 @@ func TestLifecycleCompletionFailureSurvivesRestartAndInvalidatesProgress(t *test
 				t.Fatal("reconstructed lifecycle replayed pending completion")
 			}
 			sqlMust(t, db, "DROP TRIGGER reject_lifecycle ON "+table)
+			// Advance the durable reaper retry deadline after repairing the injected fault.
+			sqlMust(t, db, "UPDATE worker_recovery_checkpoints SET reconcile_after=now()")
 			if err := restarted.Once(context.Background()); err != nil {
 				t.Fatal(err)
 			}

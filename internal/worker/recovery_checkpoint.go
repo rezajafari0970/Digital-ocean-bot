@@ -25,6 +25,7 @@ type recoveryLease struct {
 	conn                     *sql.Conn
 	key, kind, item, attempt string
 	backend                  int
+	accountLocked            string
 }
 
 func acquireRecoveryLease(ctx context.Context, db *sql.DB, kind, item string) (*recoveryLease, bool, error) {
@@ -71,9 +72,65 @@ func (l *recoveryLease) check(ctx context.Context) error {
 	if !owns {
 		return ErrRecoveryCheckpointLost
 	}
+	if l.accountLocked != "" {
+		err = l.conn.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND locktype='advisory' AND objsubid=1 AND granted AND mode='ShareLock' AND classid::bigint=((hashtextextended($1,728391450)>>32)&4294967295) AND objid::bigint=(hashtextextended($1,728391450)&4294967295))`, "worker-recovery-account:"+l.accountLocked).Scan(&owns)
+		if err != nil {
+			return err
+		}
+		if !owns {
+			return ErrRecoveryCheckpointLost
+		}
+	}
+	return nil
+}
+
+var ErrRecoveryAccountBusy = errors.New("account recovery ownership busy")
+
+// Purge never waits behind a recovery handler while holding account/native locks.
+func FenceRecoveryAccountPurge(ctx context.Context, tx *sql.Tx, account string) error {
+	var ok bool
+	if err := tx.QueryRowContext(ctx, "SELECT pg_try_advisory_xact_lock(hashtextextended($1,728391450))", "worker-recovery-account:"+account).Scan(&ok); err != nil {
+		return err
+	}
+	if !ok {
+		return ErrRecoveryAccountBusy
+	}
+	var pending bool
+	if err := tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM worker_recovery_checkpoints WHERE account_id=$1)", account).Scan(&pending); err != nil {
+		return err
+	}
+	// Session loss is not proof that an in-process native handler stopped.
+	// Only the owning reconciler can close a pending checkpoint before purge.
+	if pending {
+		return ErrRecoveryCheckpointPending
+	}
+	return nil
+}
+func (l *recoveryLease) lockAccount(ctx context.Context, account string) error {
+	if l.accountLocked == account {
+		return nil
+	}
+	var ok bool
+	if err := l.conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock_shared(hashtextextended($1,728391450))", "worker-recovery-account:"+account).Scan(&ok); err != nil {
+		return err
+	}
+	if !ok {
+		return ErrRecoveryAccountBusy
+	}
+	l.accountLocked = account
 	return nil
 }
 func (l *recoveryLease) begin(ctx context.Context, account string) error {
+	if err := l.lockAccount(ctx, account); err != nil {
+		return err
+	}
+	var exists bool
+	if err := l.conn.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM accounts WHERE id=$1)", account).Scan(&exists); err != nil {
+		return err
+	}
+	if !exists {
+		return sql.ErrNoRows
+	}
 	if err := l.check(ctx); err != nil {
 		return err
 	}
@@ -85,6 +142,9 @@ func (l *recoveryLease) begin(ctx context.Context, account string) error {
 	return err
 }
 func (l *recoveryLease) complete(ctx context.Context, account string, cause error) error {
+	if err := l.lockAccount(ctx, account); err != nil {
+		return err
+	}
 	if err := l.check(ctx); err != nil {
 		return err
 	}
@@ -100,7 +160,12 @@ func (l *recoveryLease) complete(ctx context.Context, account string, cause erro
 	if token != l.attempt {
 		return ErrRecoveryCheckpointLost
 	}
-	if cause != nil {
+	var accountExists bool
+	if err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM accounts WHERE id=$1)", account).Scan(&accountExists); err != nil {
+		return err
+	}
+	// Account removal is explicit terminal evidence; never invent a failure FK.
+	if cause != nil && accountExists {
 		err = failTx(ctx, tx, l.kind, l.item, account, cause)
 	} else {
 		err = clearFailureTx(ctx, tx, l.kind, l.item)
@@ -126,9 +191,13 @@ type pendingRecovery struct{ kind, item, account string }
 
 // Called before discovery. Active in-process lanes are skipped even if their
 // SQL session has failed. Cross-process live sessions are skipped by try-lock.
-// A failed write stops this recovery scan, not the panel or lifecycle module.
-func reconcileRecoveryCheckpoints(ctx context.Context, db *sql.DB, active func(string) bool, module string) error {
-	rows, err := db.QueryContext(ctx, "SELECT kind,item_id,account_id::text FROM worker_recovery_checkpoints WHERE ($1='lifecycle' AND kind='lifecycle') OR ($1='recovery' AND kind IN ('operation','deployment')) ORDER BY created_at,kind,item_id LIMIT 100", module)
+// Failed items remain fenced; healthy items can be discovered independently.
+func reconcileRecoveryCheckpoints(ctx context.Context, db *sql.DB, active func(string) bool, module string, cursor ...*pendingRecovery) error {
+	after := pendingRecovery{}
+	if len(cursor) > 0 {
+		after = *cursor[0]
+	}
+	rows, err := db.QueryContext(ctx, "SELECT kind,item_id,account_id::text FROM worker_recovery_checkpoints WHERE (($1='lifecycle' AND kind='lifecycle') OR ($1='recovery' AND kind IN ('operation','deployment'))) AND reconcile_after<=now() ORDER BY CASE WHEN (kind,item_id)>($2,$3) THEN 0 ELSE 1 END,kind,item_id LIMIT 100", module, after.kind, after.item)
 	if err != nil {
 		return err
 	}
@@ -146,11 +215,27 @@ func reconcileRecoveryCheckpoints(ctx context.Context, db *sql.DB, active func(s
 	if err != nil {
 		return err
 	}
+	var pending error
+	reaperEnd := time.Now().Add(2 * time.Second)
 	for _, x := range items {
+		if time.Now().After(reaperEnd) {
+			pending = errors.Join(pending, ErrRecoveryCheckpointPending)
+			break
+		}
+		// Advance even when ownership, native completion, or retry diagnostics fail.
+		if len(cursor) > 0 {
+			*cursor[0] = x
+		}
 		if active != nil && active(x.kind+":"+x.item) {
 			continue
 		}
+		itemEnd := time.Now().Add(250 * time.Millisecond)
+		if reaperEnd.Before(itemEnd) {
+			itemEnd = reaperEnd
+		}
+		itemCtx, itemCancel := context.WithDeadline(ctx, itemEnd)
 		err = func() error {
+			ctx := itemCtx
 			l, ok, e := acquireRecoveryLease(ctx, db, x.kind, x.item)
 			if e != nil || !ok {
 				return e
@@ -165,12 +250,26 @@ func reconcileRecoveryCheckpoints(ctx context.Context, db *sql.DB, active func(s
 			}
 			return l.complete(ctx, x.account, recoveryInterrupted{})
 		}()
+		itemCancel()
 		if err != nil {
-			return fmt.Errorf("recovery checkpoint reconcile: %w", err)
+			pending = errors.Join(pending, fmt.Errorf("recovery checkpoint reconcile: %w", err))
+			// A durable per-item delay rotates poison rows out of the reaper window.
+			// Failure of this diagnostic write never removes the original checkpoint.
+			writeCtx, writeCancel := context.WithTimeout(ctx, 250*time.Millisecond)
+			_, writeErr := db.ExecContext(writeCtx, "UPDATE worker_recovery_checkpoints SET reconcile_after=now()+interval '30 seconds',reconcile_error=$3 WHERE kind=$1 AND item_id=$2", x.kind, x.item, ledgerErrorText(err))
+			writeCancel()
+			pending = errors.Join(pending, writeErr)
 		}
 	}
-	if len(items) == 100 {
-		return ErrRecoveryCheckpointPending
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	var delayed bool
+	if err := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM worker_recovery_checkpoints WHERE (($1='lifecycle' AND kind='lifecycle') OR ($1='recovery' AND kind IN ('operation','deployment'))) AND reconcile_error<>'')", module).Scan(&delayed); err != nil {
+		return err
+	}
+	if pending != nil || delayed || len(items) == 100 {
+		return errors.Join(ErrRecoveryCheckpointPending, pending)
 	}
 	return nil
 }

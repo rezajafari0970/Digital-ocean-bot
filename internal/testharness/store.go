@@ -54,3 +54,38 @@ func (s *Store) BeginStep(_ context.Context, _ string, step string, max int) (in
 func (s *Store) FinishStep(context.Context, string, string, error, workflow.ErrorClass) error {
 	return nil
 }
+
+// The in-memory harness commits its model and event under one mutex.
+func (s *Store) Finalize(ctx context.Context, d *workflow.Deployment, step, message string, apply func(context.Context, workflow.DBTX) error) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if apply != nil {
+		if err := apply(ctx, nil); err != nil {
+			return err
+		}
+	}
+	pending := *d
+	pending.LockVersion++
+	s.D = pending
+	s.Events = append(s.Events, step+":"+string(d.State))
+	*d = pending
+	return nil
+}
+
+func (s *Store) AdmitStep(ctx context.Context, d *workflow.Deployment, step string, max int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.StepAttempts == nil {
+		s.StepAttempts = map[string]int{}
+	}
+	if max > 0 && s.StepAttempts[step] >= max {
+		return workflow.ErrStepRetryLimit
+	}
+	pending := *d
+	pending.LockVersion++
+	s.StepAttempts[step]++
+	s.D = pending
+	s.Events = append(s.Events, step+":"+string(d.State))
+	*d = pending
+	return nil
+}

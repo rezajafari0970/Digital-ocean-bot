@@ -48,8 +48,8 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 	versionLoaded = true
 	if providerID == "" {
 		if item.Kind == "DELETE_DROPLET" {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='delete_without_provider_resource',error_message='delete recovery cannot continue without provider resource id',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID, version)
-			return err
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',error_code='delete_without_provider_resource',error_message='delete recovery cannot continue without provider resource id',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('planned','running','unknown','verifying')`, item.ID, item.AccountID, version)
+			return requireRecoveryOperationUpdate(result, err)
 		}
 		var deploymentID, deploymentState string
 		qerr := h.Container.DB.QueryRowContext(ctx, `SELECT d.id::text,d.state
@@ -96,12 +96,12 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			}
 		}
 		if len(matches) == 1 {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID, version)
-			return err
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID, version)
+			return requireRecoveryOperationUpdate(result, err)
 		}
 		if terminalDeploymentStateForCreateRecovery(deploymentState) {
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',lock_version=lock_version+1,error_code='stale_create_without_provider_resource',updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
-			return err
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='failed',lock_version=lock_version+1,error_code='stale_create_without_provider_resource',updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
+			return requireRecoveryOperationUpdate(result, err)
 		}
 		return nil
 	}
@@ -149,8 +149,8 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			if derr := compute.DeleteServer(ctx, providerID); derr != nil {
 				return derr
 			}
-			_, err = h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
-			return err
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
+			return requireRecoveryOperationUpdate(result, err)
 		}
 	}
 	state := "unknown"
@@ -175,11 +175,8 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 		}
 	} else {
 		result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
-		if err != nil {
+		if err := requireRecoveryOperationUpdate(result, err); err != nil {
 			return err
-		}
-		if n, _ := result.RowsAffected(); n != 1 {
-			return errors.New("operation changed during recovery")
 		}
 	}
 	if item.Kind == "DELETE_DROPLET" && state == "succeeded" {
@@ -285,10 +282,7 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		var ps, innerStep, pe string
 		if qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,current_step,COALESCE(last_error,'') FROM provision_runs WHERE account_id=$1 AND droplet_id=$2`, item.AccountID, d.DropletID).Scan(&ps, &innerStep, &pe); qerr == nil {
 			if ps == "FAILED" {
-				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID, "provision failed: "+pe)
-				_ = store.Event(ctx, d.ID, "provision", workflow.Failed, "PROVISION_TERMINAL_FREEZE_V1")
-				_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
-				return nil
+				return h.persistTerminalRecovery(ctx, d, "provision failed: "+pe, "PROVISION_TERMINAL_FREEZE_V1")
 			}
 			pn, err := provisionStepRetryAt(ctx, h.Container.DB, item.AccountID, d.DropletID, innerStep)
 			if err != nil {
@@ -306,9 +300,7 @@ func (h RecoveryHandler) RecoverDeployment(ctx context.Context, item worker.Reco
 		qerr := h.Container.DB.QueryRowContext(ctx, `SELECT state,COALESCE(resource_id,'') FROM operations WHERE account_id=$1 AND idempotency_key LIKE 'deploy:'||$2||':create:%' ORDER BY created_at DESC LIMIT 1`, item.AccountID, d.ID).Scan(&opState, &resourceID)
 		if qerr == nil {
 			if opState == "failed" && resourceID == "" {
-				_, _ = h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error='create operation failed; no provider resource created',updated_at=now() WHERE id=$1 AND account_id=$2`, d.ID, item.AccountID)
-				_ = store.Event(ctx, d.ID, "create", workflow.Failed, "CREATE_TERMINAL_FREEZE_V2")
-				return nil
+				return h.persistTerminalRecovery(ctx, d, "create operation failed; no provider resource created", "CREATE_TERMINAL_FREEZE_V2")
 			}
 			// Unknown create outcomes with no resource_id must re-enter the create
 			// step. The operation ledger returns the existing reservation and the
@@ -359,6 +351,28 @@ func (h RecoveryHandler) BypassDeploymentBackoff(ctx context.Context, item worke
 	return err == nil && provisioning.PlanHasInstallerPlaceholder(cfg.Provision)
 }
 
+func (h RecoveryHandler) persistTerminalRecovery(ctx context.Context, d workflow.Deployment, msg, code string) error {
+	tx, err := h.Container.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	d.State = workflow.Failed
+	d.CurrentStep = "done"
+	d.LastError = msg
+	store := workflow.SQLStore{DB: tx}
+	if err = store.Update(ctx, &d); err != nil {
+		return err
+	}
+	if err = (deploymentFailureFinalizer{DB: tx}).MarkFailed(ctx, d); err != nil {
+		return err
+	}
+	if err = store.Event(ctx, d.ID, "recovery", workflow.Failed, code); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func terminalDeploymentStateForCreateRecovery(state string) bool {
 	switch state {
 	case "FAILED", "INSTALL_FAILED", "INSTALL_ROLLED_BACK", "PANEL_COMPLETE", "READY":
@@ -387,19 +401,13 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 			h.Container.RecordProviderObservation(ctx, d.AccountID, state, err, msg)
 		}
 	}
-	res, qerr := h.Container.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,state='FAILED',current_step='done',last_error=$3,updated_at=now() WHERE id=$1 AND account_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')`, d.ID, d.AccountID, msg)
-	if qerr != nil {
-		return false, qerr
+	if terminalDeploymentStateForCreateRecovery(string(d.State)) {
+		return false, nil
 	}
-	n, qerr := res.RowsAffected()
-	if qerr != nil {
-		return false, qerr
+	if err := h.persistTerminalRecovery(ctx, d, msg, "RECOVERY_PERMANENT_PROVIDER_ERROR:"+string(class)); err != nil {
+		return false, err
 	}
-	if n == 1 {
-		_ = (workflow.SQLStore{DB: h.Container.DB}).Event(ctx, d.ID, d.CurrentStep, workflow.Failed, "RECOVERY_PERMANENT_PROVIDER_ERROR:"+string(class))
-		_ = (deploymentFailureFinalizer{DB: h.Container.DB}).MarkFailed(ctx, d)
-	}
-	return n == 1, nil
+	return true, nil
 }
 
 func (h RecoveryHandler) freezeExhaustedInstallerRecovery(ctx context.Context, d workflow.Deployment) (bool, error) {
@@ -443,4 +451,20 @@ func provisionStepRetryAt(ctx context.Context, db *sql.DB, account, droplet, ste
 		return sql.NullTime{}, nil
 	}
 	return next, err
+}
+
+// A lost compare-and-swap is not durable completion. The next fenced attempt
+// reads the current native/SQL state before attempting further progress.
+func requireRecoveryOperationUpdate(result sql.Result, err error) error {
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return errors.New("operation changed during recovery")
+	}
+	return nil
 }
