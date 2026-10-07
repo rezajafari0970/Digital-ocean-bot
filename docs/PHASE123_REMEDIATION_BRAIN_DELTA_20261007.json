@@ -1,0 +1,52 @@
+{
+  "at_utc": "2026-10-07T13:14:00.995524+00:00",
+  "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+  "closed_ids": [
+    "PH123-001",
+    "PH123-002",
+    "PH123-003",
+    "PH123-004",
+    "PH123-005",
+    "PH123-006",
+    "PH123-007",
+    "PH123-008",
+    "PH123-009",
+    "PH123-010"
+  ],
+  "symbols": {
+    "internal/worker/recovery_checkpoint.go": [
+      "FenceRecoveryAccountPurge",
+      "reconcileRecoveryCheckpoints",
+      "runCheckpointedRecovery"
+    ],
+    "internal/worker/process_role.go": [
+      "AcquireProcessRole"
+    ],
+    "internal/worker/batch.go": [
+      "RunBoundedBatch"
+    ],
+    "internal/workflow/store.go": [
+      "AdmitStep",
+      "FinishStepResult",
+      "ReadCompletedStep",
+      "Finalize"
+    ],
+    "internal/app/deployment_ready.go": [
+      "MarkReadyIn",
+      "MarkFailedIn"
+    ],
+    "deploy/bootstrap.py": [
+      "atomic_write",
+      "prepare",
+      "read_environment"
+    ],
+    "deploy/service-topology.sh": [
+      "dob_restore_enablement_before_assets",
+      "dob_restore_runtime_services",
+      "dob_verify_service_topology"
+    ]
+  },
+  "source_snapshot": "docs/PHASE123_REMEDIATION_SOURCE_SNAPSHOT_20261007.json",
+  "frontier": "Phase123 closed in tested scope; provider authentication/billing blockers and phase4 account fairness remain",
+  "do_not_reprime": true
+}

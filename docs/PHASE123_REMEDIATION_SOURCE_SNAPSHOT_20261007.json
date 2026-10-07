@@ -1,5 +1,5 @@
 {
-  "status": "reviewed-tested-awaiting-deployment",
+  "status": "reviewed-tested-deployed",
   "baseline": "f4dadf1754122081d7bc850bcb0f69427c7312e2",
   "source_sha256": {
     "cmd/worker/main.go": "142cb3b888fda5460cf7f32bf01a1eba929c3a62e7e4781196774667e2bbff12",
@@ -114,5 +114,7 @@
     "internal/app/workflow.go": "b341ef0763c705b3acc972f3dd4fb54477ba9ff8786069e2b081adfd1624cb35",
     "internal/app/postinstall.go": "c62fa98075c80b84068e80faa2dcb28ff6280599d5cbf5c29464831e6d8bf3ab"
   },
-  "review_response_id": "resp_029a4be631125ff6006ac640e5fdb487d1a7294bff85abb394"
+  "review_response_id": "resp_029a4be631125ff6006ac640e5fdb487d1a7294bff85abb394",
+  "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+  "runtime_verified_at_utc": "2026-10-07T13:14:00.995524+00:00"
 }

@@ -1,6 +1,6 @@
 # Phase1/2/3 remediation — 2026-10-07
 
-Status: source and isolated acceptance passed; production deployment is pending.
+Status: deployed and bounded native verification passed.
 
 Baseline f4dadf1754122081d7bc850bcb0f69427c7312e2. Ten original findings and supplementary review defects corrected. Independent actual server OpenAI API response resp_029a4be631125ff6006ac640e5fdb487d1a7294bff85abb394 returned PASS with no open findings.
 
@@ -31,3 +31,6 @@ Limits:
 - Install/upgrade scenarios execute complete shell scripts with mocked OS commands, not disposable real OS installations. The real systemd fixture separately validates the exact worker process contract.
 - Release rollback retains initialized database, credentials and data intentionally for safe retry; it restores the complete managed runtime artifact set, not database bootstrap side effects or whole-host power-loss atomicity.
 - Native readback checks configuration identity/enabled/expiry; it does not prove mobile traffic or the complete residential data plane.
+
+## Final runtime proof
+Revision dacc3329b5e2969415fa7051e34356e39d549c61; schema163; frontend unchanged. 49 healthy samples over 481.1s, no automatic restarts. Native 10 configs/4 panels verified. 6 new successful config create jobs; 0 delete jobs observed. No new expiry-cycle claim under existing lifetime0 settings. Five Vultr TOKEN_INVALID and one disabled DO BILLING_BLOCKED remain separate operational blockers. No production fault injection or rollback. See PHASE123_FINAL_REAUDIT_20261007.md/JSON for final limits.

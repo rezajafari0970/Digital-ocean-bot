@@ -1,7 +1,7 @@
 {
-  "status": "SOURCE_REAUDIT_AND_ACCEPTANCE_PASS_AWAITING_DEPLOYMENT",
-  "production_changed": false,
-  "verified_at_utc": "2026-10-07T13:00:22.879025+00:00",
+  "status": "DEPLOYED_AND_BOUNDED_NATIVE_VERIFIED",
+  "production_changed": true,
+  "verified_at_utc": "2026-10-07T13:14:00.995524+00:00",
   "baseline": "f4dadf1754122081d7bc850bcb0f69427c7312e2",
   "runtime_before": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
   "migration": 163,
@@ -831,13 +831,2989 @@
     "status": "PASS"
   },
   "limits": [
-    "No guarantee of permanent absence of faults; external provider, PostgreSQL, host, disk and network failures remain possible.",
-    "Host role fence assumes the supported single worker host and shared canonical state directory; multi-host active/active fencing is not implemented.",
-    "Unresolved item persistence stays fenced and exposes degraded readiness; healthy accounts continue, and readiness alone does not restart a healthy scanner.",
-    "Operator pauses, provider/trial restrictions, quarantine, ownership/unknown outcomes and finite budgets remain authoritative.",
-    "Install/upgrade scenarios execute complete shell scripts with mocked OS commands, not disposable real OS installations. The real systemd fixture separately validates the exact worker process contract.",
-    "Release rollback retains initialized database, credentials and data intentionally for safe retry; it restores the complete managed runtime artifact set, not database bootstrap side effects or whole-host power-loss atomicity.",
-    "Native readback checks configuration identity/enabled/expiry; it does not prove mobile traffic or the complete residential data plane."
+    "No zero-failure guarantee. Host, PostgreSQL and network remain shared; multi-host active/active fencing is outside scope.",
+    "Sixteen complete-shell install/upgrade fixtures mocked OS commands; no complete disposable-host install was performed. Exact-binary systemd recovery was exercised separately.",
+    "External watchdog fixture used five seconds; production effective watchdog was verified as forty-five seconds. No production fault injection.",
+    "Successful SQL result with a lost acknowledgement was modeled around an actual committed result; no PostgreSQL wire-level COMMIT-response-loss test.",
+    "Corrupt restart ledgers deliberately refuse admission and preserve evidence; automatic destructive repair is not implemented.",
+    "Native readback proves configuration identity/enabled/expiry at observed times; no full mobile traffic, quota, device-limit or residential data-plane proof.",
+    "Both profiles already had lifetime zero/unlimited before deployment. No newly born client full expiry/delete cycle is claimed; isolated expiry/delete regressions passed.",
+    "Current provider states are persisted diagnostics; credentials and billing were not changed and the root cause of Vultr Unauthorized was not independently established."
   ],
-  "evidence_directory": "/root/backups/dob-phase123-remediation-20261007"
+  "evidence_directory": "/root/backups/dob-phase123-remediation-20261007",
+  "runtime": {
+    "verified_at_utc": "2026-10-07T13:14:00.995524+00:00",
+    "revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+    "schema": "000163_recovery_reconciliation",
+    "deployment": {
+      "at_utc": "2026-10-07T13:03:02.251163+00:00",
+      "started_at": "2026-10-07T13:02:49.082816+00:00",
+      "revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+      "services": {
+        "digital-ocean-bot-worker": {
+          "pid": "2056027",
+          "sha256": "8b5ffcdd9f01cf20339a1f2cf42123ae4e325aa8a3846a0fa784a5affe115592",
+          "restarts": "0"
+        },
+        "digital-ocean-bot-worker-panels": {
+          "pid": "2056028",
+          "sha256": "8b5ffcdd9f01cf20339a1f2cf42123ae4e325aa8a3846a0fa784a5affe115592",
+          "restarts": "0"
+        },
+        "digital-ocean-bot-api": {
+          "pid": "2055976",
+          "sha256": "dbf4316e6a7a44026cd0a7b515f4392cd5bfe802c64375ff601315b5ff8e46f1",
+          "restarts": "0"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-07T13:03:01.505071452Z"
+      },
+      "configuration_preserved": true,
+      "static_preserved": true,
+      "schema": "163",
+      "roles": "control/panels"
+    },
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "2055976",
+        "NRestarts": "0",
+        "MemoryCurrent": "10006528",
+        "MemoryMax": "infinity",
+        "sha256": "dbf4316e6a7a44026cd0a7b515f4392cd5bfe802c64375ff601315b5ff8e46f1"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "2056027",
+        "NRestarts": "0",
+        "MemoryCurrent": "13623296",
+        "MemoryMax": "536870912",
+        "sha256": "8b5ffcdd9f01cf20339a1f2cf42123ae4e325aa8a3846a0fa784a5affe115592"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "2056028",
+        "NRestarts": "0",
+        "MemoryCurrent": "12111872",
+        "MemoryMax": "536870912",
+        "sha256": "8b5ffcdd9f01cf20339a1f2cf42123ae4e325aa8a3846a0fa784a5affe115592"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-07T13:08:41.684605047Z"
+    },
+    "health_window": {
+      "status": "PASS",
+      "complete": true,
+      "sample_count": 49,
+      "duration_seconds": 481.118068,
+      "samples": [
+        {
+          "at_utc": "2026-10-07T13:03:44.727614+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:03:44.737061424Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:03:54.771873+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:03:54.772838475Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:04.800568+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:04.801401981Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:14.825571+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:14.826399963Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:24.846481+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:24.847173146Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:34.873263+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:34.874268447Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:44.899036+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:44.899835868Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:04:54.925996+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:04:54.926773289Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:04.947149+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:04.948061855Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:14.970094+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:14.970837441Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:24.988726+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:24.989536126Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:35.039191+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:35.04026755Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:45.067167+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:45.06790361Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:05:55.088306+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:05:55.088997282Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:05.108852+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:05.10944732Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:15.127907+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:15.128654848Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:25.146546+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:25.148099409Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:35.185518+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:35.186231524Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:45.203682+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:45.20454015Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:06:55.224558+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:06:55.225376047Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:05.245428+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:05.246191665Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:15.267852+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:15.268557154Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:25.289329+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:25.290279651Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:35.311383+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:35.31212271Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:45.330665+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:45.331623713Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:07:55.351686+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:07:55.352507889Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:05.376135+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:05.376872389Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:15.399056+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:15.399766885Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:25.418832+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:25.419569027Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:35.441518+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:35.442325429Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:45.461650+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:45.462327298Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:08:55.479900+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:08:55.480755693Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:05.501470+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:05.502075219Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:15.520660+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:15.521442751Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:25.541163+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:25.541984263Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:35.565659+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:35.566534714Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:45.586122+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:45.586818093Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:09:55.605095+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:09:55.60592715Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:05.625947+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:05.626806379Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:15.650834+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:15.651577888Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:25.669224+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:25.669869113Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:35.691218+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:35.692013187Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:45.709486+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:45.710279302Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:10:55.732321+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:10:55.7331756Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:11:05.759722+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:11:05.760490657Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:11:15.779112+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:11:15.779718388Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:11:25.799581+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:11:25.80035815Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:11:35.828208+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:11:35.828825657Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        },
+        {
+          "at_utc": "2026-10-07T13:11:45.845682+00:00",
+          "readyz": {
+            "status": "ready",
+            "checks": [
+              {
+                "name": "database",
+                "ok": true
+              },
+              {
+                "name": "worker_progress",
+                "ok": true
+              },
+              {
+                "name": "panel_worker_progress",
+                "ok": true
+              },
+              {
+                "name": "lifecycle_account_lanes",
+                "ok": true
+              },
+              {
+                "name": "client_mutation_progress",
+                "ok": true
+              }
+            ],
+            "at": "2026-10-07T13:11:45.846470988Z"
+          },
+          "services": {
+            "worker": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056027",
+              "NRestarts": "0"
+            },
+            "worker-panels": {
+              "ActiveState": "active",
+              "Type": "notify",
+              "WatchdogUSec": "45s",
+              "MainPID": "2056028",
+              "NRestarts": "0"
+            }
+          },
+          "ok": true
+        }
+      ],
+      "healthy_reset_ledgers": {
+        "control": {
+          "version": 1,
+          "attempts": 0,
+          "last_start_unix": 1791378170,
+          "next_start_unix": 0
+        },
+        "panels": {
+          "version": 1,
+          "attempts": 0,
+          "last_start_unix": 1791378170,
+          "next_start_unix": 0
+        }
+      },
+      "collector_stopped_pids": [
+        2056516
+      ],
+      "scope": "Bounded healthy observation >5 minutes. Collector ended intentionally after reset proof; unlimited client lifetime precludes the originally anticipated expiry-cycle wait."
+    },
+    "native_output": {
+      "finished_at": "2026-10-07T13:08:38.675427376Z",
+      "matched_snapshots": 10,
+      "native_unverified": 0,
+      "native_valid": 10,
+      "panels": 4,
+      "published_unique": 10,
+      "read_only_database": true,
+      "remote_operations": "login and fresh inbound inventory only; no config mutations",
+      "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+      "shares_after": {
+        "DIRECT": 4,
+        "RESIDENTIAL": 6
+      },
+      "shares_before": {
+        "DIRECT": 4,
+        "RESIDENTIAL": 6
+      },
+      "started_at": "2026-10-07T13:08:37.691852195Z",
+      "still_published_invalid": 0,
+      "transitioned_out": 0,
+      "unmatched_snapshots": 0
+    },
+    "new_create_jobs": 6,
+    "new_delete_jobs": 0,
+    "jobs_observed_at": "2026-10-07T13:07:26.916051+00:00",
+    "log_counts": {
+      "new_global_failclose": 0,
+      "panic": 0,
+      "ownership_lost": 0,
+      "unexpected_module_exit": 0,
+      "failure_ledger_write_error": 0,
+      "failure_ledger_clear_error": 0,
+      "supervision_stall": 0,
+      "recovery_completion_pending": 0,
+      "checkpoint_reconcile_error": 0
+    },
+    "configuration_preserved": true,
+    "static_preserved": true,
+    "rollback_executed_in_production": false
+  },
+  "operational_blockers": {
+    "at_utc": "2026-10-07T13:06:47.556286+00:00",
+    "source": "persisted provider diagnostic state; no credential modification or fresh authentication attempted",
+    "accounts": [
+      {
+        "n": 5,
+        "provider": "vultr",
+        "provider_state": "TOKEN_INVALID",
+        "latest_state_at": "2026-10-07T13:06:21.507188+00:00",
+        "earliest_state_at": "2026-10-07T13:02:06.032437+00:00",
+        "latest_checked_at": "2026-10-07T13:06:21.507188+00:00",
+        "mentions_ip_allow": false,
+        "mentions_invalid_api": false,
+        "mentions_unauthorized": true,
+        "state_predates_deployment": 3
+      },
+      {
+        "n": 1,
+        "provider": "digitalocean",
+        "provider_state": "BILLING_BLOCKED",
+        "latest_state_at": "2026-10-02T03:55:26.490952+00:00",
+        "earliest_state_at": "2026-10-02T03:55:26.490952+00:00",
+        "latest_checked_at": "2026-10-02T03:55:33.154287+00:00",
+        "mentions_ip_allow": false,
+        "mentions_invalid_api": false,
+        "mentions_unauthorized": false,
+        "state_predates_deployment": 1
+      }
+    ]
+  },
+  "final_frozen_process_fixture": {
+    "at_utc": "2026-10-07T13:01:54.171907+00:00",
+    "schema": "supervision_process_dcfc9bdd01584e8589b3a5f81dbcc868",
+    "units": {
+      "control": "dob-supervision-fixture-control-1dbcc868",
+      "panels": "dob-supervision-fixture-panels-1dbcc868"
+    },
+    "production_services_changed": false,
+    "before": {
+      "control": {
+        "pid": "2054786",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2054832",
+        "restarts": "0"
+      }
+    },
+    "after": {
+      "control": {
+        "pid": "2054786",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2055121",
+        "restarts": "1"
+      }
+    },
+    "heartbeat": [
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 0,
+          "InUse": 3,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 3,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "role": "control"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 5,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 5,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 3,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 3,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      }
+    ],
+    "peer_survived": true,
+    "automatic_role_restart": "PASS",
+    "fault": "SIGSTOP",
+    "fixture_watchdog_seconds": 5,
+    "production_watchdog_seconds": 45,
+    "effective": {
+      "control": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase123-remediation-20261007/worker.fixture ; argv[]=/root/backups/dob-phase123-remediation-20261007/worker.fixture --role=control --state-dir=/root/backups/dob-phase123-remediation-20261007/supervision_process_dcfc9bdd01584e8589b3a5f81dbcc868/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 13:01:54 UTC] ; stop_time=[n/a] ; pid=2054786 ; code=(null) ; status=0/0 }"
+      },
+      "panels": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-phase123-remediation-20261007/worker.fixture ; argv[]=/root/backups/dob-phase123-remediation-20261007/worker.fixture --role=panels --state-dir=/root/backups/dob-phase123-remediation-20261007/supervision_process_dcfc9bdd01584e8589b3a5f81dbcc868/state ; ignore_errors=no ; start_time=[Wed 2026-10-07 13:02:03 UTC] ; stop_time=[n/a] ; pid=2055121 ; code=(null) ; status=0/0 }"
+      }
+    },
+    "supervision": [
+      {
+        "kind": "production-control",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "account-rules",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "billing",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "network-identity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "network-monitor",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "recovery",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "scheduler",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": false,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "capacity-fill",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "global-reality",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-registry",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-monitor",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-protection",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "capacity-fill",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 10
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "global-reality",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "panel-registry",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "residential-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "server-protection",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      }
+    ],
+    "panel_restart_ledger": {
+      "version": 1,
+      "attempts": 2,
+      "last_start_unix": 1791378123,
+      "next_start_unix": 1791378138
+    },
+    "binary_sha256": "8b5ffcdd9f01cf20339a1f2cf42123ae4e325aa8a3846a0fa784a5affe115592",
+    "duplicate_process_rejected": true,
+    "status": "PASS"
+  }
 }

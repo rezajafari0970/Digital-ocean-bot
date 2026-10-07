@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
+  "git_head": "dacc3329b5e2969415fa7051e34356e39d549c61",
   "ready": true,
   "artifacts": [
     {
@@ -374,15 +374,7 @@
     "inspected_live_source": true,
     "note": "DEPLOYED_PHASE3_HEALTHY_WITH_TEN_OPEN_AUDIT_FINDINGS"
   },
-  "latest_development_delta": {
-    "source_baseline": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
-    "source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
-    "snapshot": "docs/PHASE123_AUDIT_SOURCE_SNAPSHOT_20261007.json",
-    "handoff": "docs/PHASE123_AUDIT_20261007.md",
-    "acceptance": "docs/PHASE123_AUDIT_20261007.json",
-    "status": "AUDITED_WITH_TEN_OPEN_FINDINGS",
-    "open_followup": "Fix PH123-001 through PH123-010 with bounded fault regressions"
-  },
+  "latest_development_delta": "docs/PHASE123_REMEDIATION_BRAIN_DELTA_20261007.json",
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
     "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
@@ -404,16 +396,16 @@
     "historical_observation": true,
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "ac1d91e8a89ea575a15e1a1c95a846c2f68fe0ff",
-  "current_frontier": "PHASE123_AUDIT_TEN_OPEN_FINDINGS",
+  "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+  "current_frontier": "Phase123 remediated; account auth/billing/fairness next",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
   "openai_review": "REVISE_SOURCE_AND_ISOLATED_FAULT_EVIDENCE",
-  "current_native_evidence_at": "2026-10-07T10:47:49.602892+00:00",
+  "current_native_evidence_at": "2026-10-07T13:08:38.675427376Z",
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
   "source_snapshot_revision": "337b6cf44bc09939e1371b9a5607f7d086e5584d",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
-  "latest_audit_verdict": "REVISE",
+  "latest_audit_verdict": "PASS_WITH_DOCUMENTED_OPERATIONAL_BLOCKERS",
   "open_reaudit_findings": [],
   "latest_reaudit_at": "2026-10-07T10:54:26.710171+00:00",
   "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
@@ -425,7 +417,9 @@
   "latest_phase3_supervision": "docs/PHASE3_SUPERVISION_20261007.md",
   "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00",
   "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
-  "open_phase123_findings": [
+  "open_phase123_findings": [],
+  "latest_phase123_reaudit": "docs/PHASE123_FINAL_REAUDIT_20261007.json",
+  "closed_phase123_findings": [
     "PH123-001",
     "PH123-002",
     "PH123-003",

@@ -35,13 +35,12 @@
   ],
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
-    "date": "2026-10-05",
-    "api_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
-    "worker_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
-    "web_static_source_revision": "d384c8b054f57c4b24cbea57bc58e05c5317fd04",
-    "status": "DEPLOYED_CAPACITY_STATUS_VERIFIED_UPCLOUD_TRIAL_CREATE_BLOCKED",
-    "acceptance": "docs/UPCLOUD_CAPACITY_STATUS_ACCEPTANCE_20261005.json",
-    "handoff": "docs/UPCLOUD_CAPACITY_STATUS_HANDOFF_20261005.md",
-    "note": "Live Upcloud 11 has per-plan resource budgets 2/2/2, provider servers0 and desired5; latest actual create rejected HTTP403/TRIAL_FIREWALL. Durable block survives a successful explicit provider refresh; list/detail show buildable0 consistently. Readable account status ACTIVE is not create permission. Latest read did not expose a positive trial_mode flag; known create rejection remains authoritative until explicit operator recovery. Full paid UpCloud lifecycle remains unverified."
+    "runtime_source_revision": "dacc3329b5e2969415fa7051e34356e39d549c61",
+    "schema": 163,
+    "at_utc": "2026-10-07T13:14:00.995524+00:00",
+    "handoff": "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "reaudit": "docs/PHASE123_FINAL_REAUDIT_20261007.json",
+    "brain_delta": "docs/PHASE123_REMEDIATION_BRAIN_DELTA_20261007.json",
+    "state": "Phase123 corrected and deployed; provider auth/billing/fairness next"
   }
 }
