@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "git_head": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "git_head": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
   "ready": true,
   "artifacts": [
     {
       "artifact": "docs/FULL_SOURCE_KNOWLEDGE.json",
       "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
-      "head_distance": 452,
+      "head_distance": 454,
       "relevant_changed_files": [
         "cmd/worker/main.go",
         "internal/adminapi/capacity_resume.go",
@@ -33,13 +33,49 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
       "artifact": "docs/SEMANTIC_KNOWLEDGE.json",
       "source_commit": "03f810813368f1902cb85f42d8de0d9d8d48c198",
+      "head_distance": 454,
+      "relevant_changed_files": [
+        "cmd/worker/main.go",
+        "internal/adminapi/capacity_resume.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/recovery_controls_test.go",
+        "internal/panels/clientops/bulk.go",
+        "internal/panels/clientops/bulk_delete.go",
+        "internal/panels/clientops/bulk_test.go",
+        "internal/panels/clientops/executor.go",
+        "internal/panels/clientops/gate.go",
+        "internal/panels/clientops/journal.go",
+        "internal/panels/clientops/lifecycle.go",
+        "internal/panels/clientops/lifecycle_snapshot.go",
+        "internal/panels/clientops/panel_failure.go",
+        "internal/panels/clientops/panel_failure_test.go",
+        "internal/panels/clientops/update.go",
+        "internal/panels/sanaei/client_mutation.go",
+        "internal/panels/sanaei/mutation.go",
+        "internal/panels/sanaei/raw_list.go",
+        "internal/panels/sanaei/resilient.go",
+        "internal/panels/sanaei/resilient_test.go",
+        "internal/panels/usercapacity/lifecycle_admission.go",
+        "internal/panels/usercapacity/lifecycle_admission_test.go",
+        "migrations/000161_client_mutation_panel_health.down.sql",
+        "migrations/000161_client_mutation_panel_health.up.sql",
+        "tools/client-failure-isolation-acceptance.sh",
+        "web/static/app.js",
+        "web/static/index.html"
+      ],
+      "status": "historical-index-supplemented-by-current-delta"
+    },
+    {
+      "artifact": "docs/DEEP_REQUIREMENTS_BRAIN.json",
+      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5",
       "head_distance": 452,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -67,13 +103,49 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/DEEP_REQUIREMENTS_BRAIN.json",
-      "source_commit": "adb7ec3665137d5f54bb72b0eda88ce1d5851fb5",
+      "artifact": "docs/FUNCTION_BEHAVIOR_BRAIN.json",
+      "source_commit": "5fcf10b508f4f085a3bec82a4ed5f38d3cd63b37",
+      "head_distance": 451,
+      "relevant_changed_files": [
+        "cmd/worker/main.go",
+        "internal/adminapi/capacity_resume.go",
+        "internal/adminapi/config_capacity.go",
+        "internal/adminapi/recovery_controls_test.go",
+        "internal/panels/clientops/bulk.go",
+        "internal/panels/clientops/bulk_delete.go",
+        "internal/panels/clientops/bulk_test.go",
+        "internal/panels/clientops/executor.go",
+        "internal/panels/clientops/gate.go",
+        "internal/panels/clientops/journal.go",
+        "internal/panels/clientops/lifecycle.go",
+        "internal/panels/clientops/lifecycle_snapshot.go",
+        "internal/panels/clientops/panel_failure.go",
+        "internal/panels/clientops/panel_failure_test.go",
+        "internal/panels/clientops/update.go",
+        "internal/panels/sanaei/client_mutation.go",
+        "internal/panels/sanaei/mutation.go",
+        "internal/panels/sanaei/raw_list.go",
+        "internal/panels/sanaei/resilient.go",
+        "internal/panels/sanaei/resilient_test.go",
+        "internal/panels/usercapacity/lifecycle_admission.go",
+        "internal/panels/usercapacity/lifecycle_admission_test.go",
+        "migrations/000161_client_mutation_panel_health.down.sql",
+        "migrations/000161_client_mutation_panel_health.up.sql",
+        "tools/client-failure-isolation-acceptance.sh",
+        "web/static/app.js",
+        "web/static/index.html"
+      ],
+      "status": "historical-index-supplemented-by-current-delta"
+    },
+    {
+      "artifact": "docs/COLUMN_BEHAVIOR_BRAIN.json",
+      "source_commit": "5ec0fbc2c4c293d04841de677ad603373db25eaa",
       "head_distance": 450,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -101,13 +173,14 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/FUNCTION_BEHAVIOR_BRAIN.json",
-      "source_commit": "5fcf10b508f4f085a3bec82a4ed5f38d3cd63b37",
+      "artifact": "docs/TEST_BEHAVIOR_BRAIN.json",
+      "source_commit": "4dc328f72436257057da58dd24553864b75d6f10",
       "head_distance": 449,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -135,13 +208,14 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/COLUMN_BEHAVIOR_BRAIN.json",
-      "source_commit": "5ec0fbc2c4c293d04841de677ad603373db25eaa",
+      "artifact": "docs/STATE_TRANSITION_BRAIN.json",
+      "source_commit": "d4835948fc7ab79e041823b919159332a6dbcfd2",
       "head_distance": 448,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -169,13 +243,14 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/TEST_BEHAVIOR_BRAIN.json",
-      "source_commit": "4dc328f72436257057da58dd24553864b75d6f10",
+      "artifact": "docs/FRONTEND_ACTION_STATE_BRAIN.json",
+      "source_commit": "ccfa4e72955080f80b7e7d508efa18d58696f1e1",
       "head_distance": 447,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -203,13 +278,14 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/STATE_TRANSITION_BRAIN.json",
-      "source_commit": "d4835948fc7ab79e041823b919159332a6dbcfd2",
+      "artifact": "docs/INCIDENT_REGRESSION_BRAIN.json",
+      "source_commit": "4eb0f2c31d2ca6a38e0fc8310556ad5a8154be21",
       "head_distance": 446,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -237,47 +313,14 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     },
     {
-      "artifact": "docs/FRONTEND_ACTION_STATE_BRAIN.json",
-      "source_commit": "ccfa4e72955080f80b7e7d508efa18d58696f1e1",
-      "head_distance": 445,
-      "relevant_changed_files": [
-        "cmd/worker/main.go",
-        "internal/adminapi/capacity_resume.go",
-        "internal/adminapi/config_capacity.go",
-        "internal/adminapi/recovery_controls_test.go",
-        "internal/panels/clientops/bulk.go",
-        "internal/panels/clientops/bulk_delete.go",
-        "internal/panels/clientops/bulk_test.go",
-        "internal/panels/clientops/executor.go",
-        "internal/panels/clientops/gate.go",
-        "internal/panels/clientops/journal.go",
-        "internal/panels/clientops/lifecycle.go",
-        "internal/panels/clientops/lifecycle_snapshot.go",
-        "internal/panels/clientops/panel_failure.go",
-        "internal/panels/clientops/panel_failure_test.go",
-        "internal/panels/clientops/update.go",
-        "internal/panels/sanaei/client_mutation.go",
-        "internal/panels/sanaei/mutation.go",
-        "internal/panels/sanaei/raw_list.go",
-        "internal/panels/sanaei/resilient.go",
-        "internal/panels/sanaei/resilient_test.go",
-        "internal/panels/usercapacity/lifecycle_admission.go",
-        "internal/panels/usercapacity/lifecycle_admission_test.go",
-        "migrations/000161_client_mutation_panel_health.down.sql",
-        "migrations/000161_client_mutation_panel_health.up.sql",
-        "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
-      ],
-      "status": "historical-index-supplemented-by-current-delta"
-    },
-    {
-      "artifact": "docs/INCIDENT_REGRESSION_BRAIN.json",
-      "source_commit": "4eb0f2c31d2ca6a38e0fc8310556ad5a8154be21",
+      "artifact": "docs/BLIND_KNOWLEDGE_CHALLENGE.json",
+      "source_commit": "7753b590b248953d1ddbef4a1ec1f2b7f16622cd",
       "head_distance": 444,
       "relevant_changed_files": [
         "cmd/worker/main.go",
@@ -305,60 +348,28 @@
         "migrations/000161_client_mutation_panel_health.down.sql",
         "migrations/000161_client_mutation_panel_health.up.sql",
         "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
-      ],
-      "status": "historical-index-supplemented-by-current-delta"
-    },
-    {
-      "artifact": "docs/BLIND_KNOWLEDGE_CHALLENGE.json",
-      "source_commit": "7753b590b248953d1ddbef4a1ec1f2b7f16622cd",
-      "head_distance": 442,
-      "relevant_changed_files": [
-        "cmd/worker/main.go",
-        "internal/adminapi/capacity_resume.go",
-        "internal/adminapi/config_capacity.go",
-        "internal/adminapi/recovery_controls_test.go",
-        "internal/panels/clientops/bulk.go",
-        "internal/panels/clientops/bulk_delete.go",
-        "internal/panels/clientops/bulk_test.go",
-        "internal/panels/clientops/executor.go",
-        "internal/panels/clientops/gate.go",
-        "internal/panels/clientops/journal.go",
-        "internal/panels/clientops/lifecycle.go",
-        "internal/panels/clientops/lifecycle_snapshot.go",
-        "internal/panels/clientops/panel_failure.go",
-        "internal/panels/clientops/panel_failure_test.go",
-        "internal/panels/clientops/update.go",
-        "internal/panels/sanaei/client_mutation.go",
-        "internal/panels/sanaei/mutation.go",
-        "internal/panels/sanaei/raw_list.go",
-        "internal/panels/sanaei/resilient.go",
-        "internal/panels/sanaei/resilient_test.go",
-        "internal/panels/usercapacity/lifecycle_admission.go",
-        "internal/panels/usercapacity/lifecycle_admission_test.go",
-        "migrations/000161_client_mutation_panel_health.down.sql",
-        "migrations/000161_client_mutation_panel_health.up.sql",
-        "tools/client-failure-isolation-acceptance.sh",
-        "web/static/app.js"
+        "web/static/app.js",
+        "web/static/index.html"
       ],
       "status": "historical-index-supplemented-by-current-delta"
     }
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
-    "handoff": "docs/CLIENT_FAILURE_ISOLATION_20261007.md",
+    "revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+    "runtime_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+    "handoff": "docs/UI_REFRESH_RECOVERY_20261007.md",
     "inspected_live_source": true,
-    "note": "DEPLOYED_CONFIG_PRESERVED_AWAITING_AUTHENTICATED_RESUME; historical source indexes must be supplemented by the new exact source snapshot and live source."
+    "note": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED"
   },
   "latest_development_delta": {
-    "source_baseline": "c494fbc1c275852a0b81be90ae62b19c19377904",
-    "source_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
-    "snapshot": "docs/CLIENT_FAILURE_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
-    "handoff": "docs/CLIENT_FAILURE_ISOLATION_20261007.md",
-    "acceptance": "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json",
-    "status": "DEPLOYED_CONFIG_PRESERVED_AWAITING_AUTHENTICATED_RESUME",
-    "open_followup": "Authenticated capacity resume then actual lifecycle and Residential replacement-cycle proof; production config preserved."
+    "source_baseline": "8b5e5d13586bb3e261ee87b755d6f1045bb8095c",
+    "source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+    "snapshot": "docs/UI_REFRESH_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
+    "handoff": "docs/UI_REFRESH_RECOVERY_20261007.md",
+    "acceptance": "docs/UI_REFRESH_RECOVERY_ACCEPTANCE_20261007.json",
+    "status": "DEPLOYED_UI_RECOVERY_AND_LIVE_CLIENT_REPLACEMENT_VERIFIED",
+    "open_followup": "Separate provider/fleet issues; no pending authenticated resume. Existing tab reload only."
   },
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source."
 }

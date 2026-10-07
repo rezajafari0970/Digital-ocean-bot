@@ -10,5 +10,6 @@
   },
   "brain_query": "/root/backups/dob-ui-refresh-recovery-20261007/brain-frontend.json",
   "canonical_tree": "/root/projects/Digital-ocean-bot-canonical-e2e",
-  "method": "Development Orchestrator PLAN/IMPLEMENT/TEST, server OpenAI reviews, real mobile Chromium fault/race, isolated PostgreSQL admin race, full Go tests; additive static fix only."
+  "method": "Development Orchestrator PLAN/IMPLEMENT/TEST, server OpenAI reviews, real mobile Chromium fault/race, isolated PostgreSQL admin race, full Go tests; additive static fix only.",
+  "source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1"
 }
