@@ -1,0 +1,229 @@
+{
+  "at_utc": "2026-10-07T04:20:28.057343+00:00",
+  "main_gate": [
+    {
+      "enabled": false,
+      "panel_id": null,
+      "singleton": true,
+      "inbound_id": null,
+      "updated_at": "2026-10-06T21:57:16.626276+00:00",
+      "concurrency": 1,
+      "kill_switch": true
+    }
+  ],
+  "bulk_gate": [
+    {
+      "enabled": false,
+      "panel_id": "f06917d6-8127-402b-9c3b-10e44d8e9039",
+      "singleton": true,
+      "expires_at": "2026-10-03T11:30:14.251943+00:00",
+      "inbound_id": 1,
+      "updated_at": "2026-10-06T21:57:16.626276+00:00",
+      "kill_switch": true,
+      "max_batch_size": 50,
+      "remaining_batches": 0
+    }
+  ],
+  "profiles": [
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 5,
+      "updated_at": "2026-10-05T04:37:19.965507+00:00",
+      "route_class": "DIRECT",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 100,
+      "user_lifetime_seconds": 0,
+      "target_users_per_inbound": 1,
+      "creation_interval_seconds": 60
+    },
+    {
+      "ports": [
+        443
+      ],
+      "enabled": true,
+      "revision": 9,
+      "updated_at": "2026-10-06T13:40:14.583474+00:00",
+      "route_class": "RESIDENTIAL",
+      "device_limit": 0,
+      "user_quota_bytes": 0,
+      "users_per_second": 10,
+      "user_lifetime_seconds": 600,
+      "target_users_per_inbound": 10,
+      "creation_interval_seconds": 60
+    }
+  ],
+  "lifecycle_control": [
+    {
+      "enabled": true,
+      "singleton": true,
+      "updated_at": "2026-10-03T16:03:28.248148+00:00",
+      "auto_enroll": true,
+      "max_batch_size": 100,
+      "operation_budget": 10000,
+      "max_active_scopes": 64
+    }
+  ],
+  "capacity_freshness": [
+    {
+      "rows": 16,
+      "newest": "2026-10-06T21:56:56.796764+00:00"
+    }
+  ],
+  "job_activity": [
+    {
+      "new_last_20m": 0,
+      "last_bulk_create_success": "2026-10-06T21:57:09.591648+00:00"
+    }
+  ],
+  "incident_job": [
+    {
+      "id": "5079c33f-b4a6-4764-b610-e29718e0f9a0",
+      "kind": "BULK_CREATE",
+      "state": "OBSOLETE",
+      "attempts": 1,
+      "panel_id": "b18cbc7f-2228-4cd3-8757-53f7ec9748f0",
+      "created_at": "2026-10-06T21:56:47.028328+00:00",
+      "last_error": "panel lifecycle no longer accepts client mutation",
+      "updated_at": "2026-10-06T22:23:18.304712+00:00",
+      "completed_at": "2026-10-06T22:23:18.304712+00:00",
+      "next_retry_at": null
+    }
+  ],
+  "proxy_health": [
+    {
+      "enabled": 12,
+      "fresh_healthy": 11
+    }
+  ],
+  "shares": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T04:19:16.0945+00:00",
+      "http_status": 200,
+      "vless_lines": 1,
+      "response_bytes": 298
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T04:18:57.425618+00:00",
+      "http_status": 200,
+      "vless_lines": 0,
+      "response_bytes": 0
+    }
+  ],
+  "publication_funnel": [
+    {
+      "collected": 1,
+      "route_class": "DIRECT",
+      "routing_eligible": 1,
+      "profile_owned_eligible": 1,
+      "time_and_server_eligible": 1
+    },
+    {
+      "collected": 59,
+      "route_class": "RESIDENTIAL",
+      "routing_eligible": 59,
+      "profile_owned_eligible": 0,
+      "time_and_server_eligible": 59
+    }
+  ],
+  "services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "diagnosis_status": "DIAGNOSED_NOT_FIXED",
+  "root_cause_review": {
+    "verdict": "CONFIRMED",
+    "causal_chain": [
+      {
+        "step": 1,
+        "finding": "Transient panel authentication/API failures opened the per-panel Sanaei runtime circuit.",
+        "evidence": [
+          "At 2026-10-06T21:57:04Z the panel login request timed out.",
+          "At 2026-10-06T21:57:16.622353Z the CSRF request timed out.",
+          "runtime_manager.go counts transient failures per panel and opens the circuit for 30 seconds after at least three failures."
+        ]
+      },
+      {
+        "step": 2,
+        "finding": "The temporary circuit-open result escaped the durable mutation executor as an error even though the job was eligible for retry.",
+        "evidence": [
+          "At 2026-10-06T21:57:16.629689Z syslog records: \"sanaei runtime circuit open: retry in 30s; execution gate fail-closed\".",
+          "Executor.RunOne calls Journal.Retry for nonterminal errors, but retryResult returns the original execution error when the journal operation succeeds.",
+          "Executor.Drain immediately returns that error to the worker loop."
+        ]
+      },
+      {
+        "step": 3,
+        "finding": "The worker converted that panel-local, pre-mutation temporary unavailability into a persistent fleet-wide mutation shutdown.",
+        "evidence": [
+          "The worker main loop calls FailCloseGate for any error returned by Drain.",
+          "FailCloseGate disables both execution gates, sets kill_switch=true, clears main-gate panel and inbound scope, and sets remaining_batches=0.",
+          "Both recorded gates have updated_at 2026-10-06T21:57:16.626276Z, matching the circuit-open/fail-close event to subsecond precision.",
+          "The main gate remains disabled with a fleet-wide scope because panel_id and inbound_id are null."
+        ]
+      },
+      {
+        "step": 4,
+        "finding": "Persistent gate closure stopped residential client replenishment.",
+        "evidence": [
+          "The latest bulk-create success was 2026-10-06T21:57:09.591648Z, immediately before gate closure.",
+          "No new jobs occurred in the reported last 20 minutes.",
+          "The residential profile has a 600-second client lifetime, so its previously generated population naturally became ineligible without replenishment."
+        ]
+      },
+      {
+        "step": 5,
+        "finding": "The Residential share correctly returned HTTP 200 with an empty body because no currently publishable client passed immutable profile-ownership eligibility.",
+        "evidence": [
+          "Live evidence reproduces Residential HTTP 200, zero VLESS lines, and zero response bytes.",
+          "The publication funnel has 59 collected and 59 routing-eligible Residential rows, but zero profile_owned_eligible rows.",
+          "output_snapshot.go explicitly requires an ACTIVE bulk_user_ownership row with the matching route class for class-specific publication when profiles exist.",
+          "Therefore route-qualified snapshot rows alone cannot be published as Residential profile output."
+        ]
+      },
+      {
+        "step": 6,
+        "finding": "The single Direct link is consistent with the same diagnosis rather than contradictory evidence.",
+        "evidence": [
+          "The Direct funnel has one collected, routing-eligible, profile-owned, time-and-server-eligible row.",
+          "The Direct profile has an infinite configured client lifetime, unlike Residential's 600 seconds.",
+          "Live evidence returns Direct HTTP 200 with one VLESS line."
+        ]
+      }
+    ],
+    "caveats": [
+      "Attribution to incident job 5079c33f-b4a6-4764-b610-e29718e0f9a0 is strong temporal and panel correlation, but the executor syslog does not include a job ID, so exact job identity is not directly proven.",
+      "The incident job's later OBSOLETE state and \"panel lifecycle no longer accepts client mutation\" error are downstream records and are not themselves proof of the initial circuit-triggering execution.",
+      "The ambiguous next_retry_at SQL in app/recovery.go is excluded from this diagnosis and is not the trigger for this gate closure.",
+      "The prior UpCloud-only expiry/capacity diagnosis may remain valid as a separate local loop, but it cannot explain the fleet-wide mutation stop or the observed cross-fleet Residential output loss.",
+      "An infinite Direct profile lifetime does not guarantee publication indefinitely; the output query still enforces snapshot freshness, deployment/account/droplet state, routing proof, ownership, server protection, port, and other eligibility guards.",
+      "The Residential ownership filter is operating as designed on the supplied evidence. Removing or weakening it would expose preserved manual/default clients outside their immutable profile ownership.",
+      "This confirms the diagnosis from the supplied source, database facts, HTTP evidence, and syslog only; no implementation or live-state changes were assessed or performed."
+    ],
+    "correction_boundary": {
+      "recommended": [
+        "Classify a pre-mutation ErrRuntimeCircuitOpen or equivalent temporary runtime acquisition failure as durable retryable unavailability, not as a reason to invoke the persistent fleet-wide fail-close gate.",
+        "Distinguish temporary pre-mutation failures from terminal validation errors, ownership/conflict errors, and genuinely ambiguous post-mutation outcomes.",
+        "Keep retries durable and bounded while retaining the existing serialized mutation concurrency.",
+        "Preserve read-before-retry and desired-state verification so retries remain idempotent and do not duplicate or overwrite clients.",
+        "Preserve exact panel, inbound, client, generation, email, route-class, and immutable profile-ownership checks.",
+        "Preserve all output eligibility and publication guards, including the profile ownership filter.",
+        "After correcting the error boundary, require an operator-domain controlled resume of the persistent execution gate with appropriate scope and validation."
+      ],
+      "excluded": [
+        "Do not unconditionally auto-reopen a fail-closed mutation gate.",
+        "Do not remove or relax the immutable profile-ownership publication filter.",
+        "Do not treat terminal, conflict, or ambiguous post-mutation errors as ordinary blind retries.",
+        "Do not attribute the trigger conclusively to a specific job ID without direct executor logging.",
+        "Do not fold the separate UpCloud expiry/capacity loop or the ignored app/recovery.go next_retry_at ambiguity into this root cause."
+      ]
+    }
+  },
+  "confirmed_worker_log": "2026-10-06T21:57:16.629689Z client mutation executor: sanaei runtime circuit open: retry in 30s; execution gate fail-closed",
+  "runtime_changed": false
+}

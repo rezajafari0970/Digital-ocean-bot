@@ -39,7 +39,7 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Fix expired-server lifecycle circular wait when Desired exceeds fresh provider capacity. Read docs/UPCLOUD_OUTPUT_DIAGNOSIS_20261007.md. Preserve create/network/output guards and user Desired. Residential endpoints remain incompatible; native x-ui restarts and Vultr232 billing classification remain separate.",
+  "next_product_step": "Repair global client-executor closure on pre-mutation per-panel temporary circuit errors; preserve uncertainty/conflict guards and perform controlled capacity resume plus native/profile Output verification. Read docs/OUTPUT_GLOBAL_DIAGNOSIS_20261007.md. Separate UpCloud expired-server capacity deadlock, trial proxy ports, native x-ui restarts and Vultr232 billing classification remain open.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
   "eligible_serving_panels": 27,
   "worker_source_revision": "fc971058a555718cdd178cd226b038c65b79383f",
@@ -378,5 +378,17 @@
     "handoff": "docs/UPCLOUD_OUTPUT_DIAGNOSIS_20261007.md",
     "both_prior_servers_expired": true,
     "root_cause": "ProcessLifecycle calls shouldWaitForDeficitBackfill(5,2) before provider-capacity breaker. Successful no-op blocks oldest EXPIRING and per-account queue; create admission cannot add at provider limit2. Output correctly excludes expired droplets."
+  },
+  "latest_global_output_diagnosis": "docs/OUTPUT_GLOBAL_DIAGNOSIS_20261007.md",
+  "global_output_diagnosis": {
+    "status": "DIAGNOSED_NOT_FIXED",
+    "observed_at_utc": "2026-10-07T04:20:28.057343Z",
+    "residential_share_links": 0,
+    "direct_share_links": 1,
+    "main_execution_gate_enabled": false,
+    "main_gate_closed_at_utc": "2026-10-06T21:57:16.626276Z",
+    "confirmed_trigger": "sanaei runtime circuit open: retry in 30s; execution gate fail-closed",
+    "runtime_changed": false,
+    "evidence_directory": "/root/backups/dob-output-global-diagnosis-20261007"
   }
 }
