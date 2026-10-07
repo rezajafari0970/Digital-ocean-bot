@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -54,12 +55,23 @@ func claimCapacityRetirementTx(ctx context.Context, tx *sql.Tx, item droplets.Li
 	if err != nil {
 		return false, err
 	}
-	if managed >= desired || retiring != 0 || active != 0 || backfill != 0 {
+	if managed >= desired || retiring != 0 || active != 0 {
 		return false, nil
 	}
 	// Never reuse the full-capacity snapshot from before an earlier deletion.
 	if lastDeleted.Valid && !cap.ObservedAt.After(lastDeleted.Time) {
 		return false, nil
+	}
+	// A historical failed backfill can coexist with a fully refilled fleet
+	// (for example another admitted deployment filled the provider's last slot).
+	// Keep that debt intact. Retire only if fresh native IDs prove every current
+	// provider slot is already an owned serving/expired server; counts alone
+	// cannot distinguish an unmanaged provider instance from stale local state.
+	if backfill != 0 {
+		proven, err := backfillAtProvenManagedCeiling(ctx, tx, item.AccountID, managed, lastDeleted)
+		if err != nil || !proven {
+			return false, err
+		}
 	}
 
 	var oldest string
@@ -190,4 +202,83 @@ func lockManagedPopulationTx(ctx context.Context, tx *sql.Tx, account string) er
 		}
 	}
 	return rows.Err()
+}
+
+func backfillAtProvenManagedCeiling(ctx context.Context, tx *sql.Tx, accountID string, managed int, lastDeleted sql.NullTime) (bool, error) {
+	var raw []byte
+	var candidates int
+	var snapshotAt time.Time
+	// This exception derives every capacity/inventory fact from one selected
+	// row in one statement. Earlier admission reads are only conservative
+	// guards: a concurrent refresh/update cannot mix their fields into proof.
+	// Equal newest timestamps are ambiguous and remain blocked.
+	err := tx.QueryRowContext(ctx, `SELECT canonical,created_at,count(*) OVER(PARTITION BY created_at) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, accountID).Scan(&raw, &snapshotAt, &candidates)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if candidates != 1 {
+		return false, nil
+	}
+	var observation struct {
+		Inventory struct {
+			Servers    []struct{ ID string }
+			ObservedAt time.Time
+		}
+		Capacity struct {
+			ObservedAt                 time.Time
+			ComputeLimit, ComputeInUse int
+			LimitKnown                 bool
+		}
+	}
+	if json.Unmarshal(raw, &observation) != nil {
+		return false, nil
+	}
+	inventory := observation.Inventory
+	capacityAt := observation.Capacity.ObservedAt
+	nativeCap := observation.Capacity
+	if !nativeCap.LimitKnown || nativeCap.ComputeLimit <= 0 || nativeCap.ComputeInUse != managed || nativeCap.ComputeLimit != managed || time.Since(snapshotAt) > 2*time.Minute || snapshotAt.After(time.Now().Add(30*time.Second)) || (lastDeleted.Valid && !snapshotAt.After(lastDeleted.Time)) {
+		return false, nil
+	}
+	if len(inventory.Servers) != managed || inventory.ObservedAt.IsZero() || capacityAt.IsZero() {
+		return false, nil
+	}
+	// Debt retirement requires a tightly assembled observation: inventory and
+	// capacity sampling at most one second apart, persisted within 30 seconds.
+	// Slower collection remains usable elsewhere but cannot authorize this
+	// exceptional retirement. Native timestamps also prevent copied capacity
+	// updates from rejuvenating an older inventory.
+	skew := capacityAt.Sub(inventory.ObservedAt)
+	inventoryLag := snapshotAt.Sub(inventory.ObservedAt)
+	capacityLag := snapshotAt.Sub(capacityAt)
+	if skew < -time.Second || skew > time.Second || inventoryLag < -time.Second || inventoryLag > 30*time.Second || capacityLag < -time.Second || capacityLag > 30*time.Second {
+		return false, nil
+	}
+	now := time.Now()
+	if now.Sub(inventory.ObservedAt) > 2*time.Minute || inventory.ObservedAt.After(now.Add(30*time.Second)) || (lastDeleted.Valid && !inventory.ObservedAt.After(lastDeleted.Time)) {
+		return false, nil
+	}
+	ids := make([]string, 0, len(inventory.Servers))
+	seen := make(map[string]bool, len(inventory.Servers))
+	for _, server := range inventory.Servers {
+		if server.ID == "" || seen[server.ID] {
+			return false, nil
+		}
+		seen[server.ID] = true
+		ids = append(ids, server.ID)
+	}
+	encoded, err := json.Marshal(ids)
+	if err != nil {
+		return false, err
+	}
+	var matched int
+	var uncertain bool
+	err = tx.QueryRowContext(ctx, `SELECT count(DISTINCT d.provider_resource_id),
+ EXISTS(SELECT 1 FROM operations o WHERE o.account_id=$1 AND o.kind='CREATE_DROPLET' AND o.state IN ('planned','running','verifying','unknown'))
+ FROM droplets d WHERE d.account_id=$1 AND d.state IN ('READY','EXPIRING')
+ AND d.provider_resource_id IN (SELECT jsonb_array_elements_text($2::jsonb))
+ AND EXISTS(SELECT 1 FROM resources own WHERE own.account_id=d.account_id AND own.provider_resource_id=d.provider_resource_id AND own.managed AND own.state<>'deleted')`, accountID, string(encoded)).Scan(&matched, &uncertain)
+	return err == nil && !uncertain && matched == managed, err
 }

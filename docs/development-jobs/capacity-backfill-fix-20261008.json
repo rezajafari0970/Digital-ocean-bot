@@ -1,0 +1,26 @@
+{
+  "goal": "Resolve full-provider-capacity expiry deadlock caused by a historical unassigned backfill debt while every provider instance is already managed; retain all ownership/freshness/pending/desired gates.",
+  "context": "Read internal/app/lifecycle_capacity_recovery.go and tests. ProductionUpcloud113 ACTIVE desired5 fresh knownlimit2/inuse2, two managed live servers no pendingoperations or nonterminaldeployments, one oldDELETED backfill_required NULLreplacement after failedreplacement, no errors because claimCapacityRetirementTx refuses all debt. Both servers expired, firstEXPIRING blocksnextREADY in account lane. Do NOT clear/reassign debts or unconditionally delete. Narrow exception only for fresh exact capacity match: backfill debt may coexist with single oldest-expired retirement when managed==providerInUse==knownLimit, noactive/retiring/pending, freshsnapshotafterlastdelete, validownedexpiry, provideractive/createallowance. All other debt cases remainblocked. Original safeguards and transaction account+resource locks remain. Reproduce real isolatedPG beforefix; concurrency16 can retire exactlyone; missing/stale/future/unmanaged capacity, unknowncreates, disabled/accountblocked, activebuild and predelete snapshot stayblocked. Preserve desired/buildspacing and idempotentproviderjournal. ActualAPIplan+review, race/fullGo required. No subagents; no productionfault injection. First scopedrepair-supervisionfix is approved/committed and not yet deployed. Final clean combined build tested inisolatedsystemd then deployonce. Additional required proof for the debt exception: exact fresh native Inventory.Server IDs must uniquely match all local managed READY/EXPIRING servers at providerlimit; native Inventory.ObservedAt must be recent and later than last deletion, and unresolved CREATE operations with known resource IDs also refuse. Never clear old debt; preserve prior conservative guard for all unproven cases. Initial plan-only job capacity-backfill-20261008 is superseded because first code checkpoint had not yet completed; use this new baseline job.",
+  "allowed_paths": [
+    "internal/app/lifecycle_capacity_recovery.go",
+    "internal/app/lifecycle_capacity_recovery_test.go",
+    "docs/development-jobs/capacity-backfill-fix-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-capacity-backfill-20261008/acceptance-race-fault.sh"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-capacity-backfill-20261008/review.py"
+    ]
+  },
+  "commit_message": "fix(lifecycle): allow proven full-capacity rotation with historical backfill debt"
+}

@@ -3,10 +3,12 @@ package app
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 )
 
@@ -327,5 +329,132 @@ func TestExpiryAuthorizationBlockedProviderNeverEntersNetworkRuntime(t *testing.
 				t.Fatal("permission restoration not recoverable", ok, err)
 			}
 		}
+	}
+}
+
+func addHistoricalDebtAtFullCapacity(t *testing.T, db *sql.DB) {
+	t.Helper()
+	_, err := db.Exec(`
+ INSERT INTO droplets(id,account_id,provider_resource_id,state,backfill_required,updated_at)
+ VALUES('debt','test','deleted-resource','DELETED',true,now()-interval '10 minutes');
+ UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Capacity,ObservedAt}',to_jsonb(now()))||jsonb_build_object('Inventory',jsonb_build_object(
+ 'ObservedAt',now(),'Servers',jsonb_build_array(jsonb_build_object('ID','old'),jsonb_build_object('ID','new')))),created_at=now();`)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+func TestCapacityRecoveryHistoricalDebtAtProvenManagedCeiling(t *testing.T) {
+	db := capacityRecoveryFixture(t)
+	addHistoricalDebtAtFullCapacity(t, db)
+	var wg sync.WaitGroup
+	results := make(chan bool, 16)
+	errs := make(chan error, 16)
+	for i := 0; i < 16; i++ {
+		id := "old"
+		if i%2 != 0 {
+			id = "new"
+		}
+		wg.Add(1)
+		go func() { defer wg.Done(); ok, err := claimRecovery(t, db, id); results <- ok; errs <- err }()
+	}
+	wg.Wait()
+	close(results)
+	close(errs)
+	n := 0
+	for ok := range results {
+		if ok {
+			n++
+		}
+	}
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if n != 1 {
+		t.Fatalf("full provider fleet remained blocked by historical debt: retirements=%d", n)
+	}
+	var debt bool
+	var replacement sql.NullString
+	var desired int
+	if err := db.QueryRow("SELECT backfill_required,replacement_deployment_id,(SELECT desired_server_count FROM accounts WHERE id='test') FROM droplets WHERE id='debt'").Scan(&debt, &replacement, &desired); err != nil {
+		t.Fatal(err)
+	}
+	if !debt || replacement.Valid || desired != 5 {
+		t.Fatal("debt or desired rewritten")
+	}
+	if _, err := db.Exec("UPDATE droplets SET state='DELETED',backfill_required=true,updated_at=now() WHERE id='old'"); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := claimRecovery(t, db, "new"); err != nil || ok {
+		t.Fatal("second retirement before fresh refill proof", ok, err)
+	}
+}
+func TestCapacityRecoveryHistoricalDebtRequiresExactFreshOwnedInventory(t *testing.T) {
+	cases := map[string]string{
+		"ambiguous_snapshot_time":          `INSERT INTO provider_snapshots SELECT account_id,provider,jsonb_set(canonical,'{Inventory,Servers,1,ID}','"unmanaged"'),data,created_at FROM provider_snapshots`,
+		"recent_but_different_observation": `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,ObservedAt}',to_jsonb(now()-interval '90 seconds'))`,
+		"slow_assembled_observation":       `UPDATE provider_snapshots SET canonical=jsonb_set(jsonb_set(canonical,'{Inventory,ObservedAt}',to_jsonb(now()-interval '90 seconds')),'{Capacity,ObservedAt}',to_jsonb(now()-interval '90 seconds'))`,
+		"missing_capacity_time":            `UPDATE provider_snapshots SET canonical=canonical #- '{Capacity,ObservedAt}'`,
+		"capacity_native_mismatch":         `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Capacity,ObservedAt}',to_jsonb(now()+interval '5 seconds'))`,
+		"missing_inventory":                `UPDATE provider_snapshots SET canonical=canonical-'Inventory'`,
+		"missing_native_time":              `UPDATE provider_snapshots SET canonical=canonical #- '{Inventory,ObservedAt}'`,
+		"stale_native_time":                `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,ObservedAt}',to_jsonb(now()-interval '3 minutes'))`,
+		"predelete_native_time":            `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,ObservedAt}',to_jsonb(now()-interval '20 minutes'))`,
+		"future_native_time":               `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,ObservedAt}',to_jsonb(now()+interval '1 minute'))`,
+		"mismatched_id":                    `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,Servers,1,ID}','"unmanaged-provider-server"')`,
+		"duplicate_id":                     `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,Servers,1,ID}','"old"')`,
+		"blank_id":                         `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,Servers,1,ID}','""')`,
+		"malformed_list":                   `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Inventory,Servers}','{}')`,
+		"ownership_revoked":                `UPDATE resources SET managed=false WHERE provider_resource_id='new'`,
+		"local_incomplete":                 `UPDATE droplets SET state='DELETED' WHERE id='new'`,
+		"provider_count_mismatch":          `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Capacity,ComputeInUse}','3')`,
+		"known_id_unknown_create":          `INSERT INTO operations VALUES('test','CREATE_DROPLET','known-id','unknown')`,
+		"pending_create":                   `INSERT INTO operations VALUES('test','CREATE_DROPLET','','running')`,
+		"active_deployment":                `INSERT INTO deployments(account_id,state) VALUES('test','PROVISIONING')`,
+		"provider_block":                   `INSERT INTO account_create_blocks VALUES('test',1,'DENIED',now())`,
+		"disabled":                         `UPDATE accounts SET enabled=false`,
+	}
+	for name, q := range cases {
+		t.Run(name, func(t *testing.T) {
+			db := capacityRecoveryFixture(t)
+			addHistoricalDebtAtFullCapacity(t, db)
+			if _, err := db.Exec(q); err != nil {
+				t.Fatal(err)
+			}
+			if ok, err := claimRecovery(t, db, "old"); err != nil || ok {
+				t.Fatal("unsafe debt bypass", ok, err)
+			}
+		})
+	}
+}
+
+func TestCapacityRecoveryDebtRevalidatesSingleObservationAfterReplacement(t *testing.T) {
+	for _, replace := range []bool{false, true} {
+		t.Run(fmt.Sprint(replace), func(t *testing.T) {
+			db := capacityRecoveryFixture(t)
+			addHistoricalDebtAtFullCapacity(t, db)
+			tx, err := db.BeginTx(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer tx.Rollback()
+			cap, err := capacity.Read(context.Background(), tx, "test", 2*time.Minute)
+			if err != nil || cap.Limit != 2 {
+				t.Fatal(cap, err)
+			}
+			// A concurrent refresh/cleanup replaces the row after the admission read.
+			q := `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Capacity,ComputeLimit}','3')`
+			if replace {
+				q = `WITH removed AS (DELETE FROM provider_snapshots RETURNING *) INSERT INTO provider_snapshots SELECT account_id,provider,jsonb_set(canonical,'{Capacity,ComputeLimit}','3'),data,created_at FROM removed`
+			}
+			if _, err = db.Exec(q); err != nil {
+				t.Fatal(err)
+			}
+			ok, err := backfillAtProvenManagedCeiling(context.Background(), tx, "test", 2, sql.NullTime{})
+			if err != nil || ok {
+				t.Fatal("mixed-observation retirement", ok, err)
+			}
+		})
 	}
 }
