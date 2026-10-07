@@ -1,0 +1,36 @@
+{
+  "goal": "Fix Configs refresh null-DOM race and prevent stale/failed/hung status reads from corrupting current views; verify automatic client recovery through one real expiry/replacement cycle.",
+  "context": "User resumed using existing authenticated UI at2026-10-07T04:59:18Z. Live gate enabled and jobs succeeded;05:00:58Z actual Direct59/Residential107. Screenshot Config status refresh failed Cannot set properties of null innerHTML is caused by asynchronous refresh crossing load(configs) DOM replacement. Bound fix: page-view generation/abort fences at full-page navigation and main async renders; immutable target identity fences, single-flight scoped polls and GET-only bounded timeout; retain last good status on network/server/null response, show retry status, auto recover at5..30s on initial read failure and online/visibility return. Preserve modal edits and independent cleanup/profile controls; no automatic writes/resume/quarantine release/credential changes. Empty eligible capacity snapshots displayed unavailable not fabricated zero. Test real Chromium mobile-size with local fixture and delayed/out-of-order reads, navigation away/back, same-page reload, malformed responses, offline/hung reads, expired session, healthy polling recovery and no repeated POST. Only source-grounded changes, server OpenAI plan/review and Orchestrator; preserve settings and native API-only Output. Static-only deployment unless evidence requires backend change.",
+  "allowed_paths": [
+    "web/static/app.js",
+    "web/static/index.html",
+    "web/tests/config-refresh-recovery.cjs",
+    "tools/ui-refresh-recovery-acceptance.sh",
+    "docs/development-jobs/ui-refresh-recovery-20261007.json",
+    "docs/UI_REFRESH_RECOVERY_20261007.md",
+    "docs/UI_REFRESH_RECOVERY_ACCEPTANCE_20261007.json",
+    "docs/UI_REFRESH_RECOVERY_SOURCE_SNAPSHOT_20261007.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/KNOWLEDGE_DRIFT_STATUS.json",
+    "docs/PRODUCTION_REVISION_STATUS.json",
+    "docs/CLIENT_FAILURE_ISOLATION_ACCEPTANCE_20261007.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 180,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/ui-refresh-recovery-acceptance.sh # async race and fault regressions"
+    ],
+    "verify": [
+      "git diff --check",
+      "python3 -c \"import json;from pathlib import Path;b=Path('/root/backups/dob-ui-refresh-recovery-20261007');assert (b/'acceptance.exit').read_text().strip()=='0';assert json.loads(json.loads((b/'review.json').read_text())['text'])['verdict']=='PASS'\""
+    ]
+  },
+  "commit_message": "fix(ui): recover status reads and fence stale page updates"
+}

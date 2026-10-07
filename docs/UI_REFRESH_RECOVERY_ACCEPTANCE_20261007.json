@@ -1,0 +1,188 @@
+{
+  "at_utc": "2026-10-07T05:15:30.285606+00:00",
+  "status": "SOURCE_AND_REVIEW_PASS_LIVE_CYCLE_PASS_STATIC_DEPLOY_PENDING",
+  "evidence_directory": "/root/backups/dob-ui-refresh-recovery-20261007",
+  "openai_review": "PASS",
+  "browser": {
+    "status": "PASS",
+    "passed": [
+      "initial mobile render",
+      "same-page reload drops stale refresh",
+      "late full render cannot overwrite navigation",
+      "superseded account read does not alert or replace current page",
+      "account read recovers while preserving its route",
+      "late account action cannot invalidate another route",
+      "immutable target fences prevent null DOM and partial writes",
+      "network, null, malformed and HTTP errors preserve status and auto-recover",
+      "polls are single-flight",
+      "hung reads timeout, recover, and ignore late completion",
+      "initial failed load recovers automatically",
+      "modal edit preserved and visibility wake supported",
+      "empty snapshot explicitly unavailable",
+      "resume sent once; automatic recovery is read-only",
+      "expired session invalidates reads and respects authentication"
+    ],
+    "page_errors": [],
+    "mutation_count": 1
+  },
+  "isolated_postgresql_race": "PASS",
+  "full_go": "PASS",
+  "live_cycle": {
+    "at_utc": "2026-10-07T05:11:34.541094+00:00",
+    "resume_at": "2026-10-07T04:59:18.304636Z",
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T04:59:18.304636+00:00",
+        "kill_switch": false,
+        "last_failure_code": ""
+      }
+    ],
+    "profile_lifetimes": [
+      {
+        "enabled": true,
+        "route_class": "DIRECT",
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 1
+      },
+      {
+        "enabled": true,
+        "route_class": "RESIDENTIAL",
+        "user_lifetime_seconds": 600,
+        "target_users_per_inbound": 10
+      }
+    ],
+    "operations_since_resume": [
+      {
+        "jobs": 17,
+        "kind": "BULK_CREATE",
+        "state": "PENDING",
+        "first_created": "2026-10-07T05:11:09.011105+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 1,
+        "kind": "BULK_CREATE",
+        "state": "RUNNING",
+        "first_created": "2026-10-07T05:11:08.489512+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 715,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T04:59:18.306902+00:00",
+        "last_completed": "2026-10-07T05:11:31.048496+00:00"
+      },
+      {
+        "jobs": 8,
+        "kind": "BULK_DELETE",
+        "state": "PENDING",
+        "first_created": "2026-10-07T05:11:10.808608+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 98,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T05:09:29.855979+00:00",
+        "last_completed": "2026-10-07T05:11:30.767692+00:00"
+      },
+      {
+        "jobs": 1,
+        "kind": "UPDATE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T05:00:41.895224+00:00",
+        "last_completed": "2026-10-07T05:00:51.224857+00:00"
+      }
+    ],
+    "initial_cohort": [
+      {
+        "state": "ACTIVE",
+        "clients": 36,
+        "route_class": "DIRECT",
+        "last_deleted": null,
+        "first_created": "2026-10-07T04:59:18.316522+00:00"
+      },
+      {
+        "state": "ACTIVE",
+        "clients": 18,
+        "route_class": "RESIDENTIAL",
+        "last_deleted": null,
+        "first_created": "2026-10-07T04:59:27.212577+00:00"
+      },
+      {
+        "state": "DELETED",
+        "clients": 98,
+        "route_class": "RESIDENTIAL",
+        "last_deleted": "2026-10-07T05:11:30.763051+00:00",
+        "first_created": "2026-10-07T04:59:24.900915+00:00"
+      },
+      {
+        "state": "DELETE_PENDING",
+        "clients": 7,
+        "route_class": "RESIDENTIAL",
+        "last_deleted": null,
+        "first_created": "2026-10-07T05:00:49.421124+00:00"
+      }
+    ],
+    "after_expiry_cohort": [
+      {
+        "state": "ACTIVE",
+        "clients": 1,
+        "route_class": "DIRECT",
+        "last_created": "2026-10-07T05:10:45.129953+00:00",
+        "first_created": "2026-10-07T05:10:45.129953+00:00"
+      },
+      {
+        "state": "PLANNED",
+        "clients": 2,
+        "route_class": "DIRECT",
+        "last_created": "2026-10-07T05:11:18.365056+00:00",
+        "first_created": "2026-10-07T05:11:09.029522+00:00"
+      },
+      {
+        "state": "ACTIVE",
+        "clients": 103,
+        "route_class": "RESIDENTIAL",
+        "last_created": "2026-10-07T05:11:05.859517+00:00",
+        "first_created": "2026-10-07T05:09:20.455105+00:00"
+      },
+      {
+        "state": "PLANNED",
+        "clients": 16,
+        "route_class": "RESIDENTIAL",
+        "last_created": "2026-10-07T05:11:18.95037+00:00",
+        "first_created": "2026-10-07T05:11:08.986495+00:00"
+      }
+    ],
+    "same_scope_replacement": [
+      {
+        "residential_scopes_replaced": 53
+      }
+    ],
+    "panel_isolation": []
+  },
+  "public_share_counts": [
+    {
+      "class": "DIRECT",
+      "token_created_at": "2026-10-07T05:01:30.181743+00:00",
+      "http_status": 200,
+      "vless_lines": 59,
+      "response_bytes": 17811
+    },
+    {
+      "class": "RESIDENTIAL",
+      "token_created_at": "2026-10-07T05:01:40.278397+00:00",
+      "http_status": 200,
+      "vless_lines": 468,
+      "response_bytes": 141302
+    }
+  ],
+  "live_ready_services": {
+    "api": "active",
+    "worker": "active"
+  },
+  "configuration_mutated": false,
+  "scope": "UI read recovery proven in isolated mobile Chromium. Real production client lifecycle and public share responses proven through initial600-second expiry; mobile VLESS data-plane connection is not tested here."
+}

@@ -1,14 +1,69 @@
 {
-  "status": "DEPLOYED_CONFIG_PRESERVED_AWAITING_AUTHENTICATED_RESUME",
-  "at_utc": "2026-10-07T04:57:19.567760+00:00",
+  "status": "DEPLOYED_AUTHENTICATED_RESUME_AND_LIVE_REPLACEMENT_VERIFIED",
+  "at_utc": "2026-10-07T05:15:30.285606+00:00",
   "baseline_revision": "c494fbc1c275852a0b81be90ae62b19c19377904",
   "full_go": true,
   "isolated_postgresql_and_race": "PASS",
   "evidence": "/root/backups/dob-client-failure-isolation-20261007",
   "original_failure": "review-1 REVISE: delay inbound/inventory/rejection quarantine until3 attempts; corrected and tested",
   "production_changed": true,
-  "operator_resume": "PENDING: existing Configs > Config Capacity > Resume automatic clients; authenticated admin session is unavailable to this operator, browser access blocked",
-  "live_replacement_cycle": "NOT_RUN: main gate remains disabled/kill_switch true from original incident",
+  "operator_resume": {
+    "status": "completed by user through authenticated UI",
+    "at_utc": "2026-10-07T04:59:18.304636Z"
+  },
+  "live_replacement_cycle": {
+    "status": "PASS",
+    "evidence": "docs/UI_REFRESH_RECOVERY_ACCEPTANCE_20261007.json",
+    "same_scope_replacement": [
+      {
+        "residential_scopes_replaced": 53
+      }
+    ],
+    "operations_since_resume": [
+      {
+        "jobs": 17,
+        "kind": "BULK_CREATE",
+        "state": "PENDING",
+        "first_created": "2026-10-07T05:11:09.011105+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 1,
+        "kind": "BULK_CREATE",
+        "state": "RUNNING",
+        "first_created": "2026-10-07T05:11:08.489512+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 715,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T04:59:18.306902+00:00",
+        "last_completed": "2026-10-07T05:11:31.048496+00:00"
+      },
+      {
+        "jobs": 8,
+        "kind": "BULK_DELETE",
+        "state": "PENDING",
+        "first_created": "2026-10-07T05:11:10.808608+00:00",
+        "last_completed": null
+      },
+      {
+        "jobs": 98,
+        "kind": "BULK_DELETE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T05:09:29.855979+00:00",
+        "last_completed": "2026-10-07T05:11:30.767692+00:00"
+      },
+      {
+        "jobs": 1,
+        "kind": "UPDATE",
+        "state": "SUCCEEDED",
+        "first_created": "2026-10-07T05:00:41.895224+00:00",
+        "last_completed": "2026-10-07T05:00:51.224857+00:00"
+      }
+    ]
+  },
   "browser": "Cloud browser cannot reach control panel: ERR_BLOCKED_BY_CLIENT. No login session available.",
   "openai_review": "PASS",
   "review_evidence": "review-final.json",
@@ -44,17 +99,17 @@
   "public_output": [
     {
       "class": "DIRECT",
-      "token_created_at": "2026-10-07T04:51:06.789148+00:00",
+      "token_created_at": "2026-10-07T05:01:30.181743+00:00",
       "http_status": 200,
-      "vless_lines": 1,
-      "response_bytes": 298
+      "vless_lines": 59,
+      "response_bytes": 17811
     },
     {
       "class": "RESIDENTIAL",
-      "token_created_at": "2026-10-07T04:52:52.439562+00:00",
+      "token_created_at": "2026-10-07T05:01:40.278397+00:00",
       "http_status": 200,
-      "vless_lines": 0,
-      "response_bytes": 0
+      "vless_lines": 468,
+      "response_bytes": 141302
     }
   ],
   "services": {
@@ -71,18 +126,18 @@
   },
   "main_gate": [
     {
-      "enabled": false,
+      "enabled": true,
       "panel_id": null,
       "singleton": true,
       "inbound_id": null,
-      "updated_at": "2026-10-06T21:57:16.626276+00:00",
+      "updated_at": "2026-10-07T04:59:18.304636+00:00",
       "concurrency": 1,
-      "kill_switch": true,
+      "kill_switch": false,
       "last_failure_at": null,
       "last_failure_code": "",
       "last_failure_job_id": "",
       "last_failure_panel_id": ""
     }
   ],
-  "scope": "Source regression and deployment verified; current automatic client creation and sustained output recovery remain unverified until authenticated resume."
+  "scope": "Source regression and rollout verified; real native lifecycle creation/expiry deletion/replacement and class shares verified through first600-second replacement cycle. Mobile VLESS traffic and indefinite uptime not claimed."
 }

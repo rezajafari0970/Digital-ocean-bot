@@ -1,0 +1,14 @@
+{
+  "at_utc": "2026-10-07T05:15:30.285606+00:00",
+  "baseline_revision": "8b5e5d13586bb3e261ee87b755d6f1045bb8095c",
+  "runtime_revision": "00a4b185929185224c38719bd8c1ec9a71dc35c6",
+  "source_hashes": {
+    "web/static/app.js": "57c7471c0a4586024a9f9ffe2e63cf974c2f52e76fe33e424079b5bc81c4a559",
+    "web/static/index.html": "97d5847d1ae6d306fff8c764eeb32b0f637d62b780911a2b8f867f234f84f348",
+    "web/tests/config-refresh-recovery.cjs": "d7edcbbb38896f095ed0f6e2e294fa3424e736138a9688dec2a0670d724949e0",
+    "tools/ui-refresh-recovery-acceptance.sh": "ea4fd9d4df117a760e50f4dbafa46f38fce5acf5d7b868242450da6ea1576afb"
+  },
+  "brain_query": "/root/backups/dob-ui-refresh-recovery-20261007/brain-frontend.json",
+  "canonical_tree": "/root/projects/Digital-ocean-bot-canonical-e2e",
+  "method": "Development Orchestrator PLAN/IMPLEMENT/TEST, server OpenAI reviews, real mobile Chromium fault/race, isolated PostgreSQL admin race, full Go tests; additive static fix only."
+}
