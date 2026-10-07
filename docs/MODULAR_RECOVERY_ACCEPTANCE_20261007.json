@@ -56,14 +56,14 @@
   "postgresql_race": "PASS",
   "full_go": "PASS",
   "configuration_preserved": true,
-  "live_verified_at": "2026-10-07T06:17:18.545926+00:00",
+  "live_verified_at": "2026-10-07T06:19:41.564699+00:00",
   "live_shares": [
     {
       "class": "DIRECT",
       "token_created_at": "2026-10-07T06:11:26.948007+00:00",
       "http_status": 200,
-      "vless_lines": 14,
-      "response_bytes": 4222
+      "vless_lines": 9,
+      "response_bytes": 2711
     },
     {
       "class": "RESIDENTIAL",
@@ -83,8 +83,8 @@
           "failures": 0,
           "isolated": 0,
           "succeeded": 0,
-          "started_unix": 1791353831,
-          "finished_unix": 1791353831,
+          "started_unix": 1791353971,
+          "finished_unix": 1791353971,
           "policy_deferred": 0,
           "last_attempt_unix": 0,
           "last_success_unix": 0
@@ -93,12 +93,12 @@
           "stalled": 0,
           "in_flight": 0
         },
-        "recovery_scan_unix": 1791353822,
-        "lifecycle_scan_unix": 1791353822,
-        "scheduler_scan_unix": 1791353827
+        "recovery_scan_unix": 1791353962,
+        "lifecycle_scan_unix": 1791353962,
+        "scheduler_scan_unix": 1791353969
       },
       "worker_id": "serverprojects.ptr.network:1400447",
-      "last_seen_at": "2026-10-07T06:17:12.344268+00:00"
+      "last_seen_at": "2026-10-07T06:19:32.343226+00:00"
     }
   ],
   "post_deploy_log_summary": {
@@ -110,8 +110,26 @@
   },
   "upcloud_capacity_recovery": {
     "local_retirement_claim": "VERIFIED_ONE_OLDEST",
-    "provider_deletion": "UNCONFIRMED_NATIVE_REQUEST_TIMEOUT_UNKNOWN_OPERATION",
-    "backfill": "NOT_YET_OBSERVED",
+    "provider_deletion": "SUCCEEDED_AFTER_AUTOMATIC_RECONCILIATION",
+    "delete_operation": {
+      "id": "861c4a56-4c36-410c-9f14-b56fec007127",
+      "kind": "DELETE_DROPLET",
+      "state": "succeeded",
+      "attempt": 3,
+      "created_at": "2026-10-07T06:14:52.733861+00:00",
+      "updated_at": "2026-10-07T06:17:25.652738+00:00"
+    },
+    "backfill": "CREATE_VERIFYING_ATTEMPT_1",
+    "create_operation": {
+      "id": "e93656db-5c7f-4196-ab8b-5b03c48b4b55",
+      "kind": "CREATE_DROPLET",
+      "state": "verifying",
+      "attempt": 1,
+      "created_at": "2026-10-07T06:18:54.356459+00:00",
+      "updated_at": "2026-10-07T06:19:08.533993+00:00"
+    },
+    "ready_replacement": "NOT_YET_VERIFIED",
+    "remaining_old_server": "EXPIRING_UNTOUCHED_BY_SECOND_DELETE",
     "desired_preserved": 5
   },
   "runtime_client_work": "GATED_EXISTING_05_28_FAILURE_NOT_REOPENED",

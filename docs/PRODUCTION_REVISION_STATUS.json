@@ -447,9 +447,9 @@
     "worker_sha256": "a8c79970e5f7c383d0136444de3cdf4df24a52b4949dc7c778f009bd82e96add",
     "static_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
     "schema": 161,
-    "verified_at": "2026-10-07T06:17:18.545926+00:00",
+    "verified_at": "2026-10-07T06:19:41.564699+00:00",
     "acceptance": "docs/MODULAR_RECOVERY_ACCEPTANCE_20261007.json",
     "remaining_action": "AUTHENTICATED_CONFIGS_RESUME_AND_NATIVE_OUTPUT_VERIFICATION",
-    "upcloud": "ONE_RETIRING_PROVIDER_DELETE_TIMEOUT_UNCONFIRMED"
+    "upcloud": "DELETE_CONFIRMED_AUTOMATIC_BACKFILL_CREATE_VERIFYING"
   }
 }
