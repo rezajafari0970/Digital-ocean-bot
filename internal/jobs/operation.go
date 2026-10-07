@@ -26,6 +26,8 @@ type Operation struct {
 	State            OperationState
 	ProviderActionID string
 	ResourceID       string
+	ErrorCode        string
+	ErrorMessage     string
 	Attempt          int
 	LockVersion      int64
 	CreatedAt        time.Time

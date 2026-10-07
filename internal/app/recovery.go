@@ -96,7 +96,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			}
 		}
 		if len(matches) == 1 {
-			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID, version)
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET resource_id=$3,state='verifying',error_code=NULL,error_message=NULL,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, matches[0].ID, version)
 			return requireRecoveryOperationUpdate(result, err)
 		}
 		if terminalDeploymentStateForCreateRecovery(deploymentState) {
@@ -149,7 +149,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			if derr := compute.DeleteServer(ctx, providerID); derr != nil {
 				return derr
 			}
-			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
+			result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state='verifying',attempt=attempt+1,error_code=NULL,error_message=NULL,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$3 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, version)
 			return requireRecoveryOperationUpdate(result, err)
 		}
 	}
@@ -174,7 +174,7 @@ func (h RecoveryHandler) RecoverOperation(ctx context.Context, item worker.Recov
 			return err
 		}
 	} else {
-		result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
+		result, err := h.Container.DB.ExecContext(ctx, `UPDATE operations SET state=$3,lock_version=lock_version+1,error_code=CASE WHEN $3='succeeded' THEN NULL ELSE error_code END,error_message=CASE WHEN $3='succeeded' THEN NULL ELSE error_message END,updated_at=now() WHERE id=$1 AND account_id=$2 AND lock_version=$4 AND state IN ('running','unknown','verifying')`, item.ID, item.AccountID, state, version)
 		if err := requireRecoveryOperationUpdate(result, err); err != nil {
 			return err
 		}

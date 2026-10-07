@@ -1,0 +1,34 @@
+{
+  "goal": "Persist truthful, secret-safe diagnostics on provider operation failures without changing lifecycle, admission, idempotency or unknown-outcome decisions.",
+  "context": "Observed production Upcloud CREATE 7ebb2683 statefailed missing error_code/error_message; deployment step preserves capacity / HTTP403 SERVER_IP_LIMIT_REACHED. Executor error state updates never carry diagnostics, Operation model/SQLStore omit existing DB columns. Sor oc output recovered by natural replacement; not an output freshness defect. Scope diagnostic persistence for executor CREATE/DELETE failure/unknown paths, checked persistence errors, clearing current diagnostics only upon new running/verifying/succeeded transitions. Derive bounded messages from allowlisted error class plus HTTP status and static stage ONLY; never raw error/provider messages, URL, header, token, code or cause. Preserve exact current error classification/state/replay behavior and callbacks. Add optional fields to Operation, atomic version-guarded SQL Update/readback. Preserve existing diagnostics if terminal/unknown callers provide no replacement details (recovery may have written them); clear on successful progress. Tests include real isolated PostgreSQL reproducer before fix, failed/cancelled persistence visibility, competing stale updates, pre-create block zero API calls, unknown transport not replayed, accepted create/reconciliation clearing, delete concurrency retained, and secret sentinel. No schema/UI/config/provider writes for tests. Actual API plan/review; race/fullGo; no subagents. Deploy clean committed artifacts using exact isolated systemd fixture and same-schema rollback to 045f1ab only after all gates pass. Avoid refactoring unrelated known ambiguous-without-ID classification in this diagnostic-only change; record limits. Actual API review resp_01c610be2835f8a8006ac6d6d9ab2887d1ae4c2cd35a1f51ab requested two directly related corrections: normalize legacy raw diagnostics on SQLStore read/RETURNING, and atomically clear diagnostic metadata in existing direct recovery progress transitions. Scope additions are only these fields and corresponding real PG tests; no provider/state/retry/ownership changes. Preserve historical stored text when a caller supplies no replacement, but never expose it via Operation; use strict closed grammar on reads. Source-literal PostgreSQL tests for the three direct recovery queries are SQL-contract tests, not full provider-path E2E; completion helper is executed directly.",
+  "allowed_paths": [
+    "internal/jobs/operation.go",
+    "internal/jobs/store.go",
+    "internal/droplets/executor.go",
+    "internal/droplets/operation_diagnostics.go",
+    "internal/droplets/operation_diagnostics_test.go",
+    "internal/droplets/operation_diagnostics_postgres_test.go",
+    "docs/development-jobs/operation-diagnostics-20261008.json",
+    "internal/jobs/operation_diagnostics.go",
+    "internal/app/recovery.go",
+    "internal/app/delete_completion.go",
+    "internal/app/recovery_diagnostics_postgres_test.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-operational-closure-20261008/acceptance-race-fault.sh"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-operational-closure-20261008/review.py"
+    ]
+  },
+  "commit_message": "fix(operations): persist bounded provider failure diagnostics"
+}

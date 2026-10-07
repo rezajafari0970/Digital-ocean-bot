@@ -18,7 +18,7 @@ func (c Container) completeRecoveredDelete(ctx context.Context, operationID, acc
 	}
 	defer tx.Rollback()
 	result, err := tx.ExecContext(ctx, `UPDATE operations
-		SET state='succeeded',lock_version=lock_version+1,updated_at=now()
+		SET state='succeeded',error_code=NULL,error_message=NULL,lock_version=lock_version+1,updated_at=now()
 		WHERE id=$1 AND account_id=$2 AND resource_id=$3 AND kind='DELETE_DROPLET'
 		AND lock_version=$4 AND state IN ('running','unknown','verifying')`,
 		operationID, accountID, providerID, version)

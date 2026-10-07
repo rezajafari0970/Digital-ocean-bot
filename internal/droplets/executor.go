@@ -53,8 +53,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if e.PreCreateCheck != nil {
 		if err := e.PreCreateCheck(ctx); err != nil {
 			reserved.State = jobs.OperationFailed
-			_ = e.Operations.Update(ctx, &reserved)
-			return reserved, err
+			return e.recordOperationError(ctx, reserved, stagePreCreate, err)
 		}
 	}
 	ssh := []string(nil)
@@ -76,18 +75,15 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		} else {
 			reserved.State = jobs.OperationUnknown
 		}
-		_ = e.Operations.Update(ctx, &reserved)
-		return reserved, err
+		return e.recordOperationError(ctx, reserved, stageCreate, err)
 	}
 	if result.Outcome == providers.OutcomeRejected || result.ServerID == "" {
 		reserved.State = jobs.OperationFailed
-		_ = e.Operations.Update(ctx, &reserved)
-		return reserved, errors.New("provider rejected create without server id")
+		return e.recordOperationError(ctx, reserved, stageCreateRejected, errors.New("provider rejected create without server id"))
 	}
 	if result.Outcome == providers.OutcomeAmbiguous {
 		reserved.State = jobs.OperationUnknown
-		_ = e.Operations.Update(ctx, &reserved)
-		return reserved, ErrOutcomeStillUnknown
+		return e.recordOperationError(ctx, reserved, stageCreateAmbiguous, ErrOutcomeStillUnknown)
 	}
 	if e.OnCreateSuccess != nil {
 		e.OnCreateSuccess(ctx, result)
@@ -100,8 +96,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, &reserved)
-			return reserved, err
+			return e.recordOperationError(ctx, reserved, stageCreateEgress, err)
 		}
 	}
 	return reserved, nil
@@ -143,8 +138,7 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID stri
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, &reserved)
-			return reserved, err
+			return e.recordOperationError(ctx, reserved, stageDeletePreEgress, err)
 		}
 	}
 	reserved.State = jobs.OperationRunning
@@ -158,14 +152,12 @@ func (e Executor) Delete(ctx context.Context, op jobs.Operation, providerID stri
 			return reserved, e.Operations.Update(ctx, &reserved)
 		}
 		reserved.State = jobs.OperationUnknown
-		_ = e.Operations.Update(ctx, &reserved)
-		return reserved, err
+		return e.recordOperationError(ctx, reserved, stageDelete, err)
 	}
 	if e.EgressCheck != nil {
 		if err := e.EgressCheck(ctx); err != nil {
 			reserved.State = jobs.OperationUnknown
-			_ = e.Operations.Update(ctx, &reserved)
-			return reserved, err
+			return e.recordOperationError(ctx, reserved, stageDeleteEgress, err)
 		}
 	}
 	reserved.State = jobs.OperationVerifying
