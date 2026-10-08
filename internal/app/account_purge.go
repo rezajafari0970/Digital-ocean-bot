@@ -96,8 +96,16 @@ func commitAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 	if err := worker.FenceRecoveryAccountPurge(ctx, tx, id); err != nil {
 		return errors.Join(ErrAccountPurgeConflict, err)
 	}
+	// Lock the parent before deleting telemetry. Late meter flushes take KEY SHARE
+	// on this same row, so neither can recreate data behind the other's commit.
+	if _, err := tx.ExecContext(ctx, "SELECT id FROM accounts WHERE id=$1 FOR UPDATE", id); err != nil {
+		return err
+	}
 	queries := []string{
 		`DELETE FROM worker_recovery_checkpoints WHERE account_id=$1`,
+		`DELETE FROM proxy_traffic_hourly WHERE role='account' AND (lower(owner_id)=$1::uuid::text OR lower(owner_id)='replace-'||$1::uuid::text)`,
+		`UPDATE proxy_economy_policy SET enabled=false,canary_account_id=NULL,updated_at=now() WHERE canary_account_id=$1`,
+		`UPDATE server_protection_control SET panel_ids=ARRAY(SELECT x FROM unnest(panel_ids) x WHERE x NOT IN(SELECT id FROM panel_instances WHERE account_id=$1)),revision=revision+1,updated_at=now() WHERE panel_ids && ARRAY(SELECT id FROM panel_instances WHERE account_id=$1)`,
 		`UPDATE residential_routing_control SET panel_ids=ARRAY(SELECT x FROM unnest(panel_ids) x WHERE x NOT IN(SELECT id FROM panel_instances WHERE account_id=$1)) WHERE panel_ids && ARRAY(SELECT id FROM panel_instances WHERE account_id=$1)`,
 		`UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true,panel_id=NULL,inbound_id=NULL,remaining_batches=0,updated_at=now() WHERE panel_id IN(SELECT id FROM panel_instances WHERE account_id=$1)`,
 

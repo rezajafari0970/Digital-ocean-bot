@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -76,5 +77,59 @@ func TestAccountDeletionBrowser(t *testing.T) {
 	var n int
 	if e := db.QueryRow("SELECT count(*) FROM accounts").Scan(&n); e != nil || n != 0 {
 		t.Fatal(n, e)
+	}
+}
+
+func TestBlockedAccountPurgeBrowser(t *testing.T) {
+	if os.Getenv("DOB_RUN_BROWSER_TEST") != "1" {
+		t.Skip("browser opt-in")
+	}
+	db := adminTestDB(t)
+	a, _, _ := seedPurgeDependencies(t, db)
+	other, _, _ := seedPanel(t, db, "http://other.invalid")
+	for _, id := range []string{a, other} {
+		sqlMust(t, db, "INSERT INTO network_profiles(id,account_id,mode) VALUES(gen_random_uuid(),$1,'direct')", id)
+	}
+	s := Server{DB: db}
+	mux := http.NewServeMux()
+	var attempts atomic.Int32
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../../web/static"))))
+	mux.HandleFunc("GET /admin/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "../../web/static/index.html") })
+	mux.HandleFunc("GET /api/v1/accounts", s.accounts)
+	mux.HandleFunc("POST /api/v1/accounts/{id}/purge", func(w http.ResponseWriter, r *http.Request) {
+		switch attempts.Add(1) {
+		case 1:
+			writeJSON(w, 409, map[string]string{"error": "Fixture cleanup is busy"})
+		case 2:
+			writeJSON(w, 500, map[string]string{"error": "Fixture transaction failed"})
+		default:
+			s.purgeAccount(w, r)
+		}
+	})
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]any{}) })
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), principalKey{}, auth.Principal{Role: auth.Admin})))
+	}))
+	defer server.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "node", "../../web/tests/account-deletion.cjs")
+	root := os.Getenv("DOB_UI_ARTIFACT_DIR")
+	if root == "" {
+		root = t.TempDir()
+	}
+	root, _ = filepath.Abs(root)
+	cmd.Env = append(os.Environ(), "DOB_UI_BASE="+server.URL, "DOB_UI_ARTIFACT_DIR="+root, "DOB_PURGE_ID="+a, "DOB_OTHER_ID="+other)
+	if out, e := cmd.CombinedOutput(); e != nil {
+		t.Fatalf("purge browser %v %s", e, out)
+	} else {
+		t.Log(string(out))
+	}
+	var n int
+	if err := db.QueryRow("SELECT count(*) FROM accounts WHERE id=$1", a).Scan(&n); err != nil || n != 0 {
+		t.Fatal(n, err)
+	}
+	if err := db.QueryRow("SELECT count(*) FROM accounts WHERE id=$1", other).Scan(&n); err != nil || n != 1 {
+		t.Fatal("other account removed", n, err)
 	}
 }

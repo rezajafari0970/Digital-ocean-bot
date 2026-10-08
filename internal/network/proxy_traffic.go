@@ -5,9 +5,11 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"log"
 	"net"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -155,7 +157,31 @@ func (m *trafficMeter) flush(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 	defer tx.Rollback()
+	// Real account scopes (including credential-replacement probes) must retain
+	// a live parent until commit. Sort locks so concurrent recorders cannot cycle.
+	owners := make(map[string]bool)
+	for k := range rows {
+		if id := trafficAccountID(k.Scope); id != "" {
+			owners[id] = false
+		}
+	}
+	ids := make([]string, 0, len(owners))
+	for id := range owners {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		var found string
+		err = tx.QueryRowContext(ctx, "SELECT id::text FROM accounts WHERE id=$1 FOR KEY SHARE", id).Scan(&found)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		owners[id] = err == nil
+	}
 	for k, v := range rows {
+		if id := trafficAccountID(k.Scope); id != "" && !owners[id] {
+			continue
+		}
 		_, err = tx.ExecContext(ctx, `INSERT INTO proxy_traffic_hourly(hour,process_id,role,owner_id,proxy_id,purpose,tx_bytes,rx_bytes,connections,requests,errors)
 VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 ON CONFLICT(hour,process_id,role,owner_id,proxy_id,purpose) DO UPDATE SET
@@ -175,11 +201,28 @@ errors=GREATEST(proxy_traffic_hourly.errors,EXCLUDED.errors),updated_at=now()`,
 	for k, v := range rows {
 		// add() timestamps at observation time; completed hours cannot receive
 		// delayed socket counts. Retain overflow for process-lifetime monotonicity.
-		if k.Scope.Role != "overflow" && time.Since(k.Hour.Add(time.Hour)) > 2*time.Minute && m.counts[k] == v {
+		if (trafficAccountID(k.Scope) != "" && !owners[trafficAccountID(k.Scope)] || k.Scope.Role != "overflow" && time.Since(k.Hour.Add(time.Hour)) > 2*time.Minute) && m.counts[k] == v {
 			delete(m.counts, k)
 		}
 	}
 	return nil
+}
+
+// Preview and base-proxy probes are not saved accounts. Recognize only exact
+// persisted account IDs and the existing replacement-probe namespace.
+func trafficAccountID(s trafficScope) string {
+	if s.Role != "account" {
+		return ""
+	}
+	id := strings.TrimPrefix(strings.ToLower(s.Owner), "replace-")
+	if len(id) != 36 || id[8] != '-' || id[13] != '-' || id[18] != '-' || id[23] != '-' {
+		return ""
+	}
+	raw, err := hex.DecodeString(strings.ReplaceAll(id, "-", ""))
+	if err != nil || len(raw) != 16 {
+		return ""
+	}
+	return id
 }
 
 // StartProxyTrafficRecorder returns a bounded shutdown flush. A crash may lose

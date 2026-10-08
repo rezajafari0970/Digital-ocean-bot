@@ -46,6 +46,12 @@ func TestExplicitLocalAccountPurgeCascadesAndClosesScopedGates(t *testing.T) {
 	a, _, _ := seedPurgeDependencies(t, db)
 	other, _, _ := seedPanel(t, db, "http://other.test")
 	sqlMust(t, db, "INSERT INTO audit_events(account_id,actor,action,resource_type,resource_id,result) VALUES($1,'admin','test','account',$2,'ok')", other, a)
+	sqlMust(t, db, "UPDATE server_protection_control SET enabled=true,scope='selected',panel_ids=ARRAY(SELECT id FROM panel_instances)")
+	sqlMust(t, db, "UPDATE proxy_economy_policy SET enabled=true,canary_account_id=$1", a)
+	for _, owner := range []string{a, "replace-" + a, other} {
+		sqlMust(t, db, "INSERT INTO proxy_traffic_hourly(hour,process_id,role,owner_id,proxy_id,purpose,tx_bytes,rx_bytes,connections,requests,errors) VALUES(date_trunc('hour',now()),'purge-fixture','account',$1,'p','identity',7,0,0,0,0)", owner)
+	}
+	sqlMust(t, db, "INSERT INTO proxy_traffic_hourly(hour,process_id,role,owner_id,proxy_id,purpose,tx_bytes,rx_bytes,connections,requests,errors) VALUES(date_trunc('hour',now()),'purge-fixture','base_proxy',$1,'p','identity',8,0,0,0,0)", a)
 	ctx := context.Background()
 	// A failed step must roll back every deletion and gate change.
 	sqlMust(t, db, "CREATE FUNCTION deny_purge() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fault'; END $$")
@@ -92,6 +98,18 @@ func TestExplicitLocalAccountPurgeCascadesAndClosesScopedGates(t *testing.T) {
 	}
 	if err := db.QueryRow("SELECT cardinality(panel_ids) FROM residential_routing_control").Scan(&n); err != nil || n != 0 {
 		t.Fatal("deleted panel remained in routing scope", n, err)
+	}
+	if err := db.QueryRow("SELECT count(*) FROM proxy_traffic_hourly WHERE role='account' AND (owner_id=$1 OR owner_id='replace-'||$1)", a).Scan(&n); err != nil || n != 0 {
+		t.Fatal("account telemetry retained", n, err)
+	}
+	if err := db.QueryRow("SELECT count(*) FROM proxy_traffic_hourly").Scan(&n); err != nil || n != 2 {
+		t.Fatal("unrelated telemetry deleted", n, err)
+	}
+	if err := db.QueryRow("SELECT count(*) FROM server_protection_control WHERE enabled AND scope='selected' AND panel_ids=ARRAY(SELECT id FROM panel_instances WHERE account_id=$1)", other).Scan(&n); err != nil || n != 1 {
+		t.Fatal("protection scope changed", n, err)
+	}
+	if err := db.QueryRow("SELECT count(*) FROM proxy_economy_policy WHERE NOT enabled AND canary_account_id IS NULL").Scan(&n); err != nil || n != 1 {
+		t.Fatal("canary widened", n, err)
 	}
 	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1); err != nil {
 		t.Fatal("lost response replay", err)
@@ -154,6 +172,22 @@ func TestLocalPurgeAPIRequiresExplicitCloudAcknowledgement(t *testing.T) {
 	}
 	if w := call(false, auth.Admin); w.Code != 400 {
 		t.Fatal(w.Code, w.Body.String())
+	}
+	// A live provider mutation must return an actionable bounded conflict, with
+	// every saved row retained. It cannot be silently reported as success.
+	tx, err := db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	if _, err = tx.Exec("SELECT pg_advisory_xact_lock_shared(hashtextextended($1,0))", "account-mutation:"+a); err != nil {
+		t.Fatal(err)
+	}
+	if w := call(true, auth.Admin); w.Code != 409 || !strings.Contains(w.Body.String(), "account_cleanup_busy") || w.Header().Get("Retry-After") == "" {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	if err = tx.Rollback(); err != nil {
+		t.Fatal(err)
 	}
 	if w := call(true, auth.Admin); w.Code != 200 || !strings.Contains(w.Body.String(), "\"provider_deletion_verified\":false") {
 		t.Fatal(w.Code, w.Body.String())

@@ -57,7 +57,7 @@ func (d *Driver) Account(ctx context.Context) (providers.Account, error) {
 	if err != nil {
 		return providers.Account{}, normalizeError("account", err)
 	}
-	return providers.Account{ID: a.UUID, Email: a.Email, Status: a.Status}, nil
+	return providers.Account{ID: a.UUID, Email: a.Email, Status: a.Status, StatusMessage: a.StatusMessage}, nil
 }
 func (d *Driver) Capacity(ctx context.Context) (providers.Capacity, error) {
 	a, err := d.client.GetAccount(ctx)
@@ -201,7 +201,7 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 	for _, x := range droplets {
 		servers = append(servers, normalizeServer(x))
 	}
-	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
+	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status, StatusMessage: account.StatusMessage}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
 }
 
 // ObserveFast keeps authorization, capacity and inventory fresh without downloading
@@ -216,7 +216,7 @@ func (d *Driver) ObserveFast(ctx context.Context) (providers.Observation, error)
 		return providers.Observation{}, err
 	}
 	now := time.Now().UTC()
-	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(inventory.Servers), ObservedAt: now}, Inventory: inventory, ObservedAt: now}, nil
+	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status, StatusMessage: account.StatusMessage}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(inventory.Servers), ObservedAt: now}, Inventory: inventory, ObservedAt: now}, nil
 }
 
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {

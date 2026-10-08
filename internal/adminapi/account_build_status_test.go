@@ -232,3 +232,15 @@ func TestCreateBlockAuditFaultFailsClosedPostgres(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestWarningMessageIsActionableWithoutChangingAdmission(t *testing.T) {
+	db := adminTestDB(t)
+	id := seedBuildAccount(t, db, "digitalocean")
+	putBuildSnapshot(t, db, id, "warning", true, 3, 1)
+	sqlMust(t, db, `UPDATE provider_snapshots SET canonical=jsonb_set(canonical,'{Account,StatusMessage}','"Verify account email"'::jsonb) WHERE account_id=$1`, id)
+	s := Server{DB: db}
+	v, err := s.accountBuildState(context.Background(), id)
+	if err != nil || v.ProviderCanCreate || !strings.Contains(v.Reason, "Verify account email") {
+		t.Fatal(v, err)
+	}
+}

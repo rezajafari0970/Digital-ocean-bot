@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"net/http"
@@ -373,9 +374,17 @@ func (s *Server) purgeAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "explicit_local_purge_acknowledgement_required"})
 		return
 	}
-	err := app.PurgeSavedAccount(r.Context(), s.DB, id, req.ProviderState, *req.Remaining)
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+	err := app.PurgeSavedAccount(ctx, s.DB, id, req.ProviderState, *req.Remaining)
+	var pgerr *pq.Error
+	if errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &pgerr) && (pgerr.Code == "55P03" || pgerr.Code == "57014")) {
+		w.Header().Set("Retry-After", "5")
+		writeJSON(w, 409, map[string]string{"error": "Account cleanup is busy. No partial deletion was committed. Refresh and retry in a few seconds.", "code": "account_cleanup_busy"})
+		return
+	}
 	if errors.Is(err, app.ErrAccountPurgeConflict) {
-		writeJSON(w, 409, map[string]string{"error": "Account changed or cleanup is still settling. Refresh and review the remaining cloud resources."})
+		writeJSON(w, 409, map[string]string{"error": "Account changed or native cleanup is still in progress. Refresh and review the remaining cloud resources before retrying."})
 		return
 	}
 	if err != nil {

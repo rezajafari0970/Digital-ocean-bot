@@ -14,9 +14,10 @@ const (
 )
 
 type Account struct {
-	ID     string
-	Email  string
-	Status string
+	ID            string
+	Email         string
+	Status        string
+	StatusMessage string `json:",omitempty"`
 }
 
 type Capacity struct {

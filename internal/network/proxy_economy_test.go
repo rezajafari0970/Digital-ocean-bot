@@ -248,3 +248,60 @@ func TestEconomyRecorderOutlivesBootstrapAndFlushesPostgres(t *testing.T) {
 		t.Fatalf("missing final flush tx=%d rx=%d err=%v", tx, rx, err)
 	}
 }
+
+func TestMeterCannotRecreatePurgedAccountPostgres(t *testing.T) {
+	db := healthDiagnosticsDB(t)
+	ctx := context.Background()
+	id := "84260918-4937-4d3a-997f-346481bce481"
+	if _, err := db.Exec("INSERT INTO accounts(id,name,provider,secret_ref) VALUES($1,'meter fixture','vultr','fixture')", id); err != nil {
+		t.Fatal(err)
+	}
+	m := newTrafficMeter()
+	scope := proxyTrafficScope(id, "p", "identity")
+	replacement := proxyTrafficScope("replace-"+id, "p", "admin_probe")
+	m.add(scope, trafficCount{TX: 7})
+	m.add(replacement, trafficCount{TX: 9})
+	if err := m.flush(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	if _, err = tx.Exec("SELECT id FROM accounts WHERE id=$1 FOR UPDATE", id); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = tx.Exec("DELETE FROM proxy_traffic_hourly WHERE role='account' AND (owner_id=$1 OR owner_id='replace-'||$1)", id); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = tx.Exec("DELETE FROM accounts WHERE id=$1", id); err != nil {
+		t.Fatal(err)
+	}
+	m.add(scope, trafficCount{TX: 3})
+	done := make(chan error, 1)
+	go func() { done <- m.flush(ctx, db) }()
+	select {
+	case err = <-done:
+		t.Fatal("flush passed uncommitted parent removal", err)
+	case <-time.After(75 * time.Millisecond):
+	}
+	if err = tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	if err = <-done; err != nil {
+		t.Fatal(err)
+	}
+	// A late connection can still report bytes after deletion; never persist them.
+	m.add(scope, trafficCount{RX: 11})
+	if err = m.flush(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+	var n int
+	if err = db.QueryRow("SELECT count(*) FROM proxy_traffic_hourly WHERE process_id=$1", m.process).Scan(&n); err != nil || n != 0 {
+		t.Fatal("orphan telemetry", n, err)
+	}
+	if len(m.counts) != 0 {
+		t.Fatal("deleted account attribution retained")
+	}
+}

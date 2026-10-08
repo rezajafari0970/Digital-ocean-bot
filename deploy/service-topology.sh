@@ -75,17 +75,40 @@ dob_stage_runtime() {
  DOB_STAGE=$(mktemp -d "$(dirname "$APP")/.dob-release.XXXXXXXX")
  trap dob_cleanup_stage EXIT
  install -d -m 0755 "$DOB_STAGE/bin" "$DOB_STAGE/web/static"
- local binary command api_sha worker_sha
+ local binary command arch api_sha worker_sha guardian_amd64_sha guardian_arm64_sha
  for binary in digital-ocean-bot-api digital-ocean-bot-worker vultr-browser-session vultr-browser-manager vultr-input-bridge; do
   command=$binary
   case "$binary" in digital-ocean-bot-api) command=api ;; digital-ocean-bot-worker) command=worker ;; esac
   (cd "$SRC" && go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/$binary" "./cmd/$command")
  done
+ for arch in amd64 arm64; do
+  (cd "$SRC" && CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/server-guardian-linux-$arch" ./cmd/server-guardian)
+ done
  cp -a "$SRC/migrations" "$DOB_STAGE/"
  cp -a "$SRC/web/static/." "$DOB_STAGE/web/static/"
  api_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-api" | awk '{print $1}')
  worker_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-worker" | awk '{print $1}')
- printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s"}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" > "$DOB_STAGE/build-manifest.json"
+ guardian_amd64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-amd64" | awk '{print $1}')
+ guardian_arm64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-arm64" | awk '{print $1}')
+ printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
+ dob_verify_staged_runtime
+}
+# Both install and upgrade must reject an incomplete release before stopping readers.
+dob_verify_staged_runtime() {
+ python3 - "$DOB_STAGE" <<'PY'
+import hashlib,json,pathlib,struct,sys
+root=pathlib.Path(sys.argv[1]);manifest=json.loads((root/'build-manifest.json').read_text())
+for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','server-guardian-linux-amd64','server-guardian-linux-arm64']:
+ p=root/'bin'/name
+ if not (p.is_file() and not p.is_symlink() and p.stat().st_size>0):raise SystemExit('required artifact missing: '+name)
+for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256')]:
+ if hashlib.sha256((root/'bin'/name).read_bytes()).hexdigest()!=manifest[key]:raise SystemExit('runtime hash mismatch: '+name)
+for arch,machine in [('amd64',62),('arm64',183)]:
+ raw=(root/'bin'/('server-guardian-linux-'+arch)).read_bytes()
+ if not (len(raw)>=20 and raw[:6]==b'\x7fELF\x02\x01' and struct.unpack_from('<H',raw,18)[0]==machine):raise SystemExit('guardian architecture mismatch: '+arch)
+ if hashlib.sha256(raw).hexdigest()!=manifest['guardian_sha256'][arch]:raise SystemExit('guardian hash mismatch: '+arch)
+print('Verified API, workers and both guardian release artifacts')
+PY
 }
 dob_prepare_stage_permissions() {
  chown -R root:digitaloceanbot "$DOB_STAGE"

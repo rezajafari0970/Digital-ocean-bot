@@ -1,0 +1,38 @@
+{
+  "goal": "Repair missing server-guardian release artifacts, reliable complete local account deletion UI/data cleanup, and actionable DigitalOcean account warning diagnostics.",
+  "context": "Continue from production fe7ba0b, canonical detached and tracked clean. Current runtime/account proxy economy remains globally enabled; matched eight-account measurement showed 85.2 percent savings, not 90. New user asks finish prior work plus fix screenshots showing provider warning, stuck deletion and Panels needing attention. Read-only audit found most current healthy-API panels have server_protection_nodes ERROR='guardian artifact unavailable'; deploy/service-topology.sh stages five binaries but omits both linux guardian artifacts that the controller requires. Fix shared fresh-install/upgrade packaging to cross-build amd64/arm64 guardians from same tested commit, hash them in manifest and verify required stage artifacts before stopping/publishing; retain native staged upgrade allowlist, receipt verification and protection policy. UI deleteAccount currently swallows failed local purge when refreshed row still has deletion state and displays success; distinguish ordinary durable cloud deletion from explicitly acknowledged complete removal of saved system data. Make local removal accessible beside deletion blocker, show real error and retries, bounded timeout and typed conflict/busy handling. Preserve worker recovery checkpoint ownership and native reconciliation; no force-removal of live checkpoints, no fake provider deletion or resetting gates. Audit all account/panel dependencies including new role-scoped proxy traffic and non-FK control scopes; prevent late meter flush from recreating purged account data and prevent deleting canary account widening its rollout. Use existing transactional purge and test rollback, scoping, lost-response replay and actual browser click/errors. No production account deletion performed as acceptance: user is fixing button behavior for future use; use isolated fixtures. DigitalOcean returns native status warning, but current DTO discards documented status_message. Propagate provider message through canonical snapshot/UI with bounded safe display, retain provider creation/admission semantics; do not invent active state or bypass billing/email/provider restriction. Diagnose remaining routing-verification/SSH errors with fresh read-only native receipts and restore normal reconciliation after artifacts are present. No subagents. Required full Go suite, relevant race tests, browser acceptance, real release staging cross-architecture artifact checks and actual OpenAI API review of exact tested source. Tests use isolated BULK_TEST_DATABASE_URL. Update handoff/current source evidence after rollout; existing docs predate fe7ba0b. Proxy/UpCloud stability and remaining 90 percent target are a following bounded investigation after this user-visible repair, no guarantee without comparable traffic evidence.",
+  "allowed_paths": [
+    "deploy/service-topology.sh",
+    "internal/serverprotection",
+    "internal/adminapi",
+    "internal/app/account_purge.go",
+    "internal/app/account_purge_test.go",
+    "internal/providers/digitalocean",
+    "internal/providers/types.go",
+    "internal/network/proxy_traffic.go",
+    "internal/network/proxy_economy_test.go",
+    "web/static/app.js",
+    "web/tests",
+    "tools/account-panel-repair-acceptance-race.sh",
+    "tools/account-panel-repair-review.py",
+    "tools/account-panel-release-test.sh",
+    "docs/development-jobs/account-panel-repair-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/account-panel-repair-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/account-panel-repair-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "fix(operations): package guardian and make account removal reliable"
+}

@@ -28,6 +28,34 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+15000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' BODY: '+await evaluate('document.body.innerText.slice(0,5000)'))}
   await waitFor('document.querySelectorAll(".accountCard").length===2');
+  if(process.env.DOB_PURGE_ID){
+   const purgeID=process.env.DOB_PURGE_ID;
+   await evaluate('window.purgeID='+JSON.stringify(purgeID)+';window.confirm=()=>false;window.purgeButton=()=>document.querySelector(".deletionProgress [data-action=purge-account]")');
+   assert.equal(await evaluate('purgeButton()?.textContent'), 'Delete from system…');
+   await evaluate('purgeButton().click()');
+   assert.equal(await evaluate('accountDeletionBusy.size'),0);
+   await evaluate('window.confirm=()=>true;purgeButton().click()');
+   await waitFor('!accountDeletionBusy.size&&document.querySelector("#toast").textContent.includes("Fixture cleanup is busy")');
+   assert.equal(await evaluate('cache.accounts.some(r=>r.id===purgeID)'),true);
+   await evaluate('purgeButton().click()');
+   await waitFor('!accountDeletionBusy.size&&document.querySelector("#toast").textContent.includes("Fixture transaction failed")');
+   assert.equal(await evaluate('cache.accounts.some(r=>r.id===purgeID)'),true);
+   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+   await evaluate('purgeButton().scrollIntoView({block:"center"})');
+   const screenshot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'account-purge-error-mobile.png'),Buffer.from(screenshot.data,'base64'));
+   await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
+   await evaluate('window.originalFetch=window.fetch;window.purgeCalls=0;window.fetch=async function(url,opt){const r=await originalFetch(url,opt);if(url.endsWith("/purge")&&opt?.method==="POST"){purgeCalls++;throw Error("Fixture lost response after purge commit")}return r};purgeButton().click();purgeButton().click()');
+   await waitFor('!accountDeletionBusy.size&&!cache.accounts.some(r=>r.id===purgeID)');
+   assert.equal(await evaluate('window.purgeCalls'),1);
+   assert.equal(await evaluate('cache.accounts.length'),1);
+   assert.ok(await evaluate('document.querySelector("#toast").textContent.includes("Cloud resource deletion remains unverified")'));
+   await call('Page.reload');
+   await waitFor('typeof cache!=="undefined"&&cache.accounts?.length===1');
+   assert.equal(await evaluate('cache.accounts[0].id'),other);
+   console.log('ACCOUNT_PURGE_REAL_CLICK_CANCEL_409_500_ERROR_LOST_RESPONSE_SCOPED_MOBILE_DESKTOP PASS');
+   return;
+  }
+
   await evaluate('window.deleteID='+JSON.stringify(id)+';window.otherID='+JSON.stringify(other)+';window.confirm=()=>true;window.originalFetch=window.fetch;window.deleteCalls=0;window.dropOnce=true;window.fetch=async function(url,opt){const r=await window.originalFetch(url,opt);if(opt?.method==="DELETE"){window.deleteCalls++;if(window.dropOnce){window.dropOnce=false;throw Error("Fixture lost response after commit")}}return r}');
   await evaluate('Promise.all([window.deleteAccount(deleteID),window.deleteAccount(deleteID)])');
   await waitFor('cache.accounts.find(r=>r.id===deleteID)?.deletion?.phase==="SETTLING"&&!accountDeletionBusy.has(deleteID)');
