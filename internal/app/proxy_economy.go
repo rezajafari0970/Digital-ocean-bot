@@ -26,6 +26,9 @@ AND (s.retry_after IS NULL OR s.retry_after<=now()))`, id, int(network.EconomyId
 // A stale idle snapshot never authorizes a create: existing preflight freshness
 // rules are deliberately unchanged.
 func (c Container) providerRefreshAge(ctx context.Context, id string, active time.Duration) time.Duration {
+	if c.DB == nil || active >= 5*time.Minute {
+		return active
+	}
 	enabled, err := c.Economy.Enabled(ctx, id)
 	if err != nil || !enabled {
 		return active
@@ -33,7 +36,12 @@ func (c Container) providerRefreshAge(ctx context.Context, id string, active tim
 	var idle bool
 	err = c.DB.QueryRowContext(ctx, `SELECT NOT EXISTS(SELECT 1 FROM operations WHERE account_id=$1 AND state IN ('planned','running','verifying','unknown'))
 AND NOT EXISTS(SELECT 1 FROM droplets WHERE account_id=$1 AND state<>'DELETED' AND (state<>'READY' OR expires_at IS NULL OR expires_at<=now()+interval '6 minutes'))
-AND EXISTS(SELECT 1 FROM accounts WHERE id=$1 AND deletion_requested_at IS NULL AND next_build_at>now()+interval '5 minutes')`, id).Scan(&idle)
+AND NOT EXISTS(SELECT 1 FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE'))
+AND NOT EXISTS(SELECT 1 FROM droplets WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL)
+AND NOT EXISTS(SELECT 1 FROM worker_recovery_checkpoints WHERE account_id=$1)
+AND EXISTS(SELECT 1 FROM accounts a WHERE a.id=$1 AND a.enabled=true AND a.deleted_at IS NULL AND a.deletion_requested_at IS NULL
+AND (a.next_build_at>now()+interval '5 minutes'
+OR (a.desired_server_count>0 AND a.desired_server_count<=(SELECT count(*) FROM droplets WHERE account_id=a.id AND state='READY' AND expires_at>now()+interval '6 minutes'))))`, id).Scan(&idle)
 	if err == nil && idle {
 		return 5 * time.Minute
 	}

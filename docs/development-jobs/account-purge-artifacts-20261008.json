@@ -1,0 +1,28 @@
+{
+  "goal": "Complete saved-account deletion by removing retired browser-session credentials safely, in both verified cloud cleanup and explicitly acknowledged local purge.",
+  "context": "Follow-up to tested/reviewed/deployed a41047c account-panel repair. Read-only filesystem audit found two real legacy browser-session directories under /var/lib/digital-ocean-bot/browser-sessions associated with Sara vul DELETE_PENDING and Sara vul 2 TOKEN_INVALID. Do not delete production accounts or these directories as acceptance; extend the shared purge operation for future user button use. Browser feature is retired (HTTP410, idle manager inactive). Preserve every existing native recovery checkpoint fence, advisory lock, disabled/two-minute/terminal state/count and acknowledgement check. After all DB delete statements succeed but before tx commit, remove only canonical UUID account's legacy browser-session directory. Fail closed on invalid ID, symlink parent or filesystem failure; absent directory is idempotent. Canonicalize account UUID from locked DB row, never join raw untrusted path. os.RemoveAll must never follow child/nested symlinks to other data. No arbitrary deletion callback exposed to API. A filesystem failure must roll back DB deletions and not produce PURGED. Cross-resource transaction limit must be explicit: if profile removal succeeds but DB commit fails, saved DB account remains but retired browser cache can already be gone; do not claim secure erasure of backups or journals. Use dependency injection in private transaction helper for rollback/error fixtures, not mutable global production path. Unit temp filesystem symlink/path/scoping/idempotency tests plus isolated PostgreSQL failure/rollback and successful shared purge integration; full Go, relevant race, actual API review exact source. Production account row counts and data unchanged except normal worker activity; no test fixture credentials in production. Continue checkpoint/push/coordinated deployment workflow; guardian release packaging now included. No subagents.",
+  "allowed_paths": [
+    "internal/app/account_purge.go",
+    "internal/app/account_purge_test.go",
+    "tools/account-purge-artifacts-acceptance-race.sh",
+    "tools/account-purge-artifacts-review.py",
+    "docs/development-jobs/account-purge-artifacts-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/account-purge-artifacts-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/account-purge-artifacts-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "fix(accounts): remove retired browser session data during purge"
+}

@@ -1,0 +1,28 @@
+{
+  "goal": "Stop redundant systemd enable/disable reloads in routine guardian reconciliation while preserving exact protection policy and fresh receipts.",
+  "context": "Follow-up to deployed a41047c. Guardian artifacts now correctly packaged and >20 nodes applied. Remaining panel alerts include genuine CPU/conntrack protection. Read-only native pinned-SSH OS probe found systemd lifetime CPU 25-49 percent on several affected small hosts while guardian process uses 0.6-2 percent; this does not yet prove causality. Source installCommand issues systemctl enable --now on every normal controller reconciliation. Official systemd documentation/source confirms enable implicitly reloads daemon configuration. Add idempotent enabled/disabled state handling: avoid enable when already persistently enabled and avoid disable when already disabled; still start/stop as required, reload for changed owned unit, restart only for staged binary or changed unit, retain policy revision fence, ownership/symlink guards, exact hash, allowlist and status validation. Do not relax CPU/conntrack thresholds, admission checks, client limits, native checkpoints or readiness. Test generated service transition shell with isolated fake systemctl: repeated healthy reconcile no enable/reload, disabled->enabled and stopped->running recover, enabled->disabled stop and cleanup ordering, command failure propagates. Test is-enabled state parsing must not mistake enabled-runtime for persistent enabled; uncertain state fails safely through real necessary operation. Keep network direct, no new proxy usage. Full Go and relevant race, actual exact-source API review, real guardian packaging gate, checkpoint/push/clean coordinated deploy. Before test/commit fast-forward this isolated worktree to the independently reviewed account-purge-artifacts follow-up when complete so changes compose; no modifications to that work. No production fault injection or account deletion, no subagents. After deploy compare same-node systemd cumulative CPU over bounded interval and native panel receipts, report real resource pressure honestly rather than hiding alerts. Pending 90-percent proxy target requires comparable actual measured bytes, not fabricated savings.",
+  "allowed_paths": [
+    "internal/serverprotection/controller.go",
+    "internal/serverprotection/rollout_test.go",
+    "tools/guardian-reconcile-acceptance-race.sh",
+    "tools/guardian-reconcile-review.py",
+    "docs/development-jobs/guardian-reconcile-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/guardian-reconcile-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/guardian-reconcile-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "fix(protection): avoid repeated systemd reloads during reconciliation"
+}

@@ -289,8 +289,14 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 						continue
 					}
 				}
-				if port, ok := rule["port"].(string); ok && port != r.Form.Get("port") {
-					continue
+				if port, ok := rule["port"].(string); ok {
+					found := false
+					for _, candidate := range strings.Split(port, ",") {
+						found = found || strings.TrimSpace(candidate) == r.Form.Get("port")
+					}
+					if !found {
+						continue
+					}
 				}
 				if patterns, ok := rule["domain"].([]any); ok {
 					found := false
@@ -298,6 +304,8 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 						pattern, _ := v.(string)
 						if strings.HasPrefix(pattern, "regexp:") {
 							found = found || regexp.MustCompile(strings.TrimPrefix(pattern, "regexp:")).MatchString(r.Form.Get("domain"))
+						} else if strings.HasPrefix(pattern, "full:") {
+							found = found || r.Form.Get("domain") == strings.TrimPrefix(pattern, "full:")
 						} else if strings.HasPrefix(pattern, "domain:") {
 							suffix := strings.TrimPrefix(pattern, "domain:")
 							found = found || r.Form.Get("domain") == suffix || strings.HasSuffix(r.Form.Get("domain"), "."+suffix)

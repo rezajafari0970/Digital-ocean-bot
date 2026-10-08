@@ -1,0 +1,42 @@
+{
+  "goal": "Integrate account purge and guardian fixes with current residential release; reduce idle account provider polling safely.",
+  "context": "Integrate two independently tested actual-API-approved checkpoints (38c3b6df529cbac8e1a7b89d38e1e5c645c222da account-purge artifacts, 00bec91d3d763583c43a50b8f0b52158a91d7856 guardian reconcile) onto current deployed baseline 7cc709efcffaacf0dad8eb5ddec8561d5a45eff1. Previous deploy correctly stopped before mutation when concurrent residential allowlist revision was found. Apply exact a41047c..00bec91 patch to this isolated baseline, preserving all residential allowlist source/settings unchanged. Further bounded economy improvement: accounts that meet desired_server_count with only READY resources >6 minutes from expiry and no outstanding operation, pending deployment, backfill or recovery checkpoint can use existing 5-minute provider inventory refresh even next_build_at NULL/past; retain scheduled-future idle branch subject to same no-pending gates. No stale snapshots authorize mutations: existing fresh preflight, capacity admission, proxy-required fail-close, recovery cadence and credential/network-generation invalidation unchanged. Database lookup/error/off flag fall back to active interval; do not reduce existing requested interval. Add isolated PostgreSQL behavior tests for target satisfied/null/past, insufficient target, deletion/disabled, imminent/unknown expiry, operations/deployments, backfill/recovery, economy rollback and error. Full Go/meaningful race across app/adminapi/network/serverprotection/provisioning/residentialsync; browser deletion acceptance and real guardian packaging; installed-core allowlist tests if existing binary. Actual API review bound to exact integrated source and baseline including tracked-staged and untracked changes, reject out-of-scope source except .local evidence/pycache. Checkpoint push. Clean detached release build and shared deployment lock before rechecking canonical/runtime and publishing; preserve browser manager retired state and exact residential dropin. No account deletion or provider mutation as acceptance, no live fault injection, no threshold relaxation. Status checkpoint in backup every meaningful phase; final handoff in repo records source, known defects fixed and external limits. 90 percent proxy reduction remains unverified; measure actual comparable traffic without disabling unrelated routes, don't force quantitative claims. No subagents. Integration test finding: existing TestResidentialWorkerAppliesChangesAndRemoval also fails twice on unchanged deployed 7cc709e baseline because its fake route matcher lacks strict allowlist full: hostname and comma-separated port matching. Extend only that test fixture to understand exact hosts and port lists; do not alter production residential policy or weaken assertions. Preserve baseline failure evidence. An unrelated 150ms clientops fixture intermittently fails under full-suite load; compare unchanged baseline, no production/test guard weakening.",
+  "allowed_paths": [
+    "internal/app/account_purge.go",
+    "internal/app/account_purge_test.go",
+    "internal/serverprotection/controller.go",
+    "internal/serverprotection/rollout_test.go",
+    "internal/app/proxy_economy.go",
+    "internal/app/proxy_economy_test.go",
+    "tools/account-purge-artifacts-acceptance-race.sh",
+    "tools/account-purge-artifacts-review.py",
+    "tools/guardian-reconcile-acceptance-race.sh",
+    "tools/guardian-reconcile-review.py",
+    "docs/development-jobs/account-purge-artifacts-20261008.json",
+    "docs/development-jobs/guardian-reconcile-20261008.json",
+    "tools/operational-integration-acceptance-race.sh",
+    "tools/operational-integration-review.py",
+    "docs/development-jobs/operational-integration-20261008.json",
+    "docs/OPERATIONAL_REPAIR_DELTA_20261008.md",
+    "HANDOFF.md",
+    "docs/PROJECT_BRAIN.md",
+    "internal/adminapi/routing_cleanup_postgres_test.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 2400,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/operational-integration-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/operational-integration-review.py"
+    ]
+  },
+  "commit_message": "fix(operations): integrate cleanup and guardian repairs with idle polling"
+}

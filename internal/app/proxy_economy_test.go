@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -17,6 +18,83 @@ import (
 	"testing"
 	"time"
 )
+
+func TestEconomySatisfiedTargetRefreshPostgres(t *testing.T) {
+	db := installerBootstrapDB(t)
+	execBootstrap(t, db, `UPDATE proxy_economy_policy SET enabled=true,canary_account_id=NULL`)
+	c := Container{DB: db, Economy: &network.EconomyController{DB: db}}
+	for _, tc := range []struct {
+		name   string
+		mutate string
+		want   time.Duration
+	}{
+		{"satisfied-null-next", "", 5 * time.Minute},
+		{"satisfied-past-next", `UPDATE accounts SET next_build_at=now()-interval '1 hour' WHERE id=$1`, 5 * time.Minute},
+		{"satisfied-soon-next", `UPDATE accounts SET next_build_at=now()+interval '1 minute' WHERE id=$1`, 5 * time.Minute},
+		{"insufficient-target", `UPDATE accounts SET desired_server_count=3 WHERE id=$1`, time.Minute},
+		{"future-scheduled-idle", `UPDATE accounts SET desired_server_count=3,next_build_at=now()+interval '1 hour' WHERE id=$1`, 5 * time.Minute},
+		{"disabled", `UPDATE accounts SET enabled=false WHERE id=$1`, time.Minute},
+		{"deleting", `UPDATE accounts SET deletion_requested_at=now() WHERE id=$1`, time.Minute},
+		{"deleted", `UPDATE accounts SET deleted_at=now() WHERE id=$1`, time.Minute},
+		{"imminent-expiry", `UPDATE droplets SET expires_at=now()+interval '5 minutes' WHERE account_id=$1`, time.Minute},
+		{"unknown-expiry", `UPDATE droplets SET expires_at=NULL WHERE account_id=$1`, time.Minute},
+		{"unready-resource", `UPDATE droplets SET state='DELETING' WHERE account_id=$1`, time.Minute},
+		{"unknown-operation", `INSERT INTO operations(id,account_id,kind,idempotency_key,state) VALUES(gen_random_uuid(),$1,'create','fixture','unknown')`, time.Minute},
+		{"planned-operation", `INSERT INTO operations(id,account_id,kind,idempotency_key,state) VALUES(gen_random_uuid(),$1,'create','fixture','planned')`, time.Minute},
+		{"finished-operation", `INSERT INTO operations(id,account_id,kind,idempotency_key,state) VALUES(gen_random_uuid(),$1,'create','fixture','succeeded')`, 5 * time.Minute},
+		{"backfill", `INSERT INTO droplets(id,account_id,provider_resource_id,state,backfill_required) VALUES(gen_random_uuid(),$1,'old','DELETED',true)`, time.Minute},
+		{"recovery", `INSERT INTO worker_recovery_checkpoints(kind,item_id,account_id) VALUES('lifecycle',$1::text,$1::uuid)`, time.Minute},
+		{"pending-deployment", `INSERT INTO deployments(id,account_id,profile_id,state,current_step) SELECT gen_random_uuid(),$1,id,'PLANNED','fixture' FROM deployment_profiles WHERE account_id=$1`, time.Minute},
+		{"finished-deployment", `INSERT INTO deployments(id,account_id,profile_id,state,current_step) SELECT gen_random_uuid(),$1,id,'READY','fixture' FROM deployment_profiles WHERE account_id=$1`, 5 * time.Minute},
+		{"future-idle-still-blocks-unknown", `UPDATE accounts SET next_build_at=now()+interval '1 hour' WHERE id=$1;`, 5 * time.Minute},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var id string
+			if err := db.QueryRow(`INSERT INTO accounts(id,provider,name,secret_ref,desired_server_count) VALUES(gen_random_uuid(),'digitalocean',$1,'unused',2) RETURNING id::text`, tc.name).Scan(&id); err != nil {
+				t.Fatal(err)
+			}
+			execBootstrap(t, db, `INSERT INTO droplets(id,account_id,provider_resource_id,state,expires_at) SELECT gen_random_uuid(),$1,'fixture-'||n,'READY',now()+interval '1 hour' FROM generate_series(1,2) n`, id)
+			execBootstrap(t, db, `INSERT INTO deployment_profiles(id,account_id,name,config) VALUES(gen_random_uuid(),$1,'fixture','{}')`, id)
+			if tc.mutate != "" {
+				execBootstrap(t, db, tc.mutate, id)
+			}
+			if got := c.providerRefreshAge(context.Background(), id, time.Minute); got != tc.want {
+				t.Fatalf("refresh=%v want=%v", got, tc.want)
+			}
+			if tc.name == "future-idle-still-blocks-unknown" {
+				execBootstrap(t, db, `INSERT INTO operations(id,account_id,kind,idempotency_key,state) VALUES(gen_random_uuid(),$1,'delete','future-unknown','unknown')`, id)
+				if got := c.providerRefreshAge(context.Background(), id, time.Minute); got != time.Minute {
+					t.Fatal("future schedule hid unknown operation", got)
+				}
+			}
+			if tc.name == "satisfied-null-next" {
+				if got := c.providerRefreshAge(context.Background(), id, 10*time.Minute); got != 10*time.Minute {
+					t.Fatal("shortened caller interval", got)
+				}
+				cancelled, cancel := context.WithCancel(context.Background())
+				cancel()
+				if got := c.providerRefreshAge(cancelled, id, time.Minute); got != time.Minute {
+					t.Fatal("cancelled lookup slowed refresh", got)
+				}
+				execBootstrap(t, db, `UPDATE proxy_economy_policy SET enabled=false`)
+				if got := c.providerRefreshAge(context.Background(), id, time.Minute); got != time.Minute {
+					t.Fatal("rollback slowed refresh", got)
+				}
+				execBootstrap(t, db, `UPDATE proxy_economy_policy SET enabled=true`)
+				bad, err := sql.Open("postgres", "postgres://127.0.0.1:1/missing?sslmode=disable&connect_timeout=1")
+				if err != nil {
+					t.Fatal(err)
+				}
+				bad.Close()
+				broken := c
+				broken.DB = bad
+				if got := broken.providerRefreshAge(context.Background(), id, time.Minute); got != time.Minute {
+					t.Fatal("query error slowed refresh", got)
+				}
+			}
+		})
+	}
+}
 
 type economyRoundTrip func(*http.Request) (*http.Response, error)
 

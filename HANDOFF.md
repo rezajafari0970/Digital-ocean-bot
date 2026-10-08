@@ -1,3 +1,9 @@
+# Operational repairs continuation — 2026-10-09 Tehran
+
+Read `docs/OPERATIONAL_REPAIR_DELTA_20261008.md` for account deletion, guardian service and proxy economy repairs. Current job `operational-release-20261009` integrates the preserved tested changes with the independently deployed residential verifier fix. Publication must be verified against runtime; source presence alone is not deployment evidence. The current residential report below remains valid for its recorded timestamp.
+
+---
+
 # Latest continuation — residential allowlist, 2026-10-09 Tehran
 
 Read `docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json`, `docs/RESIDENTIAL_ALLOWLIST_20261008.md` and `docs/RESIDENTIAL_ALLOWLIST_STATUS_FA_20261009.md` first. Reviewed verifier fix **d02f045** is deployed; API credit blocker is resolved. Runtime hashes are verified and all five readiness checks pass. At2026-10-08T22:39:27Z current serving native proof and periodic state both pass **30/30**. Canonical report commit is newer than the runtime source because it changes documentation only.

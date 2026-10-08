@@ -1,3 +1,9 @@
+# Operational repair continuation — 2026-10-08
+
+Read OPERATIONAL_REPAIR_DELTA_20261008.md first. It supersedes the archived frontier below. Verify live canonical/runtime and the integration status before continuing; do not infer deployment from a source checkpoint.
+
+---
+
 # Project Brain
 
 This is the unified retrieval layer for a fresh ChatGPT session. It combines the line-level source snapshot, semantic symbol relationships, route index, schema/migration index and test map without requiring broad source reopening.
