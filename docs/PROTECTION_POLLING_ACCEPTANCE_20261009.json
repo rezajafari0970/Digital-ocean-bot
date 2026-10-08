@@ -1,0 +1,1083 @@
+{
+  "status": "PASS_IN_TESTED_SCOPE_WITH_OPERATIONAL_LIMITS",
+  "verified_at_utc": "2026-10-08T23:31:48.455029+00:00",
+  "runtime_revision": "435486a7369965366852f48e7514efe7d6a41293",
+  "integrated_peer_revision": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "rollback_revision": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "rollback_directory": "/opt/digital-ocean-bot.rollback.HH5pqPFG",
+  "requirement": "Keep enabled guardian polling progressing despite disabled-node cleanup timeouts while preserving protection, fencing and shared budgets.",
+  "cause": "Single mixed due-target query sorted disabled targets first and used one LIMIT64 and wait-for-all round; stalled cleanup could delay enabled refresh.",
+  "change": {
+    "enabled_concurrency": 6,
+    "cleanup_concurrency": 2,
+    "shared_work_budget": 10,
+    "independent_modules": [
+      "server-protection",
+      "server-protection-cleanup"
+    ],
+    "filter_before_limit": true,
+    "due_order": "next_check_at,panel_id",
+    "node_deadline_seconds": 30,
+    "guardian_policy_or_threshold_change": false,
+    "output_filter_behavior_change": false
+  },
+  "tests": {
+    "passed": true,
+    "source": {
+      "cmd/worker/main.go": "2f854081f150330f906a7bff50a5585d9b31c0b3195293141c0cf8c3f24f0c10",
+      "cmd/worker/main_test.go": "40e2b1f392d416c59d778e1abd931edb14e968a04c03a8f5d7a1e4e1ce6019c3",
+      "cmd/worker/supervision.go": "22c4a8a1fc635ba739d89d43c0a0cda35d468374d52ca3581b44278cd25c52f0",
+      "cmd/worker/supervision_test.go": "3de5a98c3f84f7391590870cdc66ec6cf0b48e403d1054dced18522f3baf840e",
+      "docs/development-jobs/protection-poll-isolation-20261009.json": "6f038d5af4cad769f51874a8e60552a85f65986c0dd29eeb275b178282aefd26",
+      "internal/adminapi/output_snapshot.go": "b38313349de9ad2b7b8c2aef34531af94ea668879be34bcfd54fe8794e44202c",
+      "internal/serverprotection/controller.go": "b0a016920aefe3b31f5b2a53ed6276b93c19ca6e3fa19ad8f963c94fae665eff",
+      "internal/serverprotection/polling_postgres_test.go": "718939c00e77364529700642e3521eecd8e199609fdb437a54aa4cc8ad5cf799",
+      "internal/serverprotection/polling_test.go": "4f0368c469a9deb71652c7c6ea81feed2fa390c6b8ccbfd2f698902ee6aafe5c"
+    },
+    "integrated_baseline": "897f40800d047a3f08faccb501e450a17208b6bc",
+    "at": "2026-10-08T23:15:20.084036+00:00",
+    "full_isolated_postgres": true,
+    "focused_race": true,
+    "vet": true,
+    "old_negative_control": "semantic starvation reproduced; initial fixture setup failures retained separately"
+  },
+  "independent_plan_response_id": "resp_00d043925df2afaa006ac8206aa54487d195782aabde8406ad",
+  "independent_code_review": {
+    "at": "2026-10-08T23:16:00.434164+00:00",
+    "source": {
+      "cmd/worker/main.go": "2f854081f150330f906a7bff50a5585d9b31c0b3195293141c0cf8c3f24f0c10",
+      "cmd/worker/main_test.go": "40e2b1f392d416c59d778e1abd931edb14e968a04c03a8f5d7a1e4e1ce6019c3",
+      "cmd/worker/supervision.go": "22c4a8a1fc635ba739d89d43c0a0cda35d468374d52ca3581b44278cd25c52f0",
+      "cmd/worker/supervision_test.go": "3de5a98c3f84f7391590870cdc66ec6cf0b48e403d1054dced18522f3baf840e",
+      "docs/development-jobs/protection-poll-isolation-20261009.json": "6f038d5af4cad769f51874a8e60552a85f65986c0dd29eeb275b178282aefd26",
+      "internal/adminapi/output_snapshot.go": "b38313349de9ad2b7b8c2aef34531af94ea668879be34bcfd54fe8794e44202c",
+      "internal/serverprotection/controller.go": "b0a016920aefe3b31f5b2a53ed6276b93c19ca6e3fa19ad8f963c94fae665eff",
+      "internal/serverprotection/polling_postgres_test.go": "718939c00e77364529700642e3521eecd8e199609fdb437a54aa4cc8ad5cf799",
+      "internal/serverprotection/polling_test.go": "4f0368c469a9deb71652c7c6ea81feed2fa390c6b8ccbfd2f698902ee6aafe5c"
+    },
+    "response_id": "resp_0f6a235e53189f06006ac8240851d887d18a1071bfb351ad62",
+    "verdict": {
+      "decision": "PASS",
+      "blockers": [],
+      "limitations": [
+        "Deployment acceptance remains unproven: enabled receipt ages and cleanup retry progress must be measured during repeated production timeouts; the tests do not guarantee sub-60-second receipts under arbitrary shared-resource stalls.",
+        "The canonical detached checkout fails the archived-branch bootstrap assertion, as reported. The supplied provenance and test logs cannot be independently rerun or verified here.",
+        "The rollback rehearsal used isolated copies; no production rollback was attempted."
+      ]
+    },
+    "baseline": "897f40800d047a3f08faccb501e450a17208b6bc"
+  },
+  "rollback_rehearsal": {
+    "at": "2026-10-08T23:13:15.051177+00:00",
+    "passed": true,
+    "target_runtime": "897f40800d047a3f08faccb501e450a17208b6bc",
+    "verified_files": 346,
+    "scope": "Real restore-runtime-assets function on isolated copies of current release; no production services changed, no live rollback attempted",
+    "production_services_changed": false
+  },
+  "runtime": {
+    "at": "2026-10-08T23:31:48.455029+00:00",
+    "manifest": {
+      "commit": "435486a7369965366852f48e7514efe7d6a41293",
+      "build_time": "2026-10-08T23:18:17Z",
+      "api_sha256": "4f7215558988103fdd1b0de0f20a0d94bb1d6d754655a7965bc22cc60f0148ef",
+      "worker_sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
+      "guardian_sha256": {
+        "amd64": "b9839f9060ed77620a718bf69d2fbe30e69afc55cb376b8b74f86363c9fbd9d6",
+        "arm64": "4ba92d410a40dd0d047b4be28e9eb878334df51973b13a3cabcb1bd3b23b110b"
+      }
+    },
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 23:18:25 UTC",
+        "MainPID": "3830525",
+        "NRestarts": "0",
+        "MemoryCurrent": "10080256",
+        "sha256": "4f7215558988103fdd1b0de0f20a0d94bb1d6d754655a7965bc22cc60f0148ef",
+        "vcs": [
+          "build\tvcs.revision=435486a7369965366852f48e7514efe7d6a41293",
+          "build\tvcs.time=2026-10-08T23:17:26Z",
+          "build\tvcs.modified=false"
+        ]
+      },
+      "worker": {
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 23:18:26 UTC",
+        "MainPID": "3830527",
+        "NRestarts": "0",
+        "MemoryCurrent": "10305536",
+        "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
+        "vcs": [
+          "build\tvcs.revision=435486a7369965366852f48e7514efe7d6a41293",
+          "build\tvcs.time=2026-10-08T23:17:26Z",
+          "build\tvcs.modified=false"
+        ]
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 23:18:26 UTC",
+        "MainPID": "3830526",
+        "NRestarts": "0",
+        "MemoryCurrent": "21528576",
+        "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
+        "vcs": [
+          "build\tvcs.revision=435486a7369965366852f48e7514efe7d6a41293",
+          "build\tvcs.time=2026-10-08T23:17:26Z",
+          "build\tvcs.modified=false"
+        ]
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T23:31:48.533149505Z"
+    },
+    "browser_manager": {
+      "is-active": "inactive",
+      "is-enabled": "disabled"
+    },
+    "dropin_unchanged": true,
+    "log_markers": {
+      "panic": 0,
+      "module exited": 0,
+      "work stalled": 0,
+      "loop stalled": 0,
+      "guardian": 0,
+      "context deadline exceeded": 45
+    }
+  },
+  "traffic": {
+    "at": "2026-10-08T23:20:11.673496+00:00",
+    "panel": "e4567f93-b9f5-48bf-9178-5b5626e975e7",
+    "passed": true,
+    "cases": [
+      {
+        "core": "target26.9.9",
+        "class": "DIRECT",
+        "case": "direct-positive",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "DIRECT",
+        "case": "direct-browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "probe-www",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "probe-connectivity",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "ads-category",
+        "expected_allowed": true,
+        "http_status": "404",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "non-allowed",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "raw-ip",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "arbitrary-doh",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      }
+    ],
+    "credential_snapshot_pinned": true,
+    "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof"
+  },
+  "phase_1_2_3_review": {
+    "1": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Durable recovery, checked persistence, lifecycle and backoff",
+      "evidence": "Integrated full regression with isolated PostgreSQL; live worker/lifecycle/client progress checks pass. Historical fault acceptance retained; no new production failure injected."
+    },
+    "2": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Separate control/panels processes and bounded resource admission",
+      "evidence": "Both roles active, runtime hashes verified; pools and WorkBudget unchanged. New enabled6/cleanup2 ceilings tested through real shared WorkBudget."
+    },
+    "3": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Independent progress supervision and recovery",
+      "evidence": "New separate guardian module policies and supervision tests pass with race checks. No runtime restart observed since deployment; no new destructive watchdog fault injected in production."
+    }
+  },
+  "observation_windows": {
+    "before": {
+      "started_at": "2026-10-08T22:57:13.204992+00:00",
+      "finished_at": "2026-10-08T22:59:03.768460+00:00",
+      "samples": 12,
+      "max_known_receipt_age_seconds": 73.17857,
+      "samples_with_known_receipt_over_60s": 3,
+      "samples_with_missing_first_receipt": 10,
+      "stable_cohort_count": 25,
+      "stable_cohort_max_age_seconds": 73.17857,
+      "cleanup_first": null,
+      "cleanup_last": null
+    },
+    "predeploy": {
+      "started_at": "2026-10-08T23:16:13.528347+00:00",
+      "finished_at": "2026-10-08T23:18:03.999807+00:00",
+      "samples": 12,
+      "max_known_receipt_age_seconds": 46.356585,
+      "samples_with_known_receipt_over_60s": 0,
+      "samples_with_missing_first_receipt": 11,
+      "stable_cohort_count": 27,
+      "stable_cohort_max_age_seconds": 46.356585,
+      "cleanup_first": [
+        {
+          "state": "DISABLED",
+          "panel_id": "7548bd2e-4b88-4965-9476-b1940e1f532d",
+          "checked_at": "2026-10-08T23:16:11.768718+00:00",
+          "next_check_at": "2026-10-08T23:16:26.768718+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+          "checked_at": "2026-10-08T23:15:38.92349+00:00",
+          "next_check_at": "2026-10-08T23:16:46.207702+00:00"
+        }
+      ],
+      "cleanup_last": [
+        {
+          "state": "DISABLED",
+          "panel_id": "7548bd2e-4b88-4965-9476-b1940e1f532d",
+          "checked_at": "2026-10-08T23:17:50.875323+00:00",
+          "next_check_at": "2026-10-08T23:18:05.875323+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+          "checked_at": "2026-10-08T23:17:50.737112+00:00",
+          "next_check_at": "2026-10-08T23:18:05.737112+00:00"
+        }
+      ]
+    },
+    "after": {
+      "started_at": "2026-10-08T23:19:17.123926+00:00",
+      "finished_at": "2026-10-08T23:22:07.873423+00:00",
+      "samples": 18,
+      "max_known_receipt_age_seconds": 255.861272,
+      "samples_with_known_receipt_over_60s": 18,
+      "samples_with_missing_first_receipt": 4,
+      "stable_cohort_count": 27,
+      "stable_cohort_max_age_seconds": 255.861272,
+      "cleanup_first": [
+        {
+          "state": "DISABLED",
+          "panel_id": "7548bd2e-4b88-4965-9476-b1940e1f532d",
+          "checked_at": "2026-10-08T23:19:01.773518+00:00",
+          "next_check_at": "2026-10-08T23:19:16.773518+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+          "checked_at": "2026-10-08T23:19:02.206165+00:00",
+          "next_check_at": "2026-10-08T23:19:17.206165+00:00"
+        }
+      ],
+      "cleanup_last": [
+        {
+          "state": "DISABLED",
+          "panel_id": "2a5b7b62-7330-4c3b-b76c-dc1666cadb5c",
+          "checked_at": "2026-10-08T23:21:58.822354+00:00",
+          "next_check_at": "2026-10-08T23:22:13.822354+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "7548bd2e-4b88-4965-9476-b1940e1f532d",
+          "checked_at": "2026-10-08T23:21:52.042434+00:00",
+          "next_check_at": "2026-10-08T23:22:07.042434+00:00"
+        },
+        {
+          "state": "PENDING",
+          "panel_id": "bfa63613-46c1-4049-be6a-16a917112af3",
+          "checked_at": "2026-10-08T23:21:26.023847+00:00",
+          "next_check_at": "2026-10-08T23:22:40.798815+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+          "checked_at": "2026-10-08T23:21:50.903952+00:00",
+          "next_check_at": "2026-10-08T23:22:05.903952+00:00"
+        }
+      ]
+    },
+    "sustained": {
+      "started_at": "2026-10-08T23:27:05.962867+00:00",
+      "finished_at": "2026-10-08T23:29:06.525612+00:00",
+      "samples": 13,
+      "max_known_receipt_age_seconds": 46.272994,
+      "samples_with_known_receipt_over_60s": 0,
+      "samples_with_missing_first_receipt": 8,
+      "stable_cohort_count": 27,
+      "stable_cohort_max_age_seconds": 46.272994,
+      "cleanup_first": [
+        {
+          "state": "DISABLED",
+          "panel_id": "2a5b7b62-7330-4c3b-b76c-dc1666cadb5c",
+          "checked_at": "2026-10-08T23:27:05.851083+00:00",
+          "next_check_at": "2026-10-08T23:27:20.851083+00:00"
+        },
+        {
+          "state": "DISABLED",
+          "panel_id": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+          "checked_at": "2026-10-08T23:26:53.243316+00:00",
+          "next_check_at": "2026-10-08T23:27:08.243316+00:00"
+        }
+      ],
+      "cleanup_last": [
+        {
+          "state": "DISABLED",
+          "panel_id": "2a5b7b62-7330-4c3b-b76c-dc1666cadb5c",
+          "checked_at": "2026-10-08T23:28:55.697366+00:00",
+          "next_check_at": "2026-10-08T23:29:10.697366+00:00"
+        }
+      ]
+    }
+  },
+  "latest_fleet": {
+    "at": "2026-10-08T23:31:33.508252+00:00",
+    "panels": [
+      {
+        "age": 3.823022,
+        "cpu": 56.00000000000001,
+        "panel": "0b5cc145-5090-4182-b09a-ea20a595e013",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 31.528580006755284,
+        "conntrack": 16.380208333333332,
+        "checked_at": "2026-10-08T23:31:29.676921+00:00",
+        "expires_at": "2026-10-08T23:50:56.849082+00:00",
+        "verified_at": "2026-10-08T23:31:29.676921+00:00",
+        "next_check_at": "2026-10-08T23:31:44.676921+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 17.863484,
+        "cpu": 8.333333333333332,
+        "panel": "252cb663-e164-40a2-af4a-2600c2ef64b6",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 6.233625559295016,
+        "conntrack": 27.135416666666668,
+        "checked_at": "2026-10-08T23:31:15.636459+00:00",
+        "expires_at": "2026-10-08T23:37:38.971943+00:00",
+        "verified_at": "2026-10-08T23:31:15.636459+00:00",
+        "next_check_at": "2026-10-08T23:31:30.636459+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 15.015098,
+        "cpu": 40,
+        "panel": "2a6c8162-a14e-4a80-8a68-9880174ab57a",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 17.653323745412493,
+        "conntrack": 58.776041666666664,
+        "checked_at": "2026-10-08T23:31:18.484845+00:00",
+        "expires_at": "2026-10-09T00:27:06.307438+00:00",
+        "verified_at": "2026-10-08T23:31:18.484845+00:00",
+        "next_check_at": "2026-10-08T23:31:33.484845+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 1.678771,
+        "cpu": 100,
+        "panel": "2d34faed-5d05-4867-9ded-91aeaa20d497",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 28.674728380377374,
+        "conntrack": 70.7421875,
+        "checked_at": "2026-10-08T23:31:31.821172+00:00",
+        "expires_at": "2026-10-08T23:52:10.926933+00:00",
+        "verified_at": "2026-10-08T23:31:31.821172+00:00",
+        "next_check_at": "2026-10-08T23:31:46.821172+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 12.591456,
+        "cpu": 8.333333333333332,
+        "panel": "3cfd6f84-a35b-4045-b6de-d20fa63e67df",
+        "reason": "waiting for 30 seconds of stable resources",
+        "cpu_psi": 5.4541824660725835,
+        "conntrack": 62.98177083333333,
+        "checked_at": "2026-10-08T23:31:20.908487+00:00",
+        "expires_at": "2026-10-09T02:07:26.937453+00:00",
+        "verified_at": "2026-10-08T23:31:20.908487+00:00",
+        "next_check_at": "2026-10-08T23:31:35.908487+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "RECOVERING",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 44.847641,
+        "cpu": 21.73913043478261,
+        "panel": "405014f0-770e-4775-b218-adf8ac0e01fa",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 7.346817840009126,
+        "conntrack": 6.8603515625,
+        "checked_at": "2026-10-08T23:30:48.652302+00:00",
+        "expires_at": "2026-10-09T00:30:26.651911+00:00",
+        "verified_at": "2026-10-08T23:30:48.652302+00:00",
+        "next_check_at": "2026-10-08T23:31:03.652302+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 41.550594,
+        "cpu": 29.166666666666668,
+        "panel": "4265228f-0dc1-41a0-9d1a-c9adb89a9f7c",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 22.412690676152796,
+        "conntrack": 88.22916666666667,
+        "checked_at": "2026-10-08T23:30:51.949349+00:00",
+        "expires_at": "2026-10-09T00:37:35.195341+00:00",
+        "verified_at": "2026-10-08T23:30:51.949349+00:00",
+        "next_check_at": "2026-10-08T23:31:06.949349+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 0.643764,
+        "cpu": 4.166666666666666,
+        "panel": "45ee8102-6f1a-45df-9fad-e73749d09a5b",
+        "reason": "waiting for 30 seconds of stable resources",
+        "cpu_psi": 3.840444917759133,
+        "conntrack": 58.802083333333336,
+        "checked_at": "2026-10-08T23:31:32.856179+00:00",
+        "expires_at": "2026-10-09T01:45:05.034977+00:00",
+        "verified_at": "2026-10-08T23:31:32.856179+00:00",
+        "next_check_at": "2026-10-08T23:31:47.856179+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "RECOVERING",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 30.868183,
+        "cpu": 24,
+        "panel": "6514cc65-4e14-4b38-a8e1-1f2a908f5919",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 14.103448254032052,
+        "conntrack": 72.79947916666667,
+        "checked_at": "2026-10-08T23:31:02.63176+00:00",
+        "expires_at": "2026-10-09T00:50:55.995327+00:00",
+        "verified_at": "2026-10-08T23:31:02.63176+00:00",
+        "next_check_at": "2026-10-08T23:31:17.63176+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 30.792929,
+        "cpu": 100,
+        "panel": "6874d4e5-b1c4-4ad6-8852-13dbe34373ee",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 25.602954876547084,
+        "conntrack": 38.502604166666664,
+        "checked_at": "2026-10-08T23:31:02.707014+00:00",
+        "expires_at": "2026-10-09T01:09:15.586279+00:00",
+        "verified_at": "2026-10-08T23:31:02.707014+00:00",
+        "next_check_at": "2026-10-08T23:31:17.707014+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 26.779408,
+        "cpu": 77.77777777777779,
+        "panel": "72c074d8-84ca-46a6-b657-73ca4b3381ee",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 49.667386301540674,
+        "conntrack": 60.78125,
+        "checked_at": "2026-10-08T23:31:06.720535+00:00",
+        "expires_at": "2026-10-09T01:01:25.820733+00:00",
+        "verified_at": "2026-10-08T23:31:06.720535+00:00",
+        "next_check_at": "2026-10-08T23:31:21.720535+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 27.035199,
+        "cpu": 4,
+        "panel": "786dafc3-03f2-40f3-bd40-f4d71d43d868",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 2.756588100381474,
+        "conntrack": 67.3828125,
+        "checked_at": "2026-10-08T23:31:06.464744+00:00",
+        "expires_at": "2026-10-09T01:23:27.202092+00:00",
+        "verified_at": "2026-10-08T23:31:06.464744+00:00",
+        "next_check_at": "2026-10-08T23:31:21.464744+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 24.217202,
+        "cpu": 88,
+        "panel": "7d12c4a8-f952-4a9b-9bb1-371613b4e6de",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 37.8335764122196,
+        "conntrack": 62.20052083333333,
+        "checked_at": "2026-10-08T23:31:09.282741+00:00",
+        "expires_at": "2026-10-09T00:36:11.868716+00:00",
+        "verified_at": "2026-10-08T23:31:09.282741+00:00",
+        "next_check_at": "2026-10-08T23:31:24.282741+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 32.341687,
+        "cpu": 100,
+        "panel": "997bc79b-2ff6-4e42-aa4b-e3e466198949",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 95.55180523643953,
+        "conntrack": 3.369140625,
+        "checked_at": "2026-10-08T23:31:01.158256+00:00",
+        "expires_at": "2026-10-09T00:12:10.822303+00:00",
+        "verified_at": "2026-10-08T23:31:01.158256+00:00",
+        "next_check_at": "2026-10-08T23:31:16.158256+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "CRITICAL",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 18.382289,
+        "cpu": 12,
+        "panel": "9ce8ff12-3c7a-413c-aba7-c4948e5c0804",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 5.005799737201296,
+        "conntrack": 34.231770833333336,
+        "checked_at": "2026-10-08T23:31:15.117654+00:00",
+        "expires_at": "2026-10-09T03:22:49.364199+00:00",
+        "verified_at": "2026-10-08T23:31:15.117654+00:00",
+        "next_check_at": "2026-10-08T23:31:30.117654+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 27.529519,
+        "cpu": 52,
+        "panel": "a6ee20a3-3e25-423d-992c-737c869ef5ad",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 27.925604036628975,
+        "conntrack": 61.328125,
+        "checked_at": "2026-10-08T23:31:05.970424+00:00",
+        "expires_at": "2026-10-09T00:09:10.859294+00:00",
+        "verified_at": "2026-10-08T23:31:05.970424+00:00",
+        "next_check_at": "2026-10-08T23:31:20.970424+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 18.132822,
+        "cpu": 4,
+        "panel": "aa37df40-2c45-48e9-b039-004a003ba763",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 2.2414012981461195,
+        "conntrack": 16.627604166666668,
+        "checked_at": "2026-10-08T23:31:15.367121+00:00",
+        "expires_at": "2026-10-08T23:32:51.587142+00:00",
+        "verified_at": "2026-10-08T23:31:15.367121+00:00",
+        "next_check_at": "2026-10-08T23:31:30.367121+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 16.537609,
+        "cpu": 26.08695652173913,
+        "panel": "abf877e9-f373-47f3-914d-5ab82da4692c",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 19.107179029744582,
+        "conntrack": 79.77864583333333,
+        "checked_at": "2026-10-08T23:31:16.962334+00:00",
+        "expires_at": "2026-10-09T01:12:23.639067+00:00",
+        "verified_at": "2026-10-08T23:31:16.962334+00:00",
+        "next_check_at": "2026-10-08T23:31:31.962334+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 3.188516,
+        "cpu": 100,
+        "panel": "bd3c3ec0-900d-4121-af8b-bbb7605f26f5",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 75.58500061203924,
+        "conntrack": 0.3448486328125,
+        "checked_at": "2026-10-08T23:31:30.311427+00:00",
+        "expires_at": "2026-10-09T00:08:27.868099+00:00",
+        "verified_at": "2026-10-08T23:31:30.311427+00:00",
+        "next_check_at": "2026-10-08T23:31:45.311427+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "CRITICAL",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 1.619496,
+        "cpu": 96.15384615384616,
+        "panel": "c0322d10-63cf-4f20-b7dd-8fc46d7805e4",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 64.47592206145912,
+        "conntrack": 85.69010416666667,
+        "checked_at": "2026-10-08T23:31:31.880447+00:00",
+        "expires_at": "2026-10-09T00:02:57.928827+00:00",
+        "verified_at": "2026-10-08T23:31:31.880447+00:00",
+        "next_check_at": "2026-10-08T23:31:46.880447+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 15.506731,
+        "cpu": 100,
+        "panel": "c1b4027a-f9bd-42d8-88e4-3dbac1c92073",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 53.792524167662314,
+        "conntrack": 61.3671875,
+        "checked_at": "2026-10-08T23:31:17.993212+00:00",
+        "expires_at": "2026-10-09T02:54:06.690827+00:00",
+        "verified_at": "2026-10-08T23:31:17.993212+00:00",
+        "next_check_at": "2026-10-08T23:31:32.993212+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 28.001502,
+        "cpu": 100,
+        "panel": "c71b13ee-ede5-4b0c-90f8-f0dc431595e1",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 51.55307874258267,
+        "conntrack": 59.84374999999999,
+        "checked_at": "2026-10-08T23:31:05.498441+00:00",
+        "expires_at": "2026-10-09T01:02:15.748764+00:00",
+        "verified_at": "2026-10-08T23:31:05.498441+00:00",
+        "next_check_at": "2026-10-08T23:31:20.498441+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 45.901252,
+        "cpu": 79.16666666666666,
+        "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+        "reason": "connection table pressure",
+        "cpu_psi": 31.637374001543478,
+        "conntrack": 99.4140625,
+        "checked_at": "2026-10-08T23:30:47.598691+00:00",
+        "expires_at": "2026-10-09T07:31:09.606514+00:00",
+        "verified_at": "2026-10-08T23:30:47.598691+00:00",
+        "next_check_at": "2026-10-08T23:31:02.598691+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "CRITICAL",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 19.944725,
+        "cpu": 20,
+        "panel": "d49391d1-c63f-46f9-9a74-4b7c2cecb87f",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 8.428521628929223,
+        "conntrack": 58.3984375,
+        "checked_at": "2026-10-08T23:31:13.555218+00:00",
+        "expires_at": "2026-10-09T01:14:28.633314+00:00",
+        "verified_at": "2026-10-08T23:31:13.555218+00:00",
+        "next_check_at": "2026-10-08T23:31:28.555218+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 25.052463,
+        "cpu": 100,
+        "panel": "d4fbef39-e05c-464c-a999-72a02ff87c18",
+        "reason": "CPU queue pressure",
+        "cpu_psi": 92.35170432272136,
+        "conntrack": 86.53645833333333,
+        "checked_at": "2026-10-08T23:31:08.44748+00:00",
+        "expires_at": "2026-10-09T05:21:54.507011+00:00",
+        "verified_at": "2026-10-08T23:31:08.44748+00:00",
+        "next_check_at": "2026-10-08T23:31:23.44748+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "CRITICAL",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "true"
+      },
+      {
+        "age": 27.58866,
+        "cpu": 4,
+        "panel": "e4567f93-b9f5-48bf-9178-5b5626e975e7",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 2.468338307926913,
+        "conntrack": 71.51041666666667,
+        "checked_at": "2026-10-08T23:31:05.911283+00:00",
+        "expires_at": "2026-10-09T01:22:30.858494+00:00",
+        "verified_at": "2026-10-08T23:31:05.911283+00:00",
+        "next_check_at": "2026-10-08T23:31:20.911283+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 43.762043,
+        "cpu": 53.84615384615385,
+        "panel": "f342456e-9a42-4c1e-9f8a-521749ead04f",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 28.250155688250118,
+        "conntrack": 76.015625,
+        "checked_at": "2026-10-08T23:30:49.7379+00:00",
+        "expires_at": "2026-10-09T00:16:27.242979+00:00",
+        "verified_at": "2026-10-08T23:30:49.7379+00:00",
+        "next_check_at": "2026-10-08T23:31:04.7379+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 50.060254,
+        "cpu": 8,
+        "panel": "f8b36633-276b-40e4-9902-f51d964f103f",
+        "reason": "resources within initial conservative limits",
+        "cpu_psi": 4.089893206320323,
+        "conntrack": 77.265625,
+        "checked_at": "2026-10-08T23:30:43.439689+00:00",
+        "expires_at": "2026-10-08T23:56:44.843317+00:00",
+        "verified_at": "2026-10-08T23:30:43.439689+00:00",
+        "next_check_at": "2026-10-08T23:32:06.555474+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "READY",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      },
+      {
+        "age": 18.903331,
+        "cpu": 20.833333333333336,
+        "panel": "fde91c05-131d-45e6-b365-bcf28e5c87fe",
+        "reason": "reduced resource headroom",
+        "cpu_psi": 12.650256945258656,
+        "conntrack": 80.10416666666667,
+        "checked_at": "2026-10-08T23:31:14.596612+00:00",
+        "expires_at": "2026-10-09T04:23:23.411005+00:00",
+        "verified_at": "2026-10-08T23:31:14.596612+00:00",
+        "next_check_at": "2026-10-08T23:31:29.596612+00:00",
+        "routing_state": "APPLIED",
+        "guardian_state": "APPLIED",
+        "resource_state": "WARM",
+        "desired_enabled": true,
+        "applied_revision": 1,
+        "desired_revision": 1,
+        "admission_blocked": "false"
+      }
+    ],
+    "serving": 29,
+    "fresh": 29,
+    "no_verified_receipt": 0,
+    "max_age": 50.060254,
+    "mean_age": 23.108953448275862,
+    "blocked": 6
+  },
+  "routing_counts": {
+    "APPLIED": 29
+  },
+  "admission_blocks": [
+    {
+      "panel": "3cfd6f84-a35b-4045-b6de-d20fa63e67df",
+      "resource_state": "RECOVERING",
+      "reason": "waiting for 30 seconds of stable resources",
+      "age_seconds": 12.591456,
+      "cpu_percent": 8.333333333333332,
+      "conntrack_percent": 62.98177083333333
+    },
+    {
+      "panel": "45ee8102-6f1a-45df-9fad-e73749d09a5b",
+      "resource_state": "RECOVERING",
+      "reason": "waiting for 30 seconds of stable resources",
+      "age_seconds": 0.643764,
+      "cpu_percent": 4.166666666666666,
+      "conntrack_percent": 58.802083333333336
+    },
+    {
+      "panel": "997bc79b-2ff6-4e42-aa4b-e3e466198949",
+      "resource_state": "CRITICAL",
+      "reason": "CPU queue pressure",
+      "age_seconds": 32.341687,
+      "cpu_percent": 100,
+      "conntrack_percent": 3.369140625
+    },
+    {
+      "panel": "bd3c3ec0-900d-4121-af8b-bbb7605f26f5",
+      "resource_state": "CRITICAL",
+      "reason": "CPU queue pressure",
+      "age_seconds": 3.188516,
+      "cpu_percent": 100,
+      "conntrack_percent": 0.3448486328125
+    },
+    {
+      "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "resource_state": "CRITICAL",
+      "reason": "connection table pressure",
+      "age_seconds": 45.901252,
+      "cpu_percent": 79.16666666666666,
+      "conntrack_percent": 99.4140625
+    },
+    {
+      "panel": "d4fbef39-e05c-464c-a999-72a02ff87c18",
+      "resource_state": "CRITICAL",
+      "reason": "CPU queue pressure",
+      "age_seconds": 25.052463,
+      "cpu_percent": 100,
+      "conntrack_percent": 86.53645833333333
+    }
+  ],
+  "transfer_incident": {
+    "panel": "f8b36633-276b-40e4-9902-f51d964f103f",
+    "state": "RECOVERED_BY_EXISTING_RETRY",
+    "error": "scp-data-write: remote command outcome unknown; context deadline exceeded",
+    "confirmed_recovered_receipt_at": "2026-10-08T23:26:41.904574Z",
+    "diagnosis": "Rebuilt guardian artifact triggered upgrade. Transfer exceeded existing30s reconciliation deadline; guarded install did not run on incomplete transfer. Later standard pinned transport retry succeeded. Network-level cause not proven.",
+    "last_valid_receipt_preserved": true,
+    "timeout_or_hostkey_policy_changed": false
+  },
+  "new_node_readiness": {
+    "at": "2026-10-08T23:29:51.461576+00:00",
+    "nodes": [
+      {
+        "id": "405014f0-770e-4775-b218-adf8ac0e01fa",
+        "state": "UNSUPPORTED",
+        "checked_at": "2026-10-08T23:29:28.631961+00:00",
+        "created_at": "2026-10-08T23:29:00.398146+00:00",
+        "last_error": "local protection not ready: no eligible public VLESS TCP ports"
+      }
+    ],
+    "inventory": [],
+    "scopes": []
+  },
+  "limits": [
+    "Production snapshots change during ordinary creation/expiry; no global all-panels-always-ready claim.",
+    "Initial rollout caused guardian binary uploads and stale receipts, including one repeated SCP timeout. Preserved as evidence; not omitted from latency results.",
+    "Peer897 account cleanup and service repairs changed the cohort before our deploy; before/after numbers are not a controlled estimate of this change alone.",
+    "Zero stale known receipts in the sustained window does not guarantee a60s ceiling under arbitrary enabled-node/network/shared-resource stalls.",
+    "Admission blocks under CPU/conntrack pressure are real remaining capacity work; no thresholds, quotas, lifetimes or cloud spend were raised.",
+    "Mobile/ISP and local-DNS client behavior not validated here; real traffic test originated on control host.",
+    "Canonical remains detached and archived branch assertion failed at bootstrap; runtime/source provenance verified separately. No100/100continuity READY claim.",
+    "Rollback rehearsal verified346files on isolated copies only; production rollback was not performed."
+  ],
+  "next_phase": {
+    "number": 4,
+    "state": "IN_PROGRESS_PARTIAL_DELIVERABLE_COMPLETED",
+    "next_steps": [
+      "Measure and address CPU/connection-table pressure with per-account/provider eligibility and capacity-aware scheduling/output design.",
+      "Retain independent review and protection; diagnose first-receipt readiness for newly created nodes separately from steady-state polling.",
+      "Validate mobile client local DNS/domain routing and connection continuity."
+    ]
+  },
+  "progress_contract": {
+    "path": ".local/residential-allowlist-progress.json",
+    "statuses": [
+      "IN_PROGRESS",
+      "WAITING_EXTERNAL",
+      "BLOCKED",
+      "COMPLETED"
+    ],
+    "active_update_interval_seconds": 60,
+    "heartbeat_validity_seconds": 90,
+    "expired_heartbeat_meaning": "Agent activity unconfirmed; never proof an AI task is still running.",
+    "agent_continues_after_final_reply": false
+  },
+  "evidence_directory": "/root/backups/dob-capacity-stability-20261009"
+}

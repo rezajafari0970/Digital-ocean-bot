@@ -1,22 +1,22 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+  "runtime_source_revision": "435486a7369965366852f48e7514efe7d6a41293",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-08T22:39:27.352827+00:00",
+  "verified_at_utc": "2026-10-08T23:31:48.455029+00:00",
   "binaries": {
     "api": {
-      "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
-      "sha256": "1033d001fc6621e9417697cc23794a78f8cf12081d4f3427568dedc538b3e90b",
+      "revision": "435486a7369965366852f48e7514efe7d6a41293",
+      "sha256": "4f7215558988103fdd1b0de0f20a0d94bb1d6d754655a7965bc22cc60f0148ef",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
-      "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
+      "revision": "435486a7369965366852f48e7514efe7d6a41293",
+      "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
       "vcs_modified": false
     },
     "worker-panels": {
-      "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
-      "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
+      "revision": "435486a7369965366852f48e7514efe7d6a41293",
+      "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
       "vcs_modified": false
     }
   },
@@ -26,9 +26,9 @@
     "worker-panels": "active"
   },
   "migration": "000163_recovery_reconciliation",
-  "acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
+  "acceptance": "docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json",
   "verified": true,
-  "note": "Verifier credit blocker resolved; reviewed timeout fixd02f045 deployed. Residential routing/status acceptance complete; capacity-related admission remains separate follow-up.",
+  "note": "Reviewed enabled/cleanup polling isolation deployed on peer897 baseline; exact runtime verified. Operational pressure and first-receipt readiness remain explicit.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -45,19 +45,19 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Phase4: capacity and connection stability. Correlate guardian admission with CPU/conntrack and client connection pressure; design capacity-aware output/failover with fresh receipts and review safeguards; validate mobile local-DNS/domain handling. Preserve protection and user quota/lifetime policy; do not silently raise cloud spend or claim client failover exists.",
+  "next_product_step": "Continue Phase4: CPU/conntrack capacity, new-node first-receipt readiness, per-account/provider fairness and capacity-aware output design, then mobile local-DNS/domain acceptance. Keep protection, quotas/lifetimes and spend policy.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "worker_source_revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+  "worker_source_revision": "435486a7369965366852f48e7514efe7d6a41293",
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DEPLOYED_NATIVE30_PERIODIC_APPLIED_TRAFFIC_VERIFIED_WITH_CAPACITY_LIMITS",
+  "verification_status": "DEPLOYED_POLL_ISOLATION_TRAFFIC9_OF9_WITH_CAPACITY_LIMITS",
   "latest_residential_scope_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+  "previous_runtime_source_revision": "897f40800d047a3f08faccb501e450a17208b6bc",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_performance_experiment": {
     "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
@@ -128,7 +128,7 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Exact runtime hashes and five readiness checks; residential native30/30 and final periodic APPLIED30/30. Actual traffic26/27 aggregate, target and installed-repeat each9/9. Four panels admission-blocked under CPU pressure/recovery; mobile untested. Older business snapshots remain historical.",
+  "verification_scope": "Runtime hashes, readiness5/5, actual traffic9/9, full/race/vet, independent review,13sample sustained receipt window. See latest acceptance for live counts and missing first receipts; historical snapshots below are not current fleet health.",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
@@ -4508,5 +4508,34 @@
     "actual_traffic": "26/27 aggregate; target26.9.9 and installed-repeat each9/9",
     "agent_work": "COMPLETED",
     "next_phase": "Capacity/connection stability and mobile acceptance"
+  },
+  "latest_protection_polling_acceptance": "docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json",
+  "phase_1_2_3_latest_review": {
+    "1": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Durable recovery, checked persistence, lifecycle and backoff",
+      "evidence": "Integrated full regression with isolated PostgreSQL; live worker/lifecycle/client progress checks pass. Historical fault acceptance retained; no new production failure injected."
+    },
+    "2": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Separate control/panels processes and bounded resource admission",
+      "evidence": "Both roles active, runtime hashes verified; pools and WorkBudget unchanged. New enabled6/cleanup2 ceilings tested through real shared WorkBudget."
+    },
+    "3": {
+      "status": "PASS_IN_TESTED_SCOPE",
+      "scope": "Independent progress supervision and recovery",
+      "evidence": "New separate guardian module policies and supervision tests pass with race checks. No runtime restart observed since deployment; no new destructive watchdog fault injected in production."
+    }
+  },
+  "protection_polling_20261009": {
+    "runtime_revision": "435486a7369965366852f48e7514efe7d6a41293",
+    "evidence": "docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json",
+    "live_at": "2026-10-08T23:31:33.508252+00:00",
+    "serving": 29,
+    "fresh_receipts": 29,
+    "missing_first_receipt": 0,
+    "admission_blocks": 6,
+    "traffic_passed": 9,
+    "phase4_complete": false
   }
 }

@@ -1,3 +1,17 @@
+# Latest continuation — protection polling, 2026-10-09 Tehran
+
+Read `docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json` and `docs/PROTECTION_POLLING_STATUS_FA_20261009.md` first. Runtime **435486a** is deployed and includes peer operational repair **897f408**. Enabled guardian checks and disabled cleanup now run independently with6/2slots and unchanged shared budget10. Full isolated-PostgreSQL regression, race, vet and independent review pass. Runtime hashes and readiness5/5 verified; postdeploy actual traffic9/9 passed.
+
+At2026-10-08T23:31:33.508252+00:00, serving29, routing APPLIED29, fresh guardian receipts29, missing first receipts0, admission-blocked6. All13sustained samples kept known receipt ages below60s; newly created no-first-receipt nodes are separate. One upgrade SCP timeout recovered through normal retry at23:26:41Z; keep its failed observations. Peer account cleanup changed the cohort: do not attribute all latency improvement to this release.
+
+Phase1/2/3 regression review is PASS within tested scope. Phase4 remains open for capacity/connection pressure, new-node readiness, fair account/provider scheduling and mobile local-DNS behavior. No capacity thresholds, quotas/lifetimes, spend, hostkey pins or protection were relaxed. Output retains last verified blocked state until a valid clearing receipt; do not describe it as fresh-only filtering.
+
+Rollback target **897f408**, artifacts `/opt/digital-ocean-bot.rollback.HH5pqPFG`. Bootstrap detached-branch assertion remains unresolved; provenance was independently verified, not bootstrap100/100READY. Current reports are documentation-only commits newer than runtime.
+
+Status contract: `.local/residential-allowlist-progress.json` carries active action/result/next/blocker and90sheartbeat. Meaningful updates at least every60s during work. Expired heartbeat means activity unconfirmed. After final reply the development agent stops; application workers continue independently.
+
+---
+
 # Operational repairs continuation — 2026-10-09 Tehran
 
 Read `docs/OPERATIONAL_REPAIR_DELTA_20261008.md` for account deletion, guardian service and proxy economy repairs. Current job `operational-release-20261009` integrates the preserved tested changes with the independently deployed residential verifier fix. Publication must be verified against runtime; source presence alone is not deployment evidence. The current residential report below remains valid for its recorded timestamp.
