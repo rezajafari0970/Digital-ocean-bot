@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+  "git_head": "565b20c9910f3ecf8e700ff44b93842d76710555",
   "ready": true,
   "artifacts": [
     {
@@ -370,13 +370,13 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
-    "runtime_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
-    "handoff": "docs/PHASE123_CLOSURE_20261008.md",
+    "revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "runtime_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "handoff": "docs/OPERATIONAL_CONTINUATION_20261008.md",
     "inspected_live_source": true,
-    "note": "Two new bounded findings and three review safety gaps closed; provider restrictions remain. Two S1 native output/SSH timeout issues remain operational blockers, exact remote cause unproven."
+    "note": "Deployed565b20c unchanged; new operational blocker output0/ISOLATION_WAIT on all5enabled networks, deeper cause unproven. Read latest reconnect report before historicalnative20/8."
   },
-  "latest_development_delta": "docs/PHASE123_CLOSURE_20261008_BRAIN_DELTA.json",
+  "latest_development_delta": "docs/OPERATIONAL_CONTINUATION_20261008_BRAIN_DELTA.json",
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
     "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
@@ -398,18 +398,18 @@
     "historical_observation": true,
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
-  "current_frontier": "docs/PHASE123_CLOSURE_20261008.md",
+  "runtime_source_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "current_frontier": "docs/OPERATIONAL_CONTINUATION_20261008.md",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "resp_0e1b7d879be8562a006ac6b42c2a2887d1ad9d566e5e7888c0",
-  "current_native_evidence_at": "2026-10-07T21:32:07.54777821Z",
+  "openai_review": "resp_0bcc3ab20893c44a006ac6d7f933f087d1bf3b2cde41a7c4e0",
+  "current_native_evidence_at": null,
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
-  "source_snapshot_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+  "source_snapshot_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
-  "latest_audit_verdict": "PASS_IN_TESTED_SCOPE_WITH_OPERATIONAL_BLOCKERS",
+  "latest_audit_verdict": "SOURCE_TESTS_PASS_CURRENT_OUTPUT_NETWORK_BLOCKED",
   "open_reaudit_findings": [],
-  "latest_reaudit_at": "2026-10-07T21:32:07.616876+00:00",
+  "latest_reaudit_at": "2026-10-08T06:59:15.912956+00:00",
   "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
   "closed_reaudit_findings": [
     "PH12-001",
@@ -420,7 +420,7 @@
   "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00",
   "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
   "open_phase123_findings": [],
-  "latest_phase123_reaudit": "docs/PHASE123_CLOSURE_20261008_ACCEPTANCE.json",
+  "latest_phase123_reaudit": "docs/OPERATIONAL_CONTINUATION_20261008_ACCEPTANCE.json",
   "closed_phase123_findings": [
     "PH123-001",
     "PH123-002",
@@ -433,5 +433,10 @@
     "PH123-009",
     "PH123-010"
   ],
-  "git_head_scope": "Compiled product revision; subsequent documentation checkpoint does not change runtime source."
+  "git_head_scope": "Compiled product revision; subsequent documentation checkpoint does not change runtime source.",
+  "current_published_output_at": "2026-10-08T06:56:49.67614246Z",
+  "current_reconnect": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json",
+  "open_operational_findings": [
+    "NET-RECONNECT-20261008: output0, stale unhealthy network identities/ISOLATION_WAIT; precise cause unresolved."
+  ]
 }

@@ -1,0 +1,37 @@
+{
+  "at_utc": "2026-10-07T23:47:23.114764+00:00",
+  "runtime_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "schema": 163,
+  "finding_closed": "Executor operation failure diagnostics were missing despite durable failed state and known deployment-step error. Atomic bounded diagnostics now persisted; failed writes surfaced conservatively. Legacy safe readback and direct recovery progress clearing corrected after actual API review.",
+  "new_contract": {
+    "diagnostic": "Closed class + static stage + normalized HTTP only; no raw provider message/code/cause.",
+    "store": "Version-guarded atomic Update RETURNING; no-detail unknown/failed preserves stored evidence; successful progress clears. Strict grammar normalizes metadata read and replacement writes.",
+    "persistence_failure": "Return wrapped store error, not provider region-capacity classification, so failed journal persistence cannot authorize alternate-region creation.",
+    "recovery": "Adoption, delete reissue, observed success and transactional delete completion atomically clear current diagnostics on same conditional update; unknown outcome keeps evidence."
+  },
+  "operational_corrections": {
+    "sor_oc": "Fresh native output returned after automatic replacement; no stale-output publication bypass needed.",
+    "s1": "Prior affected panels are disabled and deleted; current published replacements are native verified. Exact old SSH cause still unknown.",
+    "upcloud": {
+      "operation_id": "7ebb2683-fa01-429e-bf43-b52b0d4ba1ab",
+      "deployment_id": "62ffeda7-04fb-4cdb-8e98-6399d298d64a",
+      "state": "failed",
+      "provider": "upcloud",
+      "class": "capacity",
+      "http_status": 403,
+      "provider_code": "SERVER_IP_LIMIT_REACHED",
+      "source": "deployment_step_attempts and matching worker journal at2026-10-07T22:34:00Z",
+      "historical_operation_row_modified": false
+    },
+    "vultr": "401/auth cause unresolved beyond confirmed provider rejection; no forced ACTIVE, route bypass or re-enable."
+  },
+  "rollback": {
+    "revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "schema": 163,
+    "stop_both_producers": true,
+    "do_not_clear_checkpoints_or_ledgers": true,
+    "backup_directory": "/root/backups/dob-operational-closure-20261008"
+  },
+  "next": "Diagnose and repair newly observed network-identity maintenance block; validate lifecycle and native published output before phase4.",
+  "current_reconnect": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json"
+}

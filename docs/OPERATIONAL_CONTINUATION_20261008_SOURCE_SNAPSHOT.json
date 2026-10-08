@@ -1,0 +1,39 @@
+{
+  "at_utc": "2026-10-07T23:47:23.114764+00:00",
+  "runtime_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "reviewed_source_hashes": {
+    "internal/jobs/operation.go": "3ba44ea84bdaa2c3a6c696108887839a053a525ff93d811db4401f67908c4516",
+    "internal/jobs/store.go": "56df32054764cee8d3298bc7a818d4e757c68d457c0eeb90d475e796953aed1d",
+    "internal/droplets/executor.go": "1542e5532cb097cef10e794c812e8b2e6c45d1ef3666542c2f881e0b75b68558",
+    "internal/droplets/operation_diagnostics.go": "9f83e54ff313e81edc992a2229431d716d9073ef4ec8f56a851c5b4792efc749",
+    "internal/droplets/operation_diagnostics_test.go": "0f3a89dc5aab3d866fe879926030ab91b05a728e7239e4ecc4fee8e4b1ce9596",
+    "internal/droplets/operation_diagnostics_postgres_test.go": "2d5fbea1414536f1051cd16dc06f659db12f6c51267b8a494151c09e552b92e4",
+    "docs/development-jobs/operation-diagnostics-20261008.json": "baa4e9274eacdeac2b35aeec1b8ea97b0ebddef37e99cac5ef5df2ce985b9c8b",
+    "internal/jobs/operation_diagnostics.go": "3a2b0285743ed0fc28ce8a3e25fb05130804288cebaec277d3048ddc6397265e",
+    "internal/app/recovery.go": "57f5289151e51ab2fbb391eafe7704cc758555c9c0a9add3ee5692b79096ed06",
+    "internal/app/delete_completion.go": "44b055c66ef5982cedec41090ddbe0bab4850a0cf6a4f7f9e3f67669e78fc2c8",
+    "internal/app/recovery_diagnostics_postgres_test.go": "062a3b3802a9ec9cb7e6683f40fcc29a5dbe5cdaa7259540e37060eb6fc119c7",
+    "internal/droplets/reconcile.go": "ef438be28a2c36edaec113e45c5c2e8e3aa456e498d0f89f325f6a245ab993a9",
+    "internal/droplets/executor_test.go": "b9b168e4dcef654c4329a9c7f0d54133ae90fdf09549efed51a7e569e660a79f",
+    "internal/droplets/delete_resume_postgres_test.go": "b9208fdff4dcb9d20af113f018197788147116dfdcef4d1d25bd74b76cd47b22",
+    "internal/providers/errors.go": "8d6db57d591a1c18fe8c2924928f41ed602a694ef883638321aa00b031b5fc51",
+    "internal/workflow/runtime.go": "6be3a65e746ae6de4426e30cedf2c1389015682608213dd669d8e5747432a558",
+    "internal/app/workflow.go": "b341ef0763c705b3acc972f3dd4fb54477ba9ff8786069e2b081adfd1624cb35"
+  },
+  "build": {
+    "revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "binaries": {
+      "api": {
+        "sha256": "d4c025923368a75bc4664b2b4cf579b577e3f62f2c06da4fa2fe2d76652bb3de",
+        "go_build_info": "/root/backups/dob-operational-closure-20261008/bin/api: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/api\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261007234033-565b20c9910f\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=565b20c9910f3ecf8e700ff44b93842d76710555\n\tbuild\tvcs.time=2026-10-07T23:40:33Z\n\tbuild\tvcs.modified=false"
+      },
+      "worker": {
+        "sha256": "2ae9b151d9c27fdb86c7a15a657e1b0959f4eb2245f7edae2b9b02c89c2a92aa",
+        "go_build_info": "/root/backups/dob-operational-closure-20261008/bin/worker: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/worker\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261007234033-565b20c9910f\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=565b20c9910f3ecf8e700ff44b93842d76710555\n\tbuild\tvcs.time=2026-10-07T23:40:33Z\n\tbuild\tvcs.modified=false"
+      }
+    }
+  },
+  "frozen_clean_checkout": "/root/projects/dob-operation-diagnostics-freeze-20261008",
+  "schema": 163,
+  "static_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1"
+}

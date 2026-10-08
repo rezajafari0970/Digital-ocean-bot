@@ -19,13 +19,14 @@
   ],
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
-    "runtime_source_revision": "045f1abf1af4b9fe73498dd46547cf6db0713a2a",
+    "runtime_source_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
     "schema": 163,
-    "at_utc": "2026-10-07T21:32:07.616876+00:00",
+    "at_utc": "2026-10-08T06:59:15.912956+00:00",
     "handoff": "docs/DEVELOPMENT_READY_HANDOFF.md",
-    "reaudit": "docs/PHASE123_CLOSURE_20261008_ACCEPTANCE.json",
-    "brain_delta": "docs/PHASE123_CLOSURE_20261008_BRAIN_DELTA.json",
-    "state": "Phase123 scoped closure deployed; Upcloud two cycles verified; Vultr authentication and two S1 SSH/output issues remain; phase4 not started"
+    "reaudit": "docs/OPERATIONAL_CONTINUATION_20261008_ACCEPTANCE.json",
+    "brain_delta": "docs/OPERATIONAL_CONTINUATION_20261008_BRAIN_DELTA.json",
+    "state": "Remote restored; deployment same processes healthy, CURRENT output0/network ISOLATION_WAIT. Diagnose network blocker before phase4. Historical final pipelinePASS preserved.",
+    "current_reconnect": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json"
   },
   "historical_worktree_entries": [
     " M .audit/provider-step2/chunk-progress.json",
@@ -47,5 +48,5 @@
     "?? tools/grade-fresh-session-exam-v2.py",
     "?? tools/new-chat-bootstrap.sh"
   ],
-  "latest_continuity_note": "This turn updated live/source evidence and deltas; historical mastery scores were not re-run."
+  "latest_continuity_note": "Updated live/source evidence and delta; historical mastery scores were not re-run."
 }
