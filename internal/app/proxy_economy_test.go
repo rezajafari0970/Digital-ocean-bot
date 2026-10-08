@@ -6,7 +6,9 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"io"
+	"net"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
@@ -213,4 +215,86 @@ func TestEconomyExistingRouteGuardsPostgres(t *testing.T) {
 	t.Run("inflight-cutover", TestRouteCutoverWaitsForInflightSharedLockPostgresE2E)
 	t.Run("keeper-serialization", TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E)
 	t.Run("pool-epoch", TestProxyPoolSwitchBumpsEpochAtomicallyPostgresE2E)
+}
+
+func TestEconomyIdentitySlowPrimaryRetainsCallerBudget(t *testing.T) {
+	var calls atomic.Int32
+	g := &network.Gateway{Client: &http.Client{Transport: economyRoundTrip(func(r *http.Request) (*http.Response, error) {
+		calls.Add(1)
+		if r.URL.Host == "api.ipify.org" {
+			select {
+			case <-time.After(1700 * time.Millisecond):
+			case <-r.Context().Done():
+				return nil, r.Context().Err()
+			}
+		}
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"ip":"203.0.113.9"}`)), Header: make(http.Header)}, nil
+	})}}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	ip, err := fastGatewayExitIP(ctx, g)
+	if err != nil || ip != "203.0.113.9" || calls.Load() != 1 {
+		t.Fatalf("cold healthy primary incorrectly timed out: ip=%s err=%v calls=%d", ip, err, calls.Load())
+	}
+}
+func TestEconomyOffRestoresParallelIdentity(t *testing.T) {
+	started := make(chan string, 2)
+	g := &network.Gateway{AccountID: "a", Client: &http.Client{Transport: economyRoundTrip(func(r *http.Request) (*http.Response, error) {
+		started <- r.URL.Host
+		if r.URL.Host == "api.ipify.org" {
+			<-r.Context().Done()
+			return nil, r.Context().Err()
+		}
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"ip":"203.0.113.9"}`)), Header: make(http.Header)}, nil
+	})}}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if ip, err := (Container{}).observeGatewayExitIP(ctx, g); err != nil || ip != "203.0.113.9" {
+		t.Fatalf("parallel fallback missing ip=%s err=%v", ip, err)
+	}
+	for i := 0; i < 2; i++ {
+		select {
+		case <-started:
+		case <-ctx.Done():
+			t.Fatal("parallel observer not restored")
+		}
+	}
+}
+
+func TestEconomyRejectedStickyCandidateClosesSocket(t *testing.T) {
+	closed := make(chan struct{}, 1)
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, `{"ip":"203.0.113.9","country":"Other","country_code":"xx","timezone":{"id":"UTC"}}`)
+	}))
+	srv.Config.ConnState = func(_ net.Conn, s http.ConnState) {
+		if s == http.StateClosed {
+			select {
+			case closed <- struct{}{}:
+			default:
+			}
+		}
+	}
+	srv.Start()
+	defer srv.Close()
+	target, _ := url.Parse(srv.URL)
+	raw := &http.Transport{}
+	g := &network.Gateway{Transport: raw, Client: &http.Client{Transport: economyRoundTrip(func(r *http.Request) (*http.Response, error) {
+		clone := r.Clone(r.Context())
+		u := *r.URL
+		clone.URL = &u
+		clone.URL.Scheme = target.Scheme
+		clone.URL.Host = target.Host
+		return raw.RoundTrip(clone)
+	})}}
+	candidate, err := observeStickyCandidate(context.Background(), g)
+	if err != nil || candidate.CountryCode != "xx" {
+		t.Fatalf("candidate=%+v err=%v", candidate, err)
+	}
+	// The caller rejects the country before performing collision/port operations.
+	// Its socket must already be closed, without depending on any caller cleanup.
+	select {
+	case <-closed:
+	case <-time.After(time.Second):
+		t.Fatal("rejected candidate leaked an idle proxy socket")
+	}
 }

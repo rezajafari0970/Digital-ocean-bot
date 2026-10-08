@@ -57,11 +57,18 @@ func observeStickyGeoReliable(ctx context.Context, g *network.Gateway) (stickyGe
 	if err == nil {
 		return geo, nil
 	}
-	if _, probeErr := fastGatewayExitIP(ctx, g); probeErr == nil {
+	if _, probeErr := parallelGatewayExitIP(ctx, g); probeErr == nil {
 		return stickyGeo{}, ErrProxyObservationUnavailable
 	} else {
 		return stickyGeo{}, probeErr
 	}
+}
+
+// Candidate sockets are no longer needed once the geo response is read.
+// Close before country/collision checks so every rejection path is covered.
+func observeStickyCandidate(ctx context.Context, g *network.Gateway) (stickyGeo, error) {
+	defer g.CloseIdleConnections()
+	return observeStickyGeoReliable(ctx, g)
 }
 
 func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountConfig, string, string, string, bool, *time.Time, error) {
@@ -298,7 +305,7 @@ WHERE account_id=$1
 	defer g.CloseIdleConnections()
 	checkCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
-	ip, err := fastGatewayExitIP(checkCtx, g)
+	ip, err := c.observeGatewayExitIP(checkCtx, g)
 	var oldIP string
 	_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),'') FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&oldIP)
 	if err == nil && oldIP != "" && ip == oldIP && !fallback {
@@ -377,10 +384,9 @@ WHERE account_id=$1
 			continue
 		}
 		geoCtx, cancel2 := context.WithTimeout(ctx, 5*time.Second)
-		candidate, gerr := observeStickyGeoReliable(geoCtx, g2)
+		candidate, gerr := observeStickyCandidate(geoCtx, g2)
 		cancel2()
 		if gerr != nil {
-			g2.CloseIdleConnections()
 			if errors.Is(gerr, network.ErrProxyAuth) {
 				return gerr
 			}
@@ -417,7 +423,6 @@ WHERE account_id=$1
 		// Prove sticky persistence across fresh proxy connections. Reusing g2
 		// would only prove HTTP keep-alive stability, not that the provider maps
 		// this session to the same exit after reconnect.
-		g2.CloseIdleConnections()
 		stable := true
 		for verify := 0; verify < 2; verify++ {
 			vg, verr := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)}, "identity")
@@ -427,7 +432,7 @@ WHERE account_id=$1
 				break
 			}
 			verifyCtx, verifyCancel := context.WithTimeout(ctx, 4*time.Second)
-			verifyIP, verr := fastGatewayExitIP(verifyCtx, vg)
+			verifyIP, verr := c.observeGatewayExitIP(verifyCtx, vg)
 			verifyCancel()
 			vg.CloseIdleConnections()
 			if verr != nil || verifyIP != candidate.IP {

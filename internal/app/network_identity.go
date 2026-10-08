@@ -20,13 +20,15 @@ func fastGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) 
 	if g == nil || g.Client == nil {
 		return "", network.ErrProxyConfigInvalid
 	}
+	ctx, stop := context.WithTimeout(ctx, 4*time.Second)
+	defer stop()
 	var last error
 	for _, u := range urls {
 		if err := ctx.Err(); err != nil {
 			return "", err
 		}
-		// Leave room for fallback within the existing 3-4s outer deadline.
-		probeCtx, cancel := context.WithTimeout(ctx, 1500*time.Millisecond)
+		// Cold proxy DNS + TLS must retain the original caller budget.
+		probeCtx, cancel := context.WithCancel(ctx)
 		req, _ := http.NewRequestWithContext(probeCtx, http.MethodGet, u, nil)
 		resp, err := g.Client.Do(req)
 		if err == nil {
@@ -52,6 +54,62 @@ func fastGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) 
 		if network.IsProxyAuthFailure(err) {
 			return "", err
 		}
+	}
+	return "", last
+}
+
+// The DB rollout controls the observer strategy as well as probe cadence.
+// Disabling economy immediately restores the established parallel observer.
+func (c Container) observeGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) {
+	if g == nil {
+		return "", network.ErrProxyConfigInvalid
+	}
+	enabled, err := c.Economy.Enabled(ctx, g.AccountID)
+	if err != nil {
+		return "", err
+	}
+	if !enabled {
+		return parallelGatewayExitIP(ctx, g)
+	}
+	return fastGatewayExitIP(ctx, g)
+}
+
+func parallelGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) {
+	urls := []string{"https://api.ipify.org?format=json", "https://api64.ipify.org?format=json"}
+	type result struct {
+		ip  string
+		err error
+	}
+	ch := make(chan result, len(urls))
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	for _, u := range urls {
+		go func(u string) {
+			req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+			resp, err := g.Client.Do(req)
+			if err != nil {
+				ch <- result{err: err}
+				return
+			}
+			defer resp.Body.Close()
+			var v struct {
+				IP string `json:"ip"`
+			}
+			if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&v) != nil || func() bool { ip := net.ParseIP(strings.TrimSpace(v.IP)); return ip == nil || ip.To4() == nil }() {
+				ch <- result{err: errors.New("invalid exit ip")}
+				return
+			}
+			ch <- result{ip: strings.TrimSpace(v.IP)}
+		}(u)
+	}
+	var last error
+	for range urls {
+		r := <-ch
+		if r.err == nil {
+			cancel()
+			return r.ip, nil
+		}
+		last = r.err
 	}
 	return "", last
 }
@@ -114,7 +172,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 	defer g.CloseIdleConnections()
 	checkCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	ip, err := fastGatewayExitIP(checkCtx, g)
+	ip, err := c.observeGatewayExitIP(checkCtx, g)
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,37 @@
+{
+  "goal": "Correct production-proven identity observer timeout regression before enabling proxy economy; restore old parallel observer when the DB flag is off; preserve all account identity and cleanup safeguards.",
+  "context": "Initial code a7b8a64 passed full isolated PostgreSQL and race tests and API review, but real proxy DNS plus TLS exceeded the new 1.5s per-observer timeout, causing identity observation errors while the economy flag was off. Canary admission correctly refused. Retain the original 3s/4s caller deadline for primary observation; use secondary only after early primary failure. Restore the original raced observer whenever economy is off; scope sequential observation to the configured canary. No data rollback, no schema change. A live recovery checkpoint precludes using the generic old-runtime rollback procedure; ship a tested forward correction without discarding recovery work. No subagents. Review exact tested source through API. Then deploy flag off and verify all identities before canary.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go",
+    "docs/development-jobs/proxy-economy-timeout-fix-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "fix(network): preserve cold identity probe budget and rollback strategy"
+}

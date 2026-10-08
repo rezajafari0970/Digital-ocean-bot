@@ -7,7 +7,7 @@ MANIFEST=ROOT/'docs/development-jobs/proxy-economy-20261008.json'
 def source_snapshot():
     allowed=json.loads(MANIFEST.read_text())['allowed_paths']
     paths=subprocess.check_output(['git','ls-files','-m','-o','--exclude-standard','-z'],cwd=ROOT).decode().strip('\0').split('\0')
-    paths=sorted({p for p in paths if any(p==a or p.startswith(a.rstrip('/')+'/') for a in allowed) and (ROOT/p).is_file()})
+    paths=sorted({p for p in paths if any(p==a or p.startswith(a.rstrip('/')+'/') or p=='docs/development-jobs/proxy-economy-timeout-fix-20261008.json' for a in allowed) and (ROOT/p).is_file()})
     h=hashlib.sha256()
     for p in paths:
         h.update(p.encode()+b'\0'+(ROOT/p).read_bytes()+b'\0')
@@ -29,7 +29,7 @@ def main():
         'Goal: reduce account proxy overhead; preserve fail-closed per-account identity, fresh mutation proof, unknown outcomes and cleanup, explicit direct Sanaei. '
         'Economy flag defaults off, then one-account canary, shared-base cadence only global; recovery stays fast. Fresh mutation check remains. '
         'Count actual socket bytes including auth/TLS/DoH without logging secrets; these are NOT provider billing. '
-        'Inspect changed source, regression/fault/race evidence and shutdown lifecycle. No production rollout has occurred. '
+        'Inspect changed source, regression/fault/race evidence and shutdown lifecycle. Initial a7b8a64 was deployed flag off, but its unconditional 1.5s observer timeout was too short for cold proxy DNS+TLS. Canary was refused. This forward fix must restore old raced observations when flag off and preserve original caller deadlines in sequential mode. It must not alter pending recovery checkpoints. '
         'Retire obsolete idle browser manager operationally after coordinated deployment; endpoints return 410. '
         '\nTEST EVIDENCE:\n'+json.dumps(evidence)+'\nTEST OUTPUT:\n'+(BASE/'acceptance.log').read_text()[-14000:]+''.join(chunks))
     env=os.environ.copy();env.setdefault('OPENAI_MAX_OUTPUT_TOKENS','8000')
