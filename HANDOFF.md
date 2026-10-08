@@ -1,3 +1,15 @@
+# Latest continuation — residential allowlist, 2026-10-08
+
+Read `docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json` and `docs/RESIDENTIAL_ALLOWLIST_20261008.md` first. Runtime `7cc709e` has strict residential allowlist active fleet-wide; independent serving-panel proof22/22 and installed-client canary9/9 passed. This does not include73 expired/retiring/deleting panels or mobile compatibility.
+
+**Unfinished:** four distant panels get false periodic FAILED/APPLYING from the old8second whole-proof timeout. Tested fix `3fad477` on branch `fix/residential-proof-timeout-20261008` is not deployed. Independent API review is blocked by exhausted credit(HTTP429 `credit_balance_exhausted`). Do not bypass the review gate or silently claim the entire rollout is complete. Restore review availability or obtain independent human review, integrate latest canonical, deploy guarded, verify periodic APPLIED state.
+
+**User reporting preference:** give meaningful progress updates at least every60seconds during active work; persist timestamp/current action/result/blocker/next action; distinguish WAITING_EXTERNAL/BLOCKED from active agent execution and from normal application workers.
+
+The sections below are historical. Preserve their evidence but verify live source/runtime before acting.
+
+---
+
 # Current production continuation — 2026-10-03
 
 The current frontier is durable owned-user lifecycle, accepted and enabled on eligible v3 panels. Start with `docs/BULK_LIFECYCLE_ACCEPTANCE.json`, `docs/PRODUCTION_REVISION_STATUS.json` and the final lifecycle section of `docs/DURABLE_BULK_V3_HANDOFF.md`. Verify live source/DB/runtime first.

@@ -31,3 +31,17 @@ This is destination access control inside authenticated proxy sessions. It canno
 Client DNS sent through this restricted subscription is blocked. Clients must resolve locally or supply domain destinations; arbitrary DoH/DNS hosts are not silently added to the allowlist. A mobile compatibility test remains distinct from native routing proof.
 
 Deployment and native fleet results are recorded in `RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json`. Unreachable/expired panels are not counted as successfully changed merely because the code is deployed.
+
+## Observed rollout result and exact continuation
+
+Strict routing deployed from `7cc709e` after integration with account/panel repair `a41047c`; all current/future panels select the strict policy (`DOB_RESIDENTIAL_ALLOWLIST_PANELS=all`). A replacement canary was used because the original was deleted. Independent native acceptance converged to **22/22 serving panels**, at 2026-10-08T15:43:23Z. The exact panel IDs and timestamps are in the acceptance JSON. The final inventory also contains **73 expired/retiring/deleting panels** that are excluded from this serving proof. Do not call those verified.
+
+Actual VLESS/Reality traffic with installed Xray26.3.27 passed **9/9**: DIRECT positive controls, both probes(204), BrowserLeaks(200), advertising host(404 response proves connection), and blocked ordinary domain/rawIP/arbitraryDoH. Earlier errors and diagnostics remain in the evidence directory. Default client26.9.9 failed some TLS traffic; its TLS1.2 test passed the positive destinations. This is a remaining compatibility observation, not a proven root-cause fix or mobile acceptance.
+
+Four distant panels still show periodic FAILED/APPLYING despite independent correct native routes. The controller caps its whole sequential proof at8seconds. A 300ms-per-request test reproduces the failure on the deployed source; extending the aggregate budget to30seconds passes while retaining the caller45second deadline and all mutation/readback guards. Follow-up commit **3fad47751e15697b2310be19884658e31606b6b0**, branch `fix/residential-proof-timeout-20261008`, contains only that bounded timeout adjustment and regression test. Full Go regression and relevant race tests pass. It is **not deployed**.
+
+Independent follow-up review is **blocked**: the existing OpenAI API returns HTTP429, `insufficient_quota` / `credit_balance_exhausted`, without a retry time. Do not keep retrying on a timer or claim review PASS. Restore review credit or obtain independent human review; then rebase the pending fix onto the latest canonical HEAD, revalidate source hashes and runtime, and guarded-deploy it. The prepared deployment helper must have its canonical/runtime expectations refreshed because the canonical report commit and running code commit differ. Verify periodic APPLIED state on all serving panels afterward. Main feature rollback runtime is `/opt/digital-ocean-bot.rollback.DzXr1KL8`; policy rollback deliberately restores legacy direct fallback and is not an automatic response to this status problem.
+
+## Progress reporting preference
+
+The user requests visible, accurate progress. During active work, report the current action, observed result and any wait/blocker at least every60seconds. Persist timestamped status and next action in the acceptance JSON. On yielding, explicitly distinguish agent work ending from the application's normal workers continuing. Do not leave an IN_PROGRESS status implying an unattended agent is still working.

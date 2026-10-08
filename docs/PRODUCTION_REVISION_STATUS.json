@@ -1,22 +1,22 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "runtime_source_revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-08T07:41:55.138859+00:00",
+  "verified_at_utc": "2026-10-08T15:57:40.433326+00:00",
   "binaries": {
     "api": {
-      "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
-      "sha256": "873b28ecd175f6b5aab4b64307075c68427591619f1b3cee0dabde44a2b8e887",
+      "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+      "sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
-      "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+      "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+      "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
       "vcs_modified": false
     },
     "worker-panels": {
-      "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
-      "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+      "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+      "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
       "vcs_modified": false
     }
   },
@@ -26,9 +26,9 @@
     "worker-panels": "active"
   },
   "migration": "000163_recovery_reconciliation",
-  "acceptance": "docs/NETWORK_RECOVERY_20261008_ACCEPTANCE.json",
-  "verified": false,
-  "note": "Exact deployed source/build/service observation verified; business recovery incomplete: proxy auth fails, output0. Earlier ISOLATION_WAIT diagnosis superseded.",
+  "acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
+  "verified": true,
+  "note": "Exact deployed source/build/service state verified. Strict residential serving native proof22/22 passed, installed-client traffic9/9 passed. Four distant panels still have false periodic FAILED/APPLYING; timeout correction3fad477 is tested, not deployed, and blocked on independent review because API credit is exhausted. Older business recovery snapshots are historical, not fresh claims.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -45,19 +45,19 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Restore external shared proxy auth; observe unique identity/lifecycle/native output, resolve separate Vultr auth; then Phase4 fairness/resource budgets.",
+  "next_product_step": "Restore independent review availability or obtain human review for bounded verifier timeout correction; integrate and guarded-deploy3fad477, verify periodic APPLIED states, then mobile DNS/client compatibility and excluded expired-panel coverage.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "worker_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "worker_source_revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
-  "latest_residential_dataplane_acceptance": "docs/ADS_UDP_DNS_ACCEPTANCE_20261005.json",
+  "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
   "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DIAGNOSTIC_FIX_DEPLOYED_EXTERNAL_PROXY_AUTH_BLOCKED",
-  "latest_residential_scope_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
+  "verification_status": "EXACT_RUNTIME_VERIFIED_RESIDENTIAL_NATIVE22_PERIODIC_STATUS_FIX_REVIEW_BLOCKED",
+  "latest_residential_scope_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "previous_runtime_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_performance_experiment": {
     "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",

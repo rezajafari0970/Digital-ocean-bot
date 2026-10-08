@@ -1,17 +1,492 @@
 {
-  "status": "IMPLEMENTED_NOT_DEPLOYED",
-  "baseline": "fe7ba0b88ee181b951d2f3e4b6a5c5bacab9557a",
-  "evidence_directory": "/root/backups/dob-residential-allowlist-20261008",
-  "production_changed": false,
-  "canary_panel": "a0eec71b-54f6-4d25-9fb9-aea205fbbc74",
-  "legacy_native_before": {
+  "status": "DEPLOYED_NATIVE_VERIFIED_PERIODIC_STATUS_FIX_REVIEW_BLOCKED",
+  "updated_at_utc": "2026-10-08T15:57:40.433326+00:00",
+  "updated_at_tehran": "2026-10-08T19:26:10.283955+03:30",
+  "active_agent_work": "WAITING_EXTERNAL_REVIEW_CREDIT",
+  "runtime_source": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+  "integrated_peer_source": "a41047c0af17c9a9f164d08b05f29957add170d4",
+  "routing_scope": "all",
+  "production_changed": true,
+  "policy": {
+    "allowed_category": [
+      "geosite:google@ads"
+    ],
+    "diagnostic": [
+      "domain:browserleaks.com"
+    ],
+    "probes": [
+      "full:www.gstatic.com",
+      "full:connectivitycheck.gstatic.com"
+    ],
+    "probe_protocol": "TCP",
+    "probe_ports": [
+      80,
+      443
+    ],
+    "default": "blackhole",
+    "direct_identities": "preserved",
+    "client_dns": "blocked",
+    "internal_dns": "exact managed resolver IPs/ports only"
+  },
+  "canary": {
+    "at": "2026-10-08T15:36:21.400442+00:00",
+    "panel": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
     "passed": true,
-    "route_proofs": 62
+    "cases": [
+      {
+        "class": "DIRECT",
+        "case": "direct-positive",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "DIRECT",
+        "case": "direct-browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "probe-www",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "probe-connectivity",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "ads-category",
+        "expected_allowed": true,
+        "http_status": "404",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "non-allowed",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "raw-ip",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "class": "RESIDENTIAL",
+        "case": "arbitrary-doh",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      }
+    ],
+    "client_core": "26.3.27",
+    "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof"
+  },
+  "native_canary_route_proofs": 74,
+  "serving_native_acceptance": {
+    "eligible": 22,
+    "passed": 22,
+    "pending": 0,
+    "finished_at": "2026-10-08T15:43:23.788721+00:00",
+    "panel_ids": [
+      "06bccb42-3897-468f-b3c7-72a9bac5b298",
+      "0da2e2a3-64cf-4ceb-85a5-40617e3256d6",
+      "1e65c43f-cba0-4dcb-ace5-0529b212c0c5",
+      "29adda80-97c2-4f22-bece-292b99b3e3ab",
+      "43122369-8f0d-487d-b043-9b8fad49a121",
+      "439d4c10-4f2a-4a1c-b77c-5e3cabc8e3cd",
+      "5a9f0631-87cc-4795-b735-fcd17ac69619",
+      "5ae9adb5-322a-4f1b-97b5-56c4be39a3eb",
+      "5e1cbc23-e256-4f1e-a6a4-54b9d9f98d94",
+      "60b92da6-6e18-4f5b-acd2-5345534129b4",
+      "7548bd2e-4b88-4965-9476-b1940e1f532d",
+      "7fb50c8d-a7d9-4786-af5e-a749e3b2bf31",
+      "812cbf1e-e2c6-4ce1-83ea-e90e787fdedb",
+      "82d0b406-587f-4823-8758-8764c30d0f53",
+      "a184316d-b28a-43c0-abd8-25ea05660124",
+      "c9ad05e5-10ec-4c47-8ac5-25efc31ea4b0",
+      "d29bbbbf-e536-4003-8031-886413d7dfeb",
+      "d3ffeb9f-77d3-49b7-abe5-da63ff1c2b87",
+      "d71b738b-06fd-43d0-8b70-210f86daf3ba",
+      "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+      "f394f9f3-5b03-4de5-9e3a-061d62c1ef00",
+      "fb33c940-2cb6-47e1-b6ad-15e406ed23ec"
+    ]
+  },
+  "periodic_status": {
+    "complete": false,
+    "symptom": "Four distant panels intermittently FAILED/APPLYING despite independently verified strict routing",
+    "cause": "8-second aggregate sequential native proof budget is too short; reproducing test fails at8s on deployed code and passes with30s budget",
+    "pending_commit": "3fad47751e15697b2310be19884658e31606b6b0",
+    "pending_branch": "fix/residential-proof-timeout-20261008",
+    "tests_passed": true,
+    "deployed": false,
+    "review_blocker": {
+      "at": "2026-10-08T15:53:12.548084+00:00",
+      "purpose": "classify review HTTP429, no production mutation",
+      "http_status": 429,
+      "error_type": "insufficient_quota",
+      "error_code": "credit_balance_exhausted",
+      "retry_after": null,
+      "reset_requests": null,
+      "reset_tokens": null
+    }
+  },
+  "excluded_inventory": {
+    "count": 73,
+    "reason": "Expired or retiring/deleting; not counted as serving native acceptance, no claim their cached configurations converged"
+  },
+  "runtime_observation": {
+    "at": "2026-10-08T15:39:26.268352+00:00",
+    "manifest": {
+      "commit": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+      "build_time": "2026-10-08T15:20:16Z",
+      "api_sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
+      "worker_sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+      "guardian_sha256": {
+        "amd64": "b6fedf33ce4142be2a1592193d15fd2ed574f9bcf7a0dda2c22df74e3cd3d44f",
+        "arm64": "e1c84d762520f61c2315a9407ed60e71f61babb0235999b8cf8300d4bfa138dd"
+      }
+    },
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "3140268",
+        "NRestarts": "0",
+        "sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "3140269",
+        "NRestarts": "0",
+        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "3172914",
+        "NRestarts": "0",
+        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T15:39:26.364546085Z"
+    },
+    "retired_browser": "inactive"
+  },
+  "inventory_observation": {
+    "at": "2026-10-08T15:45:06.740196+00:00",
+    "inventory": [
+      {
+        "count": 1,
+        "state": "DELETING",
+        "enabled": true,
+        "unexpired": false
+      },
+      {
+        "count": 1,
+        "state": "EXPIRING",
+        "enabled": true,
+        "unexpired": false
+      },
+      {
+        "count": 27,
+        "state": "READY",
+        "enabled": true,
+        "unexpired": false
+      },
+      {
+        "count": 22,
+        "state": "READY",
+        "enabled": true,
+        "unexpired": true
+      },
+      {
+        "count": 44,
+        "state": "RETIRING",
+        "enabled": true,
+        "unexpired": false
+      }
+    ],
+    "serving_panels": [
+      {
+        "panel": "06bccb42-3897-468f-b3c7-72a9bac5b298",
+        "verified_at": "2026-10-08T15:44:46.447454+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "0da2e2a3-64cf-4ceb-85a5-40617e3256d6",
+        "verified_at": "2026-10-08T15:19:59.620887+00:00",
+        "reconciliation_state": "FAILED"
+      },
+      {
+        "panel": "1e65c43f-cba0-4dcb-ace5-0529b212c0c5",
+        "verified_at": "2026-10-08T15:20:11.049244+00:00",
+        "reconciliation_state": "FAILED"
+      },
+      {
+        "panel": "29adda80-97c2-4f22-bece-292b99b3e3ab",
+        "verified_at": "2026-10-08T15:44:59.541379+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "43122369-8f0d-487d-b043-9b8fad49a121",
+        "verified_at": "2026-10-08T15:44:51.116692+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "439d4c10-4f2a-4a1c-b77c-5e3cabc8e3cd",
+        "verified_at": "2026-10-08T15:20:24.994997+00:00",
+        "reconciliation_state": "FAILED"
+      },
+      {
+        "panel": "5a9f0631-87cc-4795-b735-fcd17ac69619",
+        "verified_at": "2026-10-08T15:44:49.556895+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "5ae9adb5-322a-4f1b-97b5-56c4be39a3eb",
+        "verified_at": "2026-10-08T15:44:55.714374+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "5e1cbc23-e256-4f1e-a6a4-54b9d9f98d94",
+        "verified_at": "2026-10-08T15:44:41.073944+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "60b92da6-6e18-4f5b-acd2-5345534129b4",
+        "verified_at": "2026-10-08T15:44:45.410107+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "7548bd2e-4b88-4965-9476-b1940e1f532d",
+        "verified_at": "2026-10-08T15:44:50.200671+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "7fb50c8d-a7d9-4786-af5e-a749e3b2bf31",
+        "verified_at": "2026-10-08T15:44:49.352093+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "812cbf1e-e2c6-4ce1-83ea-e90e787fdedb",
+        "verified_at": "2026-10-08T15:44:56.80131+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "82d0b406-587f-4823-8758-8764c30d0f53",
+        "verified_at": "2026-10-08T15:44:50.819983+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "a184316d-b28a-43c0-abd8-25ea05660124",
+        "verified_at": "2026-10-08T15:44:57.246307+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "c9ad05e5-10ec-4c47-8ac5-25efc31ea4b0",
+        "verified_at": "2026-10-08T15:44:45.409645+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "d29bbbbf-e536-4003-8031-886413d7dfeb",
+        "verified_at": "2026-10-08T15:44:52.456886+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "d3ffeb9f-77d3-49b7-abe5-da63ff1c2b87",
+        "verified_at": "2026-10-08T15:44:53.37574+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "d71b738b-06fd-43d0-8b70-210f86daf3ba",
+        "verified_at": "2026-10-08T15:44:40.400287+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
+        "verified_at": "2026-10-08T15:44:49.455247+00:00",
+        "reconciliation_state": "APPLIED"
+      },
+      {
+        "panel": "f394f9f3-5b03-4de5-9e3a-061d62c1ef00",
+        "verified_at": "2026-10-08T15:19:59.711328+00:00",
+        "reconciliation_state": "APPLYING"
+      },
+      {
+        "panel": "fb33c940-2cb6-47e1-b6ad-15e406ed23ec",
+        "verified_at": "2026-10-08T15:44:41.789535+00:00",
+        "reconciliation_state": "APPLIED"
+      }
+    ],
+    "routing_control": {
+      "fleet": true,
+      "enabled": true,
+      "revision": 598
+    },
+    "profiles": {
+      "unavailable": true
+    }
+  },
+  "tests": {
+    "base_full_go": true,
+    "base_focused_race": true,
+    "installed_xray_26_3_27": true,
+    "target_xray_26_9_9_isolated_core_and_race": true,
+    "base_independent_review": "resp_0a8d653b9423fe7a006ac7b30b8b5487d188459895353b328e",
+    "real_canary_26_3_27": "9/9",
+    "postgres_isolated_tests": "SKIPPED; no isolated test DSN",
+    "latency_fix_full_go_and_race": true,
+    "latency_fix_negative_control": "old source fails at8 seconds; modified source passes"
   },
   "limitations": [
-    "No mobile application compatibility measurement",
-    "No HTTPS path/content inspection",
-    "No host-wide firewall guarantee",
-    "Expired/unreachable panels require separate observed convergence"
-  ]
+    "Default real client26.9.9 produced TLS failures; installed26.3.27 passes all9 tests,26.9.9 TLS1.2 passes positive cases; exact core root cause not established",
+    "Mobile/ISP compatibility untested; clients must resolve locally or send domain destinations because arbitrary in-tunnel DNS is blocked",
+    "Destination allowlist cannot inspect HTTPS paths/content or prevent an allowed host carrying a tunnel",
+    "Authenticated proxy policy is not host-wide firewall/SYN filtering",
+    "73 expired/retiring/deleting panels excluded from serving audit",
+    "Periodic controller status correction remains undeployed pending independent review"
+  ],
+  "evidence_directory": "/root/backups/dob-residential-allowlist-20261008",
+  "next_action": "Restore existing API review credit or obtain independent human review of commit3fad477; rebase onto latest canonical, verify unchanged reviewed source hashes and current runtime, guarded deploy of verifier fix, then confirm all serving panel_routing_state records become APPLIED. Do not bypass locks, gates or forge review PASS.",
+  "phase_review": {
+    "1_design": "complete",
+    "2_implementation_and_tests": "complete; deployed base reviewed",
+    "3_rollout": "strict routing independently verified22/22; periodic status correction still blocked"
+  },
+  "status_reporting_contract": {
+    "states": [
+      "IN_PROGRESS",
+      "WAITING_EXTERNAL",
+      "BLOCKED",
+      "COMPLETED"
+    ],
+    "include": [
+      "timestamp",
+      "current_action",
+      "last_observed_result",
+      "blocker",
+      "next_action"
+    ],
+    "chat_updates": "During active work, concise meaningful updates at least every60 seconds; no claims of background agent work after final reply"
+  },
+  "agent_continues_after_final_reply": false,
+  "application_workers": "active; normal production reconciliation continues independently",
+  "final_runtime_check": {
+    "at": "2026-10-08T15:57:40.433326+00:00",
+    "manifest": {
+      "commit": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+      "build_time": "2026-10-08T15:20:16Z",
+      "api_sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
+      "worker_sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+      "guardian_sha256": {
+        "amd64": "b6fedf33ce4142be2a1592193d15fd2ed574f9bcf7a0dda2c22df74e3cd3d44f",
+        "arm64": "e1c84d762520f61c2315a9407ed60e71f61babb0235999b8cf8300d4bfa138dd"
+      }
+    },
+    "binaries": {
+      "api": {
+        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+        "sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
+        "vcs_modified": false
+      },
+      "worker": {
+        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "vcs_modified": false
+      },
+      "worker-panels": {
+        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "vcs_modified": false
+      }
+    },
+    "services": {
+      "api": "active",
+      "worker": "active",
+      "worker-panels": "active"
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T15:57:40.574139023Z"
+    }
+  }
 }
