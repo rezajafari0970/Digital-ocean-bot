@@ -1,12 +1,14 @@
-# Latest continuation — residential allowlist, 2026-10-08
+# Latest continuation — residential allowlist, 2026-10-09 Tehran
 
-Read `docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json` and `docs/RESIDENTIAL_ALLOWLIST_20261008.md` first. Runtime `7cc709e` has strict residential allowlist active fleet-wide; independent serving-panel proof22/22 and installed-client canary9/9 passed. This does not include73 expired/retiring/deleting panels or mobile compatibility.
+Read `docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json`, `docs/RESIDENTIAL_ALLOWLIST_20261008.md` and `docs/RESIDENTIAL_ALLOWLIST_STATUS_FA_20261009.md` first. Reviewed verifier fix **d02f045** is deployed; API credit blocker is resolved. Runtime hashes are verified and all five readiness checks pass. At2026-10-08T22:39:27Z current serving native proof and periodic state both pass **30/30**. Canonical report commit is newer than the runtime source because it changes documentation only.
 
-**Unfinished:** four distant panels get false periodic FAILED/APPLYING from the old8second whole-proof timeout. Tested fix `3fad477` on branch `fix/residential-proof-timeout-20261008` is not deployed. Independent API review is blocked by exhausted credit(HTTP429 `credit_balance_exhausted`). Do not bypass the review gate or silently claim the entire rollout is complete. Restore review availability or obtain independent human review, integrate latest canonical, deploy guarded, verify periodic APPLIED state.
+**Remaining operational work:** at that snapshot4/30 serving panels had CPU-pressure/recovery admission blocks. Both client versions work; on the loaded canary TCP443 refusal aligns with existing guardian protection, not a demonstrated version-specific TLS defect. Pinned actual traffic is26/27 aggregate: target26.9.9 and installed-repeat26.3.27 each9/9. Preserve the initial transient failed probe; do not claim27/27 or mobile acceptance.74 expired/retiring/deleting records and1631 historical DELETED records are excluded from serving proof.
 
-**User reporting preference:** give meaningful progress updates at least every60seconds during active work; persist timestamp/current action/result/blocker/next action; distinguish WAITING_EXTERNAL/BLOCKED from active agent execution and from normal application workers.
+**Next phase:** capacity/connection stability and mobile local-DNS/domain handling; design safe capacity-aware output/failover before changing product behavior. Preserve guardian protection, quotas/lifetimes, spend, mutation gates and independent review. The agent ends after this report; normal application workers continue. No unattended AI task is implied.
 
-The sections below are historical. Preserve their evidence but verify live source/runtime before acting.
+**User reporting preference:** meaningful progress updates at least every60seconds during active work; persist timestamp/current action/result/blocker/next action; distinguish IN_PROGRESS/WAITING_EXTERNAL/BLOCKED/COMPLETED from normal application workers. Live continuation status: `.local/residential-allowlist-progress.json`.
+
+The sections below are historical. Preserve evidence but verify live source/runtime before acting.
 
 ---
 

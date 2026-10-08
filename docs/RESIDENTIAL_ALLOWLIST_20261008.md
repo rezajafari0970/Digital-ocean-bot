@@ -32,15 +32,29 @@ Client DNS sent through this restricted subscription is blocked. Clients must re
 
 Deployment and native fleet results are recorded in `RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json`. Unreachable/expired panels are not counted as successfully changed merely because the code is deployed.
 
-## Observed rollout result and exact continuation
+## Verified continuation — 2026-10-09 Tehran
 
-Strict routing deployed from `7cc709e` after integration with account/panel repair `a41047c`; all current/future panels select the strict policy (`DOB_RESIDENTIAL_ALLOWLIST_PANELS=all`). A replacement canary was used because the original was deleted. Independent native acceptance converged to **22/22 serving panels**, at 2026-10-08T15:43:23Z. The exact panel IDs and timestamps are in the acceptance JSON. The final inventory also contains **73 expired/retiring/deleting panels** that are excluded from this serving proof. Do not call those verified.
+API credit was restored and independent review passed: `resp_05bc3d42a32fa1b5006ac8179189d087d19ed1c24cb7f1c6a4`, no blockers. The previously pending verifier fix was integrated onto canonical5e6c10d as **d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e** and guarded-deployed at **2026-10-08T22:26:27Z**. The original branch/commit3fad477 remains historical; no review gate was bypassed.
 
-Actual VLESS/Reality traffic with installed Xray26.3.27 passed **9/9**: DIRECT positive controls, both probes(204), BrowserLeaks(200), advertising host(404 response proves connection), and blocked ordinary domain/rawIP/arbitraryDoH. Earlier errors and diagnostics remain in the evidence directory. Default client26.9.9 failed some TLS traffic; its TLS1.2 test passed the positive destinations. This is a remaining compatibility observation, not a proven root-cause fix or mobile acceptance.
+The confirmed defect was the8-second aggregate deadline for sequential route proofs. A delayed-request regression fails on old code and passes after the deadline becomes30seconds, inside the existing45-second operation deadline. Full Go regression and focused race checks pass on the integrated source. One build failed only because the `/tmp` tmpfs was full; a root-disk temporary directory resolved the build environment failure. No user files were deleted.
 
-Four distant panels still show periodic FAILED/APPLYING despite independent correct native routes. The controller caps its whole sequential proof at8seconds. A 300ms-per-request test reproduces the failure on the deployed source; extending the aggregate budget to30seconds passes while retaining the caller45second deadline and all mutation/readback guards. Follow-up commit **3fad47751e15697b2310be19884658e31606b6b0**, branch `fix/residential-proof-timeout-20261008`, contains only that bounded timeout adjustment and regression test. Full Go regression and relevant race tests pass. It is **not deployed**.
+Initial native proof passed28/28 and three consecutive periodic samples were28/28 APPLIED. Two newly created panels were then independently checked. At **2026-10-08T22:39:27Z / 2026-10-09T02:09:27+03:30**, all **30/30 current serving panels** were native-verified and APPLIED. API/control/panels roles are active, NRestarts0, exact running binary hashes match the clean manifest, all five readiness checks pass, and the retired browser manager stays inactive/disabled.74 expired/retiring/deleting records are excluded, along with1631 separately classified historical DELETED records.
 
-Independent follow-up review is **blocked**: the existing OpenAI API returns HTTP429, `insufficient_quota` / `credit_balance_exhausted`, without a retry time. Do not keep retrying on a timer or claim review PASS. Restore review credit or obtain independent human review; then rebase the pending fix onto the latest canonical HEAD, revalidate source hashes and runtime, and guarded-deploy it. The prepared deployment helper must have its canonical/runtime expectations refreshed because the canonical report commit and running code commit differ. Verify periodic APPLIED state on all serving panels afterward. Main feature rollback runtime is `/opt/digital-ocean-bot.rollback.DzXr1KL8`; policy rollback deliberately restores legacy direct fallback and is not an automatic response to this status problem.
+Actual traffic reused the same credentials across versions on a comparison canary: installed26.3.27 first8/9, target26.9.9 **9/9**, installed26.3.27 repeat **9/9**. The aggregate is **26/27**, not27/27; one initial www.gstatic.com positive probe failed curl35 with no proven specific cause. Both probes, advertising category, BrowserLeaks, explicit DIRECT controls and deny cases passed in each of the last two runs. Older claims that26.9.9 alone caused TLS failures are superseded by this controlled comparison. Mobile/ISP compatibility remains unmeasured.
+
+### Separate capacity finding
+
+Repeated failures on loaded canary `d4fbef39-e05c-464c-a999-72a02ff87c18` were **TCP443 connection refused** on both client versions. Sanaei showed Xray running and a stable APPLIED plan. The existing guardian reportedCPU100%, CPU queue pressure, admission_blocked=true and managed listeners verified. Its owned nft rule intentionally rejects new SYNs with TCP reset during pressure/recovery. A separate bounded watch saw5 open/5 refused connections on that panel versus10/10 open on the comparison panel. Central receipts lagged by up to73seconds in that watch, so exact packet-to-receipt alignment is not claimed.
+
+At the final snapshot, **4/30** serving panels had fresh admission-blocked receipts:3 CPU-critical and1 recovering. This is a remaining capacity/availability issue, not an allowlist escape. Protection, existing sessions, quotas/lifetimes, server sizes/counts and credentials were preserved. No new persistent probe service is running.
+
+### Three phases and next phase
+
+1. Design: complete; destination scope, DNS/sniffing boundaries, fail-closed pool and intentional rollback documented.
+2. Implementation/review/tests: complete; reviewed d02f045 is deployed and regression/race evidence retained.
+3. Rollout: routing/status acceptance complete30/30 with the capacity and traffic limits above. Do not call all production availability problems solved.
+
+Phase4 is capacity and connection stability: measure guardian admission versus CPU/conntrack/client pressure, design capacity-aware output/failover using fresh verified receipts, and test real mobile clients with local DNS/domain destinations. Client failover is not implemented by this change. Changing provider capacity/spend, disabling protection, or altering user quotas is not an implicit fix. Runtime rollback before the verifier correction: `/opt/digital-ocean-bot.rollback.BZTZp014`.
 
 ## Progress reporting preference
 

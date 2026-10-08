@@ -1,9 +1,9 @@
 {
-  "status": "DEPLOYED_NATIVE_VERIFIED_PERIODIC_STATUS_FIX_REVIEW_BLOCKED",
-  "updated_at_utc": "2026-10-08T15:57:40.433326+00:00",
-  "updated_at_tehran": "2026-10-08T19:26:10.283955+03:30",
-  "active_agent_work": "WAITING_EXTERNAL_REVIEW_CREDIT",
-  "runtime_source": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+  "status": "DEPLOYED_NATIVE30_PERIODIC_APPLIED_TRAFFIC_VERIFIED_WITH_CAPACITY_LIMITS",
+  "updated_at_utc": "2026-10-08T22:39:27.352827+00:00",
+  "updated_at_tehran": "2026-10-09T02:09:27.352827+03:30",
+  "active_agent_work": "COMPLETED",
+  "runtime_source": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
   "integrated_peer_source": "a41047c0af17c9a9f164d08b05f29957add170d4",
   "routing_scope": "all",
   "production_changed": true,
@@ -29,11 +29,12 @@
     "internal_dns": "exact managed resolver IPs/ports only"
   },
   "canary": {
-    "at": "2026-10-08T15:36:21.400442+00:00",
-    "panel": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
-    "passed": true,
+    "at": "2026-10-08T22:38:07.937020+00:00",
+    "panel": "2a6c8162-a14e-4a80-8a68-9880174ab57a",
+    "passed": false,
     "cases": [
       {
+        "core": "installed26.3.27",
         "class": "DIRECT",
         "case": "direct-positive",
         "expected_allowed": true,
@@ -42,6 +43,7 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "DIRECT",
         "case": "direct-browserleaks",
         "expected_allowed": true,
@@ -50,14 +52,16 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "probe-www",
         "expected_allowed": true,
-        "http_status": "204",
-        "curl_code": 0,
-        "passed": true
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": false
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "probe-connectivity",
         "expected_allowed": true,
@@ -66,6 +70,7 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "browserleaks",
         "expected_allowed": true,
@@ -74,6 +79,7 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "ads-category",
         "expected_allowed": true,
@@ -82,6 +88,7 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "non-allowed",
         "expected_allowed": false,
@@ -90,6 +97,7 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
         "class": "RESIDENTIAL",
         "case": "raw-ip",
         "expected_allowed": false,
@@ -98,6 +106,169 @@
         "passed": true
       },
       {
+        "core": "installed26.3.27",
+        "class": "RESIDENTIAL",
+        "case": "arbitrary-doh",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "DIRECT",
+        "case": "direct-positive",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "DIRECT",
+        "case": "direct-browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "probe-www",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "probe-connectivity",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "ads-category",
+        "expected_allowed": true,
+        "http_status": "404",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "non-allowed",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "raw-ip",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "target26.9.9",
+        "class": "RESIDENTIAL",
+        "case": "arbitrary-doh",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "DIRECT",
+        "case": "direct-positive",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "DIRECT",
+        "case": "direct-browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "probe-www",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "probe-connectivity",
+        "expected_allowed": true,
+        "http_status": "204",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "browserleaks",
+        "expected_allowed": true,
+        "http_status": "200",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "ads-category",
+        "expected_allowed": true,
+        "http_status": "404",
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "non-allowed",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
+        "class": "RESIDENTIAL",
+        "case": "raw-ip",
+        "expected_allowed": false,
+        "http_status": "000",
+        "curl_code": 35,
+        "passed": true
+      },
+      {
+        "core": "installed26.3.27-repeat",
         "class": "RESIDENTIAL",
         "case": "arbitrary-doh",
         "expected_allowed": false,
@@ -106,99 +277,131 @@
         "passed": true
       }
     ],
-    "client_core": "26.3.27",
-    "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof"
+    "credential_snapshot_pinned": true,
+    "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof",
+    "interpretation": "Pinned credentials reused across versions: installed first8/9, target26.9.9 9/9, installed repeat9/9; aggregate26/27 remains false and is not rewritten to full PASS. Initial one-off probe-www curl35 has no proven specific cause."
   },
   "native_canary_route_proofs": 74,
   "serving_native_acceptance": {
-    "eligible": 22,
-    "passed": 22,
+    "eligible": 30,
+    "passed": 30,
     "pending": 0,
-    "finished_at": "2026-10-08T15:43:23.788721+00:00",
+    "finished_at": "2026-10-08T22:39:27.352827+00:00",
     "panel_ids": [
-      "06bccb42-3897-468f-b3c7-72a9bac5b298",
-      "0da2e2a3-64cf-4ceb-85a5-40617e3256d6",
-      "1e65c43f-cba0-4dcb-ace5-0529b212c0c5",
-      "29adda80-97c2-4f22-bece-292b99b3e3ab",
-      "43122369-8f0d-487d-b043-9b8fad49a121",
-      "439d4c10-4f2a-4a1c-b77c-5e3cabc8e3cd",
-      "5a9f0631-87cc-4795-b735-fcd17ac69619",
-      "5ae9adb5-322a-4f1b-97b5-56c4be39a3eb",
-      "5e1cbc23-e256-4f1e-a6a4-54b9d9f98d94",
-      "60b92da6-6e18-4f5b-acd2-5345534129b4",
-      "7548bd2e-4b88-4965-9476-b1940e1f532d",
-      "7fb50c8d-a7d9-4786-af5e-a749e3b2bf31",
-      "812cbf1e-e2c6-4ce1-83ea-e90e787fdedb",
-      "82d0b406-587f-4823-8758-8764c30d0f53",
-      "a184316d-b28a-43c0-abd8-25ea05660124",
-      "c9ad05e5-10ec-4c47-8ac5-25efc31ea4b0",
-      "d29bbbbf-e536-4003-8031-886413d7dfeb",
-      "d3ffeb9f-77d3-49b7-abe5-da63ff1c2b87",
-      "d71b738b-06fd-43d0-8b70-210f86daf3ba",
+      "01b91e35-94a6-4c82-9224-5cb44c7423c0",
+      "0b5cc145-5090-4182-b09a-ea20a595e013",
+      "1cc65338-a34b-4cc6-8b0b-378bfa4ac2c7",
+      "247f8541-1c45-4fc5-be76-99acddc48b4d",
+      "252cb663-e164-40a2-af4a-2600c2ef64b6",
+      "2a5b7b62-7330-4c3b-b76c-dc1666cadb5c",
+      "2a6c8162-a14e-4a80-8a68-9880174ab57a",
+      "3254ec77-8101-4474-945c-9f9584793dd3",
+      "36dc2630-bf06-4c1b-9faa-d7d4c7a8d915",
+      "3cfd6f84-a35b-4045-b6de-d20fa63e67df",
+      "4265228f-0dc1-41a0-9d1a-c9adb89a9f7c",
+      "45ee8102-6f1a-45df-9fad-e73749d09a5b",
+      "47fa4f8f-e723-4750-933d-e9fa86ae54cc",
+      "6874d4e5-b1c4-4ad6-8852-13dbe34373ee",
+      "786dafc3-03f2-40f3-bd40-f4d71d43d868",
+      "7d12c4a8-f952-4a9b-9bb1-371613b4e6de",
+      "84a03acd-06ae-47c5-b8a2-42d3525fa4ee",
+      "9ce8ff12-3c7a-413c-aba7-c4948e5c0804",
+      "aa37df40-2c45-48e9-b039-004a003ba763",
+      "aba42400-e112-40c0-a4df-40458b938ee2",
+      "abf877e9-f373-47f3-914d-5ab82da4692c",
+      "b85d4298-3040-40fd-895c-f5137df8d5c7",
+      "bfa63613-46c1-4049-be6a-16a917112af3",
+      "c0322d10-63cf-4f20-b7dd-8fc46d7805e4",
+      "c961de29-b07e-4944-b078-69b2200b1003",
+      "d4fbef39-e05c-464c-a999-72a02ff87c18",
+      "d9f5ecf1-36d0-4f5c-86e9-5e9b9b68e22e",
       "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
-      "f394f9f3-5b03-4de5-9e3a-061d62c1ef00",
-      "fb33c940-2cb6-47e1-b6ad-15e406ed23ec"
-    ]
+      "f0a1bb80-a61f-41dc-9561-9fd1c12a6d3f",
+      "fde91c05-131d-45e6-b365-bcf28e5c87fe"
+    ],
+    "initial_audit": {
+      "passed": 28,
+      "finished_at": "2026-10-08T22:29:20.896596+00:00"
+    },
+    "additional_results": [
+      {
+        "panel": "4265228f-0dc1-41a0-9d1a-c9adb89a9f7c",
+        "exit": 0,
+        "passed": true
+      },
+      {
+        "panel": "aa37df40-2c45-48e9-b039-004a003ba763",
+        "exit": 0,
+        "passed": true
+      }
+    ],
+    "scope": "Serving unexpired panels only; counts change as normal lifecycle creates/expires servers"
   },
   "periodic_status": {
-    "complete": false,
-    "symptom": "Four distant panels intermittently FAILED/APPLYING despite independently verified strict routing",
-    "cause": "8-second aggregate sequential native proof budget is too short; reproducing test fails at8s on deployed code and passes with30s budget",
-    "pending_commit": "3fad47751e15697b2310be19884658e31606b6b0",
-    "pending_branch": "fix/residential-proof-timeout-20261008",
+    "complete": true,
+    "previous_symptom": "False FAILED/APPLYING from8-second aggregate sequential native proof timeout",
+    "cause": "Sequential remote route-proof requests can exceed8seconds although correct routing is running",
+    "fix": "30-second aggregate proof budget within the existing45-second operation deadline; mutation and readback guards unchanged",
+    "original_tested_commit": "3fad47751e15697b2310be19884658e31606b6b0",
+    "integrated_deployed_commit": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
     "tests_passed": true,
-    "deployed": false,
-    "review_blocker": {
-      "at": "2026-10-08T15:53:12.548084+00:00",
-      "purpose": "classify review HTTP429, no production mutation",
-      "http_status": 429,
-      "error_type": "insufficient_quota",
-      "error_code": "credit_balance_exhausted",
-      "retry_after": null,
-      "reset_requests": null,
-      "reset_tokens": null
+    "deployed": true,
+    "review": {
+      "decision": "PASS",
+      "response_id": "resp_05bc3d42a32fa1b5006ac8179189d087d19ed1c24cb7f1c6a4",
+      "prior_credit_blocker": "RESOLVED"
+    },
+    "three_samples": [
+      {
+        "at": "2026-10-08T22:28:40.819475+00:00",
+        "eligible": 28,
+        "applied": 28
+      },
+      {
+        "at": "2026-10-08T22:29:00.863890+00:00",
+        "eligible": 28,
+        "applied": 28
+      },
+      {
+        "at": "2026-10-08T22:29:20.896504+00:00",
+        "eligible": 28,
+        "applied": 28
+      }
+    ],
+    "final_sample": {
+      "at": "2026-10-08T22:39:27.352827+00:00",
+      "eligible": 30,
+      "applied": 30
     }
   },
   "excluded_inventory": {
-    "count": 73,
-    "reason": "Expired or retiring/deleting; not counted as serving native acceptance, no claim their cached configurations converged"
+    "count": 74,
+    "historical_deleted_records": 1631,
+    "reason": "Expired/retiring/deleting records excluded from serving native acceptance. Historical DELETED records are counted separately."
   },
   "runtime_observation": {
-    "at": "2026-10-08T15:39:26.268352+00:00",
-    "manifest": {
-      "commit": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
-      "build_time": "2026-10-08T15:20:16Z",
-      "api_sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
-      "worker_sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
-      "guardian_sha256": {
-        "amd64": "b6fedf33ce4142be2a1592193d15fd2ed574f9bcf7a0dda2c22df74e3cd3d44f",
-        "arm64": "e1c84d762520f61c2315a9407ed60e71f61babb0235999b8cf8300d4bfa138dd"
-      }
-    },
+    "at": "2026-10-08T22:26:27.014777+00:00",
+    "commit": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+    "backup": "/opt/digital-ocean-bot.rollback.BZTZp014",
+    "scope": "all",
     "services": {
       "api": {
         "ActiveState": "active",
-        "MainPID": "3140268",
+        "MainPID": "3737129",
         "NRestarts": "0",
-        "sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
-        "matches_manifest": true,
-        "vcs_modified_false": true
+        "sha256": "1033d001fc6621e9417697cc23794a78f8cf12081d4f3427568dedc538b3e90b"
       },
       "worker": {
         "ActiveState": "active",
-        "MainPID": "3140269",
+        "MainPID": "3737130",
         "NRestarts": "0",
-        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
-        "matches_manifest": true,
-        "vcs_modified_false": true
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6"
       },
       "worker-panels": {
         "ActiveState": "active",
-        "MainPID": "3172914",
+        "MainPID": "3737131",
         "NRestarts": "0",
-        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
-        "matches_manifest": true,
-        "vcs_modified_false": true
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6"
       }
     },
     "readyz": {
@@ -225,13 +428,18 @@
           "ok": true
         }
       ],
-      "at": "2026-10-08T15:39:26.364546085Z"
-    },
-    "retired_browser": "inactive"
+      "at": "2026-10-08T22:26:27.078728464Z"
+    }
   },
   "inventory_observation": {
-    "at": "2026-10-08T15:45:06.740196+00:00",
+    "at": "2026-10-08T22:39:27.352827+00:00",
     "inventory": [
+      {
+        "count": 1631,
+        "state": "DELETED",
+        "enabled": false,
+        "unexpired": false
+      },
       {
         "count": 1,
         "state": "DELETING",
@@ -239,22 +447,22 @@
         "unexpired": false
       },
       {
-        "count": 1,
+        "count": 2,
         "state": "EXPIRING",
         "enabled": true,
         "unexpired": false
+      },
+      {
+        "count": 30,
+        "state": "READY",
+        "enabled": true,
+        "unexpired": true
       },
       {
         "count": 27,
         "state": "READY",
         "enabled": true,
         "unexpired": false
-      },
-      {
-        "count": 22,
-        "state": "READY",
-        "enabled": true,
-        "unexpired": true
       },
       {
         "count": 44,
@@ -265,124 +473,184 @@
     ],
     "serving_panels": [
       {
-        "panel": "06bccb42-3897-468f-b3c7-72a9bac5b298",
-        "verified_at": "2026-10-08T15:44:46.447454+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "01b91e35-94a6-4c82-9224-5cb44c7423c0",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:01.214828+00:00"
       },
       {
-        "panel": "0da2e2a3-64cf-4ceb-85a5-40617e3256d6",
-        "verified_at": "2026-10-08T15:19:59.620887+00:00",
-        "reconciliation_state": "FAILED"
+        "panel": "0b5cc145-5090-4182-b09a-ea20a595e013",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:55.28916+00:00"
       },
       {
-        "panel": "1e65c43f-cba0-4dcb-ace5-0529b212c0c5",
-        "verified_at": "2026-10-08T15:20:11.049244+00:00",
-        "reconciliation_state": "FAILED"
+        "panel": "1cc65338-a34b-4cc6-8b0b-378bfa4ac2c7",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:04.784619+00:00"
       },
       {
-        "panel": "29adda80-97c2-4f22-bece-292b99b3e3ab",
-        "verified_at": "2026-10-08T15:44:59.541379+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "247f8541-1c45-4fc5-be76-99acddc48b4d",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:09.251761+00:00"
       },
       {
-        "panel": "43122369-8f0d-487d-b043-9b8fad49a121",
-        "verified_at": "2026-10-08T15:44:51.116692+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "252cb663-e164-40a2-af4a-2600c2ef64b6",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:25.555221+00:00"
       },
       {
-        "panel": "439d4c10-4f2a-4a1c-b77c-5e3cabc8e3cd",
-        "verified_at": "2026-10-08T15:20:24.994997+00:00",
-        "reconciliation_state": "FAILED"
+        "panel": "2a5b7b62-7330-4c3b-b76c-dc1666cadb5c",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:14.492168+00:00"
       },
       {
-        "panel": "5a9f0631-87cc-4795-b735-fcd17ac69619",
-        "verified_at": "2026-10-08T15:44:49.556895+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "2a6c8162-a14e-4a80-8a68-9880174ab57a",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:19.190907+00:00"
       },
       {
-        "panel": "5ae9adb5-322a-4f1b-97b5-56c4be39a3eb",
-        "verified_at": "2026-10-08T15:44:55.714374+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "3254ec77-8101-4474-945c-9f9584793dd3",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:13.390945+00:00"
       },
       {
-        "panel": "5e1cbc23-e256-4f1e-a6a4-54b9d9f98d94",
-        "verified_at": "2026-10-08T15:44:41.073944+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "36dc2630-bf06-4c1b-9faa-d7d4c7a8d915",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:00.781567+00:00"
       },
       {
-        "panel": "60b92da6-6e18-4f5b-acd2-5345534129b4",
-        "verified_at": "2026-10-08T15:44:45.410107+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "3cfd6f84-a35b-4045-b6de-d20fa63e67df",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:08.073451+00:00"
       },
       {
-        "panel": "7548bd2e-4b88-4965-9476-b1940e1f532d",
-        "verified_at": "2026-10-08T15:44:50.200671+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "4265228f-0dc1-41a0-9d1a-c9adb89a9f7c",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:07.738632+00:00"
       },
       {
-        "panel": "7fb50c8d-a7d9-4786-af5e-a749e3b2bf31",
-        "verified_at": "2026-10-08T15:44:49.352093+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "45ee8102-6f1a-45df-9fad-e73749d09a5b",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:10.269959+00:00"
       },
       {
-        "panel": "812cbf1e-e2c6-4ce1-83ea-e90e787fdedb",
-        "verified_at": "2026-10-08T15:44:56.80131+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "47fa4f8f-e723-4750-933d-e9fa86ae54cc",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:51.988775+00:00"
       },
       {
-        "panel": "82d0b406-587f-4823-8758-8764c30d0f53",
-        "verified_at": "2026-10-08T15:44:50.819983+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "6874d4e5-b1c4-4ad6-8852-13dbe34373ee",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:07.154859+00:00"
       },
       {
-        "panel": "a184316d-b28a-43c0-abd8-25ea05660124",
-        "verified_at": "2026-10-08T15:44:57.246307+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "786dafc3-03f2-40f3-bd40-f4d71d43d868",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:24.983184+00:00"
       },
       {
-        "panel": "c9ad05e5-10ec-4c47-8ac5-25efc31ea4b0",
-        "verified_at": "2026-10-08T15:44:45.409645+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "7d12c4a8-f952-4a9b-9bb1-371613b4e6de",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:06.20407+00:00"
       },
       {
-        "panel": "d29bbbbf-e536-4003-8031-886413d7dfeb",
-        "verified_at": "2026-10-08T15:44:52.456886+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "84a03acd-06ae-47c5-b8a2-42d3525fa4ee",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:01.020365+00:00"
       },
       {
-        "panel": "d3ffeb9f-77d3-49b7-abe5-da63ff1c2b87",
-        "verified_at": "2026-10-08T15:44:53.37574+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "9ce8ff12-3c7a-413c-aba7-c4948e5c0804",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:03.488198+00:00"
       },
       {
-        "panel": "d71b738b-06fd-43d0-8b70-210f86daf3ba",
-        "verified_at": "2026-10-08T15:44:40.400287+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "aa37df40-2c45-48e9-b039-004a003ba763",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:24.794397+00:00"
+      },
+      {
+        "panel": "aba42400-e112-40c0-a4df-40458b938ee2",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:31.558874+00:00"
+      },
+      {
+        "panel": "abf877e9-f373-47f3-914d-5ab82da4692c",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:43.243558+00:00"
+      },
+      {
+        "panel": "b85d4298-3040-40fd-895c-f5137df8d5c7",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:47.330275+00:00"
+      },
+      {
+        "panel": "bfa63613-46c1-4049-be6a-16a917112af3",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:51.433014+00:00"
+      },
+      {
+        "panel": "c0322d10-63cf-4f20-b7dd-8fc46d7805e4",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:09.225051+00:00"
+      },
+      {
+        "panel": "c961de29-b07e-4944-b078-69b2200b1003",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:21.824536+00:00"
+      },
+      {
+        "panel": "d4fbef39-e05c-464c-a999-72a02ff87c18",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:57.50713+00:00"
+      },
+      {
+        "panel": "d9f5ecf1-36d0-4f5c-86e9-5e9b9b68e22e",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:11.266308+00:00"
       },
       {
         "panel": "dcdb3816-3fb9-44d8-97c4-f81a2cfaa13f",
-        "verified_at": "2026-10-08T15:44:49.455247+00:00",
-        "reconciliation_state": "APPLIED"
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:39:16.423547+00:00"
       },
       {
-        "panel": "f394f9f3-5b03-4de5-9e3a-061d62c1ef00",
-        "verified_at": "2026-10-08T15:19:59.711328+00:00",
-        "reconciliation_state": "APPLYING"
+        "panel": "f0a1bb80-a61f-41dc-9561-9fd1c12a6d3f",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:56.492168+00:00"
       },
       {
-        "panel": "fb33c940-2cb6-47e1-b6ad-15e406ed23ec",
-        "verified_at": "2026-10-08T15:44:41.789535+00:00",
-        "reconciliation_state": "APPLIED"
+        "panel": "fde91c05-131d-45e6-b365-bcf28e5c87fe",
+        "state": "APPLIED",
+        "verified_at": "2026-10-08T22:38:57.864427+00:00"
       }
     ],
-    "routing_control": {
-      "fleet": true,
-      "enabled": true,
-      "revision": 598
-    },
-    "profiles": {
-      "unavailable": true
-    }
+    "profiles": [
+      {
+        "ports": [
+          443
+        ],
+        "enabled": true,
+        "revision": 5,
+        "route_class": "DIRECT",
+        "device_limit": 0,
+        "user_quota_bytes": 0,
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 1,
+        "creation_interval_seconds": 60
+      },
+      {
+        "ports": [
+          443
+        ],
+        "enabled": true,
+        "revision": 11,
+        "route_class": "RESIDENTIAL",
+        "device_limit": 0,
+        "user_quota_bytes": 0,
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 2,
+        "creation_interval_seconds": 60
+      }
+    ]
   },
   "tests": {
     "base_full_go": true,
@@ -390,25 +658,42 @@
     "installed_xray_26_3_27": true,
     "target_xray_26_9_9_isolated_core_and_race": true,
     "base_independent_review": "resp_0a8d653b9423fe7a006ac7b30b8b5487d188459895353b328e",
-    "real_canary_26_3_27": "9/9",
+    "real_canary_26_3_27": "first8/9, repeat9/9 with same credentials",
     "postgres_isolated_tests": "SKIPPED; no isolated test DSN",
     "latency_fix_full_go_and_race": true,
-    "latency_fix_negative_control": "old source fails at8 seconds; modified source passes"
+    "latency_fix_negative_control": "old source fails at8 seconds; modified source passes",
+    "latency_fix_review": "resp_05bc3d42a32fa1b5006ac8179189d087d19ed1c24cb7f1c6a4",
+    "fresh_integrated_full_go": true,
+    "fresh_integrated_focused_race": true,
+    "real_canary_26_9_9": "9/9 with same credentials",
+    "real_canary_aggregate": "26/27; one transient positive-probe failure preserved",
+    "temp_space_recovery": "Initial integrated full test could not link because /tmp tmpfs was full; rerun using root-disk TMPDIR passed; no user files deleted"
   },
   "limitations": [
-    "Default real client26.9.9 produced TLS failures; installed26.3.27 passes all9 tests,26.9.9 TLS1.2 passes positive cases; exact core root cause not established",
+    "Four of30 serving panels were temporarily admission-blocked by CPU pressure/recovery at final snapshot; resource availability is not fully resolved",
+    "Real traffic aggregate26/27; version26.9.9 and installed-repeat each9/9; intermittent upstream/network availability cannot be guaranteed",
     "Mobile/ISP compatibility untested; clients must resolve locally or send domain destinations because arbitrary in-tunnel DNS is blocked",
     "Destination allowlist cannot inspect HTTPS paths/content or prevent an allowed host carrying a tunnel",
     "Authenticated proxy policy is not host-wide firewall/SYN filtering",
-    "73 expired/retiring/deleting panels excluded from serving audit",
-    "Periodic controller status correction remains undeployed pending independent review"
+    "74 expired/retiring/deleting panels excluded; historical DELETED records are not serving evidence",
+    "Central guardian status can lag local admission changes; observed receipt age reached73seconds in a separate watch"
   ],
   "evidence_directory": "/root/backups/dob-residential-allowlist-20261008",
-  "next_action": "Restore existing API review credit or obtain independent human review of commit3fad477; rebase onto latest canonical, verify unchanged reviewed source hashes and current runtime, guarded deploy of verifier fix, then confirm all serving panel_routing_state records become APPLIED. Do not bypass locks, gates or forge review PASS.",
+  "next_action": "Phase4: capacity and connection stability. Correlate guardian admission with CPU/conntrack and client connection pressure; design capacity-aware output/failover with fresh receipts and review safeguards; validate mobile local-DNS/domain handling. Preserve protection and user quota/lifetime policy; do not silently raise cloud spend or claim client failover exists.",
   "phase_review": {
-    "1_design": "complete",
-    "2_implementation_and_tests": "complete; deployed base reviewed",
-    "3_rollout": "strict routing independently verified22/22; periodic status correction still blocked"
+    "1_design": {
+      "status": "COMPLETE",
+      "evidence": "Exact category/diagnostic/probe scope, default deny, DNS/sniffing/pool boundaries and rollback documented"
+    },
+    "2_implementation_and_tests": {
+      "status": "COMPLETE",
+      "evidence": "Reviewed deployed source; full Go and focused race PASS; reproduced old timeout failure and verified correction"
+    },
+    "3_rollout": {
+      "status": "COMPLETE_WITH_OPERATIONAL_LIMITS",
+      "evidence": "Guarded deploy, exact binaries, five readiness checks, native30/30 and final periodic APPLIED30/30; client26.9.9 9/9 and installed repeat9/9",
+      "open_operational_items": "Capacity-related admission and mobile compatibility; not full availability acceptance"
+    }
   },
   "status_reporting_contract": {
     "states": [
@@ -429,38 +714,58 @@
   "agent_continues_after_final_reply": false,
   "application_workers": "active; normal production reconciliation continues independently",
   "final_runtime_check": {
-    "at": "2026-10-08T15:57:40.433326+00:00",
     "manifest": {
-      "commit": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
-      "build_time": "2026-10-08T15:20:16Z",
-      "api_sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
-      "worker_sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+      "commit": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+      "build_time": "2026-10-08T22:26:08Z",
+      "api_sha256": "1033d001fc6621e9417697cc23794a78f8cf12081d4f3427568dedc538b3e90b",
+      "worker_sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
       "guardian_sha256": {
-        "amd64": "b6fedf33ce4142be2a1592193d15fd2ed574f9bcf7a0dda2c22df74e3cd3d44f",
-        "arm64": "e1c84d762520f61c2315a9407ed60e71f61babb0235999b8cf8300d4bfa138dd"
+        "amd64": "12d8694c2072f2355167b36b7888e85a206a38f324c15cc2e44f603c7e62a1e2",
+        "arm64": "1cdc0948e11c552c70ebba6bcbd1c2b5086e9933b8b9322e0e59e8649c4f58cb"
       }
     },
     "binaries": {
       "api": {
-        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
-        "sha256": "35bf7ea3695efc38ab2d459d534a0dc67bccc5fb2da8bb344aeb1eaffc94f2a6",
+        "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+        "sha256": "1033d001fc6621e9417697cc23794a78f8cf12081d4f3427568dedc538b3e90b",
         "vcs_modified": false
       },
       "worker": {
-        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
-        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
         "vcs_modified": false
       },
       "worker-panels": {
-        "revision": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
-        "sha256": "28886713ab1817206a50627c6d3210b5b5c150b5c32b8597fe6853e22fd1e879",
+        "revision": "d02f0450e2e8b71e5ff4b28ed52cb03eefe2f59e",
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
         "vcs_modified": false
       }
     },
     "services": {
-      "api": "active",
-      "worker": "active",
-      "worker-panels": "active"
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "3737129",
+        "NRestarts": "0",
+        "sha256": "1033d001fc6621e9417697cc23794a78f8cf12081d4f3427568dedc538b3e90b",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "3737130",
+        "NRestarts": "0",
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "3737131",
+        "NRestarts": "0",
+        "sha256": "1a8c5dd772f0c584d11c8d9d3861a65026101b69ed008aaaffb8f286bf7fc9f6",
+        "matches_manifest": true,
+        "vcs_modified_false": true
+      }
     },
     "readyz": {
       "status": "ready",
@@ -486,7 +791,254 @@
           "ok": true
         }
       ],
-      "at": "2026-10-08T15:57:40.574139023Z"
-    }
-  }
+      "at": "2026-10-08T22:39:27.33602877Z"
+    },
+    "retired_browser": {
+      "is-active": "inactive",
+      "is-enabled": "disabled"
+    },
+    "selector": "[Service]\nEnvironment=\"DOB_RESIDENTIAL_ALLOWLIST_PANELS=all\"",
+    "at": "2026-10-08T22:39:27.352827+00:00"
+  },
+  "previous_acceptance_summary": {
+    "at": "2026-10-08T15:57:40.433326+00:00",
+    "runtime": "7cc709efcffaacf0dad8eb5ddec8561d5a45eff1",
+    "native_serving_passed": 22,
+    "periodic_status_fix": "Independent review credit exhausted, not deployed at that historical checkpoint",
+    "history": "Exact previous report remains in Git commit5e6c10d; superseded by this continuation"
+  },
+  "capacity_diagnosis": {
+    "status": "FOLLOWUP_REQUIRED",
+    "at": "2026-10-08T22:39:27.352827+00:00",
+    "admission_blocked_count": 4,
+    "serving_count": 30,
+    "all_receipts_fresh_within_seconds": 60,
+    "blocked_panels": [
+      {
+        "panel": "36dc2630-bf06-4c1b-9faa-d7d4c7a8d915",
+        "state": "APPLIED",
+        "status": {
+          "ports": [
+            443
+          ],
+          "state": "RECOVERING",
+          "reason": "waiting for 30 seconds of stable resources",
+          "enabled": true,
+          "metrics": {
+            "rx_mbps": 1.1937673656945476,
+            "tx_mbps": 1.3510204130670918,
+            "fd_percent": 6.291625206933382e-14,
+            "cpu_percent": 88,
+            "disk_free_mb": 21102.46484375,
+            "mem_total_mb": 956.31640625,
+            "swap_used_mb": 0,
+            "psi_supported": true,
+            "io_psi_percent": 0,
+            "cpu_psi_percent": 61.9551863982893,
+            "mem_available_mb": 227.2890625,
+            "process_fd_known": true,
+            "conntrack_percent": 75.96354166666667,
+            "cpu_steal_percent": 0,
+            "disk_free_percent": 89.21521382991374,
+            "dropped_per_second": 0,
+            "inode_free_percent": 96.530379730017,
+            "memory_psi_percent": 0,
+            "packets_per_second": 1201.4374698064244,
+            "process_fd_percent": 0.8977907138647344,
+            "conntrack_supported": true,
+            "cpu_hot_core_percent": 88
+          },
+          "version": "1.0.0",
+          "recovery": "Xray managed listeners verified",
+          "revision": 1,
+          "xui_state": "active",
+          "observed_at": "2026-10-08T22:39:09.014315377Z",
+          "actuation_ms": 23.662,
+          "agent_running": true,
+          "nft_supported": true,
+          "sample_age_ms": 782,
+          "admission_blocked": true
+        },
+        "verified_at": "2026-10-08T22:39:09.809354+00:00",
+        "receipt_age_seconds": 17.409223
+      },
+      {
+        "panel": "3cfd6f84-a35b-4045-b6de-d20fa63e67df",
+        "state": "APPLIED",
+        "status": {
+          "ports": [
+            443
+          ],
+          "state": "CRITICAL",
+          "reason": "CPU queue pressure",
+          "enabled": true,
+          "metrics": {
+            "rx_mbps": 5.662574558379128,
+            "tx_mbps": 6.790712767997757,
+            "fd_percent": 3.454268121538817e-14,
+            "cpu_percent": 100,
+            "disk_free_mb": 15801.1171875,
+            "mem_total_mb": 950.49609375,
+            "swap_used_mb": 0.0703125,
+            "psi_supported": true,
+            "io_psi_percent": 0.468589074571782,
+            "cpu_psi_percent": 72.99536422425504,
+            "mem_available_mb": 314.69921875,
+            "process_fd_known": true,
+            "conntrack_percent": 65.32552083333333,
+            "cpu_steal_percent": 0,
+            "disk_free_percent": 67.4439310255828,
+            "dropped_per_second": 0,
+            "inode_free_percent": 98.16453332067401,
+            "memory_psi_percent": 0,
+            "packets_per_second": 1766.220358001332,
+            "process_fd_percent": 0.3770835439368132,
+            "conntrack_supported": true,
+            "cpu_hot_core_percent": 100
+          },
+          "version": "1.0.0",
+          "recovery": "Xray managed listeners verified",
+          "revision": 1,
+          "xui_state": "active",
+          "observed_at": "2026-10-08T22:38:36.941338184Z",
+          "actuation_ms": 11.35,
+          "agent_running": true,
+          "nft_supported": true,
+          "sample_age_ms": 459,
+          "admission_blocked": true
+        },
+        "verified_at": "2026-10-08T22:38:37.538631+00:00",
+        "receipt_age_seconds": 49.679946
+      },
+      {
+        "panel": "c0322d10-63cf-4f20-b7dd-8fc46d7805e4",
+        "state": "APPLIED",
+        "status": {
+          "ports": [
+            443
+          ],
+          "state": "CRITICAL",
+          "reason": "CPU queue pressure",
+          "enabled": true,
+          "metrics": {
+            "rx_mbps": 23.353875484400017,
+            "tx_mbps": 28.547778565735435,
+            "fd_percent": 4.832289082767893e-14,
+            "cpu_percent": 96.15384615384616,
+            "disk_free_mb": 21117.3984375,
+            "mem_total_mb": 956.31640625,
+            "swap_used_mb": 0,
+            "psi_supported": true,
+            "io_psi_percent": 0,
+            "cpu_psi_percent": 55.525382270487036,
+            "mem_available_mb": 319.828125,
+            "process_fd_known": true,
+            "conntrack_percent": 69.81770833333333,
+            "cpu_steal_percent": 0,
+            "disk_free_percent": 89.27834881293681,
+            "dropped_per_second": 0,
+            "inode_free_percent": 96.53041294642857,
+            "memory_psi_percent": 0,
+            "packets_per_second": 4899.321885216646,
+            "process_fd_percent": 0.623131986869787,
+            "conntrack_supported": true,
+            "cpu_hot_core_percent": 96.15384615384616
+          },
+          "version": "1.0.0",
+          "recovery": "Xray managed listeners verified",
+          "revision": 1,
+          "xui_state": "active",
+          "observed_at": "2026-10-08T22:39:04.026337797Z",
+          "actuation_ms": 25.978,
+          "agent_running": true,
+          "nft_supported": true,
+          "sample_age_ms": 831,
+          "admission_blocked": true
+        },
+        "verified_at": "2026-10-08T22:39:04.868528+00:00",
+        "receipt_age_seconds": 22.350049
+      },
+      {
+        "panel": "d4fbef39-e05c-464c-a999-72a02ff87c18",
+        "state": "APPLIED",
+        "status": {
+          "ports": [
+            443
+          ],
+          "state": "CRITICAL",
+          "reason": "CPU queue pressure",
+          "enabled": true,
+          "metrics": {
+            "rx_mbps": 23.343490953878195,
+            "tx_mbps": 23.28225914626233,
+            "fd_percent": 4.467997152812764e-14,
+            "cpu_percent": 100,
+            "disk_free_mb": 15763.19140625,
+            "mem_total_mb": 950.5,
+            "swap_used_mb": 61.546875,
+            "psi_supported": true,
+            "io_psi_percent": 0,
+            "cpu_psi_percent": 25.05777362211228,
+            "mem_available_mb": 298.22265625,
+            "process_fd_known": true,
+            "conntrack_percent": 69.94791666666667,
+            "cpu_steal_percent": 0,
+            "disk_free_percent": 67.28205235938698,
+            "dropped_per_second": 0,
+            "inode_free_percent": 98.16436154530372,
+            "memory_psi_percent": 0,
+            "packets_per_second": 5730.484607728395,
+            "process_fd_percent": 0.5641948017021212,
+            "conntrack_supported": true,
+            "cpu_hot_core_percent": 100
+          },
+          "version": "1.0.0",
+          "recovery": "Xray managed listeners verified",
+          "revision": 1,
+          "xui_state": "active",
+          "observed_at": "2026-10-08T22:38:59.686100282Z",
+          "actuation_ms": 12.259,
+          "agent_running": true,
+          "nft_supported": true,
+          "sample_age_ms": 50,
+          "admission_blocked": true
+        },
+        "verified_at": "2026-10-08T22:38:59.733053+00:00",
+        "receipt_age_seconds": 27.485524
+      }
+    ],
+    "diagnostic_panel": "d4fbef39-e05c-464c-a999-72a02ff87c18",
+    "observations": [
+      "Debug client logs show TCP443 connection refused on both client versions; both versions also produced successful DIRECT and RESIDENTIAL connections",
+      "Sanaei status showed Xray running, stable plan hash, and APPLIED routing across10 samples",
+      "Guardian receipt reports CPU100percent, CPU queue pressure, admission_blocked=true, port443, managed listeners verified",
+      "Existing owned nft admission rule rejects NEW TCP SYN with TCP reset under CRITICAL/RECOVERING while preserving established sessions",
+      "Separate TCP watch: overloaded panel5 OPEN and5 REFUSED; comparison panel10/10 OPEN; central receipt ages reached73seconds, so exact per-packet state correlation is not asserted"
+    ],
+    "conclusion": "Existing resource-protection admission is the supported cause of repeated TCP refusals on the loaded canary; it is not evidence of an allowlist escape or a version-specific TLS defect",
+    "not_changed": [
+      "guardian protection policy",
+      "client quotas/lifetimes",
+      "provider server sizes/counts",
+      "upstream credentials"
+    ],
+    "separate_unresolved_observation": "One initial www.gstatic.com request failed curl35 on the comparison panel; later same-credential tests pass. Its precise cause is not proved and is not attributed to guardian without evidence."
+  },
+  "rollback": {
+    "runtime_before_verifier_fix": "/opt/digital-ocean-bot.rollback.BZTZp014",
+    "policy_legacy_selector": "none",
+    "warning": "Legacy policy restores direct fallback and must be an intentional operator decision"
+  },
+  "evidence_files": [
+    "deployment-latency.json",
+    "latency-review.json",
+    "latency-integration.json",
+    "latency-release-full-recheck.log",
+    "latency-release-gates.log",
+    "fleet-after-latency.json",
+    "final-evidence-latency.json",
+    "traffic-pinned-diagnostic.log",
+    "traffic-healthy-comparison.json",
+    "connection-pressure-proof.json"
+  ]
 }
