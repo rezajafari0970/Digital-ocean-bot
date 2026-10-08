@@ -62,6 +62,22 @@ func TestEconomyPoolIsolationRace(t *testing.T) {
 	if a.Client.Transport == nil {
 		t.Fatal("client wrapper mutation leaked")
 	}
+	if a.Transport.TLSClientConfig.ClientSessionCache != a.resolver.tlsConfig.ClientSessionCache {
+		t.Fatal("destination/DNS ticket cache mismatch")
+	}
+	for _, g := range []*Gateway{b, newer, changed} {
+		if a.Transport.TLSClientConfig.ClientSessionCache == g.Transport.TLSClientConfig.ClientSessionCache {
+			t.Fatal("cross-scope TLS tickets")
+		}
+	}
+	plain, err := NewAccountProxyGateway("a", Proxy{ID: "p", Type: ProxyHTTP, Host: "127.0.0.1", Port: 9, Status: StatusHealthy}, creds, "provider_api")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plain.Transport.TLSClientConfig != nil || plain.resolver.tlsConfig != nil {
+		t.Fatal("unpooled behavior changed")
+	}
+
 }
 func TestEconomyBaseIntervalsFault(t *testing.T) {
 	now := time.Now()

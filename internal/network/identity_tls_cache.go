@@ -11,30 +11,30 @@ import (
 // is new, so resumption cannot stand in for a fresh exit-IP observation.
 type identityTLSCaches struct {
 	mu      sync.Mutex
-	entries map[[32]byte]*identityTLSCache
+	entries map[[32]byte]*expiringTLSCache
 	next    uint64
 }
-type identityTLSCache struct {
+type expiringTLSCache struct {
 	cache   tls.ClientSessionCache
 	expires time.Time
 	used    uint64
 }
 
-var probeTLSCaches = identityTLSCaches{entries: make(map[[32]byte]*identityTLSCache)}
+var probeTLSCaches = identityTLSCaches{entries: make(map[[32]byte]*expiringTLSCache)}
 
-func (c *identityTLSCache) Get(key string) (*tls.ClientSessionState, bool) {
+func (c *expiringTLSCache) Get(key string) (*tls.ClientSessionState, bool) {
 	if !time.Now().Before(c.expires) {
 		return nil, false
 	}
 	return c.cache.Get(key)
 }
-func (c *identityTLSCache) Put(key string, state *tls.ClientSessionState) {
+func (c *expiringTLSCache) Put(key string, state *tls.ClientSessionState) {
 	if time.Now().Before(c.expires) {
 		c.cache.Put(key, state)
 	}
 }
 
-func (s *identityTLSCaches) forRoute(account string, p Proxy, creds ProxyCredentials) *identityTLSCache {
+func (s *identityTLSCaches) forRoute(account string, p Proxy, creds ProxyCredentials) *expiringTLSCache {
 	key := sha256.Sum256([]byte(account + "\x00" + providerRouteKey(p, creds, "identity")))
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -59,7 +59,7 @@ func (s *identityTLSCaches) forRoute(account string, p Proxy, creds ProxyCredent
 			}
 			delete(s.entries, oldest)
 		}
-		c = &identityTLSCache{cache: tls.NewLRUClientSessionCache(8), expires: now.Add(10 * time.Minute)}
+		c = &expiringTLSCache{cache: tls.NewLRUClientSessionCache(8), expires: now.Add(10 * time.Minute)}
 		s.entries[key] = c
 	}
 	s.next++

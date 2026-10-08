@@ -2,6 +2,7 @@ package network
 
 import (
 	"crypto/sha256"
+	"crypto/tls"
 	"fmt"
 	"sync"
 	"time"
@@ -64,6 +65,11 @@ func (p *ProviderTransportPool) Open(owner string, proxy Proxy, creds ProxyCrede
 		if err != nil {
 			return nil, err
 		}
+		// Each exact pool entry owns fresh TLS ticket state. Expiry is absolute,
+		// matching the transport lifetime, and never extends on resumed use.
+		cache := &expiringTLSCache{cache: tls.NewLRUClientSessionCache(8), expires: now.Add(10 * time.Minute)}
+		g.Transport.TLSClientConfig = &tls.Config{ClientSessionCache: cache}
+		g.resolver.tlsConfig = &tls.Config{ClientSessionCache: cache}
 		g.Transport.IdleConnTimeout = 5 * time.Minute
 		g.Transport.MaxIdleConnsPerHost = 4
 		entry = pooledGateway{key: key, gateway: g, created: now}

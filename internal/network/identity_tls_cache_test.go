@@ -144,13 +144,36 @@ func TestIdentityTLSFreshSocketsAndVerification(t *testing.T) {
 		remote[o.Remote] = true
 		g.CloseIdleConnections()
 	}
-	if connects.Load() != 11 {
+	// Provider reconnects resume only inside one exact pool entry. Replacing
+	// the route revision, even with unchanged credentials, starts with no ticket.
+	pool := NewProviderTransportPool(4)
+	defer pool.Close()
+	for i, revision := range []string{"epoch1/ip1", "epoch1/ip1", "epoch2/ip2"} {
+		g, err := pool.Open("provider", p, creds, revision)
+		if err != nil {
+			t.Fatal(err)
+		}
+		g.Transport.TLSClientConfig.RootCAs = roots
+		resp, err := g.Client.Get(server.URL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+		g.Transport.CloseIdleConnections()
+		o := <-seen
+		if o.Resumed != (i == 1) || remote[o.Remote] {
+			t.Fatalf("provider resumed=%t fresh=%t", o.Resumed, !remote[o.Remote])
+		}
+		remote[o.Remote] = true
+	}
+	if connects.Load() != 14 {
 		t.Fatalf("CONNECT count=%d", connects.Load())
 	}
 }
 
 func TestIdentityTLSCacheIsolationBoundsExpiryRace(t *testing.T) {
-	s := identityTLSCaches{entries: make(map[[32]byte]*identityTLSCache)}
+	s := identityTLSCaches{entries: make(map[[32]byte]*expiringTLSCache)}
 	p := Proxy{ID: "p", Type: ProxyHTTP, Host: "127.0.0.1", Port: 8080}
 	creds := ProxyCredentials{Username: "sticky", Password: "secret"}
 	c := s.forRoute("a", p, creds)

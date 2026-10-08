@@ -1,0 +1,40 @@
+{
+  "goal": "Reduce repeated provider and DoH TLS handshake bytes within the already isolated economy ProviderTransportPool.",
+  "context": "Bounded follow-up to reviewed 722ca1c (identity ticket-only TLS) and deployed b5cc331. Measured remaining provider API bytes about 1.9KB/sec after existing keepalive/cache changes; optimize reconnect handshakes too. On creation of a pooled gateway, attach one NEW eight-entry expiring TLS session cache shared only by its own destination and DoH configs, lifetime ten minutes matching existing raw transport lifetime. The existing pool is enabled only by per-account economy rollout and keys account+proxy credentials+provider/generation/epoch/sticky/IP revision. Never use the global identity cache for providers; never share across entries/revisions/credentials. Flag off/unpooled paths unchanged. Preserve TLS defaults, certificate verification, all per-request SQL guards, metadata capacity authority, DNS TTL, deadlines, and cleanup. No request/result caching beyond existing policies. Add real CONNECT/TLS test proving new socket resumption within a scope and full handshake on revision replacement, plus TLS state isolation assertions in concurrent pool tests. Full suite and six-package race, actual API review on exact tested source. No subagents. Deploy together with reviewed identity TLS after current scheduler sample ends; canary first, preserve unknown operations/recovery checkpoint; browser manager disabled after standard deployment.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go",
+    "docs/development-jobs/proxy-economy-timeout-fix-20261008.json",
+    "docs/development-jobs/proxy-economy-scheduler-20261008.json",
+    "docs/development-jobs/proxy-economy-tls-20261008.json",
+    "docs/development-jobs/proxy-economy-provider-tls-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "perf(network): resume TLS within isolated provider transports"
+}

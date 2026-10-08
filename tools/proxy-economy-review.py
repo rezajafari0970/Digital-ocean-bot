@@ -34,6 +34,7 @@ def main():
         'Retire obsolete idle browser manager operationally after coordinated deployment; endpoints return 410. '
         'If the scheduler follow-up job is supplied, focus on that bounded change: the timeout fix 4790dd7 is already reviewed, deployed and verified healthy; scheduled readiness should share the keeper lease/cadence, while actual deployment and mutation checks stay fresh. '
         'If the TLS follow-up job is supplied, assess ticket-only resumption: fresh transports/resolvers/TCP/IP responses, exact account+proxy+credential digest isolation, bounded non-sliding 10-minute expiry, default TLS security and flag-off behavior. Scheduler b5cc331 is already reviewed and healthy. Go1.27.1 loadSession revalidates cached chain validity/roots and hostname; no 0-RTT or certificate bypass. '
+        'For provider TLS follow-up, identity TLS 722ca1c already passed exact-source review/tests. Assess the bounded addition of a separate per-entry TLS cache in the existing economy pool. All route/generation/epoch/credential keys and per-request guards remain unchanged; provider and identity caches must never be shared. '
         '\nTEST EVIDENCE:\n'+json.dumps(evidence)+'\nTEST OUTPUT:\n'+(BASE/'acceptance.log').read_text()[-14000:]+''.join(chunks))
     env=os.environ.copy();env.setdefault('OPENAI_MAX_OUTPUT_TOKENS','8000')
     result=subprocess.run([sys.executable,str(ROOT/'tools/openai-development-adapter.py')],cwd=ROOT,input=prompt,text=True,capture_output=True,env=env,timeout=300)
