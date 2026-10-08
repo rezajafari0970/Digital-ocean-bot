@@ -1,0 +1,40 @@
+{
+  "goal": "Reduce repeated TLS handshake bytes for fresh identity and proxy DNS observations without sharing sockets, skipping network checks, relaxing freshness or mixing account sessions.",
+  "context": "Follow-up to reviewed b5cc331. Live first global window reduced gateway TCP payload by 74.7% including 2.38MB cold catalog fetch. Remaining identity plus DNS exceeds 2.3MB/15min. Add bounded (128 scopes, 10-minute lifetime, 8 TLS server entries per scope) Go TLS client session resumption only when the existing per-account economy rollout is enabled. Scope by account, proxy ID/type/host/port and exact credential digest (includes sticky session); never log credentials or tickets. Every probe must still create a fresh HTTP transport, DNS resolver and TCP/CONNECT connection and obtain a fresh IP response; only TLS tickets may persist. DNS TTL, certificate/hostname verification, TLS versions, deadlines, proxy authentication, rotation/adoption/collision checks, mutation guards, provider capacity and cleanup stay unchanged. Flag off has no TLS cache and same prior behavior. Test actual fresh sockets plus TLS DidResume, cross-account/credential/session/port isolation, bounded expiry under race, DNS cache wiring and certificate rejection. Run full suite and six-package race, exact-source API review. No subagents. Deploy only after scheduler canary and current passive sample complete, then one-account canary and 15-minute production resampling. Retire obsolete manager after standard upgrade.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go",
+    "docs/development-jobs/proxy-economy-timeout-fix-20261008.json",
+    "docs/development-jobs/proxy-economy-scheduler-20261008.json",
+    "docs/development-jobs/proxy-economy-tls-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "perf(network): resume scoped TLS sessions for fresh identity probes",
+  "api_findings": "Inspected /usr/local/go/src/crypto/tls/{handshake_client,common}.go on Go1.27.1: ClientSessionCache supports concurrent Get/Put; standard LRU bounds server entries. loadSession checks TLS version, cached certificate expiry, hostname and verified chains against current roots, ticket expiry, and requires DHE for TLS1.3 resumption. Fresh http.Transport gets a new tls.Config; DNS gets a separate config sharing only the scoped ticket cache. Preserve default TLS configuration rather than overriding minimum versions or curves."
+}

@@ -35,6 +35,7 @@ type proxyAResolver struct {
 	mu        sync.Mutex
 	cache     map[string]cachedA
 	scope     trafficScope
+	tlsConfig *tls.Config
 	pending   map[string]*dnsFlight
 }
 
@@ -94,6 +95,7 @@ func (r *proxyAResolver) resolveFresh(ctx context.Context, host string) (string,
 	var last error
 	for _, ep := range endpoints {
 		tr := &http.Transport{
+			TLSClientConfig:       r.tlsConfig,
 			ForceAttemptHTTP2:     true,
 			TLSHandshakeTimeout:   5 * time.Second,
 			ResponseHeaderTimeout: 5 * time.Second,

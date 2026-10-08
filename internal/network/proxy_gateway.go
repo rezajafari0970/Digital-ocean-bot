@@ -24,6 +24,7 @@ type Gateway struct {
 	Transport   *http.Transport
 	Client      *http.Client
 	pooled      bool
+	resolver    *proxyAResolver
 }
 
 func NewProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
@@ -139,7 +140,7 @@ func newProxyGatewayForPurpose(accountID string, p Proxy, creds ProxyCredentials
 		Transport: trafficTransport{base: MetadataTransport{Base: PrivacyTransport{Base: tr}}, scope: scope},
 		Timeout:   30 * time.Second,
 	}
-	return &Gateway{AccountID: accountID, Proxy: p, Credentials: creds, Transport: tr, Client: client}, nil
+	return &Gateway{AccountID: accountID, Proxy: p, Credentials: creds, Transport: tr, Client: client, resolver: resolver}, nil
 }
 
 func (g *Gateway) Validate(accountID string) error {

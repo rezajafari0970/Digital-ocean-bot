@@ -165,7 +165,7 @@ func (c Container) EnsureFreshNetworkIdentity(ctx context.Context, accountID str
 		}
 		defer wipe(pass)
 	}
-	g, err := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(pass)}, "identity")
+	g, err := c.newIdentityGateway(ctx, accountID, *cfg.Proxy, network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(pass)})
 	if err != nil {
 		return err
 	}
