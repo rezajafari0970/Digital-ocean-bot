@@ -1,0 +1,2548 @@
+{
+  "audit": "proxy-separation-20261008",
+  "generated_at": "2026-10-08T09:43:01.445286+00:00",
+  "verdict": "NO_CROSS_ROLE_ROUTE_OBSERVED_WITHIN_VERIFIED_SCOPE; CONSUMPTION_AND_COVERAGE_GAPS_REMAIN",
+  "source_head": "2c2f904f53903d4e3ec55a5a9b09f2ec8904c68a",
+  "deployed_product_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "production_mutations": false,
+  "credential_plaintext_saved": false,
+  "coverage": {
+    "db_base_endpoints": 1,
+    "db_residential_endpoints": 12,
+    "non_deleted_enabled_panel_records": 81,
+    "native_settings_read": 8,
+    "native_login_unavailable": 73,
+    "native_runtime_route_probes": 72
+  },
+  "isolation": {
+    "base_residential_credential_comparison": [
+      {
+        "base": "dataimpulse",
+        "residential": "ads6",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads7",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads5",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads12",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads11",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads9",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads4",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads8",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads10",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads3",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads1",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      },
+      {
+        "base": "dataimpulse",
+        "residential": "ads2",
+        "same_authenticated_identity": false,
+        "same_host": false,
+        "same_password": false,
+        "same_username": false
+      }
+    ],
+    "base_references_in_read_panels": 0,
+    "unknown_endpoints_in_read_panels": 0,
+    "base_accounts_share_one_configured_identity": 9,
+    "enabled_base_accounts": 5,
+    "all12_residential_secrets_use_residential_scope": true
+  },
+  "current_base_failure": {
+    "code": "PROXY_AUTH_FAILED",
+    "last_success_utc": "2026-10-08T02:35:31.678643Z",
+    "cause_with_provider": "UNDETERMINED: credentials, quota or provider restriction not distinguished"
+  },
+  "traffic_observation": {
+    "initial_audit_started_at": "2026-10-08T09:01:19.666321665Z",
+    "followup_at": [
+      "2026-10-08T09:09:39.919052348Z",
+      "2026-10-08T09:09:39.919021169Z",
+      "2026-10-08T09:09:40.236609273Z",
+      "2026-10-08T09:09:40.544372669Z",
+      "2026-10-08T09:09:40.720066425Z",
+      "2026-10-08T09:09:39.919083937Z",
+      "2026-10-08T09:09:40.248045518Z",
+      "2026-10-08T09:09:39.91904295Z"
+    ],
+    "delta_bytes": 1022471317,
+    "per_panel": [
+      {
+        "panel": "6a2b0aa5-a32b-4a50-bb3a-9bf2f40393ac",
+        "account": "S1",
+        "down_bytes": 433098577,
+        "up_bytes": 30474013
+      },
+      {
+        "panel": "68c99bae-21a9-4c9f-88ff-a10f8f106527",
+        "account": "S1",
+        "down_bytes": 294179896,
+        "up_bytes": 33695096
+      },
+      {
+        "panel": "1b6f5e11-8553-4813-80ba-11c4d7ce707c",
+        "account": "S1",
+        "down_bytes": 175448376,
+        "up_bytes": 13029985
+      },
+      {
+        "panel": "5ac972c7-a12d-45ae-8e70-9ffac6621300",
+        "account": "Upcloud 113",
+        "down_bytes": 0,
+        "up_bytes": 3260
+      },
+      {
+        "panel": "5bc28159-e25a-4d0e-aa0b-5d8d29e50971",
+        "account": "Upcloud 113",
+        "down_bytes": 0,
+        "up_bytes": 3492
+      },
+      {
+        "panel": "178a676a-64d6-4f8e-b04e-711ab7c4d594",
+        "account": "Sor oc",
+        "down_bytes": 38403618,
+        "up_bytes": 3137253
+      },
+      {
+        "panel": "8c72f80e-f59c-40e7-9876-b58b3fda0bf3",
+        "account": "Sor oc",
+        "down_bytes": 191937,
+        "up_bytes": 185760
+      },
+      {
+        "panel": "17c0c73c-e524-45ad-912e-c1295c26ccb9",
+        "account": "Sor oc",
+        "down_bytes": 55755,
+        "up_bytes": 564299
+      }
+    ],
+    "metric": "native cumulative INBOUND counters, not proxy billed bytes"
+  },
+  "native_runtime_routes": [
+    {
+      "panel": "5bc28159-e25a-4d0e-aa0b-5d8d29e50971",
+      "account": "Upcloud 113",
+      "provider": "upcloud",
+      "at": "2026-10-08T09:11:01.980156797Z",
+      "runtime_route_tests": [
+        {
+          "class": "BLOCKED",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-blocked-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "BLOCKED",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-blocked-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "BLOCKED",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-62aaa4f188cf97b9",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": []
+    },
+    {
+      "panel": "6a2b0aa5-a32b-4a50-bb3a-9bf2f40393ac",
+      "account": "S1",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:02.100293302Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-6-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-1-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-409e99334e68954a",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    },
+    {
+      "panel": "68c99bae-21a9-4c9f-88ff-a10f8f106527",
+      "account": "S1",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:01.980220988Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-3-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-7-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-b60296ac2596d4c5",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    },
+    {
+      "panel": "1b6f5e11-8553-4813-80ba-11c4d7ce707c",
+      "account": "S1",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:02.289005072Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-0-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-7-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-dc3d26f288fcd943",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    },
+    {
+      "panel": "5ac972c7-a12d-45ae-8e70-9ffac6621300",
+      "account": "Upcloud 113",
+      "provider": "upcloud",
+      "at": "2026-10-08T09:11:02.69231608Z",
+      "runtime_route_tests": [
+        {
+          "class": "BLOCKED",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-blocked-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "BLOCKED",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-blocked-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "BLOCKED",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-8bb5613a4502dd4b",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": []
+    },
+    {
+      "panel": "178a676a-64d6-4f8e-b04e-711ab7c4d594",
+      "account": "Sor oc",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:01.980204006Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-8-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-0-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-aff16dc554358624",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    },
+    {
+      "panel": "17c0c73c-e524-45ad-912e-c1295c26ccb9",
+      "account": "Sor oc",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:01.980197494Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-3-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-7-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-e4d989219daf90b9",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    },
+    {
+      "panel": "8c72f80e-f59c-40e7-9876-b58b3fda0bf3",
+      "account": "Sor oc",
+      "provider": "digitalocean",
+      "at": "2026-10-08T09:11:02.395038944Z",
+      "runtime_route_tests": [
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-pool-lane-tcp-3-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-pool-lane-udp-5-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "RESIDENTIAL",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "adservice.google.com",
+          "matched": true,
+          "network": "udp",
+          "outbound_tag": "dob-route-direct-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "class": "DIRECT",
+          "domain": "www.google.com",
+          "matched": true,
+          "network": "tcp",
+          "outbound_tag": "dob-route-direct-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        }
+      ],
+      "pool_route_tests": [
+        {
+          "lane": "dob-route-pool-in-tcp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-tcp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-fast",
+          "matched": true,
+          "outbound_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        },
+        {
+          "lane": "dob-route-pool-in-udp-all",
+          "matched": true,
+          "outbound_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-9edc0b501e2690e3",
+          "read_ok": true,
+          "success": true
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "PSA-001",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "Expired cloud nodes remain running with enabled unlimited clients and increasing inbound counters",
+      "evidence": "All eight reachable panels report Xray running, DB server expiry passed, four enabled clients with no volume/expiry limit each. Between two reads aggregate inbound counters increased 1,022,471,317 bytes. The authentication outage blocks proxy-required provider operations and may block provider-side cleanup; this audit did not trace a deletion attempt for each of these eight nodes. Remote Xray remains running independently.",
+      "limit": "Inbound bytes include Direct and residential-class traffic; they do not prove billed residential bytes, DataImpulse bytes, outsider misuse, or amount since expiry. Lifetime=0 is existing intentional policy; do not reset it silently.",
+      "next": "Design idempotent panel-local retirement/expiry enforcement independent of provider deletion, preserving configured client policy and existing ownership/gates; do not blind-delete or bypass provider restrictions."
+    },
+    {
+      "id": "PSA-002",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED_CONFIGURATION",
+      "title": "Recurring residential probes multiply by panel count",
+      "evidence": "Six reachable DO panels each select all12 residential outbounds with burstObservatory interval10s, sampling1; central monitor schedules enabled healthy targets every30s. Conditional calculation only: IF Xray probes each subject once per configured10s interval, six panels times12 subjects times8640 gives622080 attempts/day; IF all12 central targets remain enabled and healthy,12 times2880 gives34560 checks/day. Exact Xray per-subject scheduling and completed attempts were not measured.",
+      "limit": "Not measured completed requests or billed bytes. Proxy health needs panel-local reachability; global health is not a safe wholesale substitute. UpCloud panels have no residential outbounds/probes in the observed configuration; this finding does not assign a cause.",
+      "next": "Measure outbound probe bytes, use bounded adaptive cadence and jitter, and retain per-panel fail-closed recovery."
+    },
+    {
+      "id": "PSA-003",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "No reliable proxy-byte attribution for this incident",
+      "evidence": "All eight readable Xray settings enable inbound byte stats but disable outbound byte stats. Control-plane health records have latency/check counts, not per-proxy bytes. Provider usage export was not available.",
+      "limit": "Current auth failure happens before destination transfer and cannot explain the user-reported rapid quota depletion by itself. Stored provider snapshot size is not transferred or billed network size.",
+      "next": "Add separately scoped accounting for base and residential outbounds; reconcile provider usage by timestamp, source IP and subuser without logging secrets."
+    },
+    {
+      "id": "PSA-004",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED_SOURCE_GAP",
+      "title": "Separate storage does not prevent future duplicate endpoint credentials across roles",
+      "evidence": "Current base and each of the12 residential records differ in host, username and password. Reviewed application write paths are base create/update, residential single create/update and residential bulk import; none contains cross-role identity exclusion. Current schema constraints/indexes/triggers are captured and contain no cross-role authenticated-identity exclusion. Direct operator SQL and every historical migration writer were not exhaustively audited. Credential-store implementations are included in the review package; live constraints/indexes/triggers for secrets and residential_proxy_secrets were also captured. These are scoped inspected paths, not a claim to have inspected every external/direct SQL writer.",
+      "limit": "This is a future-configuration prevention gap, not evidence of current mixed routing. Shared gateway IP alone is not proof of shared billing identity.",
+      "next": "Define canonical authenticated-provider identity and reject cross-role reuse in every write path plus runtime validation; test same host with distinct legitimate subscriptions and concurrent changes."
+    },
+    {
+      "id": "PSA-005",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED_SOURCE_POTENTIAL_OVERHEAD",
+      "title": "Provider observation repeats catalog requests; byte cost is unmeasured",
+      "evidence": "DO refresh becomes eligible when its stored snapshot is older than60s. Driver.Observe calls GetAccount, Catalog and ListDropletModels. Catalog itself calls GetAccount again and requests regions, sizes and distribution images. Thus a successful full observation includes a duplicate account read and refreshed catalog; it does not call legacy Discover or fetch projects/keys/firewalls through that path. UpCloud/Vultr use fastObserve with reused catalog. The two DO account profiles are proxy_required on DataImpulse. Current auth rejection prevents successful destination transfer; historical request/byte overhead is not measured. Base monitor configured10s; account identity checks separately scheduled.",
+      "limit": "No historical billed byte counter; frequency is source/configuration and can be constrained by admission/backoff. Do not infer amount from snapshot payload size.",
+      "next": "Measure requests/bytes and separate catalog TTL from frequently refreshed resource inventory."
+    },
+    {
+      "id": "PSA-006",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED_LATENT_DEPENDENCY",
+      "title": "Panel HTTP transport can inherit future proxy environment settings",
+      "evidence": "Sanaei API client falls back to http.DefaultTransport. Current API/control/panels/browser-manager processes have no HTTP_PROXY, HTTPS_PROXY or ALL_PROXY variables. Provider gateway has an explicit isolated transport and residential uses its own secrets.",
+      "limit": "No current environment-proxy routing found. HTTP proxy variables do not control the separate direct SSH net.Dialer.",
+      "next": "Use an explicit panel-management transport with Proxy:nil and a regression test; preserve TLS/timeouts."
+    }
+  ],
+  "limits": [
+    "73 Vultr panel records could not be authenticated/reached; their current/historical routes are unverified, not presumed safe or serving.",
+    "No provider billing export or destination/source-IP history was available. External use of leaked/shared credentials cannot be excluded.",
+    "Current source and eight reachable native configurations do not prove all historical traffic paths.",
+    "A listener inventory was captured. It does not establish every application-layer behavior; proxy relay or external credential use is not excluded.",
+    "Focused race tests passed; PostgreSQL-specific tests were skipped because no isolated test DSN was supplied.",
+    "Distinct configured role credentials/endpoints do not establish independent provider-side subscriptions or billing/quota pools; that independence was not verified."
+  ],
+  "tests": {
+    "argv": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "./internal/network",
+      "./internal/secrets",
+      "./internal/panels/residentialsync"
+    ],
+    "production_dsn_removed": true,
+    "isolated_pg_test_dsn_present": false,
+    "returncode": 0,
+    "stdout": "ok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/network\t1.037s\nok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/secrets\t1.020s\nok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync\t1.899s\n",
+    "stderr": ""
+  },
+  "provenance": {
+    "at": "2026-10-08T09:17:57.508840+00:00",
+    "source_vs_deployed_changed_paths": [
+      "docs/CONTINUITY_FINAL_STATUS.json",
+      "docs/DEVELOPMENT_READY_HANDOFF.md",
+      "docs/KNOWLEDGE_DRIFT_STATUS.json",
+      "docs/NETWORK_RECOVERY_20261008.md",
+      "docs/NETWORK_RECOVERY_20261008_ACCEPTANCE.json",
+      "docs/NETWORK_RECOVERY_20261008_BRAIN_DELTA.json",
+      "docs/NETWORK_RECOVERY_20261008_SOURCE_SNAPSHOT.json",
+      "docs/OPERATIONAL_CONTINUATION_20261008.md",
+      "docs/PRODUCTION_REVISION_STATUS.json"
+    ],
+    "processes": [
+      {
+        "ActiveState": "active",
+        "MainPID": "2739199",
+        "NRestarts": "0",
+        "service": "digital-ocean-bot-api",
+        "proxy_environment_keys": [],
+        "vcs_build": [
+          "build\tvcs.revision=bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+          "build\tvcs.time=2026-10-08T07:33:55Z",
+          "build\tvcs.modified=false"
+        ]
+      },
+      {
+        "ActiveState": "active",
+        "MainPID": "2739201",
+        "NRestarts": "0",
+        "service": "digital-ocean-bot-worker",
+        "proxy_environment_keys": [],
+        "vcs_build": [
+          "build\tvcs.revision=bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+          "build\tvcs.time=2026-10-08T07:33:55Z",
+          "build\tvcs.modified=false"
+        ]
+      },
+      {
+        "ActiveState": "active",
+        "MainPID": "2739202",
+        "NRestarts": "0",
+        "service": "digital-ocean-bot-worker-panels",
+        "proxy_environment_keys": [],
+        "vcs_build": [
+          "build\tvcs.revision=bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+          "build\tvcs.time=2026-10-08T07:33:55Z",
+          "build\tvcs.modified=false"
+        ]
+      },
+      {
+        "ActiveState": "active",
+        "MainPID": "4178894",
+        "NRestarts": "0",
+        "service": "digital-ocean-bot-vultr-browser-manager",
+        "proxy_environment_keys": [],
+        "vcs_build": [
+          "build\tvcs.revision=5d68621a0c37ede115f10099196d56de482fc3de",
+          "build\tvcs.time=2026-10-02T12:34:35Z",
+          "build\tvcs.modified=false"
+        ]
+      }
+    ],
+    "listeners": [
+      "udp UNCONN 0      0         127.0.0.54:53    0.0.0.0:* users:((\"systemd-resolve\",pid=2153186,fd=19))             ",
+      "udp UNCONN 0      0      127.0.0.53%lo:53    0.0.0.0:* users:((\"systemd-resolve\",pid=2153186,fd=17))             ",
+      "udp UNCONN 0      0          127.0.0.1:323   0.0.0.0:* users:((\"chronyd\",pid=1023,fd=4))                         ",
+      "udp UNCONN 0      0              [::1]:323      [::]:* users:((\"chronyd\",pid=1023,fd=5))                         ",
+      "tcp LISTEN 0      4096         0.0.0.0:631   0.0.0.0:* users:((\"cupsd\",pid=431774,fd=8))                         ",
+      "tcp LISTEN 0      4096         0.0.0.0:22    0.0.0.0:* users:((\"sshd\",pid=2153164,fd=3),(\"systemd\",pid=1,fd=255))",
+      "tcp LISTEN 0      200        127.0.0.1:5432  0.0.0.0:* users:((\"postgres\",pid=2153300,fd=6))                     ",
+      "tcp LISTEN 0      4096      127.0.0.54:53    0.0.0.0:* users:((\"systemd-resolve\",pid=2153186,fd=20))             ",
+      "tcp LISTEN 0      4096   127.0.0.53%lo:53    0.0.0.0:* users:((\"systemd-resolve\",pid=2153186,fd=18))             ",
+      "tcp LISTEN 0      2048         0.0.0.0:4040  0.0.0.0:* users:((\"uvicorn\",pid=2153171,fd=6))                      ",
+      "tcp LISTEN 0      4096            [::]:631      [::]:* users:((\"cupsd\",pid=431774,fd=9))                         ",
+      "tcp LISTEN 0      4096            [::]:22       [::]:* users:((\"sshd\",pid=2153164,fd=4),(\"systemd\",pid=1,fd=257))",
+      "tcp LISTEN 0      4096               *:18080       *:* users:((\"digital-ocean-b\",pid=2739199,fd=7))              "
+    ],
+    "base_health": [
+      {
+        "name": "dataimpulse",
+        "status": "down",
+        "health_error": "PROXY_AUTH_FAILED",
+        "last_checked_at": "2026-10-08T09:17:52.221453+00:00",
+        "last_success_at": "2026-10-08T02:35:31.678643+00:00"
+      }
+    ],
+    "proxy_table_constraints": [
+      {
+        "relname": "proxies",
+        "conname": "proxies_adapter_check",
+        "definition": "CHECK ((adapter = ANY (ARRAY['generic'::text, 'suffix-session'::text])))"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_adapter_not_null",
+        "definition": "NOT NULL adapter"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_consecutive_successes_not_null",
+        "definition": "NOT NULL consecutive_successes"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_created_at_not_null",
+        "definition": "NOT NULL created_at"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_exit_ipv4",
+        "definition": "CHECK (((exit_ip IS NULL) OR (family(exit_ip) = 4)))"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_failure_count_not_null",
+        "definition": "NOT NULL failure_count"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_host_not_null",
+        "definition": "NOT NULL host"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_id_not_null",
+        "definition": "NOT NULL id"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_name_key",
+        "definition": "UNIQUE (name)"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_name_not_null",
+        "definition": "NOT NULL name"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_port_check",
+        "definition": "CHECK (((port >= 1) AND (port <= 65535)))"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_port_not_null",
+        "definition": "NOT NULL port"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_status_not_null",
+        "definition": "NOT NULL status"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_type_check",
+        "definition": "CHECK ((type = ANY (ARRAY['http'::text, 'https'::text, 'socks5'::text])))"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_type_not_null",
+        "definition": "NOT NULL type"
+      },
+      {
+        "relname": "proxies",
+        "conname": "proxies_updated_at_not_null",
+        "definition": "NOT NULL updated_at"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_check_count_not_null",
+        "definition": "NOT NULL check_count"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_created_at_not_null",
+        "definition": "NOT NULL created_at"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_enabled_not_null",
+        "definition": "NOT NULL enabled"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_host_not_null",
+        "definition": "NOT NULL host"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_last_error_not_null",
+        "definition": "NOT NULL last_error"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_latency_ewma_ms_not_null",
+        "definition": "NOT NULL latency_ewma_ms"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_name_not_null",
+        "definition": "NOT NULL name"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_outbound_tag_key",
+        "definition": "UNIQUE (outbound_tag)"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_outbound_tag_not_null",
+        "definition": "NOT NULL outbound_tag"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_pkey",
+        "definition": "PRIMARY KEY (proxy_id)"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_port_check",
+        "definition": "CHECK (((port >= 1) AND (port <= 65535)))"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_port_not_null",
+        "definition": "NOT NULL port"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_priority_check",
+        "definition": "CHECK ((priority >= 0))"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_priority_not_null",
+        "definition": "NOT NULL priority"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_proxy_id_not_null",
+        "definition": "NOT NULL proxy_id"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_status_check",
+        "definition": "CHECK ((status = ANY (ARRAY['unknown'::text, 'healthy'::text, 'down'::text])))"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_status_not_null",
+        "definition": "NOT NULL status"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_success_ewma_not_null",
+        "definition": "NOT NULL success_ewma"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_type_check",
+        "definition": "CHECK ((type = ANY (ARRAY['http'::text, 'https'::text, 'socks5'::text])))"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_type_not_null",
+        "definition": "NOT NULL type"
+      },
+      {
+        "relname": "residential_proxies",
+        "conname": "residential_proxies_updated_at_not_null",
+        "definition": "NOT NULL updated_at"
+      }
+    ],
+    "proxy_table_indexes": [
+      {
+        "tablename": "proxies",
+        "indexname": "proxies_pkey",
+        "indexdef": "CREATE UNIQUE INDEX proxies_pkey ON public.proxies USING btree (id)"
+      },
+      {
+        "tablename": "proxies",
+        "indexname": "proxies_name_key",
+        "indexdef": "CREATE UNIQUE INDEX proxies_name_key ON public.proxies USING btree (name)"
+      },
+      {
+        "tablename": "proxies",
+        "indexname": "proxies_status_idx",
+        "indexdef": "CREATE INDEX proxies_status_idx ON public.proxies USING btree (status)"
+      },
+      {
+        "tablename": "residential_proxies",
+        "indexname": "residential_proxies_pkey",
+        "indexdef": "CREATE UNIQUE INDEX residential_proxies_pkey ON public.residential_proxies USING btree (proxy_id)"
+      },
+      {
+        "tablename": "residential_proxies",
+        "indexname": "residential_proxies_outbound_tag_key",
+        "indexdef": "CREATE UNIQUE INDEX residential_proxies_outbound_tag_key ON public.residential_proxies USING btree (outbound_tag)"
+      },
+      {
+        "tablename": "residential_proxies",
+        "indexname": "residential_proxies_active_priority_idx",
+        "indexdef": "CREATE INDEX residential_proxies_active_priority_idx ON public.residential_proxies USING btree (priority, proxy_id) WHERE (enabled = true)"
+      },
+      {
+        "tablename": "residential_proxies",
+        "indexname": "residential_name_unique",
+        "indexdef": "CREATE UNIQUE INDEX residential_name_unique ON public.residential_proxies USING btree (lower(btrim(name)))"
+      }
+    ],
+    "proxy_table_triggers": [
+      {
+        "relname": "proxies",
+        "tgname": "trg_bump_transport_epoch_proxy",
+        "definition": "CREATE TRIGGER trg_bump_transport_epoch_proxy AFTER UPDATE OF type, host, port, username, adapter, secret_ref ON public.proxies FOR EACH ROW EXECUTE FUNCTION bump_account_transport_epoch_for_proxy()",
+        "function": "CREATE OR REPLACE FUNCTION public.bump_account_transport_epoch_for_proxy()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF (OLD.type IS DISTINCT FROM NEW.type) OR (OLD.host IS DISTINCT FROM NEW.host) OR (OLD.port IS DISTINCT FROM NEW.port) OR (OLD.username IS DISTINCT FROM NEW.username) OR (OLD.adapter IS DISTINCT FROM NEW.adapter) OR (OLD.secret_ref IS DISTINCT FROM NEW.secret_ref) THEN\n    INSERT INTO account_transport_state(account_id,provider,transport_epoch,active_proxy_id,transition_reason)\n    SELECT np.account_id,a.provider,1,np.proxy_id,'proxy-definition-change' FROM network_profiles np JOIN accounts a ON a.id=np.account_id WHERE np.proxy_id=NEW.id\n    ON CONFLICT(account_id) DO UPDATE SET provider=EXCLUDED.provider,transport_epoch=account_transport_state.transport_epoch+1,active_proxy_id=EXCLUDED.active_proxy_id,transition_reason=EXCLUDED.transition_reason,updated_at=now();\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+      },
+      {
+        "relname": "residential_proxies",
+        "tgname": "residential_route_insert_delete",
+        "definition": "CREATE TRIGGER residential_route_insert_delete AFTER INSERT OR DELETE ON public.residential_proxies FOR EACH STATEMENT EXECUTE FUNCTION bump_residential_routing_revision()",
+        "function": "CREATE OR REPLACE FUNCTION public.bump_residential_routing_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='secrets' THEN\n  IF TG_OP='DELETE' THEN\n   IF OLD.proxy_id IS NULL THEN RETURN NULL; END IF;\n  ELSE\n   IF NEW.proxy_id IS NULL THEN RETURN NULL; END IF;\n  END IF;\n END IF;\n IF TG_TABLE_NAME='proxies' THEN\n  IF NOT EXISTS(SELECT 1 FROM residential_proxies WHERE proxy_id=NEW.id) THEN RETURN NULL; END IF;\n END IF;\n UPDATE residential_routing_control SET revision=revision+1 WHERE singleton;\n UPDATE panel_routing_state SET next_check_at=now();\n RETURN NULL;\nEND $function$\n"
+      },
+      {
+        "relname": "residential_proxies",
+        "tgname": "residential_route_update",
+        "definition": "CREATE TRIGGER residential_route_update AFTER UPDATE ON public.residential_proxies FOR EACH ROW WHEN ((((((((old.type IS DISTINCT FROM new.type) OR (old.host IS DISTINCT FROM new.host)) OR (old.port IS DISTINCT FROM new.port)) OR (old.username IS DISTINCT FROM new.username)) OR (old.secret_ref IS DISTINCT FROM new.secret_ref)) OR (old.priority IS DISTINCT FROM new.priority)) OR (old.enabled IS DISTINCT FROM new.enabled))) EXECUTE FUNCTION bump_residential_routing_revision()",
+        "function": "CREATE OR REPLACE FUNCTION public.bump_residential_routing_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='secrets' THEN\n  IF TG_OP='DELETE' THEN\n   IF OLD.proxy_id IS NULL THEN RETURN NULL; END IF;\n  ELSE\n   IF NEW.proxy_id IS NULL THEN RETURN NULL; END IF;\n  END IF;\n END IF;\n IF TG_TABLE_NAME='proxies' THEN\n  IF NOT EXISTS(SELECT 1 FROM residential_proxies WHERE proxy_id=NEW.id) THEN RETURN NULL; END IF;\n END IF;\n UPDATE residential_routing_control SET revision=revision+1 WHERE singleton;\n UPDATE panel_routing_state SET next_check_at=now();\n RETURN NULL;\nEND $function$\n"
+      }
+    ],
+    "panel_expiry": [
+      {
+        "panel_id": "68c99bae-21a9-4c9f-88ff-a10f8f106527",
+        "account": "S1",
+        "provider": "digitalocean",
+        "state": "READY",
+        "expires_at": "2026-10-08T03:14:27.548024+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "6a2b0aa5-a32b-4a50-bb3a-9bf2f40393ac",
+        "account": "S1",
+        "provider": "digitalocean",
+        "state": "RETIRING",
+        "expires_at": "2026-10-08T02:44:13.838676+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "5ac972c7-a12d-45ae-8e70-9ffac6621300",
+        "account": "Upcloud 113",
+        "provider": "upcloud",
+        "state": "EXPIRING",
+        "expires_at": "2026-10-08T02:47:18.892614+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "178a676a-64d6-4f8e-b04e-711ab7c4d594",
+        "account": "Sor oc",
+        "provider": "digitalocean",
+        "state": "RETIRING",
+        "expires_at": "2026-10-08T02:37:07.689398+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "8c72f80e-f59c-40e7-9876-b58b3fda0bf3",
+        "account": "Sor oc",
+        "provider": "digitalocean",
+        "state": "READY",
+        "expires_at": "2026-10-08T03:22:47.9872+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "5bc28159-e25a-4d0e-aa0b-5d8d29e50971",
+        "account": "Upcloud 113",
+        "provider": "upcloud",
+        "state": "READY",
+        "expires_at": "2026-10-08T03:01:41.745806+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "17c0c73c-e524-45ad-912e-c1295c26ccb9",
+        "account": "Sor oc",
+        "provider": "digitalocean",
+        "state": "READY",
+        "expires_at": "2026-10-08T02:43:11.981333+00:00",
+        "expired": true
+      },
+      {
+        "panel_id": "1b6f5e11-8553-4813-80ba-11c4d7ce707c",
+        "account": "S1",
+        "provider": "digitalocean",
+        "state": "READY",
+        "expires_at": "2026-10-08T03:26:12.990166+00:00",
+        "expired": true
+      }
+    ],
+    "test_provenance": {
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-count=1",
+        "./internal/network",
+        "./internal/secrets",
+        "./internal/panels/residentialsync"
+      ],
+      "production_dsn_removed": true,
+      "isolated_pg_test_dsn_present": false,
+      "returncode": 0,
+      "stdout": "ok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/network\t1.037s\nok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/secrets\t1.020s\nok  \tgithub.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync\t1.899s\n",
+      "stderr": ""
+    },
+    "schedule_source": "cmd/worker/main.go:343:\t\t\tapplication.Container.RefreshProviderSnapshots(ctx, 60*time.Second)\ncmd/worker/main.go:354:\t\t\t\t\tapplication.Container.RefreshProviderSnapshots(ctx, 60*time.Second)\ncmd/worker/main.go:587:\t\tt := time.NewTicker(60 * time.Second)\ncmd/worker/main.go:605:\t\t\t\tcctx, cancel := context.WithTimeout(ctx, 60*time.Second)\ncmd/worker/main.go:699:\tmonitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}\n",
+    "extra": {
+      "base_endpoint_type_and_health": [
+        {
+          "name": "dataimpulse",
+          "type": "socks5",
+          "status": "down",
+          "health_error": "PROXY_AUTH_FAILED",
+          "last_checked_at": "2026-10-08T09:25:32.228436+00:00",
+          "last_success_at": "2026-10-08T02:35:31.678643+00:00"
+        }
+      ],
+      "account_bindings": [
+        {
+          "name": "Vultr232",
+          "enabled": true,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Sara vul 2",
+          "enabled": true,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Vultr524",
+          "enabled": false,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Vultr 232",
+          "enabled": false,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "S1",
+          "enabled": true,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Sara vul",
+          "enabled": false,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Alii",
+          "enabled": false,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Upcloud 113",
+          "enabled": true,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        },
+        {
+          "name": "Sor oc",
+          "enabled": true,
+          "mode": "proxy_required",
+          "proxy_name": "dataimpulse"
+        }
+      ],
+      "residential_health_observation": [
+        {
+          "name": "ads12",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:14.066571+00:00",
+          "last_success_at": "2026-10-08T09:25:14.066571+00:00"
+        },
+        {
+          "name": "ads6",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:33.556827+00:00",
+          "last_success_at": "2026-10-08T09:25:33.556827+00:00"
+        },
+        {
+          "name": "ads7",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:34.039638+00:00",
+          "last_success_at": "2026-10-08T09:25:34.039638+00:00"
+        },
+        {
+          "name": "ads9",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:36.227552+00:00",
+          "last_success_at": "2026-10-08T09:25:36.227552+00:00"
+        },
+        {
+          "name": "ads11",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:36.552773+00:00",
+          "last_success_at": "2026-10-08T09:25:36.552773+00:00"
+        },
+        {
+          "name": "ads5",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:36.975149+00:00",
+          "last_success_at": "2026-10-08T09:25:36.975149+00:00"
+        },
+        {
+          "name": "ads3",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:13.708617+00:00",
+          "last_success_at": "2026-10-08T09:25:13.708617+00:00"
+        },
+        {
+          "name": "ads2",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:14.019238+00:00",
+          "last_success_at": "2026-10-08T09:25:14.019238+00:00"
+        },
+        {
+          "name": "ads10",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:14.607077+00:00",
+          "last_success_at": "2026-10-08T09:25:14.607077+00:00"
+        },
+        {
+          "name": "ads1",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:33.749312+00:00",
+          "last_success_at": "2026-10-08T09:25:33.749312+00:00"
+        },
+        {
+          "name": "ads4",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:33.824608+00:00",
+          "last_success_at": "2026-10-08T09:25:33.824608+00:00"
+        },
+        {
+          "name": "ads8",
+          "enabled": true,
+          "type": "socks5",
+          "status": "healthy",
+          "last_checked_at": "2026-10-08T09:25:36.469216+00:00",
+          "last_success_at": "2026-10-08T09:25:36.469216+00:00"
+        }
+      ]
+    },
+    "credential_schema": {
+      "at": "2026-10-08T09:37:22.768542+00:00",
+      "constraints": [
+        {
+          "relname": "proxies",
+          "conname": "proxies_type_check",
+          "definition": "CHECK ((type = ANY (ARRAY['http'::text, 'https'::text, 'socks5'::text])))"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_port_check",
+          "definition": "CHECK (((port >= 1) AND (port <= 65535)))"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_id_not_null",
+          "definition": "NOT NULL id"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_name_not_null",
+          "definition": "NOT NULL name"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_type_not_null",
+          "definition": "NOT NULL type"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_host_not_null",
+          "definition": "NOT NULL host"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_port_not_null",
+          "definition": "NOT NULL port"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_status_not_null",
+          "definition": "NOT NULL status"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_failure_count_not_null",
+          "definition": "NOT NULL failure_count"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_created_at_not_null",
+          "definition": "NOT NULL created_at"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_updated_at_not_null",
+          "definition": "NOT NULL updated_at"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_pkey",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_name_key",
+          "definition": "UNIQUE (name)"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_consecutive_successes_not_null",
+          "definition": "NOT NULL consecutive_successes"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_id_not_null",
+          "definition": "NOT NULL id"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_kind_not_null",
+          "definition": "NOT NULL kind"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_ciphertext_not_null",
+          "definition": "NOT NULL ciphertext"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_nonce_not_null",
+          "definition": "NOT NULL nonce"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_key_version_not_null",
+          "definition": "NOT NULL key_version"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_created_at_not_null",
+          "definition": "NOT NULL created_at"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_updated_at_not_null",
+          "definition": "NOT NULL updated_at"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_pkey",
+          "definition": "PRIMARY KEY (residential_id, id)"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_residential_id_fkey",
+          "definition": "FOREIGN KEY (residential_id) REFERENCES residential_proxies(proxy_id) ON DELETE CASCADE"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_success_ewma_not_null",
+          "definition": "NOT NULL success_ewma"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_latency_ewma_ms_not_null",
+          "definition": "NOT NULL latency_ewma_ms"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_check_count_not_null",
+          "definition": "NOT NULL check_count"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_proxy_id_fkey",
+          "definition": "FOREIGN KEY (proxy_id) REFERENCES proxies(id) ON DELETE CASCADE"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_adapter_not_null",
+          "definition": "NOT NULL adapter"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_adapter_check",
+          "definition": "CHECK ((adapter = ANY (ARRAY['generic'::text, 'suffix-session'::text])))"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_probe_id_fkey",
+          "definition": "FOREIGN KEY (probe_id) REFERENCES reality_probe_nodes(id) ON DELETE CASCADE"
+        },
+        {
+          "relname": "secrets",
+          "conname": "secrets_owner_check",
+          "definition": "CHECK ((((((account_id IS NOT NULL))::integer + ((proxy_id IS NOT NULL))::integer) + ((probe_id IS NOT NULL))::integer) = 1))"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_priority_check",
+          "definition": "CHECK ((priority >= 0))"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_proxy_id_not_null",
+          "definition": "NOT NULL proxy_id"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_outbound_tag_not_null",
+          "definition": "NOT NULL outbound_tag"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_priority_not_null",
+          "definition": "NOT NULL priority"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_enabled_not_null",
+          "definition": "NOT NULL enabled"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_created_at_not_null",
+          "definition": "NOT NULL created_at"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_updated_at_not_null",
+          "definition": "NOT NULL updated_at"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_pkey",
+          "definition": "PRIMARY KEY (proxy_id)"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_outbound_tag_key",
+          "definition": "UNIQUE (outbound_tag)"
+        },
+        {
+          "relname": "proxies",
+          "conname": "proxies_exit_ipv4",
+          "definition": "CHECK (((exit_ip IS NULL) OR (family(exit_ip) = 4)))"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_status_not_null",
+          "definition": "NOT NULL status"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_last_error_not_null",
+          "definition": "NOT NULL last_error"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_name_not_null",
+          "definition": "NOT NULL name"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_type_not_null",
+          "definition": "NOT NULL type"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_host_not_null",
+          "definition": "NOT NULL host"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_port_not_null",
+          "definition": "NOT NULL port"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_type_check",
+          "definition": "CHECK ((type = ANY (ARRAY['http'::text, 'https'::text, 'socks5'::text])))"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_port_check",
+          "definition": "CHECK (((port >= 1) AND (port <= 65535)))"
+        },
+        {
+          "relname": "residential_proxies",
+          "conname": "residential_proxies_status_check",
+          "definition": "CHECK ((status = ANY (ARRAY['unknown'::text, 'healthy'::text, 'down'::text])))"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_aad_scope_check",
+          "definition": "CHECK ((aad_scope = ANY (ARRAY['proxy'::text, 'residential'::text])))"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_residential_id_not_null",
+          "definition": "NOT NULL residential_id"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_id_not_null",
+          "definition": "NOT NULL id"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_kind_not_null",
+          "definition": "NOT NULL kind"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_ciphertext_not_null",
+          "definition": "NOT NULL ciphertext"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_nonce_not_null",
+          "definition": "NOT NULL nonce"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_key_version_not_null",
+          "definition": "NOT NULL key_version"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_aad_scope_not_null",
+          "definition": "NOT NULL aad_scope"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "conname": "residential_proxy_secrets_updated_at_not_null",
+          "definition": "NOT NULL updated_at"
+        }
+      ],
+      "indexes": [
+        {
+          "tablename": "proxies",
+          "indexname": "proxies_pkey",
+          "indexdef": "CREATE UNIQUE INDEX proxies_pkey ON public.proxies USING btree (id)"
+        },
+        {
+          "tablename": "proxies",
+          "indexname": "proxies_name_key",
+          "indexdef": "CREATE UNIQUE INDEX proxies_name_key ON public.proxies USING btree (name)"
+        },
+        {
+          "tablename": "proxies",
+          "indexname": "proxies_status_idx",
+          "indexdef": "CREATE INDEX proxies_status_idx ON public.proxies USING btree (status)"
+        },
+        {
+          "tablename": "secrets",
+          "indexname": "secrets_account_kind_idx",
+          "indexdef": "CREATE INDEX secrets_account_kind_idx ON public.secrets USING btree (account_id, kind)"
+        },
+        {
+          "tablename": "secrets",
+          "indexname": "secrets_proxy_id_id_idx",
+          "indexdef": "CREATE UNIQUE INDEX secrets_proxy_id_id_idx ON public.secrets USING btree (proxy_id, id) WHERE (proxy_id IS NOT NULL)"
+        },
+        {
+          "tablename": "secrets",
+          "indexname": "secrets_probe_id_id_idx",
+          "indexdef": "CREATE UNIQUE INDEX secrets_probe_id_id_idx ON public.secrets USING btree (probe_id, id) WHERE (probe_id IS NOT NULL)"
+        },
+        {
+          "tablename": "secrets",
+          "indexname": "secrets_owner_key_id_idx",
+          "indexdef": "CREATE UNIQUE INDEX secrets_owner_key_id_idx ON public.secrets USING btree (owner_key, id)"
+        },
+        {
+          "tablename": "residential_proxies",
+          "indexname": "residential_proxies_pkey",
+          "indexdef": "CREATE UNIQUE INDEX residential_proxies_pkey ON public.residential_proxies USING btree (proxy_id)"
+        },
+        {
+          "tablename": "residential_proxies",
+          "indexname": "residential_proxies_outbound_tag_key",
+          "indexdef": "CREATE UNIQUE INDEX residential_proxies_outbound_tag_key ON public.residential_proxies USING btree (outbound_tag)"
+        },
+        {
+          "tablename": "residential_proxies",
+          "indexname": "residential_proxies_active_priority_idx",
+          "indexdef": "CREATE INDEX residential_proxies_active_priority_idx ON public.residential_proxies USING btree (priority, proxy_id) WHERE (enabled = true)"
+        },
+        {
+          "tablename": "residential_proxies",
+          "indexname": "residential_name_unique",
+          "indexdef": "CREATE UNIQUE INDEX residential_name_unique ON public.residential_proxies USING btree (lower(btrim(name)))"
+        },
+        {
+          "tablename": "residential_proxy_secrets",
+          "indexname": "residential_proxy_secrets_pkey",
+          "indexdef": "CREATE UNIQUE INDEX residential_proxy_secrets_pkey ON public.residential_proxy_secrets USING btree (residential_id, id)"
+        }
+      ],
+      "triggers": [
+        {
+          "relname": "proxies",
+          "tgname": "trg_bump_transport_epoch_proxy",
+          "definition": "CREATE TRIGGER trg_bump_transport_epoch_proxy AFTER UPDATE OF type, host, port, username, adapter, secret_ref ON public.proxies FOR EACH ROW EXECUTE FUNCTION bump_account_transport_epoch_for_proxy()",
+          "function": "CREATE OR REPLACE FUNCTION public.bump_account_transport_epoch_for_proxy()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF (OLD.type IS DISTINCT FROM NEW.type) OR (OLD.host IS DISTINCT FROM NEW.host) OR (OLD.port IS DISTINCT FROM NEW.port) OR (OLD.username IS DISTINCT FROM NEW.username) OR (OLD.adapter IS DISTINCT FROM NEW.adapter) OR (OLD.secret_ref IS DISTINCT FROM NEW.secret_ref) THEN\n    INSERT INTO account_transport_state(account_id,provider,transport_epoch,active_proxy_id,transition_reason)\n    SELECT np.account_id,a.provider,1,np.proxy_id,'proxy-definition-change' FROM network_profiles np JOIN accounts a ON a.id=np.account_id WHERE np.proxy_id=NEW.id\n    ON CONFLICT(account_id) DO UPDATE SET provider=EXCLUDED.provider,transport_epoch=account_transport_state.transport_epoch+1,active_proxy_id=EXCLUDED.active_proxy_id,transition_reason=EXCLUDED.transition_reason,updated_at=now();\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+        },
+        {
+          "relname": "residential_proxies",
+          "tgname": "residential_route_insert_delete",
+          "definition": "CREATE TRIGGER residential_route_insert_delete AFTER INSERT OR DELETE ON public.residential_proxies FOR EACH STATEMENT EXECUTE FUNCTION bump_residential_routing_revision()",
+          "function": "CREATE OR REPLACE FUNCTION public.bump_residential_routing_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='secrets' THEN\n  IF TG_OP='DELETE' THEN\n   IF OLD.proxy_id IS NULL THEN RETURN NULL; END IF;\n  ELSE\n   IF NEW.proxy_id IS NULL THEN RETURN NULL; END IF;\n  END IF;\n END IF;\n IF TG_TABLE_NAME='proxies' THEN\n  IF NOT EXISTS(SELECT 1 FROM residential_proxies WHERE proxy_id=NEW.id) THEN RETURN NULL; END IF;\n END IF;\n UPDATE residential_routing_control SET revision=revision+1 WHERE singleton;\n UPDATE panel_routing_state SET next_check_at=now();\n RETURN NULL;\nEND $function$\n"
+        },
+        {
+          "relname": "residential_proxy_secrets",
+          "tgname": "residential_credential_change",
+          "definition": "CREATE TRIGGER residential_credential_change AFTER INSERT OR DELETE OR UPDATE ON public.residential_proxy_secrets FOR EACH STATEMENT EXECUTE FUNCTION bump_residential_routing_revision()",
+          "function": "CREATE OR REPLACE FUNCTION public.bump_residential_routing_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='secrets' THEN\n  IF TG_OP='DELETE' THEN\n   IF OLD.proxy_id IS NULL THEN RETURN NULL; END IF;\n  ELSE\n   IF NEW.proxy_id IS NULL THEN RETURN NULL; END IF;\n  END IF;\n END IF;\n IF TG_TABLE_NAME='proxies' THEN\n  IF NOT EXISTS(SELECT 1 FROM residential_proxies WHERE proxy_id=NEW.id) THEN RETURN NULL; END IF;\n END IF;\n UPDATE residential_routing_control SET revision=revision+1 WHERE singleton;\n UPDATE panel_routing_state SET next_check_at=now();\n RETURN NULL;\nEND $function$\n"
+        },
+        {
+          "relname": "residential_proxies",
+          "tgname": "residential_route_update",
+          "definition": "CREATE TRIGGER residential_route_update AFTER UPDATE ON public.residential_proxies FOR EACH ROW WHEN ((((((((old.type IS DISTINCT FROM new.type) OR (old.host IS DISTINCT FROM new.host)) OR (old.port IS DISTINCT FROM new.port)) OR (old.username IS DISTINCT FROM new.username)) OR (old.secret_ref IS DISTINCT FROM new.secret_ref)) OR (old.priority IS DISTINCT FROM new.priority)) OR (old.enabled IS DISTINCT FROM new.enabled))) EXECUTE FUNCTION bump_residential_routing_revision()",
+          "function": "CREATE OR REPLACE FUNCTION public.bump_residential_routing_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='secrets' THEN\n  IF TG_OP='DELETE' THEN\n   IF OLD.proxy_id IS NULL THEN RETURN NULL; END IF;\n  ELSE\n   IF NEW.proxy_id IS NULL THEN RETURN NULL; END IF;\n  END IF;\n END IF;\n IF TG_TABLE_NAME='proxies' THEN\n  IF NOT EXISTS(SELECT 1 FROM residential_proxies WHERE proxy_id=NEW.id) THEN RETURN NULL; END IF;\n END IF;\n UPDATE residential_routing_control SET revision=revision+1 WHERE singleton;\n UPDATE panel_routing_state SET next_check_at=now();\n RETURN NULL;\nEND $function$\n"
+        }
+      ],
+      "residential_aad_scopes": [
+        {
+          "aad_scope": "residential",
+          "count": 12
+        }
+      ]
+    },
+    "environment_collector": {
+      "case_insensitive": true,
+      "normalized_keys_checked": [
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "no_proxy"
+      ],
+      "source_expression": "x.lower() in [http_proxy, https_proxy, all_proxy, no_proxy]",
+      "values_recorded": false,
+      "observation": "/proc/PID/environ snapshot, not an end-to-end transport trace"
+    }
+  },
+  "native_observations": [
+    {
+      "panel": "5bc28159-e25a-4d0e-aa0b-5d8d29e50971",
+      "provider": "upcloud",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 3156439,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 19741998
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": null,
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "1b6f5e11-8553-4813-80ba-11c4d7ce707c",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 31137939669,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 2910755415
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-dc3d26f288fcd943",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-dc3d26f288fcd943",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-dc3d26f288fcd943",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-dc3d26f288fcd943",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-dc3d26f288fcd943",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-dc3d26f288fcd943",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-dc3d26f288fcd943",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-dc3d26f288fcd943",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-dc3d26f288fcd943",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-dc3d26f288fcd943",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-dc3d26f288fcd943",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-dc3d26f288fcd943"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "5ac972c7-a12d-45ae-8e70-9ffac6621300",
+      "provider": "upcloud",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 0,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 15867957
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": null,
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "6a2b0aa5-a32b-4a50-bb3a-9bf2f40393ac",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 76807457160,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 6668673130
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-409e99334e68954a",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-409e99334e68954a",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-409e99334e68954a",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-409e99334e68954a",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-409e99334e68954a",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-409e99334e68954a",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-409e99334e68954a",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-409e99334e68954a",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-409e99334e68954a",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-409e99334e68954a",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-409e99334e68954a",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-409e99334e68954a"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "68c99bae-21a9-4c9f-88ff-a10f8f106527",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 51413086210,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 4608633419
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-b60296ac2596d4c5",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-b60296ac2596d4c5",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-b60296ac2596d4c5",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-b60296ac2596d4c5",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-b60296ac2596d4c5",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-b60296ac2596d4c5",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-b60296ac2596d4c5",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-b60296ac2596d4c5",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-b60296ac2596d4c5",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-b60296ac2596d4c5",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-b60296ac2596d4c5",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-b60296ac2596d4c5"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "17c0c73c-e524-45ad-912e-c1295c26ccb9",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 2102510247,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 189383322
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-e4d989219daf90b9",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-e4d989219daf90b9",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-e4d989219daf90b9",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-e4d989219daf90b9",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-e4d989219daf90b9",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-e4d989219daf90b9",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-e4d989219daf90b9",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-e4d989219daf90b9",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-e4d989219daf90b9",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-e4d989219daf90b9",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-e4d989219daf90b9",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-e4d989219daf90b9"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "8c72f80e-f59c-40e7-9876-b58b3fda0bf3",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 2101134404,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 277871977
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-9edc0b501e2690e3",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-9edc0b501e2690e3",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-9edc0b501e2690e3",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-9edc0b501e2690e3",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-9edc0b501e2690e3",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-9edc0b501e2690e3",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-9edc0b501e2690e3",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-9edc0b501e2690e3",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-9edc0b501e2690e3",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-9edc0b501e2690e3",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-9edc0b501e2690e3",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-9edc0b501e2690e3"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    },
+    {
+      "panel": "178a676a-64d6-4f8e-b04e-711ab7c4d594",
+      "provider": "digitalocean",
+      "expired": true,
+      "xray": {
+        "errorMsg": "",
+        "state": "running",
+        "version": "26.9.9"
+      },
+      "enabled_clients": 4,
+      "unlimited_clients": 4,
+      "inbounds": [
+        {
+          "client_count": 4,
+          "client_limits": [
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            },
+            {
+              "enabled": true,
+              "expiryTime": 0,
+              "totalGB": 0
+            }
+          ],
+          "down": 3243900091,
+          "enable": true,
+          "enabled_clients": 4,
+          "expiry": 0,
+          "id": 1,
+          "protocol": "vless",
+          "tag": "in-443-tcp",
+          "total": 0,
+          "unlimited_clients": 4,
+          "up": 433524709
+        }
+      ],
+      "stats_policy": {
+        "statsInboundDownlink": true,
+        "statsInboundUplink": true,
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      },
+      "burst_observatory": {
+        "pingConfig": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3000ms"
+        },
+        "subjectSelector": [
+          "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-aff16dc554358624",
+          "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-aff16dc554358624",
+          "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-aff16dc554358624",
+          "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-aff16dc554358624",
+          "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-aff16dc554358624",
+          "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-aff16dc554358624",
+          "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-aff16dc554358624",
+          "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-aff16dc554358624",
+          "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-aff16dc554358624",
+          "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-aff16dc554358624",
+          "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-aff16dc554358624",
+          "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-aff16dc554358624"
+        ]
+      },
+      "account_proxy_references": 0,
+      "unknown_proxy_endpoints": 0
+    }
+  ],
+  "user_report": {
+    "original": "\u0686\u0648\u0646 \u062a\u0631\u0627\u0641\u06cc\u06a9 \u067e\u0631\u0648\u06a9\u0633\u06cc \u0632\u0648\u062f \u062a\u0645\u0627\u0645 \u0634\u062f\u0647",
+    "meaning": "The user reports proxy traffic allowance was depleted unusually quickly and suspects role mixing or misuse. This is user-reported depletion, not independently verified provider billing evidence."
+  },
+  "initial_report_assembled_at": "2026-10-08T09:14:09.477915+00:00",
+  "evidence_cutoff_utc": "2026-10-08T09:43:01.445286+00:00"
+}

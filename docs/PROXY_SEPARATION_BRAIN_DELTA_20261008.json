@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-08T09:22:05.489225+00:00",
+  "kind": "read_only_audit",
+  "source": "docs/PROXY_SEPARATION_AUDIT_20261008.json",
+  "runtime_unchanged": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "corrections": [
+    "Do not infer empty Output means remote traffic stopped.",
+    "Do not infer inbound byte growth equals base/residential billed traffic.",
+    "Current credentials/routes differ across roles; no provider billing-independence proof.",
+    "73 unavailable Vultr panel records remain unverified, not confirmed live.",
+    "Probe cadence calculations are conditional, not observed completed request counts.",
+    "Base auth rejection does not distinguish quota exhaustion, credential error or provider restriction."
+  ],
+  "next": [
+    "Separate byte accounting",
+    "Policy-preserving local retirement design",
+    "Adaptive measured probe budgets",
+    "Cross-role identity guard",
+    "Explicit panel direct transport",
+    "DO catalog refresh efficiency"
+  ],
+  "preserve": [
+    "Existing unlimited client profile policy",
+    "Provider/ownership/gate and fail-closed safeguards",
+    "Completed phases1/2/3; phase4 not started"
+  ]
+}

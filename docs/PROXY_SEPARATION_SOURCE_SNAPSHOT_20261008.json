@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-10-08T09:14:09.477915+00:00",
+  "source_head": "2c2f904f53903d4e3ec55a5a9b09f2ec8904c68a",
+  "deployed_product_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "files": {
+    "internal/app/provider_network_runtime.go": "2e3fcf863e8d093f5c55364c78153d620fead0b6a3a46b13e6c3e457a6431de1",
+    "internal/network/proxy_gateway.go": "3b89371778b5e97d26d3190d227e6ca90688f382bfc4dd246325471b289c5bd3",
+    "internal/network/monitor.go": "757b85efa809b6ae63322d245de8b8ed4436112e0234274f73f5504d6ac30986",
+    "internal/residential/monitor.go": "5848bbca5fc6857efc20821f5ea72e7b5c67e1fc1b9a9a2fcf23630cef783f31",
+    "internal/secrets/proxy.go": "bdd0ba04a8d3542dc765389b997d15d1a166952faf85909ed22481e2a2109a23",
+    "internal/secrets/residential.go": "add6e134304a324553301942c32dc16849e299f9936ce9500f05b00bd0381fe4",
+    "internal/panels/residentialsync/service.go": "2a639a7ff2da097d870f0a8db38d7787cdd96d27ba02cbc68049a969dae016d4",
+    "internal/panels/residentialsync/pool.go": "d2f6c33666d3504fe32086af51c5fa5188673709c3654b60870d17d42c1129e5",
+    "internal/panels/residentialsync/plan.go": "5b932c912d8ce3908c3eedb91d9770527536a2063cb412646d78df79eb86198c",
+    "internal/panels/residentialsync/execute.go": "e4d902a9d55f9e69287aedad8022d0b7207cd23a0d6d91e102fc470280abd060",
+    "internal/adminapi/proxies_write.go": "cb734efb897cf6ba477b08b0221faf8016bb55351ca7888f44ea18978e4fa09e",
+    "internal/adminapi/proxies_manage.go": "acf01f0da3e95c6dcadfce4b0a24cefed72956227d399ee975a35ad7d1ebe2e7",
+    "internal/adminapi/residential.go": "9c8e1943c46894733993e415ea8be20ec864a85539d347054ea95c082a33b389",
+    "internal/adminapi/residential_bulk.go": "1fe14c5e1bcd609432c9784d6eaea379067091572478cb0f2c7dfe2f648c66ab",
+    "internal/app/provider_refresh.go": "494497a07836c469ad1df83323922e1dd5e7dd5fada6c1601a8c1590eabaa72b",
+    "cmd/worker/main.go": "142cb3b888fda5460cf7f32bf01a1eba929c3a62e7e4781196774667e2bbff12",
+    "internal/panels/sanaei/api.go": "8857ffb282c0d261843aadf5a353ec7007aa3c18b83af2865a68bef0b1d400ae",
+    "internal/providers/digitalocean/discovery.go": "1b0670bc2c642d3a65220af67690219badefc5b27bd740e2e24587a021787a34",
+    "internal/providers/digitalocean/driver_v2.go": "4bddfd03a3bebf22478200d7455dc3ea321983bcdc19bf182510ed5662e80fe2",
+    "internal/providers/digitalocean/catalog.go": "731858c63bf0845c9502221a0936eada2237a4542fbab0f7fa7ab6aa2a0dca40",
+    "internal/secrets/key.go": "60a71ce9cd8c107ee27fe38e4de9b41e1376cb41c5b5ad2a95dd43e5a326ffaa",
+    "internal/secrets/postgres.go": "2941e50a9db74a0282a7f25c578ad3eebc4b2ed4c19b64ceb81df996f563f810",
+    "internal/secrets/probe.go": "f8865673f92595852c81874165776d682819b52224af31126a35f9a75690b746",
+    "internal/secrets/proxy_access.go": "775794f67d57ce1db12587d773bd56bc1565af184cdd1ff0a3804cb819829eb0",
+    "internal/secrets/store.go": "0df4389a2098ec6e0ce5eea1101168cd2b27ed909af0d9f890960ed91ef6fcf0"
+  },
+  "evidence_sha256": {
+    "native.jsonl": "a0b791b552152cf66096219f0afab175553aa67bf53b6a17f5056daf69b1b5eb",
+    "followup.jsonl": "c0d2cb10d1ebe3f838faaf0788849d154bd68be7a2adbb616dfff7d32669f0a5",
+    "routes-final.jsonl": "0747403689e3119c2a91d1dd01f5f1a1f64296dfcde75bac8694a9578865d094",
+    "tests.log": "46b9cac79bc72e7510204057702ec70b2cfcc181d432b1fb8148fe5e846d320e",
+    "provenance.json": "9612c5467a413f53e0732d4097b44024bfb229295069086f797d347fc0d9ea75",
+    "limits.jsonl": "94209c6e3c12dadd952f8dd65ea2566136a1d890e25ebfe5540719b5b50119f9",
+    "extra-provenance.json": "1f496050260c440817d960970c5aef1de14fa35299249ae0e182e282491318d9",
+    "credential-schema-provenance.json": "151bf2cb877388e67bfac6cc025cad1bc8c99b73b1530997c7f786be943f85af"
+  }
+}

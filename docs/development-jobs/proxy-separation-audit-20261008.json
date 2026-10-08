@@ -1,0 +1,29 @@
+{
+  "goal": "Complete a read-only evidence-bounded account-base versus residential proxy separation and consumption audit; no product, runtime, credentials, gates or policy change. Check documentation accuracy and preserve a reviewable checkpoint.",
+  "context": "Observed current production: source2c2f904/runtimebf2d6da; one DataImpulse base identity shared by9accounts with separate sticky ports,12 distinct configured residential endpoints and credential scopes; provider-side billing independence unverified. All81 non-DELETED enabled panel records attempted;8 reachable and73 Vultr unavailable. No base proxy in eight native configs;72 native route-evaluator probes pass. Eight expired nodes still serve32 enabled unlimited clients; aggregate inbound counters grew1022471317bytes between09:01 and09:09Z; cannot attribute these bytes to proxy billing. Six panels configure12 residential probes each/10s plus central30s healthy monitor; nominal rates only, not measured requests or bytes. Outbound counters disabled. Main base currently SOCKS auth rejection; cause of quota exhaustion unknown. Findings include consumption control/attribution, absent cross-role write validation, panel DefaultTransport latent env dependency, DO repeated catalog/account observation request overhead. Review must separate current observations, source risk and history/unreachable unknowns. No subagents. Existing source race tests passed and production DB excluded; PG integration skipped. This orchestrator completion is report workflow completion, not product approval.",
+  "allowed_paths": [
+    "docs/PROXY_SEPARATION_AUDIT_20261008.md",
+    "docs/PROXY_SEPARATION_AUDIT_20261008.json",
+    "docs/PROXY_SEPARATION_SOURCE_SNAPSHOT_20261008.json",
+    "docs/development-jobs/proxy-separation-audit-20261008.json",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/PROXY_SEPARATION_BRAIN_DELTA_20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "python3 /root/backups/dob-proxy-separation-audit-20261008/check-race-evidence.py"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-proxy-separation-audit-20261008/review.py"
+    ]
+  },
+  "commit_message": "docs(ops): audit proxy separation and ongoing consumption"
+}
