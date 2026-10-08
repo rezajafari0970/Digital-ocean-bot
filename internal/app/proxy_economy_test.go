@@ -159,6 +159,7 @@ func TestEconomyAdmissionAndCanaryPostgres(t *testing.T) {
 	exec(`INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,'proxy_required',$2)`, id, pid)
 	exec(`INSERT INTO account_network_identities(account_id,exit_ip,subnet_key,last_health_ok,last_health_at,sticky_session) VALUES($1,'203.0.113.44','203.0.113.0/24',true,now(),'s')`, id)
 	exec(`INSERT INTO proxy_runtime_state(account_id,proxy_id,provider,generation,health_state,circuit_state) VALUES($1,$2,'digitalocean',1,'healthy','closed')`, id, pid)
+	exec(`INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2,0,true)`, id, pid)
 	exec(`UPDATE proxy_economy_policy SET enabled=true,canary_account_id=$1`, id)
 	if ok, err := c.Economy.Enabled(ctx, ""); err != nil || ok {
 		t.Fatal("canary slowed shared monitor", err)
@@ -166,6 +167,31 @@ func TestEconomyAdmissionAndCanaryPostgres(t *testing.T) {
 	if err := c.requireAccountNetworkReady(ctx, id); err != nil {
 		t.Fatal(err)
 	}
+	var identityAt time.Time
+	if err := db.QueryRow(`SELECT last_health_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&identityAt); err != nil {
+		t.Fatal(err)
+	}
+	var scheduled sync.WaitGroup
+	for n := 0; n < 12; n++ {
+		scheduled.Add(1)
+		go func() {
+			defer scheduled.Done()
+			if err := (ScheduledStarter{Container: c}).PrepareScheduledAccount(ctx, id); err != nil {
+				t.Errorf("fresh scheduled preparation must reuse proof, not dial closed fixture proxy: %v", err)
+			}
+		}()
+	}
+	scheduled.Wait()
+	exec(`UPDATE accounts SET enabled=false WHERE id=$1`, id)
+	if err := (ScheduledStarter{Container: c}).PrepareScheduledAccount(ctx, id); !errors.Is(err, ErrAccountDisabled) {
+		t.Fatal("inactive account entered scheduled maintenance", err)
+	}
+	exec(`UPDATE accounts SET enabled=true WHERE id=$1`, id)
+	var afterAt time.Time
+	if err := db.QueryRow(`SELECT last_health_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&afterAt); err != nil || !afterAt.Equal(identityAt) {
+		t.Fatal("scheduled check forged a fresh observation", err)
+	}
+
 	if ok, err := c.identityProbeMayWait(ctx, id); err != nil || !ok {
 		t.Fatal("fresh identity should wait", err)
 	}

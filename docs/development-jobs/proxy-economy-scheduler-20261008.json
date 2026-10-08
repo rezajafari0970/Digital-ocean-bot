@@ -1,0 +1,38 @@
+{
+  "goal": "Eliminate redundant scheduled identity probes by sharing the account proxy keeper lease and 120-second cadence, while keeping fresh deployment preparation and pre-mutation identity proofs unchanged.",
+  "context": "Follow-up to deployed, full-suite/race-tested and API-reviewed 4790dd7. Canary and global watch prove all eight account identities healthy; socket counters exposed ScheduledStarter.PrepareScheduledAccount bypassing the healthy keeper cadence every schedule tick. Only when economy is enabled for that account, delegate scheduled preparation to MaintainProxyControlPlane; keep flag-off behavior identical. Do not modify prepareDeployment, workflow EnsureFreshNetworkIdentity, lifecycle mutation guards, provider capacity authority, recovery checkpoints, data, or migrations. Add isolated PostgreSQL concurrent-caller regression proving healthy scheduled readiness makes no socket request and never forges last_health_at. Keep lease-based fast recovery for stale/degraded identities. Full suite plus six-package race gate, exact-source API review and scoped checkpoint required. No subagents. Existing 15-minute wire sample is left undisturbed; deploy this follow-up only after it completes, then validate and resample.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go",
+    "docs/development-jobs/proxy-economy-timeout-fix-20261008.json",
+    "docs/development-jobs/proxy-economy-scheduler-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "fix(network): coalesce scheduled account identity maintenance"
+}
