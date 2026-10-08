@@ -25,11 +25,17 @@ import (
 type Secrets interface {
 	Get(context.Context, string, string) ([]byte, error)
 }
+
+// GuardianSSH is the existing pinned SSH transport contract, also usable by isolated fault tests.
+type GuardianSSH interface {
+	Run(context.Context, provisioning.Target, []byte, string) (string, error)
+	Upload(context.Context, provisioning.Target, []byte, string, string, os.FileMode) error
+}
 type Controller struct {
 	Admit       func(context.Context, func(context.Context) error) error
 	DB          *sql.DB
 	Secrets     Secrets
-	SSH         provisioning.SSHClient
+	SSH         GuardianSSH
 	ArtifactDir string
 	// Nil upgrades all nodes. A non-nil allowlist stages binary upgrades only;
 	// existing agents still receive enable/disable policy and status polling.
@@ -58,12 +64,15 @@ type nodeTarget struct {
 	Policy                                           Policy
 }
 
-func (c Controller) Run(ctx context.Context) {
+// Run observes enabled nodes; cleanup has its own independently supervised loop.
+func (c Controller) Run(ctx context.Context)        { c.runLane(ctx, true, 6) }
+func (c Controller) RunCleanup(ctx context.Context) { c.runLane(ctx, false, 2) }
+func (c Controller) runLane(ctx context.Context, enabled bool, concurrency int) {
 	for {
 		supervision.Pulse(ctx)
 		rctx, cancel := context.WithTimeout(ctx, 90*time.Second)
-		if e := c.Round(rctx); e != nil && ctx.Err() == nil {
-			log.Printf("server protection reconciliation: %v", e)
+		if e := c.round(rctx, &enabled, concurrency); e != nil && ctx.Err() == nil {
+			log.Printf("server protection reconciliation (enabled=%t): %v", enabled, e)
 		}
 		cancel()
 		supervision.Idle(ctx)
@@ -74,7 +83,10 @@ func (c Controller) Run(ctx context.Context) {
 		}
 	}
 }
-func (c Controller) Round(ctx context.Context) error {
+
+// Round retains combined one-shot compatibility; production registers only the two lane loops.
+func (c Controller) Round(ctx context.Context) error { return c.round(ctx, nil, 8) }
+func (c Controller) round(ctx context.Context, enabled *bool, concurrency int) error {
 	if c.DB == nil || c.Secrets == nil {
 		return fmt.Errorf("protection controller not configured")
 	}
@@ -86,8 +98,8 @@ func (c Controller) Round(ctx context.Context) error {
  n.desired_revision,n.desired_enabled
  FROM server_protection_nodes n JOIN panel_instances p ON p.id=n.panel_id
  JOIN droplets dr ON dr.id=p.droplet_id JOIN deployments dp ON dp.droplet_id=dr.id
- WHERE dr.state<>'DELETED' AND n.next_check_at<=now()
- ORDER BY n.desired_enabled,n.next_check_at,n.panel_id LIMIT 64`)
+ WHERE dr.state<>'DELETED' AND n.next_check_at<=now() AND ($1::boolean IS NULL OR n.desired_enabled=$1)
+ ORDER BY n.next_check_at,n.panel_id LIMIT 64`, enabled)
 	if e != nil {
 		return e
 	}
@@ -128,7 +140,7 @@ func (c Controller) Round(ctx context.Context) error {
 	if e != nil {
 		return e
 	}
-	sem := make(chan struct{}, 8)
+	sem := make(chan struct{}, concurrency)
 	var wg sync.WaitGroup
 	for _, t := range targets {
 		select {
@@ -181,7 +193,9 @@ func (c Controller) reconcile(ctx context.Context, t nodeTarget) {
 		return
 	}
 	var st Status
-	if t.Host == "" || t.KeyRef == "" {
+	if c.SSH == nil {
+		e = fmt.Errorf("guardian SSH transport not configured")
+	} else if t.Host == "" || t.KeyRef == "" {
 		e = fmt.Errorf("missing managed SSH target")
 	} else {
 		var private []byte

@@ -1,0 +1,19 @@
+{
+  "goal": "Prevent slow failed disabled-node guardian cleanup from delaying current enabled-panel protection receipts; preserve verified sticky output admission, guardian thresholds and all provider/client policies.",
+  "context": "Production26 current serving at22:52:54Z allAPPLIED;1critical1recovering,1stale>60s,1unsupportednewpanel.11 disabledcleanup failures include7TCP dial timeout and3hostkey mismatch; do not bypasshostkey pins. ExistingRound picksdisabledfirst,8concurrent,90sround,30snode andwaitsall then5sidle; healthyreceiptages reached73s. ExistingserverProtectionOutputPredicate is STICKY tolastverifiedblocked untilvalidopen/disabled; output_snapshot comment misleadingly saysfreshonly. Selected bounded architecture: independently supervised serving/enabled anddisabled/cleanup module loops sharingcurrentpanelWork.Do;6enabled+2cleanup slots keepsmax8. Existingperpanellock,revisionCAS,30snode and90sround,15sreceiptdue,configurationandSSHhostkeyguards stay. Preferpendingpolicychangesbeforecleanupretrybacklog, withno starvation ofoldretry targets. KeepRound compatibility forone-shotcallers ifneeded. Nochanges nft,CPUmemorythresholds,clientquotas/lifetimes,cloudspend,proxyallowlist. Adddeterministicblockedcleanup/freshenabledprogress,cancellation,SQLselectionandrevision/leaseownershiptests; isolatedPostgres,race,fullGo,independentreview,guardeddeploymentandmeasuredreceiptfreshness. No manualmanagedpanelSSH; API/read-onlycontrolDBforinvestigation. Canonicaldetachedae05935 legitimatelynewerthanlocalarchivedbranch; bootstrapfailswrongbranchandmustbereported,notforgedPASS. Runtimebaseline d02f045. PLAN REVISION: remove optional PENDING priority entirely; keep oldest next_check_at then panel_id FIFO within each enabled/cleanup lane. This avoids introducing starvation/cursor scheduling and is supported by existing35s reservation and15sreceipt due. Eachlane filter is before independentLIMIT64. Newly inserted pending changes have now() due, oldretrydues sort first, no queue starvation by newarrivals. Round isone-shotcombinedcompatibilityonly, neverregisteredproduction. Store.Sync is short andfinishesbeforeSSH. WorkBudget holds noSQLwhilequeued andneverreleasesaslotbeforecallbackreturns; productionpanelsbudget10work/40SQL. Keepnode30s,round90s,supervisionWork45s afteradmission,2minLoop,5sIdle; finalizersworst4+3+2=9s allow<=39s after30snode. Eachnewmoduleindependentlyregistered/supervised. Canonicalremoteandruntimevalidatedbybaseline-runtime.json; branchbootstrap remainsreportedFAIL(detachedcanonicalnewerthanarchivedbranch), noforgedPASS. Correct measured errorcounts:10 disabledcleanup errors(7dialtimeout,3hostkey mismatch), plus1enabledunsupported, not11disabled. RELEASE INTEGRATION: concurrent authorized release897f408 deployed23:05:19Z. Rebased owned patch onto it without conflicts; retain account purge, idle-provider polling and guardian idempotent systemctl fixes. Peer release also fixes older residential-test mock full-domain/multi-port handling exposed by our full PG run. Repeat full PG/race and review on integratedsource. Rollback mustnowbe897f408,preservingpeerwork.",
+  "allowed_paths": [
+    "internal/serverprotection/controller.go",
+    "internal/serverprotection/polling.go",
+    "internal/serverprotection/polling_test.go",
+    "internal/serverprotection/polling_postgres_test.go",
+    "cmd/worker/main.go",
+    "cmd/worker/main_test.go",
+    "cmd/worker/supervision.go",
+    "cmd/worker/supervision_test.go",
+    "internal/adminapi/output_snapshot.go",
+    "docs/development-jobs/protection-poll-isolation-20261009.json"
+  ],
+  "push": true,
+  "rollback_commit": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "integrated_baseline": "897f40800d047a3f08faccb501e450a17208b6bc"
+}

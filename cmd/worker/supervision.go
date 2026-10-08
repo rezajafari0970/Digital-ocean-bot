@@ -28,7 +28,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "catalog":
 		p.Work = 20 * time.Minute
 		p.Idle = 24 * time.Hour
-	case "server-protection":
+	case "server-protection", "server-protection-cleanup":
 		p.Loop = 2 * time.Minute
 		p.Work = 45 * time.Second
 		p.Idle = 5 * time.Second

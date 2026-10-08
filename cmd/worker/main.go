@@ -245,9 +245,11 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 	// The local protection controller is inert until its Config policy is enabled.
-	modules.Add(worker.RolePanels, "server-protection", (serverprotection.Controller{Admit: panelWork.Do, DB: application.DB, Secrets: application.Container.Secrets,
+	protection := serverprotection.Controller{Admit: panelWork.Do, DB: application.DB, Secrets: application.Container.Secrets,
 		UpgradePanels: serverprotection.ParseUpgradePanels(os.Getenv("DOB_GUARDIAN_UPGRADE_PANELS")),
-		SSH:           provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}).Run)
+		SSH:           provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}
+	modules.Add(worker.RolePanels, "server-protection", protection.Run)
+	modules.Add(worker.RolePanels, "server-protection-cleanup", protection.RunCleanup)
 	// Existing periodic diagnostics retain their recovery fallback on unmanaged nodes.
 	modules.Add(worker.RolePanels, "server-guardian", func(ctx context.Context) {
 		g := serverguardian.Service{

@@ -120,8 +120,8 @@ func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) 
 func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, class string) {
 	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
-	// Only current, recently verified admission closures affect new exports.
-	// Missing/stale telemetry and an OFF policy preserve baseline eligibility.
+	// A last verified admission closure stays withheld across stale/failed polls.
+	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
 	where += serverProtectionOutputPredicate
 	args := []any{}
 	// Class publication requires a fresh running-core proof of the current revision.
