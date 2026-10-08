@@ -156,7 +156,15 @@ func run() error {
 			if !ok {
 				return 0, fmt.Errorf("rules missing")
 			}
-			protected, direct, blocked, clientDNS := "", "", "", ""
+			protected, protectedUDP, direct, blocked, clientDNS, defaultRoute := "", "", "", "", "", ""
+			strict := false
+			for _, v := range setting["outbounds"].([]any) {
+				o := v.(map[string]any)
+				tag, _ := o["tag"].(string)
+				if strings.HasPrefix(tag, "dob-route-direct-") {
+					direct = tag
+				}
+			}
 			poolAllowed, e := poolTargets(setting, assignment.Config)
 			if e != nil {
 				return 0, e
@@ -193,13 +201,17 @@ func run() error {
 					}
 				}
 				if r["ruleTag"] == "dob-route-default" {
-					direct, _ = r["outboundTag"].(string)
+					defaultRoute, _ = r["outboundTag"].(string)
+					strict = strings.HasPrefix(defaultRoute, "dob-route-blocked-")
 				}
 				if r["ruleTag"] == "dob-route-unobserved-inbound" {
 					blocked, _ = r["outboundTag"].(string)
 				}
 				if r["ruleTag"] == "dob-route-client-dns" {
 					clientDNS, _ = r["outboundTag"].(string)
+				}
+				if r["ruleTag"] == "dob-route-residential-udp" {
+					protectedUDP, _ = r["outboundTag"].(string)
 				}
 				if r["ruleTag"] == "dob-route-residential-udp" && r["domain"] == nil {
 					return 0, fmt.Errorf("overbroad UDP block")
@@ -211,10 +223,16 @@ func run() error {
 			if len(poolAllowed) > 0 {
 				protected = "@pool"
 			}
-			if protected != "@pool" && !strings.HasPrefix(protected, "residential-ads-") && !strings.HasPrefix(protected, "dob-route-blocked-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-") {
+			if protected != "@pool" && !strings.HasPrefix(protected, "residential-ads-") && !strings.HasPrefix(protected, "dob-route-blocked-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || (!strict && !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-")) || (strict && clientDNS != blocked) {
 				return 0, fmt.Errorf("class route unavailable")
 			}
 
+			if residentialsync.StrictAllowlistEnabled(id) && !strict {
+				return 0, fmt.Errorf("strict policy not applied")
+			}
+			if strict && (defaultRoute != blocked || setting["outbounds"].([]any)[0].(map[string]any)["protocol"] != "blackhole") {
+				return 0, fmt.Errorf("strict default not blocked")
+			}
 			if len(poolAllowed) > 0 && (!poolScope["tcp"] || !poolScope["udp"]) {
 				return 0, fmt.Errorf("pool protocol scope incomplete")
 			}
@@ -317,12 +335,20 @@ func run() error {
 						ad               bool
 					}{
 						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", false}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
+						{"www.gstatic.com", "", "443", false}, {"connectivitycheck.gstatic.com", "", "80", false},
+						{"www.gstatic.com.evil.test", "", "443", false}, {"evil.www.gstatic.com", "", "443", false},
+						{"www.gstatic.com", "", "8443", false}, {"adservice.google.com", "", "53", true},
 					} {
 						expected := direct
 						if cls == "RESIDENTIAL" {
+							if strict {
+								expected = blocked
+							}
 							if dest.port == "53" {
 								expected = clientDNS
 							} else if dest.ad {
+								expected = protectedForNetwork(network, protected, protectedUDP)
+							} else if strict && network == "tcp" && (dest.port == "80" || dest.port == "443") && (dest.domain == "www.gstatic.com" || dest.domain == "connectivitycheck.gstatic.com") {
 								expected = protected
 							}
 						}
@@ -338,7 +364,11 @@ func run() error {
 					}
 				}
 			}
-			if e = check(url.Values{"inboundTag": {"dob-route-dns-query"}, "network": {"tcp"}, "port": {"53"}, "ip": {"8.8.8.8"}}, direct); e != nil {
+			dnsPort := "53"
+			if strict && assignment.Config != nil && assignment.Config.DNSMode == "doh" {
+				dnsPort = "443"
+			}
+			if e = check(url.Values{"inboundTag": {"dob-route-dns-query"}, "network": {"tcp"}, "port": {dnsPort}, "ip": {"8.8.8.8"}}, direct); e != nil {
 				return 0, e
 			}
 			if e = check(url.Values{"inboundTag": {"dob-unobserved-inbound"}, "network": {"tcp"}, "port": {"443"}, "domain": {"adservice.google.com"}}, blocked); e != nil {
@@ -348,8 +378,27 @@ func run() error {
 				for _, kind := range []string{"fast", "all"} {
 					key := "@inner:" + network + ":" + kind
 					if len(poolAllowed[key]) > 0 {
-						if e = check(url.Values{"inboundTag": {"dob-route-pool-in-" + network + "-" + kind}, "network": {network}, "port": {"443"}, "ip": {"1.1.1.1"}}, key); e != nil {
+						form := url.Values{"inboundTag": {"dob-route-pool-in-" + network + "-" + kind}, "network": {network}, "port": {"443"}}
+						if strict {
+							form.Set("domain", "adservice.google.com")
+						} else {
+							form.Set("ip", "1.1.1.1")
+						}
+						if e = check(form, key); e != nil {
 							return 0, e
+						}
+						if strict {
+							for _, domain := range []string{"www.example.com", "www.gstatic.com.evil.test"} {
+								form.Set("domain", domain)
+								if e = check(form, blocked); e != nil {
+									return 0, e
+								}
+							}
+							form.Del("domain")
+							form.Set("ip", "1.1.1.1")
+							if e = check(form, blocked); e != nil {
+								return 0, e
+							}
 						}
 					}
 				}

@@ -110,7 +110,20 @@ func configurePool(next map[string]any, p routePolicy) error {
 				}
 			}
 			balancers = append(balancers, map[string]any{"tag": tag, "selector": candidates, "fallbackTag": blockedTag, "strategy": map[string]any{"type": "leastLoad", "settings": settings}})
-			internal = append(internal, map[string]any{"type": "field", "ruleTag": tag, "inboundTag": []string{poolPrefix + "in-" + network + "-" + kind}, "network": network, "balancerTag": tag})
+			inbound := []string{poolPrefix + "in-" + network + "-" + kind}
+			if p.StrictAllowlist {
+				// Recheck the destination after loopback, not just at the public inlet.
+				internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-dns-deny", "inboundTag": inbound, "network": network, "port": "53", "outboundTag": blockedTag})
+				if !p.SniffingBlocked && p.Residential {
+					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-ads", "inboundTag": inbound, "network": network, "domain": residentialDomains(), "balancerTag": tag})
+					if network == "tcp" {
+						internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-probes", "inboundTag": inbound, "network": network, "domain": residentialProbeDomains, "port": "80,443", "balancerTag": tag})
+					}
+				}
+				internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-deny", "inboundTag": inbound, "network": network, "outboundTag": blockedTag})
+			} else {
+				internal = append(internal, map[string]any{"type": "field", "ruleTag": tag, "inboundTag": inbound, "network": network, "balancerTag": tag})
+			}
 		}
 		lanes := []string{}
 		laneCount, fastLanes := 5, 4
@@ -136,8 +149,11 @@ func configurePool(next map[string]any, p routePolicy) error {
 		if strings.HasPrefix(tag, poolPrefix) {
 			continue
 		}
-		if p.Residential && !p.SniffingBlocked && (tag == "dob-route-residential-ads" || (!p.AdsOnly && tag == "dob-route-default")) {
+		if p.Residential && !p.SniffingBlocked && (tag == "dob-route-residential-ads" || tag == "dob-route-residential-probes" || (!p.AdsOnly && tag == "dob-route-default")) {
 			for _, network := range []string{"tcp", "udp"} {
+				if tag == "dob-route-residential-probes" && network != "tcp" {
+					continue
+				}
 				copy := map[string]any{}
 				for k, v := range m {
 					copy[k] = v

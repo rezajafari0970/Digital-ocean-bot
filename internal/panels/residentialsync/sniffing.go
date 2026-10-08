@@ -8,7 +8,7 @@ import (
 // A domain route proof is insufficient if actual inbound traffic never exposes
 // its hostname. Require installed HTTP/TLS/QUIC sniffing before publishing the
 // new routing plan. This does not claim to classify encrypted/opaque hostnames.
-func validateAdSniffing(raws []json.RawMessage) error {
+func validateAdSniffing(raws []json.RawMessage, strict ...bool) error {
 	for _, raw := range raws {
 		var in struct {
 			Protocol string
@@ -23,6 +23,9 @@ func validateAdSniffing(raws []json.RawMessage) error {
 		m, err := decodeObject(in.Sniffing)
 		if err != nil {
 			return errors.New("advertising routing requires inbound sniffing")
+		}
+		if len(strict) > 0 && strict[0] && m["routeOnly"] == true {
+			return errors.New("strict residential routing requires destination override")
 		}
 		if m["enabled"] != true || m["metadataOnly"] == true {
 			return errors.New("advertising routing requires payload sniffing")

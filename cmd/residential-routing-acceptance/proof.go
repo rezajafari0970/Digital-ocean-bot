@@ -39,3 +39,12 @@ func routeProofMatches(resp sanaei.SessionResponse, expected string) (bool, erro
 	}
 	return result.Obj.Matched && result.Obj.OutboundTag == expected, nil
 }
+
+// A non-pool HTTP(S) endpoint cannot carry protected UDP. Its preceding
+// explicit deny rule, rather than the later shared ads rule, is authoritative.
+func protectedForNetwork(network, protected, udpDeny string) string {
+	if network == "udp" && udpDeny != "" {
+		return udpDeny
+	}
+	return protected
+}

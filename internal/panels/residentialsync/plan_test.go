@@ -155,14 +155,27 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 					continue
 				}
 			}
-			if port, ok := rule["port"].(string); ok && port != v.Get("port") {
+			if port, ok := rule["port"].(string); ok && !strings.Contains(","+port+",", ","+v.Get("port")+",") {
 				continue
+			}
+			if ips, ok := rule["ip"].([]any); ok {
+				match := false
+				for _, ip := range ips {
+					if ip == v.Get("ip") {
+						match = true
+					}
+				}
+				if !match {
+					continue
+				}
 			}
 			if patterns, ok := rule["domain"].([]any); ok {
 				matched := false
 				for _, value := range patterns {
 					pattern, _ := value.(string)
-					if strings.HasPrefix(pattern, "regexp:") {
+					if strings.HasPrefix(pattern, "full:") {
+						matched = matched || v.Get("domain") == strings.TrimPrefix(pattern, "full:")
+					} else if strings.HasPrefix(pattern, "regexp:") {
 						matched = matched || regexp.MustCompile(strings.TrimPrefix(pattern, "regexp:")).MatchString(v.Get("domain"))
 					} else if strings.HasPrefix(pattern, "domain:") {
 						suffix := strings.TrimPrefix(pattern, "domain:")

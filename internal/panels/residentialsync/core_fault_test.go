@@ -1,11 +1,10 @@
 package residentialsync
 
 import (
+	"bytes"
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -48,7 +47,7 @@ func TestInstalledCoreAdsFailClosedAndOtherTCPUDPDirect(t *testing.T) {
 				p.Configured = 1
 				p.Proxies = []rp{{Type: "socks5", Host: "127.0.0.1", Port: 1, Tag: "residential-ads-fault"}}
 			}
-			setting, err := buildSettings(map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"rules": []any{}}}, nil, []string{"actual-inbound-tag"}, p)
+			setting, err := buildSettings(map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"rules": []any{}}}, nil, []string{"actual-inbound-tag", "actual-vless-tag"}, p)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -58,16 +57,26 @@ func TestInstalledCoreAdsFailClosedAndOtherTCPUDPDirect(t *testing.T) {
 			}
 			proxyPort := listener.Addr().(*net.TCPAddr).Port
 			listener.Close()
+			vlessListener, err := net.Listen("tcp4", "127.0.0.1:0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			vlessPort := vlessListener.Addr().(*net.TCPAddr).Port
+			vlessListener.Close()
+			vlessAddress := net.JoinHostPort("127.0.0.1", strconv.Itoa(vlessPort))
 			// Resolve fixture domains using test-only static hosts, never public DNS.
 			for _, v := range setting["outbounds"].([]any) {
 				o := v.(map[string]any)
 				if o["protocol"] == "freedom" {
-					o["settings"] = map[string]any{"domainStrategy": "UseIPv4"}
+					// Permit test-only loopback sinks under the target core private-IP default.
+					o["settings"] = map[string]any{"domainStrategy": "UseIPv4", "finalRules": []any{map[string]any{"action": "allow"}}}
 				}
 			}
 			setting["dns"].(map[string]any)["hosts"] = map[string]any{"adservice.google.com": "127.0.0.1", "browserleaks.com": "127.0.0.1"}
-			setting["log"] = map[string]any{"loglevel": "none"}
+			setting["log"] = map[string]any{"loglevel": "debug"}
 			setting["inbounds"] = []any{map[string]any{"tag": "actual-inbound-tag", "listen": "127.0.0.1", "port": proxyPort, "protocol": "socks", "settings": map[string]any{"auth": "noauth", "udp": true}, "sniffing": map[string]any{"enabled": true, "destOverride": []string{"http", "tls", "quic"}, "metadataOnly": false}}}
+			setting["inbounds"] = append(setting["inbounds"].([]any), map[string]any{"tag": "actual-vless-tag", "listen": "127.0.0.1", "port": vlessPort, "protocol": "vless", "settings": map[string]any{"decryption": "none", "clients": []any{map[string]any{"id": "00000000-0000-4000-8000-000000000002", "email": "fixture@test"}}}})
+
 			file := filepath.Join(t.TempDir(), "core.json")
 			raw, _ := json.Marshal(setting)
 			if err = os.WriteFile(file, raw, 0600); err != nil {
@@ -79,10 +88,23 @@ func TestInstalledCoreAdsFailClosedAndOtherTCPUDPDirect(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			cmd := exec.CommandContext(ctx, binaryPath, "run", "-config", file)
+			var coreLog bytes.Buffer
+			cmd.Stdout = &coreLog
+			cmd.Stderr = &coreLog
 			if err = cmd.Start(); err != nil {
 				t.Fatal(err)
 			}
-			defer func() { cancel(); cmd.Wait() }()
+			defer func() {
+				cancel()
+				cmd.Wait()
+				if t.Failed() {
+					text := coreLog.String()
+					if len(text) > 10000 {
+						text = text[len(text)-10000:]
+					}
+					t.Log(text)
+				}
+			}()
 			address := net.JoinHostPort("127.0.0.1", strconv.Itoa(proxyPort))
 			ready := false
 			for i := 0; i < 50; i++ {
@@ -107,57 +129,33 @@ func TestInstalledCoreAdsFailClosedAndOtherTCPUDPDirect(t *testing.T) {
 					t.Fatal("non-Ad TCP did not remain direct", target, e)
 				}
 			}
-			// Actual SOCKS UDP relay: non-ad UDP reaches direct; Ads never escape.
-			control, e := net.DialTimeout("tcp", address, time.Second)
-			if e != nil {
-				t.Fatal(e)
-			}
-			defer control.Close()
-			control.SetDeadline(time.Now().Add(3 * time.Second))
-			control.Write([]byte{5, 1, 0})
-			reply := make([]byte, 2)
-			if _, e = io.ReadFull(control, reply); e != nil {
-				t.Fatal(e)
-			}
-			control.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
-			bound := make([]byte, 10)
-			if _, e = io.ReadFull(control, bound); e != nil || bound[1] != 0 {
-				t.Fatal("UDP associate", e)
-			}
-			remote := &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: int(binary.BigEndian.Uint16(bound[8:10]))}
-			conn, e := net.DialUDP("udp4", nil, remote)
-			if e != nil {
-				t.Fatal(e)
-			}
-			defer conn.Close()
-			packet := []byte{0, 0, 0, 1, 127, 0, 0, 1, byte(udpPort >> 8), byte(udpPort)}
-			packet = append(packet, []byte("opaque-no-hostname")...)
-			conn.Write(packet)
-			udp.SetReadDeadline(time.Now().Add(1500 * time.Millisecond))
-			buf := make([]byte, 100)
-			n, _, e := udp.ReadFrom(buf)
-			if e != nil || n == 0 {
-				t.Fatal("non-ad UDP direct failed", e)
-			}
-			conn.Close()
-			conn, e = net.DialUDP("udp4", nil, remote)
-			if e != nil {
-				t.Fatal(e)
-			}
-			defer conn.Close()
-			domain := "adservice.google.com"
-			packet = []byte{0, 0, 0, 3, byte(len(domain))}
-			packet = append(packet, []byte(domain)...)
-			packet = append(packet, byte(udpPort>>8), byte(udpPort))
-			packet = append(packet, []byte("protected-ad-datagram")...)
-			conn.Write(packet)
-			udp.SetReadDeadline(time.Now().Add(1500 * time.Millisecond))
-			n, _, e = udp.ReadFrom(buf)
-			if kind == "direct-control" {
-				if e != nil || n == 0 {
-					t.Fatal("direct control Ads UDP failed", e)
+			// Exercise the deployed VLESS UDP transport. Newer SOCKS inbounds
+			// resolve UDP domain destinations before dispatch; that transport
+			// cannot stand in for VLESS domain-routing acceptance.
+			receive := func(target string) (bool, error) {
+				result := make(chan error, 1)
+				go func() {
+					_, e := strictVLESSUDP(vlessAddress, "00000000000040008000000000000002", target, udpPort)
+					result <- e
+				}()
+				udp.SetReadDeadline(time.Now().Add(1200 * time.Millisecond))
+				buf := make([]byte, 100)
+				n, addr, e := udp.ReadFrom(buf)
+				if e == nil {
+					udp.WriteTo(buf[:n], addr)
 				}
-			} else if e == nil {
+				clientErr := <-result
+				return e == nil && n > 0, clientErr
+			}
+			if reached, e := receive("127.0.0.1"); !reached || e != nil {
+				t.Fatal("non-ad UDP direct failed", reached, e)
+			}
+			reached, e := receive("adservice.google.com")
+			if kind == "direct-control" {
+				if !reached || e != nil {
+					t.Fatal("direct control Ads UDP failed", reached, e)
+				}
+			} else if reached || e == nil {
 				t.Fatal("Ads UDP escaped failed residential upstream")
 			}
 			want := int64(1)

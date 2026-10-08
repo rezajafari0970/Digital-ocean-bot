@@ -128,3 +128,16 @@ func TestProofUsesWorkerLockAndKeepsOtherPanelsIndependent(t *testing.T) {
 		t.Fatal("proof did not execute after worker released")
 	}
 }
+
+func TestProtectedUDPProofHonorsHTTPDenyBeforeSharedAdsRule(t *testing.T) {
+	for _, tc := range []struct{ network, protected, deny, want string }{
+		{"tcp", "residential-http", "blocked", "residential-http"},
+		{"udp", "residential-http", "blocked", "blocked"},
+		{"udp", "residential-socks", "", "residential-socks"},
+		{"udp", "@pool", "", "@pool"},
+	} {
+		if got := protectedForNetwork(tc.network, tc.protected, tc.deny); got != tc.want {
+			t.Fatal(tc, got)
+		}
+	}
+}

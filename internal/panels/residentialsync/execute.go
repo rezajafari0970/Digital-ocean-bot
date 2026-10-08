@@ -79,6 +79,7 @@ func tagged(next map[string]any, base string) string {
 	return ""
 }
 func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map[string]any, clients []clientRoute, tags []string, p routePolicy) error {
+	p = p.normalized()
 	resp, err := exec.Do(ctx, sanaei.SessionRequest{Method: "GET", Path: "panel/api/server/status", TimeoutSeconds: 5})
 	if e := envelope(resp, err); e != nil {
 		return e
@@ -116,6 +117,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				{"browserleaks.com", "", "tcp", "443", "tls", true},
 				{"", "1.1.1.1", "tcp", "53", "", false},
 				{"", "1.1.1.1", "tcp", "443", "", false},
+				{"www.gstatic.com", "", "tcp", "443", "tls", false},
+				{"connectivitycheck.gstatic.com", "", "tcp", "80", "http", false},
+				{"www.gstatic.com.example.org", "", "tcp", "443", "tls", false},
 			} {
 				network := probe.network
 				base := blockedTag
@@ -129,13 +133,17 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				if p.AdsOnly {
 					explicitDirect := c.Effective == "DIRECT" && (!p.Harden && !p.AdsOnly || c.Class == "DIRECT")
 					switch {
-					case explicitDirect || (!p.Residential && p.Direct):
+					case explicitDirect || (!p.StrictAllowlist && !p.Residential && p.Direct):
 						base = directTag
 					case !p.Residential || p.SniffingBlocked:
 						base = blockedTag
+					case p.StrictAllowlist && probe.port == "53":
+						base = blockedTag
 					case p.Harden && probe.port == "53":
 						base = clientDNSTag
-					case !probe.ads:
+					case p.StrictAllowlist && !probe.ads && probe.domain != "www.gstatic.com" && probe.domain != "connectivitycheck.gstatic.com":
+						base = blockedTag
+					case !p.StrictAllowlist && !probe.ads:
 						base = directTag
 					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && p.Proxies[0].Type != "socks5") || (p.PoolEnabled && !poolHasUDP(p))):
 						base = blockedTag
@@ -183,7 +191,11 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		} else if p.Residential && !p.SniffingBlocked && len(p.Proxies) > 0 {
 			base = p.Proxies[0].Tag
 		}
-		form := url.Values{"port": {"53"}, "network": {"tcp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
+		port := "53"
+		if p.StrictAllowlist {
+			port = internalDNSPort(p)
+		}
+		form := url.Values{"port": {port}, "network": {"tcp"}, "inboundTag": {dnsTag}, "ip": {"1.1.1.1"}}
 		response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
 		if e = envelope(response, e); e != nil {
 			return e
@@ -234,6 +246,10 @@ func verifyPoolOutcomes(ctx context.Context, exec sanaei.SessionExecutor, desire
 		}
 		for _, kind := range []string{"fast", "all"} {
 			form := url.Values{"inboundTag": {poolPrefix + "in-" + network + "-" + kind}, "network": {network}, "port": {"443"}, "ip": {"1.1.1.1"}}
+			if p.StrictAllowlist {
+				form.Del("ip")
+				form.Set("domain", "adservice.google.com")
+			}
 			response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
 			if e = envelope(response, e); e != nil {
 				return e

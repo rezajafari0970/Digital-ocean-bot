@@ -1,0 +1,28 @@
+{
+  "goal": "Enforce server-side default-deny for RESIDENTIAL subscriptions: only existing geosite:google@ads, temporary domain:browserleaks.com, and exact client probe hosts may reach residential egress; no ordinary-domain, opaque-IP, arbitrary client DNS, or direct fallback. Preserve explicit DIRECT identities and management.",
+  "context": "User 2026-10-08 explicitly authorizes strict allowlist replacing current selective residential/direct split. Baseline fe7ba0b; isolated worktree; other account/panel repair work active, so recheck/rebase before deploy and never overwrite peers. Add StrictAllowlist rollout selector all default / none legacy rollback / panel UUID canary. Probe hosts exact full:www.gstatic.com, full:connectivitycheck.gstatic.com (observed client/core generate_204 endpoints), TCP ports80/443 only through residential pool. Do not allow all Google/gstatic. Keep category and BrowserLeaks scope unchanged. Block client DNS port53 and all other unmatched TCP/UDP; internal built-in IPv4 DNS remains necessary infrastructure and its route is constrained to exact configured resolver IPs port53 TCP only. Prohibit sniffing routeOnly:true to prevent arbitrary destination IP with allowed SNI (fail closed, no silent mutations). Apply same domain restrictions at pool loopback second stage, with specific probe port guards, to prevent bypass. Force AdsOnly/Harden when strict selected. Unknown identities stay protected even when residential generation off; explicit DIRECT only gets direct. Preserve unknown outcomes, locks, fingerprints, membership receipts, all gates/quotas/lifetime/provider credentials. No host-wide firewall or incoming Internet SYN guarantee: enforce authenticated proxied destination requests and their return traffic. TLS URL paths are encrypted, so probe allowlist is host+port, not path/body filtering. Test allow/block on real installed Xray and unit native route proof; upstream outage zero direct leaks; positive direct controls; no change unrelated production APIs. Only claim observed fleet acceptance. No active Xray probe service reintroduction; ephemeral isolated core tests only.",
+  "allowed_paths": [
+    "internal/panels/residentialsync",
+    "docs/development-jobs/residential-allowlist-20261008.json",
+    "docs/RESIDENTIAL_ALLOWLIST_20261008.md",
+    "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
+    "cmd/residential-routing-acceptance"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 240,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [],
+    "test": [
+      "go test -race ./internal/panels/residentialsync -count=1",
+      "env -u BULK_TEST_DATABASE_URL -u DOB_E2E_DSN go test -p 2 ./..."
+    ],
+    "verify": [
+      "XRAY_TEST_BINARY=/usr/local/bin/xray go test ./internal/panels/residentialsync -run TestInstalledCore -count=1",
+      "git diff --check"
+    ]
+  },
+  "commit_message": "feat(routing): enforce residential destination allowlist"
+}

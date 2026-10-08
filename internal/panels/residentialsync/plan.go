@@ -28,6 +28,7 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	StrictAllowlist       bool
 	StableFingerprint     bool
 	Performance           *residentialperf.Config
 	PerformanceGeneration int64
@@ -64,6 +65,7 @@ func decodeObject(raw json.RawMessage) (map[string]any, error) {
 	return out, nil
 }
 func planClients(raws []json.RawMessage, previous map[string]clientRoute, p routePolicy) ([]clientRoute, []string, error) {
+	p = p.normalized()
 	ids := map[string]string{}
 	emails := map[string]string{}
 	tags := []string{}
@@ -117,6 +119,11 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			}
 			ids[id] = email
 			emails[key] = id
+		}
+	}
+	if p.StrictAllowlist {
+		if err := validateStrictInboundTags(tags, nil); err != nil {
+			return nil, nil, err
 		}
 	}
 	sort.Strings(tags)
@@ -193,6 +200,12 @@ func settingsHash(v map[string]any) string {
 	return fmt.Sprintf("%x", sha256.Sum256(raw))
 }
 func buildSettings(current map[string]any, clients []clientRoute, tags []string, p routePolicy) (map[string]any, error) {
+	p = p.normalized()
+	if p.StrictAllowlist {
+		if err := validateStrictInboundTags(tags, current); err != nil {
+			return nil, err
+		}
+	}
 	raw, err := json.Marshal(current)
 	if err != nil {
 		return nil, err
@@ -251,7 +264,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if p.SniffingBlocked {
 		destination = blockedTag
 	}
-	if p.Harden && p.Residential && p.AdsOnly {
+	if p.Harden && p.Residential && p.AdsOnly && !p.StrictAllowlist {
 		// Accept client UDP/TCP DNS without depending on residential health.
 		// A queries use the cached IPv4 pool; other query types retain real
 		// responses through direct TCP forwarding (never the residential proxy).
@@ -312,13 +325,17 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && dnsDestination == p.Proxies[0].Tag {
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-dns-udp", "inboundTag": []string{dnsTag}, "network": "udp", "outboundTag": blockedTag})
 		}
-		first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-dns", "inboundTag": []string{dnsTag}, "network": "tcp,udp", "outboundTag": dnsDestination})
+		dnsRule := map[string]any{"type": "field", "ruleTag": "dob-route-dns", "inboundTag": []string{dnsTag}, "network": "tcp,udp", "outboundTag": dnsDestination}
+		if p.StrictAllowlist {
+			restrictInternalDNS(dnsRule, p)
+		}
+		first = append(first, dnsRule)
 	}
 	if len(tags) > 0 {
 		if len(directUsers) > 0 {
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-direct-users", "inboundTag": tags, "user": directUsers, "network": "tcp,udp", "outboundTag": directTag})
 		}
-		if !p.Residential && p.Direct {
+		if !p.Residential && p.Direct && !p.StrictAllowlist {
 			destination = directTag
 		}
 		if !p.Residential && !p.Direct {
@@ -332,9 +349,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
 		} else {
-			if p.Harden && p.Residential {
+			if p.Harden && (p.Residential || p.StrictAllowlist) {
 				dnsDestination := clientDNSTag
-				if p.SniffingBlocked {
+				if p.SniffingBlocked || p.StrictAllowlist {
 					dnsDestination = blockedTag
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": dnsDestination})
@@ -346,13 +363,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": residentialDomains(), "network": "udp", "outboundTag": blockedTag})
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
+				if p.StrictAllowlist {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-probes", "inboundTag": tags, "domain": residentialProbeDomains, "network": "tcp", "port": "80,443", "outboundTag": destination})
+				}
 			}
 			fallback := directTag
-			if (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
+			if p.StrictAllowlist || (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
 				fallback = blockedTag
 			}
-			// Ordinary domains and opaque/IP TCP/UDP are direct. List matching
-			// cannot classify ads absent from geosite or hidden by encryption.
+			// Strict mode denies all unmatched requests, including opaque/IP traffic.
+			// Legacy selective mode is retained only for scoped rollback.
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": fallback})
 
 		}
