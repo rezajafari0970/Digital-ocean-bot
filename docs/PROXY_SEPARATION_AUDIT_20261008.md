@@ -77,3 +77,5 @@ The source HEAD differs from the deployed bf2d6da revision only in nine document
 Final evidence assembly: 2026-10-08T09:37:22.933696+00:00. Native traffic snapshots remain09:01/09:09UTC; later schema and health observations are separately timestamped in JSON. The credential-store source and live credential-table constraints/indexes/triggers are also in the review package.
 
 Final report regeneration: 2026-10-08T09:43:01.445286+00:00. Findings based on native inbound counters do not claim successful end-to-end forwarding.
+
+Review record: PROXY_SEPARATION_REVIEW_20261008.json. Orchestrator audit workflow COMPLETE; final actual API review PASS is limited to closure of identified report revisions. No product fix or no-misuse certificate is implied.

@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-10-08T09:14:09.477915+00:00",
+  "captured_at": "2026-10-08T09:47:10.506844+00:00",
   "source_head": "2c2f904f53903d4e3ec55a5a9b09f2ec8904c68a",
   "deployed_product_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
   "files": {
@@ -38,5 +38,6 @@
     "limits.jsonl": "94209c6e3c12dadd952f8dd65ea2566136a1d890e25ebfe5540719b5b50119f9",
     "extra-provenance.json": "1f496050260c440817d960970c5aef1de14fa35299249ae0e182e282491318d9",
     "credential-schema-provenance.json": "151bf2cb877388e67bfac6cc025cad1bc8c99b73b1530997c7f786be943f85af"
-  }
+  },
+  "initial_snapshot_assembled_at": "2026-10-08T09:14:09.477915+00:00"
 }

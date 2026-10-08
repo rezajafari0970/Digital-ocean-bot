@@ -1,0 +1,45 @@
+{
+  "recorded_at": "2026-10-08T09:47:10.506844+00:00",
+  "workflow_status": "COMPLETE",
+  "audit_checkpoint": "f49efe11bb68facd6a379c75177fca6c734f3aa9",
+  "final_api_response_id": "resp_0f8cb6a2c16077f6006ac76652e79887d1a22fe8b0a7f1688d",
+  "final_review": {
+    "decision": "PASS",
+    "review_scope": "closure_of_identified_report_revisions",
+    "findings": [],
+    "limitations": [
+      "Closure review was limited to the two previously identified report-quality findings and contradictions potentially introduced by their revisions; it was not a general whole-project audit, product approval, fleet-wide safety determination, or no-misuse certificate.",
+      "PSA-001 now limits its claim to running Xray, enabled unlimited clients, and increasing inbound counters, and explicitly states that these counters do not prove end-to-end forwarding or billed proxy traffic.",
+      "PSA-006 is supported by collector metadata documenting case-insensitive checks of http_proxy, https_proxy, all_proxy, and no_proxy names in live /proc/PID/environ snapshots; those snapshots are not end-to-end transport traces.",
+      "The 73 unreachable Vultr panel records, historical routing, provider billing attribution, external credential use, and exact Xray probe execution remain unverified as stated in the report."
+    ]
+  },
+  "reviewed_input_sha256": "351dcd47778d00e50b86fff9b1e438110746459764147b883146591495a6d6c4",
+  "scope_note": "Multiple full report/source reviews led to factual and scope corrections. Final API PASS closes the two remaining report-quality revisions; it is not a product/security approval or proof of no misuse.",
+  "prior_review_records": [
+    {
+      "file": "initial-review-verdict.json",
+      "sha256": "05b26609886055853e98e7fd53920cf41079f358cd6ee28efbe206d5b94aee83"
+    },
+    {
+      "file": "second-review-verdict.json",
+      "sha256": "ce020e9121896ba873e438c6d34c756afc348e863958d260779a4269d2d1889c"
+    },
+    {
+      "file": "third-review-verdict.json",
+      "sha256": "f93fec7ce3d25793eb332c3a754f46c68f7959a6d2909bf00df760a1e3ba2d32"
+    },
+    {
+      "file": "fourth-review-verdict.json",
+      "sha256": "3af69afbe3c69a4313cefa9e712b32cab48fadb57c7f07ab8a0fb25510a05da8"
+    },
+    {
+      "file": "fifth-review-verdict.json",
+      "sha256": "d5789b8fc73e583444133435fbf607d92ebb3af12541de46687a45146ef04e98"
+    },
+    {
+      "file": "sixth-review-verdict.json",
+      "sha256": "a95bdcf76cfb91b5d721ff29a6883a71c257ee18e5844abfec4ac1190749fd78"
+    }
+  ]
+}
