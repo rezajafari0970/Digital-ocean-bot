@@ -329,16 +329,32 @@ if [ -e "$unit" ] && ! head -n 1 "$unit" | grep -Fxq '# Managed by digital-ocean
 	if stage != "" {
 		script += "stage=" + quote(stage) + "\ntrap 'rm -f -- \"$stage\"' EXIT\nprintf '%s  %s\\n' " + quote(hash) + " \"$stage\" | sha256sum -c - >/dev/null\ninstall -m 0755 \"$stage\" /usr/local/libexec/dob-server-guardian.new\nmv /usr/local/libexec/dob-server-guardian.new /usr/local/libexec/dob-server-guardian\n"
 	}
-	script += "printf %s " + quote(base64.StdEncoding.EncodeToString([]byte(Unit))) + " | base64 -d > \"$unit.new\"\nif ! cmp -s \"$unit.new\" \"$unit\"; then mv \"$unit.new\" \"$unit\"; systemctl daemon-reload; unit_changed=1; else rm -f \"$unit.new\"; fi\n"
+	script += guardianUnitCommand()
 	script += "printf %s " + quote(base64.StdEncoding.EncodeToString(raw)) + " | base64 -d | " + BinaryPath + " configure\n"
 	if p.Enabled {
 		if stage != "" {
 			script += "unit_changed=1\n"
 		}
-		script += "if [ \"$unit_changed\" = 1 ]; then systemctl restart " + UnitName + " >/dev/null 2>&1; fi\n"
-		script += "systemctl enable --now " + UnitName + " >/dev/null 2>&1\n" + BinaryPath + " wait-status " + strconv.FormatInt(p.Revision, 10) + "\n"
+		script += guardianServiceCommand(true) + BinaryPath + " wait-status " + strconv.FormatInt(p.Revision, 10) + "\n"
 	} else {
-		script += "systemctl disable --now " + UnitName + " >/dev/null 2>&1\n" + BinaryPath + " cleanup\n" + BinaryPath + " status\n"
+		script += guardianServiceCommand(false) + BinaryPath + " cleanup\n" + BinaryPath + " status\n"
 	}
 	return script
+}
+
+func guardianUnitCommand() string {
+	return "printf %s " + quote(base64.StdEncoding.EncodeToString([]byte(Unit))) + " | base64 -d > \"$unit.new\"\nif ! cmp -s \"$unit.new\" \"$unit\"; then mv \"$unit.new\" \"$unit\"; systemctl daemon-reload; unit_changed=1; else rm -f \"$unit.new\"; fi\n"
+}
+
+// Enabling an already enabled unit still makes systemctl reload the manager.
+// Only perform that operation when needed, retaining start/stop and fresh receipt.
+func guardianServiceCommand(enabled bool) string {
+	script := "state_rc=0\nunit_state=$(systemctl is-enabled " + UnitName + " 2>/dev/null) || state_rc=$?\n"
+	if enabled {
+		script += "if [ \"$unit_changed\" = 1 ]; then systemctl restart " + UnitName + " >/dev/null 2>&1; fi\n"
+		script += "if [ \"$unit_state\" != enabled ] || [ \"$state_rc\" != 0 ]; then systemctl enable " + UnitName + " >/dev/null 2>&1; fi\n"
+		return script + "systemctl start " + UnitName + " >/dev/null 2>&1\n"
+	}
+	script += "if [ \"$unit_state\" != disabled ] || [ \"$state_rc\" != 1 ]; then systemctl disable " + UnitName + " >/dev/null 2>&1; fi\n"
+	return script + "systemctl stop " + UnitName + " >/dev/null 2>&1\n"
 }
