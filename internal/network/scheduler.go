@@ -21,7 +21,7 @@ type HealthScheduler struct {
 }
 
 func (s HealthScheduler) Check(ctx context.Context, accountID string, target HealthTarget) (HealthState, error) {
-	gateway, err := NewProxyGateway(accountID, target.Proxy, target.Credentials)
+	gateway, err := NewAccountProxyGateway(accountID, target.Proxy, target.Credentials, "base_health")
 	if err != nil {
 		return target.State, err
 	}

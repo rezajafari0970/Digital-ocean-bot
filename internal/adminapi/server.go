@@ -1,22 +1,14 @@
 package adminapi
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/observability"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
-	"log"
-	"net"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -44,6 +36,7 @@ func New(db *sql.DB, c app.Container) *Server {
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
+	m.HandleFunc("GET /api/v1/proxy-traffic", s.require(s.proxyTraffic, false))
 	m.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" && r.URL.Path != s.WebPath && r.URL.Path != s.WebPath+"/" {
@@ -161,106 +154,10 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, code, x)
 }
 
+// The retired interactive browser is not part of account API management.
 func (s *Server) vultrBrowserProxy(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/websockify" {
-		_, cookieErr := r.Cookie("vultr_browser_session")
-		log.Printf("vultr ws request upgrade=%q connection=%q protocol=%q cookie=%t", r.Header.Get("Upgrade"), r.Header.Get("Connection"), r.Header.Get("Sec-WebSocket-Protocol"), cookieErr == nil)
-	}
-	c, err := r.Cookie("vultr_browser_session")
-	if err != nil {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	s.BrowserMu.Lock()
-	exp, ok := s.BrowserTickets[c.Value]
-	if !ok || time.Now().After(exp) {
-		delete(s.BrowserTickets, c.Value)
-		ok = false
-	}
-	s.BrowserMu.Unlock()
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	if r.URL.Path == "/vultr-browser/client.html" || r.URL.Path == "/vultr-browser/vnc.html" || r.URL.Path == "/vultr-browser/vnc_lite.html" {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Cache-Control", "no-store")
-		_, _ = w.Write([]byte("<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"/static/vultr-console.css?v=7\"></head><body><div id=\"status\">Starting...</div><div id=\"screen\"></div><script type=\"module\" src=\"/static/vultr-console.js?v=10\"></script></body></html>"))
-		return
-	}
-	upstream := "http://127.0.0.1:16080"
-	if r.URL.Path == "/websockify" {
-		upstream = "http://127.0.0.1:15900"
-	} else if r.URL.Path == "/vultr-browser/input/scroll" {
-		upstream = "http://127.0.0.1:16081"
-		r.URL.Path = "/scroll"
-	} else if r.URL.Path == "/vultr-browser/input/tap" {
-		upstream = "http://127.0.0.1:16081"
-		r.URL.Path = "/tap"
-	}
-	target, _ := url.Parse(upstream)
-	proxy := httputil.NewSingleHostReverseProxy(target)
-	if strings.HasPrefix(r.URL.Path, "/vultr-browser") {
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/vultr-browser")
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			r.URL.Path = "/vnc.html"
-			q := r.URL.Query()
-			q.Set("autoconnect", "1")
-			q.Set("resize", "scale")
-			q.Set("path", "websockify")
-			r.URL.RawQuery = q.Encode()
-		}
-	}
-	proxy.ServeHTTP(w, r)
+	writeJSON(w, http.StatusGone, map[string]string{"error": "vultr_console_retired"})
 }
-
-func (s *Server) ensureVultrBrowser(accountID string) error {
-	c, err := net.DialTimeout("unix", "/run/digital-ocean-bot/vultr-browser.sock", time.Second)
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-	_ = c.SetDeadline(time.Now().Add(20 * time.Second))
-	if _, err = c.Write([]byte(accountID + "\n")); err != nil {
-		return err
-	}
-	buf := make([]byte, 256)
-	n, err := c.Read(buf)
-	if err != nil {
-		return err
-	}
-	response := strings.TrimSpace(string(buf[:n]))
-	if response != "READY" {
-		return errors.New(response)
-	}
-	return nil
-}
-
 func (s *Server) createVultrBrowserTicket(w http.ResponseWriter, r *http.Request) {
-	accountID := r.PathValue("id")
-	var provider string
-	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", accountID).Scan(&provider); err != nil || provider != "vultr" {
-		writeJSON(w, 404, map[string]string{"error": "vultr_account_not_found"})
-		return
-	}
-	if err := s.ensureVultrBrowser(accountID); err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "vultr_console_unavailable", "detail": err.Error()})
-		return
-	}
-	raw := make([]byte, 32)
-	if _, err := rand.Read(raw); err != nil {
-		writeJSON(w, 500, errorBody())
-		return
-	}
-	token := hex.EncodeToString(raw)
-	s.BrowserMu.Lock()
-	for k, exp := range s.BrowserTickets {
-		if time.Now().After(exp) {
-			delete(s.BrowserTickets, k)
-		}
-	}
-	s.BrowserTickets[token] = time.Now().Add(5 * time.Minute)
-	s.BrowserMu.Unlock()
-	http.SetCookie(w, &http.Cookie{Name: "vultr_browser_session", Value: token, Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, MaxAge: 300})
-	writeJSON(w, 200, map[string]any{"ok": true, "expires_in": 300})
+	writeJSON(w, http.StatusGone, map[string]string{"error": "vultr_console_retired"})
 }

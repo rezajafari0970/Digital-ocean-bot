@@ -28,6 +28,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 	}
 	rows.Close()
 	for _, id := range ids {
+		maxAge := c.providerRefreshAge(ctx, id, maxAge)
 		var providerState, providerError string
 		var providerCheckedAt time.Time
 		_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt)
@@ -77,32 +78,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
 				return
 			}
-			snapshotReader, ok := rt.Driver.(providers.ObservationReader)
-			if !ok {
-				c.RecordProviderObservation(ctx, id, ProviderStatePermissionDenied, ErrProviderComputeUnsupported, "provider observation capability unavailable")
-				return
-			}
-			var obs providers.Observation
-			if rt.Config.Provider == "vultr" || rt.Config.Provider == "upcloud" {
-				var previous providers.Observation
-				var previousCanonical []byte
-				hasPrevious := false
-				if qerr := c.DB.QueryRowContext(ctx, `SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1`, id).Scan(&previousCanonical); qerr == nil && json.Unmarshal(previousCanonical, &previous) == nil {
-					hasPrevious = true
-				}
-				if fastReader, fastOK := rt.Driver.(providers.FastObservationReader); fastOK && hasPrevious {
-					fastCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-					obs, err = fastReader.ObserveFast(fastCtx)
-					cancel()
-					if err == nil {
-						obs.Catalog = previous.Catalog
-					}
-				} else {
-					obs, err = snapshotReader.Observe(ctx)
-				}
-			} else {
-				obs, err = snapshotReader.Observe(ctx)
-			}
+			obs, err := c.ObserveProvider(ctx, rt)
 			if rt.Gateway != nil {
 				rt.Gateway.CloseIdleConnections()
 			}

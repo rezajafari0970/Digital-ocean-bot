@@ -32,7 +32,8 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 		// spend seven discovery requests again merely because the worker started.
 		var recent bool
 		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-interval '23 hours')`, id).Scan(&recent)
-		if recent {
+		enabled, _ := c.Economy.Enabled(ctx, id)
+		if recent && !enabled {
 			continue
 		}
 		rt, err := c.Runtime(ctx, id)
@@ -44,7 +45,12 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 		if !ok {
 			continue
 		}
-		d, err := cr.Catalog(ctx)
+		var d providers.Catalog
+		if enabled {
+			d, err = c.CachedProviderCatalog(ctx, rt)
+		} else {
+			d, err = cr.Catalog(ctx)
+		}
 		if rt.Gateway != nil {
 			rt.Gateway.CloseIdleConnections()
 		}
@@ -52,6 +58,9 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 			log.Printf("catalog sync %s discovery: %v", id, err)
 			continue
 		}
+		if enabled {
+			continue
+		} // cache carries its own actual fetch timestamp
 		b, _ := json.Marshal(d)
 		_, err = c.DB.ExecContext(ctx, `INSERT INTO provider_catalog_cache(account_id,catalog,refreshed_at) VALUES($1,$2,now()) ON CONFLICT(account_id) DO UPDATE SET catalog=EXCLUDED.catalog,refreshed_at=now()`, id, b)
 		if err != nil {
@@ -61,7 +70,7 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 }
 func (c Container) RunDailyCatalogSync(ctx context.Context) {
 	c.SyncCatalogs(ctx)
-	t := time.NewTicker(24 * time.Hour)
+	t := time.NewTicker(6 * time.Hour)
 	defer t.Stop()
 	for {
 		select {

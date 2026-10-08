@@ -71,6 +71,17 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 	if mode != string(network.RouteProxyRequired) || proxyID == "" {
 		return nil
 	}
+	if enabled, e := c.Economy.Enabled(ctx, accountID); e != nil {
+		return e
+	} else if enabled {
+		fresh, e := c.identityProbeMayWait(ctx, accountID)
+		if e != nil {
+			return e
+		}
+		if fresh {
+			return nil
+		}
+	}
 
 	store := proxycontrol.SQLStore{DB: c.DB}
 	state, allowed, err := store.Acquire(ctx, accountID, proxyID, provider, time.Now().UTC(), 20*time.Second)
@@ -125,6 +136,9 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 }
 
 func proxyIdentitySignature(ctx context.Context, db *sql.DB, accountID string) (session, ip string) {
+	if db == nil {
+		return "", ""
+	}
 	_ = db.QueryRowContext(ctx, `
 SELECT COALESCE(sticky_session,''),COALESCE(host(exit_ip),'')
 FROM account_network_identities

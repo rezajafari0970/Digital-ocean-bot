@@ -207,13 +207,13 @@ WHERE account_id=$1
 	if !cap.StickySession {
 		// GENERIC_RUNTIME_PATH_V1
 		// Generic pools only observe health/geo. Never create sticky state.
-		g, err := network.NewProxyGateway(
+		g, err := network.NewAccountProxyGateway(
 			accountID,
 			*cfg.Proxy,
 			network.ProxyCredentials{
 				Username: cfg.ProxyUsername,
 				Password: string(pass),
-			},
+			}, "identity",
 		)
 		if err != nil {
 			return err
@@ -291,7 +291,7 @@ WHERE account_id=$1
 	// First try the existing sticky session in the preferred country.
 	targeted := cap.CountryTargeting && !fallback && cc != ""
 	user := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, session, targeted)
-	g, err := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
+	g, err := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)}, "identity")
 	if err != nil {
 		return err
 	}
@@ -318,7 +318,7 @@ WHERE account_id=$1
 			return nil
 		}
 		preferredUser := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, preferredSession, cap.CountryTargeting)
-		pg, pgErr := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: preferredUser, Password: string(pass)})
+		pg, pgErr := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: preferredUser, Password: string(pass)}, "identity")
 		if pgErr != nil {
 			return nil
 		}
@@ -371,7 +371,7 @@ WHERE account_id=$1
 			return err
 		}
 		user = proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, newSession, cap.CountryTargeting && !allowFallback && cc != "")
-		g2, gerr := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
+		g2, gerr := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)}, "identity")
 		if gerr != nil {
 			candidateErr = gerr
 			continue
@@ -420,7 +420,7 @@ WHERE account_id=$1
 		g2.CloseIdleConnections()
 		stable := true
 		for verify := 0; verify < 2; verify++ {
-			vg, verr := network.NewProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
+			vg, verr := network.NewAccountProxyGateway(accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)}, "identity")
 			if verr != nil {
 				stable = false
 				candidateErr = verr

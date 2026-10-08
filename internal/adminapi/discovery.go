@@ -12,6 +12,22 @@ import (
 
 func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+	lockTx, err := s.DB.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeJSON(w, 503, errorBody())
+		return
+	}
+	defer lockTx.Rollback()
+	var locked bool
+	if err = lockTx.QueryRowContext(r.Context(), `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, "provider-refresh:"+id).Scan(&locked); err != nil {
+		writeJSON(w, 503, errorBody())
+		return
+	}
+	if !locked {
+		writeJSON(w, 409, map[string]string{"error": "provider_refresh_in_progress"})
+		return
+	}
+
 	// Collapse accidental double taps/reloads: a successful snapshot younger
 	// than 15 seconds is already fresh enough for an explicit UI refresh.
 	var recentCanonical []byte
@@ -32,12 +48,7 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "detail": err.Error()})
 		return
 	}
-	sr, ok := runtime.Driver.(providers.ObservationReader)
-	if !ok {
-		writeJSON(w, 422, map[string]string{"error": "provider_observation_capability_missing"})
-		return
-	}
-	obs, err := sr.Observe(r.Context())
+	obs, err := s.Container.ObserveProvider(r.Context(), runtime)
 	if runtime.Gateway != nil {
 		runtime.Gateway.CloseIdleConnections()
 	}

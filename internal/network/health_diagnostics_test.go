@@ -69,9 +69,14 @@ func TestActiveProbeSOCKSAuthenticationDiagnostic(t *testing.T) {
 	defer g.CloseIdleConnections()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+	beforeMeter := trafficTotals(proxyTrafficScope("diagnostic-test", "test", "admin_probe"))
 	result := CheckProxy(ctx, g, "https://198.51.100.10/health?token=URL_SECRET_SENTINEL", "", "")
 	if err = <-done; err != nil {
 		t.Fatal(err)
+	}
+	afterMeter := trafficTotals(proxyTrafficScope("diagnostic-test", "test", "admin_probe"))
+	if afterMeter.Connections-beforeMeter.Connections != 1 || afterMeter.TX-beforeMeter.TX < 20 || afterMeter.RX-beforeMeter.RX != 4 {
+		t.Fatalf("SOCKS wire counters before=%+v after=%+v", beforeMeter, afterMeter)
 	}
 	if result.Status != StatusDown || result.Error != "PROXY_AUTH_FAILED" {
 		t.Fatalf("missing safe authentication diagnosis: status=%s error=%q", result.Status, result.Error)

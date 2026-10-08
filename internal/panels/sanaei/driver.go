@@ -25,7 +25,7 @@ func (d Driver) client() *http.Client {
 	if d.HTTP != nil {
 		return d.HTTP
 	}
-	return &http.Client{Timeout: 8 * time.Second}
+	return &http.Client{Timeout: 8 * time.Second, Transport: directPanelTransport}
 }
 
 func (d Driver) probe(ctx context.Context, in panels.Instance, method, path string) (int, error) {

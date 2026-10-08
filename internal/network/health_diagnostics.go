@@ -65,3 +65,9 @@ func activeProbeDiagnostic(err error) string {
 	}
 	return "PROXY_TRANSPORT_FAILED"
 }
+
+// IsProxyAuthFailure recognizes only closed, typed or exact-leaf diagnostics.
+func IsProxyAuthFailure(err error) bool {
+	d := activeProbeDiagnostic(err)
+	return d == "PROXY_AUTH_FAILED" || d == "PROXY_AUTH_METHOD_UNSUPPORTED"
+}

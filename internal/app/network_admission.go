@@ -36,5 +36,19 @@ WHERE np.account_id=$1
 	if !lastHealth.Valid || !lastHealth.Bool || rotationStarted.Valid {
 		return ErrNetworkNotReady
 	}
+	if enabled, e := c.Economy.Enabled(ctx, accountID); e != nil {
+		return e
+	} else if enabled {
+		var fresh bool
+		err = c.DB.QueryRowContext(ctx, `SELECT COALESCE(i.last_health_at<=now() AND i.last_health_at>now()-($2*interval '1 second')
+AND p.last_success_at<=now() AND p.last_success_at>now()-($3*interval '1 second'),false)
+FROM network_profiles n JOIN proxies p ON p.id=n.proxy_id JOIN account_network_identities i ON i.account_id=n.account_id WHERE n.account_id=$1`, accountID, int(network.EconomyIdentityMaxAge.Seconds()), int(network.EconomyBaseMaxAge.Seconds())).Scan(&fresh)
+		if err != nil {
+			return err
+		}
+		if !fresh {
+			return ErrNetworkNotReady
+		}
+	}
 	return nil
 }

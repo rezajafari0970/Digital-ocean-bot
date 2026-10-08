@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/upcloud"
@@ -14,9 +15,10 @@ import (
 )
 
 type Application struct {
-	Config    Config
-	DB        *sql.DB
-	Container Container
+	Config      Config
+	DB          *sql.DB
+	Container   Container
+	stopTraffic func()
 }
 
 func Bootstrap(ctx context.Context) (*Application, error) {
@@ -81,13 +83,17 @@ func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {
 		db.Close()
 		return nil, err
 	}
-	container := Container{DB: db, Secrets: secretStore, Accounts: Repository{DB: db}, Providers: registry}
-	return &Application{Config: cfg, DB: db, Container: container}, nil
+	container := Container{DB: db, Secrets: secretStore, Accounts: Repository{DB: db}, Providers: registry, Economy: &network.EconomyController{DB: db}, ProxyTransports: network.NewProviderTransportPool(128)}
+	return &Application{Config: cfg, DB: db, Container: container, stopTraffic: network.StartProxyTrafficRecorder(ctx, db)}, nil
 }
 
 func (a *Application) Close() error {
 	if a == nil || a.DB == nil {
 		return nil
+	}
+	a.Container.ProxyTransports.Close()
+	if a.stopTraffic != nil {
+		a.stopTraffic()
 	}
 	return a.DB.Close()
 }

@@ -31,7 +31,7 @@ func NewAPIClient(baseURL string, credentials Credentials, transport http.RoundT
 	}
 	jar, _ := cookiejar.New(nil)
 	if transport == nil {
-		transport = http.DefaultTransport
+		transport = directPanelTransport
 	}
 	return &APIClient{BaseURL: strings.TrimRight(baseURL, "/"), HTTP: &http.Client{Transport: transport, Jar: jar}, Credentials: credentials}, nil
 }

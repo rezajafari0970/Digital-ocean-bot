@@ -1,0 +1,36 @@
+{
+  "goal": "Reduce unnecessary account-proxy traffic, measure actual TCP payload bytes by role/purpose, and enforce direct Sanaei HTTP, preserving provider proxy-required fail-closed, per-account identity, fresh mutation proofs, unknown-outcome rules and cleanup priority.",
+  "context": "User approved implementation after read-only audit. Baseline canonical30776e8, runtimebf2d6da. Do not promise 90% billed reduction without comparable measured traffic. Implement additive hourly idempotent per-process socket counters including SOCKS/CONNECT/TLS/DoH bytes, bounded memory, no secrets, final flush; provider billing remains separate. Global DB economy flag defaults off, optional one-account canary. Healthy identity probes120s, fresh identity admission TTL180s and base TTL360s, preserve existing pre-mutation fresh check and existing 10s transient recovery/two/five-minute ladder. Sequential bounded IP observer with fallback only on failure. Healthy base probes300s only when global rollout, terminal auth backoff bounded and reset on credential update; no false base/identity health propagation. Explicit direct IPv4 Sanaei transport ignores proxy environment. Disable obsolete authenticated Vultr browser endpoints and retire idle browser manager at deployment. DO fast observation reads fresh account+inventory without catalog/duplicate account; account-scoped catalog cache21600s refreshed under shared DB lock; retain inventory60s while active, idle300s only with no planned creation/pending lifecycle and no imminent expiry, never use stale capacity for writes. Reuse only provider raw transport/DNS under per-account proxy credential hash+generation+epoch+sticky identity key; guarded request layer remains fresh and rejects obsolete scopes. No connection reuse for independent fresh identity proof. Clear stale scope caches boundedly; finite TTL. Canary and rollback via DB flag, no policy resets or secret changes. All new logic must have fault/race/isolatedPG/HTTP tests; full Go suite. Actual API final review on tested source. No subagents; no production fault injection. Ensure telemetry outlives worker bootstrap context and flushes after HTTP drain on SIGTERM.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "feat(network): meter and reduce account proxy overhead"
+}

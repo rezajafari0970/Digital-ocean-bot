@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -100,11 +101,18 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			}
 			defer wipe(password)
 		}
-		gateway, err := network.NewProxyGateway(
-			cfg.ID,
-			*cfg.Proxy,
-			network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)},
-		)
+		economy, err := c.Economy.Enabled(ctx, cfg.ID)
+		if err != nil {
+			return providerNetworkRuntime{}, err
+		}
+		stickySession, exitIP := proxyIdentitySignature(ctx, c.DB, cfg.ID)
+		creds := network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)}
+		var gateway *network.Gateway
+		if economy && c.ProxyTransports != nil {
+			gateway, err = c.ProxyTransports.Open(cfg.ID, *cfg.Proxy, creds, fmt.Sprintf("%s/%d/%d/%s/%s", cfg.Provider, generation, transportEpoch, stickySession, exitIP))
+		} else {
+			gateway, err = network.NewAccountProxyGateway(cfg.ID, *cfg.Proxy, creds, "provider_api")
+		}
 		if err != nil {
 			return providerNetworkRuntime{}, err
 		}
@@ -139,7 +147,6 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					&healthy,
 				)
 			})
-			stickySession, exitIP := proxyIdentitySignature(ctx, c.DB, cfg.ID)
 			gateway.Client.Transport = accountNetworkGuardTransport{
 				Base: observed, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
 				ProxyID: cfg.Proxy.ID, Generation: generation, TransportEpoch: transportEpoch,

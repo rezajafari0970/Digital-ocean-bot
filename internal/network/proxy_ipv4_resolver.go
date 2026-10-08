@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -33,10 +34,18 @@ type proxyAResolver struct {
 	dial      literalProxyDial
 	mu        sync.Mutex
 	cache     map[string]cachedA
+	scope     trafficScope
+	pending   map[string]*dnsFlight
+}
+
+type dnsFlight struct {
+	done chan struct{}
+	ip   string
+	err  error
 }
 
 func newProxyAResolver(accountID string, dial literalProxyDial) *proxyAResolver {
-	return &proxyAResolver{accountID: accountID, dial: dial, cache: make(map[string]cachedA)}
+	return &proxyAResolver{accountID: accountID, dial: dial, cache: make(map[string]cachedA), pending: make(map[string]*dnsFlight)}
 }
 func (r *proxyAResolver) Resolve(ctx context.Context, host string) (string, error) {
 	host = strings.TrimSpace(strings.Trim(host, "[]"))
@@ -52,7 +61,32 @@ func (r *proxyAResolver) Resolve(ctx context.Context, host string) (string, erro
 		r.mu.Unlock()
 		return x.ip, nil
 	}
+	if flight := r.pending[host]; flight != nil {
+		r.mu.Unlock()
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		case <-flight.done:
+			return flight.ip, flight.err
+		}
+	}
+	flight := &dnsFlight{done: make(chan struct{})}
+	if len(r.pending) >= 256 {
+		r.mu.Unlock()
+		return "", ErrProxyDNS
+	}
+	r.pending[host] = flight
 	r.mu.Unlock()
+	ip, err := r.resolveFresh(ctx, host)
+	r.mu.Lock()
+	flight.ip = ip
+	flight.err = err
+	delete(r.pending, host)
+	close(flight.done)
+	r.mu.Unlock()
+	return ip, err
+}
+func (r *proxyAResolver) resolveFresh(ctx context.Context, host string) (string, error) {
 	endpoints := []struct{ name, ip, endpoint string }{
 		{"cloudflare-dns.com", "1.1.1.1", "https://cloudflare-dns.com/dns-query"},
 		{"dns.google", "8.8.8.8", "https://dns.google/resolve"},
@@ -64,13 +98,15 @@ func (r *proxyAResolver) Resolve(ctx context.Context, host string) (string, erro
 			TLSHandshakeTimeout:   5 * time.Second,
 			ResponseHeaderTimeout: 5 * time.Second,
 			DialContext: func(c context.Context, _, _ string) (net.Conn, error) {
-				return r.dial(c, net.JoinHostPort(ep.ip, "443"))
+				return r.dial(withTrafficPurpose(c, "dns"), net.JoinHostPort(ep.ip, "443"))
 			},
 		}
 		q := ep.endpoint + "?name=" + url.QueryEscape(host) + "&type=A"
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, q, nil)
 		req.Header.Set("Accept", "application/dns-json")
-		resp, err := (&http.Client{Transport: tr, Timeout: 6 * time.Second}).Do(req)
+		dnsScope := r.scope
+		dnsScope.Purpose = "dns"
+		resp, err := (&http.Client{Transport: trafficTransport{base: tr, scope: dnsScope}, Timeout: 6 * time.Second}).Do(req)
 		if err != nil {
 			last = err
 			tr.CloseIdleConnections()
@@ -80,14 +116,21 @@ func (r *proxyAResolver) Resolve(ctx context.Context, host string) (string, erro
 			Answer []struct {
 				Type int    `json:"type"`
 				Data string `json:"data"`
+				TTL  uint32 `json:"TTL"`
 			} `json:"Answer"`
 		}
-		err = json.NewDecoder(resp.Body).Decode(&raw)
+		err = json.NewDecoder(io.LimitReader(resp.Body, 65536)).Decode(&raw)
 		resp.Body.Close()
 		tr.CloseIdleConnections()
 		if err != nil || resp.StatusCode/100 != 2 {
 			last = ErrProxyDNS
 			continue
+		}
+		ttl := uint32(60)
+		for _, ans := range raw.Answer {
+			if ans.TTL < ttl {
+				ttl = ans.TTL
+			}
 		}
 		for _, ans := range raw.Answer {
 			if ans.Type != 1 {
@@ -99,7 +142,20 @@ func (r *proxyAResolver) Resolve(ctx context.Context, host string) (string, erro
 			}
 			v := ip.To4().String()
 			r.mu.Lock()
-			r.cache[host] = cachedA{ip: v, expires: now.Add(60 * time.Second)}
+			for key, value := range r.cache {
+				if !time.Now().Before(value.expires) {
+					delete(r.cache, key)
+				}
+			}
+			if len(r.cache) >= 256 {
+				for key := range r.cache {
+					delete(r.cache, key)
+					break
+				}
+			}
+			if ttl > 0 {
+				r.cache[host] = cachedA{ip: v, expires: time.Now().Add(time.Duration(ttl) * time.Second)}
+			}
 			r.mu.Unlock()
 			return v, nil
 		}
@@ -119,6 +175,9 @@ type bufferedConn struct {
 func (c *bufferedConn) Read(p []byte) (int, error) { return c.r.Read(p) }
 
 func httpProxyLiteralDialer(p Proxy, creds ProxyCredentials) (literalProxyDial, error) {
+	return httpProxyLiteralDialerMeasured(p, creds, trafficScope{})
+}
+func httpProxyLiteralDialerMeasured(p Proxy, creds ProxyCredentials, scope trafficScope) (literalProxyDial, error) {
 	endpoint, err := IPv4Endpoint(context.Background(), p.Host, p.Port)
 	if err != nil {
 		return nil, err
@@ -137,6 +196,7 @@ func httpProxyLiteralDialer(p Proxy, creds ProxyCredentials) (literalProxyDial, 
 		if err != nil {
 			return nil, err
 		}
+		conn = meterProxyConn(conn, scopeForContext(scope, ctx))
 		fail := func(e error) (net.Conn, error) { _ = conn.Close(); return nil, e }
 		if p.Type == ProxyHTTPS {
 			tc := tls.Client(conn, &tls.Config{ServerName: strings.Trim(p.Host, "[]"), MinVersion: tls.VersionTLS12})

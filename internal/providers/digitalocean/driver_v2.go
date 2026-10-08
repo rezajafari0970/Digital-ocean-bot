@@ -188,7 +188,7 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 	if err != nil {
 		return providers.Observation{}, normalizeError("observe_account", err)
 	}
-	raw, err := d.client.Catalog(ctx)
+	raw, err := d.client.catalogForAccount(ctx, account)
 	if err != nil {
 		return providers.Observation{}, normalizeError("observe_catalog", err)
 	}
@@ -202,6 +202,21 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 		servers = append(servers, normalizeServer(x))
 	}
 	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(droplets), ObservedAt: now}, Catalog: normalizeCatalog(raw), Inventory: providers.Inventory{Servers: servers, ObservedAt: now}, ObservedAt: now}, nil
+}
+
+// ObserveFast keeps authorization, capacity and inventory fresh without downloading
+// static regions, plans and images. The application supplies separately aged metadata.
+func (d *Driver) ObserveFast(ctx context.Context) (providers.Observation, error) {
+	account, err := d.client.GetAccount(ctx)
+	if err != nil {
+		return providers.Observation{}, normalizeError("observe_account", err)
+	}
+	inventory, err := d.Inventory(ctx)
+	if err != nil {
+		return providers.Observation{}, err
+	}
+	now := time.Now().UTC()
+	return providers.Observation{Account: providers.Account{ID: account.UUID, Email: account.Email, Status: account.Status}, Capacity: providers.Capacity{ComputeLimit: account.DropletLimit, LimitKnown: true, ComputeInUse: len(inventory.Servers), ObservedAt: now}, Inventory: inventory, ObservedAt: now}, nil
 }
 
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {

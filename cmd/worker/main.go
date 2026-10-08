@@ -231,7 +231,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 	modules.Add(worker.RoleControl, "catalog", func(ctx context.Context) {
-		t := time.NewTicker(24 * time.Hour)
+		t := time.NewTicker(6 * time.Hour)
 		defer t.Stop()
 		for {
 			supervision.Pulse(ctx)
@@ -696,7 +696,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			log.Printf("residential monitor stopped")
 		}
 	})
-	monitor := network.Monitor{DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
+	monitor := network.Monitor{Economy: application.Container.Economy, DB: application.DB, Secrets: application.Container.Secrets, Interval: 10 * time.Second, Timeout: 8 * time.Second, Policy: network.HealthPolicy{FailureThreshold: 2, RecoveryThreshold: 2, MaxHealthyLatency: 5 * time.Second}}
 	modules.Add(worker.RoleControl, "network-monitor", func(ctx context.Context) {
 		if err := monitor.Run(ctx); err != nil && ctx.Err() == nil {
 			log.Printf("proxy monitor stopped: %v", err)

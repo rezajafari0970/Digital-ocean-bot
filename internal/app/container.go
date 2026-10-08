@@ -32,10 +32,12 @@ func (runtimeGenerationObsoleteError) RetryDelay() time.Duration {
 }
 
 type Container struct {
-	DB        *sql.DB
-	Secrets   *secrets.Store
-	Accounts  Repository
-	Providers *providers.Registry
+	DB              *sql.DB
+	Secrets         *secrets.Store
+	Accounts        Repository
+	Providers       *providers.Registry
+	Economy         *network.EconomyController
+	ProxyTransports *network.ProviderTransportPool
 }
 type runtimeGenerationStore interface {
 	CurrentGeneration(ctx context.Context, accountID, proxyID, provider string) (int64, bool, error)
