@@ -1,0 +1,32 @@
+{
+  "goal": "Persist truthful secret-safe base proxy health diagnostics and replace stale account ISOLATION_WAIT metadata when no healthy configured proxy route exists; preserve fail-closed routing and every circuit/lifecycle/admission decision.",
+  "context": "Production read-only probes through the sole configured SOCKS5 proxy all fail at username/password authentication in 8-9ms before DNS/endpoint/provider HTTP. Proxy healthy last at 2026-10-08T02:35:31Z then down; health_error empty and latency_ms stale because HealthState/SQLHealthStore drop diagnostics/latency. Keeper exits ensureActiveAccountProxy before refreshing stale ISOLATION_WAIT. External credentials/quota/account restriction cannot be fixed by resetting DB health, changing proxy or bypassing direct networking. Scoped patch: classify active health probe errors into closed static diagnostic codes, recognize exact terminal golang.org/x/net SOCKS auth errors while retaining gateway and sticky behavior; persist normalized code + measured latency atomically in existing columns, clear error on observed recovery without changing hysteresis; report missing-row/canceled store failures. On ensureActiveAccountProxy ErrNetworkNotReady only, atomically record base-proxy-blocked diagnostic metadata using joined current account/profile/proxy and no healthy enabled pool condition; no modification to health state, circuit, counters, generation, lease, proxy credentials, identity, retry/state policies. Do not claim identity was probed: static detail says identity check skipped, evidence timestamp from base probe. Preserve newer runtime observations and route changes. Real local SOCKS auth-reject fixture must reproduce missing diagnosis before fix; real isolated PostgreSQL existing columns roundtrip/error clearing/secret-safe fallback/missing row/cancel and account blocked-route integration, recovery and disabled/current-route exclusions, existing network failclosed and proxycontrol tests, focused race/full Go. Actual OpenAI API plan/review via orchestrator, no subagents. Clean committed build, exact isolated systemd worker fault fixture, controlled same-schema rollout from runtime565b20c, five-minute process observation; external proxy remains failed until operator resolves auth. No provider writes or production fault injection in tests.",
+  "allowed_paths": [
+    "internal/network/health.go",
+    "internal/network/health_state.go",
+    "internal/network/health_store.go",
+    "internal/network/health_diagnostics.go",
+    "internal/network/health_diagnostics_test.go",
+    "internal/network/health_diagnostics_postgres_test.go",
+    "internal/app/proxy_control_plane.go",
+    "internal/app/proxy_blocked_diagnostics_postgres_test.go",
+    "docs/development-jobs/proxy-health-diagnostics-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 1800,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash /root/backups/dob-network-recovery-20261008/acceptance-race-fault.sh"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-network-recovery-20261008/review.py"
+    ]
+  },
+  "commit_message": "fix(network): expose safe proxy auth and blocked-route diagnostics"
+}

@@ -13,6 +13,7 @@ type HealthState struct {
 	ConsecutiveFailures  int
 	ConsecutiveSuccesses int
 	LastLatency          time.Duration
+	LastError            string
 	LastExitIP           string
 	LastCheckedAt        time.Time
 	LastSuccessAt        time.Time
@@ -29,6 +30,7 @@ func (s HealthState) Apply(result HealthResult, policy HealthPolicy) HealthState
 		policy.RecoveryThreshold = 2
 	}
 	if result.Status == StatusHealthy && (policy.MaxHealthyLatency <= 0 || result.Latency <= policy.MaxHealthyLatency) {
+		s.LastError = ""
 		s.ConsecutiveFailures = 0
 		s.ConsecutiveSuccesses++
 		s.LastSuccessAt = result.CheckedAt
@@ -38,6 +40,12 @@ func (s HealthState) Apply(result HealthResult, policy HealthPolicy) HealthState
 			s.Status = StatusDegraded
 		}
 		return s
+	}
+	s.LastError = NormalizeHealthDiagnostic(result.Error)
+	if result.Status == StatusHealthy {
+		s.LastError = "PROXY_LATENCY_EXCEEDED"
+	} else if s.LastError == "" {
+		s.LastError = "PROXY_HEALTH_FAILED"
 	}
 	s.ConsecutiveSuccesses = 0
 	s.ConsecutiveFailures++

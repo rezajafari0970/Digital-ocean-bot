@@ -51,6 +51,11 @@ func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID stri
 	defer releaseProxyKeeperLock(lockTx)
 
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
+		if errors.Is(err, ErrNetworkNotReady) {
+			if diagnosticErr := c.recordBlockedBaseProxy(ctx, accountID); diagnosticErr != nil {
+				return errors.Join(err, diagnosticErr)
+			}
+		}
 		return err
 	}
 
@@ -126,4 +131,37 @@ FROM account_network_identities
 WHERE account_id=$1
 `, accountID).Scan(&session, &ip)
 	return session, ip
+}
+
+// recordBlockedBaseProxy records why identity maintenance was skipped. Base
+// monitor evidence never substitutes for a successful account identity probe:
+// health, circuit, counters, generation and lease fields remain untouched.
+func (c Container) recordBlockedBaseProxy(ctx context.Context, accountID string) error {
+	_, err := c.DB.ExecContext(ctx, `
+INSERT INTO proxy_runtime_state(
+ account_id,proxy_id,provider,last_error_class,last_error_detail,last_checked_at,updated_at)
+SELECT a.id,p.id,a.provider,
+ CASE WHEN p.health_error='PROXY_AUTH_FAILED'
+      THEN 'BASE_PROXY_AUTH_FAILED' ELSE 'BASE_PROXY_UNAVAILABLE' END,
+ CASE WHEN p.health_error='PROXY_AUTH_FAILED'
+      THEN 'base proxy authentication failed; identity check skipped'
+      ELSE 'no healthy configured proxy route; identity check skipped' END,
+ p.last_checked_at,now()
+FROM accounts a
+JOIN network_profiles np ON np.account_id=a.id
+JOIN proxies p ON p.id=np.proxy_id
+JOIN account_proxy_pool ap ON ap.account_id=a.id AND ap.proxy_id=p.id AND ap.enabled=true
+WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
+ AND np.mode='proxy_required' AND p.status<>'healthy' AND p.last_checked_at IS NOT NULL
+ AND NOT EXISTS (
+  SELECT 1 FROM account_proxy_pool candidate JOIN proxies healthy ON healthy.id=candidate.proxy_id
+  WHERE candidate.account_id=a.id AND candidate.enabled=true AND healthy.status='healthy'
+ )
+ON CONFLICT(account_id,proxy_id,provider) DO UPDATE SET
+ last_error_class=EXCLUDED.last_error_class,last_error_detail=EXCLUDED.last_error_detail,
+ last_checked_at=EXCLUDED.last_checked_at,updated_at=now()
+WHERE proxy_runtime_state.last_checked_at IS NULL
+   OR proxy_runtime_state.last_checked_at<EXCLUDED.last_checked_at
+`, accountID)
+	return err
 }
