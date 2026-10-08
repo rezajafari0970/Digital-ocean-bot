@@ -3,9 +3,15 @@ package app
 import (
 	"context"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
+	"golang.org/x/sys/unix"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 var ErrAccountPurgeConflict = errors.New("account purge preconditions changed")
@@ -13,6 +19,9 @@ var ErrAccountPurgeConflict = errors.New("account purge preconditions changed")
 // PurgeSavedAccount is an explicit local-only action. It never claims provider
 // deletion. Ordinary Delete retains the durable provider-cleanup workflow.
 func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string, remaining int) error {
+	if !canonicalPurgeAccountID(id) {
+		return ErrAccountPurgeConflict
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -55,6 +64,9 @@ func localPurgeAllowed(state string) bool {
 	return false
 }
 func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
+	if !canonicalPurgeAccountID(id) {
+		return ErrAccountPurgeConflict
+	}
 	if err := worker.FenceRecoveryAccountPurge(ctx, tx, id); err != nil {
 		return errors.Join(ErrAccountPurgeConflict, err)
 	}
@@ -93,14 +105,29 @@ func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 // Children without cascading FKs must be deleted before their parents. Scoped
 // gates are closed before SET NULL can accidentally widen their scope to fleet.
 func commitAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
+	return commitAccountPurgeWithArtifacts(ctx, tx, id, func(canonicalID string) error {
+		return removeAccountBrowserSession("/var/lib/digital-ocean-bot/browser-sessions", canonicalID)
+	})
+}
+
+// The dependency is private: API callers cannot choose a path or cleanup action.
+func commitAccountPurgeWithArtifacts(ctx context.Context, tx *sql.Tx, id string, removeArtifacts func(string) error) error {
+	if !canonicalPurgeAccountID(id) {
+		return ErrAccountPurgeConflict
+	}
 	if err := worker.FenceRecoveryAccountPurge(ctx, tx, id); err != nil {
 		return errors.Join(ErrAccountPurgeConflict, err)
 	}
 	// Lock the parent before deleting telemetry. Late meter flushes take KEY SHARE
 	// on this same row, so neither can recreate data behind the other's commit.
-	if _, err := tx.ExecContext(ctx, "SELECT id FROM accounts WHERE id=$1 FOR UPDATE", id); err != nil {
+	var canonicalID string
+	if err := tx.QueryRowContext(ctx, "SELECT id::text FROM accounts WHERE id=$1 FOR UPDATE", id).Scan(&canonicalID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return tx.Commit()
+		}
 		return err
 	}
+	id = canonicalID
 	queries := []string{
 		`DELETE FROM worker_recovery_checkpoints WHERE account_id=$1`,
 		`DELETE FROM proxy_traffic_hourly WHERE role='account' AND (lower(owner_id)=$1::uuid::text OR lower(owner_id)='replace-'||$1::uuid::text)`,
@@ -129,5 +156,52 @@ func commitAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 			return fmt.Errorf("account purge step %d: %w", i+1, err)
 		}
 	}
+	// Retired browser credentials must be gone before reporting PURGED. A failure
+	// rolls back the DB rows. Filesystem removal itself is not transactional: if
+	// the later DB commit fails, the account remains but this cache may be gone.
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := removeArtifacts(id); err != nil {
+		return fmt.Errorf("account browser artifacts: %w", err)
+	}
 	return tx.Commit()
+}
+
+// Canonical IDs are required before all string-derived recovery/advisory keys.
+func canonicalPurgeAccountID(id string) bool {
+	if len(id) != 36 || id != strings.ToLower(id) || id[8] != '-' || id[13] != '-' || id[18] != '-' || id[23] != '-' {
+		return false
+	}
+	raw, err := hex.DecodeString(strings.ReplaceAll(id, "-", ""))
+	return err == nil && len(raw) == 16
+}
+
+// Linux production: anchor an O_NOFOLLOW directory descriptor, then give os.Root
+// its own descriptor through procfs. Renaming/replacing the path cannot redirect
+// a subsequent removal outside this opened root. Missing procfs fails closed.
+func openAccountBrowserRoot(root string) (*os.Root, error) {
+	if !filepath.IsAbs(root) {
+		return nil, errors.New("invalid browser session root")
+	}
+	fd, err := unix.Open(root, unix.O_RDONLY|unix.O_DIRECTORY|unix.O_CLOEXEC|unix.O_NOFOLLOW, 0)
+	if errors.Is(err, unix.ENOENT) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer unix.Close(fd)
+	return os.OpenRoot("/proc/self/fd/" + strconv.Itoa(fd))
+}
+func removeAccountBrowserSession(root, id string) error {
+	if !canonicalPurgeAccountID(id) {
+		return errors.New("invalid canonical account ID")
+	}
+	anchored, err := openAccountBrowserRoot(root)
+	if err != nil || anchored == nil {
+		return err
+	}
+	defer anchored.Close()
+	return anchored.RemoveAll(id)
 }
