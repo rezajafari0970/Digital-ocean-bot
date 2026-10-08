@@ -19,14 +19,14 @@
   ],
   "note": "Volatile .audit/status artifacts do not constitute product-source drift; tracked product paths are checked separately.",
   "production_continuation": {
-    "runtime_source_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "runtime_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
     "schema": 163,
-    "at_utc": "2026-10-08T06:59:15.912956+00:00",
+    "at_utc": "2026-10-08T07:41:55.138859+00:00",
     "handoff": "docs/DEVELOPMENT_READY_HANDOFF.md",
-    "reaudit": "docs/OPERATIONAL_CONTINUATION_20261008_ACCEPTANCE.json",
-    "brain_delta": "docs/OPERATIONAL_CONTINUATION_20261008_BRAIN_DELTA.json",
-    "state": "Remote restored; deployment same processes healthy, CURRENT output0/network ISOLATION_WAIT. Diagnose network blocker before phase4. Historical final pipelinePASS preserved.",
-    "current_reconnect": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json"
+    "reaudit": "docs/NETWORK_RECOVERY_20261008_ACCEPTANCE.json",
+    "brain_delta": "docs/NETWORK_RECOVERY_20261008_BRAIN_DELTA.json",
+    "state": "Safe proxy diagnostics deployed and runtime verified; external proxy auth blocks lifecycle/output0; Vultr previous origin401 remains separate.",
+    "current_network_recovery": "docs/NETWORK_RECOVERY_20261008.md"
   },
   "historical_worktree_entries": [
     " M .audit/provider-step2/chunk-progress.json",
@@ -48,5 +48,5 @@
     "?? tools/grade-fresh-session-exam-v2.py",
     "?? tools/new-chat-bootstrap.sh"
   ],
-  "latest_continuity_note": "Updated live/source evidence and delta; historical mastery scores were not re-run."
+  "latest_continuity_note": "Latest live/source evidence and delta recorded; historical mastery scores not rerun."
 }

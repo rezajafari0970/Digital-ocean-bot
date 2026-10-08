@@ -1,0 +1,28 @@
+{
+  "at_utc": "2026-10-08T07:41:55.138859+00:00",
+  "source_commit": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "previous_runtime_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "frontier": "Shared proxy auth rejection proven; diagnostic fix deployed; output remains empty; external recovery prerequisite",
+  "actual_review": "resp_00507e92bb0c0be0006ac7473d165c87d1b75fcb99e8912c10",
+  "changed_paths": [
+    "internal/network/health.go",
+    "internal/network/health_state.go",
+    "internal/network/health_store.go",
+    "internal/network/health_diagnostics.go",
+    "internal/network/health_diagnostics_test.go",
+    "internal/network/health_diagnostics_postgres_test.go",
+    "internal/app/proxy_control_plane.go",
+    "internal/app/proxy_blocked_diagnostics_postgres_test.go",
+    "docs/development-jobs/proxy-health-diagnostics-20261008.json"
+  ],
+  "supersedes_diagnosis": "Stale ISOLATION_WAIT was not proof of ongoing IP collision: ensureActiveAccountProxy exited before identity check because base proxy down. Active monitor failed to persist reason and latency.",
+  "must_preserve": [
+    "proxy_required/no direct fallback",
+    "account unique IP/subnet isolation",
+    "circuit/generation/lease/counters",
+    "operator-disabled/deletionrequested accounts",
+    "unknown-outcome/idempotency/ownership ledger",
+    "Desired and existing native capacity limits"
+  ],
+  "next": "Restore shared proxy auth through secure provider/account settings, observe monitor recovery and unique identities, natural lifecycle, then native published output; diagnose separate Vultr origin401; Phase4 later."
+}

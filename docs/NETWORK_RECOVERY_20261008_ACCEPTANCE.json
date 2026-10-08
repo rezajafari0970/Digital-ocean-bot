@@ -1,0 +1,1664 @@
+{
+  "at_utc": "2026-10-08T07:41:55.138859+00:00",
+  "status": "DIAGNOSTIC_FIX_DEPLOYED_EXTERNAL_PROXY_AUTH_BLOCKED",
+  "runtime_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "production_end_to_end_recovered": false,
+  "deployment": {
+    "at_utc": "2026-10-08T07:35:53.989699+00:00",
+    "started_at": "2026-10-08T07:35:41.722405+00:00",
+    "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+    "previous_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "services": {
+      "digital-ocean-bot-worker": {
+        "pid": "2739201",
+        "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+        "restarts": "0"
+      },
+      "digital-ocean-bot-worker-panels": {
+        "pid": "2739202",
+        "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+        "restarts": "0"
+      },
+      "digital-ocean-bot-api": {
+        "pid": "2739199",
+        "sha256": "873b28ecd175f6b5aab4b64307075c68427591619f1b3cee0dabde44a2b8e887",
+        "restarts": "0"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T07:35:53.23940043Z"
+    },
+    "configuration_preserved": true,
+    "static_preserved": true,
+    "units_preserved": true,
+    "schema": "000163_recovery_reconciliation"
+  },
+  "observation": {
+    "status": "PASS",
+    "samples": 31,
+    "seconds": 300.98,
+    "started_at": "2026-10-08T07:36:34.408957+00:00",
+    "finished_at": "2026-10-08T07:41:35.389624+00:00",
+    "unchanged_pids_and_restart_counts": true
+  },
+  "tests": {
+    "focused_race_top_level_passes": 192,
+    "full_go": "PASS",
+    "optional_skips": [
+      "TestAccountNetworkGuardRejectsReassignmentBeforeNetworkPostgresE2E",
+      "TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E",
+      "TestProxyPoolSwitchBumpsEpochAtomicallyPostgresE2E",
+      "TestRouteCutoverWaitsForInflightSharedLockPostgresE2E",
+      "TestDuePrioritizesRetiringOverOlderExpiringE2E",
+      "TestRetiringWithoutExpiryIsDueE2E",
+      "TestPostgresRunLeaseExclusiveE2E",
+      "TestSQLStepRetrySemanticsE2E"
+    ],
+    "isolated_postgres": "Actual migrations; safe health persistence and real blocked keeper path; proxycontrol lease/generation E2Es in isolated schema",
+    "reproduction_before_fix": "Real local SOCKS RFC1929 reject yielded missing safe diagnosis / raw URL; retained test passed after fix",
+    "review_revision": "Equal-timestamp overwrite independently reproduced on PostgreSQL, fixed strict older-only predicate, all tests repeated"
+  },
+  "actual_api_plan_id": "resp_0930b863a60960fe006ac743d7da7487d18ffa36c46a4d5ba6",
+  "actual_api_review": {
+    "verdict": "PASS",
+    "findings": [],
+    "limits": [
+      "Review was limited to the supplied diff, files, and reported test output; no tools or independent repository inspection were used.",
+      "External SOCKS credentials, service eligibility, production rollout behavior, and skipped integration/systemd fixtures were not validated.",
+      "The reported race/full-Go/PostgreSQL results and equal-timestamp reproduction were accepted as provided; no production recovery or provider-output claim was evaluated."
+    ],
+    "response_id": "resp_00507e92bb0c0be0006ac7473d165c87d1b75fcb99e8912c10"
+  },
+  "exact_binary_systemd_fixture": {
+    "at_utc": "2026-10-08T07:34:45.153790+00:00",
+    "schema": "supervision_process_0197a34c1f8547f1b1754ea7666b2818",
+    "units": {
+      "control": "dob-supervision-fixture-control-666b2818",
+      "panels": "dob-supervision-fixture-panels-666b2818"
+    },
+    "production_services_changed": false,
+    "before": {
+      "control": {
+        "pid": "2738401",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2738458",
+        "restarts": "0"
+      }
+    },
+    "after": {
+      "control": {
+        "pid": "2738401",
+        "restarts": "0"
+      },
+      "panels": {
+        "pid": "2738658",
+        "restarts": "1"
+      }
+    },
+    "heartbeat": [
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 8,
+          "InUse": 1,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 9,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "role": "control"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 1,
+          "InUse": 1,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 2,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      },
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 0,
+          "InUse": 4,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 0,
+          "OpenConnections": 4,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "role": "panels"
+      }
+    ],
+    "peer_survived": true,
+    "automatic_role_restart": "PASS",
+    "fault": "SIGSTOP",
+    "fixture_watchdog_seconds": 5,
+    "production_watchdog_seconds": 45,
+    "effective": {
+      "control": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-network-recovery-20261008/worker.fixture ; argv[]=/root/backups/dob-network-recovery-20261008/worker.fixture --role=control --state-dir=/root/backups/dob-network-recovery-20261008/supervision_process_0197a34c1f8547f1b1754ea7666b2818/state ; ignore_errors=no ; start_time=[Thu 2026-10-08 07:34:45 UTC] ; stop_time=[n/a] ; pid=2738401 ; code=(null) ; status=0/0 }"
+      },
+      "panels": {
+        "Type": "notify",
+        "WatchdogUSec": "5s",
+        "ExecStart": "{ path=/root/backups/dob-network-recovery-20261008/worker.fixture ; argv[]=/root/backups/dob-network-recovery-20261008/worker.fixture --role=panels --state-dir=/root/backups/dob-network-recovery-20261008/supervision_process_0197a34c1f8547f1b1754ea7666b2818/state ; ignore_errors=no ; start_time=[Thu 2026-10-08 07:34:54 UTC] ; stop_time=[n/a] ; pid=2738658 ; code=(null) ; status=0/0 }"
+      }
+    },
+    "supervision": [
+      {
+        "kind": "production-control",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "account-rules",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "billing",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "network-identity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "network-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "recovery",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "scheduler",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": false,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "capacity-fill",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "client-mutation",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "global-reality",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-registry",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-monitor",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-protection",
+              "state": "STARTING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      },
+      {
+        "kind": "production-panels",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "capacity-fill",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 10
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "global-reality",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 9
+            },
+            {
+              "name": "panel-registry",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "residential-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-performance",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "server-protection",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            }
+          ],
+          "version": 1
+        }
+      }
+    ],
+    "panel_restart_ledger": {
+      "version": 1,
+      "attempts": 2,
+      "last_start_unix": 1791444894,
+      "next_start_unix": 1791444909
+    },
+    "binary_sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+    "duplicate_process_rejected": true,
+    "status": "PASS"
+  },
+  "fixture_setup_note": "First fixture invocation stopped before creating workers due to missing DATABASE_URL; same built binary rerun with test environment passed. No waiver or product change.",
+  "phase_reaudit": {
+    "phase1": {
+      "software_regressions": "PASS",
+      "live_lifecycle": "BLOCKED_BY_EXTERNAL_PROXY_AUTH",
+      "unknown_outcome_and_policy_preserved": true
+    },
+    "phase2": {
+      "exact_binary_peer_isolation": "PASS",
+      "duplicate_owner_rejected": true
+    },
+    "phase3": {
+      "exact_binary_SIGSTOP_watchdog_recovery": "PASS",
+      "production_process_observation": "PASS",
+      "readiness_does_not_imply_provider_or_output_health": true
+    }
+  },
+  "root_cause": {
+    "immediate_network_failure": "SOCKS username/password authentication rejected before any endpoint or provider HTTP",
+    "upstream_reason": "UNPROVEN: credentials, service entitlement/quota, account restrictions require provider-side evidence",
+    "last_base_proxy_success_utc": "2026-10-08T02:35:31.678643+00:00",
+    "base_diagnostic_endpoints": 3,
+    "existing_account_route_probes": {
+      "at_utc": "2026-10-08T07:30:36.753279404Z",
+      "diagnostic_probes": [
+        {
+          "account_id": "cd655217-210f-48ec-a289-6237ea62ef36",
+          "existing_account_route_only": true,
+          "ms": 12,
+          "safe_error": "PROXY_AUTH_FAILED",
+          "status": "down"
+        },
+        {
+          "account_id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+          "existing_account_route_only": true,
+          "ms": 9,
+          "safe_error": "PROXY_AUTH_FAILED",
+          "status": "down"
+        }
+      ],
+      "provider_requests": 0,
+      "read_only_db": true
+    },
+    "current_live": {
+      "at_utc": "2026-10-08T07:41:55.138859+00:00",
+      "read_only": true,
+      "proxies": [
+        {
+          "id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "status": "down",
+          "latency_ms": 347,
+          "failure_count": 1839,
+          "last_checked_at": "2026-10-08T07:41:52.215061+00:00",
+          "last_success_at": "2026-10-08T02:35:31.678643+00:00",
+          "safe_health_error": "PROXY_AUTH_FAILED",
+          "consecutive_successes": 0
+        }
+      ],
+      "account_network": [
+        {
+          "id": "188a2610-2482-4be6-88f2-36c880877705",
+          "mode": "proxy_required",
+          "name": "Alii",
+          "enabled": false,
+          "provider": "digitalocean",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 540,
+          "error_class": "REDACTED",
+          "retry_after": null,
+          "health_state": "healthy",
+          "circuit_state": "closed",
+          "last_health_at": null,
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-02T10:04:22.41087+00:00",
+          "last_success_at": "2026-10-02T10:04:22.41087+00:00",
+          "base_proxy_status": "down",
+          "rotation_started_at": null,
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 3
+        },
+        {
+          "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+          "mode": "proxy_required",
+          "name": "S1",
+          "enabled": true,
+          "provider": "digitalocean",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 774,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.752456+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.752456+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+          "mode": "proxy_required",
+          "name": "Sor oc",
+          "enabled": true,
+          "provider": "digitalocean",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 787,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.770084+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.770084+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+          "mode": "proxy_required",
+          "name": "Upcloud 113",
+          "enabled": true,
+          "provider": "upcloud",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 24,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.705446+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.705446+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+          "mode": "proxy_required",
+          "name": "Sara vul",
+          "enabled": false,
+          "provider": "vultr",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 763,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.762667+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.762667+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+          "mode": "proxy_required",
+          "name": "Sara vul 2",
+          "enabled": true,
+          "provider": "vultr",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 784,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.767747+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.767747+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+          "mode": "proxy_required",
+          "name": "Vultr 232",
+          "enabled": false,
+          "provider": "vultr",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 17,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.722192+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.722192+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+          "mode": "proxy_required",
+          "name": "Vultr232",
+          "enabled": true,
+          "provider": "vultr",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 24,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.704941+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.704941+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        },
+        {
+          "id": "ba4e9677-92be-443d-abf0-32493a243a73",
+          "mode": "proxy_required",
+          "name": "Vultr524",
+          "enabled": false,
+          "provider": "vultr",
+          "proxy_id": "2ca20435-5151-4fef-a933-c0ae548e915b",
+          "generation": 20,
+          "error_class": "BASE_PROXY_AUTH_FAILED",
+          "retry_after": null,
+          "health_state": "degraded",
+          "circuit_state": "closed",
+          "last_health_at": "2026-10-08T02:35:41.708139+00:00",
+          "last_health_ok": false,
+          "last_checked_at": "2026-10-08T07:41:42.21734+00:00",
+          "last_success_at": null,
+          "base_proxy_status": "down",
+          "rotation_started_at": "2026-10-08T02:35:41.708139+00:00",
+          "consecutive_failures": 0,
+          "enabled_pool_entries": 1,
+          "consecutive_successes": 0
+        }
+      ],
+      "account_capacity": [
+        {
+          "id": "188a2610-2482-4be6-88f2-36c880877705",
+          "name": "Alii",
+          "enabled": false,
+          "provider": "digitalocean",
+          "past_expiry": 0,
+          "provider_state": "BILLING_BLOCKED",
+          "recorded_ready": 0,
+          "latest_creation": "2026-10-01T04:45:48.485762+00:00",
+          "remaining_records": 0,
+          "pending_retirement": 0,
+          "provider_checked_at": "2026-10-02T03:55:33.154287+00:00",
+          "desired_server_count": 5,
+          "deletion_requested_at": "2026-10-02T03:56:28.143949+00:00"
+        },
+        {
+          "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+          "name": "S1",
+          "enabled": true,
+          "provider": "digitalocean",
+          "past_expiry": 3,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 2,
+          "latest_creation": "2026-10-08T02:20:22.747307+00:00",
+          "remaining_records": 3,
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-08T07:41:42.23915+00:00",
+          "desired_server_count": 3,
+          "deletion_requested_at": null
+        },
+        {
+          "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+          "name": "Sor oc",
+          "enabled": true,
+          "provider": "digitalocean",
+          "past_expiry": 3,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 2,
+          "latest_creation": "2026-10-08T02:18:22.904367+00:00",
+          "remaining_records": 3,
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-08T07:41:42.242909+00:00",
+          "desired_server_count": 3,
+          "deletion_requested_at": null
+        },
+        {
+          "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+          "name": "Upcloud 113",
+          "enabled": true,
+          "provider": "upcloud",
+          "past_expiry": 2,
+          "provider_state": "ACTIVE",
+          "recorded_ready": 1,
+          "latest_creation": "2026-10-08T01:59:22.562255+00:00",
+          "remaining_records": 2,
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-08T07:41:42.246956+00:00",
+          "desired_server_count": 5,
+          "deletion_requested_at": null
+        },
+        {
+          "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+          "name": "Sara vul",
+          "enabled": false,
+          "provider": "vultr",
+          "past_expiry": 16,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "latest_creation": "2026-10-07T12:20:24.546476+00:00",
+          "remaining_records": 16,
+          "pending_retirement": 16,
+          "provider_checked_at": "2026-10-07T20:10:39.507724+00:00",
+          "desired_server_count": 17,
+          "deletion_requested_at": "2026-10-07T20:14:47.525568+00:00"
+        },
+        {
+          "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+          "name": "Sara vul 2",
+          "enabled": true,
+          "provider": "vultr",
+          "past_expiry": 15,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 14,
+          "latest_creation": "2026-10-07T12:20:27.660574+00:00",
+          "remaining_records": 15,
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-08T07:41:42.2329+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": null
+        },
+        {
+          "id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+          "name": "Vultr 232",
+          "enabled": false,
+          "provider": "vultr",
+          "past_expiry": 14,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "latest_creation": "2026-10-07T12:18:59.472689+00:00",
+          "remaining_records": 14,
+          "pending_retirement": 14,
+          "provider_checked_at": "2026-10-07T20:12:10.374226+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": "2026-10-07T20:14:59.67482+00:00"
+        },
+        {
+          "id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+          "name": "Vultr232",
+          "enabled": true,
+          "provider": "vultr",
+          "past_expiry": 14,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 13,
+          "latest_creation": "2026-10-06T18:38:39.556629+00:00",
+          "remaining_records": 14,
+          "pending_retirement": 1,
+          "provider_checked_at": "2026-10-08T07:41:42.224157+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": null
+        },
+        {
+          "id": "ba4e9677-92be-443d-abf0-32493a243a73",
+          "name": "Vultr524",
+          "enabled": false,
+          "provider": "vultr",
+          "past_expiry": 14,
+          "provider_state": "TOKEN_INVALID",
+          "recorded_ready": 0,
+          "latest_creation": "2026-10-07T12:19:29.86105+00:00",
+          "remaining_records": 14,
+          "pending_retirement": 14,
+          "provider_checked_at": "2026-10-07T20:14:53.569427+00:00",
+          "desired_server_count": 15,
+          "deletion_requested_at": "2026-10-07T20:14:53.111325+00:00"
+        }
+      ],
+      "output": [
+        {
+          "snapshots": 0
+        }
+      ],
+      "checkpoints": [
+        {
+          "n": 0
+        }
+      ],
+      "ops_recent": [
+        {
+          "n": 1,
+          "kind": "DELETE_DROPLET",
+          "name": "Sara vul",
+          "state": "unknown",
+          "latest": "2026-10-08T07:41:42.243364+00:00"
+        },
+        {
+          "n": 1,
+          "kind": "DELETE_DROPLET",
+          "name": "Sara vul 2",
+          "state": "verifying",
+          "latest": "2026-10-08T07:41:32.242899+00:00"
+        },
+        {
+          "n": 1,
+          "kind": "DELETE_DROPLET",
+          "name": "Vultr 232",
+          "state": "unknown",
+          "latest": "2026-10-08T07:40:52.265995+00:00"
+        },
+        {
+          "n": 1,
+          "kind": "CREATE_DROPLET",
+          "name": "Vultr232",
+          "state": "unknown",
+          "latest": "2026-10-08T07:41:22.24223+00:00"
+        },
+        {
+          "n": 1,
+          "kind": "CREATE_DROPLET",
+          "name": "Vultr524",
+          "state": "verifying",
+          "latest": "2026-10-08T07:41:22.253465+00:00"
+        },
+        {
+          "n": 1,
+          "kind": "DELETE_DROPLET",
+          "name": "Vultr524",
+          "state": "unknown",
+          "latest": "2026-10-08T07:40:52.263849+00:00"
+        }
+      ]
+    }
+  },
+  "output_audit": {
+    "details": [],
+    "finished_at": "2026-10-08T07:40:39.575149276Z",
+    "matched_snapshots": 0,
+    "native_unverified": 0,
+    "native_valid": 0,
+    "panels": 0,
+    "published_unique": 0,
+    "read_only_database": true,
+    "remote_operations": "login and fresh inbound inventory only; no config mutations",
+    "scope": "Fresh native identity/enabled/expiry evidence at observed times. Rechecks output for concurrent removals; does not test mobile traffic, remaining-byte quotas, device limits or full routing data plane.",
+    "shares_after": {},
+    "shares_before": {},
+    "started_at": "2026-10-08T07:40:39.546154624Z",
+    "still_published_invalid": 0,
+    "transitioned_out": 0,
+    "unmatched_snapshots": 0
+  },
+  "service_audit": {
+    "at_utc": "2026-10-08T07:41:54.574134+00:00",
+    "services": {
+      "api": {
+        "Id": "digital-ocean-bot-api.service",
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 07:35:41 UTC",
+        "MainPID": "2739199",
+        "NRestarts": "0",
+        "MemoryCurrent": "11501568",
+        "MemoryMax": "infinity",
+        "sha256": "873b28ecd175f6b5aab4b64307075c68427591619f1b3cee0dabde44a2b8e887"
+      },
+      "worker": {
+        "Id": "digital-ocean-bot-worker.service",
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 07:35:43 UTC",
+        "MainPID": "2739201",
+        "NRestarts": "0",
+        "MemoryCurrent": "9613312",
+        "MemoryMax": "536870912",
+        "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07"
+      },
+      "worker-panels": {
+        "Id": "digital-ocean-bot-worker-panels.service",
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Thu 2026-10-08 07:35:43 UTC",
+        "MainPID": "2739202",
+        "NRestarts": "0",
+        "MemoryCurrent": "13434880",
+        "MemoryMax": "536870912",
+        "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T07:41:54.668356758Z"
+    },
+    "accounts": [
+      {
+        "id": "188a2610-2482-4be6-88f2-36c880877705",
+        "name": "Alii",
+        "enabled": false,
+        "provider": "digitalocean",
+        "backfill_debt": 0,
+        "provider_state": "BILLING_BLOCKED",
+        "recorded_ready": 0,
+        "runtime_status": "DELETED",
+        "pending_retirement": 0,
+        "provider_checked_at": "2026-10-02T03:55:33.154287+00:00",
+        "desired_server_count": 5,
+        "deletion_requested_at": "2026-10-02T03:56:28.143949+00:00",
+        "capacity_detail": {}
+      },
+      {
+        "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+        "name": "S1",
+        "enabled": true,
+        "provider": "digitalocean",
+        "backfill_debt": 0,
+        "provider_state": "ACTIVE",
+        "recorded_ready": 2,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "pending_retirement": 1,
+        "provider_checked_at": "2026-10-08T07:41:42.23915+00:00",
+        "desired_server_count": 3,
+        "deletion_requested_at": null,
+        "capacity_detail": {
+          "can_create": false,
+          "provider_state": "TRANSPORT_ERROR"
+        }
+      },
+      {
+        "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+        "name": "Sor oc",
+        "enabled": true,
+        "provider": "digitalocean",
+        "backfill_debt": 0,
+        "provider_state": "ACTIVE",
+        "recorded_ready": 2,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "pending_retirement": 1,
+        "provider_checked_at": "2026-10-08T07:41:42.242909+00:00",
+        "desired_server_count": 3,
+        "deletion_requested_at": null,
+        "capacity_detail": {
+          "can_create": false,
+          "provider_state": "TRANSPORT_ERROR"
+        }
+      },
+      {
+        "id": "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+        "name": "Upcloud 113",
+        "enabled": true,
+        "provider": "upcloud",
+        "backfill_debt": 1,
+        "provider_state": "ACTIVE",
+        "recorded_ready": 1,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "pending_retirement": 1,
+        "provider_checked_at": "2026-10-08T07:41:42.246956+00:00",
+        "desired_server_count": 5,
+        "deletion_requested_at": null,
+        "capacity_detail": {
+          "can_create": false,
+          "provider_state": "TRANSPORT_ERROR"
+        }
+      },
+      {
+        "id": "e8e2aba4-08dd-42c2-a8f2-71104187b8e0",
+        "name": "Sara vul",
+        "enabled": false,
+        "provider": "vultr",
+        "backfill_debt": 0,
+        "provider_state": "TOKEN_INVALID",
+        "recorded_ready": 0,
+        "runtime_status": "DELETE_PENDING",
+        "pending_retirement": 16,
+        "provider_checked_at": "2026-10-07T20:10:39.507724+00:00",
+        "desired_server_count": 17,
+        "deletion_requested_at": "2026-10-07T20:14:47.525568+00:00",
+        "capacity_detail": {}
+      },
+      {
+        "id": "4d7f05c6-2bc8-4f0c-b96d-93391398756f",
+        "name": "Sara vul 2",
+        "enabled": true,
+        "provider": "vultr",
+        "backfill_debt": 0,
+        "provider_state": "TOKEN_INVALID",
+        "recorded_ready": 14,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "pending_retirement": 1,
+        "provider_checked_at": "2026-10-08T07:41:42.2329+00:00",
+        "desired_server_count": 15,
+        "deletion_requested_at": null,
+        "capacity_detail": {
+          "can_create": false,
+          "provider_state": "TRANSPORT_ERROR"
+        }
+      },
+      {
+        "id": "7dcfd492-6fb7-4410-875f-e67bd64144d7",
+        "name": "Vultr 232",
+        "enabled": false,
+        "provider": "vultr",
+        "backfill_debt": 0,
+        "provider_state": "TOKEN_INVALID",
+        "recorded_ready": 0,
+        "runtime_status": "DELETE_PENDING",
+        "pending_retirement": 14,
+        "provider_checked_at": "2026-10-07T20:12:10.374226+00:00",
+        "desired_server_count": 15,
+        "deletion_requested_at": "2026-10-07T20:14:59.67482+00:00",
+        "capacity_detail": {}
+      },
+      {
+        "id": "fe09ed2f-ae76-4405-9caf-9b64f16768e2",
+        "name": "Vultr232",
+        "enabled": true,
+        "provider": "vultr",
+        "backfill_debt": 0,
+        "provider_state": "TOKEN_INVALID",
+        "recorded_ready": 13,
+        "runtime_status": "PROVIDER_TRANSPORT_ERROR",
+        "pending_retirement": 1,
+        "provider_checked_at": "2026-10-08T07:41:42.224157+00:00",
+        "desired_server_count": 15,
+        "deletion_requested_at": null,
+        "capacity_detail": {
+          "can_create": false,
+          "provider_state": "TRANSPORT_ERROR"
+        }
+      },
+      {
+        "id": "ba4e9677-92be-443d-abf0-32493a243a73",
+        "name": "Vultr524",
+        "enabled": false,
+        "provider": "vultr",
+        "backfill_debt": 0,
+        "provider_state": "TOKEN_INVALID",
+        "recorded_ready": 0,
+        "runtime_status": "DELETE_PENDING",
+        "pending_retirement": 14,
+        "provider_checked_at": "2026-10-07T20:14:53.569427+00:00",
+        "desired_server_count": 15,
+        "deletion_requested_at": "2026-10-07T20:14:53.111325+00:00",
+        "capacity_detail": {}
+      }
+    ],
+    "gate": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T11:35:03.384337+00:00",
+        "concurrency": 1,
+        "kill_switch": false,
+        "last_failure_at": "2026-10-07T05:28:43.90601+00:00",
+        "last_failure_code": "EXECUTOR_INTERNAL_FAILURE"
+      }
+    ],
+    "checkpoints": [],
+    "heartbeats": [
+      {
+        "kind": "production-panels",
+        "pool": {
+          "Idle": 8,
+          "InUse": 6,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 1773,
+          "OpenConnections": 14,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "worker_id": "serverprojects.ptr.network:2739202",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "capacity-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 7
+            },
+            {
+              "name": "capacity-fill",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 370
+            },
+            {
+              "name": "client-mutation",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 738
+            },
+            {
+              "name": "global-reality",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 37
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "panel-cleanup",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 369
+            },
+            {
+              "name": "panel-registry",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 74
+            },
+            {
+              "name": "residential-monitor",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 120
+            },
+            {
+              "name": "residential-performance",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-false-0",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 54
+            },
+            {
+              "name": "residential-sync-true-0",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-1",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-2",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-3",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-4",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-5",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-6",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "residential-sync-true-7",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "sanaei-cache",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "server-guardian",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 2
+            },
+            {
+              "name": "server-protection",
+              "state": "RUNNING",
+              "active": 4,
+              "waiting": 0,
+              "completed": 139
+            }
+          ],
+          "version": 1
+        },
+        "last_seen_at": "2026-10-08T07:41:52.035981+00:00"
+      },
+      {
+        "kind": "production-control",
+        "pool": {
+          "Idle": 0,
+          "InUse": 7,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 1,
+          "OpenConnections": 7,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "worker_id": "serverprojects.ptr.network:2739201",
+        "supervision": {
+          "healthy": true,
+          "modules": [
+            {
+              "name": "account-deletion",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 37
+            },
+            {
+              "name": "account-rules",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 74
+            },
+            {
+              "name": "billing",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 74
+            },
+            {
+              "name": "catalog",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "heartbeat",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "lifecycle",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 102
+            },
+            {
+              "name": "local-repair",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 1
+            },
+            {
+              "name": "network-identity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 333
+            },
+            {
+              "name": "network-monitor",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "observation-retention",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 0
+            },
+            {
+              "name": "provider-capacity",
+              "state": "IDLE",
+              "active": 0,
+              "waiting": 0,
+              "completed": 25
+            },
+            {
+              "name": "recovery",
+              "state": "RUNNING",
+              "active": 0,
+              "waiting": 0,
+              "completed": 31
+            },
+            {
+              "name": "scheduler",
+              "state": "RUNNING",
+              "active": 1,
+              "waiting": 0,
+              "completed": 74
+            }
+          ],
+          "version": 1
+        },
+        "last_seen_at": "2026-10-08T07:41:52.212951+00:00"
+      }
+    ],
+    "profiles": [
+      {
+        "enabled": true,
+        "updated_at": "2026-10-05T04:37:19.965507+00:00",
+        "route_class": "DIRECT",
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 1
+      },
+      {
+        "enabled": true,
+        "updated_at": "2026-10-07T11:35:00.463974+00:00",
+        "route_class": "RESIDENTIAL",
+        "user_lifetime_seconds": 0,
+        "target_users_per_inbound": 2
+      }
+    ],
+    "jobs_since_start": [],
+    "jobs_last_six_hours": [
+      {
+        "n": 21,
+        "kind": "BULK_CREATE",
+        "state": "SUCCEEDED"
+      }
+    ],
+    "schema": [
+      {
+        "version": "000163_recovery_reconciliation",
+        "checksum": "89221eaade29a87e44ec4212cdcd12167ad5110b402a4831afa373a5fa3615a4"
+      }
+    ],
+    "upcloud_live": [
+      {
+        "id": "074b252e-009e-4234-8229-b139406513f2",
+        "state": "EXPIRING",
+        "ready_at": "2026-10-08T01:45:35.892614+00:00",
+        "created_at": "2026-10-08T01:44:25.2081+00:00",
+        "expires_at": "2026-10-08T02:47:18.892614+00:00",
+        "updated_at": "2026-10-08T02:47:21.816833+00:00"
+      },
+      {
+        "id": "185b3e78-ca60-4f43-bda2-86b40108b7dd",
+        "state": "READY",
+        "ready_at": "2026-10-08T02:01:16.745806+00:00",
+        "created_at": "2026-10-08T01:59:22.562255+00:00",
+        "expires_at": "2026-10-08T03:01:41.745806+00:00",
+        "updated_at": "2026-10-08T02:01:16.745806+00:00"
+      }
+    ],
+    "fault_signatures_since_start": {
+      "global_failclose": 0,
+      "panic": 0,
+      "ownership_loss": 0,
+      "supervision_stall": 0,
+      "checkpoint_error": 0,
+      "ledger_write_failure": 0
+    }
+  },
+  "unchanged_configuration": true,
+  "schema": "000163_recovery_reconciliation",
+  "frontend_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
+  "rollback": {
+    "revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+    "same_schema": 163,
+    "rule": "Stop both workers and API together; restore matching binaries/manifest; preserve checkpoints, ledgers, keys and settings"
+  },
+  "remaining": [
+    "External shared proxy authentication must recover before account identity/lifecycle/native-output proof",
+    "Vultr previous origin401 on five accounts is a separate unresolved account-side blocker; no fresh Vultr origin response while proxy down",
+    "UpCloud desired5 versus native cap2; Alii remains user-disabled/BILLING_BLOCKED",
+    "Phase4 eligible-account fairness and per-account/provider resource budgets not implemented"
+  ],
+  "limits": [
+    "No native panel login in this output audit because published set is empty; zero invalid counts are not health proof",
+    "No production fault injection, no provider mutating diagnostic calls, no direct-route fallback, no forced health/ACTIVE/gate resets",
+    "No mobile/full-data-plane or indefinite uptime proof",
+    "No claim that all historical/raw diagnostics elsewhere were scrubbed"
+  ]
+}

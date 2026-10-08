@@ -1,0 +1,40 @@
+{
+  "at_utc": "2026-10-08T07:41:55.138859+00:00",
+  "source_commit": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "build": {
+    "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+    "binaries": {
+      "api": {
+        "sha256": "873b28ecd175f6b5aab4b64307075c68427591619f1b3cee0dabde44a2b8e887",
+        "go_build_info": "/root/backups/dob-network-recovery-20261008/bin/api: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/api\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261008073355-bf2d6daba2b9\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf2d6daba2b963e66296a38fe3e62304dd90de4a\n\tbuild\tvcs.time=2026-10-08T07:33:55Z\n\tbuild\tvcs.modified=false"
+      },
+      "worker": {
+        "sha256": "0294126188f27644e0d8de4870f4f9906ed09b2c13c8d925bc2fdae611ba7c07",
+        "go_build_info": "/root/backups/dob-network-recovery-20261008/bin/worker: go1.27.1\n\tpath\tgithub.com/rezajafari0970/Digital-ocean-bot/cmd/worker\n\tmod\tgithub.com/rezajafari0970/Digital-ocean-bot\tv0.0.0-20261008073355-bf2d6daba2b9\t\n\tdep\tgithub.com/lib/pq\tv1.12.3\th1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/net\tv0.59.0\th1:5zfYln+w5XCxwrnMMJPufRgNoXEaGxl0wo5GqPXyues=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf2d6daba2b963e66296a38fe3e62304dd90de4a\n\tbuild\tvcs.time=2026-10-08T07:33:55Z\n\tbuild\tvcs.modified=false"
+      }
+    }
+  },
+  "approved_sha256": {
+    "internal/network/health.go": "9c1c92734bf1d25ddd2ac29969a1c5ead6bb0168908dbbb655303b5094a62299",
+    "internal/network/health_state.go": "552767b72cd0c68604c9a853e68e7f3312ce91e2b4e8664191573d09a2ff06bd",
+    "internal/network/health_store.go": "cfa14f3e5b97a7458bad348019196d402ed5ff43eb7b6532f18dbcefe9c5a144",
+    "internal/network/health_diagnostics.go": "c6ad0e8834f3ea8c866341dcd0a3aee4742836fac2a7e3dc94b3df544ba98157",
+    "internal/network/health_diagnostics_test.go": "2762118dc25411e9f242151b5714666f49e4dfc89060a6160092ab8d76b0b6af",
+    "internal/network/health_diagnostics_postgres_test.go": "7aec62a5daeedf7e7618adca0a0903a21bf6ce1754e985295b2b7976c3ddb13e",
+    "internal/app/proxy_control_plane.go": "d98220983ec969727201377a8b2a34c96f71cffef259dd36bc35368a17718b34",
+    "internal/app/proxy_blocked_diagnostics_postgres_test.go": "2a3e5ebf2306dac76a6f8408a1b1c1e89125c2010082b7a90dbec60f7be38964",
+    "docs/development-jobs/proxy-health-diagnostics-20261008.json": "5c4b745749579efae5daf07899512daab8ab2bfc0762eca2f8b6c502645f90ae",
+    "internal/network/proxy_gateway.go": "3b89371778b5e97d26d3190d227e6ca90688f382bfc4dd246325471b289c5bd3",
+    "internal/network/proxy_ipv4_resolver.go": "df69551ff8c5d1c4c793eadf76f2c8de770c58be4fa87f6cc7a5687612fa25d6",
+    "internal/network/monitor.go": "757b85efa809b6ae63322d245de8b8ed4436112e0234274f73f5504d6ac30986",
+    "internal/network/scheduler.go": "85b0b0a15615e15a6c2b31634c2005703e066c1743c42301bbf4fa719a953e70",
+    "internal/network/leakcheck.go": "101ad24077ce1680ff699309fb21d349f6e4f776f90a1f221f179ae2a9427558",
+    "internal/app/proxy_pool.go": "33120b4071c50f361cf8984bcd861192d3d9924245ade82b2d87bc127a0103d3",
+    "internal/app/sticky_proxy.go": "54308d9196fefde553d1ecfc61e87b15f1dcbbce35c688d870b778c7549aa2b4",
+    "internal/proxycontrol/store.go": "115374e88a4834166b8d7d60f7cf1e2de7bece6e667b4d22139b1300266b9696",
+    "internal/proxycontrol/state_machine.go": "62d95f441861a570b007d54f6ac5a64e26d2a2e46b7ae469bab76cb5f98e9f1d",
+    "migrations/000105_proxy_runtime_state.up.sql": "81ae6e04e308bd6432798c6b2b928281dd943ebcb0dd9d05cfeafe50cad4f858"
+  },
+  "schema": 163,
+  "frontend_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1"
+}

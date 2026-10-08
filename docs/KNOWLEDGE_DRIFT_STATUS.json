@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "git_head": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "git_head": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
   "ready": true,
   "artifacts": [
     {
@@ -370,13 +370,13 @@
   ],
   "rule": "An artifact may be commits behind HEAD only when no indexed product/source paths changed since its source_commit. Knowledge/docs-only commits do not make source knowledge stale.",
   "latest_product_frontier": {
-    "revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
-    "runtime_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
-    "handoff": "docs/OPERATIONAL_CONTINUATION_20261008.md",
+    "revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+    "runtime_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+    "handoff": "docs/NETWORK_RECOVERY_20261008.md",
     "inspected_live_source": true,
-    "note": "Deployed565b20c unchanged; new operational blocker output0/ISOLATION_WAIT on all5enabled networks, deeper cause unproven. Read latest reconnect report before historicalnative20/8."
+    "note": "Proxy-auth failure proven; safe diagnostic patch deployed; local runtime healthy; published0/no native panel inventory performed."
   },
-  "latest_development_delta": "docs/OPERATIONAL_CONTINUATION_20261008_BRAIN_DELTA.json",
+  "latest_development_delta": "docs/NETWORK_RECOVERY_20261008_BRAIN_DELTA.json",
   "note": "Frozen knowledge indexes are historical for changed paths; use the latest source snapshot and live source. Production frontier is separate from prepared source.",
   "latest_risk_forecast": {
     "source_head": "2c3295edb7df5c4c35ab48747924e97f40d5c131",
@@ -398,18 +398,18 @@
     "historical_observation": true,
     "superseded_by": "Current phase2 frontier; authenticated Resume completed06:23:13Z"
   },
-  "runtime_source_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
-  "current_frontier": "docs/OPERATIONAL_CONTINUATION_20261008.md",
+  "runtime_source_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
+  "current_frontier": "docs/NETWORK_RECOVERY_20261008.md",
   "latest_worker_isolation_source_snapshot": "docs/WORKER_ISOLATION_SOURCE_SNAPSHOT_20261007.json",
   "latest_worker_isolation_acceptance": "docs/WORKER_ISOLATION_ACCEPTANCE_20261007.json",
-  "openai_review": "resp_0bcc3ab20893c44a006ac6d7f933f087d1bf3b2cde41a7c4e0",
+  "openai_review": "resp_00507e92bb0c0be0006ac7473d165c87d1b75fcb99e8912c10",
   "current_native_evidence_at": null,
   "previous_draft_source_revision": "c72193d5c25b15e87be9ccf360eb4b3df867908c",
-  "source_snapshot_revision": "565b20c9910f3ecf8e700ff44b93842d76710555",
+  "source_snapshot_revision": "bf2d6daba2b963e66296a38fe3e62304dd90de4a",
   "latest_phase12_reaudit": "docs/PHASE12_REAUDIT_20261007.json",
-  "latest_audit_verdict": "SOURCE_TESTS_PASS_CURRENT_OUTPUT_NETWORK_BLOCKED",
+  "latest_audit_verdict": "SOURCE_AND_PROCESS_TESTS_PASS_EXTERNAL_PROXY_AUTH_BLOCKED",
   "open_reaudit_findings": [],
-  "latest_reaudit_at": "2026-10-08T06:59:15.912956+00:00",
+  "latest_reaudit_at": "2026-10-08T07:41:55.138859+00:00",
   "latest_recovery_ledger_fix": "docs/RECOVERY_LEDGER_FIX_20261007.md",
   "closed_reaudit_findings": [
     "PH12-001",
@@ -420,7 +420,7 @@
   "latest_phase3_at": "2026-10-07T10:15:14.285478+00:00",
   "latest_phase123_audit": "docs/PHASE123_AUDIT_20261007.json",
   "open_phase123_findings": [],
-  "latest_phase123_reaudit": "docs/OPERATIONAL_CONTINUATION_20261008_ACCEPTANCE.json",
+  "latest_phase123_reaudit": "docs/NETWORK_RECOVERY_20261008_ACCEPTANCE.json",
   "closed_phase123_findings": [
     "PH123-001",
     "PH123-002",
@@ -434,9 +434,11 @@
     "PH123-010"
   ],
   "git_head_scope": "Compiled product revision; subsequent documentation checkpoint does not change runtime source.",
-  "current_published_output_at": "2026-10-08T06:56:49.67614246Z",
+  "current_published_output_at": "2026-10-08T07:40:39.575149276Z",
   "current_reconnect": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json",
   "open_operational_findings": [
-    "NET-RECONNECT-20261008: output0, stale unhealthy network identities/ISOLATION_WAIT; precise cause unresolved."
-  ]
+    "NET-AUTH-20261008: shared proxy auth rejected, needs provider-side/secure credential resolution before live lifecycle/output recovery",
+    "VULTR-AUTH-20261007: prior origin401 remains; exact account-side reason not established, fresh check blocked by shared proxy"
+  ],
+  "latest_network_recovery_source_snapshot": "docs/NETWORK_RECOVERY_20261008_SOURCE_SNAPSHOT.json"
 }
