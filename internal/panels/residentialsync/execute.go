@@ -220,7 +220,10 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 // A temporary RPC refusal is not evidence that the saved plan failed.
 // Poll reads only; never repeat save/restart merely because readiness lags.
 func verifyWhenReady(ctx context.Context, exec sanaei.SessionExecutor, desired map[string]any, clients []clientRoute, tags []string, p routePolicy) error {
-	readyCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	// This covers the whole route matrix, not only gRPC startup. Distant
+	// panels need more than eight seconds for the sequential native requests.
+	// The caller's 45-second operation deadline remains authoritative.
+	readyCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	for {
 		err := verifyRunning(readyCtx, exec, desired, clients, tags, p)
