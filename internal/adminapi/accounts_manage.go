@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"net/http"
 	"strings"
 	"time"
@@ -193,6 +194,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if x.Token != "" {
 		if _, err = tx.ExecContext(r.Context(), "UPDATE account_deletion_jobs SET next_attempt_at=now() WHERE account_id=$1", id); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if err = worker.RearmProviderAuthRetriesTx(r.Context(), tx, id); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}

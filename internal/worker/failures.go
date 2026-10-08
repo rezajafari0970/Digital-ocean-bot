@@ -89,14 +89,26 @@ func (s FailureStore) FailChecked(ctx context.Context, kind, itemID, accountID s
 }
 func failTx(ctx context.Context, tx *sql.Tx, kind, itemID, accountID string, cause error) error {
 	msg := ledgerErrorText(cause)
+	hint, hinted := boundedRetryDelay(cause)
+	if !hinted {
+		var err error
+		hint, err = providerAuthRetryTx(ctx, tx, kind, itemID, accountID, cause)
+		if err != nil {
+			return err
+		}
+		hinted = hint > 0
+		if hint == 5*time.Minute {
+			msg = ProviderAuthRetryMarker
+		}
+	}
 	var failures int
 	err := tx.QueryRowContext(ctx, `INSERT INTO worker_item_failures(kind,item_id,account_id,failures,last_error,first_failed_at,last_failed_at) VALUES($1,$2,NULLIF($3,'')::uuid,1,$4,now(),now()) ON CONFLICT(kind,item_id) DO UPDATE SET failures=LEAST(worker_item_failures.failures+1,1000000),last_error=EXCLUDED.last_error,last_failed_at=now() RETURNING failures`, kind, itemID, accountID, msg).Scan(&failures)
 	if err != nil {
 		return err
 	}
 	delay := time.Duration(1<<minFailure(failures, 6)) * time.Second
-	if hinted, ok := boundedRetryDelay(cause); ok {
-		delay = hinted
+	if hinted {
+		delay = hint
 	}
 	seconds := int((delay + time.Second - 1) / time.Second)
 	_, err = tx.ExecContext(ctx, `UPDATE worker_item_failures SET next_retry_at=now()+($3 * interval '1 second') WHERE kind=$1 AND item_id=$2`, kind, itemID, seconds)

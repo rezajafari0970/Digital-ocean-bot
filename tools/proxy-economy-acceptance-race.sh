@@ -17,12 +17,12 @@ m=runpy.run_path('tools/proxy-economy-review.py')
 pathlib.Path('.local/proxy-economy/test-source.json').write_text(json.dumps(m['source_snapshot']()))
 PYCODE
 GOMAXPROCS=4 go test -p 2 -count=1 ./...
-GOMAXPROCS=4 go test -p 2 -race -count=1 ./internal/network ./internal/app ./internal/proxycontrol ./internal/providers/digitalocean ./internal/panels/sanaei ./internal/adminapi
+GOMAXPROCS=4 go test -p 2 -race -count=1 ./internal/network ./internal/app ./internal/proxycontrol ./internal/providers/digitalocean ./internal/panels/sanaei ./internal/adminapi ./internal/worker
 git diff --check
 
 python3 - <<'PYCODE'
 import runpy,json,pathlib,time
 m=runpy.run_path('tools/proxy-economy-review.py');source=m['source_snapshot']()
 assert source==json.loads(pathlib.Path('.local/proxy-economy/test-source.json').read_text()),'source changed during tests'
-pathlib.Path('.local/proxy-economy/accepted-tests.json').write_text(json.dumps({'source':source,'passed':True,'completed_at':time.time(),'gates':['full_go_suite_isolated_postgres','race_network_app_proxycontrol_digitalocean_sanaei_adminapi','git_diff_check']},indent=2))
+pathlib.Path('.local/proxy-economy/accepted-tests.json').write_text(json.dumps({'source':source,'passed':True,'completed_at':time.time(),'gates':['full_go_suite_isolated_postgres','race_network_app_proxycontrol_digitalocean_sanaei_adminapi_worker','git_diff_check']},indent=2))
 PYCODE

@@ -1,0 +1,44 @@
+{
+  "goal": "Back off repeated provider HTTP 401 retries for retained operation/lifecycle work, and immediately rearm those retries when a validated replacement credential is saved.",
+  "context": "Production 2daa37f is healthy with scoped TLS savings verified. Read-only failure ledger shows Vultr operation/lifecycle items hitting HTTP401 every64seconds for 800-1260 attempts, with no possibility of progress until credential repair. Preserve all operations, unknown outcomes, provider-confirmed receipts, checkpoint ownership, mutation proofs, cleanup eligibility and error-driven state transitions. Only when per-account economy is enabled AND kind is operation/lifecycle AND a typed providers.Error has Class ErrorAuthentication and StatusCode401, store a fixed safe PROVIDER_AUTH_RETRY marker and use a five-minute retry delay in the existing atomic failure ledger. Existing RetryDelay hints take precedence; transient/network/proxy-auth407/untyped errors and flag-off retain existing exponential behavior. No skip based on stale account state. On successful validated token replacement, transactionally set next_retry_at=now() only for same-account operation/lifecycle rows carrying the exact marker; retain counters, records, checkpoints and operation state. Failed credential validation/transaction must not rearm. Add isolated-PostgreSQL concurrency/rollback/flag/canary/error-class tests and API-path credential rearm regression. Expand race gate to worker in addition to previous six packages. Full suite plus actual exact-source API review. No subagents. Do not touch the running production version until current 15-minute sample finishes. During that sample two new DigitalOcean accounts were added externally (now10 vs baseline8), so report cohort/workload differences honestly and never claim 90% based on incomparable totals. Canary with existing rollout; no production fault injection or replacement of user credentials. Standard coordinated upgrade and obsolete-browser retirement only. Concurrency detail: take an account row SHARE lock before reading current secret.updated_at and native checkpoint.created_at in a separate READ COMMITTED statement. No checkpoint means no long auth backoff. If the credential changed at/after the attempt start, retry in two seconds instead of five minutes. Replacement takes same account row UPDATE lock before exact-marker rearm; both commit orders are tested. Existing native checkpoint complete transaction owns the checkpoint row throughout; new code only reads it.",
+  "allowed_paths": [
+    "internal/network",
+    "internal/app",
+    "internal/providers/digitalocean",
+    "internal/panels/sanaei",
+    "internal/adminapi",
+    "cmd/worker/main.go",
+    "migrations/000164_proxy_economy.up.sql",
+    "migrations/000164_proxy_economy.down.sql",
+    "tools/proxy-wire-sample.py",
+    "tools/proxy-economy-acceptance-race.sh",
+    "tools/proxy-economy-review.py",
+    "docs/development-jobs/proxy-economy-20261008.json",
+    "cmd/api/main.go",
+    "docs/development-jobs/proxy-economy-timeout-fix-20261008.json",
+    "docs/development-jobs/proxy-economy-scheduler-20261008.json",
+    "docs/development-jobs/proxy-economy-tls-20261008.json",
+    "docs/development-jobs/proxy-economy-provider-tls-20261008.json",
+    "internal/worker/failures.go",
+    "internal/worker/auth_retry.go",
+    "internal/worker/auth_retry_test.go",
+    "docs/development-jobs/proxy-economy-auth-retry-20261008.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/proxy-economy-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/proxy-economy-review.py"
+    ]
+  },
+  "timeout_seconds": 1800,
+  "commit_message": "perf(worker): pace rejected credential retries and rearm on repair"
+}
