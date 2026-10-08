@@ -1,0 +1,28 @@
+{
+  "goal": "Correct the operational handoff for a concurrent runtime publication; documentation only, no canonical merge or binary deployment.",
+  "context": "Our product release897f408 passed tests/review and was published23:05UTC. Our documentation checkpoint09d6300 is pushed but canonical fast-forward correctly stopped when another authorized workstream published descendant435486a7369965366852f48e7514efe7d6a41293. Current canonical and runtime435486a. The15-minute traffic window23:07:06\u201323:22:06 straddled that concurrent publication, so it is mixed revision as well as mixed workload/cohort; original immutable measurement/evidence remains preserved. Record actual current runtime separately from original tested release. Do not claim our review covers the new product delta. Readonly ancestry/hash/readiness verification is permitted. Update only handoff/status/delta/acceptance and this manifest; preserve residential historical tail. No source changes. Save correction evidence and actual API review against exact docs, native checkpoint, then push existing handoff branch only. Do not merge/rebase/force-push canonical or alter concurrent changes. No subagents. The overall90percent goal remains unverified and resource/invalid-token issues unresolved.",
+  "allowed_paths": [
+    "HANDOFF.md",
+    "docs/OPERATIONAL_REPAIR_DELTA_20261008.md",
+    "docs/OPERATIONAL_REPAIR_STATUS_FA_20261009.md",
+    "docs/OPERATIONAL_REPAIR_ACCEPTANCE_20261009.json",
+    "docs/development-jobs/operational-handoff-reconcile-20261009.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 600,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "python3 /root/backups/dob-operational-handoff-reconcile-20261009/verify-race-evidence.py"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-operational-handoff-reconcile-20261009/review.py"
+    ]
+  },
+  "commit_message": "docs(operations): record concurrent runtime and mixed traffic window"
+}

@@ -1,6 +1,5 @@
 {
   "recorded_at": "2026-10-08T23:23:03.297054+00:00",
-  "runtime_product_commit": "897f40800d047a3f08faccb501e450a17208b6bc",
   "publication": {
     "at": "2026-10-08T23:07:06.073775+00:00",
     "commit": "897f40800d047a3f08faccb501e450a17208b6bc",
@@ -118,7 +117,8 @@
     "limits": [
       "Live lifecycle workload and account cohort changed; not a controlled flag-off A/B sample.",
       "Wire counts TCP payload including retransmissions to gateway IPv4s resolved at sample start, not provider billing.",
-      "Application counters flush asynchronously; stable-account rates are observations, not guaranteed attribution."
+      "Application counters flush asynchronously; stable-account rates are observations, not guaranteed attribution.",
+      "The after-sample spans product897f408 and independently published descendant435486a; cannot isolate release effects."
     ],
     "stable_account_meter_rate_reduction_percent": 5.47514874680799,
     "wire_rate_reduction_percent": 4.966092925481158
@@ -269,7 +269,7 @@
   "production_account_deletion_used_as_test": false,
   "residential_dropin_unchanged": true,
   "sanaei_management_transport": "direct IPv4; no account proxy",
-  "documentation_workflow_evidence": "/root/backups/dob-operational-handoff-20261009",
+  "documentation_workflow_evidence": "/root/backups/dob-operational-handoff-reconcile-20261009",
   "status_file": "/root/projects/Digital-ocean-bot-canonical-e2e/.local/account-panel-repair-progress.json",
   "broader_goal_complete": false,
   "remaining": [
@@ -277,5 +277,23 @@
     "Cloud cleanup of invalid-token accounts or explicitly acknowledged local purge",
     "Capacity and transient resource-pressure remediation without weakening protection",
     "Capacity-aware dashboard freshness presentation: existing two-minute conservative status windows can show idle five-minute observations as unverified; do not relabel stale evidence healthy."
-  ]
+  ],
+  "recorded_runtime_release_commit": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "current_runtime_observation": {
+    "at": "2026-10-08T23:29:47.614318+00:00",
+    "reviewed_release_commit": "897f40800d047a3f08faccb501e450a17208b6bc",
+    "observed_runtime_commit": "435486a7369965366852f48e7514efe7d6a41293",
+    "runtime_build_time": "2026-10-08T23:18:17Z",
+    "worker_started_at_utc": "2026-10-08T23:18:25Z",
+    "traffic_window_utc": [
+      "2026-10-08T23:07:06Z",
+      "2026-10-08T23:22:06Z"
+    ],
+    "traffic_mixed_revisions": true,
+    "canonical_fast_forward_skipped_due_to_drift": true,
+    "original_handoff_checkpoint": "09d6300e16fb901772695fbf1003df0a94d0c22e",
+    "prior_checkpoint_exit": 1,
+    "prior_branch_push_succeeded": true,
+    "no_canonical_merge_or_binary_deploy_by_this_documentation_job": true
+  }
 }
