@@ -1,6 +1,14 @@
-# Operational repairs continuation — 2026-10-09 Tehran
+# Operational repair release accepted — 2026-10-09 Tehran
 
-Read `docs/OPERATIONAL_REPAIR_DELTA_20261008.md` for account deletion, guardian service and proxy economy repairs. Current job `operational-release-20261009` integrates the preserved tested changes with the independently deployed residential verifier fix. Publication must be verified against runtime; source presence alone is not deployment evidence. The current residential report below remains valid for its recorded timestamp.
+Runtime/product source **897f40800d047a3f08faccb501e450a17208b6bc** is published and independently verified. Read `docs/OPERATIONAL_REPAIR_STATUS_FA_20261009.md` and `docs/OPERATIONAL_REPAIR_ACCEPTANCE_20261009.json` first, then the detailed delta. This checkpoint updates documentation only; do not redeploy unchanged binaries because canonical documentation is newer.
+
+Completed: deletion UI/error handling and safe operational/profile purge; guardian packaging and idempotent service reconcile; native provider warning detail; bounded idle provider polling. Actual API product PASS: `resp_0af18c241cde442e006ac8215607fc87d1a505ce711fa1a94b`. Full Go/race, browser, installed-core and packaging evidence binds to source digest `220584a92ade3f3d3bfe178f9250526b4a71f706a739a7c957d2e72810907f97`.
+
+Remaining: **90% reduction not verified**, invalid-token cloud cleanup and transient resource pressure. Current wire rates are 235,751 → 224,044 bytes/minute, but cohort/workload changed; do not claim causation or comparable 90%. Existing two-minute dashboard freshness may conservatively show an idle five-minute observation as unverified. Do not hide alerts or weaken freshness/protection.
+
+Evidence: `/root/backups/dob-operational-release-20261009`; original deploy EXIT marker is absent, independent `deploy-verification.exit=0` and `publication-verification.json` verify publication. Documentation workflow: `/root/backups/dob-operational-handoff-20261009`. Live continuation: `.local/account-panel-repair-progress.json`. During active work report timestamp, concrete result, blocker and next action at least every 60 seconds. Completion of this bounded release does not mean every operational goal is resolved or that an AI agent continues unattended.
+
+The residential section below is preserved as a timestamped historical acceptance; its product changes remain in this release.
 
 ---
 

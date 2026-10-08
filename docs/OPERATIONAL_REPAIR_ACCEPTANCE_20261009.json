@@ -1,0 +1,281 @@
+{
+  "recorded_at": "2026-10-08T23:23:03.297054+00:00",
+  "runtime_product_commit": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "publication": {
+    "at": "2026-10-08T23:07:06.073775+00:00",
+    "commit": "897f40800d047a3f08faccb501e450a17208b6bc",
+    "runtime_and_guardian_hashes_verified": true,
+    "residential_dropin_unchanged": true,
+    "publication_log_completion_present": true,
+    "shell_completion_marker_note": "deploy.sh EXIT marker was replaced by dob_cleanup_stage EXIT trap; this separate verification records observed runtime, not a reconstructed shell exit code"
+  },
+  "independent_deployment_verification_exit": 0,
+  "original_deploy_exit_marker": "absent; cleanup trap replaced original EXIT marker; not reconstructed",
+  "product_test_source_sha256": "220584a92ade3f3d3bfe178f9250526b4a71f706a739a7c957d2e72810907f97",
+  "product_test_gates": [
+    "full_go_suite_isolated_postgres",
+    "race_app_adminapi_network_serverprotection_provisioning_residentialsync",
+    "real_chromium_account_deletion_and_blocked_purge",
+    "installed_core_allowlist_if_available",
+    "real_guardian_cross_build_hash_arch_faults",
+    "javascript_syntax",
+    "git_diff_check"
+  ],
+  "product_api_response_id": "resp_0af18c241cde442e006ac8215607fc87d1a505ce711fa1a94b",
+  "product_api_verdict": {
+    "decision": "PASS",
+    "blockers": [],
+    "limitations": [
+      "Evidence establishes test/review binding to source digest 220584a92ade3f3d3bfe178f9250526b4a71f706a739a7c957d2e72810907f on baseline ae0593554048249b5ba1cdfe9e4405fa4b51e5b8, but does not itself establish checkpoint push or clean locked deployment/runtime publication.",
+      "Installed-core allowlist coverage was conditional on an existing /usr/local/bin/xray binary.",
+      "No production account deletion, provider mutation, or live fault injection was performed, by design.",
+      "Filesystem cleanup is intentionally non-transactional with PostgreSQL: a later commit failure can leave the account row present after its retired browser cache was removed.",
+      "The claimed 90% proxy-traffic reduction remains unverified; existing measurements are not comparable provider-billing proof.",
+      "Historical backups, logs, journals, and other external copies are not securely erased by account purge."
+    ]
+  },
+  "traffic": {
+    "at": "2026-10-08T23:23:03.264977+00:00",
+    "stable_enabled_account_count": 6,
+    "stable_account_ids": [
+      "09120fff-71f9-44f7-bd14-890d7b11e257",
+      "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+      "63cf71fa-ad4b-4ee0-a72b-b3e3cad22fbe",
+      "7fbd611e-6f48-4a84-847e-4049dbd598e9",
+      "c12dcdcb-7d16-440d-82a3-5f76bc277c92",
+      "cd655217-210f-48ec-a289-6237ea62ef36"
+    ],
+    "all_cohorts_unchanged": false,
+    "before_account_meter": {
+      "seconds": 300.705441,
+      "purposes": {
+        "dns": {
+          "bytes": 221559,
+          "connections": 42,
+          "requests": 43
+        },
+        "identity": {
+          "bytes": 125047,
+          "connections": 26,
+          "requests": 27
+        },
+        "provider_api": {
+          "bytes": 647402,
+          "connections": 19,
+          "requests": 112
+        },
+        "identity_shadow": {
+          "bytes": 0,
+          "connections": 0,
+          "requests": 0
+        }
+      },
+      "bytes": 994008,
+      "invalid_counters": []
+    },
+    "after_account_meter": {
+      "seconds": 900.510758,
+      "purposes": {
+        "dns": {
+          "bytes": 622313,
+          "connections": 121,
+          "requests": 121
+        },
+        "identity": {
+          "bytes": 403442,
+          "connections": 86,
+          "requests": 86
+        },
+        "provider_api": {
+          "bytes": 1787982,
+          "connections": 39,
+          "requests": 278
+        },
+        "identity_shadow": {
+          "bytes": 0,
+          "connections": 0,
+          "requests": 0
+        }
+      },
+      "bytes": 2813737,
+      "invalid_counters": []
+    },
+    "wire": {
+      "before": {
+        "bytes": 1180037,
+        "seconds": 300.32585644721985,
+        "bytes_per_minute": 235751.32969759128,
+        "complete": true
+      },
+      "after": {
+        "bytes": 3361140,
+        "seconds": 900.129753112793,
+        "bytes_per_minute": 224043.69959175144,
+        "complete": true
+      }
+    },
+    "proxy_90_percent_verified": false,
+    "limits": [
+      "Live lifecycle workload and account cohort changed; not a controlled flag-off A/B sample.",
+      "Wire counts TCP payload including retransmissions to gateway IPv4s resolved at sample start, not provider billing.",
+      "Application counters flush asynchronously; stable-account rates are observations, not guaranteed attribution."
+    ],
+    "stable_account_meter_rate_reduction_percent": 5.47514874680799,
+    "wire_rate_reduction_percent": 4.966092925481158
+  },
+  "health_snapshot": {
+    "at": "2026-10-08T23:22:07.010222+00:00",
+    "counts": [
+      {
+        "json_build_object": {
+          "digitalocean_accounts": 4,
+          "vultr_accounts": 3,
+          "upcloud_accounts": 1,
+          "enabled_accounts": 6,
+          "healthy_accounts": 2,
+          "broken_accounts": 0,
+          "limited_accounts": 2,
+          "unknown_accounts": 2,
+          "pending_deletion_accounts": 2,
+          "active_servers": 11,
+          "inactive_servers": 11,
+          "broken_servers": 0,
+          "degraded_servers": 5,
+          "pending_deletion_servers": 35,
+          "total_servers": 62,
+          "panel_attention_servers": 5,
+          "active_deployments": 0,
+          "live_workers": 2,
+          "observed_at": "2026-10-08T23:22:07.039716+00:00"
+        }
+      }
+    ],
+    "protection": [
+      {
+        "state": "APPLIED",
+        "desired_enabled": true,
+        "reason": "none",
+        "count": 26,
+        "verified_recent": 26
+      },
+      {
+        "state": "DISABLED",
+        "desired_enabled": false,
+        "reason": "none",
+        "count": 3,
+        "verified_recent": 3
+      },
+      {
+        "state": "ERROR",
+        "desired_enabled": true,
+        "reason": "scp-data-write: remote command outcome unknown\ncontext deadline exceeded",
+        "count": 1,
+        "verified_recent": 0
+      },
+      {
+        "state": "PENDING",
+        "desired_enabled": false,
+        "reason": "none",
+        "count": 1,
+        "verified_recent": 1
+      }
+    ],
+    "provider_warnings": [
+      {
+        "name": "Oceano new 1",
+        "status": "warning",
+        "message": "Your team has created the maximum allowed number of Droplets. Please resolve this on the control panel.",
+        "created_at": "2026-10-08T23:17:14.994502+00:00"
+      },
+      {
+        "name": "Digi oc",
+        "status": "warning",
+        "message": "Your team has created the maximum allowed number of Droplets. Please resolve this on the control panel.",
+        "created_at": "2026-10-08T23:18:43.287648+00:00"
+      },
+      {
+        "name": "S1",
+        "status": "warning",
+        "message": "Your team has created the maximum allowed number of Droplets. Please resolve this on the control panel.",
+        "created_at": "2026-10-08T23:20:43.032954+00:00"
+      },
+      {
+        "name": "Sor oc",
+        "status": "warning",
+        "message": "Your team has created the maximum allowed number of Droplets. Please resolve this on the control panel.",
+        "created_at": "2026-10-08T23:21:03.49364+00:00"
+      }
+    ],
+    "identity": [
+      {
+        "provider": "digitalocean",
+        "count": 4,
+        "healthy": 4
+      },
+      {
+        "provider": "vultr",
+        "count": 3,
+        "healthy": 2
+      },
+      {
+        "provider": "upcloud",
+        "count": 1,
+        "healthy": 1
+      }
+    ],
+    "recovery": [
+      {
+        "checkpoints": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-08T23:22:07.197126746Z"
+    }
+  },
+  "attention_reason_snapshot": {
+    "at": "2026-10-08T23:16:48.836062+00:00",
+    "counts": {
+      "waiting for 30 seconds of stable resources": 5,
+      "CPU queue pressure": 2,
+      "connection table pressure": 1
+    },
+    "all_sampled_guardians_applied": true
+  },
+  "account_cleanup": "Operational records, credentials, scoped telemetry and fixed-root legacy profile; no secure erasure of backups/logs/external copies.",
+  "cloud_cleanup_limit": "Two TOKEN_INVALID Vultr accounts remained queued in the 23:16 UTC audit; valid credentials needed to verify provider cleanup, or explicit acknowledged local system purge.",
+  "production_account_deletion_used_as_test": false,
+  "residential_dropin_unchanged": true,
+  "sanaei_management_transport": "direct IPv4; no account proxy",
+  "documentation_workflow_evidence": "/root/backups/dob-operational-handoff-20261009",
+  "status_file": "/root/projects/Digital-ocean-bot-canonical-e2e/.local/account-panel-repair-progress.json",
+  "broader_goal_complete": false,
+  "remaining": [
+    "Comparable 90 percent account-proxy reduction proof",
+    "Cloud cleanup of invalid-token accounts or explicitly acknowledged local purge",
+    "Capacity and transient resource-pressure remediation without weakening protection",
+    "Capacity-aware dashboard freshness presentation: existing two-minute conservative status windows can show idle five-minute observations as unverified; do not relabel stale evidence healthy."
+  ]
+}

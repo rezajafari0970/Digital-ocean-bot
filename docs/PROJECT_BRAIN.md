@@ -1,6 +1,6 @@
-# Operational repair continuation — 2026-10-08
+# Operational repair release — 2026-10-09 Tehran
 
-Read OPERATIONAL_REPAIR_DELTA_20261008.md first. It supersedes the archived frontier below. Verify live canonical/runtime and the integration status before continuing; do not infer deployment from a source checkpoint.
+Read OPERATIONAL_REPAIR_STATUS_FA_20261009.md, OPERATIONAL_REPAIR_ACCEPTANCE_20261009.json and OPERATIONAL_REPAIR_DELTA_20261008.md first. Runtime product 897f408 is verified; this newer checkpoint is documentation only. The 90-percent goal remains unverified. Inspect live status and current canonical/runtime before further work.
 
 ---
 

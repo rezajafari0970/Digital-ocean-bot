@@ -1,0 +1,29 @@
+{
+  "goal": "Record observed operational repair outcomes and exact continuation evidence in repository documentation.",
+  "context": "Documentation-only follow-up to tested/reviewed/deployed product source 897f40800d047a3f08faccb501e450a17208b6bc. No product code, policies or configuration changes and no new publication of binaries. Preserve existing residential acceptance sections. Read-only evidence is /root/backups/dob-operational-release-20261009: actual API PASS, source digest, full Go/race/browser/installed-core/packaging gates, runtime hashes and native observations, measured traffic with changing account cohort. Deployment shell completion marker was replaced by stage cleanup EXIT trap; independent verify-published.sh succeeded with deploy-verification.exit0 and publication-verification.json; record that distinction, never manufacture original exitcode. Final traffic observation may still be running; do not claim completion until present. Update HANDOFF and operational delta with current product source, exact evidence locations, measured results and limits, remaining invalid provider credentials and transient resource alerts; no 90-percent proof without comparable samples. Verify all product files remain byte-identical to reviewed commit, and validate source-bound prior race/test evidence rather than rerunning unchanged binaries for documentation. Then actual API review of exact documentation and supporting evidence, checkpoint/push only, and fast-forward canonical after drift check. The canonical doc commit may be newer than unchanged runtime source; state this clearly. No subagents. Persist meaningful progress and preserve all prior failures.",
+  "allowed_paths": [
+    "HANDOFF.md",
+    "docs/PROJECT_BRAIN.md",
+    "docs/OPERATIONAL_REPAIR_DELTA_20261008.md",
+    "docs/OPERATIONAL_REPAIR_ACCEPTANCE_20261009.json",
+    "docs/OPERATIONAL_REPAIR_STATUS_FA_20261009.md",
+    "docs/development-jobs/operational-handoff-20261009.json"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "python3 /root/backups/dob-operational-handoff-20261009/verify-race-evidence.py"
+    ],
+    "verify": [
+      "python3 /root/backups/dob-operational-handoff-20261009/review.py"
+    ]
+  },
+  "commit_message": "docs(operations): record deployed repairs and remaining measured limits"
+}
