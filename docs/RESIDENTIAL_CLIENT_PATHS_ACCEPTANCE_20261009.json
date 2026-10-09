@@ -1,0 +1,2907 @@
+{
+  "at": "2026-10-09T06:29:31.980774+00:00",
+  "runtime_source": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+  "implementation_deployment": "ACCEPTED",
+  "overall_residential_availability": "PARTIAL_EXTERNAL_DEPENDENCIES",
+  "strict_allowlist_scope": "all",
+  "client_paths_scope": "all",
+  "observations": {
+    "gates.json": {
+      "passed": true,
+      "source": {
+        "cmd/residential-routing-acceptance/main.go": "2cffdde157a5510e16b5d5422c8617417822dd7999cbfde6c004b8a14bc7e5e3",
+        "docs/development-jobs/residential-path-repair-20261009.json": "5f5f86859c760abbf1609ee7d329b8714bb547557cc3dd6cf94249f39c8a6ed2",
+        "internal/panels/residentialsync/allowlist.go": "ed650f35feb6281c094c1fe93b9b088b631138eeb321549794a8967c226b8786",
+        "internal/panels/residentialsync/allowlist_core_test.go": "2534366ed1ab18cf03d5da0379b10418ffdc4a4fdf0560fe8a0389221ed9f44e",
+        "internal/panels/residentialsync/allowlist_doh_test.go": "bb0473ed15bcedba02f6d5bb04fbf6911e172e50fc3d799a0e1b79648105f726",
+        "internal/panels/residentialsync/allowlist_test.go": "17be30ef750b3eb749b3aabd63516f5717409cd1947a96283b9fb5d5b5f854b7",
+        "internal/panels/residentialsync/execute.go": "449f49252df953502658af77562386083190413e4c891d0b0d526f6882bf3b88",
+        "internal/panels/residentialsync/path_core_test.go": "baf65b232f8ecc70c9fd7334c1c54b056a04446cf901bf808ddbf0391f5aaebd",
+        "internal/panels/residentialsync/path_policy_test.go": "07fc1d85107fbd675784fe514e79366838829a50f494f844bf37281564630462",
+        "internal/panels/residentialsync/path_rollback_test.go": "d9121422e077f8903763148ca851171172ab90138d4813f9533bd2a96b250a7b",
+        "internal/panels/residentialsync/plan.go": "af65f34c9b17bfef636c7ae367dffd4c7b0d785cefdebf7810f20fdb1224a93a",
+        "internal/panels/residentialsync/pool.go": "525380daa3b407aa72c311c8519d2906bfb7f56f5603b21e5e3367f2e4a1869c",
+        "internal/panels/residentialsync/service.go": "596c2bdd52a1820a6fdb145a85e2bbeda10bc13ab5a88be10bcae41f6f2b5fb3",
+        "internal/panels/residentialsync/testdata/client_paths_legacy_435486a.json": "af5661e863c5085a94bc59d27e64639bc8c3017157342a4d998383877fdc9277"
+      },
+      "at": "2026-10-09T06:16:22.206304+00:00",
+      "baseline": "464028aa60148400c1c730f8409b6f51204f5b34",
+      "gates": [
+        "full-go-final",
+        "race-final",
+        "core-target-final",
+        "core-installed-final",
+        "rollback-final",
+        "vet-final",
+        "rollback-rehearsal"
+      ]
+    },
+    "review.json": {
+      "source": {
+        "cmd/residential-routing-acceptance/main.go": "2cffdde157a5510e16b5d5422c8617417822dd7999cbfde6c004b8a14bc7e5e3",
+        "docs/development-jobs/residential-path-repair-20261009.json": "5f5f86859c760abbf1609ee7d329b8714bb547557cc3dd6cf94249f39c8a6ed2",
+        "internal/panels/residentialsync/allowlist.go": "ed650f35feb6281c094c1fe93b9b088b631138eeb321549794a8967c226b8786",
+        "internal/panels/residentialsync/allowlist_core_test.go": "2534366ed1ab18cf03d5da0379b10418ffdc4a4fdf0560fe8a0389221ed9f44e",
+        "internal/panels/residentialsync/allowlist_doh_test.go": "bb0473ed15bcedba02f6d5bb04fbf6911e172e50fc3d799a0e1b79648105f726",
+        "internal/panels/residentialsync/allowlist_test.go": "17be30ef750b3eb749b3aabd63516f5717409cd1947a96283b9fb5d5b5f854b7",
+        "internal/panels/residentialsync/execute.go": "449f49252df953502658af77562386083190413e4c891d0b0d526f6882bf3b88",
+        "internal/panels/residentialsync/path_core_test.go": "baf65b232f8ecc70c9fd7334c1c54b056a04446cf901bf808ddbf0391f5aaebd",
+        "internal/panels/residentialsync/path_policy_test.go": "07fc1d85107fbd675784fe514e79366838829a50f494f844bf37281564630462",
+        "internal/panels/residentialsync/path_rollback_test.go": "d9121422e077f8903763148ca851171172ab90138d4813f9533bd2a96b250a7b",
+        "internal/panels/residentialsync/plan.go": "af65f34c9b17bfef636c7ae367dffd4c7b0d785cefdebf7810f20fdb1224a93a",
+        "internal/panels/residentialsync/pool.go": "525380daa3b407aa72c311c8519d2906bfb7f56f5603b21e5e3367f2e4a1869c",
+        "internal/panels/residentialsync/service.go": "596c2bdd52a1820a6fdb145a85e2bbeda10bc13ab5a88be10bcae41f6f2b5fb3",
+        "internal/panels/residentialsync/testdata/client_paths_legacy_435486a.json": "af5661e863c5085a94bc59d27e64639bc8c3017157342a4d998383877fdc9277"
+      },
+      "response_id": "resp_06e33a929a4377eb006ac886b6dbf887d19a3941d08bfeb20a",
+      "verdict": {
+        "decision": "PASS",
+        "blockers": [],
+        "limitations": [
+          "No production canary, fleet deployment, post-deployment native API result, real VLESS traffic result, tunneled-DNS observation, or public egress-IP proof is provided; these remain release gates.",
+          "The supplied real-core logs do not identify binary versions or hashes, so execution specifically on both 26.3.27 and 26.9.9 is not independently proven by the logs.",
+          "HTTP/TLS and DNS core tests use isolated fixtures and redirected outbounds; they prove routing behavior but not reachability of the real probe, Cloudflare DoH, Ads, BrowserLeaks, or resolver services.",
+          "The newly authenticated but inventory-unknown user behavior is covered by synthetic route-policy testing, while the real-core test only checks configured valid identities and an invalid UUID; actual core authentication plus bounded default routing for a valid inventory-unknown identity is not directly demonstrated.",
+          "The additional upstream cause of the previously observed Ads/BrowserLeaks failures remains unresolved, and this change does not prove those external failures are fixed."
+        ]
+      }
+    },
+    "plan-final.json": {
+      "response_id": "resp_0d14cdae71840412006ac8828f65ec87d19cb8651c0892abcf",
+      "verdict": {
+        "decision": "PASS",
+        "blockers": [],
+        "required_gates": [
+          "Review generated rules to confirm exact probe/DoH host and port bounds, approved resolver-IP port-53 bounds, residential-only protected domains, unchanged unrestricted DIRECT identities, unknown-inlet denial, pool-loopback denial, and no unrestricted DIRECT escalation for newly authenticated users on validated VLESS/VMess inlets.",
+          "Execute compatibility and real-core regressions on 26.3.27 and 26.9.9, retaining nonIPQuery=drop unless reject is proven compatible; verify no external query for rejected query types.",
+          "Complete real TCP/UDP DNS-outbound and loopback-dummy DoH tests; probe success during residential outage with direct-egress proof; Ads/BrowserLeaks residential-egress tests with zero direct fallback during outage; and negative suffix, port, transport, opaque-IP, unknown-inlet, invalid-authentication, overlap, private-destination, and no-new-residential-UDP tests.",
+          "Complete actual before/after traffic tests using independent DIRECT controls and a DNS-requiring mobile-like client without claiming physical Android coverage.",
+          "Complete source review, bounded native verification, race/regression testing, provenance verification without fake READY, production canary, fleet application through the normal Sanaei API/controller, and pinned rollback rehearsal to 435486a7369965366852f48e7514efe7d6a41293 before release."
+        ]
+      }
+    },
+    "core-provenance.json": {
+      "installed26.3.27": {
+        "path": "/usr/local/bin/xray",
+        "sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed",
+        "version": "Xray 26.3.27 (Xray, Penetrates Everything.) d2758a0 (go1.26.1 linux/amd64)"
+      },
+      "target26.9.9": {
+        "path": "/root/backups/dob-residential-allowlist-20261008/xray-v26.9.9",
+        "sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+        "version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)"
+      }
+    },
+    "rollback-rehearsal.json": {
+      "passed": true,
+      "target_runtime": "435486a7369965366852f48e7514efe7d6a41293",
+      "verified_files": 352,
+      "scope": "Real restore function on isolated current-runtime copies; no live service rollback"
+    },
+    "deployment.json": {
+      "at": "2026-10-09T06:17:54.485899+00:00",
+      "commit": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+      "backup": "/opt/digital-ocean-bot.rollback.g3hz0bnW",
+      "scope": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "208634",
+          "NRestarts": "0",
+          "sha256": "ee310ae09dfd412da53865fe500049bb25cca87df8f371e2a0807d76b6b339a1"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "208636",
+          "NRestarts": "0",
+          "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "208635",
+          "NRestarts": "0",
+          "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T06:17:54.568565015Z"
+      }
+    },
+    "promotion.json": {
+      "at": "2026-10-09T06:20:01.598091+00:00",
+      "scope": "all",
+      "canary_native_checks": 106,
+      "canary_traffic_checks": 22,
+      "runtime": "65f89e432b906fc684b2f84dc2cf07dded2cd66b"
+    },
+    "fleet-first.json": {
+      "started_at": "2026-10-09T06:20:33.892482+00:00",
+      "at": "2026-10-09T06:21:58.042210+00:00",
+      "passed": false,
+      "panels": 29,
+      "results": [
+        {
+          "panel": "142cb7c3-35e8-41ab-8722-967c50ee6aa8",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:20.80307+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=142cb7c3-35e8-41ab-8722-967c50ee6aa8 reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:34Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "1b7ecfa6-77f0-4667-abcf-c2d0d0849b2b",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLYING",
+          "last_verified_at_start": "2026-10-09T06:19:47.752705+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=1b7ecfa6-77f0-4667-abcf-c2d0d0849b2b reason=pq: canceling statement due to statement timeout (57014)\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:43Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "285d7526-07d9-4f76-9322-ce9917c0ff94",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:56.060109+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=285d7526-07d9-4f76-9322-ce9917c0ff94 reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:44Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "2a1913ee-b107-4cd6-805c-eb3a4091a530",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:13.636659+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=2a1913ee-b107-4cd6-805c-eb3a4091a530 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:20:45Z\n"
+        },
+        {
+          "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:23.248194+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=31b99fce-7119-4c9a-9657-362fd7c16f15 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:20:47Z\n"
+        },
+        {
+          "panel": "3d48690f-409e-458b-9e5f-2efd456abe90",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "FAILED",
+          "last_verified_at_start": "2026-10-09T06:19:10.091075+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=3d48690f-409e-458b-9e5f-2efd456abe90 reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:49Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "458a3c3b-04a2-4cbb-b7d7-b238d606bafb",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "FAILED",
+          "last_verified_at_start": "2026-10-09T06:19:24.004224+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=458a3c3b-04a2-4cbb-b7d7-b238d606bafb reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:50Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "01e2807d-0270-4f6a-9e64-53751e041701",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:28.633388+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=01e2807d-0270-4f6a-9e64-53751e041701 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:20:52Z\n"
+        },
+        {
+          "panel": "638f7b18-5563-4fab-89ec-acc7856ddeb9",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:39.553622+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=638f7b18-5563-4fab-89ec-acc7856ddeb9 reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:20:52Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "542d8456-86a7-4f2a-b57c-eacbdc1141e1",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:14.989484+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=542d8456-86a7-4f2a-b57c-eacbdc1141e1 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:08Z\n"
+        },
+        {
+          "panel": "1ba34932-efcd-49af-914d-07d86227f39a",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:16.951653+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=1ba34932-efcd-49af-914d-07d86227f39a route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:08Z\n"
+        },
+        {
+          "panel": "6b70e476-09c2-46f1-ac17-a8405b1040cc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:20.926495+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=6b70e476-09c2-46f1-ac17-a8405b1040cc route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:08Z\n"
+        },
+        {
+          "panel": "71189d01-b247-4305-94ea-455fcfe30458",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:33.586982+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=71189d01-b247-4305-94ea-455fcfe30458 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:10Z\n"
+        },
+        {
+          "panel": "79bee1e2-e174-48a3-90ea-71aa2e44a8c4",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:18.571068+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=79bee1e2-e174-48a3-90ea-71aa2e44a8c4 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:10Z\n"
+        },
+        {
+          "panel": "79d34707-126d-4563-b9ef-de6f52f0dace",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:13.232728+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=79d34707-126d-4563-b9ef-de6f52f0dace route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:10Z\n"
+        },
+        {
+          "panel": "7c23fae0-c68c-480f-b18b-5533f76704dc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:22.022909+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=7c23fae0-c68c-480f-b18b-5533f76704dc route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:11Z\n"
+        },
+        {
+          "panel": "9051e713-5c94-4fdb-ba2c-1a2453af9efb",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:22.58401+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=9051e713-5c94-4fdb-ba2c-1a2453af9efb route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:12Z\n"
+        },
+        {
+          "panel": "9ba047fd-fd96-4a6c-b04c-42d5cc81b940",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:26.619307+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=9ba047fd-fd96-4a6c-b04c-42d5cc81b940 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:14Z\n"
+        },
+        {
+          "panel": "7ffe17a9-fcb4-4865-8cc1-95f303b10fea",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:32.758875+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=7ffe17a9-fcb4-4865-8cc1-95f303b10fea route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:29Z\n"
+        },
+        {
+          "panel": "b1bad553-7777-4c7a-8035-fa0b9aae578b",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:37.589659+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=b1bad553-7777-4c7a-8035-fa0b9aae578b reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:21:29Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "99b9b7ed-d836-452b-9304-b952a1def0b2",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:28.408803+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=99b9b7ed-d836-452b-9304-b952a1def0b2 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:29Z\n"
+        },
+        {
+          "panel": "a4b5850f-db5b-4edf-9e31-0fa6e46ecbf1",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLYING",
+          "last_verified_at_start": "2026-10-09T06:19:55.790372+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=a4b5850f-db5b-4edf-9e31-0fa6e46ecbf1 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:32Z\n"
+        },
+        {
+          "panel": "b5235aa1-7ff6-4096-a64c-cfe7abd0a641",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:19.769224+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b5235aa1-7ff6-4096-a64c-cfe7abd0a641 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:35Z\n"
+        },
+        {
+          "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:59.468659+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=ca839a3a-d181-4e01-bd97-77da6533f399 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:37Z\n"
+        },
+        {
+          "panel": "ccd054f6-78f4-4fe1-ad7a-1cba49c6e52d",
+          "passed": false,
+          "exit": 1,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:19:35.674073+00:00",
+          "summary": "ADS_UDP_DNS_PENDING panel=ccd054f6-78f4-4fe1-ad7a-1cba49c6e52d reason=class route unavailable\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=0 pending=1 at=2026-10-09T06:21:38Z\nsome serving panels not yet verified\n"
+        },
+        {
+          "panel": "e1cd28f4-b2a0-4bd2-aed4-aadb0ddac9bc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:31.992847+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=e1cd28f4-b2a0-4bd2-aed4-aadb0ddac9bc route_proofs=78\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:40Z\n"
+        },
+        {
+          "panel": "f2bea24d-9802-4f7d-ae99-6fdea6140ce6",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:30.52278+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=f2bea24d-9802-4f7d-ae99-6fdea6140ce6 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:42Z\n"
+        },
+        {
+          "panel": "b220e33e-71ac-4cad-acac-685f8731a281",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:32.636295+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b220e33e-71ac-4cad-acac-685f8731a281 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:47Z\n"
+        },
+        {
+          "panel": "b51c46df-8ac6-4fa0-bba1-2e4a4c2ea012",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:20:19.788701+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b51c46df-8ac6-4fa0-bba1-2e4a4c2ea012 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:21:58Z\n"
+        }
+      ],
+      "scope": "serving cohort at start; API native route validation with paired class evidence; no SSH"
+    },
+    "fleet-final.json": {
+      "started_at": "2026-10-09T06:22:48.693960+00:00",
+      "at": "2026-10-09T06:24:52.025241+00:00",
+      "passed": true,
+      "panels": 29,
+      "results": [
+        {
+          "panel": "142cb7c3-35e8-41ab-8722-967c50ee6aa8",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:29.914438+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=142cb7c3-35e8-41ab-8722-967c50ee6aa8 route_proofs=78\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:22:51Z\n"
+        },
+        {
+          "panel": "01e2807d-0270-4f6a-9e64-53751e041701",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:30.433715+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=01e2807d-0270-4f6a-9e64-53751e041701 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:06Z\n"
+        },
+        {
+          "panel": "1b7ecfa6-77f0-4667-abcf-c2d0d0849b2b",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:44.496207+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=1b7ecfa6-77f0-4667-abcf-c2d0d0849b2b route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:20Z\n"
+        },
+        {
+          "panel": "2a1913ee-b107-4cd6-805c-eb3a4091a530",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:20.560247+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=2a1913ee-b107-4cd6-805c-eb3a4091a530 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:20Z\n"
+        },
+        {
+          "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:44.804465+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=31b99fce-7119-4c9a-9657-362fd7c16f15 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:22Z\n"
+        },
+        {
+          "panel": "1ba34932-efcd-49af-914d-07d86227f39a",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:42.671474+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=1ba34932-efcd-49af-914d-07d86227f39a route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:22Z\n"
+        },
+        {
+          "panel": "285d7526-07d9-4f76-9322-ce9917c0ff94",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:21:56.471839+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=285d7526-07d9-4f76-9322-ce9917c0ff94 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:24Z\n"
+        },
+        {
+          "panel": "542d8456-86a7-4f2a-b57c-eacbdc1141e1",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:18.224877+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=542d8456-86a7-4f2a-b57c-eacbdc1141e1 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:42Z\n"
+        },
+        {
+          "panel": "638f7b18-5563-4fab-89ec-acc7856ddeb9",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:44.706633+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=638f7b18-5563-4fab-89ec-acc7856ddeb9 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:44Z\n"
+        },
+        {
+          "panel": "3d48690f-409e-458b-9e5f-2efd456abe90",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:09.381443+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=3d48690f-409e-458b-9e5f-2efd456abe90 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:47Z\n"
+        },
+        {
+          "panel": "71189d01-b247-4305-94ea-455fcfe30458",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:48.060239+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=71189d01-b247-4305-94ea-455fcfe30458 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:49Z\n"
+        },
+        {
+          "panel": "79bee1e2-e174-48a3-90ea-71aa2e44a8c4",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:20.792324+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=79bee1e2-e174-48a3-90ea-71aa2e44a8c4 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:50Z\n"
+        },
+        {
+          "panel": "79d34707-126d-4563-b9ef-de6f52f0dace",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:37.503597+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=79d34707-126d-4563-b9ef-de6f52f0dace route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:52Z\n"
+        },
+        {
+          "panel": "7c23fae0-c68c-480f-b18b-5533f76704dc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:41.868001+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=7c23fae0-c68c-480f-b18b-5533f76704dc route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:23:53Z\n"
+        },
+        {
+          "panel": "458a3c3b-04a2-4cbb-b7d7-b238d606bafb",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:48.488251+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=458a3c3b-04a2-4cbb-b7d7-b238d606bafb route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:00Z\n"
+        },
+        {
+          "panel": "9051e713-5c94-4fdb-ba2c-1a2453af9efb",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:42.756281+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=9051e713-5c94-4fdb-ba2c-1a2453af9efb route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:01Z\n"
+        },
+        {
+          "panel": "6b70e476-09c2-46f1-ac17-a8405b1040cc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:46.576789+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=6b70e476-09c2-46f1-ac17-a8405b1040cc route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:02Z\n"
+        },
+        {
+          "panel": "9ba047fd-fd96-4a6c-b04c-42d5cc81b940",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:14.241722+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=9ba047fd-fd96-4a6c-b04c-42d5cc81b940 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:05Z\n"
+        },
+        {
+          "panel": "7ffe17a9-fcb4-4865-8cc1-95f303b10fea",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:18.541292+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=7ffe17a9-fcb4-4865-8cc1-95f303b10fea route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:13Z\n"
+        },
+        {
+          "panel": "b1bad553-7777-4c7a-8035-fa0b9aae578b",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:41.100583+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b1bad553-7777-4c7a-8035-fa0b9aae578b route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:14Z\n"
+        },
+        {
+          "panel": "a4b5850f-db5b-4edf-9e31-0fa6e46ecbf1",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:26.805414+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=a4b5850f-db5b-4edf-9e31-0fa6e46ecbf1 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:23Z\n"
+        },
+        {
+          "panel": "99b9b7ed-d836-452b-9304-b952a1def0b2",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:37.723708+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=99b9b7ed-d836-452b-9304-b952a1def0b2 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:26Z\n"
+        },
+        {
+          "panel": "b220e33e-71ac-4cad-acac-685f8731a281",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:25.392761+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b220e33e-71ac-4cad-acac-685f8731a281 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:33Z\n"
+        },
+        {
+          "panel": "b5235aa1-7ff6-4096-a64c-cfe7abd0a641",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:22.561974+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b5235aa1-7ff6-4096-a64c-cfe7abd0a641 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:34Z\n"
+        },
+        {
+          "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:27.591776+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=ca839a3a-d181-4e01-bd97-77da6533f399 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:34Z\n"
+        },
+        {
+          "panel": "e1cd28f4-b2a0-4bd2-aed4-aadb0ddac9bc",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:19.301861+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=e1cd28f4-b2a0-4bd2-aed4-aadb0ddac9bc route_proofs=78\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:37Z\n"
+        },
+        {
+          "panel": "f2bea24d-9802-4f7d-ae99-6fdea6140ce6",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:46.452188+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=f2bea24d-9802-4f7d-ae99-6fdea6140ce6 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:38Z\n"
+        },
+        {
+          "panel": "b51c46df-8ac6-4fa0-bba1-2e4a4c2ea012",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:40.822009+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=b51c46df-8ac6-4fa0-bba1-2e4a4c2ea012 route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:50Z\n"
+        },
+        {
+          "panel": "ccd054f6-78f4-4fe1-ad7a-1cba49c6e52d",
+          "passed": true,
+          "exit": 0,
+          "state_at_start": "APPLIED",
+          "last_verified_at_start": "2026-10-09T06:22:44.804241+00:00",
+          "summary": "ADS_UDP_DNS_PASS panel=ccd054f6-78f4-4fe1-ad7a-1cba49c6e52d route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:24:52Z\n"
+        }
+      ],
+      "scope": "serving cohort at start; API native route validation with paired class evidence; no SSH"
+    },
+    "final-snapshot.json": {
+      "at": "2026-10-09T06:29:31.980774+00:00",
+      "cohort": [
+        {
+          "panel": "01e2807d-0270-4f6a-9e64-53751e041701",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:51:53.192895+00:00",
+          "verified_at": "2026-10-09T06:28:20.396913+00:00",
+          "pool_enabled": true,
+          "healthy_count": 10,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "142cb7c3-35e8-41ab-8722-967c50ee6aa8",
+          "state": "APPLIED",
+          "provider": "upcloud",
+          "expires_at": "2026-10-09T06:50:42.100698+00:00",
+          "verified_at": "2026-10-09T06:28:55.866607+00:00",
+          "pool_enabled": true,
+          "healthy_count": 0,
+          "blocked_clients": 3,
+          "configured_count": 12,
+          "residential_clients": 0
+        },
+        {
+          "panel": "1b7ecfa6-77f0-4667-abcf-c2d0d0849b2b",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:21:32.802265+00:00",
+          "verified_at": "2026-10-09T06:28:34.876809+00:00",
+          "pool_enabled": true,
+          "healthy_count": 10,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "1ba34932-efcd-49af-914d-07d86227f39a",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T08:24:27.452185+00:00",
+          "verified_at": "2026-10-09T06:29:13.117867+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "285d7526-07d9-4f76-9322-ce9917c0ff94",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T11:45:42.51484+00:00",
+          "verified_at": "2026-10-09T06:28:43.434493+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "2a1913ee-b107-4cd6-805c-eb3a4091a530",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:17:34.567628+00:00",
+          "verified_at": "2026-10-09T06:28:43.775087+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T12:45:34.977344+00:00",
+          "verified_at": "2026-10-09T06:28:44.787545+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "3d48690f-409e-458b-9e5f-2efd456abe90",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T06:55:47.383059+00:00",
+          "verified_at": "2026-10-09T06:28:54.905967+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "458a3c3b-04a2-4cbb-b7d7-b238d606bafb",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:59:03.950648+00:00",
+          "verified_at": "2026-10-09T06:29:12.775621+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "542d8456-86a7-4f2a-b57c-eacbdc1141e1",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:42:04.346359+00:00",
+          "verified_at": "2026-10-09T06:29:02.623912+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "610b3e6b-a79f-4cf9-8d5c-9975e19966df",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:26:01.631816+00:00",
+          "verified_at": "2026-10-09T06:28:52.061714+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "638f7b18-5563-4fab-89ec-acc7856ddeb9",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T08:33:54.201486+00:00",
+          "verified_at": "2026-10-09T06:28:50.883369+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "6b70e476-09c2-46f1-ac17-a8405b1040cc",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:15:37.895502+00:00",
+          "verified_at": "2026-10-09T06:29:13.054544+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "71189d01-b247-4305-94ea-455fcfe30458",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T10:34:21.055549+00:00",
+          "verified_at": "2026-10-09T06:28:54.823575+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "79bee1e2-e174-48a3-90ea-71aa2e44a8c4",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:58:17.774622+00:00",
+          "verified_at": "2026-10-09T06:29:06.380093+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "79d34707-126d-4563-b9ef-de6f52f0dace",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T08:00:32.070409+00:00",
+          "verified_at": "2026-10-09T06:28:58.577768+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "7c23fae0-c68c-480f-b18b-5533f76704dc",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T06:31:11.832862+00:00",
+          "verified_at": "2026-10-09T06:28:45.531002+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "9051e713-5c94-4fdb-ba2c-1a2453af9efb",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T09:37:38.339955+00:00",
+          "verified_at": "2026-10-09T06:28:50.691957+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "90f84e93-5b3b-4fab-9745-5289ed12efef",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T08:27:58.411733+00:00",
+          "verified_at": "2026-10-09T06:28:56.431203+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "99b9b7ed-d836-452b-9304-b952a1def0b2",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T08:10:28.05287+00:00",
+          "verified_at": "2026-10-09T06:29:04.668347+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "9ba047fd-fd96-4a6c-b04c-42d5cc81b940",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:59:52.866048+00:00",
+          "verified_at": "2026-10-09T06:28:39.041303+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "a4b5850f-db5b-4edf-9e31-0fa6e46ecbf1",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T08:45:04.682313+00:00",
+          "verified_at": "2026-10-09T06:28:52.624173+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "b1bad553-7777-4c7a-8035-fa0b9aae578b",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T09:01:50.827374+00:00",
+          "verified_at": "2026-10-09T06:29:00.159088+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "b220e33e-71ac-4cad-acac-685f8731a281",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:35:23.889166+00:00",
+          "verified_at": "2026-10-09T06:28:59.572993+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "b51c46df-8ac6-4fa0-bba1-2e4a4c2ea012",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T08:24:10.855318+00:00",
+          "verified_at": "2026-10-09T06:28:49.379283+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "b5235aa1-7ff6-4096-a64c-cfe7abd0a641",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T06:51:26.832795+00:00",
+          "verified_at": "2026-10-09T06:28:10.01119+00:00",
+          "pool_enabled": true,
+          "healthy_count": 10,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T07:31:09.606514+00:00",
+          "verified_at": "2026-10-09T06:28:54.399801+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "ccd054f6-78f4-4fe1-ad7a-1cba49c6e52d",
+          "state": "APPLIED",
+          "provider": "vultr",
+          "expires_at": "2026-10-09T10:46:39.464206+00:00",
+          "verified_at": "2026-10-09T06:28:51.792577+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        },
+        {
+          "panel": "e1cd28f4-b2a0-4bd2-aed4-aadb0ddac9bc",
+          "state": "APPLIED",
+          "provider": "upcloud",
+          "expires_at": "2026-10-09T06:44:44.295085+00:00",
+          "verified_at": "2026-10-09T06:28:41.39462+00:00",
+          "pool_enabled": true,
+          "healthy_count": 0,
+          "blocked_clients": 3,
+          "configured_count": 12,
+          "residential_clients": 0
+        },
+        {
+          "panel": "f2bea24d-9802-4f7d-ae99-6fdea6140ce6",
+          "state": "APPLIED",
+          "provider": "digitalocean",
+          "expires_at": "2026-10-09T07:24:42.058852+00:00",
+          "verified_at": "2026-10-09T06:28:53.621512+00:00",
+          "pool_enabled": true,
+          "healthy_count": 11,
+          "blocked_clients": 0,
+          "configured_count": 12,
+          "residential_clients": 3
+        }
+      ],
+      "native_verified_panels": 30,
+      "new_native_checks": [
+        {
+          "panel": "610b3e6b-a79f-4cf9-8d5c-9975e19966df",
+          "passed": true,
+          "summary": "ADS_UDP_DNS_PASS panel=610b3e6b-a79f-4cf9-8d5c-9975e19966df route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:29:30Z\n"
+        },
+        {
+          "panel": "90f84e93-5b3b-4fab-9745-5289ed12efef",
+          "passed": true,
+          "summary": "ADS_UDP_DNS_PASS panel=90f84e93-5b3b-4fab-9745-5289ed12efef route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T06:29:31Z\n"
+        }
+      ],
+      "guardian": {
+        "enabled": false,
+        "scope": "fleet",
+        "revision": 31
+      },
+      "residential_proxy_health": [
+        {
+          "count": 1,
+          "status": "down"
+        },
+        {
+          "count": 11,
+          "status": "healthy"
+        }
+      ],
+      "manifest": {
+        "commit": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+        "build_time": "2026-10-09T06:17:33Z",
+        "api_sha256": "ee310ae09dfd412da53865fe500049bb25cca87df8f371e2a0807d76b6b339a1",
+        "worker_sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362",
+        "guardian_sha256": {
+          "amd64": "5de2434cd69f3fdd19f79f13f84846c3dcbe63aa2033487e8a1775b4f01df33c",
+          "arm64": "7ad922ec96d9d8a5851fa6a8f702a9daff5a6054a6c19eaacddf5316756a6fb7"
+        }
+      },
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "208634",
+          "NRestarts": "0",
+          "sha256": "ee310ae09dfd412da53865fe500049bb25cca87df8f371e2a0807d76b6b339a1",
+          "manifest_matches": true
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "208636",
+          "NRestarts": "0",
+          "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362",
+          "manifest_matches": true
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "212098",
+          "NRestarts": "0",
+          "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362",
+          "manifest_matches": true
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T06:29:32.066869731Z"
+      },
+      "native_all_verified": true,
+      "strict_scope": "all",
+      "client_paths_scope": "all"
+    },
+    "traffic-before.json": {
+      "at": "2026-10-09T05:53:38.234371+00:00",
+      "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+      "passed": false,
+      "cases": [
+        {
+          "core": "target26.9.9",
+          "class": "DIRECT",
+          "case": "direct-positive",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002687,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "DIRECT",
+          "case": "direct-browserleaks",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002036,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-www",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002412,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-connectivity",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002752,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-fallback-google",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.003064,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "client-default-doh",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002616,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "browserleaks",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.003008,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "ads-category",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.002454,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "non-allowed",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 10.002104,
+          "curl_code": 28,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "raw-ip",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 10.002426,
+          "curl_code": 28,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "arbitrary-doh",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 10.002346,
+          "curl_code": 28,
+          "passed": true
+        }
+      ],
+      "credential_snapshot_pinned": true,
+      "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof"
+    },
+    "traffic-second-before.json": {
+      "at": "2026-10-09T05:54:07.659898+00:00",
+      "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "passed": false,
+      "cases": [
+        {
+          "core": "target26.9.9",
+          "class": "DIRECT",
+          "case": "direct-positive",
+          "expected_allowed": true,
+          "http_status": "200",
+          "duration_seconds": 0.073087,
+          "curl_code": 0,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "DIRECT",
+          "case": "direct-browserleaks",
+          "expected_allowed": true,
+          "http_status": "200",
+          "duration_seconds": 0.33762,
+          "curl_code": 0,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-www",
+          "expected_allowed": true,
+          "http_status": "204",
+          "duration_seconds": 4.967976,
+          "curl_code": 0,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-connectivity",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 10.00276,
+          "curl_code": 28,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "probe-fallback-google",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 2.95253,
+          "curl_code": 35,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "client-default-doh",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 1.778636,
+          "curl_code": 35,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "browserleaks",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 0.472715,
+          "curl_code": 35,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "ads-category",
+          "expected_allowed": true,
+          "http_status": "000",
+          "duration_seconds": 0.173396,
+          "curl_code": 35,
+          "passed": false
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "non-allowed",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 0.093208,
+          "curl_code": 35,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "raw-ip",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 0.048766,
+          "curl_code": 35,
+          "passed": true
+        },
+        {
+          "core": "target26.9.9",
+          "class": "RESIDENTIAL",
+          "case": "arbitrary-doh",
+          "expected_allowed": false,
+          "http_status": "000",
+          "duration_seconds": 0.656304,
+          "curl_code": 35,
+          "passed": true
+        }
+      ],
+      "credential_snapshot_pinned": true,
+      "scope": "control-host origin, real existing VLESS/Reality credentials; not mobile/ISP proof"
+    },
+    "traffic-canary.json": {
+      "at": "2026-10-09T06:18:45.955614+00:00",
+      "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "passed": false,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 5.167,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": false,
+          "http_status": 200,
+          "seconds": 0.376,
+          "curl_code": 0,
+          "egress_sha256": null
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.098,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.097,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.108,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 4.51,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 0.985,
+          "curl_code": 0
+        },
+        {
+          "case": "non-allowed",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.048,
+          "curl_code": 35
+        },
+        {
+          "case": "raw-ip",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.049,
+          "curl_code": 35
+        },
+        {
+          "case": "arbitrary-doh",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.053,
+          "curl_code": 35
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 200,
+          "seconds": 7.194,
+          "curl_code": 0,
+          "egress_sha256": null
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.04
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.037
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.047
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.049
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 0.039
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 5.004
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.073
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.634,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.068
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 2.195,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": false
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-canary-final.json": {
+      "at": "2026-10-09T06:19:20.435674+00:00",
+      "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "passed": true,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.068,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.378,
+          "curl_code": 0,
+          "egress_sha256": "132852f7ab066fb7f65150556262ece891c9006c40838317b2329eaee32d6b99"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.064,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.068,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.068,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.139,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 2.254,
+          "curl_code": 0
+        },
+        {
+          "case": "non-allowed",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.049,
+          "curl_code": 35
+        },
+        {
+          "case": "raw-ip",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.049,
+          "curl_code": 35
+        },
+        {
+          "case": "arbitrary-doh",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.046,
+          "curl_code": 35
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 3.22,
+          "curl_code": 0,
+          "egress_sha256": "52f23ae8b1f68cb043704a03ec5c1513341f462f83a7705ccb5b0209867dca68"
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.04
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.036
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.039
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.04
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 0.035
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.093
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.156,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.081
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 1.365,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": true
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-vultr-second.json": {
+      "at": "2026-10-09T06:21:55.035232+00:00",
+      "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+      "passed": false,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.141,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.43,
+          "curl_code": 0,
+          "egress_sha256": "13346c9c63048556fda1469235221288ff87636179027734f5fc56a0dc421b0e"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.91,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.078,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.072,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.136,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 1.184,
+          "curl_code": 0
+        },
+        {
+          "case": "non-allowed",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.047,
+          "curl_code": 35
+        },
+        {
+          "case": "raw-ip",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.05,
+          "curl_code": 35
+        },
+        {
+          "case": "arbitrary-doh",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.045,
+          "curl_code": 35
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.012,
+          "curl_code": 28,
+          "egress_sha256": null
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.044
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.05
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.034
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.062
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 0.072
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.083
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 3.126,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.104
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 0.957,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": false
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-vultr-recovery.json": {
+      "at": "2026-10-09T06:23:58.791054+00:00",
+      "panel": "31b99fce-7119-4c9a-9657-362fd7c16f15",
+      "passed": true,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.079,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.352,
+          "curl_code": 0,
+          "egress_sha256": "13346c9c63048556fda1469235221288ff87636179027734f5fc56a0dc421b0e"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.899,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.067,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.071,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.186,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 1.336,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.593,
+          "curl_code": 0,
+          "egress_sha256": "6405ffd705aa33affbba48dbbe599f2ad17cce7ef816e115ef2bbaa8c50fcac7"
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.087
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.656,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.069
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 1.155,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": true
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-digitalocean.json": {
+      "at": "2026-10-09T06:22:05.500123+00:00",
+      "panel": "71189d01-b247-4305-94ea-455fcfe30458",
+      "passed": false,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.09,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.404,
+          "curl_code": 0,
+          "egress_sha256": "eb64c073e1ee2b53cff078e119f241f9f675950090a8e2d62870b171ae2c4f93"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.061,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.059,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.062,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.212,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 2.301,
+          "curl_code": 0
+        },
+        {
+          "case": "non-allowed",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.037,
+          "curl_code": 35
+        },
+        {
+          "case": "raw-ip",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.042,
+          "curl_code": 35
+        },
+        {
+          "case": "arbitrary-doh",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.044,
+          "curl_code": 35
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.126,
+          "curl_code": 0,
+          "egress_sha256": "13056d312940fd850cb784a14ada3e1b95e1b523162c09a048ceb3efebd8d350"
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.036
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.026
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.032
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 1,
+          "seconds": 0.033
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 0.032
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.07
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 3.136,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.063
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 0.763,
+          "curl_code": 35
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": true
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-do-recovery.json": {
+      "at": "2026-10-09T06:24:13.775561+00:00",
+      "panel": "71189d01-b247-4305-94ea-455fcfe30458",
+      "passed": false,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.074,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.389,
+          "curl_code": 0,
+          "egress_sha256": "eb64c073e1ee2b53cff078e119f241f9f675950090a8e2d62870b171ae2c4f93"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.057,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.053,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.065,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 1.178,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.02,
+          "curl_code": 28
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 3.248,
+          "curl_code": 0,
+          "egress_sha256": "847f482af5fc86f476f6c60d75a1315c664b489a8dce0c2a33a0d4ad98bb40e2"
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.06
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 6.116,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.063
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 6.214,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": true
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-upcloud.json": {
+      "at": "2026-10-09T06:24:10.614091+00:00",
+      "panel": "142cb7c3-35e8-41ab-8722-967c50ee6aa8",
+      "passed": false,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.015,
+          "curl_code": 28
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.013,
+          "curl_code": 28,
+          "egress_sha256": null
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.017,
+          "curl_code": 28
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.02,
+          "curl_code": 28
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 8.021,
+          "curl_code": 28
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 0.09,
+          "curl_code": 35
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 0.092,
+          "curl_code": 35
+        },
+        {
+          "case": "non-allowed",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.093,
+          "curl_code": 35
+        },
+        {
+          "case": "raw-ip",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.095,
+          "curl_code": 35
+        },
+        {
+          "case": "arbitrary-doh",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 0,
+          "seconds": 0.09,
+          "curl_code": 35
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "seconds": 0.084,
+          "curl_code": 35,
+          "egress_sha256": null
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-tcp",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "tunnel-dns-1.1.1.1-udp",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-tcp",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "answer_count": 0,
+          "seconds": 5.007
+        },
+        {
+          "case": "tunnel-dns-8.8.8.8-udp",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "answer_count": 0,
+          "seconds": 5.005
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-tcp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 0.078
+        },
+        {
+          "case": "tunnel-dns-9.9.9.9-udp",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "answer_count": 0,
+          "seconds": 5.0
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "answer_count": 0,
+          "seconds": 8.015
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "reason": "DNS prerequisite unavailable"
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "http_status": 0,
+          "answer_count": 0,
+          "seconds": 8.014
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": false,
+          "reason": "DNS prerequisite unavailable"
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": false
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "traffic-stability-final.json": {
+      "at": "2026-10-09T06:28:39.634253+00:00",
+      "panel": "ca839a3a-d181-4e01-bd97-77da6533f399",
+      "passed": true,
+      "cases": [
+        {
+          "case": "direct-positive",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.081,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "DIRECT",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 0.379,
+          "curl_code": 0,
+          "egress_sha256": "132852f7ab066fb7f65150556262ece891c9006c40838317b2329eaee32d6b99"
+        },
+        {
+          "case": "probe-www",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.084,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-connectivity",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.071,
+          "curl_code": 0
+        },
+        {
+          "case": "probe-fallback-google",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 204,
+          "seconds": 0.075,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.586,
+          "curl_code": 0
+        },
+        {
+          "case": "ads-category",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 3.234,
+          "curl_code": 0
+        },
+        {
+          "case": "browserleaks-egress",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.763,
+          "curl_code": 0,
+          "egress_sha256": "d5db7773e4c66c8c6aae12ef34688f615baae0606aa7385aca91af08529a70c9"
+        },
+        {
+          "case": "client-default-doh-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.067
+        },
+        {
+          "case": "resolved-ip-plus-sni-browserleaks.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "seconds": 2.556,
+          "curl_code": 0
+        },
+        {
+          "case": "client-default-doh-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 200,
+          "answer_count": 1,
+          "seconds": 0.067
+        },
+        {
+          "case": "resolved-ip-plus-sni-adservice.google.com",
+          "class": "RESIDENTIAL",
+          "passed": true,
+          "http_status": 404,
+          "seconds": 2.283,
+          "curl_code": 0
+        },
+        {
+          "case": "residential-egress-distinct-from-server",
+          "class": "COMPARISON",
+          "passed": true
+        }
+      ],
+      "scope": "real fresh VLESS Reality, actual HTTP TLS, tunnel UDP/TCP DNS and DoH, resolved IP+SNI; control-host network not physical Android"
+    },
+    "proxy-matrix.json": {
+      "at": "2026-10-09T06:24:31.603076+00:00",
+      "scope": "control-host directly through each existing residential SOCKS proxy; production server paths not modified",
+      "results": [
+        {
+          "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 2.407022,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 3.280355,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 2.217377,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 1.97449,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 2.627681,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 2.08271,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "000",
+              "seconds": 6.002672,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "000",
+              "seconds": 6.002399,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "000",
+              "seconds": 6.002344,
+              "curl_code": 28,
+              "passed": false
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "000",
+              "seconds": 6.000568,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "000",
+              "seconds": 6.002233,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 4.9512,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "000",
+              "seconds": 6.002106,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "000",
+              "seconds": 6.002129,
+              "curl_code": 28,
+              "passed": false
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "000",
+              "seconds": 6.002553,
+              "curl_code": 28,
+              "passed": false
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 1.037319,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 1.121791,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 1.177751,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 0.953096,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 1.005623,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 1.081739,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 1.015735,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 1.073461,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 1.087657,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 2.031064,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 2.66127,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 2.13152,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 0.966974,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 0.911685,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 0.998218,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 2.528857,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 2.949096,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 2.720608,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        },
+        {
+          "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-3f2612095fe12bc8",
+          "cases": [
+            {
+              "host": "www.gstatic.com",
+              "http": "204",
+              "seconds": 1.099284,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "browserleaks.com",
+              "http": "200",
+              "seconds": 6.200675,
+              "curl_code": 0,
+              "passed": true
+            },
+            {
+              "host": "adservice.google.com",
+              "http": "404",
+              "seconds": 6.208596,
+              "curl_code": 0,
+              "passed": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "No physical Android/v2rayNG or user ISP test; control-host real VLESS/Reality tests cover DNS and IP+SNI.",
+    "Not all network requests passed. Initial isolated-core fixture and IP extractor errors are retained separately from service failures.",
+    "Three of12 configured residential proxies failed target connectivity in an independent control-host matrix. Existing monitor checks ipify only; endpoint health is not proof of target reachability. No arbitrary endpoint disabled or replaced.",
+    "UpCloud trial has no eligible configured residential proxy port: all12 ports3106..10000 outside code-supported80/443/8080. Residential clients correctly effectiveBLOCKED and excluded by class Output predicate. Raw-snapshot diagnostic credentials were used, not claimed to be published residential links.",
+    "UpCloud DIRECT transport/DNS timeout remains separately unresolved; no causal claim from residential firewall repair. Negative results with failed DIRECT control are not valid deny evidence.",
+    "Known bootstrap detached-branch assertion remains unresolved; source/runtime independently verified, no100percentREADY claim.",
+    "Guardian global control alreadydisabledrev31 before this work and preserved; do not report active protection or zero CPU as successful protection."
+  ],
+  "rollback": {
+    "runtime": "435486a7369965366852f48e7514efe7d6a41293",
+    "artifacts": "/opt/digital-ocean-bot.rollback.g3hz0bnW",
+    "strict_policy_selector": "DOB_RESIDENTIAL_CLIENT_PATHS_PANELS=none retains pinned strict435 policy, not unrestricted mode; reconcile through normal controller",
+    "tested_pinned_planner": true,
+    "tested_asset_restore": true
+  },
+  "evidence_sha256": {
+    "gates.json": "abf1ca218675be3d80f402d45fff90e8d6a43b5f4b92679224117f117c22ffb8",
+    "review.json": "47116288a27bee6d01917db359d6f98f0621430eba5d4c2a10aacf6f9cb99f4d",
+    "plan-final.json": "3bb7577fcdc6c635237510c6db43349b210b92fb4fb6b6ab893d03b7fc5f46d3",
+    "core-provenance.json": "800b53d4fd8937e8231a66570130724ba8f060f8586aa70ca2d91abaf9f76843",
+    "rollback-rehearsal.json": "3c247ae009c23574ea1dcb0376a1eef05527a2451328b6b0c6ea3da1594cd4f0",
+    "deployment.json": "0b81c4885dd7573f5428e8a45e4e7741caa826e8123516f54898f28255de6a4d",
+    "promotion.json": "068b454053e2753ce78817b8483bce4542670a42c8941dfae9f8e74265d891c6",
+    "fleet-first.json": "e85ee28659327261c1ca2e486fb4d0b04183763bb53f75801aaf67e1667d95bc",
+    "fleet-final.json": "e74b7e1e56aef7c05e681690f0b1c1fef87a78a4e8be95a8dac0aab0075d65a4",
+    "final-snapshot.json": "3ed5c3b599e764c79340343927c8ae3e8bbd93f2a6068f96f474cec927869674",
+    "traffic-before.json": "f9303b1d4815bbdd8e14337c503581f0a0941a27fc4cd7fe9a153cfc334e1ea7",
+    "traffic-second-before.json": "13323302ccb734b3585b64443daa63109e6b498c1f585e158f0a6b3ff8657320",
+    "traffic-canary.json": "57c751f7c67c9755901727a5678dc5dc326552f8e6d3f0e694c00df48e4e8621",
+    "traffic-canary-final.json": "9e1ba879eb4f2a7915455def082bb6fda5505ab3d441731f09deff37cffea2e6",
+    "traffic-vultr-second.json": "96ad23162107d3a5e985fe337bf2a91d92d874b99d7babe16b4d2e6aba34ae6f",
+    "traffic-vultr-recovery.json": "6586779b7095f61ddec629fe184a2e6bb23beec9350511c1a9553ad9e0acbcb6",
+    "traffic-digitalocean.json": "d1f03650f4ab9e64ee921febfdcd74f7f08bfdc6ba5082d4cf9b9f758d606e05",
+    "traffic-do-recovery.json": "229c3c44768aab5b2027b2e0d7a78967fce1ba8f2b4041dcf09f313d2b3a8975",
+    "traffic-upcloud.json": "e2f74ee978094c1d29ab33aee36d41d4e6bd77d932384c185092835428f74c7c",
+    "traffic-stability-final.json": "fc7d0be2c60be371155c382d99459760cbd3e91a0cdd375d9f080c4038311c5c",
+    "proxy-matrix.json": "262627c19f54c49202f6f957174391939bc48cc776c6bc50c198755eced2c4e5"
+  }
+}

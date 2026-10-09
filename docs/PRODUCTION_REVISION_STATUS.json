@@ -1,22 +1,22 @@
 {
   "schema_version": 2,
-  "runtime_source_revision": "435486a7369965366852f48e7514efe7d6a41293",
+  "runtime_source_revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
   "canonical_branch": "checkpoint/final-e2e-20260929",
-  "verified_at_utc": "2026-10-08T23:31:48.455029+00:00",
+  "verified_at_utc": "2026-10-09T06:29:31.980774+00:00",
   "binaries": {
     "api": {
-      "revision": "435486a7369965366852f48e7514efe7d6a41293",
-      "sha256": "4f7215558988103fdd1b0de0f20a0d94bb1d6d754655a7965bc22cc60f0148ef",
+      "revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+      "sha256": "ee310ae09dfd412da53865fe500049bb25cca87df8f371e2a0807d76b6b339a1",
       "vcs_modified": false
     },
     "worker": {
-      "revision": "435486a7369965366852f48e7514efe7d6a41293",
-      "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
+      "revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+      "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362",
       "vcs_modified": false
     },
     "worker-panels": {
-      "revision": "435486a7369965366852f48e7514efe7d6a41293",
-      "sha256": "bfc7fb10a3ef6bee011ed2bef825a2b4912c7706ba70f193f9a9dd0e7d076eef",
+      "revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+      "sha256": "b350c5c1d68d503802dc1104d3a5fac6bae6f23d4396dcb61ee5de62176c1362",
       "vcs_modified": false
     }
   },
@@ -26,9 +26,9 @@
     "worker-panels": "active"
   },
   "migration": "000163_recovery_reconciliation",
-  "acceptance": "docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json",
+  "acceptance": "docs/RESIDENTIAL_CLIENT_PATHS_ACCEPTANCE_20261009.json",
   "verified": true,
-  "note": "Reviewed enabled/cleanup polling isolation deployed on peer897 baseline; exact runtime verified. Operational pressure and first-receipt readiness remain explicit.",
+  "note": "Client DNS/probe path repair deployed; external residential instability and UpCloud trial incompatibility remain explicit.",
   "latest_ramp_acceptance": "docs/BULK_V3_100_ACCEPTANCE.json",
   "canary_tool_revision": "b789a47639f5299e84093024262d799edaf644fb",
   "resource_sampler_revision": "b789a47639f5299e84093024262d799edaf644fb",
@@ -45,19 +45,19 @@
     "recovered_job": "b10b2935-b607-4082-85b4-9f670c431de0",
     "evidence_directory": "/root/backups/dob-bulk10000-20261003"
   },
-  "next_product_step": "Continue Phase4: CPU/conntrack capacity, new-node first-receipt readiness, per-account/provider fairness and capacity-aware output design, then mobile local-DNS/domain acceptance. Keep protection, quotas/lifetimes and spend policy.",
+  "next_product_step": "Phase4: multi-target residential health and stable proxy selection; diagnose UpCloud DIRECT/DNS and provide compatible trial proxy endpoints; physical v2rayNG validation.",
   "latest_lifecycle_acceptance": "docs/BULK_LIFECYCLE_ACCEPTANCE.json",
-  "worker_source_revision": "435486a7369965366852f48e7514efe7d6a41293",
+  "worker_source_revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
   "latest_independent_profiles_acceptance": "docs/INDEPENDENT_REALITY_PROFILES_ACCEPTANCE_20261004.json",
   "latest_residential_dataplane_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
-  "web_static_source_revision": "0c7721d4521beed9ba0b7a4f6fba12114b580cc1",
-  "verification_status": "DEPLOYED_POLL_ISOLATION_TRAFFIC9_OF9_WITH_CAPACITY_LIMITS",
+  "web_static_source_revision": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+  "verification_status": "runtime_and_client_path_policy_verified; upstream_reachability_partial",
   "latest_residential_scope_acceptance": "docs/RESIDENTIAL_ALLOWLIST_ACCEPTANCE_20261008.json",
   "latest_kernel_memory_acceptance": "docs/KERNEL_MEMORY_GUARD_ACCEPTANCE_20261005.json",
   "acceptance_tool_source_revision": "54cbc731cf1c81b75afcad035b4d0707f1b62d62",
   "previous_residential_scope_acceptance": "docs/GOOGLE_ADS_ONLY_ACCEPTANCE_20261005.json",
   "latest_residential_pool_acceptance": "docs/RESIDENTIAL_POOL_ACCEPTANCE_20261005.json",
-  "previous_runtime_source_revision": "897f40800d047a3f08faccb501e450a17208b6bc",
+  "previous_runtime_source_revision": "435486a7369965366852f48e7514efe7d6a41293",
   "latest_residential_performance_acceptance": "docs/RESIDENTIAL_PERFORMANCE_ACCEPTANCE_20261005.json",
   "current_performance_experiment": {
     "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
@@ -128,7 +128,7 @@
     "canary_enable_disable_verified": true,
     "client_failover_implemented": false
   },
-  "verification_scope": "Runtime hashes, readiness5/5, actual traffic9/9, full/race/vet, independent review,13sample sustained receipt window. See latest acceptance for live counts and missing first receipts; historical snapshots below are not current fleet health.",
+  "verification_scope": "real core regressions, canary real traffic and current30native routes; no claim all proxies/physicalAndroid healthy",
   "latest_account_deletion_acceptance": "docs/ACCOUNT_DELETION_ACCEPTANCE_20261006.json",
   "latest_account_rule_application_acceptance": "docs/ACCOUNT_RULE_ACCEPTANCE_20261006.json",
   "account_rule_application": {
@@ -304,8 +304,8 @@
     }
   ],
   "latest_fleet_hardening_acceptance": "docs/FLEET_HARDENING_ACCEPTANCE_20261006.json",
-  "current_controller_snapshot_note": "Prior controller snapshot fields are historical; current fleet population changes with lifecycle.",
-  "generated_at": "2026-10-07T08:18:50.474410362Z",
+  "current_controller_snapshot_note": "2026-10-09T06:29:31Z:30native verified/30APPLIED;2UpCloud trial RES blocked; guardian alreadydisabledrev31",
+  "generated_at": "2026-10-09T06:29:31.980774+00:00",
   "latest_delete_completion_acceptance": "docs/DELETE_COMPLETION_ACCEPTANCE_20261006.json",
   "current_account_counts_at": "2026-10-07T21:32:07.616876+00:00",
   "current_account_counts_note": "Fresh database states; recorded READY is not proof of provider access or output eligibility.",
@@ -4495,7 +4495,7 @@
   },
   "current_reconnect_acceptance": "docs/OPERATIONAL_CONTINUATION_20261008_RECONNECT.json",
   "latest_network_recovery": "docs/NETWORK_RECOVERY_20261008.md",
-  "current_network_blocker": "SOCKS proxy authentication rejected; upstream account cause not established",
+  "current_network_blocker": "Intermittent residential upstream target failures; no eligible UpCloud trial residential endpoints; UpCloud DIRECT/DNS not accepted.",
   "runtime_integrity_verified": true,
   "business_output_verified": false,
   "residential_allowlist_latest": {
@@ -4511,21 +4511,9 @@
   },
   "latest_protection_polling_acceptance": "docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json",
   "phase_1_2_3_latest_review": {
-    "1": {
-      "status": "PASS_IN_TESTED_SCOPE",
-      "scope": "Durable recovery, checked persistence, lifecycle and backoff",
-      "evidence": "Integrated full regression with isolated PostgreSQL; live worker/lifecycle/client progress checks pass. Historical fault acceptance retained; no new production failure injected."
-    },
-    "2": {
-      "status": "PASS_IN_TESTED_SCOPE",
-      "scope": "Separate control/panels processes and bounded resource admission",
-      "evidence": "Both roles active, runtime hashes verified; pools and WorkBudget unchanged. New enabled6/cleanup2 ceilings tested through real shared WorkBudget."
-    },
-    "3": {
-      "status": "PASS_IN_TESTED_SCOPE",
-      "scope": "Independent progress supervision and recovery",
-      "evidence": "New separate guardian module policies and supervision tests pass with race checks. No runtime restart observed since deployment; no new destructive watchdog fault injected in production."
-    }
+    "at": "2026-10-09T06:29:31.980774+00:00",
+    "result": "regression and live readiness pass within scope",
+    "report": "docs/RESIDENTIAL_CLIENT_PATHS_STATUS_FA_20261009.md"
   },
   "protection_polling_20261009": {
     "runtime_revision": "435486a7369965366852f48e7514efe7d6a41293",
@@ -4537,5 +4525,16 @@
     "admission_blocks": 6,
     "traffic_passed": 9,
     "phase4_complete": false
+  },
+  "latest_residential_client_paths_acceptance": "docs/RESIDENTIAL_CLIENT_PATHS_ACCEPTANCE_20261009.json",
+  "residential_client_paths_latest": {
+    "acceptance": "docs/RESIDENTIAL_CLIENT_PATHS_ACCEPTANCE_20261009.json",
+    "policy_deployed": true,
+    "all_upstream_reachability_accepted": false,
+    "guardian_control": {
+      "enabled": false,
+      "scope": "fleet",
+      "revision": 31
+    }
   }
 }

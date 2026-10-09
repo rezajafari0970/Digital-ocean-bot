@@ -1,3 +1,17 @@
+# Latest continuation — residential client paths, 2026-10-09 Tehran
+
+Read `docs/RESIDENTIAL_CLIENT_PATHS_ACCEPTANCE_20261009.json` and `docs/RESIDENTIAL_CLIENT_PATHS_STATUS_FA_20261009.md` first. Runtime **65f89e4** is deployed. Exact client probes use direct VPS egress; bounded parsed TCP/UDP DNS and default Cloudflare DoH restored. Ads/BrowserLeaks remain exclusively residential and all other payload default-deny. Independent review/full regression/race/vet/both real-core versions/pinned435 rollback passed. Canary22/22 and finalrepeat13/13 passed; final serving cohort30/30 native routes and APPLIED. All runtime hashes/readiness5/5 verified.
+
+**Do not claim all residential reachability is healthy.** Additional DO/Vultr samples had transient upstream failures;3/12 direct-per-proxy checks failed target connectivity despite generic ipify health. Preserve failed observations. Two UpCloud trial panels have no eligible configured proxy port; their RES identities are effectiveBLOCKED and classOutput withholds them. Raw-snapshot UpCloud diagnostic also failed DIRECT/DNS; cause remains separate and unaccepted. Need compatible endpoints/provider capability and multi-target health work, not relaxed allowlist or direct leak. No physical Android/userISP proof.
+
+Guardian global control was already **disabled, fleet, revision31** before this work and was preserved. Do not toggle or claim active protection. No manual managed-server SSH; API-only panel inspection/application. Quotas/lifetimes/spend/recovery ownership untouched. Phase1/2/3 regression/readiness reviewed; Phase4 external upstream quality and UpCloud transport remains open.
+
+Rollback runtime **435486a**, artifacts `/opt/digital-ocean-bot.rollback.g3hz0bnW`; `DOB_RESIDENTIAL_CLIENT_PATHS_PANELS=none` restores pinned strict planner through normal controller. Strict allowlist and client-paths scopes currently all. Known detachedbootstrapbranch failure remains; independent provenance verified, no100percentREADY claim.
+
+Status `.local/residential-allowlist-progress.json` is timestamped; expired heartbeat means activity unconfirmed. Agent stops after final response; normal workers continue. Follow current evidence rather than historical counts below.
+
+---
+
 # Latest continuation — protection polling, 2026-10-09 Tehran
 
 Read `docs/PROTECTION_POLLING_ACCEPTANCE_20261009.json` and `docs/PROTECTION_POLLING_STATUS_FA_20261009.md` first. Runtime **435486a** is deployed and includes peer operational repair **897f408**. Enabled guardian checks and disabled cleanup now run independently with6/2slots and unchanged shared budget10. Full isolated-PostgreSQL regression, race, vet and independent review pass. Runtime hashes and readiness5/5 verified; postdeploy actual traffic9/9 passed.
