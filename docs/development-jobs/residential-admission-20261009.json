@@ -1,7 +1,7 @@
 {
   "job": "residential-admission-20261009",
-  "at": "2026-10-09T10:31:57.789044+00:00",
-  "status": "VERIFIED_NOT_DEPLOYED",
+  "at": "2026-10-09T10:45:28.690143+00:00",
+  "status": "CAPABILITY_DEPLOYED_PILOT_NOT_ADMITTED",
   "requirement": "RES-001: destination-aware per-VPS bounded manual admission; strict Ads/BrowserLeaks allowlist and direct probes retained",
   "baseline": "ad1b0df0a0c7e4fc66fd1c8b77503790a26e2b27",
   "rollback_runtime": "98bcb7e043cd982a8a5e01070b6fcf7080390d69",
@@ -42,5 +42,9 @@
     "canonical detached bootstrap failure remains recorded; no repository-wide READY claim",
     "no physical Android latency or app SDK show-rate evidence"
   ],
-  "next": "controlled capability deployment, fresh evidence, conditional timed pilot, native restoration, final status"
+  "next": "Keep current profile; obtain fresh stable controls then one exact5minute exclusion-only trial using deployed supported tools. Automatic ongoing quarantine/readmission is separate gated work. No silent retries or indefinite exclusions.",
+  "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "field_acceptance": false,
+  "agent_continues_after_final_reply": false,
+  "final_report": "docs/RESIDENTIAL_ADMISSION_STATUS_FA_20261009.md"
 }

@@ -1,3 +1,5 @@
+> Superseded continuation boundary: bounded manual admission is now implemented and deployed as fc76e6a. Read RESIDENTIAL_ADMISSION_STATUS_FA_20261009.md for exact unadmitted pilot status; the original plan below is historical.
+
 # Next phase: per-VPS destination health and reversible admission
 
 Status: design boundary only; not implemented, deployed or authorized for automatic promotion by this checkpoint. User authorization to perform engineering remains in place. No additional permission is needed merely to implement/test a bounded solution. The present blocker to activating an exclusion is missing supported code and its correctness/canary evidence, not missing API credit.
