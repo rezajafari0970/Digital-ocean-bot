@@ -2,6 +2,7 @@ package residentialsync
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"log"
@@ -78,11 +79,25 @@ func (s Service) observeRelays(ctx context.Context, panel string) error {
 	if e != nil {
 		return e
 	}
+	return s.recordRelayObservations(ctx, panel, observations)
+}
+
+func (s Service) recordRelayObservations(ctx context.Context, panel string, observations []relayObservation) error {
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
 		return e
 	}
 	defer tx.Rollback()
+	// Match persistPlan/apply: receiver routing state before assignments.
+	// The reverse order deadlocks when a health poll overlaps a plan change.
+	var locked string
+	e = tx.QueryRowContext(ctx, "SELECT panel_id::text FROM panel_routing_state WHERE panel_id=$1 FOR UPDATE", panel).Scan(&locked)
+	if errors.Is(e, sql.ErrNoRows) {
+		return nil
+	}
+	if e != nil {
+		return e
+	}
 	for _, o := range observations {
 		// Duplicate snapshots do not advance state. Quarantine requires sustained
 		// unhealthy time, because burst snapshots do not expose attempt timestamps.
