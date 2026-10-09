@@ -16,6 +16,7 @@ import (
 
 type Store struct{ DB *sql.DB }
 type Request struct {
+	TuningID        string   `json:"tuning_id,omitempty"`
 	RequestID       string   `json:"request_id"`
 	ExperimentID    string   `json:"experiment_id"`
 	Action          string   `json:"action"`
@@ -60,6 +61,8 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	}
 	q.RequestID = strings.ToLower(q.RequestID)
 	q.ExperimentID = strings.ToLower(q.ExperimentID)
+	// Normalize an owned copy: concurrent callers may reuse the same request slice.
+	q.PanelIDs = append([]string(nil), q.PanelIDs...)
 	seen := map[string]bool{}
 	for i, id := range q.PanelIDs {
 		id = strings.ToLower(id)
@@ -112,6 +115,11 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		return out, e
 	}
 	defer tx.Rollback()
+	if strings.HasPrefix(q.Action, "tune_") {
+		if _, e = tx.ExecContext(ctx, "SET LOCAL lock_timeout='3s'; SET LOCAL statement_timeout='10s'"); e != nil {
+			return out, e
+		}
+	}
 	if e = Lock(ctx, tx); e != nil {
 		return out, e
 	}
@@ -196,7 +204,18 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		if version != q.ExpectedVersion {
 			return out, conflict("experiment changed; refresh before this action")
 		}
+		if !strings.HasPrefix(q.Action, "tune_") && q.Action != "rollback" {
+			tuning, err := loadTuning(ctx, tx, q.ExperimentID)
+			if err != nil {
+				return out, err
+			}
+			if tuningBusy(tuning) {
+				return out, conflict("finish the active tuning before this action")
+			}
+		}
 		switch q.Action {
+		case "tune_start", "tune_cancel", "tune_publish", "tune_restore":
+			e = tuneAction(ctx, tx, q, state, version, spec)
 		case "rollback":
 			e = rollback(ctx, tx, q.ExperimentID, "requested")
 		case "publish":
@@ -313,6 +332,11 @@ func attach(ctx context.Context, tx *sql.Tx, experiment, panel string, c *Config
 	if e == nil {
 		_, e = tx.ExecContext(ctx, "UPDATE panel_routing_state SET next_check_at=now(),state='PENDING' WHERE panel_id=$1", panel)
 	}
+	if e == nil {
+		_, e = tx.ExecContext(ctx, `UPDATE residential_performance_targets t SET tuning_id=(x.tuning->>'id')::uuid,tuning_generation=t.generation
+        FROM residential_performance_experiments x WHERE x.id=$1 AND t.experiment_id=x.id AND t.panel_id=$2
+        AND (x.tuning->>'phase' IN('PUBLISHING','PUBLISHED') OR (x.tuning->>'phase'='RESTORING' AND x.tuning->>'restore_scope'='fleet'))`, experiment, panel)
+	}
 	return e
 }
 func rollback(ctx context.Context, tx *sql.Tx, id, reason string) error {
@@ -322,6 +346,14 @@ func rollback(ctx context.Context, tx *sql.Tx, id, reason string) error {
 	}
 	if state == "ROLLED_BACK" || state == "ROLLING_BACK" {
 		return nil
+	}
+	var orphan bool
+	if e := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM residential_performance_panels p JOIN panel_instances pi ON pi.id=p.panel_id JOIN droplets d ON d.id=pi.droplet_id
+ WHERE p.experiment_id=$1 AND d.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=$1 AND t.panel_id=p.panel_id))`, id).Scan(&orphan); e != nil {
+		return e
+	}
+	if orphan {
+		return conflict("rollback recovery record missing; no assignments changed")
 	}
 	var superseded bool
 	if e := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM residential_performance_targets t JOIN residential_performance_panels p ON p.panel_id=t.panel_id WHERE t.experiment_id=$1 AND p.experiment_id<>t.experiment_id)`, id).Scan(&superseded); e != nil {
@@ -346,7 +378,7 @@ func rollback(ctx context.Context, tx *sql.Tx, id, reason string) error {
 	if e != nil {
 		return e
 	}
-	_, e = tx.ExecContext(ctx, "UPDATE residential_performance_experiments SET state='ROLLING_BACK',reason=$2,version=version+1,updated_at=now() WHERE id=$1", id, reason)
+	_, e = tx.ExecContext(ctx, "UPDATE residential_performance_experiments SET state='ROLLING_BACK',tuning=CASE WHEN tuning IS NULL THEN NULL ELSE jsonb_set(tuning,'{phase}','\"SUPERSEDED\"'::jsonb) END,reason=$2,version=version+1,updated_at=now() WHERE id=$1", id, reason)
 	return e
 }
 
@@ -467,6 +499,9 @@ func (s Store) Failed(ctx context.Context, panel string, gen int64, cause error)
 	if e != nil {
 		return
 	}
+	if e = tuningFailure(ctx, tx, id, panel, gen); e != nil {
+		return
+	}
 	if count >= 3 {
 		var state string
 		if tx.QueryRowContext(ctx, "SELECT state FROM residential_performance_experiments WHERE id=$1", id).Scan(&state) == nil && state == "RUNNING" {
@@ -478,6 +513,9 @@ func (s Store) Failed(ctx context.Context, panel string, gen int64, cause error)
 	_ = tx.Commit()
 }
 func (s Store) Tick(ctx context.Context) error {
+	if e := s.tickTuning(ctx); e != nil {
+		return e
+	}
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
 		return e
@@ -503,7 +541,13 @@ func (s Store) Tick(ctx context.Context) error {
 	if e != nil {
 		return e
 	}
-	_, e = tx.ExecContext(ctx, `UPDATE residential_performance_experiments e SET state='ROLLED_BACK',version=version+1,updated_at=now() WHERE state='ROLLING_BACK' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=e.id AND t.state NOT IN('RESTORED','RETIRED'))`)
+	_, e = tx.ExecContext(ctx, `UPDATE residential_performance_experiments e SET reason='Rollback pending: missing target recovery record'
+ WHERE state='ROLLING_BACK' AND EXISTS(SELECT 1 FROM residential_performance_panels pp JOIN panel_instances pi ON pi.id=pp.panel_id JOIN droplets d ON d.id=pi.droplet_id
+ WHERE pp.experiment_id=e.id AND d.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=e.id AND t.panel_id=pp.panel_id))`)
+	if e != nil {
+		return e
+	}
+	_, e = tx.ExecContext(ctx, `UPDATE residential_performance_experiments e SET state='ROLLED_BACK',version=version+1,updated_at=now() WHERE state='ROLLING_BACK' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=e.id AND t.state NOT IN('RESTORED','RETIRED')) AND NOT EXISTS(SELECT 1 FROM residential_performance_panels pp JOIN panel_instances pi ON pi.id=pp.panel_id JOIN droplets d ON d.id=pi.droplet_id WHERE pp.experiment_id=e.id AND d.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=e.id AND t.panel_id=pp.panel_id))`)
 	if e != nil {
 		return e
 	}

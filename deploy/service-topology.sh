@@ -215,6 +215,11 @@ def q(sql):
  p=subprocess.run(['psql',url,'-XAt','-v','ON_ERROR_STOP=1','-c',sql],capture_output=True,text=True,timeout=10)
  if p.returncode:raise SystemExit('Cannot establish safe checkpoint rollback')
  return p.stdout.strip()
+# All API/worker processes are stopped. Supported tuning CLI writers also
+# acquire the shared host deploy lock, excluding starts during this guard.
+if q("SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='residential_performance_experiments' AND column_name='tuning')")=='t':
+ if q("SELECT count(*) FROM residential_performance_experiments WHERE tuning->>'phase' IN('TESTING','PUBLISHING','RESTORING')")!='0':
+  raise SystemExit('Unresolved residential tuning: overlay-unaware prior runtime remains stopped')
 if q("SELECT to_regclass('worker_recovery_checkpoints') IS NULL")!='t':
  if q('SELECT count(*) FROM worker_recovery_checkpoints')!='0':raise SystemExit('Unresolved checkpoints: prior runtime remains stopped')
 if q("SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='deployment_step_attempts' AND column_name='result_snapshot')")=='t':

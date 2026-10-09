@@ -101,8 +101,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			seen[c.Effective] = true
 		}
 	}
-	if len(tags) == 0 {
-		return nil
+	if len(tags) == 0 && !p.Harden {
+		// Process-running alone cannot acknowledge a new complete plan.
+		return errors.New("native plan proof requires an inbound or hardened internal DNS route")
 	}
 	for _, tag := range tags {
 		for _, c := range samples {

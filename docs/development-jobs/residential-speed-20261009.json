@@ -1,0 +1,22 @@
+{
+  "goal": "Reduce real residential static-asset transport latency and tail failures, preserve truthful direct probe latency, diagnose limits on ad show-rate without app source.",
+  "context": "Measured slow residential asset transport and geographically high VPS probe latency. Runtime65f89e4 baseline, canonical4df784e. Native12proxies with configuredfast_count13 producesfast=12/all=12. Implement supported timed 1-3panel selection tuning inside same KEPT permanentfleet parent, withoutglobalrollback; onlyfast_count/fast_share maychange. DurableTESTING/PUBLISHING/RESTORING/PUBLISHED/RESTORED metadata, exactpriorspec, targetidentity/generationproofs, currentparentCAS+idempotentreceipts, DBwallclockdeadline, partialcanarypreservesother/futureparentassignments. Recoveryintentcommitsindependentlyofnewenrollment; driftretainedasconflict, no fabricatedbefore_config. Parentrollbackremainsavailablebutrejectsmissingtargetrecoveryrecords; completioncannotomitliveorphans. ExistingnativeSanaeiworkerlocks, completeplanfingerprintsandgenerationCASused; emptyclienttagproofloopholefixed. Additive migration165, adminstatus metadata, operatorCLIwithshareddeployflock, rollbackguardrejectsactiveoverlay. Candidatecopyofexactoldspec13/80->3/90only, TFOtrue/Costs/allotherfieldsunchanged; UDPselectionchangesbutstrictUDPsecuritypreserved. Guardianfalse/fleet/rev31 unchanged; noquota/billing/capacitychanges, noSSHmanagedpanels, noDIRECTadroute. Boundsandacceptanceinprivateevidence/measurement-policy.json; staticJSdownloadsnotadrequests/impressions. NeedappSDKsource/callbacksforactualshowrate/creativequality. Do notpromiseunder10msinternet. Planandimplementationindependentreviewscompleted; lastreview-closePASSwithreleasegatespending. Runtimecanary/fleetclaimsonlyaftermeasurements. Bootstrapknowncanonicaldetachedbranchfailure retained; no100percentREADYclaim.",
+  "allowed_paths": [
+    "internal/residentialperf",
+    "internal/adminapi/residential_performance.go",
+    "internal/adminapi/residential_tuning_test.go",
+    "migrations/000165_residential_tuning.up.sql",
+    "migrations/000165_residential_tuning.down.sql",
+    "cmd/residential-performance-tune",
+    "docs/development-jobs/residential-speed-20261009.json",
+    "internal/adminapi/residential_fleet_test.go",
+    "internal/panels/residentialsync/tuning_core_test.go",
+    "internal/panels/residentialsync/execute.go",
+    "internal/panels/residentialsync/tuning_proof_test.go",
+    "deploy/service-topology.sh",
+    "docs/RESIDENTIAL_SPEED_DESIGN_20261009.md"
+  ],
+  "rollback_commit": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+  "ai_council": true,
+  "push": true
+}

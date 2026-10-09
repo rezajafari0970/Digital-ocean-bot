@@ -26,6 +26,16 @@ func publishable(ctx context.Context, tx *sql.Tx, panel string) error {
 	return nil
 }
 func enrollFleet(ctx context.Context, tx *sql.Tx, experiment string, c *Config) error {
+	// A missing target for an already-owned assignment is lost recovery state,
+	// not a newly discovered server. Never overwrite its original rollback point.
+	var orphan bool
+	if e := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM residential_performance_panels pp JOIN panel_instances pi ON pi.id=pp.panel_id JOIN droplets d ON d.id=pi.droplet_id
+ WHERE pp.experiment_id=$1 AND d.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=$1 AND t.panel_id=pp.panel_id))`, experiment).Scan(&orphan); e != nil {
+		return e
+	}
+	if orphan {
+		return conflict("fleet recovery record missing; enrollment paused")
+	}
 	rows, e := tx.QueryContext(ctx, "SELECT p.id::text"+publicationFrom+`
  AND NOT EXISTS(SELECT 1 FROM residential_performance_targets t WHERE t.experiment_id=$1 AND t.panel_id=p.id)
  ORDER BY p.id LIMIT 64`, experiment)
@@ -59,7 +69,7 @@ func enrollFleet(ctx context.Context, tx *sql.Tx, experiment string, c *Config) 
 func enrollPublished(ctx context.Context, tx *sql.Tx) error {
 	var id string
 	var spec []byte
-	e := tx.QueryRowContext(ctx, "SELECT id::text,spec FROM residential_performance_experiments WHERE state='KEPT' AND duration_mode='permanent' AND publish_scope='fleet' FOR UPDATE").Scan(&id, &spec)
+	e := tx.QueryRowContext(ctx, "SELECT id::text,spec FROM residential_performance_experiments WHERE state='KEPT' AND duration_mode='permanent' AND publish_scope='fleet' AND NOT COALESCE(tuning->>'phase'='RESTORING' AND tuning->>'assigned'='false',false) FOR UPDATE").Scan(&id, &spec)
 	if e == sql.ErrNoRows {
 		return nil
 	}

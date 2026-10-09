@@ -169,6 +169,7 @@ func TestPermanentMigrationKeepsTimedBaselineAndBlocksUnsafeDowngrade(t *testing
 	c, _ := json.Marshal(residentialperf.Balanced())
 	sqlMust(t, db, "INSERT INTO residential_performance_experiments(id,spec,state,deadline) VALUES($1,$2,'RUNNING',now()+interval '15 minutes')", id, string(c))
 	sqlMust(t, db, "INSERT INTO residential_performance_panels(panel_id,experiment_id,config,baseline) VALUES($1,$2,$3,'{\"routing_strategy\":{\"present\":true,\"value\":\"AsIs\"}}')", panel, id, string(c))
+	sqlMust(t, db, "INSERT INTO residential_performance_targets(experiment_id,panel_id,generation) VALUES($1,$2,1)", id, panel)
 	up, e := os.ReadFile(filepath.Join("..", "..", "migrations", "000152_residential_permanent_publish.up.sql"))
 	if e != nil {
 		t.Fatal(e)
@@ -181,6 +182,11 @@ func TestPermanentMigrationKeepsTimedBaselineAndBlocksUnsafeDowngrade(t *testing
 	if mode != "timed" || len(baseline) == 0 {
 		t.Fatal("migration changed active trial")
 	}
+	tuningUp, e := os.ReadFile(filepath.Join("..", "..", "migrations", "000165_residential_tuning.up.sql"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	sqlMust(t, db, string(tuningUp))
 	s := residentialperf.Store{DB: db}
 	_, e = s.Do(ctx, residentialperf.Request{RequestID: perfUUID(), ExperimentID: id, ExpectedVersion: 1, Action: "publish", Scope: "fleet"})
 	if e != nil {
