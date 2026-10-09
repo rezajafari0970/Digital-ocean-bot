@@ -21,6 +21,9 @@ func TestStrictConfiguredDoHIsInfrastructureOnly(t *testing.T) {
 				if inbound == dnsTag && port == "443" && ip != "9.9.9.9" {
 					want = tagged(next, directTag)
 				}
+				if inbound == "in" && port == "53" && ip != "9.9.9.9" {
+					want = tagged(next, clientDNSTag)
+				}
 				if got := strictRoute(t, next, inbound, "unknown", "", ip, "tcp", port); got != want {
 					t.Fatal(inbound, ip, port, got, want)
 				}

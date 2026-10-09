@@ -204,7 +204,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 			if pool {
 				poolWait(t, "native pool healthy", func() bool { return upstream.checks.Load() > 0 })
 			}
-			for _, domain := range []string{"adservice.google.com", "browserleaks.com", "tls.browserleaks.com", "www.gstatic.com", "connectivitycheck.gstatic.com"} {
+			for _, domain := range []string{"adservice.google.com", "browserleaks.com", "tls.browserleaks.com"} {
 				for _, port := range []int{80, 443} {
 					if body, e := strictVLESSRequest(address, resID, domain, domain, port); e != nil || body != "residential" {
 						t.Fatalf("allowed %s:%d body=%q err=%v", domain, port, body, e)
@@ -224,7 +224,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 				host string
 				port int
 			}{
-				{"127.0.0.1", sinkPort}, {"www.google.com", 443}, {"www.gstatic.com.evil.test", 443},
+				{"127.0.0.1", sinkPort}, {"maps.google.com", 443}, {"www.gstatic.com.evil.test", 443},
 				{"evil.www.gstatic.com", 443}, {"www.gstatic.com", 8443}, {"8.8.8.8", 53}, {"adservice.google.com", 53},
 				{"browserleaks.com.evil.test", 443},
 			} {
@@ -253,7 +253,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 				t.Fatal("DIRECT UDP control", body, e)
 			}
 			upstream.down.Store(true)
-			for _, host := range []string{"adservice.google.com", "www.gstatic.com"} {
+			for _, host := range []string{"adservice.google.com", "browserleaks.com"} {
 				if _, e := strictVLESSRequest(address, resID, host, host, 80); e == nil {
 					t.Fatal("failed proxy succeeded")
 				}

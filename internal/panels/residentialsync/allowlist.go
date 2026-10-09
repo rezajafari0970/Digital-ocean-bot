@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
-// Exact hosts used by client URL tests and the residential pool observer.
+// Exact client URL-test hosts. Client probes use direct server egress; the
+// independent pool observer still measures residential endpoints.
 // HTTPS paths cannot be inspected by Xray routing; this is host+port policy.
 var residentialProbeDomains = []string{
 	"full:www.gstatic.com",
 	"full:connectivitycheck.gstatic.com",
+	"full:www.google.com",
 }
 
 func (p routePolicy) normalized() routePolicy {
@@ -83,4 +85,46 @@ func validateStrictInboundTags(tags []string, current map[string]any) error {
 		}
 	}
 	return nil
+}
+
+// The default v2rayNG encrypted resolver is an explicit infrastructure exception.
+// TLS routing constrains this host/port, not encrypted paths or query names.
+var clientDoHDomains = []string{"full:cloudflare-dns.com"}
+
+func clientInfrastructureRules(tags []string, p routePolicy) []any {
+	rules := []any{}
+	if p.Residential && !p.SniffingBlocked {
+		rules = append(rules,
+			map[string]any{"type": "field", "ruleTag": "dob-route-client-probes", "inboundTag": tags, "domain": residentialProbeDomains, "network": "tcp", "port": "80,443", "outboundTag": directTag},
+			map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-allowed", "inboundTag": tags, "ip": resolverpolicy.Active(), "network": "tcp,udp", "port": "53", "outboundTag": clientDNSTag},
+			map[string]any{"type": "field", "ruleTag": "dob-route-client-doh", "inboundTag": tags, "domain": clientDoHDomains, "network": "tcp", "port": "443", "outboundTag": directTag})
+	}
+	// Exact infrastructure hosts cannot fall through into a broader Ads geosite
+	// entry on an unapproved port/transport, even if geodata changes later.
+	rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-infrastructure-deny", "inboundTag": tags, "domain": append(append([]string{}, residentialProbeDomains...), clientDoHDomains...), "network": "tcp,udp", "outboundTag": blockedTag})
+	return rules
+}
+
+// ClientPathsEnabled stages only the DNS/probe repair. Returning false keeps
+// the pinned strict policy; it never falls back to unrestricted selective mode.
+func ClientPathsEnabled(panel string) bool {
+	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_CLIENT_PATHS_PANELS"))
+	if scope == "" || scope == "all" {
+		return true
+	}
+	if scope == "none" {
+		return false
+	}
+	selected := false
+	for _, item := range strings.Split(scope, ",") {
+		id := strings.TrimSpace(item)
+		if !residentialperf.UUID.MatchString(id) {
+			return false
+		}
+		selected = selected || strings.EqualFold(id, strings.TrimSpace(panel))
+	}
+	return selected
+}
+func legacyProbeDomains() []string {
+	return []string{"full:www.gstatic.com", "full:connectivitycheck.gstatic.com"}
 }

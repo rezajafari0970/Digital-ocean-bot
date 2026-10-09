@@ -29,6 +29,7 @@ func residentialDomains() []string {
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
 	StrictAllowlist       bool
+	LegacyClientPaths     bool
 	StableFingerprint     bool
 	Performance           *residentialperf.Config
 	PerformanceGeneration int64
@@ -84,6 +85,16 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			return nil, nil, errors.New("duplicate inbound routing tag")
 		}
 		seenTags[in.Tag] = true
+		if p.StrictAllowlist {
+			if err := validateStrictInboundTags([]string{in.Tag}, nil); err != nil {
+				return nil, nil, err
+			}
+			// These exported subscription protocols authenticate current UUID clients.
+			// Other inlets must retain the terminal deny instead of gaining DNS/probes.
+			if !p.LegacyClientPaths && in.Protocol != "vless" && in.Protocol != "vmess" {
+				continue
+			}
+		}
 		tags = append(tags, in.Tag)
 		if in.Protocol != "vless" && in.Protocol != "vmess" && in.Protocol != "trojan" && in.Protocol != "shadowsocks" {
 			continue
@@ -264,13 +275,16 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if p.SniffingBlocked {
 		destination = blockedTag
 	}
-	if p.Harden && p.Residential && p.AdsOnly && !p.StrictAllowlist {
-		// Accept client UDP/TCP DNS without depending on residential health.
-		// A queries use the cached IPv4 pool; other query types retain real
-		// responses through direct TCP forwarding (never the residential proxy).
+	if p.Harden && p.Residential && p.AdsOnly && (!p.StrictAllowlist || !p.LegacyClientPaths && !p.SniffingBlocked) {
+		// Parse client DNS locally: A/AAAA use the cached IPv4-only pool.
+		// Strict mode never forwards non-IP queries or arbitrary port-53 bytes.
+		nonIP := "skip"
+		if p.StrictAllowlist {
+			nonIP = "drop"
+		}
 		kept = append(kept, map[string]any{
 			"tag": clientDNSTag, "protocol": "dns",
-			"settings":       map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": "skip"},
+			"settings":       map[string]any{"network": "tcp", "address": "1.1.1.1", "port": 53, "nonIPQuery": nonIP},
 			"streamSettings": map[string]any{"sockopt": map[string]any{"dialerProxy": directTag}},
 		})
 	}
@@ -349,6 +363,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
 		} else {
+			if p.StrictAllowlist && !p.LegacyClientPaths {
+				first = append(first, clientInfrastructureRules(tags, p)...)
+			}
 			if p.Harden && (p.Residential || p.StrictAllowlist) {
 				dnsDestination := clientDNSTag
 				if p.SniffingBlocked || p.StrictAllowlist {
@@ -363,8 +380,8 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": residentialDomains(), "network": "udp", "outboundTag": blockedTag})
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
-				if p.StrictAllowlist {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-probes", "inboundTag": tags, "domain": residentialProbeDomains, "network": "tcp", "port": "80,443", "outboundTag": destination})
+				if p.StrictAllowlist && p.LegacyClientPaths {
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-probes", "inboundTag": tags, "domain": legacyProbeDomains(), "network": "tcp", "port": "80,443", "outboundTag": destination})
 				}
 			}
 			fallback := directTag

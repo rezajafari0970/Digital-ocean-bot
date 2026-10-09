@@ -113,6 +113,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				{"adservice.google.com", "", "tcp", "443", "tls", true},
 				{"adservice.google.com", "", "udp", "443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
+				{"cloudflare-dns.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
 				{"browserleaks.com", "", "tcp", "443", "tls", true},
 				{"", "1.1.1.1", "tcp", "53", "", false},
@@ -137,11 +138,17 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = directTag
 					case !p.Residential || p.SniffingBlocked:
 						base = blockedTag
+					case p.StrictAllowlist && !p.LegacyClientPaths && probe.port == "53" && (probe.ip == "1.1.1.1" || probe.ip == "8.8.8.8"):
+						base = clientDNSTag
 					case p.StrictAllowlist && probe.port == "53":
 						base = blockedTag
+					case p.StrictAllowlist && !p.LegacyClientPaths && network == "tcp" && (probe.port == "80" || probe.port == "443") && (probe.domain == "www.gstatic.com" || probe.domain == "connectivitycheck.gstatic.com" || probe.domain == "www.google.com"):
+						base = directTag
+					case p.StrictAllowlist && !p.LegacyClientPaths && network == "tcp" && probe.port == "443" && probe.domain == "cloudflare-dns.com":
+						base = directTag
 					case p.Harden && probe.port == "53":
 						base = clientDNSTag
-					case p.StrictAllowlist && !probe.ads && probe.domain != "www.gstatic.com" && probe.domain != "connectivitycheck.gstatic.com":
+					case p.StrictAllowlist && !probe.ads && (!p.LegacyClientPaths || probe.domain != "www.gstatic.com" && probe.domain != "connectivitycheck.gstatic.com"):
 						base = blockedTag
 					case !p.StrictAllowlist && !probe.ads:
 						base = directTag

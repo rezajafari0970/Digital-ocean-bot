@@ -55,8 +55,8 @@ func TestStrictAllowlistNoOrdinaryDomainIPDNSOrProbeSuffixEscape(t *testing.T) {
 			for _, email := range []string{"r@test", "stale@test", "unassigned@test"} {
 				for _, network := range []string{"tcp", "udp"} {
 					for _, target := range []struct{ domain, ip, port string }{
-						{"www.google.com", "", "443"}, {"api.ipify.org", "", "443"}, {"", "1.1.1.1", "443"},
-						{"", "2001:db8::1", "443"}, {"", "8.8.8.8", "53"}, {"adservice.google.com", "", "53"},
+						{"maps.google.com", "", "443"}, {"api.ipify.org", "", "443"}, {"", "1.1.1.1", "443"},
+						{"", "2001:db8::1", "443"}, {"", "9.9.9.9", "53"}, {"adservice.google.com", "", "53"},
 						{"www.gstatic.com.evil.test", "", "443"}, {"evil.www.gstatic.com", "", "443"},
 						{"www.gstatic.com", "", "8443"}, {"dns.google", "", "443"}, {"browserleaks.com.evil.test", "", "443"},
 					} {
@@ -73,12 +73,15 @@ func TestStrictAllowlistNoOrdinaryDomainIPDNSOrProbeSuffixEscape(t *testing.T) {
 					}
 				}
 			}
-			for _, domain := range []string{"adservice.google.com", "browserleaks.com", "tls.browserleaks.com", "www.gstatic.com", "connectivitycheck.gstatic.com"} {
+			for _, domain := range []string{"adservice.google.com", "browserleaks.com", "tls.browserleaks.com", "www.gstatic.com", "connectivitycheck.gstatic.com", "www.google.com"} {
 				for _, network := range []string{"tcp", "udp"} {
 					want := blocked
-					probe := strings.Contains(domain, "gstatic.com")
+					probe := strings.Contains(domain, "gstatic.com") || domain == "www.google.com"
 					if !p.SniffingBlocked && p.Residential && len(p.Proxies) > 0 && (network == "tcp" || kind == "socks5" && !probe) {
 						want = tagged(next, p.Proxies[0].Tag)
+					}
+					if probe && !p.SniffingBlocked && p.Residential && network == "tcp" {
+						want = direct
 					}
 					if got := strictRoute(t, next, "in", "r@test", domain, "", network, "443"); got != want {
 						t.Fatalf("allow %s %s got %s want %s", domain, network, got, want)

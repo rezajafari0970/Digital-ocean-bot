@@ -158,6 +158,7 @@ func run() error {
 			}
 			protected, protectedUDP, direct, blocked, clientDNS, defaultRoute := "", "", "", "", "", ""
 			strict := false
+			clientPaths := residentialsync.ClientPathsEnabled(id)
 			for _, v := range setting["outbounds"].([]any) {
 				o := v.(map[string]any)
 				tag, _ := o["tag"].(string)
@@ -207,7 +208,7 @@ func run() error {
 				if r["ruleTag"] == "dob-route-unobserved-inbound" {
 					blocked, _ = r["outboundTag"].(string)
 				}
-				if r["ruleTag"] == "dob-route-client-dns" {
+				if r["ruleTag"] == "dob-route-client-dns" && clientDNS == "" || r["ruleTag"] == "dob-route-client-dns-allowed" {
 					clientDNS, _ = r["outboundTag"].(string)
 				}
 				if r["ruleTag"] == "dob-route-residential-udp" {
@@ -223,7 +224,7 @@ func run() error {
 			if len(poolAllowed) > 0 {
 				protected = "@pool"
 			}
-			if protected != "@pool" && !strings.HasPrefix(protected, "residential-ads-") && !strings.HasPrefix(protected, "dob-route-blocked-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || (!strict && !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-")) || (strict && clientDNS != blocked) {
+			if protected != "@pool" && !strings.HasPrefix(protected, "residential-ads-") && !strings.HasPrefix(protected, "dob-route-blocked-") || !strings.HasPrefix(direct, "dob-route-direct-") || !strings.HasPrefix(blocked, "dob-route-blocked-") || (!strict && !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-")) || (strict && clientPaths && !strings.HasPrefix(clientDNS, "dob-route-client-dns-resolver-")) || (strict && !clientPaths && clientDNS != blocked) {
 				return 0, fmt.Errorf("class route unavailable")
 			}
 
@@ -335,7 +336,7 @@ func run() error {
 						ad               bool
 					}{
 						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", false}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
-						{"www.gstatic.com", "", "443", false}, {"connectivitycheck.gstatic.com", "", "80", false},
+						{"www.gstatic.com", "", "443", false}, {"connectivitycheck.gstatic.com", "", "80", false}, {"www.google.com", "", "443", false}, {"cloudflare-dns.com", "", "443", false}, {"cloudflare-dns.com", "", "80", false}, {"dns.google", "", "443", false}, {"", "9.9.9.9", "53", false},
 						{"www.gstatic.com.evil.test", "", "443", false}, {"evil.www.gstatic.com", "", "443", false},
 						{"www.gstatic.com", "", "8443", false}, {"adservice.google.com", "", "53", true},
 					} {
@@ -346,10 +347,18 @@ func run() error {
 							}
 							if dest.port == "53" {
 								expected = clientDNS
+								if strict && (!clientPaths || dest.ip != "1.1.1.1" && dest.ip != "8.8.8.8") {
+									expected = blocked
+								}
 							} else if dest.ad {
 								expected = protectedForNetwork(network, protected, protectedUDP)
-							} else if strict && network == "tcp" && (dest.port == "80" || dest.port == "443") && (dest.domain == "www.gstatic.com" || dest.domain == "connectivitycheck.gstatic.com") {
+							} else if strict && network == "tcp" && (dest.port == "80" || dest.port == "443") && (dest.domain == "www.gstatic.com" || dest.domain == "connectivitycheck.gstatic.com" || dest.domain == "www.google.com" && clientPaths) {
 								expected = protected
+								if clientPaths {
+									expected = direct
+								}
+							} else if strict && clientPaths && network == "tcp" && dest.port == "443" && dest.domain == "cloudflare-dns.com" {
+								expected = direct
 							}
 						}
 						form := url.Values{"inboundTag": {tag}, "email": {emails[cls]}, "network": {network}, "port": {dest.port}}
@@ -388,7 +397,10 @@ func run() error {
 							return 0, e
 						}
 						if strict {
-							for _, domain := range []string{"www.example.com", "www.gstatic.com.evil.test"} {
+							for _, domain := range []string{"www.example.com", "www.gstatic.com.evil.test", "www.gstatic.com", "www.google.com", "cloudflare-dns.com"} {
+								if !clientPaths && (domain == "www.gstatic.com" || domain == "www.google.com" || domain == "cloudflare-dns.com") {
+									continue
+								}
 								form.Set("domain", domain)
 								if e = check(form, blocked); e != nil {
 									return 0, e
