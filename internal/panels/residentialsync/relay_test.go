@@ -99,3 +99,21 @@ func TestRelayTransportRequiresAllowedPortAndPinnedTLS(t *testing.T) {
 		t.Fatal("native random UDP allowed")
 	}
 }
+
+func TestRelaySnapshotAllowsOnlyAdditions(t *testing.T) {
+	old := rp{ID: "a", Host: "203.0.113.1", DonorDroplet: "server", DonorPlan: "proof", TransportHash: "credential"}
+	other := rp{ID: "b", Host: "203.0.113.2"}
+	if !relaySnapshotStillValid([]rp{old}, []rp{other, old}) {
+		t.Fatal("addition invalidated existing valid snapshot")
+	}
+	if relaySnapshotStillValid([]rp{old}, []rp{other}) {
+		t.Fatal("removed donor admitted")
+	}
+	for _, change := range []func(*rp){func(p *rp) { p.DonorPlan = "changed" }, func(p *rp) { p.TransportHash = "changed" }, func(p *rp) { p.Host = "203.0.113.3" }} {
+		changed := old
+		change(&changed)
+		if relaySnapshotStillValid([]rp{old}, []rp{changed, other}) {
+			t.Fatal("changed donor admitted")
+		}
+	}
+}

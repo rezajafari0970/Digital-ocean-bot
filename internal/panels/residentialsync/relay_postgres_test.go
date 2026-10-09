@@ -117,6 +117,21 @@ func TestManagedSOCKSSelectionAndPublicationPostgres(t *testing.T) {
 	if !healthy() {
 		t.Fatal("fresh verified relays not admitted")
 	}
+	// A short management outage must not rewrite every receiver path.
+	// The same stale proof is still forbidden from certifying Output health.
+	sqlMustTrial(t, db, "UPDATE panel_routing_state SET state='FAILED',verified_at=now()-interval '2 minutes' WHERE panel_id=$1", donors[0])
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET verified_at=now()-interval '2 minutes' WHERE panel_id=$1", donors[0])
+	kept, _, err := svc.policy(ctx, receiver)
+	if err != nil || len(kept.Proxies) != 4 {
+		t.Fatal("short unchanged donor verification delay rewrote pool", err)
+	}
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET verified_at=now()-interval '4 minutes' WHERE panel_id=$1", donors[0])
+	kept, _, err = svc.policy(ctx, receiver)
+	if err != nil || len(kept.Proxies) != 3 {
+		t.Fatal("stale retained proof exceeded bounded grace", err)
+	}
+	sqlMustTrial(t, db, "UPDATE panel_routing_state SET state='APPLIED',verified_at=now() WHERE panel_id=$1", donors[0])
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET verified_at=now() WHERE panel_id=$1", donors[0])
 	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET valid_until=now()+interval '3 minutes'")
 	if healthy() {
 		t.Fatal("expiring config published")

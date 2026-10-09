@@ -380,6 +380,12 @@ func (s Service) checkPolicy(ctx context.Context, panel string, want routePolicy
 	if err != nil {
 		return err
 	}
+	// New eligible donors are admitted by the next reconciliation. They must not
+	// invalidate an in-flight snapshot whose chosen donors remain exactly valid.
+	if want.RelayMode && fresh.RelayMode && len(want.Proxies) > 0 && relaySnapshotStillValid(want.Proxies, fresh.Proxies) {
+		fresh.Proxies = want.Proxies
+		fresh.Configured = want.Configured
+	}
 	// Sniffing is fresh observed runtime state, not a saved policy field.
 	want.SniffingBlocked = false
 	want.PerformanceBaseline = nil
@@ -577,4 +583,25 @@ func stablePlanPanel(panel string) bool {
 		}
 	}
 	return false
+}
+
+// Every selected donor must retain its full identity, credentials, plan and
+// transport. Only additional fresh candidates may be deferred to the next pass.
+func relaySnapshotStillValid(want, fresh []rp) bool {
+	byID := map[string]rp{}
+	for _, p := range fresh {
+		byID[p.ID] = p
+	}
+	for _, p := range want {
+		other, ok := byID[p.ID]
+		if !ok {
+			return false
+		}
+		a, _ := json.Marshal(p)
+		b, _ := json.Marshal(other)
+		if string(a) != string(b) {
+			return false
+		}
+	}
+	return true
 }
