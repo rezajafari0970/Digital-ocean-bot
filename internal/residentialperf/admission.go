@@ -218,6 +218,9 @@ func admissionStart(ctx context.Context, tx *sql.Tx, q Request) error {
 	if err = e.Eligible(now); err != nil {
 		return err
 	}
+	if err = stabilityStart(ctx, tx, q, e, now); err != nil {
+		return err
+	}
 	if e.Context.PanelID != q.PanelIDs[0] || e.Context.Owner != q.ExperimentID || e.Context.Revision != q.BaseRevision || e.Context.Plan != q.BasePlan {
 		return conflict("admission receipt belongs to another panel or plan")
 	}

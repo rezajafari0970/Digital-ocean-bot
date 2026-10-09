@@ -16,6 +16,7 @@ import (
 
 type Store struct{ DB *sql.DB }
 type Request struct {
+	StabilityEvidenceID string   `json:"stability_evidence_id,omitempty"`
 	AdmissionEvidenceID string   `json:"admission_evidence_id,omitempty"`
 	TuningID            string   `json:"tuning_id,omitempty"`
 	RequestID           string   `json:"request_id"`
@@ -60,6 +61,10 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	if q.Config != nil {
 		c := q.Config.Clone()
 		q.Config = &c
+	}
+	q.StabilityEvidenceID = strings.ToLower(q.StabilityEvidenceID)
+	if q.StabilityEvidenceID != "" && (q.Action != "tune_start" || q.AdmissionEvidenceID == "" || !UUID.MatchString(q.StabilityEvidenceID)) {
+		return out, bad("stability evidence requires an admission start")
 	}
 	q.AdmissionEvidenceID = strings.ToLower(q.AdmissionEvidenceID)
 	if q.AdmissionEvidenceID != "" && (q.Action != "tune_start" || !UUID.MatchString(q.AdmissionEvidenceID)) {

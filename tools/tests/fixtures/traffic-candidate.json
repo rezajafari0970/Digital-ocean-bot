@@ -1,0 +1,191 @@
+{
+  "at": "2026-10-09T11:43:34.179054+00:00",
+  "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+  "phase": "traffic-final",
+  "cases": [
+    {
+      "case": "ads-0",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:14.020329+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 3.327428,
+      "egress_sha256": null
+    },
+    {
+      "case": "gpt-0",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:14.020869+00:00",
+      "passed": false,
+      "http": 0,
+      "curl_code": 28,
+      "seconds": 4.003032,
+      "egress_sha256": null
+    },
+    {
+      "case": "browserleaks-0",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:17.361559+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 2.5878,
+      "egress_sha256": null
+    },
+    {
+      "case": "ads-1",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:18.038108+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 3.40151,
+      "egress_sha256": null
+    },
+    {
+      "case": "gpt-1",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:19.962502+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 2.501586,
+      "egress_sha256": null
+    },
+    {
+      "case": "browserleaks-1",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:21.451952+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 4.01252,
+      "egress_sha256": null
+    },
+    {
+      "case": "ads-2",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:22.478292+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 3.100159,
+      "egress_sha256": null
+    },
+    {
+      "case": "gpt-2",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:25.477134+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 3.616479,
+      "egress_sha256": null
+    },
+    {
+      "case": "browserleaks-2",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:25.592845+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 2.910325,
+      "egress_sha256": null
+    },
+    {
+      "case": "probe-www.gstatic.com",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:28.533556+00:00",
+      "passed": true,
+      "http": 204,
+      "curl_code": 0,
+      "seconds": 0.976395,
+      "egress_sha256": null
+    },
+    {
+      "case": "probe-connectivitycheck.gstatic.com",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:29.105663+00:00",
+      "passed": true,
+      "http": 204,
+      "curl_code": 0,
+      "seconds": 0.933651,
+      "egress_sha256": null
+    },
+    {
+      "case": "probe-www.google.com",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:29.528319+00:00",
+      "passed": true,
+      "http": 204,
+      "curl_code": 0,
+      "seconds": 0.942896,
+      "egress_sha256": null
+    },
+    {
+      "case": "deny-example.com",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:30.057026+00:00",
+      "passed": true,
+      "http": 0,
+      "curl_code": 35,
+      "seconds": 0.73236,
+      "egress_sha256": null
+    },
+    {
+      "case": "deny-1.1.1.1",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:30.487252+00:00",
+      "passed": true,
+      "http": 0,
+      "curl_code": 35,
+      "seconds": 0.686306,
+      "egress_sha256": null
+    },
+    {
+      "case": "deny-dns.google",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:30.808232+00:00",
+      "passed": true,
+      "http": 0,
+      "curl_code": 35,
+      "seconds": 0.68874,
+      "egress_sha256": null
+    },
+    {
+      "case": "direct-positive",
+      "class": "DIRECT",
+      "at": "2026-10-09T11:43:31.190535+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 0.927741,
+      "egress_sha256": null
+    },
+    {
+      "case": "egress-res",
+      "class": "RESIDENTIAL",
+      "at": "2026-10-09T11:43:31.521174+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 2.633418,
+      "egress_sha256": "38588f64f893f50d06fcf468d8ebeba5a426f62e647b5bcb94ccd1d858b0c89d"
+    },
+    {
+      "case": "egress-direct",
+      "class": "DIRECT",
+      "at": "2026-10-09T11:43:32.139651+00:00",
+      "passed": true,
+      "http": 200,
+      "curl_code": 0,
+      "seconds": 1.624727,
+      "egress_sha256": "df3848a2da25e8a9541830c6c9610fc0b0b8ca024117ae8ce32449d9c6ca4ae1"
+    }
+  ],
+  "egress_distinct": true,
+  "local_core_healthy": true,
+  "scope": "fresh actual RES/DIRECT VLESS; static HEADs and BrowserLeaks egress; not mobile latency or ad show-rate",
+  "passed": false
+}
