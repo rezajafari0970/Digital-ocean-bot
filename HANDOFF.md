@@ -1,3 +1,39 @@
+# Latest continuation — stability supervisor candidate, 2026-10-09
+
+Read docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md, the acceptance JSON and
+docs/RESIDENTIAL_STABILITY_20261009.md first. Implemented candidate lives on
+feat/residential-stability-20261009 from94b1f4d. It is NOT deployed.
+Feature checkpoint a868049c763b4a6ea871f1d4d0f0c3851ad65e05 is pushed; material source is not merged here.
+Production remains fc76e6a; final read12:25:48UTC verified three live hashes,
+readiness, parent13/80v4, selectedgen3 READY/APPLIED, routing598 and Guardianfalse31.
+Zero admission operations/exclusions; other assignments and policy identities unchanged.
+
+Candidate: bounded one-panel supervisor, two independent fixed-role eligible
+receipts with60s separation, atomic first10min/second5min freshness and consecutive
+receipt gate, at most one logical5min exclusion trial, durable intent/exact replay,
+owned cancellation, exact native-proved restoration and real PID/leased status.
+No daemon/fleet publication/retry-until-green. Python23, focused/race Go, full56
+tested packages plus27 no-test packages, and vet PASS. No new live supervisor trial.
+Last live traffic17/18 with ads-2 failure; receipt e2abb6bc-abfb-45df-9df4-896ee9a27b5d
+was ineligible: f9d12/12,343control12/12,e67control0/12. Keep every failed observation.
+
+Independent review BLOCKED: HTTP429 insufficient_quota/credit_balance_exhausted.
+Initial plan REVISE; resolved council insufficient, implementation review NOT RUN.
+Do not call source independently accepted, merge material code to release or deploy.
+Project critical gate requires independent review. Prepared review input:
+ /root/backups/dob-residential-stability-20261009/implementation-review-input.txt
+Resume there after configured review API credit is available, then resolve findings,
+checkpoint/release and only then fresh fixed-policy qualification and scoped pilot.
+Do not repeat tests unless reviewed changes affect them; source hashes are recorded.
+
+Proxyrack readonly stats40/2100 and TTL600/autoReplace none concern only e67 on the
+control host; no quota saturation at that time, no VPS-path causal attribution.
+Provider internals/Android/appSDK/show-rate/IP+SNI/UpCloud gaps remain open.
+Canonical detached-bootstrap warning preserved. Agent inactive after final response,
+normal application workers continue. Status lease is not a background AI schedule.
+
+---
+
 # Latest continuation — residential path instability, 2026-10-09 11:33 UTC
 
 Read `docs/RESIDENTIAL_CONTINUATION_STATUS_FA_20261009_1133.md` and matching acceptance JSON first. Runtime remains fc76e6a, three process hashes verified. No product or production config changes. Fresh native106before/106final; actual traffic14/18before,17/18final. Preserve four initial Ads/GPT failures; no speed/show-rate acceptance.

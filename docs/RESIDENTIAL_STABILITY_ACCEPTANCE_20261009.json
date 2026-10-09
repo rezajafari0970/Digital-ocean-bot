@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "job": "residential-stability-20261009",
+  "at_utc": "2026-10-09T12:26:50.805742+00:00",
+  "at_tehran": "2026-10-09T15:56:50.805742+03:30",
+  "status": "BLOCKED_EXTERNAL_REVIEW",
+  "baseline": "94b1f4dfbba3d3d71632fe276c61a5994f53ed10",
+  "feature_branch": "feat/residential-stability-20261009",
+  "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "production_changed": false,
+  "field_acceptance": false,
+  "pilot_executed": false,
+  "risk": "critical",
+  "review": {
+    "initial_plan": "REVISE",
+    "resolved_plan": "INSUFFICIENT_COUNCIL",
+    "implementation": "NOT_RUN",
+    "blocker": {
+      "api_status": 429,
+      "error_type": "insufficient_quota",
+      "error_code": "credit_balance_exhausted"
+    },
+    "policy": "docs/PROJECT_AI_OPERATING_SYSTEM.md; docs/PROJECT_AI_POLICY.json high_risk_requires independent_review",
+    "disagreements_resolved_independently": false
+  },
+  "gates": {
+    "focused": {
+      "exit": 0,
+      "log_sha256": "cd9bb6c33b173d4abb7d7444b9d370ef9658396319df047d9ca207d117d199a1"
+    },
+    "race": {
+      "exit": 0,
+      "log_sha256": "8d9a1be9201d50257e8205f108432623e602a45f0e572ecc054a384499568b46"
+    },
+    "full": {
+      "exit": 0,
+      "log_sha256": "114646d5d4c02404bed57aa77baae7a3aede6ee0201ba3466da664a376b317d7"
+    },
+    "vet": {
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "python-tests-final": {
+      "exit": 0,
+      "log_sha256": "c081d71656cfe889ebb98031b06f2606448577ae65eb52efb1eb92929ed9e4de"
+    },
+    "final-read": {
+      "exit": 0,
+      "log_sha256": "9742d66411c8b41d2330a3dba091dc003ab6fc23be451b6f719cb1bafcef86d3"
+    }
+  },
+  "python_test_count": 23,
+  "full_go_tested_packages": 56,
+  "full_go_packages_without_tests": 27,
+  "native_live_before": {
+    "passed": 106,
+    "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "at": "2026-10-09T11:55:23Z"
+  },
+  "actual_traffic_live_before": {
+    "passed": 17,
+    "total": 18,
+    "failed": [
+      "ads-2"
+    ],
+    "scope": "existing production; not new supervisor"
+  },
+  "live_receipt": {
+    "id": "e2abb6bc-abfb-45df-9df4-896ee9a27b5d",
+    "suspect_passed": 12,
+    "control_343_passed": 12,
+    "control_e67_passed": 0,
+    "total_attempts": 36,
+    "eligible": false,
+    "reason": "both controls must pass every scheduled destination check"
+  },
+  "provider_read_scope": "Proxyrack e67 only, control host; not a VPS path measurement",
+  "provider_threads_observed": {
+    "at": "2026-10-09T12:05:19.954393+00:00",
+    "concurrent": 40,
+    "limit": 2100
+  },
+  "provider_session_observed": {
+    "ttl_seconds": 600,
+    "auto_replace": "none",
+    "root_cause_established": false
+  },
+  "final_live": {
+    "at": "2026-10-09T12:25:48.123818+00:00",
+    "runtime": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+    "runtime_hashes_and_readiness": "PASS",
+    "parent_version": 4,
+    "parent_fast_count": 13,
+    "parent_fast_share": 80,
+    "selected_generation": 3,
+    "selected_state": "APPLIED",
+    "selected_server_state": "READY",
+    "invariants_and_other_assignments_unchanged": true,
+    "admission_operations": 0,
+    "selected_exclusions": [],
+    "routing_revision": 598,
+    "protection": {
+      "enabled": false,
+      "scope": "fleet",
+      "revision": 31
+    },
+    "latest_receipt": "e2abb6bc-abfb-45df-9df4-896ee9a27b5d"
+  },
+  "source_sha256": {
+    "internal/residentialperf/store.go": "814176d11b6201acdaa41ddee89c3b07867efe67a097eecccc75035b6a96dd5f",
+    "internal/residentialperf/admission.go": "dee5f3e4e86f2435ae1cf258870dcab8db71ea030c3d6043757869d12695e4d4",
+    "internal/residentialperf/stability.go": "e7ac75e868a8c62eb8a676a41c2d71de196cdd0b09d365ef609e2063ecc28b24",
+    "internal/adminapi/residential_stability_test.go": "53f38564d3042d2b7db1abeab7ba940ddd233fca1c4be4a5bd441647e12402a5",
+    "tools/residential-stability-pilot.py": "dc587d63e8ef5cb808570b36624ccb1daf9f41155ca9b6ef0a7a70f246a4dc2b",
+    "tools/residential-pilot-traffic.py": "9af3a115c99876cb0c40cf7ea4328650e52195b71c8c178ea3b51e145985a956",
+    "tools/tests/test_residential_stability_pilot.py": "a412edb855140ba2ff8f9701c62b505d4644cbfdc66be715cc4f92bc3f852030",
+    "tools/tests/fixtures/traffic-baseline.json": "1c0652f6a07cd9e586360f8da65e2b1fa58fdba631cc1c2952700479967de11a",
+    "tools/tests/fixtures/traffic-candidate.json": "10429ff5d95ef61d3f090e16a9100a7c24711601a49dbcd8e3df8beef74e8791",
+    "tools/tests/fixtures/stability-snapshot.json": "6eb3306b7a332d253598bed7f8e5afeb8c109f44368e63ce4c145910ba261152",
+    "docs/RESIDENTIAL_STABILITY_20261009.md": "3852520960c10d39e60ccff22076849e9b2d61957d0c8a66ddddc57704df0a74"
+  },
+  "evidence_directory": "/root/backups/dob-residential-stability-20261009",
+  "live_evidence_directory": "/root/backups/dob-residential-admission-20261009/repair-1153",
+  "rollback_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "rollback_condition": "No active tuning or exclusion obligation; exact restoration verified; existing compatibility gate passes",
+  "known_gaps": [
+    "independent plan and implementation review",
+    "live paired-qualification and exact-five-minute exclusion/restoration pilot",
+    "provider internal root cause",
+    "physical Android/v2rayNG timing",
+    "app SDK load/show/impression telemetry",
+    "prior IP+SNI and UpCloud gaps",
+    "canonical detached bootstrap warning"
+  ],
+  "agent_continues_after_final_reply": false,
+  "next": "Restore configured review API credit; resume implementation-review-input.txt, resolve review, checkpoint, release and only then frozen qualifying pilot. Never rerun probes just to obtain eligible evidence.",
+  "feature_commit": "a868049c763b4a6ea871f1d4d0f0c3851ad65e05",
+  "feature_remote_verified": true
+}
