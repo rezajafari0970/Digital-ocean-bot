@@ -99,6 +99,12 @@ func strictVLESSUDP(address, id, target string, port int) (string, error) {
 }
 
 func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
+	testInstalledCoreCategories(t, false)
+}
+
+func TestInstalledCoreExpandedCategoriesAndOutage(t *testing.T) { testInstalledCoreCategories(t, true) }
+
+func testInstalledCoreCategories(t *testing.T, expanded bool) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("installed Xray required")
@@ -113,7 +119,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 			defer sink.Close()
 			_, pt, _ := net.SplitHostPort(sink.Listener.Addr().String())
 			sinkPort, _ := strconv.Atoi(pt)
-			udp, e := net.ListenPacket("udp4", "127.0.0.1:0")
+			udp, e := net.ListenPacket("udp4", net.JoinHostPort("127.0.0.1", pt))
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -131,7 +137,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 				}
 			}()
 			udpPort := udp.LocalAddr().(*net.UDPAddr).Port
-			p := routePolicy{StrictAllowlist: true, PoolEnabled: pool, Explicit: true, Residential: true, Direct: true, Configured: 1,
+			p := routePolicy{ExpandedCategories: expanded, StrictAllowlist: true, PoolEnabled: pool, Explicit: true, Residential: true, Direct: true, Configured: 1,
 				Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: upstream.listener.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-fixture"}}}
 			clients := []clientRoute{{ID: directID, Email: "direct@test", Class: "DIRECT", Effective: "DIRECT"}, {ID: resID, Email: "res@test", Class: "RESIDENTIAL", Effective: "RESIDENTIAL"}}
 			setting, e := buildSettings(map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"rules": []any{}}}, clients, []string{"in"}, p)
@@ -161,7 +167,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 			for _, value := range setting["outbounds"].([]any) {
 				out := value.(map[string]any)
 				if out["protocol"] == "freedom" {
-					out["settings"] = map[string]any{"finalRules": []any{map[string]any{"action": "allow"}}}
+					out["settings"] = map[string]any{"redirect": net.JoinHostPort("127.0.0.1", pt), "finalRules": []any{map[string]any{"action": "allow"}}}
 				}
 			}
 			setting["log"] = map[string]any{"loglevel": "debug"}
@@ -211,6 +217,16 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 					}
 				}
 			}
+			if expanded {
+				for _, host := range []string{"ads.yahoo.com", "adnxs.com", "ad.xiaomi.com", "unityads.unity3d.com", "dt.dbankcloud.ru", "insights-collector.gog.com", "firebase.google.com", "mtalk.google.com", "play.google.com", "www.youtube.com", "r1.googlevideo.com"} {
+					if body, e := strictVLESSRequest(address, resID, host, host, 443); e != nil || body != "residential" {
+						t.Fatalf("expanded TCP %s: %q %v", host, body, e)
+					}
+					if body, e := strictVLESSUDP(address, resID, host, 443); e != nil || body != "residential" {
+						t.Fatalf("expanded UDP %s: %q %v", host, body, e)
+					}
+				}
+			}
 			// Allowed sniffed name must replace the arbitrary requested IP before the proxy sees it.
 			if body, e := strictVLESSRequest(address, resID, "127.0.0.1", "adservice.google.com", sinkPort); e != nil || body != "residential" {
 				t.Fatal("sniff override", body, e)
@@ -226,7 +242,7 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 			}{
 				{"127.0.0.1", sinkPort}, {"maps.google.com", 443}, {"www.gstatic.com.evil.test", 443},
 				{"evil.www.gstatic.com", 443}, {"www.gstatic.com", 8443}, {"8.8.8.8", 53}, {"adservice.google.com", 53},
-				{"browserleaks.com.evil.test", 443},
+				{"browserleaks.com.evil.test", 443}, {"huawei.com", 443}, {"gog.com", 443}, {"insights-collector.gog.com.evil.test", 443}, {"www.youtube.com.evil.test", 443},
 			} {
 				if body, e := strictVLESSRequest(address, resID, target.host, target.host, target.port); e == nil {
 					t.Fatalf("denied got response %s %q", target.host, body)
@@ -252,13 +268,38 @@ func TestInstalledCoreStrictAllowlistBothDirectionsAndOutage(t *testing.T) {
 			if body, e := strictVLESSUDP(address, directID, "127.0.0.1", udpPort); e != nil || body != "allowlist-udp" {
 				t.Fatal("DIRECT UDP control", body, e)
 			}
+			directExpected := int64(1)
+			if expanded {
+				for _, host := range []string{"www.youtube.com", "dt.dbankcloud.ru", "insights-collector.gog.com"} {
+					if body, e := strictVLESSRequest(address, directID, host, host, 443); e != nil || body != "direct" {
+						t.Fatal("expanded DIRECT TCP detector", host, body, e)
+					}
+					if body, e := strictVLESSUDP(address, directID, host, 443); e != nil || body != "allowlist-udp" {
+						t.Fatal("expanded DIRECT UDP detector", host, body, e)
+					}
+					directExpected++
+				}
+			}
+			if directHits.Load() != directExpected || udpHits.Load() != directExpected {
+				t.Fatal("direct detector control failed")
+			}
 			upstream.down.Store(true)
 			for _, host := range []string{"adservice.google.com", "browserleaks.com"} {
 				if _, e := strictVLESSRequest(address, resID, host, host, 80); e == nil {
 					t.Fatal("failed proxy succeeded")
 				}
 			}
-			if directHits.Load() != 1 || udpHits.Load() != 1 {
+			if expanded {
+				for _, host := range []string{"www.youtube.com", "dt.dbankcloud.ru", "insights-collector.gog.com"} {
+					if _, e := strictVLESSRequest(address, resID, host, host, 443); e == nil {
+						t.Fatal("expanded outage TCP succeeded", host)
+					}
+					if _, e := strictVLESSUDP(address, resID, host, 443); e == nil {
+						t.Fatal("expanded outage UDP succeeded", host)
+					}
+				}
+			}
+			if directHits.Load() != directExpected || udpHits.Load() != directExpected {
 				t.Fatal("outage leaked direct")
 			}
 			upstream.down.Store(false)

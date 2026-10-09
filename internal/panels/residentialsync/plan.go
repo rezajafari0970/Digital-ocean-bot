@@ -14,8 +14,7 @@ import (
 const directTag = "dob-route-direct"
 const blockedTag = "dob-route-blocked"
 
-// User-selected category: only Google advertising domains.
-// Do not widen to all-ad or other-provider categories.
+// Original Google advertising category; expanded authorized scope is staged in categories.go.
 var adDomains = []string{"geosite:google@ads"}
 
 // Temporary user-requested diagnostic exception, separate from Ads categories.
@@ -29,6 +28,7 @@ func residentialDomains() []string {
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
 	StrictAllowlist       bool
+	ExpandedCategories    bool
 	LegacyClientPaths     bool
 	StableFingerprint     bool
 	Performance           *residentialperf.Config
@@ -377,9 +377,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 				// HTTP cannot carry UDP: block only matched protected domains.
 				// Never send matched Ads UDP to the non-ad direct fallback.
 				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" {
-					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": residentialDomains(), "network": "udp", "outboundTag": blockedTag})
+					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": p.residentialDomains(), "network": "udp", "outboundTag": blockedTag})
 				}
-				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
+				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": p.residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
 				if p.StrictAllowlist && p.LegacyClientPaths {
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-probes", "inboundTag": tags, "domain": legacyProbeDomains(), "network": "tcp", "port": "80,443", "outboundTag": destination})
 				}

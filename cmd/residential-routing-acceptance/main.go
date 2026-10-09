@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 )
@@ -181,14 +182,14 @@ func run() error {
 				}
 				if r["ruleTag"] == "dob-route-residential-ads" || r["ruleTag"] == "dob-route-residential-ads-tcp" || r["ruleTag"] == "dob-route-residential-ads-udp" {
 					domains, _ := r["domain"].([]any)
-					wanted := []string{"geosite:google@ads", "domain:browserleaks.com"}
+					wanted := residentialsync.AllowedResidentialDomains(id)
 					netw, _ := r["network"].(string)
 					if len(domains) != len(wanted) || (netw != "tcp,udp" && netw != "tcp" && netw != "udp") {
-						return 0, fmt.Errorf("Ads-only scope differs")
+						return 0, fmt.Errorf("residential destination scope differs")
 					}
 					for i, d := range wanted {
 						if domains[i] != d {
-							return 0, fmt.Errorf("Ads categories differ")
+							return 0, fmt.Errorf("residential categories differ")
 						}
 					}
 					protected, _ = r["outboundTag"].(string)
@@ -245,15 +246,20 @@ func run() error {
 			type client struct{ ID, Email string }
 			tag := ""
 			observed := map[string]bool{}
+			inboundTags := []string{}
 			for _, raw := range inbounds {
 				var in struct {
 					Port     int
+					Protocol string
 					Tag      string
 					Settings json.RawMessage
 					Sniffing json.RawMessage
 				}
 				if json.Unmarshal(raw, &in) != nil {
 					return 0, fmt.Errorf("inbound shape")
+				}
+				if !strict || !clientPaths || in.Protocol == "vless" || in.Protocol == "vmess" {
+					inboundTags = append(inboundTags, in.Tag)
 				}
 				if in.Port != 443 {
 					continue
@@ -272,6 +278,18 @@ func run() error {
 				json.Unmarshal(v, &clients)
 				for _, c := range clients.Clients {
 					observed[c.ID+"|"+c.Email] = true
+				}
+			}
+			sort.Strings(inboundTags)
+			if residentialsync.ExpandedCategoriesEnabled(id) {
+				if err := validateCategoryContract(setting, residentialsync.AllowedResidentialDomains(id), strict, poolAllowed, clientPaths, inboundTags); err != nil {
+					return 0, err
+				}
+				if protectedUDP != "" {
+					protectedUDP = blocked
+				}
+				for key, values := range positivePoolTargets(poolAllowed) {
+					poolAllowed[key] = values
 				}
 			}
 			if tag == "" {
@@ -309,7 +327,7 @@ func run() error {
 				wanted := []string{expected}
 				if expected == "@pool" {
 					wanted = poolAllowed["@pool:"+form.Get("network")]
-				} else if strings.HasPrefix(expected, "@inner:") {
+				} else if strings.HasPrefix(expected, "@inner:") || strings.HasPrefix(expected, "@positive:") {
 					wanted = poolAllowed[expected]
 				}
 				matches := false
@@ -335,7 +353,7 @@ func run() error {
 						domain, ip, port string
 						ad               bool
 					}{
-						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", false}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
+						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", residentialsync.ExpandedCategoriesEnabled(id)}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
 						{"www.gstatic.com", "", "443", false}, {"connectivitycheck.gstatic.com", "", "80", false}, {"www.google.com", "", "443", false}, {"cloudflare-dns.com", "", "443", false}, {"cloudflare-dns.com", "", "80", false}, {"dns.google", "", "443", false}, {"", "9.9.9.9", "53", false},
 						{"www.gstatic.com.evil.test", "", "443", false}, {"evil.www.gstatic.com", "", "443", false},
 						{"www.gstatic.com", "", "8443", false}, {"adservice.google.com", "", "53", true},
@@ -372,6 +390,17 @@ func run() error {
 						}
 					}
 				}
+			}
+			if residentialsync.ExpandedCategoriesEnabled(id) {
+				unmatched := direct
+				if strict {
+					unmatched = blocked
+				}
+				n, err := verifyExpandedCategories(check, tag, emails, direct, unmatched, protected, protectedUDP, poolAllowed, strict, blocked)
+				if err != nil {
+					return 0, err
+				}
+				_ = n
 			}
 			dnsPort := "53"
 			if strict && assignment.Config != nil && assignment.Config.DNSMode == "doh" {

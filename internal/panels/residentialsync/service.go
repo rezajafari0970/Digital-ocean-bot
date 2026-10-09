@@ -55,7 +55,7 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	})
 }
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := (routePolicy{StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
+	p := (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)

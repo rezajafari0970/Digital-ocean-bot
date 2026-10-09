@@ -57,7 +57,7 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 			blocked = tag
 		}
 	}
-	if blocked == "" {
+	if blocked == "" || outs[blocked]["protocol"] != "blackhole" {
 		return nil, fmt.Errorf("blocking outbound absent")
 	}
 	routing := setting["routing"].(map[string]any)
@@ -137,7 +137,7 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 			for _, v := range selectors {
 				tag := v.(string)
 				o := outs[tag]
-				if !observed[tag] || !strings.HasPrefix(tag, "residential-ads-") || (network == "udp" && o["protocol"] != "socks") {
+				if !observed[tag] || !strings.HasPrefix(tag, "residential-ads-") || (o["protocol"] != "socks" && o["protocol"] != "http") || (network == "udp" && o["protocol"] != "socks") {
 					return nil, fmt.Errorf("unobserved or unsupported proxy selected")
 				}
 				targets[key] = append(targets[key], tag)

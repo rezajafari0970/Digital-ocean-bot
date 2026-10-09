@@ -118,7 +118,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-infrastructure-deny", "inboundTag": inbound, "network": network, "domain": append(append([]string{}, residentialProbeDomains...), clientDoHDomains...), "outboundTag": blockedTag})
 				}
 				if !p.SniffingBlocked && p.Residential {
-					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-ads", "inboundTag": inbound, "network": network, "domain": residentialDomains(), "balancerTag": tag})
+					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-ads", "inboundTag": inbound, "network": network, "domain": p.residentialDomains(), "balancerTag": tag})
 					if p.LegacyClientPaths && network == "tcp" {
 						internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-probes", "inboundTag": inbound, "network": network, "domain": legacyProbeDomains(), "port": "80,443", "balancerTag": tag})
 					}

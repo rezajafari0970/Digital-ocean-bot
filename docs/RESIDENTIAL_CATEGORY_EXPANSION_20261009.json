@@ -1,0 +1,327 @@
+{
+  "at": "2026-10-09T20:40:42.958850+00:00",
+  "status": "ACCEPTED_RELEASE_PENDING",
+  "baseline": "85a5b3f41e548cc700222de0e8b764de23913e8b",
+  "previous_runtime": "cebacf9f4ff5d77c692505db881210b68db4257c",
+  "source_digest": "159c78703f09b52c9702a29421510de43b1e1e0989caed4acf50a7d2f7127b20",
+  "source_manifest": "/root/backups/dob-residential-policy-20261009/source-v4.json",
+  "review": {
+    "decision": "PASS",
+    "input_sha256": "27811596352841ccc34cf657c6d47d01e578da82651b35ce43e50520118483bb",
+    "receipt": "/root/backups/dob-residential-policy-20261009/review-v4.json"
+  },
+  "tests": {
+    "postgres-v3": "8baaa113c936629b4b0b6a3ff4f72168fbc3988feed7ebdb4784844866a646e4",
+    "core-v3": "46a3162c241fb9c067a898e46e82463835504e68987a8093a733fe3206ecc2ca",
+    "race-v3": "ab164ac3fe5835ca93e31dface5e897643241e600be62e8bfb63cc0543a64926",
+    "acceptance-v4": "19c4337ba83506ede3bf42ef38fe70668816a2816890f3a595c6e1c686e92155",
+    "full-v4": "184ffd1d88e2f256b62b70aaf4477c0f07c30afb85273173a9f1357f73d1b7a2",
+    "vet-v4": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "race-v4": "362dab1d3bd2883d95a04180afc7678acf62be72a6b3143db7ac24d79c91ecc2"
+  },
+  "requested_categories": [
+    "geosite:google@ads",
+    "geosite:category-ads",
+    "geosite:category-ads-all",
+    "geosite:xiaomi@ads",
+    "geosite:unity@ads",
+    "geosite:huawei@ads",
+    "geosite:gog@ads",
+    "geosite:firebase",
+    "geosite:googlefcm",
+    "geosite:google-play",
+    "geosite:youtube"
+  ],
+  "compatibility_domains": [
+    "domain:dt.dbankcloud.ru",
+    "domain:insights-collector.gog.com"
+  ],
+  "compatibility_source_commit": "c6adacf29cc4fb05e04651fcf03e00989ef9f797",
+  "local_geodata": {
+    "asset_sha256": "adf92de0cfc70e458b399f04c5f912bf42d115ed7e37281b30e2f1c68605e4e9",
+    "asset_bytes": 10491954,
+    "categories": [
+      {
+        "category": "geosite:google@ads",
+        "domain_count": 53,
+        "samples": [
+          {
+            "type": 2,
+            "value": "2mdn-cn.net",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "2mdn.net",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "admob-cn.com",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "admob.com",
+            "attributes": [
+              "ads"
+            ]
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:category-ads",
+        "domain_count": 639,
+        "samples": [
+          {
+            "type": 3,
+            "value": "pinggai0.caixin.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "pinggai1.caixin.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "pinggai2.caixin.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "pinggai3.caixin.com",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:category-ads-all",
+        "domain_count": 170624,
+        "samples": [
+          {
+            "type": 2,
+            "value": "ruddy-pass.com",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "zgwgoxzayjmqc.store",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "zzzn1j9m4evqno.rest",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "track-victoriadates.com",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:xiaomi@ads",
+        "domain_count": 21,
+        "samples": [
+          {
+            "type": 2,
+            "value": "a.market.xiaomi.com",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "ad.intl.xiaomi.com",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "ad.mi.com",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "ad.xiaomi.com",
+            "attributes": [
+              "ads"
+            ]
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:unity@ads",
+        "domain_count": 2,
+        "samples": [
+          {
+            "type": 2,
+            "value": "iads.unity3d.com",
+            "attributes": [
+              "ads"
+            ]
+          },
+          {
+            "type": 2,
+            "value": "unityads.unity3d.com",
+            "attributes": [
+              "ads"
+            ]
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:huawei@ads",
+        "domain_count": 0,
+        "samples": [],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:gog@ads",
+        "domain_count": 0,
+        "samples": [],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:firebase",
+        "domain_count": 17,
+        "samples": [
+          {
+            "type": 3,
+            "value": "firebase.google.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "firebase.googleapis.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "firebaseappcheck.googleapis.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "firebasedynamiclinks-ipv4.googleapis.com",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:googlefcm",
+        "domain_count": 12,
+        "samples": [
+          {
+            "type": 3,
+            "value": "alt7-mtalk.google.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "alt8-mtalk.google.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "mtalk-dev.google.com",
+            "attributes": []
+          },
+          {
+            "type": 3,
+            "value": "mtalk-staging.google.com",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:google-play",
+        "domain_count": 10,
+        "samples": [
+          {
+            "type": 2,
+            "value": "googleplay.com",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "xn--ngstr-lra8j.com",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "play-fe.googleapis.com",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "play-games.googleusercontent.com",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      },
+      {
+        "category": "geosite:youtube",
+        "domain_count": 178,
+        "samples": [
+          {
+            "type": 3,
+            "value": "yt3.googleusercontent.com",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "youtube",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "youtube.ru",
+            "attributes": []
+          },
+          {
+            "type": 2,
+            "value": "youtube.az",
+            "attributes": []
+          }
+        ],
+        "core_test_exit": 0
+      }
+    ],
+    "all_present_and_core_valid": false
+  },
+  "scope_selector": "DOB_RESIDENTIAL_CATEGORIES_PANELS; empty/none/invalid preserves original; UUID canary then all",
+  "health_reporting": "read-only latest diagnostic receipt; no probes, no routing mutation; no claim of provider independence/native pool/app health",
+  "automatic_quarantine_enabled": false,
+  "prior_field_result": "NO_ACTION",
+  "upstream_root_cause_proven": false,
+  "six_stage_progress": {
+    "path_health": "read-only evidence view implemented; automatic collection and native attribution remain",
+    "independent_backup": "12 endpoints grouped into 3 gateway hosts; provider independence unverified; no purchase or new credentials",
+    "quarantine": "existing manual capability; automatic state machine not enabled",
+    "stable_selection": "existing leastLoad unchanged; per-user affinity not implemented",
+    "low_cost_monitoring": "new report generates zero network probes; ongoing scheduler unchanged",
+    "retry_timeout": "existing bounded semantics preserved; no retuning without latency evidence"
+  },
+  "evidence_directory": "/root/backups/dob-residential-policy-20261009",
+  "next": "clean deployment with category selector none; one-panel canary and exact rollback; all-panel activation only after native proof; read-only health smoke check; persist truthful final findings"
+}
