@@ -1,3 +1,13 @@
+# Latest continuation — residential path instability, 2026-10-09 11:33 UTC
+
+Read `docs/RESIDENTIAL_CONTINUATION_STATUS_FA_20261009_1133.md` and matching acceptance JSON first. Runtime remains fc76e6a, three process hashes verified. No product or production config changes. Fresh native106before/106final; actual traffic14/18before,17/18final. Preserve four initial Ads/GPT failures; no speed/show-rate acceptance.
+
+Fresh trusted receipt f4c84d5f-0612-4a52-b37c-2d3dfb4c6e20 passed36/36+2guards: previous suspect e555 and both e67/f9d controls12/12. Ineligible because suspect had no repeated Ads failure. No admission operation, no exclusions, no pilot. Independent diagnostic all12paths 120/144 over3rounds showed f9d control became unstable shortly afterward. This diagnostic is not admission authorization; do not merge observations or retry until green. Frozen one-receipt policy exhausted for this run. Endpoint versions/config remained stable; actual native chosen outbound per failed request was not captured, so no single-gateway causal claim.
+
+Parent13/80v4 and selectedgen3 preserved, routing598/Guardianfalse31 and policy/enablement unchanged. Native gstatic-only health is not Ads/GPT health; fast_count13 with12candidates caps both lanes to12. Next: bounded longitudinal multi-target health evidence, then supported exact5minute exclusion-only pilot only with qualifying fresh receipt. Automatic ongoing quarantine/readmission remains separate gated development. No mobile/appSDK/fleet performance claim. Status inactive after final reply; normal workers continue. Raw evidence `/root/backups/dob-residential-admission-20261009/resume-1133`.
+
+---
+
 # Latest continuation — bounded residential admission, 2026-10-09
 
 Read `docs/RESIDENTIAL_ADMISSION_STATUS_FA_20261009.md`, `docs/RESIDENTIAL_ADMISSION_ACCEPTANCE_20261009.json` and the capability guide. Runtime **fc76e6a669931873295ddded4f51eca3a7bbe8ca** is deployed and pushed. Full isolated-DB regression, vet, race/fault, real Xray26.3.27/26.9.9 and independent source review PASS. Three live process hashes match; readiness five responses each5/5; retired browser-manager remains disabled/inactive. Rollback98bcb7e only after all future admission obligations are restored and verified; backup path in scoped evidence directory.

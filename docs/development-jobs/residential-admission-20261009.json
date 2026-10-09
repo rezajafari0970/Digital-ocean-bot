@@ -1,6 +1,6 @@
 {
   "job": "residential-admission-20261009",
-  "at": "2026-10-09T10:45:28.690143+00:00",
+  "at": "2026-10-09T11:44:19.302405+00:00",
   "status": "CAPABILITY_DEPLOYED_PILOT_NOT_ADMITTED",
   "requirement": "RES-001: destination-aware per-VPS bounded manual admission; strict Ads/BrowserLeaks allowlist and direct probes retained",
   "baseline": "ad1b0df0a0c7e4fc66fd1c8b77503790a26e2b27",
@@ -42,9 +42,12 @@
     "canonical detached bootstrap failure remains recorded; no repository-wide READY claim",
     "no physical Android latency or app SDK show-rate evidence"
   ],
-  "next": "Keep current profile; obtain fresh stable controls then one exact5minute exclusion-only trial using deployed supported tools. Automatic ongoing quarantine/readmission is separate gated work. No silent retries or indefinite exclusions.",
+  "next": "Bounded longitudinal multi-target evidence; fresh qualifying receipt required before exact5minute pilot. Current suspect recovered; no exclusion authorized. Preserve all failures and original static controls. Automatic quarantine/readmission is separate reviewed development.",
   "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
   "field_acceptance": false,
   "agent_continues_after_final_reply": false,
-  "final_report": "docs/RESIDENTIAL_ADMISSION_STATUS_FA_20261009.md"
+  "final_report": "docs/RESIDENTIAL_CONTINUATION_STATUS_FA_20261009_1133.md",
+  "last_continuation": "resume-1133",
+  "latest_evidence_id": "f4c84d5f-0612-4a52-b37c-2d3dfb4c6e20",
+  "latest_receipt_reason": "suspect lacks repeated failure of the same Ads destination"
 }

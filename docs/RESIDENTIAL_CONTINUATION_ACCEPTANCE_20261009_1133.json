@@ -1,0 +1,3214 @@
+{
+  "at": "2026-10-09T11:44:19.302405+00:00",
+  "at_tehran": "2026-10-09T15:14:19.302405+03:30",
+  "status": "PAUSED_AT_EVIDENCE_GATE",
+  "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "source_checkpoint_before": "bb2b38e2cff91bbb98af1623d1ca2d3867f788e2",
+  "admission_receipt": {
+    "eligible": false,
+    "evidence": {
+      "collection_healthy": true,
+      "collection_outcome": "completed",
+      "guard": {
+        "positive": {
+          "proxy_id": "",
+          "target": "",
+          "round": 0,
+          "started": "2026-10-09T11:35:02.913249346Z",
+          "finished": "2026-10-09T11:35:05.636921156Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 2723
+        },
+        "denied": {
+          "proxy_id": "",
+          "target": "",
+          "round": 0,
+          "started": "2026-10-09T11:35:05.688633382Z",
+          "finished": "2026-10-09T11:35:05.701546313Z",
+          "outcome": "transport",
+          "curl_code": 56,
+          "http_status": 0,
+          "milliseconds": 12
+        },
+        "negative_core_alive": true,
+        "startup": "ready"
+      },
+      "id": "f4c84d5f-0612-4a52-b37c-2d3dfb4c6e20",
+      "manifest": "vps-chain-head-v1",
+      "context": {
+        "panel_id": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+        "panel_identity": "89689239456dac565a4f67f02eb15f63",
+        "revision": 598,
+        "plan": "7e9e0d19d3ee4ff7bfc21db2b3205077a33b44b0c37ba8760eab712da9fb94f4",
+        "generation": 3,
+        "owner": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+        "proxy_versions": {
+          "1f56f129-9557-4696-8338-6cf018efda26": 1,
+          "343e38f3-e7cf-48fc-b478-c5c9e1f94b82": 1,
+          "34c702d8-2425-4c1e-89b3-727b7969474b": 1,
+          "35dc6378-d9b8-4183-9b64-86dbc5d6c34d": 1,
+          "57834995-9db9-453f-a11d-8a61b15e4180": 1,
+          "8652799c-7d5a-4a9a-8d86-7d1f519b31dc": 1,
+          "a286d129-0df7-423d-be58-8641b6e33d67": 1,
+          "b51406c1-2e34-4145-b961-d8a34d1d11f6": 1,
+          "d4059313-96ce-4414-ab15-f742edb5be31": 1,
+          "e55578f8-c734-420f-801c-3ab96274490a": 1,
+          "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 1,
+          "f9d1b979-53ad-4ff3-8c37-551e2003c2d1": 1
+        }
+      },
+      "suspects": [
+        "e55578f8-c734-420f-801c-3ab96274490a"
+      ],
+      "controls": [
+        "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+        "f9d1b979-53ad-4ff3-8c37-551e2003c2d1"
+      ],
+      "started": "2026-10-09T11:35:02.808861183Z",
+      "finished": "2026-10-09T11:35:56.11240863Z",
+      "context_stable": true,
+      "chain_verified": true,
+      "observations": [
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "probe",
+          "round": 0,
+          "started": "2026-10-09T11:35:05.703918026Z",
+          "finished": "2026-10-09T11:35:09.756017028Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 4052
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "browserleaks",
+          "round": 0,
+          "started": "2026-10-09T11:35:09.756082321Z",
+          "finished": "2026-10-09T11:35:13.604710427Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3848
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "ads",
+          "round": 0,
+          "started": "2026-10-09T11:35:13.604778895Z",
+          "finished": "2026-10-09T11:35:17.389339381Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3784
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "gpt",
+          "round": 0,
+          "started": "2026-10-09T11:35:17.389424781Z",
+          "finished": "2026-10-09T11:35:20.945909123Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3556
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "probe",
+          "round": 1,
+          "started": "2026-10-09T11:35:20.946005614Z",
+          "finished": "2026-10-09T11:35:24.532581046Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3586
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "browserleaks",
+          "round": 1,
+          "started": "2026-10-09T11:35:24.532669572Z",
+          "finished": "2026-10-09T11:35:28.146521628Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3613
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "ads",
+          "round": 1,
+          "started": "2026-10-09T11:35:28.146638486Z",
+          "finished": "2026-10-09T11:35:32.909777675Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 4763
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "gpt",
+          "round": 1,
+          "started": "2026-10-09T11:35:32.909862384Z",
+          "finished": "2026-10-09T11:35:38.181009366Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 5271
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "probe",
+          "round": 2,
+          "started": "2026-10-09T11:35:38.181066184Z",
+          "finished": "2026-10-09T11:35:41.767115174Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3586
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "browserleaks",
+          "round": 2,
+          "started": "2026-10-09T11:35:41.767167782Z",
+          "finished": "2026-10-09T11:35:45.822333821Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 4055
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "ads",
+          "round": 2,
+          "started": "2026-10-09T11:35:45.822395516Z",
+          "finished": "2026-10-09T11:35:49.708984113Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3886
+        },
+        {
+          "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+          "target": "gpt",
+          "round": 2,
+          "started": "2026-10-09T11:35:49.709054797Z",
+          "finished": "2026-10-09T11:35:56.107623848Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 6398
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "probe",
+          "round": 0,
+          "started": "2026-10-09T11:35:05.703918026Z",
+          "finished": "2026-10-09T11:35:09.133568641Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3429
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "browserleaks",
+          "round": 0,
+          "started": "2026-10-09T11:35:09.133636488Z",
+          "finished": "2026-10-09T11:35:13.11845166Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3984
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "ads",
+          "round": 0,
+          "started": "2026-10-09T11:35:13.118527734Z",
+          "finished": "2026-10-09T11:35:16.567939041Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3449
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "gpt",
+          "round": 0,
+          "started": "2026-10-09T11:35:16.568031684Z",
+          "finished": "2026-10-09T11:35:19.994862024Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3426
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "probe",
+          "round": 1,
+          "started": "2026-10-09T11:35:19.994937716Z",
+          "finished": "2026-10-09T11:35:23.556064466Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3561
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "browserleaks",
+          "round": 1,
+          "started": "2026-10-09T11:35:23.556166226Z",
+          "finished": "2026-10-09T11:35:27.616827312Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 4060
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "ads",
+          "round": 1,
+          "started": "2026-10-09T11:35:27.616889678Z",
+          "finished": "2026-10-09T11:35:31.01684599Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3399
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "gpt",
+          "round": 1,
+          "started": "2026-10-09T11:35:31.01699023Z",
+          "finished": "2026-10-09T11:35:34.572659932Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3555
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "probe",
+          "round": 2,
+          "started": "2026-10-09T11:35:34.572762664Z",
+          "finished": "2026-10-09T11:35:37.972624798Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3399
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "browserleaks",
+          "round": 2,
+          "started": "2026-10-09T11:35:37.972698697Z",
+          "finished": "2026-10-09T11:35:41.752059761Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3779
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "ads",
+          "round": 2,
+          "started": "2026-10-09T11:35:41.752129733Z",
+          "finished": "2026-10-09T11:35:45.188214734Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3436
+        },
+        {
+          "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+          "target": "gpt",
+          "round": 2,
+          "started": "2026-10-09T11:35:45.188290266Z",
+          "finished": "2026-10-09T11:35:48.64335115Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3455
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "probe",
+          "round": 0,
+          "started": "2026-10-09T11:35:05.703917986Z",
+          "finished": "2026-10-09T11:35:08.891076112Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3187
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "browserleaks",
+          "round": 0,
+          "started": "2026-10-09T11:35:08.89116517Z",
+          "finished": "2026-10-09T11:35:12.186315323Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3295
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "ads",
+          "round": 0,
+          "started": "2026-10-09T11:35:12.186386357Z",
+          "finished": "2026-10-09T11:35:15.389978962Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3203
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "gpt",
+          "round": 0,
+          "started": "2026-10-09T11:35:15.390033844Z",
+          "finished": "2026-10-09T11:35:18.632513493Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3242
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "probe",
+          "round": 1,
+          "started": "2026-10-09T11:35:18.632602851Z",
+          "finished": "2026-10-09T11:35:21.921471873Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3288
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "browserleaks",
+          "round": 1,
+          "started": "2026-10-09T11:35:21.92154487Z",
+          "finished": "2026-10-09T11:35:25.14795836Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3226
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "ads",
+          "round": 1,
+          "started": "2026-10-09T11:35:25.148034063Z",
+          "finished": "2026-10-09T11:35:28.435237398Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3287
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "gpt",
+          "round": 1,
+          "started": "2026-10-09T11:35:28.435322407Z",
+          "finished": "2026-10-09T11:35:31.718063245Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3282
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "probe",
+          "round": 2,
+          "started": "2026-10-09T11:35:31.718143105Z",
+          "finished": "2026-10-09T11:35:34.938234305Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 204,
+          "milliseconds": 3220
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "browserleaks",
+          "round": 2,
+          "started": "2026-10-09T11:35:34.938292213Z",
+          "finished": "2026-10-09T11:35:38.319560472Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3381
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "ads",
+          "round": 2,
+          "started": "2026-10-09T11:35:38.319625954Z",
+          "finished": "2026-10-09T11:35:41.512826031Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3193
+        },
+        {
+          "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+          "target": "gpt",
+          "round": 2,
+          "started": "2026-10-09T11:35:41.512912493Z",
+          "finished": "2026-10-09T11:35:44.849872444Z",
+          "outcome": "ok",
+          "curl_code": 0,
+          "http_status": 200,
+          "milliseconds": 3336
+        }
+      ]
+    },
+    "reason": "suspect lacks repeated failure of the same Ads destination",
+    "scope": "control host -> VLESS DIRECT -> residential SOCKS -> destination; separate from native pool and mobile latency"
+  },
+  "admission_decision": {
+    "at": "2026-10-09T11:36:12.126277+00:00",
+    "evidence_id": "f4c84d5f-0612-4a52-b37c-2d3dfb4c6e20",
+    "eligible_at_collection": false,
+    "activated": false,
+    "reason": "suspect lacks repeated failure of the same Ads destination"
+  },
+  "diagnostic_policy": {
+    "frozen_at": "2026-10-09T11:38:03.846583+00:00",
+    "purpose": "Read-only investigate current native14/18 versus selected-chain36/36 discrepancy. No admission may be authorized by this diagnostic. All old failures retained.",
+    "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "proxies": "all native residential SOCKS outbounds, max12",
+    "rounds": 3,
+    "targets": [
+      "probe",
+      "browserleaks",
+      "ads-js",
+      "gpt-js"
+    ],
+    "expected_attempts": 144,
+    "concurrency": 3,
+    "request_connect_seconds": 6,
+    "request_max_seconds": 10,
+    "overall_seconds": 600,
+    "retries": 0,
+    "follow_up": "one actual18case window and final native proof; no further diagnostic role switching this run"
+  },
+  "matrix_summary": [
+    {
+      "proxy_id": "1f56f129-9557-4696-8338-6cf018efda26",
+      "passed": 11,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "343e38f3-e7cf-48fc-b478-c5c9e1f94b82",
+      "passed": 12,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "34c702d8-2425-4c1e-89b3-727b7969474b",
+      "passed": 7,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "browserleaks": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "ads-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 1,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 2
+          }
+        }
+      }
+    },
+    {
+      "proxy_id": "35dc6378-d9b8-4183-9b64-86dbc5d6c34d",
+      "passed": 12,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "57834995-9db9-453f-a11d-8a61b15e4180",
+      "passed": 11,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "35": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "8652799c-7d5a-4a9a-8d86-7d1f519b31dc",
+      "passed": 11,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "a286d129-0df7-423d-be58-8641b6e33d67",
+      "passed": 12,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "b51406c1-2e34-4145-b961-d8a34d1d11f6",
+      "passed": 8,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "browserleaks": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "ads-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        }
+      }
+    },
+    {
+      "proxy_id": "d4059313-96ce-4414-ab15-f742edb5be31",
+      "passed": 12,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+      "passed": 8,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "browserleaks": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "ads-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        }
+      }
+    },
+    {
+      "proxy_id": "e67fad8c-ca6c-4f0a-9021-e46218cdd93c",
+      "passed": 12,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "browserleaks": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "ads-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        },
+        "gpt-js": {
+          "passed": 3,
+          "attempts": 3,
+          "failure_codes": {}
+        }
+      }
+    },
+    {
+      "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+      "passed": 4,
+      "attempts": 12,
+      "targets": {
+        "probe": {
+          "passed": 1,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 2
+          }
+        },
+        "browserleaks": {
+          "passed": 2,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 1
+          }
+        },
+        "ads-js": {
+          "passed": 0,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 2,
+            "35": 1
+          }
+        },
+        "gpt-js": {
+          "passed": 1,
+          "attempts": 3,
+          "failure_codes": {
+            "28": 2
+          }
+        }
+      }
+    }
+  ],
+  "matrix": {
+    "at": "2026-10-09T11:42:10.690126+00:00",
+    "source": "current-vultr",
+    "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "rounds_complete": 3,
+    "scope": "control-host -> VLESS DIRECT tunnel -> selected residential SOCKS -> destination; not native pool selection",
+    "cases": [
+      {
+        "at": "2026-10-09T11:38:23.143201+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.047817,
+        "tls_seconds": 3.339696,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:28.392216+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.231556,
+        "tls_seconds": 4.089329,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:32.762288+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.344302,
+        "tls_seconds": 3.550265,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:37.141848+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.363058,
+        "tls_seconds": 3.501844,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:23.495989+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.399649,
+        "tls_seconds": 3.620757,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:28.533137+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.019075,
+        "tls_seconds": 4.035363,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:32.672017+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.11595,
+        "tls_seconds": 3.392806,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:36.936836+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.250857,
+        "tls_seconds": 3.489558,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:22.356764+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.258546,
+        "tls_seconds": 2.702449,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:25.585494+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.207044,
+        "tls_seconds": 2.65334,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:29.036846+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.429303,
+        "tls_seconds": 2.790793,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:35.058580+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.003041,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:38:39.284289+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.206074,
+        "tls_seconds": 3.430858,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:44.099044+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.803759,
+        "tls_seconds": 3.815767,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:48.416391+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.305278,
+        "tls_seconds": 3.524949,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:52.809128+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.378171,
+        "tls_seconds": 3.588933,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:40.166035+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.216783,
+        "tls_seconds": 2.687784,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:43.330605+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.153339,
+        "tls_seconds": 2.604513,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:46.619135+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.272734,
+        "tls_seconds": 2.7111,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:49.800770+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.167911,
+        "tls_seconds": 2.607795,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:40.521841+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.365246,
+        "tls_seconds": 2.841112,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:44.123109+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.58587,
+        "tls_seconds": 2.892681,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:47.521070+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.383235,
+        "tls_seconds": 2.797931,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:50.759252+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.213268,
+        "tls_seconds": 2.63345,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:53.103107+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.290953,
+        "tls_seconds": 2.74404,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:56.274367+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.157796,
+        "tls_seconds": 2.601815,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:59.557332+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.261438,
+        "tls_seconds": 2.705284,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:02.884990+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.304078,
+        "tls_seconds": 2.744599,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:54.037517+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.264963,
+        "tls_seconds": 2.681663,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:57.230238+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.179437,
+        "tls_seconds": 2.624521,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:00.487682+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.244032,
+        "tls_seconds": 2.668068,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:03.752993+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.251406,
+        "tls_seconds": 2.663592,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:38:57.797045+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.975675,
+        "tls_seconds": 4.033038,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:03.588889+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.772868,
+        "tls_seconds": 4.615593,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:08.215572+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.61274,
+        "tls_seconds": 3.792262,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:13.372415+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 5.143923,
+        "tls_seconds": 4.283215,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:06.105171+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.203958,
+        "tls_seconds": 2.673197,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:09.362103+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.244555,
+        "tls_seconds": 2.683609,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:12.619989+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.235189,
+        "tls_seconds": 2.692565,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:15.916679+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.274432,
+        "tls_seconds": 2.710891,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:07.186937+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.421563,
+        "tls_seconds": 2.755522,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:11.087244+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.888144,
+        "tls_seconds": 3.01745,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:14.714613+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.614275,
+        "tls_seconds": 2.922876,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:18.151353+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.425486,
+        "tls_seconds": 2.744453,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:19.386046+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "probe",
+        "http": 0,
+        "seconds": 6.002135,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:39:22.593008+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.190856,
+        "tls_seconds": 2.640047,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:28.617495+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.002057,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:39:34.632516+00:00",
+        "source": "current-vultr",
+        "round": 1,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.002762,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:39:39.056988+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.410364,
+        "tls_seconds": 3.592406,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:44.268129+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.195892,
+        "tls_seconds": 4.188307,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:50.283373+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.002888,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:39:54.621767+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.327503,
+        "tls_seconds": 3.575154,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:38.976130+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.329717,
+        "tls_seconds": 3.573019,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:44.001357+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.011634,
+        "tls_seconds": 4.06319,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:47.909696+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.885516,
+        "tls_seconds": 3.183432,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:52.241388+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.318816,
+        "tls_seconds": 3.544667,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:38.033786+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.3871,
+        "tls_seconds": 2.802833,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:41.407126+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.360512,
+        "tls_seconds": 2.743496,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:44.696493+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.270178,
+        "tls_seconds": 2.692937,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:48.008618+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.292367,
+        "tls_seconds": 2.722212,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:52.190146+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.164371,
+        "tls_seconds": 3.280543,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:57.077198+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.873164,
+        "tls_seconds": 3.892663,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:01.139640+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.049331,
+        "tls_seconds": 3.341158,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:05.377719+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.225495,
+        "tls_seconds": 3.36857,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:55.429679+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.17297,
+        "tls_seconds": 2.643791,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:58.732785+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.285801,
+        "tls_seconds": 2.714034,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:01.967568+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.221777,
+        "tls_seconds": 2.674934,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:05.334030+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.353929,
+        "tls_seconds": 2.798039,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:39:57.942056+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.309161,
+        "tls_seconds": 2.720321,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:01.410635+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.456743,
+        "tls_seconds": 2.817285,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:04.734028+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.309557,
+        "tls_seconds": 2.683874,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:08.297002+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.547929,
+        "tls_seconds": 2.933255,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:08.534280+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.178605,
+        "tls_seconds": 2.624765,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:11.712243+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.157962,
+        "tls_seconds": 2.60738,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:15.026628+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.299377,
+        "tls_seconds": 2.734788,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:18.276707+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.235055,
+        "tls_seconds": 2.681497,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:08.771675+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.37745,
+        "tls_seconds": 2.77724,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:12.071909+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.28347,
+        "tls_seconds": 2.686108,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:15.367724+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.282367,
+        "tls_seconds": 2.690064,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:18.725869+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.340877,
+        "tls_seconds": 2.758535,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:13.055338+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.739354,
+        "tls_seconds": 3.813339,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:18.443136+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 5.373443,
+        "tls_seconds": 4.266528,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:23.381386+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.926706,
+        "tls_seconds": 4.031011,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:28.334450+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.935507,
+        "tls_seconds": 3.933481,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:21.530061+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.237595,
+        "tls_seconds": 2.711867,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:24.729488+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.176258,
+        "tls_seconds": 2.621313,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:27.923947+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.172711,
+        "tls_seconds": 2.631708,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:31.128719+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.190197,
+        "tls_seconds": 2.646364,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:22.049681+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.309153,
+        "tls_seconds": 2.684103,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:25.878344+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.816879,
+        "tls_seconds": 2.973976,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:29.385967+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.495345,
+        "tls_seconds": 2.846025,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:32.742162+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.342479,
+        "tls_seconds": 2.72195,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:33.305047+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.957709,
+        "tls_seconds": 4.039226,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:38.164477+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.846546,
+        "tls_seconds": 3.897415,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:40.977225+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 2.790453,
+        "tls_seconds": 0.0,
+        "curl_code": 35,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:40:46.992215+00:00",
+        "source": "current-vultr",
+        "round": 2,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.002069,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:40:51.407244+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.402176,
+        "tls_seconds": 3.606621,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:56.172452+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.753345,
+        "tls_seconds": 3.840226,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:00.108015+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.922207,
+        "tls_seconds": 3.249376,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:04.303331+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-1f56f129-9557-4696-8338-6cf018efda26-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.183405,
+        "tls_seconds": 3.463698,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:51.173278+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.167648,
+        "tls_seconds": 3.439888,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:56.094855+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.90696,
+        "tls_seconds": 3.99185,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:00.133167+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.026657,
+        "tls_seconds": 3.334287,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:03.990245+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-343e38f3-e7cf-48fc-b478-c5c9e1f94b82-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.845371,
+        "tls_seconds": 3.167448,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:40:53.009511+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "probe",
+        "http": 0,
+        "seconds": 6.002438,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:40:59.026888+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 0,
+        "seconds": 6.002139,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:05.043230+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.001922,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:11.057530+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-34c702d8-2425-4c1e-89b3-727b7969474b-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.002646,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:08.075408+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.073167,
+        "tls_seconds": 3.327668,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:14.258735+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 6.168541,
+        "tls_seconds": 5.245087,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:18.251401+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.980108,
+        "tls_seconds": 3.275196,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:22.378011+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-35dc6378-d9b8-4183-9b64-86dbc5d6c34d-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.115651,
+        "tls_seconds": 3.392814,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:10.586417+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 6.259988,
+        "tls_seconds": 4.965861,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:16.732521+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 6.119004,
+        "tls_seconds": 4.600583,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:19.970403+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 3.223025,
+        "tls_seconds": 0.0,
+        "curl_code": 35,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:23.157234+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-57834995-9db9-453f-a11d-8a61b15e4180-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.174834,
+        "tls_seconds": 2.633754,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:14.328299+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.258226,
+        "tls_seconds": 2.710372,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:20.344102+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 0,
+        "seconds": 6.002072,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:23.464172+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.106386,
+        "tls_seconds": 2.577534,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:26.807979+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-8652799c-7d5a-4a9a-8d86-7d1f519b31dc-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.329538,
+        "tls_seconds": 2.730101,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:25.535071+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.145817,
+        "tls_seconds": 2.628689,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:28.861145+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.309194,
+        "tls_seconds": 2.761075,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:32.118455+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.24326,
+        "tls_seconds": 2.710987,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:35.334234+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-a286d129-0df7-423d-be58-8641b6e33d67-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.203749,
+        "tls_seconds": 2.670041,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:29.171391+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "probe",
+        "http": 0,
+        "seconds": 6.002522,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:35.184257+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 0,
+        "seconds": 6.002762,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:41.196823+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.00211,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:47.211605+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-b51406c1-2e34-4145-b961-d8a34d1d11f6-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.002932,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:31.001819+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 4.176087,
+        "tls_seconds": 3.445981,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:35.564160+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 4.544012,
+        "tls_seconds": 3.633237,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:39.877607+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 4.295594,
+        "tls_seconds": 3.538751,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:44.130254+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-d4059313-96ce-4414-ab15-f742edb5be31-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 4.240908,
+        "tls_seconds": 3.493593,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:41.349465+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "probe",
+        "http": 0,
+        "seconds": 6.002371,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:47.361864+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 0,
+        "seconds": 6.002071,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:53.376513+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.001752,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:59.391506+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e55578f8-c734-420f-801c-3ab96274490a-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 0,
+        "seconds": 6.002289,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:47.596390+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "probe",
+        "http": 204,
+        "seconds": 3.445147,
+        "tls_seconds": 2.806392,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:51.347155+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 200,
+        "seconds": 3.732653,
+        "tls_seconds": 2.900367,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:54.669335+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 200,
+        "seconds": 3.308022,
+        "tls_seconds": 2.679189,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:58.127076+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-e67fad8c-ca6c-4f0a-9021-e46218cdd93c-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 3.443083,
+        "tls_seconds": 2.755066,
+        "curl_code": 0,
+        "passed": true
+      },
+      {
+        "at": "2026-10-09T11:41:53.229424+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "probe",
+        "http": 0,
+        "seconds": 6.002469,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:41:59.245524+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "browserleaks",
+        "http": 0,
+        "seconds": 6.002768,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:42:05.260405+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "ads-js",
+        "http": 0,
+        "seconds": 6.00222,
+        "tls_seconds": 0.0,
+        "curl_code": 28,
+        "passed": false
+      },
+      {
+        "at": "2026-10-09T11:42:10.689408+00:00",
+        "source": "current-vultr",
+        "round": 3,
+        "proxy_tag": "residential-ads-f9d1b979-53ad-4ff3-8c37-551e2003c2d1-806a34561a9dea83",
+        "target": "gpt-js",
+        "http": 200,
+        "seconds": 5.407862,
+        "tls_seconds": 4.107887,
+        "curl_code": 0,
+        "passed": true
+      }
+    ],
+    "local_core_healthy": true
+  },
+  "traffic_before": {
+    "at": "2026-10-09T11:34:47.863284+00:00",
+    "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "phase": "traffic-before",
+    "cases": [
+      {
+        "case": "ads-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:28.287421+00:00",
+        "passed": false,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 1.375828,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:28.288066+00:00",
+        "passed": false,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 1.425839,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:29.677507+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.394376,
+        "egress_sha256": null
+      },
+      {
+        "case": "ads-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:29.730980+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.480258,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:32.085255+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.832141,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:32.231023+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.011625,
+        "egress_sha256": null
+      },
+      {
+        "case": "ads-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:35.256042+00:00",
+        "passed": false,
+        "http": 0,
+        "curl_code": 28,
+        "seconds": 4.002822,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:35.929765+00:00",
+        "passed": false,
+        "http": 0,
+        "curl_code": 28,
+        "seconds": 4.002141,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:39.269971+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.490581,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-www.gstatic.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:39.942311+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.935755,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-connectivitycheck.gstatic.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:40.891661+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.996048,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-www.google.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:41.773449+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.937034,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-example.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:41.901244+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.695033,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-1.1.1.1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:42.611663+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.720007,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-dns.google",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:42.770563+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.708204,
+        "egress_sha256": null
+      },
+      {
+        "case": "direct-positive",
+        "class": "DIRECT",
+        "at": "2026-10-09T11:34:43.352997+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 0.92929,
+        "egress_sha256": null
+      },
+      {
+        "case": "egress-res",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:34:43.496149+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 4.343551,
+        "egress_sha256": "6d67caeb0fe7e72b95fd7b77c8f22bb8dbfca3b776d9dddd77e214406f8a77d1"
+      },
+      {
+        "case": "egress-direct",
+        "class": "DIRECT",
+        "at": "2026-10-09T11:34:44.298087+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 1.681909,
+        "egress_sha256": "df3848a2da25e8a9541830c6c9610fc0b0b8ca024117ae8ce32449d9c6ca4ae1"
+      }
+    ],
+    "egress_distinct": true,
+    "local_core_healthy": true,
+    "scope": "fresh actual RES/DIRECT VLESS; static HEADs and BrowserLeaks egress; not mobile latency or ad show-rate",
+    "passed": false
+  },
+  "traffic_final": {
+    "at": "2026-10-09T11:43:34.179054+00:00",
+    "panel": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "phase": "traffic-final",
+    "cases": [
+      {
+        "case": "ads-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:14.020329+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.327428,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:14.020869+00:00",
+        "passed": false,
+        "http": 0,
+        "curl_code": 28,
+        "seconds": 4.003032,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-0",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:17.361559+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.5878,
+        "egress_sha256": null
+      },
+      {
+        "case": "ads-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:18.038108+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.40151,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:19.962502+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.501586,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:21.451952+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 4.01252,
+        "egress_sha256": null
+      },
+      {
+        "case": "ads-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:22.478292+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.100159,
+        "egress_sha256": null
+      },
+      {
+        "case": "gpt-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:25.477134+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 3.616479,
+        "egress_sha256": null
+      },
+      {
+        "case": "browserleaks-2",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:25.592845+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.910325,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-www.gstatic.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:28.533556+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.976395,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-connectivitycheck.gstatic.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:29.105663+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.933651,
+        "egress_sha256": null
+      },
+      {
+        "case": "probe-www.google.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:29.528319+00:00",
+        "passed": true,
+        "http": 204,
+        "curl_code": 0,
+        "seconds": 0.942896,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-example.com",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:30.057026+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.73236,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-1.1.1.1",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:30.487252+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.686306,
+        "egress_sha256": null
+      },
+      {
+        "case": "deny-dns.google",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:30.808232+00:00",
+        "passed": true,
+        "http": 0,
+        "curl_code": 35,
+        "seconds": 0.68874,
+        "egress_sha256": null
+      },
+      {
+        "case": "direct-positive",
+        "class": "DIRECT",
+        "at": "2026-10-09T11:43:31.190535+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 0.927741,
+        "egress_sha256": null
+      },
+      {
+        "case": "egress-res",
+        "class": "RESIDENTIAL",
+        "at": "2026-10-09T11:43:31.521174+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 2.633418,
+        "egress_sha256": "38588f64f893f50d06fcf468d8ebeba5a426f62e647b5bcb94ccd1d858b0c89d"
+      },
+      {
+        "case": "egress-direct",
+        "class": "DIRECT",
+        "at": "2026-10-09T11:43:32.139651+00:00",
+        "passed": true,
+        "http": 200,
+        "curl_code": 0,
+        "seconds": 1.624727,
+        "egress_sha256": "df3848a2da25e8a9541830c6c9610fc0b0b8ca024117ae8ce32449d9c6ca4ae1"
+      }
+    ],
+    "egress_distinct": true,
+    "local_core_healthy": true,
+    "scope": "fresh actual RES/DIRECT VLESS; static HEADs and BrowserLeaks egress; not mobile latency or ad show-rate",
+    "passed": false
+  },
+  "final_proof": {
+    "at": "2026-10-09T11:44:01.180898+00:00",
+    "invariants": {
+      "profile_unchanged": true,
+      "routing_unchanged": true,
+      "guardian_unchanged": true,
+      "policy_hashes_unchanged": true,
+      "proxy_enablement_unchanged": true,
+      "selected_assignment_unchanged": true,
+      "proxy_versions_unchanged_since_receipt": true
+    },
+    "common_assignment_changes": [],
+    "target_count_before": 1518,
+    "target_count_final": 1521,
+    "selected_panel": {
+      "panel_id": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+      "target_generation": 3,
+      "state": "APPLIED",
+      "before_config": null,
+      "owner": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "config": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "generation": 3,
+      "applied_generation": 3,
+      "verified_at": "2026-10-09T11:43:53.618412+00:00",
+      "routing_state": "APPLIED",
+      "revision": 598,
+      "performance_generation": 3,
+      "plan_hash": "7e9e0d19d3ee4ff7bfc21db2b3205077a33b44b0c37ba8760eab712da9fb94f4",
+      "routing_verified_at": "2026-10-09T11:43:53.618412+00:00",
+      "server_state": "READY",
+      "expires_at": "2026-10-09T14:04:15.044819+00:00",
+      "enabled": true
+    },
+    "admission_counts": {
+      "receipts": 3,
+      "admitted_operations": 0,
+      "assignments_with_exclusions": 0
+    },
+    "final_proxy_versions": {
+      "1f56f129-9557-4696-8338-6cf018efda26": 1,
+      "343e38f3-e7cf-48fc-b478-c5c9e1f94b82": 1,
+      "34c702d8-2425-4c1e-89b3-727b7969474b": 1,
+      "35dc6378-d9b8-4183-9b64-86dbc5d6c34d": 1,
+      "57834995-9db9-453f-a11d-8a61b15e4180": 1,
+      "8652799c-7d5a-4a9a-8d86-7d1f519b31dc": 1,
+      "a286d129-0df7-423d-be58-8641b6e33d67": 1,
+      "b51406c1-2e34-4145-b961-d8a34d1d11f6": 1,
+      "d4059313-96ce-4414-ab15-f742edb5be31": 1,
+      "e55578f8-c734-420f-801c-3ab96274490a": 1,
+      "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 1,
+      "f9d1b979-53ad-4ff3-8c37-551e2003c2d1": 1
+    },
+    "manifest": {
+      "residential_admission_schema": 1,
+      "commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+      "build_time": "2026-10-09T10:32:30Z",
+      "api_sha256": "7e8b33f179311fdd3fcaf8ed1c58676147ff6526039e6e4c382b73a7340ae48d",
+      "worker_sha256": "5d1c1b0f07b943bac5f9d4ab8688df8a91af2d55696190ffb5ae9de1f082034d",
+      "guardian_sha256": {
+        "amd64": "885fcab6a684240ee8e74a6acacf5fdbd91862a7bdc8bdad0c8f811bb7d2992c",
+        "arm64": "0286e0c5042c7f722368ba5dd21f7b0d3166d4be58966dc239cdca44be28e115"
+      }
+    },
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "582594",
+        "NRestarts": "0",
+        "actual_sha256": "7e8b33f179311fdd3fcaf8ed1c58676147ff6526039e6e4c382b73a7340ae48d",
+        "matches_manifest": true
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "582649",
+        "NRestarts": "0",
+        "actual_sha256": "5d1c1b0f07b943bac5f9d4ab8688df8a91af2d55696190ffb5ae9de1f082034d",
+        "matches_manifest": true
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "582650",
+        "NRestarts": "0",
+        "actual_sha256": "5d1c1b0f07b943bac5f9d4ab8688df8a91af2d55696190ffb5ae9de1f082034d",
+        "matches_manifest": true
+      }
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-09T11:44:01.326543691Z"
+    },
+    "remaining_private_configs": 0,
+    "traffic": {
+      "traffic-before": {
+        "at": "2026-10-09T11:34:47.863284+00:00",
+        "passed": 14,
+        "attempts": 18,
+        "static_passed": 5,
+        "static_attempts": 9,
+        "successful_static_median_ms": 2490.581,
+        "probe_ms": [
+          935.755,
+          996.048,
+          937.034
+        ],
+        "failures": [
+          {
+            "case": "ads-0",
+            "curl_code": 35,
+            "http": 0
+          },
+          {
+            "case": "gpt-0",
+            "curl_code": 35,
+            "http": 0
+          },
+          {
+            "case": "ads-2",
+            "curl_code": 28,
+            "http": 0
+          },
+          {
+            "case": "gpt-2",
+            "curl_code": 28,
+            "http": 0
+          }
+        ],
+        "egress_distinct": true,
+        "local_core_healthy": true
+      },
+      "traffic-final": {
+        "at": "2026-10-09T11:43:34.179054+00:00",
+        "passed": 17,
+        "attempts": 18,
+        "static_passed": 8,
+        "static_attempts": 9,
+        "successful_static_median_ms": 3213.7934999999998,
+        "probe_ms": [
+          976.395,
+          933.651,
+          942.896
+        ],
+        "failures": [
+          {
+            "case": "gpt-0",
+            "curl_code": 28,
+            "http": 0
+          }
+        ],
+        "egress_distinct": true,
+        "local_core_healthy": true
+      }
+    }
+  },
+  "native_before": "ADS_UDP_DNS_PASS panel=4dd711d3-00fe-4003-bcbf-51a2a4396e4b route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T11:34:33Z\n",
+  "native_final": "ADS_UDP_DNS_PASS panel=4dd711d3-00fe-4003-bcbf-51a2a4396e4b route_proofs=106\nADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=2026-10-09T11:43:43Z\n",
+  "reused_engineering_evidence": {
+    "at": "2026-10-09T11:38:43.625206+00:00",
+    "gates": {
+      "full-final": "0",
+      "vet-final": "0",
+      "final-fix-race": "0",
+      "native-final": "0",
+      "native-old-fixed": "0",
+      "deploy": "0"
+    },
+    "review_verdict": "PASS",
+    "review_unresolved": [],
+    "review_keys": [
+      "schema",
+      "profile",
+      "created_at",
+      "head",
+      "input_sha256",
+      "results",
+      "adjudicator",
+      "verdict",
+      "status"
+    ]
+  },
+  "limitations": [
+    "Native pool selected outbound was not captured per individual request; do not attribute native errors to one gateway.",
+    "Gstatic observer destination differs from diagnostic www.gstatic.com; neither proves Ads/GPT reachability.",
+    "No physical Android, app SDK, ad impressions, show-rate, provider-internal cause or fleet performance acceptance.",
+    "IP+SNI and UpCloud gaps remain untested here.",
+    "Historical detached bootstrap failure retained."
+  ],
+  "evidence_directory": "/root/backups/dob-residential-admission-20261009/resume-1133",
+  "agent_continues_after_final_reply": false,
+  "production_configuration_changes": false,
+  "new_evidence_receipts_persisted": 1
+}
