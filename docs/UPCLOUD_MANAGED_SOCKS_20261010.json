@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-09T22:18:58.575255+00:00",
+  "status": "SOURCE_ACCEPTED_RUNTIME_PENDING",
+  "baseline": "784f5f28e70a652327630a9225e6b89f3234304b",
+  "runtime_before": "2bdd5468874c66340c1aee939f3552b873ba78eb",
+  "source_digest": "2cc2a752b18b184d0b388cad97de6e23a109ee5a4736375af14c36c2a6f957e2",
+  "tests": {
+    "full": "2b079df64ea8f1ce5e6154b65d249be970076a9e863622bf5d41f71bd23c9692",
+    "vet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "race": "6a3d0efacce21aee6b60bec3201f091689cdf6796405bd94b0a9a02847b87106",
+    "relay-db": "b5520a6caed626651c023dab9a884cd2022524e382467a603a831af080ae79d1",
+    "relay-core": "e979f40e80fb4a6161d7e61e40cdb437a78a294002437deb5c82f9aa7ed8df71",
+    "three-core": "04d87c4f936b954f685abc081efee9b394b52895a5a678161a4a5324c52bc7db",
+    "focused-final": "59dd574785090482fb757c67ed8f05ad02fe5c625070e29ee98f8c2cbbab0e12"
+  },
+  "api_calls": 0,
+  "api_tokens": 0,
+  "production_changed": false,
+  "evidence_directory": "/root/backups/dob-trial-relay-implementation-20261010"
+}

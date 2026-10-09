@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"strings"
 	"time"
@@ -49,13 +50,35 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 	if !ok {
 		return nil, fmt.Errorf("outbounds unavailable")
 	}
+	relayCount := 0
+	relayHosts := map[string]bool{}
 	for _, v := range raw {
 		m := v.(map[string]any)
 		tag, _ := m["tag"].(string)
 		outs[tag] = m
+		if strings.HasPrefix(tag, "residential-ads-relay-") {
+			if !residentialsync.ValidateRelayOutbound(m) {
+				return nil, fmt.Errorf("invalid managed SOCKS transport")
+			}
+			st := m["settings"].(map[string]any)["servers"].([]any)[0].(map[string]any)
+			host := st["address"].(string)
+			if relayHosts[host] {
+				return nil, fmt.Errorf("relay servers are not distinct")
+			}
+			relayHosts[host] = true
+			relayCount++
+		}
 		if strings.HasPrefix(tag, "dob-route-blocked-") {
 			blocked = tag
 		}
+	}
+	probeURL := "https://connectivitycheck.gstatic.com/generate_204"
+	if relayCount > 0 {
+		if relayCount != residentialsync.RelayCount {
+			return nil, fmt.Errorf("relay coverage incomplete: %d/3", relayCount)
+		}
+		interval, timeout, maxRTT = 10*time.Second, 3*time.Second, 3*time.Second
+		probeURL = residentialsync.RelayProbeURL
 	}
 	if blocked == "" || outs[blocked]["protocol"] != "blackhole" {
 		return nil, fmt.Errorf("blocking outbound absent")
@@ -78,7 +101,7 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 		return nil, fmt.Errorf("pool observatory missing")
 	}
 	ping, ok := obs["pingConfig"].(map[string]any)
-	if !ok || ping["sampling"] != float64(1) || !duration(ping["interval"], interval) || !duration(ping["timeout"], timeout) || ping["destination"] != "https://connectivitycheck.gstatic.com/generate_204" {
+	if !ok || ping["sampling"] != float64(1) || !duration(ping["interval"], interval) || !duration(ping["timeout"], timeout) || ping["destination"] != probeURL {
 		return nil, fmt.Errorf("observation policy differs")
 	}
 	observed := map[string]bool{}

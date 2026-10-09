@@ -11,7 +11,7 @@ import (
 func TestProductionModulePartitionPreservesPanelSerialization(t *testing.T) {
 	modules := buildModules(&app.Application{}, worker.RoleAll, nil)
 	control := []string{"account-deletion", "account-rules", "billing", "catalog", "heartbeat", "lifecycle", "local-repair", "network-identity", "network-monitor", "observation-retention", "provider-capacity", "recovery", "scheduler"}
-	panels := []string{"capacity-cleanup", "capacity-fill", "client-mutation", "global-reality", "heartbeat", "panel-cleanup", "panel-registry", "residential-monitor", "residential-performance", "sanaei-cache", "server-guardian", "server-protection", "server-protection-cleanup", "residential-sync-false-0", "residential-sync-true-0", "residential-sync-true-1", "residential-sync-true-2", "residential-sync-true-3", "residential-sync-true-4", "residential-sync-true-5", "residential-sync-true-6", "residential-sync-true-7"}
+	panels := []string{"trial-relay-health", "capacity-cleanup", "capacity-fill", "client-mutation", "global-reality", "heartbeat", "panel-cleanup", "panel-registry", "residential-monitor", "residential-performance", "sanaei-cache", "server-guardian", "server-protection", "server-protection-cleanup", "residential-sync-false-0", "residential-sync-true-0", "residential-sync-true-1", "residential-sync-true-2", "residential-sync-true-3", "residential-sync-true-4", "residential-sync-true-5", "residential-sync-true-6", "residential-sync-true-7"}
 	sort.Strings(control)
 	sort.Strings(panels)
 	if got := modules.Names(worker.RoleControl); !reflect.DeepEqual(got, control) {

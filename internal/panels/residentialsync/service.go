@@ -85,6 +85,16 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	p.Performance = assignment.Config
 	p.PerformanceGeneration = assignment.Generation
 	p.PerformanceBaseline = assignment.Baseline
+	if trial && RelayEnabled(panel) {
+		p.RelayMode = true
+		p.PoolEnabled = true
+		p.Configured = RelayCount
+		if !p.StrictAllowlist || !p.AdsOnly {
+			return p, 0, errors.New("relay requires strict residential category policy")
+		}
+		p.Proxies, err = s.relayProxies(ctx, panel, p)
+		return p, revision, err
+	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)
  FROM residential_proxies rp
  WHERE rp.enabled AND ($1 OR rp.last_success_at>=rp.updated_at)
@@ -141,9 +151,13 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 			p.Proxies = append(p.Proxies, v.x)
 		}
 	}
-	return p, revision, nil
+	p.RelayInlet, err = s.loadRelayInlet(ctx, panel)
+	return p, revision, err
 }
 func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntime) (retErr error) {
+	if e := s.prepareRelay(ctx, panel, rt); e != nil {
+		return e
+	}
 	p, revision, err := s.policy(ctx, panel)
 	if err != nil {
 		return err
@@ -243,7 +257,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		return err
 	}
 	if !unchanged || !sameRouteMembership(savedClients, clients) {
-		if err = s.persistPlan(ctx, panel, revision, hash, p, clients); err != nil {
+		if err = s.persistPlan(ctx, panel, revision, hash, p, clients, desired); err != nil {
 			return err
 		}
 	}
@@ -315,14 +329,34 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 			return err
 		}
 	}
-	res, err := tx.ExecContext(ctx, `UPDATE panel_routing_state SET performance_generation=$5,state='APPLIED',verified_at=now(),next_check_at=now()+interval '20 seconds',last_error='',healthy_count=$4
- WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$5 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount, p.PerformanceGeneration)
+	res, err := tx.ExecContext(ctx, `UPDATE panel_routing_state SET performance_generation=$5,state='APPLIED',verified_at=now(),next_check_at=now()+CASE WHEN $6 THEN interval '10 seconds' ELSE interval '20 seconds' END,last_error='',healthy_count=CASE WHEN $6 THEN healthy_count ELSE $4 END,relay_mode=$6,category_digest=$7
+ WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$5 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount, p.PerformanceGeneration, p.RelayMode, categoryDigest(p))
 	if err != nil {
 		return err
 	}
 	n, _ := res.RowsAffected()
 	if n != 1 {
 		return fmt.Errorf("routing revision changed during apply")
+	}
+	if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
+		return err
+	}
+	if p.RelayInlet != nil {
+		proxy, e := managedSOCKS(panel, p.RelayInlet.Host, p.RelayInlet.SecretRef, p.RelayInlet.Port, p.RelayInlet.Credential)
+		if e != nil {
+			return e
+		}
+		res, e := tx.ExecContext(ctx, "UPDATE panel_relay_endpoints SET state='APPLIED',plan_hash=$2,verified_at=now() WHERE panel_id=$1 AND enabled AND transport_hash=$3", panel, hash, proxy.TransportHash)
+		if e != nil {
+			return e
+		}
+		n, _ := res.RowsAffected()
+		if n != 1 {
+			return errors.New("relay endpoint changed during apply")
+		}
+	}
+	if _, err = tx.ExecContext(ctx, "UPDATE panel_relay_assignments SET applied=true WHERE receiver_panel_id=$1 AND receiver_plan_hash=$2 AND selected", panel, hash); err != nil {
+		return err
 	}
 	return tx.Commit()
 }
@@ -376,7 +410,7 @@ func (s Service) EligiblePanels(ctx context.Context) ([]readyworker.Panel, error
 	return ps, rows.Err()
 }
 
-func (s Service) persistPlan(ctx context.Context, panel string, revision int64, hash string, p routePolicy, clients []clientRoute) error {
+func (s Service) persistPlan(ctx context.Context, panel string, revision int64, hash string, p routePolicy, clients []clientRoute, desired map[string]any) error {
 	// Persist exact membership before a request can change the remote router.
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -400,6 +434,9 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 	}
 	if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7)
  ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled); err != nil {
+		return err
+	}
+	if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM panel_client_routes WHERE panel_id=$1", panel); err != nil {

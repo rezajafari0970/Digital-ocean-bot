@@ -128,7 +128,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && !p.Harden && (p.Residential || p.Direct)) {
 					base = directTag
 				} else if !p.SniffingBlocked && (c.Effective == "RESIDENTIAL" || c.Effective == "" && p.Residential) && len(p.Proxies) > 0 {
-					if network == "tcp" || p.Proxies[0].Type == "socks5" {
+					if network == "tcp" || proxyHasUDP(p.Proxies[0]) {
 						base = p.Proxies[0].Tag
 					}
 				}
@@ -153,7 +153,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = blockedTag
 					case !p.StrictAllowlist && !probe.ads:
 						base = directTag
-					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && p.Proxies[0].Type != "socks5") || (p.PoolEnabled && !poolHasUDP(p))):
+					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && !proxyHasUDP(p.Proxies[0])) || (p.PoolEnabled && !poolHasUDP(p))):
 						base = blockedTag
 					case len(p.Proxies) > 0:
 						base = p.Proxies[0].Tag
@@ -216,6 +216,26 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		}
 		if json.Unmarshal(response.Body, &result) != nil || !result.Obj.Matched || result.Obj.OutboundTag != tagged(desired, base) {
 			return errRouteNotApplied
+		}
+	}
+	if p.RelayInlet != nil {
+		// The installed Sanaei route API cannot set source IP. Such a request
+		// must remain blocked even with the correct SOCKS username.
+		for _, network := range []string{"tcp", "udp"} {
+			form := url.Values{"port": {"443"}, "network": {network}, "inboundTag": {relayInletPrefix + p.RelayInlet.Panel}, "domain": {"browserleaks.com"}, "email": {p.RelayInlet.Credential.User}}
+			response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
+			if e = envelope(response, e); e != nil {
+				return e
+			}
+			var result struct {
+				Obj struct {
+					Matched     bool
+					OutboundTag string
+				}
+			}
+			if json.Unmarshal(response.Body, &result) != nil || !result.Obj.Matched || result.Obj.OutboundTag != tagged(desired, blockedTag) {
+				return errRouteNotApplied
+			}
 		}
 	}
 	if p.PoolEnabled {

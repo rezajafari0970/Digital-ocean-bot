@@ -27,6 +27,8 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	RelayMode             bool
+	RelayInlet            *relayInlet
 	StrictAllowlist       bool
 	ExpandedCategories    bool
 	LegacyClientPaths     bool
@@ -45,8 +47,10 @@ type routePolicy struct {
 	Proxies               []rp
 }
 type rp struct {
-	ID, Type, Host, User, Tag, Password string
-	Port                                int
+	Relay                                                *relayTransport
+	TransportHash, DonorDroplet, DonorAccount, DonorPlan string
+	ID, Type, Host, User, Tag, Password                  string
+	Port                                                 int
 }
 
 func decodeObject(raw json.RawMessage) (map[string]any, error) {
@@ -255,19 +259,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		destination = directTag
 	} else if len(p.Proxies) > 0 {
 		proxy := p.Proxies[0]
-		protocol := "http"
-		if proxy.Type == "socks5" {
-			protocol = "socks"
-		} else if proxy.Type != "http" && proxy.Type != "https" {
-			return nil, errors.New("unsupported residential protocol")
-		}
-		server := map[string]any{"address": proxy.Host, "port": proxy.Port}
-		if proxy.User != "" || proxy.Password != "" {
-			server["users"] = []any{map[string]any{"user": proxy.User, "pass": proxy.Password}}
-		}
-		outbound := map[string]any{"tag": proxy.Tag, "protocol": protocol, "settings": map[string]any{"servers": []any{server}}}
-		if proxy.Type == "https" {
-			outbound["streamSettings"] = map[string]any{"security": "tls", "tlsSettings": map[string]any{"serverName": proxy.Host}}
+		outbound, err := proxyOutbound(proxy)
+		if err != nil {
+			return nil, err
 		}
 		kept = append(kept, outbound)
 		destination = proxy.Tag
@@ -336,7 +330,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if !p.Residential && !p.Direct {
 			dnsDestination = blockedTag
 		}
-		if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && dnsDestination == p.Proxies[0].Tag {
+		if len(p.Proxies) > 0 && !proxyHasUDP(p.Proxies[0]) && dnsDestination == p.Proxies[0].Tag {
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-dns-udp", "inboundTag": []string{dnsTag}, "network": "udp", "outboundTag": blockedTag})
 		}
 		dnsRule := map[string]any{"type": "field", "ruleTag": "dob-route-dns", "inboundTag": []string{dnsTag}, "network": "tcp,udp", "outboundTag": dnsDestination}
@@ -358,7 +352,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 		if !p.AdsOnly {
 			// HTTP proxying cannot carry UDP. Deny it explicitly instead of allowing an
 			// unmatched UDP packet to use the original first (direct) outbound.
-			if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" && destination == p.Proxies[0].Tag {
+			if len(p.Proxies) > 0 && !proxyHasUDP(p.Proxies[0]) && destination == p.Proxies[0].Tag {
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "network": "udp", "outboundTag": blockedTag})
 			}
 			first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-default", "inboundTag": tags, "network": "tcp,udp", "outboundTag": destination})
@@ -376,7 +370,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			if p.Residential {
 				// HTTP cannot carry UDP: block only matched protected domains.
 				// Never send matched Ads UDP to the non-ad direct fallback.
-				if len(p.Proxies) > 0 && p.Proxies[0].Type != "socks5" {
+				if len(p.Proxies) > 0 && !proxyHasUDP(p.Proxies[0]) {
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": p.residentialDomains(), "network": "udp", "outboundTag": blockedTag})
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": p.residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
@@ -394,6 +388,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 
 		}
 
+	}
+	if err := configureRelayInlet(next, current, p, destination, &first); err != nil {
+		return nil, err
 	}
 	if p.Harden {
 		// Newly added/unobserved inbounds must not inherit the original direct

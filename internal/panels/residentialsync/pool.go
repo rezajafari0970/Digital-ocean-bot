@@ -60,20 +60,12 @@ func configurePool(next map[string]any, p routePolicy) error {
 	}
 	var tcp, udp []string
 	for _, proxy := range p.Proxies {
-		protocol := "http"
-		if proxy.Type == "socks5" {
-			protocol = "socks"
+		o, err := proxyOutbound(proxy)
+		if err != nil {
+			return err
+		}
+		if proxyHasUDP(proxy) {
 			udp = append(udp, proxy.Tag)
-		} else if proxy.Type != "http" && proxy.Type != "https" {
-			return errors.New("unsupported residential protocol")
-		}
-		server := map[string]any{"address": proxy.Host, "port": proxy.Port}
-		if proxy.User != "" || proxy.Password != "" {
-			server["users"] = []any{map[string]any{"user": proxy.User, "pass": proxy.Password}}
-		}
-		o := map[string]any{"tag": proxy.Tag, "protocol": protocol, "settings": map[string]any{"servers": []any{server}}}
-		if proxy.Type == "https" {
-			o["streamSettings"] = map[string]any{"security": "tls", "tlsSettings": map[string]any{"serverName": proxy.Host}}
 		}
 		outs = append(outs, o)
 		tcp = append(tcp, proxy.Tag)
@@ -108,6 +100,9 @@ func configurePool(next map[string]any, p routePolicy) error {
 				if len(costs) > 0 {
 					settings["costs"] = costs
 				}
+			}
+			if p.RelayMode {
+				settings["maxRTT"] = "3s"
 			}
 			balancers = append(balancers, map[string]any{"tag": tag, "selector": candidates, "fallbackTag": blockedTag, "strategy": map[string]any{"type": "leastLoad", "settings": settings}})
 			inbound := []string{poolPrefix + "in-" + network + "-" + kind}
@@ -152,7 +147,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 		if strings.HasPrefix(tag, poolPrefix) {
 			continue
 		}
-		if p.Residential && !p.SniffingBlocked && (tag == "dob-route-residential-ads" || p.LegacyClientPaths && tag == "dob-route-residential-probes" || (!p.AdsOnly && tag == "dob-route-default")) {
+		if p.Residential && !p.SniffingBlocked && (tag == "dob-route-residential-ads" || tag == "dob-route-relay-ads" || p.LegacyClientPaths && tag == "dob-route-residential-probes" || (!p.AdsOnly && tag == "dob-route-default")) {
 			for _, network := range []string{"tcp", "udp"} {
 				if tag == "dob-route-residential-probes" && network != "tcp" {
 					continue
@@ -213,6 +208,12 @@ func configurePool(next map[string]any, p routePolicy) error {
 		ping["interval"] = fmt.Sprintf("%ds", p.Performance.ProbeInterval)
 		ping["timeout"] = residentialperf.DurationMS(p.Performance.ProbeTimeout)
 	}
+	if p.RelayMode && len(tcp) > 0 {
+		ping := next["burstObservatory"].(map[string]any)["pingConfig"].(map[string]any)
+		ping["destination"] = RelayProbeURL
+		ping["interval"] = "10s"
+		ping["timeout"] = "3s"
+	}
 	return nil
 }
 func fingerprintPool(next map[string]any, replacements map[string]string) {
@@ -258,7 +259,7 @@ func fingerprintPool(next map[string]any, replacements map[string]string) {
 }
 func poolHasUDP(p routePolicy) bool {
 	for _, x := range p.Proxies {
-		if x.Type == "socks5" {
+		if proxyHasUDP(x) {
 			return true
 		}
 	}
