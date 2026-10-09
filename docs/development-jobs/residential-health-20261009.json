@@ -1,0 +1,19 @@
+{
+  "id": "residential-health-20261009",
+  "status": "DIAGNOSTICS_COMPLETE_IMPLEMENTATION_PENDING",
+  "baseline": "ba05c4ea29d8e96b046806071f1566670b2d87a4",
+  "rollback_commit": "98bcb7e043cd982a8a5e01070b6fcf7080390d69",
+  "requirement_ids": [
+    "RES-001"
+  ],
+  "allowed_paths": [
+    "docs/RESIDENTIAL_TARGET_HEALTH_STATUS_FA_20261009.md",
+    "docs/RESIDENTIAL_TARGET_HEALTH_ACCEPTANCE_20261009.json",
+    "docs/RESIDENTIAL_TARGET_HEALTH_NEXT_20261009.md",
+    "docs/development-jobs/residential-health-20261009.json",
+    "HANDOFF.md"
+  ],
+  "risk": "critical for proposed routing change; this checkpoint is diagnostic/report only",
+  "production_mutation": false,
+  "next": "Per-VPS target-aware control requires implementation/review/canary; do not globally disable from control-host probes."
+}

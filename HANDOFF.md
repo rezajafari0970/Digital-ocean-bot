@@ -1,3 +1,13 @@
+# Latest continuation — target-specific residential health, 2026-10-09
+
+Read `docs/RESIDENTIAL_TARGET_HEALTH_STATUS_FA_20261009.md` and `docs/RESIDENTIAL_TARGET_HEALTH_ACCEPTANCE_20261009.json`. Runtime remains **98bcb7e043cd982a8a5e01070b6fcf7080390d69**; this continuation makes no production routing/proxy change. Discovery control114/144, DO119/144, Vultr94/144; confirmation control36/48, Vultr38/48. Gateway8652799c-7d5a-4a9a-8d86-7d1f519b31dc failed GPT3/3 and BrowserLeaks3/3 through Vultr4dd711d3-00fe-4003-bcbf-51a2a4396e4b while matched GPT controls6/6 passed; same gateway control-host12/12passed. One other suspect reversed from Vultr0/12 to12/12 while control-host became0/12. Do not turn this into a global blacklist. Proxy gateways are IPv4; gateway-family mismatch does not explain these samples. These are diagnostic chained paths, not native pool choice.
+
+Fresh native26/29initial, all3pending passed targeted rechecks later; preserve initial failures, not atomic29/29. Fresh actualtraffic21/22DO, BrowserLeaks resolved-IP+SNI TLS failure remains. Three running executable hashes match manifest; five readiness responses each5/5. Parent13/80v4, guardianfalse/rev31, routing598 and policyhashes unchanged. Raw evidence `/root/backups/dob-residential-health-20261009`.
+
+Next implementation is **not started/accepted**: supported per-VPS destination-aware admission/quarantine with anti-flap/cooldown, CAS/ownership/generation, exact recovery and compatibility barrier. Existing tuning onlychangesfastcount/share and publishesfleet; do not bypass it with directSQL or globallydisable. Independent reviewREVISE blocks proposed activation, not diagnostic reads. App SDK/source and physicalAndroid tests still unavailable. The agent does not continue after the final reply. Meaningful active status updates have90svalidity; expired means activityunconfirmed. Keep the detachedbootstrapfailure and all failed attempts.
+
+---
+
 # Latest checkpoint — residential speed, 2026-10-09
 
 Runtime and reviewed product commit: **98bcb7e043cd982a8a5e01070b6fcf7080390d69**. Read `docs/RESIDENTIAL_SPEED_ACCEPTANCE_20261009.json` and `docs/RESIDENTIAL_SPEED_STATUS_FA_20261009.md` before continuing.
