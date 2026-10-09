@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-09T16:00:31.074784+00:00",
+  "status": "SOURCE_ACCEPTED_RELEASE_PENDING",
+  "baseline": "1cc16723cb58d5f7eb032517bf1537f75995f0fb",
+  "previous_runtime": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
+  "source_digest": "3e8a4726c760d207dc4795196e06e8d33f450c5c83f09f5cd7f70b7e80523b19",
+  "source_manifest": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/source-v2.json",
+  "source_files": 1292,
+  "change": "Retain six optional numeric curl timing milestones; omit missing/invalid/all-zero timing without changing timeout outcome or admission authority.",
+  "review": {
+    "decision": "PASS",
+    "unresolved": [],
+    "receipt": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/review-v2.json",
+    "input_sha256": "efbaf28833f85ddc15f9efb339a1af6a75cbc8906ef97ec75ab3e7a9426f20a7",
+    "prior_revise_preserved": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/review.json"
+  },
+  "tests": {
+    "focused-v2": "733f6811e41c844f1f445ff4c54386af93f290f3c2f3515be1e7a0ba2898eb7b",
+    "full-v2": "95cca1ef717b9be54221969c4d88fa950a7143f61a5736bdaeeadcee13772223",
+    "vet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "race": "10276878634ba084eb73dcd20ffbe1339b2746f1f87a2024b495b33f163c3a2e"
+  },
+  "test_environment": {
+    "database": "dob_bulk_test_diag_20261009_1918",
+    "production_database_used": false
+  },
+  "native_fixture_core": "26.9.9",
+  "observed_fault": "Original collector discarded curl timing milestones. Historical two timeout failures cannot be retrospectively localized.",
+  "independent_diagnostic": {
+    "valid_run": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/verified/diagnostic-results.json",
+    "passed": 30,
+    "total": 30,
+    "causal_claim": false,
+    "invalid_control_run_preserved": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/diagnostic-validity.json"
+  },
+  "upstream_root_cause_proven": false,
+  "upstream_reliability_fixed": false,
+  "field_trial_acceptance": false,
+  "prior_field_result": "NO_ACTION",
+  "api_review_successful_responses": 10,
+  "evidence_directory": "/root/backups/dob-residential-stability-20261009/diagnosis-1905",
+  "next": "Deploy accepted telemetry correction; verify hashes, old receipt compatibility and unchanged production invariants. No new admission probe or trial authorized by this diagnostic result."
+}

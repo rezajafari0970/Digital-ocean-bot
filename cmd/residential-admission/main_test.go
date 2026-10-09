@@ -152,7 +152,7 @@ func TestInstalledCoreAdmissionIgnoresHostileCurlConfig(t *testing.T) {
 	}
 	defer stop()
 	o := attempt(ctx, ports[0], srv.URL, 204)
-	if requests.Load() != 1 || o.Outcome != "http" || o.HTTPStatus != 503 {
+	if requests.Load() != 1 || o.Outcome != "http" || o.HTTPStatus != 503 || o.Timing == nil || o.Timing.Total <= 0 {
 		t.Fatalf("curl contract escaped: requests=%d observation=%+v", requests.Load(), o)
 	}
 }

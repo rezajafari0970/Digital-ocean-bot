@@ -36,3 +36,21 @@ func TestAdmissionEmptyConfigPreservesLegacyBytes(t *testing.T) {
 		t.Fatal("caller config mutated")
 	}
 }
+
+func TestAdmissionObservationLegacyBytesAndTimingRoundTrip(t *testing.T) {
+	raw := `{"proxy_id":"11111111-1111-4111-8111-111111111111","target":"probe","round":0,"started":"2026-10-09T15:00:00Z","finished":"2026-10-09T15:00:06Z","outcome":"timeout","curl_code":28,"http_status":0,"milliseconds":6000}`
+	var observation AdmissionObservation
+	if err := json.Unmarshal([]byte(raw), &observation); err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(observation)
+	if err != nil || string(encoded) != raw {
+		t.Fatal("legacy evidence bytes changed", string(encoded), err)
+	}
+	observation.Timing = &AdmissionTiming{Connect: 0.001, Total: 6}
+	encoded, err = json.Marshal(observation)
+	var decoded AdmissionObservation
+	if err != nil || json.Unmarshal(encoded, &decoded) != nil || decoded.Timing == nil || *decoded.Timing != *observation.Timing || decoded.CurlCode != 28 || decoded.Outcome != "timeout" {
+		t.Fatal("trace or failure verdict lost")
+	}
+}

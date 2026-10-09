@@ -35,16 +35,31 @@ type AdmissionContext struct {
 	Owner         string           `json:"owner"`
 	Proxies       map[string]int64 `json:"proxy_versions"`
 }
+
+// AdmissionTiming retains only numeric curl milestones. It is diagnostic metadata,
+// never an admission signal. A zero milestone means unobserved, not zero latency.
+// Connect includes proxy negotiation on some curl builds; it does not identify
+// the failing remote hop. Old evidence omits this optional field unchanged.
+type AdmissionTiming struct {
+	NameLookup  float64 `json:"name_lookup_seconds"`
+	Connect     float64 `json:"connect_seconds"`
+	TLS         float64 `json:"tls_seconds"`
+	Pretransfer float64 `json:"pretransfer_seconds"`
+	FirstByte   float64 `json:"first_byte_seconds"`
+	Total       float64 `json:"total_seconds"`
+}
+
 type AdmissionObservation struct {
-	ProxyID      string    `json:"proxy_id"`
-	Target       string    `json:"target"`
-	Round        int       `json:"round"`
-	Started      time.Time `json:"started"`
-	Finished     time.Time `json:"finished"`
-	Outcome      string    `json:"outcome"`
-	CurlCode     int       `json:"curl_code"`
-	HTTPStatus   int       `json:"http_status"`
-	Milliseconds int64     `json:"milliseconds"`
+	ProxyID      string           `json:"proxy_id"`
+	Target       string           `json:"target"`
+	Round        int              `json:"round"`
+	Started      time.Time        `json:"started"`
+	Finished     time.Time        `json:"finished"`
+	Outcome      string           `json:"outcome"`
+	CurlCode     int              `json:"curl_code"`
+	HTTPStatus   int              `json:"http_status"`
+	Milliseconds int64            `json:"milliseconds"`
+	Timing       *AdmissionTiming `json:"timing,omitempty"`
 }
 type AdmissionGuard struct {
 	Positive          *AdmissionObservation `json:"positive,omitempty"`

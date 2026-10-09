@@ -11,6 +11,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"io"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -402,6 +403,7 @@ func attempt(ctx context.Context, port int, target string, status int) residenti
 	}
 	json.Unmarshal(b, &result)
 	o.HTTPStatus = result.HTTPCode
+	o.Timing = parseTiming(b)
 	if err == nil {
 		if o.HTTPStatus == status {
 			o.Outcome = "ok"
@@ -430,4 +432,32 @@ func attempt(ctx context.Context, port int, target string, status int) residenti
 		o.Outcome = "interrupted"
 	}
 	return o
+}
+
+// Missing/invalid timing is left unknown; it never changes the transport verdict.
+// URLs, addresses, headers, certificates and error strings are deliberately dropped.
+func parseTiming(raw []byte) *residentialperf.AdmissionTiming {
+	var data map[string]json.RawMessage
+	if json.Unmarshal(raw, &data) != nil {
+		return nil
+	}
+	keys := []string{"time_namelookup", "time_connect", "time_appconnect", "time_pretransfer", "time_starttransfer", "time_total"}
+	values := make([]float64, len(keys))
+	for i, key := range keys {
+		v, ok := data[key]
+		if !ok || string(v) == "null" || json.Unmarshal(v, &values[i]) != nil || math.IsNaN(values[i]) || math.IsInf(values[i], 0) || values[i] < 0 || values[i] > 60 {
+			return nil
+		}
+	}
+	// Milestones may be zero when unfinished. Positive milestones cannot exceed
+	// total time; no stronger ordering is inferred across curl/proxy versions.
+	for _, v := range values[:5] {
+		if v > values[5] {
+			return nil
+		}
+	}
+	if values[5] == 0 {
+		return nil
+	}
+	return &residentialperf.AdmissionTiming{NameLookup: values[0], Connect: values[1], TLS: values[2], Pretransfer: values[3], FirstByte: values[4], Total: values[5]}
 }
