@@ -125,6 +125,21 @@ func TestManagedSOCKSSelectionAndPublicationPostgres(t *testing.T) {
 	if err != nil || len(kept.Proxies) != 4 {
 		t.Fatal("short unchanged donor verification delay rewrote pool", err)
 	}
+	// An in-flight unrelated template update retains only the installed,
+	// last-verified interface. A changed credential never receives this grace.
+	sqlMustTrial(t, db, "UPDATE panel_routing_state SET state='APPLYING',plan_hash='next-template' WHERE panel_id=$1", donors[0])
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET state='PREPARING' WHERE panel_id=$1", donors[0])
+	kept, _, err = svc.policy(ctx, receiver)
+	if err != nil || len(kept.Proxies) != 4 {
+		t.Fatal("same installed interface removed for unrelated template update", err)
+	}
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET transport_hash='new-credential' WHERE panel_id=$1", donors[0])
+	kept, _, err = svc.policy(ctx, receiver)
+	if err != nil || len(kept.Proxies) != 3 {
+		t.Fatal("unverified changed interface retained", err)
+	}
+	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET transport_hash=(SELECT transport_hash FROM panel_relay_assignments WHERE receiver_panel_id=$2 AND donor_panel_id=$1),state='APPLIED' WHERE panel_id=$1", donors[0], receiver)
+	sqlMustTrial(t, db, "UPDATE panel_routing_state SET plan_hash='donor-plan',state='FAILED' WHERE panel_id=$1", donors[0])
 	sqlMustTrial(t, db, "UPDATE panel_relay_endpoints SET verified_at=now()-interval '4 minutes' WHERE panel_id=$1", donors[0])
 	kept, _, err = svc.policy(ctx, receiver)
 	if err != nil || len(kept.Proxies) != 3 {

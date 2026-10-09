@@ -60,7 +60,7 @@ func selectRelays(choices []relayChoice, limits ...int) []rp {
 }
 func (s Service) relayProxies(ctx context.Context, receiver string, p routePolicy) ([]rp, error) {
 	rows, err := s.DB.QueryContext(ctx, `
- SELECT p.id::text,p.droplet_id::text,p.account_id::text,a.provider,dep.host,rs.plan_hash,
+ SELECT p.id::text,p.droplet_id::text,p.account_id::text,a.provider,dep.host,ep.plan_hash,
  ep.secret_ref,ep.transport_hash,ep.port,COALESCE(previous.selected AND previous.transport_hash=ep.transport_hash,false)
  FROM panel_instances p
  JOIN droplets dr ON dr.id=p.droplet_id
@@ -69,8 +69,8 @@ func (s Service) relayProxies(ctx context.Context, receiver string, p routePolic
  JOIN panel_routing_state rs ON rs.panel_id=p.id
  CROSS JOIN residential_routing_control rc
  LEFT JOIN panel_relay_assignments previous ON previous.receiver_panel_id=$1 AND previous.donor_panel_id=p.id
- JOIN panel_relay_endpoints ep ON ep.panel_id=p.id AND ep.enabled AND ep.state='APPLIED'
- AND ep.verified_at>now()-CASE WHEN COALESCE(previous.selected AND previous.donor_plan_hash=rs.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false) THEN interval '3 minutes' ELSE interval '60 seconds' END AND ep.plan_hash=rs.plan_hash
+ JOIN panel_relay_endpoints ep ON ep.panel_id=p.id AND ep.enabled AND (ep.state='APPLIED' OR (ep.state='PREPARING' AND COALESCE(previous.selected AND previous.donor_plan_hash=ep.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false)))
+ AND ep.verified_at>now()-CASE WHEN COALESCE(previous.selected AND previous.donor_plan_hash=ep.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false) THEN interval '3 minutes' ELSE interval '60 seconds' END AND (ep.plan_hash=rs.plan_hash OR COALESCE(previous.selected AND previous.donor_plan_hash=ep.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false))
  AND ep.host=dep.host
  AND (SELECT d.host||'/32' FROM panel_instances receiver JOIN LATERAL(
  SELECT host FROM deployments WHERE droplet_id=receiver.droplet_id AND state='PANEL_COMPLETE' ORDER BY created_at DESC,id DESC LIMIT 1)d ON true WHERE receiver.id=$1)=ANY(ep.allowed_sources)
@@ -81,7 +81,7 @@ func (s Service) relayProxies(ctx context.Context, receiver string, p routePolic
   AND (dr.expires_at IS NULL OR dr.expires_at>now()+CASE WHEN COALESCE(previous.selected,false) THEN interval '5 minutes' ELSE interval '10 minutes' END)
   AND ep.valid_until>now()+CASE WHEN COALESCE(previous.selected,false) THEN interval '5 minutes' ELSE interval '10 minutes' END
   AND rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids))
-  AND (rs.state='APPLIED' OR (rs.state='FAILED' AND COALESCE(previous.selected AND previous.donor_plan_hash=rs.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false))) AND rs.revision=rc.revision AND rs.verified_at>now()-CASE WHEN COALESCE(previous.selected AND previous.donor_plan_hash=rs.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false) THEN interval '3 minutes' ELSE interval '60 seconds' END
+  AND (rs.state='APPLIED' OR (rs.state IN('FAILED','APPLYING') AND COALESCE(previous.selected AND previous.donor_plan_hash=ep.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false))) AND rs.revision=rc.revision AND rs.verified_at>now()-CASE WHEN COALESCE(previous.selected AND previous.donor_plan_hash=ep.plan_hash AND previous.transport_hash=ep.transport_hash AND previous.secret_ref=ep.secret_ref,false) THEN interval '3 minutes' ELSE interval '60 seconds' END
   AND NOT rs.relay_mode AND rs.category_digest=$2
   AND (COALESCE(previous.selected,false) OR previous.cooldown_until IS NULL OR previous.cooldown_until<=now())
   AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))

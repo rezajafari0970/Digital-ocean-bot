@@ -592,16 +592,21 @@ func relaySnapshotStillValid(want, fresh []rp) bool {
 	for _, p := range fresh {
 		byID[p.ID] = p
 	}
-	for _, p := range want {
+	for i, p := range want {
 		other, ok := byID[p.ID]
 		if !ok {
 			return false
 		}
+		// A new full-template proof for the same already verified interface is
+		// metadata only. Preserve exact identity/transport checks and refresh the
+		// publication binding without restarting the receiver.
+		p.DonorPlan = other.DonorPlan
 		a, _ := json.Marshal(p)
 		b, _ := json.Marshal(other)
 		if string(a) != string(b) {
 			return false
 		}
+		want[i].DonorPlan = other.DonorPlan
 	}
 	return true
 }

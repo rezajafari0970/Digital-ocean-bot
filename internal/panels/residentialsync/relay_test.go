@@ -109,7 +109,13 @@ func TestRelaySnapshotAllowsOnlyAdditions(t *testing.T) {
 	if relaySnapshotStillValid([]rp{old}, []rp{other}) {
 		t.Fatal("removed donor admitted")
 	}
-	for _, change := range []func(*rp){func(p *rp) { p.DonorPlan = "changed" }, func(p *rp) { p.TransportHash = "changed" }, func(p *rp) { p.Host = "203.0.113.3" }} {
+	updated := old
+	updated.DonorPlan = "new-verified-template"
+	saved := []rp{old}
+	if !relaySnapshotStillValid(saved, []rp{updated}) || saved[0].DonorPlan != updated.DonorPlan {
+		t.Fatal("same-interface proof refresh was not preserved")
+	}
+	for _, change := range []func(*rp){func(p *rp) { p.TransportHash = "changed" }, func(p *rp) { p.Host = "203.0.113.3" }} {
 		changed := old
 		change(&changed)
 		if relaySnapshotStillValid([]rp{old}, []rp{changed, other}) {
