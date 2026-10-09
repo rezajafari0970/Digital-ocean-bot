@@ -48,5 +48,13 @@
     "?? tools/grade-fresh-session-exam-v2.py",
     "?? tools/new-chat-bootstrap.sh"
   ],
-  "latest_continuity_note": "Latest live/source evidence and delta recorded; historical mastery scores not rerun."
+  "latest_continuity_note": "Latest live/source evidence and delta recorded; historical mastery scores not rerun.",
+  "latest_residential_policy_continuation": {
+    "at": "2026-10-10T00:57:43.472524+03:30",
+    "runtime_commit": "2bdd5468874c66340c1aee939f3552b873ba78eb",
+    "status": "CAPABILITY_DEPLOYED_ACTIVATION_BLOCKED",
+    "category_scope": "none",
+    "report": "docs/RESIDENTIAL_CATEGORY_STATUS_FA_20261010.md",
+    "note": "Historical mastery scores and earlier ready flags above are preserved historical evidence, not current category activation acceptance."
+  }
 }

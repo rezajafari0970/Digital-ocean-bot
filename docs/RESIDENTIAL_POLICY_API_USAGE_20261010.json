@@ -1,0 +1,539 @@
+{
+  "at": "2026-10-09T21:25:10.075882+00:00",
+  "scope": "This residential-policy release only; excludes ChatGPT subscription and other jobs",
+  "purpose": "Four critical code-review rounds; architect, reviewer, adversary, test designer, adjudicator",
+  "historical_successful_generation_requests": 20,
+  "new_generation_requests_in_usage_audit": 0,
+  "read_only_response_retrieval_requests": 20,
+  "coverage_complete": true,
+  "actual_billed_usd": null,
+  "billing_note": "Exact billed cost was not returned by response receipts; no dollar amount inferred",
+  "totals": {
+    "receipts_with_usage": 20,
+    "input_tokens": 819570,
+    "cached_input_tokens": 0,
+    "output_tokens": 37172,
+    "reasoning_tokens": 20564,
+    "total_tokens": 856742
+  },
+  "rounds": {
+    "review.json": {
+      "receipts_with_usage": 5,
+      "input_tokens": 200388,
+      "cached_input_tokens": 0,
+      "output_tokens": 9861,
+      "reasoning_tokens": 5081,
+      "total_tokens": 210249,
+      "verdict": "REVISE"
+    },
+    "review-v2.json": {
+      "receipts_with_usage": 5,
+      "input_tokens": 243793,
+      "cached_input_tokens": 0,
+      "output_tokens": 13908,
+      "reasoning_tokens": 9174,
+      "total_tokens": 257701,
+      "verdict": "REVISE"
+    },
+    "review-v3.json": {
+      "receipts_with_usage": 5,
+      "input_tokens": 241720,
+      "cached_input_tokens": 0,
+      "output_tokens": 7916,
+      "reasoning_tokens": 4138,
+      "total_tokens": 249636,
+      "verdict": "REVISE"
+    },
+    "review-v4.json": {
+      "receipts_with_usage": 5,
+      "input_tokens": 133669,
+      "cached_input_tokens": 0,
+      "output_tokens": 5487,
+      "reasoning_tokens": 2171,
+      "total_tokens": 139156,
+      "verdict": "PASS"
+    }
+  },
+  "receipts": [
+    {
+      "round": "review.json",
+      "role": "architect",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_05c6edabb792f85f006ac94cc4309887d1bd8197e2e36e8de7",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577284,
+      "usage": {
+        "input_tokens": 39391,
+        "input_tokens_details": {
+          "cache_write_tokens": 39388,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2377,
+        "output_tokens_details": {
+          "reasoning_tokens": 851
+        },
+        "total_tokens": 41768
+      }
+    },
+    {
+      "round": "review.json",
+      "role": "reviewer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_040ccf0148400dc0006ac94cc438b887d19cf1290352335b9c",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577284,
+      "usage": {
+        "input_tokens": 39388,
+        "input_tokens_details": {
+          "cache_write_tokens": 39385,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1697,
+        "output_tokens_details": {
+          "reasoning_tokens": 1372
+        },
+        "total_tokens": 41085
+      }
+    },
+    {
+      "round": "review.json",
+      "role": "adversary",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_0da7dc5a5e92ee1d006ac94cc4392887d1938e5546204cfa4d",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577284,
+      "usage": {
+        "input_tokens": 39394,
+        "input_tokens_details": {
+          "cache_write_tokens": 39391,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2019,
+        "output_tokens_details": {
+          "reasoning_tokens": 953
+        },
+        "total_tokens": 41413
+      }
+    },
+    {
+      "round": "review.json",
+      "role": "test_designer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_0ccef7338c25bf26006ac94cc4393887d1939f16914f79e51a",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577284,
+      "usage": {
+        "input_tokens": 39392,
+        "input_tokens_details": {
+          "cache_write_tokens": 39389,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2139,
+        "output_tokens_details": {
+          "reasoning_tokens": 1688
+        },
+        "total_tokens": 41531
+      }
+    },
+    {
+      "round": "review.json",
+      "role": "adjudicator",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_0e4e14ab4a28ed7b006ac94d01702087d1b0f5ee07af6a0233",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577345,
+      "usage": {
+        "input_tokens": 42823,
+        "input_tokens_details": {
+          "cache_write_tokens": 42820,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1629,
+        "output_tokens_details": {
+          "reasoning_tokens": 217
+        },
+        "total_tokens": 44452
+      }
+    },
+    {
+      "round": "review-v2.json",
+      "role": "architect",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_04d18c542645cde1006ac94df9133487d1a2fd906af1d2fe56",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577593,
+      "usage": {
+        "input_tokens": 48051,
+        "input_tokens_details": {
+          "cache_write_tokens": 48048,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3169,
+        "output_tokens_details": {
+          "reasoning_tokens": 1552
+        },
+        "total_tokens": 51220
+      }
+    },
+    {
+      "round": "review-v2.json",
+      "role": "reviewer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_07e82fed6fe09445006ac94df9cd8087d184ec8e71c055bd30",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577593,
+      "usage": {
+        "input_tokens": 48048,
+        "input_tokens_details": {
+          "cache_write_tokens": 48045,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2959,
+        "output_tokens_details": {
+          "reasoning_tokens": 2632
+        },
+        "total_tokens": 51007
+      }
+    },
+    {
+      "round": "review-v2.json",
+      "role": "adversary",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_07cb0de86d987733006ac94df9ce2487d19d6527ce659bcc7f",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577593,
+      "usage": {
+        "input_tokens": 48054,
+        "input_tokens_details": {
+          "cache_write_tokens": 48051,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3233,
+        "output_tokens_details": {
+          "reasoning_tokens": 2070
+        },
+        "total_tokens": 51287
+      }
+    },
+    {
+      "round": "review-v2.json",
+      "role": "test_designer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_076f1e2ad438e177006ac94df9dc6087d1a65ab708c869929f",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577593,
+      "usage": {
+        "input_tokens": 48052,
+        "input_tokens_details": {
+          "cache_write_tokens": 48049,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2770,
+        "output_tokens_details": {
+          "reasoning_tokens": 2404
+        },
+        "total_tokens": 50822
+      }
+    },
+    {
+      "round": "review-v2.json",
+      "role": "adjudicator",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_08e873c3d276fb47006ac94e55445087d197e90be65bef5b6c",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791577685,
+      "usage": {
+        "input_tokens": 51588,
+        "input_tokens_details": {
+          "cache_write_tokens": 51585,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1777,
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        },
+        "total_tokens": 53365
+      }
+    },
+    {
+      "round": "review-v3.json",
+      "role": "architect",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_0923536c2b331c25006ac95009599c87d1a1d49e97aa047063",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578121,
+      "usage": {
+        "input_tokens": 47824,
+        "input_tokens_details": {
+          "cache_write_tokens": 47821,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1445,
+        "output_tokens_details": {
+          "reasoning_tokens": 444
+        },
+        "total_tokens": 49269
+      }
+    },
+    {
+      "round": "review-v3.json",
+      "role": "reviewer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_0db161132b56f8f9006ac9500952f087d1bd1e51b7ef8506d7",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578121,
+      "usage": {
+        "input_tokens": 47821,
+        "input_tokens_details": {
+          "cache_write_tokens": 47818,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1864,
+        "output_tokens_details": {
+          "reasoning_tokens": 1552
+        },
+        "total_tokens": 49685
+      }
+    },
+    {
+      "round": "review-v3.json",
+      "role": "adversary",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_071cf5f64499b732006ac9500959c087d198f21920893167ca",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578121,
+      "usage": {
+        "input_tokens": 47827,
+        "input_tokens_details": {
+          "cache_write_tokens": 47824,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1903,
+        "output_tokens_details": {
+          "reasoning_tokens": 1009
+        },
+        "total_tokens": 49730
+      }
+    },
+    {
+      "round": "review-v3.json",
+      "role": "test_designer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_0b31ba71ec013cff006ac9500958e487d19951adf3d7742140",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578121,
+      "usage": {
+        "input_tokens": 47825,
+        "input_tokens_details": {
+          "cache_write_tokens": 47822,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1353,
+        "output_tokens_details": {
+          "reasoning_tokens": 1025
+        },
+        "total_tokens": 49178
+      }
+    },
+    {
+      "round": "review-v3.json",
+      "role": "adjudicator",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_02288ba4bbb2d9c6006ac95043187487d19da067598ec331d5",
+      "verdict": "REVISE",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578179,
+      "usage": {
+        "input_tokens": 50423,
+        "input_tokens_details": {
+          "cache_write_tokens": 50420,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1351,
+        "output_tokens_details": {
+          "reasoning_tokens": 108
+        },
+        "total_tokens": 51774
+      }
+    },
+    {
+      "round": "review-v4.json",
+      "role": "architect",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_0a656f3db0c685a0006ac951005cb887d185fdb338f903b85f",
+      "verdict": "PASS",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578368,
+      "usage": {
+        "input_tokens": 26229,
+        "input_tokens_details": {
+          "cache_write_tokens": 26226,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1225,
+        "output_tokens_details": {
+          "reasoning_tokens": 98
+        },
+        "total_tokens": 27454
+      }
+    },
+    {
+      "round": "review-v4.json",
+      "role": "reviewer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_0c79285eb07d6051006ac950ffe53487d194b17e14e167390f",
+      "verdict": "PASS",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578368,
+      "usage": {
+        "input_tokens": 26226,
+        "input_tokens_details": {
+          "cache_write_tokens": 26223,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1501,
+        "output_tokens_details": {
+          "reasoning_tokens": 1252
+        },
+        "total_tokens": 27727
+      }
+    },
+    {
+      "round": "review-v4.json",
+      "role": "adversary",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_03e0c2a1c7110234006ac950ffe20487d1a2e38d8b04a2ebc8",
+      "verdict": "PASS",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578367,
+      "usage": {
+        "input_tokens": 26232,
+        "input_tokens_details": {
+          "cache_write_tokens": 26229,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1094,
+        "output_tokens_details": {
+          "reasoning_tokens": 301
+        },
+        "total_tokens": 27326
+      }
+    },
+    {
+      "round": "review-v4.json",
+      "role": "test_designer",
+      "requested_model": "gpt-6-sol",
+      "response_id": "resp_0556fc5873b8794f006ac950ffe50c87d18e59d17f8a901537",
+      "verdict": "PASS",
+      "http_status": 200,
+      "model": "gpt-6-sol",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578368,
+      "usage": {
+        "input_tokens": 26230,
+        "input_tokens_details": {
+          "cache_write_tokens": 26227,
+          "cached_tokens": 0
+        },
+        "output_tokens": 736,
+        "output_tokens_details": {
+          "reasoning_tokens": 446
+        },
+        "total_tokens": 26966
+      }
+    },
+    {
+      "round": "review-v4.json",
+      "role": "adjudicator",
+      "requested_model": "gpt-6-astra",
+      "response_id": "resp_0e24958b86f636bd006ac95121f3f087d1839b73b20da0d25f",
+      "verdict": "PASS",
+      "http_status": 200,
+      "model": "gpt-6-astra",
+      "status": "completed",
+      "service_tier": "default",
+      "created_at": 1791578401,
+      "usage": {
+        "input_tokens": 28752,
+        "input_tokens_details": {
+          "cache_write_tokens": 28749,
+          "cached_tokens": 0
+        },
+        "output_tokens": 931,
+        "output_tokens_details": {
+          "reasoning_tokens": 74
+        },
+        "total_tokens": 29683
+      }
+    }
+  ]
+}

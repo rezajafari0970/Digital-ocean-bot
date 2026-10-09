@@ -1,0 +1,298 @@
+{
+  "category_scope": "none",
+  "release_status": "CAPABILITY_DEPLOYED_ACTIVATION_BLOCKED",
+  "at": "2026-10-09T21:24:28.243293+00:00",
+  "commit": "2bdd5468874c66340c1aee939f3552b873ba78eb",
+  "samples": [
+    {
+      "at": "2026-10-09T21:24:28.243422+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1447898",
+          "NRestarts": "0",
+          "sha256": "ecb990951bd5bed63df5628138cb4c31b7b2430d7a5ee397c540bf1776248ce6"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1447901",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1478441",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T21:24:28.31668658Z"
+      }
+    },
+    {
+      "at": "2026-10-09T21:24:38.319365+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1447898",
+          "NRestarts": "0",
+          "sha256": "ecb990951bd5bed63df5628138cb4c31b7b2430d7a5ee397c540bf1776248ce6"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1447901",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1478441",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T21:24:38.376430744Z"
+      }
+    },
+    {
+      "at": "2026-10-09T21:24:48.382964+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1447898",
+          "NRestarts": "0",
+          "sha256": "ecb990951bd5bed63df5628138cb4c31b7b2430d7a5ee397c540bf1776248ce6"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1447901",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1478441",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T21:24:48.442915256Z"
+      }
+    },
+    {
+      "at": "2026-10-09T21:24:58.445963+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1447898",
+          "NRestarts": "0",
+          "sha256": "ecb990951bd5bed63df5628138cb4c31b7b2430d7a5ee397c540bf1776248ce6"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1447901",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1478441",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T21:24:58.501095174Z"
+      }
+    },
+    {
+      "at": "2026-10-09T21:25:08.504841+00:00",
+      "services": {
+        "api": {
+          "ActiveState": "active",
+          "MainPID": "1447898",
+          "NRestarts": "0",
+          "sha256": "ecb990951bd5bed63df5628138cb4c31b7b2430d7a5ee397c540bf1776248ce6"
+        },
+        "worker": {
+          "ActiveState": "active",
+          "MainPID": "1447901",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        },
+        "worker-panels": {
+          "ActiveState": "active",
+          "MainPID": "1478441",
+          "NRestarts": "0",
+          "sha256": "c9a6e93c949c481db2fbd283cd6fe7087c5bf28c6f0fcf6191bc9a2d591970de"
+        }
+      },
+      "readyz": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T21:25:08.558579887Z"
+      }
+    }
+  ],
+  "result": "SERVICE_HEALTH_PASS_WITH_OPEN_POLICY_FINDING",
+  "policy_invariants": "FAILED_CONCURRENT_CHANGE_PRESERVED",
+  "policy_finding": {
+    "at": "2026-10-09T21:26:36.946448+00:00",
+    "result": "OPEN_FINDING_PRESERVED",
+    "kind": "CONCURRENT_POLICY_CHANGE",
+    "updated_at": "2026-10-09T21:22:36.379888+00:00",
+    "global_policy_revision": 59,
+    "direct_profile_revision": 6,
+    "direct_profile_enabled": false,
+    "actor": "unattributed; no matching audit in inspected time window",
+    "audit_window": [],
+    "unchanged_invariants": [
+      "profile",
+      "routing",
+      "protection",
+      "obligations",
+      "recorded_at_default",
+      "proxy_admission_versions"
+    ],
+    "changed_hashes": {
+      "global": {
+        "before": "5f4ed5a1ba5623728a64a88d95aeb823",
+        "after": "01335b5f6f7f224770da9c8cfa2e374a"
+      },
+      "profiles": {
+        "before": "7b682e49993c0ce5c6cd4c8096ec8d5d",
+        "after": "2dadbdf6e23d2c64ccf8b425af2292a4"
+      }
+    },
+    "action": "No policy mutation or restoration performed; initial invariant failure retained; cannot claim all policy invariants unchanged"
+  },
+  "observed_health": {
+    "panel_id": "9d04d2ef-2a02-4ad6-91ba-121e15c67123",
+    "observed_at": "2026-10-09T21:25:08.576905Z",
+    "evidence_started": "0001-01-01T00:00:00Z",
+    "state": "NO_EVIDENCE",
+    "targets": [],
+    "source_path": "diagnostic chain through VPS; not native pool selection or application success",
+    "mutation_allowed": false,
+    "new_probe_requests": 0,
+    "provider_independence_verified": false
+  },
+  "resources_exit": 0,
+  "finished": "2026-10-09T21:26:36.946749+00:00"
+}

@@ -12,4 +12,14 @@ Public and pool-inner TCP/UDP rules share the selected domain contract. Infrastr
 
 This release is the next bounded step of the six-part strategy, not all six completed: independent-provider failover, automatic quarantine/readmission, session affinity and passive native attribution remain future gated engineering. No accounts/proxies are deleted or globally disabled; retry/deadline/ownership/recovery policy is unchanged.
 
-Source acceptance and pending release evidence: RESIDENTIAL_CATEGORY_EXPANSION_20261009.json. Production activation requires all full/vet/race/source-review gates, clean build, backup, scoped native canary, then fresh fleet verification. No replacement exclusion pilot is started.
+Source acceptance and final blocked-activation evidence: RESIDENTIAL_CATEGORY_EXPANSION_20261009.json. Production activation requires all full/vet/race/source-review gates, clean build, backup, scoped native canary, then fresh fleet verification. No replacement exclusion pilot is started.
+
+## Final observed outcome — 2026-10-10T00:57:43.472524+03:30
+
+Runtime 2bdd5468874c66340c1aee939f3552b873ba78eb is installed. Selector remains **none**. Expanded canary passed 214 native route proofs and exact legacy rollback passed 106. Expanded fleet snapshot: 26 of 28 serving panels passed; two Trial-compatible UpCloud deployments had no compatible residential endpoint. All 12 configured endpoints use ports outside the Trial policy ports 80/443/8080. Their lifecycle expiry does not resolve this recurring capability constraint. Full activation was rolled back, not certified. No endpoint, Trial flag or policy restriction was bypassed.
+
+Legacy settings were observed on all 28 panels in the rollback configuration snapshot. The later native rollback snapshot had 27/29 PASS and two initializing panels pending; targeted rechecks passed 106 and 78 route proofs once both classes existed. These receipts resolve those two gaps, not a new all-fleet expansion proof.
+
+Five successive samples passed all five readiness checks, three live binary hashes matched the accepted runtime, and no unexpected restarts occurred. Read-only health smoke returned NO_EVIDENCE with zero new probes and no mutation. This is not a claim of healthy external destinations. The final invariant check detected a separate policy update at 2026-10-09T21:22:36Z: DIRECT generation profile is disabled (revision 6; global revision 59). No matching audit event was found in the bounded window; attribution remains unknown. That setting was preserved and the failed invariant receipt retained. Other recorded invariants and proxy admission versions match baseline.
+
+API usage: 20 historical generation requests for four critical review rounds, 856742 total tokens (819570 input, 37172 output; reasoning tokens are included in output). This continuation performed 20 read-only response retrievals and zero new generations. Exact billed dollars are unavailable from these receipts. See RESIDENTIAL_POLICY_API_USAGE_20261010.json.

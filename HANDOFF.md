@@ -1,3 +1,7 @@
+# Latest residential continuation — 2026-10-10T00:57:43.472524+03:30
+
+Runtime 2bdd5468874c66340c1aee939f3552b873ba78eb deployed; category scope **none**, activation blocked by missing Trial-compatible residential endpoint. Canary PASS, fleet 26/28 positive proof, safe rollback with two targeted pending checks resolved. Five service-health samples PASS; unrelated concurrent DIRECT profile change preserved as an open finding. No new AI generation in closeout. See docs/RESIDENTIAL_CATEGORY_STATUS_FA_20261010.md and docs/RESIDENTIAL_POLICY_API_USAGE_20261010.json. All six reliability stages are not complete. No background release work after final reply.
+
 # Latest continuation — timing telemetry repaired; upstream cause unresolved
 
 Runtime **cebacf9f4ff5d77c692505db881210b68db4257c** deployed and healthy at 19:34:13 Tehran, 2026-10-09.

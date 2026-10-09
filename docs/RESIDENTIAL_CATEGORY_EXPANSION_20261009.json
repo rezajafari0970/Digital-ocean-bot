@@ -1,6 +1,6 @@
 {
   "at": "2026-10-09T20:40:42.958850+00:00",
-  "status": "ACCEPTED_RELEASE_PENDING",
+  "status": "CAPABILITY_DEPLOYED_ACTIVATION_BLOCKED",
   "baseline": "85a5b3f41e548cc700222de0e8b764de23913e8b",
   "previous_runtime": "cebacf9f4ff5d77c692505db881210b68db4257c",
   "source_digest": "159c78703f09b52c9702a29421510de43b1e1e0989caed4acf50a7d2f7127b20",
@@ -323,5 +323,261 @@
     "retry_timeout": "existing bounded semantics preserved; no retuning without latency evidence"
   },
   "evidence_directory": "/root/backups/dob-residential-policy-20261009",
-  "next": "clean deployment with category selector none; one-panel canary and exact rollback; all-panel activation only after native proof; read-only health smoke check; persist truthful final findings"
+  "next": "Provide a genuinely compatible authorized residential endpoint for Trial deployments or provider-confirmed exit from Trial. Then repeat required native canary/fleet gates, not unchanged source tests. Independent-provider verification, automatic quarantine/readmission, per-user affinity and native/application telemetry remain future work. No release or AI generation process continues after final reply.",
+  "finished_tehran": "2026-10-10T00:57:43.472524+03:30",
+  "runtime_commit": "2bdd5468874c66340c1aee939f3552b873ba78eb",
+  "category_scope": "none",
+  "expanded_categories_active": false,
+  "source_acceptance": "PASS; product source unchanged after accepted final gates",
+  "native_canary": {
+    "canary-baseline": {
+      "exit": 0,
+      "route_proofs": 106,
+      "sha256": "a8d9cb09ef3fcf4de188dc79e02097e78eb659cb1d7e6c9973e37c30a9379ae9"
+    },
+    "canary-expanded": {
+      "exit": 0,
+      "route_proofs": 214,
+      "sha256": "5c281ea4ed0f59ac09eec5b297cf603757aa52a9e8c376bd10be86e3b6fec42a"
+    },
+    "canary-rollback": {
+      "exit": 0,
+      "route_proofs": 106,
+      "sha256": "6e4e9e1b6cc9f3b9867997b04f4416c99a49c3b451860e444ea00e385615a5ad"
+    }
+  },
+  "expanded_fleet": {
+    "panels": 28,
+    "passed": 26,
+    "pending": 2,
+    "route_proofs": 5564,
+    "result": "FAILED_POSITIVE_RESIDENTIAL_GATE"
+  },
+  "rollback": {
+    "initial_panels": 29,
+    "initial_passed": 27,
+    "initial_pending": 2,
+    "targeted_resolution": {
+      "result": "PASS",
+      "at": "2026-10-09T21:24:28.162450+00:00",
+      "scope": "none",
+      "historical_result": "RESTORATION_NEEDS_ATTENTION",
+      "targeted_checks": {
+        "at": "2026-10-09T21:21:44.969761+00:00",
+        "scope": "none",
+        "results": {
+          "d7963ed5-94e7-4b8b-9eb8-f737d64c6793": 0,
+          "deea145c-15f2-4ebc-bc3c-f61f6c0d2497": 0
+        }
+      },
+      "interpretation": "The two previously pending rollback panels passed native acceptance after both route classes became available. This resolves those specific gaps; it is not a new expanded fleet acceptance."
+    },
+    "limitation": "Resolves the two recorded pending panels; not a new current-fleet expansion proof"
+  },
+  "compatibility_blocker": {
+    "panels": [
+      {
+        "id": "3126d02b-cca8-45a0-b480-292d5b13cce5",
+        "trial_compatible": true,
+        "lifecycle_state": "READY",
+        "expires_at": "2026-10-09T21:03:34.543847+00:00",
+        "routing_state": "APPLIED",
+        "pool_enabled": true,
+        "configured_count": 12,
+        "healthy_count": 0,
+        "selected_proxy_id": null
+      },
+      {
+        "id": "bc5d030b-e464-4e1d-baac-5f1a7125e305",
+        "trial_compatible": true,
+        "lifecycle_state": "READY",
+        "expires_at": "2026-10-09T21:11:48.611527+00:00",
+        "routing_state": "APPLIED",
+        "pool_enabled": true,
+        "configured_count": 12,
+        "healthy_count": 0,
+        "selected_proxy_id": null
+      }
+    ],
+    "enabled_endpoint_ports": [
+      {
+        "type": "socks5",
+        "port": 3106,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3168,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3175,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3192,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3206,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3297,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3570,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3776,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 3970,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 4328,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 4630,
+        "endpoints": 1
+      },
+      {
+        "type": "socks5",
+        "port": 10000,
+        "endpoints": 1
+      }
+    ],
+    "trial_compatible_enabled_endpoints": 0,
+    "at": "2026-10-09T21:03:30.559301+00:00",
+    "classification": "NO_TRIAL_COMPATIBLE_RESIDENTIAL_ENDPOINT",
+    "permitted_ports_source": "internal/providers/trial.go",
+    "allowed_proxy_ports": [
+      80,
+      443,
+      8080
+    ],
+    "positive_residential_proof": false,
+    "requires": "Provision a genuinely compatible authorized residential endpoint, or provider-confirmed exit from Trial; do not assume another port works or falsify profile snapshot",
+    "no_endpoint_modified": true,
+    "no_new_purchase": true
+  },
+  "concurrent_policy_change": {
+    "at": "2026-10-09T21:26:36.946448+00:00",
+    "result": "OPEN_FINDING_PRESERVED",
+    "kind": "CONCURRENT_POLICY_CHANGE",
+    "updated_at": "2026-10-09T21:22:36.379888+00:00",
+    "global_policy_revision": 59,
+    "direct_profile_revision": 6,
+    "direct_profile_enabled": false,
+    "actor": "unattributed; no matching audit in inspected time window",
+    "audit_window": [],
+    "unchanged_invariants": [
+      "profile",
+      "routing",
+      "protection",
+      "obligations",
+      "recorded_at_default",
+      "proxy_admission_versions"
+    ],
+    "changed_hashes": {
+      "global": {
+        "before": "5f4ed5a1ba5623728a64a88d95aeb823",
+        "after": "01335b5f6f7f224770da9c8cfa2e374a"
+      },
+      "profiles": {
+        "before": "7b682e49993c0ce5c6cd4c8096ec8d5d",
+        "after": "2dadbdf6e23d2c64ccf8b425af2292a4"
+      }
+    },
+    "action": "No policy mutation or restoration performed; initial invariant failure retained; cannot claim all policy invariants unchanged"
+  },
+  "service_health": {
+    "samples": 5,
+    "readiness_checks_per_sample": 5,
+    "unexpected_restarts": 0,
+    "result": "SERVICE_HEALTH_PASS_WITH_OPEN_POLICY_FINDING"
+  },
+  "health_view_smoke": {
+    "panel_id": "9d04d2ef-2a02-4ad6-91ba-121e15c67123",
+    "observed_at": "2026-10-09T21:25:08.576905Z",
+    "evidence_started": "0001-01-01T00:00:00Z",
+    "state": "NO_EVIDENCE",
+    "targets": [],
+    "source_path": "diagnostic chain through VPS; not native pool selection or application success",
+    "mutation_allowed": false,
+    "new_probe_requests": 0,
+    "provider_independence_verified": false
+  },
+  "api_usage": {
+    "at": "2026-10-09T21:25:10.075882+00:00",
+    "scope": "This residential-policy release only; excludes ChatGPT subscription and other jobs",
+    "purpose": "Four critical code-review rounds; architect, reviewer, adversary, test designer, adjudicator",
+    "historical_successful_generation_requests": 20,
+    "new_generation_requests_in_usage_audit": 0,
+    "read_only_response_retrieval_requests": 20,
+    "coverage_complete": true,
+    "actual_billed_usd": null,
+    "billing_note": "Exact billed cost was not returned by response receipts; no dollar amount inferred",
+    "totals": {
+      "receipts_with_usage": 20,
+      "input_tokens": 819570,
+      "cached_input_tokens": 0,
+      "output_tokens": 37172,
+      "reasoning_tokens": 20564,
+      "total_tokens": 856742
+    },
+    "rounds": {
+      "review.json": {
+        "receipts_with_usage": 5,
+        "input_tokens": 200388,
+        "cached_input_tokens": 0,
+        "output_tokens": 9861,
+        "reasoning_tokens": 5081,
+        "total_tokens": 210249,
+        "verdict": "REVISE"
+      },
+      "review-v2.json": {
+        "receipts_with_usage": 5,
+        "input_tokens": 243793,
+        "cached_input_tokens": 0,
+        "output_tokens": 13908,
+        "reasoning_tokens": 9174,
+        "total_tokens": 257701,
+        "verdict": "REVISE"
+      },
+      "review-v3.json": {
+        "receipts_with_usage": 5,
+        "input_tokens": 241720,
+        "cached_input_tokens": 0,
+        "output_tokens": 7916,
+        "reasoning_tokens": 4138,
+        "total_tokens": 249636,
+        "verdict": "REVISE"
+      },
+      "review-v4.json": {
+        "receipts_with_usage": 5,
+        "input_tokens": 133669,
+        "cached_input_tokens": 0,
+        "output_tokens": 5487,
+        "reasoning_tokens": 2171,
+        "total_tokens": 139156,
+        "verdict": "PASS"
+      }
+    }
+  },
+  "residential_byte_savings_measured": false
 }
