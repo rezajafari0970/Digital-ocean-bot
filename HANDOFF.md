@@ -1,3 +1,7 @@
+# Latest: UpCloud Trial residential relay strategy — 2026-10-10T01:09:50.979358+03:30
+
+Strategy requested by user, checked against current source and live metadata, and recorded at docs/UPCLOUD_TRIAL_RESIDENTIAL_RELAY_STRATEGY_20261010_FA.md. 22 metadata-only donor candidates (14 DigitalOcean, 8 Vultr); no relay path proven. Current category scope none. This documentation-only step does not implement, activate or certify the relay. API generation/receipt retrieval/new tokens in this step: zero. Preserve the prior runtime and open concurrent DIRECT-profile finding. Next implementation packages and production gates are in the strategy.
+
 # Latest residential continuation — 2026-10-10T00:57:43.472524+03:30
 
 Runtime 2bdd5468874c66340c1aee939f3552b873ba78eb deployed; category scope **none**, activation blocked by missing Trial-compatible residential endpoint. Canary PASS, fleet 26/28 positive proof, safe rollback with two targeted pending checks resolved. Five service-health samples PASS; unrelated concurrent DIRECT profile change preserved as an open finding. No new AI generation in closeout. See docs/RESIDENTIAL_CATEGORY_STATUS_FA_20261010.md and docs/RESIDENTIAL_POLICY_API_USAGE_20261010.json. All six reliability stages are not complete. No background release work after final reply.

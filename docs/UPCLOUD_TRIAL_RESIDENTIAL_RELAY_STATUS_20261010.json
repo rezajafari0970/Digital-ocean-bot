@@ -1,0 +1,18 @@
+{
+  "status": "STRATEGY_RECORDED_NOT_IMPLEMENTED",
+  "at_tehran": "2026-10-10T01:09:50.979358+03:30",
+  "baseline": "3b74ab7ff80a190428b4e85533805fe448908024",
+  "strategy": "docs/UPCLOUD_TRIAL_RESIDENTIAL_RELAY_STRATEGY_20261010_FA.md",
+  "live_inventory_at": "2026-10-10T01:06:35.724533+03:30",
+  "metadata_candidates": {
+    "vultr": 8,
+    "digitalocean": 14
+  },
+  "verified_relay_paths": 0,
+  "category_scope": "none",
+  "production_mutations_this_step": 0,
+  "openai_api_generation_requests_this_step": 0,
+  "openai_api_receipt_retrievals_this_step": 0,
+  "openai_api_tokens_this_step": 0,
+  "next": "Implement managed relay ownership, typed VLESS outbound and full-path acceptance; donor categories first, UpCloud canary next, fleet only after gates. Current production activation remains blocked pending verified relay implementation."
+}
