@@ -1,3 +1,21 @@
+# Continuation checkpoint — API restored; source accepted, release pending
+
+Read docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md and acceptance JSON first.
+Final reviewed source digest: de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7.
+Review-v4 PASS/unresolved=[]; prior F1-F11/R1,R3-R7/N1 repaired, R2 withdrawn as false.
+Python47, targeted PostgreSQL, full-v4/vet-v4/race-v4 PASS; real native component
+evidence retained. Final Python-only correction leaves the Go build graph identical.
+Production remains fc76e6a, zero admission operations/exclusions/active tuning at
+14:18UTC; no new pilot run. Prepared deploy.sh is gated and has NOT been executed.
+Evidence and exact release continuation: /root/backups/dob-residential-stability-20261009/resume-1327.
+Next: clean accepted checkpoint, integrate canonical docs, rebuild/release through
+gated standard topology path, verify hashes/readiness; fresh sufficiently long-lived
+panel and roles frozen before two windows. No repeat-until-green or fleet publication.
+Do not call field acceptance complete. Preserve provider/Android/SDK/historical gaps.
+Live status is .local/residential-allowlist-progress.json; no AI continues after final.
+
+---
+
 # Latest continuation — stability supervisor candidate, 2026-10-09
 
 Read docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md, the acceptance JSON and

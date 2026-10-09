@@ -34,6 +34,7 @@ func TestStabilityConsecutiveWindowsRejectUnsafe(t *testing.T) {
 					o := &first.Observations[i]
 					if o.ProxyID == first.Suspects[0] && o.Target == "gpt" {
 						o.Outcome = "ok"
+						o.CurlCode = 0
 						o.HTTPStatus = 200
 					}
 				}
@@ -55,10 +56,12 @@ func TestStabilityConsecutiveWindowsRejectUnsafe(t *testing.T) {
 					if o.ProxyID == second.Suspects[0] {
 						if o.Target == "gpt" {
 							o.Outcome = "ok"
+							o.CurlCode = 0
 							o.HTTPStatus = 200
 						}
 						if o.Target == "ads" {
 							o.Outcome = "timeout"
+							o.CurlCode = 28
 							o.HTTPStatus = 0
 						}
 					}

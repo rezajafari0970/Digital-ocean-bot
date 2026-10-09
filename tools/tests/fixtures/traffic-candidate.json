@@ -187,5 +187,6 @@
   "egress_distinct": true,
   "local_core_healthy": true,
   "scope": "fresh actual RES/DIRECT VLESS; static HEADs and BrowserLeaks egress; not mobile latency or ad show-rate",
-  "passed": false
+  "passed": false,
+  "complete": true
 }

@@ -63,6 +63,13 @@ func stabilityStart(ctx context.Context, tx *sql.Tx, q Request, second Admission
 	if previous != q.StabilityEvidenceID {
 		return conflict("stability requires consecutive immutable windows")
 	}
+	var tied, distinct int
+	if err := tx.QueryRowContext(ctx, "SELECT count(*),count(DISTINCT recorded_at) FROM residential_admission_evidence WHERE panel_id=$1 AND recorded_at IN (SELECT recorded_at FROM residential_admission_evidence WHERE id IN ($2,$3))", second.Context.PanelID, q.StabilityEvidenceID, second.ID).Scan(&tied, &distinct); err != nil {
+		return err
+	}
+	if tied != 2 || distinct != 2 {
+		return conflict("ambiguous stability receipt recording order")
+	}
 	first, err := loadAdmission(ctx, tx, q.StabilityEvidenceID)
 	if err != nil {
 		return err

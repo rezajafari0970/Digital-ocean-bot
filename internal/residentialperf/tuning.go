@@ -269,7 +269,7 @@ func tuningRestoreAssignments(ctx context.Context, tx *sql.Tx, id string, t *Tun
 	}
 	return saveTuning(ctx, tx, id, t)
 }
-func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, version int64, spec []byte) error {
+func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, version int64, spec []byte, authorization *admissionAuthorization) error {
 	if state != "KEPT" {
 		return conflict("tuning requires a kept permanent fleet profile")
 	}
@@ -315,7 +315,7 @@ func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, versio
 			if len(q.PanelIDs) != 1 || q.AdmissionEvidenceID == "" {
 				return bad("admission requires exactly one panel and trusted evidence")
 			}
-			if e = admissionStart(ctx, tx, q); e != nil {
+			if e = admissionStart(ctx, tx, q, authorization); e != nil {
 				return e
 			}
 		} else if q.AdmissionEvidenceID != "" {

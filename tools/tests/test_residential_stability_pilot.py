@@ -2,6 +2,8 @@ import copy, datetime as dt, importlib.util, json, os, subprocess, sys, tempfile
 from pathlib import Path
 from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[2];SPEC=importlib.util.spec_from_file_location('pilot',ROOT/'tools/residential-stability-pilot.py');m=importlib.util.module_from_spec(SPEC);SPEC.loader.exec_module(m)
+SUPPORT=ROOT/'tools/residential-pilot-support.py'
+m.support=m.verified_support(SUPPORT,m.hashlib.sha256(SUPPORT.read_bytes()).hexdigest())
 F=Path(__file__).parent/'fixtures'
 def fixture(name):return json.loads((F/(name+'.json')).read_text())
 class Clock:
@@ -11,13 +13,14 @@ class Clock:
  def monotonic(self):return self.elapsed
 class Crash(BaseException):pass
 class Fake:
- def __init__(self,p,c):self.p=p;self.c=c;self.current=copy.deepcopy(p['before']);self.receipts={};self.calls=[];self.collect_count=0;self.ineligible=0;self.crash=False;self.lost=False;self.unavailable=False;self.native_fail=0;self.native_calls=0;self.expire_during_traffic=False;self.no_restore=False;self.pulse=lambda:None
+ def __init__(self,p,c):self.p=p;self.c=c;self.current=copy.deepcopy(p['before']);self.current['inventory']={v['panel_id']:'READY' for v in self.current['assignments']};self.receipts={};self.calls=[];self.collect_count=0;self.ineligible=0;self.crash=False;self.lost=False;self.unavailable=False;self.native_fail=0;self.native_calls=0;self.expire_during_traffic=False;self.no_restore=False;self.pulse=lambda:None
  def stage(self):pass
- def runtime(self):pass
+ def runtime(self):
+  if getattr(self,"runtime_changed",False):raise m.Gate("runtime identity changed")
  def snapshot(self):
   s=self.current;t=s['profile'].get('tuning') or {};panel=s['panel'];s['at']=self.c.now().isoformat()
   if t.get('phase') in ('TESTING','RESTORING') and not self.no_restore and (t['phase']=='RESTORING' or self.c.now()>=m.instant(t['deadline'])):
-   t['phase']='RESTORED';panel['config']=copy.deepcopy(self.p['before']['profile']['spec']);panel['generation']=self.p['before']['panel']['generation']+2;s['profile']['version']+=1
+   t['reason']=t.get('reason','trial deadline expired');t['phase']='RESTORED';panel['config']=copy.deepcopy(self.p['before']['profile']['spec']);panel['generation']=self.p['before']['panel']['generation']+2;panel['plan_hash']=self.p['before']['panel']['plan_hash'];s['profile']['version']+=1
   panel.update(applied_generation=panel['generation'],native_generation=panel['generation'],verified_at=s['at'],native_verified_at=s['at'],state='APPLIED')
   return copy.deepcopy(s)
  def native(self,until=None):
@@ -36,9 +39,9 @@ class Fake:
  def execute(self,q):
   self.calls.append(copy.deepcopy(q));s=self.current
   if q['action']=='tune_start':
-   s['profile']['version']+=1;s['profile']['tuning']={'id':q['request_id'],'phase':'TESTING','panels':[self.p['panel']],'before':copy.deepcopy(self.p['before']['profile']['spec']),'candidate':q['config'],'deadline':(self.c.now()+dt.timedelta(minutes=5)).isoformat(),'admission_plan':'candidate-plan'};s['panel'].update(config=q['config'],generation=self.p['before']['panel']['generation']+1,plan_hash='candidate-plan')
-  else:s['profile']['tuning']['phase']='RESTORING';s['profile']['version']+=1
-  self.receipts[q['request_id']]={'response':{'experiment_id':q['experiment_id'],'version':s['profile']['version']},'evidence_id':q.get('admission_evidence_id')}
+   s['profile']['version']+=1;s['profile']['tuning']={'id':q['request_id'],'phase':'TESTING','rejected':False,'panels':[self.p['panel']],'before':copy.deepcopy(self.p['before']['profile']['spec']),'candidate':q['config'],'deadline':(self.c.now()+dt.timedelta(minutes=5)).isoformat(),'admission_plan':'candidate-plan','admission_evidence_id':q['admission_evidence_id'],'base_version':q['expected_version'],'base_revision':q['base_revision']};s['panel'].update(config=q['config'],generation=self.p['before']['panel']['generation']+1,plan_hash='candidate-plan')
+  else:s['profile']['tuning']['phase']='RESTORING';s['profile']['tuning']['reason']='operator cancelled';s['profile']['version']+=1
+  self.receipts[q['request_id']]={'response':{'experiment_id':q['experiment_id'],'version':s['profile']['version']},'evidence_id':q.get('admission_evidence_id'),'exact_request_verified':True}
   if self.crash and q['action']=='tune_start':self.crash=False;raise Crash()
   if self.lost:raise m.Uncertain('response lost')
   return 0
@@ -129,7 +132,7 @@ class EvidenceTests(unittest.TestCase):
    else:x['egress_distinct']=False
    with self.subTest(kind=kind),self.assertRaises(m.Gate):m.score(x)
  def test_subthreshold_or_slow_candidate_rejected(self):
-  a=fixture('traffic-baseline');b=fixture('traffic-candidate');next(v for v in b['cases'] if v['case']=='ads-0')['passed']=False;self.assertFalse(m.accepted(a,b));b=fixture('traffic-candidate')
+  a=fixture('traffic-baseline');b=fixture('traffic-candidate');next(v for v in b['cases'] if v['case']=='ads-0').update(passed=False,http=0,curl_code=28);self.assertFalse(m.accepted(a,b));b=fixture('traffic-candidate')
   for v in b['cases']:
    if v['case'] in m.STATIC and v['passed']:v['seconds']=50
   self.assertFalse(m.accepted(a,b))
@@ -142,14 +145,14 @@ class EvidenceTests(unittest.TestCase):
  def test_pinned_recovery_tools_survive_missing_source_but_reject_changes(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);source=root/'source';source.write_bytes(b'reviewed artifact');source.chmod(0o500);policy={'tools':{name:{'path':str(source),'sha256':m.hashlib.sha256(source.read_bytes()).hexdigest()} for name in m.TOOLS}}
-   adapter=m.Adapter(policy,root);adapter.stage();source.unlink();adapter.stage()
+   policy['tools']['support']={'path':str(SUPPORT),'sha256':m.hashlib.sha256(SUPPORT.read_bytes()).hexdigest()};adapter=m.Adapter(policy,root);adapter.stage();source.unlink();adapter.stage()
    staged=root/'tools'/'tune';staged.chmod(0o700)
    with self.assertRaises(m.Gate):adapter.stage()
    staged.write_bytes(b'wrong artifact');staged.chmod(0o500)
    with self.assertRaises(m.Gate):adapter.stage()
  def test_real_subprocess_timeout_kills_owned_process(self):
   with tempfile.TemporaryDirectory() as d:
-   root=Path(d);pidfile=root/'child.pid';adapter=m.Adapter({},root)
+   root=Path(d);pidfile=root/'child.pid';adapter=m.Adapter({},root);adapter.support=m.support
    code="import os,time,sys; open(sys.argv[1],'w').write(str(os.getpid())); time.sleep(30)"
    with self.assertRaises(m.Uncertain):adapter.command('timeout-test',[sys.executable,'-c',code,str(pidfile)],.1)
    pid=int(pidfile.read_text());self.assertFalse(Path('/proc/'+str(pid)).exists())

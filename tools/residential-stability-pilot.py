@@ -2,11 +2,12 @@
 """Bounded, recovery-first operator workflow. No scheduler or alternate writer."""
 import argparse, contextlib, datetime as dt, fcntl, hashlib, json, math, os
 from pathlib import Path
-import shutil, signal, stat, statistics, subprocess, sys, time, uuid
+import shutil, signal, stat, statistics, subprocess, sys, time, uuid, re
+import types
 UTC=dt.timezone.utc
 TEHRAN=dt.timezone(dt.timedelta(hours=3,minutes=30))
 TERMINAL={'NO_ACTION','COMPLETE','ERROR'}
-TOOLS={'admission','tune','native','traffic','xray'}
+TOOLS={'admission','tune','native','traffic','xray','support'}
 SERVICES={'api':'api_sha256','worker':'worker_sha256','worker-panels':'worker_sha256'}
 STATIC={f'{name}-{n}' for name in ('ads','gpt','browserleaks') for n in range(3)}
 CRITICAL={'probe-www.gstatic.com','probe-connectivitycheck.gstatic.com','probe-www.google.com','deny-example.com','deny-1.1.1.1','deny-dns.google','direct-positive','egress-res','egress-direct'}
@@ -21,6 +22,14 @@ def require(v,message):
  if not v: raise Gate(message)
 def uid(s):
  require(isinstance(s,str) and str(uuid.UUID(s))==s,'canonical UUID required'); return s
+
+def verified_support(path, expected):
+ path=Path(path);st=path.lstat()
+ require(stat.S_ISREG(st.st_mode) and st.st_uid==0 and not st.st_mode&0o022,'untrusted support module')
+ data=path.read_bytes();require(hashlib.sha256(data).hexdigest()==expected,'support identity changed')
+ module=types.ModuleType('verified_residential_pilot_support');module.__file__=str(path)
+ exec(compile(data,str(path),'exec'),module.__dict__)
+ return module
 
 def atomic(path,value):
  path=Path(path);tmp=path.with_name(path.name+'.'+str(uuid.uuid4())+'.tmp')
@@ -57,17 +66,26 @@ def validate_policy(p):
 def score(traffic):
  cases=traffic.get('cases',[]);keys=[x.get('case') for x in cases]
  require(len(cases)==18 and set(keys)==STATIC|CRITICAL and len(set(keys))==18,'incomplete or duplicate traffic cases')
- require(traffic.get('local_core_healthy') is True and traffic.get('egress_distinct') is True,'missing core or egress proof')
- good=[]
+ require(traffic.get('complete') is True and traffic.get('local_core_healthy') is True,'missing complete traffic or local core proof')
+ good=[];egress={}
  for x in cases:
-  key=x['case'];passed=x.get('passed') is True
-  if key in CRITICAL:
-   require(passed,'mandatory traffic case failed')
-   if key.startswith('deny-'):require(x['http']==0 and x['curl_code'] in (35,52,56),'unproven destination denial')
-   else:require(x['curl_code']==0 and x['http']==(204 if key.startswith('probe-') else 200),'invalid positive traffic proof')
-  elif passed:
-   require(x['curl_code']==0 and x['http']==200 and isinstance(x['seconds'],(float,int)) and math.isfinite(x['seconds']) and x['seconds']>0,'invalid static success')
-   good.append(x['seconds'])
+  key=x['case'];require(x.get('class')==('DIRECT' if key in ('direct-positive','egress-direct') else 'RESIDENTIAL'),'wrong traffic class')
+  require(type(x.get('passed')) is bool and type(x.get('http')) is int and type(x.get('curl_code')) is int,'invalid traffic result types')
+  http=x['http'];code=x['curl_code'];seconds=x.get('seconds')
+  require(0<=http<=599 and 0<=code<=255 and type(seconds) in (int,float) and math.isfinite(seconds) and seconds>=0,'invalid transport metrics')
+  require(code!=0 or 100<=http<=599,'successful transport lacks an HTTP response')
+  require(isinstance(x.get('at'),str),'missing attempt time');instant(x['at'])
+  if key.startswith('deny-'):success=http==0 and code in (35,52,56)
+  else:success=code==0 and http==(204 if key.startswith('probe-') else 200)
+  if key.startswith('egress-'):
+   value=x.get('egress_sha256');require(isinstance(value,str) and re.fullmatch(r'[a-f0-9]{64}',value),'missing valid egress hash');egress[key]=value
+  else:require(x.get('egress_sha256') is None,'unexpected egress identity')
+  require(x['passed']==success,'inconsistent traffic success flag')
+  if key in CRITICAL:require(success,'mandatory traffic case failed')
+  elif success:
+   require(seconds>0,'invalid static success latency');good.append(seconds)
+ distinct=len(egress)==2 and egress['egress-res']!=egress['egress-direct']
+ require(distinct and traffic.get('egress_distinct') is distinct,'egress identity proof failed')
  return {'successes':len(good),'median':statistics.median(good) if good else None}
 
 def accepted(baseline,candidate):
@@ -81,6 +99,7 @@ def unchanged(p,s):
  old={v['panel_id']:v for v in before['assignments'] if v['panel_id']!=p['panel']};current={v['panel_id']:v for v in s['assignments'] if v['panel_id']!=p['panel']}
  for key,v in old.items():
   if key in current:require(current[key]==v,'unselected surviving assignment changed')
+  else:require(s.get('inventory',{}).get(key)=='DELETED','unselected assignment disappeared without proven deletion')
  for key,v in current.items():
   if key not in old:require(v['config']==before['profile']['spec'] and v['owner']==before['profile']['id'],'new unrelated assignment differs from parent')
 
@@ -100,7 +119,8 @@ def parent_ready(p,s):
 
 def active(p,s,request):
  unchanged(p,s);fresh(s);t=s['profile'].get('tuning') or {};q=s['panel']
- require(t.get('id')==request['request_id'] and t.get('phase')=='TESTING','trial no longer owned and testing')
+ require(t.get('id')==request['request_id'] and t.get('phase')=='TESTING' and t.get('rejected') is False,'trial no longer owned and testing')
+ require(t.get('admission_evidence_id')==request['admission_evidence_id'] and t.get('base_version')==request['expected_version'] and t.get('base_revision')==request['base_revision'],'owned tuning evidence or base mismatch')
  require(instant(s['at'])<instant(t['deadline']),'trial deadline expired')
  require(t['panels']==[p['panel']] and t['before']==p['before']['profile']['spec'] and t['candidate']==request['config'],'trial context changed')
  require(q['owner']==request['experiment_id'] and q['generation']==p['before']['panel']['generation']+1 and q['config']==request['config'],'candidate generation or config changed')
@@ -110,12 +130,14 @@ def active(p,s,request):
 def restored(p,s,request):
  unchanged(p,s);fresh(s);t=s['profile'].get('tuning') or {};q=s['panel']
  require(t.get('id')==request['request_id'] and t.get('phase')=='RESTORED','owned restoration remains pending')
+ require(t.get('admission_evidence_id')==request['admission_evidence_id'] and t.get('base_version')==request['expected_version'] and t.get('base_revision')==request['base_revision'] and t.get('candidate')==request['config'] and t.get('panels')==[p['panel']],'restored tuning identity mismatch')
  require(t['before']==p['before']['profile']['spec'] and q['config']==t['before'] and q['owner']==request['experiment_id'],'exact parent restoration unproved')
  require(q['generation']==p['before']['panel']['generation']+2,'unexpected restoration generation')
+ require(q['plan_hash']==p['before']['panel']['plan_hash'],'exact frozen parent native plan not restored')
  return True
 
 class Adapter:
- def __init__(self,policy,directory,pulse=lambda:None):self.p=policy;self.directory=Path(directory);self.pulse=pulse;self.env=os.environ.copy();self.tools={}
+ def __init__(self,policy,directory,pulse=lambda:None):self.p=policy;self.directory=Path(directory);self.pulse=pulse;self.env=os.environ.copy();self.tools={};self.support=None
  def stage(self):
   dest=self.directory/'tools';dest.mkdir(mode=0o700,exist_ok=True);ds=dest.lstat();require(stat.S_ISDIR(ds.st_mode) and ds.st_uid==0 and not ds.st_mode&0o077,'untrusted staged directory')
   for name,spec in self.p['tools'].items():
@@ -128,27 +150,18 @@ class Adapter:
     fd=os.open(dest,os.O_DIRECTORY);os.fsync(fd);os.close(fd)
    st=target.lstat();require(stat.S_ISREG(st.st_mode) and st.st_uid==0 and not st.st_mode&0o222,'staged tool must remain read-only')
    require(hashlib.sha256(target.read_bytes()).hexdigest()==spec['sha256'],'staged tool identity changed');self.tools[name]=str(target)
+  self.support=verified_support(self.tools['support'],self.p['tools']['support']['sha256'])
  def command(self,name,args,seconds,input_text=None,env=None,until=None):
-  import ctypes
-  label=name+'-'+str(uuid.uuid4());out=self.directory/(label+'.stdout');fd=os.open(out,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600);started=time.monotonic();p=None
-  try:
-   with os.fdopen(fd,'wb') as f:
-    p=subprocess.Popen(args,stdin=subprocess.PIPE if input_text is not None else subprocess.DEVNULL,stdout=f,stderr=subprocess.DEVNULL,env=env or self.env,start_new_session=True,preexec_fn=lambda:ctypes.CDLL(None).prctl(1,signal.SIGKILL))
-    if input_text is not None:p.stdin.write(input_text.encode());p.stdin.close()
-    while p.poll() is None:
-     self.pulse()
-     if time.monotonic()-started>seconds or out.stat().st_size>2*1024*1024 or (until and now()>=until):raise Uncertain('bounded subprocess interrupted')
-     time.sleep(.25)
-   atomic(self.directory/(label+'.result.json'),{'tool':name,'returncode':p.returncode,'seconds':time.monotonic()-started})
-   return p.returncode,out.read_text()
-  finally:
-   if p is not None and p.poll() is None:
-    os.killpg(p.pid,signal.SIGTERM)
-    try:p.wait(timeout=2)
-    except subprocess.TimeoutExpired:os.killpg(p.pid,signal.SIGKILL);p.wait()
+  label=name+'-'+str(uuid.uuid4());out=self.directory/(label+'.stdout');started=time.monotonic()
+  require(self.support is not None,'verified staged support required');helper=self.support
+  rc=helper.bounded_command(args,out,seconds,env or self.env,self.pulse,input_text,until)
+  atomic(self.directory/(label+'.result.json'),{'tool':name,'returncode':rc,'seconds':time.monotonic()-started})
+  if rc in (124,125) or rc<0:raise Uncertain('bounded execution interrupted or guard failed')
+  return rc,out.read_text()
  def sql(self,query):
-  env=self.env.copy();env['PGOPTIONS']='-c default_transaction_read_only=on -c statement_timeout=10000'
-  rc,text=self.command('read-db',['psql',env['DATABASE_URL'],'-XAt','-v','ON_ERROR_STOP=1','-c',query],12,env=env)
+  require(self.support is not None,'verified staged support required')
+  with self.support.database_environment(self.directory,self.env) as env:
+   rc,text=self.command('read-db',['psql','-XAt','-v','ON_ERROR_STOP=1','-c',query],12,env=env)
   if rc:raise Uncertain('authoritative read unavailable')
   try:return json.loads(text)
   except Exception:raise Uncertain('authoritative response invalid') from None
@@ -156,6 +169,7 @@ class Adapter:
   panel=uid(self.p['panel'])
   query="""SELECT json_build_object('at',clock_timestamp(),'profile',json_build_object('id',x.id,'state',x.state,'version',x.version,'spec',x.spec,'duration_mode',x.duration_mode,'publish_scope',x.publish_scope,'tuning',x.tuning),
  'panel',json_build_object('identity',md5(jsonb_build_array(pi.account_id,pi.droplet_id,pi.driver,pi.base_url,pi.auth_secret_ref)::text),'id',p.panel_id,'owner',p.experiment_id,'config',p.config,'generation',p.generation,'applied_generation',p.applied_generation,'verified_at',p.verified_at,'native_generation',r.performance_generation,'native_verified_at',r.verified_at,'native_revision',r.revision,'plan_hash',r.plan_hash,'state',r.state,'server_state',d.state,'expires_at',d.expires_at,'enabled',pi.enabled,'account_active',a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL),
+ 'inventory',(SELECT COALESCE(jsonb_object_agg(pi.id::text,d.state),'{}'::jsonb) FROM panel_instances pi LEFT JOIN droplets d ON d.id=pi.droplet_id),
  'assignments',(SELECT COALESCE(json_agg(t ORDER BY t.panel_id),'[]'::json) FROM(SELECT pp.panel_id,pp.experiment_id AS owner,pp.config,pp.generation FROM residential_performance_panels pp JOIN panel_instances pii ON pii.id=pp.panel_id JOIN droplets dd ON dd.id=pii.droplet_id WHERE dd.state<>'DELETED')t),
  'invariants',json_build_object('routing',(SELECT row_to_json(z) FROM(SELECT enabled,fleet,panel_ids,revision FROM residential_routing_control WHERE singleton)z),'protection',(SELECT row_to_json(z) FROM(SELECT enabled,scope,revision FROM server_protection_control WHERE singleton)z),'global',md5((SELECT json_agg(z ORDER BY policy_key)::text FROM global_config_policies z)),'profiles',md5((SELECT json_agg(z ORDER BY route_class)::text FROM reality_config_profiles z)),'proxy_versions',(SELECT COALESCE(jsonb_object_agg(proxy_id::text,admission_version),'{}'::jsonb) FROM residential_proxies WHERE enabled)),
  'latest_receipt',(SELECT id FROM residential_admission_evidence WHERE panel_id=p.panel_id ORDER BY recorded_at DESC,id DESC LIMIT 1))
@@ -178,17 +192,25 @@ class Adapter:
   stored=self.sql("SELECT evidence FROM residential_admission_evidence WHERE id='"+x['evidence']['id']+"'")
   require(stored==x['evidence'],'collector and immutable receipt differ');return x
  def lookup(self,request):
-  return self.sql("SELECT (SELECT json_build_object('response',response,'evidence_id',admission_evidence_id) FROM residential_performance_operations WHERE request_id='"+uid(request['request_id'])+"')")
+  rc,text=self.command('reconcile',[self.tools['tune'],'--reconcile'],25,input_text=json.dumps(request))
+  if rc:raise Uncertain('exact request reconciliation unavailable or mismatched')
+  try:
+   value=json.loads(text);require(type(value['found']) is bool,'invalid reconciliation response')
+   if not value['found']:return None
+   require(value['exact_request_verified'] is True,'full request hash unproved')
+   return {'response':value['receipt'],'evidence_id':value['evidence_id'] or None,'exact_request_verified':True}
+  except (KeyError,ValueError):raise Uncertain('invalid reconciliation response') from None
  def execute(self,request):return self.command('tune',[self.tools['tune'],'--execute'],25,input_text=json.dumps(request))[0]
  def native(self,until=None):
   rc,text=self.command('native',[self.tools['native'],self.p['panel']],90,until=until)
-  require(rc==0 and ('ADS_UDP_DNS_PASS panel='+self.p['panel']+' route_proofs=106') in text and 'panels=1 passed=1 pending=0' in text,'native route proof failed')
+  lines=text.splitlines();passes=[v for v in lines if v.startswith('ADS_UDP_DNS_PASS')];summaries=[v for v in lines if v.startswith('ADS_UDP_DNS_FLEET_PROOF')]
+  require(rc==0 and passes==['ADS_UDP_DNS_PASS panel='+self.p['panel']+' route_proofs=106'] and len(summaries)==1 and re.fullmatch(r'ADS_UDP_DNS_FLEET_PROOF panels=1 passed=1 pending=0 at=\S+',summaries[0]) and not any(v.startswith('ADS_UDP_DNS_PENDING') for v in lines),'native route proof failed')
   return {'at':now().isoformat(),'passed':True,'route_proofs':106}
  def traffic(self,label,until=None):
   require(not (self.directory/(label+'.json')).exists(),'traffic window already attempted')
   rc,_=self.command('traffic',[sys.executable,self.tools['traffic'],self.p['panel'],label,str(self.directory),self.tools['xray']],80,until=until)
   file=self.directory/(label+'.json');require(file.exists(),'traffic collector incomplete')
-  x=json.loads(file.read_text());require(rc in (0,1) and x.get('panel')==self.p['panel'],'traffic collector failed');return x
+  x=json.loads(file.read_text());require(rc in (0,1) and x.get('panel')==self.p['panel'] and x.get('phase')==label,'traffic collector failed');return x
 
 class Engine:
  def __init__(self,policy,directory,adapter,clock=now,pause=time.sleep,monotonic=time.monotonic):
@@ -214,7 +236,7 @@ class Engine:
  def prepare(self):
   self.save('PRECHECK');self.a.runtime();s=self.a.snapshot();parent_ready(self.p,s)
   require(self.clock()<instant(self.p['not_after']) and instant(self.p['created_at'])<=self.clock()+dt.timedelta(seconds=1),'qualification policy expired or future')
-  self.a.native();self.save('BASELINE');self.s['baseline']=self.a.traffic('baseline');score(self.s['baseline']);parent_ready(self.p,self.a.snapshot())
+  self.a.native();self.save('BASELINE');self.s['baseline']=self.a.traffic('baseline');require(score(self.s['baseline'])['median'] is not None,'baseline has no successful static requests');parent_ready(self.p,self.a.snapshot())
   self.save('OBSERVE_FIRST');first=self.a.collect();self.s['first']=first;self.save('OBSERVE_FIRST','first receipt retained');e1=self.qualification(first)
   # Use a monotonic wait; authoritative DB gate later verifies measurement times.
   self.save('HOLD','waiting60seconds between independent windows');end=self.mono()+60
@@ -244,6 +266,7 @@ class Engine:
   return request
  def confirm(self,key,receipt):
   request=self.s[key]
+  require(receipt.get('exact_request_verified') is True,'full committed request identity unproved')
   require(receipt['response']['experiment_id']==request['experiment_id'],'committed operation identity mismatch')
   require(isinstance(receipt['response']['version'],int) and receipt['response']['version']==request['expected_version']+1,'committed operation version mismatch')
   require(receipt.get('evidence_id')==request.get('admission_evidence_id'),'committed evidence mismatch')
@@ -255,7 +278,7 @@ class Engine:
    self.confirm(key,receipt);return True
   s=self.a.snapshot();attempts=self.s['operation_attempts'].get(key,0)
   if key=='request':
-   parent_ready(self.p,s);require(self.clock()<instant(self.p['not_after']),'start intent expired')
+   parent_ready(self.p,s);require(self.clock()<instant(self.p['not_after']),'start intent expired');self.a.runtime()
   else:
    t=s['profile'].get('tuning') or {}
    if t.get('id')!=self.s['request']['request_id'] or t.get('phase')!='TESTING' or s['profile']['version']!=request['expected_version']:return False
@@ -274,19 +297,34 @@ class Engine:
     self.s['cancel']={'request_id':str(uuid.uuid4()),'experiment_id':self.s['request']['experiment_id'],'action':'tune_cancel','expected_version':s['profile']['version'],'tuning_id':t['id']};self.s['cancel_hash']=digest(self.s['cancel']);self.save('CANCEL_INTENT','exact owned cancellation durable')
    try:self.operation('cancel')
    except (Gate,Uncertain):self.save('RESTORING','cancellation not confirmed; observing durable deadline recovery')
+ def original_deadline(self,t):
+  value=t['deadline'];instant(value)
+  if 'deadline' not in self.s:
+   if self.s['trial_outcome']=='accepted':self.s['trial_outcome']='rejected'
+   self.s['deadline']=value
+  return instant(self.s['deadline'])
+ def acceptance_lifecycle(self,t,at):
+  if self.s['trial_outcome']!='accepted':return
+  valid=t.get('rejected') is False and instant(t['deadline'])==instant(self.s['deadline'])
+  if t.get('phase') in ('RESTORING','RESTORED'):
+   valid=valid and t.get('reason')=='trial deadline expired' and instant(at)>=instant(self.s['deadline'])
+  if not valid:
+   self.s['trial_outcome']='rejected'
+   self.save('RESTORING','candidate acceptance revoked by authoritative lifecycle')
  def trial(self):
-  self.save('TESTING','awaiting native candidate application');start=self.mono()
+  self.save('TESTING','awaiting native candidate application')
   while True:
    s=self.a.snapshot();t=s['profile'].get('tuning') or {}
    require(t.get('id')==self.s['request']['request_id'],'trial ownership changed')
-   self.s['deadline']=t['deadline']
+   deadline=self.original_deadline(t);require(instant(t['deadline'])==deadline,'trial deadline changed');proof_deadline=deadline-dt.timedelta(minutes=5)+dt.timedelta(seconds=90)
+   require(instant(s['at'])<proof_deadline and self.clock()<proof_deadline,'candidate proof budget exhausted')
    unchanged(self.p,s);require(s['panel']['owner']==self.s['request']['experiment_id'] and s['panel']['config']==self.s['request']['config'] and s['panel']['generation']==self.p['before']['panel']['generation']+1,'candidate desired assignment changed')
    try:active(self.p,s,self.s['request']);break
    except Gate:
-    require(t.get('phase')=='TESTING' and instant(s['at'])<instant(t['deadline']) and self.mono()-start<90,'candidate application not proved within budget')
+    require(t.get('phase')=='TESTING' and instant(s['at'])<instant(t['deadline']),'candidate application not proved within budget')
     self.pause(5);self.pulse()
-  deadline=instant(self.s['deadline']);self.s['native_candidate']=self.a.native(until=deadline);active(self.p,self.a.snapshot(),self.s['request'])
-  self.save('TESTING','measuring one fixed candidate traffic window');self.s['candidate']=self.a.traffic('candidate',until=deadline);active(self.p,self.a.snapshot(),self.s['request'])
+  deadline=instant(self.s['deadline']);self.s['native_candidate']=self.a.native(until=proof_deadline);proof=self.a.snapshot();active(self.p,proof,self.s['request']);require(instant(proof['profile']['tuning']['deadline'])==deadline,'trial deadline changed');require(instant(proof['at'])<proof_deadline and self.clock()<proof_deadline,'native proof exceeded total90second budget')
+  self.save('TESTING','measuring one fixed candidate traffic window');self.s['candidate']=self.a.traffic('candidate',until=deadline);after=self.a.snapshot();active(self.p,after,self.s['request']);require(instant(after['profile']['tuning']['deadline'])==deadline,'trial deadline changed')
   require(accepted(self.s['baseline'],self.s['candidate']),'candidate reliability or latency failed frozen criterion')
   self.s['trial_outcome']='accepted';self.save('RESTORING','candidate accepted; awaiting original deadline without extension')
  def recover(self):
@@ -298,10 +336,10 @@ class Engine:
   while True:
    s=self.a.snapshot();t=s['profile'].get('tuning') or {}
    require(t.get('id')==request['request_id'],'trial recovery ownership changed')
-   deadline=instant(t['deadline']);self.s['deadline']=t['deadline']
+   deadline=self.original_deadline(t);self.acceptance_lifecycle(t,s['at'])
    require(instant(s['at'])<=deadline+dt.timedelta(minutes=15) and self.mono()-started<=1200,'restoration observation budget exhausted')
    if t.get('phase')=='RESTORED':
-    restored(self.p,s,request);self.s['native_restored']=self.a.native(until=deadline+dt.timedelta(minutes=15));after=self.a.snapshot();restored(self.p,after,request);require(instant(after['at'])<=deadline+dt.timedelta(minutes=15),'restoration proof exceeded budget')
+    restored(self.p,s,request);self.s['native_restored']=self.a.native(until=deadline+dt.timedelta(minutes=15));after=self.a.snapshot();restored(self.p,after,request);self.acceptance_lifecycle(after['profile']['tuning'],after['at']);require(instant(after['at'])<=deadline+dt.timedelta(minutes=15),'restoration proof exceeded budget')
     self.s['restoration_outcome']='verified';self.save('COMPLETE','exact parent restored and native proof passed');return
    require(t.get('phase') in ('TESTING','RESTORING'),'unexpected recovery phase')
    self.pause(5);self.pulse()
@@ -330,9 +368,9 @@ class Engine:
 def status(directory):
  value=json.loads((Path(directory)/'status.json').read_text());value['activity_confirmed']=False
  try:
-  current=Path('/proc/'+str(value['pid'])+'/stat').read_text().rsplit(')',1)[1].split()[19]
+  fields=Path('/proc/'+str(value['pid'])+'/stat').read_text().rsplit(')',1)[1].split();current=fields[19]
   boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
-  value['activity_confirmed']=bool(value['valid_until'] and now()<instant(value['valid_until']) and current==value['pid_start_ticks'] and boot==value['boot_id'])
+  value['activity_confirmed']=bool(fields[0] not in ('Z','X','x') and value['valid_until'] and now()<instant(value['valid_until']) and current==value['pid_start_ticks'] and boot==value['boot_id'])
  except (OSError,KeyError,ValueError):pass
  return value
 
@@ -352,8 +390,9 @@ def main():
    tools={}
    for name,value in specs.items():
     path=Path(value);st=path.lstat();require(path.is_absolute() and stat.S_ISREG(st.st_mode) and st.st_uid==0 and not st.st_mode&0o022,'tool must be a protected regular file');tools[name]={'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
-   p={'schema':1,'job_id':str(uuid.uuid4()),'panel':panel,'suspects':suspects,'controls':controls,'created_at':now().isoformat(),'not_after':(now()+dt.timedelta(minutes=20)).isoformat(),'tools':tools,'runtime':json.loads(Path('/opt/digital-ocean-bot/build-manifest.json').read_text())}
-   a=Adapter(p,directory);p['before']=a.snapshot();validate_policy(p);parent_ready(p,p['before']);a.runtime();atomic(directory/'policy.json',p);print(json.dumps({'job_id':p['job_id'],'frozen':True,'not_after':p['not_after']}));return 0
+   created=now()
+   p={'schema':1,'job_id':str(uuid.uuid4()),'panel':panel,'suspects':suspects,'controls':controls,'created_at':created.isoformat(),'not_after':(created+dt.timedelta(minutes=20)).isoformat(),'tools':tools,'runtime':json.loads(Path('/opt/digital-ocean-bot/build-manifest.json').read_text())}
+   a=Adapter(p,directory);a.stage();p['before']=a.snapshot();validate_policy(p);parent_ready(p,p['before']);a.runtime();atomic(directory/'policy.json',p);print(json.dumps({'job_id':p['job_id'],'frozen':True,'not_after':p['not_after']}));return 0
   require((directory/'policy.json').is_file(),'frozen policy required');p=json.loads((directory/'policy.json').read_text());a=Adapter(p,directory);engine=Engine(p,directory,a)
   try:result=engine.run()
   except Exception:

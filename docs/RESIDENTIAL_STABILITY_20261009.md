@@ -1,6 +1,6 @@
 # Bounded residential stability pilot (draft, 2026-10-09)
 
-**Release status: NOT DEPLOYED / independent review blocked by API credit.**
+**Release status: SOURCE ACCEPTED / deterministic gates PASS / NOT YET DEPLOYED.**
 This document describes the implemented candidate, not accepted production behavior.
 Baseline: 94b1f4dfbba3d3d71632fe276c61a5994f53ed10.
 Current production / rollback source: fc76e6a669931873295ddded4f51eca3a7bbe8ca.
@@ -64,13 +64,14 @@ Cancellation gets one durable exact request; CAS drift never creates another.
 An unknown outcome remains RECOVERY_PENDING; it is not asserted to have failed
 or succeeded. Normal server workers retain the durable deadline recovery duty.
 
-Candidate native generation must be proved within ninety seconds. Complete native
-and actual traffic proof must finish before the original five-minute deadline,
+Candidate application AND the complete106-case native check share one ninety-second
+budget anchored to database trial deadline minus five minutes. All actual traffic
+proof must finish before the original five-minute deadline,
 with owned tuning/generation checks around measurements. Failure requests owned
 cancellation. Acceptance waits for automatic deadline restoration.
 
 COMPLETE means exact parent restoration, generation base+2, fresh APPLIED/native
-proof and a successful final route check. trial_outcome is independently accepted
+proof, equality with the frozen parent plan hash and a successful final route check. trial_outcome is independently accepted
 or rejected. Deadline expiry alone never means restoration. Observation is bounded
 to deadline+15 minutes (also a twenty-minute monotonic loop bound); otherwise
 RECOVERY_PENDING remains visible.
@@ -132,7 +133,7 @@ implied; application workers are separate.
    Rebuild tune/admission/native tools from that accepted source; use reviewed Xray.
 4. Choose a panel with enough remaining lifetime. Freeze fixed suspects/controls
    based on retained evidence before measuring. Supply a JSON mapping of absolute
-   paths with exactly admission, tune, native, traffic and xray keys.
+   paths with exactly admission, tune, native, traffic, support and xray keys.
 5. Run --freeze, then --run on that private directory using protected service env.
    --status never restarts probes. Reuse --run only to reconcile that same job.
 6. Preserve both qualification receipts and all outcomes. A NO_ACTION result does
@@ -145,7 +146,7 @@ Command interface:
     python3 tools/residential-stability-pilot.py --run --directory /private/job
     python3 tools/residential-stability-pilot.py --status --directory /private/job
 
-Do not run the candidate against production while its independent review is blocked.
+Do not run the candidate against production until the current independent review and deterministic release gates pass.
 Rollback to fc76e6a is allowed only after all active tuning/exclusion obligations
 are exactly restored and verified by the existing deployment compatibility gate.
 
@@ -161,3 +162,91 @@ production trial. Shared provider implementations and native planner are unchang
 Remaining external evidence: accepted exclusion pilot; provider-path root cause;
 physical Android/v2rayNG timings; app SDK load/show/impression events; prior
 IP+SNI/UpCloud gaps. The canonical detached-bootstrap warning remains recorded.
+
+
+## Independent-review repair record (continuation resume-1327)
+
+API credit was restored and all four independent lanes responded. The first
+source review returned REVISE; fixes are being reviewed against the new source,
+not presumed accepted because old tests passed.
+
+- F1: every uncommitted start/replay checks frozen runtime again; committed recovery
+  does not require the old runtime to remain installed.
+- F2: --reconcile uses a read-only Go transaction and Store.Do's shared complete
+  canonical request hash. Owned tuning evidence/base fields also have to match.
+  Legacy hashes are generated from deployed fc76e6a source and tested, including
+  committed operation replay. Old CLI rejects the optional unknown field.
+- F3: disappeared unselected assignment requires affirmative DELETED inventory;
+  missing inventory or a missing live assignment fails closed.
+- F4: regular-file stdin cannot block on pipe capacity. A dedicated Linux subreaper
+  closes parent-death registration races, retains process locks through cleanup,
+  kills the tool group even after its leader exits and escalates ignored SIGTERM.
+  Bounded cleanup is tested with real processes, supervisor SIGKILL and locks.
+- F5: zero-success baseline is rejected before admission collection/start.
+- F6: one DB-anchored ninety-second application+native budget, checked on successful
+  reads too; exact panel/count/summary parsing rejects1060 or contradictory results.
+- F7: immutable fixed manifest precedes dispatch; fsynced started/finished/interrupted
+  events retain partial work; final report is atomic and incomplete work cannot pass.
+- F8: every result, class, flag and latency is validated; IPv4 is parsed before
+  hashing; egress distinctness is derived from both valid hashes.
+- F9: actionable Go evidence requires consistent outcome/HTTP/curl fields.
+- F10: libpq parses protected connection data into0600 service/password files;
+  neither DSN nor password is passed in argv. Read-only mode is verified.
+- F11: zombie/dead process states cannot be reported active.
+
+Additional serialization: proxy table SHARE prevents insert/enable races; selected
+native plan and API identity are locked before freshness validation. Paired
+freshness is checked again after assignment writes, before committing. Ambiguous
+recording timestamps fail closed. The schema uses clock_timestamp after acquiring
+the common performance lock; opposite transaction-begin order is explicitly tested.
+
+A parent native hash may legitimately change if independent client membership
+changes. This pilot deliberately fails closed on that drift, retaining
+RECOVERY_PENDING instead of claiming exact restoration. The native planner test
+proves exact before/candidate/restored hashes for stable membership and endpoint
+identity. Fresh Output clients retain their authenticated route class; routing
+selection lives in applied server settings, not in a generation parameter in URI.
+Existing panel-config fencing orders in-flight candidate and restoration writes;
+a stale candidate ACK cannot complete restoration. Relevant existing controller,
+mutation-boundary and native-core tests remain part of the evidence bundle.
+
+The CLI/Store/worker recovery integration tests use an isolated PostgreSQL schema.
+Process faults and real Xray route tests are separate components, not a claim of
+a complete production fault-injection run. Real field acceptance remains gated.
+
+
+### Second review repairs
+
+R1: accepted performance is provisional until unrejected automatic restoration
+with reason "trial deadline expired" and the original retained deadline. Server
+rejection, early cancellation or deadline drift revokes acceptance; exact recovery
+can still be verified independently, including after restart.
+R2 was contradicted by source and execution: time is used by earlierStability's
+2*time.Minute; full-v3 (adminapi222.802s), vet-v3 and race-v3 passed. The import
+was retained. Model findings are not authoritative when contradicted by evidence.
+R3: supervisor bootstrap imports only the standard library. Freeze stages and
+verifies the selected helper before use; recovery imports verified bytes from
+staging and uses that same helper for database files and process supervision.
+Fresh-process tests cover missing/replaced originals and corrupt staging.
+R4: journal is created exclusively, fsynced and directory-fsynced before dispatch;
+per-event fsync continues. Deterministic ordering and TERM/KILL tests pass.
+R5: pre-mutation native/performance timestamps and lifetime are retained; final
+DB-wall-clock validation checks them plus both named controls and receipt eligibility
+after assignment writes. It does not demand APPLIED after deliberately marking PENDING.
+R6: selected account and droplet share locks retain mutable lifecycle predicates.
+Admission has existing3s lock/10s statement bounds. Account deletion generally
+locks account then droplets; deletion completion can lock droplet before account.
+That inverse path may deadlock or time out; PostgreSQL/Store abort the transaction
+without partial admission, not bypass locks. Writer-before/after tests cover expiry,
+delete and disable. Supported controller proof writes retain the performance lock.
+R7: complete must explicitly be Boolean true; requested traffic phase must match.
+Legacy recorded fixture outcomes are retained, with explicit completeness metadata.
+
+Second-review regressions: Python46PASS and targeted isolated PostgreSQL PASS.
+Final corrected-source full/race/vet and independent re-review remain release gates.
+
+Final narrow N1 review PASS: a single clock sample defines the exact twenty-minute
+freeze interval. Actual main --freeze regression passes with an advancing clock.
+Python47, full-v4/vet-v4/race-v4, focused PostgreSQL and real native component
+gates passed. Go graph is byte-identical across the final Python-only correction.
+Release and fresh field qualification remain separate from source acceptance.

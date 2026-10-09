@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -19,13 +20,17 @@ import (
 
 func main() {
 	execute := flag.Bool("execute", false, "execute one exact stdin request; default is read-only status")
+	reconcile := flag.Bool("reconcile", false, "read-only verification of exact stdin request against committed operation")
 	flag.Parse()
-	if e := run(*execute); e != nil {
+	if e := run(*execute, *reconcile); e != nil {
 		fmt.Fprintln(os.Stderr, e)
 		os.Exit(1)
 	}
 }
-func run(execute bool) error {
+func run(execute, reconcile bool) error {
+	if execute && reconcile {
+		return errors.New("execute and reconcile are mutually exclusive")
+	}
 	// Deployments hold this lock exclusively from staging through rollback. API
 	// writers are stopped before downgrade checks; operator commands share the lock.
 	if execute {
@@ -42,7 +47,7 @@ func run(execute bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	var q residentialperf.Request
-	if execute {
+	if execute || reconcile {
 		dec := json.NewDecoder(io.LimitReader(os.Stdin, 32768))
 		dec.DisallowUnknownFields()
 		if e := dec.Decode(&q); e != nil {
@@ -58,15 +63,31 @@ func run(execute bool) error {
 		}
 		// Selection tuning retains its reviewed bounds. Admission requires trusted evidence;
 		// Store enforces an otherwise identical parent, one panel and mandatory expiry.
-		if q.Action == "tune_start" && (q.Config == nil || (q.AdmissionEvidenceID == "" || len(q.Config.ExcludedProxyIDs) == 0) && (q.Config.FastCount != 3 || q.Config.FastShare != 90)) {
+		if execute && q.Action == "tune_start" && (q.Config == nil || (q.AdmissionEvidenceID == "" || len(q.Config.ExcludedProxyIDs) == 0) && (q.Config.FastCount != 3 || q.Config.FastShare != 90)) {
 			return errors.New("reviewed candidate requires fast_count=3 and fast_share=90")
 		}
+	}
+	if reconcile {
+		if os.Getenv("DATABASE_URL") == "" {
+			return errors.New("protected database environment required")
+		}
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			return errors.New("read-only database unavailable")
+		}
+		defer db.Close()
+		receipt, err := (residentialperf.Store{DB: db}).Reconcile(ctx, q)
+		if err != nil {
+			return errors.New("exact request reconciliation failed")
+		}
+		return json.NewEncoder(os.Stdout).Encode(map[string]any{"found": receipt != nil, "receipt": receipt, "exact_request_verified": receipt != nil, "evidence_id": q.AdmissionEvidenceID})
 	}
 	a, e := app.Bootstrap(ctx)
 	if e != nil {
 		return errors.New("service bootstrap unavailable")
 	}
 	defer a.Close()
+
 	var receipt *residentialperf.Receipt
 	if execute {
 		r, e := (residentialperf.Store{DB: a.DB}).Do(ctx, q)

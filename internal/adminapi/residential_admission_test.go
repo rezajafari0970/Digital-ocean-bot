@@ -39,6 +39,7 @@ func admissionFixture(t *testing.T) (*tuningFixture, residentialperf.AdmissionEv
 				o := residentialperf.AdmissionObservation{ProxyID: id, Target: target.Name, Round: round, Started: e.Started, Finished: now, Outcome: "ok", HTTPStatus: target.Status, Milliseconds: 1000}
 				if id == ids[0] && target.Name == "gpt" {
 					o.Outcome = "timeout"
+					o.CurlCode = 28
 					o.HTTPStatus = 0
 				}
 				e.Observations = append(e.Observations, o)

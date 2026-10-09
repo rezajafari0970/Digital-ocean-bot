@@ -2,14 +2,11 @@ package residentialperf
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
-	"sort"
 	"strings"
 	"time"
 )
@@ -58,35 +55,12 @@ func Lock(ctx context.Context, tx *sql.Tx) error {
 }
 func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	var out Receipt
-	if q.Config != nil {
-		c := q.Config.Clone()
-		q.Config = &c
+	var authorization admissionAuthorization
+	q, e := normalizeRequest(q)
+	if e != nil {
+		return out, e
 	}
-	q.StabilityEvidenceID = strings.ToLower(q.StabilityEvidenceID)
-	if q.StabilityEvidenceID != "" && (q.Action != "tune_start" || q.AdmissionEvidenceID == "" || !UUID.MatchString(q.StabilityEvidenceID)) {
-		return out, bad("stability evidence requires an admission start")
-	}
-	q.AdmissionEvidenceID = strings.ToLower(q.AdmissionEvidenceID)
-	if q.AdmissionEvidenceID != "" && (q.Action != "tune_start" || !UUID.MatchString(q.AdmissionEvidenceID)) {
-		return out, bad("admission evidence is only accepted for tune_start")
-	}
-	if !UUID.MatchString(q.RequestID) {
-		return out, bad("request_id must be a UUID")
-	}
-	q.RequestID = strings.ToLower(q.RequestID)
-	q.ExperimentID = strings.ToLower(q.ExperimentID)
-	// Normalize an owned copy: concurrent callers may reuse the same request slice.
-	q.PanelIDs = append([]string(nil), q.PanelIDs...)
-	seen := map[string]bool{}
-	for i, id := range q.PanelIDs {
-		id = strings.ToLower(id)
-		if !UUID.MatchString(id) || seen[id] {
-			return out, bad("panel IDs must be unique UUIDs")
-		}
-		seen[id] = true
-		q.PanelIDs[i] = id
-	}
-	sort.Strings(q.PanelIDs)
+
 	mode, scope := q.Mode, q.Scope
 	if mode == "" {
 		mode = "timed"
@@ -94,39 +68,7 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	if scope == "" {
 		scope = "selected"
 	}
-	if q.Action == "start" {
-		if q.Config != nil && len(q.Config.ExcludedProxyIDs) > 0 {
-			return out, bad("exclusions require an evidence-bound timed tuning trial")
-		}
-		if q.Config == nil || q.BaseRevision < 1 || len(q.PanelIDs) > 1000 {
-			return out, bad("configuration, reviewed revision and at most 1000 selected servers required")
-		}
-		if mode != "timed" && mode != "permanent" {
-			return out, bad("mode must be timed or permanent")
-		}
-		if scope != "selected" && scope != "fleet" {
-			return out, bad("scope must be selected or fleet")
-		}
-		if scope == "selected" && len(q.PanelIDs) == 0 {
-			return out, bad("select at least one server")
-		}
-		if scope == "fleet" && (mode != "permanent" || len(q.PanelIDs) > 0) {
-			return out, bad("fleet scope requires permanent mode and a server-resolved target list")
-		}
-		if mode == "timed" && (q.Minutes < 5 || q.Minutes > 60) {
-			return out, bad("timed tests require a 5–60 minute deadline")
-		}
-		if mode == "permanent" && q.Minutes != 0 {
-			return out, bad("permanent publication has no timer")
-		}
-		if e := q.Config.Validate(); e != nil {
-			return out, bad(e.Error())
-		}
-	} else if !UUID.MatchString(q.ExperimentID) {
-		return out, bad("experiment_id must be a UUID")
-	}
-
-	digest := fmt.Sprintf("%x", sha256.Sum256(raw(q)))
+	digest := normalizedRequestHash(q)
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
 		return out, e
@@ -232,7 +174,7 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		}
 		switch q.Action {
 		case "tune_start", "tune_cancel", "tune_publish", "tune_restore":
-			e = tuneAction(ctx, tx, q, state, version, spec)
+			e = tuneAction(ctx, tx, q, state, version, spec, &authorization)
 		case "rollback":
 			e = rollback(ctx, tx, q.ExperimentID, "requested")
 		case "publish":
@@ -298,6 +240,29 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	}
 	if e != nil {
 		return out, e
+	}
+	if q.AdmissionEvidenceID != "" {
+		if err := authorization.validate(ctx, tx, q); err != nil {
+			return out, err
+		}
+	}
+	// Recheck paired evidence after any assignment-row wait, before the atomic commit.
+	if q.StabilityEvidenceID != "" {
+		first, err := loadAdmission(ctx, tx, q.StabilityEvidenceID)
+		if err != nil {
+			return out, err
+		}
+		second, err := loadAdmission(ctx, tx, q.AdmissionEvidenceID)
+		if err != nil {
+			return out, err
+		}
+		at, err := clockNow(ctx, tx)
+		if err != nil {
+			return out, err
+		}
+		if err = ValidateStabilityPair(first, second, at); err != nil {
+			return out, err
+		}
 	}
 	e = tx.QueryRowContext(ctx, "SELECT id::text,state,version FROM residential_performance_experiments WHERE id=$1", q.ExperimentID).Scan(&out.ExperimentID, &out.State, &out.Version)
 	if e != nil {
