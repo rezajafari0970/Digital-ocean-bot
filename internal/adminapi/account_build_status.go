@@ -12,6 +12,7 @@ import (
 type accountBuildState struct {
 	TrialCompatible                                     bool
 	TrialProxyCandidates                                int
+	TrialRelay                                          *trialRelayStatus
 	Enabled                                             bool
 	State, Reason, ProviderFreshness, CapacityFreshness string
 	ProviderCanCreate, SchedulerCanBuild                bool
@@ -37,6 +38,12 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
  FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &x.TrialCompatible, &x.TrialProxyCandidates)
 	if err != nil {
 		return x, err
+	}
+	if x.TrialCompatible {
+		x.TrialRelay, err = s.trialRelayStatus(ctx, id)
+		if err != nil {
+			return x, err
+		}
 	}
 	var c struct {
 		LimitKnown                 bool

@@ -63,6 +63,17 @@ func newRelayCredential() (relayCredential, error) {
 	c.Key = string(pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: kb}))
 	return c, nil
 }
+func relayCredentialExpiry(c relayCredential) time.Time {
+	cert, _ := pem.Decode([]byte(c.Certificate))
+	if cert == nil {
+		return time.Time{}
+	}
+	v, e := x509.ParseCertificate(cert.Bytes)
+	if e != nil {
+		return time.Time{}
+	}
+	return v.NotAfter
+}
 func relayCredentialValid(c relayCredential) bool {
 	cert, _ := pem.Decode([]byte(c.Certificate))
 	if cert == nil {

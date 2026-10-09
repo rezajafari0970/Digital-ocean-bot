@@ -110,7 +110,7 @@ func (s Service) observeRelays(ctx context.Context, panel string) error {
 }
 
 // Poll only the local Xray observations, never send duplicate proxy probes.
-// Three installed candidate tunnels keep data-plane failover autonomous.
+// All installed eligible tunnels keep data-plane failover autonomous.
 func (s Service) RunRelayHealth(ctx context.Context) {
 	t := time.NewTicker(5 * time.Second)
 	defer t.Stop()

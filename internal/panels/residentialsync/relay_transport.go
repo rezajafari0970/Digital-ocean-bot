@@ -13,12 +13,16 @@ import (
 )
 
 const RelayProbeURL = "https://browserleaks.com/ip"
-const RelayCount = 3
+const RelayMinimumHealthy = 3
 
 type relayTransport struct{ SecretRef, Certificate string }
 
-func RelayEnabled(panel string) bool {
-	scope := strings.TrimSpace(os.Getenv("DOB_UPCLOUD_RELAY_PANELS"))
+func RelayEnabled(panel string) bool { return relayScopeEnabled("DOB_UPCLOUD_RELAY_PANELS", panel) }
+func RelayExpandedEnabled(panel string) bool {
+	return relayScopeEnabled("DOB_UPCLOUD_RELAY_EXPANDED_PANELS", panel)
+}
+func relayScopeEnabled(key, panel string) bool {
+	scope := strings.TrimSpace(os.Getenv(key))
 	if scope == "all" {
 		return true
 	}

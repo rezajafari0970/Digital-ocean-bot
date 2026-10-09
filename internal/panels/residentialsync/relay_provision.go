@@ -12,6 +12,7 @@ import (
 	secretstore "github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 	"net"
 	"sort"
+	"time"
 )
 
 type relayWriter interface {
@@ -61,38 +62,19 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
 		return e
 	}
 	var account, host string
-	e = s.DB.QueryRowContext(ctx, `SELECT p.account_id::text,dep.host FROM panel_instances p
+	var serverExpiry sql.NullTime
+	e = s.DB.QueryRowContext(ctx, `SELECT p.account_id::text,dep.host,dr.expires_at FROM panel_instances p
  JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=p.account_id
  JOIN LATERAL(SELECT host,profile_snapshot FROM deployments WHERE droplet_id=dr.id AND state='PANEL_COMPLETE' ORDER BY created_at DESC,id DESC LIMIT 1)dep ON true
  WHERE p.id=$1 AND p.enabled AND dr.state='READY' AND a.enabled AND a.provider_state='ACTIVE'
  AND a.deletion_requested_at IS NULL AND a.deleted_at IS NULL AND a.provider IN('vultr','digitalocean','linode')
  AND NOT a.upcloud_trial_compatible AND NOT COALESCE((dep.profile_snapshot->>'upcloud_trial_compatible')::boolean,false)
- AND(dr.expires_at IS NULL OR dr.expires_at>now()+interval '5 minutes')`, panel).Scan(&account, &host)
+ AND(dr.expires_at IS NULL OR dr.expires_at>now()+CASE WHEN EXISTS(SELECT 1 FROM panel_relay_endpoints ep WHERE ep.panel_id=p.id AND ep.enabled) THEN interval '5 minutes' ELSE interval '10 minutes' END)`, panel).Scan(&account, &host, &serverExpiry)
 	if errors.Is(e, sql.ErrNoRows) || len(sources) == 0 {
 		_, e = s.DB.ExecContext(ctx, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
 		return e
 	}
 	if e != nil {
-		return e
-	}
-	// Six warm candidates support three distinct active servers and replacements.
-	var wanted bool
-	e = s.DB.QueryRowContext(ctx, `WITH ranked AS(
- SELECT p.id,row_number()OVER(PARTITION BY a.provider ORDER BY COALESCE(dr.expires_at,'infinity'::timestamptz) DESC,p.id) AS n
- FROM panel_instances p JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=p.account_id
- JOIN panel_routing_state rs ON rs.panel_id=p.id
- WHERE p.enabled AND dr.state='READY' AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL AND a.deleted_at IS NULL
- AND a.provider IN('vultr','digitalocean','linode') AND NOT a.upcloud_trial_compatible
- AND(dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 minutes')
- AND rs.state='APPLIED' AND NOT rs.relay_mode AND rs.verified_at>now()-interval '90 seconds')
- SELECT $1::uuid IN(SELECT id FROM ranked ORDER BY n,id LIMIT 6) OR EXISTS(
- SELECT 1 FROM panel_relay_assignments ra JOIN panel_instances pi ON pi.id=ra.receiver_panel_id JOIN droplets dr ON dr.id=pi.droplet_id
- WHERE ra.donor_panel_id=$1 AND ra.selected AND pi.enabled AND dr.state='READY' AND(dr.expires_at IS NULL OR dr.expires_at>now()))`, panel).Scan(&wanted)
-	if e != nil {
-		return e
-	}
-	if !wanted {
-		_, e = s.DB.ExecContext(ctx, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
 		return e
 	}
 	// A donor must itself enforce the requested protected routing contract.
@@ -148,16 +130,23 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
 	if e != nil {
 		return e
 	}
+	validUntil := relayCredentialExpiry(credential)
+	if serverExpiry.Valid && serverExpiry.Time.Before(validUntil) {
+		validUntil = serverExpiry.Time
+	}
+	if !validUntil.After(time.Now().Add(5 * time.Minute)) {
+		return errors.New("relay lifetime too short")
+	}
 	proxy, e := managedSOCKS(panel, host, ref, port, credential)
 	if e != nil {
 		return e
 	}
-	_, e = s.DB.ExecContext(ctx, `INSERT INTO panel_relay_endpoints(panel_id,account_id,host,port,secret_ref,transport_hash,allowed_sources,enabled,state)
- VALUES($1,$2,$3,$4,$5,$6,$7,true,'PREPARING') ON CONFLICT(panel_id) DO UPDATE SET
- host=excluded.host,port=excluded.port,secret_ref=excluded.secret_ref,transport_hash=excluded.transport_hash,allowed_sources=excluded.allowed_sources,enabled=true,
+	_, e = s.DB.ExecContext(ctx, `INSERT INTO panel_relay_endpoints(panel_id,account_id,host,port,secret_ref,transport_hash,allowed_sources,valid_until,enabled,state)
+ VALUES($1,$2,$3,$4,$5,$6,$7,$8,true,'PREPARING') ON CONFLICT(panel_id) DO UPDATE SET
+ host=excluded.host,port=excluded.port,secret_ref=excluded.secret_ref,transport_hash=excluded.transport_hash,allowed_sources=excluded.allowed_sources,valid_until=excluded.valid_until,enabled=true,
  state=CASE WHEN panel_relay_endpoints.transport_hash=excluded.transport_hash AND panel_relay_endpoints.allowed_sources=excluded.allowed_sources AND panel_relay_endpoints.enabled THEN panel_relay_endpoints.state ELSE 'PREPARING' END,
  updated_at=CASE WHEN panel_relay_endpoints.transport_hash=excluded.transport_hash AND panel_relay_endpoints.allowed_sources=excluded.allowed_sources AND panel_relay_endpoints.enabled THEN panel_relay_endpoints.updated_at ELSE now() END`,
-		panel, account, host, port, ref, proxy.TransportHash, pq.Array(sources))
+		panel, account, host, port, ref, proxy.TransportHash, pq.Array(sources), validUntil)
 	return e
 }
 func (s Service) loadRelayInlet(ctx context.Context, panel string) (*relayInlet, error) {

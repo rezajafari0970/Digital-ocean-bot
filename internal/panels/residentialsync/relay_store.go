@@ -14,15 +14,22 @@ type relayChoice struct {
 	Retained bool
 }
 
-// Keep healthy assignments stable. Distinct panels alone are insufficient:
+// Install every eligible distinct path. A transient health failure is handled by
+// Xray's native healthy-only balancer, not a pool rewrite/restart that disrupts
+// all healthy peers. Lifetime, ownership and native policy proofs remain gates.
+// Keep assignments stable. Distinct panels alone are insufficient:
 // both underlying server IDs and public IPs must be different.
-func selectRelays(choices []relayChoice) []rp {
+func selectRelays(choices []relayChoice, limits ...int) []rp {
+	limit := len(choices)
+	if len(limits) > 0 {
+		limit = min(limit, limits[0])
+	}
 	out := []rp{}
 	hosts := map[string]bool{}
 	servers := map[string]bool{}
 	providers := map[string]int{}
 	accounts := map[string]int{}
-	for len(out) < RelayCount {
+	for len(out) < limit {
 		best := -1
 		score := int(^uint(0) >> 1)
 		for i, c := range choices {
@@ -71,18 +78,18 @@ func (s Service) relayProxies(ctx context.Context, receiver string, p routePolic
   AND a.deletion_requested_at IS NULL AND a.deleted_at IS NULL
   AND NOT a.upcloud_trial_compatible AND NOT COALESCE((dep.profile_snapshot->>'upcloud_trial_compatible')::boolean,false)
   AND a.provider IN('vultr','digitalocean','linode')
-  AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '5 minutes')
+  AND (dr.expires_at IS NULL OR dr.expires_at>now()+CASE WHEN COALESCE(previous.selected,false) THEN interval '5 minutes' ELSE interval '10 minutes' END)
+  AND ep.valid_until>now()+CASE WHEN COALESCE(previous.selected,false) THEN interval '5 minutes' ELSE interval '10 minutes' END
   AND rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids))
   AND rs.state='APPLIED' AND rs.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds'
   AND NOT rs.relay_mode AND rs.category_digest=$2
-  AND (previous.cooldown_until IS NULL OR previous.cooldown_until<=now())
+  AND (COALESCE(previous.selected,false) OR previous.cooldown_until IS NULL OR previous.cooldown_until<=now())
   AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
   AND NOT EXISTS(SELECT 1 FROM server_protection_nodes pn WHERE pn.panel_id=p.id AND
    (pn.verified_status->>'admission_blocked'='true' OR (pn.verified_status->>'enabled'='true' AND pn.verified_status->>'xui_state' IN('failed','inactive','active_xray_failed'))))
   AND EXISTS(SELECT 1 FROM residential_proxies rp WHERE (rs.pool_enabled OR rp.proxy_id=rs.selected_proxy_id)
    AND rp.enabled AND rp.type='socks5' AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes')
-  AND (COALESCE(previous.selected,false) OR (SELECT count(*) FROM panel_relay_assignments cap WHERE cap.donor_panel_id=p.id AND cap.selected)<8)
- ORDER BY hashtextextended(p.id::text||$1::text,4243),p.id LIMIT 256`, receiver, categoryDigest(p))
+ ORDER BY hashtextextended(p.id::text||$1::text,4243),p.id`, receiver, categoryDigest(p))
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +125,9 @@ func (s Service) relayProxies(ctx context.Context, receiver string, p routePolic
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+	if !RelayExpandedEnabled(receiver) {
+		return selectRelays(choices, RelayMinimumHealthy), nil
+	}
 	return selectRelays(choices), nil
 }
 
@@ -141,7 +151,7 @@ func persistRelays(ctx context.Context, tx *sql.Tx, panel, hash string, p routeP
  last_try=CASE WHEN panel_relay_assignments.outbound_tag=excluded.outbound_tag THEN panel_relay_assignments.last_try ELSE 0 END,
  last_success_at=CASE WHEN panel_relay_assignments.outbound_tag=excluded.outbound_tag THEN panel_relay_assignments.last_success_at ELSE NULL END,
  observed_at=CASE WHEN panel_relay_assignments.outbound_tag=excluded.outbound_tag THEN panel_relay_assignments.observed_at ELSE NULL END,
- cooldown_until=NULL,updated_at=now()`,
+ cooldown_until=CASE WHEN panel_relay_assignments.outbound_tag=excluded.outbound_tag THEN panel_relay_assignments.cooldown_until ELSE NULL END,updated_at=now()`,
 			panel, proxy.ID, proxy.DonorDroplet, proxy.DonorAccount, proxy.Relay.SecretRef, proxy.TransportHash, proxy.DonorPlan, hash, tag)
 		if e != nil {
 			return e

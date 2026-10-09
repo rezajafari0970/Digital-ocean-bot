@@ -88,11 +88,12 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if trial && RelayEnabled(panel) {
 		p.RelayMode = true
 		p.PoolEnabled = true
-		p.Configured = RelayCount
+		p.Configured = 1 // Keep an empty managed pool fail-closed.
 		if !p.StrictAllowlist || !p.AdsOnly {
 			return p, 0, errors.New("relay requires strict residential category policy")
 		}
 		p.Proxies, err = s.relayProxies(ctx, panel, p)
+		p.Configured = max(1, len(p.Proxies))
 		return p, revision, err
 	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)

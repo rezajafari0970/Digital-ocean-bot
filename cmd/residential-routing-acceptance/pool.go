@@ -74,7 +74,7 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 	}
 	probeURL := "https://connectivitycheck.gstatic.com/generate_204"
 	if relayCount > 0 {
-		if relayCount != residentialsync.RelayCount {
+		if relayCount < residentialsync.RelayMinimumHealthy {
 			return nil, fmt.Errorf("relay coverage incomplete: %d/3", relayCount)
 		}
 		interval, timeout, maxRTT = 10*time.Second, 3*time.Second, 3*time.Second

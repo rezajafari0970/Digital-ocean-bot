@@ -17,11 +17,11 @@ func TestRelaySelectionDistinctAndSticky(t *testing.T) {
 		{Proxy: rp{ID: "f", Host: "6", DonorDroplet: "d6", DonorAccount: "f"}, Provider: "vultr"},
 	}
 	got := selectRelays(choices)
-	if len(got) != 3 || got[0].ID != "a" || got[1].ID != "d" || got[2].ID != "e" {
+	if len(got) != 4 || got[0].ID != "a" || got[1].ID != "d" || got[2].ID != "e" || got[3].ID != "f" {
 		t.Fatalf("selection: %v", got)
 	}
 	got = selectRelays(choices[1:])
-	if len(got) != 3 {
+	if len(got) != 5 {
 		t.Fatal("replacement unavailable")
 	}
 }
