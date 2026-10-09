@@ -1,3 +1,23 @@
+# Latest continuation — timing telemetry repaired; upstream cause unresolved
+
+Runtime **cebacf9f4ff5d77c692505db881210b68db4257c** deployed and healthy at 19:34:13 Tehran, 2026-10-09.
+Read docs/RESIDENTIAL_TIMING_REPAIR_STATUS_FA_20261009.md and its JSON report first.
+Six optional bounded numeric curl timings are retained; missing/invalid/all-zero timing is
+omitted. No admission/retry/deadline/routing change. Final critical review PASS, focused/full/
+vet/race and real-core fixture PASS. Clean release; all3 executable hashes match,5x5 readiness,
+no unexpected restarts, production invariants unchanged. Old36-observation receipt reads
+identically with both timeout failures preserved. Backup /opt/digital-ocean-bot.rollback.MxLnvOVv.
+First diagnostic45 attempts retained but invalid for causal comparison because DIRECT control
+routing was wrong; second independently validated diagnostic30/30passed, not a reliability fix.
+Do not attribute ads3/ads10 to an unverified provider. No new admission probe/trial/exclusion.
+Prior field NO_ACTION remains; upstream cause and actual exclusion/restoration acceptance
+remain unresolved. This is a completed telemetry repair, not completion of reliability work.
+Ten successful API review responses in two rounds; no further review needed for unchanged
+source. Current progress top-level/continuation are synchronized; no AI process after final.
+Evidence /root/backups/dob-residential-stability-20261009/diagnosis-1905. Preserve all prior failures and product/Android/SDK gaps.
+
+---
+
 # Latest continuation — bounded field attempt ended NO_ACTION, 2026-10-09
 
 Runtime remains **f1ae87dc66dfbba26d20ff3931791ee01f795390**, release/health accepted.

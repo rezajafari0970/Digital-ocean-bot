@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-09T16:00:31.074784+00:00",
-  "status": "SOURCE_ACCEPTED_RELEASE_PENDING",
+  "at": "2026-10-09T16:04:13.299960+00:00",
+  "status": "TELEMETRY_REPAIR_DEPLOYED_UPSTREAM_CAUSE_UNRESOLVED",
   "baseline": "1cc16723cb58d5f7eb032517bf1537f75995f0fb",
   "previous_runtime": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
   "source_digest": "3e8a4726c760d207dc4795196e06e8d33f450c5c83f09f5cd7f70b7e80523b19",
@@ -39,5 +39,112 @@
   "prior_field_result": "NO_ACTION",
   "api_review_successful_responses": 10,
   "evidence_directory": "/root/backups/dob-residential-stability-20261009/diagnosis-1905",
-  "next": "Deploy accepted telemetry correction; verify hashes, old receipt compatibility and unchanged production invariants. No new admission probe or trial authorized by this diagnostic result."
+  "next": "Preserve NO_ACTION. New collector retains bounded timings for future authorized evidence. Upstream internal cause and real exclusion/restoration acceptance remain unresolved; do not replace controls or rerun qualification until green.",
+  "runtime_commit": "cebacf9f4ff5d77c692505db881210b68db4257c",
+  "deployment": {
+    "at": "2026-10-09T16:01:21.877636+00:00",
+    "commit": "cebacf9f4ff5d77c692505db881210b68db4257c",
+    "backup": "/opt/digital-ocean-bot.rollback.MxLnvOVv",
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "1071089",
+        "NRestarts": "0",
+        "sha256": "2c6daa27cbc27228040cee288361c46073b4efc29a3ed15a27b1516c57085470"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "1071092",
+        "NRestarts": "0",
+        "sha256": "271ca3254ca63d524e8694f8d42ee5a592ea209dd69173881892154e7e9f9b7b"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "1071093",
+        "NRestarts": "0",
+        "sha256": "271ca3254ca63d524e8694f8d42ee5a592ea209dd69173881892154e7e9f9b7b"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-09T16:01:21.951903824Z"
+    },
+    "operator_sha256": {
+      "tune": "74904d6efb00a837d70eda8c1484136067c51dc437a20884f4b8d89a7a0c86b5",
+      "admission": "f06316e3a898f73b5b81e07fc09d0cc1eb6f8c1d96de771acbf2c6bfab309226",
+      "native-acceptance": "67693508f8cff6f464f0865f6fcf807207c228d15afe25b89bf537ffff9de12d"
+    }
+  },
+  "health": {
+    "samples": 5,
+    "checks_per_sample": 5,
+    "unexpected_restarts": 0,
+    "evidence": "/root/backups/dob-residential-stability-20261009/diagnosis-1905/health-samples.json"
+  },
+  "legacy_receipt_read": {
+    "at": "2026-10-09T16:02:23.543976+00:00",
+    "receipt": "3b917046-0d4b-4619-b75f-3ee38093dbeb",
+    "observations": 36,
+    "preserved_failures": [
+      {
+        "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+        "target": "probe",
+        "round": 2,
+        "started": "2026-10-09T15:26:57.730043028Z",
+        "finished": "2026-10-09T15:27:03.74241939Z",
+        "outcome": "timeout",
+        "curl_code": 28,
+        "http_status": 0,
+        "milliseconds": 6012
+      },
+      {
+        "proxy_id": "e55578f8-c734-420f-801c-3ab96274490a",
+        "target": "browserleaks",
+        "round": 2,
+        "started": "2026-10-09T15:27:03.742475626Z",
+        "finished": "2026-10-09T15:27:09.756090385Z",
+        "outcome": "timeout",
+        "curl_code": 28,
+        "http_status": 0,
+        "milliseconds": 6013
+      }
+    ],
+    "eligible": false,
+    "timing_absent": true,
+    "readonly": true,
+    "new_probe_started": false
+  },
+  "invariants_unchanged": true,
+  "report_only_checkpoint": true,
+  "agent_continues_after_final_reply": false,
+  "evidence_sha256": {
+    "deployment.json": "84950eb5c52611a3b5feacd5d7fd36afa09f9335e78e7138946046c000fc600e",
+    "health-samples.json": "f5d05568d6fcf36dd12a70e0b50e119f20a5145eef7690564af96c1679338218",
+    "legacy-receipt-read.json": "1dfaab4cb81eefd97ed76f788a56602037dcff525e6036a01ac66fe445e996a6",
+    "deploy-invariants-before.json": "f62d9fbe407dd120220dcfd7af7c7d2df92f8af4884f1d1c8b672aa308ef218d",
+    "deploy-invariants-after.json": "c4f826e9682374facb6176fed7988bf3aedc3b0610d1ce7d0cf51cb4146be542",
+    "verify-release.log": "634b481e01c97009d409f254016e611ad3e2b5053ed313819822dcabe6bb29e3"
+  }
 }

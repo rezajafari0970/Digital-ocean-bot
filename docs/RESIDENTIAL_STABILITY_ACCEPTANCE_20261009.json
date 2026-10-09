@@ -1357,7 +1357,7 @@
     "sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
     "version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)"
   },
-  "runtime_commit": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
+  "runtime_commit": "cebacf9f4ff5d77c692505db881210b68db4257c",
   "field_acceptance": false,
   "component_evidence_only": true,
   "test_environment": {
@@ -1372,7 +1372,7 @@
     "python-v4"
   ],
   "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1327",
-  "next": "Preserve terminal NO_ACTION and fixed-role evidence. Do not resume measurement, replace controls, or launch a replacement trial to chase qualification. Timed exclusion/restoration acceptance remains unproven; further path-quality diagnosis is a separate evidence-led scope.",
+  "next": "Preserve NO_ACTION. New collector retains bounded timings for future authorized evidence. Upstream internal cause and real exclusion/restoration acceptance remain unresolved; do not replace controls or rerun qualification until green.",
   "release_scope_completed": true,
   "release_evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1845",
   "release_receipt": "docs/RESIDENTIAL_STABILITY_RELEASE_20261009.json",
@@ -1381,5 +1381,8 @@
   "field_result": "NO_ACTION",
   "field_receipt": "3b917046-0d4b-4619-b75f-3ee38093dbeb",
   "field_evidence_directory": "/root/backups/dob-residential-stability-20261009/field-1854",
-  "field_report": "docs/RESIDENTIAL_STABILITY_FIELD_20261009.json"
+  "field_report": "docs/RESIDENTIAL_STABILITY_FIELD_20261009.json",
+  "timing_repair_report": "docs/RESIDENTIAL_TIMING_REPAIR_20261009.json",
+  "timing_repair_deployed": true,
+  "upstream_root_cause_proven": false
 }
