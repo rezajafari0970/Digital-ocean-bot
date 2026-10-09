@@ -73,6 +73,18 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	if err = s.DB.QueryRowContext(ctx, `SELECT COALESCE((SELECT (d.profile_snapshot->>'upcloud_trial_compatible')::boolean FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id AND d.account_id=pi.account_id WHERE pi.id=$1 ORDER BY d.created_at DESC,d.id DESC LIMIT 1),false)`, panel).Scan(&trial); err != nil {
 		return p, 0, err
 	}
+	assignment, e := (residentialperf.Store{DB: s.DB}).Load(ctx, panel)
+	if e != nil {
+		return p, 0, e
+	}
+	if assignment.Config != nil && len(assignment.Config.ExcludedProxyIDs) > 0 {
+		if e = (residentialperf.Store{DB: s.DB}).ValidateAdmissionAssignment(ctx, panel, assignment.Generation); e != nil {
+			return p, 0, e
+		}
+	}
+	p.Performance = assignment.Config
+	p.PerformanceGeneration = assignment.Generation
+	p.PerformanceBaseline = assignment.Baseline
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)
  FROM residential_proxies rp
  WHERE rp.enabled AND ($1 OR rp.last_success_at>=rp.updated_at)
@@ -93,6 +105,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 			return p, 0, err
 		}
 		if trial && !providers.UpCloudTrialProxyPortAllowed(x.x.Port) {
+			continue
+		}
+		if p.Performance.Excludes(x.x.ID) {
 			continue
 		}
 		choices = append(choices, x)
@@ -126,13 +141,6 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 			p.Proxies = append(p.Proxies, v.x)
 		}
 	}
-	assignment, e := (residentialperf.Store{DB: s.DB}).Load(ctx, panel)
-	if e != nil {
-		return p, 0, e
-	}
-	p.Performance = assignment.Config
-	p.PerformanceGeneration = assignment.Generation
-	p.PerformanceBaseline = assignment.Baseline
 	return p, revision, nil
 }
 func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntime) (retErr error) {
@@ -250,8 +258,23 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}
 	// The executor always reads the template and running routes before a retry.
 	if err = applyAndVerify(ctx, rt.Session.Exec, current, desired, testURL, clients, tags, p, func() error {
-		_, e := s.DB.ExecContext(ctx, "UPDATE panel_routing_state SET state='APPLYING' WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3", panel, revision, hash)
-		return e
+		if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
+			if e := perf.ValidateAdmissionAssignment(ctx, panel, p.PerformanceGeneration); e != nil {
+				return e
+			}
+		}
+		result, e := s.DB.ExecContext(ctx, "UPDATE panel_routing_state SET state='APPLYING' WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$4", panel, revision, hash, p.PerformanceGeneration)
+		if e != nil {
+			return e
+		}
+		n, e := result.RowsAffected()
+		if e != nil {
+			return e
+		}
+		if n != 1 {
+			return errors.New("routing generation or plan changed before mutation")
+		}
+		return nil
 	}); err != nil {
 		return err
 	}
@@ -360,6 +383,14 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 		return err
 	}
 	defer tx.Rollback()
+	if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
+		if err = residentialperf.Lock(ctx, tx); err != nil {
+			return err
+		}
+		if err = (residentialperf.Store{DB: s.DB}).BindAdmissionPlanTx(ctx, tx, panel, p.PerformanceGeneration, hash); err != nil {
+			return err
+		}
+	}
 	var fresh int64
 	if err = tx.QueryRowContext(ctx, "SELECT revision FROM residential_routing_control WHERE singleton FOR SHARE").Scan(&fresh); err != nil {
 		return err

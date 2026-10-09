@@ -18,6 +18,16 @@ var residentialProbeDomains = []string{
 }
 
 func (p routePolicy) normalized() routePolicy {
+	if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
+		effective := make([]rp, 0, len(p.Proxies))
+		for _, proxy := range p.Proxies {
+			if !p.Performance.Excludes(proxy.ID) {
+				effective = append(effective, proxy)
+			}
+		}
+		p.Proxies = effective
+	}
+
 	if p.StrictAllowlist {
 		p.Harden = true
 		p.AdsOnly = true

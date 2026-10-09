@@ -90,7 +90,7 @@ dob_stage_runtime() {
  worker_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-worker" | awk '{print $1}')
  guardian_amd64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-amd64" | awk '{print $1}')
  guardian_arm64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-arm64" | awk '{print $1}')
- printf '{"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
+ printf '{"residential_admission_schema":1,"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
  dob_verify_staged_runtime
 }
 # Both install and upgrade must reject an incomplete release before stopping readers.
@@ -120,6 +120,7 @@ dob_prepare_stage_permissions() {
 }
 dob_publish_runtime() {
  # All readers are stopped, backup is complete and rollback is armed.
+ python3 "$SRC/deploy/admission-compatibility.py" "$SRC/deploy/bootstrap.py" "$ETC/env" "$DOB_STAGE/build-manifest.json" || return
  local path
  install -d "$APP" "$APP/web"
  for path in bin migrations web/static build-manifest.json; do
@@ -220,6 +221,9 @@ def q(sql):
 if q("SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='residential_performance_experiments' AND column_name='tuning')")=='t':
  if q("SELECT count(*) FROM residential_performance_experiments WHERE tuning->>'phase' IN('TESTING','PUBLISHING','RESTORING')")!='0':
   raise SystemExit('Unresolved residential tuning: overlay-unaware prior runtime remains stopped')
+if q("SELECT to_regclass('residential_performance_panels') IS NULL")!='t':
+ if q("SELECT count(*) FROM residential_performance_panels WHERE COALESCE(jsonb_array_length(config->'excluded_proxy_ids'),0)>0")!='0':
+  raise SystemExit('Unrestored admission assignment: prior runtime remains stopped')
 if q("SELECT to_regclass('worker_recovery_checkpoints') IS NULL")!='t':
  if q('SELECT count(*) FROM worker_recovery_checkpoints')!='0':raise SystemExit('Unresolved checkpoints: prior runtime remains stopped')
 if q("SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='deployment_step_attempts' AND column_name='result_snapshot')")=='t':

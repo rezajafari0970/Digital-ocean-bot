@@ -1,0 +1,46 @@
+{
+  "job": "residential-admission-20261009",
+  "at": "2026-10-09T10:31:57.789044+00:00",
+  "status": "VERIFIED_NOT_DEPLOYED",
+  "requirement": "RES-001: destination-aware per-VPS bounded manual admission; strict Ads/BrowserLeaks allowlist and direct probes retained",
+  "baseline": "ad1b0df0a0c7e4fc66fd1c8b77503790a26e2b27",
+  "rollback_runtime": "98bcb7e043cd982a8a5e01070b6fcf7080390d69",
+  "allowed_paths": [
+    "cmd/residential-performance-tune/main.go",
+    "cmd/residential-routing-acceptance/pool.go",
+    "deploy/service-topology.sh",
+    "internal/adminapi/residential_performance.go",
+    "internal/panels/residentialsync/allowlist.go",
+    "internal/panels/residentialsync/service.go",
+    "internal/residentialperf/config.go",
+    "internal/residentialperf/store.go",
+    "internal/residentialperf/tuning.go",
+    "internal/residentialperf/admission.go",
+    "cmd/residential-admission/main.go",
+    "cmd/residential-admission/main_test.go",
+    "internal/residentialperf/admission_test.go",
+    "internal/adminapi/residential_admission_test.go",
+    "internal/panels/residentialsync/admission_core_test.go",
+    "migrations/000166_residential_admission.up.sql",
+    "migrations/000166_residential_admission.down.sql",
+    "deploy/admission-compatibility.py",
+    "docs/RESIDENTIAL_ADMISSION_20261009.md",
+    "docs/development-jobs/residential-admission-20261009.json"
+  ],
+  "scope": "one panel,1-2exclusions,two successful controls,5-30minutes,firstpilot5minutes,parent13/80 unchanged",
+  "review": "review-final PASS, zero unresolved source findings; root verified final gate artifacts",
+  "gates": {
+    "full-final": 0,
+    "vet-final": 0,
+    "final-fix-race": 0,
+    "native-final": 0,
+    "native-old-fixed": 0
+  },
+  "evidence_directory": "/root/backups/dob-residential-admission-20261009",
+  "limits": [
+    "native core fault and database authorization tests are compositional, not a full production collector fault-injection run",
+    "canonical detached bootstrap failure remains recorded; no repository-wide READY claim",
+    "no physical Android latency or app SDK show-rate evidence"
+  ],
+  "next": "controlled capability deployment, fresh evidence, conditional timed pilot, native restoration, final status"
+}

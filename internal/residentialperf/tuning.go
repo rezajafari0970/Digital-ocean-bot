@@ -13,20 +13,22 @@ import (
 // Tuning is a latest-only recovery record. Starting another trial replaces the
 // previous publication's recovery point, only after all its assignments verify.
 type Tuning struct {
-	Schema       int       `json:"schema"`
-	ID           string    `json:"id"`
-	Phase        string    `json:"phase"`
-	Before       Config    `json:"before"`
-	Candidate    Config    `json:"candidate"`
-	Panels       []string  `json:"panels"`
-	Deadline     time.Time `json:"deadline"`
-	BaseVersion  int64     `json:"base_version"`
-	BaseRevision int64     `json:"base_revision"`
-	RestoreScope string    `json:"restore_scope,omitempty"`
-	Assigned     bool      `json:"assigned"`
-	Rejected     bool      `json:"rejected"`
-	Reason       string    `json:"reason,omitempty"`
-	Conflict     string    `json:"conflict,omitempty"`
+	AdmissionPlan       string    `json:"admission_plan,omitempty"`
+	AdmissionEvidenceID string    `json:"admission_evidence_id,omitempty"`
+	Schema              int       `json:"schema"`
+	ID                  string    `json:"id"`
+	Phase               string    `json:"phase"`
+	Before              Config    `json:"before"`
+	Candidate           Config    `json:"candidate"`
+	Panels              []string  `json:"panels"`
+	Deadline            time.Time `json:"deadline"`
+	BaseVersion         int64     `json:"base_version"`
+	BaseRevision        int64     `json:"base_revision"`
+	RestoreScope        string    `json:"restore_scope,omitempty"`
+	Assigned            bool      `json:"assigned"`
+	Rejected            bool      `json:"rejected"`
+	Reason              string    `json:"reason,omitempty"`
+	Conflict            string    `json:"conflict,omitempty"`
 }
 
 func tuningBusy(t *Tuning) bool {
@@ -61,6 +63,17 @@ func clockNow(ctx context.Context, tx *sql.Tx) (time.Time, error) {
 func tuningConfigChange(before, candidate Config) error {
 	if e := candidate.Validate(); e != nil {
 		return bad(e.Error())
+	}
+	if len(before.ExcludedProxyIDs) > 0 {
+		return bad("parent profile cannot contain exclusions")
+	}
+	if len(candidate.ExcludedProxyIDs) > 0 {
+		a := candidate.Clone()
+		a.ExcludedProxyIDs = nil
+		if string(raw(a)) != string(raw(before)) {
+			return bad("admission can change only excluded proxies")
+		}
+		return nil
 	}
 	a := candidate
 	a.FastCount = before.FastCount
@@ -298,7 +311,17 @@ func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, versio
 		if e = tuningConfigChange(before, *q.Config); e != nil {
 			return e
 		}
-		t = &Tuning{Schema: 1, ID: q.RequestID, Phase: "TESTING", Before: before, Candidate: *q.Config, Panels: q.PanelIDs, Deadline: now.Add(time.Duration(q.Minutes) * time.Minute), BaseVersion: version, BaseRevision: q.BaseRevision}
+		if len(q.Config.ExcludedProxyIDs) > 0 {
+			if len(q.PanelIDs) != 1 || q.AdmissionEvidenceID == "" {
+				return bad("admission requires exactly one panel and trusted evidence")
+			}
+			if e = admissionStart(ctx, tx, q); e != nil {
+				return e
+			}
+		} else if q.AdmissionEvidenceID != "" {
+			return bad("evidence cannot authorize a selection tuning trial")
+		}
+		t = &Tuning{AdmissionEvidenceID: q.AdmissionEvidenceID, Schema: 1, ID: q.RequestID, Phase: "TESTING", Before: before, Candidate: *q.Config, Panels: q.PanelIDs, Deadline: now.Add(time.Duration(q.Minutes) * time.Minute), BaseVersion: version, BaseRevision: q.BaseRevision}
 		if e = tuningOwnership(ctx, tx, q.ExperimentID, t, "before", false); e != nil {
 			return e
 		}
@@ -347,6 +370,9 @@ func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, versio
 		tuningRestoreIntent(t, "selected", "operator cancelled")
 		return tuningRestoreAssignments(ctx, tx, q.ExperimentID, t)
 	case "tune_publish":
+		if len(t.Candidate.ExcludedProxyIDs) > 0 || t.AdmissionEvidenceID != "" {
+			return conflict("admission trials cannot be published; allow restoration")
+		}
 		if t.Phase != "TESTING" || t.Rejected {
 			return conflict("only an unrejected testing trial can be published")
 		}
@@ -442,8 +468,22 @@ func (s Store) tickTuning(ctx context.Context) error {
 		if e != nil {
 			return e
 		}
+		reason := ""
 		if !now.Before(t.Deadline) {
-			tuningRestoreIntent(t, "selected", "trial deadline expired")
+			reason = "trial deadline expired"
+		}
+		if reason == "" && t.AdmissionEvidenceID != "" {
+			valid, err := admissionStillValid(ctx, tx, t)
+			if err != nil {
+				return err
+			}
+			if !valid {
+				reason = "admission context changed"
+				t.Rejected = true
+			}
+		}
+		if reason != "" {
+			tuningRestoreIntent(t, "selected", reason)
 			if e = saveTuning(ctx, tx, id, t); e != nil {
 				return e
 			}

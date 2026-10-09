@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"strings"
@@ -13,6 +14,14 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 	var c *residentialperf.Config
 	if len(profile) > 0 {
 		c = profile[0]
+	}
+	if c != nil && len(c.ExcludedProxyIDs) > 0 {
+		b, _ := json.Marshal(setting)
+		for _, id := range c.ExcludedProxyIDs {
+			if strings.Contains(strings.ToLower(string(b)), strings.ToLower(id)) {
+				return nil, fmt.Errorf("excluded proxy remains in native configuration")
+			}
+		}
 	}
 	interval, timeout, maxRTT := 10*time.Second, 3*time.Second, 3*time.Second
 	laneCount, fastLanes := 5, 4

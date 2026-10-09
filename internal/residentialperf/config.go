@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"sort"
 	"strings"
 )
 
 type Config struct {
+	ExcludedProxyIDs  []string           `json:"excluded_proxy_ids,omitempty"`
 	FastShare         int                `json:"fast_share"`
 	FastCount         int                `json:"fast_count"`
 	ProbeInterval     int                `json:"probe_interval_seconds"`
@@ -34,7 +36,46 @@ func Balanced() Config {
 
 var UUID = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
+// Clone owns mutable fields; normalization never mutates a caller's request.
+func (c Config) Clone() Config {
+	c.ExcludedProxyIDs = append([]string(nil), c.ExcludedProxyIDs...)
+	for i := range c.ExcludedProxyIDs {
+		c.ExcludedProxyIDs[i] = strings.ToLower(c.ExcludedProxyIDs[i])
+	}
+	sort.Strings(c.ExcludedProxyIDs)
+	if c.Costs != nil {
+		m := make(map[string]float64, len(c.Costs))
+		for k, v := range c.Costs {
+			m[k] = v
+		}
+		c.Costs = m
+	}
+	return c
+}
+func (c *Config) Excludes(id string) bool {
+	if c == nil {
+		return false
+	}
+	for _, x := range c.ExcludedProxyIDs {
+		if strings.EqualFold(x, id) {
+			return true
+		}
+	}
+	return false
+}
 func (c Config) Validate() error {
+	if len(c.ExcludedProxyIDs) > 2 {
+		return errors.New("admission permits at most two exclusions")
+	}
+	seen := map[string]bool{}
+	for _, id := range c.ExcludedProxyIDs {
+		k := strings.ToLower(id)
+		if !UUID.MatchString(id) || seen[k] {
+			return errors.New("excluded proxies must be unique UUIDs")
+		}
+		seen[k] = true
+	}
+
 	if c.FastShare < 50 || c.FastShare > 90 || c.FastShare%10 != 0 || c.FastCount < 0 || c.FastCount > 16 {
 		return errors.New("fast share must be 50–90 in steps of 10; fast count must be 0–16")
 	}

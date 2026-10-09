@@ -16,18 +16,19 @@ import (
 
 type Store struct{ DB *sql.DB }
 type Request struct {
-	TuningID        string   `json:"tuning_id,omitempty"`
-	RequestID       string   `json:"request_id"`
-	ExperimentID    string   `json:"experiment_id"`
-	Action          string   `json:"action"`
-	Config          *Config  `json:"config,omitempty"`
-	PanelIDs        []string `json:"panel_ids,omitempty"`
-	ExpectedVersion int64    `json:"expected_version"`
-	Minutes         int      `json:"minutes"`
-	BaseRevision    int64    `json:"base_revision"`
-	BasePlan        string   `json:"base_plan"`
-	Mode            string   `json:"mode,omitempty"`
-	Scope           string   `json:"scope,omitempty"`
+	AdmissionEvidenceID string   `json:"admission_evidence_id,omitempty"`
+	TuningID            string   `json:"tuning_id,omitempty"`
+	RequestID           string   `json:"request_id"`
+	ExperimentID        string   `json:"experiment_id"`
+	Action              string   `json:"action"`
+	Config              *Config  `json:"config,omitempty"`
+	PanelIDs            []string `json:"panel_ids,omitempty"`
+	ExpectedVersion     int64    `json:"expected_version"`
+	Minutes             int      `json:"minutes"`
+	BaseRevision        int64    `json:"base_revision"`
+	BasePlan            string   `json:"base_plan"`
+	Mode                string   `json:"mode,omitempty"`
+	Scope               string   `json:"scope,omitempty"`
 }
 type Receipt struct {
 	ExperimentID string `json:"experiment_id"`
@@ -56,6 +57,14 @@ func Lock(ctx context.Context, tx *sql.Tx) error {
 }
 func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	var out Receipt
+	if q.Config != nil {
+		c := q.Config.Clone()
+		q.Config = &c
+	}
+	q.AdmissionEvidenceID = strings.ToLower(q.AdmissionEvidenceID)
+	if q.AdmissionEvidenceID != "" && (q.Action != "tune_start" || !UUID.MatchString(q.AdmissionEvidenceID)) {
+		return out, bad("admission evidence is only accepted for tune_start")
+	}
 	if !UUID.MatchString(q.RequestID) {
 		return out, bad("request_id must be a UUID")
 	}
@@ -81,6 +90,9 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 		scope = "selected"
 	}
 	if q.Action == "start" {
+		if q.Config != nil && len(q.Config.ExcludedProxyIDs) > 0 {
+			return out, bad("exclusions require an evidence-bound timed tuning trial")
+		}
 		if q.Config == nil || q.BaseRevision < 1 || len(q.PanelIDs) > 1000 {
 			return out, bad("configuration, reviewed revision and at most 1000 selected servers required")
 		}
@@ -286,7 +298,11 @@ func (s Store) Do(ctx context.Context, q Request) (Receipt, error) {
 	if e != nil {
 		return out, e
 	}
-	_, e = tx.ExecContext(ctx, "INSERT INTO residential_performance_operations(request_id,request_hash,response) VALUES($1,$2,$3)", q.RequestID, digest, string(raw(out)))
+	if q.AdmissionEvidenceID == "" {
+		_, e = tx.ExecContext(ctx, "INSERT INTO residential_performance_operations(request_id,request_hash,response) VALUES($1,$2,$3)", q.RequestID, digest, string(raw(out)))
+	} else {
+		_, e = tx.ExecContext(ctx, "INSERT INTO residential_performance_operations(request_id,request_hash,response,admission_evidence_id) VALUES($1,$2,$3,$4)", q.RequestID, digest, string(raw(out)), q.AdmissionEvidenceID)
+	}
 	if e != nil {
 		return out, e
 	}

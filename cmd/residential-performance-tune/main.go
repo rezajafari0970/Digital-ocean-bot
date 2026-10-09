@@ -56,8 +56,9 @@ func run(execute bool) error {
 		default:
 			return errors.New("only supported tuning actions are allowed")
 		}
-		// This invocation is deliberately limited to the reviewed operational change.
-		if q.Action == "tune_start" && (q.Config == nil || q.Config.FastCount != 3 || q.Config.FastShare != 90) {
+		// Selection tuning retains its reviewed bounds. Admission requires trusted evidence;
+		// Store enforces an otherwise identical parent, one panel and mandatory expiry.
+		if q.Action == "tune_start" && (q.Config == nil || (q.AdmissionEvidenceID == "" || len(q.Config.ExcludedProxyIDs) == 0) && (q.Config.FastCount != 3 || q.Config.FastShare != 90)) {
 			return errors.New("reviewed candidate requires fast_count=3 and fast_share=90")
 		}
 	}
