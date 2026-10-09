@@ -1,9 +1,10 @@
-# Bounded residential stability pilot (draft, 2026-10-09)
+# Bounded residential stability pilot (2026-10-09)
 
-**Release status: SOURCE ACCEPTED / deterministic gates PASS / NOT YET DEPLOYED.**
-This document describes the implemented candidate, not accepted production behavior.
+**Release status: DEPLOYED / service health verified / production field pilot pending.**
+This document describes the deployed capability; no new production exclusion trial has been accepted.
 Baseline: 94b1f4dfbba3d3d71632fe276c61a5994f53ed10.
-Current production / rollback source: fc76e6a669931873295ddded4f51eca3a7bbe8ca.
+Current production: f1ae87dc66dfbba26d20ff3931791ee01f795390.
+Rollback source: fc76e6a669931873295ddded4f51eca3a7bbe8ca, only after safe restoration checks.
 Job: residential-stability-20261009.
 
 ## Problem and scope

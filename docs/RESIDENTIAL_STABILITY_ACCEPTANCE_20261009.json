@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-09T14:27:20.334965+00:00",
-  "status": "RELEASE_READY_NOT_DEPLOYED",
+  "at": "2026-10-09T15:22:00.965257+00:00",
+  "status": "DEPLOYED_HEALTH_VERIFIED_FIELD_PENDING",
   "source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7",
   "source_manifest": "/root/backups/dob-residential-stability-20261009/resume-1327/source-v5.json",
   "source_sha256": {
@@ -1357,7 +1357,7 @@
     "sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
     "version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)"
   },
-  "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "runtime_commit": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
   "field_acceptance": false,
   "component_evidence_only": true,
   "test_environment": {
@@ -1372,5 +1372,9 @@
     "python-v4"
   ],
   "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1327",
-  "next": "Clean checkpoint, release integration and controlled deployment; then frozen single-panel qualification. No repeat-until-green."
+  "next": "Release and health verification complete. Next field phase: freeze one fresh panel and fixed roles, then the reviewed bounded two-window qualification; at most one five-minute exclusion trial only if qualified, with exact restoration. Preserve NO_ACTION and failed observations; no retry-until-green.",
+  "release_scope_completed": true,
+  "release_evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1845",
+  "release_receipt": "docs/RESIDENTIAL_STABILITY_RELEASE_20261009.json",
+  "new_openai_api_calls_this_release": 0
 }

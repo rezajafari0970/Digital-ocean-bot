@@ -1,10 +1,10 @@
 {
   "job": "residential-stability-20261009",
-  "at": "2026-10-09T14:27:20.334965+00:00",
-  "status": "RELEASE_READY_NOT_DEPLOYED",
+  "at": "2026-10-09T15:22:00.965257+00:00",
+  "status": "DEPLOYED_HEALTH_VERIFIED_FIELD_PENDING",
   "baseline": "94b1f4dfbba3d3d71632fe276c61a5994f53ed10",
   "feature_branch": "feat/residential-stability-20261009",
-  "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
+  "runtime_commit": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
   "allowed_paths": [
     "HANDOFF.md",
     "cmd/residential-performance-tune/main.go",
@@ -85,7 +85,11 @@
   },
   "field_acceptance": false,
   "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1327",
-  "next": "Clean checkpoint, release integration and controlled deployment; then frozen single-panel qualification. No repeat-until-green.",
+  "next": "Release and health verification complete. Next field phase: freeze one fresh panel and fixed roles, then the reviewed bounded two-window qualification; at most one five-minute exclusion trial only if qualified, with exact restoration. Preserve NO_ACTION and failed observations; no retry-until-green.",
   "agent_continues_after_final_reply": false,
-  "source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7"
+  "source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7",
+  "release_scope_completed": true,
+  "release_evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1845",
+  "release_receipt": "docs/RESIDENTIAL_STABILITY_RELEASE_20261009.json",
+  "new_openai_api_calls_this_release": 0
 }

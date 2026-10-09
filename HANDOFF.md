@@ -1,3 +1,23 @@
+# Latest continuation — stability capability deployed, field pilot pending
+
+Runtime: **f1ae87dc66dfbba26d20ff3931791ee01f795390**. Release completed 2026-10-09 15:18UTC / 18:48Tehran.
+Read docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md and
+RESIDENTIAL_STABILITY_RELEASE_20261009.json before treating older sections as current.
+All1291 accepted source hashes match; review-v4 PASS and existing deterministic
+receipts reused. Clean detached build, exclusive deployment lock, before/after
+invariants and all3 running executable hashes verified. Five postrelease samples
+were each5/5ready, no restarts. Zero active tuning/exclusions/admission operations;
+parent13/80v4, routing/protection and policy identities unchanged. No new API call.
+Backup /opt/digital-ocean-bot.rollback.ahuUQyAF; recovery compatibility guards still apply.
+Requested checkpoint/build/deploy/health scope is complete. New production field
+exclusion/restoration pilot is NOT started or accepted. Follow the deployed bounded
+supervisor with fresh frozen roles and preserve NO_ACTION; no repeat-until-green.
+Provider/Android/appSDK/IP+SNI/UpCloud and historical detached bootstrap gaps remain.
+Evidence /root/backups/dob-residential-stability-20261009/resume-1845.
+No AI process continues after final response; ordinary application workers continue.
+
+---
+
 # Continuation checkpoint — API restored; source accepted, release pending
 
 Read docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md and acceptance JSON first.

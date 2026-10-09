@@ -1,0 +1,251 @@
+{
+  "at_utc": "2026-10-09T15:22:00.965257+00:00",
+  "at_tehran": "2026-10-09T18:52:00.965257+03:30",
+  "status": "DEPLOYED_HEALTH_VERIFIED_FIELD_PENDING",
+  "requested_release_scope_completed": true,
+  "runtime_commit": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
+  "accepted_source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7",
+  "source_files_verified": 1291,
+  "accepted_review": "PASS",
+  "new_openai_api_calls": 0,
+  "tests_reused_without_product_changes": [
+    "focused-v4",
+    "full-v4",
+    "vet-v4",
+    "race-v4",
+    "python-v5",
+    "native-v2",
+    "schema-live",
+    "adapter-read-check"
+  ],
+  "deployment": {
+    "at": "2026-10-09T15:18:00.397576+00:00",
+    "commit": "f1ae87dc66dfbba26d20ff3931791ee01f795390",
+    "backup": "/opt/digital-ocean-bot.rollback.ahuUQyAF",
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "999961",
+        "NRestarts": "0",
+        "sha256": "3d49876ff34b90edef67cee7e84824443e88306cedeb4ce9024bbffb3a870f79"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "999963",
+        "NRestarts": "0",
+        "sha256": "0a066afc281e10feb44d482f236adde331e162fcbc9acfc673909721b6b97d19"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "999964",
+        "NRestarts": "0",
+        "sha256": "0a066afc281e10feb44d482f236adde331e162fcbc9acfc673909721b6b97d19"
+      }
+    },
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-09T15:18:00.481646776Z"
+    },
+    "operator_sha256": {
+      "tune": "ed095024bb3c21d9f5851c0b6c9346850058d4f501fbe3e029cd58b773a79fbe",
+      "admission": "5bd3e6a3d1c2fa21e1353ff868f6ac5f6cde91ef68fc45fe68338431dd89d6fe",
+      "native-acceptance": "a2fb21e7118b664c638a1ff1be455d5382de768cb3ba84f452cfe7658096ce57"
+    }
+  },
+  "postdeploy_health": {
+    "started_at": "2026-10-09T15:18:54.619816+00:00",
+    "samples": [
+      {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T15:18:54.62774832Z"
+      },
+      {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T15:19:04.631839093Z"
+      },
+      {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T15:19:14.635888917Z"
+      },
+      {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T15:19:24.640208127Z"
+      },
+      {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-09T15:19:34.645063043Z"
+      }
+    ],
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "999961",
+        "NRestarts": "0",
+        "sha256": "3d49876ff34b90edef67cee7e84824443e88306cedeb4ce9024bbffb3a870f79"
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "999963",
+        "NRestarts": "0",
+        "sha256": "0a066afc281e10feb44d482f236adde331e162fcbc9acfc673909721b6b97d19"
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "999964",
+        "NRestarts": "0",
+        "sha256": "0a066afc281e10feb44d482f236adde331e162fcbc9acfc673909721b6b97d19"
+      }
+    },
+    "completed_at": "2026-10-09T15:19:34.739821+00:00",
+    "pass": true
+  },
+  "live_obligations": {
+    "admission_operations": 0,
+    "excluded_assignments": 0,
+    "active_tuning": 0
+  },
+  "profile_version": 4,
+  "invariants_unchanged": true,
+  "fresh_long_lived_panels_sample_count": 5,
+  "field_acceptance": false,
+  "new_trial_started": false,
+  "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1845",
+  "limitations": [
+    "New production exclusion/restoration pilot not run or accepted.",
+    "Upstream destination reliability, Android timings and app SDK show-rate are not established by service readiness.",
+    "Historical IP+SNI/UpCloud issues and detached bootstrap warning remain separately recorded."
+  ],
+  "agent_continues_after_final_reply": false
+}
