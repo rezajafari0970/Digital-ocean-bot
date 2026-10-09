@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-09T15:22:00.965257+00:00",
-  "status": "DEPLOYED_HEALTH_VERIFIED_FIELD_PENDING",
+  "at": "2026-10-09T15:30:47.629407+00:00",
+  "status": "DEPLOYED_FIELD_QUALIFICATION_NO_ACTION",
   "source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7",
   "source_manifest": "/root/backups/dob-residential-stability-20261009/resume-1327/source-v5.json",
   "source_sha256": {
@@ -1372,9 +1372,14 @@
     "python-v4"
   ],
   "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1327",
-  "next": "Release and health verification complete. Next field phase: freeze one fresh panel and fixed roles, then the reviewed bounded two-window qualification; at most one five-minute exclusion trial only if qualified, with exact restoration. Preserve NO_ACTION and failed observations; no retry-until-green.",
+  "next": "Preserve terminal NO_ACTION and fixed-role evidence. Do not resume measurement, replace controls, or launch a replacement trial to chase qualification. Timed exclusion/restoration acceptance remains unproven; further path-quality diagnosis is a separate evidence-led scope.",
   "release_scope_completed": true,
   "release_evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1845",
   "release_receipt": "docs/RESIDENTIAL_STABILITY_RELEASE_20261009.json",
-  "new_openai_api_calls_this_release": 0
+  "new_openai_api_calls_this_release": 0,
+  "field_attempt_completed": true,
+  "field_result": "NO_ACTION",
+  "field_receipt": "3b917046-0d4b-4619-b75f-3ee38093dbeb",
+  "field_evidence_directory": "/root/backups/dob-residential-stability-20261009/field-1854",
+  "field_report": "docs/RESIDENTIAL_STABILITY_FIELD_20261009.json"
 }

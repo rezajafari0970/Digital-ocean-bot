@@ -1,3 +1,23 @@
+# Latest continuation — bounded field attempt ended NO_ACTION, 2026-10-09
+
+Runtime remains **f1ae87dc66dfbba26d20ff3931791ee01f795390**, release/health accepted.
+Read docs/RESIDENTIAL_STABILITY_FIELD_20261009.json and the updated Persian status first.
+One frozen run on panel9e69b0aa: native106/106, baseline18/18. Suspect ads12 passed12/12;
+control ads10 passed12/12, control ads3 passed10/12 with probe and BrowserLeaks timeouts.
+Trusted receipt3b917046-0d4b-4619-b75f-3ee38093dbeb: healthy collector/stable context,
+but not eligible. Supervisor correctly ended NO_ACTION at15:27:18UTC; no second
+window, no request intent, no admission/exclusion/tuning operation, no restoration duty.
+Fresh postread at15:29UTC verified parent4, selected generation/native plan and other
+assignments/policies unchanged; all3 runtime hashes/readiness PASS. No new API calls.
+Do NOT rerun qualification or change roles to chase a passing sample. Production
+exclusion/restoration field acceptance remains false. Observations establish variable
+reachability, not the upstream provider's internal cause. Further path-quality diagnosis
+is separate; preserve Android/appSDK/IP+SNI/UpCloud and historical bootstrap gaps.
+Evidence /root/backups/dob-residential-stability-20261009/field-1854. Pilot process ended;
+no AI agent continues after final reply. Normal application workers remain active.
+
+---
+
 # Latest continuation — stability capability deployed, field pilot pending
 
 Runtime: **f1ae87dc66dfbba26d20ff3931791ee01f795390**. Release completed 2026-10-09 15:18UTC / 18:48Tehran.
