@@ -1,70 +1,91 @@
 {
   "job": "residential-stability-20261009",
-  "at": "2026-10-09T12:26:50.805742+00:00",
-  "status": "BLOCKED_EXTERNAL_REVIEW",
+  "at": "2026-10-09T14:27:20.334965+00:00",
+  "status": "RELEASE_READY_NOT_DEPLOYED",
   "baseline": "94b1f4dfbba3d3d71632fe276c61a5994f53ed10",
   "feature_branch": "feat/residential-stability-20261009",
   "runtime_commit": "fc76e6a669931873295ddded4f51eca3a7bbe8ca",
   "allowed_paths": [
-    "internal/residentialperf/store.go",
-    "internal/residentialperf/admission.go",
-    "internal/residentialperf/stability.go",
+    "HANDOFF.md",
+    "cmd/residential-performance-tune/main.go",
+    "cmd/residential-performance-tune/main_test.go",
+    "docs/RESIDENTIAL_STABILITY_20261009.md",
+    "docs/RESIDENTIAL_STABILITY_ACCEPTANCE_20261009.json",
+    "docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md",
+    "docs/development-jobs/residential-stability-20261009.json",
+    "internal/adminapi/residential_admission_test.go",
+    "internal/adminapi/residential_stability_authorization_test.go",
+    "internal/adminapi/residential_stability_cli_test.go",
+    "internal/adminapi/residential_stability_review_test.go",
     "internal/adminapi/residential_stability_test.go",
-    "tools/residential-stability-pilot.py",
+    "internal/residentialperf/admission.go",
+    "internal/residentialperf/request.go",
+    "internal/residentialperf/request_test.go",
+    "internal/residentialperf/stability.go",
+    "internal/residentialperf/store.go",
+    "internal/residentialperf/testdata/request-legacy-fc76e6a-source.json",
+    "internal/residentialperf/testdata/request-legacy-fc76e6a.json",
+    "internal/residentialperf/tuning.go",
+    "tools/residential-pilot-support.py",
     "tools/residential-pilot-traffic.py",
-    "tools/tests/test_residential_stability_pilot.py",
+    "tools/residential-stability-pilot.py",
+    "tools/tests/fixtures/stability-snapshot.json",
     "tools/tests/fixtures/traffic-baseline.json",
     "tools/tests/fixtures/traffic-candidate.json",
-    "tools/tests/fixtures/stability-snapshot.json",
-    "docs/RESIDENTIAL_STABILITY_20261009.md",
-    "docs/RESIDENTIAL_STABILITY_STATUS_FA_20261009.md",
-    "docs/RESIDENTIAL_STABILITY_ACCEPTANCE_20261009.json",
-    "docs/development-jobs/residential-stability-20261009.json",
-    "HANDOFF.md"
+    "tools/tests/test_residential_stability_pilot.py",
+    "tools/tests/test_residential_stability_review.py",
+    "tools/tests/test_residential_stability_review_v2.py"
   ],
   "requirement": "Bounded destination-specific temporal qualification, one five-minute trial, exact restoration and truthful live status",
   "gates": {
-    "focused": {
+    "focused-v4": {
       "exit": 0,
-      "log_sha256": "cd9bb6c33b173d4abb7d7444b9d370ef9658396319df047d9ca207d117d199a1"
+      "log_sha256": "9c57c7a46e247526955d174b86a686d5b05ef23616e8b184be3645c41e50dd68"
     },
-    "race": {
+    "full-v4": {
       "exit": 0,
-      "log_sha256": "8d9a1be9201d50257e8205f108432623e602a45f0e572ecc054a384499568b46"
+      "log_sha256": "f48a2ce66d14c15592a26e29d6634d4955ca02019de879e14841fd932c36c507"
     },
-    "full": {
-      "exit": 0,
-      "log_sha256": "114646d5d4c02404bed57aa77baae7a3aede6ee0201ba3466da664a376b317d7"
-    },
-    "vet": {
+    "vet-v4": {
       "exit": 0,
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
-    "python-tests-final": {
+    "race-v4": {
       "exit": 0,
-      "log_sha256": "c081d71656cfe889ebb98031b06f2606448577ae65eb52efb1eb92929ed9e4de"
+      "log_sha256": "ef3f14dfbf53bfe9f757b02b6360b922c13f01e3817298a298607c8786053c7c"
     },
-    "final-read": {
+    "python-v5": {
       "exit": 0,
-      "log_sha256": "9742d66411c8b41d2330a3dba091dc003ab6fc23be451b6f719cb1bafcef86d3"
+      "log_sha256": "206509b800790d1de327c380be589ad0ffb5c28f7087c3576766d2d2518a943c"
+    },
+    "native-v2": {
+      "exit": 0,
+      "log_sha256": "7f828fce43488397642bcdf7cedad4abe1e1e303fb4e4f9726c6616f8f3f8c9f"
+    },
+    "schema-live": {
+      "exit": 0,
+      "log_sha256": "cb2d952cda8ec6a2bec407d867e555b042d4fada98bcff8ea4b65edb1638521b"
+    },
+    "adapter-read-check": {
+      "exit": 0,
+      "log_sha256": "d06a9807ce445fe08aa4faccb76b7934cfffd25d5db1a0970698d9a74d460c7a"
     }
   },
   "review": {
-    "initial_plan": "REVISE",
-    "resolved_plan": "INSUFFICIENT_COUNCIL",
-    "implementation": "NOT_RUN",
-    "blocker": {
-      "api_status": 429,
-      "error_type": "insufficient_quota",
-      "error_code": "credit_balance_exhausted"
-    },
-    "policy": "docs/PROJECT_AI_OPERATING_SYSTEM.md; docs/PROJECT_AI_POLICY.json high_risk_requires independent_review",
-    "disagreements_resolved_independently": false
+    "decision": "PASS",
+    "unresolved": [],
+    "evidence": "/root/backups/dob-residential-stability-20261009/resume-1327/review-v4.json",
+    "input_sha256": "efaef06a88afcedbcfc93005a4f1d5c57a3faa04350f898259b779a3f6f9e3c4",
+    "prior_repaired_reviews": [
+      "review",
+      "review-v2",
+      "review-v3"
+    ],
+    "withdrawn_finding": "R2: time import is used; full/vet/race compiled and ran"
   },
   "field_acceptance": false,
-  "evidence_directory": "/root/backups/dob-residential-stability-20261009",
-  "next": "Restore configured review API credit; resume implementation-review-input.txt, resolve review, checkpoint, release and only then frozen qualifying pilot. Never rerun probes just to obtain eligible evidence.",
+  "evidence_directory": "/root/backups/dob-residential-stability-20261009/resume-1327",
+  "next": "Clean checkpoint, release integration and controlled deployment; then frozen single-panel qualification. No repeat-until-green.",
   "agent_continues_after_final_reply": false,
-  "feature_commit": "a868049c763b4a6ea871f1d4d0f0c3851ad65e05",
-  "feature_remote_verified": true
+  "source_digest": "de511c944e3d73308024665555f33e0b35ed35e4b21d352c06c72011c6f0b0e7"
 }

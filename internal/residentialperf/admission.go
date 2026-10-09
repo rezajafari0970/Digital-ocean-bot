@@ -111,6 +111,28 @@ func admissionIDs(e AdmissionEvidence) ([]string, error) {
 
 // Eligible distinguishes a complete diagnostic receipt from actionable evidence.
 // The oldest scheduled observation sets freshness; later retries cannot reset it.
+// Trusted diagnostics remain stored, but inconsistent transport fields cannot authorize.
+func consistentObservation(o AdmissionObservation, expected int) bool {
+	switch o.Outcome {
+	case "ok":
+		return o.CurlCode == 0 && o.HTTPStatus == expected
+	case "http":
+		return o.CurlCode == 0 && o.HTTPStatus >= 100 && o.HTTPStatus <= 599 && o.HTTPStatus != expected
+	case "timeout":
+		return o.CurlCode == 28 && o.HTTPStatus >= 0 && o.HTTPStatus <= 599
+	case "tls":
+		return (o.CurlCode == 35 || o.CurlCode == 60) && o.HTTPStatus == 0
+	case "local_proxy_unavailable":
+		return o.CurlCode == 7 && o.HTTPStatus == 0
+	case "auth":
+		return o.CurlCode == 67 && o.HTTPStatus == 0
+	case "transport":
+		return o.CurlCode > 0 && o.CurlCode != 7 && o.CurlCode != 28 && o.CurlCode != 35 && o.CurlCode != 60 && o.CurlCode != 67 && o.HTTPStatus >= 0 && o.HTTPStatus <= 599
+	default:
+		return false
+	}
+}
+
 func (e AdmissionEvidence) Eligible(now time.Time) error {
 	ids, err := admissionIDs(e)
 	if err != nil {
@@ -144,7 +166,10 @@ func (e AdmissionEvidence) Eligible(now time.Time) error {
 			return conflict("invalid admission attempt identity or timing")
 		}
 		slots[key] = true
-		ok := o.Outcome == "ok" && o.HTTPStatus == expected
+		if !consistentObservation(o, expected) {
+			return conflict("inconsistent admission transport observation")
+		}
+		ok := o.Outcome == "ok" && o.HTTPStatus == expected && o.CurlCode == 0
 		if controls[o.ProxyID] && !ok {
 			return conflict("both controls must pass every scheduled destination check")
 		}
@@ -199,7 +224,30 @@ func loadAdmission(ctx context.Context, db admissionQuery, id string) (Admission
 func (s Store) AdmissionEvidence(ctx context.Context, id string) (AdmissionEvidence, error) {
 	return loadAdmission(ctx, s.DB, id)
 }
-func admissionStart(ctx context.Context, tx *sql.Tx, q Request) error {
+func admissionStart(ctx context.Context, tx *sql.Tx, q Request, authorization *admissionAuthorization) error {
+	// Also serialize proxy insertions/enabling and native-plan writers, not just existing enabled rows.
+	// All admission locks are bounded by Store.Do's lock/statement timeouts.
+	if _, err := tx.ExecContext(ctx, "LOCK TABLE residential_proxies IN SHARE MODE"); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, "SELECT 1 FROM panel_routing_state WHERE panel_id=$1 FOR SHARE", q.PanelIDs[0]); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, "SELECT 1 FROM panel_instances WHERE id=$1 FOR SHARE", q.PanelIDs[0]); err != nil {
+		return err
+	}
+	// Hold mutable lifecycle eligibility through assignment commitment. Any inverse
+	// writer lock order fails closed through the existing three-second lock timeout.
+	if _, err := tx.ExecContext(ctx, "SELECT a.id FROM accounts a JOIN panel_instances p ON p.account_id=a.id WHERE p.id=$1 FOR SHARE OF a", q.PanelIDs[0]); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, "SELECT d.id FROM droplets d JOIN panel_instances p ON p.droplet_id=d.id WHERE p.id=$1 FOR SHARE OF d", q.PanelIDs[0]); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, "SELECT 1 FROM residential_routing_control WHERE singleton FOR SHARE"); err != nil {
+		return err
+	}
 	e, err := loadAdmission(ctx, tx, q.AdmissionEvidenceID)
 	if err != nil {
 		return err
@@ -218,6 +266,9 @@ func admissionStart(ctx context.Context, tx *sql.Tx, q Request) error {
 	if err = e.Eligible(now); err != nil {
 		return err
 	}
+	if err = stabilityStart(ctx, tx, q, e, now); err != nil {
+		return err
+	}
 	if e.Context.PanelID != q.PanelIDs[0] || e.Context.Owner != q.ExperimentID || e.Context.Revision != q.BaseRevision || e.Context.Plan != q.BasePlan {
 		return conflict("admission receipt belongs to another panel or plan")
 	}
@@ -225,16 +276,6 @@ func admissionStart(ctx context.Context, tx *sql.Tx, q Request) error {
 	sort.Strings(excluded)
 	if string(raw(excluded)) != string(raw(q.Config.ExcludedProxyIDs)) {
 		return bad("exclusions must match the receipt suspect set")
-	}
-	// Serialize endpoint/secret versions and source identity with the assignment commit.
-	if _, err = tx.ExecContext(ctx, "SELECT 1 FROM residential_proxies WHERE enabled ORDER BY proxy_id FOR SHARE"); err != nil {
-		return err
-	}
-	if _, err = tx.ExecContext(ctx, "SELECT 1 FROM panel_instances WHERE id=$1 FOR SHARE", q.PanelIDs[0]); err != nil {
-		return err
-	}
-	if _, err = tx.ExecContext(ctx, "SELECT 1 FROM residential_routing_control WHERE singleton FOR SHARE"); err != nil {
-		return err
 	}
 	current, err := admissionContext(ctx, tx, q.PanelIDs[0])
 	if err != nil {
@@ -257,6 +298,13 @@ func admissionStart(ctx context.Context, tx *sql.Tx, q Request) error {
 	if used {
 		return conflict("admission receipt already used")
 	}
+	// Assignment mutation preserves these timestamps, but retain their pre-mutation
+	// values explicitly so a later proof cannot retroactively authorize the start.
+	if err = tx.QueryRowContext(ctx, "SELECT p.verified_at,r.verified_at,d.expires_at FROM residential_performance_panels p JOIN panel_routing_state r ON r.panel_id=p.panel_id JOIN panel_instances pi ON pi.id=p.panel_id JOIN droplets d ON d.id=pi.droplet_id WHERE p.panel_id=$1", q.PanelIDs[0]).Scan(&authorization.performance, &authorization.native, &authorization.expires); err != nil {
+		return err
+	}
+	authorization.evidence = e
+	authorization.captured = true
 	return nil
 }
 func admissionStillValid(ctx context.Context, tx *sql.Tx, t *Tuning) (bool, error) {
@@ -383,4 +431,42 @@ func (s Store) BindAdmissionPlanTx(ctx context.Context, tx *sql.Tx, panel string
 	}
 	t.AdmissionPlan = hash
 	return saveTuning(ctx, tx, owner, t)
+}
+
+// Retained authorization data, scoped to a single Store.Do transaction.
+// Supported proof writers use the same performance lock; lifecycle, routing
+// and proxy locks remain held until Do commits or rolls back.
+type admissionAuthorization struct {
+	captured                     bool
+	performance, native, expires sql.NullTime
+	evidence                     AdmissionEvidence
+}
+
+func (a admissionAuthorization) validate(ctx context.Context, tx *sql.Tx, q Request) error {
+	if !a.captured {
+		return conflict("admission authorization was not captured")
+	}
+	now, err := clockNow(ctx, tx)
+	if err != nil {
+		return err
+	}
+	for _, proof := range []sql.NullTime{a.performance, a.native} {
+		if !proof.Valid || proof.Time.After(now) || !proof.Time.After(now.Add(-time.Minute)) {
+			return conflict("admission runtime proof expired before commitment")
+		}
+	}
+	if a.expires.Valid && !a.expires.Time.After(now.Add(time.Duration(q.Minutes+5)*time.Minute)) {
+		return conflict("admission server lifetime expired before commitment")
+	}
+	if err = a.evidence.Eligible(now); err != nil {
+		return err
+	}
+	var count int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM residential_proxies WHERE proxy_id=ANY($1::uuid[]) AND enabled AND type='socks5' AND status='healthy' AND last_success_at>$2", pq.Array(a.evidence.Controls), now.Add(-3*time.Minute)).Scan(&count); err != nil {
+		return err
+	}
+	if count != 2 {
+		return conflict("admission controls expired before commitment")
+	}
+	return nil
 }

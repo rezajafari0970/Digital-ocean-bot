@@ -1,0 +1,181 @@
+{
+  "at": "2026-10-09T12:16:01.22462+00:00",
+  "profile": {
+    "id": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+    "state": "KEPT",
+    "version": 4,
+    "spec": {
+      "dns_mode": "tcp",
+      "buffer_kb": 64,
+      "fast_count": 13,
+      "fast_share": 80,
+      "max_rtt_ms": 3000,
+      "tcp_options": true,
+      "gateway_ipv4": true,
+      "tcp_fast_open": true,
+      "probe_timeout_ms": 3000,
+      "routing_strategy": "preserve",
+      "tcp_user_timeout_ms": 20000,
+      "keepalive_idle_seconds": 30,
+      "probe_interval_seconds": 10,
+      "keepalive_interval_seconds": 20
+    },
+    "duration_mode": "permanent",
+    "publish_scope": "fleet",
+    "tuning": {
+      "id": "baaf6be8-59b3-4172-952a-76373e70ae01",
+      "phase": "RESTORED",
+      "before": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "panels": [
+        "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+        "71189d01-b247-4305-94ea-455fcfe30458"
+      ],
+      "reason": "operator cancelled",
+      "schema": 1,
+      "assigned": true,
+      "deadline": "2026-10-09T07:49:41.910529Z",
+      "rejected": false,
+      "candidate": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 3,
+        "fast_share": 90,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "base_version": 1,
+      "base_revision": 598,
+      "restore_scope": "selected"
+    }
+  },
+  "panel": {
+    "identity": "89689239456dac565a4f67f02eb15f63",
+    "id": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+    "owner": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+    "config": {
+      "dns_mode": "tcp",
+      "buffer_kb": 64,
+      "fast_count": 13,
+      "fast_share": 80,
+      "max_rtt_ms": 3000,
+      "tcp_options": true,
+      "gateway_ipv4": true,
+      "tcp_fast_open": true,
+      "probe_timeout_ms": 3000,
+      "routing_strategy": "preserve",
+      "tcp_user_timeout_ms": 20000,
+      "keepalive_idle_seconds": 30,
+      "probe_interval_seconds": 10,
+      "keepalive_interval_seconds": 20
+    },
+    "generation": 3,
+    "applied_generation": 3,
+    "verified_at": "2026-10-09T12:15:54.019033+00:00",
+    "native_generation": 3,
+    "native_verified_at": "2026-10-09T12:15:54.019033+00:00",
+    "native_revision": 598,
+    "plan_hash": "7e9e0d19d3ee4ff7bfc21db2b3205077a33b44b0c37ba8760eab712da9fb94f4",
+    "state": "APPLIED",
+    "server_state": "READY",
+    "expires_at": "2026-10-09T14:04:15.044819+00:00",
+    "enabled": true,
+    "account_active": true
+  },
+  "assignments": [
+    {
+      "panel_id": "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+      "owner": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "config": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "generation": 3
+    },
+    {
+      "panel_id": "075f3b4d-6238-40ad-a324-0b9b14468e90",
+      "owner": "38f9c98e-0acb-4f95-8639-8e65087edce0",
+      "config": {
+        "dns_mode": "tcp",
+        "buffer_kb": 64,
+        "fast_count": 13,
+        "fast_share": 80,
+        "max_rtt_ms": 3000,
+        "tcp_options": true,
+        "gateway_ipv4": true,
+        "tcp_fast_open": true,
+        "probe_timeout_ms": 3000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "generation": 1
+    }
+  ],
+  "invariants": {
+    "routing": {
+      "enabled": true,
+      "fleet": true,
+      "panel_ids": [],
+      "revision": 598
+    },
+    "protection": {
+      "enabled": false,
+      "scope": "fleet",
+      "revision": 31
+    },
+    "global": "5f4ed5a1ba5623728a64a88d95aeb823",
+    "profiles": "7b682e49993c0ce5c6cd4c8096ec8d5d",
+    "proxy_versions": {
+      "1f56f129-9557-4696-8338-6cf018efda26": 1,
+      "343e38f3-e7cf-48fc-b478-c5c9e1f94b82": 1,
+      "34c702d8-2425-4c1e-89b3-727b7969474b": 1,
+      "35dc6378-d9b8-4183-9b64-86dbc5d6c34d": 1,
+      "57834995-9db9-453f-a11d-8a61b15e4180": 1,
+      "8652799c-7d5a-4a9a-8d86-7d1f519b31dc": 1,
+      "a286d129-0df7-423d-be58-8641b6e33d67": 1,
+      "b51406c1-2e34-4145-b961-d8a34d1d11f6": 1,
+      "d4059313-96ce-4414-ab15-f742edb5be31": 1,
+      "e55578f8-c734-420f-801c-3ab96274490a": 1,
+      "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 1,
+      "f9d1b979-53ad-4ff3-8c37-551e2003c2d1": 1
+    }
+  },
+  "latest_receipt": "e2abb6bc-abfb-45df-9df4-896ee9a27b5d"
+}
