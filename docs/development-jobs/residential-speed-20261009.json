@@ -14,9 +14,21 @@
     "internal/panels/residentialsync/execute.go",
     "internal/panels/residentialsync/tuning_proof_test.go",
     "deploy/service-topology.sh",
-    "docs/RESIDENTIAL_SPEED_DESIGN_20261009.md"
+    "docs/RESIDENTIAL_SPEED_DESIGN_20261009.md",
+    "docs/RESIDENTIAL_SPEED_ACCEPTANCE_20261009.json",
+    "docs/RESIDENTIAL_SPEED_STATUS_FA_20261009.md",
+    "HANDOFF.md"
   ],
   "rollback_commit": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
   "ai_council": true,
-  "push": true
+  "push": true,
+  "status": "PARTIAL_SERVER_CAPABILITY_COMPLETE_PERFORMANCE_CANDIDATE_REJECTED",
+  "runtime_commit": "98bcb7e043cd982a8a5e01070b6fcf7080390d69",
+  "acceptance_report": "docs/RESIDENTIAL_SPEED_ACCEPTANCE_20261009.json",
+  "next_phase": [
+    "Target-specific residential health from each VPS, bounded hysteresis/circuit plan preserving native fail-closed and stable fingerprints",
+    "Resolve or replace the specific failing upstream endpoints after verification; avoid quarantining merely from generic ping or one transient sample",
+    "Obtain app SDK source/version and load/show/impression traces; inspect preloading, expiration and rendering separately",
+    "Physical-client latency baseline and path/location selection within existing range/quota constraints"
+  ]
 }

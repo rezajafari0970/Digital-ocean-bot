@@ -1,0 +1,691 @@
+{
+  "schema": 1,
+  "at": "2026-10-09T07:50:16.186259+00:00",
+  "status": "PARTIAL_SERVER_CAPABILITY_COMPLETE_PERFORMANCE_CANDIDATE_REJECTED",
+  "runtime_commit": "98bcb7e043cd982a8a5e01070b6fcf7080390d69",
+  "runtime_rollback_commit": "65f89e432b906fc684b2f84dc2cf07dded2cd66b",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "measurement and diagnosis",
+      "status": "COMPLETE",
+      "scope": "control-host real VLESS/Reality, not physical Android"
+    },
+    {
+      "phase": 2,
+      "name": "supported selected trials and durable recovery",
+      "status": "COMPLETE_DEPLOYED",
+      "gates": [
+        "independent review PASS",
+        "full-release exit0",
+        "release-race2 exit0",
+        "vet-release exit0",
+        "native-final26.9.9 exit0",
+        "native-old-final26.3.27 exit0"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "performance acceptance and safe restoration",
+      "status": "COMPLETE_REJECTED_AND_RESTORED",
+      "fleet_publication": false
+    }
+  ],
+  "canary": {
+    "id": "baaf6be8-59b3-4172-952a-76373e70ae01",
+    "panels": [
+      "4dd711d3-00fe-4003-bcbf-51a2a4396e4b",
+      "71189d01-b247-4305-94ea-455fcfe30458"
+    ],
+    "deadline": "2026-10-09T07:49:41.910529Z",
+    "phase": "RESTORED",
+    "version": 4,
+    "candidate": {
+      "fast_count": 3,
+      "fast_share": 90
+    },
+    "current_parent": {
+      "fast_count": 13,
+      "fast_share": 80
+    },
+    "native_fast_all_counts_before_and_restored": [
+      12,
+      12
+    ],
+    "native_fast_all_counts_candidate": [
+      3,
+      12
+    ],
+    "other_spec_fields_unchanged": true,
+    "benchmark_passed": false,
+    "native_failure_rejected_flag": false,
+    "exact_restore_verified": true,
+    "unselected_surviving_assignments_unchanged": true
+  },
+  "comparison": {
+    "at": "2026-10-09T07:41:00.537127+00:00",
+    "phase": "candidate",
+    "passed": false,
+    "pooled_median_improvement_fraction": 0.20894367035088401,
+    "reasons": [
+      "do/DIRECT/probe-http: probe tail regression",
+      "vultr/RESIDENTIAL/ads-js: insufficient asset successes",
+      "vultr/RESIDENTIAL/gpt-js: increased asset failures",
+      "vultr/RESIDENTIAL/gpt-js: asset tail regression"
+    ],
+    "rows": [
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "probe-https",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 55.3245,
+          "p90_ms": 134.90099999999998
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 50.43300000000001,
+          "p90_ms": 55.804
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "probe-http",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 40.760999999999996,
+          "p90_ms": 46.001
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 35.326,
+          "p90_ms": 121.81500000000001
+        },
+        "rejections": [
+          "probe tail regression"
+        ]
+      },
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "ads-js",
+        "before": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 86.91900000000001,
+          "p90_ms": 109.167
+        },
+        "after": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 84.294,
+          "p90_ms": 106.962
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "gpt-js",
+        "before": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 75.023,
+          "p90_ms": 87.852
+        },
+        "after": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 82.83149999999999,
+          "p90_ms": 103.37100000000001
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "ads-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 90.5355,
+          "p90_ms": 117.41699999999999
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 90.605,
+          "p90_ms": 98.40599999999999
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "DIRECT",
+        "case": "gpt-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 87.953,
+          "p90_ms": 93.38000000000001
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 83.294,
+          "p90_ms": 112.11200000000001
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "probe-https",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 52.464999999999996,
+          "p90_ms": 140.029
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 52.650000000000006,
+          "p90_ms": 68.98899999999999
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "probe-http",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 35.8595,
+          "p90_ms": 71.565
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 34.8565,
+          "p90_ms": 45.14
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "ads-js",
+        "before": {
+          "n": 12,
+          "failed": 2,
+          "median_ms": 3516.017,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 12,
+          "failed": 2,
+          "median_ms": 1305.9869999999999,
+          "p90_ms": 12000
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "gpt-js",
+        "before": {
+          "n": 12,
+          "failed": 2,
+          "median_ms": 2991.0955,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 12,
+          "failed": 1,
+          "median_ms": 1228.2235,
+          "p90_ms": 3104.965
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "ads-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 2,
+          "median_ms": 4229.463,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1257.608,
+          "p90_ms": 1740.5729999999999
+        },
+        "rejections": []
+      },
+      {
+        "panel": "do",
+        "class": "RESIDENTIAL",
+        "case": "gpt-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 1,
+          "median_ms": 4714.724,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1410.7785,
+          "p90_ms": 1741.438
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "probe-https",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 958.2395000000001,
+          "p90_ms": 1020.6729999999999
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 942.31,
+          "p90_ms": 1030.507
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "probe-http",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 707.527,
+          "p90_ms": 760.595
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 686.8340000000001,
+          "p90_ms": 737.168
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "ads-js",
+        "before": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 1744.7455,
+          "p90_ms": 1817.277
+        },
+        "after": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 1705.9465,
+          "p90_ms": 1823.1660000000002
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "gpt-js",
+        "before": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 1625.5315,
+          "p90_ms": 1699.237
+        },
+        "after": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 1627.9375,
+          "p90_ms": 1662.197
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "ads-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1733.6905000000002,
+          "p90_ms": 1828.787
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1696.6119999999999,
+          "p90_ms": 1785.136
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "DIRECT",
+        "case": "gpt-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1567.6335,
+          "p90_ms": 1653.027
+        },
+        "after": {
+          "n": 6,
+          "failed": 0,
+          "median_ms": 1642.913,
+          "p90_ms": 1679.232
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "probe-https",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 964.4865,
+          "p90_ms": 1008.616
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 959.3834999999999,
+          "p90_ms": 1007.416
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "probe-http",
+        "before": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 702.015,
+          "p90_ms": 754.9979999999999
+        },
+        "after": {
+          "n": 8,
+          "failed": 0,
+          "median_ms": 691.7515000000001,
+          "p90_ms": 753.2299999999999
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "ads-js",
+        "before": {
+          "n": 12,
+          "failed": 3,
+          "median_ms": 4297.2255000000005,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 12,
+          "failed": 3,
+          "median_ms": 3338.4339999999997,
+          "p90_ms": 12000
+        },
+        "rejections": [
+          "insufficient asset successes"
+        ]
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "gpt-js",
+        "before": {
+          "n": 12,
+          "failed": 0,
+          "median_ms": 3690.643,
+          "p90_ms": 4377.586
+        },
+        "after": {
+          "n": 12,
+          "failed": 2,
+          "median_ms": 3177.462,
+          "p90_ms": 12000
+        },
+        "rejections": [
+          "increased asset failures",
+          "asset tail regression"
+        ]
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "ads-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 1,
+          "median_ms": 4155.0065,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 6,
+          "failed": 1,
+          "median_ms": 4003.264,
+          "p90_ms": 12000
+        },
+        "rejections": []
+      },
+      {
+        "panel": "vultr",
+        "class": "RESIDENTIAL",
+        "case": "gpt-js-concurrent2",
+        "before": {
+          "n": 6,
+          "failed": 3,
+          "median_ms": 7700.2005,
+          "p90_ms": 12000
+        },
+        "after": {
+          "n": 6,
+          "failed": 1,
+          "median_ms": 3655.4619999999995,
+          "p90_ms": 12000
+        },
+        "rejections": []
+      }
+    ],
+    "scope": "controlhost realtransport only; failures assigned12s for quantiles; not liveadshowrate or physicalAndroid"
+  },
+  "proxy_matrix": {
+    "at": "2026-10-09T07:42:32.056986+00:00",
+    "origin": "controlhost directly through existing SOCKS endpoints, not per-VPS proof",
+    "proxies": 12,
+    "all_four_targets_passed": 9,
+    "failed": [
+      {
+        "proxy_id": "57834995-9db9-453f-a11d-8a61b15e4180",
+        "failures": [
+          {
+            "host": "pagead2.googlesyndication.com",
+            "http": "000",
+            "seconds": 0.374887,
+            "curl_code": 35,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "proxy_id": "b51406c1-2e34-4145-b961-d8a34d1d11f6",
+        "failures": [
+          {
+            "host": "pagead2.googlesyndication.com",
+            "http": "000",
+            "seconds": 0.365876,
+            "curl_code": 35,
+            "passed": false
+          },
+          {
+            "host": "securepubads.g.doubleclick.net",
+            "http": "000",
+            "seconds": 6.002222,
+            "curl_code": 28,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "proxy_id": "f9d1b979-53ad-4ff3-8c37-551e2003c2d1",
+        "failures": [
+          {
+            "host": "www.gstatic.com",
+            "http": "000",
+            "seconds": 6.002164,
+            "curl_code": 28,
+            "passed": false
+          },
+          {
+            "host": "browserleaks.com",
+            "http": "000",
+            "seconds": 6.001978,
+            "curl_code": 28,
+            "passed": false
+          },
+          {
+            "host": "pagead2.googlesyndication.com",
+            "http": "000",
+            "seconds": 6.002611,
+            "curl_code": 28,
+            "passed": false
+          },
+          {
+            "host": "securepubads.g.doubleclick.net",
+            "http": "000",
+            "seconds": 6.002321,
+            "curl_code": 28,
+            "passed": false
+          }
+        ]
+      }
+    ],
+    "health_caveat": "The three target-failing proxies were marked healthy in both the07:34 and07:47central snapshots; targetmatrix was07:42. These are not simultaneous probes and do not establish the upstream TLS refusal cause."
+  },
+  "final_validation": {
+    "fleet_at": "2026-10-09T07:45:57.800695+00:00",
+    "fleet_cohort": 30,
+    "fleet_native_passed": 30,
+    "traffic_at": "2026-10-09T07:44:09.862661+00:00",
+    "traffic_cases": 22,
+    "traffic_passed": true,
+    "readyz": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-09T07:47:33.710836098Z"
+    },
+    "services": {
+      "api": {
+        "ActiveState": "active",
+        "MainPID": "327732",
+        "NRestarts": "0",
+        "sha256": "84d67bf196502b855360bf8d5cf37fe554900efc752883f1332f1aab9141b82a",
+        "manifest_matches": true
+      },
+      "worker": {
+        "ActiveState": "active",
+        "MainPID": "327811",
+        "NRestarts": "0",
+        "sha256": "8efc839f6264ce55ba8c7738bca53da1dec9d30cec440bc4fd7fbf3f9e40781f",
+        "manifest_matches": true
+      },
+      "worker-panels": {
+        "ActiveState": "active",
+        "MainPID": "327812",
+        "NRestarts": "0",
+        "sha256": "8efc839f6264ce55ba8c7738bca53da1dec9d30cec440bc4fd7fbf3f9e40781f",
+        "manifest_matches": true
+      }
+    },
+    "guardian": {
+      "enabled": false,
+      "scope": "fleet",
+      "revision": 31
+    },
+    "quota_policy_hashes_unchanged": true
+  },
+  "limits": [
+    "No physicalAndroid/v2rayNG device measurements",
+    "No app SDK source or load/show/impression telemetry",
+    "No show-rate or creative-quality improvement established",
+    "No sub10ms end-to-end guarantee",
+    "Original13/80 profile retained after rejected3/90 trial",
+    "Initial fleet harness invocation failed to build due working-directory resolution; explicit go-C retry executed native30/30; initial failure preserved"
+  ],
+  "next_phase": [
+    "Target-specific residential health from each VPS, bounded hysteresis/circuit plan preserving native fail-closed and stable fingerprints",
+    "Resolve or replace the specific failing upstream endpoints after verification; avoid quarantining merely from generic ping or one transient sample",
+    "Obtain app SDK source/version and load/show/impression traces; inspect preloading, expiration and rendering separately",
+    "Physical-client latency baseline and path/location selection within existing range/quota constraints"
+  ],
+  "evidence_directory": "/root/backups/dob-residential-speed-20261009",
+  "evidence_sha256": {
+    "measurement-policy.json": "364bf3d78724f5697cce5284d65c295633820116de22fa26eb628223cb07492f",
+    "before-deployment.json": "572913b3fde33f9e760be342d0ba1ef8d8ede8a4ec173d33c78befd04fcd619d",
+    "before-trial.json": "5fc00e1c15f943f5e7fa517913677e0f219b3318460e64efc65f975a344b8ccc",
+    "after-restoration.json": "2f6ea8afbbccf958e7c261d2ae7b1ece164da31173824632db4083ba5c1a59d1",
+    "candidate-comparison.json": "9c03187c07aad0f5f7afe6259a2302b1098a756afb3d921c2f24586abf24bbb9",
+    "candidate-phase-after.json": "112040190fd4ec51226b1e6453a83bed820e96b9d3fee9b3bf6c098fcbaa8048",
+    "candidate-native-ready.json": "994baa4b8fecbe6381eb10f77a1f48bb15aae0c3f02e91c2cfbd201c095ff4c8",
+    "proxy-matrix.json": "b336266c76139c56dbf4f43a27cade2c06be1e011c17c40200ea8f078c1c8afc",
+    "fleet-native-final.json": "4df0743745e2b5cdc6601718c7908aa5e7f89de9e3ec28fdd83a19e6489f533e",
+    "traffic-final-do.json": "137d8eba2df8e53640b3c0a9e8f6d27c4b20d29f3ab221ef47bf0402bbc21ecd",
+    "final-snapshot.json": "a23827499c8ec2bba309fd257d3403ac58f7d30d5847f5676fd3d9a2b1a64a7c",
+    "review-close.json": "67299ee8010bc18439c086066efafdba35fa85e5cacb96ea644b613279bef996",
+    "review-close-source.json": "98d13f7da27a82a008ecfc03ee4b1ce17272b78ae55380eac503f646fef1c7a7",
+    "gates.json": "7400cc8628d9b9b3407a30069ccc690c1a4ca9efdcca241969d3f5481248cd0f",
+    "deployment.json": "6c3685a1313abde901352aa42d569126e04c50c7a75846ad2db0f584b17dcd17",
+    "canary-request.json": "368f481163f2d382976767db256fc428e4104fb4cbcd54f45977de54cc99307c",
+    "canary-response.json": "ea912fa3d11d7439f229f1600b20e4948f0dc02829186df4abc0944ab881d84d",
+    "rejected-canary-response.json": "4cd7c50b43a2dd0a2b5ee9bd3a22590dff9c9ffef8cb2a2d084e787bc0a005a2"
+  },
+  "assistant_continues_after_final_reply": false
+}

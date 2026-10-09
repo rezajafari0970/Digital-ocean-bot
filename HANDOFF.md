@@ -1,3 +1,13 @@
+# Latest checkpoint — residential speed, 2026-10-09
+
+Runtime and reviewed product commit: **98bcb7e043cd982a8a5e01070b6fcf7080390d69**. Read `docs/RESIDENTIAL_SPEED_ACCEPTANCE_20261009.json` and `docs/RESIDENTIAL_SPEED_STATUS_FA_20261009.md` before continuing.
+
+The 3/90 two-panel performance trial was **rejected by predeclared transport acceptance** and restored exactly to parent13/80. Parent id38f9c98e-0acb-4f95-8639-8e65087edce0 version4; tuning baaf6be8-59b3-4172-952a-76373e70ae01 phaseRESTORED. No fleet publication. New supported timed tuning/recovery capability remains deployed. Do not confuse lower median static-file latency (20.9%) with accepted fleet performance or app show-rate. Three of12 upstreams failed specific targets despite generic healthy snapshots. Raw evidence: /root/backups/dob-residential-speed-20261009. Final native30/30cohort, realtraffic22/22DO,ready5/5. Guardianfalse/fleet/rev31unchanged. Prior runtime65f89e4 backup location is in runtime-backup-path.txt; never downgrade while a future tuning phase is TESTING/PUBLISHING/RESTORING.
+
+Next: destination-specific upstream health/reliability with safe rollout, and actual app SDK source/telemetry plus physicalAndroid measurements. App code is absent here. No AI agent continues after the final response. Canonical detached-branch bootstrap mismatch remains a known bootstrap limitation; do not reset the dirty archive or claim100%READY.
+
+---
+
 # Latest continuation — residential client paths, 2026-10-09 Tehran
 
 Read `docs/RESIDENTIAL_CLIENT_PATHS_ACCEPTANCE_20261009.json` and `docs/RESIDENTIAL_CLIENT_PATHS_STATUS_FA_20261009.md` first. Runtime **65f89e4** is deployed. Exact client probes use direct VPS egress; bounded parsed TCP/UDP DNS and default Cloudflare DoH restored. Ads/BrowserLeaks remain exclusively residential and all other payload default-deny. Independent review/full regression/race/vet/both real-core versions/pinned435 rollback passed. Canary22/22 and finalrepeat13/13 passed; final serving cohort30/30 native routes and APPLIED. All runtime hashes/readiness5/5 verified.
