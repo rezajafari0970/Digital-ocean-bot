@@ -1,5 +1,10 @@
 # Development Ready Handoff
 
+## Latest checkpoint — 2026-10-10 relay/SOCKS operational acceptance (with known limitations)
+
+User explicitly paused additional remediation and accepted current deployed relay/SOCKS capability as Production with known limitations. Runtime source/binaries 559c865452ece4f0908a5f01fb32299248a85e1e; API and worker active; no deployment or safety-gate change. Independent OpenAI API review resp_09c7d79b9058304d006ac980d22d9087d194ca09f3e6cbafbc returned REVISE, **not** technical PASS. Remaining evidence: live failover, zero-healthy windows, 23 selected/unapplied paths and mutation gate success. Details: docs/RELAY_PRODUCTION_ACCEPTANCE_20261010.json. Resume only on explicit user request; do not silently restart tests or production mutations.
+
+
 ## Current frontier — proxy separation audited; consumption attribution remains open
 Read PROXY_SEPARATION_AUDIT_20261008.md/JSON and SOURCE_SNAPSHOT/BRAIN_DELTA. No product/runtime/credential/gate/quota/lifetime/route change in this audit. Source2c2f904 differs from active productbf2d6da only in documentation; API/control/panels keep original PIDs and zero restarts.
 

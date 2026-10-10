@@ -1,0 +1,37 @@
+{
+  "updated_at_utc": "2026-10-10T00:06:28.347694+00:00",
+  "scope": "relay/SOCKS production acceptance and handoff only",
+  "runtime_revision": "559c865452ece4f0908a5f01fb32299248a85e1e",
+  "production_operational_status": "PRODUCTION_ACCEPTED_BY_USER_WITH_KNOWN_LIMITATIONS",
+  "technical_acceptance": "REVISE",
+  "review_response_id": "resp_09c7d79b9058304d006ac980d22d9087d194ca09f3e6cbafbc",
+  "work_paused": true,
+  "production_services_preserved": true,
+  "pending_proofs": [
+    "live failover proof",
+    "zero healthy intervals",
+    "23 selected unapplied relay assignments",
+    "mutation execution proof"
+  ],
+  "review_blockers": [
+    {
+      "issue": "Live failover behavior is unverified",
+      "risk": "Selected and applied paths can remain selected while unhealthy, and it has not been demonstrated that the running Xray balancer excludes them, moves traffic to a healthy path, or avoids the blackhole fallback while healthy alternatives exist."
+    },
+    {
+      "issue": "Production health evidence is incomplete and contains zero-capacity intervals",
+      "risk": "The prior 900-second monitor was unfinished and recorded zero_healthy=2. Therefore, continuous healthy-path availability has not been established."
+    },
+    {
+      "issue": "A receiver has not converged",
+      "risk": "It has 23 selected but not applied assignments, including 7 donors expiring within 3 minutes. Those donors violate the greater-than-5-minute health threshold and the greater-than-10-minute new-proxy threshold, creating stale-assignment, capacity, and expiry-race risk unless this receiver is conclusively isolated from traffic."
+    },
+    {
+      "issue": "Mutation execution reliability is not established",
+      "risk": "The mutation gate is enabled and the kill switch is off, but the available history includes EXECUTOR_INTERNAL_FAILURE. With concurrency=1, a blocked or failing executor could delay all corrective mutations."
+    }
+  ],
+  "canonical_branch": "checkpoint/final-e2e-20260929",
+  "release_branch": "feat/relay-resilience-20261010",
+  "warning": "Do not mistake user operational acceptance for technical PASS. Do not change production runtime, gates or routing solely to synchronize docs."
+}
