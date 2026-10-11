@@ -15,17 +15,28 @@ async function refreshResidentialPerformance(){
   const names=new Map(d.panels.map(p=>[p.id,p.label])),targets=e?.targets||[],assigned=new Set(targets.map(t=>t.panel_id));
   const waiting=e?.inherits_future?d.panels.filter(p=>p.experiment_id!==e.id).length:0;
   const verified=e?.counts?.verified??targets.filter(t=>t.state==='APPLIED'&&t.verified).length,total=e?.counts?.total??targets.length;
-  const title=e?.state==='KEPT'?(e.inherits_future?'PUBLISHED · All current and future servers':'PERMANENT · Selected servers'):e?.state;
+  const tuning=e?.active_tuning,progress=e?.tuning_progress;
+  const phaseTitle={TESTING:'TESTING · Candidate settings',PUBLISHING:'PUBLISHING · Awaiting verification',RESTORING:'RESTORING · Previous settings pending verification'};
+  const title=phaseTitle[tuning?.phase]||(e?.state==='KEPT'?(e.inherits_future?'PUBLISHED · All current and future servers':'PERMANENT · Selected servers'):e?.state);
+  const tuningDetail=tuning?'<div role="status" class="performanceRecovery"><p><strong>Speed tuning: '+esc(tuning.phase)+'</strong>'+ (tuning.reason?' · '+esc(tuning.reason):'')+'</p>'+
+   (tuning.phase==='TESTING'?'<p>Trial deadline: '+esc(new Date(tuning.deadline).toLocaleString())+'</p>':'')+
+   (progress?'<p>'+esc(progress.verified)+' / '+esc(progress.surviving)+' surviving panels freshly verified · '+esc(progress.pending)+' pending · '+esc(progress.non_serving)+' no longer serving</p>'+
+    (progress.credential_blocked?'<p class="error">'+esc(progress.credential_blocked)+' panels have invalid provider credentials. Repair those account credentials so deletion can be verified; pending recovery records remain preserved.</p>':'')+
+    (progress.missing_targets?'<p class="error">'+esc(progress.missing_targets)+' assignments have missing recovery records.</p>':''):'')+
+   (tuning.failure?'<p>First failure: '+esc(tuning.failure.stage)+' · panel '+esc(tuning.failure.panel_id)+' · generation '+esc(tuning.failure.generation)+' · '+esc(new Date(tuning.failure.at).toLocaleString())+'</p>':tuning.reason==='runtime verification failed'?'<p class="muted">The older version did not record which panel triggered recovery.</p>':'')+
+   (tuning.conflict?'<p class="error">'+esc(tuning.conflict)+'</p>':'')+
+   (tuning.phase==='RESTORING'?'<p>Previous settings are requested. Recovery completes only after every surviving obligation verifies or its server is confirmed deleted.</p>':'')+'</div>':'';
   slot.innerHTML='<h3>Performance & rollback</h3><p class="muted">Publish shared server settings for existing and future users. Choose selected servers or all current and future servers. Permanent publication has no automatic rollback timer.</p>'+
    (d.routing_enabled?'':'<p class="error">Routing is paused. Publication and rollback stay queued until routing execution resumes.</p>')+
    '<div class="cardActions"><button data-performance="start" '+(active?'disabled':'')+'>Publish settings</button>'+
    (e?.state==='RUNNING'?'<button data-performance="keep" '+(e.can_keep?'':'disabled')+'>Keep verified settings</button><button class="ghost" data-performance="promote" '+(e.can_keep?'':'disabled')+'>Add test servers</button>':'')+
    (e&&['RUNNING','KEPT'].includes(e.state)&&!e.inherits_future?'<button data-performance="publish">Publish to all current & future servers</button>':'')+
    (e&&['RUNNING','KEPT','ROLLING_BACK'].includes(e.state)?'<button class="danger" data-performance="rollback" '+(e.state==='ROLLING_BACK'?'disabled':'')+'>'+(e.state==='ROLLING_BACK'?'Rollback pending…':'Rollback all settings')+'</button>':'')+'</div>'+
+   tuningDetail+
    (e?'<p role="status"><strong>'+esc(title)+'</strong> · '+(e.state==='RUNNING'?'Auto rollback: '+esc(new Date(e.deadline).toLocaleString()):e.state==='KEPT'?'No expiry · Manual rollback available':esc(e.reason||''))+'</p>'+
     '<p class="muted">'+esc(e.config.fast_share)+'% fast group · '+esc(e.config.fast_count||'auto')+' paths · '+esc(e.config.dns_mode.toUpperCase())+' DNS'+(e.state==='KEPT'||e.state==='RUNNING'?' · '+verified+' freshly verified / '+total+' assigned'+(e?.counts?.retired?' · '+e.counts.retired+' retired':'')+(waiting?' · '+waiting+' awaiting assignment':''):'')+'</p>'+
     (e.inherits_future?'<p>New servers inherit this profile automatically. Rollback stops inheritance and restores every server assigned to this publication.</p>':'')+
-    '<details><summary>Server results ('+targets.length+' shown / '+total+')</summary><div class="tableWrap"><table class="table"><thead><tr><th>Server</th><th>Result</th><th>Detail</th></tr></thead><tbody>'+targets.map(t=>'<tr><td>'+esc(names.get(t.panel_id)||t.panel_id)+'</td><td>'+esc(t.state==='APPLIED'&&!t.verified?'VERIFYING':t.state)+'</td><td>'+esc(t.error||'')+'</td></tr>').join('')+'</tbody></table></div></details>':'<p class="muted">No performance profile has been published.</p>')+
+    '<details><summary>Server results ('+targets.length+' shown / '+total+')</summary><div class="tableWrap"><table class="table"><thead><tr><th>Server</th><th>Result</th><th>Detail</th></tr></thead><tbody>'+targets.map(t=>'<tr><td>'+esc(names.get(t.panel_id)||t.panel_id)+'</td><td>'+esc(t.state==='APPLIED'&&!t.verified?'VERIFYING':t.state)+'</td><td>'+esc([t.error,t.server_state,t.provider_state].filter(Boolean).join(' · '))+'</td></tr>').join('')+'</tbody></table></div></details>':'<p class="muted">No performance profile has been published.</p>')+
    '<p class="muted">Unavailable servers remain pending. Rollback preserves current proxies and client identities. Roll back the current profile before publishing different settings.</p>';
  }catch(e){slot.textContent='Performance status unavailable: '+e.message}
 }

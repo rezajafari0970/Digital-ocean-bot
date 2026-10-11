@@ -463,6 +463,12 @@ func (s Store) AppliedTx(ctx context.Context, tx *sql.Tx, panel string, gen int6
 	return nil
 }
 func (s Store) Failed(ctx context.Context, panel string, gen int64, cause error) {
+	s.FailedAt(ctx, panel, gen, cause, "unspecified")
+}
+
+// FailedAt keeps the conservative rollback contract and adds bounded,
+// credential-free diagnostics for the exact failure that requested recovery.
+func (s Store) FailedAt(ctx context.Context, panel string, gen int64, cause error, stage string) {
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
 		return
@@ -485,7 +491,7 @@ func (s Store) Failed(ctx context.Context, panel string, gen int64, cause error)
 	if e != nil {
 		return
 	}
-	if e = tuningFailure(ctx, tx, id, panel, gen); e != nil {
+	if e = tuningFailure(ctx, tx, id, panel, gen, stage); e != nil {
 		return
 	}
 	if count >= 3 {

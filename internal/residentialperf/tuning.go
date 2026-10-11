@@ -10,25 +10,33 @@ import (
 	"time"
 )
 
+type TuningFailure struct {
+	PanelID    string    `json:"panel_id"`
+	Generation int64     `json:"generation"`
+	Stage      string    `json:"stage"`
+	At         time.Time `json:"at"`
+}
+
 // Tuning is a latest-only recovery record. Starting another trial replaces the
 // previous publication's recovery point, only after all its assignments verify.
 type Tuning struct {
-	AdmissionPlan       string    `json:"admission_plan,omitempty"`
-	AdmissionEvidenceID string    `json:"admission_evidence_id,omitempty"`
-	Schema              int       `json:"schema"`
-	ID                  string    `json:"id"`
-	Phase               string    `json:"phase"`
-	Before              Config    `json:"before"`
-	Candidate           Config    `json:"candidate"`
-	Panels              []string  `json:"panels"`
-	Deadline            time.Time `json:"deadline"`
-	BaseVersion         int64     `json:"base_version"`
-	BaseRevision        int64     `json:"base_revision"`
-	RestoreScope        string    `json:"restore_scope,omitempty"`
-	Assigned            bool      `json:"assigned"`
-	Rejected            bool      `json:"rejected"`
-	Reason              string    `json:"reason,omitempty"`
-	Conflict            string    `json:"conflict,omitempty"`
+	Failure             *TuningFailure `json:"failure,omitempty"`
+	AdmissionPlan       string         `json:"admission_plan,omitempty"`
+	AdmissionEvidenceID string         `json:"admission_evidence_id,omitempty"`
+	Schema              int            `json:"schema"`
+	ID                  string         `json:"id"`
+	Phase               string         `json:"phase"`
+	Before              Config         `json:"before"`
+	Candidate           Config         `json:"candidate"`
+	Panels              []string       `json:"panels"`
+	Deadline            time.Time      `json:"deadline"`
+	BaseVersion         int64          `json:"base_version"`
+	BaseRevision        int64          `json:"base_revision"`
+	RestoreScope        string         `json:"restore_scope,omitempty"`
+	Assigned            bool           `json:"assigned"`
+	Rejected            bool           `json:"rejected"`
+	Reason              string         `json:"reason,omitempty"`
+	Conflict            string         `json:"conflict,omitempty"`
 }
 
 func tuningBusy(t *Tuning) bool {
@@ -399,6 +407,19 @@ func tuneAction(ctx context.Context, tx *sql.Tx, q Request, state string, versio
 		if !now.Before(t.Deadline.Add(-time.Minute)) {
 			return conflict("publication cutoff reached; cancel or wait for restoration")
 		}
+		// Do not turn a known unverified baseline into fleet-wide candidate
+		// assignments. The canary and its timed recovery remain unchanged on rejection.
+		var unverified bool
+		e = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM residential_performance_targets t
+ LEFT JOIN residential_performance_panels p ON p.panel_id=t.panel_id
+ LEFT JOIN panel_routing_state r ON r.panel_id=t.panel_id CROSS JOIN residential_routing_control c
+ WHERE t.experiment_id=$1 AND `+tuningLive+` AND NOT COALESCE((`+tuningFresh+`),false))`, q.ExperimentID).Scan(&unverified)
+		if e != nil {
+			return e
+		}
+		if unverified {
+			return conflict("fleet publication requires fresh runtime proof for every surviving assignment; restore unavailable panels or confirm their deletion first")
+		}
 		if e = tuningAssign(ctx, tx, q.ExperimentID, t, t.Candidate, false); e != nil {
 			return e
 		}
@@ -533,7 +554,7 @@ func (s Store) tickTuning(ctx context.Context) error {
 	}
 	return tx.Commit()
 }
-func tuningFailure(ctx context.Context, tx *sql.Tx, id, panel string, gen int64) error {
+func tuningFailure(ctx context.Context, tx *sql.Tx, id, panel string, gen int64, stage string) error {
 	t, e := loadTuning(ctx, tx, id)
 	if e != nil || t == nil {
 		return e
@@ -552,6 +573,11 @@ func tuningFailure(ctx context.Context, tx *sql.Tx, id, panel string, gen int64)
 	if t.Phase == "PUBLISHING" {
 		scope = "fleet"
 	}
+	at, e := clockNow(ctx, tx)
+	if e != nil {
+		return e
+	}
+	t.Failure = &TuningFailure{PanelID: panel, Generation: gen, Stage: failureStage(stage), At: at}
 	t.Rejected = true
 	tuningRestoreIntent(t, scope, "runtime verification failed")
 	return saveTuning(ctx, tx, id, t)

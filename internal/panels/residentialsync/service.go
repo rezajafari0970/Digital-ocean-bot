@@ -164,12 +164,13 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		return err
 	}
 	perf := residentialperf.Store{DB: s.DB}
+	failureStage := "client_inventory"
 	if p.PerformanceGeneration > 0 {
 		defer func() {
 			if retErr != nil {
 				c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 				defer cancel()
-				perf.Failed(c, panel, p.PerformanceGeneration, retErr)
+				perf.FailedAt(c, panel, p.PerformanceGeneration, retErr, failureStage)
 			}
 		}()
 	}
@@ -218,11 +219,13 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
+	failureStage = "panel_snapshot"
 	rt.Session.Invalidate()
 	raws, err := rt.Session.Snapshot(ctx)
 	if err != nil {
 		return err
 	}
+	failureStage = "client_inventory"
 	if p.AdsOnly && p.Residential && (p.Harden || p.Configured > 0) {
 		if err = validateAdSniffing(raws, p.StrictAllowlist); err != nil {
 			if !p.Harden {
@@ -237,10 +240,12 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err != nil {
 		return err
 	}
+	failureStage = "settings_read"
 	current, testURL, err := readXraySetting(ctx, rt.Session.Exec)
 	if err != nil {
 		return err
 	}
+	failureStage = "ownership"
 	if p.PerformanceGeneration > 0 && (p.Performance != nil || p.PerformanceBaseline != nil) {
 		a, e := perf.Prepare(ctx, panel, p.PerformanceGeneration, residentialperf.Capture(current))
 		if e != nil {
@@ -248,6 +253,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		}
 		p.PerformanceBaseline = a.Baseline
 	}
+	failureStage = "plan"
 	desired, err := buildSettings(current, clients, tags, p)
 	if err != nil {
 		return err
@@ -263,6 +269,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		}
 	}
 
+	failureStage = "policy"
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
 	}
@@ -272,6 +279,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		}
 	}
 	// The executor always reads the template and running routes before a retry.
+	failureStage = "runtime_apply"
 	if err = applyAndVerify(ctx, rt.Session.Exec, current, desired, testURL, clients, tags, p, func() error {
 		if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
 			if e := perf.ValidateAdmissionAssignment(ctx, panel, p.PerformanceGeneration); e != nil {
@@ -293,6 +301,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}); err != nil {
 		return err
 	}
+	failureStage = "inventory_verify"
 	rt.Session.Invalidate()
 	// Membership may have changed through a panel operator while we held our lock.
 	after, err := rt.Session.Snapshot(ctx)
@@ -317,6 +326,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
 	}
+	failureStage = "receipt_commit"
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err

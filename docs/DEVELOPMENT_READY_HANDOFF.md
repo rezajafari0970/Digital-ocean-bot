@@ -1,3 +1,11 @@
+## 2026-10-11 09:54 Tehran — speed recovery prevention/diagnostics release prepared
+
+Project/config work only; Android app source is explicitly out of scope. Atomic all-survivor preflight added before tune_publish; conservative recovery gates preserved. First-trigger panel/generation/stage/time diagnostics and accurate RESTORING UI/progress added. Focused PostgreSQL, bounded relevant race, full general Go and Chromium/mobile gates PASS; exact-source API review PASS. See SPEED_RECOVERY_20261011.md and /root/backups/dob-speed-recovery-20261011/deployment.json for actual runtime release status.
+
+Existing tuning remains RESTORING on the 13/80 profile. Thirty-one unreachable surviving obligations are on Sara vul / Sara vul 2 (TOKEN_INVALID, disabled, deletion requested). No forced deletion, gate reset, stale-proof acceptance or 3/90 republish. No ad-speed gain claimed. Repair provider credentials via the account editor or obtain fresh matching panel verification; preserve unknown outcomes. Separate OpenAI API requests: 2; total tokens: 25,691.
+
+Canonical remains detached. The LOCAL checkpoint/final-e2e-20260929 branch is held by the dirty archive worktree at 6bb367f; do not move it. Publish to the fully qualified remote branch and fast-forward only canonical detached HEAD.
+
 ## Follow-up 2026-10-11 09:35 Tehran — candidate automatically restored
 
 This supersedes the historical 09:14 rollout receipt below. At 09:34:12 Tehran the experiment was version 8, phase RESTORING, rejected=true, reason `runtime verification failed`. Its latest update was 09:15:47 Tehran; fleet spec and all 45 currently active panel configurations were back to fast_count=13 / fast_share=80. All 45 had matching profile-generation receipts; routing states were 43 APPLIED and 2 APPLYING. RESTORING is not a completed recovery claim.
