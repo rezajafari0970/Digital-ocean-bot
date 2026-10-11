@@ -29,6 +29,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 	rows.Close()
 	for _, id := range ids {
 		maxAge := c.providerRefreshAge(ctx, id, maxAge)
+		// Publish the actual coordinator cadence for diagnostic evidence only.
+		// Pre-create checks retain their independent strict freshness limits.
+		intervalSeconds := min(300, max(1, int(maxAge/time.Second)))
+		if _, err := c.DB.ExecContext(ctx, "UPDATE accounts SET provider_inventory_interval_seconds=$2 WHERE id=$1 AND provider_inventory_interval_seconds<>$2", id, intervalSeconds); err != nil {
+			continue
+		}
 		var providerState, providerError string
 		var providerCheckedAt time.Time
 		_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt)
@@ -144,6 +150,7 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			} else if !providers.CanCreateCapacity(obs.Capacity) {
 				providerState = "cannot_create"
 			}
+			obs.Account.Condition = providers.AccountCondition(rt.Config.Provider, obs.Account, obs.Capacity)
 			canonical, _ := json.Marshal(obs)
 			var oldLimit int
 			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,(data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&oldLimit)

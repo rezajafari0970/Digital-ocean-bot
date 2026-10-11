@@ -15,15 +15,19 @@ func TestAccountPurgeWaitsForDurableRecoveryReconciliation(t *testing.T) {
 	ctx := context.Background()
 	f := newBootstrapFixture(t, db)
 	execBootstrap(t, db, "UPDATE accounts SET enabled=false,provider_state='LOCKED',deletion_requested_at=now()-interval '3 minutes',runtime_status='DELETE_PENDING' WHERE id=$1", f.d.AccountID)
+	confirmation, err := ReadAccountPurgeConfirmation(ctx, db, f.d.AccountID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	execBootstrap(t, db, "INSERT INTO worker_recovery_checkpoints(kind,item_id,account_id) VALUES('deployment',$1,$2)", f.d.ID, f.d.AccountID)
-	if err := PurgeSavedAccount(ctx, db, f.d.AccountID, "LOCKED", 1); !errors.Is(err, ErrAccountPurgeConflict) {
+	if err := PurgeSavedAccount(ctx, db, f.d.AccountID, "LOCKED", 1, confirmation); !errors.Is(err, ErrAccountPurgeConflict) {
 		t.Fatal("purge erased unresolved native evidence", err)
 	}
 	w := worker.Worker{Store: worker.RecoveryStore{DB: db}, Failures: worker.FailureStore{DB: db}, Handler: RecoveryHandler{Container: Container{DB: db}}}
 	if err := w.Once(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if err := PurgeSavedAccount(ctx, db, f.d.AccountID, "LOCKED", 1); err != nil {
+	if err := PurgeSavedAccount(ctx, db, f.d.AccountID, "LOCKED", 1, confirmation); err != nil {
 		t.Fatal(err)
 	}
 	var n int
@@ -172,7 +176,7 @@ func TestPurgeRejectsNoncanonicalIDBeforeAnyFence(t *testing.T) {
 	id := "43910BAB-130C-408C-8E16-F94613E87F50"
 	ctx := context.Background()
 	// Nil dependencies prove rejection precedes both DB access and native fencing.
-	if err := PurgeSavedAccount(ctx, nil, id, "LOCKED", 0); !errors.Is(err, ErrAccountPurgeConflict) {
+	if err := PurgeSavedAccount(ctx, nil, id, "LOCKED", 0, AccountPurgeConfirmation{}); !errors.Is(err, ErrAccountPurgeConflict) {
 		t.Fatal(err)
 	}
 	if err := lockAccountPurge(ctx, nil, id); !errors.Is(err, ErrAccountPurgeConflict) {

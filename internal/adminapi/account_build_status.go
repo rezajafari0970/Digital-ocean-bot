@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"strings"
 	"time"
 )
@@ -28,14 +29,14 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	var x accountBuildState
 	var runtimeStatus, stateDetail, errorState, errorDetail, provider, accountStatus, accountMessage string
 	var observedAt, snapshotAt sql.NullTime
-	var desired, managed, preCreate, ops int
+	var desired, managed, preCreate, ops, refreshSeconds int
 	var raw []byte
 	err := s.DB.QueryRowContext(ctx, `SELECT a.enabled,a.provider_state,COALESCE(a.provider_state_detail,''),COALESCE(a.provider_error_state,''),COALESCE(a.provider_error_detail,''),a.runtime_status,a.provider_checked_at,a.desired_server_count,
  (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
  (SELECT count(*) FROM deployments WHERE account_id=a.id AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
  (SELECT count(*) FROM operations WHERE account_id=a.id AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND state IN ('planned','running','verifying','unknown')),
- ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END
- FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &x.TrialCompatible, &x.TrialProxyCandidates)
+ ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.provider_inventory_interval_seconds,a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END
+ FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &refreshSeconds, &x.TrialCompatible, &x.TrialProxyCandidates)
 	if err != nil {
 		return x, err
 	}
@@ -73,6 +74,14 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	if snapshotAt.Valid {
 		x.CapacityFreshness = observationFreshness(snapshotAt.Time, time.Now())
 	}
+	// "scheduled" explicitly denotes evidence retained until the next planned
+	// read. It never passes the strict "fresh" mutation/readiness checks below.
+	if observedAt.Valid && x.ProviderFreshness != "fresh" && withinObservationSchedule(observedAt.Time, time.Now(), refreshSeconds) {
+		x.ProviderFreshness = "scheduled"
+	}
+	if snapshotAt.Valid && x.CapacityFreshness != "fresh" && withinObservationSchedule(snapshotAt.Time, time.Now(), refreshSeconds) {
+		x.CapacityFreshness = "scheduled"
+	}
 	x.State = strings.ToUpper(x.State)
 	x.Block, err = capacity.ReadCreateBlock(ctx, s.DB, id)
 	if err != nil {
@@ -90,6 +99,9 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	case accountStatus == "trial_restricted" && !x.TrialCompatible:
 		x.State = "TRIAL_RESTRICTED"
 		x.Reason = capacity.CreateBlockReason("TRIAL_FIREWALL")
+	case x.State == "ACTIVE" && errorState == "" && (x.CapacityFreshness == "fresh" || x.CapacityFreshness == "scheduled") && providers.AccountCondition(provider, providers.Account{Status: accountStatus, StatusMessage: accountMessage}, providers.Capacity{LimitKnown: c.LimitKnown, ComputeLimit: c.ComputeLimit, ComputeInUse: c.ComputeInUse}) == "CAPACITY_FULL":
+		x.State = "CANNOT_CREATE"
+		x.Reason = "Provider capacity is full. Existing servers remain usable; new builds wait for verified capacity released by the normal deletion lifecycle."
 	case accountStatus != "" && accountStatus != "active" && !(accountStatus == "trial_restricted" && x.TrialCompatible) && x.State == "ACTIVE" && errorState == "":
 		x.State = "PROVIDER_WARNING"
 		x.Reason = "Provider account status: " + accountStatus

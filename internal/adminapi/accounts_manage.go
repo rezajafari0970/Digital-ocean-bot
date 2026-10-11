@@ -346,6 +346,28 @@ func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
 	out := map[string]any{"requested_at": requested.Time, "attempts": attempts, "remaining_servers": remaining, "detail": detail, "provider_state": providerState,
 		"phase": phase, "server_now": now, "pending_operations": operations, "pending_deployments": deployments, "pending_keys": keys,
 		"local_purge_allowed": blocked && !now.Before(settleUntil)}
+	confirmation, confirmErr := app.ReadAccountPurgeConfirmation(ctx, s.DB, id)
+	if confirmErr == nil && confirmation.RequestedAt.Equal(requested.Time) {
+		out["resource_scope"] = confirmation.ResourceScope
+	} else {
+		out["local_purge_allowed"] = false
+	}
+	var localState, localDetail string
+	var localAttempts int
+	var localNext time.Time
+	if e := s.DB.QueryRowContext(ctx, "SELECT state,last_error,attempts,next_attempt_at FROM account_purge_requests WHERE account_id=$1", id).Scan(&localState, &localDetail, &localAttempts, &localNext); e == nil {
+		out["local_purge"] = map[string]any{"state": localState, "detail": localDetail, "attempts": localAttempts, "next_attempt_at": localNext}
+		if localState != "NEEDS_REVIEW" {
+			out["phase"] = "PURGE_PENDING"
+			out["detail"] = "Local system removal is saved and continues automatically. Cloud deletion remains unverified."
+			if localDetail != "" {
+				out["detail"] = localDetail
+			}
+			out["attempts"] = localAttempts
+			next = sql.NullTime{Time: localNext, Valid: true}
+			out["local_purge_allowed"] = false
+		}
+	}
 	if next.Valid {
 		out["next_attempt_at"] = next.Time
 	}
@@ -364,19 +386,21 @@ func (s *Server) purgeAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		AccountID     string `json:"account_id"`
-		ProviderState string `json:"expected_provider_state"`
-		Remaining     *int   `json:"expected_remaining_servers"`
-		Acknowledge   bool   `json:"acknowledge_cloud_resources_unverified"`
+		AccountID     string    `json:"account_id"`
+		ProviderState string    `json:"expected_provider_state"`
+		Remaining     *int      `json:"expected_remaining_servers"`
+		Acknowledge   bool      `json:"acknowledge_cloud_resources_unverified"`
+		RequestedAt   time.Time `json:"expected_deletion_requested_at"`
+		ResourceScope string    `json:"expected_resource_scope"`
 	}
 	id := r.PathValue("id")
-	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req) != nil || req.AccountID != id || req.Remaining == nil || *req.Remaining < 0 || !req.Acknowledge {
+	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req) != nil || req.AccountID != id || req.Remaining == nil || *req.Remaining < 0 || !req.Acknowledge || req.RequestedAt.IsZero() || len(req.ResourceScope) != 64 {
 		writeJSON(w, 400, map[string]string{"error": "explicit_local_purge_acknowledgement_required"})
 		return
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
-	err := app.PurgeSavedAccount(ctx, s.DB, id, req.ProviderState, *req.Remaining)
+	err := app.QueueSavedAccountPurge(ctx, s.DB, id, req.ProviderState, *req.Remaining, app.AccountPurgeConfirmation{RequestedAt: req.RequestedAt, ResourceScope: req.ResourceScope})
 	var pgerr *pq.Error
 	if errors.Is(err, context.DeadlineExceeded) || (errors.As(err, &pgerr) && (pgerr.Code == "55P03" || pgerr.Code == "57014")) {
 		w.Header().Set("Retry-After", "5")
@@ -389,6 +413,13 @@ func (s *Server) purgeAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		writeJSON(w, 500, errorBody())
+		return
+	}
+	fast, stop := context.WithTimeout(ctx, 2*time.Second)
+	err = app.PurgeSavedAccount(fast, s.DB, id, req.ProviderState, *req.Remaining, app.AccountPurgeConfirmation{RequestedAt: req.RequestedAt, ResourceScope: req.ResourceScope})
+	stop()
+	if err != nil {
+		writeJSON(w, http.StatusAccepted, map[string]any{"state": "PURGE_PENDING", "provider_deletion_verified": false, "detail": "Local removal request saved. Account-scoped cleanup continues automatically; cloud deletion remains unverified."})
 		return
 	}
 	writeJSON(w, 200, map[string]any{"state": "PURGED", "provider_deletion_verified": false, "detail": "Account and associated saved data deleted. Cloud resource deletion could not be verified; check the provider console."})

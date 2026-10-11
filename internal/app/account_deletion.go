@@ -20,9 +20,12 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 	// Also bound callers outside the periodic worker. Earlier deadlines win.
 	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel()
+	// One queued local purge and one provider cleanup get a chance per tick.
+	// A busy local account must not starve unrelated cloud deletion.
+	_, purgeErr := c.ProcessSavedAccountPurge(ctx)
 	id, release, err := c.claimAccountDeletion(ctx)
 	if err != nil || id == "" {
-		return err
+		return errors.Join(purgeErr, err)
 	}
 	defer release()
 	err = c.finishAccountDeletion(ctx, id)
@@ -61,7 +64,7 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 			return errors.Join(err, fmt.Errorf("persist deletion status: %w", saveErr))
 		}
 	}
-	return err
+	return errors.Join(purgeErr, err)
 }
 
 var errDeletionSettling = errors.New("waiting for in-flight account work to settle")

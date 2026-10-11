@@ -3,7 +3,7 @@ package adminapi
 import "time"
 
 func observationFreshness(at time.Time, now time.Time) string {
-	if at.IsZero() {
+	if at.IsZero() || at.After(now) {
 		return "never"
 	}
 	age := now.Sub(at)
@@ -14,4 +14,9 @@ func observationFreshness(at time.Time, now time.Time) string {
 		return "stale"
 	}
 	return "expired"
+}
+
+// Display-only grace is bounded to the real scheduler cadence plus one tick.
+func withinObservationSchedule(at, now time.Time, seconds int) bool {
+	return !at.IsZero() && !at.After(now) && seconds > 90 && seconds <= 300 && now.Sub(at) <= time.Duration(seconds+30)*time.Second
 }

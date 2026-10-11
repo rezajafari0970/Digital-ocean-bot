@@ -14,6 +14,7 @@ const (
 )
 
 type Account struct {
+	Condition     string `json:",omitempty"`
 	ID            string
 	Email         string
 	Status        string

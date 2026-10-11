@@ -56,7 +56,7 @@ func TestExplicitLocalAccountPurgeCascadesAndClosesScopedGates(t *testing.T) {
 	// A failed step must roll back every deletion and gate change.
 	sqlMust(t, db, "CREATE FUNCTION deny_purge() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fault'; END $$")
 	sqlMust(t, db, "CREATE TRIGGER injected_purge_fault BEFORE DELETE ON accounts FOR EACH ROW EXECUTE FUNCTION deny_purge()")
-	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1); err == nil {
+	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1, purgeConfirmation(t, db, a)); err == nil {
 		t.Fatal("fault hidden")
 	}
 	var n int
@@ -68,7 +68,7 @@ func TestExplicitLocalAccountPurgeCascadesAndClosesScopedGates(t *testing.T) {
 		t.Fatal("partial gate change", err)
 	}
 	sqlMust(t, db, "DROP TRIGGER injected_purge_fault ON accounts")
-	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1); err != nil {
+	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1, purgeConfirmation(t, db, a)); err != nil {
 		t.Fatal(err)
 	}
 	for _, table := range []string{"secrets", "account_deletion_jobs", "account_billing_snapshots", "droplets", "deployments", "panel_instances", "client_mutation_jobs"} {
@@ -111,7 +111,7 @@ func TestExplicitLocalAccountPurgeCascadesAndClosesScopedGates(t *testing.T) {
 	if err := db.QueryRow("SELECT count(*) FROM proxy_economy_policy WHERE NOT enabled AND canary_account_id IS NULL").Scan(&n); err != nil || n != 1 {
 		t.Fatal("canary widened", n, err)
 	}
-	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1); err != nil {
+	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1, purgeConfirmation(t, db, a)); err != nil {
 		t.Fatal("lost response replay", err)
 	}
 }
@@ -124,12 +124,12 @@ func TestLocalAccountPurgeRejectsStaleUnsafeAndRacingRequests(t *testing.T) {
 		state string
 		n     int
 	}{{"TOKEN_INVALID", 1}, {"LOCKED", 0}} {
-		if err := app.PurgeSavedAccount(ctx, db, a, tc.state, tc.n); !errors.Is(err, app.ErrAccountPurgeConflict) {
+		if err := app.PurgeSavedAccount(ctx, db, a, tc.state, tc.n, purgeConfirmation(t, db, a)); !errors.Is(err, app.ErrAccountPurgeConflict) {
 			t.Fatal(err)
 		}
 	}
 	sqlMust(t, db, "UPDATE accounts SET enabled=true WHERE id=$1", a)
-	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1); !errors.Is(err, app.ErrAccountPurgeConflict) {
+	if err := app.PurgeSavedAccount(ctx, db, a, "LOCKED", 1, purgeConfirmation(t, db, a)); !errors.Is(err, app.ErrAccountPurgeConflict) {
 		t.Fatal(err)
 	}
 	sqlMust(t, db, "UPDATE accounts SET enabled=false WHERE id=$1", a)
@@ -144,7 +144,7 @@ func TestLocalAccountPurgeRejectsStaleUnsafeAndRacingRequests(t *testing.T) {
 	}
 	c, cancel := context.WithTimeout(ctx, 150*time.Millisecond)
 	defer cancel()
-	if err = app.PurgeSavedAccount(c, db, a, "LOCKED", 1); err == nil {
+	if err = app.PurgeSavedAccount(c, db, a, "LOCKED", 1, purgeConfirmation(t, db, a)); err == nil {
 		t.Fatal("purge raced provider mutation")
 	}
 	var n int
@@ -162,7 +162,7 @@ func TestLocalPurgeAPIRequiresExplicitCloudAcknowledgement(t *testing.T) {
 		t.Fatal("deletion loses raw provider blocker", progress)
 	}
 	call := func(ack bool, role auth.Role) *httptest.ResponseRecorder {
-		raw, _ := json.Marshal(map[string]any{"account_id": a, "expected_provider_state": "LOCKED", "expected_remaining_servers": 1, "acknowledge_cloud_resources_unverified": ack})
+		raw, _ := json.Marshal(map[string]any{"account_id": a, "expected_provider_state": "LOCKED", "expected_remaining_servers": 1, "acknowledge_cloud_resources_unverified": ack, "expected_deletion_requested_at": progress["requested_at"], "expected_resource_scope": progress["resource_scope"]})
 		req := httptest.NewRequest("POST", "/api/v1/accounts/"+a+"/purge", strings.NewReader(string(raw)))
 		req.SetPathValue("id", a)
 		req = req.WithContext(context.WithValue(req.Context(), principalKey{}, auth.Principal{Role: role}))
@@ -173,8 +173,8 @@ func TestLocalPurgeAPIRequiresExplicitCloudAcknowledgement(t *testing.T) {
 	if w := call(false, auth.Admin); w.Code != 400 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	// A live provider mutation must return an actionable bounded conflict, with
-	// every saved row retained. It cannot be silently reported as success.
+	// A live mutation retains every saved row and returns a durable pending
+	// request. The worker completes it after the fence clears, without another click.
 	tx, err := db.Begin()
 	if err != nil {
 		t.Fatal(err)
@@ -183,13 +183,32 @@ func TestLocalPurgeAPIRequiresExplicitCloudAcknowledgement(t *testing.T) {
 	if _, err = tx.Exec("SELECT pg_advisory_xact_lock_shared(hashtextextended($1,0))", "account-mutation:"+a); err != nil {
 		t.Fatal(err)
 	}
-	if w := call(true, auth.Admin); w.Code != 409 || !strings.Contains(w.Body.String(), "account_cleanup_busy") || w.Header().Get("Retry-After") == "" {
+	if w := call(true, auth.Admin); w.Code != 202 || !strings.Contains(w.Body.String(), "PURGE_PENDING") {
 		t.Fatal(w.Code, w.Body.String())
+	}
+	var retained int
+	if err = db.QueryRow("SELECT count(*) FROM accounts WHERE id=$1", a).Scan(&retained); err != nil || retained != 1 {
+		t.Fatal("premature purge", retained, err)
 	}
 	if err = tx.Rollback(); err != nil {
 		t.Fatal(err)
 	}
+	if handled, e := (app.Container{DB: db}).ProcessSavedAccountPurge(context.Background()); e != nil || !handled {
+		t.Fatal("durable purge did not resume", handled, e)
+	}
+	if err = db.QueryRow("SELECT count(*) FROM accounts WHERE id=$1", a).Scan(&retained); err != nil || retained != 0 {
+		t.Fatal("worker did not remove account", retained, err)
+	}
 	if w := call(true, auth.Admin); w.Code != 200 || !strings.Contains(w.Body.String(), "\"provider_deletion_verified\":false") {
 		t.Fatal(w.Code, w.Body.String())
 	}
+}
+
+func purgeConfirmation(t *testing.T, db *sql.DB, id string) app.AccountPurgeConfirmation {
+	t.Helper()
+	c, err := app.ReadAccountPurgeConfirmation(context.Background(), db, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) && !errors.Is(err, app.ErrAccountPurgeConflict) {
+		t.Fatal(err)
+	}
+	return c
 }

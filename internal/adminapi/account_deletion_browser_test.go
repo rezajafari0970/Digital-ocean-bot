@@ -90,8 +90,31 @@ func TestBlockedAccountPurgeBrowser(t *testing.T) {
 	for _, id := range []string{a, other} {
 		sqlMust(t, db, "INSERT INTO network_profiles(id,account_id,mode) VALUES(gen_random_uuid(),$1,'direct')", id)
 	}
+	// A real scoped mutation fence forces the HTTP fast path into its durable
+	// queue. Completion is driven by the actual worker entrypoint after reload.
+	blocker, err := db.Conn(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer blocker.Close()
+	if _, err = blocker.ExecContext(context.Background(), "SELECT pg_advisory_lock_shared(hashtextextended($1,0))", "account-mutation:"+a); err != nil {
+		t.Fatal(err)
+	}
+	defer blocker.ExecContext(context.Background(), "SELECT pg_advisory_unlock_shared(hashtextextended($1,0))", "account-mutation:"+a)
 	s := Server{DB: db}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/system", s.system)
+	mux.HandleFunc("POST /__fixture/complete-purge", func(w http.ResponseWriter, r *http.Request) {
+		if _, e := blocker.ExecContext(r.Context(), "SELECT pg_advisory_unlock_shared(hashtextextended($1,0))", "account-mutation:"+a); e != nil {
+			http.Error(w, e.Error(), 500)
+			return
+		}
+		if handled, e := (app.Container{DB: db}).ProcessSavedAccountPurge(r.Context()); !handled || e != nil {
+			http.Error(w, "queued purge did not complete", 500)
+			return
+		}
+		writeJSON(w, 200, map[string]bool{"ok": true})
+	})
 	var attempts atomic.Int32
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../../web/static"))))
 	mux.HandleFunc("GET /admin/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "../../web/static/index.html") })

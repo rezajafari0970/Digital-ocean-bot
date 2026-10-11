@@ -18,7 +18,7 @@ var ErrAccountPurgeConflict = errors.New("account purge preconditions changed")
 
 // PurgeSavedAccount is an explicit local-only action. It never claims provider
 // deletion. Ordinary Delete retains the durable provider-cleanup workflow.
-func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string, remaining int) error {
+func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string, remaining int, confirmation AccountPurgeConfirmation) error {
 	if !canonicalPurgeAccountID(id) {
 		return ErrAccountPurgeConflict
 	}
@@ -40,17 +40,19 @@ func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string
 	var state string
 	var safe bool
 	var live int
+	var requested sql.NullTime
+	var scope string
 	err = tx.QueryRowContext(ctx, `SELECT provider_state,
  NOT enabled AND deletion_requested_at<now()-interval '2 minutes' AND runtime_status='DELETE_PENDING',
- (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining)
- FROM accounts a WHERE id=$1 FOR UPDATE`, id).Scan(&state, &safe, &live)
+ (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining),deletion_requested_at,`+accountPurgeScopeSQL+`
+ FROM accounts a WHERE id=$1 FOR UPDATE`, id).Scan(&state, &safe, &live, &requested, &scope)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil
 	} // Lost response can safely be replayed.
 	if err != nil {
 		return err
 	}
-	if !safe || live != remaining || state != expectedState || !localPurgeAllowed(state) {
+	if !confirmation.matches(requested, scope) || !safe || live != remaining || state != expectedState || !localPurgeAllowed(state) {
 		return ErrAccountPurgeConflict
 	}
 	return commitAccountPurge(ctx, tx, id)
@@ -76,28 +78,12 @@ func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 		}
 	}
 	// Serialize with panel structural mutation, including routing and cleanup.
-	rows, err := tx.QueryContext(ctx, "SELECT id::text FROM panel_instances WHERE account_id=$1 ORDER BY id", id)
-	if err != nil {
+	// Acquire the complete ordered panel fence in one database round trip.
+	// Hundreds of retired panels must not consume the request deadline merely
+	// acquiring otherwise uncontended locks.
+	if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended('panel-config:'||id::text,0))
+ FROM panel_instances WHERE account_id=$1 ORDER BY id`, id); err != nil {
 		return err
-	}
-	var panels []string
-	for rows.Next() {
-		var p string
-		if err = rows.Scan(&p); err != nil {
-			rows.Close()
-			return err
-		}
-		panels = append(panels, p)
-	}
-	err = rows.Err()
-	rows.Close()
-	if err != nil {
-		return err
-	}
-	for _, p := range panels {
-		if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", "panel-config:"+p); err != nil {
-			return err
-		}
 	}
 	return nil
 }

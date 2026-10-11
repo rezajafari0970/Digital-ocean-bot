@@ -22,6 +22,7 @@ func (recoveryInterrupted) RetryDelay() time.Duration { return 30 * time.Second 
 // The checkpoint survives process/session loss; no remote handler runs during
 // orphan reconciliation. One extra connection is included in control admission.
 type recoveryLease struct {
+	db                       *sql.DB
 	conn                     *sql.Conn
 	key, kind, item, attempt string
 	backend                  int
@@ -36,7 +37,7 @@ func acquireRecoveryLease(ctx context.Context, db *sql.DB, kind, item string) (*
 	if err != nil {
 		return nil, false, err
 	}
-	l := &recoveryLease{conn: c, kind: kind, item: item, key: "worker-recovery:" + kind + ":" + item}
+	l := &recoveryLease{db: db, conn: c, kind: kind, item: item, key: "worker-recovery:" + kind + ":" + item}
 	ok := false
 	defer func() {
 		if !ok {
@@ -148,7 +149,10 @@ func (l *recoveryLease) complete(ctx context.Context, account string, cause erro
 	if err := l.check(ctx); err != nil {
 		return err
 	}
-	tx, err := l.conn.BeginTx(ctx, nil)
+	// Keep cancellation and asynchronous rollback on a different connection
+	// from the session fence. The lease connection never owns a sql.Tx, so
+	// its final discard cannot race database/sql transaction auto-rollback.
+	tx, err := l.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -183,6 +187,12 @@ func (l *recoveryLease) complete(ctx context.Context, account string, cause erro
 	}
 	if n != 1 {
 		return ErrRecoveryCheckpointLost
+	}
+	if err = l.check(ctx); err != nil {
+		return err
+	}
+	if err = ctx.Err(); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

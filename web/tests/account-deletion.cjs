@@ -44,15 +44,24 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('purgeButton().scrollIntoView({block:"center"})');
    const screenshot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'account-purge-error-mobile.png'),Buffer.from(screenshot.data,'base64'));
    await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
+   assert.ok(await evaluate('purgeButton().getClientRects().length>0'));
+   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    await evaluate('window.originalFetch=window.fetch;window.purgeCalls=0;window.fetch=async function(url,opt){const r=await originalFetch(url,opt);if(url.endsWith("/purge")&&opt?.method==="POST"){purgeCalls++;throw Error("Fixture lost response after purge commit")}return r};purgeButton().click();purgeButton().click()');
-   await waitFor('!accountDeletionBusy.size&&!cache.accounts.some(r=>r.id===purgeID)');
+   await waitFor('!accountDeletionBusy.size&&cache.accounts.some(r=>r.id===purgeID&&r.deletion?.phase==="PURGE_PENDING")');
    assert.equal(await evaluate('window.purgeCalls'),1);
-   assert.equal(await evaluate('cache.accounts.length'),1);
-   assert.ok(await evaluate('document.querySelector("#toast").textContent.includes("Cloud resource deletion remains unverified")'));
+   assert.equal(await evaluate('cache.accounts.length'),2);
+   assert.ok(await evaluate('document.querySelector("#toast").textContent.includes("Cleanup continues automatically")'));
    await call('Page.reload');
-   await waitFor('typeof cache!=="undefined"&&cache.accounts?.length===1');
+   // Account data arrives before the page finishes its other independent reads.
+   // Assert the rendered state after reload, not merely the populated cache.
+   await waitFor('typeof cache!=="undefined"&&cache.accounts?.some(r=>r.deletion?.phase==="PURGE_PENDING")&&document.body.innerText.includes("Local system cleanup queued")');
+   await evaluate('api("/__fixture/complete-purge",{method:"POST"}).then(()=>refreshAccountsInPlace({force:true}))');
+   await waitFor('cache.accounts?.length===1');
    assert.equal(await evaluate('cache.accounts[0].id'),other);
-   console.log('ACCOUNT_PURGE_REAL_CLICK_CANCEL_409_500_ERROR_LOST_RESPONSE_SCOPED_MOBILE_DESKTOP PASS');
+   await evaluate('load("dashboard")');
+   await waitFor('document.body.innerText.includes("Server health details")');
+   assert.ok(await evaluate('document.body.innerText.includes("Provider check overdue")'));
+   console.log('ACCOUNT_PURGE_DURABLE_QUEUE_RELOAD_NATIVE_FENCE_WORKER_COMPLETION_HEALTH_DETAILS_MOBILE_DESKTOP PASS');
    return;
   }
 

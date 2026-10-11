@@ -1,0 +1,35 @@
+{
+  "goal": "Repair account deletion completion, truthful provider capacity warnings, and actionable server health for all supported provider drivers.",
+  "context": "Baseline 1ab7c7bce7004e59a17cc73b73d6c894d22305ef, isolated worktree /root/projects/dob-account-health-cleanup-20261010. User video shows local purge HTTP409 account_cleanup_busy for Sara vul, two already deleting invalid-token Vultr accounts with 31 tracked resources, DigitalOcean warnings maximum allowed Droplets at full proven limits, dashboard Inactive/unverified24 while many READY panels have fresh completed inventory and applied routing. Live evidence confirms 5-minute idle provider polling vs hardcoded 2-minute dashboard/provider freshness. Preserve provider credentials and unknown-outcome/native recovery/checkpoint fences until genuine verified cloud cleanup or explicitly acknowledged local-only purge. Never fake provider deletion, blindly retry creates, remove guards or unverifiedly label stale snapshots healthy. Need root-cause diagnosis of SQL/lock/large-history deletion and durable bounded asynchronous explicitly acknowledged local purge if needed, scoped cleanup including current relay dependencies and caches/stats, native quiescence/fair retry and exact-target auth. Distinguish capacity full, restrictions, stale provider observations, provisioning and actual failed/unreachable panels with actionable reasons and automatic bounded native recovery only within existing policy. No arbitrary TTL broadening: account expected refresh cadence and evidence invalidation, not mutation admission relaxation. Keep dedicated-proxy fail-close, all provider quotas, exact ownership, no shared-account impact, current relay/routing settings untouched. Test real isolated PostgreSQL, concurrent locks, realistic history, stale confirmations, complete FK/telemetry erasure, native in-flight, restart/lost response, all 3 provider drivers, unknown warnings/billing/auth failclosed, server health cadence edge and UI mobile. Full relevant Go/race/browser checks, actual API review exact tested diff, clean build shared deployment lock, fresh canonical/runtime recheck and safe concurrent integration before publish. No subagents. OpenAI API usage receipts must be measured and reported, status every<=60s. Do not delete a real account as a synthetic acceptance test.",
+  "allowed_paths": [
+    "internal/app",
+    "internal/adminapi",
+    "internal/providers",
+    "internal/capacity",
+    "internal/worker",
+    "migrations",
+    "web/static/app.js",
+    "web/tests",
+    "tools/account-health-cleanup-acceptance-race.sh",
+    "tools/account-health-cleanup-review.py",
+    "docs/development-jobs/account-health-cleanup-20261010.json",
+    "docs/ACCOUNT_HEALTH_CLEANUP_20261010.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 2400,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/account-health-cleanup-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/account-health-cleanup-review.py"
+    ]
+  },
+  "commit_message": "fix(accounts): reliable cleanup and evidence-based provider and server health"
+}
