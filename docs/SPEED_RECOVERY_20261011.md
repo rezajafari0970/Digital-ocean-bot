@@ -30,3 +30,13 @@ Two separate OpenAI API requests: 22,152 input + 3,539 output = 25,691 total tok
 Prepared for a clean detached build, protected publication and service/hash/readiness checks. Consult /root/backups/dob-speed-recovery-20261011/deployment.json and status.json for the actual deployment outcome; source preparation alone is not a runtime receipt.
 
 The existing 13/80 profile remains requested. Recovery still requires fresh panel proof or genuine provider deletion. Repair the two account API credentials through the normal account editor to restore provider visibility; do not send secrets to chat, force DELETED/RESTORED or disable fail-closed behavior. After recovery completes, repeat only the necessary guarded single-panel speed trial before publication.
+
+## Verified deployment receipt
+
+Runtime 93b343757e5b36265c8a01f31e089ded07e179df was published at 2026-10-11 09:55 Tehran from a clean detached build. API and both workers active, exact runtime hashes matched, all five readiness checks passed, selectors remained all. No automatic service restart observed in the release receipt.
+
+At 09:56 Tehran exactly one existing panel was checked through its API: seven asset domains routed to residential and fundingchoicesmessages.google.com remained blocked according to the existing seven-root policy. Eight native route assertions passed. Native observatory responded; DNS retained TCP 1.1.1.1/8.8.8.8, IPv4 and caching. This is routing evidence, not an ad-ready or download-speed gain.
+
+The production diagnostic query returned version8 RESTORING on13/80, 76 surviving obligations,27 freshly verified,49 pending,34 non-serving,31 invalid-credential blocked and0 missing recovery records. These are timestamped observations, not permanent counts. No old recovery records were removed or acknowledged without evidence.
+
+A concrete next routing proposal, NOT APPLIED, is to add domain:fundingchoicesmessages.google.com to the residential category extension (that host and its descendants/all URL paths), leaving broad google.com and the other removed roots unchanged. The previous explicit seven-root restriction requires user clarification before this additional domain is deployed. Its blockage is proven; its causal contribution to the recorded18-second app delay is unproven.

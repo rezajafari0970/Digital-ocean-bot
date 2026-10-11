@@ -1,3 +1,9 @@
+## 2026-10-11 09:59 Tehran — speed recovery fix deployed and one panel verified
+
+Runtime93b3437, clean build and all3services/hash/5readiness checks PASS. Focused/race/general/browser and final API review PASS. Exactly1panel API audit:7asset domains residential; fundingchoicesmessages.google.com still blocked under the user's seven-root policy;8route assertions PASS. See SPEED_RECOVERY_20261011.md. No ad-latency gain claimed.
+
+Still RESTORING13/80;31legacy obligations on Sara vul and Sara vul2 require valid provider credentials or fresh panel proof. Do not reset gates or republish3/90. Proposed additional domain:fundingchoicesmessages.google.com is not applied; clarify exception to prior explicit root restriction. Separate API2calls,25,691tokens; billing cost unavailable.
+
 ## 2026-10-11 09:54 Tehran — speed recovery prevention/diagnostics release prepared
 
 Project/config work only; Android app source is explicitly out of scope. Atomic all-survivor preflight added before tune_publish; conservative recovery gates preserved. First-trigger panel/generation/stage/time diagnostics and accurate RESTORING UI/progress added. Focused PostgreSQL, bounded relevant race, full general Go and Chromium/mobile gates PASS; exact-source API review PASS. See SPEED_RECOVERY_20261011.md and /root/backups/dob-speed-recovery-20261011/deployment.json for actual runtime release status.
