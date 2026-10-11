@@ -368,7 +368,7 @@ func run() error {
 								if strict && (!clientPaths || dest.ip != "1.1.1.1" && dest.ip != "8.8.8.8") {
 									expected = blocked
 								}
-							} else if dest.ad {
+							} else if dest.ad || residentialsync.ExpandedDomainAllowed(id, dest.domain) {
 								expected = protectedForNetwork(network, protected, protectedUDP)
 							} else if strict && network == "tcp" && (dest.port == "80" || dest.port == "443") && (dest.domain == "www.gstatic.com" || dest.domain == "connectivitycheck.gstatic.com" || dest.domain == "www.google.com" && clientPaths) {
 								expected = protected
@@ -427,6 +427,9 @@ func run() error {
 						}
 						if strict {
 							for _, domain := range []string{"www.example.com", "www.gstatic.com.evil.test", "www.gstatic.com", "www.google.com", "cloudflare-dns.com"} {
+								if residentialsync.ExpandedDomainAllowed(id, domain) {
+									continue
+								}
 								if !clientPaths && (domain == "www.gstatic.com" || domain == "www.google.com" || domain == "cloudflare-dns.com") {
 									continue
 								}

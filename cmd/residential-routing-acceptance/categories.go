@@ -8,6 +8,11 @@ var expandedCategoryProofHosts = []string{
 	"ads.yahoo.com", "adnxs.com", "ad.xiaomi.com", "unityads.unity3d.com",
 	"dt.dbankcloud.ru", "insights-collector.gog.com", "firebase.google.com",
 	"mtalk.google.com", "play.google.com", "www.youtube.com", "r1.googlevideo.com",
+	"lh1.googleusercontent.com", "lh2.googleusercontent.com", "lh3.googleusercontent.com", "lh4.googleusercontent.com",
+	"fonts.gstatic.com", "fonts.googleapis.com", "fundingchoicesmessages.google.com",
+	"graph.facebook.com", "scontent.xx.fbcdn.net", "static.xx.fbcdn.net", "video.xx.fbcdn.net",
+	"dns.google", "tpc.googlesyndication.com", "googleads.g.doubleclick.net", "play-lh.googleusercontent.com", "s0.2mdn.net",
+	"www.gstatic.com", "connectivitycheck.gstatic.com", "www.google.com", "new.googleusercontent.com", "new.fbcdn.net",
 }
 
 func verifyExpandedCategories(check func(url.Values, string) error, tag string, emails map[string]string, direct, blocked, protected, udpDeny string, pool map[string][]string, strict bool, deny string) (int, error) {
@@ -37,7 +42,7 @@ func verifyExpandedCategories(check func(url.Values, string) error, tag string, 
 				count++
 			}
 		}
-		for _, host := range []string{"huawei.com", "gog.com", "firebase.google.com.evil.test", "insights-collector.gog.com.evil.test", "www.youtube.com.evil.test"} {
+		for _, host := range []string{"huawei.com", "gog.com", "firebase.google.com.evil.test", "insights-collector.gog.com.evil.test", "www.youtube.com.evil.test", "googleusercontent.com.evil.test", "notgoogleusercontent.com", "dns.google.evil.test"} {
 			form := url.Values{"inboundTag": {tag}, "email": {emails["RESIDENTIAL"]}, "network": {network}, "domain": {host}, "port": {"443"}}
 			if err := check(form, blocked); err != nil {
 				return count, err

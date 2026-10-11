@@ -21,6 +21,22 @@ func sameCategoryStrings(value any, expected []string) bool {
 func validateCategoryContract(setting map[string]any, wanted []string, strict bool, pool map[string][]string, clientPaths bool, inboundTags []string) error {
 	routing, _ := setting["routing"].(map[string]any)
 	rules, _ := routing["rules"].([]any)
+	infrastructure := []string{"full:www.gstatic.com", "full:connectivitycheck.gstatic.com", "full:www.google.com", "full:cloudflare-dns.com"}
+	filtered := []string{}
+	for _, rule := range infrastructure {
+		host := strings.TrimPrefix(rule, "full:")
+		covered := false
+		for _, domain := range wanted {
+			if strings.HasPrefix(domain, "domain:") {
+				root := strings.TrimPrefix(domain, "domain:")
+				covered = covered || host == root || strings.HasSuffix(host, "."+root)
+			}
+		}
+		if !covered {
+			filtered = append(filtered, rule)
+		}
+	}
+	infrastructure = filtered
 	blocked := ""
 	outs := map[string]map[string]any{}
 	for _, value := range setting["outbounds"].([]any) {
@@ -168,7 +184,7 @@ func validateCategoryContract(setting map[string]any, wanted []string, strict bo
 					}
 				case prefix + "-infrastructure-deny":
 					infrastructureCount++
-					if !sameCategoryStrings(rule["domain"], []string{"full:www.gstatic.com", "full:connectivitycheck.gstatic.com", "full:www.google.com", "full:cloudflare-dns.com"}) {
+					if !sameCategoryStrings(rule["domain"], infrastructure) {
 						return fmt.Errorf("inner infrastructure precedence differs")
 					}
 				default:

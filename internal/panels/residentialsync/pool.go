@@ -110,7 +110,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 				// Recheck the destination after loopback, not just at the public inlet.
 				internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-dns-deny", "inboundTag": inbound, "network": network, "port": "53", "outboundTag": blockedTag})
 				if !p.LegacyClientPaths {
-					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-infrastructure-deny", "inboundTag": inbound, "network": network, "domain": append(append([]string{}, residentialProbeDomains...), clientDoHDomains...), "outboundTag": blockedTag})
+					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-infrastructure-deny", "inboundTag": inbound, "network": network, "domain": p.infrastructureDomains(), "outboundTag": blockedTag})
 				}
 				if !p.SniffingBlocked && p.Residential {
 					internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-ads", "inboundTag": inbound, "network": network, "domain": p.residentialDomains(), "balancerTag": tag})

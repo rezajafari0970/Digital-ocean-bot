@@ -101,17 +101,31 @@ func validateStrictInboundTags(tags []string, current map[string]any) error {
 // TLS routing constrains this host/port, not encrypted paths or query names.
 var clientDoHDomains = []string{"full:cloudflare-dns.com"}
 
+// A user-authorized residential domain must not be shadowed by a direct
+// connectivity exception or by the corresponding infrastructure deny.
+func (p routePolicy) directProbeDomains() []string {
+	domains := []string{}
+	for _, rule := range residentialProbeDomains {
+		if !p.expandedDomainAllowed(strings.TrimPrefix(rule, "full:")) {
+			domains = append(domains, rule)
+		}
+	}
+	return domains
+}
+func (p routePolicy) infrastructureDomains() []string {
+	return append(p.directProbeDomains(), clientDoHDomains...)
+}
 func clientInfrastructureRules(tags []string, p routePolicy) []any {
 	rules := []any{}
 	if p.Residential && !p.SniffingBlocked {
+		if domains := p.directProbeDomains(); len(domains) > 0 {
+			rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-probes", "inboundTag": tags, "domain": domains, "network": "tcp", "port": "80,443", "outboundTag": directTag})
+		}
 		rules = append(rules,
-			map[string]any{"type": "field", "ruleTag": "dob-route-client-probes", "inboundTag": tags, "domain": residentialProbeDomains, "network": "tcp", "port": "80,443", "outboundTag": directTag},
 			map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-allowed", "inboundTag": tags, "ip": resolverpolicy.Active(), "network": "tcp,udp", "port": "53", "outboundTag": clientDNSTag},
 			map[string]any{"type": "field", "ruleTag": "dob-route-client-doh", "inboundTag": tags, "domain": clientDoHDomains, "network": "tcp", "port": "443", "outboundTag": directTag})
 	}
-	// Exact infrastructure hosts cannot fall through into a broader Ads geosite
-	// entry on an unapproved port/transport, even if geodata changes later.
-	rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-infrastructure-deny", "inboundTag": tags, "domain": append(append([]string{}, residentialProbeDomains...), clientDoHDomains...), "network": "tcp,udp", "outboundTag": blockedTag})
+	rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-infrastructure-deny", "inboundTag": tags, "domain": p.infrastructureDomains(), "network": "tcp,udp", "outboundTag": blockedTag})
 	return rules
 }
 

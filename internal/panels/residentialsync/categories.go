@@ -14,6 +14,33 @@ var expandedResidentialCategories = []string{
 	"geosite:firebase", "geosite:googlefcm", "geosite:google-play", "geosite:youtube",
 }
 
+// Authorized on 2026-10-11: these roots and all subdomains, including
+// non-ad URLs. Domain rules cover every path; they are not URL-path filters.
+var expandedResidentialDomainRoots = []string{
+	"googleusercontent.com", "gstatic.com", "googleapis.com", "google.com",
+	"facebook.com", "fbcdn.net", "googlesyndication.com", "doubleclick.net",
+	"2mdn.net", "dns.google",
+}
+
+func (p routePolicy) expandedDomainAllowed(host string) bool {
+	if !p.ExpandedCategories {
+		return false
+	}
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
+	for _, root := range expandedResidentialDomainRoots {
+		if host == root || strings.HasSuffix(host, "."+root) {
+			return true
+		}
+	}
+	return false
+}
+
+// ExpandedDomainAllowed checks only the explicit root-domain extension;
+// geosite membership is evaluated by the running Xray core.
+func ExpandedDomainAllowed(panel, host string) bool {
+	return (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel)}).expandedDomainAllowed(host)
+}
+
 // Older deployed geodata has HUAWEI/GOG but zero @ads entries. Preserve the
 // exact attributed domain boundaries from v2fly/domain-list-community commit
 // c6adacf29cc4fb05e04651fcf03e00989ef9f797 data/huawei and data/gog.
@@ -48,6 +75,9 @@ func (p routePolicy) residentialDomains() []string {
 	if p.ExpandedCategories {
 		domains = append(domains, expandedResidentialCategories...)
 		domains = append(domains, residentialCategoryCompatibility...)
+		for _, root := range expandedResidentialDomainRoots {
+			domains = append(domains, "domain:"+root)
+		}
 	}
 	return domains
 }
