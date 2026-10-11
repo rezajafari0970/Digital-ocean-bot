@@ -629,8 +629,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	// Eight disjoint serving lanes keep running-router proofs inside the
-	// publication freshness window. Retirement has its own single lane.
+	// Eight serving consumers share the due queue so a slow panel cannot strand
+	// peers in its hash lane. Durable claims and config locks serialize each panel.
+	// Retirement retains its own consumer; native per-panel route checks stay serial.
 	// Client mutation execution remains independently gated at concurrency=1.
 	for _, serving := range []bool{true, false} {
 		lanes := 1
@@ -638,7 +639,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			lanes = 8
 		}
 		for shard := 0; shard < lanes; shard++ {
-			serving, shard, lanes := serving, shard, lanes
+			serving, shard := serving, shard
 			modules.Add(worker.RolePanels, fmt.Sprintf("residential-sync-%t-%d", serving, shard), func(ctx context.Context) {
 				t := time.NewTicker(time.Second)
 				defer t.Stop()
@@ -647,7 +648,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				after := ""
 				for {
 					supervision.Pulse(ctx)
-					p, found, err := syncer.NextDuePanelShardAfter(ctx, serving, shard, lanes, after)
+					p, found, err := syncer.NextDuePanelForWorker(ctx, serving, after)
 					if err != nil {
 						log.Printf("residential sync discovery: %v", err)
 					}

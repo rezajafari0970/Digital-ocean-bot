@@ -1,0 +1,32 @@
+{
+  "goal": "Correct demonstrated native routeTest gRPC concurrency incompatibility; improve fleet proof fairness without parallel calls inside any Sanaei panel.",
+  "context": "First panel-audit release b0bb9c9 passed full Go/race/browser and two real-core suites, but production HTTP API returned success=false with gRPC client connection closing under parallel native routeTest reads. Exact native diagnostic reproduced 3/4 successes and one closing connection error with no template/restart writes. Runtime was restored to exact prior990a412 with unchanged persistence contracts; all49 serving routes APPLIED again and errors0. Canonical remains b0bb9c9. New change keeps Sanaei HTTP route matrix serial, retains opt-in capability only for independently proven other drivers, and lets existing eight serving consumers share the due queue rather than fixed hash buckets. Existing durable ReserveOutcome, cursor after selective persistence fault, ReconcilePanel due recheck, per-panel config lock, mutation lock, 45s attempt budget, 90s reservation and global SQL work budget10 remain. Retirement separate. No freshness widening, no plan/policy changes, no native SSH. Full prior suite receipt is reused only for byte-identical unchanged surfaces; correction gates compile allpackages and rerun affected worker/native/routing race integration. The new HTTP test reproduces the real failure envelope and requires all34proof reads without mutation. Sharedqueue test honors production due recheck after a stale discovery claim and proves all38panels drain without native duplicates or retiring leakage. Review native contract, fairness, contention, SQL pool/deadline risks. No subagents. Normal exact-source test/review/clean-commit publication gates apply.",
+  "allowed_paths": [
+    "cmd/worker/main.go",
+    "internal/panels/sanaei/resilient.go",
+    "internal/panels/residentialsync/service.go",
+    "internal/panels/residentialsync/native_http_contract_test.go",
+    "internal/adminapi/routing_shared_queue_test.go",
+    "tools/panel-native-contract-review.py",
+    "tools/panel-native-contract-acceptance-race.sh",
+    "docs/development-jobs/panel-native-contract-20261012.json",
+    "docs/PANEL_AUDIT_20261012.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/panel-native-contract-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/panel-native-contract-review.py"
+    ]
+  },
+  "commit_message": "fix(routing): respect native serial proof contract and share due queue"
+}

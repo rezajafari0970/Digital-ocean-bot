@@ -343,6 +343,8 @@ var ErrPanelResponse = errors.New("invalid panel response")
 
 func panelResponseError(err error) error { return fmt.Errorf("%w: %w", ErrPanelResponse, err) }
 
-// RouteProofConcurrency opts this HTTP driver into concurrent read-only native
-// route tests. Configuration mutations remain serialized by their owner.
-func (s *ResilientSession) RouteProofConcurrency() int { return 4 }
+// Native Sanaei routeTest closes a shared panel-side gRPC client after each
+// call. Concurrent calls can return HTTP 200 with success=false and a closing
+// connection error. Only drivers with an independently proven native contract
+// may opt into concurrency; this driver must keep its complete matrix serial.
+func (s *ResilientSession) RouteProofConcurrency() int { return 1 }

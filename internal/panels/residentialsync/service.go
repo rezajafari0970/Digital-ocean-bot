@@ -488,6 +488,13 @@ func (s Service) NextDuePanel(ctx context.Context, serving bool) (readyworker.Pa
 	return s.NextDuePanelShard(ctx, serving, 0, 1)
 }
 
+// NextDuePanelForWorker exposes one shared, fair due queue to the bounded
+// worker consumers. The caller must ReserveOutcome before native work. Keeping
+// the cursor allows other panels to progress after a selective claim-write fault.
+func (s Service) NextDuePanelForWorker(ctx context.Context, serving bool, after string) (readyworker.Panel, bool, error) {
+	return s.NextDuePanelShardAfter(ctx, serving, 0, 1, after)
+}
+
 // NextDuePanelShard partitions independent panels into bounded serial lanes.
 // A panel belongs to exactly one lane; existing cross-process config locks and
 // per-runtime mutation locks still serialize its writes. Retired panels keep
