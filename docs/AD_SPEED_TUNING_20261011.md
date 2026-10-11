@@ -1,5 +1,15 @@
 # Ad asset speed tuning — 2026-10-11 Tehran
 
+## Follow-up 2026-10-11 09:35 Tehran — candidate automatically restored
+
+This supersedes the historical 09:14 rollout receipt below. At 09:34:12 Tehran the experiment was version 8, phase RESTORING, rejected=true, reason `runtime verification failed`. Its latest update was 09:15:47 Tehran; fleet spec and all 45 currently active panel configurations were back to fast_count=13 / fast_share=80. All 45 had matching profile-generation receipts; routing states were 43 APPLIED and 2 APPLYING. RESTORING is not a completed recovery claim.
+
+Code inspection: Service.apply defers Store.Failed for any returned error after policy load, including panel API snapshot/CSRF transport errors before runtime verification. During TESTING or PUBLISHING, a matching tuning-generation failure immediately requests restoration; PUBLISHING restores fleet-wide. Logs around the transition contain panel API timeouts for surviving RETIRING Vultr records. The durable reason does not identify the triggering panel, so correlation does not prove which panel caused it. This was not trial-deadline expiry or a recorded operator restore. Do not bypass recovery/freshness gates or republish the same candidate without addressing the lifecycle issue.
+
+New supplied video Screenrecorder-2026-10-11-09-27-38-624.mp4: Requesting Ad visible around 3 s, first creative around 21 s, full card around 24 s. Approximately 18 s request-to-first-creative delay remains; first-creative-to-full-card animation is not proof of network download time. No SDK callbacks, per-adapter timings or selected mobile panel identity are available. Therefore neither the rollback nor a particular network/domain is established as the sole cause of application delay.
+
+This follow-up made no production configuration changes, service restarts, new asset benchmarks or separate OpenAI API calls. Evidence: /root/backups/dob-ad-speed-20261011/slow-ad-followup.json. Next app diagnosis requires Qanari ad-loading source or sanitized monotonic load/callback/show timings and (if Google Mobile Ads is used) ResponseInfo adapter latencies. Existing runtime stays 1a0509d. Publication of this checkpoint is documentation only.
+
 Runtime/source baseline: `1a0509dce27c2302d15cf9d789680fa27a5135d2`. This change is a supported persisted performance-profile operation, not a binary change.
 
 The supplied 37-second video shows Qanari 4.2.1 (Lib v39, Xray v26.7.28), approximately 20 seconds in Requesting Ad before the first creative appears near 24 seconds. Video alone does not separate mediation, fetching, SDK callbacks and rendering. The Android application source is not present in this repository.
