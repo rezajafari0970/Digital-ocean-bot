@@ -1,3 +1,11 @@
+## 2026-10-11 09:14 Tehran — ad asset selection tuning
+
+Supported DB profile publication version 6: fast_count=3, fast_share=90, experiment 38f9c98e-0acb-4f95-8639-8e65087edce0. 43/43 active-panel profile-generation receipts observed. Three product services active; runtime remains 1a0509d. This is a documentation-only source checkpoint.
+
+One-panel static asset before/after diagnostic: adsbygoogle.js median 4.46 -> 3.37 s; ima3.js 4.97 -> 4.57 s; 12/12 requests successful, 4.28 MB payload. Not a measured application-ready improvement. No domain/probe/DNS/protocol changes, no geosite:google addition.
+
+Lifecycle still PUBLISHING with surviving retiring/expired/deleting obligations and strict freshness; do not discard obligations or claim a terminal publication state. See docs/AD_SPEED_TUNING_20261011.md and /root/backups/dob-ad-speed-20261011/status.json. Remaining app work needs Qanari ad-loading source or sanitized timing/ResponseInfo logs. Separate OpenAI API calls: zero.
+
 # Development Ready Handoff
 
 ## Latest requested correction — 2026-10-11 08:16 Tehran
