@@ -1,5 +1,10 @@
 # Development Ready Handoff
 
+## Latest checkpoint — 2026-10-11 authorized residential domain roots deployed
+
+Runtime 7557f67da9ea24f6f9d60bf906de1ec07bac5205. Ten domain roots and all their subdomains now join expanded categories; client Google/gstatic probe exceptions no longer bypass residential routing. All fleet selectors remain all. Focused/full/race and clean-build gates PASS; exactly one live panel passed 380 native route proofs. Worker receipts at 08:05 Tehran show the new policy digest on all 38 then-live panels; no fleet-wide manual acceptance run. Three product services active, runtime hashes and five readiness checks PASS. See RESIDENTIAL_DOMAIN_ROOTS_20261011.md and RESIDENTIAL_DOMAIN_ROOTS_ACCEPTANCE_20261011.json. Separate OpenAI API calls: 0. Ad show-rate recovery and earlier relay availability limitations are not proven by this routing change.
+
+
 ## Latest checkpoint — 2026-10-10 relay/SOCKS operational acceptance (with known limitations)
 
 User explicitly paused additional remediation and accepted current deployed relay/SOCKS capability as Production with known limitations. Runtime source/binaries 559c865452ece4f0908a5f01fb32299248a85e1e; API and worker active; no deployment or safety-gate change. Independent OpenAI API review resp_09c7d79b9058304d006ac980d22d9087d194ca09f3e6cbafbc returned REVISE, **not** technical PASS. Remaining evidence: live failover, zero-healthy windows, 23 selected/unapplied paths and mutation gate success. Details: docs/RELAY_PRODUCTION_ACCEPTANCE_20261010.json. Resume only on explicit user request; do not silently restart tests or production mutations.

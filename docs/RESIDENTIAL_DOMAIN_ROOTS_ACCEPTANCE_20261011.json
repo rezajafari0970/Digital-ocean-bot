@@ -1,0 +1,81 @@
+{
+  "at_tehran": "2026-10-11T08:06:11.179291+03:30",
+  "status": "DEPLOYED",
+  "runtime_commit": "7557f67da9ea24f6f9d60bf906de1ec07bac5205",
+  "scope": "authorized domain roots and subdomains alongside expanded categories",
+  "native_acceptance": {
+    "panels": 1,
+    "route_proofs": 380,
+    "result": "PASS",
+    "first_attempt": "API proof unavailable; read-only readback passed; apply not repeated"
+  },
+  "tests": [
+    "focused PASS",
+    "full go test ./... PASS",
+    "focused race PASS",
+    "clean detached build PASS",
+    "runtime hashes and 5 readiness checks PASS"
+  ],
+  "fleet_policy_records": {
+    "total_live": 38,
+    "new_digest": 38,
+    "observed_at": "2026-10-11T08:05:29.920579+03:30",
+    "groups": [
+      {
+        "provider": "digitalocean",
+        "state": "APPLIED",
+        "updated": true,
+        "panels": 15,
+        "min_healthy": 10,
+        "max_proof_age": 106
+      },
+      {
+        "provider": "digitalocean",
+        "state": "APPLYING",
+        "updated": true,
+        "panels": 1,
+        "min_healthy": 11,
+        "max_proof_age": 124
+      },
+      {
+        "provider": "upcloud",
+        "state": "APPLIED",
+        "updated": true,
+        "panels": 1,
+        "min_healthy": 4,
+        "max_proof_age": 12
+      },
+      {
+        "provider": "upcloud",
+        "state": "APPLYING",
+        "updated": true,
+        "panels": 1,
+        "min_healthy": 0,
+        "max_proof_age": 89
+      },
+      {
+        "provider": "vultr",
+        "state": "APPLIED",
+        "updated": true,
+        "panels": 20,
+        "min_healthy": 10,
+        "max_proof_age": 96
+      }
+    ],
+    "method": "database worker verification receipts; no additional per-panel acceptance tests"
+  },
+  "selectors": {
+    "DOB_RESIDENTIAL_CATEGORIES_PANELS": "all",
+    "DOB_UPCLOUD_RELAY_PANELS": "all",
+    "DOB_UPCLOUD_RELAY_EXPANDED_PANELS": "all",
+    "DOB_RESIDENTIAL_ALLOWLIST_PANELS": "all",
+    "DOB_RESIDENTIAL_CLIENT_PATHS_PANELS": "all"
+  },
+  "deployment_recovery": "First publication rolled back because helper required intentionally disabled browser-manager active. Helper corrected to actual three-service topology, same accepted source restaged and deployed.",
+  "openai_api_calls": 0,
+  "limitations": [
+    "Synthetic route evidence does not prove ad download or show-rate recovery.",
+    "Known earlier relay availability limitations are outside this change; ongoing APPLYING or zero-healthy states are not claimed fixed."
+  ],
+  "evidence_directory": "/root/backups/dob-ad-domains-release-20261011"
+}
