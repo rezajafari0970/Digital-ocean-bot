@@ -93,7 +93,7 @@ func TestExpandedProofRespectsStrictAndSelectiveFallback(t *testing.T) {
 			}
 			return nil
 		}, "in", map[string]string{"DIRECT": "direct-user", "RESIDENTIAL": "res-user"}, "direct", unmatched, "protected", "", pool, unmatched == "blocked", "blocked")
-		expected := 8*len(expandedCategoryProofHosts) + 18
+		expected := 8*len(expandedCategoryProofHosts) + 26
 		if unmatched == "blocked" {
 			expected += 8
 		}

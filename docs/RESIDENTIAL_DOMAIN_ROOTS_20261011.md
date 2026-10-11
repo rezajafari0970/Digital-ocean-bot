@@ -1,13 +1,11 @@
-# Residential domain root extension — 2026-10-11
+# Residential domain roots — correction at 2026-10-11 08:16 Tehran
 
-User authorized the listed domain roots and every subdomain, alongside the existing categories. This includes non-ad payload. All URL paths on these hosts are covered by Xray domain routing.
+Current explicit roots and all subdomains: googlevideo.com, googleapis.com, fbcdn.net, googlesyndication.com, doubleclick.net, 2mdn.net, googleusercontent.com.
 
-Roots: googleusercontent.com, gstatic.com, googleapis.com, google.com, facebook.com, fbcdn.net, googlesyndication.com, doubleclick.net, 2mdn.net, dns.google.
+These remain alongside the existing geosite categories and compatibility rules. User explicitly removed the broad gstatic.com, dns.google, facebook.com and google.com additions. dns.google appeared in both requested lists; the later explicit removal takes precedence.
 
-The shared expanded-category policy supplies the same scope to public TCP/UDP routes, inner pool routes, relay donor inlets, category digests and future panels. Existing all-panel selector activates this fleet-wide. Explicit DIRECT clients preserve their class. DNS infrastructure to approved IPs on port 53 and the Cloudflare DoH exception remain unchanged; dns.google HTTPS now uses residential routing. Client www.gstatic.com, connectivitycheck.gstatic.com and www.google.com exceptions no longer shadow the authorized residential domain rules. Health probes remain independent transport checks.
+Existing category-based routing remains authoritative for domains no longer in the explicit root extension. Existing exact TCP 80/443 client connectivity exceptions for www.gstatic.com, connectivitycheck.gstatic.com and www.google.com are restored automatically by the shared precedence filter; no blanket DIRECT or blanket BLOCK rule was added for their parent domains. Client dns.google returns to the prior strict allowlist policy.
 
-Boundaries and fail-closed behavior are retained. No credentials, billing, account policy, lifecycle, proxy pool membership, safety gate, geodata files or database schema change.
+The same scope is used for public routes, inner pools, donor relay inlets, category digests and future panels. Account proxies, credentials, lifecycle, geodata, safety gates and schema are unchanged.
 
-Validation: focused routing/acceptance tests, full Go suite and focused Race PASS. Native acceptance must run on one live panel before publication, as requested. The ordinary worker reconciliation and plan verification remain enabled after rollout. Synthetic routing evidence does not establish ad asset download, show-rate recovery, or resolution of earlier relay availability limitations.
-
-Operational receipts: /root/backups/dob-ad-domains-release-20261011.
+User explicitly requested no tests. Test definitions and operator expectations were updated for consistency but no unit/race/native acceptance test was executed for this correction. Previous acceptance receipts concern the superseded ten-root policy, not this corrected policy. Only clean build, publication integrity and service status are checked.

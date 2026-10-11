@@ -1,5 +1,10 @@
 # Development Ready Handoff
 
+## Latest requested correction — 2026-10-11 08:16 Tehran
+
+Domain roots narrowed to googlevideo.com, googleapis.com, fbcdn.net, googlesyndication.com, doubleclick.net, 2mdn.net and googleusercontent.com. Broad gstatic.com, dns.google, facebook.com and google.com entries removed; previous category/infrastructure policy restored. Existing categories retained. User explicitly waived test execution; do not attribute earlier 380-route PASS to this revision. Build/publication/service receipts: /root/backups/dob-domain-scope-correction-20261011. Deployment status is recorded there.
+
+
 ## Latest checkpoint — 2026-10-11 authorized residential domain roots deployed
 
 Runtime 7557f67da9ea24f6f9d60bf906de1ec07bac5205. Ten domain roots and all their subdomains now join expanded categories; client Google/gstatic probe exceptions no longer bypass residential routing. All fleet selectors remain all. Focused/full/race and clean-build gates PASS; exactly one live panel passed 380 native route proofs. Worker receipts at 08:05 Tehran show the new policy digest on all 38 then-live panels; no fleet-wide manual acceptance run. Three product services active, runtime hashes and five readiness checks PASS. See RESIDENTIAL_DOMAIN_ROOTS_20261011.md and RESIDENTIAL_DOMAIN_ROOTS_ACCEPTANCE_20261011.json. Separate OpenAI API calls: 0. Ad show-rate recovery and earlier relay availability limitations are not proven by this routing change.

@@ -17,9 +17,13 @@ var expandedResidentialCategories = []string{
 // Authorized on 2026-10-11: these roots and all subdomains, including
 // non-ad URLs. Domain rules cover every path; they are not URL-path filters.
 var expandedResidentialDomainRoots = []string{
-	"googleusercontent.com", "gstatic.com", "googleapis.com", "google.com",
-	"facebook.com", "fbcdn.net", "googlesyndication.com", "doubleclick.net",
-	"2mdn.net", "dns.google",
+	"googlevideo.com",
+	"googleapis.com",
+	"fbcdn.net",
+	"googlesyndication.com",
+	"doubleclick.net",
+	"2mdn.net",
+	"googleusercontent.com",
 }
 
 func (p routePolicy) expandedDomainAllowed(host string) bool {

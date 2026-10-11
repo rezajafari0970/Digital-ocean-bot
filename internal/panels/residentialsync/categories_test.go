@@ -17,7 +17,7 @@ func TestCategoryScopeAndExactContract(t *testing.T) {
 			t.Fatalf("%q: %t", tc.scope, got)
 		}
 	}
-	expected := []string{"geosite:google@ads", "domain:browserleaks.com", "geosite:category-ads", "geosite:category-ads-all", "geosite:xiaomi@ads", "geosite:unity@ads", "geosite:huawei@ads", "geosite:gog@ads", "geosite:firebase", "geosite:googlefcm", "geosite:google-play", "geosite:youtube", "domain:dt.dbankcloud.ru", "domain:insights-collector.gog.com", "domain:googleusercontent.com", "domain:gstatic.com", "domain:googleapis.com", "domain:google.com", "domain:facebook.com", "domain:fbcdn.net", "domain:googlesyndication.com", "domain:doubleclick.net", "domain:2mdn.net", "domain:dns.google"}
+	expected := []string{"geosite:google@ads", "domain:browserleaks.com", "geosite:category-ads", "geosite:category-ads-all", "geosite:xiaomi@ads", "geosite:unity@ads", "geosite:huawei@ads", "geosite:gog@ads", "geosite:firebase", "geosite:googlefcm", "geosite:google-play", "geosite:youtube", "domain:dt.dbankcloud.ru", "domain:insights-collector.gog.com", "domain:googlevideo.com", "domain:googleapis.com", "domain:fbcdn.net", "domain:googlesyndication.com", "domain:doubleclick.net", "domain:2mdn.net", "domain:googleusercontent.com"}
 	t.Setenv("DOB_RESIDENTIAL_CATEGORIES_PANELS", "all")
 	got := AllowedResidentialDomains(panel)
 	if !reflect.DeepEqual(got, expected) {
@@ -82,7 +82,7 @@ func TestExpandedRootsRoutingBoundariesAndFailClosed(t *testing.T) {
 		if !down {
 			want = tagged(next, p.Proxies[0].Tag)
 		}
-		for _, host := range []string{"lh3.googleusercontent.com", "new.googleusercontent.com", "googleusercontent.com", "fonts.gstatic.com", "www.gstatic.com", "connectivitycheck.gstatic.com", "www.google.com", "fonts.googleapis.com", "fundingchoicesmessages.google.com", "graph.facebook.com", "scontent-any.fbcdn.net", "dns.google", "tpc.googlesyndication.com", "googleads.g.doubleclick.net", "play-lh.googleusercontent.com", "s0.2mdn.net"} {
+		for _, host := range []string{"googlevideo.com", "new.googlevideo.com", "lh3.googleusercontent.com", "new.googleusercontent.com", "googleusercontent.com", "fonts.googleapis.com", "scontent-any.fbcdn.net", "tpc.googlesyndication.com", "googleads.g.doubleclick.net", "play-lh.googleusercontent.com", "s0.2mdn.net"} {
 			for _, netw := range []string{"tcp", "udp"} {
 				if got := strictRoute(t, next, "in", "r@test", host, "", netw, "443"); got != want {
 					t.Fatalf("%s/%s down=%t: %s want %s", host, netw, down, got, want)
