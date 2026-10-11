@@ -126,7 +126,7 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 	now := time.Now()
 	active := map[string]int{}
 	reasons := map[string]string{}
-	total, preserved := 0, 0
+	total := 0
 	managed := map[string]bool{}
 	for _, o := range owned {
 		managed[o.ID] = true
@@ -144,23 +144,19 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 			}
 			if managed[id] {
 				active[cls]++
-			} else {
-				preserved++
 			}
 			total++
 		}
 	}
-	target := configprofiles.Target(profiles, port) + preserved
-	deficit := 0
-	for cls, p := range byClass {
-		if p.Create {
-			deficit += max(p.Target-active[cls], 0)
-		}
+	counts, err := ObserveCapacity(profiles, port, observed, managed, classes, now)
+	if err != nil {
+		return false, err
 	}
+	target, deficit := counts.Target, counts.Deficit
 	if _, err = tx.ExecContext(ctx, `UPDATE bulk_lifecycle_scopes SET last_observed_at=now(),active_users=$3,last_error='',updated_at=now() WHERE panel_id=$1 AND inbound_id=$2`, rt.PanelID, inbound, total); err != nil {
 		return false, err
 	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,deficit,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET target_users=excluded.target_users,active_users=excluded.active_users,deficit=excluded.deficit,last_error='',observed_at=now()`, rt.PanelID, inbound, port, target, total, deficit); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO user_capacity_snapshots(panel_id,inbound_id,port,target_users,active_users,deficit,expired_users,quota_exhausted_users,last_error,observed_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'',now()) ON CONFLICT(panel_id,inbound_id) DO UPDATE SET port=excluded.port,target_users=excluded.target_users,active_users=excluded.active_users,deficit=excluded.deficit,expired_users=excluded.expired_users,quota_exhausted_users=excluded.quota_exhausted_users,created_last_cycle=0,deleted_last_cycle=0,last_error='',observed_at=now()`, rt.PanelID, inbound, port, target, total, deficit, counts.Expired, counts.Quota); err != nil {
 		return false, err
 	}
 	p := BulkPayload{Lifecycle: true, Policy: scope.Policy, GenerationID: scope.Generation, TargetUsers: max(1, len(observed)), CleanupReasons: map[string]string{}}

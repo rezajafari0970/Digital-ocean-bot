@@ -142,7 +142,7 @@ func lifecycleFixture(t *testing.T) (*sql.DB, Journal, *sanaei.PanelRuntime, *li
 	db := bulkTestDB(t)
 	_, err := db.Exec(`CREATE TABLE global_config_policies(policy_key text PRIMARY KEY,enabled boolean,ports jsonb,target_users_per_inbound int,user_quota_bytes bigint,user_lifetime_seconds int,device_limit int,users_per_second int);
  INSERT INTO global_config_policies VALUES('reality',false,'[443]',1,0,0,0,1);
- CREATE TABLE user_capacity_snapshots(panel_id uuid,inbound_id bigint,port int,target_users int,active_users int,deficit int,last_error text,observed_at timestamptz,PRIMARY KEY(panel_id,inbound_id));
+ CREATE TABLE user_capacity_snapshots(panel_id uuid,inbound_id bigint,port int,target_users int,active_users int,deficit int,expired_users int DEFAULT 0,quota_exhausted_users int DEFAULT 0,created_last_cycle int DEFAULT 0,deleted_last_cycle int DEFAULT 0,last_error text,observed_at timestamptz,PRIMARY KEY(panel_id,inbound_id));
  UPDATE bulk_lifecycle_control SET enabled=true;
  UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false;
  UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true;

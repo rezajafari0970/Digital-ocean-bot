@@ -9,9 +9,10 @@ async function performanceRequest(body){
  sessionStorage.removeItem('residentialPerformanceRequest');return result;
 }
 async function refreshResidentialPerformance(){
- const slot=document.querySelector('#residentialPerformance');if(!slot||performanceBusy)return;
- try{
-  const d=await api('/api/v1/residential-performance');performanceStatus=d;const e=d.experiment,active=e&&['RUNNING','KEPT','ROLLING_BACK'].includes(e.state);
+ if(performanceBusy)return;
+ return pollPageView('performance','residential',['#residentialPerformance'],read=>read('/api/v1/residential-performance'),(d,nodes)=>{
+  if(!d||!Array.isArray(d.panels))throw Error('Invalid performance status');
+  const slot=nodes['#residentialPerformance'];performanceStatus=d;const e=d.experiment,active=e&&['RUNNING','KEPT','ROLLING_BACK'].includes(e.state);
   const names=new Map(d.panels.map(p=>[p.id,p.label])),targets=e?.targets||[],assigned=new Set(targets.map(t=>t.panel_id));
   const waiting=e?.inherits_future?d.panels.filter(p=>p.experiment_id!==e.id).length:0;
   const verified=e?.counts?.verified??targets.filter(t=>t.state==='APPLIED'&&t.verified).length,total=e?.counts?.total??targets.length;
@@ -36,9 +37,9 @@ async function refreshResidentialPerformance(){
    (e?'<p role="status"><strong>'+esc(title)+'</strong> · '+(e.state==='RUNNING'?'Auto rollback: '+esc(new Date(e.deadline).toLocaleString()):e.state==='KEPT'?'No expiry · Manual rollback available':esc(e.reason||''))+'</p>'+
     '<p class="muted">'+esc(e.config.fast_share)+'% fast group · '+esc(e.config.fast_count||'auto')+' paths · '+esc(e.config.dns_mode.toUpperCase())+' DNS'+(e.state==='KEPT'||e.state==='RUNNING'?' · '+verified+' freshly verified / '+total+' assigned'+(e?.counts?.retired?' · '+e.counts.retired+' retired':'')+(waiting?' · '+waiting+' awaiting assignment':''):'')+'</p>'+
     (e.inherits_future?'<p>New servers inherit this profile automatically. Rollback stops inheritance and restores every server assigned to this publication.</p>':'')+
-    '<details><summary>Server results ('+targets.length+' shown / '+total+')</summary><div class="tableWrap"><table class="table"><thead><tr><th>Server</th><th>Result</th><th>Detail</th></tr></thead><tbody>'+targets.map(t=>'<tr><td>'+esc(names.get(t.panel_id)||t.panel_id)+'</td><td>'+esc(t.state==='APPLIED'&&!t.verified?'VERIFYING':t.state)+'</td><td>'+esc([t.error,t.server_state,t.provider_state].filter(Boolean).join(' · '))+'</td></tr>').join('')+'</tbody></table></div></details>':'<p class="muted">No performance profile has been published.</p>')+
+    '<details><summary>Server results ('+targets.length+' shown / '+total+')</summary><div class="tableWrap dropletTable"><table class="table"><thead><tr><th>Server</th><th>Result</th><th>Detail</th></tr></thead><tbody>'+targets.map(t=>'<tr><td data-label="Server">'+esc(names.get(t.panel_id)||t.panel_id)+'</td><td data-label="Result">'+esc(t.state==='APPLIED'&&!t.verified?'VERIFYING':t.state)+'</td><td data-label="Detail">'+esc([({RETIRED:'Server retired',ASSIGNMENT_MISSING:'Recovery assignment missing',GENERATION_UNVERIFIED:'Waiting for this settings version',ASSIGNMENT_PENDING:'Settings application pending',ROUTING_UNVERIFIED:'Native routing verification pending',ROUTING_GENERATION_CHANGED:'Routing version changed',PROOF_MISSING:'No native verification yet',PROOF_TIME_INVALID:'Invalid verification timestamp',PROOF_STALE:'Native verification overdue'}[t.recovery_reason]||t.recovery_reason),t.error,t.server_state,t.provider_state,t.routing_verified_at?'Routing proof: '+new Date(t.routing_verified_at).toLocaleString():'No routing proof'].filter(Boolean).join(' · '))+'</td></tr>').join('')+'</tbody></table></div></details>':'<p class="muted">No performance profile has been published.</p>')+
    '<p class="muted">Unavailable servers remain pending. Rollback preserves current proxies and client identities. Roll back the current profile before publishing different settings.</p>';
- }catch(e){slot.textContent='Performance status unavailable: '+e.message}
+ });
 }
 function performanceNumber(name,label,value,min,max,step=1){return '<label>'+label+'<input name="'+name+'" type="number" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'" required></label>'}
 function performanceCheck(name,label,value){return '<label class="remember"><input type="checkbox" name="'+name+'" '+(value?'checked':'')+'><span>'+label+'</span></label>'}

@@ -1,18 +1,22 @@
 package adminapi
 
 import (
+	"database/sql"
 	"net/http"
 )
 
 func (s *Server) configCapacity(w http.ResponseWriter, r *http.Request) {
-	rows, e := s.DB.QueryContext(r.Context(), `SELECT u.panel_id::text,pi.account_id::text,pi.base_url,u.inbound_id,u.port,u.target_users,u.active_users,u.expired_users,u.quota_exhausted_users,u.deficit,u.created_last_cycle,u.deleted_last_cycle,u.last_error,u.observed_at FROM user_capacity_snapshots u JOIN panel_instances pi ON pi.id=u.panel_id
- JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=dr.account_id
- WHERE pi.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
+	w.Header().Set("Cache-Control", "no-store")
+	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,pi.account_id::text,pi.base_url,i.remote_id,i.port,
+ u.target_users,u.active_users,u.expired_users,u.quota_exhausted_users,u.deficit,u.created_last_cycle,u.deleted_last_cycle,u.last_error,u.observed_at,
+ COALESCE(u.observed_at<=now() AND u.observed_at>now()-interval '30 seconds',false)
+ FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=dr.account_id
+ JOIN panel_inbound_inventory i ON i.panel_id=pi.id AND i.present AND i.enabled AND i.protocol='vless' AND i.security='reality'
+ LEFT JOIN user_capacity_snapshots u ON u.panel_id=pi.id AND u.inbound_id=i.remote_id AND u.observed_at<=now()
+ WHERE pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
  AND dr.state IN ('READY','EXPIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds')
- AND u.observed_at>now()-interval '30 seconds'
  AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=dr.id AND d.state='PANEL_COMPLETE')
- AND EXISTS(SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=pi.id AND i.remote_id=u.inbound_id AND i.present AND i.enabled)
- ORDER BY pi.base_url,u.port`)
+ ORDER BY pi.base_url,i.port,i.remote_id`)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -20,21 +24,48 @@ func (s *Server) configCapacity(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	items := []map[string]any{}
 	var target, active, expired, quota, deficit, created int
+	var observed, fresh, missing, stale int
 	for rows.Next() {
-		var panel, account, base, last string
+		var panel, account, base string
+		var last sql.NullString
 		var inbound int64
-		var port, t, a, ex, q, d, c, del int
-		var observed any
-		if rows.Scan(&panel, &account, &base, &inbound, &port, &t, &a, &ex, &q, &d, &c, &del, &last, &observed) != nil {
-			continue
+		var port int
+		var t, a, ex, q, d, c, del sql.NullInt64
+		var at sql.NullTime
+		var current bool
+		if err := rows.Scan(&panel, &account, &base, &inbound, &port, &t, &a, &ex, &q, &d, &c, &del, &last, &at, &current); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
 		}
-		target += t
-		active += a
-		expired += ex
-		quota += q
-		deficit += d
-		created += c
-		items = append(items, map[string]any{"panel_id": panel, "account_id": account, "base_url": base, "inbound_id": inbound, "port": port, "target": t, "active": a, "expired": ex, "quota_exhausted": q, "deficit": d, "created_last_cycle": c, "deleted_last_cycle": del, "last_error": last, "observed_at": observed})
+		item := map[string]any{"panel_id": panel, "account_id": account, "base_url": base, "inbound_id": inbound, "port": port,
+			"target": nil, "active": nil, "expired": nil, "quota_exhausted": nil, "deficit": nil, "created_last_cycle": nil, "deleted_last_cycle": nil, "last_error": last.String, "observed_at": nil, "fresh": current, "observation_status": "missing"}
+		if at.Valid {
+			observed++
+			if current {
+				fresh++
+				item["observation_status"] = "fresh"
+			} else {
+				stale++
+				item["observation_status"] = "stale"
+			}
+			target += int(t.Int64)
+			active += int(a.Int64)
+			expired += int(ex.Int64)
+			quota += int(q.Int64)
+			deficit += int(d.Int64)
+			created += int(c.Int64)
+			item["target"] = t.Int64
+			item["active"] = a.Int64
+			item["expired"] = ex.Int64
+			item["quota_exhausted"] = q.Int64
+			item["deficit"] = d.Int64
+			item["created_last_cycle"] = c.Int64
+			item["deleted_last_cycle"] = del.Int64
+			item["observed_at"] = at.Time
+		} else {
+			missing++
+		}
+		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
 		writeJSON(w, 500, errorBody())
@@ -46,7 +77,7 @@ func (s *Server) configCapacity(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, 200, map[string]any{"automation": automation, "target": target, "active": active, "expired": expired, "quota_exhausted": quota, "deficit": deficit, "created_last_cycle": created, "inbounds": items})
+	writeJSON(w, 200, map[string]any{"automation": automation, "target": target, "active": active, "expired": expired, "quota_exhausted": quota, "deficit": deficit, "created_last_cycle": created, "inbounds": items, "coverage": map[string]any{"eligible": len(items), "observed": observed, "fresh": fresh, "stale": stale, "missing": missing, "complete": missing == 0, "all_fresh": fresh == len(items), "freshness_seconds": 30, "totals_basis": "last_observed"}})
 }
 
 // capacityAutomationStatus is authenticated operator metadata. Public Output

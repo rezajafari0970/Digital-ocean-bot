@@ -1,0 +1,36 @@
+{
+  "goal": "Repair demonstrated panel statistics and operational diagnosis defects; resolve routing verification bottlenecks only with complete unchanged native proof and ownership guards.",
+  "context": "New 105.65-second mobile video: 45 active servers, 3-4 inactive including provisioning; UpCloud relay temporarily zero paths then recovered; Config Capacity displayed target75 active30 deficit45 based on rolling30-second subset of about50 serving panels; Residential RESTORING for fleet with stale proofs. Live canonical06f69a1 and runtime990a412, ready5/5. Sara accounts now absent and purge queueempty; no new destructive account test. Config profiles user changed recently DIRECT1 RESIDENTIAL3, preserve live settings. Need truthful stable census of eligible inbounds with freshness/missing coverage, per-class deficits not manual-client masking, accurate cycle fields, no stale data represented as current. Routing native verification currently sequential 33+ routeTest reads per panel; investigate bounded read-only concurrency within session/executor/locks without reducing probe matrix, 60second freshness, generation/plan proof, quota/deletion/recovery fences or global control settings. Show exact recovery blockers, scope preservation and mobile-readable diagnostics; do not fake RESTORED/ACTIVE. Review full video including last103s PanelSettings works; avoid classifying transient loading as bug. Reproduce isolated PostgreSQL/browser and fault/race cases. Retain unknown-outcome safety, provider drivers, proxy separation, category/UDP policy, no managed-server SSH or invented prod login. No subagents. Exact source API review, measured receipts, clean build under shared publishlock with fresh source/config comparison.",
+  "allowed_paths": [
+    "internal/adminapi",
+    "internal/panels/usercapacity",
+    "internal/panels/clientops",
+    "internal/panels/residentialsync",
+    "internal/panels/sanaei",
+    "internal/residentialperf",
+    "web/static",
+    "web/tests",
+    "tools/panel-audit-api.py",
+    "tools/panel-audit-acceptance-race.sh",
+    "tools/panel-audit-review.py",
+    "docs/development-jobs/panel-audit-20261012.json",
+    "docs/PANEL_AUDIT_20261012.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 2400,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/panel-audit-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/panel-audit-review.py"
+    ]
+  },
+  "commit_message": "fix(panel): truthful capacity coverage and bounded native route verification"
+}

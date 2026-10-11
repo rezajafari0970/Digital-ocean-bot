@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -32,7 +33,8 @@ type ResilientSession struct {
 	Policy  RetryPolicy
 	Observe func(success bool, transient bool)
 
-	loginMu sync.Mutex
+	loginMu         sync.Mutex
+	loginGeneration atomic.Uint64
 }
 
 func retryableStatus(code int) bool {
@@ -90,12 +92,33 @@ func retryableErrorWithContext(ctx context.Context, err error) bool {
 }
 
 func (s *ResilientSession) login(
-	ctx context.Context,
+	ctx context.Context, previous uint64,
 ) error {
-	s.loginMu.Lock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	timer := time.NewTicker(2 * time.Millisecond)
+	defer timer.Stop()
+	for !s.loginMu.TryLock() {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
 	defer s.loginMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 
-	return s.Client.Login(ctx)
+	if s.loginGeneration.Load() != previous {
+		return nil
+	}
+	err := s.Client.Login(ctx)
+	if err == nil {
+		s.loginGeneration.Add(1)
+	}
+	return err
 }
 
 func (s *ResilientSession) delay(
@@ -191,6 +214,7 @@ func (s *ResilientSession) Do(
 
 	for attempt := 1; attempt <= policy.MaxAttempts; attempt++ {
 
+		generation := s.loginGeneration.Load()
 		resp, err :=
 			(DirectSessionExecutor{
 				Client: s.Client,
@@ -223,7 +247,7 @@ func (s *ResilientSession) Do(
 			!relogged {
 
 			if loginErr :=
-				s.login(ctx); loginErr == nil {
+				s.login(ctx, generation); loginErr == nil {
 
 				relogged = true
 				attempt--
@@ -318,3 +342,7 @@ func ReadAllBounded(
 var ErrPanelResponse = errors.New("invalid panel response")
 
 func panelResponseError(err error) error { return fmt.Errorf("%w: %w", ErrPanelResponse, err) }
+
+// RouteProofConcurrency opts this HTTP driver into concurrent read-only native
+// route tests. Configuration mutations remain serialized by their owner.
+func (s *ResilientSession) RouteProofConcurrency() int { return 4 }

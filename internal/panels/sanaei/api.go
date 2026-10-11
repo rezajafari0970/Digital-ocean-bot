@@ -10,6 +10,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"sync"
+	"time"
 )
 
 var ErrAPIRequest = errors.New("x-ui api request failed")
@@ -19,6 +21,7 @@ type Credentials struct {
 	Password string
 }
 type APIClient struct {
+	authMu      sync.RWMutex // Login is exclusive; authenticated read requests may overlap.
 	BaseURL     string
 	HTTP        *http.Client
 	Credentials Credentials
@@ -37,6 +40,10 @@ func NewAPIClient(baseURL string, credentials Credentials, transport http.RoundT
 }
 
 func (c *APIClient) Login(ctx context.Context) error {
+	if err := c.lockAuth(ctx, true); err != nil {
+		return err
+	}
+	defer c.authMu.Unlock()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/csrf-token", nil)
 	if err != nil {
 		return fmt.Errorf("%w: csrf request: %v", ErrAPIRequest, err)
@@ -76,6 +83,10 @@ func (c *APIClient) Login(ctx context.Context) error {
 }
 
 func (c *APIClient) json(ctx context.Context, method, path string, body url.Values, out any) error {
+	if err := c.lockAuth(ctx, false); err != nil {
+		return err
+	}
+	defer c.authMu.RUnlock()
 	var reader *strings.Reader
 	if body == nil {
 		reader = strings.NewReader("")
@@ -106,4 +117,31 @@ func (c *APIClient) json(ctx context.Context, method, path string, body url.Valu
 		}
 	}
 	return nil
+}
+
+// Authentication ownership must respect the request's cancellation even while
+// another request is logging in. An ordinary RWMutex wait cannot be cancelled.
+func (c *APIClient) lockAuth(ctx context.Context, exclusive bool) error {
+	try := c.authMu.TryRLock
+	if exclusive {
+		try = c.authMu.TryLock
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if try() {
+		return nil
+	}
+	ticker := time.NewTicker(2 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if try() {
+				return nil
+			}
+		}
+	}
 }

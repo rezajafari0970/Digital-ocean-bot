@@ -37,3 +37,20 @@ const TuningProgressSQL = `CASE WHEN e.tuning IS NULL THEN NULL ELSE (
  AND (NOT (e.tuning->>'phase'='TESTING' OR (e.tuning->>'phase'='RESTORING' AND e.tuning->>'restore_scope'='selected'))
   OR t.panel_id::text IN(SELECT jsonb_array_elements_text(e.tuning->'panels')))
  ) END`
+
+// AssignmentFreshSQL is shared by display counts and the completion gate.
+const AssignmentFreshSQL = tuningFresh
+
+// AssignmentBlockerSQL reports why this exact assignment lacks native proof.
+// It is diagnostic only and never advances recovery or changes policy.
+const AssignmentBlockerSQL = `CASE
+ WHEN NOT (` + tuningLive + `) THEN 'RETIRED'
+ WHEN p.panel_id IS NULL THEN 'ASSIGNMENT_MISSING'
+ WHEN p.experiment_id IS DISTINCT FROM t.experiment_id OR p.generation IS DISTINCT FROM t.generation OR p.applied_generation IS DISTINCT FROM t.generation THEN 'GENERATION_UNVERIFIED'
+ WHEN t.state<>'APPLIED' THEN 'ASSIGNMENT_PENDING'
+ WHEN r.state IS DISTINCT FROM 'APPLIED' THEN 'ROUTING_UNVERIFIED'
+ WHEN r.revision IS DISTINCT FROM c.revision OR r.performance_generation IS DISTINCT FROM t.generation THEN 'ROUTING_GENERATION_CHANGED'
+ WHEN p.verified_at IS NULL OR r.verified_at IS NULL THEN 'PROOF_MISSING'
+ WHEN p.verified_at>clock_timestamp() OR r.verified_at>clock_timestamp() THEN 'PROOF_TIME_INVALID'
+ WHEN p.verified_at<=clock_timestamp()-interval '60 seconds' OR r.verified_at<=clock_timestamp()-interval '60 seconds' THEN 'PROOF_STALE'
+ ELSE '' END`

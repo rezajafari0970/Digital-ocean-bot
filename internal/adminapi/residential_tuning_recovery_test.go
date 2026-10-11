@@ -15,6 +15,8 @@ func TestTuningFleetPreflightRejectsUnverifiedSurvivorAtomically(t *testing.T) {
 		"retiring_invalid_account": `UPDATE accounts SET enabled=false,provider_state='TOKEN_INVALID',deletion_requested_at=now() WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1);
  UPDATE droplets SET state='RETIRING' WHERE id=(SELECT droplet_id FROM panel_instances WHERE id=$1);
  UPDATE panel_routing_state SET state='FAILED' WHERE panel_id=$1`,
+		"future_profile":    `UPDATE residential_performance_panels SET verified_at=now()+interval '1 hour' WHERE panel_id=$1`,
+		"future_router":     `UPDATE panel_routing_state SET verified_at=now()+interval '1 hour' WHERE panel_id=$1`,
 		"stale_profile":     `UPDATE residential_performance_panels SET verified_at=now()-interval '61 seconds' WHERE panel_id=$1`,
 		"stale_router":      `UPDATE panel_routing_state SET verified_at=now()-interval '61 seconds' WHERE panel_id=$1`,
 		"router_generation": `UPDATE panel_routing_state SET performance_generation=0 WHERE panel_id=$1`,
@@ -143,4 +145,33 @@ func TestTuningProgressShowsBlockedSurvivorWithoutCompletingRecovery(t *testing.
 		t.Fatal("misleading recovery progress", response.Body.String())
 	}
 	f.phase("RESTORING")
+}
+
+func TestPerformanceStatusCannotCallStaleRoutingVerified(t *testing.T) {
+	f := newTuningFixture(t, 1)
+	f.start()
+	f.verify(f.panels[0])
+	sqlMust(t, f.db, "UPDATE panel_routing_state SET verified_at=now()-interval '61 seconds' WHERE panel_id=$1", f.panels[0])
+	request := httptest.NewRequest("GET", "/api/v1/residential-performance", nil)
+	request = request.WithContext(context.WithValue(request.Context(), principalKey{}, auth.Principal{Role: auth.Admin}))
+	response := httptest.NewRecorder()
+	(&Server{DB: f.db}).residentialPerformanceStatus(response, request)
+	if response.Code != 200 {
+		t.Fatal(response.Code, response.Body.String())
+	}
+	var body struct {
+		Experiment struct {
+			Counts  struct{ Verified int }
+			Targets []struct {
+				Verified bool
+				Reason   string `json:"recovery_reason"`
+			}
+		}
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.Experiment.Counts.Verified != 0 || len(body.Experiment.Targets) != 1 || body.Experiment.Targets[0].Verified || body.Experiment.Targets[0].Reason != "PROOF_STALE" {
+		t.Fatal(response.Body.String())
+	}
 }

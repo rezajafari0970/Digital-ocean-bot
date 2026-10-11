@@ -14,6 +14,10 @@ func (d DirectSessionExecutor) Do(ctx context.Context, x SessionRequest) (Sessio
 	if d.Client == nil || d.Client.HTTP == nil {
 		return SessionResponse{}, ErrSessionRequest
 	}
+	if err := d.Client.lockAuth(ctx, false); err != nil {
+		return SessionResponse{}, err
+	}
+	defer d.Client.authMu.RUnlock()
 	var body io.Reader
 	if len(x.Body) > 0 {
 		body = strings.NewReader(string(x.Body))

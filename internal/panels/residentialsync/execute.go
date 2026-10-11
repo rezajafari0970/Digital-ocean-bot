@@ -105,6 +105,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		// Process-running alone cannot acknowledge a new complete plan.
 		return errors.New("native plan proof requires an inbound or hardened internal DNS route")
 	}
+	checks := []func(context.Context) error{}
 	for _, tag := range tags {
 		for _, c := range samples {
 			for _, probe := range []struct {
@@ -172,25 +173,32 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				} else {
 					form.Set("ip", probe.ip)
 				}
-				response, e := exec.Do(ctx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
-				if e = envelope(response, e); e != nil {
-					return e
-				}
-				var result struct {
-					Obj struct {
-						Matched     bool
-						OutboundTag string
+				checks = append(checks, func(checkCtx context.Context) error {
+					response, e := exec.Do(checkCtx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
+					if e = envelope(response, e); e != nil {
+						return e
 					}
-				}
-				matches := json.Unmarshal(response.Body, &result) == nil && result.Obj.Matched && result.Obj.OutboundTag == expected
-				if p.PoolEnabled && len(p.Proxies) > 0 && base == p.Proxies[0].Tag {
-					matches = result.Obj.Matched && poolLaneMatches(desired, network, result.Obj.OutboundTag)
-				}
-				if !matches {
-					return errRouteNotApplied
-				}
+					var result struct {
+						Obj struct {
+							Matched     bool
+							OutboundTag string
+						}
+					}
+					matches := json.Unmarshal(response.Body, &result) == nil && result.Obj.Matched && result.Obj.OutboundTag == expected
+					if p.PoolEnabled && len(p.Proxies) > 0 && base == p.Proxies[0].Tag {
+						matches = result.Obj.Matched && poolLaneMatches(desired, network, result.Obj.OutboundTag)
+					}
+					if !matches {
+						return errRouteNotApplied
+					}
+					return nil
+				})
 			}
 		}
+	}
+
+	if err := runRouteProofChecks(ctx, exec, checks); err != nil {
+		return err
 	}
 
 	if p.Harden {

@@ -12,7 +12,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    const file=path.join(staticRoot,name);if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
-  const data={'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
+  const data={'/api/v1/residential-proxies':[],'/api/v1/residential-routing':{enabled:true,verified_panels:1,scoped_panels:1,configured_proxies:1,healthy_proxies:1},'/api/v1/residential-performance':{panels:[],experiment:null,routing_enabled:true,defaults:{}},'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(url.pathname in data?data[url.pathname]:{status:'ready',checks:[],active_servers:1}));
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
@@ -90,6 +90,30 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await waitFor("![...activePageView.polls.values()].some(x=>x.busy)");
   await evaluate("fixtureQueue.push({url:'/api/v1/config-capacity',kind:'json',body:{...testCap,inbounds:[],target:0,active:0,deficit:0}});refreshConfigStatus()");
   assert.equal(await evaluate("document.querySelector('#capacityStatusSlot .stat b').textContent"),'—');assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('Counts are unavailable')"),true);await evaluate("load('configs')");mark('empty snapshot explicitly unavailable');
+  // Missing and stale rows remain visible with accurate labels on both screen sizes.
+  const covered={...capacity,coverage:{eligible:3,observed:2,fresh:1,stale:1,missing:1},inbounds:[{...capacity.inbounds[0],observation_status:'fresh',observed_at:new Date().toISOString()},{...capacity.inbounds[0],panel_id:'stale',observation_status:'stale',observed_at:'2026-10-01T00:00:00Z'},{...capacity.inbounds[0],panel_id:'missing',target:null,active:null,deficit:null,observation_status:'missing'}]};
+  for(const width of [390,1280]){
+   await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<800});
+   await evaluate('fixtureQueue.push({url:"/api/v1/config-capacity",kind:"json",body:'+JSON.stringify(covered)+'});refreshConfigStatus()');
+   assert.equal(await evaluate("document.querySelector('[data-capacity-coverage]').innerText.includes('2 / 3 eligible')"),true);
+   assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('Unknown')"),true);
+   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
+  }mark('stale and missing coverage visible on mobile and desktop');
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  const health={status:'ready',active_servers:45,inactive_servers:1,observed_at:new Date().toISOString(),server_health:[{account_name:'Fixture',provider:'upcloud',provider_resource_id:'fixture-resource',lifecycle_state:'READY',reason:'ROUTING_UNVERIFIED'}]};
+  await evaluate('fixtureQueue.push({url:"/api/v1/system",kind:"json",body:'+JSON.stringify(health)+'});load("dashboard")');
+  assert.equal(await evaluate("document.querySelector('#dashboardStatus').innerText.includes('Routing not verified')"),true);
+  assert.equal(await evaluate("document.querySelector('#dashboardStatus .tableWrap').scrollWidth<=document.querySelector('#dashboardStatus .tableWrap').clientWidth+1"),true);
+  await evaluate('fixtureQueue.push({url:"/api/v1/system",kind:"json",body:'+JSON.stringify({...health,active_servers:46,server_health:[]})+'});refreshDashboard()');
+  assert.equal(await evaluate("document.querySelector('#dashboardStatus .stat b').textContent"),'46');mark('dashboard refreshes without navigation and mobile reasons fit');
+  await evaluate("holdRead('dashboard-old','/api/v1/system');window.dashboardOld=refreshDashboard();void 0");await waitFor("fixtureHolds.some(x=>x.id==='dashboard-old')");
+  await evaluate('load("configs");finishRead("dashboard-old",'+JSON.stringify(health)+');dashboardOld');
+  assert.equal(await evaluate("!!document.querySelector('#capacityStatusSlot')&&!document.querySelector('#dashboardStatus')"),true);mark('dashboard refresh cannot overwrite a different page');
+  await evaluate("load('residential')");await waitFor("document.querySelector('#residentialPerformance')?.innerText.includes('No performance profile')");
+  await evaluate("holdRead('performance-old','/api/v1/residential-performance');window.oldPerformance=refreshResidentialPerformance();void 0");await waitFor("fixtureHolds.some(x=>x.id==='performance-old')");
+  const perfReads=await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length");await evaluate("Promise.all(Array.from({length:8},()=>refreshResidentialPerformance()))");assert.equal(await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length"),perfReads);
+  await evaluate("load('configs');finishRead('performance-old',{panels:[],experiment:{id:'late'}});oldPerformance");
+  assert.equal(await evaluate("performanceStatus.experiment===null&&!!document.querySelector('#capacityStatusSlot')"),true);mark('residential status is single-flight and ignores obsolete responses');
   // One click is one mutation; recoveries issue no POSTs.
   const postBefore=await evaluate("fixtureCalls.filter(x=>x.method!=='GET').length");assert.equal(postBefore,0);
   await evaluate("document.querySelector('[data-action=resume-capacity]').click()");await waitFor("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity/resume').length===1&&!activePageView.loading");

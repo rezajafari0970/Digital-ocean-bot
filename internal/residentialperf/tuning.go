@@ -100,10 +100,10 @@ func tuningConfigChange(before, candidate Config) error {
 const tuningLive = ` EXISTS(SELECT 1 FROM panel_instances pi JOIN droplets d ON d.id=pi.droplet_id WHERE pi.id=t.panel_id AND d.state<>'DELETED') `
 const tuningFresh = ` t.state='APPLIED' AND p.experiment_id=t.experiment_id
  AND p.generation=t.generation AND p.applied_generation=t.generation
- AND p.verified_at>clock_timestamp()-interval '60 seconds'
+ AND p.verified_at<=clock_timestamp() AND p.verified_at>clock_timestamp()-interval '60 seconds'
  AND r.state='APPLIED' AND r.revision=c.revision
  AND r.performance_generation=t.generation
- AND r.verified_at>clock_timestamp()-interval '60 seconds' `
+ AND r.verified_at<=clock_timestamp() AND r.verified_at>clock_timestamp()-interval '60 seconds' `
 
 // Saved selected IDs and every surviving fleet target are obligations. A missing
 // or changed marker is a conflict, never a way to shrink the proof set.
@@ -447,7 +447,7 @@ func eligibleWallClock(ctx context.Context, tx *sql.Tx, panel string, minutes in
  WHERE p.id=$1 AND p.enabled AND d.state='READY' AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
  AND (d.expires_at IS NULL OR d.expires_at>clock_timestamp()+($2+5)*interval '1 minute')
  AND c.enabled AND (c.fleet OR p.id=ANY(c.panel_ids)) AND r.pool_enabled AND r.state='APPLIED' AND r.revision=c.revision
- AND r.verified_at>clock_timestamp()-interval '60 seconds' AND c.revision=$3 AND ($4='' OR r.plan_hash=$4)
+ AND r.verified_at<=clock_timestamp() AND r.verified_at>clock_timestamp()-interval '60 seconds' AND c.revision=$3 AND ($4='' OR r.plan_hash=$4)
  AND EXISTS(SELECT 1 FROM residential_proxies WHERE enabled AND status='healthy' AND last_success_at>clock_timestamp()-interval '3 minutes'))`, panel, minutes, revision, plan).Scan(&ok)
 	if e != nil {
 		return e
