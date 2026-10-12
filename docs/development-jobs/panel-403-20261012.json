@@ -14,11 +14,56 @@
   ],
   "push": true,
   "rollback_commit": "a1c2ed4f98a4b397994ca431198ff7b2bf49e51d",
-  "status": "VERIFIED_PENDING_PUBLICATION",
+  "status": "COMPLETE",
   "root_cause": "umask077 Git clone plus cp-a preserved root-only static permissions",
   "focused_tests": 12,
   "review": "PASS",
   "fault_test": "post-publication unreadable JS rejected; matching runtime restored; panel and6assets PASS",
   "evidence": "/root/backups/dob-panel-403-20261012",
-  "unresolved_code_blockers": []
+  "unresolved_code_blockers": [],
+  "acceptance": {
+    "status": "COMPLETE",
+    "completed_at": "2026-10-12T04:16:39.210447+00:00",
+    "source_revision": "1564cb513c949707800fa8f01722c394abe366d0",
+    "public_revision": "96da63e228229594542b42969c94e79feba41277",
+    "public_branches": [
+      "main",
+      "stable"
+    ],
+    "new_server": "limited-lime.ptr.network",
+    "new_server_update": "PASS",
+    "new_server_preservation": {
+      "protected_objects": 8,
+      "changed": 0
+    },
+    "panel_http": 200,
+    "verified_assets": 6,
+    "managed_services": 3,
+    "ready_checks": 5,
+    "focused_tests": 12,
+    "regression": "go test ./..., go vet, bootstrap Python and Node gates PASS",
+    "fault": "unreadable live app.js rejected; rollback restored asset hash and all3services; panel6assets PASS",
+    "github_actions": [
+      {
+        "id": 38202942727,
+        "branch": "stable",
+        "conclusion": "success"
+      },
+      {
+        "id": 38202942783,
+        "branch": "main",
+        "conclusion": "success"
+      }
+    ],
+    "secret_scans": "Gitleaks and known-live literals PASS; no sensitive values logged",
+    "publisher_evidence": "/var/lib/datacenter-publisher/release-vl772vsr",
+    "api_usage": {
+      "requests": 6,
+      "input_tokens": 53700,
+      "output_tokens": 8891,
+      "total_tokens": 62591
+    },
+    "original_production_revision": "395e6ad856c3b857444be2bf6f75e5971ef7f4e6",
+    "additional_fresh_container": "Not run: optional creation stalled before instance existed and was cancelled. Actual normal stable Git-clone update on the affected Ubuntu26 server and restrictive-mode Ubuntu24 publisher install are verified."
+  }
 }
