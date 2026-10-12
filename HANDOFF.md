@@ -1,3 +1,7 @@
+## Resume — 2026-10-13 00:29 Tehran
+
+Video follow-up remains BLOCKED_FINAL_API_REVIEW. One requested recheck again returned429 credit_balance_exhausted. Code/test hashes unchanged from32874909; runtime5b0dc764 unchanged on both hosts. Confirmed API37826tokens unchanged;4intentional attempts total,3failed, unreceipted legacy usage unknown. Native observation-stale count recovered19to0; primary43active/2provisioning/4degraded/9pending,2active builds. Read docs/VIDEO_FOLLOWUP_20261012.md and resume_20261013 in the job JSON. Restore API credit before final review; do not waive gates.
+
 ## Latest — video follow-up 2026-10-12: BLOCKED FINAL API REVIEW
 
 Read docs/VIDEO_FOLLOWUP_20261012.md and docs/development-jobs/video-followup-20261012.json before historical entries below. Tested candidate is on separate fix/video-followup-20261012 branch; no public or production change. Canonical remains a1f118d; both runtimes5b0dc76. Final independent OpenAI approval is blocked by HTTP429 credit_balance_exhausted and must not be waived. Confirmed current-phase API37826tokens; interrupted legacy usage unknown. Full59Go packages, final adminapi/Postgres, browser, output contracts and CLI tests pass. Current Vultr4335 provider401 is a separate credential/access blocker. Resume at final review after credit restoration, then existing public gates and both-host acceptance.

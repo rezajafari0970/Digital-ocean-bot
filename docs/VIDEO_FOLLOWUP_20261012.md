@@ -1,3 +1,13 @@
+## Resume check — 2026-10-13 00:29 Tehran
+
+User requested continuation. Exact tested source32874909 and every code/test hash remain unchanged. Both production hosts still run5b0dc764, with3active services and5/5readiness checks; no new public release or deployment occurred.
+
+One new final API review attempt at00:26:19Tehran was rejected: HTTP429 insufficient_quota / credit_balance_exhausted. No usage receipt returned. Total intentional requests for this repair are now4:1completed response and3failures; confirmed receipt usage remains37002input+824output=37826tokens. Unreceipted legacy activity and dollar charges remain unknown. Do not replace missing usage with zero or waive the mandatory final review.
+
+Fresh primary read at00:29:04Tehran:58tracked=43active+2inactive/provisioning+4degraded+9pending deletion;0broken.2active builds, including1waiting installer. The19provider-stale classifications seen at00:27:29 disappeared through normal worker observations by00:29:04, without manual refresh or restart. Linode10managed,8READY,9completed provision runs; stages differ and these numbers are not all service-ready. Last-observed client capacity200target/194active/6deficit with36/40fresh,4stale,0missing is not a simultaneous live total. Vultr4335 still TOKEN_INVALID.
+
+Status remains IN PROGRESS — BLOCKED FINAL API REVIEW. Next action:restore the connected API credit, obtain a fresh final verdict for the unchanged source, and only then use the existing release/scanning/install gates and verify both hosts. No repeated quota calls are running.
+
 # Video follow-up — 2026-10-12
 
 **IN PROGRESS — BLOCKED FINAL API REVIEW. No new public release or production deployment.**

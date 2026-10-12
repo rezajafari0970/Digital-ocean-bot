@@ -116,8 +116,8 @@
       }
     ],
     "billed_usd": null,
-    "intentional_requests_submitted": 3,
-    "failed_intentional_requests": 2,
+    "intentional_requests_submitted": 4,
+    "failed_intentional_requests": 3,
     "api_access_status": "BLOCKED_CREDIT_BALANCE_EXHAUSTED",
     "prior_two_phase_confirmed_tokens": 232325,
     "known_receipt_total_across_three_phases": 270151,
@@ -139,9 +139,19 @@
         "api_error_code": "credit_balance_exhausted",
         "request_id": "req_9ccc81f5902a48d7a3fd7417b5690b16",
         "tokens": null
+      },
+      {
+        "phase": "resume-final-20261013",
+        "receipt": false,
+        "http_status": 429,
+        "api_error_code": "credit_balance_exhausted",
+        "request_id": "req_d9cfe506c6234b77a2afe22972640af5",
+        "tokens": null
       }
     ],
-    "counting_note": "Only returned usage receipts are summed. Failed requests and interrupted legacy activity are not invented as zero; these totals are not the organization billing total."
+    "counting_note": "Only returned usage receipts are summed. Failed requests and interrupted legacy activity are not invented as zero; these totals are not the organization billing total.",
+    "last_credit_check": "2026-10-12T20:56:19.873185+00:00",
+    "confirmed_new_tokens_on_resume": null
   },
   "video_audit": {
     "video_seconds": 218.546,
@@ -251,5 +261,52 @@
     "Use existing public secret scan, unprivileged full tests and exact-source Ubuntu24 install/update gates; then update both hosts with identity audit and fresh feature acceptance.",
     "Reconcile latest native lifecycle and account states; do not overwrite credentials, quota, Desired, spacing or protection settings."
   ],
-  "evidence_directory": "/root/backups/dob-video-followup-20261012"
+  "evidence_directory": "/root/backups/dob-video-followup-20261012",
+  "resume_20261013": {
+    "at": "2026-10-12T21:00:04.940466+00:00",
+    "status": "BLOCKED_FINAL_API_REVIEW",
+    "source_candidate": "32874909c539177e3d1e84bea147bd7d16623767",
+    "tested_hashes_unchanged": true,
+    "new_api_attempts": 1,
+    "new_response_receipts": 0,
+    "error": {
+      "type": "HTTPError",
+      "at": "2026-10-12T20:56:19.873185+00:00",
+      "http_status": 429,
+      "request_id": "req_d9cfe506c6234b77a2afe22972640af5",
+      "api_error_type": "insufficient_quota",
+      "api_error_code": "credit_balance_exhausted",
+      "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/."
+    },
+    "confirmed_cumulative_tokens": 37826,
+    "runtime_revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+    "production_modified": false,
+    "observed_at": "2026-10-12T20:59:04.277626+00:00",
+    "server_counts": {
+      "total_servers": 58,
+      "active_servers": 43,
+      "inactive_servers": 2,
+      "broken_servers": 0,
+      "degraded_servers": 4,
+      "pending_deletion_servers": 9,
+      "active_deployments": 2
+    },
+    "builds": {
+      "active_builds": 2,
+      "waiting_builds": 1,
+      "observed_at": "2026-10-12T20:59:03.800585933Z"
+    },
+    "health_reasons": {
+      "PANEL_DEGRADED": 4,
+      "PENDING_DELETION": 9,
+      "PROVISIONING": 2
+    },
+    "observation_stale_recovery": {
+      "first_count": 19,
+      "last_count": 0,
+      "manual_intervention": false
+    },
+    "external_provider_blocker": "Vultr4335 TOKEN_INVALID persists",
+    "next_step": "Restore API credit, obtain independent final PASS, then unchanged public validation/install gates and both-host deployment."
+  }
 }
