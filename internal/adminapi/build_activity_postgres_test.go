@@ -22,6 +22,7 @@ func TestBuildActivitySummaryGlobalTerminalAndSecretSafety(t *testing.T) {
 		t.Fatal(e)
 	}
 	sqlMust(t, db, `INSERT INTO operations(id,account_id,kind,idempotency_key,state,error_code,error_message) VALUES(gen_random_uuid(),$1,'CREATE_DROPLET',$2,'failed','invalid_request','raw secret-value')`, a, "deploy:"+id+":create:region:us-east")
+	sqlMust(t, db, `INSERT INTO operations(id,account_id,kind,idempotency_key,state,error_code,error_message) SELECT gen_random_uuid(),$1,'CREATE_DROPLET','deploy:'||id::text||':create:region:old','failed','region_capacity','old region failure' FROM deployments WHERE state IN ('READY','PANEL_COMPLETE')`, a)
 	s := Server{DB: db}
 	w := httptest.NewRecorder()
 	s.buildActivity(w, httptest.NewRequest("GET", "/api/v1/build-activity?summary=1", nil))
@@ -50,6 +51,9 @@ func TestBuildActivitySummaryGlobalTerminalAndSecretSafety(t *testing.T) {
 			if r.Active || r.OperationError != "operation: invalid_request" {
 				t.Fatal(r)
 			}
+		}
+		if (r.State == "READY" || r.State == "PANEL_COMPLETE") && r.OperationError != "" {
+			t.Fatal("recovered create error shown as current", r)
 		}
 		if r.Active && (r.State == "PANEL_COMPLETE" || r.State == "INSTALL_FAILED" || r.State == "INSTALL_ROLLED_BACK" || r.State == "UNKNOWN") {
 			t.Fatal(r)
@@ -99,10 +103,15 @@ func TestProvisionErrorHistoryDoesNotMultiplyOrHideRecovered(t *testing.T) {
 	if len(out) != 1 || out[0]["occurrences"] != float64(2) || out[0]["affected_deployments"] != float64(2) || out[0]["open_runs"] != float64(0) {
 		t.Fatal(out)
 	}
-	sqlMust(t, db, `UPDATE provision_runs SET state='WAITING_INSTALLER' WHERE id=$1`, run)
+	sqlMust(t, db, `UPDATE provision_runs SET state='WAITING_INSTALLER',current_step='ssh' WHERE id=$1`, run)
 	out = read()
 	if out[0]["open_runs"] != float64(1) || out[0]["waiting_runs"] != float64(1) {
 		t.Fatal(out)
+	}
+	sqlMust(t, db, `UPDATE provision_runs SET current_step='panel' WHERE id=$1`, run)
+	out = read()
+	if out[0]["open_runs"] != float64(0) || out[0]["waiting_runs"] != float64(0) {
+		t.Fatal("prior step counted as current", out)
 	}
 	sqlMust(t, db, `UPDATE droplets SET state='DELETED' WHERE id=$1`, d)
 	out = read()

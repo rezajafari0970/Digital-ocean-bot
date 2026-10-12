@@ -19,7 +19,8 @@ async function refreshResidentialPerformance(){
   const tuning=e?.active_tuning,progress=e?.tuning_progress;
   const phaseTitle={TESTING:'TESTING · Candidate settings',PUBLISHING:'PUBLISHING · Awaiting verification',RESTORING:'RESTORING · Previous settings pending verification'};
   const title=phaseTitle[tuning?.phase]||(e?.state==='KEPT'?(e.inherits_future?'PUBLISHED · All current and future servers':'PERMANENT · Selected servers'):e?.state);
-  const tuningDetail=tuning?'<div role="status" class="performanceRecovery"><p><strong>Speed tuning: '+esc(tuning.phase)+'</strong>'+ (tuning.reason?' · '+esc(tuning.reason):'')+'</p>'+
+  const tuningDetail=tuning?'<div role="status" class="performanceRecovery"><p><strong>'+(['RESTORED','PUBLISHED'].includes(tuning.phase)?'Last speed-tuning result: ':'Speed tuning: ')+esc(tuning.phase)+'</strong>'+ (tuning.reason?' · '+esc(tuning.reason):'')+'</p>'+
+   (tuning.phase==='RESTORED'?'<p class="muted">This trial was rolled back. Current publication and server verification are shown below.</p>':'')+
    (tuning.phase==='TESTING'?'<p>Trial deadline: '+esc(new Date(tuning.deadline).toLocaleString())+'</p>':'')+
    (progress?'<p>'+esc(progress.verified)+' / '+esc(progress.surviving)+' surviving panels freshly verified · '+esc(progress.pending)+' pending · '+esc(progress.non_serving)+' no longer serving</p>'+
     (progress.credential_blocked?'<p class="error">'+esc(progress.credential_blocked)+' panels have invalid provider credentials. Repair those account credentials so deletion can be verified; pending recovery records remain preserved.</p>':'')+

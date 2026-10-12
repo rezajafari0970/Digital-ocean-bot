@@ -1,3 +1,7 @@
+## Latest — video follow-up 2026-10-12: BLOCKED FINAL API REVIEW
+
+Read docs/VIDEO_FOLLOWUP_20261012.md and docs/development-jobs/video-followup-20261012.json before historical entries below. Tested candidate is on separate fix/video-followup-20261012 branch; no public or production change. Canonical remains a1f118d; both runtimes5b0dc76. Final independent OpenAI approval is blocked by HTTP429 credit_balance_exhausted and must not be waived. Confirmed current-phase API37826tokens; interrupted legacy usage unknown. Full59Go packages, final adminapi/Postgres, browser, output contracts and CLI tests pass. Current Vultr4335 provider401 is a separate credential/access blocker. Resume at final review after credit restoration, then existing public gates and both-host acceptance.
+
 ## 2026-10-12 — Linode expiry deficit recovery verified
 
 - Product source `c839c0c4daac4d230b1ffabd78972cf9be80a128`; public main/stable and both management runtimes `5b0dc7640eaf51909ae04a1710aae15bf34088ab`. Existing accounts, proxies, profiles, credentials, port/path and resource identities preserved; both hosts3units active and5readiness checks pass. Both GitHub Actions runs succeeded.

@@ -19,7 +19,7 @@ const buildActivitySQL = `SELECT d.id::text,a.name,d.state,d.current_step,d.atte
  count(*) FILTER(WHERE d.state='WAITING_INSTALLER' AND (` + activeBuildPredicate + `)) OVER(),
  COALESCE(op.error_code,''),COALESCE(op.error_message,'')
  FROM deployments d JOIN accounts a ON a.id=d.account_id
- LEFT JOIN LATERAL(SELECT o.error_code,o.error_message FROM operations o WHERE o.account_id=d.account_id AND o.kind='CREATE_DROPLET' AND o.state<>'succeeded' AND (o.idempotency_key='deploy:'||d.id::text||':create' OR o.idempotency_key LIKE 'deploy:'||d.id::text||':create:region:%') ORDER BY o.updated_at DESC,o.id DESC LIMIT 1) op ON true
+ LEFT JOIN LATERAL(SELECT o.error_code,o.error_message FROM operations o WHERE d.droplet_id IS NULL AND COALESCE(d.provider_id,'')='' AND d.state NOT IN ('READY','PANEL_COMPLETE') AND o.account_id=d.account_id AND o.kind='CREATE_DROPLET' AND o.state<>'succeeded' AND (o.idempotency_key='deploy:'||d.id::text||':create' OR o.idempotency_key LIKE 'deploy:'||d.id::text||':create:region:%') ORDER BY o.updated_at DESC,o.id DESC LIMIT 1) op ON true
  ORDER BY d.updated_at DESC,d.id DESC LIMIT 100`
 
 func (s *Server) buildActivity(w http.ResponseWriter, r *http.Request) {

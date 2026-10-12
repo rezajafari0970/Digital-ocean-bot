@@ -28,7 +28,7 @@ WITH provider_inventory AS (
  FROM accounts a LEFT JOIN provider_inventory pi ON pi.account_id=a.id
  WHERE deleted_at IS NULL OR runtime_status='DELETE_PENDING'
 ), server_evidence AS (
- SELECT dr.id,dr.provider_resource_id,dr.state lifecycle_state,a.name account_name,a.provider,
+ SELECT dr.id,dr.provider_resource_id,dr.state lifecycle_state,a.name account_name,a.provider,a.provider_state,a.provider_error_state,
  pi.created_at provider_observed_at,pi.created_at+(pi.refresh_seconds*interval '1 second') next_provider_refresh_at,
  p.last_sync_at,p.last_sync_state,p.route_state,p.route_verified_at,p.admission_blocked,p.xui_failed,p.protection_failed,
  CASE
@@ -90,7 +90,7 @@ SELECT json_build_object(
  'provider_stale_servers',(SELECT count(*) FROM live_servers WHERE reason='PROVIDER_OBSERVATION_STALE'),
  'panel_attention_servers',(SELECT count(*) FROM live_servers WHERE health='degraded'),
  'server_health',COALESCE((SELECT json_agg(row_to_json(detail)) FROM(
- SELECT id,account_name,provider,provider_resource_id,lifecycle_state,health,reason,provider_observed_at,next_provider_refresh_at,last_sync_at,last_sync_state,route_state,route_verified_at,admission_blocked,xui_failed,protection_failed
+ SELECT id,account_name,provider,provider_state,provider_error_state,provider_resource_id,lifecycle_state,health,reason,provider_observed_at,next_provider_refresh_at,last_sync_at,last_sync_state,route_state,route_verified_at,admission_blocked,xui_failed,protection_failed
  FROM live_servers WHERE health<>'active' ORDER BY account_name,id LIMIT 100)detail),'[]'::json),
  'active_deployments',(SELECT count(*) FROM deployments d WHERE ` + activeBuildPredicate + `),
  'live_workers',(SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'),

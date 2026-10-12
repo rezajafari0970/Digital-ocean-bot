@@ -23,6 +23,7 @@ type accountBuildState struct {
 	Block                                               *capacity.CreateBlock
 	DesiredRemaining, Pending, InUse, Limit             int
 	LimitKnown                                          bool
+	RefreshSeconds                                      int
 }
 
 func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuildState, error) {
@@ -40,6 +41,7 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	if err != nil {
 		return x, err
 	}
+	x.RefreshSeconds = refreshSeconds
 	if x.TrialCompatible {
 		x.TrialRelay, err = s.trialRelayStatus(ctx, id)
 		if err != nil {

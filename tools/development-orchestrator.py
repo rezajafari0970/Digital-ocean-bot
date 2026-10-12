@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import fcntl,json,os,pathlib,subprocess,tempfile,time
+import argparse,fcntl,json,os,pathlib,re,subprocess,tempfile,time
 from datetime import datetime,timezone
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 os.environ["PATH"] = "/usr/local/go/bin:/usr/local/bin:/usr/bin:/bin:" + os.environ.get("PATH", "")
@@ -290,8 +290,15 @@ def one(job):
         j["retry_after"]=0; j.pop("last_error",None); j["phase"]=PHASES[PHASES.index(phase)+1]
         j["status"]="COMPLETE" if j["phase"]=="COMPLETE" else "READY"; s["updated_at"]=now()
         write_state(s); ev(event="phase_done",job=job,phase=phase,next=j["phase"]); return 0
-def main():
-    job=os.environ.get("DEV_JOB","proxy-control-plane")
+def main(argv=None):
+    parser=argparse.ArgumentParser(description="Run one explicitly selected development job.")
+    parser.add_argument("--job",default=os.environ.get("DEV_JOB"),help="Job name (or set DEV_JOB)")
+    args=parser.parse_args(argv)
+    job=args.job
+    if not job or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*",job):
+        parser.error("an explicit, valid --job or DEV_JOB is required")
+    if not (JOBS/(job+".json")).is_file():
+        parser.error("job manifest does not exist")
     while True:
         rc=one(job)
         s=state(); j=s["jobs"].get(job,{})

@@ -5,6 +5,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  const staticRoot=path.resolve(__dirname,'../static');
  const profileData=[{route_class:'RESIDENTIAL',enabled:true,master_enabled:true,ports:[443],target_users_per_inbound:20,user_lifetime_seconds:600,users_per_second:1,revision:1}];
  const capacity={target:20,active:7,expired:0,quota_exhausted:0,deficit:13,created_last_cycle:1,inbounds:[{panel_id:'fixture',inbound_id:1,base_url:'http://fixture.invalid',port:443,target:20,active:7,deficit:13,created_last_cycle:1}],automation:{running:true,panels:[],cooldown_panels:0,quarantined_panels:0}};
+ const outputHTML=fs.readFileSync(path.resolve(__dirname,'../../internal/adminapi/output_view.go'),'utf8').match(/io.WriteString\(w, `([\s\S]*?)`\)/)[1];
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(url.pathname.startsWith('/static/')||url.pathname==='/admin/'){
@@ -12,6 +13,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    const file=path.join(staticRoot,name);if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
+  if(url.pathname==='/share/output/view-fixture'){res.setHeader('Content-Type',url.searchParams.get('view')==='1'?'text/html':'text/plain');res.end(url.searchParams.get('view')==='1'?outputHTML:'vless://fixture@host.test:443?note='+('long'.repeat(200))+'\n');return}
   const data={'/api/v1/residential-proxies':[],'/api/v1/residential-routing':{enabled:true,verified_panels:1,scoped_panels:1,configured_proxies:1,healthy_proxies:1},'/api/v1/residential-performance':{panels:[],experiment:null,routing_enabled:true,defaults:{}},'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(url.pathname in data?data[url.pathname]:{status:'ready',checks:[],active_servers:1}));
  });
@@ -42,7 +44,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    window.finishRead=(id,body,status=200)=>{const item=fixtureHolds.find(x=>x.id===id);if(!item)throw Error('missing held request '+id);item.resolve(new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}}))};
   }`;
   await call('Page.addScriptToEvaluateOnNewDocument',{source:init});
-  const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('Evaluation failed: '+JSON.stringify(r.exceptionDetails));return r.result.value};
+  const evaluate=async (expression,userGesture=false)=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture});if(r.exceptionDetails)throw Error('Evaluation failed: '+JSON.stringify(r.exceptionDetails));return r.result.value};
   async function waitFor(expression,ms=12000){const end=Date.now()+ms;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' body='+await evaluate('document.body.innerText.slice(-3000)'))}
   const mark=x=>{passed.push(x);console.log('PASS',x)};
   await call('Page.navigate',{url:base+'/admin/#configs'});await waitFor('!!document.querySelector("#capacityStatusSlot")&&!activePageView.loading');
@@ -60,6 +62,17 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("fixtureQueue.push({url:'/api/v1/accounts/123/dashboard',kind:'network'});accountDash(123)");await waitFor('activePageView.loadFailed');
   await evaluate("fixtureQueue.push({url:'/api/v1/accounts/123/dashboard',kind:'json',body:{account:{name:'Recovered account'},capacity:{},resources:{},network:{},deployments:{},runtime:{}}});window.dispatchEvent(new Event('online'))");
   await waitFor("document.querySelector('#title').textContent==='Account — Recovered account'");assert.equal(await evaluate('fixtureAlerts.length'),0);mark('account read recovers while preserving its route');
+  for(const freshness of ['scheduled','stale','expired']){
+   await evaluate('fixtureQueue.push({url:"/api/v1/accounts/123/dashboard",kind:"json",body:{account:{name:"Inventory fixture"},capacity:{data_status:'+JSON.stringify(freshness)+'},resources:{total:3,managed:2,unmanaged:1,active:2},network:{},deployments:{},runtime:{}}});accountDash(123)');
+   assert.equal(await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/accounts/123/refresh').length"),0);
+   assert.equal(await evaluate("document.body.innerText.includes('Provider servers observed')"),true);
+  }mark('account observation ages never trigger implicit provider mutations');
+  for(const available of [false,true]){
+   await evaluate('fixtureQueue.push({url:"/api/v1/accounts/123/dashboard",kind:"json",body:{account:{name:"Inventory fixture"},capacity:{},resources:{data_available:'+available+'},droplets:[],network:{},deployments:{},runtime:{}}});accountDash(123)');
+   assert.equal(await evaluate("document.body.innerText.includes('Provider inventory unavailable; no provider observation')"),!available);
+   assert.equal(await evaluate("document.body.innerText.includes('No provider servers in the latest inventory.')"),available);
+  }mark('missing inventory and observed empty inventory remain distinct');
+
   await evaluate("load('configs')");
   await evaluate("window.previousView=activePageView;accountDash(123,{preserveHash:true})");assert.equal(await evaluate("current==='configs'&&activePageView===previousView"),true);mark('late account action cannot invalidate another route');
   // Removing only one target while a request is in-flight is harmless and does not partially update.
@@ -100,30 +113,46 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
   }mark('stale and missing coverage visible on mobile and desktop');
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
-  const health={status:'ready',active_servers:45,inactive_servers:1,observed_at:new Date().toISOString(),server_health:[{account_name:'Fixture',provider:'upcloud',provider_resource_id:'fixture-resource',lifecycle_state:'READY',reason:'ROUTING_UNVERIFIED'}]};
+  const health={status:'ready',active_servers:45,inactive_servers:1,observed_at:new Date().toISOString(),server_health:[{account_name:'Fixture',provider:'upcloud',provider_resource_id:'fixture-resource',lifecycle_state:'READY',reason:'ROUTING_UNVERIFIED',provider_state:'TOKEN_INVALID'}]};
   await evaluate('fixtureQueue.push({url:"/api/v1/system",kind:"json",body:'+JSON.stringify(health)+'});load("dashboard")');
-  assert.equal(await evaluate("document.querySelector('#dashboardStatus').innerText.includes('Routing not verified')"),true);
+  assert.equal(await evaluate("document.querySelector('#dashboardStatus').innerText.includes('Routing not verified')&&document.querySelector('#dashboardStatus').innerText.includes('TOKEN_INVALID')"),true);
   assert.equal(await evaluate("document.querySelector('#dashboardStatus .tableWrap').scrollWidth<=document.querySelector('#dashboardStatus .tableWrap').clientWidth+1"),true);
   await evaluate('fixtureQueue.push({url:"/api/v1/system",kind:"json",body:'+JSON.stringify({...health,active_servers:46,server_health:[]})+'});refreshDashboard()');
   assert.equal(await evaluate("document.querySelector('#dashboardStatus .stat b').textContent"),'46');mark('dashboard refreshes without navigation and mobile reasons fit');
   await evaluate("holdRead('dashboard-old','/api/v1/system');window.dashboardOld=refreshDashboard();void 0");await waitFor("fixtureHolds.some(x=>x.id==='dashboard-old')");
-  await evaluate('load("configs");finishRead("dashboard-old",'+JSON.stringify(health)+');dashboardOld');
+  await evaluate('load("configs")');await evaluate('finishRead("dashboard-old",'+JSON.stringify(health)+');dashboardOld');
   assert.equal(await evaluate("!!document.querySelector('#capacityStatusSlot')&&!document.querySelector('#dashboardStatus')"),true);mark('dashboard refresh cannot overwrite a different page');
   await evaluate("load('residential')");await waitFor("document.querySelector('#residentialPerformance')?.innerText.includes('No performance profile')");
   await evaluate("holdRead('performance-old','/api/v1/residential-performance');window.oldPerformance=refreshResidentialPerformance();void 0");await waitFor("fixtureHolds.some(x=>x.id==='performance-old')");
   const perfReads=await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length");await evaluate("Promise.all(Array.from({length:8},()=>refreshResidentialPerformance()))");assert.equal(await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length"),perfReads);
-  await evaluate("load('configs');finishRead('performance-old',{panels:[],experiment:{id:'late'}});oldPerformance");
+  await evaluate("load('configs')");await evaluate("finishRead('performance-old',{panels:[],experiment:{id:'late'}});oldPerformance");
   assert.equal(await evaluate("performanceStatus.experiment===null&&!!document.querySelector('#capacityStatusSlot')"),true);mark('residential status is single-flight and ignores obsolete responses');
   // One click is one mutation; recoveries issue no POSTs.
   const postBefore=await evaluate("fixtureCalls.filter(x=>x.method!=='GET').length");assert.equal(postBefore,0);
-  await evaluate("document.querySelector('[data-action=resume-capacity]').click()");await waitFor("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity/resume').length===1&&!activePageView.loading");
+  assert.equal(await evaluate("document.querySelector('[data-action=resume-capacity]').textContent"),'Recheck eligible client scopes');mark('running automation exposes explicit scope recovery');
+  await evaluate('fixtureQueue.push({url:"/api/v1/config-capacity",kind:"json",body:{...testCap,automation:{...testCap.automation,running:false}}});refreshConfigStatus()');
+  assert.equal(await evaluate("document.querySelector('[data-action=resume-capacity]').disabled"),false);
+  await evaluate("document.querySelector('[data-action=resume-capacity]').click();document.querySelector('[data-action=resume-capacity]').dispatchEvent(new MouseEvent('click',{bubbles:true}))");await waitFor("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity/resume').length===1&&!activePageView.loading");
   await evaluate("refreshConfigStatus()");assert.equal(await evaluate("fixtureCalls.filter(x=>x.method!=='GET').length"),1);mark('resume sent once; automatic recovery is read-only');
+  // The visible popup exists before any asynchronous sharing request begins.
+  assert.deepEqual(await evaluate("(()=>{const w=openOutputWindow();const result=[!!w,w?.document.body.innerText.includes('Preparing your output'),w?.opener===null];w?.close();return result})()",true),[true,true,true]);mark('output popup immediately explains pending loading');
+  await evaluate('fixtureQueue.push({url:"/api/v1/panel-settings",kind:"json",body:{listen_port:18080,web_path:"/admin",username:"fixture"}},{url:"/api/v1/project-update",kind:"json",body:{available:true,status:"succeeded",current_revision:"runtime-new-revision",installed_revision:"historical-old-revision",ended_at:"2026-10-12T10:00:00Z"}});load("settings")');
+  await waitFor("document.querySelector('#projectUpdateStatus')?.innerText.includes('runtime-new-')");
+  assert.equal(await evaluate("document.querySelector('#projectUpdateStatus').innerText.includes('Last update installed revision: historical-o')"),true);mark('running version and old update receipt are distinct');
+  await evaluate("load('configs')");
   // An expired admin session stops automatic reads, without automatically signing in.
   await evaluate("fixtureQueue.push({url:'/api/v1/config-capacity',kind:'json',status:401,body:{error:'unauthorized'}});refreshConfigStatus()");assert.equal(await evaluate("token===''&&!document.querySelector('#login').hidden&&activePageView===null"),true);
   const afterLogout=await evaluate('fixtureCalls.length');await evaluate("wakePageReads();refreshConfigStatus();refreshClientOpsStatus();refreshOutputAutomationStatus()");assert.equal(await evaluate('fixtureCalls.length'),afterLogout);mark('expired session invalidates reads and respects authentication');
   // Only the local fixture establishes a replacement session; production login is never bypassed.
   await evaluate("token='local-new-fixture';showApp()");await waitFor("!!document.querySelector('#capacityStatusSlot')&&!activePageView.loading");
   assert.deepEqual(errors,[]);await evaluate("document.querySelector('#capacityStatusSlot').scrollIntoView();document.querySelector('#toast').hidden=true");const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'configs-mobile.png'),Buffer.from(shot.data,'base64'));
+  await call('Page.navigate',{url:base+'/share/output/view-fixture?view=1'});await waitFor("document.querySelector('#configs')?.textContent.startsWith('vless://')");
+  assert.equal(await evaluate("document.querySelector('#outputStatus').hidden"),true);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);mark('human output wraps long URI lines on mobile without altering their text');
+  await evaluate("fixtureQueue.push({url:'/share/output/view-fixture',kind:'json',status:503,body:{error:'unavailable'}})");
+  await waitFor("document.querySelector('#outputStatus').textContent.includes('temporarily unavailable')");
+  assert.equal(await evaluate("document.querySelector('#configs').textContent"),'');
+  await waitFor("document.querySelector('#configs').textContent.startsWith('vless://')&&document.querySelector('#outputStatus').hidden");mark('human output explains failure, clears stale URIs and recovers');
   fs.writeFileSync(path.join(root,'result.json'),JSON.stringify({status:'PASS',passed,page_errors:errors,mutation_count:1},null,2));console.log('UI_REFRESH_RECOVERY_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}
 })().catch(e=>{console.error(e);process.exitCode=1});

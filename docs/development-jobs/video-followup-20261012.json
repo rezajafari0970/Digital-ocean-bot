@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "goal": "Fully inspect 218.546-second user video and repair proven diagnostics, current-versus-historical state, inventory, read-side effects and mobile output issues while preserving provider/proxy/lifecycle policies.",
+  "status": "IN_PROGRESS_BLOCKED_FINAL_API_REVIEW",
+  "at": "2026-10-12T20:21:53.023520+00:00",
+  "base_revision": "a1f118d5351b24e6946a5acf0176cf738c9a7ee5",
+  "production_revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+  "isolated_branch": "fix/video-followup-20261012",
+  "worktree": "/root/projects/dob-video-followup-20261012",
+  "production_modified": false,
+  "public_published": false,
+  "canonical_advanced": false,
+  "allowed_paths": [
+    "internal/adminapi/account_build_status.go",
+    "internal/adminapi/build_activity.go",
+    "internal/adminapi/build_activity_postgres_test.go",
+    "internal/adminapi/dashboard.go",
+    "internal/adminapi/freshness.go",
+    "internal/adminapi/output_view.go",
+    "internal/adminapi/project_update.go",
+    "internal/adminapi/provision_errors.go",
+    "internal/adminapi/status_counts.go",
+    "internal/adminapi/video_followup_test.go",
+    "tools/development-orchestrator.py",
+    "tools/tests/test_development_orchestrator_cli.py",
+    "web/static/app.js",
+    "web/static/output-live.js",
+    "web/static/panel-settings.js",
+    "web/static/residential_performance.js",
+    "web/tests/config-refresh-recovery.cjs",
+    "web/tests/output_live.cjs",
+    "PROJECT_STATE.md",
+    "HANDOFF.md",
+    "docs/development-jobs/video-followup-20261012.json",
+    "docs/VIDEO_FOLLOWUP_20261012.md"
+  ],
+  "source_sha256": {
+    "internal/adminapi/account_build_status.go": "400d85a2351e0f3403786b15e7336ab0ee24dc5781dce78d23b8173ae47f5e2b",
+    "internal/adminapi/build_activity.go": "38aaf4f8ad5872a690f32a0ee4f0384d665408f420a127725fd1a414e2419c03",
+    "internal/adminapi/build_activity_postgres_test.go": "b6f250a067202998894148e34dcce75e76d9ab7b573d56d53656bddc80a4a770",
+    "internal/adminapi/dashboard.go": "e2a6f6b7e2b5777f06a5333ced4e42e24783d9d52985b948430a0cc4e45a8ac6",
+    "internal/adminapi/freshness.go": "f1397768dc3af2dcac8384fe0676061475d074fc44ab7387106625ce23815e21",
+    "internal/adminapi/output_view.go": "929e49041633ccaceca65723c82ded7ac1de5873ce6a14aae57dc836bd748d32",
+    "internal/adminapi/project_update.go": "682253b0ba96c8847d21aa0fcfa48cda866f324ec24605d90b645ed4007933f8",
+    "internal/adminapi/provision_errors.go": "a58fd347ac61709f520c9bb610215e8776bb3c4d47cb7ac2eac0bceb2712ddf0",
+    "internal/adminapi/status_counts.go": "a3dd6a99483cb85801d8d595b563803ee456846cb6d3aaa35cace6e078505967",
+    "internal/adminapi/video_followup_test.go": "6abc70f5ac23f864e664148d548303b68e6fb4b02afe3afee2b2b95e5ccd84ea",
+    "tools/development-orchestrator.py": "63a52910871856fb1be45e1bdc2351f6647268edf05a2258a5d5cb0b98d6cecf",
+    "tools/tests/test_development_orchestrator_cli.py": "8bd5c2144456f24be586ab8afa095e467ddddb642a1f010a836e488f3a331a64",
+    "web/static/app.js": "943f03ea835f5d96db7f8114b2540b82f53ef17f835400f8088d821a8e017f9b",
+    "web/static/output-live.js": "f7122a3046efdbb653d82173aa3a702fb1d91b7c7b8b739fbfa8a4adc298dcfd",
+    "web/static/panel-settings.js": "9465bc8c8eb2ee22e26b1d48f75f9831a7ca391f0d8b4c2e7155efe124f0fd36",
+    "web/static/residential_performance.js": "3bc77841f8b0242584465438781ce6bf5d2ec376cb4f075be45c7a47ae814238",
+    "web/tests/config-refresh-recovery.cjs": "537a68757de95fd5c81485836d86059684c045234adbbb1fc6769d56e173389e",
+    "web/tests/output_live.cjs": "f596514bfc31052dcaeb88c1a661a5fa5b8d445e743f90be76181c24618e64a8"
+  },
+  "tests": {
+    "full_go_with_isolated_postgres_and_optional_browser": "PASS 59 packages",
+    "final_adminapi_package": "PASS 262.917 seconds",
+    "go_vet": "PASS",
+    "real_chromium_regressions": "PASS 26 scenarios",
+    "output_uri_unit_tests": "PASS 3",
+    "orchestrator_cli_tests": "PASS 2",
+    "final_raw_and_opt_in_output_postgres_contracts": "PASS"
+  },
+  "review": {
+    "initial": "REVISE",
+    "findings": [
+      "R1 freshness threshold metadata",
+      "R2 missing inventory versus observed empty"
+    ],
+    "resolution": "Both fixed with targeted Postgres and browser tests; independent final PASS unavailable",
+    "blocker": "HTTP429 insufficient_quota / credit_balance_exhausted",
+    "must_not_waive": "User required independent OpenAI final review before publication/production acceptance; confirmed from earlier accepted workflow on2026-10-02 and2026-10-10."
+  },
+  "api_usage": {
+    "confirmed_responses": 1,
+    "confirmed_total_tokens": 37826,
+    "unreceipted_activity": [
+      {
+        "at": "2026-10-12T19:44:12.729481+00:00",
+        "cause": "legacy orchestrator diagnostic --help invoked default PLAN; terminated",
+        "requests": "unknown",
+        "tokens": null,
+        "billed_usd": null
+      },
+      {
+        "phase": "resolution",
+        "cause": "review request ended with transport/API exception; no response receipt",
+        "error": {
+          "type": "HTTPError",
+          "at": "2026-10-12T20:09:41.020880+00:00"
+        },
+        "tokens": null,
+        "billed_usd": null
+      }
+    ],
+    "confirmed_input_tokens": 37002,
+    "confirmed_output_tokens": 824,
+    "receipts": [
+      {
+        "phase": "source",
+        "id": "resp_0e5bc96c09d0748a006acd3d7716dc87d1ab5852e792f1271a",
+        "usage": {
+          "input_tokens": 37002,
+          "input_tokens_details": {
+            "cache_write_tokens": 36999,
+            "cached_tokens": 0
+          },
+          "output_tokens": 824,
+          "output_tokens_details": {
+            "reasoning_tokens": 257
+          },
+          "total_tokens": 37826
+        }
+      }
+    ],
+    "billed_usd": null,
+    "intentional_requests_submitted": 3,
+    "failed_intentional_requests": 2,
+    "api_access_status": "BLOCKED_CREDIT_BALANCE_EXHAUSTED",
+    "prior_two_phase_confirmed_tokens": 232325,
+    "known_receipt_total_across_three_phases": 270151,
+    "known_receipt_responses_across_three_phases": 12,
+    "failed_requests": [
+      {
+        "phase": "resolution",
+        "receipt": false,
+        "error": {
+          "type": "HTTPError",
+          "at": "2026-10-12T20:09:41.020880+00:00"
+        },
+        "tokens": null
+      },
+      {
+        "phase": "resolution-focused",
+        "receipt": false,
+        "http_status": 429,
+        "api_error_code": "credit_balance_exhausted",
+        "request_id": "req_9ccc81f5902a48d7a3fd7417b5690b16",
+        "tokens": null
+      }
+    ],
+    "counting_note": "Only returned usage receipts are summed. Failed requests and interrupted legacy activity are not invented as zero; these totals are not the organization billing total."
+  },
+  "video_audit": {
+    "video_seconds": 218.546,
+    "coverage": "all seconds visually inspected, readable4-second sheets plus1-second sheets",
+    "findings": [
+      {
+        "time": "00:00\u201300:14",
+        "finding": "Dashboard classifications and concurrent provider/routing failures",
+        "resolution": "Add provider account state beside routing/lifecycle evidence; no gate changes",
+        "status": "TESTED"
+      },
+      {
+        "time": "00:22\u201300:34;01:18\u201301:42",
+        "finding": "Inventory totals/active zero for DO and other providers",
+        "resolution": "Canonical inventory is shared by rows and counters, duplicate legacy aliases ignored, unavailable differs from empty",
+        "status": "TESTED"
+      },
+      {
+        "time": "00:43\u201301:02",
+        "finding": "Vultr4335 401/TOKEN_INVALID",
+        "resolution": "Requires valid credential or provider access correction; no token reset, direct bypass or unverifiable deletion",
+        "status": "EXTERNAL_BLOCKER"
+      },
+      {
+        "time": "01:03\u201301:17",
+        "finding": "DigitalOcean full resource quotas",
+        "resolution": "Expected configured/provider capacity, not a failed running server",
+        "status": "EXPECTED"
+      },
+      {
+        "time": "01:18\u201301:25",
+        "finding": "Account detail stale classification contradicts configured cadence; implicit refresh POST",
+        "resolution": "Shared bounded display freshness metadata; reads no longer mutate provider refresh",
+        "status": "TESTED"
+      },
+      {
+        "time": "01:50\u201302:00",
+        "finding": "Installer handoff and prior SSH timeout",
+        "resolution": "Waiting build recovered through native worker; historical failure remains, current-step group counts corrected",
+        "status": "NATIVELY_RECOVERED"
+      },
+      {
+        "time": "02:05\u201302:11",
+        "finding": "Completed builds show failed prior create-region attempt",
+        "resolution": "Current create operation errors shown only before resource identity and successful completion; history retained",
+        "status": "TESTED"
+      },
+      {
+        "time": "02:17\u201302:30",
+        "finding": "Historical SSH fingerprints inherit unrelated current waiting count",
+        "resolution": "Open/waiting diagnostic groups must match current provision step",
+        "status": "TESTED"
+      },
+      {
+        "time": "02:33\u201302:46",
+        "finding": "RESTORED tuning attempt beside PUBLISHED current settings",
+        "resolution": "Restored trial explicitly historical; current publication and verification remain visible",
+        "status": "IMPLEMENTED"
+      },
+      {
+        "time": "02:47\u201303:00",
+        "finding": "Resume while automation running",
+        "resolution": "Explicit recheck-scopes label and confirmation preserve legitimate recovery; double-submit guarded",
+        "status": "TESTED"
+      },
+      {
+        "time": "02:47\u201303:05",
+        "finding": "Stale last-observed client counts and 3 historical failed jobs",
+        "resolution": "Last-observed totals preserve timestamps. Initial10Linode complete; latest9ready after native expiry, next configured build20:25:14UTC. No cadence or class target change.",
+        "status": "OBSERVED_EXPECTED"
+      },
+      {
+        "time": "03:04\u201303:05",
+        "finding": "Protection OFF revision38",
+        "resolution": "Preserve intentional saved setting",
+        "status": "EXPECTED"
+      },
+      {
+        "time": "03:13\u201303:22",
+        "finding": "Blank newly opened output tab while share created",
+        "resolution": "Immediate popup loading plus opt-in browser view loading/empty/error status; stale URI clearing, mobile wrapping, raw subscription/class/filter semantics unchanged",
+        "status": "TESTED"
+      },
+      {
+        "time": "03:35\u201303:38",
+        "finding": "Old update receipt shown as currently installed revision",
+        "resolution": "Runtime current_revision distinct from last update receipt and timestamp; works when bridge unavailable",
+        "status": "TESTED"
+      },
+      {
+        "time": "diagnostic tool",
+        "finding": "Legacy orchestrator ignored --help and implicitly chose old job",
+        "resolution": "Require explicit validated --job or DEV_JOB; help/invalid requests cannot start work or API",
+        "status": "TESTED"
+      }
+    ]
+  },
+  "external_blockers": [
+    "OpenAI API credit balance exhausted",
+    "Vultr4335 repeated provider401/TOKEN_INVALID requires valid credential/access policy"
+  ],
+  "resume": [
+    "Restore API credit through authorized account controls; do not submit more calls while exhausted.",
+    "Inspect existing request and receipt files; obtain a new final review of this exact candidate including final output changes. Never blindly replay a submitted request.",
+    "Resolve any review defects, rerun affected gates and update source hashes.",
+    "Only after final review PASS, push canonical checkpoint and advance canonical detached HEAD; leave existing dirty archive branch untouched.",
+    "Use existing public secret scan, unprivileged full tests and exact-source Ubuntu24 install/update gates; then update both hosts with identity audit and fresh feature acceptance.",
+    "Reconcile latest native lifecycle and account states; do not overwrite credentials, quota, Desired, spacing or protection settings."
+  ],
+  "evidence_directory": "/root/backups/dob-video-followup-20261012"
+}

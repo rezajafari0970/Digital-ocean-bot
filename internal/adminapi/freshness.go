@@ -20,3 +20,12 @@ func observationFreshness(at time.Time, now time.Time) string {
 func withinObservationSchedule(at, now time.Time, seconds int) bool {
 	return !at.IsZero() && !at.After(now) && seconds > 90 && seconds <= 300 && now.Sub(at) <= time.Duration(seconds+30)*time.Second
 }
+
+// The display retains scheduled evidence without changing the strict freshness
+// window used for mutation admission.
+func observationDisplaySeconds(seconds int) int {
+	if seconds > 90 && seconds <= 300 {
+		return max(120, seconds+30)
+	}
+	return 120
+}

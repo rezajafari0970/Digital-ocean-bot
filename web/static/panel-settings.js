@@ -2,7 +2,7 @@
 (function(){
  let starting=false,lastState=null;
  const stages=['Check prerequisites','Fetch release','Install dependencies','Build release','Back up and preserve data','Verify services and panel','Complete'];
- const labels={idle:'Ready to update',queued:'Update queued',running:'Updating project',succeeded:'Update completed',failed:'Update failed',interrupted:'Update interrupted',unavailable:'Update service unavailable'};
+ const labels={idle:'Ready to update',queued:'Update queued',running:'Updating project',succeeded:'Last update completed',failed:'Update failed',interrupted:'Update interrupted',unavailable:'Update service unavailable'};
  function settingsFields(d){
   return '<label>Listen port<input name="listen_port" type="number" min="1024" max="65535" required value="'+esc(d.listen_port)+'"></label>'+
    '<label>Web path<input name="web_path" required value="'+esc(d.web_path)+'"></label>'+
@@ -49,7 +49,9 @@
   const slot=$('#projectUpdateStatus'),button=$('#projectUpdateButton');if(!slot||!button)return;
   const label=labels[s.status]||'Checking update';
   let body='<p><b>'+esc(label)+'</b></p>';
-  if(s.installed_revision)body+='<p class="muted">Installed revision: '+esc(s.installed_revision.slice(0,12))+'</p>';
+  if(s.current_revision)body+='<p>Currently running revision: '+esc(s.current_revision.slice(0,12))+'</p>';
+  if(s.installed_revision)body+='<p class="muted">Last update installed revision: '+esc(s.installed_revision.slice(0,12))+'</p>';
+  if(s.ended_at)body+='<p class="muted">Last update finished: '+esc(new Date(s.ended_at).toLocaleString())+'</p>';
   if(s.job_id){
    body+='<ol>'+stages.map((label,index)=>{
     const n=index+1,done=s.status==='succeeded'||n<s.stage,failed=(s.status==='failed'||s.status==='interrupted')&&n===s.stage;

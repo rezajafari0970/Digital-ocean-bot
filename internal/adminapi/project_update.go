@@ -8,6 +8,8 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo"
 )
 
 type updateState struct {
@@ -21,6 +23,7 @@ type updateState struct {
 	EndedAt           string `json:"ended_at,omitempty"`
 	FromRevision      string `json:"from_revision,omitempty"`
 	InstalledRevision string `json:"installed_revision,omitempty"`
+	CurrentRevision   string `json:"current_revision"`
 	Error             string `json:"error,omitempty"`
 	RecoveryRequired  bool   `json:"recovery_required,omitempty"`
 }
@@ -81,9 +84,10 @@ func (s *Server) projectUpdateStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	state, err := s.updateController().Request(r.Context(), "status")
 	if err != nil {
-		writeJSON(w, 200, updateState{Status: "unavailable", Error: "update_control_unavailable"})
+		writeJSON(w, 200, updateState{Status: "unavailable", Error: "update_control_unavailable", CurrentRevision: buildinfo.Current().Commit})
 		return
 	}
+	state.CurrentRevision = buildinfo.Current().Commit
 	writeJSON(w, 200, state)
 }
 func (s *Server) startProjectUpdate(w http.ResponseWriter, r *http.Request) {
@@ -108,6 +112,7 @@ func (s *Server) startProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
+	state.CurrentRevision = buildinfo.Current().Commit
 	writeJSON(w, 202, state)
 }
 func (s *Server) applyPanelSettings(w http.ResponseWriter, r *http.Request) {

@@ -41,12 +41,9 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": build.State, "provider_reason": build.Reason, "can_create": build.SchedulerCanBuild, "provider_can_create": build.ProviderCanCreate, "scheduler_can_build": build.SchedulerCanBuild, "scheduler_reason": build.SchedulerReason, "create_block": build.Block, "upcloud_trial_compatible": build.TrialCompatible, "trial_proxy_candidates": build.TrialProxyCandidates, "trial_relay": build.TrialRelay}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
 	d.Billing = s.accountBilling(r.Context(), id)
-	var total, managed, active int
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE state<>'deleted'),count(*) FILTER(WHERE state<>'deleted' AND managed),count(*) FILTER(WHERE state='active') FROM resources WHERE account_id=$1 AND type='server'`, id).Scan(&total, &managed, &active); err != nil && !errors.Is(err, sql.ErrNoRows) {
-		writeJSON(w, 500, errorBody())
-		return
-	}
-	d.Resources = map[string]any{"total": total, "managed": managed, "unmanaged": total - managed, "active": active}
+	// Counts and rows share the canonical provider inventory. Legacy resource
+	// aliases differ by provider and may contain both droplet and server rows.
+	d.Resources = map[string]any{"total": nil, "managed": nil, "unmanaged": nil, "active": nil, "data_available": false}
 
 	limit, limitKnown, providerDroplets := build.Limit, build.LimitKnown, build.InUse
 	var lastRefresh sql.NullTime
@@ -72,11 +69,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	ageSeconds := int64(0)
 	if lastRefresh.Valid {
 		ageSeconds = int64(time.Since(lastRefresh.Time).Seconds())
-		if ageSeconds <= 120 {
-			freshnessStatus = "fresh"
-		} else {
-			freshnessStatus = "stale"
-		}
+		freshnessStatus = build.CapacityFreshness
 	}
 	var desiredServers int
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT desired_server_count FROM accounts WHERE id=$1`, id).Scan(&desiredServers); err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -88,7 +81,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		desiredRemaining = 0
 	}
 	evidence := s.capacityEvidenceForAccount(id, provider)
-	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "buildable_now": build.Buildable, "pending_builds": build.Pending, "plan_available": build.PlanAvailable, "lower_bound": evidence.LowerBound, "evidence_source": evidence.Source, "probe_in_flight": evidence.ProbeInFlight, "probe_after": evidence.ProbeAfter, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "stale_after_seconds": 120}
+	d.Capacity = map[string]any{"managed_servers": managedDroplets, "managed_droplets": managedDroplets, "desired_servers": desiredServers, "desired_remaining": desiredRemaining, "capacity_state": evidence.State, "buildable_now": build.Buildable, "pending_builds": build.Pending, "plan_available": build.PlanAvailable, "lower_bound": evidence.LowerBound, "evidence_source": evidence.Source, "probe_in_flight": evidence.ProbeInFlight, "probe_after": evidence.ProbeAfter, "last_managed_server_created": lastCreated.Time, "data_available": lastRefresh.Valid, "data_status": freshnessStatus, "snapshot_age_seconds": ageSeconds, "fresh_for_seconds": 120, "scheduled_refresh_seconds": build.RefreshSeconds, "stale_after_seconds": observationDisplaySeconds(build.RefreshSeconds)}
 	if lastRefresh.Valid {
 		d.Capacity["limit_known"] = limitKnown
 		d.Capacity["provider_servers"] = providerDroplets
@@ -202,7 +195,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	d.Runtime["boot_circuits"] = bootCircuits
 	var running, ready int
-	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE d.state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),count(*) FILTER(WHERE d.state IN ('READY','PANEL_COMPLETE') AND dr.state='READY') FROM deployments d LEFT JOIN droplets dr ON dr.id=d.droplet_id WHERE d.account_id=$1 AND (dr.id IS NULL OR dr.state<>'DELETED')`, id).Scan(&running, &ready); err != nil {
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FILTER(WHERE `+activeBuildPredicate+`),count(*) FILTER(WHERE d.state IN ('READY','PANEL_COMPLETE') AND dr.state='READY') FROM deployments d LEFT JOIN droplets dr ON dr.id=d.droplet_id WHERE d.account_id=$1 AND (dr.id IS NULL OR dr.state<>'DELETED')`, id).Scan(&running, &ready); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
@@ -269,18 +262,31 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
+			seen := map[string]bool{}
+			managedCount, activeCount := 0, 0
 			for _, x := range obs.Inventory.Servers {
+				if x.ID == "" || seen[x.ID] {
+					continue
+				}
+				seen[x.ID] = true
 				age := int64(0)
 				if !x.CreatedAt.IsZero() {
 					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
 				info, managed := managedIDs[x.ID]
+				if managed {
+					managedCount++
+				}
+				if x.State == providers.ServerStateReady {
+					activeCount++
+				}
 				var expiresAt any
 				if info.ExpiresAt.Valid {
 					expiresAt = info.ExpiresAt.Time
 				}
 				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
 			}
+			d.Resources = map[string]any{"total": len(d.Droplets), "managed": managedCount, "unmanaged": len(d.Droplets) - managedCount, "active": activeCount, "data_available": true}
 		}
 	}
 	writeJSON(w, 200, d)
