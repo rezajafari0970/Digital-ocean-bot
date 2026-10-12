@@ -1,0 +1,89 @@
+{
+  "status": "PUBLISHED_AWAITING_TIMER_PROOF",
+  "initial_public_commit": "d168177784161e2c7f88a19862cd30793609bf5d",
+  "source_checkpoint": "4f471861aa630d73a2ab8a36d4bad3b52cc68a28",
+  "repository": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config",
+  "production_runtime_unchanged": "395e6ad856c3b857444be2bf6f75e5971ef7f4e6",
+  "migration": 171,
+  "evidence_directory": "/root/backups/dob-public-installer-20261012",
+  "publisher_state": "/var/lib/datacenter-publisher/state.json",
+  "publisher_timer": "datacenter-publisher.timer",
+  "initial_review": "PASS_after_three_resolutions",
+  "api_usage": {
+    "requests": 7,
+    "input_tokens": 69890,
+    "output_tokens": 12977,
+    "total_tokens": 82867
+  },
+  "tests": {
+    "schema": 1,
+    "status": "verified",
+    "date": "2026-10-12",
+    "product_source_sha256": "ba219bcb5f50e6df75dd34201d836ed8eabccbe55fea12a653a3e4dbf867974f",
+    "ubuntu_amd64": {
+      "22.04": [
+        "fresh_install",
+        "upgrade",
+        "custom_port",
+        "reinstall",
+        "fault_rollback",
+        "interrupted_recovery"
+      ],
+      "24.04": [
+        "fresh_install",
+        "upgrade",
+        "reboot_persistence"
+      ],
+      "26.04": [
+        "fresh_install",
+        "browser_initial_setup",
+        "password_change"
+      ]
+    },
+    "arm64": {
+      "cross_build": [
+        "api",
+        "worker",
+        "install-bootstrap",
+        "server-guardian"
+      ],
+      "executed_on_arm64_hardware": false
+    },
+    "regression": {
+      "go_pass": 1125,
+      "go_optional_skipped": 449,
+      "go_vet": "PASS",
+      "postgres_race_auth_tests": 2,
+      "bootstrap_tests": 5,
+      "node_output_tests": 3
+    },
+    "release_gates": {
+      "generic_secret_canary": "BLOCKED",
+      "actual_master_key_canary": "BLOCKED",
+      "uncommitted_source": "BLOCKED",
+      "symlink": "BLOCKED",
+      "environment": "BLOCKED",
+      "remote_conflict_atomicity": "PASS"
+    },
+    "public_git_install_verified": true,
+    "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
+    "public_one_command_update_verified": true
+  },
+  "github_commands": [
+    {
+      "install": "PASS",
+      "ubuntu": "26.04",
+      "public_commit": "d168177784161e2c7f88a19862cd30793609bf5d"
+    },
+    {
+      "update": "PASS",
+      "ubuntu": "24.04",
+      "public_commit": "d168177784161e2c7f88a19862cd30793609bf5d"
+    }
+  ],
+  "limitations": [
+    "HTTP transport; use SSH tunnel or operator HTTPS proxy",
+    "arm64 cross-built; no hardware run",
+    "Canonical remains detached; historical mastery bootstrap branch guard not claimed passing"
+  ]
+}

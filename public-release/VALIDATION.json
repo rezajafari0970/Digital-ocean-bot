@@ -48,6 +48,7 @@
     "environment": "BLOCKED",
     "remote_conflict_atomicity": "PASS"
   },
-  "public_git_install_verified": false,
-  "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy"
+  "public_git_install_verified": true,
+  "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
+  "public_one_command_update_verified": true
 }
