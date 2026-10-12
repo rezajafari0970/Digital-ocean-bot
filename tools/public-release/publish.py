@@ -25,7 +25,7 @@ def main():
   if state.get('manifest_sha256')==manifest and state.get('status')=='published':
    state['source_revision']=revision;write_state(state);shutil.rmtree(run_dir);print('Public product source unchanged');return
   run(['python3',HERE/'private-secret-scan.py',export_dir,source/'deploy/bootstrap.py'])
-  run([HERE/'gitleaks','dir',export_dir,'--redact=100','--no-banner','--ignore-gitleaks-allow'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  run([HERE/'gitleaks','dir',export_dir,'--redact=100','--no-banner','--ignore-gitleaks-allow','--config',HERE/'gitleaks.toml'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
   repo=run_dir/'repo'
   run(['git','clone','--quiet','--branch','main',config['remote'],repo])
   repo.chmod(0o755)

@@ -1,0 +1,5 @@
+[extend]
+useDefault = true
+[allowlist]
+description = "Only generated SHA256 file manifest, verified separately before publishing"
+paths = ['''(^|/)release/FILES\.json$''']
