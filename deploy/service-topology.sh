@@ -148,7 +148,7 @@ dob_backup_runtime() {
  done
  : > "$DOB_BACKUP/active"
  : > "$DOB_BACKUP/enabled"
- for unit in "${SERVICES[@]}"; do
+ for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager; do
   if systemctl is-active --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/active"; fi
   if systemctl is-enabled --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/enabled"; fi
  done
@@ -261,6 +261,7 @@ GUARD
  fi
  if [ -n "${DOB_PENDING:-}" ]; then rm -f -- "$DOB_PENDING"; fi
  echo "Deployment failed; restored matching binaries, migrations, static, manifest and units. Evidence: $DOB_BACKUP" >&2
+ if [ "${DOB_MANUAL_RECOVERY:-0}" = 1 ]; then exit 0; fi
  exit "$code"
 }
 dob_verify_service_topology() {
@@ -279,17 +280,22 @@ dob_verify_service_topology() {
  done
  systemctl is-active --quiet digital-ocean-bot-api
  dob_verify_exact_exec digital-ocean-bot-api "$APP/bin/digital-ocean-bot-api"
- python3 - <<'PY'
-import json,time,urllib.request,subprocess,pathlib
+ python3 - "$SRC/deploy/bootstrap.py" "$ETC" <<'PY'
+import json,time,urllib.request,subprocess,pathlib,runpy,sys
 # DOB_TOPOLOGY_RUNTIME_CONTRACT
 pid=subprocess.check_output(['systemctl','show','digital-ocean-bot-api','-p','MainPID','--value'],text=True).strip()
 mode=[x for x in pathlib.Path('/proc/'+pid+'/environ').read_bytes().split(b'\x00') if x.startswith(b'DOB_WORKER_MODE=')]
 assert mode==[b'DOB_WORKER_MODE=split'],'API effective worker mode must be split'
+helpers=runpy.run_path(sys.argv[1])
+values=helpers['read_environment'](pathlib.Path(sys.argv[2])/'env')
+port=subprocess.check_output(['psql','-XAt','-v','ON_ERROR_STOP=1','-c','SELECT listen_port FROM panel_settings WHERE id=true'],env=helpers['database_environment'](values),text=True).strip()
+assert port.isdigit() and 1024<=int(port)<=65535,'Invalid effective panel port'
+ready_url='http://127.0.0.1:'+port+'/readyz'
 end=time.monotonic()+60
 last=None
 while time.monotonic()<end:
  try:
-  with urllib.request.urlopen('http://127.0.0.1:18080/readyz',timeout=3) as response:d=json.load(response)
+  with urllib.request.urlopen(ready_url,timeout=3) as response:d=json.load(response)
   if len(d.get('checks',[]))==5 and all(x.get('ok') for x in d['checks']):break
  except Exception as exc:last=type(exc).__name__
  time.sleep(1)

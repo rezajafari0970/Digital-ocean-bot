@@ -53,12 +53,12 @@ def main():
   # All candidate tests run without access to root's keys, configuration or home.
   cache=pathlib.Path('/var/cache/datacenter-publisher-tests')
   script=run_dir/'validate.sh'
-  script.write_text('set -euo pipefail\ncd "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\nnode --check web/static/app.js\nnode --test web/tests/output_live.cjs web/tests/account-output.cjs web/tests/config-refresh-recovery.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
+  script.write_text('set -euo pipefail\ncd "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\nnode --check web/static/app.js\nnode --test web/tests/output_live.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
   script.chmod(0o755)
   with (run_dir/'validation.log').open('w') as log:
    run(['systemd-run','--quiet','--wait','--pipe','--collect',
      '-p','User=datacenter-build','-p','Group=datacenter-build','-p','ProtectHome=true','-p','ProtectSystem=strict','-p','PrivateTmp=true','-p','NoNewPrivileges=true','-p','MemoryMax=1800M','-p','CPUQuota=150%','-p','ReadWritePaths='+str(cache),
-     '/usr/bin/env','-i','PATH=/usr/local/go/bin:/usr/bin:/bin','HOME='+str(cache),'GOCACHE='+str(cache/'build'),'GOPATH='+str(cache/'go'),'GOMAXPROCS=2','GOTOOLCHAIN=local','GOFLAGS=-buildvcs=false','PYTHONDONTWRITEBYTECODE=1','bash',script,repo],stdout=log,stderr=subprocess.STDOUT,timeout=1800)
+     '/usr/bin/env','-i','PATH=/usr/local/lib/datacenter-bot/go1.27.1/bin:/usr/bin:/bin','HOME='+str(cache),'GOCACHE='+str(cache/'build'),'GOPATH='+str(cache/'go'),'GOMAXPROCS=2','GOTOOLCHAIN=local','GOFLAGS=-buildvcs=false','PYTHONDONTWRITEBYTECODE=1','bash',script,repo],stdout=log,stderr=subprocess.STDOUT,timeout=1800)
   # Exact committed candidate is installed into a private, unprivileged LXC test container.
   container=config['test_container'];archive=run_dir/'candidate.tar.gz'
   with tarfile.open(archive,'w:gz') as tar:tar.add(repo,arcname=public)

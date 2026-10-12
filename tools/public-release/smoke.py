@@ -16,13 +16,21 @@ def fingerprints():
  p=subprocess.run(['psql','-XAt','-c',"SELECT id::text||':'||username||':'||password_hash FROM admin_users ORDER BY id"],env=env,capture_output=True,check=True)
  return {'key':hashlib.sha256(pathlib.Path('/etc/digital-ocean-bot/master.key').read_bytes()).hexdigest(),'env':hashlib.sha256(pathlib.Path('/etc/digital-ocean-bot/env').read_bytes()).hexdigest(),'users':hashlib.sha256(p.stdout).hexdigest()}
 def main():
+ global BASE
  parser=argparse.ArgumentParser();parser.add_argument('--before',action='store_true');parser.add_argument('--revision');a=parser.parse_args()
  snapshot=pathlib.Path('/root/release-before.json');password_file=pathlib.Path('/root/release-test-password')
  if a.before:
   if pathlib.Path('/usr/local/lib/datacenter-bot/source').exists():snapshot.write_text(json.dumps(fingerprints()))
   return
+ source=pathlib.Path('/usr/local/lib/datacenter-bot/source').read_text().strip()
+ import runpy
+ helpers=runpy.run_path(source+'/deploy/bootstrap.py')
+ env=helpers['database_environment'](helpers['read_environment'](pathlib.Path('/etc/digital-ocean-bot/env')))
+ port=subprocess.check_output(['psql','-XAt','-c','SELECT listen_port FROM panel_settings WHERE id=true'],env=env,text=True).strip()
+ BASE='http://127.0.0.1:'+port
  status,ready=request('/readyz');assert status==200 and len(ready['checks'])==5 and all(x['ok']for x in ready['checks'])
  version=json.loads(pathlib.Path('/opt/digital-ocean-bot/build-manifest.json').read_text());assert version['commit']==a.revision
+ assert request('/version')[1]['commit']==a.revision
  for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
   subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)
  assert subprocess.run(['systemctl','is-active','--quiet','digital-ocean-bot-vultr-browser-manager']).returncode!=0
