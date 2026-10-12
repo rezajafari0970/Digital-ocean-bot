@@ -37,7 +37,7 @@
   "push": true,
   "rollback_commit": "d85e0a510dfbc84a369b7b3e3d41d7f04d307984",
   "scope_explanation": "Worker startup must also guard pending migrations. Existing opt-in browser fixtures lacked auth/me, capacity status, and current GET options; their assertions are unchanged and now exercise the real UI again.",
-  "status": "VERIFIED_AWAITING_PUBLICATION_AND_RUNTIME",
+  "status": "COMPLETE",
   "evidence": "/root/backups/dob-panel-settings-20261012",
   "independent_review_resolution": {
     "blocker": "Repeated settings save could lose restart if oneshot active",
@@ -69,5 +69,24 @@
     "input_tokens": 74430,
     "output_tokens": 12112,
     "total_tokens": 86542
-  }
+  },
+  "completed_at": "2026-10-12T05:30:09.110241+00:00",
+  "source_revision": "ea47093803c1a2bd22e0405d426b023df350f662",
+  "public_revision": "25afa02ee19d47894e0c0e5be4ade7fb7285e4fb",
+  "runtime": {
+    "both_management_hosts": "25afa02ee19d47894e0c0e5be4ade7fb7285e4fb",
+    "normal_admin_login": "PASS",
+    "fixed_host_and_updater": "PASS",
+    "original_existing_entity_rows_and_identity_preserved": "PASS",
+    "new_host_actual_panel_update": "PASS",
+    "duplicate_request_same_job": true,
+    "session_and_credentials_survive_update": true,
+    "ready_checks_per_host": 5,
+    "private_evidence": "/root/backups/panel-settings-deployment-20261012",
+    "github_actions": [
+      38207688428,
+      38207688071
+    ]
+  },
+  "verification_note": "Fault injection restored all hashed runtime and root control assets. Initial immediate readyz probe raced the first worker heartbeat; a bounded subsequent check converged with all five checks and all six panel assets passing without intervention."
 }
