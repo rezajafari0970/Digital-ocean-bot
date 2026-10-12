@@ -50,5 +50,6 @@
   },
   "public_git_install_verified": true,
   "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
-  "public_one_command_update_verified": true
+  "public_one_command_update_verified": true,
+  "bootstrap_without_preinstalled_curl": "PASS"
 }

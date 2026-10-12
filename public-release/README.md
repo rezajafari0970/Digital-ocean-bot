@@ -4,10 +4,10 @@
 
 ## نصب خودکار
 
-روی Ubuntu Server با کاربر root یا sudo اجرا کنید:
+روی Ubuntu Server با کاربر **root** اجرا کنید (در صورت نیاز ابتدا `sudo -i`). این دستور حتی اگر curl نصب نباشد، پیش‌نیاز دریافت اسکریپت را هم نصب می‌کند:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/stable/install.sh -o /tmp/datacenter-install.sh && sudo bash /tmp/datacenter-install.sh
+apt-get update && apt-get install -y curl ca-certificates && curl -fsSL https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/stable/install.sh -o /root/datacenter-install.sh && bash /root/datacenter-install.sh
 ```
 
 نصب‌کننده بدون پرسش، پیش‌نیازها، PostgreSQL، Go با checksum ثابت، برنامه و سه سرویس systemd را نصب می‌کند. سرویس‌ها پس از ریبوت اجرا می‌شوند و در صورت خرابی دوباره راه‌اندازی می‌شوند. نصب اینترنت می‌خواهد؛ بستهٔ آفلاین نیست.

@@ -1,5 +1,5 @@
 {
-  "status": "PUBLISHED_AWAITING_TIMER_PROOF",
+  "status": "COMPLETE",
   "initial_public_commit": "d168177784161e2c7f88a19862cd30793609bf5d",
   "source_checkpoint": "4f471861aa630d73a2ab8a36d4bad3b52cc68a28",
   "repository": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config",
@@ -85,5 +85,18 @@
     "HTTP transport; use SSH tunnel or operator HTTPS proxy",
     "arm64 cross-built; no hardware run",
     "Canonical remains detached; historical mastery bootstrap branch guard not claimed passing"
-  ]
+  ],
+  "automatic_sync": {
+    "source_commit": "065a5ea7d7dcd73732b529c9766319d8c4bc7a3f",
+    "public_commit": "838c0f266a7ab34a011637d9547bafb07ebc2563",
+    "timer_driven": true,
+    "published_at": 1791776278.3168328,
+    "source_created_at": 1791776161.2107544,
+    "latency_seconds": 117.11
+  },
+  "bootstrap_command": {
+    "entrypoint_without_preinstalled_curl": "PASS",
+    "identity_preserved": true
+  },
+  "verified_public_commit": "838c0f266a7ab34a011637d9547bafb07ebc2563"
 }
