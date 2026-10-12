@@ -37,7 +37,32 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 		phaseCtx, cancel := context.WithTimeout(stageCtx, timeout)
 		defer cancel()
 		start := time.Now()
-		res, err := r.SSH.RunDetailedObserved(phaseCtx, t, key, cmd, stages)
+		// A failed idempotency predicate is an expected precheck miss. Buffer its
+		// command observation until stderr/result classification is available so it
+		// is not also recorded as an SSH failure. Transport and real command faults
+		// still reach the stage observer unchanged.
+		var commandStages []StageObservation
+		phaseStages := stages
+		if phase == "precheck" && stages != nil {
+			phaseStages = func(o StageObservation) {
+				if o.Stage == StageCommand {
+					commandStages = append(commandStages, o)
+				} else {
+					stages(o)
+				}
+			}
+		}
+		res, err := r.SSH.RunDetailedObserved(phaseCtx, t, key, cmd, phaseStages)
+		expectedMiss := false
+		if phase == "precheck" && errors.Is(err, ErrSSHCommand) && res.ExitCode != nil && *res.ExitCode == 1 && res.Signal == "" {
+			diag := ClassifyCommandFailure(err, res)
+			expectedMiss = diag.Code == "SSH_COMMAND_EXIT" || diag.Code == "SSH_COMMAND_FAILED"
+		}
+		for _, o := range commandStages {
+			if !expectedMiss || o.Err == nil {
+				stages(o)
+			}
+		}
 		if observe != nil {
 			observe(ScriptPhaseResult{Phase: phase, Result: res, Err: err, Duration: time.Since(start)})
 		}

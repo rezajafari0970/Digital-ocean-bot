@@ -119,15 +119,35 @@ func classify(op string, status int, raw []byte) *providers.Error {
 		} `json:"errors"`
 	}
 	if (status == 400 || status == 403) && json.Unmarshal(raw, &payload) == nil {
+		// Class-specific provider errors take precedence over validation fields.
 		for _, item := range payload.Errors {
 			reason := strings.ToLower(strings.TrimSpace(item.Reason))
 			switch {
 			case strings.HasPrefix(reason, "account limit reached"):
-				class, code = providers.ErrorCapacity, "ACCOUNT_LIMIT_REACHED"
+				return problem(providers.ErrorCapacity, op, "ACCOUNT_LIMIT_REACHED", status)
 			case strings.Contains(reason, "insufficient capacity") || strings.Contains(reason, "not enough capacity"):
 				class, code = providers.ErrorRegionCapacity, "REGION_CAPACITY_UNAVAILABLE"
 			case item.Field == "image" && strings.Contains(reason, "not available"):
 				class, code = providers.ErrorImageUnavailable, "IMAGE_UNAVAILABLE"
+			}
+		}
+		if class == providers.ErrorInvalidRequest {
+			// Never include provider-controlled field names, values or reasons.
+			// Validation remains a definitive rejection, not a retry/adoption signal.
+			for _, field := range []string{"label", "region", "type", "image", "authorized_keys", "tags"} {
+				for _, item := range payload.Errors {
+					if item.Field != field {
+						continue
+					}
+					code = "INVALID_" + strings.ToUpper(field)
+					if field == "label" {
+						reason := strings.ToLower(item.Reason)
+						if strings.Contains(reason, "unique") || strings.Contains(reason, "already exists") || strings.Contains(reason, "already in use") {
+							code = "LABEL_CONFLICT"
+						}
+					}
+					return problem(class, op, code, status)
+				}
 			}
 		}
 	}

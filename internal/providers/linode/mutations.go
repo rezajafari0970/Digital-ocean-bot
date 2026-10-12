@@ -26,6 +26,16 @@ func identityTag(identity string) string {
 	return "dob-id-" + hex.EncodeToString(sum[:20])
 }
 func (d *Driver) ownerTag() string { return "dob-account-" + d.accountID }
+
+// Only the wire label changes. The immutable operation and ownership tags remain
+// authoritative for retries, including ambiguous creates from older releases.
+func (d *Driver) deploymentLabel(name, identity string) string {
+	sum := sha256.Sum256([]byte("linode-label-v1\x00" + d.accountID + "\x00" + identity))
+	if len(name) > 31 {
+		name = name[:31]
+	}
+	return strings.TrimRight(name, "-_.") + "-" + hex.EncodeToString(sum[:16])
+}
 func (d *Driver) owns(x serverData) bool {
 	return contains(x.Tags, d.ownerTag()) && contains(x.Tags, "managed-by-digital-ocean-bot")
 }
@@ -50,7 +60,7 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	if !labelPattern.MatchString(req.Name) || strings.Contains(req.Name, "--") || strings.Contains(req.Name, "__") || strings.Contains(req.Name, "..") {
 		return invalid("INVALID_LABEL")
 	}
-	if req.RegionID == "" || req.PlanID == "" || req.Identity == "" || len(req.SSHAuthorizedKeys) == 0 || len(req.SSHKeyRefs) != 0 {
+	if req.RegionID == "" || req.PlanID == "" || req.Identity == "" || strings.ContainsAny(req.Identity, "\x00\r\n") || len(req.SSHAuthorizedKeys) == 0 || len(req.SSHKeyRefs) != 0 {
 		return invalid("INCOMPLETE_CREATE_REQUEST")
 	}
 	validImage := false
@@ -70,6 +80,10 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	}
 	tags := []string{"managed-by-digital-ocean-bot", d.ownerTag(), identityTag(req.Identity)}
 	for _, tag := range req.Tags {
+		if (strings.HasPrefix(tag, "dob-account-") && tag != d.ownerTag()) ||
+			((strings.HasPrefix(tag, "dob-dep-") || strings.HasPrefix(tag, "dob-deployment-") || strings.HasPrefix(tag, "dob-id-")) && tag != identityTag(req.Identity)) {
+			return invalid("CONFLICTING_OWNERSHIP_TAG")
+		}
 		if !contains(tags, tag) {
 			tags = append(tags, tag)
 		}
@@ -97,8 +111,12 @@ func (d *Driver) CreateServer(ctx context.Context, req providers.CreateServerReq
 	if *settings.Backups || *settings.Managed {
 		return rejected, problem(providers.ErrorInvalidRequest, "create_server", "ACCOUNT_PAID_ADDONS_ENABLED", 0)
 	}
+	label := d.deploymentLabel(req.Name, req.Identity)
+	if !labelPattern.MatchString(label) {
+		return invalid("INVALID_LABEL")
+	}
 	var x serverData
-	e := d.client.do(ctx, http.MethodPost, "/linode/instances", createRequest{Label: req.Name, Region: req.RegionID, Type: req.PlanID, Image: req.ImageID, AuthorizedKeys: keys, Tags: tags, Booted: true}, &x)
+	e := d.client.do(ctx, http.MethodPost, "/linode/instances", createRequest{Label: label, Region: req.RegionID, Type: req.PlanID, Image: req.ImageID, AuthorizedKeys: keys, Tags: tags, Booted: true}, &x)
 	if e != nil {
 		if isAmbiguous(e) {
 			return providers.CreateServerResult{Outcome: providers.OutcomeAmbiguous}, problem(providers.ErrorAmbiguousOutcome, "create_server", "CREATE_OUTCOME_UNCONFIRMED", 0)

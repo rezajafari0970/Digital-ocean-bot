@@ -24,7 +24,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
 
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+12000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression)}
-  await waitFor('document.querySelector("#primaryAction")!==null');
+  await waitFor('typeof activePageView!=="undefined" && activePageView?.page==="accounts" && !activePageView.loading && !document.querySelector("#app").hidden && !document.querySelector("#primaryAction").hidden');
   await evaluate('document.querySelector("#primaryAction").click()');
   await waitFor('document.querySelector("#modalFields [name=provider]")!==null');
   assert.deepEqual((await evaluate('[...document.querySelector("#modalFields [name=provider]").options].map(x=>x.value)')).sort(),['digitalocean','upcloud','vultr']);

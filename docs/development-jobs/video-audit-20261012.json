@@ -1,0 +1,141 @@
+{
+  "goal": "Audit/fix video 2026-10-12 (282s). User authorizes repair and public GitHub release and production deployment, preserving all account/proxy/client policies. Source 5be88bd public/runtime25afa02. Linode 29 deployments: first PANEL_COMPLETE and28 FAILED HTTP400 REQUEST_REJECTED. Every profile name account-auto; existing instance same label. Stable deployment ownership identity set in workflow.RuntimeSteps.Create but Name never varies. Linode labels must be unique. Proposed provider-only deterministic label using account+deployment identity suffix; preserve current identity tags so prior ambiguous operations reconcile by tags without duplicate POST. Do not rewrite historical names, operations, quotas, credentials. Add bounded enum error classifiers (label conflict, validation field, plan/region) without raw provider text/secrets. Exact quota remains unknown; goal10 is not provider cap. Existing Linode EXPIRING after9:12UTC, 1managed<desired10; lifecycle waits deficit backfill, no deletion attempted. Restore create then verify native replacement/deletion; do not erase server record or manually mark deleted. Build Activity UI recreates entire content with Loading every5s; counts PANEL_COMPLETE/INSTALL_FAILED/INSTALL_ROLLED_BACK as active; last100 is not global active total. Fix stable read-only singleflight polling with generation/route guards, lastgood data, backoff, stable row keys/scroll/modal; complete terminal taxonomy; backend authoritative active summary or additive metadata keeping backwards compatibility, old deleted deployments never active. Provision error families aggregate all historical errors without unresolved distinction: normal SSH initial boot refusal and installer handoff placeholder register as failures despite later success. Preserve history but clearly label historical vs unresolved; investigate true bootstrap command exits and panel runtime faults before changing behavior. Dashboard total49 =active44+pending4+degraded1 changes to36+4+9 after user updater restart: likely routing transient classification, not missing records; show total and actual reason/error without falsely marking healthy. Source/bootstrap existing detached HEAD warning known and preserved. All invariants: cross-account isolation, proxy fail-close, verified provider identity, no blind retry, ownership, desired concurrency/lifetime, no secrets publication. Need bounded plan, concrete failure tests, risk blockers. NO generic refactors. No production mutations in review.",
+  "context": "video evidence and production read-only baseline",
+  "allowed_paths": [
+    "internal/providers/linode",
+    "internal/adminapi",
+    "web/static",
+    "web/tests",
+    "internal/provisioning",
+    "internal/jobs/operation_diagnostics.go",
+    "public-release",
+    "docs/development-jobs/video-audit-20261012.json"
+  ],
+  "rollback_commit": "5be88bddaa3e31a5a8559bd46780b9622d1708a6",
+  "push": true,
+  "status": "VERIFIED_AWAITING_PUBLICATION_AND_RUNTIME",
+  "evidence": "/root/backups/dob-video-audit-20261012",
+  "tests": {
+    "full_go_with_isolated_postgres_and_optional_browser_tests": "PASS",
+    "go_packages_passed": 59,
+    "go_vet": "PASS",
+    "linode_provider_and_provisioning_race": "PASS",
+    "provider_executor_reconciliation_and_workflow_race": "PASS",
+    "postgres_activity_global_counts_over_100_terminal_states_deleted_resources_secret_safety": "PASS",
+    "postgres_history_join_multiplicity_recovered_and_waiting_runs": "PASS",
+    "real_chromium_build_activity_mobile_desktop_scroll_stale_navigation_failure_recovery": "PASS",
+    "real_chromium_config_dashboard_residential_read_regression": "PASS",
+    "upcloud_form_browser": "PASS",
+    "independent_source_review": "PASS"
+  },
+  "openai_api_usage": {
+    "responses": 8,
+    "input_tokens": 151371,
+    "output_tokens": 17543,
+    "total_tokens": 168914
+  },
+  "review_resolution": {
+    "source": "PASS",
+    "unresolved_source_defects": [],
+    "initial_reports_preserved": true
+  },
+  "tested_source_sha256": {
+    "internal/adminapi/build_activity.go": "1a3173e13f4469a6e82a9751c91e553a1a06127b6fd5bbd1bf94a901b24bf717",
+    "internal/adminapi/build_activity_postgres_test.go": "2706c3d07b8f301dfcdc27cb8aea7a5f0aca47bea56e1d0dda26bb7207ddd4e3",
+    "internal/adminapi/provision_errors.go": "817176ad2f3e659a4743683843e7d167de9eca2e079452ff8db26f93097f4644",
+    "internal/adminapi/status_counts.go": "c6ea7dc08d580343b85ea6ce7176eb3caf9e076138a850b5514982819550b0e9",
+    "internal/jobs/operation_diagnostics.go": "8290eec4d00df8f2304fd70e4e27ae51a5add70c7d8af5ee32790e6be8ddf2df",
+    "internal/providers/linode/client.go": "80d095bbea5a9c1f60bac90b179666406672faf5738bf8241ca987c44f23a172",
+    "internal/providers/linode/mutations.go": "ea29bc0c8123ee10b804eebdf7a8319183a39e83d4b8bc6ee6ceb5589f5e4020",
+    "internal/providers/linode/video_regression_test.go": "7dfbeec5fc5681cde6562d862ef1051427394eee32aaea6278789692767463d9",
+    "internal/provisioning/script_observation_test.go": "30d2ec5d16cc3c831edf9c10632986c9b797cb3a4237204cc8b4e14801ddf5c5",
+    "internal/provisioning/script_runner.go": "4f7c0559a7af8db8389e9c90327a0fe6528949d55d013561aa36ae8ed59ba5e0",
+    "web/static/app.js": "e7ab52c5191ed608acbab30cfe28e8afc18b3f5a8f59843e5ab04e516b7cbad6",
+    "web/tests/build-activity.cjs": "caff15b3ab23e4256b1acc9b21a20bf14f3813594ad67f2ad401c88deb616aa3",
+    "web/tests/upcloud.cjs": "d47fc316108fb70187e7e5aca0c85720595c42a6009158b6347a03bd00a1c2b6"
+  },
+  "scope_explanation": "Read models use the existing bounded diagnostic sanitizer to prevent legacy raw provider response leakage. Public release notes record actual gates; the UpCloud browser test now waits for authenticated page readiness before clicking an existing HTML button.",
+  "video_findings": {
+    "video": "Screenrecorder-2026-10-12-16-47-47-141.mp4",
+    "duration_seconds": 282.354604,
+    "inspection": "All 282 one-second samples visually reviewed, with five larger contact sheets; not a claim to inspect every encoded frame.",
+    "findings": [
+      {
+        "time": "00:00–00:13",
+        "issue": "Apparent loss of active servers",
+        "evidence": "44 active + 4 pending + 1 degraded = 49 tracked",
+        "resolution": "Show total tracked and bounded reason/routing/admission/protection details. Health policy unchanged."
+      },
+      {
+        "time": "00:17–00:31",
+        "issue": "Linode creates only first instance, repeated HTTP400",
+        "evidence": "Profile name is repeated unchanged in Linode create payload; ownership identity already unique.",
+        "resolution": "Deterministic account/deployment label, old ownership tag adoption preserved; historical HTTP400 reasons individually unknown. Native create acceptance pending rollout."
+      },
+      {
+        "time": "00:17–00:31",
+        "issue": "Linode capacity differs from other providers",
+        "evidence": "Provider adapter gives usage and proven lower bound, not an exact cap.",
+        "resolution": "Keep unknown explicit; desired 10 is not proof of provider quota."
+      },
+      {
+        "time": "00:32–00:46",
+        "issue": "Vultr capacity failures",
+        "evidence": "Desired 15 versus observed capacity 10; deliberate 15-minute quota-increase probes.",
+        "resolution": "Show linked sanitized durable operation detail, keep capacity probe policy."
+      },
+      {
+        "time": "00:49–01:18 and 03:49–04:08",
+        "issue": "Build Activity refresh repeatedly replaces whole page and resets reading",
+        "resolution": "Keyed mounted singleflight polling, scroll retention, last-good data, timeout/backoff, navigation/modal fences, mobile details."
+      },
+      {
+        "time": "00:49–01:18",
+        "issue": "74 active builds includes completed installs and recent-limit bias",
+        "resolution": "Authoritative global active/waiting counts independent of latest 100; exclude terminal and deleted linkage."
+      },
+      {
+        "time": "00:49–01:18 and 03:49–04:08",
+        "issue": "SSH/install history presented as current failure",
+        "resolution": "Deduplicate aggregation before deployment join; show historical/current-failed-step cohorts; expected precheck exit1 no duplicate command error; retain true transport, DNS, permission, signal and non-1 failures."
+      },
+      {
+        "time": "01:19–01:34 and 04:09",
+        "issue": "Residential verification declines around update",
+        "evidence": "Live routing later converged naturally to all APPLIED before deployment.",
+        "resolution": "Keep actual health failures visible; no forced healthy state or weakened verification."
+      },
+      {
+        "time": "01:35–01:55 and 04:19",
+        "issue": "Config target/active deficit and stale observations",
+        "evidence": "220/215 then 220/219 in video, observation freshness mixed.",
+        "resolution": "Counts remain live observed inventory; existing missing/stale labels retained, viewport retention and read recovery regression verified."
+      },
+      {
+        "time": "02:00–02:19 and 04:30–04:42",
+        "issue": "Output links",
+        "evidence": "VLESS text loaded; no malformed/missing output proved.",
+        "resolution": "Raw subscription-compatible output preserved; full regression includes output tests."
+      },
+      {
+        "time": "02:23–03:11",
+        "issue": "Update temporarily offline/not-ready, then ready",
+        "evidence": "Same revision reinstall restarted API, completed naturally.",
+        "resolution": "Exact-candidate installer/update gates and preservation checks required; no claim that a restart has zero downtime."
+      },
+      {
+        "time": "03:16–03:35",
+        "issue": "Active total falls after update",
+        "evidence": "36 active + 4 pending + 9 degraded still total49.",
+        "resolution": "Total and reason presentation separates lifecycle/health changes from missing records."
+      }
+    ],
+    "api_usage": {
+      "responses": 8,
+      "input_tokens": 151371,
+      "output_tokens": 17543,
+      "total_tokens": 168914
+    }
+  },
+  "known_baseline_warning": "Canonical detached HEAD is mandated by prior handoff; bootstrap branch-name guard fails for this existing condition. Not represented as passed or rewritten."
+}

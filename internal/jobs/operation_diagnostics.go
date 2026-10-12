@@ -45,3 +45,9 @@ func (o *Operation) normalizeDiagnostics() {
 	}
 	o.ErrorCode, o.ErrorMessage = normalizeDiagnostic(o.ErrorCode, o.ErrorMessage)
 }
+
+// SafeDiagnostic applies the same bounded grammar to diagnostic read models.
+// Never expose a legacy raw provider response from an operations row.
+func SafeDiagnostic(code, message string) (string, string) {
+	return normalizeDiagnostic(code, message)
+}

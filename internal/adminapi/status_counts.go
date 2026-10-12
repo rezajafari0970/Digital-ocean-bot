@@ -30,7 +30,7 @@ WITH provider_inventory AS (
 ), server_evidence AS (
  SELECT dr.id,dr.provider_resource_id,dr.state lifecycle_state,a.name account_name,a.provider,
  pi.created_at provider_observed_at,pi.created_at+(pi.refresh_seconds*interval '1 second') next_provider_refresh_at,
- p.last_sync_at,p.last_sync_state,
+ p.last_sync_at,p.last_sync_state,p.route_state,p.route_verified_at,p.admission_blocked,p.xui_failed,p.protection_failed,
  CASE
  WHEN dr.state IN ('RETIRING','DELETING','EXPIRING') OR dr.expires_at<=now()+interval '10 seconds' OR a.deletion_requested_at IS NOT NULL THEN 'PENDING_DELETION'
  WHEN dr.state LIKE '%FAIL%' OR EXISTS(SELECT 1 FROM deployments dep WHERE dep.droplet_id=dr.id AND dep.state IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK')) THEN 'DEPLOYMENT_FAILED'
@@ -54,7 +54,7 @@ WITH provider_inventory AS (
  SELECT x->>'State' state FROM jsonb_array_elements(CASE WHEN jsonb_typeof(pi.canonical->'Inventory'->'Servers')='array' THEN pi.canonical->'Inventory'->'Servers' ELSE '[]'::jsonb END)x
  WHERE x->>'ID'=dr.provider_resource_id LIMIT 1)os ON true
  LEFT JOIN LATERAL(
- SELECT p.id,p.enabled,rs.state route_state,
+ SELECT p.id,p.enabled,rs.state route_state,rs.verified_at route_verified_at,
  pn.verified_status->>'admission_blocked'='true' admission_blocked,
  pn.verified_status->>'enabled'='true' AND pn.verified_status->>'xui_state' IN ('failed','inactive','active_xray_failed') xui_failed,
  pn.desired_enabled AND pn.state IN ('ERROR','UNSUPPORTED') protection_failed,
@@ -90,9 +90,9 @@ SELECT json_build_object(
  'provider_stale_servers',(SELECT count(*) FROM live_servers WHERE reason='PROVIDER_OBSERVATION_STALE'),
  'panel_attention_servers',(SELECT count(*) FROM live_servers WHERE health='degraded'),
  'server_health',COALESCE((SELECT json_agg(row_to_json(detail)) FROM(
- SELECT id,account_name,provider,provider_resource_id,lifecycle_state,health,reason,provider_observed_at,next_provider_refresh_at,last_sync_at,last_sync_state
+ SELECT id,account_name,provider,provider_resource_id,lifecycle_state,health,reason,provider_observed_at,next_provider_refresh_at,last_sync_at,last_sync_state,route_state,route_verified_at,admission_blocked,xui_failed,protection_failed
  FROM live_servers WHERE health<>'active' ORDER BY account_name,id LIMIT 100)detail),'[]'::json),
- 'active_deployments',(SELECT count(*) FROM deployments WHERE state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE')),
+ 'active_deployments',(SELECT count(*) FROM deployments d WHERE ` + activeBuildPredicate + `),
  'live_workers',(SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'),
  'observed_at',now()
 )`
