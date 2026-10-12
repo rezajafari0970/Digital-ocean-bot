@@ -20,13 +20,14 @@ type User struct {
 	BootstrapTokenHash []byte
 }
 type Session struct {
-	ID             string
-	UserID         string
-	TokenHash      []byte
-	CredentialHash string
-	ExpiresAt      time.Time
-	CreatedAt      time.Time
-	LastSeenAt     time.Time
+	ID                 string
+	UserID             string
+	TokenHash          []byte
+	CredentialUsername string
+	CredentialHash     string
+	ExpiresAt          time.Time
+	CreatedAt          time.Time
+	LastSeenAt         time.Time
 }
 type Principal struct {
 	UserID             string

@@ -1,55 +1,91 @@
 {
-  "schema": 1,
+  "schema": 2,
   "status": "verified",
   "date": "2026-10-12",
-  "product_source_sha256": "ba219bcb5f50e6df75dd34201d836ed8eabccbe55fea12a653a3e4dbf867974f",
-  "ubuntu_amd64": {
-    "22.04": [
-      "fresh_install",
-      "upgrade",
-      "custom_port",
-      "reinstall",
-      "fault_rollback",
-      "interrupted_recovery"
-    ],
-    "24.04": [
-      "fresh_install",
-      "upgrade",
-      "reboot_persistence"
-    ],
-    "26.04": [
-      "fresh_install",
-      "browser_initial_setup",
-      "password_change"
-    ]
-  },
-  "arm64": {
-    "cross_build": [
-      "api",
-      "worker",
-      "install-bootstrap",
-      "server-guardian"
-    ],
-    "executed_on_arm64_hardware": false
-  },
-  "regression": {
-    "go_pass": 1125,
-    "go_optional_skipped": 449,
+  "feature": "panel settings, ordinary login and persistent project update",
+  "current_evidence": {
+    "full_go_with_isolated_postgres_and_optional_browser_tests": "PASS",
+    "go_packages_passed": 59,
     "go_vet": "PASS",
-    "postgres_race_auth_tests": 2,
+    "focused_postgres_race_auth_settings_retention": "PASS",
+    "root_updater_unit_tests": 9,
+    "static_permission_and_http_gate_tests": 12,
     "bootstrap_tests": 5,
-    "node_output_tests": 3
+    "node_output_tests": 3,
+    "actual_fresh_bootstrap_admin_login": "PASS",
+    "bootstrap_retry_and_update_keep_custom_credentials": "PASS",
+    "ubuntu_26_amd64_systemd_update_from_panel": "PASS",
+    "mobile_width": 390,
+    "username_password_port_path_edit": "PASS",
+    "blank_password_preserved": "PASS",
+    "reload_during_update_api_restart": "PASS",
+    "rapid_address_saves_with_active_restart_unit": "PASS",
+    "post_publication_failure_restores_cli_helper_units_and_runtime": "PASS",
+    "socket_peer_and_action_rejection": "PASS"
   },
-  "release_gates": {
-    "generic_secret_canary": "BLOCKED",
-    "actual_master_key_canary": "BLOCKED",
-    "uncommitted_source": "BLOCKED",
-    "symlink": "BLOCKED",
-    "environment": "BLOCKED",
-    "remote_conflict_atomicity": "PASS"
+  "publication_gates": {
+    "exact_candidate_ubuntu_24_amd64_install": "required before push",
+    "full_go_and_vet_unprivileged": "required before push",
+    "live_secret_scan_and_gitleaks": "required before push",
+    "atomic_main_and_stable": "required"
   },
-  "public_git_install_verified": true,
-  "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
-  "public_one_command_update_verified": true,
-  "bootstrap_without_preinstalled_curl": "PASS"
+  "prior_release_evidence": {
+    "schema": 1,
+    "status": "verified",
+    "date": "2026-10-12",
+    "product_source_sha256": "ba219bcb5f50e6df75dd34201d836ed8eabccbe55fea12a653a3e4dbf867974f",
+    "ubuntu_amd64": {
+      "22.04": [
+        "fresh_install",
+        "upgrade",
+        "custom_port",
+        "reinstall",
+        "fault_rollback",
+        "interrupted_recovery"
+      ],
+      "24.04": [
+        "fresh_install",
+        "upgrade",
+        "reboot_persistence"
+      ],
+      "26.04": [
+        "fresh_install",
+        "browser_initial_setup",
+        "password_change"
+      ]
+    },
+    "arm64": {
+      "cross_build": [
+        "api",
+        "worker",
+        "install-bootstrap",
+        "server-guardian"
+      ],
+      "executed_on_arm64_hardware": false
+    },
+    "regression": {
+      "go_pass": 1125,
+      "go_optional_skipped": 449,
+      "go_vet": "PASS",
+      "postgres_race_auth_tests": 2,
+      "bootstrap_tests": 5,
+      "node_output_tests": 3
+    },
+    "release_gates": {
+      "generic_secret_canary": "BLOCKED",
+      "actual_master_key_canary": "BLOCKED",
+      "uncommitted_source": "BLOCKED",
+      "symlink": "BLOCKED",
+      "environment": "BLOCKED",
+      "remote_conflict_atomicity": "PASS"
+    },
+    "public_git_install_verified": true,
+    "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
+    "public_one_command_update_verified": true,
+    "bootstrap_without_preinstalled_curl": "PASS"
+  },
+  "notes": [
+    "Prior release matrix is historical; current feature validation is listed separately. No current ARM hardware execution claim.",
+    "Existing custom credentials are preserved by updates. A current operator-authorized admin reset is a separate private operation."
+  ]
 }

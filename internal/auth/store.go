@@ -18,8 +18,8 @@ func (s SQLStore) CreateSession(ctx context.Context, x Session) error {
 	// The shared row lock closes login-versus-password-change races.
 	result, err := s.DB.ExecContext(ctx, `INSERT INTO admin_sessions(id,user_id,token_hash,expires_at,created_at,last_seen_at)
  SELECT gen_random_uuid(),u.id,$2,$3,now(),now()
- FROM (SELECT id FROM admin_users WHERE id=$1 AND password_hash=$4 AND enabled FOR SHARE) u`,
-		x.UserID, x.TokenHash, x.ExpiresAt, x.CredentialHash)
+ FROM (SELECT id FROM admin_users WHERE id=$1 AND password_hash=$4 AND username=$5 AND enabled FOR SHARE) u`,
+		x.UserID, x.TokenHash, x.ExpiresAt, x.CredentialHash, x.CredentialUsername)
 	if err != nil {
 		return err
 	}

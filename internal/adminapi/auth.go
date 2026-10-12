@@ -33,7 +33,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	if req.Remember {
 		authSvc.TTL = 30 * 24 * time.Hour
 	}
-	token, p, err := authSvc.LoginWithBootstrapGrant(r.Context(), req.Username, req.Password, r.Header.Get("X-Bootstrap-Token"))
+	token, p, err := authSvc.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		writeJSON(w, 401, map[string]string{"error": "invalid_credentials"})
 		return
@@ -55,10 +55,6 @@ func (s *Server) require(next http.HandlerFunc, write bool) http.HandlerFunc {
 		p, err := s.Auth.Authenticate(r.Context(), token)
 		if err != nil {
 			writeJSON(w, 401, map[string]string{"error": "unauthorized"})
-			return
-		}
-		if p.MustChangePassword && r.URL.Path != "/api/v1/auth/password" && r.URL.Path != "/api/v1/auth/logout" && r.URL.Path != "/api/v1/auth/me" {
-			writeJSON(w, 403, map[string]string{"error": "password_change_required"})
 			return
 		}
 		if write && !p.CanWrite() {

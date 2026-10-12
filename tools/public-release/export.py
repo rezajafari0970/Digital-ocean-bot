@@ -2,7 +2,7 @@
 """Export immutable product blobs, never original history or operational data."""
 import argparse,hashlib,json,pathlib,re,subprocess
 PREFIXES=('cmd/','internal/','migrations/','web/','deploy/')
-EXTENSIONS={'.go','.sql','.cjs','.js','.py','.sh','.conf','.service','.html','.css','.json'}
+EXTENSIONS={'.go','.sql','.cjs','.js','.py','.sh','.conf','.service','.socket','.html','.css','.json'}
 EXACT={'go.mod','go.sum','install.sh','deploy/datacenter-bot'}
 MAPPED={'public-release/README.md':'README.md','public-release/gitignore':'.gitignore','public-release/checks.yml':'.github/workflows/checks.yml','public-release/check-source.py':'release/check-source.py','public-release/VALIDATION.json':'release/VALIDATION.json'}
 def git(source,*args):return subprocess.check_output(['git','-C',str(source),*args])
@@ -25,7 +25,7 @@ def export(source,revision,destination,require_clean=True):
   if not entry:continue
   meta,path=entry.split(b'\t',1);mode,kind,oid=meta.decode().split();name=path.decode()
   if not selected(name):continue
-  if mode not in ('100644','100755') or kind!='blob' or not re.fullmatch(r'[A-Za-z0-9_./-]+',name) or '..' in pathlib.PurePosixPath(name).parts:raise ValueError('Unsafe export entry: '+name)
+  if mode not in ('100644','100755') or kind!='blob' or not re.fullmatch(r'[A-Za-z0-9_./@-]+',name) or '..' in pathlib.PurePosixPath(name).parts:raise ValueError('Unsafe export entry: '+name)
   target=MAPPED.get(name,name);raw=git(source,'cat-file','blob',oid)
   if len(raw)>5_000_000 or b'\0' in raw:raise ValueError('Unexpected binary or oversized source: '+name)
   p=destination/target;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw);p.chmod(int(mode[-3:],8))

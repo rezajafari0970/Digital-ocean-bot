@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import datetime,json,os,pathlib,runpy,secrets,shutil,subprocess,sys
+import datetime,json,os,pathlib,runpy,secrets,shutil,subprocess,sys,tarfile
 from urllib.parse import urlsplit,unquote
 ROOT=pathlib.Path(__file__).resolve().parent
 helpers=runpy.run_path(str(ROOT/'bootstrap.py'))
@@ -30,7 +30,6 @@ def prepare():
   fresh=True
  helpers['prepare'](str(ETC),'digital_ocean_bot','digitaloceanbot',GID,validate_only=not fresh)
  if fresh:
-  if not (ETC/'setup-token').exists(): atomic(ETC/'setup-token',secrets.token_urlsafe(32)+'\n')
   if (ETC/'bootstrap.pending').exists():
    u=urlsplit(values()['DATABASE_URL']);password=unquote(u.password)
    if u.username!='digitaloceanbot' or u.path!='/digital_ocean_bot' or len(password)!=48 or any(c not in '0123456789abcdef' for c in password):
@@ -59,14 +58,29 @@ def backup():
  shutil.copytree(ETC,b/'configuration')
  with (b/'database.dump').open('wb') as out:
   p=subprocess.run(['pg_dump','--format=custom','--no-owner'],env=db_env(),stdout=out,stderr=subprocess.PIPE,timeout=600)
- if p.returncode:raise RuntimeError('Database backup failed; live services unchanged')
+ if p.returncode:raise RuntimeError('Database backup failed; release publication blocked')
+ # Readers are stopped by the caller; preserve the entire persistent directory.
+ data=pathlib.Path('/var/lib/digital-ocean-bot')
+ if data.exists():
+  with tarfile.open(b/'persistent-data.tar','w',dereference=False) as archive:
+   archive.add(data,arcname='digital-ocean-bot')
+  with tarfile.open(b/'persistent-data.tar','r') as archive:
+   if not archive.getmembers():raise RuntimeError('Persistent data backup is empty')
+ subprocess.run(['pg_restore','--file=/dev/null',str(b/'database.dump')],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True,timeout=600)
  shutil.copy2('/opt/digital-ocean-bot/build-manifest.json',b/'build-manifest.json')
+ # Flush completed backups before any release publication.
+ for path in b.rglob('*'):
+  if path.is_file() and not path.is_symlink():
+   with path.open('rb') as saved:os.fsync(saved.fileno())
+ fd=os.open(b,os.O_DIRECTORY)
+ try:os.fsync(fd)
+ finally:os.close(fd)
  print('Private database/configuration backup: '+str(b))
 def complete():
  if STATE.exists():
   state=json.loads(STATE.read_text());state['status']='installed';atomic(STATE,json.dumps(state)+'\n')
 def status():
- print(query("SELECT json_build_object('port',listen_port,'path',web_path,'host',listen_host) FROM panel_settings WHERE id=true;"))
+ print(query("SELECT json_build_object('port',listen_port,'path',web_path,'host','0.0.0.0') FROM panel_settings WHERE id=true;"))
 def main():
  mode=sys.argv[1]
  if mode=='prepare':prepare()

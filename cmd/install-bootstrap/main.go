@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -11,7 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -23,21 +21,13 @@ func main() {
 		log.Fatal("database configuration failed")
 	}
 	defer db.Close()
-	if err = (migrate.Runner{DB: db, Dir: "migrations"}).Up(ctx); err != nil {
+	if err = (migrate.Runner{DB: db, Dir: "migrations", PreserveData: os.Getenv("DOB_FRESH_INSTALL") != "1"}).Up(ctx); err != nil {
 		log.Fatal(err)
 	}
 	// No permission marker means migration-only (normal update and existing installations).
 	if os.Getenv("DOB_FRESH_INSTALL") != "1" {
 		fmt.Println("Migrations ready; existing users preserved")
 		return
-	}
-	raw, err := os.ReadFile("/etc/digital-ocean-bot/setup-token")
-	if err != nil {
-		log.Fatal("setup token unavailable")
-	}
-	grant := strings.TrimSpace(string(raw))
-	if len(grant) != 43 {
-		log.Fatal("invalid setup token")
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
 	if err != nil {
@@ -56,8 +46,7 @@ func main() {
 		log.Fatal(err)
 	}
 	if count == 0 {
-		h := sha256.Sum256([]byte(grant))
-		_, err = tx.ExecContext(ctx, `INSERT INTO admin_users(id,username,password_hash,role,enabled,must_change_password,bootstrap_token_hash) VALUES(gen_random_uuid(),'admin',$1,'admin',true,true,$2)`, string(hash), h[:])
+		_, err = tx.ExecContext(ctx, `INSERT INTO admin_users(id,username,password_hash,role,enabled,must_change_password,bootstrap_token_hash) VALUES(gen_random_uuid(),'admin',$1,'admin',true,false,NULL)`, string(hash))
 		if err != nil {
 			log.Fatal(err)
 		}

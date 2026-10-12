@@ -13,8 +13,9 @@ import (
 )
 
 type Runner struct {
-	DB  *sql.DB
-	Dir string
+	DB           *sql.DB
+	Dir          string
+	PreserveData bool
 }
 
 func (r Runner) Up(ctx context.Context) error {
@@ -69,9 +70,31 @@ func (r Runner) Up(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		var guard *retentionGuard
+		if r.PreserveData {
+			if _, err = tx.ExecContext(ctx, "SET LOCAL standard_conforming_strings = on"); err != nil {
+				tx.Rollback()
+				return err
+			}
+			if err = rejectTransactionEscape(string(raw)); err != nil {
+				tx.Rollback()
+				return err
+			}
+			guard, err = captureRetention(ctx, tx, version)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
 		if _, err = tx.ExecContext(ctx, string(raw)); err != nil {
 			tx.Rollback()
 			return fmt.Errorf("migration %s: %w", version, err)
+		}
+		if guard != nil {
+			if err = guard.verify(ctx, tx); err != nil {
+				tx.Rollback()
+				return fmt.Errorf("migration %s: %w", version, err)
+			}
 		}
 		if _, err = tx.ExecContext(ctx, `INSERT INTO schema_migrations(version,checksum) VALUES($1,$2)`, version, checksum); err != nil {
 			tx.Rollback()

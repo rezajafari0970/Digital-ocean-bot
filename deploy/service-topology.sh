@@ -11,6 +11,10 @@ DOB_UNIT_ASSETS=(
  digital-ocean-bot-api.service.d/60-worker-isolation.conf
  digital-ocean-bot-worker.service.d/60-worker-isolation.conf
 )
+DOB_UPDATE_UNITS=(datacenter-bot-update.socket datacenter-bot-update@.service datacenter-bot-update.service datacenter-bot-restart-api.service)
+DOB_UNIT_ASSETS+=("${DOB_UPDATE_UNITS[@]}")
+DOB_CONTROL_FILES=(/usr/local/bin/datacenter-bot /usr/local/lib/datacenter-bot/install.sh /usr/local/lib/datacenter-bot/source)
+
 dob_preflight_service_topology() {
  local unit path
  for unit in "${SERVICES[@]}"; do
@@ -59,13 +63,14 @@ dob_verify_exact_exec() {
 }
 dob_install_service_topology() {
  local unit
- for unit in "${DOB_UNIT_ASSETS[@]:0:4}"; do
+ for unit in "${DOB_UNIT_ASSETS[@]:0:4}" "${DOB_UPDATE_UNITS[@]}"; do
    install -m 0644 "$SRC/deploy/$unit" "$DOB_UNIT_DIR/$unit"
  done
  install -d -m 0755 "$DOB_UNIT_DIR/digital-ocean-bot-api.service.d" "$DOB_UNIT_DIR/digital-ocean-bot-worker.service.d"
  install -m 0644 "$SRC/deploy/api-split-workers.conf" "$DOB_UNIT_DIR/digital-ocean-bot-api.service.d/60-worker-isolation.conf"
  install -m 0644 "$SRC/deploy/worker-control.conf" "$DOB_UNIT_DIR/digital-ocean-bot-worker.service.d/60-worker-isolation.conf"
  systemctl daemon-reload
+ systemctl enable --now datacenter-bot-update.socket
 }
 # Prepare every artifact outside live paths before stopping services.
 dob_cleanup_stage() {
@@ -84,6 +89,7 @@ dob_stage_runtime() {
  for arch in amd64 arm64; do
   (cd "$SRC" && CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/server-guardian-linux-$arch" ./cmd/server-guardian)
  done
+ install -m 0750 "$SRC/deploy/project-update.py" "$DOB_STAGE/bin/project-update.py"
  cp -a "$SRC/migrations" "$DOB_STAGE/"
  cp -a "$SRC/web/static/." "$DOB_STAGE/web/static/"
  api_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-api" | awk '{print $1}')
@@ -168,15 +174,30 @@ dob_backup_runtime() {
    cp -a "$APP/$path" "$DOB_BACKUP/runtime/$path"
   fi
  done
+ install -d -m 0700 "$DOB_BACKUP/control"
+ for path in "${DOB_CONTROL_FILES[@]}"; do
+  if [ -f "$path" ]; then
+   install -d -m 0700 "$DOB_BACKUP/control$(dirname "$path")"
+   cp -a "$path" "$DOB_BACKUP/control$path"
+  fi
+ done
  : > "$DOB_BACKUP/active"
  : > "$DOB_BACKUP/enabled"
- for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager; do
+ for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-bot-update.socket; do
   if systemctl is-active --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/active"; fi
   if systemctl is-enabled --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/enabled"; fi
  done
 }
 dob_restore_runtime_assets() {
  local path
+ for path in "${DOB_CONTROL_FILES[@]}"; do
+  if [ -f "$DOB_BACKUP/control$path" ]; then
+   install -d -m 0755 "$(dirname "$path")" || return
+   cp -a "$DOB_BACKUP/control$path" "$path" || return
+  elif [ -d "$DOB_BACKUP/control" ]; then
+   rm -f -- "$path" || return
+  fi
+ done
  for path in "${DOB_UNIT_ASSETS[@]}"; do
   if [ -e "$DOB_BACKUP/units/$path" ]; then
    install -d "$DOB_UNIT_DIR/$(dirname "$path")" || return
@@ -197,7 +218,10 @@ dob_restore_runtime_assets() {
 # can leave dangling enable links after restoring an absent previous unit.
 dob_restore_enablement_before_assets() {
  local unit load
- for unit in "${SERVICES[@]}"; do
+ if [ "$(systemctl show datacenter-bot-update.socket -p LoadState --value)" = loaded ]; then
+  systemctl stop datacenter-bot-update.socket || return
+ fi
+ for unit in "${SERVICES[@]}" datacenter-bot-update.socket; do
   if ! grep -Fxq "$unit" "$DOB_BACKUP/enabled"; then
    load=$(systemctl show "$unit" -p LoadState --value) || return
    case "$load" in
@@ -324,4 +348,16 @@ while time.monotonic()<end:
 else:raise SystemExit('split topology readiness did not converge: '+str(last))
 PY
  python3 "$SRC/deploy/verify-panel.py" --bootstrap "$SRC/deploy/bootstrap.py" --etc "$ETC" --static-root "$SRC/web/static"
+ systemctl is-enabled --quiet datacenter-bot-update.socket
+ systemctl is-active --quiet datacenter-bot-update.socket
+ runuser -u digitaloceanbot -- python3 - <<'CONTROL'
+import json,socket
+with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as connection:
+ connection.settimeout(8)
+ connection.connect('/run/datacenter-bot/update.sock')
+ connection.sendall(b'{"action":"status"}\n')
+ response=json.loads(connection.makefile('rb').readline(16384))
+ assert response.get('ok') and response['state']['available'],'Update control is not available'
+print('Verified fixed-action update control as the runtime user')
+CONTROL
 }

@@ -129,6 +129,7 @@ func TestUpCloudBrowser(t *testing.T) {
 	}
 	s := Server{Container: app.Container{Providers: registry}}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/auth/me", s.authMe)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../../web/static"))))
 	mux.HandleFunc("GET /admin/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "../../web/static/index.html") })
 	mux.HandleFunc("GET /api/v1/providers", s.providersMetadata)

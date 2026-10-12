@@ -1,0 +1,12 @@
+[Unit]
+Description=Datacenter fixed-action update control
+[Service]
+Type=exec
+User=root
+WorkingDirectory=/
+ExecStart=/usr/bin/python3 -I /opt/digital-ocean-bot/bin/project-update.py control
+StandardInput=socket
+StandardOutput=inherit
+StandardError=journal
+RuntimeMaxSec=20
+UMask=0077

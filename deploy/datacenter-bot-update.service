@@ -1,0 +1,12 @@
+[Unit]
+Description=Datacenter project update
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/
+ExecStart=/usr/bin/python3 -I /opt/digital-ocean-bot/bin/project-update.py run
+TimeoutStartSec=45min
+KillMode=control-group
+UMask=0077

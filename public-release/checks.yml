@@ -21,9 +21,11 @@ jobs:
           go test ./...
           go vet ./...
           python3 deploy/bootstrap_test.py
+          python3 deploy/project_update_test.py
           sudo useradd --system digitaloceanbot
           sudo python3 deploy/static_permissions_test.py
           bash -n install.sh deploy/*.sh
           node --check web/static/app.js
+          node --check web/static/panel-settings.js
       - name: Verify exported file manifest
         run: python3 release/check-source.py

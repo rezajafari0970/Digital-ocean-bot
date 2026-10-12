@@ -1,0 +1,13 @@
+[Unit]
+Description=Datacenter project update control socket
+[Socket]
+ListenStream=/run/datacenter-bot/update.sock
+SocketUser=root
+SocketGroup=digitaloceanbot
+SocketMode=0660
+DirectoryMode=0755
+Accept=yes
+MaxConnections=16
+RemoveOnStop=yes
+[Install]
+WantedBy=sockets.target

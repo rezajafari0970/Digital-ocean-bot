@@ -28,6 +28,7 @@ func TestPermanentBrowser(t *testing.T) {
 	sqlMust(t, db, "INSERT INTO panel_routing_state(panel_id,revision,state,pool_enabled) SELECT $1,revision,'FAILED',true FROM residential_routing_control", second)
 	s := Server{DB: db, Container: app.Container{Secrets: secret}}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/auth/me", s.authMe)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../../web/static"))))
 	mux.HandleFunc("GET /admin/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "../../web/static/index.html") })
 	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]bool{"ready": true}) })

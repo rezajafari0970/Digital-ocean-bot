@@ -1,0 +1,9 @@
+[Unit]
+Description=Apply saved Datacenter panel address
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/
+ExecStart=/usr/bin/python3 -I /opt/digital-ocean-bot/bin/project-update.py restart-api
+TimeoutStartSec=45min
+UMask=0077

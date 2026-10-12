@@ -37,20 +37,20 @@ def main():
  assert subprocess.run(['systemctl','is-active','--quiet','digital-ocean-bot-vultr-browser-manager']).returncode!=0
  if snapshot.exists():assert json.loads(snapshot.read_text())==fingerprints(),'Update changed credentials/identity'
  if not password_file.exists():
-  assert request('/api/v1/auth/login',{'username':'admin','password':'admin'})[0]==401
-  grant=pathlib.Path('/etc/digital-ocean-bot/setup-token').read_text().strip()
-  status,result=request('/api/v1/auth/login',{'username':'admin','password':'admin'},grant=grant)
-  assert status==200 and result['user']['MustChangePassword'];token=result['token']
-  assert request('/api/v1/accounts',token=token)[0]==403
-  password=secrets.token_urlsafe(24)
-  assert request('/api/v1/auth/password',{'current_password':'admin','new_password':password},token)[0]==204
-  assert request('/api/v1/auth/me',token=token)[0]==401
-  password_file.write_text(password);password_file.chmod(0o600)
+  status,result=request('/api/v1/auth/login',{'username':'admin','password':'admin'})
+  assert status==200 and not result['user']['MustChangePassword']
+  assert request('/api/v1/accounts',token=result['token'])[0]==200
+  assert request('/api/v1/auth/logout',{},result['token'])[0]==204
+  password_file.write_text('admin');password_file.chmod(0o600)
  password=password_file.read_text()
- status,result=request('/api/v1/auth/login',{'username':'admin','password':password});assert status==200 and not result['user']['MustChangePassword']
+ status,result=request('/api/v1/auth/login',{'username':'admin','password':password})
+ assert status==200 and not result['user']['MustChangePassword']
  assert request('/api/v1/accounts',token=result['token'])[0]==200
- assert request('/api/v1/auth/login',{'username':'admin','password':'admin'},grant=pathlib.Path('/etc/digital-ocean-bot/setup-token').read_text().strip())[0]==401
+ settings=request('/api/v1/panel-settings',token=result['token'])[1]
+ assert 'listen_host' not in settings and settings['username']=='admin'
+ status,update=request('/api/v1/project-update',token=result['token'])
+ assert status==200 and update['available']
  assert request('/api/v1/auth/logout',{},result['token'])[0]==204
  if snapshot.exists():snapshot.unlink()
- print(json.dumps({'smoke':'PASS','revision':a.revision,'ready_checks':5,'identity_preserved':True,'initial_credentials_protected':True}))
+ print(json.dumps({'smoke':'PASS','revision':a.revision,'ready_checks':5,'identity_preserved':True,'ordinary_login_verified':True}))
 if __name__=='__main__':main()

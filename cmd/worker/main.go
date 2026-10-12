@@ -88,7 +88,7 @@ func main() {
 		}
 	}()
 
-	if err := (migrate.Runner{DB: application.DB, Dir: "migrations"}).Up(bootCtx); err != nil {
+	if err := (migrate.Runner{DB: application.DB, Dir: "migrations", PreserveData: true}).Up(bootCtx); err != nil {
 		log.Fatal(err)
 	}
 	if role.Owns(worker.RoleControl) {

@@ -59,7 +59,7 @@ def main():
   # All candidate tests run without access to root's keys, configuration or home.
   cache=pathlib.Path('/var/cache/datacenter-publisher-tests')
   script=run_dir/'validate.sh'
-  script.write_text('set -euo pipefail\ncd "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\nnode --check web/static/app.js\nnode --test web/tests/output_live.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
+  script.write_text('set -euo pipefail\ncd "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\npython3 deploy/project_update_test.py\nnode --check web/static/app.js\nnode --check web/static/panel-settings.js\nnode --test web/tests/output_live.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
   script.chmod(0o755)
   with (run_dir/'validation.log').open('w') as log:
    run(['systemd-run','--quiet','--wait','--pipe','--collect',

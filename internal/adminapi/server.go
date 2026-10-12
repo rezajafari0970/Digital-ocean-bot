@@ -14,6 +14,8 @@ import (
 )
 
 type Server struct {
+	Updater             updateController
+	ListenPort          int
 	WebPath             string
 	Auth                auth.Service
 	DB                  *sql.DB
@@ -137,6 +139,9 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/audit", s.require(s.audit, false))
 	m.HandleFunc("GET /api/v1/system", s.require(s.system, false))
 	m.HandleFunc("GET /api/v1/providers", s.require(s.providersMetadata, false))
+	m.HandleFunc("GET /api/v1/project-update", s.require(s.projectUpdateStatus, false))
+	m.HandleFunc("POST /api/v1/project-update", s.require(s.startProjectUpdate, true))
+	m.HandleFunc("POST /api/v1/panel-settings/apply", s.require(s.applyPanelSettings, true))
 	m.HandleFunc("GET /api/v1/panel-settings", s.require(s.getPanelSettings, false))
 	m.HandleFunc("PUT /api/v1/panel-settings", s.require(s.updatePanelSettings, true))
 	return m
