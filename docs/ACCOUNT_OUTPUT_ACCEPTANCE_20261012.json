@@ -1,0 +1,101 @@
+{
+  "status": "COMPLETED",
+  "at_tehran": "2026-10-12T05:56:08.765540+03:30",
+  "runtime_source_commit": "395e6ad856c3b857444be2bf6f75e5971ef7f4e6",
+  "rollback_source_commit": "d73e7205f54bc072e2446c59b5949ce2adbc5af5",
+  "rollback_artifacts": "/opt/digital-ocean-bot.rollback.pVnYVYRz",
+  "source_sha256": "88ec7583d830c3f096b7d3d9f33f80bdb5764515094a3c3b5b537ee0f458a722",
+  "review_decision": "PASS",
+  "review_unresolved": [],
+  "tests": {
+    "passed": true,
+    "focused_race_tests": 17,
+    "browser": "8 buttons; 4 providers; actual popups; exact lines; fixed token expiry; mobile/desktop",
+    "full_passed_tests": 1125,
+    "full_skipped_opt_in_tests": 447,
+    "full_failures": 0,
+    "vet": "PASS",
+    "node_live_view_tests": 3,
+    "production_database_used": false,
+    "note": "Full regression preceded the final fixture-only snapshot restore correction; affected account integration tests are opt-in and were skipped in that run, then all passed in acceptance-v4 with isolated PostgreSQL and race."
+  },
+  "production": {
+    "at": "2026-10-12T02:25:08.282330+00:00",
+    "passed": true,
+    "failure": null,
+    "accounts": 9,
+    "scopes": 18,
+    "positive_scopes": 18,
+    "returned_configs": 144,
+    "cross_account_or_class_overlap": 0,
+    "temporary_capabilities_removed": true,
+    "new_servers_or_clients_created": false,
+    "limitations": "New share issuance tested through real authenticated routes in isolated PostgreSQL; production canary capabilities were temporarily inserted and removed by the administrator."
+  },
+  "runtime_services": {
+    "api": {
+      "ActiveState": "active",
+      "MainPID": "2069263",
+      "NRestarts": "0",
+      "sha256": "1d8733e28f951f5b09dd8779f24bcb37ffc11f176b19d0e1a5cc86820b8a3b91"
+    },
+    "worker": {
+      "ActiveState": "active",
+      "MainPID": "2069269",
+      "NRestarts": "0",
+      "sha256": "85e2cacc381be797ab9378e0440b534632f7843a7195d6f3f673cdde40a37018"
+    },
+    "worker-panels": {
+      "ActiveState": "active",
+      "MainPID": "2069268",
+      "NRestarts": "0",
+      "sha256": "85e2cacc381be797ab9378e0440b534632f7843a7195d6f3f673cdde40a37018"
+    }
+  },
+  "readyz": {
+    "status": "ready",
+    "checks": [
+      {
+        "name": "database",
+        "ok": true
+      },
+      {
+        "name": "worker_progress",
+        "ok": true
+      },
+      {
+        "name": "panel_worker_progress",
+        "ok": true
+      },
+      {
+        "name": "lifecycle_account_lanes",
+        "ok": true
+      },
+      {
+        "name": "client_mutation_progress",
+        "ok": true
+      }
+    ],
+    "at": "2026-10-12T02:24:16.525702775Z"
+  },
+  "migration": {
+    "version": "000170_account_output_share",
+    "checksum": "7975b8a1afc197168d8e86f63c43457ba068d4d24f11dd0bbfd668ab422b70c9"
+  },
+  "settings_preserved": true,
+  "api_usage": {
+    "requests": 6,
+    "input_tokens": 48559,
+    "output_tokens": 5953,
+    "total_tokens": 54512,
+    "cost_usd": null
+  },
+  "evidence_directory": "/root/backups/dob-account-output-20261012",
+  "background_development_process": false,
+  "limitations": [
+    "Existing Output eligibility still excludes stale, expired, blocked or unhealthy configs.",
+    "In-flight response uses PostgreSQL statement-snapshot semantics.",
+    "Unsupported privileged database ownership rewrites are outside the account output API.",
+    "Historical detached-branch bootstrap assertion remains; source/runtime hashes verified independently."
+  ]
+}

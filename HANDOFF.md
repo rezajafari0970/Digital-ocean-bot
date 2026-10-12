@@ -1,3 +1,9 @@
+# Latest account Output release — 2026-10-12T05:56:08.765540+03:30
+
+Runtime 395e6ad856c3b857444be2bf6f75e5971ef7f4e6 deployed and verified. Direct and Residential buttons on every Accounts card open account-bound live Output. Separate account_output_share_tokens table and /share/account-output endpoint preserve scope and backward compatibility. Live check: 9 accounts, 18 positive scopes, 144 configs, zero cross-account/class overlap; temporary verification capabilities removed. All 3 process hashes and readyz 5/5 match; settings preserved. 17 focused/race tests, actual browser, full1125 pass (447 opt-in skips), vet and independent review PASS. Read docs/ACCOUNT_OUTPUT_20261012.md and docs/ACCOUNT_OUTPUT_ACCEPTANCE_20261012.json. API this work: 6 requests, 48559 input + 5953 output = 54512 tokens; billed USD unknown. No development process remains after final. Prior provider/panel work stays outside this feature.
+
+---
+
 # Latest: UpCloud Trial residential relay strategy — 2026-10-10T01:09:50.979358+03:30
 
 Strategy requested by user, checked against current source and live metadata, and recorded at docs/UPCLOUD_TRIAL_RESIDENTIAL_RELAY_STRATEGY_20261010_FA.md. 22 metadata-only donor candidates (14 DigitalOcean, 8 Vultr); no relay path proven. Current category scope none. This documentation-only step does not implement, activate or certify the relay. API generation/receipt retrieval/new tokens in this step: zero. Preserve the prior runtime and open concurrent DIRECT-profile finding. Next implementation packages and production gates are in the strategy.
