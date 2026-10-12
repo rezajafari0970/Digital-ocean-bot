@@ -1,0 +1,53 @@
+name: Advanced Reality lab (no deployment)
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/advanced-reality-lab-*']
+  pull_request:
+    paths:
+      - 'internal/advancedreality/**'
+      - 'internal/adminapi/advanced_reality*'
+      - 'cmd/advanced-reality-lab/**'
+      - 'web/static/advanced-reality.js'
+      - 'tools/advanced-reality-*'
+      - '.github/workflows/advanced-reality-lab.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: dob_bulk_test_are
+          POSTGRES_USER: are_fixture
+          POSTGRES_PASSWORD: ephemeral-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U are_fixture -d dob_bulk_test_are'
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: true
+      - name: Download pinned official test core
+        shell: bash
+        run: |
+          mkdir -m 700 .are-core
+          curl --fail --location --proto '=https' --tlsv1.2 --max-time 90 \
+            https://github.com/XTLS/Xray-core/releases/download/v26.10.10/Xray-linux-64.zip \
+            --output .are-core/core.zip
+          echo '72a5fde819713a103c6fc26a87aa025c1518c918a34eba4bc38d64dc0728e5d9  .are-core/core.zip' | sha256sum --check
+          unzip -p .are-core/core.zip xray > .are-core/xray
+          chmod 700 .are-core/xray
+      - name: Run isolated gates
+        env:
+          BULK_TEST_DATABASE_URL: postgres://are_fixture:ephemeral-ci-only@localhost:5432/dob_bulk_test_are?sslmode=disable
+          ADVANCED_REALITY_TEST_XRAY: ${{ github.workspace }}/.are-core/xray
+          ARE_EVIDENCE_DIR: ${{ runner.temp }}/are-evidence
+          GOMAXPROCS: '2'
+        run: bash tools/advanced-reality-acceptance.sh

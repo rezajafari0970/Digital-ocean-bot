@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-12T23:53:14.693272+00:00",
+  "stage": "LOCAL_ACCEPTANCE_PASS_REMOTE_CANARY_BLOCKED",
+  "focused_acceptance": {
+    "focused_acceptance": "PASS",
+    "fleet_activation": "BLOCKED",
+    "phone_compatibility": "BLOCKED",
+    "source_files": {
+      "cmd/advanced-reality-lab/main.go": "e5bb32ab0736112cc7c5b9c3347c3764c44d5efb664d06c81da37272187b1045",
+      "internal/adminapi/advanced_reality.go": "d5e1d9574435f700a1d97c1dab40731264fef079d9fb6cd23bb52eeee384fe89",
+      "internal/adminapi/advanced_reality_test.go": "978c33d738b7e8cc5d7a12adb4414b355f65a1e56692aca38f7baa44b2cf740b",
+      "internal/adminapi/server.go": "d96ae37e1cadb635f8be4a27c1807cf9f66ff31b21931a4a089e9cf866b4a105",
+      "internal/advancedreality/catalog.go": "5e30de2de2dd94c23eaf85c8b671925a79713b7a5e1f8f361969eecb36e70ff1",
+      "internal/advancedreality/contract.go": "1374668418fac14cc7e8788b9cf67bfc33041f65abe696542dd983923501126b",
+      "internal/advancedreality/contract_test.go": "06862dbc5589fa3cfff01dca4da4cef6ffec737a5cd35239ac02dac487741731",
+      "internal/advancedreality/inventory.go": "a11e890b21ed8fc3468d304088acffb9bf728915a27aa7e23bebeee926366419",
+      "internal/advancedreality/lab.go": "610e39f61e098d498957b8ddf74b30213781c7eb4d8b5dbd7e034d38e3cb33a4",
+      "internal/advancedreality/lab_test.go": "1e8ed425b3ec88bcb749b0c55ef8dcae15e8a1b8e9426d5e4adc0aec6cbdbf57",
+      "internal/advancedreality/native_test.go": "ed244a349429c3467a0fbbd7b684285588b2d41a256f4d478f93f14866c5702b",
+      "internal/advancedreality/policy.go": "33924f80eaa263d2225b741e3baa6b353c4bcb337dd8b444cf7fddd6212ac76f",
+      "internal/advancedreality/policy_test.go": "e1f105b2ca05f016b3580d3a6a0dfc0c7fa0142ab93710d7473b0db758cb943c",
+      "tools/advanced-reality-acceptance.sh": "5bd9b935ed721bbf776e61907369c36827e3a24d814e0e03aadc2f0b444973bf",
+      "tools/advanced-reality-host-observe.py": "ffda6bbcea1be6a6a1f269cebee28c42d759d60e7fb04d1cd92188e0f9541774",
+      "web/static/advanced-reality.js": "90b00e951cb136b799d9ade1be7b8a2d7e29105d8382dbc1ff1ff99d909fa981",
+      "web/static/app.js": "af8825684c330586c0416e27601fede616f1b134b43497eb972d296802bce253",
+      "web/static/index.html": "3d5337d663b7cfdf0dabfa56e466bf965bda3115d10305a8a8001de328260699"
+    },
+    "core_binary_sha256": "4cca4de3ab8c16b3803a70e9ebe0570d2a72480c716d89aa91603ec568bf0f44",
+    "client_binary_sha256": "b2c525e082cf2fef460499c88838d355f0b9bfb5a00bdb3eaa99b6af63825006"
+  },
+  "test_results": {
+    "core_and_contract_including_subtests": 44,
+    "api_postgres": 3,
+    "failures": 0,
+    "skipped_tests": 0,
+    "native_pairs": [
+      {
+        "server": "26.5.9",
+        "client": "26.3.27",
+        "result": "PASS"
+      },
+      {
+        "server": "26.10.10",
+        "client": "26.5.9",
+        "result": "PASS"
+      },
+      {
+        "server": "26.10.10",
+        "client": "26.3.27",
+        "result": "PASS"
+      }
+    ],
+    "initial_native_failures": "RETAINED: fixture private-destination denial; corrected exact loopback allow rule only in test baseline",
+    "live_phone": "BLOCKED",
+    "load_stress_memory_oom_reboot": "BLOCKED"
+  },
+  "fleet_observation": {
+    "at": "2026-10-12T23:45:25.677889+00:00",
+    "nondeleted_panels": 56,
+    "fresh_route": 46,
+    "failed_routes": 10,
+    "fresh_os_samples": 0,
+    "known_core_versions": 0
+  },
+  "production_changed": false,
+  "system_writes": [],
+  "external_openai_api_requests": 0,
+  "external_openai_api_tokens": 0,
+  "runtime_commit_unchanged": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+  "production_readiness_checks_passed": 5,
+  "canary_blockers": [
+    "test_host_ssh_timeout",
+    "test_host_22_and_80_timeout_from_second_vantage",
+    "official_v2rayng_device_evidence_missing",
+    "fleet_has_failed_routes",
+    "fleet_core_and_os_coverage_missing"
+  ],
+  "raw_evidence_path": "/root/backups/dob-advanced-reality-20261013"
+}

@@ -1,0 +1,22 @@
+{
+  "experiment_version": "0.1.0-experimental",
+  "default_mode": "DISABLED",
+  "actuator_installed": false,
+  "source_baseline": "a1f118d5351b24e6946a5acf0176cf738c9a7ee5",
+  "runtime_at_preflight": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+  "product_paths_equal_at_preflight": true,
+  "upstream_source_audit": {
+    "3x-ui": {"tag": "v3.10.0", "commit": "74c3cc38821cabd66ad316ea562851422d0b0063", "license": "GPL-3.0"},
+    "Xray-core": {"tag": "v26.10.10", "commit": "701af60772cda123492f86e383e1fdba066614a9", "license": "MPL-2.0"},
+    "REALITY_dependency": {"commit": "8cdf7bf9c7f09cb9814bf08c3eb877f68b85fba8", "license": "MPL-2.0 plus retained Go notices"},
+    "v2rayNG_reference_only": {"tag": "2.2.6", "commit": "15b4fff8e45da9bc0acaa5cc1d80a1d3531e8712", "license": "GPL-3.0", "installed_phone_verified": false}
+  },
+  "native_test_archives": [
+    {"url": "https://github.com/XTLS/Xray-core/releases/download/v26.5.9/Xray-linux-64.zip", "sha256": "f56c106b7c0159ad386bccd340faa5bbf55fd5c15821ec9e63e6a6ba11d3d1c7"},
+    {"url": "https://github.com/XTLS/Xray-core/releases/download/v26.10.10/Xray-linux-64.zip", "sha256": "72a5fde819713a103c6fc26a87aa025c1518c918a34eba4bc38d64dc0728e5d9"}
+  ],
+  "installed_test_binary": {"version": "26.3.27", "sha256": "8255dd939c34cf966cc91517b6324dd3c8d0bcf49ffac8beca049a38c46845ed", "archive_provenance_verified": false},
+  "test_host": {"address": "168.144.41.190", "intended_inbound_port": 80, "ssh_access": "BLOCKED_TIMEOUT", "second_vantage_tcp_22_and_80": "BLOCKED_TIMEOUT"},
+  "phone_acceptance": "BLOCKED_NO_DEVICE_EVIDENCE",
+  "fleet_activation": "BLOCKED"
+}

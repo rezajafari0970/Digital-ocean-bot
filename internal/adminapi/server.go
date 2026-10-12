@@ -38,6 +38,8 @@ func New(db *sql.DB, c app.Container) *Server {
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
+	m.HandleFunc("GET /api/v1/advanced-reality", s.require(s.advancedRealityStatus, false))
+	m.HandleFunc("POST /api/v1/advanced-reality/validate", s.require(s.advancedRealityValidate, true))
 	m.HandleFunc("GET /api/v1/proxy-traffic", s.require(s.proxyTraffic, false))
 	m.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
