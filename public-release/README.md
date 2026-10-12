@@ -58,3 +58,7 @@ sudo bash install.sh --source "$(pwd)"
 مسیر محلی باید سورس مورد اعتماد شما باشد. نام module برای سازگاری importهای پروژه حفظ شده است. قابلیت‌های اختیاری که به حساب ارائه‌دهنده و منابع واقعی نیاز دارند در تست نصب منابع خارجی ایجاد نمی‌کنند.
 
 نتایج آزمون نسخه و ماتریس واقعی آزمون در `release/VALIDATION.json` ثبت می‌شود؛ امکان ساخت arm64 با آزمون واقعی روی ماشین arm64 یکسان نیست.
+
+### Panel verification during installation
+
+The installer checks the configured panel page and all referenced JavaScript/CSS against the release before reporting success. Static directories and files are readable by the service user even when downloaded with restrictive root permissions. Updates repair the earlier `403 Forbidden` issue while preserving existing configuration and login credentials.

@@ -36,6 +36,9 @@ def main():
   expected=state.get('public_revision',config['initial_revision'])
   pending=state.get('pending_revision') if state.get('status')=='publishing' else None
   if pending and base==pending:
+   refs=output(['git','-C',repo,'ls-remote','origin','refs/heads/main','refs/heads/stable'])
+   if len(refs.splitlines())!=2 or any(not x.startswith(pending+'\t') for x in refs.splitlines()):
+    raise RuntimeError('Pending publication refs disagree; refusing acknowledgement')
    state.update(status='published',public_revision=pending,source_revision=state['pending_source'],manifest_sha256=state['pending_manifest']);write_state(state)
    print('Reconciled previously acknowledged remote publication');return
   if base!=expected:raise RuntimeError('Destination changed independently; refusing to overwrite it')
@@ -71,6 +74,11 @@ def main():
   run(['lxc','exec',container,'--','mkdir','-p','/var/lib/datacenter-bot-installer/revisions'])
   run(['lxc','exec',container,'--','tar','-xzf','/root/release-candidate.tar.gz','-C','/var/lib/datacenter-bot-installer/revisions'])
   target='/var/lib/datacenter-bot-installer/revisions/'+public
+  # Reproduce a real root Git clone under installer umask 077; tar's
+  # readable build-validation modes must not hide runtime permission bugs.
+  restrictive = "import pathlib,subprocess,sys;root=pathlib.Path(sys.argv[1]);records=subprocess.check_output(['git','-C',str(root),'ls-files','-s','-z']).split(b'\\0');[(root/rec.split(b'\\t',1)[1].decode()).chmod(0o700 if rec.startswith(b'100755 ') else 0o600) for rec in records if rec];[p.chmod(0o700) for p in root.rglob('*') if p.is_dir()];root.chmod(0o700);assert (root/'web/static').stat().st_mode&0o777==0o700;assert (root/'web/static/index.html').stat().st_mode&0o777==0o600"
+  run(['lxc','exec',container,'--','python3','-c',restrictive,target])
+  run(['lxc','exec',container,'--','python3',target+'/deploy/static_permissions_test.py'])
   with (run_dir/'installation.log').open('w') as log:
    run(['lxc','exec',container,'--','bash',target+'/install.sh','--source',target],stdout=log,stderr=subprocess.STDOUT,timeout=1800)
   run(['lxc','exec',container,'--','python3','/root/release-smoke.py','--revision',public])

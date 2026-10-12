@@ -111,18 +111,40 @@ print('Verified API, workers and both guardian release artifacts')
 PY
 }
 dob_prepare_stage_permissions() {
- chown -R root:digitaloceanbot "$DOB_STAGE"
- chmod 0750 "$DOB_STAGE" "$DOB_STAGE/bin" "$DOB_STAGE/migrations"
- chmod 0750 "$DOB_STAGE/bin/"*
- chmod 0640 "$DOB_STAGE/migrations/"*.sql
+ # cp -a preserves root-only modes from the installer's umask 077 clone.
+ # Reject links/special files before changing ownership or permissions.
+ test -d "$DOB_STAGE/web/static" || return
+ test -f "$DOB_STAGE/web/static/index.html" || return
+ local unexpected
+ unexpected=$(find "$DOB_STAGE/web" ! -type d ! -type f -print -quit) || return
+ test -z "$unexpected" || return
+ chown -R root:digitaloceanbot "$DOB_STAGE" || return
+ chmod 0750 "$DOB_STAGE" "$DOB_STAGE/bin" "$DOB_STAGE/migrations" || return
+ chmod 0750 "$DOB_STAGE/bin/"* || return
+ chmod 0640 "$DOB_STAGE/migrations/"*.sql || return
+ find "$DOB_STAGE/web" -type d -exec chmod 0750 {} + || return
+ find "$DOB_STAGE/web" -type f -exec chmod 0640 {} + || return
+ # Check the effective reader before stopping any running service.
+ runuser -u digitaloceanbot -- python3 - "$DOB_STAGE/web/static" <<'STATIC' || return
+import os,sys
+def failed(error):
+ raise error
+for directory,children,files in os.walk(sys.argv[1],onerror=failed):
+ if os.access(directory,os.W_OK):raise PermissionError('Runtime user can write a static directory')
+ for name in files:
+  path=os.path.join(directory,name)
+  if os.access(path,os.W_OK):raise PermissionError('Runtime user can write a static file')
+  with open(path,'rb') as asset:asset.read(1)
+print('Verified panel asset access as the runtime user')
+STATIC
  local migration
- for migration in "$DOB_STAGE/migrations/"*.sql; do runuser -u digitaloceanbot -- test -r "$migration"; done
+ for migration in "$DOB_STAGE/migrations/"*.sql; do runuser -u digitaloceanbot -- test -r "$migration" || return; done
 }
 dob_publish_runtime() {
  # All readers are stopped, backup is complete and rollback is armed.
  python3 "$SRC/deploy/admission-compatibility.py" "$SRC/deploy/bootstrap.py" "$ETC/env" "$DOB_STAGE/build-manifest.json" || return
  local path
- install -d "$APP" "$APP/web"
+ install -d -m 0755 "$APP" "$APP/web"
  for path in bin migrations web/static build-manifest.json; do
   rm -rf -- "$APP/$path"
   mv "$DOB_STAGE/$path" "$APP/$path"
@@ -301,4 +323,5 @@ while time.monotonic()<end:
  time.sleep(1)
 else:raise SystemExit('split topology readiness did not converge: '+str(last))
 PY
+ python3 "$SRC/deploy/verify-panel.py" --bootstrap "$SRC/deploy/bootstrap.py" --etc "$ETC" --static-root "$SRC/web/static"
 }

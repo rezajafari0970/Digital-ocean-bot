@@ -1,3 +1,7 @@
+# Panel HTTP403 installer repair — 2026-10-12
+
+Confirmed new-server HTTP403 was filesystem permissions, not authentication. Shared staging now normalizes and checks public-static access as the service user before stopping services. Deployment acceptance compares actual configured HTML and6referenced assets to candidate bytes.12focused tests and a real static-permission fault/rollback passed; independent review PASS. Publisher now tests restrictive Git-derived source modes, invokes panel smoke, and verifies both refs during publication reconciliation. Evidence: /root/backups/dob-panel-403-20261012. Publication and new-server update are pending at this checkpoint; consult the live publisher ledger and this evidence directory for completion. Original production must remain on395e6ad; only the newly connected limited-lime server is the update target.
+
 # Public installer and automatic publication — 2026-10-12
 
 Public repository: https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config

@@ -31,6 +31,7 @@ def main():
  status,ready=request('/readyz');assert status==200 and len(ready['checks'])==5 and all(x['ok']for x in ready['checks'])
  version=json.loads(pathlib.Path('/opt/digital-ocean-bot/build-manifest.json').read_text());assert version['commit']==a.revision
  assert request('/version')[1]['commit']==a.revision
+ subprocess.run(['python3',source+'/deploy/verify-panel.py','--bootstrap',source+'/deploy/bootstrap.py','--etc','/etc/digital-ocean-bot','--static-root',source+'/web/static'],check=True)
  for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
   subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)
  assert subprocess.run(['systemctl','is-active','--quiet','digital-ocean-bot-vultr-browser-manager']).returncode!=0

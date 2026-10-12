@@ -1,0 +1,24 @@
+{
+  "goal": "Fix confirmed HTTP 403 on /admin after public unattended install, preserve all existing credentials and data, strengthen deploy readiness and publication tests, publish through existing secret-scanned automatic pipeline, update new server.",
+  "context": "Runtime evidence: new Ubuntu26 server all three units active and /readyz5/5 but /admin403. namei root:digitaloceanbot static directory0700 and index.html0600; service user cannot read. Source clone runs under umask077; cp -a preserves those modes. Shared dob_prepare_stage_permissions only normalizes bin/migrations; ignores web tree. Selective runtime public-static chmod dirs0750/files0640 immediately made /admin and /static/app.js return200, confirming causality. Original production is not to be redeployed. No auth bypass, no changes to secrets/env/DB/admin password.\nProposed minimal repair: normalize staged web directories0750 and regular files0640 root:service-group; explicitly test staged static readability/traversal as service user before stopping services; reject unexpected symlinks/special files. Ensure runtime app/web parents permit traversal with explicit install directory modes. Extend installer verification after readiness to HTTP GET actual configured admin path and every referenced local script/stylesheet, reject missing/non-200/wrong bytes or contents; use same deployed source as expected. Test under restrictive umask077 with nested static fixture and inaccessible asset injection, service user read and no write. Extend publisher smoke to call actual panel gate; force source tree directories0700/files0600 except tracked executable files0700 before isolated installation to reproduce real root clone. Preserve current manifest, identity, rollback, stages and app behavior. Add focused root integration regression in CI and publisher alongside existing full regressions. Real normal GitHub stable install then upgrade on new server and fresh Ubuntu26 container; prove no credentials changed. Fault evidence: broken static asset makes verifier fail; existing rollback guard reused. No unrelated product changes.",
+  "allowed_paths": [
+    "deploy/service-topology.sh",
+    "deploy/verify-panel.py",
+    "deploy/static_permissions_test.py",
+    "tools/public-release/publish.py",
+    "tools/public-release/smoke.py",
+    "public-release/checks.yml",
+    "public-release/README.md",
+    "docs/development-jobs/panel-403-20261012.json",
+    "HANDOFF.md"
+  ],
+  "push": true,
+  "rollback_commit": "a1c2ed4f98a4b397994ca431198ff7b2bf49e51d",
+  "status": "VERIFIED_PENDING_PUBLICATION",
+  "root_cause": "umask077 Git clone plus cp-a preserved root-only static permissions",
+  "focused_tests": 12,
+  "review": "PASS",
+  "fault_test": "post-publication unreadable JS rejected; matching runtime restored; panel and6assets PASS",
+  "evidence": "/root/backups/dob-panel-403-20261012",
+  "unresolved_code_blockers": []
+}
