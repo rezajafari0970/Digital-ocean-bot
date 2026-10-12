@@ -506,27 +506,18 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				log.Printf("global reality discovery: %v", err)
 				return
 			}
-			sem := make(chan struct{}, 8)
-			var wg sync.WaitGroup
-			for _, panel := range panels {
-				panel := panel
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					select {
-					case sem <- struct{}{}:
-						defer func() { <-sem }()
-					case <-ctx.Done():
-						return
-					}
-					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-					defer cancel()
-					if err := panelPollWork.Do(cctx, func(ctx context.Context) error { return reconciler.ReconcilePanel(ctx, panel, false) }); err != nil && cctx.Err() == nil {
-						log.Printf("global reality panel %s: %v", panel.ID, err)
-					}
-				}()
-			}
-			wg.Wait()
+			// Queue waiting must not consume the native reconciliation deadline.
+			// The shared batch helper admits work before invoking this handler.
+			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelPollWork.Do, func(ctx context.Context, index int) error {
+				panel := panels[index]
+				cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+				defer cancel()
+				err := reconciler.ReconcilePanel(cctx, panel, false)
+				if err != nil && ctx.Err() == nil {
+					log.Printf("global reality panel %s: %v", panel.ID, err)
+				}
+				return err
+			})
 		}
 		run()
 		for {

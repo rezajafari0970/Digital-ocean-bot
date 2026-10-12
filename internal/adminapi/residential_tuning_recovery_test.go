@@ -175,3 +175,72 @@ func TestPerformanceStatusCannotCallStaleRoutingVerified(t *testing.T) {
 		t.Fatal(response.Body.String())
 	}
 }
+
+func TestTuningCompletedProgressDoesNotReopenForFutureServer(t *testing.T) {
+	for _, phase := range []string{"PUBLISHED", "RESTORED"} {
+		t.Run(phase, func(t *testing.T) {
+			f := newTuningFixture(t, 1)
+			f.start()
+			f.verify(f.panels[0])
+			f.do("tune_publish")
+			f.verify(f.panels...)
+			f.tick()
+			f.phase("PUBLISHED")
+			if phase == "RESTORED" {
+				f.do("tune_restore")
+				f.verify(f.panels...)
+				f.tick()
+				f.phase("RESTORED")
+			}
+			future := fleetSeed(t, f.db, "after-completed-tuning")
+			f.tick()
+			f.verify(future)
+			read := func() (json.RawMessage, int, bool, string) {
+				t.Helper()
+				request := httptest.NewRequest("GET", "/api/v1/residential-performance", nil)
+				request = request.WithContext(context.WithValue(request.Context(), principalKey{}, auth.Principal{Role: auth.Admin}))
+				response := httptest.NewRecorder()
+				(&Server{DB: f.db}).residentialPerformanceStatus(response, request)
+				if response.Code != 200 {
+					t.Fatal(response.Code, response.Body.String())
+				}
+				var body struct {
+					Experiment struct {
+						Tuning   struct{ Phase string } `json:"active_tuning"`
+						Progress json.RawMessage        `json:"tuning_progress"`
+						Counts   struct{ Verified int }
+						Targets  []struct {
+							PanelID  string `json:"panel_id"`
+							Verified bool
+							Reason   string `json:"recovery_reason"`
+						}
+					}
+				}
+				if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+					t.Fatal(err)
+				}
+				if body.Experiment.Tuning.Phase != phase {
+					t.Fatal("completed history changed", response.Body.String())
+				}
+				for _, target := range body.Experiment.Targets {
+					if target.PanelID == future {
+						return body.Experiment.Progress, body.Experiment.Counts.Verified, target.Verified, target.Reason
+					}
+				}
+				t.Fatal("future assignment missing")
+				return nil, 0, false, ""
+			}
+			progress, verified, fresh, reason := read()
+			if string(progress) != "null" || verified != 2 || !fresh || reason != "" {
+				t.Fatal("completed cycle invented new pending work", string(progress), verified, fresh, reason)
+			}
+			// Closing a historical progress display must not hide a real stale assignment.
+			sqlMust(t, f.db, "UPDATE panel_routing_state SET verified_at=now()-interval '61 seconds' WHERE panel_id=$1", future)
+			progress, verified, fresh, reason = read()
+			if string(progress) != "null" || verified != 1 || fresh || reason != "PROOF_STALE" {
+				t.Fatal("current fleet proof was hidden", string(progress), verified, fresh, reason)
+			}
+			f.phase(phase)
+		})
+	}
+}

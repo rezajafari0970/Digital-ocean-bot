@@ -1,0 +1,30 @@
+{
+  "goal": "Stop completed historical tuning display from labelling later healthy fleet enrollment as pending recovery. Give native global Reality reconciliation its full existing timeout after bounded admission.",
+  "context": "Baseline canonical/runtime1be2fab passed postrelease observation:51/51active,0inactive/degraded/broken,51/51fresh routing proofs/errors0,capacity245/245deficit0. Completion truly RESTORED at earlier50/50gate. Two newly inherited fleet assignments are fresh APPLIED but have no old tuning marker. TuningProgressSQL still calculates historical RESTORED cycle over all current fleet and falsely displays49/51,2pending, while correct liveassignmentcounts51verifiedandnoblockers. Return null active-progress ONLY for known terminal RESTORED/PUBLISHED phases, preserving active_tuning history, current assignment counts/freshness/blockers, and every completion/generation/revision/deletion/ownership guard. Existing UI already renders progress conditionally. No execution/config/schema/native-call change. Test both terminal phases via actual Store actions, later fleet enrollment, real API handler and synthetic stale native-proof timestamp: no historicalpending but actual futureassignment staleness remains visible. Existing active RESTORING unverified survivor test and full tuning gate/race suite must still pass. Inherit broad prior tests only on unchanged bytes. Actual exact-source APIreview, cleanlockedrelease and multiwindow livechecks required. No subagents. Additional live investigation before API review: two READY/PANEL_COMPLETE native COMPLETED panels have fresh route proof but no native inbounds or target selections for20+minutes; globalReality enabled/stable/443 and both qualify for readyworker source. Global Reality alone created its20s child deadline BEFORE queueing in the two-slot polling class, unlike capacity handlers already using RunBoundedBatch. Under22pollwaiters it can time out without executing and suppress timeout logging. Replace its hand-written semaphore with existing RunBoundedBatch and create same20s deadline INSIDE admitted handler, preserving class2/shared10/concurrency8/nativeownership, config, generation and cancellation bounds. Handler errors log only while parent remains active, so real native timeout is diagnosable. No new helper or executionbudgetincrease. Rerun worker/globalReality/routing race packages plus full tuning tests and compileall. Verify new-server bootstrap through existing native controller after release, not manual SSH or forced database state. This scope amendment was discovered before final review; diagnostic-only test receipts archived and superseded.",
+  "allowed_paths": [
+    "cmd/worker/main.go",
+    "internal/residentialperf/diagnostics.go",
+    "internal/adminapi/residential_tuning_recovery_test.go",
+    "tools/panel-tuning-display-review.py",
+    "tools/panel-tuning-display-acceptance-race.sh",
+    "docs/development-jobs/panel-tuning-display-20261012.json",
+    "docs/PANEL_AUDIT_20261012.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/panel-tuning-display-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/panel-tuning-display-review.py"
+    ]
+  },
+  "commit_message": "fix(panels): preserve admitted policy timeouts and completed tuning status"
+}

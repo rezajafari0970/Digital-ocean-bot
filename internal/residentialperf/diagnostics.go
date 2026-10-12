@@ -12,9 +12,11 @@ func failureStage(stage string) string {
 }
 
 // TuningProgressSQL is a read-only correlated expression for the admin status
-// query's experiment e and routing control c. It uses the same freshness and
+// query's experiment e and routing control c. Completed cycles keep their
+// history but have no active pending count; later fleet enrollment is reported
+// by assignment counts. Active cycles use the same freshness and
 // surviving-target predicates as completion; it cannot authorize a transition.
-const TuningProgressSQL = `CASE WHEN e.tuning IS NULL THEN NULL ELSE (
+const TuningProgressSQL = `CASE WHEN e.tuning IS NULL OR e.tuning->>'phase' IN ('RESTORED','PUBLISHED') THEN NULL ELSE (
  SELECT json_build_object(
  'surviving',count(*),
  'verified',count(*) FILTER(WHERE COALESCE((` + tuningFresh + `
