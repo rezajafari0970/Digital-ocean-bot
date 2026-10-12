@@ -107,6 +107,12 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 					return
 				}
 			}
+			if rt.Config.Provider == "linode" {
+				if err := c.SyncLinodeResources(ctx, id, obs.Inventory); err != nil {
+					log.Printf("linode inventory persistence account=%s: %v", id, err)
+					return
+				}
+			}
 			// Vultr's public API exposes current instances but not the account's
 			// Maximum Instances limit. Overlay only API-proven capacity evidence;
 			// current usage and lower-bound learning always remain API-derived.

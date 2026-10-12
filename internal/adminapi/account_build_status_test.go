@@ -32,7 +32,7 @@ func TestAccountBuildParityAndReservationsPostgres(t *testing.T) {
 	db := adminTestDB(t)
 	s := Server{DB: db}
 	ctx := context.Background()
-	for _, provider := range []string{"upcloud", "digitalocean", "vultr"} {
+	for _, provider := range []string{"upcloud", "digitalocean", "vultr", "linode"} {
 		id := seedBuildAccount(t, db, provider)
 		putBuildSnapshot(t, db, id, "active", true, 3, 1)
 		check := func(want *int, providerOK bool) {

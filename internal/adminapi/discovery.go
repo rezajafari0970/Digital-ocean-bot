@@ -66,6 +66,12 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if runtime.Config.Provider == "linode" {
+		if err := s.Container.SyncLinodeResources(r.Context(), id, obs.Inventory); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "inventory_store_failed"})
+			return
+		}
+	}
 	canonical, _ := json.Marshal(obs)
 	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4)`, id, runtime.Config.Provider, []byte(`{}`), canonical); err != nil {
 		writeJSON(w, 500, map[string]string{"error": "snapshot_store_failed"})

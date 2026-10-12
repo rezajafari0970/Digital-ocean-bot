@@ -27,6 +27,9 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 			if provider == "vultr" {
 				return "Vultr"
 			}
+			if provider == "linode" {
+				return "Linode"
+			}
 			if provider == "upcloud" {
 				return "UpCloud"
 			}
@@ -44,6 +47,15 @@ func (s *Server) accountCapacity(w http.ResponseWriter, r *http.Request) {
 	x, err := capacity.Read(r.Context(), s.DB, id, 2*time.Minute)
 	if err != nil {
 		writeJSON(w, 409, map[string]string{"error": "account_capacity_unavailable"})
+		return
+	}
+	var provider string
+	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", id).Scan(&provider); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if provider == "linode" && !x.LimitKnown {
+		writeJSON(w, 200, map[string]any{"server_limit": nil, "limit_known": false, "provider_servers": x.InUse, "pending": x.Pending, "available": nil, "droplet_limit": nil, "active": x.InUse})
 		return
 	}
 	writeJSON(w, 200, map[string]any{"server_limit": x.Limit, "provider_servers": x.InUse, "pending": x.Pending, "available": x.Available(), "droplet_limit": x.Limit, "active": x.InUse})

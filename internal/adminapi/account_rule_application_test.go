@@ -68,7 +68,7 @@ func ruleTick(t *testing.T, db *sql.DB, a string) {
 }
 func TestAccountRuleApplicationFutureOnlyAndDesiredMatrix(t *testing.T) {
 	db := adminTestDB(t)
-	for _, provider := range []string{"digitalocean", "vultr", "upcloud"} {
+	for _, provider := range []string{"digitalocean", "vultr", "upcloud", "linode"} {
 		t.Run(provider, func(t *testing.T) {
 			a, ids := ruleFixture(t, db, provider, 15)
 			var expiry time.Time

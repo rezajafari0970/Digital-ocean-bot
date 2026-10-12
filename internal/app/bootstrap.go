@@ -8,6 +8,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/linode"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/upcloud"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/vultr"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
@@ -80,6 +81,10 @@ func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {
 		return nil, err
 	}
 	if err := registry.Register(upcloud.Factory{}); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := registry.Register(linode.Factory{}); err != nil {
 		db.Close()
 		return nil, err
 	}

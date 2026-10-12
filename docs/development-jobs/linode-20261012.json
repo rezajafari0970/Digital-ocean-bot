@@ -1,0 +1,45 @@
+{
+  "goal": "Add a modular production Linode provider alongside DigitalOcean, Vultr and UpCloud. Complete driver, account preview, catalog Ubuntu support, per-account guarded proxy transport, SSH inline identities, safe create/delete/reconciliation, resources, truthful capacity and billing, dashboard and browser integration. Preserve all current controls and unrelated providers.",
+  "context": "Canonical494b95a/runtime9e59e3a. Existing prior routing/lifecycle acceptance is explicitly paused by user and must not be repaired or claimed stable in this scope. Linode APIv4 authoritative docs inspected: bearerPAT; authorized_keys installs root key; instance numeric ID; list pages/results/data; delete removes local disks/backups but detaches block volumes, reserved IPs retained; never create extra volumes/reserved IPs/backups. Exact account quota is not documented; mark the numeric maximum unknown, use complete inventory for usage, classify explicit quota rejection as capacity and retain bounded shared workflow retry/backoff. Never infer an exact global count from a generic resource-limit rejection. Account/settings defaults may enable automatic backups; preserve account defaults and document price/constraints honestly. Model errors sanitize raw provider bodies. Existing InlineSSHKeys path supplies per-deployment root key. No Linode production credential has been supplied. Evidence-based bounded tests and native compatibility; no real-cloud acceptance claim without live account.",
+  "allowed_paths": [
+    "internal/providers/linode",
+    "internal/app/bootstrap.go",
+    "internal/app/linode_resources.go",
+    "internal/app/linode_integration_test.go",
+    "internal/app/provider_refresh.go",
+    "internal/app/provider_catalog_economy.go",
+    "internal/app/workflow.go",
+    "internal/adminapi/linode_integration_test.go",
+    "internal/adminapi/discovery.go",
+    "internal/adminapi/status_counts.go",
+    "internal/adminapi/capacity_observability.go",
+    "internal/adminapi/account_deletion_test.go",
+    "internal/adminapi/account_rule_application_test.go",
+    "internal/adminapi/account_build_status_test.go",
+    "web/static/app.js",
+    "web/tests/linode.cjs",
+    "tools/linode-api.py",
+    "tools/linode-review.py",
+    "tools/linode-acceptance.sh",
+    "docs/development-jobs/linode-20261012.json",
+    "docs/LINODE_20261012.md",
+    "internal/adminapi/resources_api.go"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/linode-acceptance.sh -race"
+    ],
+    "verify": [
+      "python3 tools/linode-review.py"
+    ]
+  },
+  "push": false,
+  "commit_message": "feat(provider): integrate Linode driver and lifecycle support"
+}

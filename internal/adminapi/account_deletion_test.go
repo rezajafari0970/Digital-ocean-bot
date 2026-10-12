@@ -82,7 +82,7 @@ type deletionFixtureDriver struct {
 
 func (d *deletionFixtureDriver) Name() string { return d.provider }
 func (d *deletionFixtureDriver) Capabilities() providers.Capabilities {
-	return providers.Capabilities{Compute: true, InlineSSHKeys: d.provider == "upcloud"}
+	return providers.Capabilities{Compute: true, InlineSSHKeys: d.provider == "upcloud" || d.provider == "linode"}
 }
 func (d *deletionFixtureDriver) ListServers(ctx context.Context) ([]providers.Server, error) {
 	d.lists++
@@ -116,7 +116,7 @@ func requestDeletion(s *Server, id string, role auth.Role) *httptest.ResponseRec
 	return w
 }
 func TestAccountDeletionProviderVerificationAndTimeoutFault(t *testing.T) {
-	for _, provider := range []string{"digitalocean", "vultr", "upcloud"} {
+	for _, provider := range []string{"digitalocean", "vultr", "upcloud", "linode"} {
 		t.Run(provider, func(t *testing.T) {
 			db := adminTestDB(t)
 			ctx := context.Background()
@@ -205,7 +205,7 @@ func TestAccountDeletionSkipsLockedHeadAndKeepsCleanupNetwork(t *testing.T) {
 	ctx := context.Background()
 	s := Server{DB: db}
 	var ids []string
-	for _, provider := range []string{"digitalocean", "vultr", "upcloud"} {
+	for _, provider := range []string{"digitalocean", "vultr", "upcloud", "linode"} {
 		id := perfUUID()
 		ids = append(ids, id)
 		sqlMust(t, db, "INSERT INTO accounts(id,name,provider,secret_ref) VALUES($1,'fixture',$2,'test')", id, provider)
@@ -219,7 +219,7 @@ func TestAccountDeletionSkipsLockedHeadAndKeepsCleanupNetwork(t *testing.T) {
 	sqlMust(t, db, "UPDATE account_deletion_jobs SET next_attempt_at=now()+interval '1 hour' WHERE account_id=$1", ids[2])
 	c := app.Container{DB: db}
 	maintained, e := c.AccountNetworkMaintenanceIDs(ctx)
-	if e != nil || len(maintained) != 3 {
+	if e != nil || len(maintained) != len(ids) {
 		t.Fatal("zero-server cleanup lost network", maintained, e)
 	}
 	conn, e := db.Conn(ctx)
@@ -242,6 +242,10 @@ func TestAccountDeletionSkipsLockedHeadAndKeepsCleanupNetwork(t *testing.T) {
 	db.QueryRow("SELECT attempts FROM account_deletion_jobs WHERE account_id=$1", ids[2]).Scan(&n)
 	if n != 0 {
 		t.Fatal("not-due job claimed")
+	}
+	// A fourth provider may remain beyond the coordinator's bounded batch.
+	if e = c.ProcessAccountDeletions(ctx); e != nil {
+		t.Fatal(e)
 	}
 	// Legacy archive has no cleanup intent/job and must not be reactivated.
 	sqlMust(t, db, "DELETE FROM account_deletion_jobs WHERE account_id=$1", ids[2])
