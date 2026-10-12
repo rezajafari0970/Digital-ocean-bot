@@ -326,6 +326,14 @@ func (c Container) admitRetirement(ctx context.Context, accountID, dropletID, pr
 	if state != "RETIRING" {
 		return false, nil
 	}
+	// A stale ordinary lifecycle item cannot skip the new path's start gate.
+	var unstartedDeficit bool
+	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM lifecycle_deficit_claims WHERE droplet_id=$1 AND (started_at IS NULL OR account_id<>$2 OR provider_resource_id<>$3))`, dropletID, accountID, providerID).Scan(&unstartedDeficit); err != nil {
+		return false, err
+	}
+	if unstartedDeficit {
+		return false, nil
+	}
 	if _, err = tx.ExecContext(ctx, `UPDATE account_rule_application SET retirement_started=true,updated_at=now()
  WHERE account_id=$1 AND waiting_droplet_id=$2`, accountID, dropletID); err != nil {
 		return false, err

@@ -73,3 +73,7 @@ sudo bash install.sh --source "$(pwd)"
 ### Panel verification during installation
 
 The installer checks the configured panel page and all referenced JavaScript/CSS against the release before reporting success. Static directories and files are readable by the service user even when downloaded with restrictive root permissions. Updates repair the earlier `403 Forbidden` issue while preserving existing configuration and login credentials.
+
+### Linode expiry recovery
+
+An expired managed Linode can retire below the configured Desired count when another server in the same account has fresh, verified service readiness. Retirement is serialized, revalidated before starting, and processed by the existing deletion journal. The next retirement waits for verified backfill recovery. Desired remains a growth target, not an asserted provider quota; normal growth spacing and provider/proxy admission remain unchanged.

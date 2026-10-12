@@ -1,0 +1,102 @@
+{
+  "job": "expiry-deficit-20261012",
+  "status": "VALIDATED_AWAITING_PUBLIC_GATES",
+  "base_revision": "19f7901a01214dde2b5b33842676e42d2ae15128",
+  "user_authorized": "Correct remaining Linode expired-server lifecycle with best safe strategy; preserve established provider/ownership/proxy/no-blind-retry gates; previous public rollout authorization continues.",
+  "goal": "Permit exactly one owned expired retirement below Desired after native same-account serving capacity is freshly proven, without treating Desired as provider quota. Keep subsequent delete blocked until existing backfill debt/active/unknown operations settle. Existing journal performs DELETE and provider absence verification. No direct manual delete.",
+  "observed": "Old Linode107935963 expired09:12UTC; two newer Ready+PANEL_COMPLETE, each5clients and output verified; next scheduled fourth provisioning. Physical Desired10 and20\u201330minute growth spacing unchanged.",
+  "allowed_paths": [
+    "internal/app/lifecycle.go",
+    "internal/app/lifecycle_expiry_deficit.go",
+    "internal/app/lifecycle_expiry_deficit_test.go",
+    "docs/development-jobs/expiry-deficit-20261012.json",
+    "public-release/VALIDATION.json",
+    "public-release/README.md",
+    "migrations/000173_expiry_deficit_claims.up.sql",
+    "migrations/000173_expiry_deficit_claims.down.sql",
+    "internal/app/account_rule_application.go",
+    "internal/app/consistency.go",
+    "internal/app/lifecycle_capacity_recovery_test.go"
+  ],
+  "risk": "Destructive provider deletion; must prove fresh exact ownership/expiry/provider IDs, serialize admission and backfill; real PostgreSQL race/fault tests, independent plan/source review, public release gates and native one-delete canary required.",
+  "at": "2026-10-12T15:49:35.298033+00:00",
+  "plan_review": "REVISE: durable claim/start boundary, backfill completion and FK lock coverage addressed in implementation",
+  "api_usage": {
+    "responses": 3,
+    "input_tokens": 59738,
+    "output_tokens": 3673,
+    "total_tokens": 63411,
+    "receipts": [
+      {
+        "phase": "plan",
+        "id": "resp_0673c133ace5491b006accfc15b97c87d1b6d63a8f77db6884",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 14735,
+          "input_tokens_details": {
+            "cache_write_tokens": 14732,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1428,
+          "output_tokens_details": {
+            "reasoning_tokens": 354
+          },
+          "total_tokens": 16163
+        }
+      },
+      {
+        "phase": "source",
+        "id": "resp_046815d0cd52cb7a006accfee3b77487d1867d2286192f1306",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 30697,
+          "input_tokens_details": {
+            "cache_write_tokens": 30694,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1822,
+          "output_tokens_details": {
+            "reasoning_tokens": 930
+          },
+          "total_tokens": 32519
+        }
+      },
+      {
+        "phase": "resolution",
+        "id": "resp_0381b2d4c54120d3006acd00f81ce887d18cad4b7bf102bbf1",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 14306,
+          "input_tokens_details": {
+            "cache_write_tokens": 14303,
+            "cached_tokens": 0
+          },
+          "output_tokens": 423,
+          "output_tokens_details": {
+            "reasoning_tokens": 174
+          },
+          "total_tokens": 14729
+        }
+      }
+    ],
+    "billed_usd": "not available; not inferred"
+  },
+  "scope_extension_reason": "Persist exact claim/start and durable serving-recovery receipts; fence ordinary admission; extend existing local consistency and update one old test fixture.",
+  "source_review": "PASS after correcting identity-revocation cancellation and strengthening FK blocking tests",
+  "tests": {
+    "unchanged_go_packages_with_isolated_postgres_and_browser": 58,
+    "final_app_package_complete_postgres_race": "PASS",
+    "final_targeted_expiry_admission_deletion_race": "PASS",
+    "go_vet": "PASS",
+    "independent_source_review": "PASS",
+    "claim_event_fault_rollback": "PASS",
+    "sixteen_workers_single_claim": "PASS",
+    "identity_change_and_cancelled_generation_fence": "PASS",
+    "fresh_native_same_account_serving_proof": "PASS",
+    "foreign_key_insert_serialization": "PASS",
+    "linked_backfill_service_recovery_and_later_expiry": "PASS"
+  }
+}

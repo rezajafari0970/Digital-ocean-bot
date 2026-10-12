@@ -15,7 +15,7 @@ import (
 func capacityRecoveryFixture(t *testing.T) *sql.DB {
 	t.Helper()
 	db := fenceTestDB(t)
-	_, err := db.Exec(`ALTER TABLE accounts ADD COLUMN provider_state text DEFAULT 'ACTIVE',ADD COLUMN provider_error_state text,ADD COLUMN desired_server_count int DEFAULT 5,ADD COLUMN runtime_status text,ADD COLUMN runtime_status_detail text,ADD COLUMN runtime_status_at timestamptz,ADD COLUMN updated_at timestamptz DEFAULT now();
+	_, err := db.Exec(`ALTER TABLE accounts ADD COLUMN provider text DEFAULT 'upcloud',ADD COLUMN provider_state text DEFAULT 'ACTIVE',ADD COLUMN provider_error_state text,ADD COLUMN desired_server_count int DEFAULT 5,ADD COLUMN runtime_status text,ADD COLUMN runtime_status_detail text,ADD COLUMN runtime_status_at timestamptz,ADD COLUMN updated_at timestamptz DEFAULT now();
  CREATE TABLE account_create_blocks(account_id text,version bigint,code text,blocked_at timestamptz);
  CREATE TABLE provider_snapshots(account_id text,provider text,canonical jsonb,data jsonb,created_at timestamptz);
  CREATE TABLE operations(account_id text,kind text,resource_id text,state text);

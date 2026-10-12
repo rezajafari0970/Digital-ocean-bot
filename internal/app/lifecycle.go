@@ -20,6 +20,13 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 			return err
 		}
 	}
+	var deficitClaim string
+	if item.State == droplets.Retiring {
+		err := c.DB.QueryRowContext(ctx, `SELECT claim_id::text FROM lifecycle_deficit_claims WHERE droplet_id=$1 AND account_id=$2 AND provider_resource_id=$3`, item.ID, item.AccountID, item.ProviderID).Scan(&deficitClaim)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+	}
 	var providerState string
 	if err := c.DB.QueryRowContext(ctx, "SELECT COALESCE(provider_state,'') FROM accounts WHERE id=$1", item.AccountID).Scan(&providerState); err != nil {
 		return err
@@ -126,7 +133,11 @@ func (c Container) ProcessLifecycle(ctx context.Context, item droplets.Lifecycle
 				}
 			}
 			if !claimed && desired > 0 && managed < desired && retiring == 0 {
-				claimed, err = claimCapacityRetirementTx(ctx, tx, item)
+				deficitClaim, err = claimExpiredDeficitRetirementTx(ctx, tx, item)
+				claimed = deficitClaim != ""
+				if err == nil && !claimed {
+					claimed, err = claimCapacityRetirementTx(ctx, tx, item)
+				}
 				if err != nil {
 					tx.Rollback()
 					return err
@@ -280,6 +291,12 @@ processLifecycle:
 		return runtime.CheckMutationGeneration(ctx)
 	}
 	if item.State == droplets.Retiring {
+		if deficitClaim != "" {
+			allowed, err := c.admitExpiredDeficitRetirement(ctx, item, deficitClaim)
+			if err != nil || !allowed {
+				return err
+			}
+		}
 		allowed, err := c.AdmitLifecycleRetirement(ctx, item.AccountID, item.ID, item.ProviderID)
 		if err != nil {
 			return err

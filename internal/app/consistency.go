@@ -9,6 +9,10 @@ import (
 // ReconcileLocalState repairs only relationships that are provable from local
 // persisted state. It never creates or deletes provider resources.
 func (c Container) ReconcileLocalState(ctx context.Context) {
+	if err := c.reconcileExpiryDeficitBackfill(ctx); err != nil {
+		log.Printf("expiry deficit recovery observation: %v", err)
+	}
+
 	if n, err := c.ReconcileFailedProvisioning(ctx); err != nil {
 		log.Printf("terminal provisioning reconcile: %v", err)
 	} else if n > 0 {
