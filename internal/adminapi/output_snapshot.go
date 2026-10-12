@@ -119,6 +119,13 @@ func (s *Server) outputSnapshotResponse(w http.ResponseWriter, r *http.Request) 
 	s.outputSnapshotClass(w, r, class)
 }
 func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, class string) {
+	s.outputSnapshotScoped(w, r, class, nil)
+}
+func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, class string, scope *accountOutputScope) {
+	if scope != nil && (scope.AccountID == "" || scope.Token == "" || (class != "DIRECT" && class != "RESIDENTIAL")) {
+		http.Error(w, "invalid output scope", http.StatusBadRequest)
+		return
+	}
 	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
 	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
 	// A last verified admission closure stays withheld across stale/failed polls.
@@ -140,6 +147,13 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
          AND own.state='ACTIVE' AND own.route_class=$1)) `
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
+	}
+	if scope != nil {
+		args = append(args, scope.AccountID, scope.Token)
+		// Revalidate capability and ownership in the same statement snapshot as output.
+		where += ` AND dr.account_id=$2 AND p.account_id=dr.account_id AND d.account_id=dr.account_id
+   AND a.deleted_at IS NULL AND EXISTS(SELECT 1 FROM account_output_share_tokens ast
+    WHERE ast.token=$3 AND ast.account_id=dr.account_id AND ast.route_class=$1 AND ast.revoked_at IS NULL) `
 	}
 	// A failed health check hides residential links immediately, ahead of reconciliation.
 	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR
@@ -179,7 +193,11 @@ func (s *Server) outputSnapshotClass(w http.ResponseWriter, r *http.Request, cla
 	for rows.Next() {
 		var u string
 		var ports []byte
-		if rows.Scan(&u, &ports) == nil && outputProfilePortAllowed(u, ports) {
+		if err := rows.Scan(&u, &ports); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if outputProfilePortAllowed(u, ports) {
 			out.WriteString(u)
 			out.WriteByte('\n')
 		}

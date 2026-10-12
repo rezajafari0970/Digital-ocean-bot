@@ -1,0 +1,21 @@
+{
+  "goal": "Add Direct and Residential buttons to every Accounts card. Each opens live plaintext Output for exactly that account and class. Enforce cross-account isolation in database query and persisted capability token; never fall back to global output.",
+  "context": "Current source/runtime d73e720. Design: new authenticated admin POST /api/v1/accounts/{id}/output/share; class mandatory DIRECT/RESIDENTIAL; nullable account_id FK ON DELETE CASCADE in output_share_tokens, existing NULL tokens stay global. Scoped insert selects an existing nondeleted account; unknown/malformed IDs fail. Shared token alone binds account+class, URL parameters cannot broaden/change scope, all rows checked against dr.account_id plus consistent panel/deployment owners. Reuse existing outputSnapshotClass filtering through scoped helper including freshness, expiry-10s, native route proof, health, cleanup and profile ownership. Do not alter traffic/routing/gates or server lifecycle. Existing global Output and shares backward compatible. Exact raw URI strings preserved. New UI buttons reuse popup pattern passing ID in path and type in JSON; repeated refresh uses fixed token. Isolated PostgreSQL and browser tests across 4 providers, identical names/reused client IDs, tampering, deletion, expiry, stale/fault/empty; full regression and race. Rollback baseline d73e720, additive migration retained, revoke/delete scoped tokens BEFORE older global-only code can run. Known historical bootstrap detached-branch failure recorded; exact HEAD/runtime chain verified separately. CHOSEN SAFER REVISION: use separate account_output_share_tokens table with NOT NULL account FK ON DELETE CASCADE and class CHECK, and /share/account-output/{token}. Existing output_share_tokens remains untouched so rollback/old readers cannot reinterpret account tokens as global, even if URL is manually changed. Scope object distinguishes global nil from invalid scoped input. Active token is rechecked within the final output statement. Query scope overrides rejected. No owner-reassignment API is added.",
+  "allowed_paths": [
+    "internal/adminapi/output_snapshot.go",
+    "internal/adminapi/account_output.go",
+    "internal/adminapi/account_output_test.go",
+    "internal/adminapi/account_output_browser_test.go",
+    "internal/adminapi/server.go",
+    "web/static/app.js",
+    "web/tests/account-output.cjs",
+    "migrations/000170_account_output_share.up.sql",
+    "migrations/000170_account_output_share.down.sql",
+    "tools/account-output-api.py",
+    "tools/account-output-review.py",
+    "docs/development-jobs/account-output-20261012.json",
+    "docs/ACCOUNT_OUTPUT_20261012.md",
+    "web/static/index.html"
+  ],
+  "push": false
+}
