@@ -7,7 +7,7 @@ import (
 )
 
 func TestRealityURIAlwaysCarriesVisionFlow(t *testing.T) {
-	s, e := VLESSRealityURI(VLESSReality{UUID: "eb44dbca-6064-4085-8145-ca022e5b2f65", Host: "167.172.28.228", Port: 18443, SNI: "www.cloudflare.com", PublicKey: "public", ShortID: "04a54a16", Remark: "test"})
+	s, e := VLESSRealityURI(VLESSReality{UUID: "b530c072-21c6-405d-95d8-fa78afa2d62e", Host: "167.172.28.228", Port: 18443, SNI: "www.cloudflare.com", PublicKey: "public", ShortID: "04a54a16", Remark: "test"})
 	if e != nil {
 		t.Fatal(e)
 	}

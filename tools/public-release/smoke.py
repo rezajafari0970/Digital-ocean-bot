@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Run inside the isolated publisher test container, never production."""
+import argparse,hashlib,json,os,pathlib,secrets,subprocess,urllib.request,urllib.error
+BASE='http://127.0.0.1:18080'
+def request(path,payload=None,token='',grant=''):
+ headers={'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Bootstrap-Token':grant}
+ req=urllib.request.Request(BASE+path,data=json.dumps(payload).encode() if payload is not None else None,headers=headers)
+ try:
+  with urllib.request.urlopen(req,timeout=20) as res:return res.status,json.loads(res.read() or b'null')
+ except urllib.error.HTTPError as e:return e.code,json.loads(e.read() or b'null')
+def fingerprints():
+ import runpy
+ source=pathlib.Path('/usr/local/lib/datacenter-bot/source').read_text().strip()
+ funcs=runpy.run_path(source+'/deploy/bootstrap.py')
+ env=funcs['database_environment'](funcs['read_environment'](pathlib.Path('/etc/digital-ocean-bot/env')))
+ p=subprocess.run(['psql','-XAt','-c',"SELECT id::text||':'||username||':'||password_hash FROM admin_users ORDER BY id"],env=env,capture_output=True,check=True)
+ return {'key':hashlib.sha256(pathlib.Path('/etc/digital-ocean-bot/master.key').read_bytes()).hexdigest(),'env':hashlib.sha256(pathlib.Path('/etc/digital-ocean-bot/env').read_bytes()).hexdigest(),'users':hashlib.sha256(p.stdout).hexdigest()}
+def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--before',action='store_true');parser.add_argument('--revision');a=parser.parse_args()
+ snapshot=pathlib.Path('/root/release-before.json');password_file=pathlib.Path('/root/release-test-password')
+ if a.before:
+  if pathlib.Path('/usr/local/lib/datacenter-bot/source').exists():snapshot.write_text(json.dumps(fingerprints()))
+  return
+ status,ready=request('/readyz');assert status==200 and len(ready['checks'])==5 and all(x['ok']for x in ready['checks'])
+ version=json.loads(pathlib.Path('/opt/digital-ocean-bot/build-manifest.json').read_text());assert version['commit']==a.revision
+ for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
+  subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)
+ assert subprocess.run(['systemctl','is-active','--quiet','digital-ocean-bot-vultr-browser-manager']).returncode!=0
+ if snapshot.exists():assert json.loads(snapshot.read_text())==fingerprints(),'Update changed credentials/identity'
+ if not password_file.exists():
+  assert request('/api/v1/auth/login',{'username':'admin','password':'admin'})[0]==401
+  grant=pathlib.Path('/etc/digital-ocean-bot/setup-token').read_text().strip()
+  status,result=request('/api/v1/auth/login',{'username':'admin','password':'admin'},grant=grant)
+  assert status==200 and result['user']['MustChangePassword'];token=result['token']
+  assert request('/api/v1/accounts',token=token)[0]==403
+  password=secrets.token_urlsafe(24)
+  assert request('/api/v1/auth/password',{'current_password':'admin','new_password':password},token)[0]==204
+  assert request('/api/v1/auth/me',token=token)[0]==401
+  password_file.write_text(password);password_file.chmod(0o600)
+ password=password_file.read_text()
+ status,result=request('/api/v1/auth/login',{'username':'admin','password':password});assert status==200 and not result['user']['MustChangePassword']
+ assert request('/api/v1/accounts',token=result['token'])[0]==200
+ assert request('/api/v1/auth/login',{'username':'admin','password':'admin'},grant=pathlib.Path('/etc/digital-ocean-bot/setup-token').read_text().strip())[0]==401
+ assert request('/api/v1/auth/logout',{},result['token'])[0]==204
+ if snapshot.exists():snapshot.unlink()
+ print(json.dumps({'smoke':'PASS','revision':a.revision,'ready_checks':5,'identity_preserved':True,'initial_credentials_protected':True}))
+if __name__=='__main__':main()

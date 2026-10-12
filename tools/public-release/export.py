@@ -17,6 +17,7 @@ def export(source,revision,destination,require_clean=True):
  revision=git(source,'rev-parse',revision+'^{commit}').decode().strip()
  if require_clean:
   dirty=git(source,'status','--porcelain','--untracked-files=all','--','cmd','internal','migrations','web','deploy','install.sh','go.mod','go.sum','public-release').decode()
+  dirty='\n'.join(line for line in dirty.splitlines() if '__pycache__' not in pathlib.PurePosixPath(line[3:]).parts)
   if dirty.strip():raise ValueError('Commit/clean the product working tree before publication')
  if destination.exists() and any(destination.iterdir()):raise ValueError('Export destination must be empty')
  destination.mkdir(parents=True,exist_ok=True);files={}

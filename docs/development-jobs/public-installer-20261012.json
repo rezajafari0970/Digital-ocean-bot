@@ -16,7 +16,9 @@
     "web/static/index.html",
     "public-release/",
     "tools/public-release/",
-    "docs/development-jobs/public-installer-20261012.json"
+    "docs/development-jobs/public-installer-20261012.json",
+    "internal/panels/export/vless_test.go",
+    "internal/panels/realitycontract/contract_test.go"
   ],
   "push": true,
   "rollback_commit": "b6c8b8ebda96fdce50dc90408d958533588408d5"
