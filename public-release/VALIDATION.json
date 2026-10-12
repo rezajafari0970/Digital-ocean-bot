@@ -1,0 +1,5 @@
+{
+  "status": "candidate_under_test",
+  "tested": [],
+  "arm64": "cross-build planned; no hardware execution claimed"
+}

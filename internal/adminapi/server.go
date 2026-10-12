@@ -53,6 +53,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /readyz", s.ready)
 	m.HandleFunc("GET /version", s.version)
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
+	m.HandleFunc("GET /api/v1/auth/me", s.require(s.authMe, false))
+	m.HandleFunc("POST /api/v1/auth/password", s.require(s.changePassword, false))
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
 	m.HandleFunc("POST /api/v1/accounts", s.require(s.createAccount, true))
 	m.HandleFunc("POST /api/v1/accounts/preview", s.require(s.accountPreview, true))

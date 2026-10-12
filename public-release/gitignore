@@ -1,0 +1,17 @@
+*.env
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.db
+*.sqlite*
+*.dump
+*.log
+__pycache__/
+.local/
+.audit/
+backups/
+bin/
+coverage*

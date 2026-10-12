@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared desired topology for fresh install and upgrade.
-SERVICES=(digital-ocean-bot-vultr-browser-manager digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-worker-panels)
+SERVICES=(digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-worker-panels)
 DOB_UNIT_DIR=${DOB_UNIT_DIR:-/etc/systemd/system}
 ETC=${ETC:-/etc/digital-ocean-bot}
 DOB_UNIT_ASSETS=(
@@ -76,7 +76,7 @@ dob_stage_runtime() {
  trap dob_cleanup_stage EXIT
  install -d -m 0755 "$DOB_STAGE/bin" "$DOB_STAGE/web/static"
  local binary command arch api_sha worker_sha guardian_amd64_sha guardian_arm64_sha
- for binary in digital-ocean-bot-api digital-ocean-bot-worker vultr-browser-session vultr-browser-manager vultr-input-bridge; do
+ for binary in digital-ocean-bot-api digital-ocean-bot-worker install-bootstrap vultr-browser-session vultr-browser-manager vultr-input-bridge; do
   command=$binary
   case "$binary" in digital-ocean-bot-api) command=api ;; digital-ocean-bot-worker) command=worker ;; esac
   (cd "$SRC" && go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/$binary" "./cmd/$command")
@@ -98,7 +98,7 @@ dob_verify_staged_runtime() {
  python3 - "$DOB_STAGE" <<'PY'
 import hashlib,json,pathlib,struct,sys
 root=pathlib.Path(sys.argv[1]);manifest=json.loads((root/'build-manifest.json').read_text())
-for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','server-guardian-linux-amd64','server-guardian-linux-arm64']:
+for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','install-bootstrap','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','server-guardian-linux-amd64','server-guardian-linux-arm64']:
  p=root/'bin'/name
  if not (p.is_file() and not p.is_symlink() and p.stat().st_size>0):raise SystemExit('required artifact missing: '+name)
 for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256')]:
@@ -259,6 +259,7 @@ GUARD
   fi
   exit "$code"
  fi
+ if [ -n "${DOB_PENDING:-}" ]; then rm -f -- "$DOB_PENDING"; fi
  echo "Deployment failed; restored matching binaries, migrations, static, manifest and units. Evidence: $DOB_BACKUP" >&2
  exit "$code"
 }

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+case "${1:-status}" in
+ install) exec bash /usr/local/lib/datacenter-bot/install.sh ;;
+ update) exec bash /usr/local/lib/datacenter-bot/install.sh --update ;;
+ status) systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-worker-panels ;;
+ version) cat /opt/digital-ocean-bot/build-manifest.json ;;
+ logs) exec journalctl -u digital-ocean-bot-api -u digital-ocean-bot-worker -u digital-ocean-bot-worker-panels --no-pager -n 100 ;;
+ recover)
+  [ "$(id -u)" = 0 ] || { echo 'Run with sudo.' >&2; exit 1; }
+  pending=/etc/digital-ocean-bot/deployment.pending
+  test -f "$pending" || { echo 'No interrupted deployment.'; exit 0; }
+  mapfile -t recovery < "$pending"
+  test "${#recovery[@]}" = 2
+  SRC=${recovery[0]}; DOB_BACKUP=${recovery[1]}
+  [[ "$SRC" = /var/lib/datacenter-bot-installer/revisions/* ]] || { echo 'Inspect the local-source recovery record before running its recovery script.'; exit 1; }
+  [[ "$DOB_BACKUP" = /opt/digital-ocean-bot.rollback.* ]] || exit 1
+  export SRC DOB_BACKUP
+  exec bash "$SRC/deploy/recover.sh" ;;
+ *) echo 'Usage: datacenter-bot {update|status|version|logs|recover}'; exit 64 ;;
+esac

@@ -1,0 +1,27 @@
+name: Source checks
+on:
+  push:
+    branches: [main, stable]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - name: Regression and static checks
+        env:
+          GOMAXPROCS: '2'
+          GOTOOLCHAIN: local
+        run: |
+          go test ./...
+          go vet ./...
+          python3 deploy/bootstrap_test.py
+          bash -n install.sh deploy/*.sh
+          node --check web/static/app.js
+      - name: Verify exported file manifest
+        run: python3 release/check-source.py
