@@ -1,0 +1,31 @@
+{
+  "goal": "Publish actual post-proof panel inventory and bulk capacity observations without redundant native requests or synthetic freshness.",
+  "context": "Baseline canonical/runtime10fda61. Work admission correction achieved genuine RESTORED with50/50verified obligations and49/49serving fresh native proofs, zero route errors. However two-slot bulk polling makes10otherwise healthy inventories older than120s, producing false inactive and stale capacity9/48fresh. Existing route reconciliation already performs full fresh post-proof native inventory after session invalidation, membership match and generation/revision checks. Reuse that exact snapshot through existing inventory.SQLStore.Sync and new public read-only usercapacity.ObserveVerifiedSnapshot for enabled VLESS TCP Reality bulk-managed inbounds, using existing ownership predicate and class-aware bulk counter. No extra native call, no mutation, no widened global/SQL/native concurrency, no forced timestamps when proof or required client traffic missing. Missing traffic skips capacity write retaining prior counts AND timestamp. Inventory and capacity transactions finish before route receipt transaction; independent factual inventory may remain if later receipt commit fails. Native proof failures cannot publish fresh inventory. Existing native, generation, deletion, unknown-outcome, recovery guards unchanged. Focused native fake HTTP PostgreSQL race test passed. Run full affected race suites, PostgreSQL regression and compileall; reuse previous broad tests only for unchanged bytes. Fresh actual API review and locked clean-source deployment required. Observe route proof freshness, inventory false inactive and capacity freshness over multiplewindows; never fabricate admin session or delete real accounts as tests. No subagents. REVIEW1 found native streamSettings can be an encoded JSON string. Corrected observer to normalize both object and string forms using the existing driver pattern; PostgreSQL test deletes prior observation before encoded-form call so silently skipping cannot pass. Re-run full affected gates and measured review for corrected exact source.",
+  "allowed_paths": [
+    "internal/panels/residentialsync/service.go",
+    "internal/panels/usercapacity/verified_observation.go",
+    "internal/panels/usercapacity/bulk_observation_postgres_test.go",
+    "internal/adminapi/routing_cleanup_postgres_test.go",
+    "tools/panel-proof-observation-review.py",
+    "tools/panel-proof-observation-acceptance-race.sh",
+    "docs/development-jobs/panel-proof-observation-20261012.json",
+    "docs/PANEL_AUDIT_20261012.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/panel-proof-observation-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/panel-proof-observation-review.py"
+    ]
+  },
+  "commit_message": "fix(panels): publish verified native inventory and capacity observations"
+}

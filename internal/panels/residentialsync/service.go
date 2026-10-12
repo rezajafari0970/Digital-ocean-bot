@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residentialperf"
 	"os"
@@ -325,6 +327,19 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}
 	if err = s.checkPolicy(ctx, panel, p, revision); err != nil {
 		return err
+	}
+	// The post-proof inventory is freshly read after invalidating the session.
+	// Publish its real normalized evidence before acknowledging the route; do not
+	// force another native read merely to refresh the independent panel counters.
+	observed, observeErr := sanaei.InventoryFromRaw(panel, after)
+	if observeErr != nil {
+		return observeErr
+	}
+	if _, observeErr = (inventory.SQLStore{DB: s.DB}).Sync(ctx, observed); observeErr != nil {
+		return observeErr
+	}
+	if observeErr = (usercapacity.Service{DB: s.DB}).ObserveVerifiedSnapshot(ctx, panel, after); observeErr != nil {
+		return observeErr
 	}
 	failureStage = "receipt_commit"
 	tx, err := s.DB.BeginTx(ctx, nil)

@@ -233,6 +233,7 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	template := map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"rules": []any{}}}
 	running := template
 	saves, reloads := 0, 0
+	rejectProof := false
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
@@ -263,6 +264,10 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 			reloads++
 			w.WriteHeader(500)
 		case "/panel/api/xray/routeTest":
+			if rejectProof {
+				fmt.Fprint(w, `{"success":false,"msg":"native proof unavailable"}`)
+				return
+			}
 			r.ParseForm()
 			tag := ""
 			for _, value := range running["routing"].(map[string]any)["rules"].([]any) {
@@ -379,6 +384,24 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	if saves != 2 || reloads != 2 {
 		t.Fatal("unchanged routing restarted")
 	}
+	var before, after, clients int
+	if err := db.QueryRow("SELECT count(*) FROM panel_inventory_syncs WHERE panel_id=$1 AND state='COMPLETED'", panel).Scan(&before); err != nil || before < 3 {
+		t.Fatal("verified inventories were not published", before, err)
+	}
+	if err := db.QueryRow("SELECT client_count FROM panel_inbound_inventory WHERE panel_id=$1 AND remote_id=1 AND present", panel).Scan(&clients); err != nil || clients != 2 {
+		t.Fatal("normalized inventory missing", clients, err)
+	}
+	mu.Lock()
+	rejectProof = true
+	mu.Unlock()
+	sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+	if err := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); err == nil {
+		t.Fatal("failed native proof accepted")
+	}
+	if err := db.QueryRow("SELECT count(*) FROM panel_inventory_syncs WHERE panel_id=$1 AND state='COMPLETED'", panel).Scan(&after); err != nil || after != before {
+		t.Fatal("failed proof fabricated fresh inventory", before, after, err)
+	}
+
 }
 
 func TestRoutingDueLanesKeepRetiredFailuresOutOfServingQueue(t *testing.T) {
