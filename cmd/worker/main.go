@@ -140,6 +140,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
 	controlWork := worker.NewWorkBudget(3)
 	panelWork := worker.NewWorkBudget(10)
+	// Keep bulk observation/policy scans from filling the proof admission queue.
+	// The existing shared SQL budget still bounds every admitted handler.
+	panelPollWork := worker.NewWorkClass(panelWork, 2)
 
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
@@ -160,7 +163,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					lanes.Stalled = 1
 				}
 			}
-			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "panel_work": panelWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -518,7 +521,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					}
 					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 					defer cancel()
-					if err := panelWork.Do(cctx, func(ctx context.Context) error { return reconciler.ReconcilePanel(ctx, panel, false) }); err != nil && cctx.Err() == nil {
+					if err := panelPollWork.Do(cctx, func(ctx context.Context) error { return reconciler.ReconcilePanel(ctx, panel, false) }); err != nil && cctx.Err() == nil {
 						log.Printf("global reality panel %s: %v", panel.ID, err)
 					}
 				}()
@@ -557,7 +560,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				log.Printf("user capacity discovery: %v", err)
 				return
 			}
-			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelWork.Do, func(ctx context.Context, index int) error {
+			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelPollWork.Do, func(ctx context.Context, index int) error {
 				panel := panels[index]
 				cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 				defer cancel()
@@ -602,7 +605,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				log.Printf("user capacity cleanup discovery: %v", err)
 				return
 			}
-			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelWork.Do, func(ctx context.Context, index int) error {
+			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelPollWork.Do, func(ctx context.Context, index int) error {
 				panel := panels[index]
 				cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 				defer cancel()

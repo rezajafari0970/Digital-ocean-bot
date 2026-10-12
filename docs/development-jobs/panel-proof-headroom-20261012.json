@@ -1,0 +1,30 @@
+{
+  "goal": "Prevent bulk panel scans from starving strict native routing proof freshness without raising SQL/global work budgets.",
+  "context": "Runtime and canonical1216713; all46serving routes APPLIED, errors0, accountwarningsonlycapacityfull after transientproxyisolationauto-recovered. RESTORING still14stale60s proofs. Production heartbeat: shared panel work10/10active25waiting; DB40max,6inuse,6idle,WaitCount0. Capacityfill8,capacitycleanup8,globalreality8 queue alongside8routeconsumers, reducing route admission. Add a bounded WorkClass(parent=existing10,limit2) used ONLY by globalreality,capacityfill,capacitycleanup. It acquires class permit before parent admission and any SQL/native/runtime lock, honorscontext whilequeued, and retainspermituntilhandlerreturns evenon cancellation. No recursive parent acquisition. NativeHTTPproof remainsserial;8serving sharedqueueconsumers,1retirementconsumer,45sattempt,90sreservation,freshness60,generation/native/unknownoutcome/deletionguardsandclientmutationconcurrency1 unchanged. Expose pollclass waiting/admitted snapshot in existing heartbeat. Regression test saturates20polljobs,asserts8routejobsadmittedwithglobal10unchanged,then cancellation/drain no leaks. Previously accepted untouched surfaces reused byte-for-byte; rerun worker and relevant background/routing race suites and compileall. No userconfigchange,nativeSSH or subagents. Fresh exact-source APIreview and cleancommitdeployment with postrelease proofage observations required.",
+  "allowed_paths": [
+    "cmd/worker/main.go",
+    "internal/worker/work_class.go",
+    "internal/worker/work_class_test.go",
+    "tools/panel-proof-headroom-review.py",
+    "tools/panel-proof-headroom-acceptance-race.sh",
+    "docs/development-jobs/panel-proof-headroom-20261012.json",
+    "docs/PANEL_AUDIT_20261012.md"
+  ],
+  "ai_council": false,
+  "api_implement": false,
+  "push": false,
+  "api_timeout_seconds": 300,
+  "timeout_seconds": 900,
+  "commands": {
+    "implement": [
+      "git diff --check"
+    ],
+    "test": [
+      "bash tools/panel-proof-headroom-acceptance-race.sh"
+    ],
+    "verify": [
+      "python3 tools/panel-proof-headroom-review.py"
+    ]
+  },
+  "commit_message": "fix(worker): reserve routing admission headroom from bulk panel scans"
+}

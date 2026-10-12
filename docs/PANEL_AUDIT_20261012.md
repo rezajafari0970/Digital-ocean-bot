@@ -27,3 +27,7 @@ Historical backups and external provider billing records are not deleted by appl
 ## Native contract correction
 
 Release b0bb9c9 was rolled back after the post-publication native API check found the shared gRPC close behavior. No configuration template, proxy policy, proof freshness window, or recovery record was cleared. All 49 serving routing records subsequently returned to APPLIED with no errors on the restored runtime. `panel-native-contract-20261012` binds the correction to new affected-package race and HTTP-contract tests and a fresh API review. Prior comprehensive tests are reused only for verified unchanged bytes; no claim is made that the rejected concurrency strategy passed production acceptance.
+
+## Admission headroom
+
+Post-release evidence found native proof age still reaching 80 seconds because bulk capacity and policy scans saturated the shared 10-slot budget (25 waiters), while the 40-connection SQL pool had zero connection wait. A two-slot polling class now gates global Reality, capacity fill and capacity cleanup before the unchanged shared admission budget. Routing, client mutation and retirement retain their original bounds and guards. The polling class is visible in heartbeat metadata; blocked polling acquires no shared slot or SQL connection. A contention/cancellation regression requires all eight proof consumers to enter despite twenty queued polls, with no slot leaks. Production proof latency remains an observed release gate.
