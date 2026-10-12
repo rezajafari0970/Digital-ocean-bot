@@ -69,7 +69,7 @@ url='http://'+host+':'+str(d['port'])+d['path']
 print('Panel: '+url)
 grant=pathlib.Path('/etc/digital-ocean-bot/setup-token')
 values=runpy.run_path(str(src/'deploy/bootstrap.py'))['read_environment'](pathlib.Path('/etc/digital-ocean-bot/env'))
-p=subprocess.run(['psql','-XAt','-c',"SELECT count(*) FROM admin_users WHERE must_change_password AND bootstrap_token_hash IS NOT NULL"],env=dict(os.environ,PGDATABASE=values['DATABASE_URL']),capture_output=True,text=True)
+p=subprocess.run(['psql','-XAt','-c',"SELECT count(*) FROM admin_users WHERE must_change_password AND bootstrap_token_hash IS NOT NULL"],env=runpy.run_path(str(src/'deploy/bootstrap.py'))['database_environment'](values),capture_output=True,text=True)
 if p.returncode==0 and p.stdout.strip()!='0' and grant.exists():
  print('Private first-use link: '+url+'#setup='+grant.read_text().strip())
  print('Initial username/password: admin / admin. Set a new password at first login.')

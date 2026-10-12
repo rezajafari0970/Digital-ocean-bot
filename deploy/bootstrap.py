@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import re
 import secrets
-from urllib.parse import urlsplit, unquote
+from urllib.parse import urlsplit, unquote, parse_qs
 import sys
 import tempfile
 
@@ -56,6 +56,16 @@ def read_environment(env):
             not IDENT.fullmatch(unquote(url.username or "")) or not IDENT.fullmatch(unquote(url.path.lstrip("/"))) or url.fragment):
         raise ValueError("Invalid persisted database connection")
     return values
+
+def database_environment(values):
+    url = urlsplit(values['DATABASE_URL'])
+    options = parse_qs(url.query)
+    env = dict(os.environ, PGHOST=url.hostname, PGPORT=str(url.port or 5432),
+               PGUSER=unquote(url.username), PGPASSWORD=unquote(url.password),
+               PGDATABASE=unquote(url.path.lstrip('/')), PGCONNECT_TIMEOUT='15')
+    for option, name in [('sslmode','PGSSLMODE'),('sslrootcert','PGSSLROOTCERT'),('sslcert','PGSSLCERT'),('sslkey','PGSSLKEY')]:
+        if option in options: env[name] = options[option][-1]
+    return env
 
 def prepare(directory, database, user, gid, validate_only=False):
     root = Path(directory)

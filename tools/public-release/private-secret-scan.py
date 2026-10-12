@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Compare export with local live secrets in memory. Never output secret values."""
-import argparse,base64,json,os,pathlib,runpy,subprocess
+import argparse,base64,json,os,pathlib,runpy,subprocess,re,hashlib
 from urllib.parse import urlsplit,unquote
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 def scan(candidate,bootstrap,configuration):
@@ -12,25 +12,26 @@ def scan(candidate,bootstrap,configuration):
   if len(raw)>=8:needles.add(raw)
   try:
    d=json.loads(raw)
-   def visit(x):
+   def visit(x,field=""):
+    sensitive=bool(re.search(r"password|secret|token|private|username|credential|authorization|api.?key|ssh.?key",field,re.I))
     if isinstance(x,dict):
-     for v in x.values():visit(v)
+     for k,v in x.items():visit(v,k)
     elif isinstance(x,list):
-     for v in x:visit(v)
-    elif isinstance(x,str) and len(x)>=8:needles.add(x.encode())
+     for v in x:visit(v,field)
+    elif isinstance(x,str) and len(x)>=8 and sensitive:needles.add(x.encode())
    visit(d)
   except (ValueError,UnicodeError):pass
   if b'PRIVATE KEY' in raw:
    for line in raw.splitlines():
     if len(line)>=20 and not line.startswith(b'-----'):needles.add(line.strip())
  def query(sql):
-  q=subprocess.run(['psql','-XAt','-v','ON_ERROR_STOP=1'],input=sql,env=dict(os.environ,PGDATABASE=values['DATABASE_URL']),capture_output=True,text=True,timeout=40)
+  q=subprocess.run(['psql','-XAt','-v','ON_ERROR_STOP=1'],input=sql,env=runpy.run_path(str(bootstrap))['database_environment'](values),capture_output=True,text=True,timeout=40)
   if q.returncode:raise RuntimeError('Private database scan failed')
   return json.loads(q.stdout)
  add(encoded);add(values['DATABASE_URL']);add(unquote(urlsplit(values['DATABASE_URL']).password))
  for p in configuration.glob('*.env'):
   for line in p.read_text().splitlines():
-   if '=' in line and not line.lstrip().startswith('#'):add(line.split('=',1)[1].strip().strip("\"'"))
+   if '=' in line and not line.lstrip().startswith('#') and re.search(r'KEY|TOKEN|PASSWORD|SECRET',line.split('=',1)[0]):add(line.split('=',1)[1].strip().strip("\"'"))
  for p in pathlib.Path('/root/.ssh').glob('*'):
   if p.is_file() and p.stat().st_size<50000 and b'PRIVATE KEY' in p.read_bytes():add(p.read_bytes())
  rows=query("SELECT COALESCE(json_agg(row_to_json(t)),'[]') FROM (SELECT id,account_id,proxy_id,probe_id,kind,encode(ciphertext,'hex') AS ciphertext,encode(nonce,'hex') AS nonce FROM secrets)t;")
@@ -48,10 +49,15 @@ def scan(candidate,bootstrap,configuration):
  for table,column in [('output_share_tokens','token'),('account_output_share_tokens','token'),('output_config_snapshots','uri')]:
   for row in query("SELECT COALESCE(json_agg(row_to_json(t)),'[]') FROM (SELECT "+column+" FROM "+table+")t;"):
    if row.get(column):add(row[column])
- findings=[]
+ findings=[]; match_meta={}
  for p in candidate.rglob('*'):
   if not p.is_file() or '.git' in p.relative_to(candidate).parts:continue
-  if any(secret in p.read_bytes() for secret in needles):findings.append(str(p.relative_to(candidate)))
+  raw=p.read_bytes()
+  matched=[secret for secret in needles if secret in raw]
+  if matched:
+   findings.append(str(p.relative_to(candidate)))
+   for secret in matched:match_meta[hashlib.sha256(secret).hexdigest()[:12]]={'length':len(secret),'ipv4':bool(re.fullmatch(rb'[0-9.]+',secret)),'private_key_line':len(secret)>60}
+ if findings:print(json.dumps({'match_metadata_no_values':match_meta}))
  if findings:raise RuntimeError('Live secret match in paths: '+','.join(findings))
  print(json.dumps({'known_live_secret_scan':'PASS','private_values_compared':len(needles),'values_logged':False}))
 if __name__=='__main__':

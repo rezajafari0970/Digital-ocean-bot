@@ -14,7 +14,7 @@ def peer(sql):
  return p.stdout.strip()
 def values(): return helpers['read_environment'](ETC/'env')
 def db_env():
- return dict(os.environ,PGDATABASE=values()['DATABASE_URL'])
+ return helpers['database_environment'](values())
 def query(sql):
  p=subprocess.run(['psql','-XAt','-v','ON_ERROR_STOP=1'],env=db_env(),input=sql,text=True,capture_output=True,timeout=30)
  if p.returncode: raise RuntimeError('Database check failed; credentials were preserved')
