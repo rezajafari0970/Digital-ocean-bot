@@ -1,6 +1,6 @@
 {
   "job": "expiry-deficit-20261012",
-  "status": "VALIDATED_AWAITING_PUBLIC_GATES",
+  "status": "RELEASE_AND_NATIVE_EXPIRY_BACKFILL_VERIFIED",
   "base_revision": "19f7901a01214dde2b5b33842676e42d2ae15128",
   "user_authorized": "Correct remaining Linode expired-server lifecycle with best safe strategy; preserve established provider/ownership/proxy/no-blind-retry gates; previous public rollout authorization continues.",
   "goal": "Permit exactly one owned expired retirement below Desired after native same-account serving capacity is freshly proven, without treating Desired as provider quota. Keep subsequent delete blocked until existing backfill debt/active/unknown operations settle. Existing journal performs DELETE and provider absence verification. No direct manual delete.",
@@ -98,5 +98,646 @@
     "fresh_native_same_account_serving_proof": "PASS",
     "foreign_key_insert_serialization": "PASS",
     "linked_backfill_service_recovery_and_later_expiry": "PASS"
+  },
+  "completion": {
+    "at": "2026-10-12T16:26:37.307514+00:00",
+    "status": "RELEASE_AND_NATIVE_EXPIRY_BACKFILL_VERIFIED",
+    "product_source_revision": "c839c0c4daac4d230b1ffabd78972cf9be80a128",
+    "public_revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+    "native": {
+      "status": "PASS",
+      "summary": {
+        "at": "2026-10-12T16:24:53.146397+00:00",
+        "status": "PASS",
+        "old_state": "DELETED",
+        "delete_operations": [
+          {
+            "id": "8efce3f7-5d07-4601-b99b-08f634bde01c",
+            "kind": "DELETE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107935963",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:58:44.744694+00:00",
+            "updated_at": "2026-10-12T15:59:05.143988+00:00"
+          }
+        ],
+        "replacement": {
+          "provider_resource_id": "107979802",
+          "state": "READY",
+          "deployment_state": "PANEL_COMPLETE",
+          "target_users": 5,
+          "active_users": 5,
+          "deficit": 0,
+          "routing_state": "APPLIED"
+        },
+        "claim": [
+          {
+            "droplet_id": "4ebcacf6-c6b3-4e05-b853-87991443f1aa",
+            "claim_id": "63793e50-957d-4b1a-99a3-2e80c0839607",
+            "account_id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+            "provider_resource_id": "107935963",
+            "started_at": "2026-10-12T15:58:44.708598+00:00",
+            "recovered_at": "2026-10-12T16:24:44.631677+00:00",
+            "created_at": "2026-10-12T15:58:44.661356+00:00",
+            "state": "DELETED"
+          }
+        ],
+        "active_builds": [],
+        "provider_old_absent": true
+      },
+      "evidence": {
+        "at": "2026-10-12T16:24:53.146397+00:00",
+        "version": {
+          "commit": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+          "build_time": "2026-10-12T15:53:39Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-12T16:24:53.155599978Z"
+        },
+        "accounts": [
+          {
+            "id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+            "provider_state": "ACTIVE",
+            "runtime_status": "READY",
+            "desired_server_count": 10,
+            "build_spacing_minutes": 20,
+            "build_spacing_max_minutes": 30,
+            "next_build_at": "2026-10-12T16:48:04.626772+00:00"
+          }
+        ],
+        "linode": [
+          {
+            "id": "4ebcacf6-c6b3-4e05-b853-87991443f1aa",
+            "provider_resource_id": "107935963",
+            "state": "DELETED",
+            "expires_at": "2026-10-12T09:12:13.004996+00:00",
+            "replacement_deployment_id": "94c7672e-ec25-4e25-aaff-3092ffd1a57c",
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "72a277ce-9d8a-42d1-9d05-500311f5f894",
+            "xui_active": true,
+            "checked_at": "2026-10-12T09:07:44.010524+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T15:58:45.117402+00:00",
+            "target_users": null,
+            "active_users": null,
+            "deficit": null,
+            "observed_at": null
+          },
+          {
+            "id": "08c4d4c9-9dbb-482f-b942-b75f22a7cc24",
+            "provider_resource_id": "107975680",
+            "state": "READY",
+            "expires_at": "2026-10-12T20:03:31.274658+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "beffb3ed-6ef5-40f5-a0c1-2b7a5859be24",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:16.585175+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:34.087101+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:34.086396+00:00"
+          },
+          {
+            "id": "77580e3a-c1d4-4610-adbd-e34e69b1d70a",
+            "provider_resource_id": "107975848",
+            "state": "READY",
+            "expires_at": "2026-10-12T20:28:13.167165+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "e06185d2-166d-4f09-9c23-0c3a8640144d",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:20.167913+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:44.422548+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:44.42182+00:00"
+          },
+          {
+            "id": "e7149649-4b19-496d-b40c-67aab748c501",
+            "provider_resource_id": "107977602",
+            "state": "READY",
+            "expires_at": "2026-10-12T21:26:15.445355+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "8b63e0e5-b787-4415-a68e-f86ae9a30d9e",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:14.383172+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:30.411788+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:50.194099+00:00"
+          },
+          {
+            "id": "4bb0475a-dede-4a62-b4cd-7a4f6f5b62e6",
+            "provider_resource_id": "107979273",
+            "state": "READY",
+            "expires_at": "2026-10-12T22:38:48.344233+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "6ea8f306-5812-4620-9099-fd1ba7afb1dd",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:11.786344+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:23.919546+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:47.697682+00:00"
+          },
+          {
+            "id": "8ea3df75-3cc8-4344-ad18-e93f042233d2",
+            "provider_resource_id": "107979556",
+            "state": "READY",
+            "expires_at": "2026-10-12T20:15:22.365724+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "8bcee84e-5fc1-4987-8c6d-6aa8588dd75c",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:06.664485+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:30.170008+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:50.597053+00:00"
+          },
+          {
+            "id": "e4af5752-daf5-45a9-957a-421f51f74199",
+            "provider_resource_id": "107979802",
+            "state": "READY",
+            "expires_at": "2026-10-12T20:54:13.440835+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "002259af-abfd-401f-8b7a-863819d88cba",
+            "xui_active": true,
+            "checked_at": "2026-10-12T16:20:05.964381+00:00",
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:50.027817+00:00",
+            "target_users": 5,
+            "active_users": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T16:24:50.027052+00:00"
+          },
+          {
+            "id": "6994f199-24b1-4b5f-82b1-4f841c8b9919",
+            "provider_resource_id": "107980886",
+            "state": "READY",
+            "expires_at": "2026-10-12T23:45:47.760758+00:00",
+            "replacement_deployment_id": null,
+            "backfill_required": false,
+            "deployment_state": "PANEL_COMPLETE",
+            "panel_id": "a81c07f2-c06c-48de-8b4b-9fadf41fa23a",
+            "xui_active": null,
+            "checked_at": null,
+            "routing_state": "APPLIED",
+            "verified_at": "2026-10-12T16:24:34.90917+00:00",
+            "target_users": null,
+            "active_users": null,
+            "deficit": null,
+            "observed_at": null
+          }
+        ],
+        "operations": [
+          {
+            "id": "7f4b001b-5f5b-4fed-a0c7-bfa8210e44e6",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107935963",
+            "attempt": 1,
+            "created_at": "2026-10-12T01:50:44.534001+00:00",
+            "updated_at": "2026-10-12T01:51:04.965347+00:00"
+          },
+          {
+            "id": "d2a90082-1e25-44cb-883d-eb1672fa1020",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107975680",
+            "attempt": 1,
+            "created_at": "2026-10-12T14:41:16.159466+00:00",
+            "updated_at": "2026-10-12T14:41:37.68488+00:00"
+          },
+          {
+            "id": "515824b6-ee1b-4387-9051-90ccf671f7c9",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107975848",
+            "attempt": 1,
+            "created_at": "2026-10-12T14:45:37.181855+00:00",
+            "updated_at": "2026-10-12T14:45:57.974982+00:00"
+          },
+          {
+            "id": "07c685ec-24a5-4da0-a2ae-476584d398f0",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107977602",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:16:06.064929+00:00",
+            "updated_at": "2026-10-12T15:16:25.592194+00:00"
+          },
+          {
+            "id": "12991d40-3557-4edb-9979-37cd520ab34a",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107979273",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:44:46.264238+00:00",
+            "updated_at": "2026-10-12T15:45:06.884284+00:00"
+          },
+          {
+            "id": "4f671efa-3b57-4812-b91d-627b2d01267b",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107979556",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:53:06.16274+00:00",
+            "updated_at": "2026-10-12T15:53:25.632242+00:00"
+          },
+          {
+            "id": "8efce3f7-5d07-4601-b99b-08f634bde01c",
+            "kind": "DELETE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107935963",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:58:44.744694+00:00",
+            "updated_at": "2026-10-12T15:59:05.143988+00:00"
+          },
+          {
+            "id": "707681f9-2136-4f35-97ae-c802aedb960d",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107979802",
+            "attempt": 1,
+            "created_at": "2026-10-12T15:59:15.139499+00:00",
+            "updated_at": "2026-10-12T15:59:35.211974+00:00"
+          },
+          {
+            "id": "7fcc28f7-a01d-4096-bed2-460b0d004be5",
+            "kind": "CREATE_DROPLET",
+            "state": "succeeded",
+            "resource_id": "107980886",
+            "attempt": 1,
+            "created_at": "2026-10-12T16:19:15.356865+00:00",
+            "updated_at": "2026-10-12T16:19:34.646691+00:00"
+          }
+        ],
+        "provider_observation": [
+          {
+            "provider": "linode",
+            "created_at": "2026-10-12T16:23:15.607925+00:00",
+            "limit_known": false,
+            "in_use": 7,
+            "inventory_at": "2026-10-12T16:23:15.585317439Z",
+            "servers": [
+              {
+                "id": "107975680",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107975848",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107977602",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107979273",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107979556",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107979802",
+                "state": "ready",
+                "ready": true
+              },
+              {
+                "id": "107980886",
+                "state": "ready",
+                "ready": true
+              }
+            ]
+          }
+        ],
+        "claims": [
+          {
+            "droplet_id": "4ebcacf6-c6b3-4e05-b853-87991443f1aa",
+            "claim_id": "63793e50-957d-4b1a-99a3-2e80c0839607",
+            "account_id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+            "provider_resource_id": "107935963",
+            "started_at": "2026-10-12T15:58:44.708598+00:00",
+            "recovered_at": "2026-10-12T16:24:44.631677+00:00",
+            "created_at": "2026-10-12T15:58:44.661356+00:00",
+            "state": "DELETED"
+          }
+        ]
+      }
+    },
+    "output": {
+      "observed_at": "2026-10-12T16:23:08.823980+00:00",
+      "classes": {
+        "DIRECT": {
+          "http_status": 200,
+          "configs": 6,
+          "by_provider_resource": {
+            "107979802": 1,
+            "107975848": 1,
+            "107979556": 1,
+            "107977602": 1,
+            "107979273": 1,
+            "107975680": 1
+          },
+          "foreign_or_expired_resources": 0
+        },
+        "RESIDENTIAL": {
+          "http_status": 200,
+          "configs": 18,
+          "by_provider_resource": {
+            "107979273": 3,
+            "107979556": 3,
+            "107979802": 3,
+            "107977602": 3,
+            "107975848": 3,
+            "107975680": 3
+          },
+          "foreign_or_expired_resources": 0
+        }
+      },
+      "class_overlap": 0,
+      "both_new_servers_in_both_classes": true,
+      "replacement_provider_id": "107979802",
+      "replacement_present_both_classes": true
+    },
+    "runtime": {
+      "primary": {
+        "at": "2026-10-12T16:16:54.532325+00:00",
+        "units": {
+          "digital-ocean-bot-api": {
+            "active": "active",
+            "binary_sha256": "885394de925db137efe7ab8b75d24f2edb8a0ab57ef129fec3fe9a65d75cb96a"
+          },
+          "digital-ocean-bot-worker": {
+            "active": "active",
+            "binary_sha256": "bd53834ef001fd8628885baecb0c47c2a1a2d90dbb9b703a02cdb56334b62c55"
+          },
+          "digital-ocean-bot-worker-panels": {
+            "active": "active",
+            "binary_sha256": "bd53834ef001fd8628885baecb0c47c2a1a2d90dbb9b703a02cdb56334b62c55"
+          }
+        },
+        "version": {
+          "commit": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+          "build_time": "2026-10-12T15:53:39Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-12T16:16:54.540762847Z"
+        }
+      },
+      "secondary": {
+        "at": "2026-10-12T16:16:51.838485+00:00",
+        "units": {
+          "digital-ocean-bot-api": {
+            "active": "active",
+            "binary_sha256": "851701c563d02bd9e105c59128c4f3a405f0ad6623a19dd5e8f7c48e6f6099e3"
+          },
+          "digital-ocean-bot-worker": {
+            "active": "active",
+            "binary_sha256": "fa4f5e8f6ce4b1e51d5272395fc532228bbf7f48cb56a2b430d89b7bfbfb79de"
+          },
+          "digital-ocean-bot-worker-panels": {
+            "active": "active",
+            "binary_sha256": "fa4f5e8f6ce4b1e51d5272395fc532228bbf7f48cb56a2b430d89b7bfbfb79de"
+          }
+        },
+        "version": {
+          "commit": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+          "build_time": "2026-10-12T15:53:42Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-12T16:16:51.84941716Z"
+        }
+      }
+    },
+    "configuration_preservation": {
+      "primary": {
+        "at": "2026-10-12T16:16:54.066649+00:00",
+        "identity_files_preserved": true,
+        "changed_existing_rows": {},
+        "counts": {
+          "accounts": 9,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 10,
+          "droplets": 1911,
+          "resources": 1976,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      },
+      "secondary": {
+        "at": "2026-10-12T16:16:51.492373+00:00",
+        "identity_files_preserved": true,
+        "changed_existing_rows": {},
+        "counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      }
+    },
+    "github_actions": [
+      {
+        "id": 38273452397,
+        "head_branch": "stable",
+        "head_sha": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38273452397",
+        "created_at": "2026-10-12T15:53:02Z",
+        "updated_at": "2026-10-12T15:53:56Z"
+      },
+      {
+        "id": 38273452091,
+        "head_branch": "main",
+        "head_sha": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38273452091",
+        "created_at": "2026-10-12T15:53:02Z",
+        "updated_at": "2026-10-12T15:53:46Z"
+      }
+    ],
+    "openai_api_usage": {
+      "responses": 3,
+      "input_tokens": 59738,
+      "output_tokens": 3673,
+      "total_tokens": 63411,
+      "receipts": [
+        {
+          "phase": "plan",
+          "id": "resp_0673c133ace5491b006accfc15b97c87d1b6d63a8f77db6884",
+          "model": "gpt-6-astra",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 14735,
+            "input_tokens_details": {
+              "cache_write_tokens": 14732,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1428,
+            "output_tokens_details": {
+              "reasoning_tokens": 354
+            },
+            "total_tokens": 16163
+          }
+        },
+        {
+          "phase": "source",
+          "id": "resp_046815d0cd52cb7a006accfee3b77487d1867d2286192f1306",
+          "model": "gpt-6-astra",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 30697,
+            "input_tokens_details": {
+              "cache_write_tokens": 30694,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1822,
+            "output_tokens_details": {
+              "reasoning_tokens": 930
+            },
+            "total_tokens": 32519
+          }
+        },
+        {
+          "phase": "resolution",
+          "id": "resp_0381b2d4c54120d3006acd00f81ce887d18cad4b7bf102bbf1",
+          "model": "gpt-6-astra",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 14306,
+            "input_tokens_details": {
+              "cache_write_tokens": 14303,
+              "cached_tokens": 0
+            },
+            "output_tokens": 423,
+            "output_tokens_details": {
+              "reasoning_tokens": 174
+            },
+            "total_tokens": 14729
+          }
+        }
+      ],
+      "billed_usd": "not available; not inferred"
+    },
+    "known_two_phase_total_tokens": 232325,
+    "limits": [
+      "Exact Linode compute quota remains unknown. Desired10 is a configured growth target, not provider capacity.",
+      "Growth continues through normal configured spacing; this completion does not assert all10 Linodes exist.",
+      "This deficit retirement behavior is enabled for Linode only. Other provider lifecycle policies are unchanged."
+    ],
+    "evidence": "/root/backups/dob-expiry-deficit-20261012",
+    "publisher_evidence": "/var/lib/datacenter-publisher/release-t8in__ia"
   }
 }
