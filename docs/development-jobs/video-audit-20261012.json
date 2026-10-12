@@ -13,7 +13,7 @@
   ],
   "rollback_commit": "5be88bddaa3e31a5a8559bd46780b9622d1708a6",
   "push": true,
-  "status": "VERIFIED_AWAITING_PUBLICATION_AND_RUNTIME",
+  "status": "RELEASE_VERIFIED_WITH_LIFECYCLE_FOLLOWUP",
   "evidence": "/root/backups/dob-video-audit-20261012",
   "tests": {
     "full_go_with_isolated_postgres_and_optional_browser_tests": "PASS",
@@ -70,7 +70,7 @@
         "time": "00:17–00:31",
         "issue": "Linode creates only first instance, repeated HTTP400",
         "evidence": "Profile name is repeated unchanged in Linode create payload; ownership identity already unique.",
-        "resolution": "Deterministic account/deployment label, old ownership tag adoption preserved; historical HTTP400 reasons individually unknown. Native create acceptance pending rollout."
+        "resolution": "Deterministic account/deployment labels deployed. Two native CREATE_DROPLET operations succeeded attempt1, both completed SSH/panel/Reality and fulfilled5/5 observed users. Existing account Output returned2DIRECT+6RESIDENTIAL configs with no cross-account, expired-resource or class overlap."
       },
       {
         "time": "00:17–00:31",
@@ -135,7 +135,240 @@
       "input_tokens": 151371,
       "output_tokens": 17543,
       "total_tokens": 168914
-    }
+    },
+    "remaining_lifecycle_acceptance": "Old Linode107935963 remains EXPIRING under existing deficit-backfill policy at managed3/desired10; native deletion has not been attempted or verified."
   },
-  "known_baseline_warning": "Canonical detached HEAD is mandated by prior handoff; bootstrap branch-name guard fails for this existing condition. Not represented as passed or rewritten."
+  "known_baseline_warning": "Canonical detached HEAD is mandated by prior handoff; bootstrap branch-name guard fails for this existing condition. Not represented as passed or rewritten.",
+  "completion": {
+    "completed_at": "2026-10-12T15:12:50.192314+00:00",
+    "product_source_revision": "8626a1ade83c38262636163f64a786961f0079a4",
+    "public_revision": "7829f9d05dc4e543fbc4594f0556533d00142cf3",
+    "runtime_hosts": [
+      "serverprojects.ptr.network",
+      "limited-lime.ptr.network"
+    ],
+    "native_linode": {
+      "status": "PASS",
+      "evidence": {
+        "observed_at": "2026-10-12T14:51:01.258878+00:00",
+        "rows": [
+          {
+            "id": "dcb71764-13b7-42a5-a6a8-7313721fe206",
+            "created_at": "2026-10-12T14:45:30.949268+00:00",
+            "updated_at": "2026-10-12T14:50:18.167165+00:00",
+            "deployment_state": "PANEL_COMPLETE",
+            "deployment_step": "panel_complete",
+            "deployment_error": "",
+            "provider_resource_id": "107975848",
+            "lifecycle_state": "READY",
+            "provision_state": "COMPLETED",
+            "provision_step": "done",
+            "panel_id": "e06185d2-166d-4f09-9c23-0c3a8640144d",
+            "routing_state": "APPLIED",
+            "panel_sync_state": "COMPLETED",
+            "panel_sync_at": "2026-10-12T14:50:57.354851+00:00"
+          },
+          {
+            "id": "1f1787ff-1727-47dc-8661-ce777381f12b",
+            "created_at": "2026-10-12T14:41:11.116399+00:00",
+            "updated_at": "2026-10-12T14:45:28.274658+00:00",
+            "deployment_state": "PANEL_COMPLETE",
+            "deployment_step": "panel_complete",
+            "deployment_error": "",
+            "provider_resource_id": "107975680",
+            "lifecycle_state": "READY",
+            "provision_state": "COMPLETED",
+            "provision_step": "done",
+            "panel_id": "beffb3ed-6ef5-40f5-a0c1-2b7a5859be24",
+            "routing_state": "APPLIED",
+            "panel_sync_state": "COMPLETED",
+            "panel_sync_at": "2026-10-12T14:50:46.388219+00:00"
+          }
+        ]
+      }
+    },
+    "runtime_final": {
+      "observed_at": "2026-10-12T15:12:06.548756+00:00",
+      "revision": "7829f9d05dc4e543fbc4594f0556533d00142cf3",
+      "readiness_checks": 5,
+      "server_counts": {
+        "total_servers": 50,
+        "active_servers": 44,
+        "inactive_servers": 1,
+        "broken_servers": 0,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 5,
+        "active_deployments": 2
+      },
+      "builds": {
+        "active_builds": 2,
+        "waiting_builds": 0,
+        "observed_at": "2026-10-12T15:12:06.023047342Z"
+      },
+      "health_reasons": {
+        "PENDING_DELETION": 5,
+        "PROVISIONING": 1
+      },
+      "recent_build_rows": 100,
+      "historical_error_families": 59,
+      "legacy_array_preserved": true,
+      "linode": [
+        {
+          "provider_resource_id": "107975848",
+          "state": "READY",
+          "expires_at": "2026-10-12T20:28:13.167165+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "e06185d2-166d-4f09-9c23-0c3a8640144d",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "107975680",
+          "state": "READY",
+          "expires_at": "2026-10-12T20:03:31.274658+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "beffb3ed-6ef5-40f5-a0c1-2b7a5859be24",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "107935963",
+          "state": "EXPIRING",
+          "expires_at": "2026-10-12T09:12:13.004996+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "72a277ce-9d8a-42d1-9d05-500311f5f894",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        }
+      ],
+      "config_capacity": {
+        "target": 210,
+        "active": 208,
+        "deficit": 2,
+        "coverage": {
+          "all_fresh": false,
+          "complete": true,
+          "eligible": 42,
+          "fresh": 27,
+          "freshness_seconds": 30,
+          "missing": 0,
+          "observed": 42,
+          "stale": 15,
+          "totals_basis": "last_observed"
+        }
+      },
+      "linode_config_capacity": [
+        {
+          "panel_id": "e06185d2-166d-4f09-9c23-0c3a8640144d",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-12T15:11:21.702493Z"
+        },
+        {
+          "panel_id": "beffb3ed-6ef5-40f5-a0c1-2b7a5859be24",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-12T15:12:03.687626Z"
+        }
+      ]
+    },
+    "openai_api_usage": {
+      "responses": 8,
+      "input_tokens": 151371,
+      "output_tokens": 17543,
+      "total_tokens": 168914
+    },
+    "github_actions": [
+      {
+        "id": 38263157008,
+        "head_branch": "main",
+        "head_sha": "7829f9d05dc4e543fbc4594f0556533d00142cf3",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38263157008"
+      },
+      {
+        "id": 38263156746,
+        "head_branch": "stable",
+        "head_sha": "7829f9d05dc4e543fbc4594f0556533d00142cf3",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38263156746"
+      }
+    ],
+    "configuration_and_existing_identity_preserved": true,
+    "account_output_acceptance": {
+      "observed_at": "2026-10-12T15:12:06.854862+00:00",
+      "classes": {
+        "DIRECT": {
+          "http_status": 200,
+          "configs": 2,
+          "by_provider_resource": {
+            "107975680": 1,
+            "107975848": 1
+          },
+          "foreign_or_expired_resources": 0
+        },
+        "RESIDENTIAL": {
+          "http_status": 200,
+          "configs": 6,
+          "by_provider_resource": {
+            "107975680": 3,
+            "107975848": 3
+          },
+          "foreign_or_expired_resources": 0
+        }
+      },
+      "class_overlap": 0,
+      "both_new_servers_in_both_classes": true
+    },
+    "native_delete_acceptance": "PENDING_EXISTING_DEFICIT_BACKFILL_POLICY",
+    "native_config_acceptance": {
+      "status": "PASS",
+      "evidence": {
+        "at": "2026-10-12T15:11:13.923864+00:00",
+        "rows": [
+          {
+            "provider_resource_id": "107975680",
+            "panel_id": "beffb3ed-6ef5-40f5-a0c1-2b7a5859be24",
+            "target": 5,
+            "active": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T15:10:52.380085+00:00",
+            "fresh": true
+          },
+          {
+            "provider_resource_id": "107975848",
+            "panel_id": "e06185d2-166d-4f09-9c23-0c3a8640144d",
+            "target": 5,
+            "active": 5,
+            "deficit": 0,
+            "observed_at": "2026-10-12T15:11:10.589706+00:00",
+            "fresh": true
+          }
+        ]
+      }
+    },
+    "native_growth_continues_at_configured_spacing": true,
+    "limitations": [
+      "Exact Linode quota remains unknown; desired10 is not a provider cap.",
+      "Old Linode107935963 is still EXPIRING. Existing deficit-backfill policy holds deletion while managed3 is below desired10. Native deletion is not claimed verified.",
+      "New Reality panels require three successful target-observation rounds before inbound/client creation; installation completion is not equivalent to config readiness.",
+      "Normal growth continues at configured20–30minute spacing; no claim that all10 Linodes already exist.",
+      "Historical generic HTTP400 causes cannot be individually reconstructed.",
+      "Historical diagnostics remain visible and explicitly labeled; real transient failures retain recovery semantics.",
+      "Recorded loss of active count was a health/lifecycle distribution change, not disappearance of49 tracked servers."
+    ]
+  }
 }

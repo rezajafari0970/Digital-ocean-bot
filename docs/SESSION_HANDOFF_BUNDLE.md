@@ -1,3 +1,17 @@
+## 2026-10-12 — Video repair verified and deployed
+
+- Product checkpoint `8626a1ade83c38262636163f64a786961f0079a4`; public main/stable and both management runtimes `7829f9d05dc4e543fbc4594f0556533d00142cf3`. User explicitly authorized fixes, publication and rollout. Both GitHub Actions runs succeeded.
+- Fixed Linode duplicate wire labels using immutable account/deployment identity; preserved ownership tags, reconciliation, durable operation keys, quota and spacing policies. Native scheduled Linode `107975848` completed create, SSH/bootstrap, panel installation, verified routing and inventory. Its configured client target was fulfilled. Growth toward desired10 continues at20–30minute spacing; exact provider quota remains unknown.
+- Remaining lifecycle observation: old Linode107935963 is still EXPIRING under the established deficit-backfill policy (managed3 < desired10); no provider deletion has been attempted. Do not claim deletion acceptance. Keep this visible in the next operational check.
+- Build Activity uses mounted keyed polling, preserves scroll and modal/navigation state, retains last-good data, and shows authoritative global active/waiting counts. Terminal/deleted history is excluded. Dashboard separates total tracked servers from health categories and exposes bounded actual reasons.
+- Existing account share links returned2DIRECT and6RESIDENTIAL configs across the two new Linodes; no foreign or expired server URI and no class overlap.
+- Historical provisioning errors aggregate without deployment join fanout. Expected precheck exit1 no longer duplicates command-stage failure; real faults remain observable. Native execution confirmed PRECHECK_MISS followed by successful bootstrap without false STAGE_FAILED.
+- Full isolated PostgreSQL and opt-in browser regression:59Go packages PASS; vet, provider/executor/workflow race, read-model race, mobile/desktop build and config/dashboard read-recovery tests PASS. Independent source review PASS after narrowly correcting observation suppression. Initial failed reports/test fixtures retained as evidence, not erased.
+- Public pipeline exported immutable allowlisted source, passed Gitleaks and live-secret scans, unprivileged regression and exact-source Ubuntu24LXC update. Both management updates preserved existing account/proxy/profile/server identity and login settings;5readiness checks and actual running binary hashes passed. No public export of private history/evidence.
+- OpenAI API for this task:8responses;151371input+17543output=168914tokens. No billed USD inferred.
+- Evidence `/root/backups/dob-video-audit-20261012`, `/root/backups/video-audit-deployment-20261012` on management hosts, publisher `/var/lib/datacenter-publisher/release-m4k8scr_`. Full video mapping and receipt summaries in `docs/development-jobs/video-audit-20261012.json`.
+- Canonical remains detached by established workflow. Existing branch-name bootstrap warning is preserved, not claimed passed. This entry supersedes older runtime/version boundaries below.
+
 # SESSION HANDOFF BUNDLE
 
 > Generated continuity entrypoint. Read this first; source/runtime remain authoritative.
