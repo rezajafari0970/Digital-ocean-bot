@@ -1,5 +1,53 @@
 {
-  "status": "candidate_under_test",
-  "tested": [],
-  "arm64": "cross-build planned; no hardware execution claimed"
+  "schema": 1,
+  "status": "verified",
+  "date": "2026-10-12",
+  "product_source_sha256": "ba219bcb5f50e6df75dd34201d836ed8eabccbe55fea12a653a3e4dbf867974f",
+  "ubuntu_amd64": {
+    "22.04": [
+      "fresh_install",
+      "upgrade",
+      "custom_port",
+      "reinstall",
+      "fault_rollback",
+      "interrupted_recovery"
+    ],
+    "24.04": [
+      "fresh_install",
+      "upgrade",
+      "reboot_persistence"
+    ],
+    "26.04": [
+      "fresh_install",
+      "browser_initial_setup",
+      "password_change"
+    ]
+  },
+  "arm64": {
+    "cross_build": [
+      "api",
+      "worker",
+      "install-bootstrap",
+      "server-guardian"
+    ],
+    "executed_on_arm64_hardware": false
+  },
+  "regression": {
+    "go_pass": 1125,
+    "go_optional_skipped": 449,
+    "go_vet": "PASS",
+    "postgres_race_auth_tests": 2,
+    "bootstrap_tests": 5,
+    "node_output_tests": 3
+  },
+  "release_gates": {
+    "generic_secret_canary": "BLOCKED",
+    "actual_master_key_canary": "BLOCKED",
+    "uncommitted_source": "BLOCKED",
+    "symlink": "BLOCKED",
+    "environment": "BLOCKED",
+    "remote_conflict_atomicity": "PASS"
+  },
+  "public_git_install_verified": false,
+  "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy"
 }

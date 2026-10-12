@@ -3,7 +3,9 @@
 import fcntl,hashlib,json,os,pathlib,runpy,shutil,subprocess,sys,tarfile,tempfile,time
 BASE=pathlib.Path('/var/lib/datacenter-publisher')
 HERE=pathlib.Path(__file__).resolve().parent
-def run(args,**kw):return subprocess.run([str(x) for x in args],check=True,**kw)
+def run(args,**kw):
+ try:return subprocess.run([str(x) for x in args],check=True,**kw)
+ except subprocess.CalledProcessError as e:raise RuntimeError('Gate '+pathlib.Path(str(args[0])).name+' failed (exit '+str(e.returncode)+'); see candidate evidence') from None
 def output(args,**kw):return subprocess.check_output([str(x) for x in args],**kw).decode().strip()
 def write_state(data):
  temp=BASE/'state.new';temp.write_text(json.dumps(data,indent=2)+'\n');temp.chmod(0o600);os.replace(temp,BASE/'state.json')
@@ -17,6 +19,7 @@ def main():
   state=json.loads((BASE/'state.json').read_text()) if (BASE/'state.json').exists() else {}
   if state.get('source_revision')==revision and state.get('status')=='published':print('No new committed source');return
   run_dir=pathlib.Path(tempfile.mkdtemp(prefix='release-',dir=BASE));run_dir.chmod(0o755)
+  print('Candidate evidence: '+str(run_dir),flush=True)
   export_dir=run_dir/'export'
   runpy.run_path(str(HERE/'export.py'))['export'](source,revision,export_dir)
   export_dir.chmod(0o755)

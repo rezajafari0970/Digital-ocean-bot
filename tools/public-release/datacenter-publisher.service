@@ -1,0 +1,11 @@
+[Unit]
+Description=Validate and publish committed Datacenter releases
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/datacenter-publisher/publish.py
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0077
+TimeoutStartSec=45min
+Nice=10

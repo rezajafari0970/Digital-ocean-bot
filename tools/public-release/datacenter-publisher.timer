@@ -1,0 +1,9 @@
+[Unit]
+Description=Check accepted Datacenter source for publication
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=120s
+AccuracySec=15s
+Unit=datacenter-publisher.service
+[Install]
+WantedBy=timers.target
