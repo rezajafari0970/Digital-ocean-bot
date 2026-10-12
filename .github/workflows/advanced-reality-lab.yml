@@ -19,18 +19,18 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
         env:
           POSTGRES_DB: dob_bulk_test_are
           POSTGRES_USER: are_fixture
           POSTGRES_PASSWORD: ephemeral-ci-only
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U are_fixture -d dob_bulk_test_are'
+          --health-cmd "pg_isready -U are_fixture -d dob_bulk_test_are"
           --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: '1.27.1'
           cache: true
