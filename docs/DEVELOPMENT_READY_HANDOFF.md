@@ -1,3 +1,7 @@
+## 2026-10-12 — lifecycle acceptance follow-up (partial external closure)
+
+Runtime9e59e3a remains unchanged. Read LIFECYCLE_ACCEPTANCE_20261012.md/JSON and PANEL_AUDIT_20261012.md before historical entries below. Fresh isolated race/browser acceptance:68top-level tests,153including subtests, zero failures/unresolved skips. Last observed capacity225/225,45/45fresh routes,0inactive/degraded/broken. Two tracked Vultr deletions wait below Desired9/10 for configured backfill, next scheduled build05:24:15Tehran; do not accelerate user spacing or claim their deletion. Sara accounts are locally absent, but historical31cloud resources remain unverified without valid access. No dedicated live-cloud test account was available. Overall acceptance is partial; no new production mutation or code release. Additional external OpenAI API0requests/0tokens. Full evidence:/root/backups/dob-lifecycle-acceptance-20261012.
+
 ## 2026-10-11 09:59 Tehran — speed recovery fix deployed and one panel verified
 
 Runtime93b3437, clean build and all3services/hash/5readiness checks PASS. Focused/race/general/browser and final API review PASS. Exactly1panel API audit:7asset domains residential; fundingchoicesmessages.google.com still blocked under the user's seven-root policy;8route assertions PASS. See SPEED_RECOVERY_20261011.md. No ad-latency gain claimed.

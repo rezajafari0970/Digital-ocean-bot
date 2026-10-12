@@ -1,0 +1,115 @@
+{
+  "at": "2026-10-12T04:33:52.027665+03:30",
+  "observed_at_tehran": "2026-10-12T04:30:55.808485+03:30",
+  "runtime_commit": "9e59e3a45f90e6b98043c2bae66b88b8cad352f8",
+  "tested_source_commit": "c19c7d0ad258235430e83ecaf69e8b2ceff5392e",
+  "overall": "PARTIAL_EXTERNAL_EVIDENCE_REQUIRED",
+  "stages": {
+    "1": {
+      "capacity": "PASS",
+      "tracked_two_deletions": "WAITING_CONFIGURED_BACKFILL",
+      "next_build_at_tehran": "2026-10-12T05:24:15.177084+03:30",
+      "desired": 10,
+      "observed_managed": 9,
+      "policy_unchanged": true
+    },
+    "2": {
+      "local_absence": "VERIFIED",
+      "cloud_deletion": "BLOCKED_NO_VALID_ACCOUNT_ACCESS",
+      "accounts": [
+        "Sara vul",
+        "Sara vul 2"
+      ],
+      "historical_last_known_resources": 31,
+      "current_cloud_resource_count": null
+    },
+    "3": {
+      "isolated_acceptance": "PASS",
+      "tests": {
+        "passes": 153,
+        "failures": 0,
+        "unresolved_skips": 0,
+        "top_level_passes": 68,
+        "browser": [
+          {
+            "test": "TestAccountDeletionBrowser",
+            "result": "pass"
+          },
+          {
+            "test": "TestBlockedAccountPurgeBrowser",
+            "result": "pass"
+          },
+          {
+            "test": "TestOutputBrowserViewScriptIsServed",
+            "result": "pass"
+          }
+        ],
+        "initial_skip_resolved_by": "stage3-remaining.jsonl"
+      },
+      "production_deletion": "VERIFIED_ONE_POST_RELEASE_OPERATION",
+      "dedicated_live_cloud_account_e2e": "NOT_RUN_NO_DEDICATED_ACCOUNT_CREDENTIALS"
+    },
+    "4": {
+      "report": "RECORDED",
+      "external_api_requests_added": 0,
+      "external_api_tokens_added": 0
+    }
+  },
+  "dashboard": {
+    "digitalocean_accounts": 4,
+    "vultr_accounts": 3,
+    "upcloud_accounts": 1,
+    "enabled_accounts": 8,
+    "healthy_accounts": 4,
+    "capacity_full_accounts": 4,
+    "broken_accounts": 0,
+    "limited_accounts": 0,
+    "unknown_accounts": 0,
+    "pending_deletion_accounts": 0,
+    "active_servers": 45,
+    "inactive_servers": 0,
+    "broken_servers": 0,
+    "degraded_servers": 0,
+    "pending_deletion_servers": 4,
+    "total_servers": 49,
+    "provisioning_servers": 0,
+    "provider_stale_servers": 0,
+    "panel_attention_servers": 0,
+    "active_deployments": 0,
+    "live_workers": 2,
+    "observed_at": "2026-10-12T01:00:55.912053+00:00"
+  },
+  "routing": {
+    "serving": 45,
+    "applied": 45,
+    "fresh": 45,
+    "max_proof_age_seconds": 55,
+    "errors": 0
+  },
+  "capacity": {
+    "eligible": 45,
+    "observed": 45,
+    "fresh": 30,
+    "last_observed_totals": {
+      "target": 225,
+      "active": 225,
+      "deficit": 0,
+      "expired": 0,
+      "quota": 0
+    }
+  },
+  "configuration_unchanged": {
+    "files": true,
+    "configuration": true
+  },
+  "api_usage": {
+    "this_followup_requests": 0,
+    "this_followup_tokens": 0,
+    "prior_panel_audit_requests": 11,
+    "prior_panel_audit_tokens": 197126,
+    "combined_with_account_cleanup_requests": 15,
+    "combined_with_account_cleanup_tokens": 372886,
+    "historical_monetary_cost": null,
+    "monetary_cost_reason": "API receipts do not report a charge; no additional API requests in this follow-up"
+  }
+}
