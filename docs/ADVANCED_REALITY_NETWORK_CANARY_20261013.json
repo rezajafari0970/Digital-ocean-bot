@@ -1,0 +1,273 @@
+{
+  "at": "2026-10-13T00:30:33.895179+00:00",
+  "host": "66.245.221.209",
+  "provider": "vultr",
+  "droplet_id": "dfe82d65-c792-419b-a432-d24f1c0eefc1",
+  "scope": "isolated_authenticated_synthetic_sidecar_on_existing_host",
+  "server_versions": [
+    "26.10.10",
+    "26.9.9"
+  ],
+  "client_version": "26.5.9",
+  "server_original_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+  "server_official_test_sha256": "4cca4de3ab8c16b3803a70e9ebe0570d2a72480c716d89aa91603ec568bf0f44",
+  "client_sha256": "b2c525e082cf2fef460499c88838d355f0b9bfb5a00bdb3eaa99b6af63825006",
+  "positive_requests_including_intentional_cancellation": 156,
+  "unexpected_failures": 0,
+  "invalid_auth_checks": [
+    {
+      "transport": "tcp",
+      "invalid_field": "short_id",
+      "payload_access_rejected": true
+    },
+    {
+      "transport": "tcp",
+      "invalid_field": "uuid",
+      "payload_access_rejected": true
+    },
+    {
+      "transport": "xhttp",
+      "invalid_field": "short_id",
+      "payload_access_rejected": true
+    },
+    {
+      "transport": "xhttp",
+      "invalid_field": "uuid",
+      "payload_access_rejected": true
+    }
+  ],
+  "results": [
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 1714.97,
+      "download_p95_ms": 2393.2,
+      "failed": 0,
+      "phase": "baseline",
+      "requests": 20,
+      "transport": "tcp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 387.07500000000005,
+      "download_p95_ms": 2190.84,
+      "failed": 0,
+      "phase": "baseline",
+      "requests": 20,
+      "transport": "xhttp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 1745.17,
+      "download_p95_ms": 6904.76,
+      "failed": 0,
+      "phase": "candidate",
+      "requests": 20,
+      "transport": "tcp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 361.245,
+      "download_p95_ms": 2121.94,
+      "failed": 0,
+      "phase": "candidate",
+      "requests": 20,
+      "transport": "xhttp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 1759.025,
+      "download_p95_ms": 6993.26,
+      "failed": 0,
+      "phase": "rollback",
+      "requests": 20,
+      "transport": "tcp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 360.34,
+      "download_p95_ms": 2166.11,
+      "failed": 0,
+      "phase": "rollback",
+      "requests": 20,
+      "transport": "xhttp",
+      "request_kinds": {
+        "download": 14,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 1745.94,
+      "download_p95_ms": 7015.3,
+      "failed": 0,
+      "phase": "recovered",
+      "requests": 9,
+      "transport": "tcp",
+      "request_kinds": {
+        "download": 3,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 390.0,
+      "download_p95_ms": 1650.89,
+      "failed": 0,
+      "phase": "recovered",
+      "requests": 9,
+      "transport": "xhttp",
+      "request_kinds": {
+        "download": 3,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 1740.49,
+      "download_p95_ms": 1800.87,
+      "failed": 0,
+      "phase": "existing-core",
+      "requests": 9,
+      "transport": "tcp",
+      "request_kinds": {
+        "download": 3,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    },
+    {
+      "core": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+      "download_p50_ms": 387.94,
+      "download_p95_ms": 1769.93,
+      "failed": 0,
+      "phase": "existing-core",
+      "requests": 9,
+      "transport": "xhttp",
+      "request_kinds": {
+        "download": 3,
+        "upload": 1,
+        "slow": 1,
+        "cancel": 4
+      }
+    }
+  ],
+  "candidate_decision": "NOT_PROMOTED_NO_ESTABLISHED_BENEFIT",
+  "candidate_change": "existing synthetic policy.levels.0.bufferSize 64->128 only",
+  "structure_preserved": true,
+  "performance_note": "TCP p95 increased after candidate and remained elevated after rollback; no causal attribution or stable speed improvement. Small samples, two datacenter vantage points, resource-capped synthetic fixture.",
+  "rollback_config_sha256": "df36c2a5285b4dd20aa85b8ab5db4ace4a6b8fe0acf7172b0e728c918f844357",
+  "owned_child_crash_recovery": "PASS_single_child_exit_then_18_successful_requests",
+  "isolated_memory_boundary": {
+    "limit_bytes": 33554432,
+    "result": "oom-kill",
+    "scope": "separate synthetic allocation process; not full-host or Xray OOM recovery"
+  },
+  "cleanup": {
+    "cleanup": "PASS",
+    "owned_directory_removed": true,
+    "ports": {
+      "18081": "FREE",
+      "18443": "FREE",
+      "24443": "FREE",
+      "24444": "FREE"
+    },
+    "last_test_state": {
+      "core_alive": true,
+      "core_config_sha256": "df36c2a5285b4dd20aa85b8ab5db4ace4a6b8fe0acf7172b0e728c918f844357",
+      "core_fds": 8,
+      "core_memory_kib": {
+        "VmHWM": 38700,
+        "VmRSS": 37900
+      },
+      "core_pid": 7164,
+      "elapsed_seconds": 101.54,
+      "generation": 1,
+      "phase": "rollback",
+      "recoveries": 0
+    },
+    "production_service": {
+      "ActiveState": "active",
+      "MainPID": "3809",
+      "NRestarts": "0"
+    },
+    "production_config_sha256": "443bc111e6058d44eb5fa7155b73ffcc8aa4a140eda66b23c3bf1ae444a88d47",
+    "production_config_unchanged": false,
+    "production_binary_unchanged": true
+  },
+  "production_config_drift": {
+    "observed": true,
+    "concurrent_successful_bulk_create_jobs": 3,
+    "conclusion": "Concurrent worker activity and newly added live inbound observed; old config was not restored over new users. Exact byte-level attribution unavailable; no production config writes in experiment commands."
+  },
+  "local_acceptance": {
+    "test_results": {
+      "core-and-contract.jsonl": {
+        "passed_including_subtests": 44,
+        "failed": 0,
+        "skipped": 0
+      },
+      "admin.jsonl": {
+        "passed_including_subtests": 3,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "focused_acceptance": "PASS",
+    "fleet_activation": "BLOCKED",
+    "phone_compatibility": "BLOCKED",
+    "core_binary_sha256": "4cca4de3ab8c16b3803a70e9ebe0570d2a72480c716d89aa91603ec568bf0f44",
+    "client_binary_sha256": "b2c525e082cf2fef460499c88838d355f0b9bfb5a00bdb3eaa99b6af63825006"
+  },
+  "harness_sha256": "29ca23a6d9850a57c0df3042882e535c6ce70821fd8d23dc746680a828685fdd",
+  "production_core_changed": false,
+  "production_kernel_network_settings_changed": false,
+  "fleet_activation": "BLOCKED",
+  "remaining_gates": [
+    "actual_official_v2rayng_device_and_existing_config_import",
+    "phone_DNS_UDP_TUN_and_network_switch",
+    "representative_long_soak_and_performance_benefit",
+    "live_panel_apply_drain_and_rollback_implementation",
+    "fleet_core_os_coverage",
+    "dedicated_host_reboot_and_full_failure_tests"
+  ],
+  "external_openai_api_requests": 0,
+  "external_openai_api_tokens": 0,
+  "evidence_path": "/root/backups/dob-advanced-reality-20261013/network-canary"
+}

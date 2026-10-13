@@ -47,7 +47,7 @@ files = sorted(set(list(r.glob('internal/advancedreality/*.go')) +
     list(r.glob('cmd/advanced-reality-lab/*.go')) +
     [r/'internal/adminapi/server.go', r/'web/static/app.js', r/'web/static/index.html',
      r/'web/static/advanced-reality.js', r/'tools/advanced-reality-acceptance.sh',
-     r/'tools/advanced-reality-host-observe.py']))
+     r/'tools/advanced-reality-host-observe.py', r/'tools/advanced-reality-network-canary.py']))
 before = {str(p.relative_to(r)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 before['TEST_CORE_BINARY'] = hashlib.sha256(pathlib.Path(os.environ['ADVANCED_REALITY_TEST_XRAY']).read_bytes()).hexdigest()
 client = os.environ.get('ADVANCED_REALITY_TEST_CLIENT_XRAY', os.environ['ADVANCED_REALITY_TEST_XRAY'])
@@ -58,6 +58,7 @@ go test -p 1 -race -count=1 -json ./internal/advancedreality > "$ARE_EVIDENCE_DI
 go test -p 1 -race -count=1 -json -run '^TestAdvancedReality' ./internal/adminapi > "$ARE_EVIDENCE_DIR/admin.jsonl"
 go vet ./internal/advancedreality ./internal/adminapi ./cmd/advanced-reality-lab
 go build -p 1 -o "$ARE_EVIDENCE_DIR/advanced-reality-lab" ./cmd/advanced-reality-lab
+python3 -c "import ast,pathlib; ast.parse(pathlib.Path('tools/advanced-reality-network-canary.py').read_text())"
 node --check web/static/advanced-reality.js
 node --check web/static/app.js
 python3 - <<'PY'
@@ -68,7 +69,7 @@ files = sorted(set(list(r.glob('internal/advancedreality/*.go')) +
     list(r.glob('cmd/advanced-reality-lab/*.go')) +
     [r/'internal/adminapi/server.go', r/'web/static/app.js', r/'web/static/index.html',
      r/'web/static/advanced-reality.js', r/'tools/advanced-reality-acceptance.sh',
-     r/'tools/advanced-reality-host-observe.py']))
+     r/'tools/advanced-reality-host-observe.py', r/'tools/advanced-reality-network-canary.py']))
 hashes = {str(p.relative_to(r)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 before = json.loads(pathlib.Path(os.environ['ARE_EVIDENCE_DIR'], 'source-before.json').read_text())
 core_hash = hashlib.sha256(pathlib.Path(os.environ['ADVANCED_REALITY_TEST_XRAY']).read_bytes()).hexdigest()
