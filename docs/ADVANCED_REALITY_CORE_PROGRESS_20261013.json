@@ -545,8 +545,10 @@
   "full_fleet_activation": "BLOCKED",
   "latest_continuation": {
     "receipt": "ADVANCED_REALITY_STAGE1_FAILURE_20261013.json",
-    "recorded_utc": "2026-10-13T11:31:47.518704+00:00",
-    "status": "stage1_mobile_failed_under_diagnosis",
-    "new_canary_expires_utc": "2026-10-13T15:02:35+00:00"
+    "recorded_utc": "2026-10-13T11:50:19.381663+00:00",
+    "status": "stage1_phone_tcp_connect_timeout_under_diagnosis",
+    "new_canary_expires_utc": "2026-10-13T15:02:35+00:00",
+    "client_core": "26.5.9",
+    "tcp_observer_expires_utc": "2026-10-13T12:06:39.889049+00:00"
   }
 }

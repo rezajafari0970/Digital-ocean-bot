@@ -1,13 +1,18 @@
 {
-  "recorded_utc": "2026-10-13T11:31:47.518704+00:00",
+  "recorded_utc": "2026-10-13T11:50:19.381663+00:00",
   "user_report_utc": "2026-10-13T11:23:16Z",
-  "stage1_status": "MOBILE_ACCEPTANCE_FAILED_DIAGNOSIS_PENDING",
+  "stage1_status": "MOBILE_ACCEPTANCE_FAILED_TCP_CONNECT_DIAGNOSIS_PENDING",
   "user_report": {
     "MCI": "DID_NOT_CONNECT",
     "Irancell": "DID_NOT_CONNECT",
     "profile_published_in_app_for_other_users": true,
     "other_user_results": "NOT_RECEIVED",
-    "app_name_version_and_actual_core": "UNKNOWN"
+    "app_name_version_and_actual_core": {
+      "app": "v2rayNG",
+      "package": "com.v2ray.ang",
+      "app_version": "NOT_IN_LOG",
+      "xray_core": "26.5.9"
+    }
   },
   "first_diagnostic": {
     "utc": "2026-10-13T11:24:33.915196+00:00",
@@ -301,5 +306,138 @@
   "stages_2_3_4": "NOT_STARTED",
   "production_panel_or_core_replaced": false,
   "openai_api_requests": 0,
-  "openai_api_tokens": 0
+  "openai_api_tokens": 0,
+  "stock_phone_log": {
+    "profile": "ARE-Stock-Control-13Oct",
+    "endpoint": "172.237.20.67:24447",
+    "device_log_window": "2026-10-13 15:04:38 to 15:05:19",
+    "timezone": "not explicitly encoded in Android log",
+    "client": {
+      "app": "v2rayNG",
+      "package": "com.v2ray.ang",
+      "app_version": "NOT_IN_LOG",
+      "xray_core": "26.5.9"
+    },
+    "carrier_for_this_log": "NOT_IDENTIFIED",
+    "core_started": true,
+    "imported_parameters_match_control": true,
+    "result": "TCP_CONNECT_TIMEOUT",
+    "failure_excerpt": "dial tcp 172.237.20.67:24447: i/o timeout",
+    "retries_exhausted": true,
+    "interpretation": "Observed failing attempts do not establish TCP; REALITY/VLESS authentication mismatch is not demonstrated. Google delay-test deadlines and proxied UDP closed pipes are consistent with failed transport.",
+    "cause_not_proven": [
+      "carrier filtering",
+      "provider firewall",
+      "network route or phone VPN routing"
+    ],
+    "full_phone_log_saved": false,
+    "private_client_credentials_saved_in_repository": false
+  },
+  "host_tcp_firewall_check": {
+    "utc": "2026-10-13T11:42:54.061639+00:00",
+    "units": {
+      "x-ui": {
+        "exit": 0,
+        "stdout": "ActiveState=active\nSubState=running\nMainPID=4564\nResult=success\nNRestarts=0\n",
+        "stderr": ""
+      },
+      "are-stage1-phone-20261013": {
+        "exit": 0,
+        "stdout": "ActiveState=active\nSubState=running\nMainPID=7208\nResult=success\nNRestarts=0\n",
+        "stderr": ""
+      },
+      "are-stage1-policy-20261013": {
+        "exit": 0,
+        "stdout": "ActiveState=active\nSubState=running\nMainPID=7216\nResult=success\nNRestarts=0\n",
+        "stderr": ""
+      },
+      "are-stage1-stock-control-20261013": {
+        "exit": 0,
+        "stdout": "ActiveState=active\nSubState=running\nMainPID=8482\nResult=success\nNRestarts=0\n",
+        "stderr": ""
+      }
+    },
+    "listeners": {
+      "exit": 0,
+      "stdout": "LISTEN 0      4096   *:443   *:* users:((\"xray-linux-amd6\",pid=6239,fd=7))\nLISTEN 0      4096   *:24447 *:* users:((\"xray\",pid=8482,fd=4))           \nLISTEN 0      4096   *:24445 *:* users:((\"xray\",pid=7208,fd=8))           \n",
+      "stderr": ""
+    },
+    "nft": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "iptables-save": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "ufw": {
+      "exit": 0,
+      "stdout": "Status: inactive\n",
+      "stderr": ""
+    },
+    "memory_available_kib": 454696,
+    "scope": "Read-only host firewall checks; provider firewall API not inspected."
+  },
+  "bounded_tcp_observer": {
+    "snapshot": {
+      "utc": "2026-10-13T11:47:26.968299+00:00",
+      "observer": {
+        "started_utc": "2026-10-13T11:46:49.889049+00:00",
+        "scheduled_end_utc": "2026-10-13T12:06:39.889049+00:00",
+        "updated_utc": "2026-10-13T11:47:26.590964+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          24445,
+          24447
+        ],
+        "counts": {
+          "24445:manager:in:syn": 1,
+          "24445:manager:out:syn_ack": 1,
+          "24447:manager:in:syn": 1,
+          "24447:manager:out:syn_ack": 1
+        },
+        "minutes": {
+          "2026-10-13T11:47Z": {
+            "24445:manager:in:syn": 1,
+            "24445:manager:out:syn_ack": 1,
+            "24447:manager:in:syn": 1,
+            "24447:manager:out:syn_ack": 1
+          }
+        },
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      },
+      "observer_unit": "ActiveState=active\nMainPID=9699\nResult=success\nNRestarts=0\nMemoryCurrent=7618560\n",
+      "production_status_same": true,
+      "production_config_same": true,
+      "production_core_same": true
+    },
+    "calibration": {
+      "utc": "2026-10-13T11:47:24.173293+00:00",
+      "tests": [
+        {
+          "port": 24445,
+          "tcp_connect": true,
+          "seconds": 0.241
+        },
+        {
+          "port": 24447,
+          "tcp_connect": true,
+          "seconds": 0.227
+        }
+      ]
+    },
+    "unit": "are-stage1-tcp-observer-v2-20261013",
+    "duration_seconds": 1190,
+    "runtime_max_seconds": 1200,
+    "interpretation_limit": "Other-source packets cannot identify a user or carrier. Observer started after pasted phone log and cannot establish whether packets from that past attempt arrived. New timed phone attempt required."
+  },
+  "next_step": "Repeat stock control phone connection while observer is active; report exact time and carrier. No client parameter changes or later-stage operations.",
+  "evidence_sha256": {
+    "phase1-tcp-firewall.log": "95bdd4cc0ba952a77e5060a063c347ec69d021e1b0421156a1e73ba328ae5adc",
+    "phase1-tcp-observer-v2-check.log": "1a8f829771ca279f7203af120370389dc256acb03ff65963562b14d6b7e0d349",
+    "phase1-observer-v2-calibration.json": "2210955eb8430b541527c483728df7cd8cefa7291b55001b889eb6c8774150ce"
+  }
 }

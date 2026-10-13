@@ -2,13 +2,18 @@
   "recorded_utc": "2026-10-13T11:05:26.596253+00:00",
   "scope": "stage_1_only_by_user_request",
   "stage_1": {
-    "status": "MOBILE_ACCEPTANCE_FAILED_DIAGNOSIS_PENDING",
+    "status": "MOBILE_ACCEPTANCE_FAILED_TCP_CONNECT_DIAGNOSIS_PENDING",
     "preparation": "PASS",
     "technical_connectivity": "PASS",
     "phone_MCI": "USER_REPORTED_DID_NOT_CONNECT",
     "phone_Irancell": "USER_REPORTED_DID_NOT_CONNECT",
     "long_session_and_network_switch": "NOT_ACCEPTED_CONNECTION_FAILED",
-    "client_app_and_core_version": "UNKNOWN"
+    "client_app_and_core_version": {
+      "app": "v2rayNG",
+      "package": "com.v2ray.ang",
+      "app_version": "NOT_IN_LOG",
+      "xray_core": "26.5.9"
+    }
   },
   "stages_2_3_4": "NOT_STARTED_IN_THIS_CONTINUATION",
   "prior_stock_phone_report": "USER_REPORTED_PASS_ON_MCI_AND_IRANCELL_NOT_MODIFIED_CORE_ACCEPTANCE",
@@ -138,8 +143,9 @@
   "openai_api_tokens": 0,
   "latest_diagnostic": {
     "receipt": "ADVANCED_REALITY_STAGE1_FAILURE_20261013.json",
-    "recorded_utc": "2026-10-13T11:31:47.518704+00:00",
+    "recorded_utc": "2026-10-13T11:50:19.381663+00:00",
     "stock_control_port": 24447,
-    "stock_phone_results": "PENDING_USER_TEST"
+    "stock_phone_results": "TCP_CONNECT_TIMEOUT_CARRIER_NOT_IDENTIFIED",
+    "tcp_observer_expires_utc": "2026-10-13T12:06:39.889049+00:00"
   }
 }
