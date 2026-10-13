@@ -1,0 +1,119 @@
+{
+  "observed_at": "2026-10-13T00:09:29.273355+00:00",
+  "source_commit": "ffe80e798c4c22c8f74e4f68619ef2efd8caa298",
+  "stage": "LOCAL_AND_GITHUB_CI_PASS_NETWORK_CANARY_BLOCKED",
+  "ci": {
+    "run_id": 38325580709,
+    "job_id": 115063349443,
+    "status": "completed",
+    "url": "https://github.com/rezajafari0970/Digital-ocean-bot/actions/runs/38325580709",
+    "conclusion": "success",
+    "test_results": {
+      "core_and_contract_including_subtests": 44,
+      "api_postgres": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "passed_at": "2026-10-13T00:08:12Z",
+    "server_core": "26.10.10",
+    "client_core": "26.10.10"
+  },
+  "local_acceptance": {
+    "test_results": {
+      "core-and-contract.jsonl": {
+        "passed_including_subtests": 44,
+        "failed": 0,
+        "skipped": 0
+      },
+      "admin.jsonl": {
+        "passed_including_subtests": 3,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "focused_acceptance": "PASS",
+    "fleet_activation": "BLOCKED",
+    "phone_compatibility": "BLOCKED",
+    "source_files": {
+      "cmd/advanced-reality-lab/main.go": "e5bb32ab0736112cc7c5b9c3347c3764c44d5efb664d06c81da37272187b1045",
+      "internal/adminapi/advanced_reality.go": "d5e1d9574435f700a1d97c1dab40731264fef079d9fb6cd23bb52eeee384fe89",
+      "internal/adminapi/advanced_reality_test.go": "978c33d738b7e8cc5d7a12adb4414b355f65a1e56692aca38f7baa44b2cf740b",
+      "internal/adminapi/server.go": "d96ae37e1cadb635f8be4a27c1807cf9f66ff31b21931a4a089e9cf866b4a105",
+      "internal/advancedreality/catalog.go": "5e30de2de2dd94c23eaf85c8b671925a79713b7a5e1f8f361969eecb36e70ff1",
+      "internal/advancedreality/contract.go": "1374668418fac14cc7e8788b9cf67bfc33041f65abe696542dd983923501126b",
+      "internal/advancedreality/contract_test.go": "06862dbc5589fa3cfff01dca4da4cef6ffec737a5cd35239ac02dac487741731",
+      "internal/advancedreality/inventory.go": "a11e890b21ed8fc3468d304088acffb9bf728915a27aa7e23bebeee926366419",
+      "internal/advancedreality/lab.go": "610e39f61e098d498957b8ddf74b30213781c7eb4d8b5dbd7e034d38e3cb33a4",
+      "internal/advancedreality/lab_test.go": "1e8ed425b3ec88bcb749b0c55ef8dcae15e8a1b8e9426d5e4adc0aec6cbdbf57",
+      "internal/advancedreality/native_test.go": "ed244a349429c3467a0fbbd7b684285588b2d41a256f4d478f93f14866c5702b",
+      "internal/advancedreality/policy.go": "33924f80eaa263d2225b741e3baa6b353c4bcb337dd8b444cf7fddd6212ac76f",
+      "internal/advancedreality/policy_test.go": "e1f105b2ca05f016b3580d3a6a0dfc0c7fa0142ab93710d7473b0db758cb943c",
+      "tools/advanced-reality-acceptance.sh": "5f7408d9614df324b403e922465d412d265baa45ff0519b1067aac694d26811e",
+      "tools/advanced-reality-host-observe.py": "ffda6bbcea1be6a6a1f269cebee28c42d759d60e7fb04d1cd92188e0f9541774",
+      "web/static/advanced-reality.js": "90b00e951cb136b799d9ade1be7b8a2d7e29105d8382dbc1ff1ff99d909fa981",
+      "web/static/app.js": "af8825684c330586c0416e27601fede616f1b134b43497eb972d296802bce253",
+      "web/static/index.html": "3d5337d663b7cfdf0dabfa56e466bf965bda3115d10305a8a8001de328260699"
+    },
+    "core_binary_sha256": "4cca4de3ab8c16b3803a70e9ebe0570d2a72480c716d89aa91603ec568bf0f44",
+    "client_binary_sha256": "b2c525e082cf2fef460499c88838d355f0b9bfb5a00bdb3eaa99b6af63825006"
+  },
+  "acceptance_guard_checks": {
+    "valid_evidence": "ACCEPTED",
+    "skipped": "REJECTED",
+    "incomplete": "REJECTED",
+    "missing_native_test": "REJECTED",
+    "failed": "REJECTED"
+  },
+  "fleet_snapshot": {
+    "observed_at": "2026-10-13T00:05:35.697253+00:00",
+    "nondeleted_panels": 57,
+    "ready": 55,
+    "expiring": 2,
+    "applied_routes": 47,
+    "failed_routes": 10,
+    "fresh_routes": 46,
+    "fresh_os_samples": 0,
+    "known_core_versions": 0,
+    "registered_inbounds": 53,
+    "failed_routes_on_token_invalid_accounts": 10,
+    "causation_established": false
+  },
+  "runtime_checks": {
+    "healthz": 200,
+    "readyz": 200,
+    "readiness_passed": 5,
+    "readiness_total": 5,
+    "units": {
+      "digital-ocean-bot-api": {
+        "active": true,
+        "pid": 3716586,
+        "restarts": 0
+      },
+      "digital-ocean-bot-worker": {
+        "active": true,
+        "pid": 3716587,
+        "restarts": 0
+      },
+      "digital-ocean-bot-worker-panels": {
+        "active": true,
+        "pid": 3716588,
+        "restarts": 0
+      }
+    }
+  },
+  "canary": {
+    "host": "168.144.41.190",
+    "tcp22": "TIMEOUT",
+    "tcp80": "TIMEOUT",
+    "at": "2026-10-13T00:03:24Z"
+  },
+  "phone": "BLOCKED_NO_ACTUAL_DEVICE_EVIDENCE",
+  "live_rollback": "NOT_IMPLEMENTED_LAB_ROLLBACK_ONLY",
+  "production_changed": false,
+  "core_or_kernel_changes_applied": false,
+  "fleet_activation": "BLOCKED",
+  "full_repository_test_rerun": false,
+  "external_openai_api_requests_this_continuation": 0,
+  "external_openai_api_tokens_this_continuation": 0,
+  "raw_evidence_path": "/root/backups/dob-advanced-reality-20261013"
+}
