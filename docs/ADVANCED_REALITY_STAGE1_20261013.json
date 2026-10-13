@@ -1,0 +1,139 @@
+{
+  "recorded_utc": "2026-10-13T11:05:26.596253+00:00",
+  "scope": "stage_1_only_by_user_request",
+  "stage_1": {
+    "status": "AWAITING_USER_PHONE_TEST",
+    "preparation": "PASS",
+    "technical_connectivity": "PASS",
+    "phone_MCI": "PENDING_USER_TEST",
+    "phone_Irancell": "PENDING_USER_TEST",
+    "long_session_and_network_switch": "PENDING_USER_TEST",
+    "client_app_and_core_version": "UNKNOWN"
+  },
+  "stages_2_3_4": "NOT_STARTED_IN_THIS_CONTINUATION",
+  "prior_stock_phone_report": "USER_REPORTED_PASS_ON_MCI_AND_IRANCELL_NOT_MODIFIED_CORE_ACCEPTANCE",
+  "canary": {
+    "host": "172.237.20.67",
+    "port": 24445,
+    "transport": "tcp",
+    "unit": "are-stage1-phone-20261013",
+    "core_revision": "are-0.2.1",
+    "started_utc": "2026-10-13T11:02:35+00:00",
+    "expires_utc": "2026-10-13T15:02:35+00:00"
+  },
+  "technical_tests": {
+    "tested_utc": "2026-10-13T11:02:58.611654+00:00",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 are-0.2.1",
+    "tests": [
+      {
+        "name": "https_egress",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 0.918175 221",
+        "egress_ip": "172.237.20.67"
+      },
+      {
+        "name": "https_second_site",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 1.630918 577"
+      },
+      {
+        "name": "udp_dns",
+        "passed": true,
+        "answers": 2
+      }
+    ],
+    "all_passed": true
+  },
+  "postflight": {
+    "utc": "2026-10-13T11:04:17.091300+00:00",
+    "state": {
+      "revision": "are-0.2.1",
+      "instance": "6b6f333602b7a7445981601ef174e4aa",
+      "states": [
+        {
+          "registered_tcp_reality": true,
+          "port": 24445,
+          "generation": 3,
+          "policy": {
+            "enabled": true,
+            "max_handshakes": 32,
+            "timeout_ms": 15000,
+            "drain": false
+          },
+          "expires_at": "2026-10-13T11:09:07.289215247Z",
+          "counts": {
+            "started": 3,
+            "succeeded": 3,
+            "failed": 0,
+            "timed_out": 0,
+            "rejected": 0,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              2,
+              1,
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    "units": {
+      "x-ui": {
+        "ActiveState": "active",
+        "MainPID": "4564",
+        "NRestarts": "0",
+        "MemoryCurrent": "157462528",
+        "MemoryPeak": "232837120"
+      },
+      "are-stage1-phone-20261013": {
+        "ActiveState": "active",
+        "MainPID": "7208",
+        "NRestarts": "0",
+        "MemoryCurrent": "11366400",
+        "MemoryPeak": "11370496"
+      },
+      "are-stage1-policy-20261013": {
+        "ActiveState": "active",
+        "MainPID": "7216",
+        "NRestarts": "0",
+        "MemoryCurrent": "9154560",
+        "MemoryPeak": "9412608"
+      }
+    },
+    "production_core_unchanged": true,
+    "production_config_same_as_prepare": true,
+    "candidate_config_sha256": "181b0f47ecc10ce56595e763a13ad2fed2b4a879a2937921be9c6f34443e5240",
+    "candidate_sha256": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+    "expires_utc": "2026-10-13T15:02:35+00:00"
+  },
+  "production_main_panel_replaced": false,
+  "client_changed": false,
+  "candidate_source_commit": "cf9f71c059b1f7184b2dc353d749ae0417229940",
+  "policy": {
+    "max_handshakes": 32,
+    "timeout_ms": 15000,
+    "lease_seconds": 300,
+    "renewal_seconds": 90,
+    "bound_to_canary_lifetime": true
+  },
+  "limits": [
+    "Official Linux client testing is not phone acceptance.",
+    "Phone test traffic is resource bounded and is not a speed benchmark.",
+    "Host reboot, resource exhaustion, fleet compatibility and fleet rollout were not performed."
+  ],
+  "evidence_sha256": {
+    "phase1-prepare.log": "5ba89fe29effdaa703c87ede081ec5822260d9086114065672bb3b503e4e5c58",
+    "phase1-start.log": "6b099393c8959d9956c0cebacea8307ec516e2323868d8cab7a1c1606ee47df4",
+    "phase1-client-test.log": "3d00646e6429fec72ba9c118f1deedaa758b626441deafbbb66525af8f32c330",
+    "phase1-postflight.log": "099231a7744dd4d3075ca0b1a28428cf7710c443a67cc3a1b75d74c63c1890fe"
+  },
+  "openai_api_requests": 0,
+  "openai_api_tokens": 0
+}
