@@ -269,5 +269,12 @@
   ],
   "external_openai_api_requests": 0,
   "external_openai_api_tokens": 0,
-  "evidence_path": "/root/backups/dob-advanced-reality-20261013/network-canary"
+  "evidence_path": "/root/backups/dob-advanced-reality-20261013/network-canary",
+  "ci": {
+    "run_id": 38327671649,
+    "job_id": 115070007255,
+    "source_commit": "b2902f5d095b620379b55c785fbbf96d4d371237",
+    "result": "SUCCESS",
+    "url": "https://github.com/rezajafari0970/Digital-ocean-bot/actions/runs/38327671649"
+  }
 }

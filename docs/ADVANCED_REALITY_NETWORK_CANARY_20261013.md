@@ -48,3 +48,5 @@
 Harness: `tools/advanced-reality-network-canary.py`؛ تنها برای fixture متعلق به آزمایش، با فایل owner و تنظیمات مصنوعی از پیش ساخته‌شده است. هیچ endpoint برای نوشتن Production اضافه نمی‌کند.
 شواهد خام: `/root/backups/dob-advanced-reality-20261013/network-canary`.
 مصرف OpenAI API این مرحله: صفر درخواست و صفر توکن.
+
+CI روی Commit `b2902f5`، اجرای `38327671649`: SUCCESS. این CI پذیرش کد و fixture محلی را تکرار می‌کند؛ رسید WAN از اجرای واقعی سرور جایگزین مستقل است.
