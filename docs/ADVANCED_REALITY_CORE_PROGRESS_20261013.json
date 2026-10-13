@@ -1,7 +1,7 @@
 {
-  "recorded_utc": "2026-10-13T02:45:13.652091+00:00",
+  "recorded_utc": "2026-10-13T03:00:03.072990+00:00",
   "revision": "are-0.2.1",
-  "status": "experimental_canary_in_progress",
+  "status": "isolated_final_core_canary_passed_awaiting_modified_phone_acceptance",
   "phone_baseline": "USER_REPORTED_PASS_MCI_IRANCELL",
   "production_changed": false,
   "upstream_full_suites": {
@@ -31,12 +31,516 @@
     "30-minute data-path soak belongs to are-0.2.0; final socket-lifecycle changes have separate native crash evidence."
   ],
   "remaining": [
-    "final_binary_wan_acceptance",
-    "github_ci",
-    "full_host_reboot_on_dedicated_host",
-    "modified_core_phone_acceptance",
+    "modified_core_phone_acceptance_on_MCI_and_Irancell_including_long_session_and_network_switching",
+    "full_host_reboot_and_resource_exhaustion_on_dedicated_host",
+    "fresh_supported_OS_and_core_matrix_before_fleet_rollout",
     "persistent_fleet_actuator_and_seamless_binary_or_inbound_rollout"
   ],
   "openai_api_requests": 0,
-  "openai_api_tokens": 0
+  "openai_api_tokens": 0,
+  "tested_code_commit": "cf9f71c059b1f7184b2dc353d749ae0417229940",
+  "deployment": {
+    "custom_core": "independent_canary_only",
+    "custom_sanaei": "built_and_native_tested_not_installed_over_main_panel",
+    "app_or_client_changed": false,
+    "phone_core_revision": "unknown"
+  },
+  "ci": [
+    {
+      "name": "advanced-reality-lab",
+      "run_id": 38338397989,
+      "job_id": 115103613940,
+      "conclusion": "success"
+    },
+    {
+      "name": "advanced-reality-forks",
+      "run_id": 38338398052,
+      "job_id": 115103614326,
+      "conclusion": "success",
+      "integrated_bot_native_compatibility": "PASS"
+    }
+  ],
+  "wan": {
+    "are-0.2.0": {
+      "configured_soak_seconds": 1800,
+      "binary_sha256": "95a181757449ba63e870781f45f32ef90da21cfec667ab284bc807ed678cf668",
+      "results": {
+        "rounds": 150,
+        "stock": {
+          "requests": 600,
+          "failed": 0,
+          "p50_ms": 1580.32,
+          "p95_nearest_rank_ms": 1733.27
+        },
+        "candidate": {
+          "requests": 600,
+          "failed": 0,
+          "p50_ms": 1619.0,
+          "p95_nearest_rank_ms": 1759.01
+        }
+      },
+      "functional_events": [
+        {
+          "name": "registered_scope",
+          "passed": true,
+          "utc": "2026-10-13T02:13:01.561348+00:00"
+        },
+        {
+          "name": "baseline_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:13:03.321077+00:00"
+        },
+        {
+          "name": "candidate_disabled_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:13:05.004186+00:00"
+        },
+        {
+          "name": "candidate_enabled_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:13:11.196226+00:00"
+        },
+        {
+          "name": "upload_integrity",
+          "passed": true,
+          "utc": "2026-10-13T02:13:12.796392+00:00"
+        },
+        {
+          "name": "idempotent_replay",
+          "passed": true,
+          "utc": "2026-10-13T02:13:14.995275+00:00"
+        },
+        {
+          "name": "stale_generation_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:13:17.309885+00:00"
+        },
+        {
+          "name": "bounded_incomplete_handshakes",
+          "passed": true,
+          "utc": "2026-10-13T02:13:28.125986+00:00",
+          "counts": {
+            "started": 5,
+            "succeeded": 3,
+            "failed": 2,
+            "timed_out": 2,
+            "rejected": 1,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              3,
+              1,
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "active_stream_started",
+          "passed": true,
+          "utc": "2026-10-13T02:13:33.326530+00:00"
+        },
+        {
+          "name": "drain_preserves_active_past_handshake_deadline",
+          "passed": true,
+          "utc": "2026-10-13T02:13:42.059561+00:00",
+          "counts": {
+            "started": 6,
+            "succeeded": 4,
+            "failed": 2,
+            "timed_out": 2,
+            "rejected": 1,
+            "in_flight": 0,
+            "active_connections": 1,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              4,
+              1,
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "drain_rejects_new_stream",
+          "passed": true,
+          "utc": "2026-10-13T02:13:46.394259+00:00"
+        },
+        {
+          "name": "drained_stream_integrity",
+          "passed": true,
+          "utc": "2026-10-13T02:13:52.246719+00:00"
+        },
+        {
+          "name": "rollback_resumes_new_connections",
+          "passed": true,
+          "utc": "2026-10-13T02:13:58.623985+00:00"
+        },
+        {
+          "name": "invalid_uuid_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:13:59.706326+00:00"
+        },
+        {
+          "name": "invalid_short_id_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:14:04.536277+00:00"
+        },
+        {
+          "name": "soak_30_minutes",
+          "passed": true,
+          "utc": "2026-10-13T02:44:14.143703+00:00",
+          "rounds": 150,
+          "requests_per_path": 600,
+          "final_state": {
+            "revision": "are-0.2.0",
+            "instance": "390de0b97e9d0d1a80f171fb100ed91f",
+            "states": [
+              {
+                "registered_tcp_reality": true,
+                "port": 24445,
+                "generation": 26,
+                "policy": {
+                  "enabled": false,
+                  "max_handshakes": 16,
+                  "timeout_ms": 15000,
+                  "drain": false
+                },
+                "expires_at": "0001-01-01T00:00:00Z",
+                "counts": {
+                  "started": 613,
+                  "succeeded": 606,
+                  "failed": 7,
+                  "timed_out": 2,
+                  "rejected": 6,
+                  "in_flight": 0,
+                  "active_connections": 0,
+                  "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+                    0,
+                    511,
+                    96,
+                    6,
+                    0,
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "baseline_restored",
+          "passed": true,
+          "utc": "2026-10-13T02:44:14.144161+00:00"
+        }
+      ]
+    },
+    "are-0.2.1": {
+      "configured_soak_seconds": 300,
+      "binary_sha256": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+      "results": {
+        "rounds": 25,
+        "stock": {
+          "requests": 100,
+          "failed": 0,
+          "p50_ms": 1575.74,
+          "p95_nearest_rank_ms": 1694.38
+        },
+        "candidate": {
+          "requests": 100,
+          "failed": 0,
+          "p50_ms": 1625.49,
+          "p95_nearest_rank_ms": 1687.81
+        }
+      },
+      "functional_events": [
+        {
+          "name": "registered_scope",
+          "passed": true,
+          "utc": "2026-10-13T02:49:13.482365+00:00"
+        },
+        {
+          "name": "baseline_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:49:15.053953+00:00"
+        },
+        {
+          "name": "candidate_disabled_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:49:16.710251+00:00"
+        },
+        {
+          "name": "candidate_enabled_transfer",
+          "passed": true,
+          "utc": "2026-10-13T02:49:22.817819+00:00"
+        },
+        {
+          "name": "upload_integrity",
+          "passed": true,
+          "utc": "2026-10-13T02:49:24.729568+00:00"
+        },
+        {
+          "name": "idempotent_replay",
+          "passed": true,
+          "utc": "2026-10-13T02:49:26.939276+00:00"
+        },
+        {
+          "name": "stale_generation_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:49:29.293727+00:00"
+        },
+        {
+          "name": "bounded_incomplete_handshakes",
+          "passed": true,
+          "utc": "2026-10-13T02:49:39.955964+00:00",
+          "counts": {
+            "started": 5,
+            "succeeded": 3,
+            "failed": 2,
+            "timed_out": 2,
+            "rejected": 1,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              3,
+              1,
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "active_stream_started",
+          "passed": true,
+          "utc": "2026-10-13T02:49:45.275265+00:00"
+        },
+        {
+          "name": "drain_preserves_active_past_handshake_deadline",
+          "passed": true,
+          "utc": "2026-10-13T02:49:54.344887+00:00",
+          "counts": {
+            "started": 6,
+            "succeeded": 4,
+            "failed": 2,
+            "timed_out": 2,
+            "rejected": 1,
+            "in_flight": 0,
+            "active_connections": 1,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              4,
+              1,
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "drain_rejects_new_stream",
+          "passed": true,
+          "utc": "2026-10-13T02:49:58.652088+00:00"
+        },
+        {
+          "name": "drained_stream_integrity",
+          "passed": true,
+          "utc": "2026-10-13T02:50:04.197279+00:00"
+        },
+        {
+          "name": "rollback_resumes_new_connections",
+          "passed": true,
+          "utc": "2026-10-13T02:50:10.658152+00:00"
+        },
+        {
+          "name": "invalid_uuid_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:50:11.775767+00:00"
+        },
+        {
+          "name": "invalid_short_id_rejected",
+          "passed": true,
+          "utc": "2026-10-13T02:50:16.520106+00:00"
+        },
+        {
+          "name": "soak_5_minutes",
+          "passed": true,
+          "utc": "2026-10-13T02:55:23.384051+00:00",
+          "rounds": 25,
+          "requests_per_path": 100,
+          "final_state": {
+            "revision": "are-0.2.1",
+            "instance": "b2586c139a91dd83e8a7b49f3a442bcb",
+            "states": [
+              {
+                "registered_tcp_reality": true,
+                "port": 24445,
+                "generation": 11,
+                "policy": {
+                  "enabled": false,
+                  "max_handshakes": 32,
+                  "timeout_ms": 15000,
+                  "drain": false
+                },
+                "expires_at": "0001-01-01T00:00:00Z",
+                "counts": {
+                  "started": 116,
+                  "succeeded": 109,
+                  "failed": 7,
+                  "timed_out": 2,
+                  "rejected": 6,
+                  "in_flight": 0,
+                  "active_connections": 0,
+                  "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+                    0,
+                    103,
+                    7,
+                    6,
+                    0,
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "baseline_restored",
+          "passed": true,
+          "utc": "2026-10-13T02:55:23.384310+00:00"
+        }
+      ]
+    },
+    "interpretation": "Synthetic bounded comparison through an unchanged official Linux client, not a mobile benchmark or performance improvement claim. Intentional invalid-auth, drain and timeout probes are excluded from positive soak request counts."
+  },
+  "official_client_https_udp_with_policy_enabled": {
+    "tested_utc": "2026-10-13T02:57:32.261385+00:00",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 are-0.2.1",
+    "tests": [
+      {
+        "name": "https_egress",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 1.006000 217",
+        "egress_ip": "66.245.221.209"
+      },
+      {
+        "name": "https_second_site",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 0.945478 577"
+      },
+      {
+        "name": "udp_dns",
+        "passed": true,
+        "answers": 2
+      }
+    ],
+    "all_passed": true
+  },
+  "final_postflight": {
+    "utc": "2026-10-13T02:57:02.688440+00:00",
+    "production_panel": {
+      "ActiveState": "active",
+      "MainPID": "3809",
+      "NRestarts": "0"
+    },
+    "production_core_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+    "candidate_sha256": {
+      "xray": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+      "config.json": "d560141e285d35d9dbb300c5ed26edea47070a477dba0ec10199b7328f50489c"
+    },
+    "state": {
+      "revision": "are-0.2.1",
+      "instance": "b2586c139a91dd83e8a7b49f3a442bcb",
+      "states": [
+        {
+          "registered_tcp_reality": true,
+          "port": 24445,
+          "generation": 12,
+          "policy": {
+            "enabled": true,
+            "max_handshakes": 32,
+            "timeout_ms": 15000,
+            "drain": false
+          },
+          "expires_at": "2026-10-13T03:01:23.280713623Z",
+          "counts": {
+            "started": 116,
+            "succeeded": 109,
+            "failed": 7,
+            "timed_out": 2,
+            "rejected": 6,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              103,
+              7,
+              6,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    "units": {
+      "are-corelab-final-20261013": {
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Tue 2026-10-13 02:47:34 UTC",
+        "MainPID": "20910",
+        "NRestarts": "0",
+        "MemoryCurrent": "38821888",
+        "MemoryPeak": "41029632"
+      },
+      "are-phone-policy-20261013": {
+        "ActiveState": "active",
+        "ActiveEnterTimestamp": "Tue 2026-10-13 02:56:21 UTC",
+        "MainPID": "23105",
+        "NRestarts": "0",
+        "MemoryCurrent": "9134080",
+        "MemoryPeak": "9375744"
+      }
+    },
+    "expires_utc": "2026-10-13T03:47:34+00:00"
+  },
+  "phone_test_policy": {
+    "enabled": true,
+    "max_handshakes": 32,
+    "timeout_ms": 15000,
+    "drain": false,
+    "lease_seconds": 300,
+    "renewal_interval_seconds": 90,
+    "renewal_unit": "are-phone-policy-20261013",
+    "bound_to_canary_unit": true,
+    "stops_10_seconds_before_canary_expiry": true,
+    "conflict_handling": "Stop on instance/generation/policy drift; no blind retry on unknown outcome. Rollback only while still owned; otherwise lease expires."
+  },
+  "evidence_sha256": {
+    "wan-test.log": "538ea0c81cfb8235a2654e6460489c49d6eba0787caf35904289cad6f6527260",
+    "wan/complete.json": "c68115d29cd77fa6e0df575736b1ee7d543d97271d2e01fdf6f6ff59c395788d",
+    "wan/soak.json": "c412ca4146639c72e406274a40aa626e5ca5cccf1d5dde9a2f009006de0f467e",
+    "wan-final-test.log": "340cd9931fb6fb62bda7df6da0df7df93bf1bf15c6cb0e25b29567df4c9d4a9a",
+    "wan-final/complete.json": "c85949c7a4e96e9d06b52d206cc1b6bf2c58b1c1d204153ccd23f37206dcf8f6",
+    "wan-final/soak.json": "e44860f97ac16cefdb6b10a7597a3a1d6fe6e576adde3aadfdf48302add27143",
+    "release-core-full-tests.log": "ffb87b45faec665d87b8efa7afd2803742bfbcdc595831535231356448749e90",
+    "release-reality-full-tests.log": "dadad116cad56d34a496c94079fde4c9d23c645d6c24aed0c3205de1cd92426e",
+    "panel-full-tests-serial.log": "905ce80d2f4b108b27a01f10a3f1ae2ebc4363fcf4f586a1256854521dd2f6c1",
+    "final-core-xhttp-matrix.log": "d551d77115aac233ecd79ada1106ede38ea6f8074279fb73da8e8c751bf41d13",
+    "verified-release-build/build-receipt.json": "bf2ea4a106c1ae4f4b46c28b5f1a6787ea1d46c0ce9a0e895d62b2bf97f801cd",
+    "resource-samples.json": "12093380d74b1001c8ee42bfabce13519e3ffd2cb3e45fa31060e5f88113d1c9"
+  },
+  "not_implemented": [
+    "XHTTP_admission_control",
+    "TLS_record_size_tuning",
+    "padding_or_fragmentation",
+    "new_crypto_or_client_protocol"
+  ],
+  "full_fleet_activation": "BLOCKED"
 }

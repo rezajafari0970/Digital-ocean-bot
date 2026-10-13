@@ -39,6 +39,8 @@ The native panel test uses an isolated database, a real modified Xray process, t
 
 ## Evidence boundaries
 
+The final 0.2.1 binary subsequently passed its own five-minute WAN run (200 positive requests across stock/candidate paths, zero unexpected failures), separate HTTPS/UDP checks with admission policy enabled, and both GitHub CI workflows. It is running only in a time-bounded independent canary, not the main panel service. The Sanaei fork remains built/native-tested rather than installed over the main panel. See ../../docs/ADVANCED_REALITY_CORE_ACCEPTANCE_20261013.md and its JSON receipt for hashes, counts, deadlines and remaining gates.
+
 The initial 30-minute WAN data-path run uses build `are-0.2.0` (hash in the manifest). Version 0.2.1 adds socket lifecycle recovery, close synchronization, descriptor handling and native crash tests. These are separately built and tested; the earlier soak is not relabeled as a 30-minute run of the final binary.
 
 The phone baseline was reported successful by the user on MCI and Irancell. That report concerns the stock 26.9.9 profile, not the modified binary. Exact installed phone core, long phone sessions and network switching remain unverified.
