@@ -12,6 +12,33 @@ fi
 umask 077
 mkdir "$ARE_EVIDENCE_DIR"
 export GOMAXPROCS="${GOMAXPROCS:-2}"
+# Report only test identifiers and aggregate results, never raw config/DB errors.
+report_test_results() {
+  local result=$?
+  trap - EXIT
+  python3 - <<'REPORT'
+import collections, json, os, pathlib
+for name in ('core-and-contract.jsonl', 'admin.jsonl'):
+    path = pathlib.Path(os.environ['ARE_EVIDENCE_DIR'], name)
+    if not path.exists():
+        print(json.dumps({'suite': name, 'status': 'NOT_RUN'}))
+        continue
+    counts = collections.Counter()
+    failed = []
+    try:
+        for line in path.read_text().splitlines():
+            event = json.loads(line)
+            if event.get('Test') and event.get('Action') in ('pass', 'fail', 'skip'):
+                counts[event['Action']] += 1
+                if event['Action'] != 'pass':
+                    failed.append({'test': event['Test'], 'action': event['Action']})
+        print(json.dumps({'suite': name, 'counts': dict(counts), 'nonpassing': failed}))
+    except (OSError, ValueError):
+        print(json.dumps({'suite': name, 'status': 'INVALID_EVIDENCE'}))
+REPORT
+  exit "$result"
+}
+trap report_test_results EXIT
 python3 - <<'PY'
 import hashlib, json, os, pathlib
 r = pathlib.Path.cwd()
@@ -49,7 +76,21 @@ client = os.environ.get('ADVANCED_REALITY_TEST_CLIENT_XRAY', os.environ['ADVANCE
 client_hash = hashlib.sha256(pathlib.Path(client).read_bytes()).hexdigest()
 if before != {**hashes, 'TEST_CORE_BINARY': core_hash, 'TEST_CLIENT_BINARY': client_hash}:
     raise SystemExit('FAIL: source or test binary changed during acceptance')
-receipt = {'focused_acceptance': 'PASS', 'fleet_activation': 'BLOCKED',
+required = {
+    'core-and-contract.jsonl': 'TestNativeXrayTLSXHTTPAndRealityRollback',
+    'admin.jsonl': 'TestAdvancedRealityInventoryUsesExistingSchema',
+}
+test_results = {}
+for name, critical in required.items():
+    events = [json.loads(line) for line in pathlib.Path(os.environ['ARE_EVIDENCE_DIR'], name).read_text().splitlines()]
+    started = {e['Test'] for e in events if e.get('Action') == 'run' and e.get('Test')}
+    passed = {e['Test'] for e in events if e.get('Action') == 'pass' and e.get('Test')}
+    if (not events or events[-1].get('Action') != 'pass' or events[-1].get('Test')
+            or any(e.get('Action') in ('fail', 'skip') for e in events)
+            or not started or started != passed or critical not in passed):
+        raise SystemExit('FAIL: missing, failed, skipped or incomplete required test evidence: '+name)
+    test_results[name] = {'passed_including_subtests': len(passed), 'failed': 0, 'skipped': 0}
+receipt = {'test_results': test_results, 'focused_acceptance': 'PASS', 'fleet_activation': 'BLOCKED',
            'phone_compatibility': 'BLOCKED', 'source_files': hashes,
            'core_binary_sha256': core_hash, 'client_binary_sha256': client_hash}
 pathlib.Path(os.environ['ARE_EVIDENCE_DIR'], 'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
