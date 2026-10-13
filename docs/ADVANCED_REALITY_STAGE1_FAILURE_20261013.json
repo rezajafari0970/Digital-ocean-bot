@@ -692,5 +692,12 @@
     "technical_test": "PASS",
     "phone_test": "NOT_TESTED",
     "recorded_utc": "2026-10-13T12:13:39.891781+00:00"
+  },
+  "latest_followup": {
+    "receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json",
+    "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
+    "primary_8443_phone_result": "TCP_CONNECT_FAILED_CARRIER_UNKNOWN",
+    "new_ip_control_phone_result": "PENDING",
+    "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI."
   }
 }

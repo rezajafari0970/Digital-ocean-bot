@@ -1,0 +1,251 @@
+{
+  "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
+  "scope": "stage1_only",
+  "status": "MOBILE_ACCEPTANCE_FAILED_IP_CONTROL_PENDING",
+  "phone_log_analysis": {
+    "source": "user_supplied_v2rayNG_log_2026-10-13_1545",
+    "raw_log_and_credentials_committed": false,
+    "client_core": "26.5.9",
+    "carrier": "UNKNOWN",
+    "timezone_assumption": "Tehran UTC+03:30 for correlation; Android timestamps contain no timezone and phone clock alignment is unverified",
+    "primary_endpoint": "172.237.20.67:8443",
+    "primary_result": "TCP_CONNECT_FAILED",
+    "primary_error_local": "15:45:23.989",
+    "primary_errors": [
+      "network is unreachable",
+      "i/o timeout",
+      "software caused connection abort"
+    ],
+    "switch_local": "15:45:27.973",
+    "comparison_endpoint": "139.84.240.33:443",
+    "comparison_evidence": [
+      "VLESS tunneling requests",
+      "XTLS unpadding and TLS server responses",
+      "SOCKS UDP DNS responses returned"
+    ],
+    "comparison_result": "RETURNED_TUNNELED_DATA_OBSERVED_NOT_FULL_MOBILE_ACCEPTANCE",
+    "same_carrier_and_unchanged_network": "NOT_CONFIRMED",
+    "measurement_warning": "Old untagged probes to the primary endpoint continue after switching; cannot assign every gstatic timeout to the newly selected profile.",
+    "primary_observer_in_assumed_1215Z_minute": {},
+    "primary_later_other_syn": 196,
+    "primary_later_other_syn_ack": 196,
+    "primary_later_other_first_minute": "2026-10-13T12:16Z",
+    "interpretation": "The supplied primary attempt failed at TCP establishment. Subsequent unattributed incoming traffic prevents claiming the endpoint is universally unreachable. Filtering or exact drop location is not proven."
+  },
+  "primary_snapshot": {
+    "utc": "2026-10-13T12:19:52.106693+00:00",
+    "observer": {
+      "started_utc": "2026-10-13T12:10:57.728322+00:00",
+      "scheduled_end_utc": "2026-10-13T12:40:47.728322+00:00",
+      "updated_utc": "2026-10-13T12:19:51.163935+00:00",
+      "active": true,
+      "capture_alive": true,
+      "ports": [
+        8443,
+        24447
+      ],
+      "counts": {
+        "8443:manager:in:syn": 3,
+        "8443:manager:out:syn_ack": 3,
+        "8443:manager:in:rst": 6,
+        "8443:other:in:syn": 196,
+        "8443:other:out:syn_ack": 196,
+        "8443:other:in:rst": 121
+      },
+      "minutes": {
+        "2026-10-13T12:11Z": {
+          "8443:manager:in:syn": 3,
+          "8443:manager:out:syn_ack": 3,
+          "8443:manager:in:rst": 6
+        },
+        "2026-10-13T12:16Z": {
+          "8443:other:in:syn": 3,
+          "8443:other:out:syn_ack": 3,
+          "8443:other:in:rst": 1
+        },
+        "2026-10-13T12:17Z": {
+          "8443:other:in:syn": 1,
+          "8443:other:out:syn_ack": 1,
+          "8443:other:in:rst": 1
+        },
+        "2026-10-13T12:18Z": {
+          "8443:other:in:syn": 50,
+          "8443:other:out:syn_ack": 50,
+          "8443:other:in:rst": 15
+        },
+        "2026-10-13T12:19Z": {
+          "8443:other:in:syn": 142,
+          "8443:other:out:syn_ack": 142,
+          "8443:other:in:rst": 104
+        }
+      },
+      "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+    },
+    "units": "Id=x-ui.service\nActiveState=active\nMainPID=4564\nNRestarts=0\nMemoryCurrent=165621760\n\nId=are-stage1-phone-20261013.service\nActiveState=active\nMainPID=7208\nNRestarts=0\nMemoryCurrent=8622080\n\nId=are-stage1-stock-control-20261013.service\nActiveState=active\nMainPID=8482\nNRestarts=0\nMemoryCurrent=7286784\n\nId=are-stage1-stock-8443-20261013.service\nActiveState=active\nMainPID=10947\nNRestarts=0\nMemoryCurrent=8880128\n\nId=are-stage1-altport-observer-20261013.service\nActiveState=active\nMainPID=11205\nNRestarts=0\nMemoryCurrent=7503872\n",
+    "listeners": [
+      "LISTEN 0      4096               *:443         *:* users:((\"xray-linux-amd6\",pid=6239,fd=7))              ",
+      "LISTEN 0      4096               *:24447       *:* users:((\"xray\",pid=8482,fd=4))                         ",
+      "LISTEN 0      4096               *:24445       *:* users:((\"xray\",pid=7208,fd=8))                         ",
+      "LISTEN 0      4096               *:8443        *:* users:((\"xray\",pid=10947,fd=4))                        "
+    ],
+    "production_status_same": true,
+    "production_config_same": true,
+    "production_core_same": true,
+    "same_stock_config_except_port": true,
+    "same_stock_binary": true,
+    "memory_available_kib": 408820,
+    "expires_utc": "2026-10-13T15:02:35+00:00"
+  },
+  "new_control": {
+    "start": {
+      "host": "139.84.240.33",
+      "port": 8443,
+      "started_utc": "2026-10-13T12:25:08.903217+00:00",
+      "expires_utc": "2026-10-13T12:55:08.903217+00:00",
+      "unit": "are-stage1-ipcontrol-8443-20261013",
+      "observer_unit": "are-stage1-ipcontrol-observer-20261013",
+      "same_config_and_binary_as_primary_8443": true,
+      "config_sha256": "3894695159fec7b08cf9a9d127c79019da21fcdf49851bb8182dfd4bef9b5dd7",
+      "core_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+      "production_unchanged": true,
+      "memory_available_before_kib": 298696,
+      "resource_limits": {
+        "core_memory_max_mib": 64,
+        "core_cpu_percent": 20,
+        "observer_memory_max_mib": 32,
+        "observer_cpu_percent": 5
+      },
+      "observer": {
+        "started_utc": "2026-10-13T12:25:10.357476+00:00",
+        "scheduled_end_utc": "2026-10-13T12:55:00.357476+00:00",
+        "updated_utc": "2026-10-13T12:25:11.455366+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          8443
+        ],
+        "counts": {},
+        "minutes": {},
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      }
+    },
+    "client_test": {
+      "tested_utc": "2026-10-13T12:25:38.439552+00:00",
+      "client_core": "26.5.9",
+      "server_core": "26.9.9 official",
+      "tests": [
+        {
+          "name": "https_egress",
+          "passed": true,
+          "curl_exit": 0,
+          "metrics": "200 0.724806 216",
+          "egress_ip": "139.84.240.33"
+        },
+        {
+          "name": "https_second_site",
+          "passed": true,
+          "curl_exit": 0,
+          "metrics": "200 0.739323 577"
+        },
+        {
+          "name": "udp_dns",
+          "passed": true,
+          "answers": 2
+        }
+      ],
+      "all_passed": true
+    },
+    "postflight": {
+      "utc": "2026-10-13T12:26:25.225205+00:00",
+      "host": "139.84.240.33",
+      "port": 8443,
+      "expires_utc": "2026-10-13T12:55:08.903217+00:00",
+      "production_status_same": true,
+      "production_config_same": true,
+      "production_binary_same": true,
+      "candidate_config_sha256": "3894695159fec7b08cf9a9d127c79019da21fcdf49851bb8182dfd4bef9b5dd7",
+      "units": {
+        "x-ui": {
+          "ActiveState": "active",
+          "RuntimeMaxUSec": "infinity",
+          "MainPID": "4019",
+          "NRestarts": "0",
+          "MemoryCurrent": "445792256",
+          "MemoryPeak": "770531328"
+        },
+        "are-stage1-ipcontrol-8443-20261013": {
+          "ActiveState": "active",
+          "RuntimeMaxUSec": "30min",
+          "MainPID": "12471",
+          "NRestarts": "0",
+          "MemoryCurrent": "12038144",
+          "MemoryPeak": "12234752"
+        },
+        "are-stage1-ipcontrol-observer-20261013": {
+          "ActiveState": "active",
+          "RuntimeMaxUSec": "30min",
+          "MainPID": "12473",
+          "NRestarts": "0",
+          "MemoryCurrent": "10297344",
+          "MemoryPeak": "10649600"
+        }
+      },
+      "listeners": [
+        "LISTEN 0      4096               *:8443        *:* users:((\"xray\",pid=12471,fd=4))          ",
+        "LISTEN 0      4096               *:443         *:* users:((\"xray-linux-amd6\",pid=5695,fd=7))"
+      ],
+      "observer": {
+        "started_utc": "2026-10-13T12:25:10.357476+00:00",
+        "scheduled_end_utc": "2026-10-13T12:55:00.357476+00:00",
+        "updated_utc": "2026-10-13T12:26:24.951653+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          8443
+        ],
+        "counts": {
+          "8443:manager:in:syn": 3,
+          "8443:manager:out:syn_ack": 3,
+          "8443:manager:in:rst": 6
+        },
+        "minutes": {
+          "2026-10-13T12:25Z": {
+            "8443:manager:in:syn": 3,
+            "8443:manager:out:syn_ack": 3,
+            "8443:manager:in:rst": 6
+          }
+        },
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      },
+      "memory_available_kib": 269632
+    },
+    "comparison": "Identical official binary and byte-identical server config to 172.237.20.67:8443; client connection settings differ only by endpoint IP. OS/provider/path differ and resource caps are tighter; not a speed benchmark.",
+    "phone_MCI": "NOT_TESTED",
+    "phone_Irancell": "NOT_TESTED",
+    "expires_utc": "2026-10-13T12:55:08.903217+00:00"
+  },
+  "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI.",
+  "limitations": [
+    "Management success is not mobile acceptance or proof of filtering bypass.",
+    "Working production 443 and failed primary 8443 differ in IP, port and REALITY settings; these phone logs alone do not isolate one parameter.",
+    "Non-443 REALITY remains a bounded diagnostic, not a permanent stealth recommendation.",
+    "Packet counters do not identify users/carriers and do not prove authentication.",
+    "The phone clock and network continuity have not been independently verified.",
+    "No modified-core phone acceptance established by this stock control."
+  ],
+  "production_changed": false,
+  "app_or_client_core_changed": false,
+  "provider_firewall_changed": false,
+  "later_stages_started": false,
+  "openai_api_requests": 0,
+  "openai_api_tokens": 0,
+  "evidence_sha256": {
+    "phase1-phone-1545-check.log": "60951d16757f3cc0885b3f764648104f9c554b120457138ccb625350cdc45fab",
+    "phone-1545-workinghost-inventory.log": "831171b330d5305a5b0562ba4dcda9999bd9a881d970c9260338ef8499e8853b",
+    "phone-1545-workinghost-preflight.log": "cee4a95d368fb0f5f0e235bfbbb3aee2fcd169a12610cafb0cdb078420aeeec8",
+    "phone-1545-ipcontrol-prepare.log": "eb53a8d7b326ae143d4c4ff8127e05394ff497ebb33f1eae4a2efb30158bccfa",
+    "phone-1545-ipcontrol-start.log": "aecc575c7a8f84aef28d7222b6fda8b4f756c0443f506941bad61ef0bce01654",
+    "ipcontrol-8443-client/result.json": "0a312c357c6a1cbaed3da09039d0ffa909c6d8335564c909609f07911bc3e90f",
+    "phone-1545-ipcontrol-postflight.log": "e05e9356769284bbc5db08c394315203b4640f270d74575a76a6c7eeeec3cd97"
+  }
+}
