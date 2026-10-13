@@ -1,0 +1,33 @@
+name: Advanced Reality server forks
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/advanced-reality-lab-20261013]
+    paths:
+      - patches/advanced-reality/**
+      - tools/build-advanced-reality-forks.py
+      - .github/workflows/advanced-reality-forks.yml
+permissions:
+  contents: read
+jobs:
+  build-and-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Build pinned server forks and require critical race/native evidence
+        run: python3 tools/build-advanced-reality-forks.py --work-dir "$RUNNER_TEMP/are-forks-build"
+      - name: Upload receipts and build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: advanced-reality-server-fork-evidence
+          path: |
+            ${{ runner.temp }}/are-forks-build/build-receipt.json
+            ${{ runner.temp }}/are-forks-build/binary-hashes.json
+            ${{ runner.temp }}/are-forks-build/*.log
+          if-no-files-found: error

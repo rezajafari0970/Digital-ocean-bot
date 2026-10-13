@@ -1,0 +1,901 @@
+diff --git a/common/realityguard/guard.go b/common/realityguard/guard.go
+new file mode 100644
+index 0000000..8181cca
+--- /dev/null
++++ b/common/realityguard/guard.go
+@@ -0,0 +1,329 @@
++// Package realityguard provides opt-in, process-local control of REALITY pre-authentication work.
++// It does not change the client protocol or Xray configuration schema.
++package realityguard
++
++import (
++	"context"
++	"crypto/rand"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"io"
++	"net"
++	"net/http"
++	"os"
++	"path/filepath"
++	"regexp"
++	"sort"
++	"strconv"
++	"strings"
++	"sync"
++	"sync/atomic"
++	"time"
++)
++
++const Revision = "are-0.2.1"
++
++type Policy struct {
++	Enabled       bool `json:"enabled"`
++	MaxHandshakes int  `json:"max_handshakes"`
++	TimeoutMS     int  `json:"timeout_ms"`
++	Drain         bool `json:"drain"`
++}
++
++func baseline() Policy { return Policy{MaxHandshakes: 32, TimeoutMS: 15000} }
++
++type Counts struct {
++	Started         uint64    `json:"started"`
++	Succeeded       uint64    `json:"succeeded"`
++	Failed          uint64    `json:"failed"`
++	TimedOut        uint64    `json:"timed_out"`
++	Rejected        uint64    `json:"rejected"`
++	InFlight        int       `json:"in_flight"`
++	Active          int       `json:"active_connections"`
++	DurationBuckets [6]uint64 `json:"duration_buckets_le_50_250_1000_5000_15000_inf_ms"`
++}
++type State struct {
++	Registered bool      `json:"registered_tcp_reality"`
++	Port       int       `json:"port"`
++	Generation uint64    `json:"generation"`
++	Policy     Policy    `json:"policy"`
++	ExpiresAt  time.Time `json:"expires_at"`
++	Counts     Counts    `json:"counts"`
++}
++type Request struct {
++	Instance           string `json:"instance"`
++	Port               int    `json:"port"`
++	ExpectedGeneration uint64 `json:"expected_generation"`
++	RequestID          string `json:"request_id"`
++	LeaseSeconds       int    `json:"lease_seconds"`
++	Policy             Policy `json:"policy"`
++}
++type Receipt struct {
++	Instance  string `json:"instance"`
++	RequestID string `json:"request_id"`
++	Previous  Policy `json:"previous"`
++	State     State  `json:"state"`
++}
++type record struct {
++	request Request
++	receipt Receipt
++}
++type Controller struct {
++	mu       sync.Mutex
++	instance string
++	states   map[int]*State
++	journal  map[string]record
++	now      func() time.Time
++}
++
++var current atomic.Pointer[Controller]
++var requestID = regexp.MustCompile("^[a-zA-Z0-9_-]{8,64}$")
++var ErrRejected = errors.New("REALITY pre-authentication admission rejected")
++
++func New(ports []int) (*Controller, error) {
++	b := make([]byte, 16)
++	if _, err := rand.Read(b); err != nil {
++		return nil, err
++	}
++	c := &Controller{instance: hex.EncodeToString(b), states: map[int]*State{}, journal: map[string]record{}, now: time.Now}
++	if len(ports) == 0 || len(ports) > 16 {
++		return nil, errors.New("invalid port scope")
++	}
++	for _, p := range ports {
++		if p < 1 || p > 65535 || c.states[p] != nil {
++			return nil, errors.New("invalid port scope")
++		}
++		c.states[p] = &State{Port: p, Generation: 1, Policy: baseline()}
++	}
++	return c, nil
++}
++
++// RegisterTCP marks only an actual TCP REALITY listener as controllable.
++func RegisterTCP(port int) {
++	if c := current.Load(); c != nil {
++		c.register(port)
++	}
++}
++func (c *Controller) register(port int) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	if s := c.states[port]; s != nil {
++		s.Registered = true
++	}
++}
++
++func (c *Controller) expire(s *State) {
++	if !s.ExpiresAt.IsZero() && !c.now().Before(s.ExpiresAt) {
++		s.Policy = baseline()
++		s.ExpiresAt = time.Time{}
++		s.Generation++
++	}
++}
++func (c *Controller) snapshot() any {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	states := make([]State, 0, len(c.states))
++	for _, s := range c.states {
++		c.expire(s)
++		states = append(states, *s)
++	}
++	sort.Slice(states, func(i, j int) bool { return states[i].Port < states[j].Port })
++	return struct {
++		Revision string  `json:"revision"`
++		Instance string  `json:"instance"`
++		States   []State `json:"states"`
++	}{Revision, c.instance, states}
++}
++func (c *Controller) apply(r Request) (Receipt, int) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	s := c.states[r.Port]
++	if s == nil || !s.Registered || r.Instance != c.instance || !requestID.MatchString(r.RequestID) {
++		return Receipt{}, 409
++	}
++	c.expire(s)
++	if old, ok := c.journal[r.RequestID]; ok {
++		if old.request != r {
++			return Receipt{}, 409
++		}
++		// Historical receipt only; callers must GET current state after an unknown outcome.
++		return old.receipt, 200
++	}
++	if s.Generation != r.ExpectedGeneration {
++		return Receipt{}, 409
++	}
++	p := r.Policy
++	if p.MaxHandshakes < 1 || p.MaxHandshakes > 512 || p.TimeoutMS < 1000 || p.TimeoutMS > 30000 || (!p.Enabled && p.Drain) {
++		return Receipt{}, 422
++	}
++	if p.Enabled {
++		if r.LeaseSeconds < 15 || r.LeaseSeconds > 300 {
++			return Receipt{}, 422
++		}
++	} else if r.LeaseSeconds != 0 {
++		return Receipt{}, 422
++	}
++	// Bounded journal never evicts request IDs silently. Restart has a new instance.
++	if len(c.journal) >= 256 {
++		return Receipt{}, 409
++	}
++	previous := s.Policy
++	s.Policy = p
++	s.Generation++
++	s.ExpiresAt = time.Time{}
++	if p.Enabled {
++		s.ExpiresAt = c.now().Add(time.Duration(r.LeaseSeconds) * time.Second)
++	}
++	receipt := Receipt{c.instance, r.RequestID, previous, *s}
++	c.journal[r.RequestID] = record{r, receipt}
++	return receipt, 200
++}
++
++type Ticket struct {
++	c       *Controller
++	s       *State
++	start   time.Time
++	policy  Policy
++	once    sync.Once
++	release func()
++}
++
++func Begin(conn net.Conn) (*Ticket, error) {
++	c := current.Load()
++	if c == nil {
++		return nil, nil
++	}
++	_, p, err := net.SplitHostPort(conn.LocalAddr().String())
++	if err != nil {
++		return nil, nil
++	}
++	port, err := strconv.Atoi(p)
++	if err != nil {
++		return nil, nil
++	}
++	return c.begin(port)
++}
++func (c *Controller) begin(port int) (*Ticket, error) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	s := c.states[port]
++	if s == nil {
++		return nil, nil
++	}
++	c.expire(s)
++	if s.Policy.Enabled && (s.Policy.Drain || s.Counts.InFlight >= s.Policy.MaxHandshakes) {
++		s.Counts.Rejected++
++		return nil, ErrRejected
++	}
++	s.Counts.Started++
++	s.Counts.InFlight++
++	return &Ticket{c: c, s: s, start: c.now(), policy: s.Policy}, nil
++}
++func (t *Ticket) Context() (context.Context, context.CancelFunc) {
++	if t == nil || !t.policy.Enabled {
++		return context.Background(), func() {}
++	}
++	return context.WithTimeout(context.Background(), time.Duration(t.policy.TimeoutMS)*time.Millisecond)
++}
++
++// Finish counts a successful REALITY handshake, not VLESS user authentication.
++func (t *Ticket) Finish(err error, ctx context.Context) func() {
++	if t == nil {
++		return nil
++	}
++	t.once.Do(func() {
++		t.c.mu.Lock()
++		defer t.c.mu.Unlock()
++		n := &t.s.Counts
++		n.InFlight--
++		ms := t.c.now().Sub(t.start).Milliseconds()
++		bucket := 5
++		for i, b := range []int64{50, 250, 1000, 5000, 15000} {
++			if ms <= b {
++				bucket = i
++				break
++			}
++		}
++		n.DurationBuckets[bucket]++
++		if err != nil {
++			n.Failed++
++			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
++				n.TimedOut++
++			}
++			return
++		}
++		n.Succeeded++
++		n.Active++
++		var once sync.Once
++		t.release = func() { once.Do(func() { t.c.mu.Lock(); defer t.c.mu.Unlock(); t.s.Counts.Active-- }) }
++	})
++	return t.release
++}
++func (c *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
++	w.Header().Set("Content-Type", "application/json")
++	w.Header().Set("Cache-Control", "no-store")
++	if r.Method == "GET" && r.URL.Path == "/v1/state" {
++		json.NewEncoder(w).Encode(c.snapshot())
++		return
++	}
++	if r.Method != "POST" || r.URL.Path != "/v1/transition" {
++		http.Error(w, `{"error":"not_found"}`, 404)
++		return
++	}
++	r.Body = http.MaxBytesReader(w, r.Body, 4096)
++	var q Request
++	d := json.NewDecoder(r.Body)
++	d.DisallowUnknownFields()
++	if d.Decode(&q) != nil || d.Decode(new(any)) != io.EOF {
++		http.Error(w, `{"error":"invalid_request"}`, 400)
++		return
++	}
++	v, status := c.apply(q)
++	w.WriteHeader(status)
++	if status != 200 {
++		io.WriteString(w, `{"error":"transition_rejected"}`)
++		return
++	}
++	json.NewEncoder(w).Encode(v)
++}
++
++// StartFromEnv is deliberately disabled unless BOTH explicit process controls are supplied.
++// The Unix socket must be in an existing private directory. Only an attested stale socket can be reclaimed.
++func StartFromEnv() (func(), error) {
++	path, scope := os.Getenv("XRAY_ARE_SOCKET"), os.Getenv("XRAY_ARE_PORTS")
++	if path == "" && scope == "" {
++		return func() {}, nil
++	}
++	if !filepath.IsAbs(path) || scope == "" {
++		return nil, errors.New("ARE requires absolute socket and explicit ports")
++	}
++	dir, err := os.Lstat(filepath.Dir(path))
++	if err != nil || !dir.IsDir() || dir.Mode()&os.ModeSymlink != 0 || dir.Mode().Perm()&0077 != 0 {
++		return nil, errors.New("ARE socket directory must be private")
++	}
++	var ports []int
++	for _, s := range strings.Split(scope, ",") {
++		p, e := strconv.Atoi(s)
++		if e != nil {
++			return nil, errors.New("invalid ARE port")
++		}
++		ports = append(ports, p)
++	}
++	c, err := New(ports)
++	if err != nil {
++		return nil, err
++	}
++	l, releaseSocket, err := openControlSocket(path)
++	if err != nil {
++		return nil, err
++	}
++	if !current.CompareAndSwap(nil, c) {
++		l.Close()
++		releaseSocket()
++		return nil, errors.New("ARE already started")
++	}
++	server := &http.Server{Handler: c, ReadHeaderTimeout: 2 * time.Second, ReadTimeout: 3 * time.Second, WriteTimeout: 3 * time.Second, IdleTimeout: 3 * time.Second, MaxHeaderBytes: 4096}
++	go server.Serve(l)
++	return func() { current.CompareAndSwap(c, nil); server.Close(); l.Close(); releaseSocket() }, nil
++}
+diff --git a/common/realityguard/guard_test.go b/common/realityguard/guard_test.go
+new file mode 100644
+index 0000000..3664acd
+--- /dev/null
++++ b/common/realityguard/guard_test.go
+@@ -0,0 +1,223 @@
++package realityguard
++
++import (
++	"context"
++	"errors"
++	"net"
++	"net/http"
++	"net/http/httptest"
++	"os"
++	"path/filepath"
++	"strings"
++	"sync"
++	"testing"
++	"time"
++)
++
++func ctl(t *testing.T) *Controller {
++	t.Helper()
++	c, e := New([]int{24445})
++	if e != nil {
++		t.Fatal(e)
++	}
++	c.register(24445)
++	return c
++}
++func req(c *Controller) Request {
++	return Request{Instance: c.instance, Port: 24445, ExpectedGeneration: 1, RequestID: "test-0001", LeaseSeconds: 30, Policy: Policy{true, 2, 1000, false}}
++}
++func TestLimitDrainPreservesEstablished(t *testing.T) {
++	c := ctl(t)
++	q := req(c)
++	if _, s := c.apply(q); s != 200 {
++		t.Fatal(s)
++	}
++	a, _ := c.begin(24445)
++	b, _ := c.begin(24445)
++	if _, e := c.begin(24445); !errors.Is(e, ErrRejected) {
++		t.Fatal(e)
++	}
++	release := a.Finish(nil, context.Background())
++	q.ExpectedGeneration = 2
++	q.RequestID = "test-drain"
++	q.Policy.Drain = true
++	if _, s := c.apply(q); s != 200 {
++		t.Fatal(s)
++	}
++	if _, e := c.begin(24445); !errors.Is(e, ErrRejected) {
++		t.Fatal(e)
++	}
++	b.Finish(errors.New("bad"), context.Background())
++	if c.states[24445].Counts.Active != 1 {
++		t.Fatal("active connection disturbed")
++	}
++	release()
++	release()
++	if c.states[24445].Counts.Active != 0 || c.states[24445].Counts.InFlight != 0 {
++		t.Fatal(c.states[24445].Counts)
++	}
++}
++func TestCASReplayLeaseAndRestart(t *testing.T) {
++	c := ctl(t)
++	now := time.Now()
++	c.now = func() time.Time { return now }
++	q := req(c)
++	first, s := c.apply(q)
++	if s != 200 {
++		t.Fatal(s)
++	}
++	if x, s := c.apply(q); s != 200 || x.State.Generation != first.State.Generation {
++		t.Fatal("replay")
++	}
++	bad := q
++	bad.Policy.TimeoutMS++
++	if _, s := c.apply(bad); s != 409 {
++		t.Fatal("key reuse")
++	}
++	bad = q
++	bad.RequestID = "different"
++	if _, s := c.apply(bad); s != 409 {
++		t.Fatal("stale")
++	}
++	now = now.Add(31 * time.Second)
++	c.snapshot()
++	if c.states[24445].Policy.Enabled || c.states[24445].Generation != 3 {
++		t.Fatal("lease")
++	}
++	other := ctl(t)
++	if _, s := other.apply(q); s != 409 {
++		t.Fatal("process instance")
++	}
++}
++func TestConcurrentBudgetAndAccounting(t *testing.T) {
++	c := ctl(t)
++	q := req(c)
++	q.Policy.MaxHandshakes = 8
++	c.apply(q)
++	var wg sync.WaitGroup
++	for i := 0; i < 200; i++ {
++		wg.Add(1)
++		go func() {
++			defer wg.Done()
++			v, e := c.begin(24445)
++			if e != nil {
++				return
++			}
++			time.Sleep(time.Millisecond)
++			done := v.Finish(nil, context.Background())
++			done()
++		}()
++	}
++	wg.Wait()
++	n := c.states[24445].Counts
++	if n.InFlight != 0 || n.Active != 0 || n.Started != n.Succeeded || n.Started+n.Rejected != 200 {
++		t.Fatal(n)
++	}
++}
++func TestDeadlineAndFailure(t *testing.T) {
++	c := ctl(t)
++	q := req(c)
++	c.apply(q)
++	v, _ := c.begin(24445)
++	ctx, cancel := v.Context()
++	defer cancel()
++	deadline, ok := ctx.Deadline()
++	if !ok || time.Until(deadline) > time.Second {
++		t.Fatal("deadline")
++	}
++	expired, cancel2 := context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
++	defer cancel2()
++	v.Finish(context.DeadlineExceeded, expired)
++	if c.states[24445].Counts.TimedOut != 1 {
++		t.Fatal("timeout not counted")
++	}
++}
++func TestDisabledAndUnscoped(t *testing.T) {
++	c := ctl(t)
++	if v, e := c.begin(443); v != nil || e != nil {
++		t.Fatal("scope")
++	}
++	v, _ := c.begin(24445)
++	ctx, cancel := v.Context()
++	defer cancel()
++	if _, ok := ctx.Deadline(); ok {
++		t.Fatal("disabled deadline")
++	}
++	v.Finish(errors.New("x"), ctx)
++}
++func TestHTTPRejectsInvalidAndLarge(t *testing.T) {
++	c := ctl(t)
++	for _, body := range []string{"{} {}", `{"unexpected":1}`, strings.Repeat("x", 4097)} {
++		w := httptest.NewRecorder()
++		c.ServeHTTP(w, httptest.NewRequest("POST", "/v1/transition", strings.NewReader(body)))
++		if w.Code != 400 {
++			t.Fatal(w.Code)
++		}
++	}
++	w := httptest.NewRecorder()
++	c.ServeHTTP(w, httptest.NewRequest("GET", "/v1/state", nil))
++	if w.Code != 200 || strings.Contains(w.Body.String(), "privateKey") {
++		t.Fatal(w.Body.String())
++	}
++}
++func TestSocketScopePermissionsAndCleanup(t *testing.T) {
++	dir := t.TempDir()
++	os.Chmod(dir, 0700)
++	path := filepath.Join(dir, "control.sock")
++	t.Setenv("XRAY_ARE_SOCKET", path)
++	t.Setenv("XRAY_ARE_PORTS", "24445")
++	stop, err := StartFromEnv()
++	if err != nil {
++		t.Fatal(err)
++	}
++	info, e := os.Stat(path)
++	if e != nil || info.Mode().Perm() != 0600 {
++		t.Fatal("socket permissions", e)
++	}
++	tr := &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
++		return (&net.Dialer{}).DialContext(ctx, "unix", path)
++	}}
++	cl := http.Client{Transport: tr, Timeout: time.Second}
++	res, e := cl.Get("http://unix/v1/state")
++	if e != nil {
++		t.Fatal(e)
++	}
++	res.Body.Close()
++	tr.CloseIdleConnections()
++	if _, e := StartFromEnv(); e == nil {
++		t.Fatal("duplicate accepted")
++	}
++	stop()
++	if _, e := os.Stat(path); !os.IsNotExist(e) {
++		t.Fatal("socket not removed")
++	}
++	os.WriteFile(path, []byte("owned by another"), 0600)
++	if _, e := StartFromEnv(); e == nil {
++		t.Fatal("overwrote existing")
++	}
++}
++func TestJournalBoundAndInvalidPolicy(t *testing.T) {
++	c := ctl(t)
++	q := req(c)
++	q.Policy.MaxHandshakes = 0
++	if _, s := c.apply(q); s != 422 {
++		t.Fatal(s)
++	}
++	for i := 0; i < 256; i++ {
++		c.journal[string(rune(i))] = record{}
++	}
++	q = req(c)
++	if _, s := c.apply(q); s != 409 {
++		t.Fatal("unbounded journal")
++	}
++}
++
++func TestUnregisteredScopeCannotApply(t *testing.T) {
++	c, e := New([]int{24445})
++	if e != nil {
++		t.Fatal(e)
++	}
++	if _, s := c.apply(req(c)); s != 409 {
++		t.Fatal("unregistered port accepted")
++	}
++}
+diff --git a/common/realityguard/socket_linux.go b/common/realityguard/socket_linux.go
+new file mode 100644
+index 0000000..82d9520
+--- /dev/null
++++ b/common/realityguard/socket_linux.go
+@@ -0,0 +1,124 @@
++//go:build linux
++
++package realityguard
++
++import (
++	"encoding/json"
++	"errors"
++	"io"
++	"net"
++	"os"
++	"sync"
++	"syscall"
++	"time"
++)
++
++type socketClaim struct {
++	CTimeSec  int64  `json:"ctime_sec"`
++	CTimeNSec int64  `json:"ctime_nsec"`
++	Version   int    `json:"version"`
++	Device    uint64 `json:"device"`
++	Inode     uint64 `json:"inode"`
++}
++
++// openControlSocket holds a process-lifetime flock and only reclaims a refused
++// socket whose inode matches our durable claim. Unknown paths are never removed.
++func openControlSocket(path string) (net.Listener, func(), error) {
++	lockPath := path + ".are-owner"
++	fd, err := syscall.Open(lockPath, syscall.O_RDWR|syscall.O_CREAT|syscall.O_EXCL|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0600)
++	created := err == nil
++	if errors.Is(err, syscall.EEXIST) {
++		fd, err = syscall.Open(lockPath, syscall.O_RDWR|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0)
++	}
++	if err != nil {
++		return nil, nil, err
++	}
++	f := os.NewFile(uintptr(fd), lockPath)
++	var once sync.Once
++	release := func() { once.Do(func() { syscall.Flock(fd, syscall.LOCK_UN); f.Close() }) }
++	fail := func(e error) (net.Listener, func(), error) { release(); return nil, nil, e }
++	info, err := f.Stat()
++	if err != nil {
++		return fail(err)
++	}
++	stat, ok := info.Sys().(*syscall.Stat_t)
++	if !ok || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 || stat.Uid != uint32(os.Geteuid()) {
++		return fail(errors.New("invalid ARE socket ownership record"))
++	}
++	if err = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
++		f.Close()
++		return nil, nil, errors.New("ARE socket owner is active")
++	}
++	claim := socketClaim{Version: 1}
++	if !created {
++		b, e := io.ReadAll(io.LimitReader(f, 1025))
++		if e != nil || len(b) > 1024 || json.Unmarshal(b, &claim) != nil || claim.Version != 1 {
++			return fail(errors.New("invalid ARE socket ownership record"))
++		}
++	}
++	persist := func() error {
++		b, e := json.Marshal(claim)
++		if e != nil {
++			return e
++		}
++		if e = f.Truncate(0); e != nil {
++			return e
++		}
++		if _, e = f.WriteAt(b, 0); e != nil {
++			return e
++		}
++		return f.Sync()
++	}
++	if created {
++		if err = persist(); err != nil {
++			return fail(err)
++		}
++	}
++	old, err := os.Lstat(path)
++	if err == nil {
++		st, ok := old.Sys().(*syscall.Stat_t)
++		if !ok || old.Mode()&os.ModeSocket == 0 || st.Uid != uint32(os.Geteuid()) || claim.Inode == 0 || uint64(st.Dev) != claim.Device || st.Ino != claim.Inode || int64(st.Ctim.Sec) != claim.CTimeSec || int64(st.Ctim.Nsec) != claim.CTimeNSec {
++			return fail(errors.New("unowned ARE socket path"))
++		}
++		conn, dialErr := net.DialTimeout("unix", path, 200*time.Millisecond)
++		if dialErr == nil {
++			conn.Close()
++			return fail(errors.New("ARE socket is still serving"))
++		}
++		if !errors.Is(dialErr, syscall.ECONNREFUSED) {
++			return fail(errors.New("ARE socket outcome unknown"))
++		}
++		fresh, e := os.Lstat(path)
++		if e != nil || !os.SameFile(old, fresh) {
++			return fail(errors.New("ARE socket changed concurrently"))
++		}
++		if err = os.Remove(path); err != nil {
++			return fail(err)
++		}
++	} else if !os.IsNotExist(err) {
++		return fail(err)
++	}
++	listener, err := net.Listen("unix", path)
++	if err != nil {
++		return fail(err)
++	}
++	if err = os.Chmod(path, 0600); err != nil {
++		listener.Close()
++		return fail(err)
++	}
++	info, err = os.Lstat(path)
++	if err != nil {
++		listener.Close()
++		return fail(err)
++	}
++	st := info.Sys().(*syscall.Stat_t)
++	claim.Device = uint64(st.Dev)
++	claim.Inode = st.Ino
++	claim.CTimeSec = int64(st.Ctim.Sec)
++	claim.CTimeNSec = int64(st.Ctim.Nsec)
++	if err = persist(); err != nil {
++		listener.Close()
++		return fail(err)
++	}
++	return listener, release, nil
++}
+diff --git a/common/realityguard/socket_linux_test.go b/common/realityguard/socket_linux_test.go
+new file mode 100644
+index 0000000..9247724
+--- /dev/null
++++ b/common/realityguard/socket_linux_test.go
+@@ -0,0 +1,76 @@
++//go:build linux
++
++package realityguard
++
++import (
++	"bufio"
++	"context"
++	"fmt"
++	"net"
++	"os"
++	"os/exec"
++	"path/filepath"
++	"testing"
++	"time"
++)
++
++func TestOwnedSocketCrashRecovery(t *testing.T) {
++	if os.Getenv("ARE_CRASH_CHILD") == "1" {
++		stop, e := StartFromEnv()
++		if e != nil {
++			fmt.Println("FAILED")
++			os.Exit(2)
++		}
++		_ = stop
++		fmt.Println("READY")
++		time.Sleep(time.Minute)
++		os.Exit(3)
++	}
++	dir := t.TempDir()
++	os.Chmod(dir, 0700)
++	path := filepath.Join(dir, "core.sock")
++	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
++	defer cancel()
++	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestOwnedSocketCrashRecovery$")
++	cmd.Env = append(os.Environ(), "ARE_CRASH_CHILD=1", "XRAY_ARE_SOCKET="+path, "XRAY_ARE_PORTS=24445")
++	out, e := cmd.StdoutPipe()
++	if e != nil {
++		t.Fatal(e)
++	}
++	if e = cmd.Start(); e != nil {
++		t.Fatal(e)
++	}
++	defer func() { cmd.Process.Kill(); cmd.Wait() }()
++	line, e := bufio.NewReader(out).ReadString('\n')
++	if e != nil || line != "READY\n" {
++		t.Fatal("child failed", line, e)
++	}
++	if _, _, e := openControlSocket(path); e == nil {
++		t.Fatal("live owner was replaced")
++	}
++	cmd.Process.Kill()
++	cmd.Wait()
++	if _, e := os.Lstat(path); e != nil {
++		t.Fatal("test did not leave stale socket")
++	}
++	t.Setenv("XRAY_ARE_SOCKET", path)
++	t.Setenv("XRAY_ARE_PORTS", "24445")
++	stop, e := StartFromEnv()
++	if e != nil {
++		t.Fatal("owned crash recovery", e)
++	}
++	stop()
++	// A socket planted after graceful close does not match the durable inode claim.
++	foreign, e := net.Listen("unix", path)
++	if e != nil {
++		t.Fatal(e)
++	}
++	foreign.(*net.UnixListener).SetUnlinkOnClose(false)
++	foreign.Close()
++	if _, e := StartFromEnv(); e == nil {
++		t.Fatal("foreign stale socket was removed")
++	}
++	if _, e := os.Lstat(path); e != nil {
++		t.Fatal("foreign socket disappeared")
++	}
++}
+diff --git a/common/realityguard/socket_other.go b/common/realityguard/socket_other.go
+new file mode 100644
+index 0000000..78d81ff
+--- /dev/null
++++ b/common/realityguard/socket_other.go
+@@ -0,0 +1,12 @@
++//go:build !linux
++
++package realityguard
++
++import (
++	"errors"
++	"net"
++)
++
++func openControlSocket(string) (net.Listener, func(), error) {
++	return nil, nil, errors.New("ARE control is supported on Linux servers only")
++}
+diff --git a/go.mod b/go.mod
+index be24f79..c351150 100644
+--- a/go.mod
++++ b/go.mod
+@@ -63,3 +63,5 @@ require (
+ 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+ 	gopkg.in/yaml.v2 v2.4.0 // indirect
+ )
++
++replace github.com/xtls/reality => ../reality
+diff --git a/main/run.go b/main/run.go
+index b87ca63..f6bb6f2 100644
+--- a/main/run.go
++++ b/main/run.go
+@@ -18,6 +18,7 @@ import (
+ 	"github.com/xtls/xray-core/common/errors"
+ 	clog "github.com/xtls/xray-core/common/log"
+ 	"github.com/xtls/xray-core/common/platform"
++	"github.com/xtls/xray-core/common/realityguard"
+ 	"github.com/xtls/xray-core/core"
+ 	"github.com/xtls/xray-core/main/commands/base"
+ )
+@@ -91,6 +92,13 @@ func executeRun(cmd *base.Command, args []string) {
+ 		os.Exit(0)
+ 	}
+ 
++	stopGuard, err := realityguard.StartFromEnv()
++	if err != nil {
++		fmt.Println("Failed to start ARE control:", err)
++		os.Exit(23)
++	}
++	defer stopGuard()
++
+ 	if err := server.Start(); err != nil {
+ 		fmt.Println("Failed to start:", err)
+ 		os.Exit(-1)
+diff --git a/transport/internet/reality/reality.go b/transport/internet/reality/reality.go
+index 50b2e02..dcd4b45 100644
+--- a/transport/internet/reality/reality.go
++++ b/transport/internet/reality/reality.go
+@@ -27,6 +27,7 @@ import (
+ 	"github.com/xtls/xray-core/common/crypto"
+ 	"github.com/xtls/xray-core/common/errors"
+ 	"github.com/xtls/xray-core/common/net"
++	"github.com/xtls/xray-core/common/realityguard"
+ 	"github.com/xtls/xray-core/common/utils"
+ 	"github.com/xtls/xray-core/core"
+ 	"github.com/xtls/xray-core/transport/internet/tls"
+@@ -36,6 +37,15 @@ import (
+ 
+ type Conn struct {
+ 	*reality.Conn
++	release func()
++}
++
++func (c *Conn) Close() error {
++	err := c.Conn.Close()
++	if c.release != nil {
++		c.release()
++	}
++	return err
+ }
+ 
+ func (c *Conn) HandshakeAddress() net.Address {
+@@ -50,8 +60,20 @@ func (c *Conn) HandshakeAddress() net.Address {
+ }
+ 
+ func Server(c net.Conn, config *reality.Config) (net.Conn, error) {
+-	realityConn, err := reality.Server(context.Background(), c, config)
+-	return &Conn{Conn: realityConn}, err
++	ticket, err := realityguard.Begin(c)
++	if err != nil {
++		c.Close()
++		return nil, err
++	}
++	ctx, cancel := ticket.Context()
++	defer cancel()
++	realityConn, err := reality.Server(ctx, c, config)
++	release := ticket.Finish(err, ctx)
++	if err != nil {
++		c.Close()
++		return nil, err
++	}
++	return &Conn{Conn: realityConn, release: release}, nil
+ }
+ 
+ type UConn struct {
+diff --git a/transport/internet/tcp/hub.go b/transport/internet/tcp/hub.go
+index c68d55d..45d4e86 100644
+--- a/transport/internet/tcp/hub.go
++++ b/transport/internet/tcp/hub.go
+@@ -10,6 +10,7 @@ import (
+ 	"github.com/xtls/xray-core/common"
+ 	"github.com/xtls/xray-core/common/errors"
+ 	"github.com/xtls/xray-core/common/net"
++	"github.com/xtls/xray-core/common/realityguard"
+ 	"github.com/xtls/xray-core/transport/internet"
+ 	"github.com/xtls/xray-core/transport/internet/reality"
+ 	"github.com/xtls/xray-core/transport/internet/stat"
+@@ -76,6 +77,7 @@ func ListenTCP(ctx context.Context, address net.Address, port net.Port, streamSe
+ 	}
+ 	if config := reality.ConfigFromStreamSettings(streamSettings); config != nil {
+ 		l.realityConfig = config.GetREALITYConfig()
++		realityguard.RegisterTCP(int(port))
+ 		go goreality.DetectPostHandshakeRecordsLens(l.realityConfig)
+ 	}
+ 

@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-10-13T05:23:37+03:30",
+  "source": "user_report_in_chat",
+  "profile": "ARE-Phone-Test-13Oct",
+  "host": "66.245.221.209",
+  "port": 24443,
+  "server_core": "26.9.9",
+  "buffer_kib": 64,
+  "networks": {
+    "MCI": "USER_REPORTED_PASS",
+    "IRANCELL": "USER_REPORTED_PASS"
+  },
+  "scope": "User said config tested successfully on both mobile operators. No screenshots, installed app/core version, duration, or network-switch trace supplied.",
+  "remaining_phone_evidence": [
+    "installed_app_and_core_version",
+    "long_duration",
+    "network_switch",
+    "modified_core_profile"
+  ],
+  "automated_tests": {
+    "client_core": "26.5.9",
+    "https_sites": 2,
+    "udp_dns": "PASS",
+    "egress_ip": "66.245.221.209"
+  },
+  "improved_performance_proven": false,
+  "dpi_invisibility_proven": false
+}

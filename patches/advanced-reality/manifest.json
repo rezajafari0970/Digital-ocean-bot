@@ -1,0 +1,40 @@
+{
+  "revision": "are-0.2.1",
+  "production_enabled": false,
+  "repositories": [
+    {
+      "name": "xray",
+      "url": "https://github.com/XTLS/Xray-core.git",
+      "commit": "52a412d9e2f5c2a5142b1b4e2ab3771dacb8b120",
+      "patch": "xray.patch",
+      "patch_sha256": "c8888dd0df3dee8a822c2e45b325adb8fe960f265baa5c2677748a523e6eb126",
+      "license_file": "xray.LICENSE",
+      "license_sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    {
+      "name": "reality",
+      "url": "https://github.com/XTLS/REALITY.git",
+      "commit": "8cdf7bf9c7f09cb9814bf08c3eb877f68b85fba8",
+      "patch": "reality.patch",
+      "patch_sha256": "d9e740a5e5b2c44350d939201a00f607350ba3509a0c3763e4fd023599c6de9b",
+      "license_file": "reality.LICENSE",
+      "license_sha256": "7c1bcfe5b0a8009ffae73984bad8e3b5f6bc562f67d6d67bafb600a3b8c08c5e"
+    },
+    {
+      "name": "sanaei",
+      "url": "https://github.com/mhsanaei/3x-ui.git",
+      "commit": "74c3cc38821cabd66ad316ea562851422d0b0063",
+      "patch": "sanaei.patch",
+      "patch_sha256": "65f5fbcc8e2bc2108f3afef7f4df000b01de552f5177c7ccfc3e10f9611d46a1",
+      "license_file": "sanaei.LICENSE",
+      "license_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    }
+  ],
+  "node": {
+    "version": "v26.11.1",
+    "archive_sha256": "3883bfc73f9a680ca4eab04b196068aaaab1373ffa77d8fc1a4408222495b651"
+  },
+  "core_go_toolchain": "go version go1.27.1 linux/amd64",
+  "panel_go_toolchain": "go version go1.27.2 linux/amd64",
+  "previous_datapath_soak_binary_sha256": "95a181757449ba63e870781f45f32ef90da21cfec667ab284bc807ed678cf668"
+}

@@ -22,7 +22,8 @@ func Capabilities() []Capability {
 		{"tls13_cipher_selection", "tls_library", "NOT_GENERIC_CONFIG_CONTROL", "TLS<=1.2 cipher settings do not select Go TLS1.3 cipher suites."},
 		{"reality_tcp_finalmask", "server_core", "REJECTED_COMBINATION", "Keep the Sanaei REALITY/finalmask.tcp rejection; do not bypass it."},
 		{"linux_pacing_cgroups", "server_os", "HOST_PREFLIGHT_REQUIRED", "Inspect kernel, qdisc and service ownership before scoped experiments; no global sysctl writes."},
-		{"graceful_live_apply", "panel_and_core", "BLOCKED", "Existing apply can fall back to restart; active-stream preservation is not proven."},
+		{"tcp_reality_admission_control", "experimental_server_fork", "NATIVE_VERIFIED", "Opt-in Linux TCP REALITY control: bounded pre-authentication work, leased CAS policies, drain and counters. Not installed on the fleet."},
+		{"graceful_live_apply", "panel_and_core", "BLOCKED", "Full config or binary replacement can still require restart. Only the experimental admission-policy transition has active-stream preservation evidence."},
 		{"official_v2rayng", "client", "UNVERIFIED", "No client binary changes. Exact installed core and real import/connection evidence required."},
 		{"dpi_invisibility", "network", "NOT_GUARANTEED", "Measure connection success and traffic properties from external networks; no universal invisibility claim."},
 	}

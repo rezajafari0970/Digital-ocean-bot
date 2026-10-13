@@ -1,0 +1,42 @@
+{
+  "recorded_utc": "2026-10-13T02:45:13.652091+00:00",
+  "revision": "are-0.2.1",
+  "status": "experimental_canary_in_progress",
+  "phone_baseline": "USER_REPORTED_PASS_MCI_IRANCELL",
+  "production_changed": false,
+  "upstream_full_suites": {
+    "xray": "PASS",
+    "reality": "PASS",
+    "sanaei_serial": "PASS"
+  },
+  "critical_race_native_tests": "PASS",
+  "compatibility_module": {
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0,
+    "official_client_core": "26.5.9",
+    "server_core": "26.9.9 are-0.2.1",
+    "transports": [
+      "TLS/XHTTP",
+      "REALITY/XHTTP"
+    ]
+  },
+  "binaries": {
+    "xray-are": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+    "x-ui-are": "e2b744aaad43ba1ee5c499d23801128bf81f9e6f8640c986c3db1d037cb48df8"
+  },
+  "notes": [
+    "Initial panel full suite found missing OpenAPI routes; registry and generated specification were fixed.",
+    "Concurrent upstream panel tests encountered occupied fixed test ports; serial full suite passed.",
+    "30-minute data-path soak belongs to are-0.2.0; final socket-lifecycle changes have separate native crash evidence."
+  ],
+  "remaining": [
+    "final_binary_wan_acceptance",
+    "github_ci",
+    "full_host_reboot_on_dedicated_host",
+    "modified_core_phone_acceptance",
+    "persistent_fleet_actuator_and_seamless_binary_or_inbound_rollout"
+  ],
+  "openai_api_requests": 0,
+  "openai_api_tokens": 0
+}

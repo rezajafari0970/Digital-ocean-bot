@@ -215,7 +215,7 @@ func TestNativeXrayTLSXHTTPAndRealityRollback(t *testing.T) {
 			// Newer cores deny private destinations by default. The synthetic origin
 			// is deliberately loopback: allow ONLY this fixture's exact port/address,
 			// from the initial fixture baseline, never in a live candidate proposal.
-			if version == "26.5.9" || version == "26.10.10" {
+			if version == "26.5.9" || version == "26.9.9" || version == "26.10.10" {
 				originURL, _ := url.Parse(origin.URL)
 				server["outbounds"].([]any)[0].(map[string]any)["settings"] = map[string]any{"finalRules": []any{map[string]any{"action": "allow", "network": "tcp", "ip": []string{"127.0.0.1/32"}, "port": originURL.Port()}}}
 			}

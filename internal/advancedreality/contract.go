@@ -124,7 +124,7 @@ func Inspect(before, after []byte, core string) (Plan, error) {
 	p := Plan{Version: Version, CoreVersion: core, BaselineSHA256: Digest(before), CandidateSHA256: Digest(after), ChangedPaths: []string{}, Blockers: []string{"core_native_validation_required", "official_client_compatibility_required", "canary_health_required", "actuator_not_installed"}}
 	// Exact audited releases only. No semver guessing of experimental support.
 	switch core {
-	case "26.3.27", "26.5.9", "26.10.10":
+	case "26.3.27", "26.5.9", "26.9.9", "26.10.10":
 	default:
 		return Plan{}, ErrVersion
 	}

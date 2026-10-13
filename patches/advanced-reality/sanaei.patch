@@ -1,0 +1,686 @@
+diff --git a/frontend/public/openapi.json b/frontend/public/openapi.json
+index b50cb36..cef6d6f 100644
+--- a/frontend/public/openapi.json
++++ b/frontend/public/openapi.json
+@@ -6400,6 +6400,191 @@
+         }
+       }
+     },
++    "/panel/api/server/advancedReality": {
++      "get": {
++        "tags": [
++          "Server"
++        ],
++        "summary": "Experimental TCP REALITY admission state. Disabled unless XUI_ARE_SOCKET is configured. Admin access only.",
++        "operationId": "get_panel_api_server_advancedReality",
++        "responses": {
++          "200": {
++            "description": "Unwrapped core status; REALITY connection counts are not VLESS users.",
++            "content": {
++              "application/json": {
++                "schema": {
++                  "type": "object",
++                  "required": [
++                    "revision",
++                    "instance",
++                    "states"
++                  ],
++                  "properties": {
++                    "revision": {
++                      "type": "string"
++                    },
++                    "instance": {
++                      "type": "string"
++                    },
++                    "states": {
++                      "type": "array",
++                      "items": {
++                        "type": "object"
++                      }
++                    }
++                  }
++                }
++              }
++            }
++          },
++          "409": {
++            "description": "Experimental control is disabled."
++          },
++          "503": {
++            "description": "Core control is unavailable."
++          }
++        }
++      }
++    },
++    "/panel/api/server/advancedReality/transition": {
++      "post": {
++        "tags": [
++          "Server"
++        ],
++        "summary": "Apply or roll back a leased admission policy with instance/generation CAS. Does not rewrite Xray JSON or restart the core.",
++        "operationId": "post_panel_api_server_advancedReality_transition",
++        "description": "Admin access only. Read state after an unknown outcome. A repeated request ID returns a historical receipt; it is not proof of current state. Enabled leases last 15–300 seconds; disabled policy requires lease_seconds=0. Drain requires enabled=true. Deadline includes unauthenticated fallback forwarding.",
++        "requestBody": {
++          "required": true,
++          "content": {
++            "application/json": {
++              "schema": {
++                "type": "object",
++                "additionalProperties": false,
++                "required": [
++                  "instance",
++                  "port",
++                  "expected_generation",
++                  "request_id",
++                  "lease_seconds",
++                  "policy"
++                ],
++                "properties": {
++                  "instance": {
++                    "type": "string"
++                  },
++                  "port": {
++                    "type": "integer",
++                    "minimum": 1,
++                    "maximum": 65535
++                  },
++                  "expected_generation": {
++                    "type": "integer",
++                    "minimum": 1
++                  },
++                  "request_id": {
++                    "type": "string",
++                    "pattern": "^[a-zA-Z0-9_-]{8,64}$"
++                  },
++                  "lease_seconds": {
++                    "type": "integer",
++                    "minimum": 0,
++                    "maximum": 300
++                  },
++                  "policy": {
++                    "type": "object",
++                    "additionalProperties": false,
++                    "required": [
++                      "enabled",
++                      "max_handshakes",
++                      "timeout_ms",
++                      "drain"
++                    ],
++                    "properties": {
++                      "enabled": {
++                        "type": "boolean"
++                      },
++                      "max_handshakes": {
++                        "type": "integer",
++                        "minimum": 1,
++                        "maximum": 512
++                      },
++                      "timeout_ms": {
++                        "type": "integer",
++                        "minimum": 1000,
++                        "maximum": 30000
++                      },
++                      "drain": {
++                        "type": "boolean"
++                      }
++                    }
++                  }
++                }
++              }
++            }
++          }
++        },
++        "responses": {
++          "200": {
++            "description": "Unwrapped historical transition receipt.",
++            "content": {
++              "application/json": {
++                "schema": {
++                  "type": "object",
++                  "required": [
++                    "instance",
++                    "request_id",
++                    "previous",
++                    "state"
++                  ],
++                  "properties": {
++                    "instance": {
++                      "type": "string"
++                    },
++                    "request_id": {
++                      "type": "string"
++                    },
++                    "previous": {
++                      "type": "object"
++                    },
++                    "state": {
++                      "type": "object"
++                    }
++                  }
++                }
++              }
++            }
++          },
++          "400": {
++            "description": "Malformed or oversized request."
++          },
++          "409": {
++            "description": "Disabled control, stale instance/generation, unknown scope, conflicting ID or full journal."
++          },
++          "422": {
++            "description": "Invalid policy bounds or lease."
++          },
++          "503": {
++            "description": "Transport outcome may be unknown; fetch state before any retry.",
++            "content": {
++              "application/json": {
++                "schema": {
++                  "type": "object",
++                  "properties": {
++                    "error": {
++                      "type": "string"
++                    },
++                    "outcome_unknown": {
++                      "type": "boolean"
++                    }
++                  }
++                }
++              }
++            }
++          }
++        }
++      }
++    },
+     "/panel/api/server/xrayMetricsState": {
+       "get": {
+         "tags": [
+diff --git a/frontend/src/pages/api-docs/endpoints.ts b/frontend/src/pages/api-docs/endpoints.ts
+index a0b343a..aaa9af9 100644
+--- a/frontend/src/pages/api-docs/endpoints.ts
++++ b/frontend/src/pages/api-docs/endpoints.ts
+@@ -495,6 +495,106 @@ export const sections: readonly Section[] = [
+         response:
+           '{\n  "success": true,\n  "obj": [\n    { "t": 1700000000, "v": 12.5 },\n    { "t": 1700000002, "v": 13.1 }\n  ]\n}',
+       },
++      {
++        method: 'GET',
++        path: '/panel/api/server/advancedReality',
++        summary:
++          'Experimental TCP REALITY admission state. Disabled unless XUI_ARE_SOCKET is configured. Admin access only.',
++        responses: {
++          '200': {
++            description: 'Unwrapped core status; REALITY connection counts are not VLESS users.',
++            content: {
++              'application/json': {
++                schema: {
++                  type: 'object',
++                  required: ['revision', 'instance', 'states'],
++                  properties: {
++                    revision: { type: 'string' },
++                    instance: { type: 'string' },
++                    states: { type: 'array', items: { type: 'object' } },
++                  },
++                },
++              },
++            },
++          },
++          '409': { description: 'Experimental control is disabled.' },
++          '503': { description: 'Core control is unavailable.' },
++        },
++      },
++      {
++        method: 'POST',
++        path: '/panel/api/server/advancedReality/transition',
++        summary:
++          'Apply or roll back a leased admission policy with instance/generation CAS. Does not rewrite Xray JSON or restart the core.',
++        description:
++          'Admin access only. Read state after an unknown outcome. A repeated request ID returns a historical receipt; it is not proof of current state. Enabled leases last 15–300 seconds; disabled policy requires lease_seconds=0. Drain requires enabled=true. Deadline includes unauthenticated fallback forwarding.',
++        requestSchema: {
++          type: 'object',
++          additionalProperties: false,
++          required: [
++            'instance',
++            'port',
++            'expected_generation',
++            'request_id',
++            'lease_seconds',
++            'policy',
++          ],
++          properties: {
++            instance: { type: 'string' },
++            port: { type: 'integer', minimum: 1, maximum: 65535 },
++            expected_generation: { type: 'integer', minimum: 1 },
++            request_id: { type: 'string', pattern: '^[a-zA-Z0-9_-]{8,64}$' },
++            lease_seconds: { type: 'integer', minimum: 0, maximum: 300 },
++            policy: {
++              type: 'object',
++              additionalProperties: false,
++              required: ['enabled', 'max_handshakes', 'timeout_ms', 'drain'],
++              properties: {
++                enabled: { type: 'boolean' },
++                max_handshakes: { type: 'integer', minimum: 1, maximum: 512 },
++                timeout_ms: { type: 'integer', minimum: 1000, maximum: 30000 },
++                drain: { type: 'boolean' },
++              },
++            },
++          },
++        },
++        responses: {
++          '200': {
++            description: 'Unwrapped historical transition receipt.',
++            content: {
++              'application/json': {
++                schema: {
++                  type: 'object',
++                  required: ['instance', 'request_id', 'previous', 'state'],
++                  properties: {
++                    instance: { type: 'string' },
++                    request_id: { type: 'string' },
++                    previous: { type: 'object' },
++                    state: { type: 'object' },
++                  },
++                },
++              },
++            },
++          },
++          '400': { description: 'Malformed or oversized request.' },
++          '409': {
++            description:
++              'Disabled control, stale instance/generation, unknown scope, conflicting ID or full journal.',
++          },
++          '422': { description: 'Invalid policy bounds or lease.' },
++          '503': {
++            description: 'Transport outcome may be unknown; fetch state before any retry.',
++            content: {
++              'application/json': {
++                schema: {
++                  type: 'object',
++                  properties: { error: { type: 'string' }, outcome_unknown: { type: 'boolean' } },
++                },
++              },
++            },
++          },
++        },
++      },
+       {
+         method: 'GET',
+         path: '/panel/api/server/xrayMetricsState',
+diff --git a/internal/web/controller/advanced_reality.go b/internal/web/controller/advanced_reality.go
+new file mode 100644
+index 0000000..738fbbb
+--- /dev/null
++++ b/internal/web/controller/advanced_reality.go
+@@ -0,0 +1,64 @@
++package controller
++
++import (
++	"context"
++	"github.com/gin-gonic/gin"
++	"io"
++	"net"
++	"net/http"
++	"os"
++	"path/filepath"
++	"time"
++)
++
++// These routes inherit API authentication, admin token scope and CSRF middleware.
++// Only the explicit private Unix socket is contacted. There is no restart fallback,
++// shell command, config rewrite or SQLite write in this path.
++func (a *ServerController) advancedRealityState(c *gin.Context) {
++	a.advancedRealityRelay(c, http.MethodGet, "/v1/state")
++}
++func (a *ServerController) advancedRealityTransition(c *gin.Context) {
++	a.advancedRealityRelay(c, http.MethodPost, "/v1/transition")
++}
++func (a *ServerController) advancedRealityRelay(c *gin.Context, method, path string) {
++	c.Header("Cache-Control", "no-store")
++	socket := os.Getenv("XUI_ARE_SOCKET")
++	if socket == "" {
++		c.JSON(409, gin.H{"error": "advanced_reality_disabled"})
++		return
++	}
++	if !filepath.IsAbs(socket) {
++		c.JSON(503, gin.H{"error": "advanced_reality_unavailable"})
++		return
++	}
++	ctx, cancel := context.WithTimeout(c.Request.Context(), 4*time.Second)
++	defer cancel()
++	var body io.Reader
++	if method == http.MethodPost {
++		body = http.MaxBytesReader(c.Writer, c.Request.Body, 4096)
++	}
++	req, err := http.NewRequestWithContext(ctx, method, "http://unix"+path, body)
++	if err != nil {
++		c.JSON(400, gin.H{"error": "invalid_request"})
++		return
++	}
++	req.Header.Set("Content-Type", "application/json")
++	tr := &http.Transport{Proxy: nil, DisableKeepAlives: true, DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
++		return (&net.Dialer{Timeout: time.Second}).DialContext(ctx, "unix", socket)
++	}}
++	defer tr.CloseIdleConnections()
++	client := &http.Client{Transport: tr, Timeout: 4 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
++	resp, err := client.Do(req)
++	if err != nil {
++		// A failed POST can have committed. Never retry here; fetch state with the instance/generation.
++		c.JSON(503, gin.H{"error": "advanced_reality_unavailable", "outcome_unknown": method == http.MethodPost})
++		return
++	}
++	defer resp.Body.Close()
++	data, err := io.ReadAll(io.LimitReader(resp.Body, 65537))
++	if err != nil || len(data) > 65536 {
++		c.JSON(503, gin.H{"error": "advanced_reality_response_invalid", "outcome_unknown": method == http.MethodPost})
++		return
++	}
++	c.Data(resp.StatusCode, "application/json", data)
++}
+diff --git a/internal/web/controller/advanced_reality_native_test.go b/internal/web/controller/advanced_reality_native_test.go
+new file mode 100644
+index 0000000..6c6706f
+--- /dev/null
++++ b/internal/web/controller/advanced_reality_native_test.go
+@@ -0,0 +1,192 @@
++//go:build are_native
++
++package controller
++
++import (
++	"bytes"
++	"context"
++	"crypto/ecdh"
++	"crypto/rand"
++	"crypto/sha256"
++	"encoding/base64"
++	"encoding/json"
++	"fmt"
++	"github.com/mhsanaei/3x-ui/v3/internal/database"
++	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
++	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
++	"net"
++	"net/http"
++	"net/http/httptest"
++	"os"
++	"os/exec"
++	"path/filepath"
++	"testing"
++	"time"
++)
++
++func TestAdvancedRealityNativeCore(t *testing.T) {
++	binary := os.Getenv("ARE_NATIVE_CORE")
++	if binary == "" {
++		t.Fatal("ARE_NATIVE_CORE required with are_native tag")
++	}
++	dir := t.TempDir()
++	if e := os.Chmod(dir, 0700); e != nil {
++		t.Fatal(e)
++	}
++	socket := filepath.Join(dir, "control.sock")
++	t.Setenv("XUI_ARE_SOCKET", socket)
++	listener, e := net.Listen("tcp", "127.0.0.1:0")
++	if e != nil {
++		t.Fatal(e)
++	}
++	port := listener.Addr().(*net.TCPAddr).Port
++	listener.Close()
++	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }))
++	target.EnableHTTP2 = true
++	target.StartTLS()
++	defer target.Close()
++	key, e := ecdh.X25519().GenerateKey(rand.Reader)
++	if e != nil {
++		t.Fatal(e)
++	}
++	config := map[string]any{"log": map[string]any{"loglevel": "none"}, "inbounds": []any{map[string]any{"listen": "127.0.0.1", "port": port, "protocol": "vless", "settings": map[string]any{"decryption": "none", "clients": []any{map[string]any{"id": "00000000-0000-4000-8000-000000000001", "flow": "xtls-rprx-vision"}}}, "streamSettings": map[string]any{"network": "tcp", "security": "reality", "realitySettings": map[string]any{"target": target.Listener.Addr().String(), "serverNames": []string{"example.com"}, "privateKey": base64.RawURLEncoding.EncodeToString(key.Bytes()), "shortIds": []string{"0123456789abcdef"}}}}}, "outbounds": []any{map[string]any{"protocol": "freedom"}}}
++	raw, e := json.Marshal(config)
++	if e != nil {
++		t.Fatal(e)
++	}
++	path := filepath.Join(dir, "config.json")
++	os.WriteFile(path, raw, 0600)
++	before := sha256.Sum256(raw)
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	cmd := exec.CommandContext(ctx, binary, "run", "-config", path)
++	cmd.Env = append(os.Environ(), "XRAY_ARE_SOCKET="+socket, fmt.Sprintf("XRAY_ARE_PORTS=%d", port))
++	diag, e := os.Create(filepath.Join(dir, "core-start.log"))
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer diag.Close()
++	cmd.Stdout = diag
++	cmd.Stderr = diag
++	if e = cmd.Start(); e != nil {
++		t.Fatal(e)
++	}
++	defer func() { cancel(); cmd.Wait() }()
++	engine, api := newAPIAuthTestEngine(t)
++	a := &ServerController{}
++	g := engine.Group("/panel/api/server")
++	g.Use(api.checkAPIAuth, api.enforceTokenScope)
++	g.GET("/advancedReality", a.advancedRealityState)
++	g.POST("/advancedReality/transition", a.advancedRealityTransition)
++	const token = "native-admin-token"
++	if e = database.GetDB().Create(&model.ApiToken{Name: "are-native", Token: crypto.HashTokenSHA256(token), Enabled: true, Scope: model.ApiScopeAdmin}).Error; e != nil {
++		t.Fatal(e)
++	}
++	call := func(method, suffix string, q any) (int, map[string]any) {
++		var data []byte
++		if q != nil {
++			data, _ = json.Marshal(q)
++		}
++		r := httptest.NewRequest(method, "/panel/api/server/advancedReality"+suffix, bytes.NewReader(data))
++		r.Header.Set("Authorization", "Bearer "+token)
++		r.Header.Set("Content-Type", "application/json")
++		w := httptest.NewRecorder()
++		engine.ServeHTTP(w, r)
++		var out map[string]any
++		if json.Unmarshal(w.Body.Bytes(), &out) != nil {
++			t.Fatal("invalid response")
++		}
++		return w.Code, out
++	}
++	var state map[string]any
++	for i := 0; i < 50; i++ {
++		status, out := call("GET", "", nil)
++		if status == 200 {
++			state = out
++			break
++		}
++		time.Sleep(100 * time.Millisecond)
++	}
++	if state == nil {
++		log, _ := os.ReadFile(filepath.Join(dir, "core-start.log"))
++		t.Fatalf("native core control did not start: %s", log)
++	}
++	row := state["states"].([]any)[0].(map[string]any)
++	if row["registered_tcp_reality"] != true {
++		t.Fatal("unregistered")
++	}
++	policy := map[string]any{"enabled": true, "max_handshakes": 2, "timeout_ms": 1000, "drain": false}
++	q := map[string]any{"instance": state["instance"], "port": port, "expected_generation": row["generation"], "request_id": "native-apply-001", "lease_seconds": 15, "policy": policy}
++	status, receipt := call("POST", "/transition", q)
++	if status != 200 {
++		t.Fatal(status, receipt)
++	}
++	conn, e := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), time.Second)
++	if e != nil {
++		t.Fatal(e)
++	}
++	conn.SetReadDeadline(time.Now().Add(3 * time.Second))
++	start := time.Now()
++	_, e = conn.Read(make([]byte, 1))
++	conn.Close()
++	if e == nil || time.Since(start) > 2500*time.Millisecond {
++		t.Fatal("native deadline not enforced", e)
++	}
++	// Roll back exactly to the previous policy via a new CAS transition, not a restart.
++	applied := receipt["state"].(map[string]any)
++	rollback := map[string]any{"instance": state["instance"], "port": port, "expected_generation": applied["generation"], "request_id": "native-rollback-001", "lease_seconds": 0, "policy": receipt["previous"]}
++	status, out := call("POST", "/transition", rollback)
++	if status != 200 {
++		t.Fatal(status, out)
++	}
++	status, out = call("GET", "", nil)
++	if status != 200 {
++		t.Fatal(status)
++	}
++	row = out["states"].([]any)[0].(map[string]any)
++	if row["policy"].(map[string]any)["enabled"] != false || row["counts"].(map[string]any)["timed_out"].(float64) < 1 {
++		t.Fatal("rollback or counters", out)
++	}
++	after, e := os.ReadFile(path)
++	if e != nil || sha256.Sum256(after) != before {
++		t.Fatal("core JSON was rewritten")
++	}
++	if out["instance"] != state["instance"] {
++		t.Fatal("core restarted")
++	}
++
++	// A real SIGKILL leaves the Unix socket behind. The next process must recover
++	// only its owned socket, reset ephemeral policies and reject the old instance.
++	oldEnv := cmd.Env
++	cmd.Process.Kill()
++	cmd.Wait()
++	cancel()
++	ctx, cancel = context.WithCancel(context.Background())
++	cmd = exec.CommandContext(ctx, binary, "run", "-config", path)
++	cmd.Env = oldEnv
++	cmd.Stdout = diag
++	cmd.Stderr = diag
++	if e = cmd.Start(); e != nil {
++		t.Fatal(e)
++	}
++	var recovered map[string]any
++	for i := 0; i < 50; i++ {
++		status, fresh := call("GET", "", nil)
++		if status == 200 && fresh["instance"] != state["instance"] {
++			recovered = fresh
++			break
++		}
++		time.Sleep(100 * time.Millisecond)
++	}
++	if recovered == nil {
++		t.Fatal("owned socket crash recovery failed")
++	}
++	row = recovered["states"].([]any)[0].(map[string]any)
++	if row["policy"].(map[string]any)["enabled"] != false {
++		t.Fatal("stale policy survived process restart")
++	}
++	status, _ = call("POST", "/transition", q)
++	if status != 409 {
++		t.Fatal("stale process instance accepted", status)
++	}
++}
+diff --git a/internal/web/controller/advanced_reality_test.go b/internal/web/controller/advanced_reality_test.go
+new file mode 100644
+index 0000000..418959f
+--- /dev/null
++++ b/internal/web/controller/advanced_reality_test.go
+@@ -0,0 +1,92 @@
++package controller
++
++import (
++	"github.com/gin-gonic/gin"
++	"github.com/mhsanaei/3x-ui/v3/internal/database"
++	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
++	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
++	"io"
++	"net"
++	"net/http"
++	"net/http/httptest"
++	"path/filepath"
++	"strings"
++	"sync/atomic"
++	"testing"
++)
++
++func TestAdvancedRealityAuthScopeAndNoRestart(t *testing.T) {
++	engine, api := newAPIAuthTestEngine(t)
++	a := &ServerController{}
++	g := engine.Group("/panel/api/server")
++	g.Use(api.checkAPIAuth, api.enforceTokenScope)
++	g.GET("/advancedReality", a.advancedRealityState)
++	g.POST("/advancedReality/transition", a.advancedRealityTransition)
++	path := filepath.Join(t.TempDir(), "core.sock")
++	l, e := net.Listen("unix", path)
++	if e != nil {
++		t.Fatal(e)
++	}
++	var posts atomic.Int32
++	srv := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++		if r.Method == "POST" {
++			posts.Add(1)
++			b, _ := io.ReadAll(r.Body)
++			if string(b) != `{"instance":"example"}` {
++				t.Error("body changed")
++			}
++		}
++		w.Header().Set("Content-Type", "application/json")
++		io.WriteString(w, `{"instance":"example","states":[]}`)
++	})}
++	go srv.Serve(l)
++	defer srv.Close()
++	t.Setenv("XUI_ARE_SOCKET", path)
++	for _, scope := range []string{model.ApiScopeAdmin, model.ApiScopeMonitor, model.ApiScopeNodeSync} {
++		token := "are-token-" + scope
++		if e := database.GetDB().Create(&model.ApiToken{Name: scope, Token: crypto.HashTokenSHA256(token), Enabled: true, Scope: scope}).Error; e != nil {
++			t.Fatal(e)
++		}
++		r := httptest.NewRequest("POST", "/panel/api/server/advancedReality/transition", strings.NewReader(`{"instance":"example"}`))
++		r.Header.Set("Authorization", "Bearer "+token)
++		w := httptest.NewRecorder()
++		engine.ServeHTTP(w, r)
++		want := 403
++		if scope == model.ApiScopeAdmin {
++			want = 200
++		}
++		if w.Code != want {
++			t.Fatal(scope, w.Code, w.Body.String())
++		}
++	}
++	r := httptest.NewRequest("GET", "/panel/api/server/advancedReality", nil)
++	r.Header.Set("X-Requested-With", "XMLHttpRequest")
++	w := httptest.NewRecorder()
++	engine.ServeHTTP(w, r)
++	if w.Code != 401 {
++		t.Fatal("anonymous", w.Code)
++	}
++	if posts.Load() != 1 {
++		t.Fatal("unexpected mutation count", posts.Load())
++	}
++}
++func TestAdvancedRealityDisabledAndUnknownOutcome(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	a := &ServerController{}
++	e := gin.New()
++	e.POST("/transition", a.advancedRealityTransition)
++	for _, socket := range []string{"", filepath.Join(t.TempDir(), "missing.sock")} {
++		t.Setenv("XUI_ARE_SOCKET", socket)
++		w := httptest.NewRecorder()
++		e.ServeHTTP(w, httptest.NewRequest("POST", "/transition", strings.NewReader("{}")))
++		if socket == "" {
++			if w.Code != 409 {
++				t.Fatal(w.Code)
++			}
++		} else {
++			if w.Code != 503 || !strings.Contains(w.Body.String(), `"outcome_unknown":true`) {
++				t.Fatal(w.Code, w.Body.String())
++			}
++		}
++	}
++}
+diff --git a/internal/web/controller/server.go b/internal/web/controller/server.go
+index a7a1384..b8277ed 100644
+--- a/internal/web/controller/server.go
++++ b/internal/web/controller/server.go
+@@ -45,6 +45,8 @@ func NewServerController(g *gin.RouterGroup) *ServerController {
+ // initRouter sets up the routes for server status, Xray management, and utility endpoints.
+ func (a *ServerController) initRouter(g *gin.RouterGroup) {
+ 	g.GET("/status", a.status)
++	g.GET("/advancedReality", a.advancedRealityState)
++	g.POST("/advancedReality/transition", a.advancedRealityTransition)
+ 	g.GET("/cpuHistory/:bucket", a.getCpuHistoryBucket)
+ 	g.GET("/history/:metric/:bucket", a.getMetricHistoryBucket)
+ 	g.GET("/xrayMetricsState", a.getXrayMetricsState)

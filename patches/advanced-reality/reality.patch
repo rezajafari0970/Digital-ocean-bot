@@ -1,0 +1,134 @@
+diff --git a/are_cancel_test.go b/are_cancel_test.go
+new file mode 100644
+index 0000000..9384879
+--- /dev/null
++++ b/are_cancel_test.go
+@@ -0,0 +1,46 @@
++package reality
++
++import (
++	"context"
++	"errors"
++	"io"
++	"net"
++	"testing"
++	"time"
++)
++
++func TestAREServerCancellationClosesBothSides(t *testing.T) {
++	l, e := net.Listen("tcp", "127.0.0.1:0")
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer l.Close()
++	peer, e := net.Dial("tcp", l.Addr().String())
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer peer.Close()
++	incoming, e := l.Accept()
++	if e != nil {
++		t.Fatal(e)
++	}
++	target, remote := net.Pipe()
++	defer remote.Close()
++	cfg := &Config{ServerNames: map[string]bool{"example.com": true}, DialContext: func(context.Context, string, string) (net.Conn, error) { return target, nil }}
++	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Millisecond)
++	defer cancel()
++	done := make(chan error, 1)
++	go func() { _, e := Server(ctx, incoming, cfg); done <- e }()
++	select {
++	case e := <-done:
++		if !errors.Is(e, context.DeadlineExceeded) {
++			t.Fatal(e)
++		}
++	case <-time.After(2 * time.Second):
++		t.Fatal("REALITY cancellation leaked blocking work")
++	}
++	remote.SetReadDeadline(time.Now().Add(time.Second))
++	if _, e := remote.Read(make([]byte, 1)); e != io.EOF {
++		t.Fatal("target remained open", e)
++	}
++}
+diff --git a/tls.go b/tls.go
+index b33301e..24e9b1c 100644
+--- a/tls.go
++++ b/tls.go
+@@ -171,6 +171,10 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 		return nil, errors.New("REALITY: failed to dial dest: " + err.Error())
+ 	}
+ 
++	// Bound target I/O and fallback forwarding only when the caller supplies a deadline.
++	stopCancel := context.AfterFunc(ctx, func() { conn.Close(); target.Close() })
++	defer stopCancel()
++
+ 	if config.Xver == 1 || config.Xver == 2 {
+ 		if _, err = proxyproto.HeaderProxyFromAddrs(config.Xver, conn.RemoteAddr(), conn.LocalAddr()).WriteTo(target); err != nil {
+ 			target.Close()
+@@ -196,7 +200,7 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 			},
+ 			config: config,
+ 		},
+-		ctx: context.Background(),
++		ctx: ctx,
+ 	}
+ 
+ 	copying := false
+@@ -207,7 +211,7 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 	go func() {
+ 		for {
+ 			mutex.Lock()
+-			hs.clientHello, _, err = hs.c.readClientHello(context.Background()) // TODO: Change some rules in this function.
++			hs.clientHello, _, err = hs.c.readClientHello(ctx) // TODO: Change some rules in this function.
+ 			if copying || err != nil || hs.c.vers != VersionTLS13 || !config.ServerNames[hs.clientHello.serverName] {
+ 				break
+ 			}
+@@ -216,7 +220,7 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 				if keyShare.group == X25519MLKEM768 && len(keyShare.data) == mlkem.EncapsulationKeySize768+32 {
+ 					if peerPub2 != nil {
+ 						peerPub2 = nil // ensure fail
+-						break // ensure once
++						break          // ensure once
+ 					}
+ 					peerPub2 = keyShare.data[mlkem.EncapsulationKeySize768:]
+ 					continue // fast continue
+@@ -224,7 +228,7 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 				if keyShare.group == X25519 && len(keyShare.data) == 32 {
+ 					if peerPub != nil {
+ 						peerPub2 = nil // ensure fail
+-						break // ensure once
++						break          // ensure once
+ 					}
+ 					peerPub = keyShare.data
+ 					break // ensure order
+@@ -431,7 +435,12 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 						break
+ 					}
+ 				}
+-				time.Sleep(5 * time.Second)
++				select {
++				case <-ctx.Done():
++					err = ctx.Err()
++					break f
++				case <-time.After(5 * time.Second):
++				}
+ 				if maxUseless, ok := GlobalMaxCSSMsgCount.Load(key); ok {
+ 					hs.c.MaxUselessRecords = maxUseless.(int)
+ 				}
+@@ -459,6 +468,16 @@ func Server(ctx context.Context, conn net.Conn, config *Config) (*Conn, error) {
+ 	}()
+ 
+ 	waitGroup.Wait()
++	if !stopCancel() && ctx.Err() != nil {
++		conn.Close()
++		target.Close()
++		return nil, ctx.Err()
++	}
++	if ctx.Err() != nil {
++		conn.Close()
++		target.Close()
++		return nil, ctx.Err()
++	}
+ 	target.Close()
+ 	if config.Show {
+ 		fmt.Printf("REALITY remoteAddr: %v\ths.c.isHandshakeComplete.Load(): %v\n", remoteAddr, hs.c.isHandshakeComplete.Load())
