@@ -1,0 +1,305 @@
+{
+  "recorded_utc": "2026-10-13T11:31:47.518704+00:00",
+  "user_report_utc": "2026-10-13T11:23:16Z",
+  "stage1_status": "MOBILE_ACCEPTANCE_FAILED_DIAGNOSIS_PENDING",
+  "user_report": {
+    "MCI": "DID_NOT_CONNECT",
+    "Irancell": "DID_NOT_CONNECT",
+    "profile_published_in_app_for_other_users": true,
+    "other_user_results": "NOT_RECEIVED",
+    "app_name_version_and_actual_core": "UNKNOWN"
+  },
+  "first_diagnostic": {
+    "utc": "2026-10-13T11:24:33.915196+00:00",
+    "state": {
+      "revision": "are-0.2.1",
+      "instance": "6b6f333602b7a7445981601ef174e4aa",
+      "states": [
+        {
+          "registered_tcp_reality": true,
+          "port": 24445,
+          "generation": 16,
+          "policy": {
+            "enabled": true,
+            "max_handshakes": 32,
+            "timeout_ms": 15000,
+            "drain": false
+          },
+          "expires_at": "2026-10-13T11:28:37.319664904Z",
+          "counts": {
+            "started": 9,
+            "succeeded": 4,
+            "failed": 5,
+            "timed_out": 0,
+            "rejected": 0,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              0,
+              4,
+              4,
+              1,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    "state_status": 200,
+    "units": {
+      "x-ui": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "4564",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "159170560",
+        "MemoryPeak": "232837120",
+        "CPUUsageNSec": "57779591000"
+      },
+      "are-stage1-phone-20261013": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "7208",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "8634368",
+        "MemoryPeak": "11370496",
+        "CPUUsageNSec": "178501000"
+      },
+      "are-stage1-policy-20261013": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "7216",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "9158656",
+        "MemoryPeak": "9420800",
+        "CPUUsageNSec": "105599000"
+      }
+    },
+    "config_unchanged": true,
+    "binary_sha256": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+    "tcp_states_24445": {
+      "LISTEN": 1
+    },
+    "host_global_TcpExt": {
+      "ListenOverflows": "0",
+      "ListenDrops": "0",
+      "TCPTimeouts": "283",
+      "SyncookiesSent": "0"
+    },
+    "host_global_Tcp": {
+      "PassiveOpens": "4044",
+      "AttemptFails": "57",
+      "EstabResets": "977",
+      "CurrEstab": "11",
+      "RetransSegs": "318",
+      "InErrs": "3"
+    },
+    "warning_error_categories": {
+      "warning": 3,
+      "error": 0,
+      "timeout": 0,
+      "failed": 0,
+      "rejected": 0,
+      "panic": 0,
+      "fatal": 0
+    },
+    "memory_available_kib": 426464
+  },
+  "modified_core_retest_from_manager": {
+    "tested_utc": "2026-10-13T11:26:23.546830+00:00",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 are-0.2.1",
+    "tests": [
+      {
+        "name": "https_egress",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 1.069165 216",
+        "egress_ip": "172.237.20.67"
+      },
+      {
+        "name": "https_second_site",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 1.026513 577"
+      },
+      {
+        "name": "udp_dns",
+        "passed": true,
+        "answers": 2
+      }
+    ],
+    "all_passed": true
+  },
+  "stock_core_control": {
+    "utc": "2026-10-13T11:28:29.674704+00:00",
+    "stock_version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)",
+    "stock_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+    "same_config_except_port": true,
+    "production_status_unchanged": true,
+    "state": {
+      "ActiveState": "active",
+      "MainPID": "8482",
+      "NRestarts": "0"
+    },
+    "expires_utc": "2026-10-13T15:02:35+00:00"
+  },
+  "stock_core_control_test_from_manager": {
+    "tested_utc": "2026-10-13T11:29:05.942239+00:00",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 official",
+    "tests": [
+      {
+        "name": "https_egress",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 1.020842 221",
+        "egress_ip": "172.237.20.67"
+      },
+      {
+        "name": "https_second_site",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 0.954336 577"
+      },
+      {
+        "name": "udp_dns",
+        "passed": true,
+        "answers": 2
+      }
+    ],
+    "all_passed": true
+  },
+  "postflight": {
+    "utc": "2026-10-13T11:30:24.796816+00:00",
+    "state": {
+      "revision": "are-0.2.1",
+      "instance": "6b6f333602b7a7445981601ef174e4aa",
+      "states": [
+        {
+          "registered_tcp_reality": true,
+          "port": 24445,
+          "generation": 20,
+          "policy": {
+            "enabled": true,
+            "max_handshakes": 32,
+            "timeout_ms": 15000,
+            "drain": false
+          },
+          "expires_at": "2026-10-13T11:34:37.329842148Z",
+          "counts": {
+            "started": 16,
+            "succeeded": 7,
+            "failed": 9,
+            "timed_out": 0,
+            "rejected": 0,
+            "in_flight": 0,
+            "active_connections": 0,
+            "duration_buckets_le_50_250_1000_5000_15000_inf_ms": [
+              1,
+              5,
+              9,
+              1,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    "state_status": 200,
+    "units": {
+      "x-ui": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "4564",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "160641024",
+        "MemoryPeak": "232837120",
+        "CPUUsageNSec": "65144686000"
+      },
+      "are-stage1-phone-20261013": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "7208",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "8798208",
+        "MemoryPeak": "11370496",
+        "CPUUsageNSec": "221674000"
+      },
+      "are-stage1-policy-20261013": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "7216",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "9158656",
+        "MemoryPeak": "9420800",
+        "CPUUsageNSec": "111362000"
+      },
+      "are-stage1-stock-control-20261013": {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "8482",
+        "Result": "success",
+        "NRestarts": "0",
+        "MemoryCurrent": "8105984",
+        "MemoryPeak": "9670656",
+        "CPUUsageNSec": "106203000"
+      }
+    },
+    "config_unchanged": true,
+    "binary_sha256": "dd0d92b41f2a8975aeccc3d097f15e835cb435af29e213fb81294242f89d252a",
+    "tcp_states_24445": {
+      "LISTEN": 1
+    },
+    "host_global_TcpExt": {
+      "ListenOverflows": "0",
+      "ListenDrops": "0",
+      "TCPTimeouts": "330",
+      "SyncookiesSent": "0"
+    },
+    "host_global_Tcp": {
+      "PassiveOpens": "4644",
+      "AttemptFails": "88",
+      "EstabResets": "1111",
+      "CurrEstab": "10",
+      "RetransSegs": "373",
+      "InErrs": "3"
+    },
+    "warning_error_categories": {
+      "warning": 3,
+      "error": 0,
+      "timeout": 0,
+      "failed": 0,
+      "rejected": 0,
+      "panic": 0,
+      "fatal": 0
+    },
+    "memory_available_kib": 416012,
+    "stock_control_started_utc": "2026-10-13T11:28:29+00:00"
+  },
+  "interpretation": [
+    "No candidate service restart, config/binary drift or current resource exhaustion was observed.",
+    "No admission-limit rejections or guard timeouts were recorded in the first diagnostic.",
+    "First diagnostic had 9 REALITY starts, 4 successes and 5 failures. Three successes were our initial tests; other attempts are unattributed. REALITY success is not VLESS authentication or a user result.",
+    "Both paths pass HTTPS and UDP from the management host; this does not prove reachability from either mobile carrier.",
+    "Stock control uses the same IP and config with only the inbound port changed from 24445 to 24447. Because the port also differs, its result alone cannot conclusively isolate modified-core effects.",
+    "Root cause remains unknown pending exact client error/app version and mobile control results."
+  ],
+  "next_required_evidence": [
+    "stock_control_phone_result_MCI_and_Irancell",
+    "client_error_log_or_screenshot",
+    "app_name_version_and_actual_client_core"
+  ],
+  "stages_2_3_4": "NOT_STARTED",
+  "production_panel_or_core_replaced": false,
+  "openai_api_requests": 0,
+  "openai_api_tokens": 0
+}

@@ -544,9 +544,9 @@
   ],
   "full_fleet_activation": "BLOCKED",
   "latest_continuation": {
-    "receipt": "ADVANCED_REALITY_STAGE1_20261013.json",
-    "recorded_utc": "2026-10-13T11:05:26.596253+00:00",
-    "status": "stage1_technical_pass_waiting_for_user_phone_test",
+    "receipt": "ADVANCED_REALITY_STAGE1_FAILURE_20261013.json",
+    "recorded_utc": "2026-10-13T11:31:47.518704+00:00",
+    "status": "stage1_mobile_failed_under_diagnosis",
     "new_canary_expires_utc": "2026-10-13T15:02:35+00:00"
   }
 }
