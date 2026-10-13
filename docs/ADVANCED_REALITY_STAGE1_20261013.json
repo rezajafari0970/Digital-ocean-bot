@@ -2,7 +2,7 @@
   "recorded_utc": "2026-10-13T11:05:26.596253+00:00",
   "scope": "stage_1_only_by_user_request",
   "stage_1": {
-    "status": "MOBILE_ACCEPTANCE_FAILED_STOCK_SYN_NOT_OBSERVED",
+    "status": "MOBILE_ACCEPTANCE_FAILED_ALTERNATE_PORT_TEST_PENDING",
     "preparation": "PASS",
     "technical_connectivity": "PASS",
     "phone_MCI": "USER_REPORTED_DID_NOT_CONNECT",
@@ -142,12 +142,15 @@
   "openai_api_requests": 0,
   "openai_api_tokens": 0,
   "latest_diagnostic": {
-    "receipt": "ADVANCED_REALITY_STAGE1_FAILURE_20261013.json",
-    "recorded_utc": "2026-10-13T12:04:49.675557+00:00",
+    "receipt": "ADVANCED_REALITY_STAGE1_ALTPORT_20261013.json",
+    "recorded_utc": "2026-10-13T12:13:39.891781+00:00",
     "stock_control_port": 24447,
     "stock_phone_results": "TCP_CONNECT_TIMEOUT_NO_NON_MANAGER_SYN_OBSERVED_CARRIER_UNKNOWN",
-    "tcp_observer_expires_utc": "2026-10-13T12:06:39.889049+00:00",
+    "tcp_observer_expires_utc": "2026-10-13T12:40:47.728322+00:00",
     "provider_firewall": "NONE_ATTACHED_API_200",
-    "next_step": "Identify the carrier used for the 15:22-15:23 phone log and whether another existing profile works on the same phone and network; then choose a discriminating endpoint/path test. Do not repeat unchanged stock tests blindly."
+    "next_step": "Phone test ARE-Stock-8443-13Oct for 30 seconds while observer is active, with exact time and carrier; compare to prior stock 24447 timeout. Do not claim filtering bypass before actual phone success.",
+    "alternate_stock_port": 8443,
+    "alternate_phone_results": "NOT_TESTED",
+    "alternate_manager_tests": "HTTPS_AND_UDP_PASS"
   }
 }

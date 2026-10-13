@@ -433,7 +433,7 @@
     "runtime_max_seconds": 1200,
     "interpretation_limit": "The timed phone test now overlaps the observer. No stock-port non-manager SYN was seen. Other-source traffic remains unattributable; no ACK/data or successful VLESS sessions are measured."
   },
-  "next_step": "Identify the carrier used for the 15:22-15:23 phone log and whether another existing profile works on the same phone and network; then choose a discriminating endpoint/path test. Do not repeat unchanged stock tests blindly.",
+  "next_step": "Phone test ARE-Stock-8443-13Oct for 30 seconds while observer is active, with exact time and carrier; compare to prior stock 24447 timeout. Do not claim filtering bypass before actual phone success.",
   "evidence_sha256": {
     "phase1-tcp-firewall.log": "95bdd4cc0ba952a77e5060a063c347ec69d021e1b0421156a1e73ba328ae5adc",
     "phase1-tcp-observer-v2-check.log": "1a8f829771ca279f7203af120370389dc256acb03ff65963562b14d6b7e0d349",
@@ -685,5 +685,12 @@
     "utc": "2026-10-13T12:01:47.647924484Z",
     "interpretation": "No attached Linode Cloud Firewall returned for this legacy-config instance. This does not rule out all upstream/provider network faults.",
     "reference": "https://techdocs.akamai.com/linode-api/reference/get-linode-firewalls"
+  },
+  "followup_alternate_port": {
+    "receipt": "ADVANCED_REALITY_STAGE1_ALTPORT_20261013.json",
+    "port": 8443,
+    "technical_test": "PASS",
+    "phone_test": "NOT_TESTED",
+    "recorded_utc": "2026-10-13T12:13:39.891781+00:00"
   }
 }

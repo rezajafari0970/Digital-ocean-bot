@@ -1,0 +1,235 @@
+{
+  "recorded_utc": "2026-10-13T12:13:39.891781+00:00",
+  "scope": "stage1_only",
+  "status": "MOBILE_ACCEPTANCE_FAILED_ALTERNATE_PORT_TEST_PENDING",
+  "reason": "User requested changes to work around filtering; timed stock 24447 test showed no non-manager SYN at the host. Alternate port tests a single connection variable. Exact filter or drop location is unproven.",
+  "host": "172.237.20.67",
+  "port": 8443,
+  "comparison_port": 24447,
+  "comparison": "Same official binary and identical server configuration except inbound port; same client identity, REALITY keys, SNI, fingerprint and flow. No credentials stored in this receipt.",
+  "start": {
+    "utc": "2026-10-13T12:10:01.949893+00:00",
+    "unit": "are-stage1-stock-8443-20261013",
+    "port": 8443,
+    "comparison_port": 24447,
+    "stock_version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)",
+    "stock_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+    "same_stock_config_except_port": true,
+    "candidate_config_sha256": "3894695159fec7b08cf9a9d127c79019da21fcdf49851bb8182dfd4bef9b5dd7",
+    "production_status_same": true,
+    "production_config_same": true,
+    "production_core_same": true,
+    "state": {
+      "ActiveState": "active",
+      "MainPID": "10947",
+      "NRestarts": "0"
+    },
+    "expires_utc": "2026-10-13T15:02:35+00:00",
+    "memory_available_before_kib": 438772
+  },
+  "client_test": {
+    "tested_utc": "2026-10-13T12:11:10.119701+00:00",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 official",
+    "tests": [
+      {
+        "name": "https_egress",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 0.990735 221",
+        "egress_ip": "172.237.20.67"
+      },
+      {
+        "name": "https_second_site",
+        "passed": true,
+        "curl_exit": 0,
+        "metrics": "200 0.958861 577"
+      },
+      {
+        "name": "udp_dns",
+        "passed": true,
+        "answers": 2
+      }
+    ],
+    "all_passed": true
+  },
+  "postflight": {
+    "utc": "2026-10-13T12:11:54.392315+00:00",
+    "observer": {
+      "started_utc": "2026-10-13T12:10:57.728322+00:00",
+      "scheduled_end_utc": "2026-10-13T12:40:47.728322+00:00",
+      "updated_utc": "2026-10-13T12:11:53.392944+00:00",
+      "active": true,
+      "capture_alive": true,
+      "ports": [
+        8443,
+        24447
+      ],
+      "counts": {
+        "8443:manager:in:syn": 3,
+        "8443:manager:out:syn_ack": 3,
+        "8443:manager:in:rst": 6
+      },
+      "minutes": {
+        "2026-10-13T12:11Z": {
+          "8443:manager:in:syn": 3,
+          "8443:manager:out:syn_ack": 3,
+          "8443:manager:in:rst": 6
+        }
+      },
+      "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+    },
+    "units": "Id=x-ui.service\nActiveState=active\nMainPID=4564\nNRestarts=0\nMemoryCurrent=164261888\n\nId=are-stage1-phone-20261013.service\nActiveState=active\nMainPID=7208\nNRestarts=0\nMemoryCurrent=8589312\n\nId=are-stage1-stock-control-20261013.service\nActiveState=active\nMainPID=8482\nNRestarts=0\nMemoryCurrent=7286784\n\nId=are-stage1-stock-8443-20261013.service\nActiveState=active\nMainPID=10947\nNRestarts=0\nMemoryCurrent=9347072\n\nId=are-stage1-altport-observer-20261013.service\nActiveState=active\nMainPID=11205\nNRestarts=0\nMemoryCurrent=7630848\n",
+    "listeners": [
+      "LISTEN 0      4096               *:443         *:* users:((\"xray-linux-amd6\",pid=6239,fd=7))              ",
+      "LISTEN 0      4096               *:24447       *:* users:((\"xray\",pid=8482,fd=4))                         ",
+      "LISTEN 0      4096               *:24445       *:* users:((\"xray\",pid=7208,fd=8))                         ",
+      "LISTEN 0      4096               *:8443        *:* users:((\"xray\",pid=10947,fd=4))                        "
+    ],
+    "production_status_same": true,
+    "production_config_same": true,
+    "production_core_same": true,
+    "same_stock_config_except_port": true,
+    "same_stock_binary": true,
+    "memory_available_kib": 410564,
+    "expires_utc": "2026-10-13T15:02:35+00:00"
+  },
+  "previous_observer_final": {
+    "started_utc": "2026-10-13T11:46:49.889049+00:00",
+    "scheduled_end_utc": "2026-10-13T12:06:39.889049+00:00",
+    "updated_utc": "2026-10-13T12:06:40.183114+00:00",
+    "active": false,
+    "capture_alive": false,
+    "ports": [
+      24445,
+      24447
+    ],
+    "counts": {
+      "24445:manager:in:syn": 1,
+      "24445:manager:out:syn_ack": 1,
+      "24447:manager:in:syn": 2,
+      "24447:manager:out:syn_ack": 2,
+      "24445:other:in:syn": 65,
+      "24445:other:out:syn_ack": 89,
+      "24445:other:in:rst": 21,
+      "24445:other:out:rst": 6,
+      "24445:other:in:syn_ack": 3
+    },
+    "minutes": {
+      "2026-10-13T11:47Z": {
+        "24445:manager:in:syn": 1,
+        "24445:manager:out:syn_ack": 1,
+        "24447:manager:in:syn": 1,
+        "24447:manager:out:syn_ack": 1
+      },
+      "2026-10-13T11:48Z": {
+        "24445:other:in:syn": 2,
+        "24445:other:out:syn_ack": 2
+      },
+      "2026-10-13T11:49Z": {
+        "24445:other:in:syn": 6,
+        "24445:other:out:syn_ack": 7,
+        "24445:other:in:rst": 7
+      },
+      "2026-10-13T11:50Z": {
+        "24445:other:in:syn": 1,
+        "24445:other:out:syn_ack": 6
+      },
+      "2026-10-13T11:51Z": {
+        "24445:other:in:syn": 3,
+        "24445:other:out:syn_ack": 4
+      },
+      "2026-10-13T11:52Z": {
+        "24445:other:in:syn": 5,
+        "24445:other:out:syn_ack": 5,
+        "24445:other:in:rst": 1
+      },
+      "2026-10-13T11:53Z": {
+        "24445:other:in:syn": 6,
+        "24445:other:out:syn_ack": 10,
+        "24445:other:out:rst": 1,
+        "24445:other:in:rst": 1
+      },
+      "2026-10-13T11:54Z": {
+        "24445:other:in:syn": 1,
+        "24445:other:out:syn_ack": 2,
+        "24445:other:in:rst": 2
+      },
+      "2026-10-13T11:55Z": {
+        "24445:other:in:syn": 1,
+        "24445:other:out:syn_ack": 3,
+        "24445:other:in:rst": 1
+      },
+      "2026-10-13T11:56Z": {
+        "24445:other:in:syn": 5,
+        "24445:other:out:syn_ack": 10,
+        "24445:other:in:rst": 1
+      },
+      "2026-10-13T11:57Z": {
+        "24445:other:in:syn": 1,
+        "24445:other:out:syn_ack": 1
+      },
+      "2026-10-13T11:58Z": {
+        "24447:manager:in:syn": 1,
+        "24447:manager:out:syn_ack": 1,
+        "24445:other:in:syn": 5,
+        "24445:other:out:syn_ack": 5,
+        "24445:other:in:rst": 1
+      },
+      "2026-10-13T11:59Z": {
+        "24445:other:in:syn": 5,
+        "24445:other:out:syn_ack": 5,
+        "24445:other:in:rst": 5
+      },
+      "2026-10-13T12:00Z": {
+        "24445:other:in:syn": 6,
+        "24445:other:out:syn_ack": 11
+      },
+      "2026-10-13T12:01Z": {
+        "24445:other:in:syn": 3,
+        "24445:other:out:syn_ack": 3,
+        "24445:other:in:syn_ack": 3,
+        "24445:other:out:rst": 3
+      },
+      "2026-10-13T12:03Z": {
+        "24445:other:in:syn": 4,
+        "24445:other:out:syn_ack": 4
+      },
+      "2026-10-13T12:04Z": {
+        "24445:other:in:syn": 4,
+        "24445:other:out:syn_ack": 4
+      },
+      "2026-10-13T12:05Z": {
+        "24445:other:in:syn": 7,
+        "24445:other:out:syn_ack": 7,
+        "24445:other:in:rst": 2,
+        "24445:other:out:rst": 2
+      }
+    },
+    "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+  },
+  "phone_MCI": "NOT_TESTED",
+  "phone_Irancell": "NOT_TESTED",
+  "observer_expires_utc": "2026-10-13T12:40:47.728322+00:00",
+  "canary_expires_utc": "2026-10-13T15:02:35+00:00",
+  "next_step": "Phone test ARE-Stock-8443-13Oct for 30 seconds while observer is active, with exact time and carrier; compare to prior stock 24447 timeout. Do not claim filtering bypass before actual phone success.",
+  "limitations": [
+    "Management-host HTTPS/UDP success does not prove mobile connectivity or DPI bypass.",
+    "Changing to port 8443 does not make REALITY undetectable or establish a permanent solution.",
+    "8443 is a second independent stock control; the modified core remains on 24445.",
+    "Packet counters do not identify a user/carrier and do not establish authentication.",
+    "Core validation warned that using REALITY on non-443 ports may increase blocking risk; this is a bounded reachability test, not a stealth recommendation."
+  ],
+  "production_changed": false,
+  "app_or_client_core_changed": false,
+  "provider_firewall_changed": false,
+  "later_stages_started": false,
+  "openai_api_requests": 0,
+  "openai_api_tokens": 0,
+  "evidence_sha256": {
+    "phase1-altport-preflight.log": "9b2800e05952338b4ae701c7a77b06ba835eef9993c887409777ff8a27cc7c6f",
+    "stock-8443-client/result.json": "62fe94e3bbf5196c1b384698f6bf863c982c8f94760651488b02d7529f2a01ac",
+    "phase1-stock-8443-postflight.log": "3243c5354cebdbd0f62e7c2fc27332032dd029976d9cc9fc2753ed0efae3101f"
+  },
+  "start_receipt_sha256": "841e95d0eeefb8d9ecbe7dee2d9dc115f65a9b5125169e3b2ed7a9663e76c77c"
+}
