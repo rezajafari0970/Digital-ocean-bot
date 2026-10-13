@@ -545,16 +545,17 @@
   "full_fleet_activation": "BLOCKED",
   "latest_continuation": {
     "receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json",
-    "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
-    "status": "stage1_primary_8443_failed_ip_control_phone_test_pending",
+    "recorded_utc": "2026-10-13T12:40:18.029974+00:00",
+    "status": "stage1_ip_control_partial_phone_connectivity_stability_unconfirmed",
     "new_canary_expires_utc": "2026-10-13T15:02:35+00:00",
     "client_core": "26.5.9",
     "tcp_observer_expires_utc": "2026-10-13T12:40:47.728322+00:00",
     "provider_firewall": "NONE_ATTACHED_API_200",
-    "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI.",
+    "next_step": "Before the existing 16:25:08 Tehran expiry, keep the same profile and one unchanged network, stop overlapping delay/IP tests, and try normal browsing for 60 seconds. Report carrier, exact time, page-open result, and whether the network/VPN was switched around 16:01:18. Do not change keys/SNI/resources until this distinguishes probe failures from general connectivity instability.",
     "alternate_stock_port": 8443,
     "ip_control_host": "139.84.240.33",
     "ip_control_port": 8443,
-    "ip_control_expires_utc": "2026-10-13T12:55:08.903217+00:00"
+    "ip_control_expires_utc": "2026-10-13T12:55:08.903217+00:00",
+    "ip_control_phone_results": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN"
   }
 }

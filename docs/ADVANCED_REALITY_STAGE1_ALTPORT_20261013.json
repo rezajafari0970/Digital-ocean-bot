@@ -212,7 +212,7 @@
   "phone_Irancell": "NOT_TESTED",
   "observer_expires_utc": "2026-10-13T12:40:47.728322+00:00",
   "canary_expires_utc": "2026-10-13T15:02:35+00:00",
-  "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI.",
+  "next_step": "Before the existing 16:25:08 Tehran expiry, keep the same profile and one unchanged network, stop overlapping delay/IP tests, and try normal browsing for 60 seconds. Report carrier, exact time, page-open result, and whether the network/VPN was switched around 16:01:18. Do not change keys/SNI/resources until this distinguishes probe failures from general connectivity instability.",
   "limitations": [
     "Management-host HTTPS/UDP success does not prove mobile connectivity or DPI bypass.",
     "Changing to port 8443 does not make REALITY undetectable or establish a permanent solution.",
@@ -326,5 +326,9 @@
     "memory_available_kib": 408820,
     "expires_utc": "2026-10-13T15:02:35+00:00"
   },
-  "followup_receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json"
+  "followup_receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json",
+  "ip_control_phone_followup": {
+    "recorded_utc": "2026-10-13T12:40:18.029974+00:00",
+    "result": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN"
+  }
 }

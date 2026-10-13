@@ -2,7 +2,7 @@
   "recorded_utc": "2026-10-13T11:05:26.596253+00:00",
   "scope": "stage_1_only_by_user_request",
   "stage_1": {
-    "status": "MOBILE_ACCEPTANCE_FAILED_IP_CONTROL_PENDING",
+    "status": "MOBILE_ACCEPTANCE_NOT_CONFIRMED_IP_CONTROL_PARTIAL_CONNECTIVITY",
     "preparation": "PASS",
     "technical_connectivity": "PASS",
     "phone_MCI": "USER_REPORTED_DID_NOT_CONNECT",
@@ -143,20 +143,24 @@
   "openai_api_tokens": 0,
   "latest_diagnostic": {
     "receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json",
-    "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
+    "recorded_utc": "2026-10-13T12:40:18.029974+00:00",
     "stock_control_port": 24447,
     "stock_phone_results": "TCP_CONNECT_TIMEOUT_NO_NON_MANAGER_SYN_OBSERVED_CARRIER_UNKNOWN",
     "tcp_observer_expires_utc": "2026-10-13T12:40:47.728322+00:00",
     "provider_firewall": "NONE_ATTACHED_API_200",
-    "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI.",
+    "next_step": "Before the existing 16:25:08 Tehran expiry, keep the same profile and one unchanged network, stop overlapping delay/IP tests, and try normal browsing for 60 seconds. Report carrier, exact time, page-open result, and whether the network/VPN was switched around 16:01:18. Do not change keys/SNI/resources until this distinguishes probe failures from general connectivity instability.",
     "alternate_stock_port": 8443,
     "alternate_phone_results": "TCP_CONNECT_FAILED_CARRIER_UNKNOWN_LATER_PACKETS_UNATTRIBUTED",
     "alternate_manager_tests": "HTTPS_AND_UDP_PASS",
     "ip_control_host": "139.84.240.33",
     "ip_control_port": 8443,
-    "ip_control_phone_results": "NOT_TESTED",
+    "ip_control_phone_results": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN",
     "ip_control_expires_utc": "2026-10-13T12:55:08.903217+00:00",
     "ip_control_observer_expires_utc": "2026-10-13T12:55:00.357476+00:00",
-    "ip_control_manager_tests": "HTTPS_AND_UDP_PASS"
+    "ip_control_manager_tests": "HTTPS_AND_UDP_PASS",
+    "ip_control_website_result": "NOT_REPORTED",
+    "ip_control_carrier": "UNKNOWN",
+    "ip_control_server_restarts": 0,
+    "ip_control_server_oom_kills": 0
   }
 }

@@ -695,9 +695,9 @@
   },
   "latest_followup": {
     "receipt": "ADVANCED_REALITY_STAGE1_IP_CONTROL_20261013.json",
-    "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
+    "recorded_utc": "2026-10-13T12:40:18.029974+00:00",
     "primary_8443_phone_result": "TCP_CONNECT_FAILED_CARRIER_UNKNOWN",
-    "new_ip_control_phone_result": "PENDING",
-    "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI."
+    "new_ip_control_phone_result": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN",
+    "next_step": "Before the existing 16:25:08 Tehran expiry, keep the same profile and one unchanged network, stop overlapping delay/IP tests, and try normal browsing for 60 seconds. Report carrier, exact time, page-open result, and whether the network/VPN was switched around 16:01:18. Do not change keys/SNI/resources until this distinguishes probe failures from general connectivity instability."
   }
 }

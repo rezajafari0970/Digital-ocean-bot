@@ -1,7 +1,7 @@
 {
-  "recorded_utc": "2026-10-13T12:28:28.661765+00:00",
+  "recorded_utc": "2026-10-13T12:40:18.029974+00:00",
   "scope": "stage1_only",
-  "status": "MOBILE_ACCEPTANCE_FAILED_IP_CONTROL_PENDING",
+  "status": "MOBILE_ACCEPTANCE_NOT_CONFIRMED_IP_CONTROL_PARTIAL_CONNECTIVITY",
   "phone_log_analysis": {
     "source": "user_supplied_v2rayNG_log_2026-10-13_1545",
     "raw_log_and_credentials_committed": false,
@@ -220,11 +220,110 @@
       "memory_available_kib": 269632
     },
     "comparison": "Identical official binary and byte-identical server config to 172.237.20.67:8443; client connection settings differ only by endpoint IP. OS/provider/path differ and resource caps are tighter; not a speed benchmark.",
-    "phone_MCI": "NOT_TESTED",
-    "phone_Irancell": "NOT_TESTED",
-    "expires_utc": "2026-10-13T12:55:08.903217+00:00"
+    "phone_MCI": "NOT_CONFIRMED_UNATTRIBUTED_PHONE_LOG",
+    "phone_Irancell": "NOT_CONFIRMED_UNATTRIBUTED_PHONE_LOG",
+    "expires_utc": "2026-10-13T12:55:08.903217+00:00",
+    "phone_test_unknown_carrier": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN",
+    "after_phone_snapshot": {
+      "utc": "2026-10-13T12:37:44.632156+00:00",
+      "host": "139.84.240.33",
+      "port": 8443,
+      "expires_utc": "2026-10-13T12:55:08.903217+00:00",
+      "production_status_same": true,
+      "production_config_same": true,
+      "production_binary_same": true,
+      "candidate_config_sha256": "3894695159fec7b08cf9a9d127c79019da21fcdf49851bb8182dfd4bef9b5dd7",
+      "units": {
+        "x-ui": {
+          "ActiveState": "active",
+          "SubState": "running",
+          "ActiveEnterTimestamp": "Tue 2026-10-13 09:42:24 UTC",
+          "RuntimeMaxUSec": "infinity",
+          "MainPID": "4019",
+          "Result": "success",
+          "NRestarts": "0",
+          "MemoryCurrent": "431669248",
+          "MemoryPeak": "770531328",
+          "CPUUsageNSec": "4830928362000",
+          "TasksCurrent": "23",
+          "CPUQuotaPerSecUSec": "infinity",
+          "MemoryHigh": "infinity",
+          "MemoryMax": "infinity"
+        },
+        "are-stage1-ipcontrol-8443-20261013": {
+          "ActiveState": "active",
+          "SubState": "running",
+          "ActiveEnterTimestamp": "Tue 2026-10-13 12:25:08 UTC",
+          "RuntimeMaxUSec": "30min",
+          "MainPID": "12471",
+          "Result": "success",
+          "NRestarts": "0",
+          "MemoryCurrent": "19779584",
+          "MemoryPeak": "23461888",
+          "CPUUsageNSec": "1146684000",
+          "TasksCurrent": "7",
+          "CPUQuotaPerSecUSec": "200ms",
+          "MemoryHigh": "33554432",
+          "MemoryMax": "67108864",
+          "cgroup": {
+            "cpu.stat": "usage_usec 1146684\nuser_usec 640229\nsystem_usec 506454\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 693\nnr_throttled 6\nthrottled_usec 352670\nnr_bursts 0\nburst_usec 0",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+            "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0",
+            "pids.events": "max 0"
+          }
+        },
+        "are-stage1-ipcontrol-observer-20261013": {
+          "ActiveState": "active",
+          "SubState": "running",
+          "ActiveEnterTimestamp": "Tue 2026-10-13 12:25:08 UTC",
+          "RuntimeMaxUSec": "30min",
+          "MainPID": "12473",
+          "Result": "success",
+          "NRestarts": "0",
+          "MemoryCurrent": "10772480",
+          "MemoryPeak": "10788864",
+          "CPUUsageNSec": "932443000",
+          "TasksCurrent": "2",
+          "CPUQuotaPerSecUSec": "50ms",
+          "MemoryHigh": "infinity",
+          "MemoryMax": "33554432",
+          "cgroup": {
+            "cpu.stat": "usage_usec 932443\nuser_usec 588495\nsystem_usec 343947\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 1049\nnr_throttled 17\nthrottled_usec 1543706\nnr_bursts 0\nburst_usec 0",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+            "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0",
+            "pids.events": "max 0"
+          }
+        }
+      },
+      "observer": {
+        "started_utc": "2026-10-13T12:25:10.357476+00:00",
+        "scheduled_end_utc": "2026-10-13T12:55:00.357476+00:00",
+        "updated_utc": "2026-10-13T12:37:44.791941+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          8443
+        ],
+        "counts": {
+          "8443:manager:in:syn": 3,
+          "8443:manager:out:syn_ack": 3,
+          "8443:manager:in:rst": 6,
+          "8443:other:in:syn": 185,
+          "8443:other:out:syn_ack": 200,
+          "8443:other:in:rst": 148,
+          "8443:other:out:rst": 80
+        },
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      },
+      "memory_available_kib": 281136,
+      "host_pressure": {
+        "cpu": "some avg10=17.98 avg60=14.68 avg300=14.36 total=2507404976\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0",
+        "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=501312415\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=336914766",
+        "io": "some avg10=0.02 avg60=0.02 avg300=0.00 total=990117977\nfull avg10=0.02 avg60=0.02 avg300=0.00 total=728098999"
+      }
+    }
   },
-  "next_step": "Test ARE-IP-Control-8443-13Oct for 30 seconds on the same phone and carrier used for the failed primary 8443 test; report carrier and exact time. Expiry 16:25:08 Tehran. This changes only the client endpoint IP; no import of the production profile keys/SNI.",
+  "next_step": "Before the existing 16:25:08 Tehran expiry, keep the same profile and one unchanged network, stop overlapping delay/IP tests, and try normal browsing for 60 seconds. Report carrier, exact time, page-open result, and whether the network/VPN was switched around 16:01:18. Do not change keys/SNI/resources until this distinguishes probe failures from general connectivity instability.",
   "limitations": [
     "Management success is not mobile acceptance or proof of filtering bypass.",
     "Working production 443 and failed primary 8443 differ in IP, port and REALITY settings; these phone logs alone do not isolate one parameter.",
@@ -246,6 +345,109 @@
     "phone-1545-ipcontrol-prepare.log": "eb53a8d7b326ae143d4c4ff8127e05394ff497ebb33f1eae4a2efb30158bccfa",
     "phone-1545-ipcontrol-start.log": "aecc575c7a8f84aef28d7222b6fda8b4f756c0443f506941bad61ef0bce01654",
     "ipcontrol-8443-client/result.json": "0a312c357c6a1cbaed3da09039d0ffa909c6d8335564c909609f07911bc3e90f",
-    "phone-1545-ipcontrol-postflight.log": "e05e9356769284bbc5db08c394315203b4640f270d74575a76a6c7eeeec3cd97"
-  }
+    "phone-1545-ipcontrol-postflight.log": "e05e9356769284bbc5db08c394315203b4640f270d74575a76a6c7eeeec3cd97",
+    "phone-1601-ipcontrol-check.log": "cd95fbf0e7fe57be10fe94c6bcc2e8ae487faa04d4549f224d9b15a2b0538e29",
+    "phone-1601-ipcontrol-compact.log": "643c53b1563abc935318d4eb17690f27a7d764644ff6da8a3b0bdd9bf39bf394"
+  },
+  "latest_phone_report": {
+    "source": "user_supplied_v2rayNG_log_2026-10-13_1601",
+    "raw_log_and_credentials_committed": false,
+    "phone_source_ip_retained": false,
+    "profile": "ARE-IP-Control-8443-13Oct",
+    "endpoint": "139.84.240.33:8443",
+    "client_core": "26.5.9",
+    "server_core": "26.9.9 official stock",
+    "carrier": "UNKNOWN",
+    "same_network_as_previous_test": "NOT_CONFIRMED",
+    "timezone_assumption": "Tehran UTC+03:30; phone timezone and clock alignment are not independently verified",
+    "result": "RETURNED_TUNNELED_DATA_WITH_TIMEOUTS_AND_ABORTS_CARRIER_UNKNOWN",
+    "website_opened_by_user": "NOT_REPORTED",
+    "http_success_status_in_log": "NOT_SHOWN",
+    "evidence": [
+      {
+        "local_time": "16:00:42.852",
+        "event": "ECONNREFUSED at local SOCKS 127.0.0.1:10808 before core start; not refusal by remote endpoint"
+      },
+      {
+        "local_time": "16:00:44.048",
+        "event": "Core started successfully"
+      },
+      {
+        "local_time": "16:00:49 onward",
+        "event": "Returned XTLS payload and SOCKS UDP DNS responses show working tunneled data on at least some connections"
+      },
+      {
+        "local_time": "16:01:18.019",
+        "event": "Multiple existing remote sockets report software caused connection abort together; exact cause is not established"
+      },
+      {
+        "local_time": "16:01:19.826",
+        "event": "App getRemoteIPInfo reports Read timed out while TLS handshaking"
+      },
+      {
+        "local_time": "16:01:21.855",
+        "event": "Writing returned data to local SOCKS consumer reports broken pipe; compatible with consumer closure following its timeout"
+      },
+      {
+        "local_time": "16:01:18-27",
+        "event": "New and retried connections again return DNS and TLS payload"
+      }
+    ],
+    "probe_load": "Numerous overlapping delay and IP-info requests are visible. Their causal role is not proven.",
+    "interpretation": "The new endpoint carries tunneled traffic, but sustained mobile use is not accepted. Relative to the earlier failed primary attempt, this supports an endpoint/path difference; it does not establish permanent IP blocking, filtering mechanism, or success of the modified ARE core.",
+    "hypotheses_not_proven": [
+      "Phone network transition or local socket lifecycle",
+      "Intermittent path loss/delay",
+      "Destination or overlapping probe timeout"
+    ],
+    "server_observation": {
+      "utc": "2026-10-13T12:37:44.632156+00:00",
+      "production_unchanged": true,
+      "canary_pid": 12471,
+      "canary_restarts": 0,
+      "memory_current_bytes": 19779584,
+      "memory_peak_bytes": 23461888,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "cpu_lifetime_stats": {
+        "usage_usec": 1146684,
+        "user_usec": 640229,
+        "system_usec": 506454,
+        "nice_usec": 0,
+        "core_sched.force_idle_usec": 0,
+        "nr_periods": 693,
+        "nr_throttled": 6,
+        "throttled_usec": 352670,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      },
+      "cpu_quota_percent": 20,
+      "host_cpu_pressure_at_snapshot": "some avg10=17.98 avg60=14.68 avg300=14.36 total=2507404976\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0",
+      "resource_interpretation": "No canary restart, OOM, memory-limit hit, or PID-limit hit. CPU quota throttling totals only 0.352670 seconds since launch; the snapshot does not justify raising limits and cannot localize transient delay during the phone attempt.",
+      "phone_time_window_observer_minutes_utc": {
+        "2026-10-13T12:30Z": {
+          "8443:other:in:syn": 58,
+          "8443:other:out:syn_ack": 65,
+          "8443:other:in:rst": 25,
+          "8443:other:out:rst": 5
+        },
+        "2026-10-13T12:31Z": {
+          "8443:other:in:syn": 114,
+          "8443:other:out:syn_ack": 122,
+          "8443:other:in:rst": 67,
+          "8443:other:out:rst": 22
+        }
+      },
+      "counter_caveat": "Counts include retransmissions and unassigned peers. SYN-ACK counts can exceed SYN counts. Counts do not prove unique clients, authentication, or identify the handset; no peer addresses or payloads were retained."
+    }
+  },
+  "resource_limits_changed_after_phone_test": false,
+  "evidence_format_note": "The first operator receipt is output-tail truncated; its complete observer object was parsed separately. The compact follow-up receipt is complete valid JSON."
 }
