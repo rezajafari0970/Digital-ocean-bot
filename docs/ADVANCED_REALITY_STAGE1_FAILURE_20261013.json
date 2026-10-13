@@ -1,7 +1,7 @@
 {
-  "recorded_utc": "2026-10-13T11:50:19.381663+00:00",
+  "recorded_utc": "2026-10-13T12:04:49.675557+00:00",
   "user_report_utc": "2026-10-13T11:23:16Z",
-  "stage1_status": "MOBILE_ACCEPTANCE_FAILED_TCP_CONNECT_DIAGNOSIS_PENDING",
+  "stage1_status": "MOBILE_ACCEPTANCE_FAILED_STOCK_SYN_NOT_OBSERVED",
   "user_report": {
     "MCI": "DID_NOT_CONNECT",
     "Irancell": "DID_NOT_CONNECT",
@@ -296,12 +296,11 @@
     "First diagnostic had 9 REALITY starts, 4 successes and 5 failures. Three successes were our initial tests; other attempts are unattributed. REALITY success is not VLESS authentication or a user result.",
     "Both paths pass HTTPS and UDP from the management host; this does not prove reachability from either mobile carrier.",
     "Stock control uses the same IP and config with only the inbound port changed from 24445 to 24447. Because the port also differs, its result alone cannot conclusively isolate modified-core effects.",
-    "Root cause remains unknown pending exact client error/app version and mobile control results."
+    "Latest timed stock test had no observed non-manager SYN at the host; pre/post manager probes succeeded and provider API returned no attached Cloud Firewall. Exact path failure and carrier attribution remain unresolved."
   ],
   "next_required_evidence": [
-    "stock_control_phone_result_MCI_and_Irancell",
-    "client_error_log_or_screenshot",
-    "app_name_version_and_actual_client_core"
+    "carrier_used_in_timed_stock_phone_log",
+    "whether_another_existing_profile_works_on_same_phone_and_network"
   ],
   "stages_2_3_4": "NOT_STARTED",
   "production_panel_or_core_replaced": false,
@@ -432,12 +431,259 @@
     "unit": "are-stage1-tcp-observer-v2-20261013",
     "duration_seconds": 1190,
     "runtime_max_seconds": 1200,
-    "interpretation_limit": "Other-source packets cannot identify a user or carrier. Observer started after pasted phone log and cannot establish whether packets from that past attempt arrived. New timed phone attempt required."
+    "interpretation_limit": "The timed phone test now overlaps the observer. No stock-port non-manager SYN was seen. Other-source traffic remains unattributable; no ACK/data or successful VLESS sessions are measured."
   },
-  "next_step": "Repeat stock control phone connection while observer is active; report exact time and carrier. No client parameter changes or later-stage operations.",
+  "next_step": "Identify the carrier used for the 15:22-15:23 phone log and whether another existing profile works on the same phone and network; then choose a discriminating endpoint/path test. Do not repeat unchanged stock tests blindly.",
   "evidence_sha256": {
     "phase1-tcp-firewall.log": "95bdd4cc0ba952a77e5060a063c347ec69d021e1b0421156a1e73ba328ae5adc",
     "phase1-tcp-observer-v2-check.log": "1a8f829771ca279f7203af120370389dc256acb03ff65963562b14d6b7e0d349",
-    "phase1-observer-v2-calibration.json": "2210955eb8430b541527c483728df7cd8cefa7291b55001b889eb6c8774150ce"
+    "phase1-observer-v2-calibration.json": "2210955eb8430b541527c483728df7cd8cefa7291b55001b889eb6c8774150ce",
+    "phase1-phone-1523-check.log": "a11f26747ecf3065c848ae200d7818ac912c84e1936f799498b7c7fe66c6c554",
+    "phase1-phone-1523-postcheck.log": "4d9643c2fec55fd01073f6c8ddfb01dba556e4442dd4e38bcd9f7ae2a6226ff5",
+    "phase1-phone-1523-postcalibration.json": "9cd199c3a89bbc27a758599b9c664a977c27c38c551c26b15e07d236c82d8b09",
+    "phone-firewall-read.json": "063653a6cf4cfe098a9c3aa1de06ede61bd4bd94bdca28151e648d5b394b75b8"
+  },
+  "timed_stock_phone_log": {
+    "profile": "ARE-Stock-Control-13Oct",
+    "endpoint": "172.237.20.67:24447",
+    "device_log_window": "2026-10-13 15:22:21 to 15:23:12",
+    "timezone_interpretation": "Asia/Tehran from ongoing test context; Android lines have no explicit timezone",
+    "correlated_utc_window": "2026-10-13T11:52:21Z to 2026-10-13T11:53:12Z",
+    "carrier": "NOT_IDENTIFIED",
+    "client_core": "26.5.9",
+    "result": "TCP_CONNECT_TIMEOUT",
+    "core_started": true,
+    "imported_parameters_match_control": true,
+    "raw_phone_log_saved": false,
+    "credentials_saved_in_repository": false,
+    "destination_probe_tls_timeout_is_not_outer_reality_success_evidence": true
+  },
+  "timed_tcp_correlation": {
+    "snapshot_before_postcalibration": {
+      "utc": "2026-10-13T11:57:29.866844+00:00",
+      "observer": {
+        "started_utc": "2026-10-13T11:46:49.889049+00:00",
+        "scheduled_end_utc": "2026-10-13T12:06:39.889049+00:00",
+        "updated_utc": "2026-10-13T11:57:29.707038+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          24445,
+          24447
+        ],
+        "counts": {
+          "24445:manager:in:syn": 1,
+          "24445:manager:out:syn_ack": 1,
+          "24447:manager:in:syn": 1,
+          "24447:manager:out:syn_ack": 1,
+          "24445:other:in:syn": 31,
+          "24445:other:out:syn_ack": 50,
+          "24445:other:in:rst": 13,
+          "24445:other:out:rst": 1
+        },
+        "minutes": {
+          "2026-10-13T11:47Z": {
+            "24445:manager:in:syn": 1,
+            "24445:manager:out:syn_ack": 1,
+            "24447:manager:in:syn": 1,
+            "24447:manager:out:syn_ack": 1
+          },
+          "2026-10-13T11:48Z": {
+            "24445:other:in:syn": 2,
+            "24445:other:out:syn_ack": 2
+          },
+          "2026-10-13T11:49Z": {
+            "24445:other:in:syn": 6,
+            "24445:other:out:syn_ack": 7,
+            "24445:other:in:rst": 7
+          },
+          "2026-10-13T11:50Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 6
+          },
+          "2026-10-13T11:51Z": {
+            "24445:other:in:syn": 3,
+            "24445:other:out:syn_ack": 4
+          },
+          "2026-10-13T11:52Z": {
+            "24445:other:in:syn": 5,
+            "24445:other:out:syn_ack": 5,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:53Z": {
+            "24445:other:in:syn": 6,
+            "24445:other:out:syn_ack": 10,
+            "24445:other:out:rst": 1,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:54Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 2,
+            "24445:other:in:rst": 2
+          },
+          "2026-10-13T11:55Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 3,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:56Z": {
+            "24445:other:in:syn": 5,
+            "24445:other:out:syn_ack": 10,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:57Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 1
+          }
+        },
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      },
+      "observer_unit": "ActiveState=active\nMainPID=9699\nResult=success\nNRestarts=0\nMemoryCurrent=7819264\n",
+      "test_units": "Id=are-stage1-phone-20261013.service\nActiveState=active\nMainPID=7208\nNRestarts=0\n\nId=are-stage1-stock-control-20261013.service\nActiveState=active\nMainPID=8482\nNRestarts=0\n",
+      "test_listeners": [
+        "LISTEN 0      4096               *:24447       *:* users:((\"xray\",pid=8482,fd=4))                         ",
+        "LISTEN 0      4096               *:24445       *:* users:((\"xray\",pid=7208,fd=8))                         "
+      ],
+      "production_status_same": true,
+      "production_config_same": true,
+      "production_core_same": true
+    },
+    "snapshot_after_postcalibration": {
+      "utc": "2026-10-13T11:58:22.843544+00:00",
+      "observer": {
+        "started_utc": "2026-10-13T11:46:49.889049+00:00",
+        "scheduled_end_utc": "2026-10-13T12:06:39.889049+00:00",
+        "updated_utc": "2026-10-13T11:58:22.390987+00:00",
+        "active": true,
+        "capture_alive": true,
+        "ports": [
+          24445,
+          24447
+        ],
+        "counts": {
+          "24445:manager:in:syn": 1,
+          "24445:manager:out:syn_ack": 1,
+          "24447:manager:in:syn": 2,
+          "24447:manager:out:syn_ack": 2,
+          "24445:other:in:syn": 35,
+          "24445:other:out:syn_ack": 54,
+          "24445:other:in:rst": 14,
+          "24445:other:out:rst": 1
+        },
+        "minutes": {
+          "2026-10-13T11:47Z": {
+            "24445:manager:in:syn": 1,
+            "24445:manager:out:syn_ack": 1,
+            "24447:manager:in:syn": 1,
+            "24447:manager:out:syn_ack": 1
+          },
+          "2026-10-13T11:48Z": {
+            "24445:other:in:syn": 2,
+            "24445:other:out:syn_ack": 2
+          },
+          "2026-10-13T11:49Z": {
+            "24445:other:in:syn": 6,
+            "24445:other:out:syn_ack": 7,
+            "24445:other:in:rst": 7
+          },
+          "2026-10-13T11:50Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 6
+          },
+          "2026-10-13T11:51Z": {
+            "24445:other:in:syn": 3,
+            "24445:other:out:syn_ack": 4
+          },
+          "2026-10-13T11:52Z": {
+            "24445:other:in:syn": 5,
+            "24445:other:out:syn_ack": 5,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:53Z": {
+            "24445:other:in:syn": 6,
+            "24445:other:out:syn_ack": 10,
+            "24445:other:out:rst": 1,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:54Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 2,
+            "24445:other:in:rst": 2
+          },
+          "2026-10-13T11:55Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 3,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:56Z": {
+            "24445:other:in:syn": 5,
+            "24445:other:out:syn_ack": 10,
+            "24445:other:in:rst": 1
+          },
+          "2026-10-13T11:57Z": {
+            "24445:other:in:syn": 1,
+            "24445:other:out:syn_ack": 1
+          },
+          "2026-10-13T11:58Z": {
+            "24447:manager:in:syn": 1,
+            "24447:manager:out:syn_ack": 1,
+            "24445:other:in:syn": 4,
+            "24445:other:out:syn_ack": 4,
+            "24445:other:in:rst": 1
+          }
+        },
+        "scope": "SYN/SYN-ACK/RST counters only; no packet files, payloads, or peer addresses retained"
+      },
+      "observer_unit": "ActiveState=active\nMainPID=9699\nResult=success\nNRestarts=0\nMemoryCurrent=7569408\n",
+      "test_units": "Id=are-stage1-phone-20261013.service\nActiveState=active\nMainPID=7208\nNRestarts=0\n\nId=are-stage1-stock-control-20261013.service\nActiveState=active\nMainPID=8482\nNRestarts=0\n",
+      "test_listeners": [
+        "LISTEN 0      4096               *:24447       *:* users:((\"xray\",pid=8482,fd=4))                         ",
+        "LISTEN 0      4096               *:24445       *:* users:((\"xray\",pid=7208,fd=8))                         "
+      ],
+      "production_status_same": true,
+      "production_config_same": true,
+      "production_core_same": true
+    },
+    "postcalibration": {
+      "utc": "2026-10-13T11:58:04.537480+00:00",
+      "port": 24447,
+      "tcp_connect": true,
+      "seconds": 0.236
+    },
+    "stock_other_source_syn_observed_during_entire_capture_to_postcheck": 0,
+    "minute_buckets": [
+      {
+        "utc_minute": "2026-10-13T11:52Z",
+        "stock_other_syn": 0,
+        "stock_other_syn_ack": 0
+      },
+      {
+        "utc_minute": "2026-10-13T11:53Z",
+        "stock_other_syn": 0,
+        "stock_other_syn_ack": 0
+      }
+    ],
+    "interpretation": "No non-manager stock-port SYN was observed on the monitored host during the phone window or the entire capture through postcheck. Pre/post manager TCP probes and their SYN/SYN-ACK were observed; both listeners and units remained active. This supports a failure before the server application, not a demonstrated REALITY or VLESS rejection.",
+    "limits": [
+      "No peer addresses or packet payloads retained.",
+      "Other-source traffic on 24445 cannot be attributed to this phone or any carrier.",
+      "SYN and SYN-ACK packet counts include retransmissions and do not prove completed handshakes or authentication.",
+      "Exact drop location is not established; phone routing, carrier/intermediate path or provider-edge transport issues remain possible."
+    ]
+  },
+  "provider_firewall_check": {
+    "firewalls": [],
+    "firewalls_http_status": 200,
+    "instance_http_status": 200,
+    "interface_generation": "legacy_config",
+    "network_mode": "proxy_required",
+    "pages": 1,
+    "provider": "linode",
+    "provider_mutations": 0,
+    "results": 0,
+    "scope": "GET-only provider firewall diagnosis using existing account network runtime",
+    "utc": "2026-10-13T12:01:47.647924484Z",
+    "interpretation": "No attached Linode Cloud Firewall returned for this legacy-config instance. This does not rule out all upstream/provider network faults.",
+    "reference": "https://techdocs.akamai.com/linode-api/reference/get-linode-firewalls"
   }
 }
