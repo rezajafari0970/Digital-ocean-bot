@@ -1,6 +1,6 @@
 # Direct MCI investigation — 2026-10-14
 
-Status: **direct Irancell sidecar path verified; MCI solution and v2rayNG application acceptance not established; experimental project changes only**.
+Status: **A–B–A confirms MCI/main-destination path impairment in the measured window; no direct MCI remedy verified; experimental project changes only**.
 
 ## Scope and constraints
 
@@ -44,7 +44,7 @@ This is an observation/validation feature, not a rollout actuator or an automati
 
 ## Next acceptance gates
 
-- The Irancell paired run below is complete. Return to MCI for an A-B-A confirmation while holding destination, official client binary, payload, transport and timeout fixed and honoring target expiry.
+- The Irancell and MCI return runs below complete the A-B-A comparison. Preserve the failure evidence; localize the affected path before further transport/kernel changes or promotion.
 - A bounded packet trace and client/origin nonce/hash correlation; no payload or credential logging.
 - A successful profile must pass full upload/download, DNS, official v2rayNG import/TUN, sustained traffic, screen-off, network switch and reconnect checks before promotion.
 - Compare connect latency, time to first byte, useful throughput, timeout rate and reconnect time against the unchanged control. A setting is not better just because it fragments more.
@@ -79,7 +79,7 @@ Private raw receipts, command results and packet captures are kept in the owner-
 - Broad repository gate before the final case-alias guard hardening: **1,779 passed, 41 skipped, zero failed**, exit 0; full go vet exit 0. Skips are pre-existing opt-in browser/live/core/namespace/database suites, not claimed as passed. After that small guard hardening, focused native/race/admin tests, package vet, CLI build and JS syntax checks passed again. No application UI was changed.
 - CLI end-to-end synthetic check: a complete report returns a non-applying sample; a false download-success claim is rejected. This is not network acceptance.
 - No new API request was made after the two Astra receipts above.
-- **Updated external requirement:** the Irancell paired run below is complete; a return to MCI is needed for A-B-A confirmation. Switching the active SIM/network cannot be assumed or performed through the available nonroot Termux shell. The MCI solution, official v2rayNG acceptance, sustained-throughput improvement and fleet activation remain unverified.
+- **Updated external requirement:** both carrier runs and the MCI return are complete below. The MCI remedy, official v2rayNG acceptance, sustained-throughput improvement and fleet activation remain unverified.
 
 
 ## Irancell paired follow-up — 2026-10-14
@@ -103,4 +103,52 @@ Cleanup was verified: all four temporary units stopped, all five test ports clos
 
 **API usage for this follow-up: 0 requests, 0 tokens, USD 0 additional estimated cost.** The preceding two-request Astra stage remains 21,181 tokens and USD 0.9922925 estimated; this is not an account-wide usage total. The follow-up changes documentation and private receipts only, so the prior code acceptance results above remain applicable and no full code test suite was repeated.
 
-Next: switch the same phone back to MCI for a bounded A-B-A confirmation. Keep direct routing, the fixed client, production safety and lifecycle guards intact. Do not promote or deploy fleet-wide on the strength of Irancell success alone.
+The return-to-MCI comparison is completed below. Keep direct routing, the fixed client, production safety and lifecycle guards intact. Do not promote or deploy fleet-wide on the strength of Irancell success alone.
+
+
+## Return to MCI and bounded UDP candidates — 2026-10-14
+
+The target-observed return-path source was verified as **AS197207 (MCCI)**. The phone, its official Xray 26.5.9 binary/hash, target and production configuration were unchanged. MCI, Irancell and MCI-return observations now form a sequential A-B-A comparison; this is stronger than an unpaired report but does not eliminate all route/time or endpoint confounders.
+
+| Main-destination batch | Off-carrier control | MCI return |
+|---|---:|---:|
+| Same-port HTTP/TLS 1.3, small and directional bulk | 12/12 | 4/12; only small responses |
+| VLESS/TLS 1.3, directional plus combined bulk | 15/15 | 5/15; only small responses |
+| Existing production REALITY/TCP 443 | 4/4 | 0/4 |
+| VLESS/TLS 1.3 over mKCP/UDP, isolated high port | 7/7 | 0/7 |
+| Same mKCP/TLS on UDP 443 | 2/2 | 0/2 |
+| Same UDP 443 candidate with Salamander FinalMask | 2/2 | 0/2 |
+| **Main-destination total** | **42/42** | **9/42; no usable profile** |
+
+Both candidate configurations passed native validation with the unchanged client release and the server core. TLS certificate verification remained enabled. The UDP transport and mask trials modified isolated, bounded test services only; production TCP 443 was not changed. The probes used the same nonce/hash/full-body criteria as earlier tests.
+
+All eight same-port bulk cases succeeded on Irancell and failed again on MCI. The repeated MCI plaintext downloads stopped at **15,207 of 65,634 body bytes**. A server capture of one such flow showed handshake and request completion, the initial response flight and retransmissions, with no subsequent client ACK observed at that server. This does not establish whether Android emitted those ACKs or where they disappeared.
+
+A separate **direct synthetic reference** on the existing management host passed **6/6** from the same MCI phone, including complete HTTP/TLS upload and download. Local fixture controls also passed 6/6. This was a terminating diagnostic endpoint, not a traffic relay or a tested production proxy. Its different destination/route/OS limits causal isolation; it establishes that this phone/MCI session was not universally unable to transfer these payloads.
+
+The high-port UDP packet capture reached its **6,000-packet limit** during the first phone attempt; later absent packets must not be inferred from that truncated observation. The UDP-443 capture contains 5,993 packet records for the observed phone source across the bounded trials. Initial phone UDP traffic reached the target and target replies were observed leaving it, but phone reception is not established. No tested UDP/mask candidate restored even the small synthetic request. No panic or fatal runtime error was present in the isolated core logs.
+
+### Interpretation and next action
+
+The supported diagnosis is **impairment correlated with MCI and the main destination/path in this measurement window**. Plaintext and multiple encrypted transports, the A-B-A result and the second-destination reference make a purely REALITY, SNI, certificate or generic phone-TLS explanation insufficient. They do not prove intentional DPI, identify a particular operator device or geographic segment, or exclude all provider/endpoint behavior. No setting tested here is a verified direct MCI solution.
+
+Preserve the known Irancell result with its scope limits: four small production REALITY website responses do not constitute sustained production bulk/app qualification. A direct replacement origin on a separately verified reachable IP/prefix/provider route is an option that does not add a relay; it is not a repair or guarantee for the current IP. Provider/carrier route or source-dependent protection investigation remains appropriate.
+
+The missing discriminating evidence is a synchronized observation closer to subscriber/access egress, ideally paired with provider-edge and target captures. Ordinary nonroot Android access cannot be assumed to capture the cellular wire. A rootless VPNService recorder can change TCP ownership and does not prove that the original socket's ACKs left the phone; two Android VPN services cannot ordinarily run together. A USB-tethered laptop can reproduce and capture its own flows, but must be labeled as a changed tethering/NAT/client scope, with source ASN/IP reverified.
+
+Future output health must be keyed by observed carrier ASN, endpoint IP/port, transport, exact client version/hash, measurement scope and timestamp. Partial bodies/timeouts fail; failed controls make the result inconclusive; missing or stale evidence remains unqualified. Never average Irancell/control success into MCI health. A failed required sample should prevent promotion for that carrier/endpoint/scope, with fresh complete bidirectional samples and independent app acceptance required for recovery. These are acceptance requirements, not a newly deployed production quarantine system. The existing experimental assessment still returns **can_apply:false**.
+
+### Cleanup, review and accounting
+
+All temporary TCP/UDP listeners and the direct reference listener were verified closed; all corresponding test units were no longer running. The first UDP cleanup encountered an already-inactive transient unit; a fresh state read preceded an idempotent cleanup, followed by port/key/hash checks. Temporary certificate private keys and test credentials/configurations on target/manager were removed; client runners removed private files and stopped their sidecars. Production JSON SHA-256 remained unchanged and main TCP 443 remained listening. Phone remote services remained running with autostart enabled. Evidence archives were copied through the existing lifecycle/pinned-host guard and verified by SHA-256.
+
+One additional sanitized Responses API review used **gpt-6-astra**, high reasoning, store:false, standard tier. It completed in approximately 104 seconds and supported the scoped path-dependent interpretation, capture limitations and conservative promotion requirements; it did not produce or validate a working bypass.
+
+| API scope | Requests | Input tokens | Output tokens | Total tokens | Estimated USD |
+|---|---:|---:|---:|---:|---:|
+| MCI-return review | 1 | 815 | 3,925 | 4,740 | 0.2044000 |
+| All three Astra requests in this investigation | 3 | 2,562 | 23,359 | 25,921 | 1.1966925 |
+
+The new response includes 3,071 reasoning tokens within its output total, with zero cached-input/cache-write tokens. Cost uses published standard rates and is an estimate, not a billed invoice or account-wide total. Previous ChatGPT usage and older Sol-stage requests are outside this table. No full source test suite was repeated for this documentation/private-evidence-only follow-up, and nothing was deployed fleet-wide.
+
+Primary configuration references consulted: [Xray mKCP](https://xtls.github.io/en/config/transports/mkcp.html), [TLS](https://xtls.github.io/en/config/transports/tls.html), [FinalMask](https://xtls.github.io/en/config/transports/finalmask.html). Version compatibility was established by actual native/control tests, not inferred solely from current documentation. Pricing reference: [OpenAI GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra).
