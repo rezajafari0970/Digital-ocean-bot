@@ -77,3 +77,12 @@ The installer checks the configured panel page and all referenced JavaScript/CSS
 ### Linode expiry recovery
 
 An expired managed Linode can retire below the configured Desired count when another server in the same account has fresh, verified service readiness. Retirement is serialized, revalidated before starting, and processed by the existing deletion journal. The next retirement waits for verified backfill recovery. Desired remains a growth target, not an asserted provider quota; normal growth spacing and provider/proxy admission remain unchanged.
+
+
+## دقت وضعیت و خروجی موبایل
+
+شمارنده‌های موجودی از همان دادهٔ ارائه‌دهنده در جدول محاسبه می‌شوند؛ نبود داده با موجودی صفر متفاوت است. زمان مشاهده و نوبت به‌روزرسانی مشخص‌اند و بازکردن صفحهٔ اکانت درخواست تازه‌سازی ناخواسته ایجاد نمی‌کند.
+
+خطای تاریخی ساخت یا نصب از وضعیت فعلی جداست. تنظیمات پنل نسخهٔ واقعاً در حال اجرا را جدا از نتیجهٔ آپدیت قبلی نشان می‌دهد. گزینهٔ بررسی دوبارهٔ ظرفیت، دامنه‌های واجد شرایط را با تأیید صریح بررسی می‌کند و کلیک تکراری حین درخواست مهار می‌شود.
+
+نمایش انسانی Output وضعیت بارگذاری، خالی‌بودن و خطا را مشخص می‌کند و خطوط بلند روی موبایل شکسته می‌شوند. قالب لینک خام اشتراک و مرز اکانت و نوع خروجی حفظ شده‌اند.

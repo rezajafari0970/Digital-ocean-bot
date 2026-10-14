@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "goal": "Fully inspect 218.546-second user video and repair proven diagnostics, current-versus-historical state, inventory, read-side effects and mobile output issues while preserving provider/proxy/lifecycle policies.",
-  "status": "IN_PROGRESS_BLOCKED_FINAL_API_REVIEW",
-  "at": "2026-10-12T20:21:53.023520+00:00",
+  "status": "SOURCE_APPROVED_AWAITING_PUBLIC_GATES",
+  "at": "2026-10-14T06:41:25.705352+00:00",
   "base_revision": "a1f118d5351b24e6946a5acf0176cf738c9a7ee5",
   "production_revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
   "isolated_branch": "fix/video-followup-20261012",
@@ -32,7 +32,9 @@
     "PROJECT_STATE.md",
     "HANDOFF.md",
     "docs/development-jobs/video-followup-20261012.json",
-    "docs/VIDEO_FOLLOWUP_20261012.md"
+    "docs/VIDEO_FOLLOWUP_20261012.md",
+    "public-release/README.md",
+    "public-release/VALIDATION.json"
   ],
   "source_sha256": {
     "internal/adminapi/account_build_status.go": "400d85a2351e0f3403786b15e7336ab0ee24dc5781dce78d23b8173ae47f5e2b",
@@ -69,13 +71,21 @@
       "R1 freshness threshold metadata",
       "R2 missing inventory versus observed empty"
     ],
-    "resolution": "Both fixed with targeted Postgres and browser tests; independent final PASS unavailable",
-    "blocker": "HTTP429 insufficient_quota / credit_balance_exhausted",
-    "must_not_waive": "User required independent OpenAI final review before publication/production acceptance; confirmed from earlier accepted workflow on2026-10-02 and2026-10-10."
+    "resolution": "PASS independent gpt-6-astra final bounded review2026-10-14",
+    "blocker": null,
+    "must_not_waive": "User required independent OpenAI final review before publication/production acceptance; confirmed from earlier accepted workflow on2026-10-02 and2026-10-10.",
+    "final_receipt": "resp_0531915f6f66fdce006acf231a500487d198223074041581bd",
+    "scope": "Bounded source review of the supplied final corrections for candidate 32874909c539177e3d1e84bea147bd7d16623767, using the preserved earlier review. No tools, implementation, or independent test execution. This is not deployment acceptance.",
+    "evidence_gaps": [
+      "Go, PostgreSQL, vet, browser, affected-package, and output JavaScript passes are reported rather than independently verified here.",
+      "Mandatory publication scanning, unprivileged tests, exact-source Ubuntu 24 install/update validation, and runtime verification on both hosts remain pending. This source PASS does not waive them.",
+      "The newly named October 14 video was unavailable and is not covered by this review.",
+      "Candidate identity and unchanged raw subscription, class-fencing, provider, proxy, quota, and deletion behavior rely on the preserved review and supplied change scope; a complete repository diff was not independently inspected."
+    ]
   },
   "api_usage": {
-    "confirmed_responses": 1,
-    "confirmed_total_tokens": 37826,
+    "confirmed_responses": 2,
+    "confirmed_total_tokens": 57848,
     "unreceipted_activity": [
       {
         "at": "2026-10-12T19:44:12.729481+00:00",
@@ -95,8 +105,8 @@
         "billed_usd": null
       }
     ],
-    "confirmed_input_tokens": 37002,
-    "confirmed_output_tokens": 824,
+    "confirmed_input_tokens": 56204,
+    "confirmed_output_tokens": 1644,
     "receipts": [
       {
         "phase": "source",
@@ -113,15 +123,32 @@
           },
           "total_tokens": 37826
         }
+      },
+      {
+        "phase": "resume-final-20261014",
+        "id": "resp_0531915f6f66fdce006acf231a500487d198223074041581bd",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 19202,
+          "input_tokens_details": {
+            "cache_write_tokens": 19199,
+            "cached_tokens": 0
+          },
+          "output_tokens": 820,
+          "output_tokens_details": {
+            "reasoning_tokens": 242
+          },
+          "total_tokens": 20022
+        }
       }
     ],
     "billed_usd": null,
-    "intentional_requests_submitted": 4,
+    "intentional_requests_submitted": 5,
     "failed_intentional_requests": 3,
-    "api_access_status": "BLOCKED_CREDIT_BALANCE_EXHAUSTED",
+    "api_access_status": "AVAILABLE_FINAL_REVIEW_PASS",
     "prior_two_phase_confirmed_tokens": 232325,
-    "known_receipt_total_across_three_phases": 270151,
-    "known_receipt_responses_across_three_phases": 12,
+    "known_receipt_total_across_three_phases": 290173,
+    "known_receipt_responses_across_three_phases": 13,
     "failed_requests": [
       {
         "phase": "resolution",
@@ -151,7 +178,8 @@
     ],
     "counting_note": "Only returned usage receipts are summed. Failed requests and interrupted legacy activity are not invented as zero; these totals are not the organization billing total.",
     "last_credit_check": "2026-10-12T20:56:19.873185+00:00",
-    "confirmed_new_tokens_on_resume": null
+    "confirmed_new_tokens_on_resume": 20022,
+    "last_successful_review_at": "2026-10-14T06:41:25.704517+00:00"
   },
   "video_audit": {
     "video_seconds": 218.546,
@@ -308,5 +336,257 @@
     },
     "external_provider_blocker": "Vultr4335 TOKEN_INVALID persists",
     "next_step": "Restore API credit, obtain independent final PASS, then unchanged public validation/install gates and both-host deployment."
+  },
+  "resume_20261014": {
+    "source_review": "PASS",
+    "code_hashes_unchanged": true,
+    "new_video": "UNAVAILABLE_ATTACHMENT_NOT_INSPECTED",
+    "runtime_before": {
+      "observed_at": "2026-10-14T06:37:19.730310+00:00",
+      "revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+      "readiness_checks": 5,
+      "server_counts": {
+        "total_servers": 49,
+        "active_servers": 45,
+        "inactive_servers": 1,
+        "broken_servers": 0,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 3,
+        "active_deployments": 1
+      },
+      "builds": {
+        "active_builds": 1,
+        "waiting_builds": 1,
+        "observed_at": "2026-10-14T06:37:19.304807318Z"
+      },
+      "health_reasons": {
+        "PENDING_DELETION": 3,
+        "PROVISIONING": 1
+      },
+      "recent_build_rows": 100,
+      "historical_error_families": 62,
+      "legacy_array_preserved": true,
+      "linode": [
+        {
+          "provider_resource_id": "108109178",
+          "state": "READY",
+          "expires_at": "2026-10-14T12:04:38.261482+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "7b245259-78d1-42a7-9a81-5f2f8542a879",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108106504",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:55:33.323968+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "c12a1f87-0852-4367-8a48-a843feebf7a0",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108105744",
+          "state": "READY",
+          "expires_at": "2026-10-14T10:04:20.16208+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "255c2c6e-bddc-474d-8dd1-6a169f8132c0",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108105168",
+          "state": "READY",
+          "expires_at": "2026-10-14T11:58:59.260877+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "9e72c203-e65a-4b04-814c-215ef63297d7",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108103900",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:08:21.870331+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "8dc827b7-b70b-4b77-985c-ca8c47ad46b1",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108103536",
+          "state": "READY",
+          "expires_at": "2026-10-14T10:54:12.866119+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "7d6b3a3f-28d5-4d0f-8ba2-5e4abadbd250",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108096458",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:44:50.47264+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "aa59b369-c617-4b87-9435-3ff5975ab0c1",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108095576",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:08:24.231152+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "1a39dbe6-d6ae-45e2-ba6e-2007545dc6fa",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108089967",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:09:02.703381+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "0c1ddbee-011a-40da-a8b3-77128a511561",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108084046",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:25:47.47588+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "779b9003-3c15-4b86-9e77-f90810a3cf2c",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        }
+      ],
+      "config_capacity": {
+        "target": 225,
+        "active": 221,
+        "deficit": 4,
+        "coverage": {
+          "all_fresh": false,
+          "complete": true,
+          "eligible": 45,
+          "fresh": 41,
+          "freshness_seconds": 30,
+          "missing": 0,
+          "observed": 45,
+          "stale": 4,
+          "totals_basis": "last_observed"
+        }
+      },
+      "linode_config_capacity": [
+        {
+          "panel_id": "7d6b3a3f-28d5-4d0f-8ba2-5e4abadbd250",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:36:47.241703Z"
+        },
+        {
+          "panel_id": "aa59b369-c617-4b87-9435-3ff5975ab0c1",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:02.335617Z"
+        },
+        {
+          "panel_id": "7b245259-78d1-42a7-9a81-5f2f8542a879",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 1,
+          "deficit": 4,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:13.727722Z"
+        },
+        {
+          "panel_id": "c12a1f87-0852-4367-8a48-a843feebf7a0",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:04.252258Z"
+        },
+        {
+          "panel_id": "9e72c203-e65a-4b04-814c-215ef63297d7",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:36:48.525211Z"
+        },
+        {
+          "panel_id": "0c1ddbee-011a-40da-a8b3-77128a511561",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:07.019445Z"
+        },
+        {
+          "panel_id": "1a39dbe6-d6ae-45e2-ba6e-2007545dc6fa",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:08.233631Z"
+        },
+        {
+          "panel_id": "8dc827b7-b70b-4b77-985c-ca8c47ad46b1",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:36:48.233141Z"
+        },
+        {
+          "panel_id": "255c2c6e-bddc-474d-8dd1-6a169f8132c0",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:09.158238Z"
+        },
+        {
+          "panel_id": "779b9003-3c15-4b86-9e77-f90810a3cf2c",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:37:13.622571Z"
+        }
+      ]
+    },
+    "next": "Pass existing publication gates then both-host acceptance"
   }
 }

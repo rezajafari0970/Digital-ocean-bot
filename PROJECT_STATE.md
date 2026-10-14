@@ -1,3 +1,11 @@
+## Current — 2026-10-14: independent source PASS, publication gates pending
+
+This entry supersedes earlier credit-blocked status. One new gpt-6-astra final review completed with PASS for the tested candidate32874909; all18 code/test hashes remain unchanged. New receipt19202input+820output=20022tokens. This repair now has2completed responses totaling56204input+1644output=57848tokens, across5intentional requests including3earlier failures. Known receipts across the three named phases290173tokens; unreceipted legacy activity and billed USD remain unknown.
+
+The October14 attachment Screenrecorder-2026-10-14-09-51-50-639.mp4 was not delivered and has not been inspected. The approved scope is the completed October12 video follow-up. Public source scanners, unprivileged regression, exact-candidate Ubuntu24 install/update, atomic GitHub main/stable publication, and both-host runtime acceptance are now next. Do not claim them completed yet.
+
+Fresh predeployment primary at2026-10-14T06:37:19Z:49tracked=45active+1provisioning+3pending deletion,0broken,0degraded;1active/waiting build. Last-observed capacity225target/221active/4deficit,41of45fresh,4stale,0missing. Both hosts have3active services and5/5readiness on runtime5b0dc764. No arbitrary provider credential, quota, Desired, spacing or protection changes.
+
 ## Resume — 2026-10-13 00:29 Tehran
 
 Video follow-up remains BLOCKED_FINAL_API_REVIEW. One requested recheck again returned429 credit_balance_exhausted. Code/test hashes unchanged from32874909; runtime5b0dc764 unchanged on both hosts. Confirmed API37826tokens unchanged;4intentional attempts total,3failed, unreceipted legacy usage unknown. Native observation-stale count recovered19to0; primary43active/2provisioning/4degraded/9pending,2active builds. Read docs/VIDEO_FOLLOWUP_20261012.md and resume_20261013 in the job JSON. Restore API credit before final review; do not waive gates.
