@@ -1,6 +1,6 @@
 # Direct MCI investigation — 2026-10-14
 
-Status: **network solution not established; experimental project changes only**.
+Status: **direct Irancell sidecar path verified; MCI solution and v2rayNG application acceptance not established; experimental project changes only**.
 
 ## Scope and constraints
 
@@ -31,7 +31,7 @@ Initial controls used Linux Xray 26.3.27; the pacing and same-port batches use L
 
 Server capture verified phone SYN advertisements of MSS 1400 (default), 536 and 900. Lower MSS did not recover transfer. The server trace contains retransmitted sequence ranges and a lack of normal ACK advancement after the initial exchange. Offload/GRO/GSO can produce apparent packet sizes larger than the advertised MSS: analyze sequence space, not host-capture lengths alone. Server-side capture alone cannot locate the loss or establish what Android received.
 
-**Supported conclusion:** the target is not wholly unreachable, and neither all TLS nor all authenticated proxy traffic is blocked. There is a reproducible larger-transfer problem on the tested path. These observations do not prove which middlebox, network segment, endpoint, MTU behavior or DPI mechanism caused it, and do not establish successful REALITY or usable browsing.
+**Supported conclusion from the MCI batches:** the target is not wholly unreachable, and neither all TLS nor all authenticated proxy traffic is blocked. There is a reproducible larger-transfer problem on the tested path. These observations do not prove which middlebox, network segment, endpoint, MTU behavior or DPI mechanism caused it, and do not establish successful REALITY or usable browsing.
 
 ## Durable project changes
 
@@ -44,7 +44,7 @@ This is an observation/validation feature, not a rollout actuator or an automati
 
 ## Next acceptance gates
 
-- A near-time paired test on Irancell and MCI from this phone, holding destination, client binary, SNI, payload, transport and timeout fixed.
+- The Irancell paired run below is complete. Return to MCI for an A-B-A confirmation while holding destination, official client binary, payload, transport and timeout fixed and honoring target expiry.
 - A bounded packet trace and client/origin nonce/hash correlation; no payload or credential logging.
 - A successful profile must pass full upload/download, DNS, official v2rayNG import/TUN, sustained traffic, screen-off, network switch and reconnect checks before promotion.
 - Compare connect latency, time to first byte, useful throughput, timeout rate and reconnect time against the unchanged control. A setting is not better just because it fragments more.
@@ -79,4 +79,28 @@ Private raw receipts, command results and packet captures are kept in the owner-
 - Broad repository gate before the final case-alias guard hardening: **1,779 passed, 41 skipped, zero failed**, exit 0; full go vet exit 0. Skips are pre-existing opt-in browser/live/core/namespace/database suites, not claimed as passed. After that small guard hardening, focused native/race/admin tests, package vet, CLI build and JS syntax checks passed again. No application UI was changed.
 - CLI end-to-end synthetic check: a complete report returns a non-applying sample; a false download-success claim is rejected. This is not network acceptance.
 - No new API request was made after the two Astra receipts above.
-- **Remaining external requirement:** a paired Irancell run from the phone. Switching the active SIM/network cannot be assumed or performed through the available nonroot Termux shell. Network solution, official v2rayNG acceptance, throughput improvement and fleet activation remain unverified.
+- **Updated external requirement:** the Irancell paired run below is complete; a return to MCI is needed for A-B-A confirmation. Switching the active SIM/network cannot be assumed or performed through the available nonroot Termux shell. The MCI solution, official v2rayNG acceptance, sustained-throughput improvement and fleet activation remain unverified.
+
+
+## Irancell paired follow-up — 2026-10-14
+
+The user switched the same phone to Irancell. The target-observed source prefix was independently associated with **AS44244 (Iran Cell)** using RIPEstat; the phone's dual-SIM display alone was not treated as proof of the active data route. The destination and production configuration were unchanged, and both control and phone used official Xray **26.5.9**.
+
+| Direct test | Off-carrier control | Irancell phone |
+|---|---:|---:|
+| Same-port plaintext HTTP / TLS 1.3, two runs per size and direction | 12/12 | 12/12 |
+| Ordinary VLESS / TLS 1.3: 12 directional/tiny cases plus 3 combined bulk transfers | 15/15 | 15/15 |
+| Existing production REALITY on 443: two 204 checks and two complete robots.txt fetches | 4/4 | 4/4 |
+| **Total** | **31/31** | **31/31** |
+
+All eight same-port bulk cases that failed on MCI completed on Irancell. All three combined VLESS cases verified the full 16 KiB upload and 64 KiB download, including the nonce and server-computed upload hash. All **54 synthetic requests** across both sides correlated with origin request/response logs; no partial-body success was accepted. The production REALITY responses matched the off-carrier control body hashes, including both complete 6,624-byte robots.txt bodies. Production REALITY used its existing credentials, SNI and chrome fingerprint, without FinalMask.
+
+These results establish that the direct target and fixed official core can transfer complete payloads over the tested Irancell session. They strengthen the path-dependent diagnosis for the prior MCI failures. They do **not** identify the DPI mechanism or prove a permanent carrier-specific block: the measurements were sequential, and route/time changes remain possible. The synthetic fixture reused the same target, ports and methodology with fresh short-lived certificate/UUID material after the earlier cleanup; it was not byte-identical cryptographic material. The production REALITY configuration remained unchanged.
+
+The four production phone requests took approximately 1.37–2.06 seconds end to end. These small transfers are not a useful-throughput benchmark, and occasional longer synthetic requests were observed. This is sidecar protocol acceptance, not official v2rayNG import/TUN, long-running browsing, screen-off or reconnect acceptance. No v2rayNG application or embedded-core changes and no extra traffic relay were introduced.
+
+Cleanup was verified: all four temporary units stopped, all five test ports closed, target and manager fixture credentials removed, and no phone sidecar process remained. Main 443 remained listening and the production configuration hash matched the pre-test hash. Header-only packet metadata and origin logs were archived through the existing guarded transport and archive SHA-256 was verified; this still does not prove phone-side packet reception. Remote phone services remained running with autostart enabled.
+
+**API usage for this follow-up: 0 requests, 0 tokens, USD 0 additional estimated cost.** The preceding two-request Astra stage remains 21,181 tokens and USD 0.9922925 estimated; this is not an account-wide usage total. The follow-up changes documentation and private receipts only, so the prior code acceptance results above remain applicable and no full code test suite was repeated.
+
+Next: switch the same phone back to MCI for a bounded A-B-A confirmation. Keep direct routing, the fixed client, production safety and lifecycle guards intact. Do not promote or deploy fleet-wide on the strength of Irancell success alone.
