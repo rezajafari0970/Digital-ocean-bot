@@ -1,3 +1,17 @@
+## Current — 2026-10-14: approved follow-up published and deployed
+
+This entry supersedes all earlier quota-blocked and publication-pending entries. Approved source a5937cecdc1ba2fccaeb348274f3afcc5a172f6b produced public main/stable be435f7865649598e1d2df841aea1e5c7c8f0638. Both management hosts run that release; all3 process hashes match,5/5readiness, panelHTTP200 and6assets match. Login and current_revision accepted on both; all7enabled primary account inventory counters match canonical rows and freshness metadata. Primary8accounts,1proxy,12residential proxies,9profiles,2186droplets,2305resources and both login/settings identities were preserved. No manual provider mutation or protection/Desired/spacing change.
+
+Independent final gpt-6-astra PASS; all18tested source/test hashes unchanged. Existing isolated PostgreSQL full59packages, final adminapi, vet,26Chromium scenarios,3output URI tests,2CLI tests and final raw/opt-in contracts passed. Public live-secret/Gitleaks checks, unprivileged full regression, exact-candidate Ubuntu24LXC installation/update and atomic main/stable push passed; GitHub Actions38524021241and38524020555 succeeded.
+
+New API receipt19202input+820output=20022tokens; this follow-up totals56204input+1644output=57848tokens in2completed responses across5intentional attempts,3earlier failures. Known receipts across the three named phases total290173tokens,13responses; this is not the account billing total. Unreceipted interrupted legacy activity and billed USD remain unknown. No additional API requests after PASS.
+
+Final live primary2026-10-14T06:50:56Z (10:20:56Tehran):47tracked=43active+2inactive+2pending deletion,0broken,0degraded,2active builds. Inactive reasons1PROVISIONING and1ROUTING_UNVERIFIED. The8PANEL_DEGRADED flags sampled after rollout cleared through normal control-loop activity; no manual recovery, and no unsupported causal diagnosis. Last-observed capacity200/200with30of40fresh and10stale is not simultaneous live proof. Old Vultr4335 is absent in the current account list; it was not changed by this work.
+
+The October14 attachment Screenrecorder-2026-10-14-09-51-50-639.mp4 failed delivery and has NOT been inspected. Next:receive the new video, map its observations to this current release and investigate any additional proven defects. Do not claim all project problems permanently eliminated or that the unavailable video is covered.
+
+Evidence:/root/backups/dob-video-followup-20261012/FINAL-20261014.json; per-host /root/backups/video-followup-deployment-20261014; publisher /var/lib/datacenter-publisher/release-mbgfhzqi. The acceptance helper initially attempted to parse the empty logout response asJSON; it was corrected and the feature check rerun successfully. This was an audit helper issue, not an application failure.
+
 ## Current — 2026-10-14: independent source PASS, publication gates pending
 
 This entry supersedes earlier credit-blocked status. One new gpt-6-astra final review completed with PASS for the tested candidate32874909; all18 code/test hashes remain unchanged. New receipt19202input+820output=20022tokens. This repair now has2completed responses totaling56204input+1644output=57848tokens, across5intentional requests including3earlier failures. Known receipts across the three named phases290173tokens; unreceipted legacy activity and billed USD remain unknown.

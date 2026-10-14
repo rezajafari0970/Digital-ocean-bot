@@ -1,15 +1,15 @@
 {
   "schema": 1,
   "goal": "Fully inspect 218.546-second user video and repair proven diagnostics, current-versus-historical state, inventory, read-side effects and mobile output issues while preserving provider/proxy/lifecycle policies.",
-  "status": "SOURCE_APPROVED_AWAITING_PUBLIC_GATES",
-  "at": "2026-10-14T06:41:25.705352+00:00",
+  "status": "DEPLOYED_APPROVED_SCOPE_AWAITING_NEW_VIDEO",
+  "at": "2026-10-14T06:52:18.886650+00:00",
   "base_revision": "a1f118d5351b24e6946a5acf0176cf738c9a7ee5",
-  "production_revision": "5b0dc7640eaf51909ae04a1710aae15bf34088ab",
+  "production_revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
   "isolated_branch": "fix/video-followup-20261012",
   "worktree": "/root/projects/dob-video-followup-20261012",
-  "production_modified": false,
-  "public_published": false,
-  "canonical_advanced": false,
+  "production_modified": true,
+  "public_published": true,
+  "canonical_advanced": true,
   "allowed_paths": [
     "internal/adminapi/account_build_status.go",
     "internal/adminapi/build_activity.go",
@@ -588,5 +588,622 @@
       ]
     },
     "next": "Pass existing publication gates then both-host acceptance"
-  }
+  },
+  "acceptance_20261014": {
+    "at": "2026-10-14T06:52:18.886650+00:00",
+    "status": "DEPLOYED_APPROVED_SCOPE_AWAITING_NEW_VIDEO",
+    "approved_source": "a5937cecdc1ba2fccaeb348274f3afcc5a172f6b",
+    "public_revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+    "source_tests_unchanged": true,
+    "public_refs": [
+      "main",
+      "stable"
+    ],
+    "github_actions": [
+      {
+        "id": 38524021241,
+        "head_sha": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "name": "Source checks",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38524021241"
+      },
+      {
+        "id": 38524020555,
+        "head_sha": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "name": "Source checks",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38524020555"
+      }
+    ],
+    "source_review": "PASS",
+    "api_usage": {
+      "confirmed_responses": 2,
+      "confirmed_total_tokens": 57848,
+      "unreceipted_activity": [
+        {
+          "at": "2026-10-12T19:44:12.729481+00:00",
+          "cause": "legacy orchestrator diagnostic --help invoked default PLAN; terminated",
+          "requests": "unknown",
+          "tokens": null,
+          "billed_usd": null
+        },
+        {
+          "phase": "resolution",
+          "cause": "review request ended with transport/API exception; no response receipt",
+          "error": {
+            "type": "HTTPError",
+            "at": "2026-10-12T20:09:41.020880+00:00"
+          },
+          "tokens": null,
+          "billed_usd": null
+        }
+      ],
+      "confirmed_input_tokens": 56204,
+      "confirmed_output_tokens": 1644,
+      "receipts": [
+        {
+          "phase": "source",
+          "id": "resp_0e5bc96c09d0748a006acd3d7716dc87d1ab5852e792f1271a",
+          "usage": {
+            "input_tokens": 37002,
+            "input_tokens_details": {
+              "cache_write_tokens": 36999,
+              "cached_tokens": 0
+            },
+            "output_tokens": 824,
+            "output_tokens_details": {
+              "reasoning_tokens": 257
+            },
+            "total_tokens": 37826
+          }
+        },
+        {
+          "phase": "resume-final-20261014",
+          "id": "resp_0531915f6f66fdce006acf231a500487d198223074041581bd",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 19202,
+            "input_tokens_details": {
+              "cache_write_tokens": 19199,
+              "cached_tokens": 0
+            },
+            "output_tokens": 820,
+            "output_tokens_details": {
+              "reasoning_tokens": 242
+            },
+            "total_tokens": 20022
+          }
+        }
+      ],
+      "billed_usd": null,
+      "intentional_requests_submitted": 5,
+      "failed_intentional_requests": 3,
+      "api_access_status": "AVAILABLE_FINAL_REVIEW_PASS",
+      "prior_two_phase_confirmed_tokens": 232325,
+      "known_receipt_total_across_three_phases": 290173,
+      "known_receipt_responses_across_three_phases": 13,
+      "failed_requests": [
+        {
+          "phase": "resolution",
+          "receipt": false,
+          "error": {
+            "type": "HTTPError",
+            "at": "2026-10-12T20:09:41.020880+00:00"
+          },
+          "tokens": null
+        },
+        {
+          "phase": "resolution-focused",
+          "receipt": false,
+          "http_status": 429,
+          "api_error_code": "credit_balance_exhausted",
+          "request_id": "req_9ccc81f5902a48d7a3fd7417b5690b16",
+          "tokens": null
+        },
+        {
+          "phase": "resume-final-20261013",
+          "receipt": false,
+          "http_status": 429,
+          "api_error_code": "credit_balance_exhausted",
+          "request_id": "req_d9cfe506c6234b77a2afe22972640af5",
+          "tokens": null
+        }
+      ],
+      "counting_note": "Only returned usage receipts are summed. Failed requests and interrupted legacy activity are not invented as zero; these totals are not the organization billing total.",
+      "last_credit_check": "2026-10-12T20:56:19.873185+00:00",
+      "confirmed_new_tokens_on_resume": 20022,
+      "last_successful_review_at": "2026-10-14T06:41:25.704517+00:00"
+    },
+    "primary": {
+      "update-result.json": {
+        "at": "2026-10-14T06:48:37.320734+00:00",
+        "exit": 0
+      },
+      "after.json": {
+        "at": "2026-10-14T06:49:26.199621+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 8,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 9,
+          "droplets": 2186,
+          "resources": 2305,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 8,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 9,
+          "droplets": 2186,
+          "resources": 2305,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      },
+      "runtime.json": {
+        "at": "2026-10-14T06:49:26.794514+00:00",
+        "revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "feature-acceptance.json": {
+        "at": "2026-10-14T06:49:27.369081+00:00",
+        "login": "PASS",
+        "current_revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "historical_installed_revision": "25afa02ee19d47894e0c0e5be4ade7fb7285e4fb",
+        "accounts": [
+          {
+            "account": "Oceano new 1",
+            "resources": {
+              "active": 10,
+              "data_available": true,
+              "managed": 10,
+              "total": 10,
+              "unmanaged": 0
+            },
+            "data_status": "scheduled",
+            "scheduled_refresh_seconds": 300,
+            "stale_after_seconds": 330,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "Linode mari",
+            "resources": {
+              "active": 10,
+              "data_available": true,
+              "managed": 10,
+              "total": 10,
+              "unmanaged": 0
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 300,
+            "stale_after_seconds": 330,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "S1",
+            "resources": {
+              "active": 3,
+              "data_available": true,
+              "managed": 2,
+              "total": 3,
+              "unmanaged": 1
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 60,
+            "stale_after_seconds": 120,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "Digi oc",
+            "resources": {
+              "active": 3,
+              "data_available": true,
+              "managed": 3,
+              "total": 3,
+              "unmanaged": 0
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 300,
+            "stale_after_seconds": 330,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "Vultr Usman 1",
+            "resources": {
+              "active": 9,
+              "data_available": true,
+              "managed": 9,
+              "total": 9,
+              "unmanaged": 0
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 60,
+            "stale_after_seconds": 120,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "Vultr Usman 12",
+            "resources": {
+              "active": 9,
+              "data_available": true,
+              "managed": 9,
+              "total": 9,
+              "unmanaged": 0
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 60,
+            "stale_after_seconds": 120,
+            "row_count_consistency": "PASS"
+          },
+          {
+            "account": "Sor oc",
+            "resources": {
+              "active": 3,
+              "data_available": true,
+              "managed": 3,
+              "total": 3,
+              "unmanaged": 0
+            },
+            "data_status": "fresh",
+            "scheduled_refresh_seconds": 300,
+            "stale_after_seconds": 330,
+            "row_count_consistency": "PASS"
+          }
+        ],
+        "provider_mutation_performed": false
+      }
+    },
+    "secondary": {
+      "update-result.json": {
+        "at": "2026-10-14T06:46:33.395265+00:00",
+        "exit": 0
+      },
+      "after.json": {
+        "at": "2026-10-14T06:47:11.263062+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      },
+      "runtime.json": {
+        "at": "2026-10-14T06:47:11.787364+00:00",
+        "revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "feature-acceptance.json": {
+        "at": "2026-10-14T06:47:58.889536+00:00",
+        "login": "PASS",
+        "current_revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+        "historical_installed_revision": "25afa02ee19d47894e0c0e5be4ade7fb7285e4fb",
+        "accounts": [],
+        "provider_mutation_performed": false
+      }
+    },
+    "runtime": {
+      "observed_at": "2026-10-14T06:50:56.118123+00:00",
+      "revision": "be435f7865649598e1d2df841aea1e5c7c8f0638",
+      "readiness_checks": 5,
+      "server_counts": {
+        "total_servers": 47,
+        "active_servers": 43,
+        "inactive_servers": 2,
+        "broken_servers": 0,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 2,
+        "active_deployments": 2
+      },
+      "builds": {
+        "active_builds": 2,
+        "waiting_builds": 0,
+        "observed_at": "2026-10-14T06:50:55.845574799Z"
+      },
+      "health_reasons": {
+        "PENDING_DELETION": 2,
+        "PROVISIONING": 1,
+        "ROUTING_UNVERIFIED": 1
+      },
+      "recent_build_rows": 100,
+      "historical_error_families": 62,
+      "legacy_array_preserved": true,
+      "linode": [
+        {
+          "provider_resource_id": "108109178",
+          "state": "READY",
+          "expires_at": "2026-10-14T12:04:38.261482+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "7b245259-78d1-42a7-9a81-5f2f8542a879",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108106504",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:55:33.323968+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "c12a1f87-0852-4367-8a48-a843feebf7a0",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108105744",
+          "state": "READY",
+          "expires_at": "2026-10-14T10:04:20.16208+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "255c2c6e-bddc-474d-8dd1-6a169f8132c0",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108105168",
+          "state": "READY",
+          "expires_at": "2026-10-14T11:58:59.260877+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "9e72c203-e65a-4b04-814c-215ef63297d7",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108103900",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:08:21.870331+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "8dc827b7-b70b-4b77-985c-ca8c47ad46b1",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108103536",
+          "state": "READY",
+          "expires_at": "2026-10-14T10:54:12.866119+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "7d6b3a3f-28d5-4d0f-8ba2-5e4abadbd250",
+          "panel_registered": true,
+          "routing_state": "APPLYING"
+        },
+        {
+          "provider_resource_id": "108096458",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:44:50.47264+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "aa59b369-c617-4b87-9435-3ff5975ab0c1",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108095576",
+          "state": "READY",
+          "expires_at": "2026-10-14T09:08:24.231152+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "1a39dbe6-d6ae-45e2-ba6e-2007545dc6fa",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108089967",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:09:02.703381+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "0c1ddbee-011a-40da-a8b3-77128a511561",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        },
+        {
+          "provider_resource_id": "108084046",
+          "state": "READY",
+          "expires_at": "2026-10-14T07:25:47.47588+00:00",
+          "provision_state": "COMPLETED",
+          "current_step": "done",
+          "panel_id": "779b9003-3c15-4b86-9e77-f90810a3cf2c",
+          "panel_registered": true,
+          "routing_state": "APPLIED"
+        }
+      ],
+      "config_capacity": {
+        "target": 200,
+        "active": 200,
+        "deficit": 0,
+        "coverage": {
+          "all_fresh": false,
+          "complete": true,
+          "eligible": 40,
+          "fresh": 30,
+          "freshness_seconds": 30,
+          "missing": 0,
+          "observed": 40,
+          "stale": 10,
+          "totals_basis": "last_observed"
+        }
+      },
+      "linode_config_capacity": [
+        {
+          "panel_id": "7d6b3a3f-28d5-4d0f-8ba2-5e4abadbd250",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:49:54.268685Z"
+        },
+        {
+          "panel_id": "aa59b369-c617-4b87-9435-3ff5975ab0c1",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:50:20.080847Z"
+        },
+        {
+          "panel_id": "7b245259-78d1-42a7-9a81-5f2f8542a879",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:48.350509Z"
+        },
+        {
+          "panel_id": "c12a1f87-0852-4367-8a48-a843feebf7a0",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:50:20.86495Z"
+        },
+        {
+          "panel_id": "9e72c203-e65a-4b04-814c-215ef63297d7",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:53.585521Z"
+        },
+        {
+          "panel_id": "0c1ddbee-011a-40da-a8b3-77128a511561",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:54.908677Z"
+        },
+        {
+          "panel_id": "1a39dbe6-d6ae-45e2-ba6e-2007545dc6fa",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:55.635974Z"
+        },
+        {
+          "panel_id": "8dc827b7-b70b-4b77-985c-ca8c47ad46b1",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:51.588374Z"
+        },
+        {
+          "panel_id": "255c2c6e-bddc-474d-8dd1-6a169f8132c0",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "fresh",
+          "observed_at": "2026-10-14T06:50:55.809731Z"
+        },
+        {
+          "panel_id": "779b9003-3c15-4b86-9e77-f90810a3cf2c",
+          "inbound_id": 1,
+          "port": 443,
+          "target": 5,
+          "active": 5,
+          "deficit": 0,
+          "observation_status": "stale",
+          "observed_at": "2026-10-14T06:50:22.562573Z"
+        }
+      ]
+    },
+    "postdeploy_transient_panel_degraded": {
+      "initial": 8,
+      "later": 0,
+      "manual_action": false,
+      "root_cause": "Routing failure flags cleared through the normal control loop; no causal diagnosis beyond observed recovery is claimed."
+    },
+    "new_video": {
+      "file": "Screenrecorder-2026-10-14-09-51-50-639.mp4",
+      "status": "ATTACHMENT_DELIVERY_FAILED_NOT_INSPECTED",
+      "required_next": "User reupload"
+    },
+    "evidence": "/var/lib/datacenter-publisher/release-mbgfhzqi"
+  },
+  "next_step": "Receive failed October14video attachment and inspect against current released source; approved October12follow-up is deployed."
 }
