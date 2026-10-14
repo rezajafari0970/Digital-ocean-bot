@@ -1,7 +1,7 @@
 {
   "id": "ip-lifecycle-20261015",
-  "phase": "PUBLISH_FOUNDATION",
-  "status": "SOURCE_APPROVED",
+  "phase": "LIFECYCLE_IMPLEMENTATION_PENDING",
+  "status": "FOUNDATION_DEPLOYED_CONTINUATION_REQUIRED",
   "baseline_source": "895fe62e2215b6c2bbf92e15fe977e181df25a0c",
   "baseline_runtime": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
   "worktree": "/root/projects/dob-ip-lifecycle-20261015",
@@ -99,7 +99,7 @@
       }
     ]
   },
-  "updated_at": "2026-10-14T23:46:39.660978+00:00",
+  "updated_at": "2026-10-14T23:54:44.767574+00:00",
   "full_lifecycle_complete": false,
   "source_review": "PASS foundation only, source-r1/r2/r3 resolution chain",
   "source_hashes": {
@@ -138,8 +138,50 @@
     "exact_final": "PASS full-final exact source; isolated PostgreSQL; sequential packages",
     "race": "PASS focused race",
     "vet": "PASS",
-    "publication": "PENDING",
-    "deployment": "PENDING"
+    "publication": "PASS existing export/secret scan/unprivileged suite/Ubuntu24 LXC install gates; atomic main+stable",
+    "deployment": "PASS secondary then primary; schema175; all service executable hashes and readiness5/5",
+    "github_actions": [
+      {
+        "id": 38656313441,
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38656313441"
+      },
+      {
+        "id": 38656313752,
+        "branch": "stable",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38656313752"
+      }
+    ],
+    "live_inventory": "PASS four existing accounts; unknown quotas remain unknown; UpCloud absent"
   },
-  "next_step": "Finish exact-source gates; publish independent read-only foundation through existing release gates. Then implement mutation/approval journal, ownership/leases/deletion fences, provider mutation and guest network/output integration under R1-R6. Paid canary requires explicit operational values, selected servers and cost/impact approval. UpCloud account absent."
+  "next_step": "Continue implementation from this verified foundation: mutation/approval/ownership journal and lease/delete fences under R1-R6; then real provider mutation and versioned guest/network/protocol/output integration, with fixture tests and API review. Do not treat inventory journal as mutation journal. Obtain explicit IPv6 diversity geometry, desired counts/timing/lifetime/budget/canary choices before any paid/disruptive canary. UpCloud requires a configured account before live validation.",
+  "source_revision": "2f793b81c2462d7dce118cd8c3adb46e26a24404",
+  "public_revision": "ab92f7f45c1403c4b5c72fb825f6711ab55313f7",
+  "runtime": {
+    "primary": {
+      "revision": "ab92f7f45c1403c4b5c72fb825f6711ab55313f7",
+      "schema": "000175_ip_inventory",
+      "accounts": 4,
+      "readiness": "5/5",
+      "identity_and_environment_preserved": true
+    },
+    "secondary": {
+      "revision": "ab92f7f45c1403c4b5c72fb825f6711ab55313f7",
+      "schema": "000175_ip_inventory",
+      "accounts": 0,
+      "readiness": "5/5",
+      "identity_and_environment_preserved": true,
+      "limitation": "No provider account; installation acceptance only"
+    }
+  },
+  "limits": [
+    "No IP allocation, attachment, release, guest network or new-IP config publication executed.",
+    "No mutation journal/approval, native deletion fence, publication lease integration, guest plan/executor or operational rotation yet.",
+    "Lifetime/spacing/target/budget/canary/prefix controls remain unset; missing values block paid canary, not authorization for further offline coding.",
+    "Primary HTTP acceptance attempted during updater stage5 was refused; after updater succeeded, health/readiness/auth boundary/assets checks passed. No claim of zero control-plane downtime."
+  ]
 }

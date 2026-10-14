@@ -1,3 +1,11 @@
+## Current — 2026-10-15: Read-only IP foundation deployed; full lifecycle incomplete
+
+Verified source 2f793b81c2462d7dce118cd8c3adb46e26a24404; public/main+stable/runtime ab92f7f45c1403c4b5c72fb825f6711ab55313f7; schema175. Existing release gates, both GitHub Actions runs, then secondary and primary control-plane rollout PASS. Both have matching running executable hashes, all three services active and readiness5/5; environment/account identity preserved. Secondary has zero provider accounts and is not an IP canary.
+At23:52Z the final persisted inventory run succeeded for all four configured accounts: DO reserved-v4 limit10 used0, DO v6 quota unknown; Linode public-v4 used9 (includes primary) and routed-v6 used0, quotas unknown; both Vultr reserved-v4/v6 used0, quotas unknown. Earlier Vultr read failure remains in initial evidence and is not the latest outcome. UpCloud account absent.
+No IP allocated/released, no guest network/core changes, no additional-IP config published. Full lifecycle is NOT implemented: mutation/approval/ownership journal, leases/native delete fences, provider mutation, network/protocol proof, output and rotation remain. Unset operational values block paid canary; they do not revoke authorization for further offline implementation. Continue from docs/IP_LIFECYCLE_20261015.md, its R1-R6 requirements and docs/development-jobs/ip-lifecycle-20261015.json. Other workstreams stay paused.
+Actual API:4 completed gpt-6-astra responses,72268 input+8534 output=80802 total;cached0,cache_write72256;actual/estimated money unknown. No more review calls after source-r3 PASS.
+During updater stage5 one primary HTTP check was refused; final checks after updater completion passed. Zero control-plane downtime is not claimed.
+
 ## Current — 2026-10-15: Additional-IP read-only foundation source approved
 
 Continue docs/IP_LIFECYCLE_20261015.md and docs/development-jobs/ip-lifecycle-20261015.json.

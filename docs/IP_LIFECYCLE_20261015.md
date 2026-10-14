@@ -91,3 +91,13 @@ Desired v4/v6 counts, per-run count, concurrency, allocation interval/jitter, li
 - آزمون restart در این مرحله با انقضای lease و ساخت Store جدید شبیه‌سازی شده است؛ آزمون مرگ فرایند هنگام provider mutation انجام نشده است. آزمون browser با admin تزریق‌شده و refresh ساختگی، مجوز یا مسیر provider زنده را اثبات نمی‌کند.
 - هیچ IP تخصیص/آزاد نشده؛ هیچ guest network یا client core تغییر نکرده؛ کانفیگی با IP اضافه منتشر نشده است.
 - چهار پاسخ واقعی gpt-6-astra: ورودی 72,268، خروجی 8,534، مجموع 80,802؛ cache read صفر، cache write برابر 72,256. مبلغ واقعی و برآورد هر دو نامشخص؛ مصرف داخلی ChatGPT در این ارقام نیست.
+
+
+## Verified publication and continuation checkpoint — 2026-10-14T23:54:44.767574+00:00
+- Source: 2f793b81c2462d7dce118cd8c3adb46e26a24404; published installer main/stable and both installed control planes: ab92f7f45c1403c4b5c72fb825f6711ab55313f7.
+- Existing publisher gates passed: exact exported manifest, live-secret comparison with values not logged, gitleaks, unprivileged Go/vet/bootstrap/update checks, Ubuntu24 LXC installer/update and identity preservation. Both GitHub Actions runs passed.
+- Secondary then primary: schema175, all three services active, process executable hashes match each local manifest, health OK and readiness5/5. Account identity and environment fingerprints unchanged. Secondary has no provider accounts; this does not validate provider IP operations.
+- One primary HTTP check attempted while updater was still in stage5 received connection refused. Final acceptance after updater success passed. No zero-downtime claim.
+- Final persisted manual inventory at23:52Z: all four configured accounts OBSERVED; DO reserved IPv4 quota10/used0; DO reserved IPv6 quota unknown/used0; Linode public IPv4 used9 and SLAAC IPv6 used9, routed IPv6 used0, quotas unknown; both Vultr reserved families used0 with unknown quotas. Earlier failed Vultr read recovered on this later observation. These are read results, not allocation or attachment proofs.
+- Further operational implementation remains necessary and authorized offline. Mutation/approval/ownership journal, leases/native-deletion fences, provider writes, guest network, protocol health, new-IP config publication, rotation and release are NOT implemented in this release. Do not use current read receipts as a mutation journal.
+- Paid/disruptive canary remains blocked by unset operational values, selected targets/cost/impact and explicit approval. UpCloud also lacks a configured account. No completion time estimated.

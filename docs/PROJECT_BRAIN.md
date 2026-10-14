@@ -1,3 +1,9 @@
+# Verified additional-IP foundation — 2026-10-15
+
+Read the current entries in PROJECT_STATE.md/HANDOFF.md and IP_LIFECYCLE_20261015.md. Runtime ab92f7f/schema175 is verified on both control planes; full IP lifecycle remains incomplete. This delta supersedes the older source-approved publication-pending entry below.
+
+---
+
 # Additional-IP continuation — 2026-10-15
 
 Read IP_LIFECYCLE_20261015.md and development-jobs/ip-lifecycle-20261015.json first. Source-approved read-only foundation; full lifecycle is incomplete and disabled. Reconcile publication/runtime receipts before continuing. Earlier generated indexes remain historical, not evidence of this unindexed delta.
