@@ -1,7 +1,7 @@
 {
   "id": "broken-accounts-20261014",
-  "status": "SOURCE_APPROVED_AWAITING_PUBLIC_GATES",
-  "at": "2026-10-14T15:46:16.161641+00:00",
+  "status": "DEPLOYED_VERIFIED_EXTERNAL_PROVIDER_LOCKS_REMAIN",
+  "at": "2026-10-14T15:53:42.892293+00:00",
   "base_revision": "4f3b273869e79e01c2c73a5ce2c2ae3dff855151",
   "review": {
     "decision": "PASS",
@@ -234,7 +234,7 @@
     "Sor oc",
     "Digi oc"
   ],
-  "production_changes": false,
+  "production_changes": true,
   "writer_inventory": [
     {
       "path": "internal/adminapi/accounts_manage.go",
@@ -260,5 +260,1014 @@
       "sha256": "bbea34ef25022b712ddf9c28668b53eb4445f7b645cc61b9bfee6552c58a7196",
       "sql": "UPDATE accounts SET provider_state='LOCKED',runtime_status='DELETE_PENDING',deletion_requested_at=now()-interval '3 minutes' WHERE"
     }
-  ]
+  ],
+  "public_published": true,
+  "production_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+  "acceptance": {
+    "at": "2026-10-14T15:53:42.892293+00:00",
+    "status": "DEPLOYED_VERIFIED_EXTERNAL_PROVIDER_LOCKS_REMAIN",
+    "approved_source": "8865f814b0c4e4fb0db79330b667e74656fad177",
+    "public_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+    "source_tests_unchanged": true,
+    "public_refs": [
+      "main",
+      "stable"
+    ],
+    "github_actions": [
+      {
+        "id": 38592602057,
+        "name": "Source checks",
+        "head_sha": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38592602057"
+      },
+      {
+        "id": 38592601079,
+        "name": "Source checks",
+        "head_sha": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38592601079"
+      }
+    ],
+    "source_review": "gpt-6-astra PASS",
+    "api_usage": {
+      "responses": 8,
+      "input_tokens": 175323,
+      "output_tokens": 17316,
+      "total_tokens": 192639,
+      "billed_usd": null,
+      "scope": "This broken-accounts task only; prior tasks excluded",
+      "receipts": [
+        {
+          "phase": "final",
+          "id": "resp_0640cb89751d78ae006acf9d1a9c0487d1811523089a868980",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 56930,
+            "input_tokens_details": {
+              "cache_write_tokens": 56927,
+              "cached_tokens": 0
+            },
+            "output_tokens": 3072,
+            "output_tokens_details": {
+              "reasoning_tokens": 1490
+            },
+            "total_tokens": 60002
+          }
+        },
+        {
+          "phase": "harness-final",
+          "id": "resp_03943e007877db35006acfa0c2569c87d1a16addb1d3a16a44",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 4267,
+            "input_tokens_details": {
+              "cache_write_tokens": 4264,
+              "cached_tokens": 0
+            },
+            "output_tokens": 596,
+            "output_tokens_details": {
+              "reasoning_tokens": 57
+            },
+            "total_tokens": 4863
+          }
+        },
+        {
+          "phase": "harness-resolution",
+          "id": "resp_0331bd2e51cefb68006acfa1f6151087d1ad2056434e3df929",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 8070,
+            "input_tokens_details": {
+              "cache_write_tokens": 8067,
+              "cached_tokens": 0
+            },
+            "output_tokens": 667,
+            "output_tokens_details": {
+              "reasoning_tokens": 55
+            },
+            "total_tokens": 8737
+          }
+        },
+        {
+          "phase": "ordering-final",
+          "id": "resp_0267bf1694cc3f58006acf9f08eae487d1a5c12e3c0fcf6f67",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 12648,
+            "input_tokens_details": {
+              "cache_write_tokens": 12645,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1161,
+            "output_tokens_details": {
+              "reasoning_tokens": 302
+            },
+            "total_tokens": 13809
+          }
+        },
+        {
+          "phase": "plan",
+          "id": "resp_095fd72aa489bb88006acf916eb39487d1a925c0c49a8920e8",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 20080,
+            "input_tokens_details": {
+              "cache_write_tokens": 20077,
+              "cached_tokens": 0
+            },
+            "output_tokens": 3255,
+            "output_tokens_details": {
+              "reasoning_tokens": 165
+            },
+            "total_tokens": 23335
+          }
+        },
+        {
+          "phase": "publication-final",
+          "id": "resp_0fa3a09d71f0cf8c006acfa039fa0887d1aa76abbf4489a6f0",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 12485,
+            "input_tokens_details": {
+              "cache_write_tokens": 12482,
+              "cached_tokens": 0
+            },
+            "output_tokens": 784,
+            "output_tokens_details": {
+              "reasoning_tokens": 144
+            },
+            "total_tokens": 13269
+          }
+        },
+        {
+          "phase": "resolution",
+          "id": "resp_07abe0aa066fe79c006acf9970539487d182eff7c8a9b02629",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 37548,
+            "input_tokens_details": {
+              "cache_write_tokens": 37545,
+              "cached_tokens": 0
+            },
+            "output_tokens": 4218,
+            "output_tokens_details": {
+              "reasoning_tokens": 2070
+            },
+            "total_tokens": 41766
+          }
+        },
+        {
+          "phase": "source",
+          "id": "resp_0893f17058deca6d006acf957cebc087d1b868a0ca4a0fa2b0",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 23295,
+            "input_tokens_details": {
+              "cache_write_tokens": 23292,
+              "cached_tokens": 0
+            },
+            "output_tokens": 3563,
+            "output_tokens_details": {
+              "reasoning_tokens": 1423
+            },
+            "total_tokens": 26858
+          }
+        }
+      ]
+    },
+    "primary": {
+      "update-result.json": {
+        "started_at": "2026-10-14T15:50:39.115312+00:00",
+        "finished_at": "2026-10-14T15:52:08.746037+00:00",
+        "exit": 0,
+        "expected_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b"
+      },
+      "after.json": {
+        "at": "2026-10-14T15:52:31.921499+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 8,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 9,
+          "droplets": 2248,
+          "resources": 2408,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 8,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 9,
+          "droplets": 2248,
+          "resources": 2409,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      },
+      "runtime.json": {
+        "at": "2026-10-14T15:52:32.539788+00:00",
+        "revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "account-health.json": {
+        "at": "2026-10-14T15:53:04.518792+00:00",
+        "runtime_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "system": {
+          "inactive_servers": 1,
+          "server_health": [
+            {
+              "id": "4097bb2d-aed0-416e-9932-1c89ce218623",
+              "account_name": "Digi oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608906313",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T08:02:13.80346+00:00",
+              "next_provider_refresh_at": "2026-10-14T08:03:13.80346+00:00",
+              "last_sync_at": "2026-10-14T08:01:13.328194+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T08:01:13.333274+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "61935f37-a644-4cfb-ad36-05b55b3189ed",
+              "account_name": "Digi oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608910092",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T08:02:13.80346+00:00",
+              "next_provider_refresh_at": "2026-10-14T08:03:13.80346+00:00",
+              "last_sync_at": "2026-10-14T08:01:17.605147+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T08:01:17.60977+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "c741b7df-64a9-4b56-b375-948d346206e9",
+              "account_name": "Digi oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608913109",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T08:02:13.80346+00:00",
+              "next_provider_refresh_at": "2026-10-14T08:03:13.80346+00:00",
+              "last_sync_at": "2026-10-14T08:01:18.118882+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T08:01:18.124272+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "3ab2ce27-d5df-48ba-93d5-d0bcf4dc59b1",
+              "account_name": "S1",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608931541",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:54:29.872036+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:55:29.872036+00:00",
+              "last_sync_at": "2026-10-14T07:58:35.018244+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:35.327351+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "3b065fad-8bf9-4142-b9b7-f4a31ed74b84",
+              "account_name": "S1",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608933480",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:54:29.872036+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:55:29.872036+00:00",
+              "last_sync_at": "2026-10-14T07:58:46.605379+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:20.336203+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "a1bd4dbe-91b1-4b11-919a-974d21e421f3",
+              "account_name": "S1",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608926919",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:54:29.872036+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:55:29.872036+00:00",
+              "last_sync_at": "2026-10-14T07:58:33.912924+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:33.922867+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "18cfa5fa-d823-4073-a177-0af1628e8aa3",
+              "account_name": "Sor oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608942616",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:55:13.318777+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:56:13.318777+00:00",
+              "last_sync_at": "2026-10-14T07:58:38.14419+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:19.885402+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "af76f0d8-d249-4200-8c09-1f8ce9d4fc89",
+              "account_name": "Sor oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608921458",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:55:13.318777+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:56:13.318777+00:00",
+              "last_sync_at": "2026-10-14T07:58:16.025072+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:11.781298+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "c65fe2de-0687-4624-b10d-38405b89d2db",
+              "account_name": "Sor oc",
+              "provider": "digitalocean",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "provider_resource_id": "608924151",
+              "lifecycle_state": "RETIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T07:55:13.318777+00:00",
+              "next_provider_refresh_at": "2026-10-14T07:56:13.318777+00:00",
+              "last_sync_at": "2026-10-14T07:58:36.73789+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "FAILED",
+              "route_verified_at": "2026-10-14T07:58:17.928214+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "14f9e044-20f5-4c79-89b0-7ed5c8501c8d",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "c78cc0ff-150d-4163-882a-34956c43eeb7",
+              "lifecycle_state": "EXPIRING",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:52:46.625065+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:52:46.630794+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "23cf2788-a0be-496d-9e82-df8357ef801a",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "58525b13-dda7-4145-a38e-2ec272cb90db",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:50:37.264519+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:50:37.2704+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "47d53297-cde3-4b9c-b09b-649aa460ec65",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "f4f32787-4b99-4db7-b901-58195a9ff38f",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:50:52.14193+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:50:52.146819+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "577022c5-d3dd-45c1-b908-da7baea63d07",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "d2e4a83d-8523-480b-aad9-f8c877f49043",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:52:08.499874+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:52:08.507057+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "806e614e-b59e-47ac-82c5-4caf6fef1144",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "92f873ac-f5dd-4c4c-a816-12d094a3707d",
+              "lifecycle_state": "PROVISIONING",
+              "health": "inactive",
+              "reason": "PROVISIONING",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": null,
+              "last_sync_state": null,
+              "route_state": null,
+              "route_verified_at": null,
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "b0ec5167-9bcc-4b58-8d38-907d1c9269a3",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "66473b18-38bb-4eeb-8854-7ca72ff31d41",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:52:58.168094+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:52:58.173431+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "b188b488-acfd-4b06-a012-0e49c925c342",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "f6497619-6e9f-43e9-a521-d97722d8fde2",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:50:38.707194+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:50:38.720555+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            },
+            {
+              "id": "f9314802-1045-4264-8c21-d12979f7499b",
+              "account_name": "Vultr Usman 1",
+              "provider": "vultr",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "provider_resource_id": "f4ea578c-1de5-47bb-9e7d-076e89e011a4",
+              "lifecycle_state": "READY",
+              "health": "pending",
+              "reason": "PENDING_DELETION",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "next_provider_refresh_at": "2026-10-14T15:53:01.340965+00:00",
+              "last_sync_at": "2026-10-14T15:52:20.14415+00:00",
+              "last_sync_state": "COMPLETED",
+              "route_state": "APPLIED",
+              "route_verified_at": "2026-10-14T15:52:20.14826+00:00",
+              "admission_blocked": null,
+              "xui_failed": null,
+              "protection_failed": null
+            }
+          ],
+          "enabled_accounts": 7,
+          "healthy_accounts": 3,
+          "broken_accounts": 3,
+          "degraded_accounts": 0,
+          "capacity_full_accounts": 1,
+          "limited_accounts": 0,
+          "unknown_accounts": 0,
+          "pending_deletion_accounts": 0,
+          "account_health_total": 7,
+          "account_health_truncated": false,
+          "account_health": [
+            {
+              "id": "09120fff-71f9-44f7-bd14-890d7b11e257",
+              "name": "Digi oc",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:52:58.550164+00:00",
+              "provider_checked_at": "2026-10-14T15:52:58.550164+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:58.067494+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:52:58.550164+00:00",
+              "provider_observed_at": "2026-10-14T08:02:13.80346+00:00",
+              "observed_provider_status": "locked",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:00.777663+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+              "name": "S1",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:52:59.069628+00:00",
+              "provider_checked_at": "2026-10-14T15:52:59.069629+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:58.560964+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:52:59.069629+00:00",
+              "provider_observed_at": "2026-10-14T07:54:29.872036+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:49.319926+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+              "name": "Sor oc",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:52:59.46167+00:00",
+              "provider_checked_at": "2026-10-14T15:52:59.46167+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:59.084098+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:52:59.461671+00:00",
+              "provider_observed_at": "2026-10-14T07:55:13.318777+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:00.794395+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+              "name": "Linode mari",
+              "provider": "linode",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:49:43.206387+00:00",
+              "provider_checked_at": "2026-10-14T15:49:43.206387+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": null,
+              "provider_account_status": null,
+              "provider_account_observed_at": null,
+              "provider_observed_at": "2026-10-14T15:49:43.199416+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:51:58.957652+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "c12dcdcb-7d16-440d-82a3-5f76bc277c92",
+              "name": "Oceano new 1",
+              "provider": "digitalocean",
+              "health": "capacity",
+              "reason": "CAPACITY_FULL",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "PROVIDER_BLOCKED",
+              "provider_state_at": "2026-10-14T15:49:03.843064+00:00",
+              "provider_checked_at": "2026-10-14T15:49:03.843064+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": null,
+              "provider_account_status": null,
+              "provider_account_observed_at": null,
+              "provider_observed_at": "2026-10-14T15:49:03.841003+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:49.244524+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "6b1e5dc2-1daf-4b3a-a990-82134d12ec6b",
+              "name": "Vultr Usman 1",
+              "provider": "vultr",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_checked_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:51:59.872499+00:00",
+              "provider_account_status": "active",
+              "provider_account_observed_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:38.88491+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "c3b02da1-9f48-4d7a-bbfe-ddc1d9a955b9",
+              "name": "Vultr Usman 12",
+              "provider": "vultr",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_checked_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:01.457787+00:00",
+              "provider_account_status": "active",
+              "provider_account_observed_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_observed_at": "2026-10-14T15:52:03.222198+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:28.763711+00:00",
+              "network_recovery_started_at": null
+            }
+          ],
+          "total_servers": 49,
+          "active_servers": 32,
+          "broken_servers": 0,
+          "degraded_servers": 0,
+          "pending_deletion_servers": 16,
+          "provisioning_servers": 1
+        },
+        "counts_match_details": true
+      },
+      "account-health-initial.json": {
+        "at": "2026-10-14T15:52:32.751183+00:00",
+        "runtime_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "system": {
+          "enabled_accounts": 7,
+          "healthy_accounts": 3,
+          "broken_accounts": 3,
+          "degraded_accounts": 0,
+          "capacity_full_accounts": 1,
+          "limited_accounts": 0,
+          "unknown_accounts": 0,
+          "pending_deletion_accounts": 0,
+          "account_health_total": 7,
+          "account_health_truncated": false,
+          "account_health": [
+            {
+              "id": "09120fff-71f9-44f7-bd14-890d7b11e257",
+              "name": "Digi oc",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:51:59.848853+00:00",
+              "provider_checked_at": "2026-10-14T15:51:59.848853+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:51:58.08328+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:51:59.848853+00:00",
+              "provider_observed_at": "2026-10-14T08:02:13.80346+00:00",
+              "observed_provider_status": "locked",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:00.777663+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "cd655217-210f-48ec-a289-6237ea62ef36",
+              "name": "S1",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:52:04.090126+00:00",
+              "provider_checked_at": "2026-10-14T15:52:04.090126+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:03.673415+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:52:04.090127+00:00",
+              "provider_observed_at": "2026-10-14T07:54:29.872036+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:50:39.057926+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "60a5570e-d79f-4d78-9bfa-dde89264ca94",
+              "name": "Sor oc",
+              "provider": "digitalocean",
+              "health": "broken",
+              "reason": "LOCKED",
+              "provider_state": "LOCKED",
+              "provider_error_state": "TRANSPORT_ERROR",
+              "runtime_status": "PROVIDER_LOCKED",
+              "provider_state_at": "2026-10-14T15:52:03.669661+00:00",
+              "provider_checked_at": "2026-10-14T15:52:03.669661+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:03.290294+00:00",
+              "provider_account_status": "locked",
+              "provider_account_observed_at": "2026-10-14T15:52:03.669662+00:00",
+              "provider_observed_at": "2026-10-14T07:55:13.318777+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:00.794395+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+              "name": "Linode mari",
+              "provider": "linode",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:49:43.206387+00:00",
+              "provider_checked_at": "2026-10-14T15:49:43.206387+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": null,
+              "provider_account_status": null,
+              "provider_account_observed_at": null,
+              "provider_observed_at": "2026-10-14T15:49:43.199416+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:51:58.957652+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "c12dcdcb-7d16-440d-82a3-5f76bc277c92",
+              "name": "Oceano new 1",
+              "provider": "digitalocean",
+              "health": "capacity",
+              "reason": "CAPACITY_FULL",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "PROVIDER_BLOCKED",
+              "provider_state_at": "2026-10-14T15:49:03.843064+00:00",
+              "provider_checked_at": "2026-10-14T15:49:03.843064+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": null,
+              "provider_account_status": null,
+              "provider_account_observed_at": null,
+              "provider_observed_at": "2026-10-14T15:49:03.841003+00:00",
+              "observed_provider_status": "warning",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:50:38.105557+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "6b1e5dc2-1daf-4b3a-a990-82134d12ec6b",
+              "name": "Vultr Usman 1",
+              "provider": "vultr",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_checked_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:51:59.872499+00:00",
+              "provider_account_status": "active",
+              "provider_account_observed_at": "2026-10-14T15:52:01.343912+00:00",
+              "provider_observed_at": "2026-10-14T15:52:01.340965+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:50:37.516387+00:00",
+              "network_recovery_started_at": null
+            },
+            {
+              "id": "c3b02da1-9f48-4d7a-bbfe-ddc1d9a955b9",
+              "name": "Vultr Usman 12",
+              "provider": "vultr",
+              "health": "healthy",
+              "reason": "HEALTHY",
+              "provider_state": "ACTIVE",
+              "provider_error_state": null,
+              "runtime_status": "READY",
+              "provider_state_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_checked_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_error_at": null,
+              "provider_refresh_attempt_at": "2026-10-14T15:52:01.457787+00:00",
+              "provider_account_status": "active",
+              "provider_account_observed_at": "2026-10-14T15:52:03.224425+00:00",
+              "provider_observed_at": "2026-10-14T15:52:03.222198+00:00",
+              "observed_provider_status": "active",
+              "network_health_ok": true,
+              "network_checked_at": "2026-10-14T15:52:28.763711+00:00",
+              "network_recovery_started_at": null
+            }
+          ],
+          "total_servers": 49,
+          "active_servers": 24,
+          "broken_servers": 0,
+          "degraded_servers": 4,
+          "pending_deletion_servers": 16,
+          "provisioning_servers": 1
+        },
+        "counts_match_details": true
+      }
+    },
+    "secondary": {
+      "update-result.json": {
+        "started_at": "2026-10-14T15:48:56.553068+00:00",
+        "finished_at": "2026-10-14T15:49:39.577307+00:00",
+        "exit": 0,
+        "expected_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b"
+      },
+      "after.json": {
+        "at": "2026-10-14T15:50:22.195377+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        }
+      },
+      "runtime.json": {
+        "at": "2026-10-14T15:50:22.726201+00:00",
+        "revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "account-health.json": {
+        "at": "2026-10-14T15:50:22.903523+00:00",
+        "runtime_revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+        "system": {
+          "enabled_accounts": 0,
+          "healthy_accounts": 0,
+          "broken_accounts": 0,
+          "degraded_accounts": 0,
+          "capacity_full_accounts": 0,
+          "limited_accounts": 0,
+          "unknown_accounts": 0,
+          "pending_deletion_accounts": 0,
+          "account_health_total": 0,
+          "account_health_truncated": false,
+          "account_health": [],
+          "total_servers": 0,
+          "active_servers": 0,
+          "broken_servers": 0,
+          "degraded_servers": 0,
+          "pending_deletion_servers": 0,
+          "provisioning_servers": 0
+        },
+        "counts_match_details": true
+      }
+    },
+    "evidence": "/var/lib/datacenter-publisher/release-lgrjszr9"
+  },
+  "next_step": "Provider/account owner resolves external restrictions; continue bounded native observations. No forced unlock, replay, or provider mutations."
 }
