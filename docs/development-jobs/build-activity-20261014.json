@@ -1,7 +1,7 @@
 {
   "id": "build-activity-20261014",
-  "status": "SOURCE_APPROVED_AWAITING_PUBLIC_GATES",
-  "at": "2026-10-14T17:55:43.797485+00:00",
+  "status": "COMPATIBILITY_SOURCE_APPROVED_AWAITING_CORRECTED_ROLLOUT",
+  "at": "2026-10-14T18:22:07.494179+00:00",
   "base_revision": "34d0e64c34fd9e2ee0b87e0b3c1441bdf4401347",
   "source_hashes": {
     "internal/adminapi/build_activity.go": "ddb350d6c0bbf9bce896e433513a03ef397d9215e053634f54f815f34fe70bbb",
@@ -10,12 +10,14 @@
     "internal/adminapi/provision_errors.go": "0de2ae8c5763c08ef79721c15ebb0203adcbbc6c0728e8fc3def83564e259dae",
     "internal/app/installer_handoff_test.go": "e0b5789b47ded0a9db8637e362a0dcf3f367d90f698365d6b0e7890569dad08e",
     "internal/app/profile.go": "16bdf6965ce697e9841911e14ffc4ec1486b3528614beb86741024dd82e3678d",
-    "internal/provisioning/build_activity_regression_test.go": "554ac83aa7d9281a69ae3244adbaa9f2133a44fdde41fd86447383f24e989bbf",
+    "internal/provisioning/build_activity_regression_test.go": "1a57bf0146cf8957cd9a481951e5d5213b24ffbabd39b3367b0a537cd22282eb",
     "internal/provisioning/diagnostics.go": "6e7797cdb3e9d8466b59f4d23eee5554ef772dcf3a533994b56b305baa119c20",
-    "internal/provisioning/engine.go": "fe2a9bad0bbee4652fedd4e74c39273bf140a39b8bf59bd5348b077c3563541b",
-    "internal/provisioning/installer_executor.go": "7946ee891807f177f6dba0232aa3df74651f92ff572498a7fd28ec805858b5a0",
+    "internal/provisioning/engine.go": "43dbbfc43987f9763f10e2ffc6b66cdc64b9a297f7619dfb4a133de671a098b3",
+    "internal/provisioning/installer_executor.go": "2f45439aa7d83105bb6bfb11b1578973ad9e5ffaf2787cf2405a30bc60ab5fb1",
+    "internal/provisioning/legacy_precheck.go": "1337069c0c88a3c440074cf1ef082b87889636ffaf12cea5dac659dfa77227fc",
+    "internal/provisioning/legacy_precheck_test.go": "747f258bf0f396ad3f05f481eb9343e5fe877387d487f8ced12b7d07d5d9daa5",
     "internal/provisioning/script_observation_test.go": "0013ca4a3e053b191506dc26bd1c65c2dd8e44f08610a02529549c5ae5a6a242",
-    "internal/provisioning/script_runner.go": "e406dfe251ab19eaa5a944ba76e58447e4d81f2b6cacb95b662ed558ed5ddef3",
+    "internal/provisioning/script_runner.go": "547cbfa332f22ff7d652fa2bfff427774ea80e5f84ac5296e187111f9fce2c26",
     "internal/workflow/engine.go": "77c4821b44faabb0aadf40e96886403d63d72eb1b538d492a5a28a08bd7e79cb",
     "internal/workflow/installer_handoff_test.go": "170e312613acff371cb4d2a7669f16fe71172455f7845fe119b9b2ed0f8dece9",
     "web/static/app.css": "d0909e3dfbd83b947132a32620b4b927024b72072f2f3a67494dd231c25653da",
@@ -26,22 +28,18 @@
     "decision": "PASS",
     "blocking_defects": [],
     "evidence_gaps": [
-      "The supplied PostgreSQL regression passed; tests were not independently executed in this review.",
-      "The full-project suite against the final exact source remains mandatory and is not established by the focused regression.",
-      "Publication and deployment acceptance remain mandatory separate gates and have not been established."
+      "Tests were not independently executed in this review; passing full focused provisioning and workflow package results are accepted as supplied.",
+      "Full-project tests against the final exact source remain mandatory before publication.",
+      "Hash identity for the other 17 candidate files and the recorded predicates' immutable-catalog provenance are accepted as supplied, not independently verified.",
+      "Corrected-source publication and gated runtime acceptance on both hosts remain unestablished. Temporary use of the prior approved release and completion of the previously affected build without manual resets do not establish corrected-source runtime acceptance."
     ],
     "scope": {
-      "coverage": "Bounded source approval of the final delta in internal/adminapi/provision_errors.go and internal/adminapi/build_diagnostics_regression_test.go. Hash identity of the other 15 previously reviewed files is accepted as supplied.",
-      "final_blocker": "Resolved: missing-installer suppression no longer depends on deployment state. Account/resource fences and current-generation selection or generation-1 snapshot evidence remain. The added regression retains the legacy provision LastError and selected installer while advancing through INSTALL_COMPLETE, IMPORTING_DATABASE, and PANEL_COMPLETE, requiring current_failed_runs=0 at each transition.",
-      "previous_blockers": {
-        "installer_generation_attribution": "Preserved as resolved: attribution follows installer_runs.deployment_id with account/resource fences and that deployment's selected generation.",
-        "terminal_failure_without_event": "Preserved as resolved: non-deleted FAILED provision runs enter the global current-run set independently of step errors and events, without invented fingerprint attribution.",
-        "ambiguous_installer_outcome": "Preserved as resolved from the prior review: execute and rollback permit precheck-based reconciliation within the remaining attempt budget."
-      },
-      "history": "The final delta changes current-failure classification without removing historical diagnostics. Configured handoffs, recovered probes, superseded generations, and deleted resources must not independently establish current failures.",
-      "live_observation": "As supplied, the updated read-only diagnostic query returned 0 current failures across 44 historical families in 85 ms, with history unchanged. This is a point-in-time observation, not deployment acceptance or a guarantee against recurring external SSH/network failures.",
-      "operational_writes": "None performed in this review; all production activity to date is reported as read-only.",
-      "gates": "PASS is source approval for this bounded delta only. Full exact-source project testing, publication, and deployment acceptance remain separately gated."
+      "coverage": "Narrow resolution review of the supplied legacy_precheck.go and legacy_precheck_test.go changes.",
+      "resolution": "The raw stderr != \"\" guard rejects all nonempty stderr for both exact legacy predicates, including exit 1. Regression cases explicitly reject space, newline, tab, and CRLF at exits 1, 3, and 4 and all other tested exits for both predicates. The prior blocking mismatch is resolved.",
+      "assessment": "The adaptation remains bounded to the two exact command strings for exit-3/4 handling. Generic predicates retain exit-1-only handling. Prior accepted command-error classification, signal and missing-status checks, observer consistency, and verification-failure behavior remain preserved.",
+      "immutability": "The supplied correction introduces no immutable script or manifest changes, registry SHA bypasses, or changes to generation selection, timeouts, attempt budgets, or provider mutation gates.",
+      "previous_reviews": "Preserve prior resolved source reviews for unchanged-hash files, including current-failure suppression, installer-generation attribution, terminal failures without events, and bounded ambiguous-outcome reconciliation.",
+      "approval_boundary": "PASS is source approval only. Full exact-source tests, existing gated public publication, and both-host deployment and runtime acceptance remain separately required."
     }
   },
   "validation": {
@@ -55,13 +53,47 @@
     "runtime_acceptance": "PENDING"
   },
   "api_usage": {
-    "responses": 3,
-    "input_tokens": 69956,
-    "output_tokens": 4243,
-    "total_tokens": 74199,
+    "responses": 5,
+    "input_tokens": 89807,
+    "output_tokens": 5265,
+    "total_tokens": 95072,
     "billed_usd": null,
-    "scope": "This Build Activity task only; prior tasks and internal ChatGPT session excluded",
+    "scope": "Entire current Build Activity task, including live compatibility correction; prior tasks and internal ChatGPT session excluded",
     "receipts": [
+      {
+        "phase": "compatibility/compatibility-final",
+        "id": "resp_03544cdf084dfe5a006acfc69fc5b487d19f9c3687edb8947e",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 2380,
+          "input_tokens_details": {
+            "cache_write_tokens": 2377,
+            "cached_tokens": 0
+          },
+          "output_tokens": 407,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2787
+        }
+      },
+      {
+        "phase": "compatibility/compatibility-review",
+        "id": "resp_0cdc25e3ad62223a006acfc5e02c7487d1846af9d337dc9266",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 17471,
+          "input_tokens_details": {
+            "cache_write_tokens": 17468,
+            "cached_tokens": 0
+          },
+          "output_tokens": 615,
+          "output_tokens_details": {
+            "reasoning_tokens": 98
+          },
+          "total_tokens": 18086
+        }
+      },
       {
         "phase": "source-r2",
         "id": "resp_07dc25ec748d3259006acfbf355d5487d18f51c3109d8df1da",
@@ -119,5 +151,24 @@
     "historical_families": 44,
     "open_families": 0
   },
-  "production_changes": false
+  "production_changes": false,
+  "first_rollout": {
+    "public_revision": "4d78c70cfd231e70e6a50d0fb4ddeaf1253ed306",
+    "accepted": false,
+    "regression": "legacy systemctl predicate status4 rejected",
+    "containment": {
+      "action": "temporary runtime rollback to prior verified release for legacy systemctl precheck compatibility",
+      "started_at": "2026-10-14T18:07:59.871808+00:00",
+      "finished_at": "2026-10-14T18:08:35.329821+00:00",
+      "revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+      "exit": 0,
+      "database_migrations_added_by_build_activity_release": 0
+    },
+    "affected_run_recovery": {
+      "state": "COMPLETED",
+      "step": "done",
+      "resource_state": "READY",
+      "updated_at": "2026-10-14T18:10:15.36393+00:00"
+    }
+  }
 }

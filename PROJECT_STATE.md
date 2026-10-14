@@ -1,3 +1,11 @@
+## Current — 2026-10-14: live compatibility correction approved; corrected rollout pending
+
+First public Build Activity release4d78c70 was NOT finally accepted. Live acceptance exposed strict exit1-only rejection of two immutable legacy Sanaei systemctl predicates(status4,empty stderr). Primary was temporarily restored to prior verified fa868e8; the affected run completed at18:10:15Z without manual retry/reset. Corrected source recognizes3/4 ONLY for those two exact predicates with completely empty stderr, preserving generic failure gates, verification, manifests/hashes and budgets. Real Bash/full runner regression, compatibility-final Astra PASS, exact-source full-final and vet-final pass.19 source/test hashes recorded.
+
+First preservation audit's single resources managed flag transition was proved by recreating its baseline hash with only that boolean inverted; account/resource/provider identifiers unchanged and linked deployment began before update. Original evidence retained. Final audit separates this mutable lifecycle flag from immutable identity columns.
+
+Next: gated corrected publication, then both-host updater and actual live feature/UI verification, including a native selected handoff without false configuration error. API receipts for the entire Build Activity task:5 calls,89807 input+5265 output=95072 tokens; billed USD unavailable.
+
 ## Current — 2026-10-14: Build Activity source approved; publication pending
 
 All44 historical error families were correlated with run/resource outcomes. Fixes distinguish selected-installer handoff from true missing configuration, reject unsafe precheck exits, preserve typed ambiguous outcomes, enforce durable checkpoints and safe reconciliation/rollback, and separate current/recovered/retired diagnostics with mobile-readable messages. Exact17-file source hashes match the final Astra source-r3 PASS resolution chain. Focused fault/PostgreSQL tests,11 Chromium scenario groups, full-final sequential isolated-DB project tests and vet pass. No production mutation or release yet. API: 3 completed gpt-6-astra responses; 69956 input + 4243 output = 74199 tokens; actual billed USD unavailable.

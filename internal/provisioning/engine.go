@@ -223,7 +223,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 					state = "PHASE_SKIPPED"
 				} else if p.Phase == "precheck" && p.Err != nil {
 					d := ClassifyCommandFailure(p.Err, p.Result)
-					if expectedPrecheckMiss(p.Err, p.Result) {
+					if expectedPrecheckMiss(p.Err, p.Result, script.Precheck) {
 						state = "PRECHECK_MISS"
 					} else {
 						state = "PHASE_FAILED"

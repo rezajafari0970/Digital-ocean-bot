@@ -24,7 +24,7 @@ func (s *precheckExitStub) RunDetailedObserved(_ context.Context, _ Target, _ []
 	return s.result, err
 }
 func TestPrecheckOnlyFalsePredicateAllowsExecution(t *testing.T) {
-	for _, code := range []int{1, 2, 126, 127, -1} {
+	for _, code := range []int{1, 2, 3, 4, 126, 127, -1} {
 		for _, signal := range []string{"", "TERM"} {
 			t.Run(fmt.Sprintf("exit%d-%s", code, signal), func(t *testing.T) {
 				var exit *int

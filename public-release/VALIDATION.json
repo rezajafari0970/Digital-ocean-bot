@@ -2,14 +2,14 @@
   "schema": 2,
   "status": "source_verified_publication_gates_required",
   "date": "2026-10-14",
-  "feature": "Accurate Build Activity diagnostics and durable installer recovery",
+  "feature": "Accurate Build Activity diagnostics, durable recovery and immutable legacy predicate compatibility",
   "current_evidence": {
     "focused_postgres_and_fault_injection": "PASS focused-r4/r5",
     "browser": "PASS 11 Chromium scenario groups including mobile diagnostics",
-    "full_go": "PASS full-final exact source, isolated PostgreSQL, serial packages",
-    "vet": "PASS",
-    "astra": "PASS source-review -> source-r2 -> source-r3 resolution chain",
-    "reviewed_files": 17,
+    "full_go": "PASS compatibility/full-final exact source",
+    "vet": "PASS compatibility/vet-final",
+    "astra": "PASS compatibility-final with earlier source review chain",
+    "reviewed_files": 19,
     "publication": "PENDING",
     "runtime_acceptance": "PENDING"
   },
@@ -23,6 +23,7 @@
     "Historical diagnostics remain preserved and distinct from current failures.",
     "Selected installer handoffs are informational; missing configuration remains visible.",
     "Precheck, ambiguous-outcome and checkpoint gates prevent unsafe replay or false completion.",
-    "Read-only detail snapshots and mobile-accessible diagnostic messages preserve existing API contracts."
+    "Read-only detail snapshots and mobile-accessible diagnostic messages preserve existing API contracts.",
+    "Only two exact immutable Sanaei prechecks recognize service-inactive/absent exits; arbitrary shell failures remain rejected."
   ]
 }

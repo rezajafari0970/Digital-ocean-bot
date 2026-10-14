@@ -53,7 +53,7 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 			}
 		}
 		res, err := r.SSH.RunDetailedObserved(phaseCtx, t, key, cmd, phaseStages)
-		expectedMiss := phase == "precheck" && expectedPrecheckMiss(err, res)
+		expectedMiss := phase == "precheck" && expectedPrecheckMiss(err, res, step.Precheck)
 		for _, o := range commandStages {
 			if !expectedMiss || o.Err == nil {
 				stages(o)
@@ -79,7 +79,7 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 			}
 			return nil
 		}
-		if !expectedPrecheckMiss(err, precheckResult) {
+		if !expectedPrecheckMiss(err, precheckResult, step.Precheck) {
 			return err
 		}
 	}
@@ -96,10 +96,10 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 	return nil
 }
 
-// Only the documented false-predicate exit may authorize execution. Shell
+// Only a known false-predicate exit may authorize execution. Shell
 // errors, signals, missing exit status and infrastructure faults are failures.
-func expectedPrecheckMiss(err error, result CommandResult) bool {
-	if !errors.Is(err, ErrSSHCommand) || result.ExitCode == nil || *result.ExitCode != 1 || result.Signal != "" {
+func expectedPrecheckMiss(err error, result CommandResult, command string) bool {
+	if !errors.Is(err, ErrSSHCommand) || result.ExitCode == nil || !precheckMissExit(command, *result.ExitCode, result.Stderr) || result.Signal != "" {
 		return false
 	}
 	diag := ClassifyCommandFailure(err, result)

@@ -73,7 +73,7 @@ func (e InstallerExecutor) Execute(ctx context.Context, ir InstallerRun, resolve
 				retryable := false
 				if p.Err != nil {
 					d := ClassifyCommandFailure(p.Err, p.Result)
-					if p.Phase == "precheck" && expectedPrecheckMiss(p.Err, p.Result) {
+					if p.Phase == "precheck" && expectedPrecheckMiss(p.Err, p.Result, step.Precheck) {
 						state = "PRECHECK_MISS"
 					} else {
 						state = "PHASE_FAILED"
