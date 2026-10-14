@@ -29,7 +29,7 @@ func read(path string) ([]byte, error) {
 	return b, nil
 }
 func run() error {
-	action := flag.String("action", "status", "init, inspect, stage, status, rollback, remove, export, inventory")
+	action := flag.String("action", "status", "init, inspect, stage, status, rollback, remove, export, inventory, evidence")
 	dir := flag.String("lab", "", "absolute private lab directory; init requires it not to exist")
 	base := flag.String("baseline", "", "baseline JSON file")
 	candidate := flag.String("candidate", "", "candidate JSON file")
@@ -37,11 +37,18 @@ func run() error {
 	expected := flag.String("expected-sha256", "", "current lab hash from prior receipt")
 	key := flag.String("request-key", "", "8..64 character idempotency key")
 	output := flag.String("output", "", "new private export file; never stdout")
+	evidence := flag.String("evidence", "", "bounded private connectivity evidence report")
 	flag.Parse()
 	l := advancedreality.Lab{Dir: *dir}
 	var result any
 	var e error
 	switch *action {
+	case "evidence":
+		var b []byte
+		b, e = read(*evidence)
+		if e == nil {
+			result, e = advancedreality.AssessConnectivity(b, time.Now().UTC())
+		}
 	case "init":
 		var b []byte
 		b, e = read(*base)

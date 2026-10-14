@@ -136,6 +136,12 @@ func Inspect(before, after []byte, core string) (Plan, error) {
 	if e != nil {
 		return Plan{}, e
 	}
+	if e = rejectRealityInboundMask(a); e != nil {
+		return Plan{}, e
+	}
+	if e = rejectRealityInboundMask(b); e != nil {
+		return Plan{}, e
+	}
 	if e = compare(a, b, "", &p.ChangedPaths); e != nil {
 		return Plan{}, e
 	}
