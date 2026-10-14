@@ -198,3 +198,48 @@ Reference Android common 6.1 source confirms that segs_out increments before que
 4. Naming a DPI vendor/model requires provider/device-side evidence or a separately validated distinguishing fingerprint. None is present here.
 
 No new OpenAI API call was made: **0 requests, 0 tokens, USD 0 additional API cost**. The previous three Astra reviews remain 25,921 tokens and USD 1.1966925 estimated, not an invoice or account total. No fleet or production behavior was changed.
+
+## Temporary one-target preservation and own-socket capture — 2026-10-14, 04:10–04:20 UTC
+
+### Authorized lifecycle exception
+
+The user explicitly authorized a temporary deletion exception for **104.105.133.93**, while preserving project rules. A single transaction extended only this existing READY droplet's expiry by **7,200 seconds**, from **2026-10-14T04:22:06.006935Z** to **2026-10-14T06:22:06.006935Z (09:52:06 Tehran)**. Audit event **18**, action TEMP_DIAGNOSTIC_LIFETIME_EXTENSION, records the old/new expiry and scope.
+
+The transaction acquired the existing account deployment-admission and lifecycle-excess advisory locks in order, locked the exact droplet, and checked the expected old expiry, target identity, managed resource, enabled/ACTIVE account, no account deletion request, no replacement and no existing delete intent. Duplicate application is rejected using the audit receipt. Only this row's expires_at/updated_at and the audit event were written. Global lifetime policies, lifecycle workers, provider/account revocation handling, pinned-host checks and the operator's greater-than-40-minute eligibility guard were unchanged.
+
+This is **expiry postponement, not immunity from every deletion cause**. Native expiry eligibility resumes at the new deadline without a restoration job. Explicit manual deletion or account/provider revocation remains effective. No permanent allowlist or repeatedly renewing hold was added.
+
+### Valid new measurement
+
+An isolated direct, terminating plaintext HTTP fixture used TCP 38459 with a 1,200-second service limit and a 4,000-record, 96-byte-snapshot target capture. It did not relay traffic. Native-header TCP_INFO readers sampled owned sockets on the nonroot phone and target, correlated by random nonce and source tuple. Control traffic originated on the manager; phone traffic reached the target from **5.216.99.157**, matching the previously verified MCI source. This used raw Python sockets, not v2rayNG or a modified Xray core.
+
+An initial startup failed because a ctypes shared library named tcp_info_reader.so shadowed the Python module tcp_info_reader.py. All twelve immediate ECONNREFUSED results from that batch are **invalid fixture observations**, not carrier failures. Renaming the native library to libtcpdiag.so fixed the import; a real loopback HTTP response established readiness before a separate, preserved second batch. The reusable README now documents the noncolliding name.
+
+| Valid nonce/hash/full-body cases | Off-carrier control | Direct MCI phone |
+|---|---:|---:|
+| Small requests before and after bulk | 2/2 | 2/2 |
+| Two 64-KiB downloads | 2/2 | 0/2 |
+| Two 16-KiB uploads | 2/2 | 0/2 |
+| Total | 6/6 | 2/6 |
+
+Both downloads again delivered **15,207 body bytes**, plus 61 header bytes, to the phone. Phone TCP_INFO counted **15,268 received bytes**; this exactly matched unique server-captured TCP sequence coverage. The server's TCP bytes_acked stayed **0**, and the highest phone ACK visible at the target stayed relative **1**. Between the phone's connected and pre-close settled snapshots, its output count increased by 15 segments, one containing data: 14 additional non-payload output-accounting events. These are not fourteen independently captured wire ACKs.
+
+Both uploads now resolve an earlier uncertainty: the phone's bytes_acked reached **8,329**, consistent with receiving acknowledgment for the **8,328 request bytes** captured and counted by the server, plus the SYN sequence-space byte. The phone accounted for all **16,598 request bytes** in bytes_sent minus bytes_retrans, with additional retransmissions; the server still received only 8,328 and no subsequent upload payload appeared in its capture. The application received 8,114 body bytes after the 214-byte request header. Thus absence of initial server ACK reception at the phone is not the explanation for these two failed uploads.
+
+No RST or zero-window record appeared in these six phone flows. The target capture recorded **309 packets**, 321 received by filter and **0 kernel capture drops**; it did not reach its packet limit. Server read/hold timeouts and client deadlines were deliberately bounded local fixture behavior, not discovered censor timers.
+
+### Supported localization and limits
+
+The observations narrow the unexplained gap to **after phone TCP output accounting and before target packet observation** for subsequent upload traffic, with a corresponding missing phone-to-target acknowledgment-feedback pattern during downloads. Downlink data and upload ACK reception at the phone are established. This strengthens a directional, flow-dependent path-impairment diagnosis and makes a purely TLS/SNI/REALITY explanation insufficient for the reproduced plaintext failures.
+
+It still does **not** identify a DPI product, physical hop, operator intent, or prove that the missing packets left the modem. Android TCP output counters increment before lower-layer transmission; radio/driver, access NAT/firewall, transit, provider-edge and other intervening behavior are not individually excluded. Endpoint clocks were not independently synchronized, so no one-way latency or exact temporal hop localization is inferred. Nonces, tuples and each host's monotonic sampling establish flow correlation.
+
+Existing access suffices for these endpoint tests. No additional phone package or ordinary permission would supply the missing cellular-wire observation. Further physical localization needs a capture at subscriber/access egress or provider edge. A separately authorized tethered-device capture could investigate a changed client/NAT scope, but would not retroactively capture these original Termux flows. Rooting or changing v2rayNG is not proposed.
+
+### Cleanup and persistence
+
+Both temporary units were stopped at **04:20:22Z**; TCP 38459 was verified closed, while production TCP 443 remained open. Production config SHA-256 remained **6ce59e4c3d40309c2f23e42311008c4fffde50e98882a9227d80fc9a9cf8ebb8**. Phone remote services remained running with autostart. No kernel setting, production panel/core, app, extra relay or fleet policy was changed.
+
+The target evidence archive was copied through the unchanged guarded operator and hash-verified: 30,157 bytes, SHA-256 **857f1056bb3ce2c8214008af294509ddbad9d3e94461e8102b0a2ecd52072d7e**. Private lifecycle receipts and detailed own-socket/capture evidence are retained in the manager's corresponding diagnostic backup directories. The temporary target expiry remains in force for further authorized tests; no working direct MCI profile was promoted.
+
+**Additional OpenAI API usage in this stage: 0 requests, 0 tokens, USD 0.** The three prior Astra requests remain 25,921 tokens and USD 1.1966925 estimated, excluding older Sol-stage calls and ChatGPT usage.

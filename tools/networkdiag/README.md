@@ -7,9 +7,11 @@ Compile tcp_info_reader.c as a shared library using the headers and compiler on 
 Example for an operator-controlled scratch directory:
 
 ```sh
-cc -shared -fPIC -O2 -Wall -Wextra -Werror tcp_info_reader.c -o /private/scratch/tcp_info_reader.so
-python3 tcp_info_reader.py --library /private/scratch/tcp_info_reader.so --self-test
+cc -shared -fPIC -O2 -Wall -Wextra -Werror tcp_info_reader.c -o /private/scratch/libtcpdiag.so
+python3 tcp_info_reader.py --library /private/scratch/libtcpdiag.so --self-test
 ```
+
+Use a distinct native library basename such as libtcpdiag.so. Do not place tcp_info_reader.so beside tcp_info_reader.py: Python may select the shared object as an extension module, although this library exposes a ctypes C ABI and has no PyInit entry point.
 
 The C reader uses the native header's offsetof and field size, and the returned getsockopt length. Unsupported/truncated fields are null, never invented zero values. No Python hard-coded ABI offsets are used. Keep library/header/source hashes, architecture, kernel version and UTC/monotonic timestamps in the measurement receipt. Native architecture binaries and private receipts are not committed.
 
