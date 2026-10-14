@@ -49,9 +49,9 @@ func TestPrecheckMissIsNotDuplicateStageFailure(t *testing.T) {
 		{"predicate miss", "not installed", ErrSSHCommand, false, 3, &one, "", false},
 		{"dns failure", "Temporary failure resolving archive.ubuntu.com", ErrSSHCommand, true, 1, &one, "", true},
 		{"transport failure", "", errors.New("connection lost"), true, 1, nil, "", true},
-		{"command missing", "command not found", ErrSSHCommand, false, 3, &missingCmd, "", true},
-		{"syntax error", "syntax error", ErrSSHCommand, false, 3, &two, "", true},
-		{"no exit evidence", "unknown failure", ErrSSHCommand, false, 3, nil, "", true},
+		{"command missing", "command not found", ErrSSHCommand, true, 1, &missingCmd, "", true},
+		{"syntax error", "syntax error", ErrSSHCommand, true, 1, &two, "", true},
+		{"no exit evidence", "unknown failure", ErrSSHCommand, true, 1, nil, "", true},
 		{"signalled", "killed", ErrSSHCommand, true, 1, &one, "KILL", true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

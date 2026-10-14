@@ -2,17 +2,16 @@
   "schema": 2,
   "status": "source_verified_publication_gates_required",
   "date": "2026-10-14",
-  "feature": "Accurate broken-account diagnosis and ordered provider/network recovery evidence",
+  "feature": "Accurate Build Activity diagnostics and durable installer recovery",
   "current_evidence": {
-    "provider_and_postgres_regressions": "PASS",
-    "full_go": "PASS full-r6 all packages",
-    "race": "PASS four affected packages",
+    "focused_postgres_and_fault_injection": "PASS focused-r4/r5",
+    "browser": "PASS 11 Chromium scenario groups including mobile diagnostics",
+    "full_go": "PASS full-final exact source, isolated PostgreSQL, serial packages",
     "vet": "PASS",
-    "browser": "PASS 27 real Chromium scenarios",
-    "astra": "harness-resolution PASS",
-    "reviewed_file_count": 29,
-    "runtime_acceptance": "PENDING",
-    "publication": "PENDING"
+    "astra": "PASS source-review -> source-r2 -> source-r3 resolution chain",
+    "reviewed_files": 17,
+    "publication": "PENDING",
+    "runtime_acceptance": "PENDING"
   },
   "publication_gates": {
     "exact_candidate_ubuntu_24_amd64_install": "required before push",
@@ -21,10 +20,9 @@
     "atomic_main_and_stable": "required"
   },
   "notes": [
-    "Provider restrictions remain distinct from transport/proxy failures and full capacity.",
-    "Credential-version and operation-order fences protect both success and failure evidence.",
-    "READY publication verifies current account-specific runtime through commit; old observations cannot clear current failures.",
-    "Account-only evidence and complete inventory are distinct.",
-    "No forced provider unlock, proxy bypass or provider mutation-policy changes."
+    "Historical diagnostics remain preserved and distinct from current failures.",
+    "Selected installer handoffs are informational; missing configuration remains visible.",
+    "Precheck, ambiguous-outcome and checkpoint gates prevent unsafe replay or false completion.",
+    "Read-only detail snapshots and mobile-accessible diagnostic messages preserve existing API contracts."
   ]
 }

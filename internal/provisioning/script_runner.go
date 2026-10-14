@@ -53,11 +53,7 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 			}
 		}
 		res, err := r.SSH.RunDetailedObserved(phaseCtx, t, key, cmd, phaseStages)
-		expectedMiss := false
-		if phase == "precheck" && errors.Is(err, ErrSSHCommand) && res.ExitCode != nil && *res.ExitCode == 1 && res.Signal == "" {
-			diag := ClassifyCommandFailure(err, res)
-			expectedMiss = diag.Code == "SSH_COMMAND_EXIT" || diag.Code == "SSH_COMMAND_FAILED"
-		}
+		expectedMiss := phase == "precheck" && expectedPrecheckMiss(err, res)
 		for _, o := range commandStages {
 			if !expectedMiss || o.Err == nil {
 				stages(o)
@@ -83,14 +79,7 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 			}
 			return nil
 		}
-		if !errors.Is(err, ErrSSHCommand) {
-			return err
-		}
-		diag := ClassifyCommandFailure(err, precheckResult)
-		// A plain command exit means the idempotency predicate is unmet.
-		// Recognized infrastructure/system failures must not be mistaken for
-		// "not installed" and are propagated to retry/terminal policy.
-		if diag.Code != "SSH_COMMAND_FAILED" && diag.Code != "SSH_COMMAND_EXIT" {
+		if !expectedPrecheckMiss(err, precheckResult) {
 			return err
 		}
 	}
@@ -105,4 +94,14 @@ func (r SSHScriptRunner) RunScript(ctx context.Context, t Target, key []byte, st
 		}
 	}
 	return nil
+}
+
+// Only the documented false-predicate exit may authorize execution. Shell
+// errors, signals, missing exit status and infrastructure faults are failures.
+func expectedPrecheckMiss(err error, result CommandResult) bool {
+	if !errors.Is(err, ErrSSHCommand) || result.ExitCode == nil || *result.ExitCode != 1 || result.Signal != "" {
+		return false
+	}
+	diag := ClassifyCommandFailure(err, result)
+	return diag.Code == "SSH_COMMAND_EXIT" || diag.Code == "SSH_COMMAND_FAILED"
 }

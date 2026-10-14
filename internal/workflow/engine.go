@@ -136,17 +136,21 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 			d, err = step.fn(stepCtx, d)
 			cancel()
 			finish()
-			if errors.Is(err, provisioning.ErrInstallerNotConfigured) {
+			if errors.Is(err, provisioning.ErrInstallerNotConfigured) || errors.Is(err, provisioning.ErrInstallerHandoff) {
+				lastError, message := "INSTALLER_NOT_CONFIGURED", "installer not configured"
+				if errors.Is(err, provisioning.ErrInstallerHandoff) {
+					lastError, message = "", "waiting for selected installer"
+				}
 				d.State = WaitingInstaller
 				d.CurrentStep = "provision"
-				d.LastError = "INSTALLER_NOT_CONFIGURED"
+				d.LastError = lastError
 				if ferr := e.finishStep(ctx, d, step.name, nil, ErrorClass("")); ferr != nil {
 					return d, fmt.Errorf("persist installer placeholder: %w", ferr)
 				}
 				d.State = WaitingInstaller
 				d.CurrentStep = "provision"
-				d.LastError = "INSTALLER_NOT_CONFIGURED"
-				if uerr := e.transition(ctx, &d, "provision", "installer not configured"); uerr != nil {
+				d.LastError = lastError
+				if uerr := e.transition(ctx, &d, "provision", message); uerr != nil {
 					return d, uerr
 				}
 				return d, nil

@@ -33,5 +33,10 @@ func (c Container) DeploymentConfigFromSnapshot(ctx context.Context, deploymentI
 		}
 		return p
 	}(), Target: provisioning.Target{User: snap.SSHUser, KeySecretRef: snap.SSHKeySecretRef}, Template: template, DatabasePaths: sanaei.DefaultDatabasePaths()}
+	_, _, selected, err := c.deploymentInstallerRef(ctx, deploymentID, snap)
+	if err != nil {
+		return DeploymentConfig{}, snap, err
+	}
+	cfg.Provision.InstallerHandoff = selected
 	return cfg, snap, nil
 }

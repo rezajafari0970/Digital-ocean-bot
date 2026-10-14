@@ -9,6 +9,7 @@ import (
 var ErrInvalidPlan = errors.New("invalid provision plan")
 var ErrInterruptedUnsafe = errors.New("previous worker stopped during non-reconcilable script")
 var ErrInstallerNotConfigured = errors.New("installer not configured")
+var ErrInstallerHandoff = errors.New("waiting for selected installer")
 
 type SecretReader interface {
 	Get(context.Context, string, string) ([]byte, error)
@@ -33,10 +34,12 @@ type StagedCommandRunner interface {
 	RunDetailedObserved(context.Context, Target, []byte, string, StageObserver) (CommandResult, error)
 }
 type Plan struct {
-	Bootstrap    string       `json:"bootstrap,omitempty"`
-	InstallPanel string       `json:"install_panel,omitempty"`
-	Verify       string       `json:"verify,omitempty"`
-	Scripts      []ScriptStep `json:"scripts,omitempty"`
+	// Derived from the immutable deployment selection, never accepted from JSON.
+	InstallerHandoff bool         `json:"-"`
+	Bootstrap        string       `json:"bootstrap,omitempty"`
+	InstallPanel     string       `json:"install_panel,omitempty"`
+	Verify           string       `json:"verify,omitempty"`
+	Scripts          []ScriptStep `json:"scripts,omitempty"`
 }
 type Engine struct {
 	Store     Store
@@ -92,16 +95,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 	// verify. Reconcile them back to an explicit paused installer state.
 	for i := 1; i < len(steps); i++ {
 		if steps[i].script != nil && IsInstallerPlaceholder(*steps[i].script) && order[run.CurrentStep] > i {
-			run.State = WaitingInstaller
-			run.CurrentStep = steps[i].name
-			run.LastError = ErrInstallerNotConfigured.Error()
-			run.NextRetryAt = nil
-			_ = e.Store.Update(ctx, run)
-			if e.Events != nil {
-				diag := ClassifyError(ErrInstallerNotConfigured)
-				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: steps[i].name, State: "WAITING_INSTALLER", Diagnostic: diag, Retryable: false})
-			}
-			return run, ErrInstallerNotConfigured
+			return e.waitForInstaller(ctx, run, steps[i].name, plan.InstallerHandoff)
 		}
 	}
 	for idx, step := range steps {
@@ -109,16 +103,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 			continue
 		}
 		if step.script != nil && IsInstallerPlaceholder(*step.script) {
-			run.State = WaitingInstaller
-			run.CurrentStep = step.name
-			run.LastError = ErrInstallerNotConfigured.Error()
-			run.NextRetryAt = nil
-			_ = e.Store.Update(ctx, run)
-			if e.Events != nil {
-				diag := ClassifyError(ErrInstallerNotConfigured)
-				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: "WAITING_INSTALLER", Diagnostic: diag, Retryable: false})
-			}
-			return run, ErrInstallerNotConfigured
+			return e.waitForInstaller(ctx, run, step.name, plan.InstallerHandoff)
 		}
 		// A durable successful finish may precede a crashed checkpoint write.
 		// Repaired historical runs can also contain completed steps after a gap.
@@ -146,8 +131,12 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 		if interrupted && step.script != nil && step.script.Execute != "" && step.script.Precheck == "" {
 			run.State = Failed
 			run.LastError = ErrInterruptedUnsafe.Error()
-			_ = e.Store.FinishStep(ctx, run.ID, step.name, ErrInterruptedUnsafe, true)
-			_ = e.Store.Update(ctx, run)
+			if err := e.Store.FinishStep(ctx, run.ID, step.name, ErrInterruptedUnsafe, true); err != nil {
+				return run, errors.Join(ErrInterruptedUnsafe, err)
+			}
+			if err := e.Store.Update(ctx, run); err != nil {
+				return run, errors.Join(ErrInterruptedUnsafe, err)
+			}
 			if e.Events != nil {
 				diag := ClassifyError(ErrInterruptedUnsafe)
 				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: "FAILED", Diagnostic: diag, Retryable: false, Metadata: map[string]any{"reason": "interrupted_without_precheck"}})
@@ -156,13 +145,12 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 		}
 		stepAttempt, beginErr := e.Store.BeginStep(ctx, run.ID, step.name, maxAttempts)
 		if beginErr != nil {
-			if errors.Is(beginErr, ErrStepRetryDeferred) {
+			if !errors.Is(beginErr, ErrStepTerminal) && !errors.Is(beginErr, ErrStepRetryLimit) {
 				return run, beginErr
 			}
 			run.State = Failed
 			run.LastError = beginErr.Error()
-			_ = e.Store.Update(ctx, run)
-			return run, beginErr
+			return run, errors.Join(beginErr, e.Store.Update(ctx, run))
 		}
 		run.State = step.state
 		run.CurrentStep = step.name
@@ -235,7 +223,7 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 					state = "PHASE_SKIPPED"
 				} else if p.Phase == "precheck" && p.Err != nil {
 					d := ClassifyCommandFailure(p.Err, p.Result)
-					if d.Code == "SSH_COMMAND_FAILED" || d.Code == "SSH_COMMAND_EXIT" {
+					if expectedPrecheckMiss(p.Err, p.Result) {
 						state = "PRECHECK_MISS"
 					} else {
 						state = "PHASE_FAILED"
@@ -292,7 +280,9 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 				retryable = true
 			}
 			terminal := !retryable || (maxAttempts > 0 && stepAttempt >= maxAttempts)
-			_ = e.Store.FinishStep(ctx, run.ID, step.name, err, terminal)
+			if persistErr := e.Store.FinishStep(ctx, run.ID, step.name, err, terminal); persistErr != nil {
+				return run, errors.Join(err, persistErr)
+			}
 			if terminal {
 				run.State = Failed
 			}
@@ -303,7 +293,9 @@ func (e Engine) Execute(ctx context.Context, target Target, plan Plan) (Run, err
 				}
 				_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step.name, State: state, Attempt: stepAttempt, Diagnostic: diag, Duration: duration, Retryable: !terminal})
 			}
-			_ = e.Store.Update(ctx, run)
+			if persistErr := e.Store.Update(ctx, run); persistErr != nil {
+				return run, errors.Join(err, persistErr)
+			}
 			if terminal {
 				return run, errors.Join(ErrStepTerminal, err)
 			}
@@ -356,4 +348,24 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func (e Engine) waitForInstaller(ctx context.Context, run Run, step string, selected bool) (Run, error) {
+	run.State, run.CurrentStep, run.NextRetryAt = WaitingInstaller, step, nil
+	pause := ErrInstallerNotConfigured
+	diag := ClassifyError(pause)
+	run.LastError = pause.Error()
+	if selected {
+		pause = ErrInstallerHandoff
+		diag = Diagnostic{}
+		run.LastError = ""
+	}
+	if err := e.Store.Update(ctx, run); err != nil {
+		// Do not return a handoff sentinel unless the checkpoint is durable.
+		return run, err
+	}
+	if e.Events != nil {
+		_ = e.Events.Event(ctx, Event{RunID: run.ID, Step: step, State: "WAITING_INSTALLER", Diagnostic: diag, Metadata: map[string]any{"installer_selected": selected}})
+	}
+	return run, pause
 }

@@ -144,6 +144,9 @@ func tailDiagnostic(s string) string {
 }
 
 func ClassifyCommandFailure(err error, res CommandResult) Diagnostic {
+	if err == nil {
+		return Diagnostic{}
+	}
 	d := ClassifyError(err)
 	d.StdoutTail = tailDiagnostic(res.Stdout)
 	d.StderrTail = tailDiagnostic(res.Stderr)
@@ -151,6 +154,8 @@ func ClassifyCommandFailure(err error, res CommandResult) Diagnostic {
 	d.Signal = res.Signal
 	m := strings.ToLower(res.Stderr + "\n" + res.Stdout + "\n" + err.Error())
 	switch {
+	case errors.Is(err, ErrCommandOutcomeUnknown), errors.Is(err, ErrInterruptedUnsafe), errors.Is(err, ErrHostKeyMismatch), errors.Is(err, ErrHostKeyVerifierMissing):
+		// Text from partial output cannot weaken an ambiguous outcome or trust failure.
 	case strings.EqualFold(res.Signal, "KILL") || strings.Contains(m, "process killed"):
 		d.Class = ClassCommand
 		d.Code = "PROCESS_KILLED"
@@ -188,7 +193,7 @@ func DiagnosticRetryable(d Diagnostic) bool {
 	switch d.Code {
 	case "SERVER_READINESS_BLOCKED", "PKG_LOCK_BUSY", "DNS_RESOLUTION_FAILED", "DPKG_INTERRUPTED", "SERVICE_START_FAILED", "SSH_DISCONNECTED", "SSH_CONNECTION_REFUSED", "SSH_CONNECT_TIMEOUT", "SSH_NO_ROUTE", "SSH_CONNECTION_RESET", "SSH_NOT_READY", "SSH_CONTEXT_TIMEOUT", "PROCESS_KILLED":
 		return true
-	case "DISK_FULL", "PERMISSION_DENIED", "SSH_HOST_KEY_FAILED", "COMMAND_OUTCOME_UNKNOWN":
+	case "DISK_FULL", "PERMISSION_DENIED", "SSH_HOST_KEY_FAILED", "SSH_HOST_KEY_MISMATCH", "SSH_AUTH_FAILED", "COMMAND_OUTCOME_UNKNOWN":
 		return false
 	default:
 		return d.Class != ClassConfiguration

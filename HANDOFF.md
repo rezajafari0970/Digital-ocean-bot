@@ -1,3 +1,9 @@
+## Current — 2026-10-14: Build Activity source approved; publication pending
+
+All44 historical error families were correlated with run/resource outcomes. Fixes distinguish selected-installer handoff from true missing configuration, reject unsafe precheck exits, preserve typed ambiguous outcomes, enforce durable checkpoints and safe reconciliation/rollback, and separate current/recovered/retired diagnostics with mobile-readable messages. Exact17-file source hashes match the final Astra source-r3 PASS resolution chain. Focused fault/PostgreSQL tests,11 Chromium scenario groups, full-final sequential isolated-DB project tests and vet pass. No production mutation or release yet. API: 3 completed gpt-6-astra responses; 69956 input + 4243 output = 74199 tokens; actual billed USD unavailable.
+
+Next: existing gated public publisher, then secondary and primary updater with identity/data/health/feature acceptance. Preserve history and native bounded worker recovery; no manual provider mutations. See docs/BUILD_ACTIVITY_20261014.md and docs/development-jobs/build-activity-20261014.json.
+
 ## Current — 2026-10-14: broken-account fixes published and verified on both hosts
 
 This entry supersedes publication-pending entries. Approved source 8865f814b0c4e4fb0db79330b667e74656fad177 produced public main/stable fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b. All 29 approved code/test/migration hashes match the public candidate. Final Astra source PASS, full-r6 sequential Go/PostgreSQL/browser suite, 16 ordering variants, race, vet and three isolated Linode browser repeats passed. Public secret scans, unprivileged regressions, exact-candidate Ubuntu24 install/update and GitHub Actions passed.
