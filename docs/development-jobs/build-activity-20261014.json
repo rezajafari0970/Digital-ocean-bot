@@ -1,7 +1,7 @@
 {
   "id": "build-activity-20261014",
-  "status": "COMPATIBILITY_SOURCE_APPROVED_AWAITING_CORRECTED_ROLLOUT",
-  "at": "2026-10-14T18:22:07.494179+00:00",
+  "status": "DEPLOYED_AND_VERIFIED",
+  "at": "2026-10-14T18:30:31.254571+00:00",
   "base_revision": "34d0e64c34fd9e2ee0b87e0b3c1441bdf4401347",
   "source_hashes": {
     "internal/adminapi/build_activity.go": "ddb350d6c0bbf9bce896e433513a03ef397d9215e053634f54f815f34fe70bbb",
@@ -151,7 +151,7 @@
     "historical_families": 44,
     "open_families": 0
   },
-  "production_changes": false,
+  "production_changes": true,
   "first_rollout": {
     "public_revision": "4d78c70cfd231e70e6a50d0fb4ddeaf1253ed306",
     "accepted": false,
@@ -170,5 +170,761 @@
       "resource_state": "READY",
       "updated_at": "2026-10-14T18:10:15.36393+00:00"
     }
+  },
+  "public_published": true,
+  "production_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+  "acceptance": {
+    "at": "2026-10-14T18:30:31.254571+00:00",
+    "status": "DEPLOYED_AND_VERIFIED",
+    "approved_source": "dfb69f3f284dd85b1901e8c7e0f875e105b0e735",
+    "public_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+    "first_rollout_not_accepted": true,
+    "temporary_containment": {
+      "action": "temporary runtime rollback to prior verified release for legacy systemctl precheck compatibility",
+      "started_at": "2026-10-14T18:07:59.871808+00:00",
+      "finished_at": "2026-10-14T18:08:35.329821+00:00",
+      "revision": "fa868e8b0cd0dab4879c3dab3be79d8e5b6ad46b",
+      "exit": 0,
+      "database_migrations_added_by_build_activity_release": 0
+    },
+    "first_resource_flag_proof": {
+      "id": "13eb2f5d-d3a0-4e1a-be92-b01b65f97e50",
+      "type": "server",
+      "provider": "linode",
+      "before_managed": false,
+      "after_managed": true,
+      "baseline_hash_reproduced": true,
+      "other_identity_columns_unchanged": true
+    },
+    "reviewed_files": 19,
+    "source_hashes_preserved": true,
+    "source_review_chain": [
+      "source-review REVISE",
+      "source-r2 REVISE",
+      "source-r3 PASS",
+      "compatibility-review REVISE",
+      "compatibility-final PASS"
+    ],
+    "api_usage": {
+      "responses": 5,
+      "input_tokens": 89807,
+      "output_tokens": 5265,
+      "total_tokens": 95072,
+      "billed_usd": null,
+      "scope": "Entire current Build Activity task, including live compatibility correction; prior tasks and internal ChatGPT session excluded",
+      "receipts": [
+        {
+          "phase": "compatibility/compatibility-final",
+          "id": "resp_03544cdf084dfe5a006acfc69fc5b487d19f9c3687edb8947e",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 2380,
+            "input_tokens_details": {
+              "cache_write_tokens": 2377,
+              "cached_tokens": 0
+            },
+            "output_tokens": 407,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 2787
+          }
+        },
+        {
+          "phase": "compatibility/compatibility-review",
+          "id": "resp_0cdc25e3ad62223a006acfc5e02c7487d1846af9d337dc9266",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 17471,
+            "input_tokens_details": {
+              "cache_write_tokens": 17468,
+              "cached_tokens": 0
+            },
+            "output_tokens": 615,
+            "output_tokens_details": {
+              "reasoning_tokens": 98
+            },
+            "total_tokens": 18086
+          }
+        },
+        {
+          "phase": "source-r2",
+          "id": "resp_07dc25ec748d3259006acfbf355d5487d18f51c3109d8df1da",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 23349,
+            "input_tokens_details": {
+              "cache_write_tokens": 23346,
+              "cached_tokens": 0
+            },
+            "output_tokens": 864,
+            "output_tokens_details": {
+              "reasoning_tokens": 268
+            },
+            "total_tokens": 24213
+          }
+        },
+        {
+          "phase": "source-r3",
+          "id": "resp_0c54f04408782d97006acfbfeaf45c87d19d3e7155adaee694",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 5434,
+            "input_tokens_details": {
+              "cache_write_tokens": 5431,
+              "cached_tokens": 0
+            },
+            "output_tokens": 474,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 5908
+          }
+        },
+        {
+          "phase": "source-review",
+          "id": "resp_06ce6add3926b474006acfbddefbf887d1a366c345ae3e3149",
+          "model": "gpt-6-astra",
+          "usage": {
+            "input_tokens": 41173,
+            "input_tokens_details": {
+              "cache_write_tokens": 41170,
+              "cached_tokens": 0
+            },
+            "output_tokens": 2905,
+            "output_tokens_details": {
+              "reasoning_tokens": 2070
+            },
+            "total_tokens": 44078
+          }
+        }
+      ]
+    },
+    "primary": {
+      "update-result.json": {
+        "started_at": "2026-10-14T18:27:29.334441+00:00",
+        "finished_at": "2026-10-14T18:28:10.862938+00:00",
+        "exit": 0,
+        "expected_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d"
+      },
+      "after.json": {
+        "at": "2026-10-14T18:28:21.440789+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 5,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 6,
+          "droplets": 1028,
+          "resources": 1301,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 5,
+          "proxies": 1,
+          "residential_proxies": 12,
+          "deployment_profiles": 6,
+          "droplets": 1028,
+          "resources": 1302,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "managed_flag_changes": 0
+      },
+      "runtime.json": {
+        "at": "2026-10-14T18:28:22.011600+00:00",
+        "revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "build-activity.json": {
+        "at": "2026-10-14T18:31:41.219702+00:00",
+        "runtime_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "contracts": "PASS",
+        "legacy_arrays": "PASS",
+        "detail": {
+          "state": "COMPLETED",
+          "steps": 14,
+          "events": 185,
+          "structured_metadata": true
+        },
+        "active_builds": 0,
+        "waiting_builds": 0,
+        "recent_records": 100,
+        "historical_families": 45,
+        "current_failed_runs": 0,
+        "open_error_families": 0,
+        "current_error_codes": [],
+        "post_deploy_events": {
+          "selected_handoffs": 0,
+          "false_config_errors": 0,
+          "historical_error_events": 0,
+          "legacy_predicate_misses": 1,
+          "legacy_completed_runs": 1,
+          "legacy_predicate_false_failures": 0
+        },
+        "system": {
+          "total_servers": 39,
+          "active_servers": 37,
+          "inactive_servers": 1,
+          "broken_servers": 0,
+          "degraded_servers": 0,
+          "pending_deletion_servers": 1,
+          "provisioning_servers": 0
+        }
+      }
+    },
+    "secondary": {
+      "update-result.json": {
+        "started_at": "2026-10-14T18:26:25.273757+00:00",
+        "finished_at": "2026-10-14T18:26:57.666742+00:00",
+        "exit": 0,
+        "expected_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d"
+      },
+      "after.json": {
+        "at": "2026-10-14T18:27:11.043648+00:00",
+        "identity_files_preserved": true,
+        "changed_identity_counts": {},
+        "before_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "after_counts": {
+          "accounts": 0,
+          "proxies": 0,
+          "residential_proxies": 0,
+          "deployment_profiles": 0,
+          "droplets": 0,
+          "resources": 0,
+          "admin_users": 1,
+          "panel_settings": 1
+        },
+        "managed_flag_changes": 0
+      },
+      "runtime.json": {
+        "at": "2026-10-14T18:27:11.632614+00:00",
+        "revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "readiness_checks": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": "active",
+            "binary_matches": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": "active",
+            "binary_matches": true
+          }
+        ],
+        "panel": {
+          "panel_http": 200,
+          "assets_verified": 6
+        }
+      },
+      "build-activity.json": {
+        "at": "2026-10-14T18:27:11.954249+00:00",
+        "runtime_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "contracts": "PASS",
+        "legacy_arrays": "PASS",
+        "detail": {},
+        "active_builds": 0,
+        "waiting_builds": 0,
+        "recent_records": 0,
+        "historical_families": 0,
+        "current_failed_runs": 0,
+        "open_error_families": 0,
+        "current_error_codes": [],
+        "post_deploy_events": {
+          "selected_handoffs": 0,
+          "false_config_errors": 0,
+          "historical_error_events": 0,
+          "legacy_predicate_misses": 0,
+          "legacy_completed_runs": 0,
+          "legacy_predicate_false_failures": 0
+        },
+        "system": {
+          "total_servers": 0,
+          "active_servers": 0,
+          "inactive_servers": 0,
+          "broken_servers": 0,
+          "degraded_servers": 0,
+          "pending_deletion_servers": 0,
+          "provisioning_servers": 0
+        }
+      }
+    },
+    "live_browser": {
+      "at": "2026-10-14T18:28:26.227Z",
+      "status": "PASS",
+      "runtime_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+      "summary": [
+        "Active / waiting builds\n1",
+        "Waiting for installer\n1",
+        "Recent records\n100",
+        "Current failed SSH / install runs\n0",
+        "Historical error families\n45"
+      ],
+      "mobile_layout": true,
+      "expanded_history": true,
+      "detail_modal": true,
+      "page_errors": 0,
+      "browser_mutations": 0,
+      "request_count": 15
+    },
+    "health_transient_observation": {
+      "observed_at": "2026-10-14T18:29:03.264288+00:00",
+      "total_servers": 39,
+      "active_servers": 29,
+      "inactive_servers": 2,
+      "broken_servers": 0,
+      "degraded_servers": 7,
+      "pending_deletion_servers": 1,
+      "provisioning_servers": 1,
+      "server_health": [
+        {
+          "id": "618de696-13b4-47dc-8def-e057e146ec1c",
+          "account_name": "Linode mari",
+          "provider": "linode",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "108152147",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:28:46.54387+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:46.54387+00:00",
+          "last_sync_at": "2026-10-14T18:27:15.368826+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:15.374294+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "d37224e5-7155-4fb0-a96e-19d3cee7b829",
+          "account_name": "Linode mari",
+          "provider": "linode",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "108139012",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:28:46.54387+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:46.54387+00:00",
+          "last_sync_at": "2026-10-14T18:27:14.630475+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:14.637718+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "e428ca6d-670a-4629-bb22-a6c097429773",
+          "account_name": "Linode mari",
+          "provider": "linode",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "108152007",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:28:46.54387+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:46.54387+00:00",
+          "last_sync_at": "2026-10-14T18:27:05.474548+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:05.479678+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "b12c7e1c-3816-40b5-804a-f04fda3a3d61",
+          "account_name": "Oceano new 1",
+          "provider": "digitalocean",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "609109020",
+          "lifecycle_state": "PROVISIONING",
+          "health": "inactive",
+          "reason": "PROVISIONING",
+          "provider_observed_at": "2026-10-14T18:28:49.681792+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:49.681792+00:00",
+          "last_sync_at": null,
+          "last_sync_state": null,
+          "route_state": null,
+          "route_verified_at": null,
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "040970d8-2d0f-437e-a727-b2f617fb3de9",
+          "account_name": "Vultr Usman 1",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "d0e1882a-b16b-4e7b-9f22-3c70973bdbba",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:27:01.842723+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:32:01.842723+00:00",
+          "last_sync_at": "2026-10-14T18:28:40.338292+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:07.23273+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "806e614e-b59e-47ac-82c5-4caf6fef1144",
+          "account_name": "Vultr Usman 1",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "92f873ac-f5dd-4c4c-a816-12d094a3707d",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:27:01.842723+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:32:01.842723+00:00",
+          "last_sync_at": "2026-10-14T18:28:46.57309+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:14.99003+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "8feea9db-e1e1-4cfa-9df1-77f7f06c8893",
+          "account_name": "Vultr Usman 1",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "fc49f833-3a22-4e65-9dea-54a937fbcb31",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:27:01.842723+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:32:01.842723+00:00",
+          "last_sync_at": "2026-10-14T18:28:40.318881+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:12.968254+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "91a29e99-20d8-4fa6-a94c-ddaa3b765c38",
+          "account_name": "Vultr Usman 1",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "9cf30dcd-3666-44f9-a6c3-56ef28c41e74",
+          "lifecycle_state": "READY",
+          "health": "inactive",
+          "reason": "ROUTING_UNVERIFIED",
+          "provider_observed_at": "2026-10-14T18:27:01.842723+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:32:01.842723+00:00",
+          "last_sync_at": "2026-10-14T18:27:24.149346+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "APPLYING",
+          "route_verified_at": "2026-10-14T18:26:38.05081+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "3495df35-845b-401b-abd9-20c3097eda34",
+          "account_name": "Vultr Usman 12",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "8172ef93-21ac-433e-ba91-03c68dd2408a",
+          "lifecycle_state": "READY",
+          "health": "degraded",
+          "reason": "PANEL_DEGRADED",
+          "provider_observed_at": "2026-10-14T18:28:19.58632+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:19.58632+00:00",
+          "last_sync_at": "2026-10-14T18:28:21.028517+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "FAILED",
+          "route_verified_at": "2026-10-14T18:27:14.766577+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        },
+        {
+          "id": "e60a006c-b0b6-41ae-adc9-2621b4b69952",
+          "account_name": "Vultr Usman 12",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "4d752bd7-9b00-4518-9593-c9f5c3912106",
+          "lifecycle_state": "EXPIRING",
+          "health": "pending",
+          "reason": "PENDING_DELETION",
+          "provider_observed_at": "2026-10-14T18:28:19.58632+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:29:19.58632+00:00",
+          "last_sync_at": "2026-10-14T18:28:41.161676+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "APPLIED",
+          "route_verified_at": "2026-10-14T18:28:41.169083+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        }
+      ]
+    },
+    "health_recovery_observation": {
+      "observed_at": "2026-10-14T18:30:03.284181+00:00",
+      "total_servers": 39,
+      "active_servers": 38,
+      "inactive_servers": 0,
+      "broken_servers": 0,
+      "degraded_servers": 0,
+      "pending_deletion_servers": 1,
+      "provisioning_servers": 0,
+      "server_health": [
+        {
+          "id": "e60a006c-b0b6-41ae-adc9-2621b4b69952",
+          "account_name": "Vultr Usman 12",
+          "provider": "vultr",
+          "provider_state": "ACTIVE",
+          "provider_error_state": null,
+          "provider_resource_id": "4d752bd7-9b00-4518-9593-c9f5c3912106",
+          "lifecycle_state": "EXPIRING",
+          "health": "pending",
+          "reason": "PENDING_DELETION",
+          "provider_observed_at": "2026-10-14T18:29:30.855482+00:00",
+          "next_provider_refresh_at": "2026-10-14T18:30:30.855482+00:00",
+          "last_sync_at": "2026-10-14T18:29:44.848489+00:00",
+          "last_sync_state": "COMPLETED",
+          "route_state": "APPLIED",
+          "route_verified_at": "2026-10-14T18:29:44.853551+00:00",
+          "admission_blocked": null,
+          "xui_failed": null,
+          "protection_failed": null
+        }
+      ]
+    },
+    "github_actions": [
+      {
+        "id": 38614830299,
+        "name": "Source checks",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38614830299"
+      },
+      {
+        "id": 38614830490,
+        "name": "Source checks",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38614830490"
+      }
+    ],
+    "publication_evidence": "/var/lib/datacenter-publisher/release-6mp1a776",
+    "prior_primary_feature_sample": {
+      "at": "2026-10-14T18:30:30.808428+00:00",
+      "runtime_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+      "contracts": "PASS",
+      "legacy_arrays": "PASS",
+      "detail": {
+        "state": "COMPLETED",
+        "steps": 14,
+        "events": 185,
+        "structured_metadata": true
+      },
+      "active_builds": 0,
+      "waiting_builds": 0,
+      "recent_records": 100,
+      "historical_families": 45,
+      "current_failed_runs": 0,
+      "open_error_families": 0,
+      "current_error_codes": [],
+      "post_deploy_events": {
+        "selected_handoffs": 0,
+        "false_config_errors": 0,
+        "historical_error_events": 0,
+        "legacy_predicate_misses": 1,
+        "legacy_completed_runs": 1,
+        "legacy_predicate_false_failures": 0
+      },
+      "system": {
+        "total_servers": 39,
+        "active_servers": 36,
+        "inactive_servers": 1,
+        "broken_servers": 0,
+        "degraded_servers": 1,
+        "pending_deletion_servers": 1,
+        "provisioning_servers": 0
+      }
+    },
+    "post_acceptance_routing_observations": [
+      {
+        "at_us": "1792002317564525",
+        "message": "2026/10/14 18:25:17 global reality panel de3aaecf-2341-4bbc-a582-1fd476ddb83d: ssh command failed: EOF"
+      },
+      {
+        "at_us": "1792002467075373",
+        "message": "2026/10/14 18:27:47 residential sync persistence 8a51f88f-bd10-4660-9e07-c43584b2298a: context canceled"
+      },
+      {
+        "at_us": "1792002467075373",
+        "message": "2026/10/14 18:27:47 residential sync panel 8a51f88f-bd10-4660-9e07-c43584b2298a: x-ui api request failed: csrf transport: Get \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467075373",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467075373",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467079001",
+        "message": "2026/10/14 18:27:47 residential sync persistence d7577bed-2335-46b3-b697-d5788a366d46: context canceled"
+      },
+      {
+        "at_us": "1792002467079001",
+        "message": "2026/10/14 18:27:47 residential sync panel d7577bed-2335-46b3-b697-d5788a366d46: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467079001",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467079766",
+        "message": "2026/10/14 18:27:47 residential sync persistence 8364b816-0046-403f-beb0-915975c9956d: context canceled"
+      },
+      {
+        "at_us": "1792002467079766",
+        "message": "2026/10/14 18:27:47 residential sync panel 8364b816-0046-403f-beb0-915975c9956d: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467079766",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467081409",
+        "message": "2026/10/14 18:27:47 residential sync persistence 89b5b610-a99c-4667-937a-eed1363774d0: context canceled"
+      },
+      {
+        "at_us": "1792002467081409",
+        "message": "2026/10/14 18:27:47 residential sync panel 89b5b610-a99c-4667-937a-eed1363774d0: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467081409",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467081409",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467083263",
+        "message": "2026/10/14 18:27:47 residential sync persistence 32a6d600-94c8-4087-8930-618a5b3f6444: context canceled"
+      },
+      {
+        "at_us": "1792002467083263",
+        "message": "2026/10/14 18:27:47 residential sync panel 32a6d600-94c8-4087-8930-618a5b3f6444: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467083263",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467083263",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467091560",
+        "message": "2026/10/14 18:27:47 residential sync persistence 4fc345e3-8149-458f-9f1d-85ab82c310d3: context canceled"
+      },
+      {
+        "at_us": "1792002467091560",
+        "message": "2026/10/14 18:27:47 residential sync panel 4fc345e3-8149-458f-9f1d-85ab82c310d3: sanaei session request failed: Get \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467091560",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467095608",
+        "message": "2026/10/14 18:27:47 residential sync persistence 601f835e-245f-410a-afa2-7871d57b4dc9: context canceled"
+      },
+      {
+        "at_us": "1792002467095608",
+        "message": "2026/10/14 18:27:47 residential sync panel 601f835e-245f-410a-afa2-7871d57b4dc9: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467095608",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002467101071",
+        "message": "2026/10/14 18:27:47 residential sync persistence 83c343c5-6679-4adb-81c9-83dbbbd3dc79: context canceled"
+      },
+      {
+        "at_us": "1792002467101071",
+        "message": "2026/10/14 18:27:47 residential sync panel 83c343c5-6679-4adb-81c9-83dbbbd3dc79: sanaei session request failed: Post \"[URL]\": terminated signal received"
+      },
+      {
+        "at_us": "1792002467101071",
+        "message": "2026/10/14 18:27:47 residential sync discovery: context canceled"
+      },
+      {
+        "at_us": "1792002479955207",
+        "message": "2026/10/14 18:27:59 worker started role=panels modules=[capacity-cleanup capacity-fill client-mutation global-reality heartbeat panel-cleanup panel-registry residential-monitor residential-performance residential-sync-false-0 residential-sync-true-0 residential-sync-true-1 residential-sync-true-2 residential-sync-true-3 residential-sync-true-4 residential-sync-true-5 residential-sync-true-6 residential-sync-true-7 sanaei-cache server-guardian server-protection server-protection-cleanup trial-relay-health] db_budget=40"
+      },
+      {
+        "at_us": "1792002628129475",
+        "message": "2026/10/14 18:30:28 residential sync panel e2309142-827e-46d9-8bea-a2ddffe1522e: sanaei session request failed: Post \"[URL]\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+      }
+    ]
   }
 }
