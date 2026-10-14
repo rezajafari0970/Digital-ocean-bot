@@ -152,3 +152,49 @@ One additional sanitized Responses API review used **gpt-6-astra**, high reasoni
 The new response includes 3,071 reasoning tokens within its output total, with zero cached-input/cache-write tokens. Cost uses published standard rates and is an estimate, not a billed invoice or account-wide total. Previous ChatGPT usage and older Sol-stage requests are outside this table. No full source test suite was repeated for this documentation/private-evidence-only follow-up, and nothing was deployed fleet-wide.
 
 Primary configuration references consulted: [Xray mKCP](https://xtls.github.io/en/config/transports/mkcp.html), [TLS](https://xtls.github.io/en/config/transports/tls.html), [FinalMask](https://xtls.github.io/en/config/transports/finalmask.html). Version compatibility was established by actual native/control tests, not inferred solely from current documentation. Pricing reference: [OpenAI GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra).
+
+## Localization follow-up — 2026-10-14, 03:54 UTC onward
+
+**Exact DPI identity and physical drop location remain unproven.** This stage re-analyzed already archived target metadata and validated a new own-socket measurement capability. It did not run a fresh target-path test or discover a working bypass.
+
+A live database read found the same target READY, account enabled and provider ACTIVE, but expiry remained 2026-10-14T04:22:06.006935Z (07:52 Tehran). The existing operator's greater-than-40-minute lifetime precondition was false. A guarded read-only date operation at 03:54:41Z returned target_precondition_failed before remote execution. Neither the guard nor target lifetime was changed. No replacement destination was silently substituted.
+
+### More precise observations from the stored MCI-return trace
+
+The analysis correlated each direct same-port client result with its matching source IP/port in the server metadata. Both plaintext download attempts had the same pattern:
+
+| Observation | Both plaintext download attempts |
+|---|---:|
+| HTTP body received by phone curl | 15,207 bytes |
+| HTTP response header length from fixture | 61 bytes |
+| Unique server TCP payload sequence coverage | 15,268 bytes |
+| Effective payload MSS in the captured flow | 1,388 bytes |
+| Highest client relative ACK visible at server | 1; no response payload acknowledged |
+| Captured RST / zero-window records | 0 / 0 |
+
+15,207 + 61 = 15,268 = 11 × 1,388. The initial send comprised ten MSS of data followed by one additional MSS, then repeated retransmission of the first range. This accounts for the observed partial body without assuming a fixed 15-KiB censorship threshold. Host offload aggregated some records; packet-record counts are not physical wire-packet counts.
+
+The two plaintext uploads each reached only 8,328 unique request bytes (six MSS) at the server. Server ACKs advanced through relative 8,329, but phone receipt of those ACKs is unknown. The fixture later emitted FIN after its configured 18-second read timeout; that server-generated close is not evidence of an injected reset. Curl's earlier 8-second deadline is likewise a local diagnostic timeout, not proof of a network device's timer.
+
+Across the twelve same-port MCI flows, no RST or zero-window record appeared in the server trace. TLS handshake completion was observed in the curl results even for failed bulk cases. These observations make “TLS handshake always blocked” and “an observed reset injection caused these failures” inaccurate descriptions. They do not prove that no resets existed at an unobserved point or identify DPI, firewall, NAT, radio, transit, or provider mechanisms.
+
+The narrower supported description is: initial data reaches the opposite application/host, then forward progress/acknowledgement feedback fails on this observed MCI–destination path. For the plaintext downloads, phone application receipt of the initial server flight is established, while the server never observes ACK advancement for it. Android ACK creation and physical egress were not captured during those historical flows; the exact gap cannot be localized further from this archive.
+
+The TCP trace recorded 1,443 packet records and zero kernel capture drops (1,448 reported received by filter). It is finite, server-side, header-only metadata. The saved text does not preserve enough TTL/checksum/payload information for vendor fingerprinting or a geographic-hop claim.
+
+### Additional capability validated, not a target test
+
+Added experimental tools/networkdiag/tcp_info_reader.c and tcp_info_reader.py. They read TCP_INFO only for owned sockets using the native C header layout and returned structure length. Four full-body loopback cases and invalid-descriptor rejection passed on the nonroot Android phone and manager. The phone's kernel returned 232 bytes; the manager returned 280. No hard-coded Python ABI offsets or privileged operations were used.
+
+Termux raw packet socket creation failed with permission denied (errno 13). No raw packets were captured, no root was installed, and v2rayNG and its embedded core were untouched. The helper has no daemon, listener after self-test completion, arbitrary remote-target CLI, relay, or persistence/autostart change.
+
+Reference Android common 6.1 source confirms that segs_out increments before queue_xmit. Consequently even new TCP_INFO samples cannot alone prove that an ACK physically left the modem. They can narrow the interval between TCP accounting and target capture when collected on the same fresh failing flow; they cannot retroactively fill that gap in previous tests.
+
+### What is still required
+
+1. The same target must first satisfy the existing lifecycle guard through the project's authorized lifecycle process. A new IP would be a new scope, not localization of this IP's historical failure.
+2. On an eligible target, collect synchronized, nonce-correlated phone own-socket snapshots and a bounded target capture for a tiny control and one failing plaintext bulk flow in each direction.
+3. To identify the actual loss segment, obtain observation at subscriber/access egress or a provider edge and compare it with the two endpoints. Server-root access is not access to the provider's transit edge. Absent traceroute replies do not by themselves locate a silent drop.
+4. Naming a DPI vendor/model requires provider/device-side evidence or a separately validated distinguishing fingerprint. None is present here.
+
+No new OpenAI API call was made: **0 requests, 0 tokens, USD 0 additional API cost**. The previous three Astra reviews remain 25,921 tokens and USD 1.1966925 estimated, not an invoice or account total. No fleet or production behavior was changed.
