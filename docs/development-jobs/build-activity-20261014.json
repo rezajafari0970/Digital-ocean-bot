@@ -926,5 +926,189 @@
         "message": "2026/10/14 18:30:28 residential sync panel e2309142-827e-46d9-8bea-a2ddffe1522e: sanaei session request failed: Post \"[URL]\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
       }
     ]
+  },
+  "continuation_20261014": {
+    "status": "FOLLOWUP_VERIFIED_NO_NEW_CODE",
+    "snapshot": {
+      "at_tehran": "2026-10-14T22:12:45.303618+03:30",
+      "runtime_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+      "canonical_head": "da5f391e9ee9567d78bb442a08b756d20e0eb375",
+      "checkpoint_remote_tracking": "da5f391e9ee9567d78bb442a08b756d20e0eb375",
+      "git_status": "?? .local/\n?? deploy/__pycache__/\n?? tools/__pycache__/",
+      "publisher": {
+        "validation_revision": "2eabb1beae1f9ed7ebac1cf5eaecbae90c13c482",
+        "validation_source": "9bf2d2d2f379d2a67116c747787c8cdbcbc9e646",
+        "validation_manifest": "4eed86d027846870097c7ea36318d9556829e492a3107bdbc379ee00ae45f6f7",
+        "validation_evidence": "/var/lib/datacenter-publisher/release-kplj5rt5",
+        "status": "published",
+        "pending_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "pending_source": "dfb69f3f284dd85b1901e8c7e0f875e105b0e735",
+        "pending_manifest": "8aa0ec2fe3a50c844813bf0b8226f3e8c854c19d48b2a89c6804ee6f1951eded",
+        "evidence": "/var/lib/datacenter-publisher/release-6mp1a776",
+        "source_revision": "da5f391e9ee9567d78bb442a08b756d20e0eb375",
+        "public_revision": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "manifest_sha256": "8aa0ec2fe3a50c844813bf0b8226f3e8c854c19d48b2a89c6804ee6f1951eded",
+        "published_at": 1792002244.2854435
+      },
+      "system": {
+        "observed_at": "2026-10-14T18:42:45.155896+00:00",
+        "total_servers": 39,
+        "active_servers": 38,
+        "inactive_servers": 0,
+        "broken_servers": 0,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 1,
+        "provisioning_servers": 0,
+        "broken_accounts": 0,
+        "degraded_accounts": 0,
+        "server_health": [
+          {
+            "id": "56497bac-6def-4daa-9cf1-cc84c93c1b2e",
+            "account_name": "Vultr Usman 12",
+            "provider": "vultr",
+            "provider_state": "ACTIVE",
+            "provider_error_state": null,
+            "provider_resource_id": "ff36dd7f-d975-4637-a073-6697fa61507a",
+            "lifecycle_state": "EXPIRING",
+            "health": "pending",
+            "reason": "PENDING_DELETION",
+            "provider_observed_at": "2026-10-14T18:42:31.185494+00:00",
+            "next_provider_refresh_at": "2026-10-14T18:43:31.185494+00:00",
+            "last_sync_at": "2026-10-14T18:42:41.695714+00:00",
+            "last_sync_state": "COMPLETED",
+            "route_state": "APPLIED",
+            "route_verified_at": "2026-10-14T18:42:41.703654+00:00",
+            "admission_blocked": null,
+            "xui_failed": null,
+            "protection_failed": null
+          }
+        ]
+      },
+      "build": {
+        "active": 0,
+        "waiting": 0,
+        "recent": 100,
+        "current_failed_runs": 0,
+        "historical_families": 45,
+        "current_error_codes": []
+      },
+      "services": {
+        "digital-ocean-bot-api": "active",
+        "digital-ocean-bot-worker": "active",
+        "digital-ocean-bot-worker-panels": "active"
+      }
+    },
+    "verification": {
+      "at_tehran": "2026-10-14T22:13:18.567248+03:30",
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-14T18:43:18.486379825Z"
+      },
+      "version": {
+        "commit": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+        "build_time": "2026-10-14T18:27:35Z",
+        "go_version": "go1.27.1",
+        "modified": false
+      },
+      "reviewed_runtime_file_hashes": 19,
+      "previously_affected": [
+        {
+          "id": "e60a006c-b0b6-41ae-adc9-2621b4b69952",
+          "state": "DELETED",
+          "expires_at": "2026-10-14T17:37:54.214246+00:00",
+          "route_state": "APPLIED",
+          "verified_at": "2026-10-14T18:38:11.024695+00:00",
+          "last_error_empty": true
+        },
+        {
+          "id": "8bde6a32-858e-4ef3-963f-71a499b2a9dc",
+          "state": "READY",
+          "expires_at": "2026-10-14T23:44:22.412607+00:00",
+          "route_state": "APPLIED",
+          "verified_at": "2026-10-14T18:42:56.015836+00:00",
+          "last_error_empty": true
+        }
+      ],
+      "post_deploy_events": {
+        "selected_handoffs": 2,
+        "false_config_errors": 0,
+        "legacy_precheck_misses": 3,
+        "legacy_false_failures": 0
+      },
+      "routing_errors_since_previous_final": {
+        "other": 1,
+        "timeout": 2
+      },
+      "last_route_errors": [
+        {
+          "at_us": "1792002846229562",
+          "category": "other"
+        },
+        {
+          "at_us": "1792002903673935",
+          "category": "timeout"
+        },
+        {
+          "at_us": "1792003192653097",
+          "category": "timeout"
+        }
+      ],
+      "api_usage": {
+        "responses": 5,
+        "input_tokens": 89807,
+        "output_tokens": 5265,
+        "total_tokens": 95072,
+        "billed_usd": null
+      },
+      "new_api_calls_this_continuation": 0
+    },
+    "remaining_checks": {
+      "at": "2026-10-14T18:43:52.789937+00:00",
+      "routing_recent": [
+        {
+          "at_us": "1792002846229562",
+          "message": "2026/10/14 18:34:06 residential sync panel 83c343c5-6679-4adb-81c9-83dbbbd3dc79: sanaei session request failed: Get \"[URL]\": dial tcp4 172.237.13.92:2053: connect: no route to host"
+        },
+        {
+          "at_us": "1792002903673935",
+          "message": "2026/10/14 18:35:03 residential sync panel 8ac5c96f-e7a9-43a5-89e7-0ea6c5b36906: sanaei session request failed: Post \"[URL]\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+        },
+        {
+          "at_us": "1792003192653097",
+          "message": "2026/10/14 18:39:52 residential sync panel d7577bed-2335-46b3-b697-d5788a366d46: sanaei session request failed: Post \"[URL]\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+        }
+      ],
+      "latest_pending_server": [
+        {
+          "id": "56497bac-6def-4daa-9cf1-cc84c93c1b2e",
+          "state": "EXPIRING",
+          "created_at": "2026-10-14T11:01:40.167184+00:00",
+          "updated_at": "2026-10-14T18:42:40.174075+00:00",
+          "expires_at": "2026-10-14T18:42:34.338911+00:00"
+        }
+      ]
+    }
   }
 }

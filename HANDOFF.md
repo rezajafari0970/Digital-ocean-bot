@@ -1,3 +1,9 @@
+## Current — 2026-10-14 22:13 Tehran: Build Activity follow-up verified
+
+No product change or new deployment. Both hosts still run public69be1e0 with three active services and5/5 readiness. Primary observation at18:42:45Z:39 tracked=38active+1pending; inactive,broken,degraded servers/accounts=0; active/waiting builds=0,current failed runs=0,45 retained historical families. Previously affected timeout server is READY/APPLIED with no last error and fresh18:42:56Z verification. Previous pending server is DELETED; new pending server expired18:42:34Z. Native cumulative selected handoffs2 and legacy precheck misses3, both false-error counts0. All19 reviewed installed file hashes match. Two network timeouts and one no-route event occurred since the prior sample; histories retained and no permanent network guarantee claimed.
+
+No new API call: task totals5 responses,89807 input+5265 output=95072 tokens; billed USD unknown. Evidence:/root/backups/dob-build-activity-20261014/continuation-20261014. No forced resource mutations, resets, configuration changes or repeated full tests.
+
 ## Current — 2026-10-14: Build Activity fixes published and verified on both hosts
 
 This supersedes publication-pending entries. Approved source dfb69f3f284dd85b1901e8c7e0f875e105b0e735 produced public main/stable 69be1e0621cbd05dd2c410a5fea6a5cdf167356d; all19 reviewed code/test hashes match the exported candidate. Astra review chain resolved original blockers and the live legacy-predicate compatibility regression, then compatibility-final PASS. Compatibility/full-final exact-source project tests with isolated PostgreSQL/browser, focused regressions,11 Chromium scenario groups and vet pass. Publisher secret scans, unprivileged checks, exact-candidate Ubuntu24 install/update and GitHub Actions passed.
