@@ -10,23 +10,45 @@ WITH provider_inventory AS (
  FROM accounts a LEFT JOIN LATERAL(
  SELECT canonical,created_at FROM provider_snapshots ps WHERE ps.account_id=a.id AND ps.canonical IS NOT NULL
  ORDER BY created_at DESC LIMIT 1)s ON true
-), live_accounts AS (
- SELECT a.*, CASE
- WHEN deletion_requested_at IS NOT NULL THEN 'pending'
- WHEN provider_state IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED')
-  OR COALESCE(provider_error_state,'')<>'' OR runtime_status LIKE '%ERROR%' THEN 'broken'
- WHEN NOT COALESCE(pi.current,false) OR provider_checked_at>now()
-  OR provider_checked_at<=now()-((provider_inventory_interval_seconds+30)*interval '1 second') THEN 'unknown'
- WHEN EXISTS(SELECT 1 FROM account_create_blocks b WHERE b.account_id=a.id) THEN 'limited'
+), account_evidence AS (
+ SELECT a.*,pi.created_at provider_observed_at,
+ pi.canonical->'Account'->>'Status' observed_provider_status,
+ ani.last_health_ok network_health_ok,ani.last_health_at network_checked_at,
+ ani.rotation_started_at network_recovery_started_at,
+ CASE
+ WHEN a.deletion_requested_at IS NOT NULL THEN 'PENDING_DELETION'
+ WHEN a.provider_state IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED') THEN a.provider_state
+ WHEN lower(pi.canonical->'Account'->>'Status')='locked'
+  AND (credential.updated_at IS NULL OR credential.updated_at<=pi.created_at)
+  AND (a.provider_account_observed_at IS NULL OR a.provider_account_observed_at<=pi.created_at) THEN 'LOCKED'
+ WHEN COALESCE(a.provider_error_state,'')<>'' THEN a.provider_error_state
+ WHEN a.provider_state='RATE_LIMITED' THEN 'RATE_LIMITED'
+ WHEN a.runtime_status LIKE '%ERROR%' THEN 'RUNTIME_ERROR'
+ WHEN a.runtime_status='ISOLATION_WAIT' THEN 'NETWORK_NOT_READY'
+ WHEN NOT a.enabled THEN 'ACCOUNT_DISABLED'
+ WHEN NOT COALESCE(pi.current,false) OR a.provider_checked_at IS NULL OR a.provider_checked_at>now()
+  OR a.provider_checked_at<=now()-((a.provider_inventory_interval_seconds+30)*interval '1 second') THEN 'OBSERVATION_STALE'
+ WHEN EXISTS(SELECT 1 FROM account_create_blocks b WHERE b.account_id=a.id) THEN 'CREATE_RESTRICTED'
  WHEN pi.canonical->'Account'->>'Condition'='CAPACITY_FULL'
   AND (pi.canonical->'Capacity'->>'LimitKnown')::boolean
   AND (pi.canonical->'Capacity'->>'ComputeLimit')::int>0
-  AND (pi.canonical->'Capacity'->>'ComputeInUse')::int >= (pi.canonical->'Capacity'->>'ComputeLimit')::int THEN 'capacity'
- WHEN COALESCE(pi.canonical->'Account'->>'Status','active') NOT IN ('active','') THEN 'limited'
- WHEN enabled AND provider_state='ACTIVE' AND provider_checked_at IS NOT NULL THEN 'healthy'
- ELSE 'unknown' END health
+  AND (pi.canonical->'Capacity'->>'ComputeInUse')::int >= (pi.canonical->'Capacity'->>'ComputeLimit')::int THEN 'CAPACITY_FULL'
+ WHEN COALESCE(pi.canonical->'Account'->>'Status','active') NOT IN ('active','') THEN 'PROVIDER_WARNING'
+ WHEN a.provider_state='ACTIVE' THEN 'HEALTHY'
+ ELSE 'UNVERIFIED' END reason
  FROM accounts a LEFT JOIN provider_inventory pi ON pi.account_id=a.id
- WHERE deleted_at IS NULL OR runtime_status='DELETE_PENDING'
+ LEFT JOIN secrets credential ON credential.account_id=a.id AND credential.id=a.secret_ref
+ LEFT JOIN account_network_identities ani ON ani.account_id=a.id
+ WHERE a.deleted_at IS NULL OR a.runtime_status='DELETE_PENDING'
+), live_accounts AS (
+ SELECT *,CASE
+ WHEN reason='PENDING_DELETION' THEN 'pending'
+ WHEN reason IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED') THEN 'broken'
+ WHEN reason IN ('TRANSPORT_ERROR','PROXY_ERROR','RATE_LIMITED','NETWORK_NOT_READY','RUNTIME_ERROR') THEN 'degraded'
+ WHEN reason='CAPACITY_FULL' THEN 'capacity'
+ WHEN reason IN ('CREATE_RESTRICTED','PROVIDER_WARNING') THEN 'limited'
+ WHEN reason='HEALTHY' THEN 'healthy'
+ ELSE 'unknown' END health FROM account_evidence
 ), server_evidence AS (
  SELECT dr.id,dr.provider_resource_id,dr.state lifecycle_state,a.name account_name,a.provider,a.provider_state,a.provider_error_state,
  pi.created_at provider_observed_at,pi.created_at+(pi.refresh_seconds*interval '1 second') next_provider_refresh_at,
@@ -77,6 +99,12 @@ SELECT json_build_object(
  'healthy_accounts',(SELECT count(*) FROM live_accounts WHERE health='healthy'),
  'capacity_full_accounts',(SELECT count(*) FROM live_accounts WHERE health='capacity'),
  'broken_accounts',(SELECT count(*) FROM live_accounts WHERE health='broken'),
+ 'degraded_accounts',(SELECT count(*) FROM live_accounts WHERE health='degraded'),
+ 'account_health_total',(SELECT count(*) FROM live_accounts),
+ 'account_health_truncated',(SELECT count(*)>100 FROM live_accounts),
+ 'account_health',COALESCE((SELECT json_agg(row_to_json(detail)) FROM(
+ SELECT id,name,provider,health,reason,provider_state,provider_error_state,runtime_status,provider_state_at,provider_checked_at,provider_error_at,provider_refresh_attempt_at,provider_account_status,provider_account_observed_at,provider_observed_at,observed_provider_status,network_health_ok,network_checked_at,network_recovery_started_at
+ FROM live_accounts ORDER BY CASE health WHEN 'broken' THEN 0 WHEN 'degraded' THEN 1 WHEN 'limited' THEN 2 WHEN 'unknown' THEN 3 ELSE 4 END,name,id LIMIT 100)detail),'[]'::json),
  'limited_accounts',(SELECT count(*) FROM live_accounts WHERE health='limited'),
  'unknown_accounts',(SELECT count(*) FROM live_accounts WHERE health='unknown'),
  'pending_deletion_accounts',(SELECT count(*) FROM live_accounts WHERE health='pending'),

@@ -43,6 +43,11 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	attempt, beginErr := s.Container.BeginProviderAttempt(r.Context(), id, false)
+	if beginErr != nil {
+		writeJSON(w, 409, map[string]string{"error": "account_not_ready"})
+		return
+	}
 	runtime, err := s.Container.Runtime(r.Context(), id)
 	if err != nil {
 		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "detail": err.Error()})
@@ -56,7 +61,15 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		var mode string
 		_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(mode,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&mode)
 		state := app.ClassifyAccountProviderError(err, mode == "proxy_required")
-		s.Container.RecordProviderObservation(r.Context(), id, state, err, err.Error())
+		published, persistErr := s.Container.RecordProviderObservation(r.Context(), attempt, state, err, err.Error())
+		if persistErr != nil {
+			writeJSON(w, 500, map[string]string{"error": "observation_store_failed"})
+			return
+		}
+		if !published {
+			writeJSON(w, 409, map[string]string{"error": "observation_superseded"})
+			return
+		}
 		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "state": state, "detail": err.Error()})
 		return
 	}
@@ -72,11 +85,6 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	canonical, _ := json.Marshal(obs)
-	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4)`, id, runtime.Config.Provider, []byte(`{}`), canonical); err != nil {
-		writeJSON(w, 500, map[string]string{"error": "snapshot_store_failed"})
-		return
-	}
 	accountAllowed, statusErr := capacity.AccountStatusAllowsCreate(r.Context(), s.DB, id, obs.Account.Status)
 	if statusErr != nil {
 		writeJSON(w, 500, errorBody())
@@ -88,6 +96,14 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 	if !canCreate {
 		status = "PROVIDER_BLOCKED"
 	}
-	_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$4,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$5,runtime_status_detail=$4,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, string(detail), status)
+	published, publishErr := s.Container.PublishProviderObservation(r.Context(), runtime, attempt, obs, status, string(detail))
+	if publishErr != nil {
+		writeJSON(w, 500, map[string]string{"error": "observation_store_failed"})
+		return
+	}
+	if !published {
+		writeJSON(w, 409, map[string]string{"error": "observation_superseded"})
+		return
+	}
 	writeJSON(w, 200, map[string]any{"refreshed": true, "email": obs.Account.Email, "external_id": obs.Account.ID, "server_limit": obs.Capacity.ComputeLimit, "limit_known": obs.Capacity.LimitKnown, "provider_servers": obs.Capacity.ComputeInUse, "droplet_limit": obs.Capacity.ComputeLimit, "provider_droplets": obs.Capacity.ComputeInUse})
 }

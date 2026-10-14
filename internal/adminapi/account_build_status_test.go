@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -102,7 +101,6 @@ func TestCreateBlockRetainsRefreshAndVersionedRecoveryPostgres(t *testing.T) {
 	ctx := context.Background()
 	id := seedBuildAccount(t, db, "upcloud")
 	putBuildSnapshot(t, db, id, "active", true, 2, 0)
-	c := app.Container{DB: db}
 	if e := capacity.RecordCreateBlock(ctx, db, id, trialDenied()); e != nil {
 		t.Fatal(e)
 	}
@@ -110,7 +108,7 @@ func TestCreateBlockRetainsRefreshAndVersionedRecoveryPostgres(t *testing.T) {
 	if e != nil || old == nil {
 		t.Fatal(old, e)
 	}
-	c.RecordProviderObservation(ctx, id, app.ProviderStateActive, nil, `{"can_create":true}`)
+	publishBuildObservation(t, db, id)
 	if _, e = capacity.Read(ctx, db, id, 2*time.Minute); !errors.Is(e, capacity.ErrCreateBlocked) {
 		t.Fatal("refresh cleared block", e)
 	}

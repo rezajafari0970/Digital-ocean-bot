@@ -25,6 +25,9 @@ func TestClassifyAccountProviderError(t *testing.T) {
 		{"rate", &providers.Error{Class: providers.ErrorRateLimited}, false, ProviderStateRateLimited},
 		{"proxy", fmt.Errorf("wrapped: %w", network.ErrProxyRequired), true, ProviderStateProxyError},
 		{"proxy-circuit", network.ErrProxyCircuitOpen, true, ProviderStateProxyError},
+		{"local-network", ErrNetworkNotReady, true, ProviderStateProxyError},
+		{"wrapped-local-network", fmt.Errorf("runtime: %w", ErrNetworkNotReady), true, ProviderStateProxyError},
+		{"direct-not-proxy", ErrNetworkNotReady, false, ProviderStateTransportError},
 		{"transport", errors.New("connection reset"), false, ProviderStateTransportError},
 	}
 	for _, tc := range cases {
@@ -36,6 +39,15 @@ func TestClassifyAccountProviderError(t *testing.T) {
 	}
 }
 func TestProviderStateRecoveryPolicy(t *testing.T) {
+	if !errors.Is(ErrNetworkNotReady, network.ErrAccountNetworkNotReady) {
+		t.Fatal("network sentinel split")
+	}
+	if providerObservationProbeInterval(ProviderStateLocked, ProviderStateProxyError) != 45*time.Second {
+		t.Fatal("proxy error accelerated lock probes")
+	}
+	if providerObservationProbeInterval(ProviderStateTokenInvalid, ProviderStateTransportError) != 5*time.Minute {
+		t.Fatal("transport error accelerated credential probes")
+	}
 	if ProviderProbeInterval(ProviderStateLocked) > time.Minute {
 		t.Fatal("locked accounts must be reprobed quickly")
 	}

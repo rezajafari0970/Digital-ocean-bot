@@ -1,0 +1,264 @@
+{
+  "id": "broken-accounts-20261014",
+  "status": "SOURCE_APPROVED_AWAITING_PUBLIC_GATES",
+  "at": "2026-10-14T15:46:16.161641+00:00",
+  "base_revision": "4f3b273869e79e01c2c73a5ce2c2ae3dff855151",
+  "review": {
+    "decision": "PASS",
+    "blocking_defects": [],
+    "evidence_gaps": [
+      {
+        "area": "Full execution gate",
+        "gap": "No completed exact-current-source sequential full-r6 result is supplied. The three isolated browser passes do not establish a full-suite pass. full-r5 used the earlier incomplete fixture; its final outcome is not established here.",
+        "needed": "Retain the completed full-r5 result and historical failure logs. Run and retain a fresh sequential full-r6 gate against the final candidate, with browser coverage enabled, and investigate all failures before publication."
+      },
+      {
+        "area": "Independent verification",
+        "gap": "Run results, exact-source attribution and unchanged-file attestations are supplied evidence, not independently reproduced.",
+        "needed": "Retain attributable final-candidate hashes, unchanged-file inventory and complete execution logs, including the previously required 16 ordering variants."
+      },
+      {
+        "area": "Provider restrictions",
+        "gap": "This test-harness repair provides no evidence of provider-side unlock or resolution of the historical provider restriction.",
+        "needed": "Preserve that uncertainty in operational reporting and continue bounded observations."
+      }
+    ],
+    "scope": {
+      "method": "Source-only review of the two supplied harness files, their diffs and the supplied product-initialization excerpts, using the prior whole-source PASS and unchanged-file attestations as the baseline. No tools, tests or live verification performed.",
+      "files": [
+        "web/tests/linode.cjs",
+        "internal/adminapi/linode_integration_test.go"
+      ],
+      "findings": [
+        "The added GET /api/v1/auth/me fixture supplies the successful authenticated bootstrap required by enterPanel before showApp. It is confined to the isolated test server and does not alter production authentication.",
+        "The readiness condition waits for the accounts route, a nonloading active view, an unhidden app and an attached click handler. It does not force application readiness or bypass initialization.",
+        "Timeout diagnostics capture route, document, loading, visibility, handler and rendered-page state without explicitly collecting credentials or form contents.",
+        "The existing form, pricing, mobile/desktop and edit checks remain intact; no assertion removal or new blocking source interaction was identified.",
+        "The missing bootstrap endpoint explains the earlier hidden-app failure consistently with the supplied initialization code. All three supplied current-source browser repetitions pass, addressing the previous isolated-browser evidence gap without erasing historical failures."
+      ],
+      "overall_source_assessment": "The prior whole-candidate known-source-blocker approval is preserved within the stated unchanged-file baseline. No new source blocker is identified in this bounded delta.",
+      "release_gate": "PASS is source-only approval, not execution, publication or deployment approval. A successful final-candidate full execution gate and separate deployment approval remain mandatory. Production is reported untouched, and provider-enforced restrictions remain external."
+    }
+  },
+  "review_receipt": "resp_0331bd2e51cefb68006acfa1f6151087d1ad2056434e3df929",
+  "source_hashes": {
+    "internal/adminapi/account_build_status.go": "a15bd1a5e4a04f9bcae5007c768d13fbb742c0557a2927df7b6bd99e5ded3a45",
+    "internal/adminapi/account_build_status_test.go": "01d64efb6345b22ec2e0656a82c847f3e2ca1c3118e18935dc5c27820ac47f09",
+    "internal/adminapi/account_preflight.go": "bf14ad571f01269cfaa57b07558c9fdf1372d577eb0cc215d51de6f33ae9f538",
+    "internal/adminapi/broken_accounts_test.go": "4f934170704b4ffc9ffcbbfa09621fb0ae4f0c5f0b06fcb888f52d53271c3b53",
+    "internal/adminapi/discovery.go": "3a4ed4740dde89d285a778c95b73fe7ba7932b0bca3585ca58ddcd1b615f644c",
+    "internal/adminapi/status_counts.go": "bb0eb1e50becd00eb59ee2373fdd9cd4825a038f29f55e1739e0af73fb389370",
+    "internal/adminapi/upcloud_trial_test.go": "b1a4a6d2196b4ed2015c0ed190a8247433da85f1200381fe584b8440e36c9864",
+    "internal/app/account_state.go": "716648bef75b87cfd64fc710611df21b2eab1354ea644c480010f34cb60f80dd",
+    "internal/app/account_state_test.go": "bd20e707bccf2355c91c6bdaf3e1503879515da961cc20df3da5aaf25987977a",
+    "internal/app/container.go": "b3c71c5ccc27044965d31c0e507447cc2ec946d9a9f227e8f837e2b1d44374f9",
+    "internal/app/provider_observation_attempt.go": "c449121ec599a9c4fde85964e388e99f3d16775fb371005e2cc2eac3013ccf76",
+    "internal/app/provider_observation_network.go": "1733d4f64db22f49f865dd6101d84656099ac2f370f05c041244f0d00b55c278",
+    "internal/app/provider_observation_publish.go": "630a68aec097b3c7fc063ff32bcf49621ac871acfb3c36483d07366713a93982",
+    "internal/app/provider_observation_publish_test.go": "599c1a96543f8faeb5ccd9af4f0004a83631ca0786eff61ec6d9458518234a56",
+    "internal/app/provider_refresh.go": "6c51006827214e7b3a36e57cab822a36399e8a47a2658e9f5f9b7de92f6661f8",
+    "internal/app/provider_request_observation.go": "9b8868ee488025ef04c2580ff05d014de025ff308005a9d072f2a8d4d25bf8e0",
+    "internal/app/provider_request_observation_test.go": "d6e9d4eb5767fbc3daec75c5ba7a81a9ad267b967faa8d12b3099785cc2caa7c",
+    "internal/app/recovery.go": "5b53ecaeeef7511ce67e59191feba413c69f361c610a4f2e7cad0386fd83fd9b",
+    "internal/app/sticky_proxy.go": "d855376360cd4eaa98b2d6681252df3078f29799ea0c0a24468e4bcfa015e3b0",
+    "internal/app/workflow.go": "beaf0e4e357f65198efe0449aa8f3f0d6e8e3a796db172e5316c559e33aeba8a",
+    "internal/providers/digitalocean/account_lock_test.go": "0c01a5a08bcdc97fbbb10406321c7509090b8d5d43373a0b815c1f790637ed51",
+    "internal/providers/digitalocean/driver_v2.go": "28b7d77bfe067e9998a08ca3aa8afaa0154265c058e6152a6705492ef12d700e",
+    "migrations/000174_provider_observation_order.down.sql": "c4aa70f26e3bf0fcacb821712a3962d39d7bef42fea6003aab1d8624052370ac",
+    "migrations/000174_provider_observation_order.up.sql": "8adfbe42a2a063573a4c27aeae6642f2c7a60e0f57779d5f620f19f921978c6c",
+    "web/static/app.js": "cfb27f4b4574273a25716d5c5990a7a3297029822a296f5e164ca16bf68bcfa2",
+    "web/tests/config-refresh-recovery.cjs": "0fb0a0a6aabf65d1535474e28a0bd05f7f0976ca88321ba232b344df3a15e589",
+    "web/tests/residential_permanent.cjs": "0dad0bd8cc8d229743f53450d24fc4352085ffbdb26e672fed737e7ff87a3589",
+    "web/tests/linode.cjs": "60ec26ba10474a20593919f1a5413f2be66f34f03543a0c7fc1e76316d08da68",
+    "internal/adminapi/linode_integration_test.go": "816e5635eab1fe59e1891737ce8a8d072b3a8d16741436aee0f1e5fac632d64c"
+  },
+  "validation": {
+    "provider_and_postgres_regressions": "PASS",
+    "full_go": "PASS full-r6 all packages",
+    "race": "PASS four affected packages",
+    "vet": "PASS",
+    "browser": "PASS 27 real Chromium scenarios",
+    "astra": "harness-resolution PASS",
+    "reviewed_file_count": 29,
+    "runtime_acceptance": "PENDING",
+    "publication": "PENDING"
+  },
+  "api_usage": {
+    "responses": 8,
+    "input_tokens": 175323,
+    "output_tokens": 17316,
+    "total_tokens": 192639,
+    "billed_usd": null,
+    "scope": "This broken-accounts task only; prior tasks excluded",
+    "receipts": [
+      {
+        "phase": "final",
+        "id": "resp_0640cb89751d78ae006acf9d1a9c0487d1811523089a868980",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 56930,
+          "input_tokens_details": {
+            "cache_write_tokens": 56927,
+            "cached_tokens": 0
+          },
+          "output_tokens": 3072,
+          "output_tokens_details": {
+            "reasoning_tokens": 1490
+          },
+          "total_tokens": 60002
+        }
+      },
+      {
+        "phase": "harness-final",
+        "id": "resp_03943e007877db35006acfa0c2569c87d1a16addb1d3a16a44",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 4267,
+          "input_tokens_details": {
+            "cache_write_tokens": 4264,
+            "cached_tokens": 0
+          },
+          "output_tokens": 596,
+          "output_tokens_details": {
+            "reasoning_tokens": 57
+          },
+          "total_tokens": 4863
+        }
+      },
+      {
+        "phase": "harness-resolution",
+        "id": "resp_0331bd2e51cefb68006acfa1f6151087d1ad2056434e3df929",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 8070,
+          "input_tokens_details": {
+            "cache_write_tokens": 8067,
+            "cached_tokens": 0
+          },
+          "output_tokens": 667,
+          "output_tokens_details": {
+            "reasoning_tokens": 55
+          },
+          "total_tokens": 8737
+        }
+      },
+      {
+        "phase": "ordering-final",
+        "id": "resp_0267bf1694cc3f58006acf9f08eae487d1a5c12e3c0fcf6f67",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 12648,
+          "input_tokens_details": {
+            "cache_write_tokens": 12645,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1161,
+          "output_tokens_details": {
+            "reasoning_tokens": 302
+          },
+          "total_tokens": 13809
+        }
+      },
+      {
+        "phase": "plan",
+        "id": "resp_095fd72aa489bb88006acf916eb39487d1a925c0c49a8920e8",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 20080,
+          "input_tokens_details": {
+            "cache_write_tokens": 20077,
+            "cached_tokens": 0
+          },
+          "output_tokens": 3255,
+          "output_tokens_details": {
+            "reasoning_tokens": 165
+          },
+          "total_tokens": 23335
+        }
+      },
+      {
+        "phase": "publication-final",
+        "id": "resp_0fa3a09d71f0cf8c006acfa039fa0887d1aa76abbf4489a6f0",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 12485,
+          "input_tokens_details": {
+            "cache_write_tokens": 12482,
+            "cached_tokens": 0
+          },
+          "output_tokens": 784,
+          "output_tokens_details": {
+            "reasoning_tokens": 144
+          },
+          "total_tokens": 13269
+        }
+      },
+      {
+        "phase": "resolution",
+        "id": "resp_07abe0aa066fe79c006acf9970539487d182eff7c8a9b02629",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 37548,
+          "input_tokens_details": {
+            "cache_write_tokens": 37545,
+            "cached_tokens": 0
+          },
+          "output_tokens": 4218,
+          "output_tokens_details": {
+            "reasoning_tokens": 2070
+          },
+          "total_tokens": 41766
+        }
+      },
+      {
+        "phase": "source",
+        "id": "resp_0893f17058deca6d006acf957cebc087d1b868a0ca4a0fa2b0",
+        "model": "gpt-6-astra",
+        "usage": {
+          "input_tokens": 23295,
+          "input_tokens_details": {
+            "cache_write_tokens": 23292,
+            "cached_tokens": 0
+          },
+          "output_tokens": 3563,
+          "output_tokens_details": {
+            "reasoning_tokens": 1423
+          },
+          "total_tokens": 26858
+        }
+      }
+    ]
+  },
+  "external_restrictions": [
+    "S1",
+    "Sor oc",
+    "Digi oc"
+  ],
+  "production_changes": false,
+  "writer_inventory": [
+    {
+      "path": "internal/adminapi/accounts_manage.go",
+      "line": 191,
+      "sha256": "1fccf2cfb21df0d1dbee9933bac25cb8e3e4bd16c97bc5b44a9c38060f119a24",
+      "sql": "UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=NULL,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=NULL,runtime_status=CASE WHEN deletion_requested_at IS NULL THEN 'ISOLATION_WAIT' ELSE 'DELETE_PENDING' END,runtime_status_detail='credential replaced; provider refresh pending',runtime_status_at=now(),next_build_at=NULL WHERE"
+    },
+    {
+      "path": "internal/app/provider_observation_publish.go",
+      "line": 74,
+      "sha256": "630a68aec097b3c7fc063ff32bcf49621ac871acfb3c36483d07366713a93982",
+      "sql": "UPDATE accounts SET external_id=$2,email=NULLIF($3,''),\n provider_state=CASE WHEN $4='LOCKED' THEN 'LOCKED' WHEN $9 THEN 'ACTIVE' WHEN $12 AND provider_state='ACTIVE' THEN 'LOCKED' ELSE provider_state END,\n provider_state_detail=$5,provider_state_at=clock_timestamp(),provider_observation_started_at=$8,\n provider_restriction_started_at=CASE WHEN $9 OR $4='LOCKED' THEN $8\n WHEN provider_state IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED') THEN COALESCE(provider_restriction_started_at,provider_state_at)\n WHEN $12 THEN (SELECT created_at FROM provider_snapshots WHERE"
+    },
+    {
+      "path": "internal/app/provider_observation_attempt.go",
+      "line": 93,
+      "sha256": "c449121ec599a9c4fde85964e388e99f3d16775fb371005e2cc2eac3013ccf76",
+      "sql": "UPDATE accounts SET provider_state=$2,provider_state_detail=$3,provider_state_at=clock_timestamp(),provider_restriction_started_at=$4,provider_observation_started_at=GREATEST(provider_observation_started_at,$4),\n   provider_checked_at=CASE WHEN $5 THEN clock_timestamp() ELSE provider_checked_at END,\n   provider_account_status=CASE WHEN $2='LOCKED' THEN 'locked' ELSE provider_account_status END,\n   provider_account_observed_at=CASE WHEN $2='LOCKED' THEN clock_timestamp() ELSE provider_account_observed_at END,\n   runtime_status=$6,runtime_status_detail=$3,runtime_status_at=clock_timestamp(),next_build_at=NULL,updated_at=clock_timestamp()\n   WHERE"
+    },
+    {
+      "path": "cmd/admin-acceptance/main.go",
+      "line": 255,
+      "sha256": "bbea34ef25022b712ddf9c28668b53eb4445f7b645cc61b9bfee6552c58a7196",
+      "sql": "UPDATE accounts SET provider_state='LOCKED',runtime_status='DELETE_PENDING',deletion_requested_at=now()-interval '3 minutes' WHERE"
+    }
+  ]
+}

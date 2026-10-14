@@ -398,7 +398,9 @@ func (h RecoveryHandler) freezePermanentDeploymentError(ctx context.Context, d w
 	if class != providers.ErrorUnknown && class != "" {
 		state := ClassifyAccountProviderError(err, false)
 		if state != ProviderStateTransportError {
-			h.Container.RecordProviderObservation(ctx, d.AccountID, state, err, msg)
+			if _, persistErr := h.Container.recordBoundProviderError(ctx, err, false); persistErr != nil {
+				return false, persistErr
+			}
 		}
 	}
 	if terminalDeploymentStateForCreateRecovery(string(d.State)) {

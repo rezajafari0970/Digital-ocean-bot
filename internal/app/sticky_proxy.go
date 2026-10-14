@@ -346,9 +346,7 @@ WHERE account_id=$1
 		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.CountryCode, preferredGeo.Timezone, newLocale)
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
-		if pgErr == nil {
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULL,provider_error_state=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_state END,provider_error_detail=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_detail END,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND (COALESCE(provider_error_state,'')='' OR (provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%'))`, accountID)
-		}
+		// Provider refresh owns account readiness; this result proves network health only.
 		return pgErr
 	}
 	// Existing address disappeared or changed: begin/continue recovery.
@@ -470,10 +468,6 @@ WHERE account_id=$1
 	if err != nil {
 		return classifyIdentityWriteError(err)
 	}
-	detail := ""
-	if allowFallback && cc != "" && !strings.EqualFold(geo.CountryCode, cc) {
-		detail = "preferred country unavailable for 5 minutes; temporary fallback: " + geo.Country
-	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='READY',runtime_status_detail=NULLIF($2,''),provider_error_state=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_state END,provider_error_detail=CASE WHEN provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%' THEN NULL ELSE provider_error_detail END,runtime_status_at=now(),updated_at=now() WHERE id=$1 AND provider_state='ACTIVE' AND (COALESCE(provider_error_state,'')='' OR (provider_error_state='TRANSPORT_ERROR' AND COALESCE(provider_error_detail,'') LIKE '%account network not ready%'))`, accountID, detail)
+	// Provider refresh owns readiness and clearing observation errors.
 	return nil
 }

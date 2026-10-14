@@ -49,8 +49,11 @@ func (d *Driver) Capabilities() providers.Capabilities {
 	return providers.Capabilities{Account: true, Catalog: true, Compute: true, SSHKeys: true, Inventory: true}
 }
 func (d *Driver) Health(ctx context.Context) error {
-	_, err := d.client.GetAccount(ctx)
-	return normalizeError("health", err)
+	a, err := d.client.GetAccount(ctx)
+	if err != nil {
+		return normalizeError("health", err)
+	}
+	return lockedAccountObservation("health", a.Status, a.StatusMessage)
 }
 func (d *Driver) Account(ctx context.Context) (providers.Account, error) {
 	a, err := d.client.GetAccount(ctx)
@@ -188,6 +191,9 @@ func (d *Driver) Observe(ctx context.Context) (providers.Observation, error) {
 	if err != nil {
 		return providers.Observation{}, normalizeError("observe_account", err)
 	}
+	if err := lockedAccountObservation("observe_account", account.Status, account.StatusMessage); err != nil {
+		return providers.Observation{}, err
+	}
 	raw, err := d.client.catalogForAccount(ctx, account)
 	if err != nil {
 		return providers.Observation{}, normalizeError("observe_catalog", err)
@@ -210,6 +216,9 @@ func (d *Driver) ObserveFast(ctx context.Context) (providers.Observation, error)
 	account, err := d.client.GetAccount(ctx)
 	if err != nil {
 		return providers.Observation{}, normalizeError("observe_account", err)
+	}
+	if err := lockedAccountObservation("observe_account", account.Status, account.StatusMessage); err != nil {
+		return providers.Observation{}, err
 	}
 	inventory, err := d.Inventory(ctx)
 	if err != nil {
@@ -258,6 +267,32 @@ func normalizeServer(d Droplet) providers.Server {
 	created, _ := time.Parse(time.RFC3339, d.CreatedAt)
 	return providers.Server{ID: strconv.Itoa(d.ID), Name: d.Name, State: state, Ready: state == providers.ServerStateReady && d.PublicIPv4 != "", RegionID: d.Region.Slug, PrimaryIPv4: d.PublicIPv4, CreatedAt: created, Tags: append([]string(nil), d.Tags...)}
 }
+
+// A successful account HTTP response can still explicitly deny account access.
+// Stop before catalog/inventory reads so their failures cannot hide this evidence.
+func lockedAccountObservation(op, status, message string) error {
+	if !strings.EqualFold(strings.TrimSpace(status), "locked") {
+		return nil
+	}
+	if strings.TrimSpace(message) == "" {
+		message = "DigitalOcean account is locked; review the provider control panel and contact support."
+	}
+	return &providers.Error{Class: providers.ErrorAccountLocked, Operation: op, StatusCode: 200, Code: "ACCOUNT_LOCKED", Message: message}
+}
+
+func accountLockResponse(h HTTPError) bool {
+	if h.Status != 400 && h.Status != 403 && h.Status != 422 {
+		return false
+	}
+	message := strings.TrimPrefix(strings.ToLower(strings.Join(strings.Fields(h.Message), " ")), "your ")
+	for _, phrase := range []string{"account locked", "account is locked", "account has been locked", "team has been locked", "there is currently a lock on the account"} {
+		if message == phrase || strings.HasPrefix(message, phrase+".") || strings.HasPrefix(message, phrase+",") || strings.HasPrefix(message, phrase+" due to ") {
+			return true
+		}
+	}
+	return false
+}
+
 func normalizeError(op string, err error) error {
 	if err == nil {
 		return nil
@@ -268,7 +303,7 @@ func normalizeError(op string, err error) error {
 		switch {
 		case h.Status == 401:
 			class = providers.ErrorAuthentication
-		case h.Status == 403 && strings.Contains(strings.ToLower(h.Message), "locked"):
+		case accountLockResponse(h):
 			class = providers.ErrorAccountLocked
 		case h.Status == 403:
 			class = providers.ErrorPermissionDenied

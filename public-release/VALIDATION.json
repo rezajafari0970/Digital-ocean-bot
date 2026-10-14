@@ -2,17 +2,17 @@
   "schema": 2,
   "status": "source_verified_publication_gates_required",
   "date": "2026-10-14",
-  "feature": "Accurate canonical inventory, current build diagnostics, runtime version, and readable live output",
+  "feature": "Accurate broken-account diagnosis and ordered provider/network recovery evidence",
   "current_evidence": {
-    "full_go_with_isolated_postgres_and_browser": "PASS 59 packages",
-    "final_adminapi_package": "PASS",
-    "go_vet": "PASS",
-    "real_chromium_mobile_desktop": "PASS 26 scenarios",
-    "output_uri_unit": "PASS 3 tests",
-    "explicit_job_cli": "PASS 2 tests",
-    "raw_and_opt_in_output_postgres_contracts": "PASS",
-    "independent_final_source_review": "PASS",
-    "tested_code_and_test_files_sha256_rechecked": 18
+    "provider_and_postgres_regressions": "PASS",
+    "full_go": "PASS full-r6 all packages",
+    "race": "PASS four affected packages",
+    "vet": "PASS",
+    "browser": "PASS 27 real Chromium scenarios",
+    "astra": "harness-resolution PASS",
+    "reviewed_file_count": 29,
+    "runtime_acceptance": "PENDING",
+    "publication": "PENDING"
   },
   "publication_gates": {
     "exact_candidate_ubuntu_24_amd64_install": "required before push",
@@ -20,169 +20,11 @@
     "live_secret_scan_and_gitleaks": "required before push",
     "atomic_main_and_stable": "required"
   },
-  "prior_release_evidence": {
-    "schema": 2,
-    "status": "verified",
-    "date": "2026-10-12",
-    "feature": "Linode expiry retirement below Desired with durable admission and verified backfill recovery",
-    "current_evidence": {
-      "unchanged_go_packages_with_isolated_postgres_and_browser": 58,
-      "final_app_package_complete_postgres_race": "PASS",
-      "final_targeted_expiry_admission_deletion_race": "PASS",
-      "go_vet": "PASS",
-      "independent_source_review": "PASS",
-      "claim_event_fault_rollback": "PASS",
-      "sixteen_workers_single_claim": "PASS",
-      "identity_change_and_cancelled_generation_fence": "PASS",
-      "fresh_native_same_account_serving_proof": "PASS",
-      "foreign_key_insert_serialization": "PASS",
-      "linked_backfill_service_recovery_and_later_expiry": "PASS"
-    },
-    "publication_gates": {
-      "exact_candidate_ubuntu_24_amd64_install": "required before push",
-      "full_go_and_vet_unprivileged": "required before push",
-      "live_secret_scan_and_gitleaks": "required before push",
-      "atomic_main_and_stable": "required"
-    },
-    "prior_release_evidence": {
-      "schema": 2,
-      "status": "verified",
-      "date": "2026-10-12",
-      "feature": "Linode unique deployment labels, stable build activity, truthful health and provisioning history",
-      "current_evidence": {
-        "full_go_with_isolated_postgres_and_optional_browser_tests": "PASS",
-        "go_packages_passed": 59,
-        "go_vet": "PASS",
-        "linode_provider_and_provisioning_race": "PASS",
-        "provider_executor_reconciliation_and_workflow_race": "PASS",
-        "postgres_activity_global_counts_over_100_terminal_states_deleted_resources_secret_safety": "PASS",
-        "postgres_history_join_multiplicity_recovered_and_waiting_runs": "PASS",
-        "real_chromium_build_activity_mobile_desktop_scroll_stale_navigation_failure_recovery": "PASS",
-        "real_chromium_config_dashboard_residential_read_regression": "PASS",
-        "upcloud_form_browser": "PASS",
-        "independent_source_review": "PASS"
-      },
-      "publication_gates": {
-        "exact_candidate_ubuntu_24_amd64_install": "required before push",
-        "full_go_and_vet_unprivileged": "required before push",
-        "live_secret_scan_and_gitleaks": "required before push",
-        "atomic_main_and_stable": "required"
-      },
-      "prior_release_evidence": {
-        "schema": 2,
-        "status": "verified",
-        "date": "2026-10-12",
-        "feature": "panel settings, ordinary login and persistent project update",
-        "current_evidence": {
-          "full_go_with_isolated_postgres_and_optional_browser_tests": "PASS",
-          "go_packages_passed": 59,
-          "go_vet": "PASS",
-          "focused_postgres_race_auth_settings_retention": "PASS",
-          "root_updater_unit_tests": 9,
-          "static_permission_and_http_gate_tests": 12,
-          "bootstrap_tests": 5,
-          "node_output_tests": 3,
-          "actual_fresh_bootstrap_admin_login": "PASS",
-          "bootstrap_retry_and_update_keep_custom_credentials": "PASS",
-          "ubuntu_26_amd64_systemd_update_from_panel": "PASS",
-          "mobile_width": 390,
-          "username_password_port_path_edit": "PASS",
-          "blank_password_preserved": "PASS",
-          "reload_during_update_api_restart": "PASS",
-          "rapid_address_saves_with_active_restart_unit": "PASS",
-          "post_publication_failure_restores_cli_helper_units_and_runtime": "PASS",
-          "socket_peer_and_action_rejection": "PASS"
-        },
-        "publication_gates": {
-          "exact_candidate_ubuntu_24_amd64_install": "required before push",
-          "full_go_and_vet_unprivileged": "required before push",
-          "live_secret_scan_and_gitleaks": "required before push",
-          "atomic_main_and_stable": "required"
-        },
-        "prior_release_evidence": {
-          "schema": 1,
-          "status": "verified",
-          "date": "2026-10-12",
-          "product_source_sha256": "ba219bcb5f50e6df75dd34201d836ed8eabccbe55fea12a653a3e4dbf867974f",
-          "ubuntu_amd64": {
-            "22.04": [
-              "fresh_install",
-              "upgrade",
-              "custom_port",
-              "reinstall",
-              "fault_rollback",
-              "interrupted_recovery"
-            ],
-            "24.04": [
-              "fresh_install",
-              "upgrade",
-              "reboot_persistence"
-            ],
-            "26.04": [
-              "fresh_install",
-              "browser_initial_setup",
-              "password_change"
-            ]
-          },
-          "arm64": {
-            "cross_build": [
-              "api",
-              "worker",
-              "install-bootstrap",
-              "server-guardian"
-            ],
-            "executed_on_arm64_hardware": false
-          },
-          "regression": {
-            "go_pass": 1125,
-            "go_optional_skipped": 449,
-            "go_vet": "PASS",
-            "postgres_race_auth_tests": 2,
-            "bootstrap_tests": 5,
-            "node_output_tests": 3
-          },
-          "release_gates": {
-            "generic_secret_canary": "BLOCKED",
-            "actual_master_key_canary": "BLOCKED",
-            "uncommitted_source": "BLOCKED",
-            "symlink": "BLOCKED",
-            "environment": "BLOCKED",
-            "remote_conflict_atomicity": "PASS"
-          },
-          "public_git_install_verified": true,
-          "transport": "HTTP; use the documented SSH tunnel or an operator-managed HTTPS reverse proxy",
-          "public_one_command_update_verified": true,
-          "bootstrap_without_preinstalled_curl": "PASS"
-        },
-        "notes": [
-          "Prior release matrix is historical; current feature validation is listed separately. No current ARM hardware execution claim.",
-          "Existing custom credentials are preserved by updates. A current operator-authorized admin reset is a separate private operation."
-        ]
-      },
-      "notes": [
-        "This repair changes no provider mutation admission, proxy isolation, quota, deletion or panel readiness policies.",
-        "Linode capacity remains usage-only when the provider does not expose an exact quota. Historical generic HTTP400 records do not prove a particular cause.",
-        "Historical precheck, initial SSH boot probes and installer handoffs remain visible; normal predicate exit 1 no longer duplicates command-stage errors.",
-        "Build activity retains the original array API; summary=1 adds global counts independent of the displayed 100 records.",
-        "Tests and install verification use fixtures and isolated systems. Live acceptance is recorded privately after deployment."
-      ]
-    },
-    "notes": [
-      "The initial complete run found one outdated minimal PostgreSQL fixture missing accounts.provider. It was corrected; the complete final app package and focused race suites were rerun successfully. The other 58 packages passed with opt-in database and browser tests.",
-      "Only Linode gains this deficit retirement path. Exact quota remains unknown; Desired and normal growth spacing are unchanged.",
-      "Claiming is not mutation authorization. A separate durable start revalidates fresh ownership, expiry, account, route, native inventory and serving sibling proof. Existing delete journal and provider absence confirmation remain authoritative.",
-      "New retirement waits for prior backfill to reach verified service; a durable recovery receipt is retained through later replacement expiry.",
-      "Live native deletion and refill acceptance are collected privately after controlled deployment."
-    ]
-  },
   "notes": [
-    "Provider inventory rows and counts share the canonical observation. Missing observations remain unknown rather than zero.",
-    "Strict capacity admission freshness is separate from scheduled display freshness. Viewing accounts no longer implicitly posts a refresh.",
-    "Completed build errors, current waiting steps, historical tuning and running-versus-installed revisions have distinct semantics.",
-    "Human output views show loading, empty and failure states and wrap long lines on mobile; raw subscription formats and scope boundaries are preserved.",
-    "An active global gate still allows explicit eligible-scope rechecking; duplicate clicks are guarded.",
-    "Provider/proxy isolation, quotas, Desired, growth spacing and deletion admission are unchanged.",
-    "The October14 video failed attachment delivery and is not included in this validation.",
-    "Publication checks and runtime acceptance are independently collected by the release pipeline; source approval is not deployment acceptance."
+    "Provider restrictions remain distinct from transport/proxy failures and full capacity.",
+    "Credential-version and operation-order fences protect both success and failure evidence.",
+    "READY publication verifies current account-specific runtime through commit; old observations cannot clear current failures.",
+    "Account-only evidence and complete inventory are distinct.",
+    "No forced provider unlock, proxy bypass or provider mutation-policy changes."
   ]
 }

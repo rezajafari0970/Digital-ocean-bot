@@ -1,3 +1,9 @@
+## Current — 2026-10-14: broken-account source approved, publication pending
+
+Independent gpt-6-astra harness-resolution review PASS; 29 reviewed product/test/migration hashes rechecked. Final focused/race/vet/27-scenario browser and complete affected package checks passed. The final full-r6 project suite passed; prior fixture failures remain recorded. Native provider/account isolation and mutation gates retained. External locks on S1, Sor oc and Digi oc require provider/account-owner resolution; software fixes their classification and prevents stale observations/independent network recovery from erasing restrictions. Digi native account-specific network predicates all passed at15:03:24Z, which does not unlock the provider account.
+
+This task API receipts: 8 completed calls, 175323 input + 17316 output = 192639 total tokens; billed USD unavailable. See docs/BROKEN_ACCOUNTS_20261014.md and docs/development-jobs/broken-accounts-20261014.json. Next: existing gated publisher, then both-host updater and preservation/health acceptance. Do not claim deployment yet.
+
 ## Current — 2026-10-14: approved follow-up published and deployed
 
 This entry supersedes all earlier quota-blocked and publication-pending entries. Approved source a5937cecdc1ba2fccaeb348274f3afcc5a172f6b produced public main/stable be435f7865649598e1d2df841aea1e5c7c8f0638. Both management hosts run that release; all3 process hashes match,5/5readiness, panelHTTP200 and6assets match. Login and current_revision accepted on both; all7enabled primary account inventory counters match canonical rows and freshness metadata. Primary8accounts,1proxy,12residential proxies,9profiles,2186droplets,2305resources and both login/settings identities were preserved. No manual provider mutation or protection/Desired/spacing change.

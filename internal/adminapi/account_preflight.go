@@ -39,6 +39,11 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	}
 	// Preflight validates identity with one lightweight provider request. Full
 	// discovery belongs to explicit Refresh and must not be repeated here.
+	attempt, beginErr := s.Container.BeginProviderAttempt(r.Context(), id, false)
+	if beginErr != nil {
+		writeJSON(w, 409, map[string]string{"error": "account_not_ready"})
+		return
+	}
 	rt, err := s.Container.Runtime(r.Context(), id)
 	if err == nil {
 		ar, ok := rt.Driver.(providers.AccountReader)
@@ -50,13 +55,13 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 			account, identityErr = ar.Account(r.Context())
 		}
 		accountStatus = account.Status
+		if identityErr == nil && account.Status == "locked" {
+			identityErr = &providers.Error{Class: providers.ErrorAccountLocked, StatusCode: 200, Code: "ACCOUNT_LOCKED", Operation: "account", Message: account.StatusMessage}
+		}
 		allowed, statusErr := capacity.AccountStatusAllowsCreate(r.Context(), s.DB, id, account.Status)
 		checks["provider_account_active"] = identityErr == nil && statusErr == nil && allowed
 		if identityErr == nil && statusErr != nil {
 			identityErr = statusErr
-		}
-		if identityErr == nil {
-			_, _ = s.DB.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,'') WHERE id=$1`, id, account.ID, account.Email)
 		}
 		err = identityErr
 		if rt.Gateway != nil {
@@ -97,7 +102,15 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	// a provider lock (other provider endpoints can still return 422). Only a
 	// full Discover refresh can transition LOCKED -> ACTIVE.
 	if err != nil {
-		s.Container.RecordProviderObservation(r.Context(), id, providerState, err, string(detail))
+		published, persistErr := s.Container.RecordProviderObservation(r.Context(), attempt, providerState, err, string(detail))
+		if persistErr != nil {
+			writeJSON(w, 500, map[string]string{"error": "observation_store_failed"})
+			return
+		}
+		if !published {
+			writeJSON(w, 409, map[string]string{"error": "observation_superseded"})
+			return
+		}
 	}
 	code := 200
 	if !ready {

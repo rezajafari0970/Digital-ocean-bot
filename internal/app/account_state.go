@@ -69,7 +69,7 @@ func ProviderStateRuntimeStatus(state string) string {
 }
 
 func IsProviderObservationError(state string) bool {
-	return state == ProviderStateTransportError || state == ProviderStateProxyError
+	return state == ProviderStateTransportError || state == ProviderStateProxyError || state == ProviderStateRateLimited
 }
 func ProviderProbeInterval(state string) time.Duration {
 	switch state {
@@ -84,4 +84,9 @@ func ProviderProbeInterval(state string) time.Duration {
 	default:
 		return 0
 	}
+}
+
+// An independent network error must not accelerate hard-restriction probes.
+func providerObservationProbeInterval(state, observationError string) time.Duration {
+	return max(ProviderProbeInterval(state), ProviderProbeInterval(observationError))
 }

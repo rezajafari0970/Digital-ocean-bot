@@ -17,7 +17,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 )
 
-var ErrNetworkNotReady = errors.New("account network not ready")
+var ErrNetworkNotReady = network.ErrAccountNetworkNotReady
 var ErrProviderComputeUnsupported = errors.New("provider compute capability unavailable")
 var ErrRuntimeGenerationObsolete = runtimeGenerationObsoleteError{}
 
@@ -148,10 +148,35 @@ type accountCredentialSource struct {
 	store     *secrets.Store
 	accountID string
 	ref       string
+	db        *sql.DB
+	expected  ProviderAttempt
 }
 
 func (s accountCredentialSource) Get(ctx context.Context) ([]byte, error) {
-	return s.store.Get(ctx, s.accountID, s.ref)
+	if s.db == nil {
+		return s.store.Get(ctx, s.accountID, s.ref)
+	}
+	c := Container{DB: s.db}
+	before, err := c.BeginProviderAttempt(ctx, s.accountID, false)
+	if err != nil {
+		return nil, err
+	}
+	if !sameProviderCredential(before, s.expected) {
+		return nil, errProviderCredentialObsolete
+	}
+	value, err := s.store.Get(ctx, s.accountID, s.ref)
+	if err != nil {
+		return nil, err
+	}
+	after, err := c.BeginProviderAttempt(ctx, s.accountID, false)
+	if err != nil || !sameProviderCredential(after, s.expected) {
+		wipe(value)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errProviderCredentialObsolete
+	}
+	return value, nil
 }
 
 func (c Container) providerRegistry() (*providers.Registry, error) {
@@ -172,7 +197,17 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 	}
 	guarded.Transport = providerMutationFence{base: base, db: c.DB, account: cfg.ID}
 	client = &guarded
-	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef}}
+	var credentialIdentity ProviderAttempt
+	if c.DB != nil {
+		credentialIdentity, err = c.BeginProviderAttempt(ctx, cfg.ID, false)
+		if err != nil {
+			return nil, err
+		}
+		if credentialIdentity.SecretRef != cfg.SecretRef {
+			return nil, ErrRuntimeGenerationObsolete
+		}
+	}
+	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef, db: c.DB, expected: credentialIdentity}}
 	if cfg.Provider == "upcloud" {
 		var raw []byte
 		if err := c.DB.QueryRowContext(ctx, "SELECT preferred_sizes FROM accounts WHERE id=$1", cfg.ID).Scan(&raw); err != nil {

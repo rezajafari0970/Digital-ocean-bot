@@ -80,7 +80,7 @@ func TestUpCloudTrialAtomicEnableAndNewDenial(t *testing.T) {
 	if trialEnable(s, id, b.Version, auth.Admin, true) != 409 {
 		t.Fatal("mode activation cleared a new denial")
 	}
-	(app.Container{DB: db}).RecordProviderObservation(context.Background(), id, app.ProviderStateActive, nil, "read succeeded")
+	publishBuildObservation(t, db, id)
 	b, _ = capacity.ReadCreateBlock(context.Background(), db, id)
 	if b == nil {
 		t.Fatal("refresh removed denial")

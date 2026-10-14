@@ -23,6 +23,10 @@ type DeploymentConfig struct {
 }
 
 func (c Container) Workflow(ctx context.Context, accountID string, cfg DeploymentConfig) (workflow.Engine, error) {
+	attempt, err := c.BeginProviderAttempt(ctx, accountID, false)
+	if err != nil {
+		return workflow.Engine{}, err
+	}
 	runtime, err := c.Runtime(ctx, accountID)
 	if err != nil {
 		return workflow.Engine{}, err
@@ -31,7 +35,8 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 	if err != nil {
 		return workflow.Engine{}, err
 	}
-	executor := droplets.Executor{Operations: runtime.Operations, Provider: compute, Gate: runtime.Gate}
+	executor := c.providerObservationExecutor(runtime, attempt, compute)
+	observeCreateError := executor.OnCreateError
 	executor.PreCreateCheck = func(checkCtx context.Context) error {
 		var desired, managed, preCreate int
 		err := c.DB.QueryRowContext(checkCtx, `SELECT (SELECT desired_server_count FROM accounts WHERE id=$1),(SELECT count(*) FROM droplets WHERE account_id=$1 AND state<>'DELETED'),(SELECT count(*) FROM deployments WHERE account_id=$1 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL)`, accountID).Scan(&desired, &managed, &preCreate)
@@ -54,8 +59,7 @@ func (c Container) Workflow(ctx context.Context, accountID string, cfg Deploymen
 		}
 		class := providers.Class(createErr)
 		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorRateLimited || class == providers.ErrorTransport || class == providers.ErrorUnavailable || class == providers.ErrorAmbiguousOutcome {
-			state := ClassifyAccountProviderError(createErr, runtime.Config.Network.Mode == network.RouteProxyRequired)
-			c.RecordProviderObservation(cbCtx, accountID, state, createErr, createErr.Error())
+			observeCreateError(cbCtx, createErr)
 		}
 		if runtime.Config.Provider == "vultr" {
 			c.handleVultrCreateError(cbCtx, accountID, compute, createErr)

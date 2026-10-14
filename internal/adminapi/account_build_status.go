@@ -30,14 +30,15 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	var x accountBuildState
 	var runtimeStatus, stateDetail, errorState, errorDetail, provider, accountStatus, accountMessage string
 	var observedAt, snapshotAt sql.NullTime
+	var retainedLock bool
 	var desired, managed, preCreate, ops, refreshSeconds int
 	var raw []byte
 	err := s.DB.QueryRowContext(ctx, `SELECT a.enabled,a.provider_state,COALESCE(a.provider_state_detail,''),COALESCE(a.provider_error_state,''),COALESCE(a.provider_error_detail,''),a.runtime_status,a.provider_checked_at,a.desired_server_count,
  (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
  (SELECT count(*) FROM deployments WHERE account_id=a.id AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
  (SELECT count(*) FROM operations WHERE account_id=a.id AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND state IN ('planned','running','verifying','unknown')),
- ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.provider_inventory_interval_seconds,a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END
- FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &refreshSeconds, &x.TrialCompatible, &x.TrialProxyCandidates)
+ ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.provider_inventory_interval_seconds,a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END,COALESCE(lower(ps.canonical->'Account'->>'Status')='locked' AND (credential.updated_at IS NULL OR credential.updated_at<=ps.created_at) AND (a.provider_account_observed_at IS NULL OR a.provider_account_observed_at<=ps.created_at),false)
+ FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true LEFT JOIN secrets credential ON credential.account_id=a.id AND credential.id=a.secret_ref WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &refreshSeconds, &x.TrialCompatible, &x.TrialProxyCandidates, &retainedLock)
 	if err != nil {
 		return x, err
 	}
@@ -96,6 +97,17 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	case !x.Enabled:
 		x.State = "DISABLED"
 		x.Reason = "Account disabled in panel"
+	case x.State == "LOCKED" || x.State == "TOKEN_INVALID" || x.State == "PERMISSION_DENIED" || x.State == "BILLING_BLOCKED":
+		x.Reason = strings.ReplaceAll(x.State, "_", " ")
+		if e, ok := meta["provider_error"].(string); ok && e != "" {
+			x.Reason += ": " + e
+		}
+	case retainedLock:
+		x.State = "LOCKED"
+		x.Reason = "Last complete provider account observation is locked; no newer resolution observed. Open the provider control panel and contact support."
+		if errorState != "" {
+			x.Reason += " Independent observation error: " + errorState
+		}
 	case x.Block != nil:
 		x.Reason = capacity.CreateBlockReason(x.Block.Code)
 	case accountStatus == "trial_restricted" && !x.TrialCompatible:

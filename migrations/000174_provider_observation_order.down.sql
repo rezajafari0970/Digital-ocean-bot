@@ -1,0 +1,1 @@
+ALTER TABLE accounts DROP COLUMN provider_observation_started_at,DROP COLUMN provider_restriction_started_at,DROP COLUMN provider_success_started_at,DROP COLUMN provider_error_started_at,DROP COLUMN provider_error_at,DROP COLUMN provider_refresh_attempt_at,DROP COLUMN provider_account_status,DROP COLUMN provider_account_observed_at;

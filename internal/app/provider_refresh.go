@@ -36,13 +36,9 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			continue
 		}
 		var providerState, providerError string
-		var providerCheckedAt time.Time
-		_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt)
-		effectiveState := providerState
-		if providerError != "" {
-			effectiveState = providerError
-		}
-		if interval := ProviderProbeInterval(effectiveState); interval > 0 && time.Since(providerCheckedAt) < interval {
+		var providerCheckedAt, refreshAttemptAt time.Time
+		_ = c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz),COALESCE(provider_refresh_attempt_at,provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt, &refreshAttemptAt)
+		if interval := providerObservationProbeInterval(providerState, providerError); interval > 0 && time.Since(refreshAttemptAt) < interval {
 			continue
 		}
 		var fresh bool
@@ -63,25 +59,28 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 			defer lockTx.Rollback()
 			// Re-check account state and freshness after acquiring the lock: another
 			// coordinator may have refreshed or changed provider state while we waited.
-			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt); qerr != nil {
+			if qerr := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,''),COALESCE(provider_checked_at,'epoch'::timestamptz),COALESCE(provider_refresh_attempt_at,provider_checked_at,'epoch'::timestamptz) FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError, &providerCheckedAt, &refreshAttemptAt); qerr != nil {
 				return
 			}
-			effectiveState = providerState
-			if providerError != "" {
-				effectiveState = providerError
-			}
-			if interval := ProviderProbeInterval(effectiveState); interval > 0 && time.Since(providerCheckedAt) < interval {
+			if interval := providerObservationProbeInterval(providerState, providerError); interval > 0 && time.Since(refreshAttemptAt) < interval {
 				return
 			}
 			_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL AND created_at > now()-($2 * interval '1 second'))`, id, int(maxAge/time.Second)).Scan(&fresh)
 			if providerRefreshMaySkip(fresh, providerState, providerError, providerCheckedAt, maxAge, time.Now().UTC()) {
 				return
 			}
+			attempt, beginErr := c.BeginProviderAttempt(ctx, id, true)
+			if beginErr != nil {
+				log.Printf("provider attempt account=%s: %v", id, beginErr)
+				return
+			}
 			rt, err := c.Runtime(ctx, id)
 			if err != nil {
 				providerState := ClassifyAccountProviderError(err, true)
 				detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
-				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
+				if _, persistErr := c.RecordProviderObservation(ctx, attempt, providerState, err, string(detail)); persistErr != nil {
+					log.Printf("provider error publication account=%s: %v", id, persistErr)
+				}
 				return
 			}
 			obs, err := c.ObserveProvider(ctx, rt)
@@ -93,7 +92,9 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				proxyRequired := rt.Config.Network.Mode == "proxy_required"
 				providerState := ClassifyAccountProviderError(err, proxyRequired)
 				detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_error": err.Error(), "can_create": false})
-				c.RecordProviderObservation(ctx, id, providerState, err, string(detail))
+				if _, persistErr := c.RecordProviderObservation(ctx, attempt, providerState, err, string(detail)); persistErr != nil {
+					log.Printf("provider error publication account=%s: %v", id, persistErr)
+				}
 				return
 			}
 			if rt.Config.Provider == "vultr" {
@@ -157,34 +158,21 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 				providerState = "cannot_create"
 			}
 			obs.Account.Condition = providers.AccountCondition(rt.Config.Provider, obs.Account, obs.Capacity)
-			canonical, _ := json.Marshal(obs)
-			var oldLimit int
-			_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,(data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1`, id).Scan(&oldLimit)
-			var snapshotID string
-			if err = c.DB.QueryRowContext(ctx, `INSERT INTO provider_snapshots(id,account_id,provider,version,data,canonical) VALUES(gen_random_uuid(),$1,$2,2,$3,$4) RETURNING id::text`, id, rt.Config.Provider, []byte(`{}`), canonical).Scan(&snapshotID); err != nil {
-				return
-			}
-			newLimit := obs.Capacity.ComputeLimit
-			if oldLimit > 0 && newLimit > 0 && oldLimit != newLimit {
-				_, _ = c.DB.ExecContext(ctx, `INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)`, id, oldLimit, newLimit, newLimit-oldLimit, snapshotID)
-				log.Printf("capacity change %s: %d -> %d (%+d)", id, oldLimit, newLimit, newLimit-oldLimit)
-			}
 			detail, _ := json.Marshal(map[string]any{"provider_state": providerState, "provider_account_status": obs.Account.Status, "can_create": canCreate, "droplet_limit": obs.Capacity.ComputeLimit, "provider_droplets": obs.Capacity.ComputeInUse})
 			runtimeStatus := "READY"
 			probeManagedCapacity := rt.Config.Provider == "vultr" && (observedCapacitySource == "vultr_api_saturation" || observedCapacitySource == "vultr_api_probe_success" || observedCapacitySource == "vultr_api_probe")
 			if !canCreate && !probeManagedCapacity {
 				runtimeStatus = "PROVIDER_BLOCKED"
 			}
-			_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=$5,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$5,runtime_status_at=now(),updated_at=now() WHERE id=$1`, id, obs.Account.ID, obs.Account.Email, runtimeStatus, string(detail))
+			published, publishErr := c.PublishProviderObservation(ctx, rt, attempt, obs, runtimeStatus, string(detail))
+			if publishErr != nil {
+				log.Printf("provider observation publication %s: %v", id, publishErr)
+				return
+			}
+			if !published {
+				return
+			}
 			c.ReconcileOwnedOrphans(ctx, id)
 		}()
 	}
-}
-
-func (c Container) RecordProviderObservation(ctx context.Context, id, state string, err error, detail string) {
-	if IsProviderObservationError(state) {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET provider_error_state=$2,provider_error_detail=$3,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, state, detail, ProviderStateRuntimeStatus(state))
-		return
-	}
-	_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET provider_state=$2,provider_state_detail=$3,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=now(),runtime_status=$4,runtime_status_detail=$3,runtime_status_at=now(),next_build_at=NULL,updated_at=now() WHERE id=$1`, id, state, detail, ProviderStateRuntimeStatus(state))
 }
