@@ -1,17 +1,17 @@
 {
   "schema": 2,
   "status": "source_verified_publication_gates_required",
-  "date": "2026-10-14",
-  "feature": "Accurate Build Activity diagnostics, durable recovery and immutable legacy predicate compatibility",
+  "date": "2026-10-15",
+  "feature": "Read-only additional-IP inventory and explicit disabled execution gates",
   "current_evidence": {
-    "focused_postgres_and_fault_injection": "PASS focused-r4/r5",
-    "browser": "PASS 11 Chromium scenario groups including mobile diagnostics",
-    "full_go": "PASS compatibility/full-final exact source",
-    "vet": "PASS compatibility/vet-final",
-    "astra": "PASS compatibility-final with earlier source review chain",
-    "reviewed_files": 19,
+    "focused_postgres_and_browser": "PASS focused-r4",
+    "unit_and_provider_contracts": "PASS",
+    "full_regression_r1": "PASS prior source; not final gate",
+    "exact_final": "PASS full-final exact source; isolated PostgreSQL; sequential packages",
+    "race": "PASS focused race",
+    "vet": "PASS",
     "publication": "PENDING",
-    "runtime_acceptance": "PENDING"
+    "deployment": "PENDING"
   },
   "publication_gates": {
     "exact_candidate_ubuntu_24_amd64_install": "required before push",
@@ -20,10 +20,9 @@
     "atomic_main_and_stable": "required"
   },
   "notes": [
-    "Historical diagnostics remain preserved and distinct from current failures.",
-    "Selected installer handoffs are informational; missing configuration remains visible.",
-    "Precheck, ambiguous-outcome and checkpoint gates prevent unsafe replay or false completion.",
-    "Read-only detail snapshots and mobile-accessible diagnostic messages preserve existing API contracts.",
-    "Only two exact immutable Sanaei prechecks recognize service-inactive/absent exits; arbitrary shell failures remain rejected."
+    "Four provider inventory adapters are fixture-tested; UpCloud has no live account in current validation.",
+    "Unknown quota remains nullable and historical capacity evidence is preserved.",
+    "CLI and panel share durable account admission; late rate-limit deadlines survive takeover and successful newer reads.",
+    "No paid allocation, guest change, rotation, release or additional-IP config publication is implemented or enabled."
   ]
 }

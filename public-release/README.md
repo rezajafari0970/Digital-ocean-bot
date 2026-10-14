@@ -96,3 +96,8 @@ An expired managed Linode can retire below the configured Desired count when ano
 Build Activity خطای جاری، اجرای بازیابی‌شده و سابقهٔ سرور حذف‌شده را جدا نمایش می‌دهد. متن کامل خطا و خروجی در موبایل قابل مشاهده است. تحویل عادی به نصب‌کنندهٔ انتخاب‌شده خطای پیکربندی محسوب نمی‌شود. ادامهٔ نصب و اعلام تکمیل به پیش‌بررسی معتبر و ثبت پایدار نتیجه وابسته‌اند؛ فرمان با نتیجهٔ نامعلوم تنها از مسیر بازیابی محدود و قابل بررسی ادامه می‌یابد.
 
 پیش‌بررسی‌های قدیمیِ نصب Sanaei نیز با وضعیت سرویس هنوز نصب‌نشده سازگارند؛ این سازگاری فقط همان فرمان‌های شناخته‌شده را پوشش می‌دهد و خطای واقعی فرمان را مجوز ادامهٔ نصب نمی‌داند.
+
+
+## Additional IP inventory
+The Additional IPs page reads official IP inventory per account for DigitalOcean, Vultr, Linode and UpCloud. Unknown quotas remain unknown; the last valid capacity and its provenance remain visible after failed reads. Panel and CLI reads share durable admission and provider cooldowns, including late rate-limit replies.
+Allocation, attachment, rotation, release, guest-network changes and config publication using additional IPs are unavailable in this release. Discovered resources remain protected. Operational settings and canary cost/impact approval are still required. Reading IPv6 inventory does not change the existing IPv4 execution policy. The planning library is not an execution or availability guarantee.

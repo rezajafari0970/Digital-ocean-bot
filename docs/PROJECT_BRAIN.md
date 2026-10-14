@@ -1,3 +1,9 @@
+# Additional-IP continuation — 2026-10-15
+
+Read IP_LIFECYCLE_20261015.md and development-jobs/ip-lifecycle-20261015.json first. Source-approved read-only foundation; full lifecycle is incomplete and disabled. Reconcile publication/runtime receipts before continuing. Earlier generated indexes remain historical, not evidence of this unindexed delta.
+
+---
+
 # Operational repair continuation — 2026-10-08
 
 Read OPERATIONAL_REPAIR_DELTA_20261008.md first. It supersedes the archived frontier below. Verify live canonical/runtime and the integration status before continuing; do not infer deployment from a source checkpoint.

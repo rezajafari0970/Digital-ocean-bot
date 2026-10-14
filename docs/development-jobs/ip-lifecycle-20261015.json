@@ -1,0 +1,145 @@
+{
+  "id": "ip-lifecycle-20261015",
+  "phase": "PUBLISH_FOUNDATION",
+  "status": "SOURCE_APPROVED",
+  "baseline_source": "895fe62e2215b6c2bbf92e15fe977e181df25a0c",
+  "baseline_runtime": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
+  "worktree": "/root/projects/dob-ip-lifecycle-20261015",
+  "evidence": "/root/backups/dob-ip-lifecycle-20261015",
+  "provider_mutations_authorized": false,
+  "operational_settings": null,
+  "api_usage": {
+    "requests": 4,
+    "input_tokens": 72268,
+    "output_tokens": 8534,
+    "cached_tokens": 0,
+    "cache_write_tokens": 72256,
+    "total_tokens": 80802,
+    "actual_billed_amount": null,
+    "estimated_amount": null,
+    "currency": null,
+    "amount_reason": "No invoice or verified model pricing receipt available",
+    "scope": "This task API calls only; ChatGPT session/internal usage excluded",
+    "receipts": [
+      {
+        "phase": "design-review",
+        "id": "resp_009ba08145b29ffb006ad00da274a487d191f2d1781fca3f58",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 1911,
+          "input_tokens_details": {
+            "cache_write_tokens": 1908,
+            "cached_tokens": 0
+          },
+          "output_tokens": 2182,
+          "output_tokens_details": {
+            "reasoning_tokens": 516
+          },
+          "total_tokens": 4093
+        },
+        "decision": "REVISE"
+      },
+      {
+        "phase": "source-r1",
+        "id": "resp_0513e808351b39d2006ad0113ce37c87d1aaee933843b5001b",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 29646,
+          "input_tokens_details": {
+            "cache_write_tokens": 29643,
+            "cached_tokens": 0
+          },
+          "output_tokens": 2795,
+          "output_tokens_details": {
+            "reasoning_tokens": 1552
+          },
+          "total_tokens": 32441
+        },
+        "decision": "REVISE"
+      },
+      {
+        "phase": "source-r2",
+        "id": "resp_02317731b89041b9006ad01222812487d1a9080b5a23fb2cf9",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 31247,
+          "input_tokens_details": {
+            "cache_write_tokens": 31244,
+            "cached_tokens": 0
+          },
+          "output_tokens": 3141,
+          "output_tokens_details": {
+            "reasoning_tokens": 2047
+          },
+          "total_tokens": 34388
+        },
+        "decision": "REVISE"
+      },
+      {
+        "phase": "source-r3",
+        "id": "resp_00d2d796c90b0247006ad012d6ff6c87d1aa4172acf6b66a03",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 9464,
+          "input_tokens_details": {
+            "cache_write_tokens": 9461,
+            "cached_tokens": 0
+          },
+          "output_tokens": 416,
+          "output_tokens_details": {
+            "reasoning_tokens": 101
+          },
+          "total_tokens": 9880
+        },
+        "decision": "PASS"
+      }
+    ]
+  },
+  "updated_at": "2026-10-14T23:46:39.660978+00:00",
+  "full_lifecycle_complete": false,
+  "source_review": "PASS foundation only, source-r1/r2/r3 resolution chain",
+  "source_hashes": {
+    "cmd/ip-inventory/main.go": "b4b145882cd27ed7e120be067ede50c94f4180856dfd6783a96a4cec13598bbf",
+    "internal/adminapi/ip_inventory.go": "a09028d9d5a3d11aa4d345ee6b41390d18c25c7facd9e54a54bcca15b65094e0",
+    "internal/adminapi/ip_inventory_browser_test.go": "ad948a8c58f4247902bfc68b26b6436d1f73b4c11dcccb5163eca207487773f4",
+    "internal/adminapi/ip_inventory_postgres_test.go": "699d1961969fad02256c2af1b401494c212f8f4f6f8e0bc655f6048a2e8d46a0",
+    "internal/app/ip_inventory.go": "87143710736e30bb084e687fd55ab31682150e8b2f8aacf45f4e6194b993d3eb",
+    "internal/ipam/inventory.go": "16e3f2fd6b250bb7e543b2c9bf23d56a031f74bf58185716fe1339385d9a97d4",
+    "internal/ipam/plan.go": "d34365bcfcbf573b02e831b01d885aaaf7ffe8aa9418918bc787b9a9d8eafa03",
+    "internal/ipam/plan_test.go": "f6a679b0461dc483cba63b27ef0324b6d3079d33b2d36be1421ed77ae4914e5f",
+    "internal/ipam/policy.go": "58bc8c10b9b018667925913b60a6201651c0e36302dc60dc25cff624eb6f1c88",
+    "internal/ipam/policy_test.go": "f132b0027c902483fe04a5d26b5554de35f823e9c1bf73a13812b54c8a5c89b6",
+    "internal/ipam/service.go": "37da6453868128864019e5aa2ee8b4a4ffd10c50dea483f3ec407dbca84d5882",
+    "internal/providers/digitalocean/ip.go": "a6de46161f1ec4e596e134d2c6861c8c0743bc01bdc75734ae38b91510cfe5c9",
+    "internal/providers/digitalocean/ip_test.go": "5604e7eacea5d57e9347757d4fbfe4dba303736a424b75c8279e507bd481b88c",
+    "internal/providers/ip.go": "f500fbe61cda5e4aa1a1c8f839ffb73651638600aad1c11d5235faeab7cba973",
+    "internal/providers/linode/ip.go": "ac5ea287a9f249a5e22bd9764510661338afbacb4bbf6cd494e168c1cb3d3888",
+    "internal/providers/linode/ip_test.go": "ad1b01be35c83c8c4d5e7e31718b238b2a92e65d898f081971411590764dc287",
+    "internal/providers/upcloud/ip.go": "4b0b23d538583783c14f3a209b8655e26283b87520e77e1eeee61ff44a0e9784",
+    "internal/providers/upcloud/ip_test.go": "8eb8fdca311303cafdff94f1541605664a4a9f6f9258b3071fa770e3522a2c6c",
+    "internal/providers/vultr/ip.go": "9abb792d5cd90b5bf3c70ee52cc776b24e531369f1f0ea2abf36b1770a69dd74",
+    "internal/providers/vultr/ip_test.go": "2bfb6aa74d8aea552d3b6e6de738c421ea91aa9700072db18fa2f6236ff14849",
+    "migrations/000175_ip_inventory.down.sql": "73659cc733bb7933b4479ad5e7289c759967f331931062412fd422ce2da4849f",
+    "migrations/000175_ip_inventory.up.sql": "10944da32ff44c4cf2419e5c8beea3bd9757e8fa3d22b4ada79a7259f76c48fa",
+    "web/static/ip-inventory.js": "bfe77b184282043e5d2967299cbfbb129d938002caaaeb5011d5e9b29a84e376",
+    "web/tests/ip-inventory.cjs": "a80dd551685e939b708778d33bf422fe80f21b3ae6696df69fb98f724bb42683",
+    "internal/adminapi/server.go": "66fcf48e617fcbd7ae4e011d55e6753736e36b917ddc02309cc89af4f63e0c84",
+    "web/static/app.js": "f1ac1504846a01749cde52ff38615edd383fd5c708c4eb702b35a9fef6db0cf9",
+    "web/static/index.html": "60d6d87518d3782164a64e5c7d0309c2d03373315773e1a58eab3769d9584d2b"
+  },
+  "validation": {
+    "focused_postgres_and_browser": "PASS focused-r4",
+    "unit_and_provider_contracts": "PASS",
+    "full_regression_r1": "PASS prior source; not final gate",
+    "exact_final": "PASS full-final exact source; isolated PostgreSQL; sequential packages",
+    "race": "PASS focused race",
+    "vet": "PASS",
+    "publication": "PENDING",
+    "deployment": "PENDING"
+  },
+  "next_step": "Finish exact-source gates; publish independent read-only foundation through existing release gates. Then implement mutation/approval journal, ownership/leases/deletion fences, provider mutation and guest network/output integration under R1-R6. Paid canary requires explicit operational values, selected servers and cost/impact approval. UpCloud account absent."
+}
