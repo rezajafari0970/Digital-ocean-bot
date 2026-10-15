@@ -1,6 +1,6 @@
 {
   "id": "transport-apply-20261015",
-  "updated_at": "2026-10-15T21:32:18.756229+00:00",
+  "updated_at": "2026-10-15T21:49:51.702993+00:00",
   "status": "DEPLOYED_EXISTING_LISTENERS_VERIFIED_WITH_BROWSER_LIMIT",
   "base_revision": "74d645823470bc8a8aea08457e8c9244ff1b608c",
   "stage_status": {
@@ -203,5 +203,14 @@
   "initial_public_revision": "23268f68da5b3caefbb8abd4e73324db83a4aed0",
   "product_source": "ef2db8e0ae224063662cd73c5db2e76932f80985",
   "public_revision": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
-  "acceptance": "docs/TRANSPORT_APPLY_ACCEPTANCE_20261015.json"
+  "acceptance": "docs/TRANSPORT_APPLY_ACCEPTANCE_20261015.json",
+  "continuation_verification": {
+    "at": "2026-10-15T21:49:51.702993+00:00",
+    "evidence": "docs/TRANSPORT_APPLY_CONTINUATION_20261015.json",
+    "status": "RECONFIRMED_DEPLOYED_WITH_BROWSER_LIMIT",
+    "eligible_matches": 31,
+    "readiness_samples_passed": 15,
+    "new_api_requests": 0,
+    "new_api_tokens": 0
+  }
 }

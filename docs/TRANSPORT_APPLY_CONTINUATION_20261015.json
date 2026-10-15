@@ -1,0 +1,357 @@
+{
+  "at": "2026-10-15T21:49:51.702993+00:00",
+  "status": "RECONFIRMED_DEPLOYED_WITH_BROWSER_LIMIT",
+  "prior_acceptance": "docs/TRANSPORT_APPLY_ACCEPTANCE_20261015.json",
+  "primary": {
+    "at": "2026-10-15T21:48:31.387608+00:00",
+    "commit": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "source": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "schema": "000180_transport_apply",
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T21:48:31.42164859Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "policy": {
+      "revision": 6,
+      "network": "xhttp",
+      "host": "aparat.com",
+      "flow": "xtls-rprx-vision-udp443",
+      "finalmask_enabled": true,
+      "scope": "both"
+    },
+    "jobs": [
+      {
+        "state": "OBSOLETE",
+        "phase": "SERVER_RETIRED",
+        "count": 1
+      },
+      {
+        "state": "SUCCEEDED",
+        "phase": "CORE_VERIFIED_PIN_PROMOTED",
+        "count": 17
+      }
+    ],
+    "eligible": {
+      "total": 31,
+      "matching": 31
+    },
+    "pass": true
+  },
+  "secondary": {
+    "at": "2026-10-15T21:48:33.357095+00:00",
+    "commit": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "source": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "schema": "000180_transport_apply",
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T21:48:33.399824131Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "policy": {
+      "revision": 3,
+      "network": "xhttp",
+      "host": "apart.com",
+      "flow": "xtls-rprx-vision-udp443",
+      "finalmask_enabled": true,
+      "scope": "both"
+    },
+    "jobs": [],
+    "eligible": {
+      "total": 0,
+      "matching": 0
+    },
+    "pass": true
+  },
+  "output": {
+    "at": "2026-10-15T21:48:47.953093+00:00",
+    "api": {
+      "ALL": {
+        "counts": {
+          "xhttp": 99,
+          "host:aparat.com": 99,
+          "strict_extra_valid": 99,
+          "xhttp_udp443_finalmask": 99,
+          "canary_verified": 5
+        },
+        "new_paths": 21,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 21,
+          "host:aparat.com": 21,
+          "strict_extra_valid": 21,
+          "xhttp_udp443_finalmask": 21,
+          "canary_verified": 1
+        },
+        "new_paths": 21,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 57,
+          "host:aparat.com": 57,
+          "strict_extra_valid": 57,
+          "xhttp_udp443_finalmask": 57,
+          "canary_verified": 3
+        },
+        "new_paths": 19,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "shares": {
+      "ALL": {
+        "counts": {
+          "xhttp": 99,
+          "host:aparat.com": 99,
+          "strict_extra_valid": 99,
+          "xhttp_udp443_finalmask": 99,
+          "canary_verified": 5
+        },
+        "new_paths": 21,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 21,
+          "host:aparat.com": 21,
+          "strict_extra_valid": 21,
+          "xhttp_udp443_finalmask": 21,
+          "canary_verified": 1
+        },
+        "new_paths": 21,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 57,
+          "host:aparat.com": 57,
+          "strict_extra_valid": 57,
+          "xhttp_udp443_finalmask": 57,
+          "canary_verified": 3
+        },
+        "new_paths": 19,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "listeners": [
+      {
+        "network": "tcp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 2
+      },
+      {
+        "network": "xhttp",
+        "flow": "xtls-rprx-vision-udp443",
+        "finalmask": "true",
+        "count": 34
+      },
+      {
+        "network": "xhttp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 26
+      }
+    ],
+    "pass": true
+  },
+  "readiness_samples": [
+    {
+      "at": "2026-10-15T21:48:42.688562+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:48:45.698621+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:48:48.701501+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:48:51.704973+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:48:54.708480+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:48:57.711931+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:00.714234+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:03.717788+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:06.721063+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:09.724808+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:12.727768+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:15.734213+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:18.738364+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:21.748393+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    },
+    {
+      "at": "2026-10-15T21:49:24.751339+00:00",
+      "status": "ready",
+      "checks": 5,
+      "all_ok": true
+    }
+  ],
+  "new_product_changes": false,
+  "new_listener_writes": false,
+  "new_external_model_api_requests": 0,
+  "new_external_model_api_tokens": 0,
+  "task_prior_external_model_api_tokens": 177534,
+  "limitations": [
+    "Browser Dialer remains unsupported with REALITY.",
+    "No fresh phone test; refresh subscriptions or reimport manual profiles.",
+    "Secondary has no eligible listeners; its preserved policy revision3 still uses apart.com.",
+    "Eligibility and output counts are time-dependent."
+  ]
+}
