@@ -30,7 +30,8 @@ func (d *Driver) ObserveIPs(ctx context.Context) (providers.IPObservation, error
 	}
 	counts := map[int]int{4: 0, 6: 0}
 	for _, x := range ips {
-		if x.Access != "public" && x.Access != "private" {
+		// Utility addresses are returned by the official list endpoint but do not consume public-IP capacity.
+		if x.Access != "public" && x.Access != "private" && x.Access != "utility" {
 			return out, providers.IPDataError()
 		}
 		if x.Access != "public" {

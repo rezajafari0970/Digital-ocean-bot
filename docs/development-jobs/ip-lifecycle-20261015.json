@@ -315,9 +315,9 @@
     "completed_requests": 13,
     "incomplete_requests": 1
   },
-  "updated_at": "2026-10-15T01:54:48.527062+00:00",
+  "updated_at": "2026-10-15T01:58:32.213540+00:00",
   "full_lifecycle_complete": false,
-  "source_review": "PASS offline core only, lifecycle-r1 through lifecycle-r5 resolution chain",
+  "source_review": "Core lifecycle-r5 PASS; utility correction PASS; pure allocation wire ip-wire-r4 PASS (separate branch, no runtime caller).",
   "source_hashes": {
     "internal/adminapi/ip_inventory.go": "4077c3550c8d280f4d7292cd3541d58f17449bedfda0bc7bd2614bf5b1333e4d",
     "internal/adminapi/ip_inventory_browser_test.go": "c2bcf09ee0592b05d6d7a5577816c50e6c2a68243c57dead2843a4b0f608e869",
@@ -384,9 +384,9 @@
       }
     ]
   },
-  "next_step": "Integrate verified wire branch0553853 into same lifecycle feature after current release bookkeeping; bind approved exact wire digest to actual one-shot send with generation/account/proxy fencing, preserve UNKNOWN candidates, and implement provider reconciliation. Then guest/protocol/output/renewal/rotation. Canary still unapproved.",
-  "source_revision": "5acb57ebd8fd81cb05891bbf13478d9ef58bbaf2",
-  "public_revision": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+  "next_step": "Continue isolated wire branch0553853 with actual one-shot send/account transport/reconciliation after integrating current core/utility source. Release lane owns utility473e991 acceptance. Guest/protocol/output/renewal/rotation remain; canary lacks approved operational settings.",
+  "source_revision": "1bf2114e7df47d12c25f74dce7da9be516f20ee8",
+  "public_revision": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
   "runtime": {
     "primary": {
       "revision": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
@@ -418,10 +418,28 @@
       "exact_final": "PASS lifecycle-core-full-final, isolated PostgreSQL/browser, all packages sequential",
       "race": "PASS lifecycle-core-race-final: PostgreSQL concurrency/publication/config/credential guards and secrets",
       "vet": "PASS lifecycle-core-vet",
-      "publication": "NOT_STARTED for lifecycle core",
-      "deployment": "NOT_STARTED for lifecycle core"
+      "publication": "PASS existing exporter/secret scans/unprivileged suite/Ubuntu24 install",
+      "deployment": "PASS both hosts15935e9/schema176;3 active services,5/5 ready, zero lifecycle mutations",
+      "github_actions": [
+        {
+          "id": 38666960184,
+          "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+          "head_branch": "main",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960184"
+        },
+        {
+          "id": 38666960307,
+          "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+          "head_branch": "stable",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960307"
+        }
+      ]
     },
-    "activation": "No production policy/funding/approval rows or provider mutations. No guest changes, deployment or additional-IP config publication. Store dispatch/publication are not called by production routes/workers.",
+    "activation": "Disabled core deployed. No production policies/funding/approvals/IP operations/endpoints/leases or guest networking changes; operational callers not wired.",
     "remaining": [
       "provider wire contracts and consumed send tickets",
       "account scheduler and restart reconciliation",
@@ -458,7 +476,7 @@
       "native delete/account purge guards",
       "retained encrypted cleanup credentials and candidate keyring validation"
     ],
-    "next_step": "Integrate verified wire branch0553853 into same lifecycle feature after current release bookkeeping; bind approved exact wire digest to actual one-shot send with generation/account/proxy fencing, preserve UNKNOWN candidates, and implement provider reconciliation. Then guest/protocol/output/renewal/rotation. Canary still unapproved.",
+    "next_step": "Continue isolated wire branch0553853 with actual one-shot send/account transport/reconciliation after integrating current core/utility source. Release lane owns utility473e991 acceptance. Guest/protocol/output/renewal/rotation remain; canary lacks approved operational settings.",
     "keyring_limit": "Retained version lookup and candidate bootstrap validation only, not concurrent key rotation or physical key-erasure protocol."
   },
   "foundation_validation": {
@@ -537,63 +555,124 @@
     "lifecycle-core-regression-r5": "PASS",
     "exact_review_hashes": "MATCH",
     "diff_check": "PASS",
-    "bootstrap": "BLOCKED existing detached canonical branch; direct source/runtime/hash verification passed"
+    "bootstrap": "BLOCKED existing detached canonical branch; direct source/runtime/hash verification passed",
+    "utility-isolated-final": "PASS",
+    "upcloud-utility-race": "PASS"
   },
   "stage_status": [
     {
-      "stage": "baseline",
-      "status": "VERIFIED"
+      "stage": "baseline_brain",
+      "status": "VERIFIED",
+      "detail": "Existing Brain, worktree, GitHub, schema175 before and176 after, live identities and processes reconciled."
     },
     {
-      "stage": "inventory_capacity_ui",
-      "status": "DEPLOYED",
-      "revision": "ab92f7f"
+      "stage": "provider_feasibility",
+      "status": "IN_PROGRESS",
+      "detail": "Official resource types/statuses researched. Current account-specific cost/quota/interface evidence incomplete; UpCloud account absent."
     },
     {
-      "stage": "account_capability_cost",
-      "status": "PARTIAL",
-      "remaining": "DO IPv4 quota verified; other quotas/account pricing/capability remain unknown; UpCloud absent"
+      "stage": "read_only_inventory",
+      "status": "VERIFIED",
+      "detail": "All four existing accounts read; DO/Linode/Vultr live. UpCloud fixture only; utility compatibility fix separate review. Unknown quota retained as unknown."
     },
     {
-      "stage": "policy_funding_journal_ownership",
-      "status": "VERIFIED_OFFLINE"
+      "stage": "policy_funding_settings",
+      "status": "VERIFIED",
+      "detail": "Independent IPv4/IPv6 controls and account funding settings deployed disabled, with no paid defaults."
     },
     {
-      "stage": "lease_native_delete_credential_protection",
-      "status": "VERIFIED_OFFLINE"
+      "stage": "capacity_reservations",
+      "status": "VERIFIED",
+      "detail": "Offline core shared-scope capacity/funding reservation guards tested; no live allocation or evidence writer activation."
     },
     {
-      "stage": "provider_transport",
-      "status": "NOT_IMPLEMENTED"
+      "stage": "mutation_journal",
+      "status": "VERIFIED",
+      "detail": "Core immutable intent/receipt/ownership journal and authorization/recovery guards tested and deployed; actual wire consumption is deferred."
     },
     {
-      "stage": "operational_scheduler_reconciliation",
-      "status": "NOT_IMPLEMENTED"
+      "stage": "normalize_prefix_history",
+      "status": "VERIFIED",
+      "detail": "Core normalization/exact dedupe/explicit prefix scope/history and one endpoint per owned allocation tested; no real subnet acquired."
     },
     {
-      "stage": "guest_network_protocol_ipv6",
-      "status": "NOT_IMPLEMENTED"
+      "stage": "allocation_wire_contracts",
+      "status": "VERIFIED",
+      "detail": "Pure request/response contracts for four providers passed API/race/fuzz/vet; source0553853 is in GitHub. No HTTP sender or runtime integration."
     },
     {
-      "stage": "output_renewal_rotation_release",
-      "status": "LIBRARY_ONLY"
+      "stage": "independent_mutation_scheduler",
+      "status": "NOT_STARTED",
+      "detail": "Allocation worker, account lanes orchestration and provider restart reconciliation not wired. Read inventory scheduler already exists."
+    },
+    {
+      "stage": "attachment_cleanup",
+      "status": "NOT_STARTED",
+      "detail": "Actual attach/detach/release authority and send adapters remain. Native compute deletion/account purge guards exist."
+    },
+    {
+      "stage": "endpoint_lifetime_rotation",
+      "status": "IN_PROGRESS",
+      "detail": "Stored selection/lifetime and lease/drain/retire library tested; automatic replacement/migration/rotation not wired."
+    },
+    {
+      "stage": "guest_network",
+      "status": "NOT_STARTED",
+      "detail": "Versioned network snapshots/apply/restore, listener/routing/firewall execution remain."
+    },
+    {
+      "stage": "protocol_ipv6_fallback",
+      "status": "NOT_STARTED",
+      "detail": "Real protocol reachability and user-network IPv6/fallback probes remain."
+    },
+    {
+      "stage": "configuration_output",
+      "status": "NOT_STARTED",
+      "detail": "Actual extra-IP output, existing client renewal and migration integration remain."
+    },
+    {
+      "stage": "panel",
+      "status": "IN_PROGRESS",
+      "detail": "Inventory, quota/provenance, policies/funding and journal views deployed; no real lifecycle resources to display yet."
+    },
+    {
+      "stage": "api_review",
+      "status": "VERIFIED",
+      "detail": "Core lifecycle-r5 PASS and pure wire ip-wire-r4 PASS. Neither approves full lifecycle or canary."
+    },
+    {
+      "stage": "core_tests",
+      "status": "VERIFIED",
+      "detail": "Exact full project isolated PostgreSQL/browser, focused race, vet, publisher install and GitHub Actions passed."
     },
     {
       "stage": "core_publication",
-      "status": "IN_PROGRESS"
+      "status": "VERIFIED",
+      "detail": "Source5acb57e -> public main/stable15935e9; exact installer candidate verified."
     },
     {
-      "stage": "provider_canary",
+      "stage": "core_deployment",
+      "status": "VERIFIED",
+      "detail": "Both hosts15935e9/schema176, all3 services, readiness5/5, identity/environment preserved, zero IP operations/allocations/endpoints/leases."
+    },
+    {
+      "stage": "ip_canary",
       "status": "BLOCKED",
-      "reason": "Incomplete integration and no approved settings/targets/cost/impact"
+      "detail": "Requires finished execution/proof/output integration plus explicit lifetime/spacing/count/budget/targets/prefix policy and concrete cost/impact approval. UpCloud account missing."
     },
     {
-      "stage": "operational_rollout",
-      "status": "NOT_STARTED"
+      "stage": "ip_rollout",
+      "status": "NOT_STARTED",
+      "detail": "Depends on independent provider canary evidence and approved operational limits."
+    },
+    {
+      "stage": "upcloud_utility_correction",
+      "status": "IN_PROGRESS",
+      "detail": "Reviewed/tested source1bf2114 published473e991; acceptance belongs to existing release lane."
     }
   ],
   "release_lane": {
-    "updated_at": "2026-10-15T01:53:50.029255+00:00",
+    "updated_at": "2026-10-15T01:46:45.020508+00:00",
     "owner": "continuation-77cf3cc7e2d4",
     "source_core": "5acb57ebd8fd81cb05891bbf13478d9ef58bbaf2",
     "public_core": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
@@ -604,118 +683,14 @@
     "other_writer_detected": "ipwire and documentation changed during this continuation; left intact. Release lane will not modify ipwire or commit it. Utility fix source isolated; test DB also isolated.",
     "utility_review": "PASS; full isolated suite pending",
     "provider_mutations_authorized": false,
-    "utility_source": "1bf2114",
-    "utility_validation": "PASS isolated full/race/vet/static review",
-    "utility_release": "publisher started",
-    "continuation_requirement": "Canonical/checkpoint has independent utility correction descendant1bf2114 of5acb57e. Shared feat branch left at5acb57e with all ipwire edits intact; integrate by normal merge after its own review, not reset. Shared UpCloud diff duplicates accepted fix."
+    "utility_validation": "PASS: isolated full project suite, provider race, vet, diff check and exact review hashes",
+    "shared_worktree_state": "Active independent ipwire edits preserved; no shared-worktree exact-final claim",
+    "utility_review_hashes": {
+      "internal/providers/upcloud/ip.go": "324685b594fa60a8bc050d80bfbf232197ee9854602cd3da42cabfd5f96d9ce8",
+      "internal/providers/upcloud/ip_test.go": "1011827b7879689093b48f966fe7352dfbbd93b20ce3bcba523d13d5a04fea18"
+    },
+    "wire_contracts": "Isolated /root/projects/dob-ip-wire-20261015; pure contracts reviewed PASS and committed0553853. No runtime sender or HTTP IO. Existing lifecycle Brain/job remains authority."
   },
-  "stages": [
-    {
-      "id": "baseline_brain",
-      "status": "VERIFIED",
-      "detail": "Existing Brain, worktree, GitHub, schema175 before and176 after, live identities and processes reconciled."
-    },
-    {
-      "id": "provider_feasibility",
-      "status": "IN_PROGRESS",
-      "detail": "Official resource types/statuses researched. Current account-specific cost/quota/interface evidence incomplete; UpCloud account absent."
-    },
-    {
-      "id": "read_only_inventory",
-      "status": "VERIFIED",
-      "detail": "All four existing accounts read; DO/Linode/Vultr live. UpCloud fixture only; utility compatibility fix separate review. Unknown quota retained as unknown."
-    },
-    {
-      "id": "policy_funding_settings",
-      "status": "VERIFIED",
-      "detail": "Independent IPv4/IPv6 controls and account funding settings deployed disabled, with no paid defaults."
-    },
-    {
-      "id": "capacity_reservations",
-      "status": "VERIFIED",
-      "detail": "Offline core shared-scope capacity/funding reservation guards tested; no live allocation or evidence writer activation."
-    },
-    {
-      "id": "mutation_journal",
-      "status": "VERIFIED",
-      "detail": "Core immutable intent/receipt/ownership journal and authorization/recovery guards tested and deployed; actual wire consumption is deferred."
-    },
-    {
-      "id": "normalize_prefix_history",
-      "status": "VERIFIED",
-      "detail": "Core normalization/exact dedupe/explicit prefix scope/history and one endpoint per owned allocation tested; no real subnet acquired."
-    },
-    {
-      "id": "allocation_wire_contracts",
-      "status": "VERIFIED",
-      "detail": "Pure request/response contracts for four providers passed API/race/fuzz/vet; source0553853 is in GitHub. No HTTP sender or runtime integration."
-    },
-    {
-      "id": "independent_mutation_scheduler",
-      "status": "NOT_STARTED",
-      "detail": "Allocation worker, account lanes orchestration and provider restart reconciliation not wired. Read inventory scheduler already exists."
-    },
-    {
-      "id": "attachment_cleanup",
-      "status": "NOT_STARTED",
-      "detail": "Actual attach/detach/release authority and send adapters remain. Native compute deletion/account purge guards exist."
-    },
-    {
-      "id": "endpoint_lifetime_rotation",
-      "status": "IN_PROGRESS",
-      "detail": "Stored selection/lifetime and lease/drain/retire library tested; automatic replacement/migration/rotation not wired."
-    },
-    {
-      "id": "guest_network",
-      "status": "NOT_STARTED",
-      "detail": "Versioned network snapshots/apply/restore, listener/routing/firewall execution remain."
-    },
-    {
-      "id": "protocol_ipv6_fallback",
-      "status": "NOT_STARTED",
-      "detail": "Real protocol reachability and user-network IPv6/fallback probes remain."
-    },
-    {
-      "id": "configuration_output",
-      "status": "NOT_STARTED",
-      "detail": "Actual extra-IP output, existing client renewal and migration integration remain."
-    },
-    {
-      "id": "panel",
-      "status": "IN_PROGRESS",
-      "detail": "Inventory, quota/provenance, policies/funding and journal views deployed; no real lifecycle resources to display yet."
-    },
-    {
-      "id": "api_review",
-      "status": "VERIFIED",
-      "detail": "Core lifecycle-r5 PASS and pure wire ip-wire-r4 PASS. Neither approves full lifecycle or canary."
-    },
-    {
-      "id": "core_tests",
-      "status": "VERIFIED",
-      "detail": "Exact full project isolated PostgreSQL/browser, focused race, vet, publisher install and GitHub Actions passed."
-    },
-    {
-      "id": "core_publication",
-      "status": "VERIFIED",
-      "detail": "Source5acb57e -> public main/stable15935e9; exact installer candidate verified."
-    },
-    {
-      "id": "core_deployment",
-      "status": "VERIFIED",
-      "detail": "Both hosts15935e9/schema176, all3 services, readiness5/5, identity/environment preserved, zero IP operations/allocations/endpoints/leases."
-    },
-    {
-      "id": "ip_canary",
-      "status": "BLOCKED",
-      "detail": "Requires finished execution/proof/output integration plus explicit lifetime/spacing/count/budget/targets/prefix policy and concrete cost/impact approval. UpCloud account missing."
-    },
-    {
-      "id": "ip_rollout",
-      "status": "NOT_STARTED",
-      "detail": "Depends on independent provider canary evidence and approved operational limits."
-    }
-  ],
   "wire_contracts": {
     "worktree": "/root/projects/dob-ip-wire-20261015",
     "branch": "feat/ip-wire-20261015",
