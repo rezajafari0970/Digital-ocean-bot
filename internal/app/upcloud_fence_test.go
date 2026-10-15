@@ -7,18 +7,12 @@ import (
 )
 
 func TestUpCloudStopAllowedOnlyWithDurableCleanupManifest(t *testing.T) {
-	db := fenceTestDB(t)
-	for _, q := range []string{
-		"ALTER TABLE accounts ADD COLUMN provider text DEFAULT 'upcloud'",
-		"UPDATE accounts SET enabled=false,deletion_requested_at=now()",
-		"CREATE TABLE provider_cleanup_manifests(account_id text,provider text,server_id text,completed_at timestamptz)",
-	} {
-		if _, e := db.Exec(q); e != nil {
-			t.Fatal(e)
-		}
-	}
+	db := installerBootstrapDB(t)
+	fixture := newBootstrapFixture(t, db)
+	account := fixture.d.AccountID
+	execBootstrap(t, db, "UPDATE accounts SET provider='upcloud',enabled=false,deletion_requested_at=now() WHERE id=$1", account)
 	calls := 0
-	f := providerMutationFence{db: db, account: "test", base: fenceTransport(func(*http.Request) (*http.Response, error) {
+	f := providerMutationFence{db: db, account: account, base: fenceTransport(func(*http.Request) (*http.Response, error) {
 		calls++
 		return &http.Response{StatusCode: 200, Body: http.NoBody}, nil
 	})}
@@ -34,7 +28,7 @@ func TestUpCloudStopAllowedOnlyWithDurableCleanupManifest(t *testing.T) {
 	if e := send("POST", url); e == nil {
 		t.Fatal("unplanned stop allowed")
 	}
-	if _, e := db.Exec("INSERT INTO provider_cleanup_manifests VALUES('test','upcloud','00112233-4455-4677-8899-aabbccddeeff',NULL)"); e != nil {
+	if _, e := db.Exec("INSERT INTO provider_cleanup_manifests(account_id,provider,server_id,identity,storage_ids) VALUES($1,'upcloud','00112233-4455-4677-8899-aabbccddeeff','cleanup-fixture','[]')", account); e != nil {
 		t.Fatal(e)
 	}
 	if e := send("POST", url); e != nil {

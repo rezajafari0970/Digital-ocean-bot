@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/ipam"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"golang.org/x/sys/unix"
 	"os"
@@ -114,6 +115,9 @@ func commitAccountPurgeWithArtifacts(ctx context.Context, tx *sql.Tx, id string,
 		return err
 	}
 	id = canonicalID
+	if err := ipam.CheckObligations(ctx, tx, id, ""); err != nil {
+		return errors.Join(ErrAccountPurgeConflict, err)
+	}
 	queries := []string{
 		`DELETE FROM worker_recovery_checkpoints WHERE account_id=$1`,
 		`DELETE FROM proxy_traffic_hourly WHERE role='account' AND (lower(owner_id)=$1::uuid::text OR lower(owner_id)='replace-'||$1::uuid::text)`,
@@ -129,6 +133,7 @@ func commitAccountPurgeWithArtifacts(ctx context.Context, tx *sql.Tx, id string,
 		`DELETE FROM bulk_user_ownership WHERE generation_id IN(SELECT g.id FROM bulk_user_generations g JOIN panel_instances p ON p.id=g.panel_id WHERE p.account_id=$1)`,
 		`DELETE FROM worker_item_failures WHERE account_id=$1 OR (account_id IS NULL AND (item_id=$1::uuid::text OR item_id IN (SELECT id::text FROM panel_instances WHERE account_id=$1 UNION SELECT id::text FROM droplets WHERE account_id=$1 UNION SELECT id::text FROM deployments WHERE account_id=$1 UNION SELECT id::text FROM operations WHERE account_id=$1)))`,
 		`DELETE FROM audit_events WHERE account_id=$1 OR (account_id IS NULL AND resource_type IN ('account','deployment','droplet','panel','operation','server') AND (resource_id=$1::uuid::text OR resource_id IN(SELECT id::text FROM panel_instances WHERE account_id=$1 UNION SELECT id::text FROM droplets WHERE account_id=$1 UNION SELECT id::text FROM deployments WHERE account_id=$1 UNION SELECT id::text FROM operations WHERE account_id=$1)))`,
+		`DELETE FROM ip_cleanup_credentials WHERE account_id=$1`,
 		`DELETE FROM secrets WHERE account_id=$1`,
 		`DELETE FROM lifecycle_events WHERE account_id=$1`,
 		`DELETE FROM provider_snapshots WHERE account_id=$1`,

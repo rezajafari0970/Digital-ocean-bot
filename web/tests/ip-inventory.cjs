@@ -31,7 +31,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.ok(text.includes('Allocation and rotation disabled'));
   assert.ok(text.includes('fixture <account>'));
   assert.ok(text.includes('Quota unknown'));
-  assert.ok(text.includes('not yet implemented'));
+  assert.ok(text.includes('approved canary plan'));
   assert.equal(await evaluate('document.querySelectorAll("account").length'),0);
   assert.equal(await evaluate('document.querySelector("[data-ip-account] tbody td:nth-child(2)").textContent'),'0');
   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
@@ -39,8 +39,20 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await waitFor('window.ipCalls.length===1&&document.querySelectorAll("[data-ip-refresh]:not(:disabled)").length===2');
   assert.equal((await evaluate('window.ipCalls'))[0],'/api/v1/accounts/11111111-1111-4111-8111-111111111111/ip-inventory/refresh');
   await call('Page.reload');await waitFor('document.querySelectorAll("[data-ip-account]").length===2');
+  const v6='document.querySelectorAll("[data-ip-policy]")[1]',v4='document.querySelectorAll("[data-ip-policy]")[0]';
+  await evaluate(v6+'.closest("details").open=true');
+  assert.equal(await evaluate(v6+'.querySelector("[name=diversity_bits]").value'),'');
+  assert.equal(await evaluate(v6+'.querySelector("[name=desired]").value'),'');
+  await evaluate('const f='+v6+';f.querySelector("[name=desired]").value="2";f.querySelector("[name=diversity_bits]").value="56";f.querySelector("button").click()');
+  await waitFor(v6+'?.dataset.revision==="1"');
+  assert.equal(await evaluate(v6+'.querySelector("[name=desired]").value'),'2');
+  assert.equal(await evaluate(v4+'.querySelector("[name=desired]").value'),'');
+  await call('Page.reload');await waitFor(v6+'?.dataset.revision==="1"');
+  assert.equal(await evaluate(v6+'.querySelector("[name=diversity_bits]").value'),'56');
+  await evaluate(v6+'.closest("details").open=true');
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
   const shot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'ip-inventory-mobile.png'),Buffer.from(shot.data,'base64'));
-  console.log('IP_INVENTORY_DISABLED_UNKNOWN_ZERO_ESCAPE_MANUAL_PER_ACCOUNT_RELOAD_MOBILE PASS');
+  console.log('IP_INVENTORY_SETTINGS_NULL_CAS_FAMILY_ISOLATION_RELOAD_MOBILE PASS');
  }finally{
   if(ws)ws.close();chrome.kill('SIGTERM');fs.closeSync(log);
   await new Promise(r=>setTimeout(r,500));fs.rmSync(profile,{recursive:true,force:true});

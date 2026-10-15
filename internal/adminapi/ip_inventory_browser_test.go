@@ -32,6 +32,8 @@ func TestIPInventoryBrowser(t *testing.T) {
 	s := Server{DB: db}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/ip-inventory", s.ipInventory)
+	mux.HandleFunc("PUT /api/v1/accounts/{id}/ip-policy/{family}", s.saveIPPolicy)
+	mux.HandleFunc("PUT /api/v1/accounts/{id}/ip-funding", s.saveIPFunding)
 	mux.HandleFunc("GET /api/v1/auth/me", s.authMe)
 	mux.HandleFunc("POST /api/v1/accounts/{id}/ip-inventory/refresh", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]string{"state": "FAILED", "error_class": "rate_limited"})

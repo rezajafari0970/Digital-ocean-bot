@@ -26,6 +26,9 @@ func (s InventoryStore) Begin(ctx context.Context, account string) (ReadTicket, 
 		return t, e
 	}
 	defer tx.Rollback()
+	if e = LockAccount(ctx, tx, account); e != nil {
+		return t, e
+	}
 	_, e = tx.ExecContext(ctx, `INSERT INTO ip_inventory_lanes(account_id) VALUES($1) ON CONFLICT DO NOTHING`, account)
 	if e != nil {
 		return t, e
@@ -83,6 +86,9 @@ func (s InventoryStore) Finish(ctx context.Context, t ReadTicket, o *providers.I
 		return e
 	}
 	defer tx.Rollback()
+	if e = LockAccount(ctx, tx, t.AccountID); e != nil {
+		return e
+	}
 	var id string
 	var failures int
 	e = tx.QueryRowContext(ctx, "SELECT COALESCE(request_id::text,''),failures FROM ip_inventory_lanes WHERE account_id=$1 FOR UPDATE", t.AccountID).Scan(&id, &failures)

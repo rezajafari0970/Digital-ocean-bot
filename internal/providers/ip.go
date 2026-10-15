@@ -29,10 +29,11 @@ type IPResource struct {
 	Protected bool `json:"protected"`
 }
 type IPObservation struct {
-	Resources  []IPResource `json:"resources"`
-	Quotas     []IPQuota    `json:"quotas"`
-	Complete   bool         `json:"complete"`
-	ObservedAt time.Time    `json:"observed_at"`
+	CredentialGeneration string       `json:"credential_generation,omitempty"`
+	Resources            []IPResource `json:"resources"`
+	Quotas               []IPQuota    `json:"quotas"`
+	Complete             bool         `json:"complete"`
+	ObservedAt           time.Time    `json:"observed_at"`
 }
 type IPReader interface {
 	ObserveIPs(context.Context) (IPObservation, error)

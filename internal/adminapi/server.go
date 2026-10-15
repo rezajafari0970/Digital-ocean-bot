@@ -39,6 +39,8 @@ func New(db *sql.DB, c app.Container) *Server {
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
 	m.HandleFunc("GET /api/v1/ip-inventory", s.require(s.ipInventory, false))
+	m.HandleFunc("PUT /api/v1/accounts/{id}/ip-policy/{family}", s.require(s.saveIPPolicy, true))
+	m.HandleFunc("PUT /api/v1/accounts/{id}/ip-funding", s.require(s.saveIPFunding, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/ip-inventory/refresh", s.require(s.refreshIPInventory, true))
 	m.HandleFunc("GET /api/v1/proxy-traffic", s.require(s.proxyTraffic, false))
 	m.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))

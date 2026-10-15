@@ -72,6 +72,12 @@ func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, err
 		release()
 		return nil, errors.New("provider mutation blocked: account disabled or deleting")
 	}
+	if server := nativeIPDeleteTarget(req); server != "" {
+		if err = guardIPNativeDelete(req.Context(), conn, f.account, server); err != nil {
+			release()
+			return nil, err
+		}
+	}
 	resp, err := f.base.RoundTrip(req)
 	if err != nil {
 		release()

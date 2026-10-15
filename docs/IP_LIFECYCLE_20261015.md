@@ -1,3 +1,31 @@
+## Current checkpoint — 2026-10-15T01:38:46.268053+00:00
+
+Offline core validation is complete; publication and schema176 deployment are next. Baseline source3e73663 and both hosts runtime ab92f7f/schema175 were directly verified;3/3 services and readiness5/5, binary manifests and account/environment identity snapshots retained. Existing bootstrap rejects detached canonical; no bootstrap READY claim.
+Exact reviewed source matches lifecycle-r5 PASS. Full project suite on isolated PostgreSQL, targeted lifecycle/credential/config-writer races, Chromium policy UI, final race, pure/provider race and vet passed. Initial failed fixtures remain recorded. No new API request in this continuation:9 responses (8 completed,1 incomplete),264481 input+24625 output=289106 total;cached0,cache_write264454;actual/estimated money unavailable.
+Implemented: independent v4/v6 settings, account-wide funding/quota reservations, immutable mutation/ownership evidence, one-shot dispatch authorization, cleanup credential retention, lease/drain/retire library, native delete/purge fences. Approval/runtime writers and publication callers remain unavailable. No provider purchase/release, guest change or additional-IP config.
+Next: existing gated publisher, secondary then primary acceptance; then provider transport/send consumption, scheduling/reconciliation, guest/protocol verification and output/renewal/cleanup integration. Paid/disruptive canary still requires concrete approval. Other development remains paused.
+
+## Current lifecycle core checkpoint — 2026-10-15T01:38:45.786618+00:00
+
+The composed OFFLINE CORE passed actual gpt-6-astra review lifecycle-r5 and exact-source full Go/PostgreSQL/Chromium suite plus vet. Focused race tests are running. All 39 reviewed code/test/migration hashes match. Core settings, journal, evidence/funding/capacity reservations, ownership/prefix selection, publication-lease library, cleanup-key retention and native deletion guards are implemented; this is not operational IP rotation. Provider writes/send consumption, scheduling/reconciliation, guest/protocol proof, real output/renewal integration and release remain incomplete.
+No core publication/deployment yet; both runtimes remain ab92f7f/schema175. IP execution stays disabled, no paid defaults or canary authority. No provider mutation or guest network change occurred. Continue the same job; unrelated work remains paused.
+Actual API task receipts: 9 responses (8 completed, 1 incomplete), input264481/output24625/total289106, cached0/cache-write264454. Actual and estimated money unknown. The current machine-readable job supersedes earlier progress entries below.
+
+## Continuation checkpoint — 2026-10-15T01:28:00.629136+00:00
+
+Baseline remains source 3e73663, runtime ab92f7f on both hosts, schema175. Uncommitted lifecycle core is under validation; production is unchanged. Settings and funding have no paid defaults or execution authority. Journal, evidence/capacity reservations, immutable ownership history, encrypted cleanup snapshot, lease library, and native-delete/purge fences are implemented offline. Actual provider writes, transport send-ticket consumption, network execution, worker scheduling, output/renewal integration and release remain incomplete.
+Real review lifecycle-r3 resolved D1–D9 and N1/N2, requested N3 recovery/admission serialization; that fix is written and lifecycle-r4 incremental review is submitted. Targeted lifecycle-r2-fix2 PostgreSQL/browser tests passed. Full suite is in progress but will need final-source verification after N3 and documented status fixes.
+Official creation contracts differ: DigitalOcean reserved IPv4 POST returns202 and requires a separate correlated resource readback before ownership; DO reserved IPv6/Vultr/UpCloud create return201; Linode IP/range create returns200. Linode IPv4 allocation endpoint supports legacy interfaces only. Capability/account/prefix/cost evidence is still required before execution.
+API task receipts so far: 7 responses, input 234466, output 23285, total 257751, cached 0, cache-write 234445. Actual and estimated charges unknown. R4 receipt pending. No additional IP purchase, release, guest network change or new-IP configuration has been performed.
+Continue the same job/worktree. Other development remains paused. Operational parameters and canary approval remain unset; this does not block offline implementation.
+
+# Continuation in progress — 2026-10-15
+
+## In progress — 2026-10-15T01:07:41.415449+00:00: lifecycle continuation, not approved or deployed
+
+Verified source baseline3e73663 and runtime ab92f7f/schema175 on both hosts, readiness5/5. Current edits add policy/funding settings, mutation/evidence/ownership journals, native delete/purge protection and a publication-lease library. They remain uncommitted and unapproved; production output/provider execution is not wired. A real gpt-6-astra review returned REVISE and reached the output limit; D1-D9 fixes and regressions are in progress. Do not mistake previous foundation PASS for approval of these edits. No IP purchase/release, guest change or new deployment.
+Task API receipts now 5 responses (4 completed, 1 incomplete): 106760 input + 15034 output = 121794; cached 0, cache_write 106745; actual/estimated money unknown. Continue docs/development-jobs/ip-lifecycle-20261015.json and current worktree. Other work remains paused.
+
 # Additional IP lifecycle — 2026-10-15
 Status: READ_ONLY_FOUNDATION_SOURCE_APPROVED; full lifecycle remains incomplete. No canary or provider mutation authorized yet.
 

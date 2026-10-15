@@ -66,7 +66,17 @@ func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {
 		return nil, err
 	}
 	defer wipe(key)
-	secretStore, err := secrets.NewStore(secrets.SQLRepository{DB: db}, key, cfg.MasterKeyVersion)
+	retained, err := secrets.LoadRetainedKeys()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	defer func() {
+		for _, k := range retained {
+			wipe(k)
+		}
+	}()
+	secretStore, err := secrets.NewStoreWithKeys(secrets.SQLRepository{DB: db}, key, cfg.MasterKeyVersion, retained)
 	if err != nil {
 		db.Close()
 		return nil, err

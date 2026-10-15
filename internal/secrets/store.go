@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"bytes"
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
@@ -27,21 +28,46 @@ type Store struct {
 	repo       Repository
 	aead       cipher.AEAD
 	keyVersion int
+	keys       map[int]cipher.AEAD
 }
 
+// NewStore is the single-key compatibility entry point. It refuses a SQL store
+// whose retained cleanup archives need another key; use NewStoreWithKeys.
 func NewStore(repo Repository, masterKey []byte, keyVersion int) (*Store, error) {
-	if len(masterKey) != 32 {
+	return NewStoreWithKeys(repo, masterKey, keyVersion, nil)
+}
+func NewStoreWithKeys(repo Repository, masterKey []byte, keyVersion int, retained map[int][]byte) (*Store, error) {
+	if keyVersion < 1 || len(masterKey) != 32 {
 		return nil, ErrInvalidMasterKey
 	}
-	block, err := aes.NewCipher(masterKey)
-	if err != nil {
-		return nil, err
+	all := map[int][]byte{}
+	for version, key := range retained {
+		all[version] = key
 	}
-	aead, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, err
+	if old, ok := all[keyVersion]; ok && !bytes.Equal(old, masterKey) {
+		return nil, ErrInvalidMasterKey
 	}
-	return &Store{repo: repo, aead: aead, keyVersion: keyVersion}, nil
+	all[keyVersion] = masterKey
+	ring := map[int]cipher.AEAD{}
+	for version, key := range all {
+		if version < 1 || len(key) != 32 {
+			return nil, ErrInvalidMasterKey
+		}
+		block, e := aes.NewCipher(key)
+		if e != nil {
+			return nil, e
+		}
+		aead, e := cipher.NewGCM(block)
+		if e != nil {
+			return nil, e
+		}
+		ring[version] = aead
+	}
+	s := &Store{repo: repo, aead: ring[keyVersion], keyVersion: keyVersion, keys: ring}
+	if e := s.ValidateIPCleanupKeys(context.Background()); e != nil {
+		return nil, e
+	}
+	return s, nil
 }
 
 func (s *Store) Put(ctx context.Context, accountID, id, kind string, plaintext []byte) error {
@@ -60,7 +86,11 @@ func (s *Store) Get(ctx context.Context, accountID, id string) ([]byte, error) {
 		return nil, err
 	}
 	aad := []byte(r.AccountID + "\x00" + r.ID + "\x00" + r.Kind)
-	pt, err := s.aead.Open(nil, r.Nonce, r.Ciphertext, aad)
+	aead, ok := s.keys[r.KeyVersion]
+	if !ok {
+		return nil, ErrSecretDecrypt
+	}
+	pt, err := aead.Open(nil, r.Nonce, r.Ciphertext, aad)
 	if err != nil {
 		return nil, ErrSecretDecrypt
 	}
