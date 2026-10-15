@@ -1,3 +1,16 @@
+## Wire contracts verified; operational execution remains pending — 2026-10-15T01:54:48.527062+00:00
+
+Pure allocation wire contracts committed and pushed at0553853f82cc256ec152a5f0d68fe77d14fc97ee (feat/ip-wire-20261015). Actual API review ip-wire-r4 PASS resolved B1/B2/B3; exact race,185891 fuzz executions and vet PASS. No HTTP sender or production caller, no ownership/release authority from decoded replies. Current installed core remains15935e9/schema176 on both hosts. Full21-stage ledger and API receipts are in the existing job JSON. Next: actual-send consumption/account transport/reconciliation, then guest/protocol/output/renewal and rotation.
+
+## Current verified release and next stage — 2026-10-15T01:53:27.755510+00:00
+
+Core source5acb57e produced public15935e9. Both live hosts are now15935e9/schema176, 3 active services and readiness5/5; executable manifests, identity/env preservation and zero operations/allocations/endpoints/leases verified. No additional IP purchase/release, guest network change or new-IP config. This verifies the disabled control-plane core only. Source/public/installation tests and both GitHub Actions passed.
+The same job now includes a complete stage ledger. Pure provider allocation wire contracts are isolated at /root/projects/dob-ip-wire-20261015 to avoid mixing in-progress contracts with release bookkeeping; existing Brain/job remain authority. No HTTP sender/worker/output caller exists. API review is still in progress for these contracts; corrected issues preserve untrusted resource hints in UNKNOWN responses and reject JSON/enum ambiguity. Remaining offline execution/network/output integration is authorized; canary needs concrete operational approval and UpCloud access.
+
+## Lifecycle core source approved — 2026-10-15T01:39:17.948753+00:00
+
+Actual lifecycle-r5 API review PASS for the composed offline core; all 39 reviewed source hashes unchanged. Exact full project PostgreSQL/browser suite, focused race tests and vet PASS. Publication and deployment are next through the existing gated pipeline. Runtime remains ab92f7f/schema175 until acceptance. No provider IP mutation or guest network change. This is an independent disabled control-plane release, not a complete rotation implementation. Current phase/details/API totals are in docs/development-jobs/ip-lifecycle-20261015.json. Continue remaining provider/send, scheduler/recovery, guest/protocol and output/renewal/release integrations after this release; operational canary remains unapproved.
+
 ## Current checkpoint — 2026-10-15T01:38:46.268053+00:00
 
 Offline core validation is complete; publication and schema176 deployment are next. Baseline source3e73663 and both hosts runtime ab92f7f/schema175 were directly verified;3/3 services and readiness5/5, binary manifests and account/environment identity snapshots retained. Existing bootstrap rejects detached canonical; no bootstrap READY claim.
