@@ -1,25 +1,25 @@
 {
   "id": "ip-lifecycle-20261015",
-  "phase": "TRANSPORT_INTEGRATION_PENDING",
+  "phase": "WIRE_CONSUMPTION_VERIFIED_RUNTIME_ADAPTER_PENDING",
   "status": "IN_PROGRESS",
   "baseline_source": "895fe62e2215b6c2bbf92e15fe977e181df25a0c",
   "baseline_runtime": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
-  "worktree": "/root/projects/dob-ip-lifecycle-20261015",
+  "worktree": "/root/projects/dob-ip-send-20261015",
   "evidence": "/root/backups/dob-ip-lifecycle-20261015",
   "provider_mutations_authorized": false,
   "operational_settings": null,
   "api_usage": {
-    "requests": 14,
-    "input_tokens": 306866,
-    "output_tokens": 27901,
+    "requests": 19,
+    "input_tokens": 334569,
+    "output_tokens": 34346,
     "cached_tokens": 0,
-    "cache_write_tokens": 306824,
-    "total_tokens": 334767,
+    "cache_write_tokens": 332501,
+    "total_tokens": 368915,
     "actual_billed_amount": null,
     "estimated_amount": null,
     "currency": null,
     "amount_reason": "No invoice or verified model pricing receipt available",
-    "scope": "This task API calls only; ChatGPT session/internal usage excluded",
+    "scope": "All retained task receipts through send-code-r1, deduplicated by response id; monetary amount not supplied.",
     "receipts": [
       {
         "phase": "design-review",
@@ -310,12 +310,112 @@
         },
         "decision": "PASS",
         "scope": "Source inspection of all four supplied files: pure wire preparation, response decoding, candidate retention and tests only. No lifecycle, sending, ownership or release authority approval."
+      },
+      {
+        "id": "resp_098bc92dc89260d3006ad0399e1c4c87d19dc6b7e067022a3d",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 25680,
+          "input_tokens_details": {
+            "cache_write_tokens": 25677,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1349,
+          "output_tokens_details": {
+            "reasoning_tokens": 787
+          },
+          "total_tokens": 27029
+        },
+        "phase": "send-code-r1",
+        "decision": "PASS",
+        "scope": "Offline exact-wire consumption/result replay only; production account adapter and canary remain unaccepted."
+      },
+      {
+        "id": "resp_0d7d1d0fb87d0729006ad0378a8a7087d19b67b90077177a59",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 506,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1035,
+          "output_tokens_details": {
+            "reasoning_tokens": 257
+          },
+          "total_tokens": 1541
+        },
+        "phase": "send-plan-adversary",
+        "decision": "DESIGN_FINDINGS",
+        "scope": "Offline exact-wire consumption/result replay only; production account adapter and canary remain unaccepted."
+      },
+      {
+        "id": "resp_0fb1e8e788a4144e006ad0378a812487d1b9d968f78fc6b316",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 505,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1440,
+          "output_tokens_details": {
+            "reasoning_tokens": 501
+          },
+          "total_tokens": 1945
+        },
+        "phase": "send-plan-architect",
+        "decision": "DESIGN_FINDINGS",
+        "scope": "Offline exact-wire consumption/result replay only; production account adapter and canary remain unaccepted."
+      },
+      {
+        "id": "resp_0e78f9e5846c2d0a006ad0378a77f887d1a210a63323a9d060",
+        "model": "gpt-6-sol",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 505,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1583,
+          "output_tokens_details": {
+            "reasoning_tokens": 1018
+          },
+          "total_tokens": 2088
+        },
+        "phase": "send-plan-reviewer",
+        "decision": "DESIGN_FINDINGS",
+        "scope": "Offline exact-wire consumption/result replay only; production account adapter and canary remain unaccepted."
+      },
+      {
+        "id": "resp_0acccf2fdb756261006ad0378a875487d188ad1b27ceb09165",
+        "model": "gpt-6-sol",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 507,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1038,
+          "output_tokens_details": {
+            "reasoning_tokens": 516
+          },
+          "total_tokens": 1545
+        },
+        "phase": "send-plan-test_designer",
+        "decision": "DESIGN_FINDINGS",
+        "scope": "Offline exact-wire consumption/result replay only; production account adapter and canary remain unaccepted."
       }
     ],
-    "completed_requests": 13,
+    "completed_requests": 18,
     "incomplete_requests": 1
   },
-  "updated_at": "2026-10-15T01:59:40.421704+00:00",
+  "updated_at": "2026-10-15T02:35:04.216160+00:00",
   "full_lifecycle_complete": false,
   "source_review": "Core lifecycle-r5 PASS; utility correction PASS; pure allocation wire ip-wire-r4 PASS (separate branch, no runtime caller).",
   "source_hashes": {
@@ -402,7 +502,7 @@
       }
     ]
   },
-  "next_step": "Continue isolated wire branch0553853 with actual one-shot send/account transport/reconciliation after integrating current core/utility source. Release lane owns utility473e991 acceptance. Guest/protocol/output/renewal/rotation remain; canary lacks approved operational settings.",
+  "next_step": "Implement and independently verify the production account sender: retained credential identity, single route guard (no recursive acquisition), ordered fences, DB-session-loss/generation barrier, request-boundary isolation. Then read-only provider reconciliation (including DO IPv4 correlated GET), scheduler, attachment/release, guest/protocol/output/rotation. No paid canary authority.",
   "source_revision": "1bf2114e7df47d12c25f74dce7da9be516f20ee8",
   "public_revision": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
   "runtime": {
@@ -412,7 +512,7 @@
       "accounts": 4,
       "readiness": "5/5",
       "identity_and_environment_preserved": true,
-      "verified_at": "2026-10-15T01:57:30.455532+00:00",
+      "verified_at": "2026-10-15T02:27:27Z",
       "lifecycle_rows": {
         "policies": 0,
         "funding": 0,
@@ -429,7 +529,7 @@
       "readiness": "5/5",
       "identity_and_environment_preserved": true,
       "limitation": "No provider account; installation acceptance only",
-      "verified_at": "2026-10-15T01:56:30.846346+00:00",
+      "verified_at": "2026-10-15T02:27:30Z",
       "lifecycle_rows": {
         "policies": 0,
         "funding": 0,
@@ -622,12 +722,12 @@
     {
       "stage": "provider_feasibility",
       "status": "IN_PROGRESS",
-      "detail": "Official resource types/statuses researched. Current account-specific cost/quota/interface evidence incomplete; UpCloud account absent."
+      "detail": "Per-account quote/quota/interface evidence incomplete; operational settings unset; UpCloud absent."
     },
     {
       "stage": "read_only_inventory",
       "status": "VERIFIED",
-      "detail": "All four existing accounts read; DO/Linode/Vultr live. UpCloud fixture only; utility compatibility fix separate review. Unknown quota retained as unknown."
+      "detail": "DO/Linode/Vultr account reads verified; UpCloud utility fix deployed, no live UpCloud account."
     },
     {
       "stage": "policy_funding_settings",
@@ -642,7 +742,7 @@
     {
       "stage": "mutation_journal",
       "status": "VERIFIED",
-      "detail": "Core immutable intent/receipt/ownership journal and authorization/recovery guards tested and deployed; actual wire consumption is deferred."
+      "detail": "Deployed core journal; exact wire consumption/result replay now verified offline on schema177, not deployed."
     },
     {
       "stage": "normalize_prefix_history",
@@ -652,12 +752,12 @@
     {
       "stage": "allocation_wire_contracts",
       "status": "VERIFIED",
-      "detail": "Pure request/response contracts for four providers passed API/race/fuzz/vet; source0553853 is in GitHub. No HTTP sender or runtime integration."
+      "detail": "Four provider pure contracts merged; bounded one-call HTTP primitive verified with fake/localhost transport. No production account caller."
     },
     {
       "stage": "independent_mutation_scheduler",
       "status": "NOT_STARTED",
-      "detail": "Allocation worker, account lanes orchestration and provider restart reconciliation not wired. Read inventory scheduler already exists."
+      "detail": "Worker not wired. Bounded account result-replay recovery now verified offline; provider GET reconciliation remains."
     },
     {
       "stage": "attachment_cleanup",
@@ -692,17 +792,17 @@
     {
       "stage": "api_review",
       "status": "VERIFIED",
-      "detail": "Core lifecycle-r5 PASS and pure wire ip-wire-r4 PASS. Neither approves full lifecycle or canary."
+      "detail": "Core r5, utility, pure-wire r4 and send-code-r1 PASS in their stated scopes; four design roles identify unaccepted production runtime blockers."
     },
     {
       "stage": "core_tests",
       "status": "VERIFIED",
-      "detail": "Exact full project isolated PostgreSQL/browser, focused race, vet, publisher install and GitHub Actions passed."
+      "detail": "Current send slice: all-package isolated PostgreSQL/browser full regression, focused race/fault, vet and exact review hashes PASS."
     },
     {
       "stage": "core_publication",
       "status": "VERIFIED",
-      "detail": "Source5acb57e -> public main/stable15935e9; exact installer candidate verified."
+      "detail": "Existing release473e991 published. New consumption slice source checkpoint only; publisher gates not run for it."
     },
     {
       "stage": "core_deployment",
@@ -723,6 +823,26 @@
       "stage": "upcloud_utility_correction",
       "status": "VERIFIED",
       "detail": "Official utility/private entries excluded from public count; source1bf2114/public473e991, full/race/vet/API/publisher/Actions and both-host acceptance PASS. No live UpCloud account."
+    },
+    {
+      "stage": "durable_wire_consumption",
+      "status": "VERIFIED_OFFLINE",
+      "detail": "Exact approved wire digest, atomic entitlement consumption, one-use handles and append-only sanitized results; schema177 not deployed."
+    },
+    {
+      "stage": "account_result_replay",
+      "status": "VERIFIED_OFFLINE",
+      "detail": "Per-account restart replays only durable receipts/cooldown; no request replay or ownership inference."
+    },
+    {
+      "stage": "production_account_sender",
+      "status": "BLOCKED",
+      "detail": "Not implemented. Must resolve single route-lock ownership, retained credential binding and generation barriers across DB session loss."
+    },
+    {
+      "stage": "wire_slice_release",
+      "status": "NOT_STARTED",
+      "detail": "Source checkpoint only. No publisher/deployment or paid provider calls for new slice."
     }
   ],
   "release_lane": {
@@ -794,5 +914,73 @@
     "deployments": "PASS secondary then primary",
     "scope": "Public inventory parser compatibility; no live UpCloud account"
   },
-  "release_checkpoint_revision": "ddcd553c0b5596623c0973952670c0d24c335ee4"
+  "release_checkpoint_revision": "ddcd553c0b5596623c0973952670c0d24c335ee4",
+  "send_integration": {
+    "status": "VERIFIED_OFFLINE",
+    "stage": "CONSUMPTION_AND_RESULT_REPLAY",
+    "worktree": "/root/projects/dob-ip-send-20261015",
+    "branch": "feat/ip-send-20261015",
+    "base": "2e91efe701795b777694cd94643d359250a27024",
+    "mutation_authorized": false,
+    "updated_at": "2026-10-15T02:35:04.216160+00:00",
+    "requirement_refs": [
+      "ACC-001",
+      "NET-001",
+      "docs/IP_LIFECYCLE_20261015.md"
+    ],
+    "impact": [
+      "internal/ipam plan/evidence/journal",
+      "internal/providers/ipwire",
+      "isolated adminapi tests",
+      "additive migration177; no production callers"
+    ],
+    "review": "send-code-r1 PASS; four-role design council recorded",
+    "source_hashes": {
+      "internal/ipam/wire.go": "d3b44bd76fea937d14c07af4e9bd12d1e7b1d0ec21b7c5f1607ee33f8930bd46",
+      "internal/ipam/wire_test.go": "a7f2ec5d95b999646270865ba17c8dbf48c75f2c864f222f44ca686925e3513e",
+      "internal/ipam/journal.go": "c165a902ee087875abf286ff4e7b6e6e66bfc578052c768c143d1c202e2484ff",
+      "internal/ipam/evidence.go": "9d73a25dd8e1c3a7045e0023da368ccd8b0acb98ab8154119a83d17974c0eac0",
+      "internal/ipam/plan.go": "f7faffcf373ce6a3f600ceaddf93c6893a46cadb7146f275294537f80dd5dbde",
+      "internal/providers/ipwire/exchange.go": "70ae0231a7b22969eab531d85cdc9e4c0930d0543abe6f55319f05222deabad5",
+      "internal/providers/ipwire/exchange_test.go": "95cf96004c3e4f500add633d23d0a57b5349a720659532ccb6497bc7ffbb6432",
+      "internal/adminapi/ip_wire_postgres_test.go": "bfd690a04b778e05dfd11ce03f50663582a60205644cd6692b69b04c87574c48",
+      "migrations/000177_ip_wire_consumption.up.sql": "37e731fa9aa31123d86184998c429e3258c04186c39ad9fb2a09b0417aac761d",
+      "migrations/000177_ip_wire_consumption.down.sql": "21709647baa3c043d372faa11ddd41c7ed5ea7a0fcf0a95caa164cb8d455dc0b"
+    },
+    "migration": "000177_ip_wire_consumption (not deployed)",
+    "tests": {
+      "race_fault": "send-race-r2 PASS",
+      "full_regression": "send-full-r1 PASS isolated PostgreSQL/browser all packages",
+      "vet": "PASS internal/ipam and internal/providers/ipwire",
+      "diff_check": "PASS",
+      "source_review_hashes": "MATCH; ipwire/wire.go package comment updated only, pure contract implementation unchanged",
+      "production_callers": "NONE"
+    },
+    "runtime_adapter": "NOT_IMPLEMENTED; design blockers remain",
+    "publication": "NOT_STARTED for this slice",
+    "deployment": "NOT_STARTED for this slice",
+    "rollback_source": "be110790838c96ed98c4771d890a4410bbf0d3a7",
+    "limitations": [
+      "Preflight is not an atomic network fence. Trusted callback must provide runtime account/credential/route fence; no such production adapter is enabled.",
+      "Transport primitive calls a supplied trusted nonretrying RoundTripper once; it does not create account authorization.",
+      "Result replay is receipt persistence only, not provider GET reconciliation or ownership from inventory diff.",
+      "DB-session-loss/route-reentrancy concerns are unaccepted for live mutation and deferred explicitly."
+    ],
+    "design_adjudication": {
+      "adopted": [
+        "exact versioned spec/method/URL/body digest in immutable evidence and plan",
+        "unique operation consumption committed with dispatch; no handle on commit error",
+        "shared one-use flag consumed before preflight; no handle reconstruction",
+        "immutable sanitized result before stable receipt/cooldown replay",
+        "durable missing-receipt admission barrier",
+        "independent account recovery; unknown retains reservations"
+      ],
+      "deferred_live_blockers": [
+        "single ordered route guard without recursive lock/callbacks",
+        "retained credential and route identity at actual RoundTrip boundary",
+        "generation/route protection across loss of database lock session"
+      ],
+      "scope_resolution": "No changes to production account runtime and no network-under-SQL-lock exception; accept only offline primitives. Do not report live sender complete."
+    }
+  }
 }

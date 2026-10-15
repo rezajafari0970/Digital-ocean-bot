@@ -24,15 +24,16 @@ type CapacityEvidence struct {
 	Source                    string
 }
 type ExecutionEvidence struct {
-	ID                     string `json:"id"`
-	AccountID              string `json:"account_id"`
-	Generation             string `json:"generation"`
-	Provider               string `json:"provider"`
-	Family                 int    `json:"family"`
-	Product                string `json:"product"`
-	Region                 string `json:"region"`
-	ServerID               string `json:"server_id"`
-	InventoryRequestID     string `json:"inventory_request_id"`
+	WireRequest            *WireRequest `json:"wire_request,omitempty"`
+	ID                     string       `json:"id"`
+	AccountID              string       `json:"account_id"`
+	Generation             string       `json:"generation"`
+	Provider               string       `json:"provider"`
+	Family                 int          `json:"family"`
+	Product                string       `json:"product"`
+	Region                 string       `json:"region"`
+	ServerID               string       `json:"server_id"`
+	InventoryRequestID     string       `json:"inventory_request_id"`
 	Supported, Healthy     bool
 	NetworkImpact          string
 	ObservedAt, ValidUntil time.Time
@@ -111,6 +112,12 @@ func (s Store) SaveFunding(ctx context.Context, f Funding, expected int64) (Fund
 // constraints are represented as nil limits and block dispatch. Live writer is not wired yet.
 func (s Store) RecordExecutionEvidence(ctx context.Context, v ExecutionEvidence) (string, error) {
 	now := time.Now()
+	if v.WireRequest != nil {
+		w, err := v.WireRequest.prepare()
+		if err != nil || !wireScope(w.Spec(), v.Provider, v.Family, v.Product, v.ServerID, v.Region) || w.Impact() != v.NetworkImpact {
+			return "", ErrEvidence
+		}
+	}
 	if v.AccountID == "" || v.Generation == "" || v.Provider == "" || (v.Family != 4 && v.Family != 6) || v.Product == "" || v.Region == "" || v.ServerID == "" || v.InventoryRequestID == "" || v.NetworkImpact == "" || v.ObservedAt.After(now) || now.Sub(v.ObservedAt) > 5*time.Minute || !v.ValidUntil.After(now) || v.ValidUntil.After(v.ObservedAt.Add(5*time.Minute)) || len(v.Capacities) == 0 || len(v.Capacities) > 16 {
 		return "", ErrEvidence
 	}
@@ -257,6 +264,9 @@ func executionEvidence(ctx context.Context, tx SQLFence, p Plan, a Assignment) (
 	}
 	if !v.Supported || !v.Healthy || v.NetworkImpact != a.NetworkImpact {
 		return v, ErrEvidence
+	}
+	if _, e = boundWire(p, a, v, false); e != nil {
+		return v, e
 	}
 	generation, e := CredentialGeneration(ctx, tx, p.Input.AccountID)
 	if e != nil {

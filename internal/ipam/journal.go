@@ -53,6 +53,9 @@ type DispatchReceipt struct {
 
 func digestBytes(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
 func (s Store) SavePlan(ctx context.Context, p Plan) error {
+	if e := validateWireKeys(p); e != nil {
+		return e
+	}
 	canonical := Preview(p.Input, p.CreatedAt)
 	raw, _ := json.Marshal(p)
 	want, _ := json.Marshal(canonical)
@@ -322,12 +325,23 @@ func (s Store) QueueApproval(ctx context.Context, approval string) ([]string, er
 // Dispatch is a one-shot durable authorization. Losing its return value is UNKNOWN,
 // not permission to call it again. Callers must never reconstruct/replay this ticket.
 func (s Store) Dispatch(ctx context.Context, id, currentGeneration string) (Operation, error) {
-	var o Operation
 	tx, e := s.DB.BeginTx(ctx, nil)
+	if e != nil {
+		return Operation{}, e
+	}
+	defer tx.Rollback()
+	o, e := s.dispatchTx(ctx, tx, id, currentGeneration, false)
 	if e != nil {
 		return o, e
 	}
-	defer tx.Rollback()
+	if e = tx.Commit(); e != nil {
+		return Operation{}, e
+	}
+	return o, nil
+}
+func (s Store) dispatchTx(ctx context.Context, tx *sql.Tx, id, currentGeneration string, wire bool) (Operation, error) {
+	var o Operation
+	var e error
 	if e = tx.QueryRowContext(ctx, "SELECT account_id::text FROM ip_mutation_intents WHERE id=$1", id).Scan(&o.AccountID); e != nil {
 		return o, e
 	}
@@ -357,6 +371,9 @@ func (s Store) Dispatch(ctx context.Context, id, currentGeneration string) (Oper
 		return o, ErrEvidence
 	}
 
+	if !wire && len(p.Input.WireRequests) != 0 {
+		return o, ErrEvidence
+	}
 	var assignment Assignment
 	found := false
 	for _, a := range p.Assignments {
@@ -376,6 +393,11 @@ func (s Store) Dispatch(ctx context.Context, id, currentGeneration string) (Oper
 	if e != nil {
 		return o, e
 	}
+	if wire {
+		if _, e = boundWire(p, assignment, evidence, true); e != nil {
+			return o, e
+		}
+	}
 	for _, c := range evidence.Capacities {
 		headroom, err := capacityHeadroom(ctx, tx, o.AccountID, c, currentGeneration)
 		if err != nil {
@@ -390,6 +412,7 @@ func (s Store) Dispatch(ctx context.Context, id, currentGeneration string) (Oper
 	e = tx.QueryRowContext(ctx, `SELECT
  EXISTS(SELECT 1 FROM ip_native_delete_fences WHERE account_id=$1 AND server_id=$2)
  OR EXISTS(SELECT 1 FROM ip_mutation_intents WHERE account_id=$1 AND state IN('UNKNOWN','BLOCKED'))
+ OR EXISTS(SELECT 1 FROM ip_wire_consumptions w JOIN ip_mutation_intents pending ON pending.id=w.operation_id WHERE pending.account_id=$1 AND NOT EXISTS(SELECT 1 FROM ip_mutation_receipts receipt WHERE receipt.operation_id=pending.id AND receipt.receipt_key='wire:'||w.dispatch_id::text))
  OR EXISTS(SELECT 1 FROM ip_mutation_lanes WHERE account_id=$1 AND (rate_limit_until>clock_timestamp() OR next_dispatch_at>clock_timestamp())),
  (SELECT count(*) FROM ip_mutation_intents WHERE account_id=$1 AND state IN('DISPATCHED','ACCEPTED')),
  f.max_concurrent
@@ -429,7 +452,7 @@ func (s Store) Dispatch(ctx context.Context, id, currentGeneration string) (Oper
 		return o, e
 	}
 	o.State = "DISPATCHED"
-	return o, tx.Commit()
+	return o, nil
 }
 func (s Store) RecoverDispatched(ctx context.Context, account string, olderThan time.Time) error {
 	// No reset to PLANNED, no provider retry, and no deletion of a reservation.

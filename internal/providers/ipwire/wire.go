@@ -1,5 +1,6 @@
-// Package ipwire defines pure provider wire contracts. It performs no IO and
-// grants no allocation, guest-network or cleanup authority.
+// Package ipwire defines provider wire contracts and a bounded exchange primitive.
+// Preparation and decoding are pure; Exchange requires a trusted account adapter.
+// This package grants no allocation, guest-network or cleanup authority.
 package ipwire
 
 import (

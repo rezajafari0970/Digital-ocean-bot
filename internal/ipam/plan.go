@@ -34,22 +34,23 @@ type Quote struct {
 	ExpiresAt            time.Time `json:"expires_at"`
 }
 type PlanInput struct {
-	EvidenceIDs              map[string]string `json:"evidence_ids"`
-	FundingRevision          int64             `json:"funding_revision"`
-	AccountID                string            `json:"account_id"`
-	PolicyRevision           int64             `json:"policy_revision"`
-	Policy                   Policy            `json:"policy"`
-	Quota                    *int              `json:"quota"`
-	TotalUsed                int               `json:"total_used"`
-	ManagedActive            int               `json:"managed_active"`
-	Reserved                 int               `json:"reserved"`
-	PendingRelease           int               `json:"pending_release"`
-	UnknownOperations        int               `json:"unknown_operations"`
-	ExistingCommitmentMicros int64             `json:"existing_commitment_micros"`
-	InventoryAt              time.Time         `json:"inventory_at"`
-	CredentialGeneration     string            `json:"credential_generation"`
-	Quote                    Quote             `json:"quote"`
-	Candidates               []Candidate       `json:"candidates"`
+	WireRequests             map[string]WireRequest `json:"wire_requests,omitempty"`
+	EvidenceIDs              map[string]string      `json:"evidence_ids"`
+	FundingRevision          int64                  `json:"funding_revision"`
+	AccountID                string                 `json:"account_id"`
+	PolicyRevision           int64                  `json:"policy_revision"`
+	Policy                   Policy                 `json:"policy"`
+	Quota                    *int                   `json:"quota"`
+	TotalUsed                int                    `json:"total_used"`
+	ManagedActive            int                    `json:"managed_active"`
+	Reserved                 int                    `json:"reserved"`
+	PendingRelease           int                    `json:"pending_release"`
+	UnknownOperations        int                    `json:"unknown_operations"`
+	ExistingCommitmentMicros int64                  `json:"existing_commitment_micros"`
+	InventoryAt              time.Time              `json:"inventory_at"`
+	CredentialGeneration     string                 `json:"credential_generation"`
+	Quote                    Quote                  `json:"quote"`
+	Candidates               []Candidate            `json:"candidates"`
 }
 type Assignment struct {
 	ServerID      string `json:"server_id"`
