@@ -173,7 +173,7 @@ func TestAccountOutputEligibilityAndRevocation(t *testing.T) {
 		// Lifecycle transitions intentionally purge snapshots; a fresh worker observation
 		// is required after restoring eligibility. Recreate only this fixture's evidence.
 		for class, uri := range x.URIs {
-			sqlMust(t, db, "INSERT INTO output_config_snapshots(panel_id,uri,client_id,visible_until) VALUES($1,$2,$3,now()+interval '30 minutes') ON CONFLICT(panel_id,uri) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until", x.Panel, uri, "client-"+class+"-"+x.Panel)
+			sqlMust(t, db, "INSERT INTO output_config_snapshots(panel_id,uri,client_id,visible_until) VALUES($1,$2,$3,now()+interval '30 minutes') ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until", x.Panel, uri, "client-"+class+"-"+x.Panel)
 		}
 		if w := readAccountOutput(s, token, ""); w.Code != 200 || w.Body.String() != x.URIs["DIRECT"]+"\n" {
 			t.Fatal("eligibility restore", i, w.Code, w.Body.String())

@@ -64,7 +64,9 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 	}
 	records, ok := s.collectRuntimeOutput(ctx, p, runtime)
 	if ok {
-		s.persistOutputSnapshot(ctx, p.ID, records)
+		if err := s.persistOutputSnapshot(ctx, p.ID, records); err != nil {
+			return ""
+		}
 		if len(records) == 0 {
 			log.Printf("output refresh panel=%s empty_output", p.ID)
 		}

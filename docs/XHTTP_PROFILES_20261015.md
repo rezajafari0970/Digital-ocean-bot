@@ -1,3 +1,8 @@
+## Output persistence incident and forward fix — 2026-10-15
+New native XHTTP listeners were being created and their links generated, but the old output_config_snapshots primary key indexed the complete URI. Production PostgreSQL reported index rows4136–4184bytes above2704; persistence errors were silently discarded. The earlier canary/URI checks did not cover the long URI through this materialized-output table.
+Migration179 replaces the unbounded URI index with a bounded digest, preserving full URI data and existing timestamps. Conflict updates require exact URI equality and count checks abort any collision. Failed snapshot transactions preserve prior data and emit credential-free stage/SQLSTATE diagnostics.
+Regression: actual4096-byte exported paths fail on original source(0/3 stored); fixed full URI storage/shared output/refresh/dedup/stale removal pass. Upgrade preserves TCP and first_seen; injected DB failure returns an error and retains prior snapshot. Focused race plus full isolated PostgreSQL/browser suite pass. Publication and live output acceptance are still pending at this source checkpoint. No listener/path/credential/default conversion or unrelated IP lifecycle work.
+
 # XHTTP listener profiles — 2026-10-15
 
 ## Contract

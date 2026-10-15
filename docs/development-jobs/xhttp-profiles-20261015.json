@@ -1,6 +1,6 @@
 {
   "id": "xhttp-profiles-20261015",
-  "status": "DEPLOYED_XHTTP_WITH_EXPLICIT_COMPATIBILITY_LIMITS",
+  "status": "XHTTP_OUTPUT_PERSISTENCE_FIX_VERIFIED_PUBLICATION_PENDING",
   "base_revision": "63ed1345aa6500d792f44d34ce8f722b15b79b63",
   "goal": "Generate managed Direct and Residential XHTTP Reality stream-up configs with long nonrepeating stable paths, Host apart.com, exact user Extra and FinalMask preset, with compatibility evidence before rollout. Implement API/UI, server payload, fresh export, lifecycle client flow and migration concurrency. Preserve credentials and account isolation; no provider or IP lifecycle mutations.",
   "allowed_paths": [
@@ -20,7 +20,7 @@
   ],
   "context": "Shared physical listener per panel+port; one path per inbound, not per client. Current TCP only; transition must not silently force stale Vision clients. Browser WebView incompatible with stream-up Reality IP/custom Host; Flow Vision incompatible encryption=none XHTTP. Exact FinalMask runtime compatibility unresolved (26.9.9 rejects numeric brutalUp and UDP exp). Keep requested preset available but do not claim runtime applied if unsupported. Need stable bounded 4096-byte path (not universal max) with random unique suffix and distinct words. Mutation worker and planners must serialize transition; no pending mutation plans at switch. New schema177 reserved by separate IP work; resolve additive migration numbering without skipping pending source. Existing global default TCP until explicit canary/verified activation. Rollback63ed134; no deployment until deterministic gates and canary.",
   "scope_adjudication": "Creation defaults and immutable new-listener pins only. Existing TCP listeners remain TCP; no in-place conversion. The user was told this scope. Server-side header budget32768 required and tested to support4096-byte paths without HTTP431; client Extra unchanged. Migration runner keys full filenames so178 leaves177 independently applicable. Protection TCP port parsing must include XHTTP. Publication and activation of tested creation default are authorized by user continuation; no existing-listener conversion.",
-  "updated_at": "2026-10-15T16:23:43.399698+00:00",
+  "updated_at": "2026-10-15T16:47:30.006266+00:00",
   "stage_status": [
     {
       "stage": "baseline",
@@ -91,6 +91,21 @@
       "stage": "project_brain_handoff",
       "status": "PASS",
       "evidence": "Current source/runtime, limitations and next steps checkpointed and pushed"
+    },
+    {
+      "stage": "output_storage_incident",
+      "status": "ROOT_CAUSE_CONFIRMED",
+      "evidence": "Production PostgreSQL output_config_snapshots_pkey: index row 4136-4184 exceeds2704; native XHTTP generation succeeds but output persistence rolled back silently."
+    },
+    {
+      "stage": "output_storage_fix",
+      "status": "PASS",
+      "evidence": "Baseline PostgreSQL long-path regression fails0/3; fixed full4096-byte URI persistence/share/refresh/purge and schema178->179 preservation/error rollback pass. Focused output/account/profile race and full isolated PostgreSQL/browser go test ./... pass."
+    },
+    {
+      "stage": "output_storage_rollout",
+      "status": "PENDING",
+      "evidence": "Runtime remains89292e7/schema178 until normal gated publication/update/acceptance."
     }
   ],
   "api_usage": {
