@@ -1,0 +1,338 @@
+{
+  "at": "2026-10-15T19:01:15.298405+00:00",
+  "publication": {
+    "status": "published",
+    "source_revision": "cffd27319bb3c492c1c94c12bdbbed0d785ac09d",
+    "public_revision": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+    "at": "2026-10-15T18:57:32.374846+00:00"
+  },
+  "github": [
+    {
+      "id": 38789919878,
+      "name": "Source checks",
+      "head_branch": "main",
+      "head_sha": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38789919878"
+    },
+    {
+      "id": 38789919769,
+      "name": "Source checks",
+      "head_branch": "stable",
+      "head_sha": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38789919769"
+    }
+  ],
+  "hosts": {
+    "primary": {
+      "verification": {
+        "at": "2026-10-15T18:59:49.975152+00:00",
+        "commit": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+        "source": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+        "schema": "000179_output_uri_digest",
+        "accounts": 4,
+        "account_identity_hash": "46c86858fe56f797708a5eaa42ac609c",
+        "environment_hash": "3b75ce242c5583f03da9e5f37bb79242080002d2fe46f788cf1887d52dc6c61d",
+        "health": {
+          "status": "ok"
+        },
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-15T18:59:50.110263869Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ],
+        "account_identity_preserved": true,
+        "environment_preserved": true,
+        "retained_pins_unchanged": true,
+        "retained_pins": 44,
+        "expired_pins": 0,
+        "transport_asset_matches_release": true,
+        "creation_policy_unchanged": true,
+        "policy": {
+          "network": "tcp",
+          "finalmask_enabled": false
+        },
+        "policy_revision": 5
+      },
+      "outputs": {
+        "at": "2026-10-15T18:59:50.405990+00:00",
+        "api": {
+          "ALL": {
+            "counts": {
+              "xhttp": 125,
+              "strict_extra_valid": 125,
+              "tcp": 5
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "DIRECT": {
+            "counts": {
+              "xhttp": 25,
+              "strict_extra_valid": 25,
+              "tcp": 1
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "RESIDENTIAL": {
+            "counts": {
+              "xhttp": 75,
+              "strict_extra_valid": 75,
+              "tcp": 3
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "shares": {
+          "ALL": {
+            "counts": {
+              "xhttp": 125,
+              "strict_extra_valid": 125,
+              "tcp": 5
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "DIRECT": {
+            "counts": {
+              "xhttp": 25,
+              "strict_extra_valid": 25,
+              "tcp": 1
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "RESIDENTIAL": {
+            "counts": {
+              "xhttp": 75,
+              "strict_extra_valid": 75,
+              "tcp": 3
+            },
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "listeners": [
+          {
+            "network": "xhttp",
+            "flow": "xtls-rprx-vision-udp443",
+            "finalmask": "true",
+            "count": 1
+          },
+          {
+            "network": "tcp",
+            "flow": "",
+            "finalmask": "false",
+            "count": 3
+          },
+          {
+            "network": "xhttp",
+            "flow": "",
+            "finalmask": "false",
+            "count": 40
+          }
+        ],
+        "pass": true
+      },
+      "update": {
+        "rc": 0,
+        "after": "0219700581c967f1fd6523ff8d047b0518ae3b25"
+      }
+    },
+    "secondary": {
+      "verification": {
+        "at": "2026-10-15T18:58:37.298503+00:00",
+        "commit": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+        "source": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+        "schema": "000179_output_uri_digest",
+        "accounts": 0,
+        "account_identity_hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "environment_hash": "956b57c08a0195f8650eefbb2ce52b8b7331e86bb13d591cb7a5752a70722855",
+        "health": {
+          "status": "ok"
+        },
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-15T18:58:37.447186329Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ],
+        "account_identity_preserved": true,
+        "environment_preserved": true,
+        "retained_pins_unchanged": true,
+        "retained_pins": 0,
+        "expired_pins": 0,
+        "transport_asset_matches_release": true,
+        "creation_policy_unchanged": true,
+        "policy": {
+          "network": "xhttp",
+          "mode": "stream-up",
+          "host": "apart.com",
+          "path_bytes": 4096,
+          "finalmask_enabled": true,
+          "finalmask_scope": "both",
+          "flow": "xtls-rprx-vision-udp443"
+        },
+        "policy_revision": 3
+      },
+      "outputs": {
+        "at": "2026-10-15T18:58:37.809524+00:00",
+        "api": {
+          "ALL": {
+            "counts": {},
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "DIRECT": {
+            "counts": {},
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          },
+          "RESIDENTIAL": {
+            "counts": {},
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "shares": {
+          "RESIDENTIAL": {
+            "counts": {},
+            "new_paths": 0,
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "listeners": [],
+        "pass": true
+      },
+      "update": {
+        "rc": 0,
+        "after": "0219700581c967f1fd6523ff8d047b0518ae3b25"
+      }
+    }
+  },
+  "consumer_core": [
+    {
+      "profile": "vision-finalmask",
+      "baseline_strict_json_failed": true,
+      "fixed_strict_json_valid": true,
+      "boolean_preserved": true,
+      "core_26_9_9_config_test": "PASS"
+    },
+    {
+      "profile": "legacy",
+      "baseline_strict_json_failed": true,
+      "fixed_strict_json_valid": true,
+      "boolean_preserved": true,
+      "core_26_9_9_config_test": "PASS"
+    }
+  ],
+  "phone": "NOT_RETESTED_TUNNEL_DISCONNECTED",
+  "api_usage": {
+    "input_tokens": 2597,
+    "input_tokens_details": {
+      "cache_write_tokens": 2594,
+      "cached_tokens": 0
+    },
+    "output_tokens": 354,
+    "output_tokens_details": {
+      "reasoning_tokens": 238
+    },
+    "total_tokens": 2951
+  }
+}

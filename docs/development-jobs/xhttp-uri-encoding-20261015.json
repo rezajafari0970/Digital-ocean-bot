@@ -1,7 +1,7 @@
 {
   "id": "xhttp-uri-encoding-20261015",
-  "updated_at": "2026-10-15T18:55:28.834933+00:00",
-  "status": "VERIFIED_PUBLICATION_PENDING",
+  "updated_at": "2026-10-15T19:01:15.298405+00:00",
+  "status": "DEPLOYED_STRICT_LIVE_OUTPUT_VERIFIED",
   "base_revision": "e5ad05e105c23daf611b25e109431ad91c17471f",
   "stage_status": {
     "reproduce": "PASS_BASELINE_FAIL",
@@ -9,9 +9,9 @@
     "strict_consumer_and_core": "PASS",
     "postgres_race": "PASS",
     "api_review": "PASS_NOTE_ADDRESSED",
-    "publication": "PENDING",
-    "normal_updates": "PENDING",
-    "live_outputs": "PENDING",
+    "publication": "PASS_EXACT_UBUNTU24_AND_GITHUB",
+    "normal_updates": "PASS_SECONDARY_THEN_PRIMARY",
+    "live_outputs": "PASS_ALL_DIRECT_RESIDENTIAL",
     "phone": "DISCONNECTED_REFRESH_REQUIRED"
   },
   "product_hashes": {
@@ -31,5 +31,14 @@
     },
     "total_tokens": 2951
   },
-  "evidence_directory": "/root/projects/dob-xhttp-uri-20261015/.local/uri-evidence"
+  "evidence_directory": "/root/projects/dob-xhttp-uri-20261015/.local/uri-evidence",
+  "source_revision": "cffd27319bb3c492c1c94c12bdbbed0d785ac09d",
+  "public_revision": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+  "acceptance": "docs/XHTTP_URI_ACCEPTANCE_20261015.json",
+  "observed_primary_creation_default": {
+    "network": "tcp",
+    "revision": 5,
+    "changed_by_this_repair": false
+  },
+  "live_vision_finalmask_count": 0
 }
