@@ -68,13 +68,17 @@ func (s Service) FastFill(ctx context.Context, p readyworker.Panel, runtime *san
 		if life > 0 {
 			expiry = time.Now().Add(time.Duration(life) * time.Second).UnixMilli()
 		}
+		flow, err := clientops.InboundFlow(ctx, runtime, inboundID)
+		if err != nil {
+			return false, err
+		}
 		payload := clientops.BulkPayload{GenerationID: generation.ID, TargetUsers: effectiveTarget}
 		for i := 0; i < n; i++ {
 			id, err := sanaei.UUIDv4()
 			if err != nil {
 				return false, err
 			}
-			payload.Clients = append(payload.Clients, sanaei.Client{ID: id, Email: ownershipEmail(generation.Marker, id), Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitHWID: limit, Flow: transportprofile.Flow(in.Transport)})
+			payload.Clients = append(payload.Clients, sanaei.Client{ID: id, Email: ownershipEmail(generation.Marker, id), Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitHWID: limit, Flow: flow})
 		}
 		_, planned, err := (clientops.Journal{DB: s.DB}).ReserveBulk(ctx, runtime.AccountID, p.ID, inboundID, payload)
 		return planned, err

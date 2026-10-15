@@ -1,0 +1,136 @@
+diff --git a/main/commands/all/dob_capabilities.go b/main/commands/all/dob_capabilities.go
+new file mode 100644
+index 0000000..d77dc75
+--- /dev/null
++++ b/main/commands/all/dob_capabilities.go
+@@ -0,0 +1,16 @@
++package all
++
++import (
++	"fmt"
++	"github.com/xtls/xray-core/main/commands/base"
++)
++
++var cmdDOBCapabilities = &base.Command{
++	UsageLine: "{{.Exec}} dob-capabilities",
++	Short:     "Report verified Digital Ocean Bot transport extensions",
++	Run: func(cmd *base.Command, args []string) {
++		fmt.Println(`{"schema":1,"reality_finalmask_fragment":true,"xhttp_vision_encryption":true}`)
++	},
++}
++
++func init() { base.RootCommand.Commands = append(base.RootCommand.Commands, cmdDOBCapabilities) }
+diff --git a/transport/internet/finalmask/fragment/conn.go b/transport/internet/finalmask/fragment/conn.go
+index 3c65a8b..2804d84 100644
+--- a/transport/internet/finalmask/fragment/conn.go
++++ b/transport/internet/finalmask/fragment/conn.go
+@@ -1,6 +1,7 @@
+ package fragment
+ 
+ import (
++	"errors"
+ 	"net"
+ 	"time"
+ 
+@@ -30,6 +31,15 @@ func NewConnServer(c *Config, raw net.Conn, server bool) (net.Conn, error) {
+ 	return NewConnClient(c, raw, server)
+ }
+ 
++// CloseWrite preserves the underlying half-close contract used by REALITY.
++// Never unwrap the data path: all writes must continue through the mask.
++func (c *fragmentConn) CloseWrite() error {
++	if cw, ok := c.Conn.(interface{ CloseWrite() error }); ok {
++		return cw.CloseWrite()
++	}
++	return errors.ErrUnsupported
++}
++
+ func (c *fragmentConn) TcpMaskConn() {}
+ 
+ func (c *fragmentConn) RawConn() net.Conn {
+diff --git a/transport/internet/finalmask/fragment/halfclose_test.go b/transport/internet/finalmask/fragment/halfclose_test.go
+new file mode 100644
+index 0000000..36407b4
+--- /dev/null
++++ b/transport/internet/finalmask/fragment/halfclose_test.go
+@@ -0,0 +1,80 @@
++package fragment
++
++import (
++	"errors"
++	"io"
++	"net"
++	"testing"
++	"time"
++)
++
++func TestFragmentHalfClosePreservesReadAndMask(t *testing.T) {
++	listener, err := net.Listen("tcp", "127.0.0.1:0")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer listener.Close()
++	peerCh := make(chan net.Conn, 1)
++	go func() { c, _ := listener.Accept(); peerCh <- c }()
++	raw, err := net.Dial("tcp", listener.Addr().String())
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer raw.Close()
++	peer := <-peerCh
++	if peer == nil {
++		t.Fatal("accept")
++	}
++	defer peer.Close()
++	deadline := time.Now().Add(3 * time.Second)
++	raw.SetDeadline(deadline)
++	peer.SetDeadline(deadline)
++	wrapped, err := NewConnServer(&Config{PacketsFrom: 0, PacketsTo: 1, LengthsMin: []int64{2}, LengthsMax: []int64{2}, DelaysMin: []int64{0}, DelaysMax: []int64{0}, MaxSplitMin: 2, MaxSplitMax: 2}, raw, true)
++	if err != nil {
++		t.Fatal(err)
++	}
++	c := wrapped.(*fragmentConn)
++	if c.Splice() {
++		t.Fatal("server mask bypassed")
++	}
++	record := []byte{22, 3, 3, 0, 6, 1, 2, 3, 4, 5, 6}
++	done := make(chan error, 1)
++	go func() {
++		_, e := c.Write(record)
++		if e == nil {
++			e = c.CloseWrite()
++		}
++		done <- e
++	}()
++	got, err := io.ReadAll(peer)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(got) != len(record)+5 {
++		t.Fatalf("TLS record was not split: %d", len(got))
++	}
++	if err = <-done; err != nil {
++		t.Fatal(err)
++	}
++	go func() { peer.Write([]byte("reply")); peer.(*net.TCPConn).CloseWrite() }()
++	reply, err := io.ReadAll(c)
++	if err != nil || string(reply) != "reply" {
++		t.Fatal("read side closed", err)
++	}
++}
++func TestFragmentHalfCloseUnsupportedDoesNotClose(t *testing.T) {
++	a, b := net.Pipe()
++	defer a.Close()
++	defer b.Close()
++	c := &fragmentConn{Conn: a}
++	if !errors.Is(c.CloseWrite(), errors.ErrUnsupported) {
++		t.Fatal("unsupported half-close hidden")
++	}
++	a.SetDeadline(time.Now().Add(time.Second))
++	b.SetDeadline(time.Now().Add(time.Second))
++	go b.Write([]byte{7})
++	p := make([]byte, 1)
++	if _, err := c.Read(p); err != nil || p[0] != 7 {
++		t.Fatal("connection closed", err)
++	}
++}

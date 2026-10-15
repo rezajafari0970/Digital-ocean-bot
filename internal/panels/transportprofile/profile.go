@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/big"
 	"net"
 	"strings"
@@ -17,7 +18,7 @@ const MaxPathBytes = 4096
 const ServerMaxHeaderBytes = 32768
 const ExtraPreset = `{"xPaddingBytes":"100-1000","noGRPCHeader":true,"scStreamUpServerSecs":"20-80","scMaxEachPostBytes":1000000,"scMinPostsIntervalMs":30,"scMaxConcurrentPosts":4}`
 const FinalMaskPreset = `{"tcp":[{"type":"fragment","settings":{"packets":"tlshello","lengths":["48-80","80-128","128-192","192-288","288-448"],"delays":["0-1","1-2","1-2","0-1","0-1"],"maxSplit":"3-5"}}],"udp":[{"type":"noise","settings":{"reset":"90-150","noise":[{"type":"exp","packet":"<t><c><r 12-24>","delay":"0-1"},{"type":"exp","packet":"<n><rc 8-16><rd 4-8>","delay":"0-2"},{"rand":"12-32","randRange":"0-255","delay":"0-1"}]}}],"quicParams":{"congestion":"bbr","bbrProfile":"standard","debug":false,"brutalUp":0,"brutalDown":0,"initStreamReceiveWindow":8388608,"maxStreamReceiveWindow":16777216,"initConnectionReceiveWindow":20971520,"maxConnectionReceiveWindow":41943040,"maxIdleTimeout":45,"keepAlivePeriod":15,"disablePathMTUDiscovery":false,"maxIncomingStreams":512}}`
-const FinalMaskStatus = "Requested preset saved; not enabled: Xray 26.9.9 rejects numeric brutalUp/brutalDown and UDP exp. Client compatibility has not been verified."
+const FinalMaskStatus = "On XHTTP Reality (HTTP/2), TCP masks apply to the connection. UDP and QUIC settings are saved separately and do not act on this TCP transport. Server Fragment requires the verified patched core."
 
 var ErrInvalid = errors.New("invalid Reality transport profile")
 var ErrPinned = errors.New("observed listener transport differs from pinned profile; automatic transport replacement denied")
@@ -31,6 +32,7 @@ type Config struct {
 	Extra            json.RawMessage `json:"extra,omitempty"`
 	FinalMask        json.RawMessage `json:"finalmask,omitempty"`
 	FinalMaskEnabled bool            `json:"finalmask_enabled"`
+	FinalMaskScope   string          `json:"finalmask_scope,omitempty"`
 	BrowserDialer    string          `json:"browser_dialer,omitempty"`
 	Flow             string          `json:"flow,omitempty"`
 }
@@ -53,19 +55,49 @@ func Flow(network string) string {
 }
 func (c Config) Validate(pinned bool) error {
 	if c.NetworkName() == "tcp" {
-		if c.Mode != "" || c.Host != "" || c.Path != "" || c.PathBytes != 0 || len(c.Extra) > 0 || len(c.FinalMask) > 0 || c.FinalMaskEnabled || c.BrowserDialer != "" || c.Flow != "" {
+		if c.Mode != "" || c.Host != "" || c.Path != "" || c.PathBytes != 0 || len(c.Extra) > 0 || len(c.FinalMask) > 0 || c.FinalMaskEnabled || c.FinalMaskScope != "" || c.BrowserDialer != "" || c.Flow != "" {
 			return ErrInvalid
 		}
 		return nil
 	}
-	if c.Network != "xhttp" || c.Mode != "stream-up" || c.Flow != "" || c.BrowserDialer != "" || c.FinalMaskEnabled {
-		return ErrInvalid
+	if c.Network != "xhttp" {
+		return fmt.Errorf("%w: unsupported network", ErrInvalid)
 	}
-	if c.Host != "apart.com" || !validHost(c.Host) || c.PathBytes < 256 || c.PathBytes > MaxPathBytes {
-		return ErrInvalid
+	switch c.Mode {
+	case "auto", "stream-up", "stream-one", "packet-up":
+	default:
+		return fmt.Errorf("%w: unsupported XHTTP mode", ErrInvalid)
 	}
-	if !equalJSON(c.Extra, json.RawMessage(ExtraPreset)) || !equalJSON(c.FinalMask, json.RawMessage(FinalMaskPreset)) {
-		return ErrInvalid
+	switch c.Flow {
+	case "", Vision, VisionUDP443:
+	default:
+		return fmt.Errorf("%w: unsupported flow", ErrInvalid)
+	}
+	switch c.BrowserDialer {
+	case "", "OkHttp", "WebView":
+	default:
+		return fmt.Errorf("%w: invalid Browser Dialer selection", ErrInvalid)
+	}
+	if !validHost(c.Host) || c.PathBytes < 256 || c.PathBytes > MaxPathBytes {
+		return fmt.Errorf("%w: Host must be a domain and path size must be 256–4096", ErrInvalid)
+	}
+	if err := ValidateExtra(c.Extra); err != nil {
+		return err
+	}
+	if len(c.FinalMask) > 0 {
+		if _, err := jsonObject(c.FinalMask); err != nil {
+			return fmt.Errorf("%w: FinalMask must be a JSON object", ErrInvalid)
+		}
+	}
+	switch c.FinalMaskScope {
+	case "", "both", "client", "server":
+	default:
+		return fmt.Errorf("%w: invalid FinalMask scope", ErrInvalid)
+	}
+	if c.FinalMaskEnabled {
+		if _, err := c.TCPMask(); err != nil {
+			return err
+		}
 	}
 	if pinned {
 		return ValidatePath(c.Path, c.PathBytes)
@@ -173,13 +205,18 @@ func NewPath(size int) (string, error) {
 	return path, ValidatePath(path, size)
 }
 
-// WireSettings never includes client FinalMask or Browser Dialer in the inbound.
+// WireSettings keeps editable Extra fields and a bounded header budget.
 func (c Config) WireSettings() map[string]any {
 	// XHTTP repeats the URL in legacy Referer padding. A 4096-byte path
 	// exceeds the core's default 8192-byte total header budget.
 	var extra map[string]json.RawMessage
 	_ = json.Unmarshal(c.Extra, &extra)
-	extra["serverMaxHeaderBytes"] = json.RawMessage("32768")
+	if extra == nil {
+		extra = map[string]json.RawMessage{}
+	}
+	if _, ok := extra["serverMaxHeaderBytes"]; !ok {
+		extra["serverMaxHeaderBytes"] = json.RawMessage("32768")
+	}
 	return map[string]any{"host": c.Host, "path": c.Path, "mode": c.Mode, "extra": extra}
 }
 
@@ -201,24 +238,23 @@ func FromStream(stream map[string]any) (Config, error) {
 		Host, Path, Mode string
 		Extra            json.RawMessage
 	}
-	if json.Unmarshal(b, &x) != nil || !validHost(x.Host) || x.Mode != "stream-up" {
+	if json.Unmarshal(b, &x) != nil {
 		return Config{}, ErrInvalid
 	}
-	if ValidatePath(x.Path, len(x.Path)) != nil {
-		return Config{}, ErrInvalid
+	extra, e := jsonObject(x.Extra)
+	if e != nil {
+		return Config{}, e
 	}
-	var extra map[string]json.RawMessage
-	if json.Unmarshal(x.Extra, &extra) != nil {
-		return Config{}, ErrInvalid
+	// The historical server-only default is omitted from client exports.
+	if string(extra["serverMaxHeaderBytes"]) == "32768" {
+		delete(extra, "serverMaxHeaderBytes")
 	}
-	var maxHeader int
-	if json.Unmarshal(extra["serverMaxHeaderBytes"], &maxHeader) != nil || maxHeader != ServerMaxHeaderBytes {
-		return Config{}, ErrInvalid
-	}
-	delete(extra, "serverMaxHeaderBytes")
 	x.Extra, _ = json.Marshal(extra)
-	if !equalJSON(x.Extra, json.RawMessage(ExtraPreset)) {
-		return Config{}, ErrInvalid
+	c := Config{Network: "xhttp", Host: x.Host, Path: x.Path, PathBytes: len(x.Path), Mode: x.Mode, Extra: x.Extra}
+	if fm, ok := stream["finalmask"]; ok {
+		c.FinalMask, _ = json.Marshal(fm)
+		c.FinalMaskEnabled = true
+		c.FinalMaskScope = "both"
 	}
-	return Config{Network: "xhttp", Host: x.Host, Path: x.Path, PathBytes: len(x.Path), Mode: x.Mode, Extra: x.Extra, FinalMask: json.RawMessage(FinalMaskPreset)}, nil
+	return c, c.Validate(true)
 }

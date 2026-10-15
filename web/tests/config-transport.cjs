@@ -6,7 +6,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  const profileData=[{route_class:'RESIDENTIAL',enabled:true,master_enabled:true,ports:[443],target_users_per_inbound:20,user_lifetime_seconds:600,users_per_second:1,revision:1}];
  const capacity={target:20,active:7,expired:0,quota_exhausted:0,deficit:13,created_last_cycle:1,inbounds:[{panel_id:'fixture',inbound_id:1,base_url:'http://fixture.invalid',port:443,target:20,active:7,deficit:13,created_last_cycle:1}],automation:{running:true,panels:[],cooldown_panels:0,quarantined_panels:0}};
  const outputHTML=fs.readFileSync(path.resolve(__dirname,'../../internal/adminapi/output_view.go'),'utf8').match(/io.WriteString\(w, `([\s\S]*?)`\)/)[1];
- const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'New physical listeners only. Existing listeners retain their saved transport and path.',finalmask_status:'Requested preset saved; not enabled.',compatibility:'Empty flow and disabled Browser Dialer.'};const saves=[];
+ const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};preset.flow="xtls-rprx-vision-udp443";preset.finalmask={tcp:preset.finalmask.tcp};preset.finalmask_enabled=true;preset.finalmask_scope="both";preset.browser_dialer="";let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'New physical listeners only. Existing listeners retain their saved transport and path.',finalmask_status:'TCP Fragment requires verified core; UDP and QUIC settings do not act on HTTP/2.',compatibility:'Vision uses VLESS Encryption; Browser Dialer requires TLS.'};const saves=[];
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(url.pathname==='/api/v1/configs/transport'){
@@ -58,10 +58,10 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await waitFor("document.querySelector('#modal').open");
   await evaluate("var sel=document.querySelector('[name=transport_network]');sel.value='xhttp';sel.dispatchEvent(new Event('change'))");
   assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'apart.com');
-  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').readOnly"),true);
+  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').readOnly"),false);
   assert.equal(await evaluate("document.querySelector('[name=path_bytes]').value"),'4096');
-  assert.equal(await evaluate("document.querySelectorAll('#xhttpFields select[disabled]').length"),2);
-  assert.equal(await evaluate("document.querySelector('#modalFields').innerText.includes('not enabled')"),true);
+  assert.equal(await evaluate("document.querySelectorAll('#xhttpFields select[disabled]').length"),0);
+  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('REALITY')"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'xhttp-mobile.png'),Buffer.from(shot.data,'base64'));
   await evaluate("document.querySelector('#modalSubmit').click()");
@@ -71,15 +71,18 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await waitFor("document.querySelector('#modal').open");
   await evaluate("document.querySelector('[name=path_bytes]').value='4097';document.querySelector('#modalSubmit').click()");
   assert.equal(saves.length,1);
-  await evaluate("document.querySelector('[name=path_bytes]').value='1024';document.querySelector('#modalSubmit').click()");
+  await evaluate("document.querySelector('[name=path_bytes]').value='1024';document.querySelector('[name=xhttp_host]').value='custom.example.org';document.querySelector('[name=xhttp_mode]').value='packet-up';document.querySelector('[name=browser_dialer]').value='WebView';document.querySelector('[name=xhttp_extra]').value=JSON.stringify({xPaddingBytes:'256-512',noGRPCHeader:false});document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open");
-  assert.equal(saves.length,2);assert.equal(saves[1].config.path_bytes,1024);
+  assert.equal(saves.length,2);assert.equal(saves[1].config.path_bytes,1024);assert.equal(saves[1].config.host,'custom.example.org');assert.equal(saves[1].config.mode,'packet-up');assert.equal(saves[1].config.browser_dialer,'WebView');assert.deepEqual(saves[1].config.extra,{xPaddingBytes:'256-512',noGRPCHeader:false});
   await evaluate("document.querySelector('#editTransport').click()");
   await waitFor("document.querySelector('#modal').open");
+  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'custom.example.org');
+  assert.equal(await evaluate("document.querySelector('[name=browser_dialer]').value"),'WebView');
+  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('not active with REALITY')"),true);
   await evaluate("var sel=document.querySelector('[name=transport_network]');sel.value='tcp';sel.dispatchEvent(new Event('change'));document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configTransportSlot').innerText.includes('TCP Reality')");
   assert.deepEqual(saves[2].config,{network:'tcp',finalmask_enabled:false});
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:['mobile layout','exact preset','incompatible options disabled','boundary validation','revision save','TCP creation-default rollback'],page_errors:errors},null,2));console.log('XHTTP_TRANSPORT_BROWSER_PASS');
+  fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:['mobile layout','exact preset','editable settings survive reload','dialer limitation explicit','boundary validation','revision save','TCP creation-default rollback'],page_errors:errors},null,2));console.log('XHTTP_TRANSPORT_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -12,18 +12,19 @@ import (
 var ErrMismatch = errors.New("sanaei inbound semantic mismatch")
 
 type Expected struct {
-	Transport   transportprofile.Config
-	RemoteID    int64
-	Remark      string
-	Port        int
-	UUID        string
-	Flow        string
-	Target      string
-	ServerNames []string
-	PrivateKey  string
-	ShortID     string
-	Fingerprint string
-	Sniffing    map[string]any
+	Transport              transportprofile.Config
+	RemoteID               int64
+	Remark                 string
+	Port                   int
+	UUID                   string
+	Decryption, Encryption string
+	Flow                   string
+	Target                 string
+	ServerNames            []string
+	PrivateKey             string
+	ShortID                string
+	Fingerprint            string
+	Sniffing               map[string]any
 }
 
 type Inbound struct {
@@ -68,7 +69,13 @@ func Validate(in Inbound, w Expected) error {
 	if e != nil {
 		return e
 	}
-	if s["decryption"] != "none" || s["encryption"] != "none" {
+	if w.Decryption == "" {
+		w.Decryption = "none"
+	}
+	if w.Encryption == "" {
+		w.Encryption = "none"
+	}
+	if s["decryption"] != w.Decryption || s["encryption"] != w.Encryption {
 		return fmt.Errorf("%w: vless crypto", ErrMismatch)
 	}
 	clients, ok := s["clients"].([]any)
@@ -82,7 +89,7 @@ func Validate(in Inbound, w Expected) error {
 			continue
 		}
 		flow, _ := c["flow"].(string)
-		if w.Transport.NetworkName() == "xhttp" && flow != "" {
+		if w.Transport.NetworkName() == "xhttp" && flow != w.Flow {
 			return fmt.Errorf("%w: XHTTP flow", ErrMismatch)
 		}
 		if c["id"] == w.UUID && flow == w.Flow {
@@ -103,6 +110,25 @@ func Validate(in Inbound, w Expected) error {
 		got, e := transportprofile.FromStream(st)
 		if e != nil {
 			return fmt.Errorf("%w: XHTTP settings", ErrMismatch)
+		}
+		if got.MaskOnServer() != w.Transport.MaskOnServer() {
+			return fmt.Errorf("%w: FinalMask activation", ErrMismatch)
+		}
+		if got.MaskOnServer() {
+			a, e := got.TCPMask()
+			if e != nil {
+				return ErrMismatch
+			}
+			b, e := w.Transport.TCPMask()
+			if e != nil {
+				return ErrMismatch
+			}
+			var av, bv any
+			json.Unmarshal(a, &av)
+			json.Unmarshal(b, &bv)
+			if !reflect.DeepEqual(av, bv) {
+				return fmt.Errorf("%w: FinalMask settings", ErrMismatch)
+			}
 		}
 		a, _ := json.Marshal(got.WireSettings())
 		b, _ := json.Marshal(w.Transport.WireSettings())

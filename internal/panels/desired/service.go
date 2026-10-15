@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportcore"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"strconv"
 
@@ -256,6 +257,9 @@ func (d *panelDeps) Add(
 	payload realityconfig.Payload,
 ) error {
 
+	if err := d.prepareTransport(ctx, payload); err != nil {
+		return err
+	}
 	_, err :=
 		sanaei.AddInbound(
 			ctx,
@@ -279,6 +283,9 @@ func (d *panelDeps) Update(ctx context.Context, remoteID int64, payload realityc
 	}
 	payload, err = preserveInboundClients(payload, current)
 	if err != nil {
+		return err
+	}
+	if err = d.prepareTransport(ctx, payload); err != nil {
 		return err
 	}
 	_, err = sanaei.UpdateInbound(ctx, d.exec, remoteID, payload)
@@ -657,4 +664,19 @@ WHERE pi.id=$1
 	}
 	return run(ctx)
 
+}
+
+func (d *panelDeps) prepareTransport(ctx context.Context, payload realityconfig.Payload) error {
+	if payload.StreamSettings["network"] != "xhttp" {
+		return nil
+	}
+	key, err := d.secrets.Get(ctx, d.accountID, d.target.KeySecretRef)
+	if err != nil {
+		return err
+	}
+	defer credentials.Wipe(key)
+	if !sanaei.ConfigLockHeld(ctx, d.db, d.panelID) {
+		return errors.New("transport preparation requires panel config lock")
+	}
+	return transportcore.Prepare(ctx, d.ssh, d.target, key, payload)
 }

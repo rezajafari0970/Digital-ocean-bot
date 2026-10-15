@@ -24,6 +24,7 @@ type Managed struct {
 	PrivateKey  string
 	PublicKey   string
 	ShortID     string
+	Encryption  string
 	Flow        string
 	Fingerprint string
 }
@@ -61,8 +62,21 @@ func (m Managed) URI() (string, error) {
 	if m.PublicKey == "" {
 		return "", ErrInvalid
 	}
+	if m.Transport.NetworkName() == "xhttp" && m.Transport.Flow != "" {
+		if m.Flow != "" && m.Flow != m.Transport.ServerFlow() && m.Flow != m.Transport.Flow {
+			return "", ErrInvalid
+		}
+		m.Flow = m.Transport.Flow
+		if m.Encryption == "" {
+			_, public, err := transportprofile.EncryptionPair(m.PrivateKey, m.Remark)
+			if err != nil {
+				return "", err
+			}
+			m.Encryption = public
+		}
+	}
 	return exporter.VLESSRealityURI(exporter.VLESSReality{
 		UUID: m.UUID, Host: m.Host, Port: m.Port, SNI: m.SNI, PublicKey: m.PublicKey,
-		ShortID: m.ShortID, Fingerprint: m.Fingerprint, Flow: m.Flow, Remark: m.Remark, Transport: m.Transport,
+		ShortID: m.ShortID, Fingerprint: m.Fingerprint, Flow: m.Flow, Encryption: m.Encryption, Remark: m.Remark, Transport: m.Transport,
 	})
 }

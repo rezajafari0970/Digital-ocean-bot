@@ -1,0 +1,287 @@
+diff --git a/internal/config/version b/internal/config/version
+index 8c1da59..2f4c798 100644
+--- a/internal/config/version
++++ b/internal/config/version
+@@ -1 +1 @@
+-3.8.5
+\ No newline at end of file
++3.8.5-dob-fm.1
+\ No newline at end of file
+diff --git a/internal/database/db.go b/internal/database/db.go
+index 9d5efd9..4178444 100644
+--- a/internal/database/db.go
++++ b/internal/database/db.go
+@@ -2465,6 +2465,10 @@ func stripRealityFinalmaskTcpFromStream(raw string) (string, bool) {
+ 	if tcp, _ := finalmask["tcp"].([]any); len(tcp) == 0 {
+ 		return raw, false
+ 	}
++	if xray.SupportsRealityFragment(stream) {
++		return raw, false
++	}
++
+ 	delete(finalmask, "tcp")
+ 	if len(finalmask) == 0 {
+ 		delete(stream, "finalmask")
+diff --git a/internal/database/dob_finalmask_test.go b/internal/database/dob_finalmask_test.go
+new file mode 100644
+index 0000000..3dd70b6
+--- /dev/null
++++ b/internal/database/dob_finalmask_test.go
+@@ -0,0 +1,32 @@
++package database
++
++import (
++	"github.com/mhsanaei/3x-ui/v3/internal/xray"
++	"os"
++	"path/filepath"
++	"testing"
++)
++
++func TestDOBFinalMaskMigrationKeepsVerifiedFragment(t *testing.T) {
++	core := os.Getenv("DOB_NATIVE_CORE")
++	if core == "" {
++		t.Skip("DOB_NATIVE_CORE required")
++	}
++	dir := t.TempDir()
++	if err := os.Symlink(core, filepath.Join(dir, xray.GetBinaryName())); err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv("XUI_BIN_FOLDER", dir)
++	raw := `{"network":"xhttp","security":"reality","finalmask":{"tcp":[{"type":"fragment","settings":{"packets":"tlshello"}}]}}`
++	got, changed := stripRealityFinalmaskTcpFromStream(raw)
++	if changed || got != raw {
++		t.Fatal("verified fragment removed during migration")
++	}
++	if err := os.Remove(filepath.Join(dir, xray.GetBinaryName())); err != nil {
++		t.Fatal(err)
++	}
++	_, changed = stripRealityFinalmaskTcpFromStream(raw)
++	if !changed {
++		t.Fatal("stock guard bypassed without verified core")
++	}
++}
+diff --git a/internal/web/service/dob_finalmask_native_test.go b/internal/web/service/dob_finalmask_native_test.go
+new file mode 100644
+index 0000000..9392196
+--- /dev/null
++++ b/internal/web/service/dob_finalmask_native_test.go
+@@ -0,0 +1,126 @@
++package service
++
++import (
++	"encoding/json"
++	"os"
++	"path/filepath"
++	"testing"
++
++	"github.com/mhsanaei/3x-ui/v3/internal/database"
++	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
++	"github.com/mhsanaei/3x-ui/v3/internal/xray"
++)
++
++func TestDOBFinalMaskNativePersistence(t *testing.T) {
++	core := os.Getenv("DOB_NATIVE_CORE")
++	if core == "" {
++		t.Skip("DOB_NATIVE_CORE required")
++	}
++	dir := t.TempDir()
++	if err := os.Symlink(core, filepath.Join(dir, xray.GetBinaryName())); err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv("XUI_BIN_FOLDER", dir)
++	setupConflictDB(t)
++	stream := realityFinalMaskStream
++	in := &model.Inbound{Tag: "dob-native-fragment", Enable: true, Listen: "127.0.0.1", Port: 44302, Protocol: model.VLESS, StreamSettings: stream, Settings: `{"clients":[],"decryption":"none"}`}
++	svc := &InboundService{}
++	created, _, err := svc.AddInbound(in)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var saved model.Inbound
++	if err = database.GetDB().First(&saved, created.Id).Error; err != nil {
++		t.Fatal(err)
++	}
++	var observed map[string]any
++	if json.Unmarshal([]byte(saved.StreamSettings), &observed) != nil || !xray.SupportsRealityFragment(observed) {
++		t.Fatal("native readback lost fragment")
++	}
++	cfg, err := (&XrayService{}).GetXrayConfig()
++	if err != nil {
++		t.Fatal(err)
++	}
++	found := false
++	for _, v := range cfg.InboundConfigs {
++		if v.Tag != in.Tag {
++			continue
++		}
++		found = true
++		var s map[string]any
++		if json.Unmarshal(v.StreamSettings, &s) != nil || s["finalmask"] == nil {
++			t.Fatal("runtime generation stripped fragment")
++		}
++	}
++	if !found {
++		t.Fatal("runtime inbound absent")
++	}
++	if err = os.Remove(filepath.Join(dir, xray.GetBinaryName())); err != nil {
++		t.Fatal(err)
++	}
++	if validateFinalMaskRealityCombo(stream) == nil {
++		t.Fatal("unverified core accepted")
++	}
++}
++
++func TestDOBNativeRoundtripFixture(t *testing.T) {
++	core := os.Getenv("DOB_NATIVE_CORE")
++	input := os.Getenv("DOB_NATIVE_INPUT")
++	output := os.Getenv("DOB_NATIVE_OUTPUT")
++	if core == "" || input == "" || output == "" {
++		t.Skip("native roundtrip environment required")
++	}
++	dir := t.TempDir()
++	if err := os.Symlink(core, filepath.Join(dir, xray.GetBinaryName())); err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv("XUI_BIN_FOLDER", dir)
++	setupConflictDB(t)
++	raw, err := os.ReadFile(input)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var fixture map[string]json.RawMessage
++	if json.Unmarshal(raw, &fixture) != nil {
++		t.Fatal("fixture")
++	}
++	var inbounds []struct {
++		Listen                   string
++		Port                     int
++		Settings, StreamSettings json.RawMessage
++	}
++	if json.Unmarshal(fixture["inbounds"], &inbounds) != nil || len(inbounds) != 1 {
++		t.Fatal("inbound fixture")
++	}
++	v := inbounds[0]
++	in := &model.Inbound{Tag: "dob-native-roundtrip", Enable: true, Listen: v.Listen, Port: v.Port, Protocol: model.VLESS, Settings: string(v.Settings), StreamSettings: string(v.StreamSettings)}
++	if _, _, err = (&InboundService{}).AddInbound(in); err != nil {
++		t.Fatal("native AddInbound failed", err)
++	}
++	cfg, err := (&XrayService{}).GetXrayConfig()
++	if err != nil {
++		t.Fatal(err)
++	}
++	found := false
++	for _, generated := range cfg.InboundConfigs {
++		if generated.Tag != in.Tag {
++			continue
++		}
++		b, e := json.Marshal([]any{generated})
++		if e != nil {
++			t.Fatal(e)
++		}
++		fixture["inbounds"] = b
++		found = true
++	}
++	if !found {
++		t.Fatal("generated inbound missing")
++	}
++	b, err := json.Marshal(fixture)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err = os.WriteFile(output, b, 0600); err != nil {
++		t.Fatal(err)
++	}
++}
+diff --git a/internal/web/service/inbound.go b/internal/web/service/inbound.go
+index af8d2a4..d6fbc0d 100644
+--- a/internal/web/service/inbound.go
++++ b/internal/web/service/inbound.go
+@@ -777,7 +777,7 @@ func validateFinalMaskRealityCombo(streamSettings string) error {
+ 	if err := json.Unmarshal([]byte(streamSettings), &stream); err != nil {
+ 		return nil
+ 	}
+-	if len(finalMaskRealityTcpMasks(stream)) == 0 {
++	if len(finalMaskRealityTcpMasks(stream)) == 0 || xray.SupportsRealityFragment(stream) {
+ 		return nil
+ 	}
+ 	return common.NewError("Finalmask is not supported with REALITY security — it crashes Xray-core on the first connection (see XTLS/Xray-core#6453). Remove the finalmask configuration or switch security to tls/none.")
+diff --git a/internal/web/service/xray.go b/internal/web/service/xray.go
+index c79e752..8f6b8cb 100644
+--- a/internal/web/service/xray.go
++++ b/internal/web/service/xray.go
+@@ -355,7 +355,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
+ 			// would still crash Xray on the next restart without this — drop
+ 			// it here too, the same way liftXhttpSessionIDKeys and
+ 			// HealShadowsocksClientMethods heal other legacy data in place.
+-			if len(finalMaskRealityTcpMasks(stream)) > 0 {
++			if len(finalMaskRealityTcpMasks(stream)) > 0 && !xray.SupportsRealityFragment(stream) {
+ 				logger.Warningf("Inbound %q: dropping finalmask, incompatible with REALITY security (crashes Xray-core, see XTLS/Xray-core#6453)", inbound.Tag)
+ 				delete(stream, "finalmask")
+ 			}
+diff --git a/internal/xray/dob_finalmask.go b/internal/xray/dob_finalmask.go
+new file mode 100644
+index 0000000..231b0ee
+--- /dev/null
++++ b/internal/xray/dob_finalmask.go
+@@ -0,0 +1,61 @@
++package xray
++
++import (
++	"context"
++	"encoding/json"
++	"os"
++	"os/exec"
++	"sync"
++	"time"
++)
++
++var dobCapabilityCache struct {
++	sync.Mutex
++	path      string
++	size      int64
++	mod       time.Time
++	checked   time.Time
++	supported bool
++}
++
++// SupportsRealityFragment keeps the stock guard for every unverified core or mask.
++func SupportsRealityFragment(stream map[string]any) bool {
++	if stream["security"] != "reality" {
++		return false
++	}
++	fm, ok := stream["finalmask"].(map[string]any)
++	if !ok {
++		return false
++	}
++	masks, ok := fm["tcp"].([]any)
++	if !ok || len(masks) == 0 {
++		return false
++	}
++	for _, v := range masks {
++		m, ok := v.(map[string]any)
++		if !ok || m["type"] != "fragment" {
++			return false
++		}
++	}
++	binary := GetBinaryPath()
++	stat, err := os.Stat(binary)
++	if err != nil || !stat.Mode().IsRegular() {
++		return false
++	}
++	dobCapabilityCache.Lock()
++	defer dobCapabilityCache.Unlock()
++	c := &dobCapabilityCache
++	if c.path == binary && c.size == stat.Size() && c.mod.Equal(stat.ModTime()) && time.Since(c.checked) < 5*time.Second {
++		return c.supported
++	}
++	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
++	defer cancel()
++	raw, err := exec.CommandContext(ctx, binary, "dob-capabilities").Output()
++	var caps struct {
++		Schema   int  `json:"schema"`
++		Fragment bool `json:"reality_finalmask_fragment"`
++	}
++	supported := err == nil && len(raw) < 4096 && json.Unmarshal(raw, &caps) == nil && caps.Schema == 1 && caps.Fragment
++	c.path, c.size, c.mod, c.checked, c.supported = binary, stat.Size(), stat.ModTime(), time.Now(), supported
++	return supported
++}

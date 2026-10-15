@@ -102,8 +102,12 @@ func Build(
 	if err := input.Transport.Validate(input.Transport.NetworkName() == "xhttp"); err != nil {
 		return Payload{}, err
 	}
-	if input.Transport.NetworkName() == "xhttp" && input.Flow != "" {
-		return Payload{}, ErrInvalidConfig
+	if input.Transport.NetworkName() == "xhttp" {
+		selected := input.Transport.ServerFlow()
+		if input.Flow != "" && input.Flow != selected {
+			return Payload{}, ErrInvalidConfig
+		}
+		input.Flow = selected
 	}
 	if input.Flow == "" && input.Transport.NetworkName() == "tcp" {
 		input.Flow =
@@ -131,6 +135,16 @@ func Build(
 			"fallbacks": []any{},
 		}
 
+	if input.Transport.NetworkName() == "xhttp" && input.Flow != "" {
+		decryption, encryption, err := transportprofile.EncryptionPair(input.PrivateKey, input.Remark)
+		if err != nil {
+			return Payload{}, err
+		}
+		settings["decryption"] = decryption
+		settings["encryption"] = encryption
+		settings["flow"] = input.Flow
+		delete(settings, "fallbacks")
+	}
 	realitySettings :=
 		map[string]any{
 			"show": false,
@@ -171,6 +185,13 @@ func Build(
 			},
 		}
 
+	if input.Transport.MaskOnServer() {
+		mask, err := input.Transport.TCPMask()
+		if err != nil {
+			return Payload{}, err
+		}
+		streamSettings["finalmask"] = mask
+	}
 	sniffing :=
 		map[string]any{
 			"enabled": true,

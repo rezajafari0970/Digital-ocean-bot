@@ -1,0 +1,15 @@
+{
+  "version": "dob-fm-0.1.0",
+  "core": {
+    "name": "xray",
+    "sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+    "gzip_sha256": "a8afb9ce60654b8ad9060391f136cea3077462bcca8170a404a7d1017cf6e847",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/5793567513420e536bdfca28464dbe831d13caa2/xray.gz"
+  },
+  "panel": {
+    "name": "x-ui",
+    "sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+    "gzip_sha256": "8d1f45b1d79f79c78038a53cf900282e562617a8ba656fa22dee666802ea460a",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/5793567513420e536bdfca28464dbe831d13caa2/x-ui.gz"
+  }
+}

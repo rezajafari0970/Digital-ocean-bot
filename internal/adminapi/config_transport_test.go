@@ -30,7 +30,7 @@ func TestTransportPolicyPinsAndConcurrency(t *testing.T) {
 		t.Fatal("omitted network accepted")
 	}
 	wrong := transportprofile.Preset()
-	wrong.Host = "example.org"
+	wrong.Host = "example.org/path"
 	if save(transportprofile.Policy{Revision: initial.Revision, Config: wrong}) != 400 {
 		t.Fatal("wrong host accepted")
 	}
@@ -105,7 +105,10 @@ func TestTransportPolicyPinsAndConcurrency(t *testing.T) {
 	if _, e = db.Exec(`INSERT INTO reality_listener_profiles(panel_id,managed_key,config,path,policy_revision) SELECT panel_id,'duplicate',config,path,policy_revision FROM reality_listener_profiles WHERE panel_id=$1 AND managed_key='shared'`, panel); e == nil {
 		t.Fatal("duplicate path persisted")
 	}
-	for _, mutate := range []func(*transportprofile.Config){func(c *transportprofile.Config) { c.FinalMaskEnabled = true }, func(c *transportprofile.Config) { c.BrowserDialer = "WebView" }, func(c *transportprofile.Config) { c.Flow = "xtls-rprx-vision" }} {
+	for _, mutate := range []func(*transportprofile.Config){func(c *transportprofile.Config) {
+		c.FinalMaskEnabled = true
+		c.FinalMask = json.RawMessage(`{"tcp":[]}`)
+	}, func(c *transportprofile.Config) { c.BrowserDialer = "invalid" }, func(c *transportprofile.Config) { c.Flow = "udp443" }} {
 		c := transportprofile.Preset()
 		mutate(&c)
 		if save(transportprofile.Policy{Revision: 3, Config: c}) != 400 {

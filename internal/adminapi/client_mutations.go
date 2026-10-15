@@ -97,13 +97,21 @@ func (s *Server) clientMutations(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 409, map[string]string{"error": "unsupported_inbound_transport"})
 			return
 		}
-		flow := transportprofile.Flow(network)
+		flow, err := transportprofile.PlannedFlow(r.Context(), s.DB, req.PanelID, req.InboundID, network)
+		if err != nil {
+			writeJSON(w, 409, map[string]string{"error": "inbound_flow_unavailable"})
+			return
+		}
 		if req.Flow != nil {
-			flow = *req.Flow
-			if network == "xhttp" && flow != "" {
-				writeJSON(w, 400, map[string]string{"error": "xhttp_requires_empty_flow"})
+			requested := *req.Flow
+			if requested == transportprofile.VisionUDP443 {
+				requested = transportprofile.Vision
+			}
+			if network == "xhttp" && requested != flow {
+				writeJSON(w, 400, map[string]string{"error": "flow_differs_from_listener"})
 				return
 			}
+			flow = requested
 		}
 		payload = map[string]any{"Client": sanaei.Client{
 			ID: req.ClientID, Email: req.Email, Enable: enable,

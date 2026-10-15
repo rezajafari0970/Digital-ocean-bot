@@ -11,53 +11,67 @@ import (
 // Transport is immutable for pinned listeners; new policy revisions never
 // reinterpret queued payloads or convert an existing listener.
 func InboundFlow(ctx context.Context, rt *sanaei.PanelRuntime, id int64) (string, error) {
+	flow, _, err := inboundContract(ctx, rt, id)
+	return flow, err
+}
+func inboundContract(ctx context.Context, rt *sanaei.PanelRuntime, id int64) (string, string, error) {
 	if rt == nil || rt.Session == nil {
-		return "", ErrInvalidRequest
+		return "", "", ErrInvalidRequest
 	}
 	raws, e := rt.Session.Snapshot(ctx)
 	if e != nil {
-		return "", e
+		return "", "", e
 	}
 	found := false
 	flow := ""
+	network := ""
 	for _, raw := range raws {
 		var in struct {
+			Settings json.RawMessage
 			ID       int64
 			Enable   bool
 			Protocol string
 			Stream   json.RawMessage `json:"streamSettings"`
 		}
 		if json.Unmarshal(raw, &in) != nil {
-			return "", ErrVerify
+			return "", "", ErrVerify
 		}
 		if in.ID != id {
 			continue
 		}
 		if found || !in.Enable || in.Protocol != "vless" {
-			return "", ErrInboundMissing
+			return "", "", ErrInboundMissing
 		}
 		found = true
 		var st struct{ Network, Security string }
 		if json.Unmarshal(in.Stream, &st) != nil || st.Security != "reality" || !transportprofile.Supported(st.Network) {
-			return "", ErrClientConflict
+			return "", "", ErrClientConflict
 		}
-		flow = transportprofile.Flow(st.Network)
+		network = st.Network
+		var settings map[string]any
+		if json.Unmarshal(in.Settings, &settings) != nil {
+			return "", "", ErrVerify
+		}
+		flow, e = transportprofile.InboundServerFlow(network, settings)
+		if e != nil {
+			return "", "", ErrClientConflict
+		}
 	}
 	if !found {
-		return "", ErrInboundMissing
+		return "", "", ErrInboundMissing
 	}
-	return flow, nil
+	return flow, network, nil
 }
 func validateJobTransport(ctx context.Context, rt *sanaei.PanelRuntime, job Job) error {
 	if job.Kind != KindCreate && job.Kind != KindBulkCreate && job.Kind != KindUpdate {
 		return nil
 	}
 	rt.Session.Invalidate()
-	flow, e := InboundFlow(ctx, rt, job.InboundID)
+	flow, network, e := inboundContract(ctx, rt, job.InboundID)
 	if e != nil {
 		return e
 	}
-	if flow != "" {
+	if network == "tcp" {
 		return nil
 	} // Existing TCP semantics are unchanged.
 	switch job.Kind {
@@ -66,7 +80,7 @@ func validateJobTransport(ctx context.Context, rt *sanaei.PanelRuntime, job Job)
 		if e != nil {
 			return e
 		}
-		if c.Flow != "" {
+		if c.Flow != flow {
 			return ErrClientConflict
 		}
 	case KindBulkCreate:
@@ -75,7 +89,7 @@ func validateJobTransport(ctx context.Context, rt *sanaei.PanelRuntime, job Job)
 			return ErrInvalidRequest
 		}
 		for _, c := range p.Clients {
-			if c.Flow != "" {
+			if c.Flow != flow {
 				return ErrClientConflict
 			}
 		}
@@ -84,7 +98,7 @@ func validateJobTransport(ctx context.Context, rt *sanaei.PanelRuntime, job Job)
 		if e != nil {
 			return e
 		}
-		if p.Flow != nil && *p.Flow != "" {
+		if p.Flow != nil && *p.Flow != flow {
 			return ErrClientConflict
 		}
 	}

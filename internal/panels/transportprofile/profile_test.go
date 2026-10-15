@@ -34,17 +34,12 @@ func TestPathLengthUniquenessAndBoundaries(t *testing.T) {
 		}
 	}
 }
-func TestUnsupportedOptionsDoNotPretendToBeActive(t *testing.T) {
+func TestInvalidOptionsAndLegacyRequestedPreset(t *testing.T) {
 	base := transportprofile.Preset()
 	for _, mutate := range []func(*transportprofile.Config){
-		func(c *transportprofile.Config) { c.FinalMaskEnabled = true },
-		func(c *transportprofile.Config) { c.BrowserDialer = "WebView" },
-		func(c *transportprofile.Config) { c.Flow = "xtls-rprx-vision" },
-		func(c *transportprofile.Config) { c.Mode = "packet-up" },
-		func(c *transportprofile.Config) { c.Host = "example.org" },
 		func(c *transportprofile.Config) { c.Host = "apart.com\nx:test" },
-		func(c *transportprofile.Config) { c.Extra = json.RawMessage("{}") },
 		func(c *transportprofile.Config) {
+			c.FinalMaskEnabled = true
 			c.FinalMask = append(append([]byte("{\"finalmask\":"), c.FinalMask...), '}')
 		},
 	} {

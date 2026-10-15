@@ -13,20 +13,25 @@ func (s *Server) getConfigTransport(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, 200, map[string]any{"policy": p, "preset": transportprofile.Preset(), "max_path_bytes": transportprofile.MaxPathBytes, "scope": "New physical listeners only. Existing listeners retain their saved transport and path. Direct and Residential clients on one listener share its path.", "finalmask_status": transportprofile.FinalMaskStatus, "compatibility": "XHTTP Reality stream-up uses native dialing and empty flow. WebView and Vision are not supported by this preset."})
+	writeJSON(w, 200, map[string]any{"policy": p, "preset": transportprofile.Recommended(), "max_path_bytes": transportprofile.MaxPathBytes, "scope": "New physical listeners only. Existing listeners retain their saved transport and path. Direct and Residential clients on one listener share its path.", "finalmask_status": transportprofile.FinalMaskStatus, "compatibility": "Vision and Vision-udp443 use VLESS Encryption on XHTTP. Browser Dialer is a saved client preference; REALITY uses native dialing and VLESS links cannot enable the app setting. TCP Fragment is active only after core capability verification."})
 }
 func (s *Server) putConfigTransport(w http.ResponseWriter, r *http.Request) {
 	var p transportprofile.Policy
-	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16384))
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 65536))
 	dec.DisallowUnknownFields()
 	if dec.Decode(&p) != nil || dec.Decode(new(any)) != io.EOF || p.Revision < 1 {
 		writeJSON(w, 400, map[string]string{"error": "invalid_transport_request"})
 		return
 	}
-	if p.Config.Network == "" || p.Config.Validate(false) != nil {
-		writeJSON(w, 400, map[string]string{"error": "invalid_transport", "detail": "Use TCP or XHTTP stream-up with a domain Host and path size 256–4096. XHTTP requires empty Flow, disabled Browser Dialer and disabled FinalMask. Preset JSON is preserved unchanged."})
+	if p.Config.Network == "" {
+		writeJSON(w, 400, map[string]string{"error": "invalid_transport", "detail": "Select an explicit network."})
 		return
 	}
+	if err := p.Config.Validate(false); err != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_transport", "detail": err.Error()})
+		return
+	}
+
 	raw, e := json.Marshal(p.Config)
 	if e != nil {
 		writeJSON(w, 400, errorBody())

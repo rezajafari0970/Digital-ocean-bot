@@ -4,8 +4,22 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"sync/atomic"
 	"time"
 )
+
+type configLockKey struct{}
+type configLockOwnership struct {
+	db     *sql.DB
+	panel  string
+	active atomic.Bool
+}
+
+// ConfigLockHeld verifies the caller still owns the structural mutation lock.
+func ConfigLockHeld(ctx context.Context, db *sql.DB, panel string) bool {
+	held, ok := ctx.Value(configLockKey{}).(*configLockOwnership)
+	return ok && held.db == db && held.panel == panel && held.active.Load()
+}
 
 // WithConfigLock serializes structural mutations across API and worker processes.
 // Callers take this lock before the shared runtime mutation lock.
@@ -27,5 +41,8 @@ func WithConfigLock(ctx context.Context, db *sql.DB, panel string, fn func(conte
 			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
 		}
 	}()
-	return fn(ctx)
+	held := &configLockOwnership{db: db, panel: panel}
+	held.active.Store(true)
+	defer held.active.Store(false)
+	return fn(context.WithValue(ctx, configLockKey{}, held))
 }

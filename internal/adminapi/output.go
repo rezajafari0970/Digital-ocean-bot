@@ -133,6 +133,26 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
 		return nil, false
 	}
+	pins := map[string]transportprofile.Config{}
+	pinRows, pinErr := s.DB.QueryContext(ctx, "SELECT managed_key,config FROM reality_listener_profiles WHERE panel_id=$1", p.ID)
+	if pinErr != nil {
+		return nil, false
+	}
+	for pinRows.Next() {
+		var key string
+		var raw []byte
+		var c transportprofile.Config
+		if pinRows.Scan(&key, &raw) != nil || json.Unmarshal(raw, &c) != nil {
+			pinRows.Close()
+			return nil, false
+		}
+		pins[key] = c
+	}
+	pinErr = pinRows.Err()
+	pinRows.Close()
+	if pinErr != nil {
+		return nil, false
+	}
 	records := make([]outputRecord, 0)
 	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {
@@ -166,6 +186,23 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 		transport, err := transportprofile.FromStream(stream)
 		if err != nil {
+			exportErrors++
+			continue
+		}
+		if pin, ok := pins[in.Remark]; ok {
+			transport, err = transportprofile.ApplyPinnedClientOptions(transport, pin)
+			if err != nil {
+				exportErrors++
+				continue
+			}
+		}
+		decryption, _ := settings["decryption"].(string)
+		encryption, err := transportprofile.ClientEncryption(decryption)
+		if err != nil {
+			exportErrors++
+			continue
+		}
+		if advertised, ok := settings["encryption"].(string); ok && advertised != "" && advertised != encryption {
 			exportErrors++
 			continue
 		}
@@ -218,7 +255,12 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 				remark += "-" + email
 			}
 			flow, _ := cl["flow"].(string)
-			link, e := export.VLESSRealityURI(export.VLESSReality{Transport: transport, UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Flow: flow, Remark: remark})
+			flow, e = transportprofile.ObservedClientFlow(transport, flow)
+			if e != nil {
+				exportErrors++
+				continue
+			}
+			link, e := export.VLESSRealityURI(export.VLESSReality{Transport: transport, UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Encryption: encryption, Flow: flow, Remark: remark})
 			if e == nil {
 				visibleUntil := outputVisibleUntil(cl["expiryTime"])
 				records = append(records, outputRecord{ClientID: id, URI: link, VisibleUntil: visibleUntil})

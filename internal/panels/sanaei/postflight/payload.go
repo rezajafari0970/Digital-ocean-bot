@@ -45,5 +45,5 @@ func ValidatePayload(in Inbound, remoteID int64, p realityconfig.Payload) error 
 	if err != nil {
 		return err
 	}
-	return Validate(in, Expected{Transport: transport, RemoteID: remoteID, Remark: p.Remark, Port: p.Port, UUID: fmt.Sprint(c["id"]), Flow: fmt.Sprint(c["flow"]), Target: fmt.Sprint(rs["dest"]), ServerNames: names, PrivateKey: fmt.Sprint(rs["privateKey"]), ShortID: ids[0], Fingerprint: fmt.Sprint(rs["fingerprint"]), Sniffing: p.Sniffing})
+	return Validate(in, Expected{Transport: transport, RemoteID: remoteID, Remark: p.Remark, Port: p.Port, UUID: fmt.Sprint(c["id"]), Flow: fmt.Sprint(c["flow"]), Decryption: fmt.Sprint(s["decryption"]), Encryption: fmt.Sprint(s["encryption"]), Target: fmt.Sprint(rs["dest"]), ServerNames: names, PrivateKey: fmt.Sprint(rs["privateKey"]), ShortID: ids[0], Fingerprint: fmt.Sprint(rs["fingerprint"]), Sniffing: p.Sniffing})
 }

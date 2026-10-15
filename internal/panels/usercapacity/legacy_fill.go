@@ -88,6 +88,10 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 				return mutated, err
 			}
 		}
+		flow, err := transportprofile.InboundServerFlow(rec.Transport, st)
+		if err != nil {
+			return mutated, err
+		}
 		owned := make([]ownedClient, 0, n)
 		expiry := int64(0)
 		if life > 0 {
@@ -99,7 +103,7 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 				return mutated, e
 			}
 			email := ownershipEmail(generation.Marker, id)
-			clients = append(clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: transportprofile.Flow(rec.Transport)})
+			clients = append(clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: flow})
 			owned = append(owned, ownedClient{ID: id, Email: email})
 		}
 		if err = s.planOwnedClients(ctx, generation.ID, owned); err != nil {

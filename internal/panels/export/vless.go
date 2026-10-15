@@ -21,6 +21,7 @@ type VLESSReality struct {
 	PublicKey   string
 	ShortID     string
 	Fingerprint string
+	Encryption  string
 	Flow        string
 	Remark      string
 }
@@ -40,14 +41,30 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 	if err := x.Transport.Validate(x.Transport.NetworkName() == "xhttp"); err != nil {
 		return "", err
 	}
-	if x.Transport.NetworkName() == "xhttp" && x.Flow != "" {
-		return "", ErrInvalidVLESS
+	if x.Transport.NetworkName() == "xhttp" {
+		if x.Flow != x.Transport.Flow {
+			return "", ErrInvalidVLESS
+		}
+		if x.Flow != "" {
+			if x.Flow != transportprofile.Vision && x.Flow != transportprofile.VisionUDP443 {
+				return "", ErrInvalidVLESS
+			}
+			if !transportprofile.ValidClientEncryption(x.Encryption) {
+				return "", ErrInvalidVLESS
+			}
+		}
 	}
 	if x.Transport.NetworkName() == "tcp" && (x.Flow == "" || x.Flow == "xtls-rprx-vision") {
 		x.Flow = "xtls-rprx-vision-udp443"
 	}
 	q := url.Values{}
-	q.Set("encryption", "none")
+	if x.Encryption == "" {
+		x.Encryption = "none"
+	}
+	if x.Encryption != "none" && !transportprofile.ValidClientEncryption(x.Encryption) {
+		return "", ErrInvalidVLESS
+	}
+	q.Set("encryption", x.Encryption)
 	if x.Flow != "" {
 		q.Set("flow", x.Flow)
 	}
@@ -62,6 +79,13 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 		q.Set("host", x.Transport.Host)
 		q.Set("path", x.Transport.Path)
 		q.Set("extra", string(x.Transport.Extra))
+		if x.Transport.MaskOnClient() {
+			mask, err := x.Transport.TCPMask()
+			if err != nil {
+				return "", err
+			}
+			q.Set("fm", string(mask))
+		}
 	}
 	hostport := net.JoinHostPort(x.Host, strconv.Itoa(x.Port))
 	return fmt.Sprintf("vless://%s@%s?%s#%s", url.PathEscape(x.UUID), hostport, q.Encode(), url.QueryEscape(x.Remark)), nil
