@@ -1,11 +1,34 @@
-## Verified release checkpoint — 2026-10-15T01:59:13.186974+00:00
+## Current continuation checkpoint — 2026-10-15T02:35:06.547490+00:00
 
-This entry supersedes earlier publication-pending progress. Core5acb57e and utility correction1bf2114 produced public **473e99193198aceb71dbd319f4c8d4fdcdbdfdc2**, published to main/stable and installed sequentially on secondary then primary. Both schema176, three services active, running binary hashes matching manifests, readiness5/5, account/environment identity preserved. All IP lifecycle policy/funding/operation/allocation/endpoint/lease counts are0. No provider IP purchase/release, guest-network mutation or additional-IP config publication occurred.
-Exact isolated full Go/PostgreSQL/Chromium suite, provider race, vet and actual bounded API review PASS. Existing publisher secret scan, exported manifest, unprivileged gates and Ubuntu24 install/update PASS. GitHub main/stable runs38668218198/38668218110 succeeded. UpCloud utility/private inventory rows are excluded from public capacity; unknown access is still rejected. UpCloud has no live account and was fixture-tested only.
-Independent pure provider wire contracts are checkpointed at0553853 on feat/ip-wire-20261015. Four exact hashes match ip-wire-r4 PASS; race/vet and recorded fuzz185891 executions PASS. This is request/response preparation only: no real send, ownership or release authority. The concurrent lane was preserved; do not reset its source. Canonical and fix/ip-utility branch include the accepted correction; the shared feat/ip-lifecycle worktree retains uncommitted documentation and duplicate utility edits. Integrate by normal merge with evidence, never by discarding changes.
-API task ledger: 14 responses (13 completed, 1 incomplete), 306866 input + 27901 output = 334767 tokens; cached 0, cache-write 306824. Since this continuation's first receipt snapshot:5 new responses/45661 tokens, including the2738-token utility review and42923 across the concurrent wire reviews. Actual billed and estimated monetary amounts are unavailable.
-Full IP lifecycle remains incomplete. Settings/journal/ownership/protection core are deployed disabled; capacity/pricing verification is partial; prefix/lifetime/lease logic and wire contracts are offline verified. Durable actual-send consumption, runtime account scheduling/reconciliation, guest/listener/routing/firewall/protocol+user-network IPv6 proof, actual Output/renewal/migration/rotation/release remain unaccepted. Canary is blocked until those integrations and explicit operational target/count/cost/impact/prefix approval; UpCloud additionally lacks an account. Rollout is not started. See stage_status in the existing job for every stage.
-Next: Continue verified pure contracts in /root/projects/dob-ip-wire-20261015 (0553853), integrate exact plan/evidence with durable actual-send consumption, per-account transport and restart reconciliation; then guest/protocol and output/renewal/release. Reconcile canonical utility correction by normal merge, preserving all uncommitted shared work. No paid/disruptive authority.
+Offline consumption/result replay source is committed on feat/ip-send-20261015 at 81723381e58c3caccebc6c83cf9d049c00bd747f. Continue that exact worktree (/root/projects/dob-ip-send-20261015); canonical product source remains the accepted utility release. This canonical commit updates handoff/job documentation only. Public473e991/schema176 stays installed on both hosts. Full regression/race/API review passed for the offline slice; live account adapter remains unimplemented and not accepted. No new public installer release, schema177 deployment or paid mutation was performed.
+
+## Offline wire consumption verified — 2026-10-15T02:35:04.216160+00:00
+
+Implemented and verified exact approved wire binding, durable one-shot entitlement consumption, shared non-replayable handle, bounded HTTP primitive, immutable sanitized result journal, and independent account receipt/cooldown replay. Schema177 exists only in source/test databases; both live hosts remain473e991/schema176 (fresh read-only acceptance02:27Z,3 active services,readiness5/5,zero lifecycle obligations).
+
+Evidence: send-code-r1 API PASS (offline scope), send-race-r2 PASS, send-full-r1 PASS (all packages, isolated PostgreSQL/browser), vet/diff PASS, exact reviewed hashes MATCH. Initial focused run failed only the localhost TLS hostname fixture; corrected fixture passed race and full suite. Four independent design roles ran through the project API. New5 responses used34148 tokens; cumulative 19 responses (18 completed,1 incomplete), 334569 input + 34346 output = 368915; cached 0, cache-write 332501. Money remains unavailable, not estimated.
+
+**Live account sender is NOT complete.** Preflight is not an atomic network fence. Production adapter must bind retained credentials and account transport at the actual request boundary, acquire route guard once (avoid recursive lock deadlock), and resolve generation safety across database-session loss. No production route/worker calls Run/Exchange. No paid allocation, attachment/release, guest change or new-IP output was executed. Provider observation reconciliation (DO IPv4 requires correlated readback), scheduler, guest/protocol/output and rotation remain. This source-only checkpoint does not claim publication/deployment of schema177 or lifecycle completion.
+
+Continue at /root/projects/dob-ip-send-20261015, branch feat/ip-send-20261015, using the existing ip-lifecycle-20261015 job and its complete stage_status ledger. Original feature/utility/wire worktrees were preserved. Existing bootstrap remains blocked by its canonical named-branch assumption; no READY/mastery claim is made. Next: Implement and independently verify the production account sender: retained credential identity, single route guard (no recursive acquisition), ordered fences, DB-session-loss/generation barrier, request-boundary isolation. Then read-only provider reconciliation (including DO IPv4 correlated GET), scheduler, attachment/release, guest/protocol/output/rotation. No paid canary authority.
+
+## Live status confirmed — 2026-10-15T01:59:40.421704+00:00
+
+Both hosts now run public473e99193198aceb71dbd319f4c8d4fdcdbdfdc2 (core plus reviewed UpCloud utility correction), schema176. Both GitHub Actions passed. Independent read-only acceptance confirmed3 active services,5/5 readiness, running hash matches, account/environment preservation and all six lifecycle counts zero. Wire source0553853 remains independently committed on feat/ip-wire-20261015 with API PASS/race/fuzz/vet; it has no operational sender. Stage ledger uses the single stage_status array in the existing job.
+API task cumulative:14 responses(13 completed,1 incomplete),306866 input+27901 output=334767 total;cached0,cache-write306824. Actual billed and estimated money remain unknown. These totals include the utility review and four pure-wire review iterations. No IP purchase/release, guest network change or additional-IP configuration. Next implementation is durable actual-send consumption and provider reconciliation, followed by guest/protocol/output/renewal/rotation. Operational canary remains unapproved.
+
+## Wire contracts verified; operational execution remains pending — 2026-10-15T01:54:48.527062+00:00
+
+Pure allocation wire contracts committed and pushed at0553853f82cc256ec152a5f0d68fe77d14fc97ee (feat/ip-wire-20261015). Actual API review ip-wire-r4 PASS resolved B1/B2/B3; exact race,185891 fuzz executions and vet PASS. No HTTP sender or production caller, no ownership/release authority from decoded replies. Current installed core remains15935e9/schema176 on both hosts. Full21-stage ledger and API receipts are in the existing job JSON. Next: actual-send consumption/account transport/reconciliation, then guest/protocol/output/renewal and rotation.
+
+## Current verified release and next stage — 2026-10-15T01:53:27.755510+00:00
+
+Core source5acb57e produced public15935e9. Both live hosts are now15935e9/schema176, 3 active services and readiness5/5; executable manifests, identity/env preservation and zero operations/allocations/endpoints/leases verified. No additional IP purchase/release, guest network change or new-IP config. This verifies the disabled control-plane core only. Source/public/installation tests and both GitHub Actions passed.
+The same job now includes a complete stage ledger. Pure provider allocation wire contracts are isolated at /root/projects/dob-ip-wire-20261015 to avoid mixing in-progress contracts with release bookkeeping; existing Brain/job remain authority. No HTTP sender/worker/output caller exists. API review is still in progress for these contracts; corrected issues preserve untrusted resource hints in UNKNOWN responses and reject JSON/enum ambiguity. Remaining offline execution/network/output integration is authorized; canary needs concrete operational approval and UpCloud access.
+
+## Lifecycle core source approved — 2026-10-15T01:39:17.948753+00:00
+
+Actual lifecycle-r5 API review PASS for the composed offline core; all 39 reviewed source hashes unchanged. Exact full project PostgreSQL/browser suite, focused race tests and vet PASS. Publication and deployment are next through the existing gated pipeline. Runtime remains ab92f7f/schema175 until acceptance. No provider IP mutation or guest network change. This is an independent disabled control-plane release, not a complete rotation implementation. Current phase/details/API totals are in docs/development-jobs/ip-lifecycle-20261015.json. Continue remaining provider/send, scheduler/recovery, guest/protocol and output/renewal/release integrations after this release; operational canary remains unapproved.
 
 ## Continuation release acceptance — 2026-10-15
 
@@ -146,3 +169,48 @@ Desired v4/v6 counts, per-run count, concurrency, allocation interval/jitter, li
 - Final persisted manual inventory at23:52Z: all four configured accounts OBSERVED; DO reserved IPv4 quota10/used0; DO reserved IPv6 quota unknown/used0; Linode public IPv4 used9 and SLAAC IPv6 used9, routed IPv6 used0, quotas unknown; both Vultr reserved families used0 with unknown quotas. Earlier failed Vultr read recovered on this later observation. These are read results, not allocation or attachment proofs.
 - Further operational implementation remains necessary and authorized offline. Mutation/approval/ownership journal, leases/native-deletion fences, provider writes, guest network, protocol health, new-IP config publication, rotation and release are NOT implemented in this release. Do not use current read receipts as a mutation journal.
 - Paid/disruptive canary remains blocked by unset operational values, selected targets/cost/impact and explicit approval. UpCloud also lacks a configured account. No completion time estimated.
+
+### Wire consumption checkpoint evidence
+
+Risk router: {"schema": 1, "profile": "critical", "score": 46, "reasons": ["auth", "credential", "deadlock", "generation", "high_risk_path:internal/providers/ipwire/", "lifecycle", "medium_risk_path:internal/app/ip_send.go", "migration_path", "production", "provider", "proxy", "runtime", "secret", "transaction"]}
+
+Crash boundaries: before acknowledged COMMIT → no handle; after consumption/lost handle → UNKNOWN without resend; response without durable result → UNKNOWN; durable result without receipt → replay receipt only; completed receipt → idempotent replay. UNKNOWN retains all funding/capacity obligations.
+
+Go transport contract reference: https://go.dev/src/net/http/transport.go . The implementation supplies no GetBody or idempotency header and performs one RoundTrip invocation; the supplied transport must itself be trusted and nonretrying.
+
+| Stage | Status | Detail |
+|---|---|---|
+| baseline_brain | VERIFIED | Existing Brain, worktree, GitHub, schema175 before and176 after, live identities and processes reconciled. |
+| provider_feasibility | IN_PROGRESS | Per-account quote/quota/interface evidence incomplete; operational settings unset; UpCloud absent. |
+| read_only_inventory | VERIFIED | DO/Linode/Vultr account reads verified; UpCloud utility fix deployed, no live UpCloud account. |
+| policy_funding_settings | VERIFIED | Independent IPv4/IPv6 controls and account funding settings deployed disabled, with no paid defaults. |
+| capacity_reservations | VERIFIED | Offline core shared-scope capacity/funding reservation guards tested; no live allocation or evidence writer activation. |
+| mutation_journal | VERIFIED | Deployed core journal; exact wire consumption/result replay now verified offline on schema177, not deployed. |
+| normalize_prefix_history | VERIFIED | Core normalization/exact dedupe/explicit prefix scope/history and one endpoint per owned allocation tested; no real subnet acquired. |
+| allocation_wire_contracts | VERIFIED | Four provider pure contracts merged; bounded one-call HTTP primitive verified with fake/localhost transport. No production account caller. |
+| independent_mutation_scheduler | NOT_STARTED | Worker not wired. Bounded account result-replay recovery now verified offline; provider GET reconciliation remains. |
+| attachment_cleanup | NOT_STARTED | Actual attach/detach/release authority and send adapters remain. Native compute deletion/account purge guards exist. |
+| endpoint_lifetime_rotation | IN_PROGRESS | Stored selection/lifetime and lease/drain/retire library tested; automatic replacement/migration/rotation not wired. |
+| guest_network | NOT_STARTED | Versioned network snapshots/apply/restore, listener/routing/firewall execution remain. |
+| protocol_ipv6_fallback | NOT_STARTED | Real protocol reachability and user-network IPv6/fallback probes remain. |
+| configuration_output | NOT_STARTED | Actual extra-IP output, existing client renewal and migration integration remain. |
+| panel | IN_PROGRESS | Inventory, quota/provenance, policies/funding and journal views deployed; no real lifecycle resources to display yet. |
+| api_review | VERIFIED | Core r5, utility, pure-wire r4 and send-code-r1 PASS in their stated scopes; four design roles identify unaccepted production runtime blockers. |
+| core_tests | VERIFIED | Current send slice: all-package isolated PostgreSQL/browser full regression, focused race/fault, vet and exact review hashes PASS. |
+| core_publication | VERIFIED | Existing release473e991 published. New consumption slice source checkpoint only; publisher gates not run for it. |
+| core_deployment | VERIFIED | Both hosts473e991/schema176 with core plus utility fix,3 active services/readiness5/5, identities/env preserved, no IP mutation records. |
+| ip_canary | BLOCKED | Requires finished execution/proof/output integration plus explicit lifetime/spacing/count/budget/targets/prefix policy and concrete cost/impact approval. UpCloud account missing. |
+| ip_rollout | NOT_STARTED | Depends on independent provider canary evidence and approved operational limits. |
+| upcloud_utility_correction | VERIFIED | Official utility/private entries excluded from public count; source1bf2114/public473e991, full/race/vet/API/publisher/Actions and both-host acceptance PASS. No live UpCloud account. |
+| durable_wire_consumption | VERIFIED_OFFLINE | Exact approved wire digest, atomic entitlement consumption, one-use handles and append-only sanitized results; schema177 not deployed. |
+| account_result_replay | VERIFIED_OFFLINE | Per-account restart replays only durable receipts/cooldown; no request replay or ownership inference. |
+| production_account_sender | BLOCKED | Not implemented. Must resolve single route-lock ownership, retained credential binding and generation barriers across DB session loss. |
+| wire_slice_release | NOT_STARTED | Source checkpoint only. No publisher/deployment or paid provider calls for new slice. |
+
+New API receipts (raw evidence retained in existing backup directory):
+
+- send-code-r1: resp_098bc92dc89260d3006ad0399e1c4c87d19dc6b7e067022a3d, gpt-6-astra, completed, 27029 tokens.
+- send-plan-adversary: resp_0d7d1d0fb87d0729006ad0378a8a7087d19b67b90077177a59, gpt-6-astra, completed, 1541 tokens.
+- send-plan-architect: resp_0fb1e8e788a4144e006ad0378a812487d1b9d968f78fc6b316, gpt-6-astra, completed, 1945 tokens.
+- send-plan-reviewer: resp_0e78f9e5846c2d0a006ad0378a77f887d1a210a63323a9d060, gpt-6-sol, completed, 2088 tokens.
+- send-plan-test_designer: resp_0acccf2fdb756261006ad0378a875487d188ad1b27ceb09165, gpt-6-sol, completed, 1545 tokens.
