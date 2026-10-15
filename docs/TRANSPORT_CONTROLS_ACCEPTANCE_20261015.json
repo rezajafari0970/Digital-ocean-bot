@@ -1,0 +1,309 @@
+{
+  "at": "2026-10-15T18:39:22.011678+00:00",
+  "product_source": "3a933ec6a26c9876c7edf03845852ea6802ba726",
+  "public_revision": "26dd5720647423369dd16280f85ce49dce84a1ac",
+  "schema": "000179_output_uri_digest",
+  "primary": {
+    "at": "2026-10-15T18:38:18.336905+00:00",
+    "commit": "26dd5720647423369dd16280f85ce49dce84a1ac",
+    "source": "26dd5720647423369dd16280f85ce49dce84a1ac",
+    "schema": "000179_output_uri_digest",
+    "accounts": 4,
+    "account_identity_hash": "46c86858fe56f797708a5eaa42ac609c",
+    "environment_hash": "3b75ce242c5583f03da9e5f37bb79242080002d2fe46f788cf1887d52dc6c61d",
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T18:38:18.475918261Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 41,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "apart.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 4
+  },
+  "secondary": {
+    "at": "2026-10-15T18:32:06.112381+00:00",
+    "commit": "26dd5720647423369dd16280f85ce49dce84a1ac",
+    "source": "26dd5720647423369dd16280f85ce49dce84a1ac",
+    "schema": "000179_output_uri_digest",
+    "accounts": 0,
+    "account_identity_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "environment_hash": "956b57c08a0195f8650eefbb2ce52b8b7331e86bb13d591cb7a5752a70722855",
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T18:32:06.218619908Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 0,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "apart.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 3
+  },
+  "automatic_native_runtime": {
+    "panel_version": "3.8.5-dob-fm.1",
+    "core_capabilities": {
+      "schema": 1,
+      "reality_finalmask_fragment": true,
+      "xhttp_vision_encryption": true
+    },
+    "core_sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+    "panel_sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+    "installation_phase": "applied",
+    "inbounds": [
+      {
+        "port": 443,
+        "network": "xhttp",
+        "finalmask_tcp": true,
+        "host": "apart.com",
+        "path_bytes": 4096,
+        "flows": [
+          "xtls-rprx-vision"
+        ],
+        "vless_encryption": true,
+        "clients": 2
+      }
+    ],
+    "at": "2026-10-15T18:36:53.425752+00:00",
+    "droplet_id": "663dda79-6f4a-4d2e-8252-9d134761eb34"
+  },
+  "output": {
+    "at": "2026-10-15T18:37:35.619892+00:00",
+    "api": {
+      "ALL": {
+        "counts": {
+          "xhttp": 153,
+          "xhttp_udp443_finalmask": 3,
+          "tcp": 5
+        },
+        "new_paths": 1,
+        "invalid": 0
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 31,
+          "tcp": 1,
+          "xhttp_udp443_finalmask": 1
+        },
+        "new_paths": 1,
+        "invalid": 0
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 91,
+          "tcp": 3,
+          "xhttp_udp443_finalmask": 1
+        },
+        "new_paths": 1,
+        "invalid": 0
+      }
+    },
+    "shares": {
+      "ALL": {
+        "counts": {
+          "xhttp": 153,
+          "xhttp_udp443_finalmask": 3,
+          "tcp": 5
+        },
+        "new_paths": 1,
+        "invalid": 0
+      },
+      "DIRECT": {
+        "counts": {
+          "tcp": 1,
+          "xhttp": 31,
+          "xhttp_udp443_finalmask": 1
+        },
+        "new_paths": 1,
+        "invalid": 0
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 91,
+          "tcp": 3,
+          "xhttp_udp443_finalmask": 1
+        },
+        "new_paths": 1,
+        "invalid": 0
+      }
+    },
+    "listeners": [
+      {
+        "network": "xhttp",
+        "flow": "xtls-rprx-vision-udp443",
+        "finalmask": "true",
+        "count": 1
+      },
+      {
+        "network": "tcp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 1
+      },
+      {
+        "network": "xhttp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 40
+      }
+    ],
+    "fleet": [
+      {
+        "state": "DELETED",
+        "count": 1158
+      },
+      {
+        "state": "PROVISIONING",
+        "count": 1
+      },
+      {
+        "state": "EXPIRING",
+        "count": 2
+      },
+      {
+        "state": "READY",
+        "count": 36
+      }
+    ],
+    "new_output_verified": true
+  },
+  "github_actions": [
+    {
+      "id": 38785476763,
+      "head_branch": "stable",
+      "head_sha": "26dd5720647423369dd16280f85ce49dce84a1ac",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38785476763"
+    },
+    {
+      "id": 38785475702,
+      "head_branch": "main",
+      "head_sha": "26dd5720647423369dd16280f85ce49dce84a1ac",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38785475702"
+    }
+  ],
+  "runtime_artifact": "5793567513420e536bdfca28464dbe831d13caa2",
+  "api_responses": 3,
+  "api_tokens": 111796,
+  "limits": [
+    "Browser preference selectable but inactive with REALITY; actual activation needs TLS endpoint and client app setting.",
+    "Only TCP Fragment acts on XHTTP Reality HTTP/2; saved UDP/QUIC masks are inactive.",
+    "New physical listeners only;41 pre-existing primary pins unchanged.",
+    "Phone SSH tunnel disconnected; no fresh mobile operator/phone or SDK ad-display claim.",
+    "WAN arbitrary UDP443 endpoint is blocked by existing ads-only policy; UDP443 positive test was isolated real-core/native-panel roundtrip."
+  ]
+}

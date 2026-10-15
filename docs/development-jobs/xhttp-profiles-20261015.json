@@ -544,5 +544,10 @@
     "new_model_inference_requests": 0,
     "new_tokens": 0,
     "note": "No new external model review requested in the output-storage repair."
+  },
+  "transport_controls_followup": {
+    "job": "transport-controls-20261015",
+    "status": "DEPLOYED",
+    "supersedes": "Earlier empty-Flow and disabled-TCP-FinalMask limitation for NEW listeners; Browser Dialer remains inactive with REALITY."
   }
 }

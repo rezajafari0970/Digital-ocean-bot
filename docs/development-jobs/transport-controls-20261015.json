@@ -1,7 +1,7 @@
 {
   "id": "transport-controls-20261015",
-  "updated_at": "2026-10-15T18:22:41.625012+00:00",
-  "status": "VERIFIED_PUBLICATION_PENDING",
+  "updated_at": "2026-10-15T18:39:22.011678+00:00",
+  "status": "DEPLOYED_AUTOMATIC_OUTPUT_VERIFIED_WITH_BROWSER_LIMIT",
   "base_revision": "5aea5e1fd9ce1ca7932a9038c703a480e8c466c8",
   "runtime_artifact": "5793567513420e536bdfca28464dbe831d13caa2",
   "stage_status": {
@@ -9,10 +9,11 @@
     "panel_and_core": "PASS",
     "isolated_and_native_tests": "PASS",
     "api_review": "PASS_R3",
-    "controlplane_publication": "PENDING",
-    "normal_updates": "PENDING",
-    "new_default_output": "PENDING",
-    "phone": "BLOCKED_TUNNEL_DISCONNECTED"
+    "controlplane_publication": "PASS",
+    "normal_updates": "PASS_SECONDARY_THEN_PRIMARY",
+    "new_default_output": "PASS_ALL_DIRECT_RESIDENTIAL",
+    "phone": "BLOCKED_TUNNEL_DISCONNECTED",
+    "browser_dialer": "SELECTABLE_SAVED_INACTIVE_WITH_REALITY"
   },
   "scope": "NEW physical listeners only. Existing immutable pins preserved; no provider/IP purchases or phone app changes. Browser Dialer saved but inactive with REALITY.",
   "evidence_directory": "/root/projects/dob-transport-controls-20261015/.local/transport-controls",
@@ -51,5 +52,8 @@
     "web/static/config-transport.js": "b7dd1b5a69261494d022e0edf17936cf41ba8d2dd56854676ca9216252c27deb",
     "web/tests/config-transport.cjs": "ef93aada774300eb02454c5ff74edccd5303c39b81acc67fdff91c30f4d453ec"
   },
-  "api_tokens": 111796
+  "api_tokens": 111796,
+  "product_source": "3a933ec6a26c9876c7edf03845852ea6802ba726",
+  "public_revision": "26dd5720647423369dd16280f85ce49dce84a1ac",
+  "acceptance": "docs/TRANSPORT_CONTROLS_ACCEPTANCE_20261015.json"
 }
