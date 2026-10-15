@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"testing"
@@ -19,7 +20,7 @@ func TestOutputRefreshLeavesDatabaseHeadroomWhileLocksWait(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			s := &Server{DB: db}
+			s := New(db, app.Container{})
 			defer func() {
 				_, _ = blocker.ExecContext(ctx, "SELECT pg_advisory_unlock_all()")
 				blocker.Close()

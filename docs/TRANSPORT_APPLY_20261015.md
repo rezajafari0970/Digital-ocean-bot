@@ -25,3 +25,7 @@ Private evidence: .local/apply-evidence and /root/backups/dob-transport-apply-20
 ## Live acceptance correction
 
 The first public release23268f6 exposed API database pool starvation under the real primary fleet:64 collectors pinned connections for the new config lock and waited for nested SQL. No listener jobs had been queued. Primary was restored through the normal installer to approved0219700 and readiness5/5 recovered; schema180 remains. Output admission now reserves pool headroom using min(8,maxOpen/3). Actual PostgreSQL regression fails before and passes after at pool sizes6 and24; affected race, full isolated PostgreSQL/Chromium suite, and vet pass. R7 reviewer PASS. Total task7API responses 169138tokens; billed money unknown. Corrected normal release and live application remain pending at this checkpoint.
+
+## Constructor integration correction
+
+R7 live acceptance found New still eagerly constructed semaphore64, bypassing the lazy DB-aware limit. No transport application occurred. Primary was restored to approved0219700 a second time. Final correction removes this constructor preinitialization and changes the PG regression to instantiate the actual constructor. It fails before and passes after at pools6/24, with final affected PostgreSQL/race/vet PASS and R8 reviewer PASS. The full isolated PG/Chromium R7 suite remains the broad evidence immediately before this two-line wiring correction; it was not repeated. Normal publisher full tests/exact Ubuntu24 and live acceptance follow. Task8review responses 177534tokens; billed money unknown.
