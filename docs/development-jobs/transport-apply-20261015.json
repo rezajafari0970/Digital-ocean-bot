@@ -1,7 +1,7 @@
 {
   "id": "transport-apply-20261015",
-  "updated_at": "2026-10-15T21:14:15.133439+00:00",
-  "status": "CONSTRUCTOR_FIX_VERIFIED_PUBLICATION_PENDING",
+  "updated_at": "2026-10-15T21:32:18.756229+00:00",
+  "status": "DEPLOYED_EXISTING_LISTENERS_VERIFIED_WITH_BROWSER_LIMIT",
   "base_revision": "74d645823470bc8a8aea08457e8c9244ff1b608c",
   "stage_status": {
     "diagnosis": "PASS_OLD_LISTENER_PIN",
@@ -10,14 +10,17 @@
     "race_vet": "PASS_R8_TARGETED_OUTPUT_AND_TRANSPORT",
     "native_core_apply_restore": "PASS",
     "api_review": "PASS_R8",
-    "publication": "FINAL_CONSTRUCTOR_RELEASE_PENDING",
-    "normal_updates": "PRIMARY_RESTORED_NO_APPLY",
-    "live_apply": "PENDING",
-    "live_output": "PENDING",
+    "publication": "PASS_FINAL_5a78762",
+    "normal_updates": "PASS_SECONDARY_THEN_PRIMARY_FINAL_HEALTH",
+    "live_apply": "17_VERIFIED_1_RETIRED_BEFORE_WRITE",
+    "live_output": "PASS_ALL_DIRECT_RESIDENTIAL_HOST_FLOW_FINALMASK",
     "browser_dialer": "UNAVAILABLE_WITH_REALITY",
-    "phone": "DISCONNECTED_REFRESH_REQUIRED",
+    "phone": "NO_FRESH_PHONE_TEST_REFRESH_REQUIRED",
     "pool_regression": "BASELINE_FAIL_FIXED_PASS_6_AND_24",
-    "constructor_regression": "REAL_NEW_BASELINE_FAIL_FIXED_PASS_6_AND_24"
+    "constructor_regression": "REAL_NEW_BASELINE_FAIL_FIXED_PASS_6_AND_24",
+    "actual_connection": "PASS_OFFICIAL26_9_9_HTTPS_AND_UDP443",
+    "live_pool_health": "PASS_15_BEFORE_AND_15_DURING_APPLY",
+    "eligible_profile_consistency": "ALL_MATCH_POLICY6"
   },
   "reviewed_source_hashes": {
     "cmd/worker/main.go": "b9ef5bb954390343f6aee9ef5aed34546c4a3c36773b739340246c5ff618628f",
@@ -197,5 +200,8 @@
   ],
   "api_tokens": 177534,
   "evidence_directory": "/root/projects/dob-transport-apply-20261015/.local/apply-evidence",
-  "initial_public_revision": "23268f68da5b3caefbb8abd4e73324db83a4aed0"
+  "initial_public_revision": "23268f68da5b3caefbb8abd4e73324db83a4aed0",
+  "product_source": "ef2db8e0ae224063662cd73c5db2e76932f80985",
+  "public_revision": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+  "acceptance": "docs/TRANSPORT_APPLY_ACCEPTANCE_20261015.json"
 }

@@ -29,3 +29,13 @@ The first public release23268f6 exposed API database pool starvation under the r
 ## Constructor integration correction
 
 R7 live acceptance found New still eagerly constructed semaphore64, bypassing the lazy DB-aware limit. No transport application occurred. Primary was restored to approved0219700 a second time. Final correction removes this constructor preinitialization and changes the PG regression to instantiate the actual constructor. It fails before and passes after at pools6/24, with final affected PostgreSQL/race/vet PASS and R8 reviewer PASS. The full isolated PG/Chromium R7 suite remains the broad evidence immediately before this two-line wiring correction; it was not repeated. Normal publisher full tests/exact Ubuntu24 and live acceptance follow. Task8review responses 177534tokens; billed money unknown.
+
+## Final acceptance — 2026-10-15T21:32:18.756229+00:00
+
+Final sourceef2db8e/public5a78762 passed the normal publisher, full unprivileged tests, exact Ubuntu24 install, and both GitHub workflows. Secondary then primary normal updates passed. Both hosts have3active hash-matching services, schema180 and readiness5/5; identity/environment and saved policies preserved. Fifteen continuous readiness samples before apply and fifteen during apply all passed after the actual-constructor correction.
+
+17 existing listeners were applied and proved against the replacement core, listener socket, active users and exact transport before pin promotion. One queued server retired before any write and became OBSOLETE. All currently eligible listener pins match primary policy6; latest count29 (previously30, normal expiry). No failed/blocked/running jobs remain. Independent native readback confirms patched panel3.8.5-dob-fm.1/core26.10.10 dob-fm-0.1.0, matching executable hashes, aparat.com, Vision/Encryption and TCP FinalMask.
+
+The output sample contains100 ALL/20 DIRECT/60 RESIDENTIAL links, all XHTTP/aparat.com/VisionUDP443/FinalMask, zero strict decoding or pin mismatches, in both API and existing shares. Counts vary with scheduling/freshness. A current migrated DIRECT API URI was run using official Xray26.9.9: HTTPS200/204 and nonce-verified UDP443 both pass. Initial UDP probe had a locally resolved loopback target, corrected to the owned public endpoint; no transport/routing change was needed. Temporary consumer and UDP responder were stopped.
+
+Browser Dialer remains unavailable with REALITY. No fresh phone test; user must refresh subscription or reimport manually imported profiles. Task8review responses177534tokens, money unavailable. Other IP work remains paused. See acceptance JSON.

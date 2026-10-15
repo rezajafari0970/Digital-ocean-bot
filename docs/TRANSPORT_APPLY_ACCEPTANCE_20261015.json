@@ -1,0 +1,377 @@
+{
+  "at": "2026-10-15T21:32:18.756229+00:00",
+  "publication": {
+    "status": "published",
+    "source_revision": "ef2db8e0ae224063662cd73c5db2e76932f80985",
+    "public_revision": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "at": "2026-10-15T21:16:17.950575+00:00"
+  },
+  "primary": {
+    "at": "2026-10-15T21:18:52.820157+00:00",
+    "commit": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "source": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "schema": "000180_transport_apply",
+    "accounts": 4,
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T21:18:52.942508093Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 53,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "creation_policy_unchanged": true,
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "aparat.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "browser_dialer": "WebView",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 6,
+    "final_readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T21:31:08.996486463Z"
+    }
+  },
+  "secondary": {
+    "at": "2026-10-15T21:17:22.626300+00:00",
+    "commit": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "source": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+    "schema": "000180_transport_apply",
+    "accounts": 0,
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T21:17:22.750485226Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 0,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "creation_policy_unchanged": true,
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "apart.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 3
+  },
+  "applications": {
+    "at": "2026-10-15T21:31:10.017176+00:00",
+    "policy_revision": 6,
+    "policy_host": "aparat.com",
+    "eligible_listeners": 29,
+    "matching_policy": 29,
+    "mismatches": [],
+    "jobs": [
+      {
+        "state": "OBSOLETE",
+        "phase": "SERVER_RETIRED",
+        "count": 1
+      },
+      {
+        "state": "SUCCEEDED",
+        "phase": "CORE_VERIFIED_PIN_PROMOTED",
+        "count": 17
+      }
+    ]
+  },
+  "output": {
+    "at": "2026-10-15T21:29:47.455337+00:00",
+    "api": {
+      "ALL": {
+        "counts": {
+          "xhttp": 100,
+          "host:aparat.com": 100,
+          "strict_extra_valid": 100,
+          "xhttp_udp443_finalmask": 100,
+          "canary_verified": 5
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 20,
+          "host:aparat.com": 20,
+          "strict_extra_valid": 20,
+          "xhttp_udp443_finalmask": 20,
+          "canary_verified": 1
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 60,
+          "host:aparat.com": 60,
+          "strict_extra_valid": 60,
+          "xhttp_udp443_finalmask": 60,
+          "canary_verified": 3
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "shares": {
+      "ALL": {
+        "counts": {
+          "xhttp": 100,
+          "host:aparat.com": 100,
+          "strict_extra_valid": 100,
+          "xhttp_udp443_finalmask": 100,
+          "canary_verified": 5
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 20,
+          "host:aparat.com": 20,
+          "strict_extra_valid": 20,
+          "xhttp_udp443_finalmask": 20,
+          "canary_verified": 1
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 60,
+          "host:aparat.com": 60,
+          "strict_extra_valid": 60,
+          "xhttp_udp443_finalmask": 60,
+          "canary_verified": 3
+        },
+        "new_paths": 20,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "listeners": [
+      {
+        "network": "tcp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 2
+      },
+      {
+        "network": "xhttp",
+        "flow": "xtls-rprx-vision-udp443",
+        "finalmask": "true",
+        "count": 30
+      },
+      {
+        "network": "xhttp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 26
+      }
+    ],
+    "pass": true
+  },
+  "running_core_sample": {
+    "core_sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+    "core_version": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.1.0 (go1.27.1 linux/amd64)",
+    "inbounds": [
+      {
+        "client_flows": [
+          "xtls-rprx-vision"
+        ],
+        "clients": 5,
+        "finalmask_tcp": true,
+        "flow": "xtls-rprx-vision",
+        "host": "aparat.com",
+        "network": "xhttp",
+        "port": 443,
+        "vless_encryption": true
+      }
+    ],
+    "panel_sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+    "panel_version": "3.8.5-dob-fm.1",
+    "running_core_hash_match": true
+  },
+  "actual_consumer_test": {
+    "client": "official26.9.9",
+    "flow": "xtls-rprx-vision-udp443",
+    "finalmask": true,
+    "source": "current migrated DIRECT API output",
+    "xhttp_host": "aparat.com",
+    "http": [
+      {
+        "url": "https://www.cloudflare.com/cdn-cgi/trace",
+        "rc": 0,
+        "result": "200 222",
+        "error": ""
+      },
+      {
+        "url": "https://www.gstatic.com/generate_204",
+        "rc": 0,
+        "result": "204 0",
+        "error": ""
+      }
+    ],
+    "udp443": true,
+    "success": true
+  },
+  "continuous_readiness": {
+    "before_apply": 15,
+    "during_apply": 15,
+    "all_ready": true
+  },
+  "github_actions": [
+    {
+      "id": 38808577678,
+      "head_branch": "stable",
+      "head_sha": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38808577678"
+    },
+    {
+      "id": 38808576470,
+      "head_branch": "main",
+      "head_sha": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38808576470"
+    }
+  ],
+  "reviewed_files_unchanged": 28,
+  "limitations": [
+    "Browser Dialer unavailable with REALITY; saved preference is inactive and not exported.",
+    "Phone was not connected for a fresh device test; refresh subscriptions or reimport manual profiles.",
+    "UDP/QUIC FinalMask sections do not act on this TCP HTTP/2 transport.",
+    "Output/listener counts change with creation, expiry and freshness gates."
+  ],
+  "probe_correction": "The first UDP probe used a hostname resolving locally to127.0.1.1; that invalid destination was corrected to the owned public endpoint. The final real migrated DIRECT-output test passed HTTPS and nonce-verified UDP443. No routing policy was changed."
+}
