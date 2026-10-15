@@ -1,3 +1,8 @@
+## Live status confirmed — 2026-10-15T01:59:40.421704+00:00
+
+Both hosts now run public473e99193198aceb71dbd319f4c8d4fdcdbdfdc2 (core plus reviewed UpCloud utility correction), schema176. Both GitHub Actions passed. Independent read-only acceptance confirmed3 active services,5/5 readiness, running hash matches, account/environment preservation and all six lifecycle counts zero. Wire source0553853 remains independently committed on feat/ip-wire-20261015 with API PASS/race/fuzz/vet; it has no operational sender. Stage ledger uses the single stage_status array in the existing job.
+API task cumulative:14 responses(13 completed,1 incomplete),306866 input+27901 output=334767 total;cached0,cache-write306824. Actual billed and estimated money remain unknown. These totals include the utility review and four pure-wire review iterations. No IP purchase/release, guest network change or additional-IP configuration. Next implementation is durable actual-send consumption and provider reconciliation, followed by guest/protocol/output/renewal/rotation. Operational canary remains unapproved.
+
 ## Wire contracts verified; operational execution remains pending — 2026-10-15T01:54:48.527062+00:00
 
 Pure allocation wire contracts committed and pushed at0553853f82cc256ec152a5f0d68fe77d14fc97ee (feat/ip-wire-20261015). Actual API review ip-wire-r4 PASS resolved B1/B2/B3; exact race,185891 fuzz executions and vet PASS. No HTTP sender or production caller, no ownership/release authority from decoded replies. Current installed core remains15935e9/schema176 on both hosts. Full21-stage ledger and API receipts are in the existing job JSON. Next: actual-send consumption/account transport/reconciliation, then guest/protocol/output/renewal and rotation.
