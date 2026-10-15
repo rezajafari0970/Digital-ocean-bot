@@ -2,7 +2,9 @@ package adminapi
 
 import (
 	"context"
+	"encoding/json"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -18,6 +20,13 @@ func TestOutputSnapshotLongXHTTPRoundTrip(t *testing.T) {
 	s := &Server{DB: db}
 	ctx := context.Background()
 	profile := transportprofile.Preset()
+	// Production jsonb reads add spaces which must survive strict URI decoding.
+	if err := db.QueryRow("SELECT $1::jsonb", string(profile.Extra)).Scan(&profile.Extra); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(profile.Extra), ": ") {
+		t.Fatal("fixture did not exercise PostgreSQL JSON whitespace")
+	}
 	var err error
 	profile.Path, err = transportprofile.NewPath(4096)
 	if err != nil {
@@ -75,6 +84,28 @@ func TestOutputSnapshotLongXHTTPRoundTrip(t *testing.T) {
 	for _, rec := range records {
 		if !strings.Contains(w.Body.String(), rec.URI+"\n") {
 			t.Fatal("shared output lost a complete URI")
+		}
+		u, err := url.Parse(rec.URI)
+		if err != nil {
+			t.Fatal(err)
+		}
+		foundExtra := false
+		for _, field := range strings.Split(u.RawQuery, "&") {
+			key, raw, _ := strings.Cut(field, "=")
+			if key != "extra" {
+				continue
+			}
+			foundExtra = true
+			decoded, err := url.PathUnescape(raw)
+			var extra struct {
+				NoGRPCHeader bool `json:"noGRPCHeader"`
+			}
+			if err != nil || json.Unmarshal([]byte(decoded), &extra) != nil || !extra.NoGRPCHeader {
+				t.Fatal("shared Extra failed v2rayNG decoding or lost boolean type")
+			}
+		}
+		if u.Query().Get("type") == "xhttp" && !foundExtra {
+			t.Fatal("shared XHTTP URI lost the extra field")
 		}
 	}
 	s.persistOutputSnapshot(ctx, panel, records[1:])

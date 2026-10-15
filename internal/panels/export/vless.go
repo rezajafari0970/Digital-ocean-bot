@@ -88,5 +88,8 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 		}
 	}
 	hostport := net.JoinHostPort(x.Host, strconv.Itoa(x.Port))
-	return fmt.Sprintf("vless://%s@%s?%s#%s", url.PathEscape(x.UUID), hostport, q.Encode(), url.QueryEscape(x.Remark)), nil
+	// VLESS consumers use URI-component decoding: a literal + is not a space.
+	query := strings.ReplaceAll(q.Encode(), "+", "%20")
+	remark := strings.ReplaceAll(url.QueryEscape(x.Remark), "+", "%20")
+	return fmt.Sprintf("vless://%s@%s?%s#%s", url.PathEscape(x.UUID), hostport, query, remark), nil
 }

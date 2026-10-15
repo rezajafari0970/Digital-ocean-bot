@@ -1,0 +1,35 @@
+{
+  "id": "xhttp-uri-encoding-20261015",
+  "updated_at": "2026-10-15T18:55:28.834933+00:00",
+  "status": "VERIFIED_PUBLICATION_PENDING",
+  "base_revision": "e5ad05e105c23daf611b25e109431ad91c17471f",
+  "stage_status": {
+    "reproduce": "PASS_BASELINE_FAIL",
+    "fix": "PASS",
+    "strict_consumer_and_core": "PASS",
+    "postgres_race": "PASS",
+    "api_review": "PASS_NOTE_ADDRESSED",
+    "publication": "PENDING",
+    "normal_updates": "PENDING",
+    "live_outputs": "PENDING",
+    "phone": "DISCONNECTED_REFRESH_REQUIRED"
+  },
+  "product_hashes": {
+    "internal/panels/export/vless.go": "e3d663bdc7f4bc883fa5f698710273f01cc1e859a65cb2ed25d9dc804ca6be55",
+    "internal/panels/export/uri_encoding_test.go": "e13c9f9684013dcab147cdde9819393449ee9a364387fa6e9eb2c7d2ead629d1",
+    "internal/adminapi/output_snapshot_long_test.go": "ebc90d314aa714bcec31f1fc95507870a2dd3d4072bba933560df35186f52173"
+  },
+  "api_usage": {
+    "input_tokens": 2597,
+    "input_tokens_details": {
+      "cache_write_tokens": 2594,
+      "cached_tokens": 0
+    },
+    "output_tokens": 354,
+    "output_tokens_details": {
+      "reasoning_tokens": 238
+    },
+    "total_tokens": 2951
+  },
+  "evidence_directory": "/root/projects/dob-xhttp-uri-20261015/.local/uri-evidence"
+}
