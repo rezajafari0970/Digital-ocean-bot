@@ -17,12 +17,15 @@ import (
 )
 
 func TestOutputSchedulerRealOverlappingRefreshes(t *testing.T) {
-	testOutputScheduler(t, false)
+	testOutputScheduler(t, false, false)
 }
 func TestOutputSchedulerSkipsBusyLocks(t *testing.T) {
-	testOutputScheduler(t, true)
+	testOutputScheduler(t, true, false)
 }
-func testOutputScheduler(t *testing.T, lockEarly bool) {
+func TestOutputSchedulerRefillsSlotsWithinSweep(t *testing.T) {
+	testOutputScheduler(t, true, true)
+}
+func testOutputScheduler(t *testing.T, lockEarly, singleSweep bool) {
 	db := adminTestDB(t)
 	db.SetMaxOpenConns(24)
 	var mu sync.Mutex
@@ -110,8 +113,32 @@ func testOutputScheduler(t *testing.T, lockEarly bool) {
 		t.Error("bounded collectors did not drain")
 	}
 	defer drain()
+	// Probe pool headroom while the dispatcher itself is waiting/refilling.
+	probeStop, probeDone := make(chan struct{}), make(chan struct{})
+	go func() {
+		defer close(probeDone)
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-probeStop:
+				return
+			case <-ticker.C:
+				ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+				if err := db.PingContext(ctx); err != nil {
+					t.Error("dispatch starved concurrent SQL", err)
+				}
+				cancel()
+			}
+		}
+	}()
+	defer func() { close(probeStop); <-probeDone }()
 	runTicks := func() {
-		for tick := 0; tick < 6; tick++ {
+		ticks := 6
+		if singleSweep {
+			ticks = 1
+		}
+		for tick := 0; tick < ticks; tick++ {
 			s.refreshOutputLive(context.Background())
 			probe, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 			if e := db.PingContext(probe); e != nil {

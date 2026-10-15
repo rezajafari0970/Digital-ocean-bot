@@ -28,6 +28,7 @@ type Server struct {
 	OutputPanelMu      sync.Mutex
 	OutputPanelRun     map[string]bool
 	OutputRefreshSem   chan struct{}
+	OutputRefreshDone  chan struct{}
 	OutputRefreshAfter string
 	BrowserMu          sync.Mutex
 	BrowserTickets     map[string]time.Time

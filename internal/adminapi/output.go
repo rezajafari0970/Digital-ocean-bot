@@ -316,6 +316,10 @@ func rotateOutputPanels(panels []readyworker.Panel, start int) []readyworker.Pan
 func (s *Server) refreshOutputLive(ctx context.Context) {
 	s.OutputRefreshMu.Lock()
 	defer s.OutputRefreshMu.Unlock()
+	// Bound the serialized eligibility/admission sweep. Existing collectors keep
+	// their own work deadline and release ownership only after lock cleanup.
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	if ctx.Err() != nil {
 		return
 	}
@@ -327,12 +331,48 @@ func (s *Server) refreshOutputLive(ctx context.Context) {
 		return
 	}
 	s.OutputRefreshAfter = scheduleOutputPanels(panels, s.OutputRefreshAfter, func(p readyworker.Panel) bool {
-		return s.startPanelOutputRefresh(ctx, p)
+		return s.waitPanelOutputRefresh(ctx, p)
 	})
+}
+
+// waitPanelOutputRefresh fills slots freed during this sweep rather than
+// leaving them idle until another ticker event. Only one dispatcher waits.
+func (s *Server) waitPanelOutputRefresh(ctx context.Context, panel readyworker.Panel) bool {
+	for ctx.Err() == nil {
+		if s.startPanelOutputRefresh(ctx, panel) {
+			return true
+		}
+		s.OutputPanelMu.Lock()
+		running := s.OutputPanelRun[panel.ID]
+		sem, done := s.OutputRefreshSem, s.OutputRefreshDone
+		available := sem != nil && len(sem) < cap(sem)
+		s.OutputPanelMu.Unlock()
+		if running || sem == nil {
+			return false
+		}
+		// Completion can precede this inspection. Capacity, not the coalesced
+		// notification, is authoritative and prevents a lost wakeup.
+		if available {
+			continue
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-done:
+		}
+	}
+	return false
 }
 
 func (s *Server) startPanelOutputRefresh(parent context.Context, panel readyworker.Panel) bool {
 	s.OutputPanelMu.Lock()
+	if parent.Err() != nil {
+		s.OutputPanelMu.Unlock()
+		return false
+	}
+	if s.OutputRefreshDone == nil {
+		s.OutputRefreshDone = make(chan struct{}, 1)
+	}
 	if s.OutputPanelRun == nil {
 		s.OutputPanelRun = map[string]bool{}
 	}
@@ -366,9 +406,13 @@ func (s *Server) startPanelOutputRefresh(parent context.Context, panel readywork
 
 	go func() {
 		defer func() {
-			<-s.OutputRefreshSem
 			s.OutputPanelMu.Lock()
+			<-s.OutputRefreshSem
 			delete(s.OutputPanelRun, panel.ID)
+			select {
+			case s.OutputRefreshDone <- struct{}{}:
+			default:
+			}
 			s.OutputPanelMu.Unlock()
 		}()
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
