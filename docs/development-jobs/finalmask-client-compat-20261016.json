@@ -22,8 +22,8 @@
       "medium_risk_path:internal/panels/transportprofile/client_mask_test.go"
     ]
   },
-  "updated_at": "2026-10-15T22:06:58.448716+00:00",
-  "status": "SOURCE_VERIFIED_PUBLICATION_PENDING",
+  "updated_at": "2026-10-15T22:12:28.534350+00:00",
+  "status": "DEPLOYED_VERIFIED_WITH_PHONE_LIMIT",
   "reviewed_source_hashes": {
     "internal/panels/transportprofile/client_mask.go": "cf48e72df081da0872335d768df846b9ad331d623493467cdfaae21758b7f5f3",
     "internal/panels/transportprofile/client_mask_test.go": "401e7a1249f6b900873b58b521e1378f9756c6550d9d0b6ce40fb13f64e5de1a",
@@ -143,9 +143,13 @@
     "race_postgres": "PASS_SEQUENTIAL_PANELS",
     "vet": "PASS",
     "review": "PASS_EVIDENCE_CLOSURE",
-    "publication": "PENDING",
-    "updates": "PENDING",
-    "phone": "NOT_DIRECTLY_TESTED"
+    "publication": "PASS_FULL_PUBLISHER_AND_EXACT_UBUNTU24",
+    "updates": "PASS_BOTH_HOSTS_HASHES_READINESS5_5",
+    "phone": "NOT_DIRECTLY_TESTED_REFRESH_REQUIRED",
+    "github_actions": "PASS_MAIN_AND_STABLE",
+    "live_output": "PASS_API_AND_SHARES_ALL64_DIRECT13_RESIDENTIAL38",
+    "live_native": "PASS_UNMODIFIED_URI_26_5_9_AND26_9_9_HTTPS200_204",
+    "live_health": "PASS_15_SAMPLES"
   },
   "evidence_directory": "/root/projects/dob-finalmask-client-compat-20261016/.local/compat",
   "adjudication": {
@@ -154,5 +158,8 @@
     "test_requirements": "Reproduced actual official old-core failure; actual candidate Go-exported URI was decoded without repair and both binaries passed parse and live connections.",
     "initial_race_failure": "Parallel packages share database advisory executor key628341902731 even across isolated schemas. Complete sequential panels race suite passed. Original failures retained.",
     "bootstrap": "Existing detached canonical causes bootstrap branch guard failure; no READY claim. Exact current HEAD and reference equality verified separately."
-  }
+  },
+  "product_source": "407c75e1b18f2b91a7356f0c55c774c9b270a041",
+  "public_revision": "7a30f5eb3c8cd2ffe2be09a0c0dcacd564d83e4d",
+  "acceptance": "docs/FINALMASK_CLIENT_COMPAT_ACCEPTANCE_20261016.json"
 }
