@@ -1,6 +1,6 @@
 {
   "id": "xhttp-profiles-20261015",
-  "status": "XHTTP_OUTPUT_PERSISTENCE_FIX_VERIFIED_PUBLICATION_PENDING",
+  "status": "DEPLOYED_XHTTP_OUTPUT_VERIFIED_WITH_COMPATIBILITY_LIMITS",
   "base_revision": "63ed1345aa6500d792f44d34ce8f722b15b79b63",
   "goal": "Generate managed Direct and Residential XHTTP Reality stream-up configs with long nonrepeating stable paths, Host apart.com, exact user Extra and FinalMask preset, with compatibility evidence before rollout. Implement API/UI, server payload, fresh export, lifecycle client flow and migration concurrency. Preserve credentials and account isolation; no provider or IP lifecycle mutations.",
   "allowed_paths": [
@@ -20,7 +20,7 @@
   ],
   "context": "Shared physical listener per panel+port; one path per inbound, not per client. Current TCP only; transition must not silently force stale Vision clients. Browser WebView incompatible with stream-up Reality IP/custom Host; Flow Vision incompatible encryption=none XHTTP. Exact FinalMask runtime compatibility unresolved (26.9.9 rejects numeric brutalUp and UDP exp). Keep requested preset available but do not claim runtime applied if unsupported. Need stable bounded 4096-byte path (not universal max) with random unique suffix and distinct words. Mutation worker and planners must serialize transition; no pending mutation plans at switch. New schema177 reserved by separate IP work; resolve additive migration numbering without skipping pending source. Existing global default TCP until explicit canary/verified activation. Rollback63ed134; no deployment until deterministic gates and canary.",
   "scope_adjudication": "Creation defaults and immutable new-listener pins only. Existing TCP listeners remain TCP; no in-place conversion. The user was told this scope. Server-side header budget32768 required and tested to support4096-byte paths without HTTP431; client Extra unchanged. Migration runner keys full filenames so178 leaves177 independently applicable. Protection TCP port parsing must include XHTTP. Publication and activation of tested creation default are authorized by user continuation; no existing-listener conversion.",
-  "updated_at": "2026-10-15T16:47:30.006266+00:00",
+  "updated_at": "2026-10-15T16:54:59.420628+00:00",
   "stage_status": [
     {
       "stage": "baseline",
@@ -104,8 +104,8 @@
     },
     {
       "stage": "output_storage_rollout",
-      "status": "PENDING",
-      "evidence": "Runtime remains89292e7/schema178 until normal gated publication/update/acceptance."
+      "status": "PASS",
+      "evidence": "Both hosts56c0b8e/schema179, active matching3services/readiness5/5; existing shares publish XHTTP ALL36/DIRECT7/RESIDENTIAL21 at16:53:40Z, full4096path/clientExtra/emptyFlow verified.0output persist errors observed after restart."
     }
   ],
   "api_usage": {
@@ -157,14 +157,14 @@
     "web/tests/config-transport.cjs": "348f950a6f715401fb21957d8e310a256b43161924d7248070e20dfbfbcebeda"
   },
   "evidence_directory": "/root/projects/dob-xhttp-20261015/.local/xhttp-evidence",
-  "source_revision": "d671e194a29223f15aa8599fc4e88335eb060486",
-  "public_revision": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+  "source_revision": "aaf0ccbf7464d33e744a4c67d94e45acb8411941",
+  "public_revision": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
   "publication_evidence": "/var/lib/datacenter-publisher/release-uwkq_g2j",
-  "runtime_revision": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
-  "schema": "000178_xhttp_listener_profiles",
+  "runtime_revision": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+  "schema": "000179_output_uri_digest",
   "activation": {
     "primary": {
-      "revision": 2,
+      "revision": 3,
       "network": "xhttp",
       "path_bytes": 4096,
       "host": "apart.com",
@@ -178,13 +178,14 @@
       "finalmask_enabled": false
     },
     "scope": "New physical listeners only. Existing TCP listeners and pre-existing pins remain TCP.",
-    "ordinary_new_xhttp_listener_observed": false,
+    "ordinary_new_xhttp_listener_observed": true,
     "native_canary_verified": true
   },
   "acceptance": {
     "primary": {
-      "at": "2026-10-15T16:21:23.018663+00:00",
-      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+      "at": "2026-10-15T16:53:39.656730+00:00",
+      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+      "schema": "000179_output_uri_digest",
       "services": [
         {
           "unit": "digital-ocean-bot-api",
@@ -229,7 +230,7 @@
             "ok": true
           }
         ],
-        "at": "2026-10-15T16:21:23.119260657Z"
+        "at": "2026-10-15T16:53:39.761527453Z"
       },
       "account_identity_preserved": true,
       "environment_preserved": true,
@@ -240,12 +241,51 @@
           "count": 1,
           "min_path_bytes": null,
           "max_path_bytes": null
+        },
+        {
+          "network": "xhttp",
+          "count": 8,
+          "min_path_bytes": 4096,
+          "max_path_bytes": 4096
         }
       ]
     },
     "secondary": {
-      "at": "2026-10-15T16:18:23.601610+00:00",
-      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+      "at": "2026-10-15T16:50:58.188012+00:00",
+      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+      "schema": "000179_output_uri_digest",
+      "active_matching_services": 3,
+      "readiness_passed": 5,
+      "account_identity_preserved": true,
+      "environment_preserved": true,
+      "transport_asset_verified": true,
+      "evidence": "limited-lime.ptr.network:/root/backups/dob-xhttp-output-fix-20261015/after.json"
+    },
+    "fleet": {
+      "at": "2026-10-15T16:53:39.656730+00:00",
+      "counts": {
+        "total_servers": 39,
+        "active_servers": 37,
+        "inactive_servers": 0,
+        "broken_servers": 0,
+        "degraded_servers": 1,
+        "pending_deletion_servers": 1,
+        "provisioning_servers": 0
+      },
+      "note": "Transient degraded count fell9 to1 after restart; no claim all fleet issues resolved."
+    }
+  },
+  "remaining": [
+    "Exact requested FinalMask cannot be enabled on tested core26.9.9; it remains stored unchanged and disabled.",
+    "WebView cannot be combined with selected native XHTTP Reality stream-up.",
+    "No existing-listener conversion. No long-term, all-provider or in-app ad-display guarantee.",
+    "Latest bounded fleet snapshot39tracked/37active/1degraded/1pending deletion. Existing TCP is retained; ordinary lifecycle/routing freshness gates still apply."
+  ],
+  "acceptance_before_output_fix": {
+    "primary": {
+      "at": "2026-10-15T16:53:39.656730+00:00",
+      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+      "schema": "000179_output_uri_digest",
       "services": [
         {
           "unit": "digital-ocean-bot-api",
@@ -290,33 +330,182 @@
             "ok": true
           }
         ],
-        "at": "2026-10-15T16:18:23.719108211Z"
+        "at": "2026-10-15T16:53:39.761527453Z"
       },
       "account_identity_preserved": true,
       "environment_preserved": true,
-      "transport_asset_verified": true
+      "transport_asset_verified": true,
+      "listeners": [
+        {
+          "network": "tcp",
+          "count": 1,
+          "min_path_bytes": null,
+          "max_path_bytes": null
+        },
+        {
+          "network": "xhttp",
+          "count": 8,
+          "min_path_bytes": 4096,
+          "max_path_bytes": 4096
+        }
+      ]
+    },
+    "secondary": {
+      "at": "2026-10-15T16:50:58.188012+00:00",
+      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+      "schema": "000179_output_uri_digest",
+      "active_matching_services": 3,
+      "readiness_passed": 5,
+      "account_identity_preserved": true,
+      "environment_preserved": true,
+      "transport_asset_verified": true,
+      "evidence": "limited-lime.ptr.network:/root/backups/dob-xhttp-output-fix-20261015/after.json"
     },
     "fleet": {
-      "at": "2026-10-15T16:22:12.956922+00:00",
+      "at": "2026-10-15T16:53:39.656730+00:00",
       "counts": {
         "total_servers": 39,
-        "active_servers": 29,
-        "inactive_servers": 5,
-        "degraded_servers": 0,
-        "pending_deletion_servers": 5
+        "active_servers": 37,
+        "inactive_servers": 0,
+        "broken_servers": 0,
+        "degraded_servers": 1,
+        "pending_deletion_servers": 1,
+        "provisioning_servers": 0
       },
-      "reason_counts": {
-        "PENDING_DELETION": 5,
-        "PROVIDER_UNAVAILABLE": 5
-      },
-      "degraded_details": []
+      "note": "Transient degraded count fell9 to1 after restart; no claim all fleet issues resolved."
     }
   },
-  "remaining": [
-    "Exact requested FinalMask cannot be enabled on tested core26.9.9; it remains stored unchanged and disabled.",
-    "WebView cannot be combined with selected native XHTTP Reality stream-up.",
-    "No existing-listener conversion. No long-term, all-provider or in-app ad-display guarantee.",
-    "Ordinary fleet-created XHTTP listener has not yet been observed after activation; creation/URI/pinning are covered by source tests and native API canary.",
-    "Five live non-active servers were PROVIDER_UNAVAILABLE in final dashboard snapshot; no provider recovery was attempted in this feature task."
-  ]
+  "output_storage_acceptance": {
+    "at": "2026-10-15T16:53:40.082270+00:00",
+    "api": {
+      "ALL": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 140,
+          "xhttp": 36
+        },
+        "xhttp_unique_paths": 8,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      },
+      "DIRECT": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 28,
+          "xhttp": 7
+        },
+        "xhttp_unique_paths": 7,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      },
+      "RESIDENTIAL": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 84,
+          "xhttp": 21
+        },
+        "xhttp_unique_paths": 7,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      }
+    },
+    "shares": {
+      "ALL": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 140,
+          "xhttp": 36
+        },
+        "xhttp_unique_paths": 8,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      },
+      "DIRECT": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 28,
+          "xhttp": 7
+        },
+        "xhttp_unique_paths": 7,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      },
+      "RESIDENTIAL": {
+        "http_status": 200,
+        "cache_control": "no-store",
+        "counts": {
+          "tcp": 84,
+          "xhttp": 21
+        },
+        "xhttp_unique_paths": 7,
+        "xhttp_path_lengths": [
+          4096
+        ],
+        "invalid_xhttp": 0
+      }
+    },
+    "stored": [
+      {
+        "network": "tcp",
+        "configs": 145,
+        "panels": 29,
+        "last_seen": "2026-10-15T16:53:39.861195+00:00"
+      },
+      {
+        "network": "xhttp",
+        "configs": 37,
+        "panels": 8,
+        "last_seen": "2026-10-15T16:53:39.764404+00:00"
+      }
+    ]
+  },
+  "output_storage_fix_source_hashes": {
+    "internal/adminapi/account_output_test.go": "4ab78115db1d2713ecd54966204752fb3fecc3b56829f9c78d6013751f6f7467",
+    "internal/adminapi/output.go": "5450cee816bd2c029a12342d9f2d5d736219f5acb64795e21e4987b03d5c0d88",
+    "internal/adminapi/output_snapshot.go": "595fa9da44dbed4c0383735fd17c6160b85612f5be41d642085e0d2ddeee40ec",
+    "internal/adminapi/output_snapshot_long_test.go": "78fe1542a15a555e4f6bb0051cdfdfb0bdd6a1f8e788bc4c254915358655616a",
+    "migrations/000179_output_uri_digest.up.sql": "0131189d90b7c3ea88968d376faa508eba3ea271f9faa9831ffd5bbf3aa98a6c",
+    "migrations/000179_output_uri_digest.down.sql": "1f14e2746bd7309bc0414da21a3de90032a19774c16d4dc132d7b5dfc62b8242"
+  },
+  "output_storage_publication": {
+    "source_revision": "aaf0ccbf7464d33e744a4c67d94e45acb8411941",
+    "public_revision": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+    "github": [
+      {
+        "id": 38772205709,
+        "head_branch": "main",
+        "head_sha": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 38772206538,
+        "head_branch": "stable",
+        "head_sha": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "evidence": "/var/lib/datacenter-publisher/release-1jofos65"
+  },
+  "api_usage_output_fix": {
+    "new_model_inference_requests": 0,
+    "new_tokens": 0,
+    "note": "No new external model review requested in the output-storage repair."
+  }
 }
