@@ -5,7 +5,7 @@
   "source_base": "d5f0668052bc3ae1d1fc08a9a860fdc7d77279ce",
   "branch": "feat/output-controls-20261016",
   "worktree": "/root/projects/dob-output-controls-20261016",
-  "status": "DISPATCH_VERIFIED_PUBLICATION_PENDING",
+  "status": "DEPLOYED_OUTPUT_CONTROLS_LIVE_COVERAGE_NOT_ACCEPTED",
   "stage_status": {
     "diagnosis": "COMPLETE: sliding admission cursor causes >15sec stale snapshots; two empty panels completed normal target warmup",
     "output_policy": "IMPLEMENTED: separate singleton, emission-only policy, UI; defaults omit both fields",
@@ -16,8 +16,8 @@
     "browser": "PASS",
     "real_scheduler_race": "PASS:36panels,overlapping slow requests,SQL headroom",
     "full_regression": "PASS: exact complete go test ./... with isolated PostgreSQL/browser",
-    "publication": "PENDING_DISPATCH",
-    "deployment": "NOT_STARTED",
+    "publication": "PASS: exactUbuntu24 and GitHub main/stable",
+    "deployment": "PASS:bothhosts90fe8c3/schema181,3services5readiness,identity/pins/nativepolicy preserved",
     "review": "SOURCE_APPROVED_WITH_RELEASE_GATES",
     "initial_deployment": "PASS on bothhosts0d860a8/schema181; native realHTTPS PASS",
     "initial_live": "FAIL:34ready,32-34DIRECT; advisory waits consume collector slots; preserved initial-live-acceptance.json",
@@ -25,7 +25,11 @@
     "locks_regression": "PASS: initial8/28 ->28/28unlocked then36/36,realPostgres race/ownership/cancellation/panic",
     "second_deployment": "PASS on bothhosts ee313c6/schema181; native realHTTPS PASS",
     "second_live": "FAIL: occasional1missingready,zeroHTTPerrors; busy skips with4sec revisit gaps; retained locks-live-acceptance.json",
-    "dispatcher": "PASS: bounded completion-driven admission,8max budget unchanged; one-sweep28free then36all persisted"
+    "dispatcher": "PASS: bounded completion-driven admission,8max budget unchanged; one-sweep28free then36all persisted",
+    "native_production": "PASS:unmodified productionURI official26.5.9/26.9.9 HTTPS200/204",
+    "output_fields": "PASS:all8tested outputsurfaces omitExtra/FinalMask/Browser metadata",
+    "live_output": "NOT_ACCEPTED:6of30samples miss1ready server during long native configlocks; strict15sec gate preserved",
+    "phone": "NOT_DIRECTLY_TESTED"
   },
   "allowed_paths": [
     "internal/adminapi/output.go",
@@ -89,7 +93,7 @@
     ]
   },
   "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence",
-  "updated_at": "2026-10-15T23:45:54.592173+00:00",
+  "updated_at": "2026-10-15T23:59:36.464962+00:00",
   "adjudication": {
     "disagreements": [],
     "freshness": "Keep15sec output and60sec routing proof; no stale fallback. Under persistent failure, output remains withheld.",
@@ -390,5 +394,8 @@
       }
     }
   ],
-  "api_tokens": 180087
+  "api_tokens": 180087,
+  "public_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+  "acceptance": "docs/OUTPUT_CONTROLS_ACCEPTANCE_20261016.json",
+  "remaining": "Decide output freshness semantics with user; current15sec maintained. Full count equality is NOT delivered. Any further native-worker lock-scope change needs its own invariant-driven design; do not bypass locks, fakefreshness, disableworker or change tests to obtain green."
 }

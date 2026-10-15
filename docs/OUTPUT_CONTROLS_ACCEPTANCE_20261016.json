@@ -1,0 +1,2325 @@
+{
+  "status": "DEPLOYED_OUTPUT_CONTROLS_LIVE_COVERAGE_NOT_ACCEPTED",
+  "at": "2026-10-15T23:59:36.464962+00:00",
+  "source_revision": "097fc640d909715d99dd6665ed290b9c7d1d966e",
+  "runtime_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+  "schema": "000181_output_policy",
+  "primary": {
+    "at": "2026-10-15T23:50:51.189524+00:00",
+    "commit": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "source": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "schema": "000181_output_policy",
+    "accounts": 4,
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T23:50:51.284564466Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 77,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "output_settings_asset_matches_release": true,
+    "creation_policy_unchanged": true,
+    "output_policy": {
+      "revision": 1,
+      "include_xhttp_extra": false,
+      "include_finalmask": false
+    },
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "aparat.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "browser_dialer": "WebView",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 6
+  },
+  "secondary": {
+    "at": "2026-10-15T23:49:44.501750+00:00",
+    "commit": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "source": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "schema": "000181_output_policy",
+    "accounts": 0,
+    "health": {
+      "status": "ok"
+    },
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-15T23:49:44.598702135Z"
+    },
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "account_identity_preserved": true,
+    "environment_preserved": true,
+    "retained_pins_unchanged": true,
+    "retained_pins": 0,
+    "expired_pins": 0,
+    "transport_asset_matches_release": true,
+    "output_settings_asset_matches_release": true,
+    "creation_policy_unchanged": true,
+    "output_policy": {
+      "revision": 1,
+      "include_xhttp_extra": false,
+      "include_finalmask": false
+    },
+    "policy": {
+      "network": "xhttp",
+      "mode": "stream-up",
+      "host": "apart.com",
+      "path_bytes": 4096,
+      "finalmask_enabled": true,
+      "finalmask_scope": "both",
+      "flow": "xtls-rprx-vision-udp443"
+    },
+    "policy_revision": 3
+  },
+  "native": {
+    "source": "unmodified production URI",
+    "omitted_fields": true,
+    "cores": [
+      {
+        "version": "Xray 26.5.9 (Xray, Penetrates Everything.) 1bdb488 (go1.26.3 linux/amd64)",
+        "parse": true,
+        "http": [
+          {
+            "url": "https://www.cloudflare.com/cdn-cgi/trace",
+            "rc": 0,
+            "status": "200"
+          },
+          {
+            "url": "https://www.gstatic.com/generate_204",
+            "rc": 0,
+            "status": "204"
+          }
+        ],
+        "pass": true
+      },
+      {
+        "version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)",
+        "parse": true,
+        "http": [
+          {
+            "url": "https://www.cloudflare.com/cdn-cgi/trace",
+            "rc": 0,
+            "status": "200"
+          },
+          {
+            "url": "https://www.gstatic.com/generate_204",
+            "rc": 0,
+            "status": "204"
+          }
+        ],
+        "pass": true
+      }
+    ],
+    "pass": true
+  },
+  "live": {
+    "at": "2026-10-15T23:51:19.683999+00:00",
+    "surfaces": {
+      "api:ALL": {
+        "links": 132,
+        "servers": 27,
+        "types": {
+          "xhttp": 132
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:DIRECT": {
+        "links": 27,
+        "servers": 27,
+        "types": {
+          "xhttp": 27
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:RESIDENTIAL": {
+        "links": 78,
+        "servers": 26,
+        "types": {
+          "xhttp": 78
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:ALL": {
+        "links": 132,
+        "servers": 27,
+        "types": {
+          "xhttp": 132
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:DIRECT": {
+        "links": 27,
+        "servers": 27,
+        "types": {
+          "xhttp": 27
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:RESIDENTIAL": {
+        "links": 78,
+        "servers": 26,
+        "types": {
+          "xhttp": 78
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+        "links": 24,
+        "servers": 8,
+        "types": {
+          "xhttp": 24
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+        "links": 9,
+        "servers": 9,
+        "types": {
+          "xhttp": 9
+        },
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "samples": [
+      {
+        "at": "2026-10-15T23:51:20.877750+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:24.045465+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:27.205895+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:30.369916+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:33.530971+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:36.706722+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 26,
+        "direct_links": 26,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:39.869107+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 3,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:43.046508+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 7,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:46.227816+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:49.382979+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 6,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:52.588145+00:00",
+        "active_servers": 28,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:55.755253+00:00",
+        "active_servers": 29,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 28,
+        "direct_servers": 28,
+        "direct_links": 28,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:51:58.955771+00:00",
+        "active_servers": 29,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 6,
+        "stable_direct_ready_servers": 28,
+        "direct_servers": 28,
+        "direct_links": 28,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:02.124761+00:00",
+        "active_servers": 29,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 27,
+        "direct_servers": 28,
+        "direct_links": 28,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:05.305499+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 4,
+        "stable_direct_ready_servers": 32,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:08.496011+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:11.652335+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:14.841913+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:17.999140+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:21.164305+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 19,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:24.314895+00:00",
+        "active_servers": 35,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:27.489200+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:30.670988+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:33.834679+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:36.984285+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:40.139518+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:43.293534+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 35,
+        "direct_links": 35,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:46.480416+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 18,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:49.637682+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 21,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:52:52.814211+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 25,
+        "stable_direct_ready_servers": 35,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      }
+    ],
+    "pass": false
+  },
+  "metrics": {
+    "samples": 30,
+    "samples_missing_ready": 6,
+    "max_missing_ready": 1,
+    "max_snapshot_age_seconds": 25,
+    "last_sample": {
+      "at": "2026-10-15T23:52:52.814211+00:00",
+      "active_servers": 36,
+      "active_without_snapshots": 1,
+      "active_stale_snapshots": 1,
+      "oldest_active_snapshot_seconds": 25,
+      "stable_direct_ready_servers": 35,
+      "direct_servers": 34,
+      "direct_links": 34,
+      "missing_stable_direct_servers": 1,
+      "ready": true
+    }
+  },
+  "lock_observation": [
+    {
+      "panel": "a8af9ea9-06fd-4f8b-b9fd-18af96bb30eb",
+      "observed_granted_seconds": 16.3,
+      "query_age_seconds": 25.1,
+      "snapshot_age": 25.3
+    },
+    {
+      "panel": "a8af9ea9-06fd-4f8b-b9fd-18af96bb30eb",
+      "observed_granted_seconds": 14.3,
+      "query_age_seconds": 23.1,
+      "snapshot_age": 23.3
+    },
+    {
+      "panel": "a8af9ea9-06fd-4f8b-b9fd-18af96bb30eb",
+      "observed_granted_seconds": 12.2,
+      "query_age_seconds": 21.0,
+      "snapshot_age": 21.2
+    }
+  ],
+  "initial_failed_live": {
+    "at": "2026-10-15T23:09:15.888658+00:00",
+    "surfaces": {
+      "api:ALL": {
+        "links": 171,
+        "servers": 35,
+        "types": {
+          "xhttp": 171
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:DIRECT": {
+        "links": 34,
+        "servers": 34,
+        "types": {
+          "xhttp": 34
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:RESIDENTIAL": {
+        "links": 102,
+        "servers": 34,
+        "types": {
+          "xhttp": 102
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:ALL": {
+        "links": 171,
+        "servers": 35,
+        "types": {
+          "xhttp": 171
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:DIRECT": {
+        "links": 34,
+        "servers": 34,
+        "types": {
+          "xhttp": 34
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:RESIDENTIAL": {
+        "links": 102,
+        "servers": 34,
+        "types": {
+          "xhttp": 102
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+        "links": 30,
+        "servers": 10,
+        "types": {
+          "xhttp": 30
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+        "links": 10,
+        "servers": 10,
+        "types": {
+          "xhttp": 10
+        },
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "samples": [
+      {
+        "at": "2026-10-15T23:09:17.006796+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:20.166930+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:23.316044+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:26.478030+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:29.638609+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:32.811007+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:35.959420+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:39.127562+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:42.292048+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 14,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:45.435585+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:48.617188+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 2,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 2,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:51.769372+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 14,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:54.933950+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:09:58.093774+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 19,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:10:01.277963+00:00",
+        "active_servers": 36,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 14,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      }
+    ],
+    "pass": false
+  },
+  "second_failed_live": {
+    "at": "2026-10-15T23:33:29.675928+00:00",
+    "surfaces": {
+      "api:ALL": {
+        "links": 125,
+        "servers": 25,
+        "types": {
+          "xhttp": 125
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:DIRECT": {
+        "links": 25,
+        "servers": 25,
+        "types": {
+          "xhttp": 25
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:RESIDENTIAL": {
+        "links": 75,
+        "servers": 25,
+        "types": {
+          "xhttp": 75
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:ALL": {
+        "links": 125,
+        "servers": 25,
+        "types": {
+          "xhttp": 125
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:DIRECT": {
+        "links": 25,
+        "servers": 25,
+        "types": {
+          "xhttp": 25
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:RESIDENTIAL": {
+        "links": 75,
+        "servers": 25,
+        "types": {
+          "xhttp": 75
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+        "links": 27,
+        "servers": 9,
+        "types": {
+          "xhttp": 27
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+        "links": 9,
+        "servers": 9,
+        "types": {
+          "xhttp": 9
+        },
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "samples": [
+      {
+        "at": "2026-10-15T23:33:30.824800+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 5,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:33.978480+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:37.139688+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:40.308106+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:43.465755+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:46.628530+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 24,
+        "direct_links": 24,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:49.782498+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 14,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:52.948425+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 18,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 24,
+        "direct_links": 24,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:56.114696+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 17,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 24,
+        "direct_links": 24,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:33:59.302192+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 6,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:02.476098+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:05.641891+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 4,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:08.802158+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 7,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:11.973787+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 25,
+        "direct_links": 25,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:15.142094+00:00",
+        "active_servers": 19,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 14,
+        "stable_direct_ready_servers": 18,
+        "direct_servers": 26,
+        "direct_links": 26,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:18.282824+00:00",
+        "active_servers": 20,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 17,
+        "stable_direct_ready_servers": 19,
+        "direct_servers": 27,
+        "direct_links": 27,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:21.446054+00:00",
+        "active_servers": 21,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 20,
+        "direct_servers": 29,
+        "direct_links": 29,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:24.626830+00:00",
+        "active_servers": 22,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 21,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:27.786734+00:00",
+        "active_servers": 24,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 23,
+        "direct_servers": 31,
+        "direct_links": 31,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:30.965321+00:00",
+        "active_servers": 24,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 17,
+        "stable_direct_ready_servers": 23,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:34.126062+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:37.295791+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:40.486262+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:43.641982+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:46.825031+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 17,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:49.992936+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:53.176223+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:56.332617+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:34:59.485411+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-15T23:35:02.863555+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 1,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      }
+    ],
+    "pass": false
+  },
+  "latest_fleet": {
+    "at": "2026-10-15T23:57:53.159358+00:00",
+    "runtime": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "servers": [
+      {
+        "id": "0b7dae76-cea3-439d-bc93-85b78dd97be9",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "0c88eb81-28e4-45c5-ae4d-808ab7f4cd21",
+        "state": "READY",
+        "server_seconds_left": 15088,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 4,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "0ea7a66c-69fa-420b-93ad-a236df5eac74",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "82a4fa40-252e-4a79-b0a3-145195569a84",
+        "state": "READY",
+        "server_seconds_left": 21396,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 2,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "14e5fc1e-1ae8-455e-bc2d-ae7b9bb39fc3",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "5a48e87d-4325-4bd0-9a57-e48e002b27a7",
+        "state": "READY",
+        "server_seconds_left": 14046,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 20,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "18079ee0-78ba-416f-bdfd-c344100ade49",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "0cb8cd4b-cf5a-467a-a8bc-cf1cfcaf558e",
+        "state": "READY",
+        "server_seconds_left": 18034,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 4,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "27d1df41-01e4-4666-a7d0-c7694ef413a2",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "caa89608-b96a-4a57-bd42-551bf1f25c1d",
+        "state": "READY",
+        "server_seconds_left": 13427,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 2,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 27,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "28d51ff5-c46d-4bde-b07c-af2a3bb6b9e2",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "bc2b0971-5041-4660-9aff-9d5dc4330dc3",
+        "state": "READY",
+        "server_seconds_left": 4510,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 10,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 2,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "2b2b643a-c47a-44cd-b5aa-3aefccba297d",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "d40860a1-90b8-4165-aab3-b86c619efd09",
+        "state": "READY",
+        "server_seconds_left": 14841,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 20,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "2bb54542-cdd8-461f-9abc-d92e7e6d7d1d",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "a1585420-c06e-49da-b513-28d19519eca6",
+        "state": "READY",
+        "server_seconds_left": 12190,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 1,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "36b4e5de-aa89-431a-b0d1-fbebd3ea6348",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "89b1e8c4-3f72-4e06-8ef4-ff81214073c9",
+        "state": "READY",
+        "server_seconds_left": 13730,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 7,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "3908cbce-fc7a-4713-8416-c9dcc50715dd",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "a8af9ea9-06fd-4f8b-b9fd-18af96bb30eb",
+        "state": "READY",
+        "server_seconds_left": 638,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 0,
+        "snapshot_age": 25,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 3,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "3bd2a8b7-aca4-4175-9ebe-7ba35a77b1e9",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "86f3a554-0269-4b65-8d49-ae0b57f55b4b",
+        "state": "READY",
+        "server_seconds_left": 3624,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 7,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 27,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "4c03a88e-656a-4881-b59a-06f781375e70",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "eea8954b-2c99-49a6-839a-e101137c03f9",
+        "state": "READY",
+        "server_seconds_left": 19303,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 16,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "4c2a23cc-5aab-4a84-aee6-671f3559a8ee",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "2c7469a5-ea83-4a1b-b4bd-06191d5ff259",
+        "state": "READY",
+        "server_seconds_left": 9620,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 9,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "63dd04f3-f51b-4c41-b4a4-634c5fed2eda",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "44429f67-013b-49ea-9ea7-9afe331e494d",
+        "state": "READY",
+        "server_seconds_left": 5912,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 5,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 26,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "6c0b1244-b810-4a1e-adcb-41837cf4d4f0",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "2d145670-ac9d-4955-9155-36092c586aeb",
+        "state": "READY",
+        "server_seconds_left": 16077,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 15,
+        "direct_routes": 0,
+        "residential_routes": 0,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "6c8ebbe3-1221-48e9-bc6e-5773b9a0ab05",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "e9e50014-cdee-4066-ae5f-ec3a837085fd",
+        "state": "READY",
+        "server_seconds_left": 21250,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 4,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "6d9406d0-fba2-40d4-993e-36c9121625e2",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "483d87ab-18fa-4c64-bceb-0bc7b5d36756",
+        "state": "READY",
+        "server_seconds_left": 12188,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 8,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "7adf1761-33e5-4e7a-b679-250866e0a897",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "aa03d416-afda-4244-8429-45ba0ffbc7f6",
+        "state": "READY",
+        "server_seconds_left": 8604,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 10,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "7c463ee3-e11a-4561-8e34-d918c5bc6636",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "37266b21-287b-42f6-994b-4ce1b9ae1715",
+        "state": "READY",
+        "server_seconds_left": 9538,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 15,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "7c904091-667c-4cb9-aded-6e4f66ef7bf1",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "5d6bcc63-ac80-4a46-993a-f284125d68b7",
+        "state": "READY",
+        "server_seconds_left": 12687,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 18,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "7d1420bb-6a8b-427c-9aaa-12e6cae29809",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "fd21beba-f3f1-4344-8283-0215591f3996",
+        "state": "READY",
+        "server_seconds_left": 15409,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 16,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "9e7974ee-7a18-4072-863c-b3ce70c9110b",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "7dcf5188-5505-4fb6-9966-03b153f8db1a",
+        "state": "READY",
+        "server_seconds_left": 13647,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 18,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "a427047b-81fb-4fb4-82a1-03867d09e95e",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "a811bc2c-136a-44b4-a8fc-ebc13852ca28",
+        "state": "READY",
+        "server_seconds_left": 980,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 2,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 27,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "aacb9448-53f5-4846-ae3a-db5cba2c9e04",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "dbf23a44-b801-425d-a3e4-bdabee7f4eb9",
+        "state": "READY",
+        "server_seconds_left": 6095,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 6,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "b093ecf8-a9e0-4e98-975b-0a8115254e43",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "a7ad7dde-5723-4eef-b642-b7cd03b2cde7",
+        "state": "READY",
+        "server_seconds_left": 7247,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 16,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "b358bdc2-691f-4b3f-aa47-319afafe391e",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "2a602536-8bb5-4edb-abff-89a8e33733da",
+        "state": "READY",
+        "server_seconds_left": 4100,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 5,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 29,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "bb63c635-9d6a-4f4f-9ba9-cfeae6d508a7",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "fba4cb5a-726f-4849-b6c9-5b4936f33f14",
+        "state": "READY",
+        "server_seconds_left": 5119,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 3,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "c322b061-7712-47ab-b4af-644f743b3c49",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "3890f201-f599-43d8-9ec3-ab9a24a1983b",
+        "state": "READY",
+        "server_seconds_left": 11579,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 8,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "c61d4ef4-5deb-4291-a57c-41cb74b13630",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "23d4db94-d10b-4f32-acdf-f38c26d636f9",
+        "state": "READY",
+        "server_seconds_left": 21359,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 15,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "caa8e35d-80a3-48e5-b1a1-305ccb520a64",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "cfefd29d-a63d-4b74-96dd-9a7290af0333",
+        "state": "READY",
+        "server_seconds_left": 1065,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 23,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "cd0c0a43-266f-4389-9fc7-42951651cfad",
+        "provider": "linode",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "9b944ebf-bf28-4841-80af-e7bc00f25109",
+        "state": "READY",
+        "server_seconds_left": 3713,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 18,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "e1d99b5a-f1e9-404e-9bdf-b29ef0e286a3",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "e204a012-2990-4b0b-9440-13c91d56b373",
+        "state": "READY",
+        "server_seconds_left": 7510,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 0,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 19,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "e31d6f3e-7647-442c-bd3c-324e4c7c50cd",
+        "provider": "vultr",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "72706284-c7e5-40f6-830b-5dc75ef0192e",
+        "state": "READY",
+        "server_seconds_left": 13505,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 1,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 7,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "f1d8eeb1-4eae-41d8-b2e3-5084f54483fa",
+        "provider": "digitalocean",
+        "health": "active",
+        "reason": "HEALTHY",
+        "panel_id": "cc584a05-9b35-4d54-b568-47dda7d36265",
+        "state": "READY",
+        "server_seconds_left": 9068,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 5,
+        "fresh_rows": 5,
+        "snapshot_age": 2,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 24,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "3cadfa65-bdb1-443f-a63b-d552a2a54282",
+        "provider": "vultr",
+        "health": "pending",
+        "reason": "PENDING_DELETION",
+        "panel_id": "48d30cc6-817e-49db-a3f7-1357b2b54630",
+        "state": "READY",
+        "server_seconds_left": -203,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 9,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "8ecec62d-96b2-45ad-aac9-9fe889c5d0e5",
+        "provider": "vultr",
+        "health": "pending",
+        "reason": "PENDING_DELETION",
+        "panel_id": "16bb53a8-b185-4c98-8f8a-a0fd3dbe3833",
+        "state": "EXPIRING",
+        "server_seconds_left": -13144,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 24,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "906b2d55-7704-4096-babd-0260b0843f63",
+        "provider": "vultr",
+        "health": "pending",
+        "reason": "PENDING_DELETION",
+        "panel_id": "3cf88f8d-8d64-4fc6-8f78-f57b86867e7d",
+        "state": "READY",
+        "server_seconds_left": -2213,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 11,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "d5e36d1c-93dd-4884-9619-dd0e77117e65",
+        "provider": "vultr",
+        "health": "pending",
+        "reason": "PENDING_DELETION",
+        "panel_id": "4a035c55-1c21-4002-aadf-1049d7c179e5",
+        "state": "READY",
+        "server_seconds_left": -12806,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 44,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      },
+      {
+        "id": "e8d2e4be-0043-424c-abb0-e6fcd00e8f37",
+        "provider": "vultr",
+        "health": "pending",
+        "reason": "PENDING_DELETION",
+        "panel_id": "ec336515-3c4e-4e1d-b1d8-a6c6b60aa846",
+        "state": "READY",
+        "server_seconds_left": -59,
+        "enabled": true,
+        "deployment_state": "PANEL_COMPLETE",
+        "snapshot_rows": 0,
+        "fresh_rows": 0,
+        "snapshot_age": null,
+        "route_state": "APPLIED",
+        "route_revision": 644,
+        "target_revision": 644,
+        "route_age": 36,
+        "direct_routes": 1,
+        "residential_routes": 4,
+        "transport_block": 0,
+        "cleanup_block": 0
+      }
+    ],
+    "profiles": [
+      {
+        "route_class": "RESIDENTIAL",
+        "ports": [
+          443
+        ]
+      },
+      {
+        "route_class": "DIRECT",
+        "ports": [
+          443
+        ]
+      }
+    ],
+    "route_control": {
+      "enabled": true,
+      "fleet": true,
+      "revision": 644
+    },
+    "schema": "000181_output_policy"
+  },
+  "github_actions": [
+    {
+      "id": 38825697344,
+      "head_sha": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+      "head_branch": "main",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38825697344"
+    },
+    {
+      "id": 38825697645,
+      "head_sha": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+      "head_branch": "stable",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38825697645"
+    }
+  ],
+  "publisher": {
+    "status": "published",
+    "source_revision": "097fc640d909715d99dd6665ed290b9c7d1d966e",
+    "public_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+    "evidence": "/var/lib/datacenter-publisher/release-wgrx0kde"
+  },
+  "source_hashes": {
+    "internal/adminapi/output.go": "f51c2b8a4bec961722cb154cb6278abf404b87af3872806a2eed827bd1085185",
+    "internal/adminapi/output_fairness_test.go": "08cae311785c93eddb58a9c20a7e8168b2228ca7b6493bfe5342661bb8cac31f",
+    "internal/adminapi/output_scheduler_postgres_test.go": "1b469492ce9ae4252aef5dfa5ce8953cdaf3bcafb7654aa7264e1f376ebda12f",
+    "internal/adminapi/output_settings.go": "f54a437fd08f88c0d17e11e94c8f56b88577242973fe3e7f99a0b0454e87f5d7",
+    "internal/adminapi/output_settings_test.go": "83d0926a67b35216ef8d2237fa4ac4282691e8202e214e1ee6ff0be401ae737f",
+    "internal/adminapi/output_snapshot.go": "93f1345aaf1c21659351304cfb4e498ea8c013f09bba5dc0622a3436b71f4d6d",
+    "internal/adminapi/output_snapshot_long_test.go": "dfd7e1b38428fef5c15d2f61347d60cb513c0cba1ac607f6f7d0e1bff249a4f3",
+    "internal/adminapi/server.go": "6ef3d02b3c5bb93128ffc263a56f2131765e4501af44757b633340034e74c7e6",
+    "internal/panels/export/options.go": "9ed8ea94a4227ef931d666ea3e6079bf74d19a3c64c87ef1a41c56c7342e1122",
+    "internal/panels/export/options_test.go": "4f0cb52687fc31116cd91f4c8302c326a916f3214c5f412cc975f670f5e06b18",
+    "migrations/000181_output_policy.down.sql": "5e07e8ccd8a31e8628e3951540ea7f60024b9833f032908681fd92fdb72ffb29",
+    "migrations/000181_output_policy.up.sql": "8bb29e3654a716edb93c06f407986ab5c2ffc6423aba6d1611acfc426bda6906",
+    "web/static/config-transport.js": "e511a70d3097594f758cff8dc573203f9f24d37d8471ae9f60078603ed480e67",
+    "web/static/index.html": "4ee4a6657d46d5eac7f85a6c5c8f0c087b6ed5e0d2cd65a558e93e550352dfec",
+    "web/static/output-settings.js": "b44250525fb32b9bdcb2ab5895523cc97fbddb23daf7d6541c66742b8e9b828d",
+    "web/tests/config-transport.cjs": "1d0e712186c698a35003b20060f6cdcd47a6d8692091d4b1e8721a928b7adf15",
+    "internal/adminapi/output_pool_postgres_test.go": "1b088799ffe5cee546f3bcece1261135415aa7804619e4ab383b38090477db7f",
+    "internal/adminapi/output_config_lock_postgres_test.go": "46b2e91ceb2f9134c16177eefdc5aec8696af4f541b93a7bb8f86e304a2f54de",
+    "internal/panels/sanaei/config_lock.go": "162d7b68fefd6bbc8071f94eff7c6bc4f0db889ac1d3dffcbf9f8d364ffd0fed",
+    "internal/adminapi/output_dispatch_test.go": "5ec42e1caee1feb72e706ba3f69abb8294add6edffe9a4703e10c066605edc3d"
+  },
+  "api_tokens": 180087,
+  "api_responses": 17,
+  "limitations": [
+    "Strict live coverage FAILED:6/30samples had one missing ready server; never mark complete or relabel this test PASS.",
+    "Current output requires15second snapshot freshness. Native structural workers can hold the granted lock continuously for at least16.3observed seconds; query age25.1sec includes possible lock wait and is not an exact held-duration measurement. Snapshot age reached25sec in acceptance and28.9sec in diagnosis.",
+    "Scheduler refills slots and checks other panels promptly; it cannot freshly verify a panel while its native worker owns the config lock. globalreality logged a native session deadline for the slow panel.",
+    "Any proposed15-to30second output freshness change is a behavior/policy decision,not implemented or tested; account/expiry/ownership/protection/routing gates must stay. A larger window cannot guarantee output during arbitrary outages.",
+    "Browser Dialer cannot be activated for inbound REALITY clients by a server-only setting. Saved preference and core capability preserved; no Xray core replacement in this task.",
+    "Phone was not directly retested. Refresh its subscription to use omitted optional fields."
+  ]
+}
