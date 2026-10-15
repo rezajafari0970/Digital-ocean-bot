@@ -94,7 +94,7 @@ func bulkTestDB(t *testing.T) *sql.DB {
 	if _, err = db.Exec(fixture); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle", "000161_client_mutation_panel_health"} {
+	for _, name := range []string{"000124_client_mutation_jobs", "000125_bulk_user_ownership", "000127_client_mutation_execution_gate", "000131_bulk_user_unknown_outcome_recovery", "000134_durable_bulk_create", "000135_bulk_scale_recovery", "000136_bulk_lifecycle", "000161_client_mutation_panel_health", "000180_transport_apply"} {
 		b, e := os.ReadFile(filepath.Join("../../../migrations", name+".up.sql"))
 		if e != nil {
 			t.Fatal(e)

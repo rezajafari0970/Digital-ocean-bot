@@ -1,0 +1,160 @@
+{
+  "id": "transport-apply-20261015",
+  "updated_at": "2026-10-15T20:48:20.525837+00:00",
+  "status": "VERIFIED_PUBLICATION_PENDING",
+  "base_revision": "74d645823470bc8a8aea08457e8c9244ff1b608c",
+  "stage_status": {
+    "diagnosis": "PASS_OLD_LISTENER_PIN",
+    "implementation": "PASS",
+    "postgres_browser_full": "PASS",
+    "race_vet": "PASS",
+    "native_core_apply_restore": "PASS",
+    "api_review": "PASS_R5_R6",
+    "publication": "PENDING",
+    "normal_updates": "PENDING",
+    "live_apply": "PENDING",
+    "live_output": "PENDING",
+    "browser_dialer": "UNAVAILABLE_WITH_REALITY",
+    "phone": "DISCONNECTED_REFRESH_REQUIRED"
+  },
+  "reviewed_source_hashes": {
+    "cmd/worker/main.go": "b9ef5bb954390343f6aee9ef5aed34546c4a3c36773b739340246c5ff618628f",
+    "cmd/worker/main_test.go": "167d5b7df22ab8053626f73a03204342a01c0de1b24edd10eda5bc6239d27fc3",
+    "cmd/worker/supervision.go": "0d416c150c3e17d2b49f69ca890b9f34fbb24a903ff321fdb2515e280da1d37b",
+    "internal/adminapi/config_transport.go": "0dd62bc91b0ab545b01e5d5a152fcda6ed351f27f1d187636eef9ae1b11424ff",
+    "internal/adminapi/config_transport_apply_test.go": "86b04565717cd0f5cef8b77573191c8acb1c548dc1446ee78d6dd66e05d9ce67",
+    "internal/adminapi/output.go": "fe0abf44e703cea62e4deb301238c0c15c6b5ff56ddfb22ccd84ddab9f230025",
+    "internal/adminapi/output_snapshot.go": "89396725da78e3c039f57d54c4f82b11cf00ad472bd94d8a84e02123a69a0689",
+    "internal/adminapi/server.go": "bf2213df65b42dbf6843d189f380e718f08ebc802b84051d306f124e2faf8926",
+    "internal/panels/clientops/bulk_test.go": "2b326956c48fd5f340d2c31c6f17e8edc5e72ca21b814b8a9750f8791c311ccc",
+    "internal/panels/clientops/journal.go": "2c1de6d904ccfd571615e2eb7781eaacc09138d9824f7fdf3cf852245dbfb60c",
+    "internal/panels/clientops/transport.go": "b50ebfb92c6d372959f375a4fdace5d35aa53f7ea15c7bf8205d99bf56bc5cd6",
+    "internal/panels/globalreality/service.go": "271632a62f86d2afa9a922207b0adb29510a92994fb59958f28b9a1d704335c6",
+    "internal/panels/transportapply/native_test.go": "21592b38ad6f88df9a1213afbc8193bd4e16dbe099ed3240b6d218d7de786724",
+    "internal/panels/transportapply/postgres_test.go": "438231b3bc9acea92e82faf72f395a8901f0b52d82cb0b0a9cd4f452f90ed718",
+    "internal/panels/transportapply/runtime.go": "c69c13da100ad5eb6d5f3badd410ca2bb6186e2d4c3ed6e213c8b8b588644f5e",
+    "internal/panels/transportapply/runtime_test.go": "61358245723938a4247775b994e460bbe9084be80c1c9c3e7482480d0539c6cd",
+    "internal/panels/transportapply/runtime_verify.py": "df5d17b25d28ddc8ebd4b53bf1ae94c9e34254b0a4e46c6aecdbcf4af15b3888",
+    "internal/panels/transportapply/service.go": "98b2374df641b75d367052d00fd431fd9de73d6edc9bc404501b6b96fb12c80b",
+    "internal/panels/transportapply/service_test.go": "cb430f0b757553bec5d8fedc650d39980d275b3fff6d050cf00b8c4cd0e777b3",
+    "internal/panels/transportapply/store.go": "41c348663aae9060b9052fd0f8a119b84b761c224d2dc1f2a3989d234b00de00",
+    "internal/panels/transportapply/transform.go": "b94a09d79f4ed07bfe51622f14e08b1a2908be395a5ffb0484a1978ec65a3da2",
+    "internal/panels/transportapply/transform_test.go": "ca5807b81e8b9fd3015e67a0d91aabc5be8271ad7198db2648ccffdb166f9604",
+    "migrations/000180_transport_apply.down.sql": "8f871c6e4071f139fb47c1dd7b9896d7520dacb3976449ede46e0b5eb5c406cc",
+    "migrations/000180_transport_apply.up.sql": "8fae34267e4ae02b2685b7a01e5cd82b9f50c394d7e65a8c732abefbd1fe8c71",
+    "web/static/config-transport.js": "2b182c8066a85a01ff4b721341476a6db144a96d2047904f7b67f48994ccf33e",
+    "web/tests/config-transport.cjs": "dc2fd9691c7c90d33438160341b3d1bcbd24622acfd36691a3de80830a6f4262"
+  },
+  "api_usage": [
+    {
+      "review": "review-r1",
+      "id": "resp_0943706968ec339c006ad133f81c7c87d1ba72467bf68ae993",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 31306,
+        "input_tokens_details": {
+          "cache_write_tokens": 31303,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2448,
+        "output_tokens_details": {
+          "reasoning_tokens": 2070
+        },
+        "total_tokens": 33754
+      },
+      "decision": "REVISE"
+    },
+    {
+      "review": "review-r2",
+      "id": "resp_0cc8fe6e7d743970006ad13658d7d887d19c516960023902a3",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 34618,
+        "input_tokens_details": {
+          "cache_write_tokens": 34615,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3358,
+        "output_tokens_details": {
+          "reasoning_tokens": 3106
+        },
+        "total_tokens": 37976
+      },
+      "decision": "REVISE"
+    },
+    {
+      "review": "review-r3",
+      "id": "resp_03741ce3dcb79b2d006ad13709734c87d1bec192773f6a4f36",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 35032,
+        "input_tokens_details": {
+          "cache_write_tokens": 35029,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3890,
+        "output_tokens_details": {
+          "reasoning_tokens": 3458
+        },
+        "total_tokens": 38922
+      },
+      "decision": "REVISE"
+    },
+    {
+      "review": "review-r4",
+      "id": "resp_01e4049746388374006ad13933acac87d187029ac1189b9b98",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 37693,
+        "input_tokens_details": {
+          "cache_write_tokens": 37690,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3777,
+        "output_tokens_details": {
+          "reasoning_tokens": 3620
+        },
+        "total_tokens": 41470
+      },
+      "decision": "REVISE"
+    },
+    {
+      "review": "review-r5",
+      "id": "resp_051e44d072983776006ad139a89d3087d18914dd3bee05f37b",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 3261,
+        "input_tokens_details": {
+          "cache_write_tokens": 3258,
+          "cached_tokens": 0
+        },
+        "output_tokens": 191,
+        "output_tokens_details": {
+          "reasoning_tokens": 129
+        },
+        "total_tokens": 3452
+      },
+      "decision": "PASS"
+    },
+    {
+      "review": "review-r6",
+      "id": "resp_07a5adf4f2528fac006ad13bf26e1087d1b31ceb456b6133c5",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 6280,
+        "input_tokens_details": {
+          "cache_write_tokens": 6277,
+          "cached_tokens": 0
+        },
+        "output_tokens": 168,
+        "output_tokens_details": {
+          "reasoning_tokens": 75
+        },
+        "total_tokens": 6448
+      },
+      "decision": "PASS"
+    }
+  ],
+  "api_tokens": 162022,
+  "evidence_directory": "/root/projects/dob-transport-apply-20261015/.local/apply-evidence"
+}

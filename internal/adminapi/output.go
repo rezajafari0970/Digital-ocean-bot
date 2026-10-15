@@ -47,6 +47,21 @@ func outputMap(raw json.RawMessage) (map[string]any, error) {
 }
 
 func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel) string {
+	ctx, cancel := context.WithTimeout(parent, 90*time.Second)
+	defer cancel()
+	_ = sanaei.WithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) error {
+		var busy bool
+		if err := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM reality_transport_apply_jobs WHERE panel_id=$1 AND state IN('RUNNING','BLOCKED'))", p.ID).Scan(&busy); err != nil {
+			return err
+		}
+		if !busy {
+			s.refreshPanelOutputLocked(ctx, p)
+		}
+		return nil
+	})
+	return ""
+}
+func (s *Server) refreshPanelOutputLocked(parent context.Context, p readyworker.Panel) string {
 
 	ctx, cancel := context.WithTimeout(parent, 90*time.Second)
 	defer cancel()

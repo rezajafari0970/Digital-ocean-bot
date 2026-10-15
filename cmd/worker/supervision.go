@@ -46,6 +46,9 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		p.Idle = 5 * time.Second
 	case "sanaei-cache":
 		p.Idle = 5 * time.Second
+	case "transport-apply":
+		p.Work = 5 * time.Minute
+		p.Idle = 3 * time.Second
 	case "client-mutation":
 		p.Work = 2 * time.Minute
 		p.Idle = time.Second

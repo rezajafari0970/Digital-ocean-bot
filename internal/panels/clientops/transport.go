@@ -8,8 +8,8 @@ import (
 )
 
 // InboundFlow reads the same authenticated snapshot used by lifecycle planning.
-// Transport is immutable for pinned listeners; new policy revisions never
-// reinterpret queued payloads or convert an existing listener.
+// Default policy revisions do not reinterpret queued payloads. Explicit transport
+// applications drain queued work and fence admission before changing a pin.
 func InboundFlow(ctx context.Context, rt *sanaei.PanelRuntime, id int64) (string, error) {
 	flow, _, err := inboundContract(ctx, rt, id)
 	return flow, err

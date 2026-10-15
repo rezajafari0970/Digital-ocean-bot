@@ -33,6 +33,13 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	if s.DB == nil || s.Secrets == nil || p.ID == "" {
 		return errors.New("global reality config")
 	}
+	var applying bool
+	if err := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM reality_transport_apply_jobs WHERE panel_id=$1 AND state IN('RUNNING','BLOCKED'))", p.ID).Scan(&applying); err != nil {
+		return err
+	}
+	if applying {
+		return nil
+	}
 	var enabled bool
 	var portsRaw []byte
 	e := s.DB.QueryRowContext(ctx, `SELECT enabled,ports FROM global_config_policies WHERE policy_key='reality'`).Scan(&enabled, &portsRaw)

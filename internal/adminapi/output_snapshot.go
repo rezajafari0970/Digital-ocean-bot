@@ -166,6 +166,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	// A last verified admission closure stays withheld across stale/failed polls.
 	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
 	where += serverProtectionOutputPredicate
+	where += " AND NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED')) "
 	args := []any{}
 	// Class publication requires a fresh running-core proof of the current revision.
 	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `

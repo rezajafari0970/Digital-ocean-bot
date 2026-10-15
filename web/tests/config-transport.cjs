@@ -6,9 +6,12 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  const profileData=[{route_class:'RESIDENTIAL',enabled:true,master_enabled:true,ports:[443],target_users_per_inbound:20,user_lifetime_seconds:600,users_per_second:1,revision:1}];
  const capacity={target:20,active:7,expired:0,quota_exhausted:0,deficit:13,created_last_cycle:1,inbounds:[{panel_id:'fixture',inbound_id:1,base_url:'http://fixture.invalid',port:443,target:20,active:7,deficit:13,created_last_cycle:1}],automation:{running:true,panels:[],cooldown_panels:0,quarantined_panels:0}};
  const outputHTML=fs.readFileSync(path.resolve(__dirname,'../../internal/adminapi/output_view.go'),'utf8').match(/io.WriteString\(w, `([\s\S]*?)`\)/)[1];
- const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};preset.flow="xtls-rprx-vision-udp443";preset.finalmask={tcp:preset.finalmask.tcp};preset.finalmask_enabled=true;preset.finalmask_scope="both";preset.browser_dialer="";let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'New physical listeners only. Existing listeners retain their saved transport and path.',finalmask_status:'TCP Fragment requires verified core; UDP and QUIC settings do not act on HTTP/2.',compatibility:'Vision uses VLESS Encryption; Browser Dialer requires TLS.'};const saves=[];
+ const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};preset.flow="xtls-rprx-vision-udp443";preset.finalmask={tcp:preset.finalmask.tcp};preset.finalmask_enabled=true;preset.finalmask_scope="both";preset.browser_dialer="WebView";let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'Saved defaults apply to new listeners. Select Apply to existing to update managed listeners in sequence. Existing client IDs and limits are preserved; clients must refresh subscriptions.',finalmask_status:'TCP Fragment requires verified core; UDP and QUIC settings do not act on HTTP/2.',compatibility:'Vision uses VLESS Encryption; Browser Dialer requires TLS.'};const saves=[],actions=[];
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
+  if(url.pathname==='/api/v1/configs/transport/apply'||url.pathname.startsWith('/api/v1/configs/transport/rollback/')){
+   actions.push(url.pathname);transport.applications=[{id:'00000000-0000-4000-8000-000000000001',panel_id:'fixture-panel',managed_key:'dob:global-reality:00443',state:actions.length===1?'SUCCEEDED':'PENDING',error:''}];res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport));return;
+  }
   if(url.pathname==='/api/v1/configs/transport'){
    if(req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);saves.push(p);if(p.revision!==transport.policy.revision){res.writeHead(409);res.end(JSON.stringify({error:'transport_revision_changed'}));return}transport.policy={revision:p.revision+1,config:p.config};res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport))});return}
    res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport));return;
@@ -60,28 +63,35 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'apart.com');
   assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').readOnly"),false);
   assert.equal(await evaluate("document.querySelector('[name=path_bytes]').value"),'4096');
-  assert.equal(await evaluate("document.querySelectorAll('#xhttpFields select[disabled]').length"),0);
+  assert.equal(await evaluate("document.querySelectorAll('#xhttpFields select[disabled]:not([name=browser_dialer])').length"),0);
+  assert.equal(await evaluate("document.querySelector('[name=browser_dialer]').disabled"),true);
   assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('REALITY')"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'xhttp-mobile.png'),Buffer.from(shot.data,'base64'));
   await evaluate("document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configTransportSlot').innerText.includes('apart.com')");
-  assert.equal(saves.length,1);assert.deepEqual(saves[0].config,preset);
+  assert.equal(saves.length,1);assert.deepEqual(saves[0].config,preset);assert.equal(saves[0].apply_existing,true);
   await evaluate("document.querySelector('#editTransport').click()");
   await waitFor("document.querySelector('#modal').open");
   await evaluate("document.querySelector('[name=path_bytes]').value='4097';document.querySelector('#modalSubmit').click()");
   assert.equal(saves.length,1);
-  await evaluate("document.querySelector('[name=path_bytes]').value='1024';document.querySelector('[name=xhttp_host]').value='custom.example.org';document.querySelector('[name=xhttp_mode]').value='packet-up';document.querySelector('[name=browser_dialer]').value='WebView';document.querySelector('[name=xhttp_extra]').value=JSON.stringify({xPaddingBytes:'256-512',noGRPCHeader:false});document.querySelector('#modalSubmit').click()");
+  await evaluate("document.querySelector('[name=path_bytes]').value='1024';document.querySelector('[name=xhttp_host]').value='custom.example.org';document.querySelector('[name=xhttp_mode]').value='packet-up';document.querySelector('[name=xhttp_extra]').value=JSON.stringify({xPaddingBytes:'256-512',noGRPCHeader:false});document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open");
   assert.equal(saves.length,2);assert.equal(saves[1].config.path_bytes,1024);assert.equal(saves[1].config.host,'custom.example.org');assert.equal(saves[1].config.mode,'packet-up');assert.equal(saves[1].config.browser_dialer,'WebView');assert.deepEqual(saves[1].config.extra,{xPaddingBytes:'256-512',noGRPCHeader:false});
   await evaluate("document.querySelector('#editTransport').click()");
   await waitFor("document.querySelector('#modal').open");
   assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'custom.example.org');
   assert.equal(await evaluate("document.querySelector('[name=browser_dialer]').value"),'WebView');
-  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('not active with REALITY')"),true);
+  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('not active or exported for REALITY')"),true);
   await evaluate("var sel=document.querySelector('[name=transport_network]');sel.value='tcp';sel.dispatchEvent(new Event('change'));document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configTransportSlot').innerText.includes('TCP Reality')");
   assert.deepEqual(saves[2].config,{network:'tcp',finalmask_enabled:false});
+  await evaluate("document.querySelector('#applyExistingTransport').click()");
+  await waitFor("!!document.querySelector('[data-transport-rollback]')");
+  assert.equal(await evaluate("document.querySelector('#configTransportSlot').innerText.includes('Verified: 1')"),true);
+  await evaluate("document.querySelector('[data-transport-rollback]').click()");
+  await waitFor("document.querySelector('#configTransportSlot').innerText.includes('Queued: 1')");
+  assert.equal(actions.length,2);
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:['mobile layout','exact preset','editable settings survive reload','dialer limitation explicit','boundary validation','revision save','TCP creation-default rollback'],page_errors:errors},null,2));console.log('XHTTP_TRANSPORT_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

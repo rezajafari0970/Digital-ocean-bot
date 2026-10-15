@@ -18,6 +18,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/rollingreboot"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/serverguardian"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportapply"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/usercapacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/residential"
@@ -487,6 +488,31 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
+	modules.Add(worker.RolePanels, "transport-apply", func(ctx context.Context) {
+		ticker := time.NewTicker(3 * time.Second)
+		defer ticker.Stop()
+		service := transportapply.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes, SSH: provisioning.SSHClient{Timeout: 180 * time.Second, HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}}
+		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				cctx, finish, err := supervision.Begin(ctx, "work", 0)
+				if err != nil {
+					continue
+				}
+				bounded, cancel := context.WithTimeout(cctx, 240*time.Second)
+				err = panelWork.Do(bounded, service.RunOne)
+				cancel()
+				finish()
+				if err != nil && ctx.Err() == nil {
+					log.Printf("transport apply: %v", err)
+				}
+			}
+		}
+	})
 	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
 	modules.Add(worker.RolePanels, "global-reality", func(ctx context.Context) {
 		t := time.NewTicker(10 * time.Second)

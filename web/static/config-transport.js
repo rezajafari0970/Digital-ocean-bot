@@ -1,8 +1,8 @@
 function transportDialerStatus(c){
- return c.browser_dialer ? 'Requested '+c.browser_dialer+' · inactive with REALITY' : 'Disabled';
+ return 'Unavailable with REALITY · not enabled in exported links';
 }
 function transportMaskStatus(c){
- return c.finalmask_enabled ? 'TCP Fragment · '+(c.finalmask_scope||'both')+' · new listeners' : 'Disabled';
+ return c.finalmask_enabled ? 'TCP Fragment · '+(c.finalmask_scope||'both') : 'Disabled';
 }
 async function refreshConfigTransport(){
  const slot=document.querySelector('#configTransportSlot');if(!slot)return;
@@ -12,8 +12,32 @@ async function refreshConfigTransport(){
   const row=(name,value)=>'<span>'+esc(name)+'</span><span>'+esc(value)+'</span>';
   let rows=row('Network',network==='xhttp'?'XHTTP Reality · '+c.mode:'TCP Reality');
   if(network==='xhttp')rows+=row('XHTTP Host',c.host)+row('Path length',c.path_bytes+' bytes · unique per listener')+row('Flow',c.flow||'Empty')+row('VLESS Encryption',c.flow?'Enabled for Vision':'None')+row('Browser Dialer',transportDialerStatus(c))+row('FinalMask',transportMaskStatus(c));
-  slot.innerHTML='<div class="card section"><div class="cardHeader"><h3>Transport for new listeners</h3><button class="small ghost" id="editTransport">Edit transport</button></div><div class="kv">'+rows+'</div><p class="muted">'+esc(data.scope)+'</p></div>';
+  slot.innerHTML='<div class="card section"><div class="cardHeader"><h3>Listener transport settings</h3><button class="small ghost" id="editTransport">Edit transport</button></div><div class="kv">'+rows+'</div><p class="muted">'+esc(data.scope)+'</p></div>';
   document.querySelector('#editTransport').onclick=()=>openConfigTransport(data);
+  const jobs=data.applications||[],counts={};
+  jobs.forEach(j=>counts[j.state]=(counts[j.state]||0)+1);
+  const stateNames={PENDING:'Queued',RUNNING:'Applying / verifying',SUCCEEDED:'Verified',BLOCKED:'Needs review',FAILED:'Failed',OBSOLETE:'Server retired'};
+  const status=Object.entries(counts).map(([k,v])=>esc(stateNames[k]||k)+': '+v).join(' · ')||'No existing-listener application requested';
+  const area=document.createElement('div');area.className='card section';
+  area.innerHTML='<h3>Apply saved settings</h3><p>'+status+'</p><p class="muted">Updates existing managed listeners one at a time. UUIDs, quotas and expiry are preserved. Imported clients must refresh their subscriptions after verification.</p><button class="small" id="applyExistingTransport">Apply to existing listeners</button><button class="small ghost" id="refreshTransportStatus">Refresh status</button><div id="transportApplyError"></div>'+
+   jobs.slice(0,80).map(j=>'<div class="kv"><span>'+esc(j.panel_id.slice(0,8))+' · '+esc(j.managed_key)+'</span><span>'+esc(stateNames[j.state]||j.state)+' '+esc(j.error||'')+((j.state==='SUCCEEDED'||j.state==='BLOCKED')?'<button type="button" class="small ghost" data-transport-rollback="'+esc(j.id)+'">Restore previous transport</button>':'')+(j.state==='BLOCKED'?'<button type="button" class="small ghost" data-transport-retry="'+esc(j.id)+'">Recheck and retry</button>':'')+'</span></div>').join('');
+  slot.appendChild(area);
+  document.querySelector('#refreshTransportStatus').onclick=refreshConfigTransport;
+  document.querySelector('#applyExistingTransport').onclick=async ev=>{
+   ev.currentTarget.disabled=true;
+   try{await api('/api/v1/configs/transport/apply',{method:'POST',body:JSON.stringify({revision:data.policy.revision})});await refreshConfigTransport()}
+   catch(err){document.querySelector('#transportApplyError').textContent=err.message;ev.target.disabled=false}
+  };
+  area.querySelectorAll('[data-transport-retry]').forEach(btn=>btn.onclick=async()=>{
+   btn.disabled=true;
+   try{await api('/api/v1/configs/transport/retry/'+btn.dataset.transportRetry,{method:'POST',body:'{}'});await refreshConfigTransport()}
+   catch(err){document.querySelector('#transportApplyError').textContent=err.message;btn.disabled=false}
+  });
+  area.querySelectorAll('[data-transport-rollback]').forEach(btn=>btn.onclick=async()=>{
+   btn.disabled=true;
+   try{await api('/api/v1/configs/transport/rollback/'+btn.dataset.transportRollback,{method:'POST',body:'{}'});await refreshConfigTransport()}
+   catch(err){document.querySelector('#transportApplyError').textContent=err.message;btn.disabled=false}
+  });
  }catch(e){
   if(slot.isConnected)slot.innerHTML='<div class="card section">Transport settings unavailable. <button class="small ghost" id="retryTransport">Retry</button></div>';
   document.querySelector('#retryTransport')?.addEventListener('click',refreshConfigTransport);
@@ -23,8 +47,9 @@ function openConfigTransport(data){
  const policy=data.policy,preset=data.preset,current=policy.config;
  const c=current.network==='xhttp'?structuredClone(current):structuredClone(preset);
  $('#modalForm').noValidate=false;$('#modalSubmit').hidden=false;
- $('#modalTitle').textContent='Transport for new listeners';
+ $('#modalTitle').textContent='Listener transport settings';
  $('#modalFields').innerHTML='<p>'+esc(data.scope)+'</p>'+
+ '<label><input type="checkbox" name="apply_existing" checked> Apply these settings to existing managed listeners as well as new listeners</label>'+
  '<label>Transport<select name="transport_network"><option value="tcp">TCP Reality</option><option value="xhttp">XHTTP Reality</option></select></label>'+
  '<div id="xhttpFields">'+
  '<label>XHTTP Mode<select name="xhttp_mode"><option value="stream-up">stream-up</option><option value="packet-up">packet-up</option><option value="stream-one">stream-one</option><option value="auto">auto</option></select></label>'+
@@ -39,17 +64,17 @@ function openConfigTransport(data){
  '<label>FinalMask (JSON)<textarea name="finalmask_json" rows="12" spellcheck="false">'+esc(JSON.stringify(c.finalmask||preset.finalmask,null,2))+'</textarea></label>'+
  '<button type="button" class="small ghost" id="useFragmentPreset">Use tested TCP Fragment preset</button>'+
  '<p class="muted">'+esc(data.finalmask_status)+'</p>'+
- '<label>Browser Dialer preference<select name="browser_dialer"><option value="">Disabled</option><option value="OkHttp">OkHttp</option><option value="WebView">WebView</option></select></label>'+
+ '<label>Browser Dialer<select name="browser_dialer" disabled><option value="">Unavailable with REALITY</option><option value="OkHttp">Saved OkHttp preference — inactive</option><option value="WebView">Saved WebView preference — inactive</option></select></label>'+
  '<p class="muted" id="browserDialerNotice"></p>'+
- '<p class="muted">XHTTP Host does not change SNI. SNI follows the panel’s existing SNI selection policy. Changing defaults applies to new listeners; existing listeners keep their saved settings.</p></div>';
+ '<p class="muted">XHTTP Host does not change SNI. SNI follows the panel’s existing SNI selection policy. Applying to existing listeners changes their saved settings after native verification.</p></div>';
  const field=name=>$('#modalFields [name="'+name+'"]');
  field('transport_network').value=current.network||'tcp';field('xhttp_mode').value=c.mode||'stream-up';
  field('transport_flow').value=c.flow||'';field('finalmask_enabled').value=String(!!c.finalmask_enabled);
  field('finalmask_scope').value=c.finalmask_scope||'both';field('browser_dialer').value=c.browser_dialer||'';
  const sync=()=>{
   const visible=field('transport_network').value==='xhttp';$('#xhttpFields').hidden=!visible;
-  $('#xhttpFields').querySelectorAll('input,select,textarea,button').forEach(x=>{x.disabled=!visible});
-  $('#browserDialerNotice').textContent=field('browser_dialer').value ? 'This saves your preference. It is not active with REALITY: Browser Dialer needs a TLS endpoint and must be enabled in the client app. A VLESS link cannot turn on this app setting.' : 'Native dialing. Browser Dialer can be selected as a preference, but REALITY cannot use the browser connection.';
+  $('#xhttpFields').querySelectorAll('input,select,textarea,button').forEach(x=>{x.disabled=!visible||x.name==='browser_dialer'});
+  $('#browserDialerNotice').textContent='Browser Dialer is not active or exported for REALITY. Enabling it requires a compatible client transport; changing only this server setting cannot enable it.';
  };
  field('transport_network').onchange=sync;field('browser_dialer').onchange=sync;sync();
  $('#useFragmentPreset').onclick=()=>{field('finalmask_json').value=JSON.stringify(preset.finalmask,null,2)};
@@ -66,7 +91,7 @@ function openConfigTransport(data){
    delete config.path;
   }
   $('#modalSubmit').disabled=true;
-  try{await api('/api/v1/configs/transport',{method:'PUT',body:JSON.stringify({revision:policy.revision,config})});$('#modal').close();await refreshConfigTransport()}
+  try{await api('/api/v1/configs/transport',{method:'PUT',body:JSON.stringify({revision:policy.revision,config,apply_existing:field('apply_existing').checked})});$('#modal').close();await refreshConfigTransport()}
   catch(err){$('#modalError').textContent=err.message}
   finally{$('#modalSubmit').disabled=false}
  };
