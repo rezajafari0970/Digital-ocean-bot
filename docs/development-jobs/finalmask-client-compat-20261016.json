@@ -1,0 +1,158 @@
+{
+  "id": "finalmask-client-compat-20261016",
+  "goal": "Fix FinalMask VLESS output for older client cores rejecting plural-only lengths/delays. Preserve newer arrays and add positive scalar length/delay fallbacks on client export only.",
+  "context": "Phone fatal LengthMin cannot be 0 before connection. Server masks and saved profiles must remain identical. Native old/new binary tests required before deploy.",
+  "allowed_paths": [
+    "internal/panels/transportprofile/client_mask.go",
+    "internal/panels/transportprofile/client_mask_test.go",
+    "internal/panels/export/vless.go",
+    "internal/panels/export/client_mask_test.go"
+  ],
+  "rollback_commit": "1aa5a19e8adca36a7c82a413e711ac4dbfe4732a",
+  "runtime_rollback": "5a78762b03e0b2dcf16f9cf66ed1a2abf5cd4ba6",
+  "risk": {
+    "schema": 1,
+    "profile": "high",
+    "score": 11,
+    "reasons": [
+      "deploy",
+      "medium_risk_path:internal/panels/export/client_mask_test.go",
+      "medium_risk_path:internal/panels/export/vless.go",
+      "medium_risk_path:internal/panels/transportprofile/client_mask.go",
+      "medium_risk_path:internal/panels/transportprofile/client_mask_test.go"
+    ]
+  },
+  "updated_at": "2026-10-15T22:06:58.448716+00:00",
+  "status": "SOURCE_VERIFIED_PUBLICATION_PENDING",
+  "reviewed_source_hashes": {
+    "internal/panels/transportprofile/client_mask.go": "cf48e72df081da0872335d768df846b9ad331d623493467cdfaae21758b7f5f3",
+    "internal/panels/transportprofile/client_mask_test.go": "401e7a1249f6b900873b58b521e1378f9756c6550d9d0b6ce40fb13f64e5de1a",
+    "internal/panels/export/vless.go": "8ef15e81b62c4dc80b8e576f580eaf90e4537101b9093d7b2076e829efe4886b",
+    "internal/panels/export/client_mask_test.go": "352c9ae9bae20d53ef1845746f21faccc39b8ded8c18137c5e592710cb2fe83d"
+  },
+  "api_usage": [
+    {
+      "role": "adversary",
+      "model": "gpt-6-astra",
+      "id": "resp_04875b5112101ffe006ad14cfcde4887d1a6cad0c4b4bbab15",
+      "usage": {
+        "input_tokens": 4544,
+        "input_tokens_details": {
+          "cache_write_tokens": 4541,
+          "cached_tokens": 0
+        },
+        "output_tokens": 647,
+        "output_tokens_details": {
+          "reasoning_tokens": 198
+        },
+        "total_tokens": 5191
+      }
+    },
+    {
+      "role": "architect",
+      "model": "gpt-6-astra",
+      "id": "resp_0d8f2a2596ca590d006ad14cfcd64887d18b74779abd4e254c",
+      "usage": {
+        "input_tokens": 4543,
+        "input_tokens_details": {
+          "cache_write_tokens": 4540,
+          "cached_tokens": 0
+        },
+        "output_tokens": 690,
+        "output_tokens_details": {
+          "reasoning_tokens": 155
+        },
+        "total_tokens": 5233
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_0ef8e458c5d8989f006ad14cfcbc4887d180d36884fe60c5db",
+      "usage": {
+        "input_tokens": 4543,
+        "input_tokens_details": {
+          "cache_write_tokens": 4540,
+          "cached_tokens": 0
+        },
+        "output_tokens": 749,
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        },
+        "total_tokens": 5292
+      }
+    },
+    {
+      "role": "test_designer",
+      "model": "gpt-6-sol",
+      "id": "resp_06afe068e7518d24006ad14cfc8ed887d19f11e313cb6dd403",
+      "usage": {
+        "input_tokens": 4545,
+        "input_tokens_details": {
+          "cache_write_tokens": 4542,
+          "cached_tokens": 0
+        },
+        "output_tokens": 900,
+        "output_tokens_details": {
+          "reasoning_tokens": 634
+        },
+        "total_tokens": 5445
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_017e2f78cad68f99006ad14d7c24c487d1ae34e27987e3244c",
+      "usage": {
+        "input_tokens": 7044,
+        "input_tokens_details": {
+          "cache_write_tokens": 7041,
+          "cached_tokens": 0
+        },
+        "output_tokens": 657,
+        "output_tokens_details": {
+          "reasoning_tokens": 482
+        },
+        "total_tokens": 7701
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_011bb32e13e8e39b006ad14e3341ac87d18ca28155bdb8fad6",
+      "usage": {
+        "input_tokens": 817,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 170,
+        "output_tokens_details": {
+          "reasoning_tokens": 54
+        },
+        "total_tokens": 987
+      }
+    }
+  ],
+  "api_tokens": 29849,
+  "stage_status": {
+    "diagnosis": "PASS_OFFICIAL26_5_9_IDENTICAL_ERROR",
+    "implementation": "PASS_CLIENT_EXPORT_ONLY",
+    "regression": "BASELINE_FAIL_FIXED_PASS",
+    "native_connection": "PASS_OFFICIAL26_5_9_AND26_9_9_HTTPS200_204",
+    "race_postgres": "PASS_SEQUENTIAL_PANELS",
+    "vet": "PASS",
+    "review": "PASS_EVIDENCE_CLOSURE",
+    "publication": "PENDING",
+    "updates": "PENDING",
+    "phone": "NOT_DIRECTLY_TESTED"
+  },
+  "evidence_directory": "/root/projects/dob-finalmask-client-compat-20261016/.local/compat",
+  "adjudication": {
+    "unresolved": [],
+    "null_delay": "Rejected in client adapter; server masks remain unchanged.",
+    "test_requirements": "Reproduced actual official old-core failure; actual candidate Go-exported URI was decoded without repair and both binaries passed parse and live connections.",
+    "initial_race_failure": "Parallel packages share database advisory executor key628341902731 even across isolated schemas. Complete sequential panels race suite passed. Original failures retained.",
+    "bootstrap": "Existing detached canonical causes bootstrap branch guard failure; no READY claim. Exact current HEAD and reference equality verified separately."
+  }
+}

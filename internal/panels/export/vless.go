@@ -80,7 +80,7 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 		q.Set("path", x.Transport.Path)
 		q.Set("extra", string(x.Transport.Extra))
 		if x.Transport.MaskOnClient() {
-			mask, err := x.Transport.TCPMask()
+			mask, err := x.Transport.ClientTCPMask()
 			if err != nil {
 				return "", err
 			}
