@@ -1,3 +1,12 @@
+## XHTTP creation defaults deployed and enabled — 2026-10-15T16:23:43.399698+00:00
+This entry supersedes the publication-pending XHTTP entry. Product source d671e19 produced public main/stable 89292e72b9feb2addebaf1bd4dd39e12b09d216c. Both control-plane hosts run that exact revision and schema178. All three running binaries match manifests; readiness5/5, ordinary login/API, new asset, account identity and environment preservation passed. GitHub main and stable checks passed. Creation policy revision2 selects XHTTP Reality stream-up, apart.com Host and4096-byte pinned paths on both hosts.
+Existing TCP listeners and pre-existing pins remain TCP. Creating another user on an existing TCP listener still produces TCP. A normal newly-created fleet XHTTP listener was not yet observed at activation; do not claim all servers converted or end-to-end acceptance across every provider.
+All36reviewed product/test hashes match PASS; full isolated PostgreSQL/browser suite, final affected-package race, browser-r3, vet/diff passed. Native X-UI create/retry/restart/readback and phone16/16allowed requests passed; temporary canary cleaned up, main panel active. Operator identification was unavailable on this repeat, and ad tests are static assets rather than SDK display.
+Exact FinalMask preset remains saved but DISABLED: tested Xray26.9.9 rejects numeric brutalUp and UDP exp. WebView disabled; Flow empty. These requests are compatibility-limited, not completed activation.
+Final fleet at16:22:12Z:39tracked=29active+5inactive(PROVIDER_UNAVAILABLE)+5pending deletion,0degraded,0broken. No provider recovery/IP allocation or unrelated rotation work performed.
+OpenAI task:7responses,61103input+13941output=75044tokens; this continuation0new inference requests. Five GETs retrieved prior usage receipts. Actual billed amount unknown.
+Resume from docs/XHTTP_PROFILES_20261015.md and the same development job. Feature publication/rollout is complete with the explicit compatibility limits above. Do not restart paused additional-IP work without user direction.
+
 ## XHTTP profiles verified; publication and rollout pending — 2026-10-15T16:12:24.814032+00:00
 Current task is XHTTP creation defaults. Additional-IP sender/rotation work remains paused.
 Source lives in /root/projects/dob-xhttp-20261015, branch feat/xhttp-profiles-20261015.

@@ -1,6 +1,6 @@
 {
   "id": "xhttp-profiles-20261015",
-  "status": "VALIDATED_AWAITING_PUBLIC_GATES",
+  "status": "DEPLOYED_XHTTP_WITH_EXPLICIT_COMPATIBILITY_LIMITS",
   "base_revision": "63ed1345aa6500d792f44d34ce8f722b15b79b63",
   "goal": "Generate managed Direct and Residential XHTTP Reality stream-up configs with long nonrepeating stable paths, Host apart.com, exact user Extra and FinalMask preset, with compatibility evidence before rollout. Implement API/UI, server payload, fresh export, lifecycle client flow and migration concurrency. Preserve credentials and account isolation; no provider or IP lifecycle mutations.",
   "allowed_paths": [
@@ -20,7 +20,7 @@
   ],
   "context": "Shared physical listener per panel+port; one path per inbound, not per client. Current TCP only; transition must not silently force stale Vision clients. Browser WebView incompatible with stream-up Reality IP/custom Host; Flow Vision incompatible encryption=none XHTTP. Exact FinalMask runtime compatibility unresolved (26.9.9 rejects numeric brutalUp and UDP exp). Keep requested preset available but do not claim runtime applied if unsupported. Need stable bounded 4096-byte path (not universal max) with random unique suffix and distinct words. Mutation worker and planners must serialize transition; no pending mutation plans at switch. New schema177 reserved by separate IP work; resolve additive migration numbering without skipping pending source. Existing global default TCP until explicit canary/verified activation. Rollback63ed134; no deployment until deterministic gates and canary.",
   "scope_adjudication": "Creation defaults and immutable new-listener pins only. Existing TCP listeners remain TCP; no in-place conversion. The user was told this scope. Server-side header budget32768 required and tested to support4096-byte paths without HTTP431; client Extra unchanged. Migration runner keys full filenames so178 leaves177 independently applicable. Protection TCP port parsing must include XHTTP. Publication and activation of tested creation default are authorized by user continuation; no existing-listener conversion.",
-  "updated_at": "2026-10-15T16:12:24.814032+00:00",
+  "updated_at": "2026-10-15T16:23:43.399698+00:00",
   "stage_status": [
     {
       "stage": "baseline",
@@ -59,15 +59,38 @@
     },
     {
       "stage": "publication",
-      "status": "PENDING"
+      "status": "PASS",
+      "evidence": "main/stable atomic push; unprivileged suite, secret scans, Ubuntu24 exact install and5/5readiness"
     },
     {
       "stage": "deployment",
-      "status": "PENDING"
+      "status": "PASS",
+      "evidence": "Both live hosts89292e7/schema178;3units and5readiness checks; authenticated policy revision2 XHTTP4096/apart.com"
     },
     {
       "stage": "activation_and_health",
-      "status": "PENDING"
+      "status": "PASS",
+      "evidence": "Both live hosts89292e7/schema178;3units and5readiness checks; authenticated policy revision2 XHTTP4096/apart.com"
+    },
+    {
+      "stage": "webview",
+      "status": "UNSUPPORTED_FOR_SELECTED_PROFILE",
+      "evidence": "Native stream-up Reality cannot use requested WebView; left disabled with explicit UI"
+    },
+    {
+      "stage": "flow",
+      "status": "PASS_EMPTY_FLOW",
+      "evidence": "XHTTP encryption=none requires empty flow; planner, worker and export verified"
+    },
+    {
+      "stage": "existing_listener_conversion",
+      "status": "NOT_IN_CURRENT_SCOPE",
+      "evidence": "Existing TCP listeners and pins preserved; no in-place conversion"
+    },
+    {
+      "stage": "project_brain_handoff",
+      "status": "PASS",
+      "evidence": "Current source/runtime, limitations and next steps checkpointed and pushed"
     }
   ],
   "api_usage": {
@@ -118,5 +141,167 @@
     "web/static/index.html": "db6f4045da52e991ded78e1ce11ccafc944714f415d5c89017f57285fb162151",
     "web/tests/config-transport.cjs": "348f950a6f715401fb21957d8e310a256b43161924d7248070e20dfbfbcebeda"
   },
-  "evidence_directory": "/root/projects/dob-xhttp-20261015/.local/xhttp-evidence"
+  "evidence_directory": "/root/projects/dob-xhttp-20261015/.local/xhttp-evidence",
+  "source_revision": "d671e194a29223f15aa8599fc4e88335eb060486",
+  "public_revision": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+  "publication_evidence": "/var/lib/datacenter-publisher/release-uwkq_g2j",
+  "runtime_revision": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+  "schema": "000178_xhttp_listener_profiles",
+  "activation": {
+    "primary": {
+      "revision": 2,
+      "network": "xhttp",
+      "path_bytes": 4096,
+      "host": "apart.com",
+      "finalmask_enabled": false
+    },
+    "secondary": {
+      "revision": 2,
+      "network": "xhttp",
+      "path_bytes": 4096,
+      "host": "apart.com",
+      "finalmask_enabled": false
+    },
+    "scope": "New physical listeners only. Existing TCP listeners and pre-existing pins remain TCP.",
+    "ordinary_new_xhttp_listener_observed": false,
+    "native_canary_verified": true
+  },
+  "acceptance": {
+    "primary": {
+      "at": "2026-10-15T16:21:23.018663+00:00",
+      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-15T16:21:23.119260657Z"
+      },
+      "account_identity_preserved": true,
+      "environment_preserved": true,
+      "transport_asset_verified": true,
+      "listeners": [
+        {
+          "network": "tcp",
+          "count": 1,
+          "min_path_bytes": null,
+          "max_path_bytes": null
+        }
+      ]
+    },
+    "secondary": {
+      "at": "2026-10-15T16:18:23.601610+00:00",
+      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-15T16:18:23.719108211Z"
+      },
+      "account_identity_preserved": true,
+      "environment_preserved": true,
+      "transport_asset_verified": true
+    },
+    "fleet": {
+      "at": "2026-10-15T16:22:12.956922+00:00",
+      "counts": {
+        "total_servers": 39,
+        "active_servers": 29,
+        "inactive_servers": 5,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 5
+      },
+      "reason_counts": {
+        "PENDING_DELETION": 5,
+        "PROVIDER_UNAVAILABLE": 5
+      },
+      "degraded_details": []
+    }
+  },
+  "remaining": [
+    "Exact requested FinalMask cannot be enabled on tested core26.9.9; it remains stored unchanged and disabled.",
+    "WebView cannot be combined with selected native XHTTP Reality stream-up.",
+    "No existing-listener conversion. No long-term, all-provider or in-app ad-display guarantee.",
+    "Ordinary fleet-created XHTTP listener has not yet been observed after activation; creation/URI/pinning are covered by source tests and native API canary.",
+    "Five live non-active servers were PROVIDER_UNAVAILABLE in final dashboard snapshot; no provider recovery was attempted in this feature task."
+  ]
 }

@@ -22,3 +22,13 @@ Switch creation default back to TCP with current policy revision to stop future 
 
 ## API use
 7completed model responses:61103input+13941output=75044tokens. No new inference this continuation; prior5council receipts read by GET. Billed amount unavailable.
+
+## Deployed acceptance — 2026-10-15T16:23:43.399698+00:00
+- Product source: d671e194a29223f15aa8599fc4e88335eb060486.
+- Public/runtime:89292e72b9feb2addebaf1bd4dd39e12b09d216c; both main/stable Actions passed.
+- Both management hosts: schema178, three active matching binaries, five successful readiness checks, identity/environment preserved, actual transport API and asset verified.
+- Creation default revision2 is XHTTP stream-up/apart.com/4096bytes on both hosts. Existing TCP listeners and pins remain TCP. No ordinary fleet XHTTP listener observed yet after activation.
+- Final dashboard39tracked:29active,5provider-unavailable inactive,5pending deletion,0degraded. Provider recovery is outside this change.
+- Exact FinalMask and WebView remain unsupported for the tested combination. Empty Flow is intentional.
+- Temporary native38445 and independent38444 tests cleaned up; user's separate38443 manual test was not touched.
+- No new external model inference; total task usage75,044tokens in7responses.
