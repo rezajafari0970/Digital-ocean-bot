@@ -1,0 +1,275 @@
+{
+  "at": "2026-10-15T19:33:55.762079+00:00",
+  "scope": "Read-only audit; no production mutations or new release",
+  "public_revision": "0219700581c967f1fd6523ff8d047b0518ae3b25",
+  "native": [
+    {
+      "api_inbounds": [
+        {
+          "finalmask_tcp": false,
+          "flow": null,
+          "host": "apart.com",
+          "network": "xhttp",
+          "port": 443,
+          "vless_encryption": false
+        }
+      ],
+      "native": {
+        "core_sha256": "c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+        "core_version": "Xray 26.9.9 (Xray, Penetrates Everything.) 52a412d (go1.27.1 linux/amd64)",
+        "inbounds": [
+          {
+            "client_flows": [
+              ""
+            ],
+            "clients": 2,
+            "finalmask_tcp": false,
+            "flow": "",
+            "host": "apart.com",
+            "network": "xhttp",
+            "port": 443,
+            "vless_encryption": false
+          }
+        ],
+        "panel_sha256": "816420f7a6df3eb3272c3608767207b1ade81c3dcb7fed7b46c7949454a8a14c",
+        "panel_version": "3.8.5",
+        "running_core_hash_match": true
+      },
+      "panel_id": "0a3d1fd0-437d-47ac-b582-cece4c90bddd"
+    },
+    {
+      "api_inbounds": [
+        {
+          "finalmask_tcp": true,
+          "flow": "xtls-rprx-vision",
+          "host": "apart.com",
+          "network": "xhttp",
+          "port": 443,
+          "vless_encryption": true
+        }
+      ],
+      "native": {
+        "core_sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+        "core_version": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.1.0 (go1.27.1 linux/amd64)",
+        "inbounds": [
+          {
+            "client_flows": [
+              "xtls-rprx-vision"
+            ],
+            "clients": 2,
+            "finalmask_tcp": true,
+            "flow": "xtls-rprx-vision",
+            "host": "apart.com",
+            "network": "xhttp",
+            "port": 443,
+            "vless_encryption": true
+          }
+        ],
+        "panel_sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+        "panel_version": "3.8.5-dob-fm.1",
+        "running_core_hash_match": true
+      },
+      "panel_id": "a44c6f41-1506-4292-9819-3a5ba1983ba2"
+    },
+    {
+      "api_inbounds": [
+        {
+          "finalmask_tcp": true,
+          "flow": "xtls-rprx-vision",
+          "host": "aparat.com",
+          "network": "xhttp",
+          "port": 443,
+          "vless_encryption": true
+        }
+      ],
+      "native": {
+        "core_sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+        "core_version": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.1.0 (go1.27.1 linux/amd64)",
+        "inbounds": [
+          {
+            "client_flows": [
+              "xtls-rprx-vision"
+            ],
+            "clients": 2,
+            "finalmask_tcp": true,
+            "flow": "xtls-rprx-vision",
+            "host": "aparat.com",
+            "network": "xhttp",
+            "port": 443,
+            "vless_encryption": true
+          }
+        ],
+        "panel_sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+        "panel_version": "3.8.5-dob-fm.1",
+        "running_core_hash_match": true
+      },
+      "panel_id": "9b944ebf-bf28-4841-80af-e7bc00f25109"
+    },
+    {
+      "api_inbounds": [
+        {
+          "finalmask_tcp": true,
+          "flow": "xtls-rprx-vision",
+          "host": "aparat.com",
+          "network": "xhttp",
+          "port": 443,
+          "vless_encryption": true
+        }
+      ],
+      "native": {
+        "core_sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
+        "core_version": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.1.0 (go1.27.1 linux/amd64)",
+        "inbounds": [
+          {
+            "client_flows": [
+              "xtls-rprx-vision"
+            ],
+            "clients": 2,
+            "finalmask_tcp": true,
+            "flow": "xtls-rprx-vision",
+            "host": "aparat.com",
+            "network": "xhttp",
+            "port": 443,
+            "vless_encryption": true
+          }
+        ],
+        "panel_sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
+        "panel_version": "3.8.5-dob-fm.1",
+        "running_core_hash_match": true
+      },
+      "panel_id": "2c7469a5-ea83-4a1b-b4bd-06191d5ff259"
+    }
+  ],
+  "profile_output": {
+    "at": "2026-10-15T19:32:39.482761+00:00",
+    "screenshot_listener": [
+      {
+        "panel_id": "0a3d1fd0-437d-47ac-b582-cece4c90bddd",
+        "listener_created_at": "2026-10-15T16:42:28.783295+00:00",
+        "config": {
+          "host": "apart.com",
+          "mode": "stream-up",
+          "network": "xhttp",
+          "path_bytes": 4096,
+          "finalmask_enabled": false
+        }
+      }
+    ],
+    "new_output": {
+      "9b944ebf-bf28-4841-80af-e7bc00f25109": {
+        "address": "172.235.191.103",
+        "host": "aparat.com",
+        "flow": "xtls-rprx-vision-udp443",
+        "fm_present": true,
+        "sample_remark": "dob:global-reality:00443-u-p9b944ebfbf28484180afe7bc00f25109-i1-d283c881",
+        "count": 5
+      },
+      "2c7469a5-ea83-4a1b-b4bd-06191d5ff259": {
+        "address": "139.84.246.147",
+        "host": "aparat.com",
+        "flow": "xtls-rprx-vision-udp443",
+        "fm_present": true,
+        "sample_remark": "dob:global-reality:00443-u-p2c7469a5ea834a1bb4bd06191d5ff259-i1-33dc5a56",
+        "count": 3
+      }
+    }
+  },
+  "live_output": {
+    "at": "2026-10-15T19:29:51.329314+00:00",
+    "api": {
+      "ALL": {
+        "counts": {
+          "tcp": 18,
+          "xhttp": 112,
+          "strict_extra_valid": 112,
+          "xhttp_udp443_finalmask": 9
+        },
+        "new_paths": 3,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 24,
+          "strict_extra_valid": 24,
+          "xhttp_udp443_finalmask": 2,
+          "tcp": 4
+        },
+        "new_paths": 2,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "tcp": 10,
+          "xhttp": 63,
+          "strict_extra_valid": 63,
+          "xhttp_udp443_finalmask": 4
+        },
+        "new_paths": 2,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "shares": {
+      "ALL": {
+        "counts": {
+          "xhttp": 112,
+          "strict_extra_valid": 112,
+          "tcp": 18,
+          "xhttp_udp443_finalmask": 9
+        },
+        "new_paths": 3,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "xhttp": 24,
+          "strict_extra_valid": 24,
+          "tcp": 4,
+          "xhttp_udp443_finalmask": 2
+        },
+        "new_paths": 2,
+        "invalid": 0,
+        "reasons": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "xhttp": 63,
+          "strict_extra_valid": 63,
+          "tcp": 10,
+          "xhttp_udp443_finalmask": 4
+        },
+        "new_paths": 2,
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "listeners": [
+      {
+        "network": "xhttp",
+        "flow": "xtls-rprx-vision-udp443",
+        "finalmask": "true",
+        "count": 3
+      },
+      {
+        "network": "tcp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 4
+      },
+      {
+        "network": "xhttp",
+        "flow": "",
+        "finalmask": "false",
+        "count": 40
+      }
+    ],
+    "pass": true
+  },
+  "new_model_api_requests": 0,
+  "new_model_api_tokens": 0,
+  "phone": "Screenshots only; no fresh phone runtime test",
+  "browser_dialer": "Saved WebView preference; not imported by VLESS formatter, and REALITY bypasses browser dialer in the client core"
+}
