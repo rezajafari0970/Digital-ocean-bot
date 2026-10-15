@@ -1,6 +1,6 @@
 {
   "id": "ip-lifecycle-20261015",
-  "phase": "ISOLATED_INVENTORY_CORRECTION_PUBLICATION",
+  "phase": "TRANSPORT_INTEGRATION_PENDING",
   "status": "IN_PROGRESS",
   "baseline_source": "895fe62e2215b6c2bbf92e15fe977e181df25a0c",
   "baseline_runtime": "69be1e0621cbd05dd2c410a5fea6a5cdf167356d",
@@ -9,12 +9,12 @@
   "provider_mutations_authorized": false,
   "operational_settings": null,
   "api_usage": {
-    "requests": 10,
-    "input_tokens": 267126,
-    "output_tokens": 24718,
+    "requests": 14,
+    "input_tokens": 306866,
+    "output_tokens": 27901,
     "cached_tokens": 0,
-    "cache_write_tokens": 267096,
-    "total_tokens": 291844,
+    "cache_write_tokens": 306824,
+    "total_tokens": 334767,
     "actual_billed_amount": null,
     "estimated_amount": null,
     "currency": null,
@@ -212,6 +212,7 @@
         "scope": "Composed OFFLINE CORE only, incremental against lifecycle-r4."
       },
       {
+        "phase": "upcloud-utility",
         "id": "resp_081ba5a3804261d6006ad02f7780b087d1aa3c912eee1ea227",
         "model": "gpt-6-astra",
         "status": "completed",
@@ -227,17 +228,96 @@
           },
           "total_tokens": 2738
         },
-        "phase": "upcloud-utility",
         "decision": "PASS",
-        "scope": "Public inventory compatibility only; excludes provider writers"
+        "scope": "Static review of this change only; tests not executed. No approval of the full IP lifecycle."
+      },
+      {
+        "phase": "ip-wire-r1",
+        "id": "resp_0290f3a65a74b07e006ad0306ac0ec87d196fb88f9469fec9f",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 7591,
+          "input_tokens_details": {
+            "cache_write_tokens": 7588,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1093,
+          "output_tokens_details": {
+            "reasoning_tokens": 721
+          },
+          "total_tokens": 8684
+        },
+        "decision": "REVISE",
+        "scope": "Pure wire preparation, response decoding and supplied tests only; no lifecycle or authority assessment."
+      },
+      {
+        "phase": "ip-wire-r2",
+        "id": "resp_0181b1ed93c83b49006ad030f2378487d1882003e822f321fc",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 9731,
+          "input_tokens_details": {
+            "cache_write_tokens": 9728,
+            "cached_tokens": 0
+          },
+          "output_tokens": 913,
+          "output_tokens_details": {
+            "reasoning_tokens": 467
+          },
+          "total_tokens": 10644
+        },
+        "decision": "REVISE",
+        "scope": "Source inspection of all four supplied files: pure preparation, response decoding and tests only. No lifecycle, sending or authority approval."
+      },
+      {
+        "phase": "ip-wire-r3",
+        "id": "resp_0e89aa552a8e9098006ad03178315887d1bea479bf5d097001",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 10921,
+          "input_tokens_details": {
+            "cache_write_tokens": 10918,
+            "cached_tokens": 0
+          },
+          "output_tokens": 769,
+          "output_tokens_details": {
+            "reasoning_tokens": 427
+          },
+          "total_tokens": 11690
+        },
+        "decision": "REVISE",
+        "scope": "Source inspection of all four supplied files; pure preparation, decoding and tests only. No lifecycle or authority approval."
+      },
+      {
+        "phase": "ip-wire-r4",
+        "id": "resp_0705c278daa6fe57006ad031c547b887d1baeed02254ea15d7",
+        "model": "gpt-6-astra",
+        "status": "completed",
+        "usage": {
+          "input_tokens": 11497,
+          "input_tokens_details": {
+            "cache_write_tokens": 11494,
+            "cached_tokens": 0
+          },
+          "output_tokens": 408,
+          "output_tokens_details": {
+            "reasoning_tokens": 222
+          },
+          "total_tokens": 11905
+        },
+        "decision": "PASS",
+        "scope": "Source inspection of all four supplied files: pure wire preparation, response decoding, candidate retention and tests only. No lifecycle, sending, ownership or release authority approval."
       }
     ],
-    "completed_requests": 9,
+    "completed_requests": 13,
     "incomplete_requests": 1
   },
-  "updated_at": "2026-10-15T01:53:23.829042+00:00",
+  "updated_at": "2026-10-15T01:59:13.186974+00:00",
   "full_lifecycle_complete": false,
-  "source_review": "PASS offline core only, lifecycle-r1 through lifecycle-r5 resolution chain",
+  "source_review": "Core lifecycle-r5 PASS; utility correction PASS; pure allocation wire ip-wire-r4 PASS (separate branch, no runtime caller).",
   "source_hashes": {
     "internal/adminapi/ip_inventory.go": "4077c3550c8d280f4d7292cd3541d58f17449bedfda0bc7bd2614bf5b1333e4d",
     "internal/adminapi/ip_inventory_browser_test.go": "c2bcf09ee0592b05d6d7a5577816c50e6c2a68243c57dead2843a4b0f608e869",
@@ -283,27 +363,63 @@
     "exact_final": "PASS lifecycle-core-full-final, isolated PostgreSQL/browser, all packages sequential",
     "race": "PASS lifecycle-core-race-final: PostgreSQL concurrency/publication/config/credential guards and secrets",
     "vet": "PASS lifecycle-core-vet",
-    "publication": "NOT_STARTED for lifecycle core",
-    "deployment": "NOT_STARTED for lifecycle core"
+    "publication": "PASS existing exporter/secret scans/unprivileged suite/Ubuntu24 install",
+    "deployment": "PASS both hosts15935e9/schema176;3 active services,5/5 ready, zero lifecycle mutations",
+    "github_actions": [
+      {
+        "id": 38666960184,
+        "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+        "head_branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960184"
+      },
+      {
+        "id": 38666960307,
+        "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+        "head_branch": "stable",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960307"
+      }
+    ]
   },
-  "next_step": "Publish utility-only correction; verify exact installer revision then secondary and primary acceptance. Shared feat/ip-lifecycle worktree remains owned by concurrent writer; do not overwrite or stage its ipwire changes.",
-  "source_revision": "2f793b81c2462d7dce118cd8c3adb46e26a24404",
-  "public_revision": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+  "next_step": "Continue verified pure contracts in /root/projects/dob-ip-wire-20261015 (0553853), integrate exact plan/evidence with durable actual-send consumption, per-account transport and restart reconciliation; then guest/protocol and output/renewal/release. Reconcile canonical utility correction by normal merge, preserving all uncommitted shared work. No paid/disruptive authority.",
+  "source_revision": "1bf2114e7df47d12c25f74dce7da9be516f20ee8",
+  "public_revision": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
   "runtime": {
     "primary": {
-      "revision": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+      "revision": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
       "schema": "000176_ip_lifecycle_journal",
       "accounts": 4,
       "readiness": "5/5",
-      "identity_and_environment_preserved": true
+      "identity_and_environment_preserved": true,
+      "verified_at": "2026-10-15T01:57:30.455532+00:00",
+      "lifecycle_rows": {
+        "policies": 0,
+        "funding": 0,
+        "operations": 0,
+        "allocations": 0,
+        "endpoints": 0,
+        "leases": 0
+      }
     },
     "secondary": {
-      "revision": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+      "revision": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
       "schema": "000176_ip_lifecycle_journal",
       "accounts": 0,
       "readiness": "5/5",
       "identity_and_environment_preserved": true,
-      "limitation": "No provider account; installation acceptance only"
+      "limitation": "No provider account; installation acceptance only",
+      "verified_at": "2026-10-15T01:56:30.846346+00:00",
+      "lifecycle_rows": {
+        "policies": 0,
+        "funding": 0,
+        "operations": 0,
+        "allocations": 0,
+        "endpoints": 0,
+        "leases": 0
+      }
     }
   },
   "limits": [
@@ -320,10 +436,28 @@
       "exact_final": "PASS lifecycle-core-full-final, isolated PostgreSQL/browser, all packages sequential",
       "race": "PASS lifecycle-core-race-final: PostgreSQL concurrency/publication/config/credential guards and secrets",
       "vet": "PASS lifecycle-core-vet",
-      "publication": "NOT_STARTED for lifecycle core",
-      "deployment": "NOT_STARTED for lifecycle core"
+      "publication": "PASS existing exporter/secret scans/unprivileged suite/Ubuntu24 install",
+      "deployment": "PASS both hosts15935e9/schema176;3 active services,5/5 ready, zero lifecycle mutations",
+      "github_actions": [
+        {
+          "id": 38666960184,
+          "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+          "head_branch": "main",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960184"
+        },
+        {
+          "id": 38666960307,
+          "head_sha": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
+          "head_branch": "stable",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38666960307"
+        }
+      ]
     },
-    "activation": "No production policy/funding/approval rows or provider mutations. No guest changes, deployment or additional-IP config publication. Store dispatch/publication are not called by production routes/workers.",
+    "activation": "Disabled core deployed. No production policies/funding/approvals/IP operations/endpoints/leases or guest networking changes; operational callers not wired.",
     "remaining": [
       "provider wire contracts and consumed send tickets",
       "account scheduler and restart reconciliation",
@@ -333,9 +467,9 @@
       "production output/client renewal/migration integration",
       "approved provider-specific canary and gradual rollout"
     ],
-    "updated_at": "2026-10-15T01:39:17.948753+00:00",
+    "updated_at": "2026-10-15T01:54:48.527062+00:00",
     "status": "IN_PROGRESS",
-    "stage": "CORE_PUBLICATION",
+    "stage": "TRANSPORT_INTEGRATION_PENDING",
     "new_test_evidence": {
       "lifecycle-r2-fix1": "FAIL: fixture omitted mandatory network profile UUID/mode; corrected",
       "lifecycle-r2-fix2": "PASS: PostgreSQL lifecycle, actual credential/config writer races, UI Chromium, native fences, secrets",
@@ -349,7 +483,7 @@
       "diff_check": "PASS",
       "bootstrap": "BLOCKED existing detached canonical branch; direct source/runtime/hash verification passed"
     },
-    "production_changed": false,
+    "production_changed": true,
     "paid_or_network_operations": false,
     "implemented_offline": [
       "policy/funding settings",
@@ -360,8 +494,17 @@
       "native delete/account purge guards",
       "retained encrypted cleanup credentials and candidate keyring validation"
     ],
-    "next_step": "Run existing gated publisher and GitHub Actions; deploy disabled core secondary then primary and verify schema176, identity/env, executables, readiness and zero IP mutation rows. Continue provider transport/scheduler/network/output work.",
-    "keyring_limit": "Retained version lookup and candidate bootstrap validation only, not concurrent key rotation or physical key-erasure protocol."
+    "next_step": "Continue verified pure contracts in /root/projects/dob-ip-wire-20261015 (0553853), integrate exact plan/evidence with durable actual-send consumption, per-account transport and restart reconciliation; then guest/protocol and output/renewal/release. Reconcile canonical utility correction by normal merge, preserving all uncommitted shared work. No paid/disruptive authority.",
+    "keyring_limit": "Retained version lookup and candidate bootstrap validation only, not concurrent key rotation or physical key-erasure protocol.",
+    "release_acceptance": {
+      "at": "2026-10-15T01:59:13.186974+00:00",
+      "source": "1bf2114e7df47d12c25f74dce7da9be516f20ee8",
+      "public": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
+      "schema": 176,
+      "primary": "PASS",
+      "secondary": "PASS",
+      "complete_lifecycle": false
+    }
   },
   "foundation_validation": {
     "focused_postgres_and_browser": "PASS focused-r4",
@@ -447,23 +590,23 @@
     {
       "stage": "baseline",
       "status": "VERIFIED",
-      "limitation": "Detached canonical still fails historical bootstrap assertion"
+      "limitation": "Historical bootstrap fails detached-branch assertion; direct checks passed"
     },
     {
       "stage": "inventory_capacity_ui",
       "status": "DEPLOYED"
     },
     {
-      "stage": "account_capability_cost",
+      "stage": "provider_account_quotas_cost",
       "status": "PARTIAL",
-      "remaining": "DO IPv4 limit10; other quotas unknown; UpCloud account absent"
+      "remaining": "DO reserved-v4 latest verified limit10; other checked quotas unknown; UpCloud absent; fresh target quote required"
     },
     {
       "stage": "policy_funding_journal_ownership",
       "status": "DEPLOYED_DISABLED"
     },
     {
-      "stage": "prefix_lifetime_selection",
+      "stage": "prefix_history_lifetime_selection",
       "status": "VERIFIED_OFFLINE"
     },
     {
@@ -471,9 +614,14 @@
       "status": "DEPLOYED_CORE_ONLY"
     },
     {
-      "stage": "provider_transport",
-      "status": "SOURCE_IN_PROGRESS_UNVERIFIED",
-      "evidence": "New ipwire source in shared worktree; excluded from release"
+      "stage": "provider_wire_contracts",
+      "status": "VERIFIED_OFFLINE",
+      "revision": "0553853",
+      "scope": "Pure request/response preparation; no caller or IO"
+    },
+    {
+      "stage": "actual_send_consumption_account_transport",
+      "status": "NOT_ACCEPTED"
     },
     {
       "stage": "operational_scheduler_reconciliation",
@@ -481,27 +629,22 @@
     },
     {
       "stage": "guest_network_protocol_ipv6",
-      "status": "NOT_IMPLEMENTED"
+      "status": "NOT_ACCEPTED"
     },
     {
       "stage": "output_renewal_rotation_release",
       "status": "LIBRARY_ONLY"
     },
     {
-      "stage": "core_publication",
+      "stage": "core_and_utility_publication",
       "status": "DEPLOYED",
-      "source": "5acb57e",
-      "public": "15935e9",
+      "public": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
       "schema": 176
-    },
-    {
-      "stage": "utility_correction",
-      "status": "VERIFIED_AWAITING_RELEASE"
     },
     {
       "stage": "provider_canary",
       "status": "BLOCKED",
-      "reason": "Incomplete integration and unset targets/prefix/policies/budget/impact approval"
+      "reason": "Complete remaining integrations and obtain explicit targets/count/lifetime/spacing/budget/prefix/impact approval; UpCloud account absent"
     },
     {
       "stage": "operational_rollout",
@@ -509,22 +652,70 @@
     }
   ],
   "release_lane": {
-    "updated_at": "2026-10-15T01:46:45.020508+00:00",
+    "updated_at": "2026-10-15T01:59:13.186974+00:00",
     "owner": "continuation-77cf3cc7e2d4",
     "source_core": "5acb57ebd8fd81cb05891bbf13478d9ef58bbaf2",
     "public_core": "15935e9cd7d9cc6b4d23e6beadfddb3e75b876c8",
-    "secondary": "schema176 readiness5/5 accepted; no provider accounts",
-    "primary": "schema176 readiness5/5 accepted; identities/env preserved; all lifecycle rows zero",
+    "secondary": "473e991/schema176/readiness5/5/identities-preserved/lifecycle-rows0",
+    "primary": "473e991/schema176/readiness5/5/identities-preserved/lifecycle-rows0",
     "utility_fix_worktree": "/root/projects/dob-ip-utility-fix-20261015",
     "utility_fix_branch": "fix/ip-utility-inventory-20261015",
     "other_writer_detected": "ipwire and documentation changed during this continuation; left intact. Release lane will not modify ipwire or commit it. Utility fix source isolated; test DB also isolated.",
-    "utility_review": "PASS; full isolated suite pending",
+    "utility_review": "PASS bounded correction",
     "provider_mutations_authorized": false,
-    "utility_validation": "PASS: isolated full project suite, provider race, vet, diff check and exact review hashes",
+    "utility_validation": "PASS exact isolated full/race/vet/Chromium + publisher installation + GitHub CI",
     "shared_worktree_state": "Active independent ipwire edits preserved; no shared-worktree exact-final claim",
     "utility_review_hashes": {
       "internal/providers/upcloud/ip.go": "324685b594fa60a8bc050d80bfbf232197ee9854602cd3da42cabfd5f96d9ce8",
       "internal/providers/upcloud/ip_test.go": "1011827b7879689093b48f966fe7352dfbbd93b20ce3bcba523d13d5a04fea18"
-    }
+    },
+    "wire_contracts": "Isolated /root/projects/dob-ip-wire-20261015; pure contracts reviewed PASS and committed0553853. No runtime sender or HTTP IO. Existing lifecycle Brain/job remains authority.",
+    "status": "COMPLETE",
+    "utility_source": "1bf2114e7df47d12c25f74dce7da9be516f20ee8",
+    "utility_public": "473e99193198aceb71dbd319f4c8d4fdcdbdfdc2",
+    "utility_release": "PUBLISHED_AND_DEPLOYED",
+    "rollback_runtime": "15935e9; no downgrade below lifecycle guards once any obligation exists"
+  },
+  "wire_contracts": {
+    "worktree": "/root/projects/dob-ip-wire-20261015",
+    "branch": "feat/ip-wire-20261015",
+    "stage": "PURE_CONTRACTS_VERIFIED",
+    "status": "VERIFIED",
+    "runtime_caller": false,
+    "network_io": false,
+    "last_test": "ip-wire-r6 PASS race",
+    "source_review": "ip-wire-r4 PASS pure contracts only",
+    "next": "Integrate exact plan/evidence with persisted actual-send consumption, account transport and reconciliation; no live IP mutation authority.",
+    "source_revision": "0553853f82cc256ec152a5f0d68fe77d14fc97ee",
+    "tests": [
+      "ip-wire-r6 race PASS",
+      "ip-wire-fuzz PASS185891 executions",
+      "vet PASS"
+    ]
+  },
+  "utility_validation": {
+    "full": "PASS utility-isolated-final",
+    "race": "PASS upcloud-utility-race",
+    "vet": "PASS UpCloud",
+    "review": "PASS actual upcloud-utility receipt; hashes match",
+    "publisher": "PASS release-0i1un6qw",
+    "github_actions": [
+      {
+        "id": 38668218110,
+        "branch": "stable",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38668218110"
+      },
+      {
+        "id": 38668218198,
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38668218198"
+      }
+    ],
+    "deployments": "PASS secondary then primary",
+    "scope": "Public inventory parser compatibility; no live UpCloud account"
   }
 }
