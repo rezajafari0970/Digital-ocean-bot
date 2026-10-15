@@ -283,9 +283,8 @@
   ],
   "acceptance_before_output_fix": {
     "primary": {
-      "at": "2026-10-15T16:53:39.656730+00:00",
-      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
-      "schema": "000179_output_uri_digest",
+      "at": "2026-10-15T16:21:23.018663+00:00",
+      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
       "services": [
         {
           "unit": "digital-ocean-bot-api",
@@ -330,7 +329,7 @@
             "ok": true
           }
         ],
-        "at": "2026-10-15T16:53:39.761527453Z"
+        "at": "2026-10-15T16:21:23.119260657Z"
       },
       "account_identity_preserved": true,
       "environment_preserved": true,
@@ -341,38 +340,76 @@
           "count": 1,
           "min_path_bytes": null,
           "max_path_bytes": null
-        },
-        {
-          "network": "xhttp",
-          "count": 8,
-          "min_path_bytes": 4096,
-          "max_path_bytes": 4096
         }
       ]
     },
     "secondary": {
-      "at": "2026-10-15T16:50:58.188012+00:00",
-      "commit": "56c0b8e8ad2b7af19cfec862acfef9c68d11b56e",
-      "schema": "000179_output_uri_digest",
-      "active_matching_services": 3,
-      "readiness_passed": 5,
+      "at": "2026-10-15T16:18:23.601610+00:00",
+      "commit": "89292e72b9feb2addebaf1bd4dd39e12b09d216c",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "restarts": 0,
+          "running_hash_matches_manifest": true
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-15T16:18:23.719108211Z"
+      },
       "account_identity_preserved": true,
       "environment_preserved": true,
-      "transport_asset_verified": true,
-      "evidence": "limited-lime.ptr.network:/root/backups/dob-xhttp-output-fix-20261015/after.json"
+      "transport_asset_verified": true
     },
     "fleet": {
-      "at": "2026-10-15T16:53:39.656730+00:00",
+      "at": "2026-10-15T16:22:12.956922+00:00",
       "counts": {
         "total_servers": 39,
-        "active_servers": 37,
-        "inactive_servers": 0,
-        "broken_servers": 0,
-        "degraded_servers": 1,
-        "pending_deletion_servers": 1,
-        "provisioning_servers": 0
+        "active_servers": 29,
+        "inactive_servers": 5,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 5
       },
-      "note": "Transient degraded count fell9 to1 after restart; no claim all fleet issues resolved."
+      "reason_counts": {
+        "PENDING_DELETION": 5,
+        "PROVIDER_UNAVAILABLE": 5
+      },
+      "degraded_details": []
     }
   },
   "output_storage_acceptance": {
