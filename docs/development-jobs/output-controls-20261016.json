@@ -1,0 +1,207 @@
+{
+  "id": "output-controls-20261016",
+  "goal": "Independent client output optional fields; remove Extra/FinalMask/Browser metadata from outputs while preserving native settings; repair missing-output collector fairness",
+  "rollback_public": "7a30f5eb3c8cd2ffe2be09a0c0dcacd564d83e4d",
+  "source_base": "d5f0668052bc3ae1d1fc08a9a860fdc7d77279ce",
+  "branch": "feat/output-controls-20261016",
+  "worktree": "/root/projects/dob-output-controls-20261016",
+  "status": "SOURCE_VERIFIED_PUBLICATION_PENDING",
+  "stage_status": {
+    "diagnosis": "COMPLETE: sliding admission cursor causes >15sec stale snapshots; two empty panels completed normal target warmup",
+    "output_policy": "IMPLEMENTED: separate singleton, emission-only policy, UI; defaults omit both fields",
+    "browser_dialer": "LIMITATION_CONFIRMED: cannot activate inbound REALITY clients by server-only browser dialer; preserve saved preference and core",
+    "fairness": "IMPLEMENTED: last admitted panel ID cursor, sorted copy; budget/freshness/lock fences preserved",
+    "focused_race": "PASS",
+    "native_candidate": "PASS: official26.5.9/26.9.9 parse and HTTPS200/204 without Extra/FinalMask",
+    "browser": "PASS",
+    "real_scheduler_race": "PASS:36panels,overlapping slow requests,SQL headroom",
+    "full_regression": "PASS_COMPOSED: all non-admin packages in broad run; exact final complete admin package separately PASS; initial failing test retained",
+    "publication": "PENDING",
+    "deployment": "NOT_STARTED",
+    "review": "PASS_SOURCE_WITH_RELEASE_GATES"
+  },
+  "allowed_paths": [
+    "internal/adminapi/output.go",
+    "internal/adminapi/output_snapshot.go",
+    "internal/adminapi/output_snapshot_long_test.go",
+    "internal/adminapi/server.go",
+    "web/static/config-transport.js",
+    "web/static/index.html",
+    "web/tests/config-transport.cjs",
+    "internal/adminapi/output_fairness_test.go",
+    "internal/adminapi/output_scheduler_postgres_test.go",
+    "internal/adminapi/output_settings.go",
+    "internal/adminapi/output_settings_test.go",
+    "internal/panels/export/options.go",
+    "internal/panels/export/options_test.go",
+    "migrations/000181_output_policy.down.sql",
+    "migrations/000181_output_policy.up.sql",
+    "web/static/output-settings.js"
+  ],
+  "source_hashes": {
+    "internal/adminapi/output.go": "a8190901546735c70a1b42a9de069cf2c3830765e399372c59cd0497598cb1c8",
+    "internal/adminapi/output_fairness_test.go": "08cae311785c93eddb58a9c20a7e8168b2228ca7b6493bfe5342661bb8cac31f",
+    "internal/adminapi/output_scheduler_postgres_test.go": "f2b3999b8cdcc933aac7ccb788a3f3c2547bf4451a2ad1b4e5f28b47e7c0e308",
+    "internal/adminapi/output_settings.go": "f54a437fd08f88c0d17e11e94c8f56b88577242973fe3e7f99a0b0454e87f5d7",
+    "internal/adminapi/output_settings_test.go": "83d0926a67b35216ef8d2237fa4ac4282691e8202e214e1ee6ff0be401ae737f",
+    "internal/adminapi/output_snapshot.go": "93f1345aaf1c21659351304cfb4e498ea8c013f09bba5dc0622a3436b71f4d6d",
+    "internal/adminapi/output_snapshot_long_test.go": "dfd7e1b38428fef5c15d2f61347d60cb513c0cba1ac607f6f7d0e1bff249a4f3",
+    "internal/adminapi/server.go": "4bbc3ca61a903c062415908c35f67c1809ccf9c0a7726097f0a704f4bd85ab09",
+    "internal/panels/export/options.go": "9ed8ea94a4227ef931d666ea3e6079bf74d19a3c64c87ef1a41c56c7342e1122",
+    "internal/panels/export/options_test.go": "4f0cb52687fc31116cd91f4c8302c326a916f3214c5f412cc975f670f5e06b18",
+    "migrations/000181_output_policy.down.sql": "5e07e8ccd8a31e8628e3951540ea7f60024b9833f032908681fd92fdb72ffb29",
+    "migrations/000181_output_policy.up.sql": "8bb29e3654a716edb93c06f407986ab5c2ffc6423aba6d1611acfc426bda6906",
+    "web/static/config-transport.js": "e511a70d3097594f758cff8dc573203f9f24d37d8471ae9f60078603ed480e67",
+    "web/static/index.html": "4ee4a6657d46d5eac7f85a6c5c8f0c087b6ed5e0d2cd65a558e93e550352dfec",
+    "web/static/output-settings.js": "b44250525fb32b9bdcb2ab5895523cc97fbddb23daf7d6541c66742b8e9b828d",
+    "web/tests/config-transport.cjs": "1d0e712186c698a35003b20060f6cdcd47a6d8692091d4b1e8721a928b7adf15"
+  },
+  "risk": {
+    "schema": 1,
+    "profile": "critical",
+    "score": 31,
+    "reasons": [
+      "concurrency",
+      "deploy",
+      "medium_risk_path:internal/adminapi/",
+      "medium_risk_path:internal/panels/export/",
+      "migration",
+      "migration_path",
+      "production",
+      "push",
+      "rollback",
+      "sql"
+    ]
+  },
+  "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence",
+  "updated_at": "2026-10-15T23:02:10.442448+00:00",
+  "adjudication": {
+    "disagreements": [],
+    "freshness": "Keep15sec output and60sec routing proof; no stale fallback. Under persistent failure, output remains withheld.",
+    "empty_panels": "Both had3eligible target observations and subsequently created actual users without forced change; no bootstrap defect established.",
+    "initial_test_failures": "Legacy roundtrip required explicit includeExtra option under new defaults; corrected fixture. Slow simulation8ticks insufficient capacity for36at2sec; ten ticks is under15sec and passes. Real HTTP fixture initially omitted deployment.host and was corrected; final real scheduler-racePASS.",
+    "bootstrap": "Existing detached canonical named-branch guard still fails. Exact baseline/origin equality and clean tracked canonical verified; no mastery READY claim."
+  },
+  "api_usage": [
+    {
+      "role": "adversary",
+      "model": "gpt-6-astra",
+      "id": "resp_0126f1dafeffbe3e006ad157386ce087d18c2cd064ab066602",
+      "usage": {
+        "input_tokens": 9224,
+        "input_tokens_details": {
+          "cache_write_tokens": 9221,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1046,
+        "output_tokens_details": {
+          "reasoning_tokens": 96
+        },
+        "total_tokens": 10270
+      }
+    },
+    {
+      "role": "architect",
+      "model": "gpt-6-astra",
+      "id": "resp_07431e9868f9c7ce006ad1573862ac87d18ccf8d96bd50bfbf",
+      "usage": {
+        "input_tokens": 9223,
+        "input_tokens_details": {
+          "cache_write_tokens": 9220,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1062,
+        "output_tokens_details": {
+          "reasoning_tokens": 146
+        },
+        "total_tokens": 10285
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_0d1946c0938b16af006ad15738671087d18fbcc15d03d0003a",
+      "usage": {
+        "input_tokens": 9223,
+        "input_tokens_details": {
+          "cache_write_tokens": 9220,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1109,
+        "output_tokens_details": {
+          "reasoning_tokens": 564
+        },
+        "total_tokens": 10332
+      }
+    },
+    {
+      "role": "test_designer",
+      "model": "gpt-6-sol",
+      "id": "resp_05ea9701ab888534006ad157386bc887d19eed772fe555cf2d",
+      "usage": {
+        "input_tokens": 9225,
+        "input_tokens_details": {
+          "cache_write_tokens": 9222,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1121,
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        },
+        "total_tokens": 10346
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_054ae1d474b39821006ad158744bd887d1b6f1e6841e8500ff",
+      "usage": {
+        "input_tokens": 10753,
+        "input_tokens_details": {
+          "cache_write_tokens": 10750,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2049,
+        "output_tokens_details": {
+          "reasoning_tokens": 1766
+        },
+        "total_tokens": 12802
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_05fc5f0a9d53f085006ad1590ccf0887d182de6df8c5d9b4ae",
+      "usage": {
+        "input_tokens": 11892,
+        "input_tokens_details": {
+          "cache_write_tokens": 11889,
+          "cached_tokens": 0
+        },
+        "output_tokens": 698,
+        "output_tokens_details": {
+          "reasoning_tokens": 516
+        },
+        "total_tokens": 12590
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_0f5381d10f9014e0006ad15a10d32c87d1a8624b187a1dbe6a",
+      "usage": {
+        "input_tokens": 12921,
+        "input_tokens_details": {
+          "cache_write_tokens": 12918,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1092,
+        "output_tokens_details": {
+          "reasoning_tokens": 954
+        },
+        "total_tokens": 14013
+      }
+    }
+  ],
+  "api_tokens": 80638
+}

@@ -3,10 +3,12 @@ package adminapi
 import (
 	"context"
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"io"
 	"log"
@@ -214,11 +216,17 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 		args = append(args, n)
 		where += ` AND o.first_seen_at>=now()-($` + strconv.Itoa(len(args)) + `*interval '1 minute') `
 	}
-	columns := `o.uri,NULL::jsonb`
+	columns := `o.uri,NULL::jsonb AS ports`
 	if class != "ALL" {
-		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1)`
+		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1) AS ports`
 	}
 	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
+	// The sentinel retains a row even for empty output or a missing policy.
+	// Both policy and eligible URIs use this one statement snapshot.
+	q = `SELECT ep.revision,ep.include_xhttp_extra,ep.include_finalmask,published.uri,published.ports
+ FROM (SELECT true AS singleton) anchor
+ LEFT JOIN output_export_policy ep ON ep.singleton=anchor.singleton
+ LEFT JOIN LATERAL (` + q + `) published ON true`
 	rows, e := s.DB.QueryContext(r.Context(), q, args...)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
@@ -227,13 +235,27 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	defer rows.Close()
 	var out strings.Builder
 	for rows.Next() {
-		var u string
+		var raw sql.NullString
+		var revision sql.NullInt64
+		var extra, mask sql.NullBool
 		var ports []byte
-		if err := rows.Scan(&u, &ports); err != nil {
+		if err := rows.Scan(&revision, &extra, &mask, &raw, &ports); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		if outputProfilePortAllowed(u, ports) {
+		if !revision.Valid || revision.Int64 < 1 || !extra.Valid || !mask.Valid {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if !raw.Valid {
+			continue
+		}
+		if outputProfilePortAllowed(raw.String, ports) {
+			u, err := export.ApplyOutputOptions(raw.String, export.OutputOptions{IncludeXHTTPExtra: extra.Bool, IncludeFinalMask: mask.Bool})
+			if err != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
 			out.WriteString(u)
 			out.WriteByte('\n')
 		}

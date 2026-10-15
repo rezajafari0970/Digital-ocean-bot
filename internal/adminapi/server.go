@@ -14,23 +14,23 @@ import (
 )
 
 type Server struct {
-	Updater             updateController
-	ListenPort          int
-	WebPath             string
-	Auth                auth.Service
-	DB                  *sql.DB
-	Container           app.Container
-	Health              observability.Health
-	LoginLimiter        *LoginLimiter
-	OutputRuntimes      *sanaei.RuntimeManager
-	OutputPauseMu       sync.RWMutex
-	OutputRefreshMu     sync.Mutex
-	OutputPanelMu       sync.Mutex
-	OutputPanelRun      map[string]bool
-	OutputRefreshSem    chan struct{}
-	OutputRefreshCursor int
-	BrowserMu           sync.Mutex
-	BrowserTickets      map[string]time.Time
+	Updater            updateController
+	ListenPort         int
+	WebPath            string
+	Auth               auth.Service
+	DB                 *sql.DB
+	Container          app.Container
+	Health             observability.Health
+	LoginLimiter       *LoginLimiter
+	OutputRuntimes     *sanaei.RuntimeManager
+	OutputPauseMu      sync.RWMutex
+	OutputRefreshMu    sync.Mutex
+	OutputPanelMu      sync.Mutex
+	OutputPanelRun     map[string]bool
+	OutputRefreshSem   chan struct{}
+	OutputRefreshAfter string
+	BrowserMu          sync.Mutex
+	BrowserTickets     map[string]time.Time
 }
 
 func New(db *sql.DB, c app.Container) *Server {
@@ -93,6 +93,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("DELETE /api/v1/residential-proxies/{id}", s.require(s.deleteResidentialProxy, true))
 	m.HandleFunc("POST /api/v1/residential-proxies/{id}/test", s.require(s.testResidentialProxy, true))
 	m.HandleFunc("GET /api/v1/configs/transport", s.require(s.getConfigTransport, false))
+	m.HandleFunc("GET /api/v1/configs/output-settings", s.require(s.getOutputSettings, false))
+	m.HandleFunc("PUT /api/v1/configs/output-settings", s.require(s.putOutputSettings, true))
 	m.HandleFunc("POST /api/v1/configs/transport/apply", s.require(s.applyConfigTransport, true))
 	m.HandleFunc("POST /api/v1/configs/transport/rollback/{id}", s.require(s.rollbackConfigTransport, true))
 	m.HandleFunc("POST /api/v1/configs/transport/retry/{id}", s.require(s.retryConfigTransport, true))

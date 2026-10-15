@@ -18,6 +18,8 @@ func TestOutputSnapshotLongXHTTPRoundTrip(t *testing.T) {
 	db := adminTestDB(t)
 	_, _, panel := seedPanel(t, db, "http://panel.test")
 	s := &Server{DB: db}
+	// This round-trip explicitly requests the full optional client fields.
+	sqlMust(t, db, "UPDATE output_export_policy SET include_xhttp_extra=true,include_finalmask=true")
 	ctx := context.Background()
 	profile := transportprofile.Preset()
 	// Production jsonb reads add spaces which must survive strict URI decoding.

@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"log"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -320,11 +321,9 @@ func (s *Server) refreshOutputLive(ctx context.Context) {
 	if len(panels) == 0 {
 		return
 	}
-	start := s.OutputRefreshCursor % len(panels)
-	s.OutputRefreshCursor = (start + 1) % len(panels)
-	for _, panel := range rotateOutputPanels(panels, start) {
-		s.startPanelOutputRefresh(ctx, panel)
-	}
+	s.OutputRefreshAfter = scheduleOutputPanels(panels, s.OutputRefreshAfter, func(p readyworker.Panel) bool {
+		return s.startPanelOutputRefresh(ctx, p)
+	})
 }
 
 func (s *Server) startPanelOutputRefresh(parent context.Context, panel readyworker.Panel) bool {
@@ -372,4 +371,24 @@ func (s *Server) startPanelOutputRefresh(parent context.Context, panel readywork
 		_ = s.refreshPanelOutput(ctx, panel)
 	}()
 	return true
+}
+
+// scheduleOutputPanels uses the stable panel ID order, so deletion/insertion
+// cannot reinterpret an index as a different continuation point.
+func scheduleOutputPanels(panels []readyworker.Panel, after string, admit func(readyworker.Panel) bool) string {
+	if len(panels) == 0 {
+		return after
+	}
+	panels = append([]readyworker.Panel(nil), panels...)
+	sort.Slice(panels, func(i, j int) bool { return panels[i].ID < panels[j].ID })
+	start := sort.Search(len(panels), func(i int) bool { return panels[i].ID > after })
+	if start == len(panels) {
+		start = 0
+	}
+	for _, p := range rotateOutputPanels(panels, start) {
+		if admit(p) {
+			after = p.ID
+		}
+	}
+	return after
 }

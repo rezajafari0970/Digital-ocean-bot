@@ -14,6 +14,8 @@ async function refreshConfigTransport(){
   if(network==='xhttp')rows+=row('XHTTP Host',c.host)+row('Path length',c.path_bytes+' bytes · unique per listener')+row('Flow',c.flow||'Empty')+row('VLESS Encryption',c.flow?'Enabled for Vision':'None')+row('Browser Dialer',transportDialerStatus(c))+row('FinalMask',transportMaskStatus(c));
   slot.innerHTML='<div class="card section"><div class="cardHeader"><h3>Listener transport settings</h3><button class="small ghost" id="editTransport">Edit transport</button></div><div class="kv">'+rows+'</div><p class="muted">'+esc(data.scope)+'</p></div>';
   document.querySelector('#editTransport').onclick=()=>openConfigTransport(data);
+  const outputArea=document.createElement('div');outputArea.id='outputSettingsSlot';slot.appendChild(outputArea);
+  if(typeof refreshOutputSettings==='function')await refreshOutputSettings();
   const jobs=data.applications||[],counts={};
   jobs.forEach(j=>counts[j.state]=(counts[j.state]||0)+1);
   const stateNames={PENDING:'Queued',RUNNING:'Applying / verifying',SUCCEEDED:'Verified',BLOCKED:'Needs review',FAILED:'Failed',OBSOLETE:'Server retired'};
