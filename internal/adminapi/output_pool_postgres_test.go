@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestOutputRefreshLeavesDatabaseHeadroomWhileLocksWait(t *testing.T) {
+func TestOutputRefreshLeavesDatabaseHeadroomWhileLocksBusy(t *testing.T) {
 	for _, budget := range []int{6, 24} {
 		t.Run(fmt.Sprint(budget), func(t *testing.T) {
 			db := adminTestDB(t)
@@ -56,15 +56,21 @@ func TestOutputRefreshLeavesDatabaseHeadroomWhileLocksWait(t *testing.T) {
 			if admitted == 0 {
 				t.Fatal("fixture did not start output refreshes")
 			}
-			// Wait until admitted collectors actually hold pool connections waiting on
-			// the real PostgreSQL locks, then exercise unrelated API/readiness SQL.
-			blocked := min(admitted, budget-1)
-			until := time.Now().Add(2 * time.Second)
-			for db.Stats().InUse < blocked+1 && time.Now().Before(until) {
+			// Busy panel locks must promptly release scarce collector slots, even
+			// while all blocker locks remain held.
+			until := time.Now().Add(time.Second)
+			drained := false
+			for time.Now().Before(until) {
+				s.OutputPanelMu.Lock()
+				drained = len(s.OutputPanelRun) == 0 && len(s.OutputRefreshSem) == 0
+				s.OutputPanelMu.Unlock()
+				if drained {
+					break
+				}
 				time.Sleep(5 * time.Millisecond)
 			}
-			if db.Stats().InUse < blocked+1 {
-				t.Fatal("collectors did not reach the held locks")
+			if !drained {
+				t.Fatal("busy locks kept output collectors and pool slots occupied")
 			}
 			probe, cancel := context.WithTimeout(ctx, 300*time.Millisecond)
 			defer cancel()

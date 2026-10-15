@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -16,6 +17,12 @@ import (
 )
 
 func TestOutputSchedulerRealOverlappingRefreshes(t *testing.T) {
+	testOutputScheduler(t, false)
+}
+func TestOutputSchedulerSkipsBusyLocks(t *testing.T) {
+	testOutputScheduler(t, true)
+}
+func testOutputScheduler(t *testing.T, lockEarly bool) {
 	db := adminTestDB(t)
 	db.SetMaxOpenConns(24)
 	var mu sync.Mutex
@@ -57,7 +64,7 @@ func TestOutputSchedulerRealOverlappingRefreshes(t *testing.T) {
 			active--
 			delete(inFlight, id)
 			mu.Unlock()
-			fmt.Fprint(w, `{"success":true,"obj":[]}`)
+			fmt.Fprint(w, `{"success":true,"obj":[{"id":1,"enable":true,"remark":"fixture","protocol":"vless","port":443,"settings":{"decryption":"none","clients":[{"id":"b530c072-21c6-405d-95d8-fa78afa2d62e","enable":true,"email":"test","flow":"xtls-rprx-vision"}]},"streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverNames":["www.example.com"],"shortIds":["aabb"]}}}]}`)
 			return
 		}
 		t.Errorf("unexpected panel endpoint %s", r.URL.Path)
@@ -65,17 +72,32 @@ func TestOutputSchedulerRealOverlappingRefreshes(t *testing.T) {
 	}))
 	defer remote.Close()
 	for i := 0; i < 36; i++ {
-		seedPanel(t, db, fmt.Sprintf("%s/%d/", remote.URL, i))
+		_, _, panel := seedPanel(t, db, fmt.Sprintf("%s/%d/", remote.URL, i))
+		sqlMust(t, db, "INSERT INTO inbound_export_metadata(panel_id,remote_id,public_key) VALUES($1,1,'public')", panel)
 	}
 	sqlMust(t, db, "UPDATE deployments SET host='fixture.invalid'")
 	eligible, err := (readyworker.SQLSource{DB: db}).EligibleReadyPanels(context.Background())
 	if err != nil || len(eligible) != 36 {
 		t.Fatalf("eligible fixture=%d: %v", len(eligible), err)
 	}
+	sort.Slice(eligible, func(i, j int) bool { return eligible[i].ID < eligible[j].ID })
+	blocker, err := db.Conn(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer blocker.Close()
+	defer blocker.ExecContext(context.Background(), "SELECT pg_advisory_unlock_all()")
+	if lockEarly {
+		for _, p := range eligible[:8] {
+			if _, err := blocker.ExecContext(context.Background(), "SELECT pg_advisory_lock(hashtextextended($1,0))", "panel-config:"+p.ID); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 	s := New(db, app.Container{})
 	s.OutputRuntimes = &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: 5 * time.Second}, TTL: time.Minute}
-	defer func() {
-		deadline := time.Now().Add(6 * time.Second)
+	drain := func() {
+		deadline := time.Now().Add(7 * time.Second)
 		for time.Now().Before(deadline) {
 			s.OutputPanelMu.Lock()
 			n := len(s.OutputPanelRun)
@@ -86,16 +108,37 @@ func TestOutputSchedulerRealOverlappingRefreshes(t *testing.T) {
 			time.Sleep(20 * time.Millisecond)
 		}
 		t.Error("bounded collectors did not drain")
-	}()
-	for tick := 0; tick < 6; tick++ {
-		s.refreshOutputLive(context.Background())
-		probe, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-		if e := db.PingContext(probe); e != nil {
-			t.Error("scheduler starved API SQL", e)
-		}
-		cancel()
-		time.Sleep(time.Second)
 	}
+	defer drain()
+	runTicks := func() {
+		for tick := 0; tick < 6; tick++ {
+			s.refreshOutputLive(context.Background())
+			probe, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+			if e := db.PingContext(probe); e != nil {
+				t.Error("scheduler starved API SQL", e)
+			}
+			cancel()
+			time.Sleep(time.Second)
+		}
+	}
+	assertFresh := func(want int) {
+		t.Helper()
+		var count int
+		if err := db.QueryRow("SELECT count(DISTINCT panel_id) FROM output_config_snapshots WHERE last_seen_at>now()-interval '15 seconds'").Scan(&count); err != nil || count != want {
+			t.Fatalf("completed fresh snapshots=%d want=%d err=%v", count, want, err)
+		}
+	}
+	runTicks()
+	drain()
+	if lockEarly {
+		assertFresh(28)
+		if _, err := blocker.ExecContext(context.Background(), "SELECT pg_advisory_unlock_all()"); err != nil {
+			t.Fatal(err)
+		}
+		runTicks()
+		drain()
+	}
+	assertFresh(36)
 	mu.Lock()
 	defer mu.Unlock()
 	if len(seen) != 36 {

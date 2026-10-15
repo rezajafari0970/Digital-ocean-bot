@@ -5,7 +5,7 @@
   "source_base": "d5f0668052bc3ae1d1fc08a9a860fdc7d77279ce",
   "branch": "feat/output-controls-20261016",
   "worktree": "/root/projects/dob-output-controls-20261016",
-  "status": "SOURCE_VERIFIED_PUBLICATION_PENDING",
+  "status": "LOCK_CONTENTION_FIX_VERIFIED_PUBLICATION_PENDING",
   "stage_status": {
     "diagnosis": "COMPLETE: sliding admission cursor causes >15sec stale snapshots; two empty panels completed normal target warmup",
     "output_policy": "IMPLEMENTED: separate singleton, emission-only policy, UI; defaults omit both fields",
@@ -15,33 +15,40 @@
     "native_candidate": "PASS: official26.5.9/26.9.9 parse and HTTPS200/204 without Extra/FinalMask",
     "browser": "PASS",
     "real_scheduler_race": "PASS:36panels,overlapping slow requests,SQL headroom",
-    "full_regression": "PASS_COMPOSED: all non-admin packages in broad run; exact final complete admin package separately PASS; initial failing test retained",
-    "publication": "PENDING",
+    "full_regression": "PASS_COMPOSED: complete non-admin packages from locks-full; exact final full admin rerun; initial timing fixture failure retained",
+    "publication": "PENDING_FOLLOWUP",
     "deployment": "NOT_STARTED",
-    "review": "PASS_SOURCE_WITH_RELEASE_GATES"
+    "review": "SOURCE_APPROVED_WITH_RELEASE_GATES",
+    "initial_deployment": "PASS on bothhosts0d860a8/schema181; native realHTTPS PASS",
+    "initial_live": "FAIL:34ready,32-34DIRECT; advisory waits consume collector slots; preserved initial-live-acceptance.json",
+    "lock_contention": "PASS: pg_try_advisory_lock only for collector; mutation blocking unchanged; no callback without ownership",
+    "locks_regression": "PASS: initial8/28 ->28/28unlocked then36/36,realPostgres race/ownership/cancellation/panic"
   },
   "allowed_paths": [
     "internal/adminapi/output.go",
-    "internal/adminapi/output_snapshot.go",
-    "internal/adminapi/output_snapshot_long_test.go",
-    "internal/adminapi/server.go",
-    "web/static/config-transport.js",
-    "web/static/index.html",
-    "web/tests/config-transport.cjs",
+    "internal/adminapi/output_config_lock_postgres_test.go",
     "internal/adminapi/output_fairness_test.go",
+    "internal/adminapi/output_pool_postgres_test.go",
     "internal/adminapi/output_scheduler_postgres_test.go",
     "internal/adminapi/output_settings.go",
     "internal/adminapi/output_settings_test.go",
+    "internal/adminapi/output_snapshot.go",
+    "internal/adminapi/output_snapshot_long_test.go",
+    "internal/adminapi/server.go",
     "internal/panels/export/options.go",
     "internal/panels/export/options_test.go",
+    "internal/panels/sanaei/config_lock.go",
     "migrations/000181_output_policy.down.sql",
     "migrations/000181_output_policy.up.sql",
-    "web/static/output-settings.js"
+    "web/static/config-transport.js",
+    "web/static/index.html",
+    "web/static/output-settings.js",
+    "web/tests/config-transport.cjs"
   ],
   "source_hashes": {
-    "internal/adminapi/output.go": "a8190901546735c70a1b42a9de069cf2c3830765e399372c59cd0497598cb1c8",
+    "internal/adminapi/output.go": "98a2eff0e3bc51edb3507e657ad92d88a39569de0932b95fc8260a71d00889b6",
     "internal/adminapi/output_fairness_test.go": "08cae311785c93eddb58a9c20a7e8168b2228ca7b6493bfe5342661bb8cac31f",
-    "internal/adminapi/output_scheduler_postgres_test.go": "f2b3999b8cdcc933aac7ccb788a3f3c2547bf4451a2ad1b4e5f28b47e7c0e308",
+    "internal/adminapi/output_scheduler_postgres_test.go": "0e84933e5853638242d3c1e5fa0da29d6c8f45dd738a67fda3bfc42e83f7d507",
     "internal/adminapi/output_settings.go": "f54a437fd08f88c0d17e11e94c8f56b88577242973fe3e7f99a0b0454e87f5d7",
     "internal/adminapi/output_settings_test.go": "83d0926a67b35216ef8d2237fa4ac4282691e8202e214e1ee6ff0be401ae737f",
     "internal/adminapi/output_snapshot.go": "93f1345aaf1c21659351304cfb4e498ea8c013f09bba5dc0622a3436b71f4d6d",
@@ -54,7 +61,10 @@
     "web/static/config-transport.js": "e511a70d3097594f758cff8dc573203f9f24d37d8471ae9f60078603ed480e67",
     "web/static/index.html": "4ee4a6657d46d5eac7f85a6c5c8f0c087b6ed5e0d2cd65a558e93e550352dfec",
     "web/static/output-settings.js": "b44250525fb32b9bdcb2ab5895523cc97fbddb23daf7d6541c66742b8e9b828d",
-    "web/tests/config-transport.cjs": "1d0e712186c698a35003b20060f6cdcd47a6d8692091d4b1e8721a928b7adf15"
+    "web/tests/config-transport.cjs": "1d0e712186c698a35003b20060f6cdcd47a6d8692091d4b1e8721a928b7adf15",
+    "internal/adminapi/output_pool_postgres_test.go": "1b088799ffe5cee546f3bcece1261135415aa7804619e4ab383b38090477db7f",
+    "internal/adminapi/output_config_lock_postgres_test.go": "46b2e91ceb2f9134c16177eefdc5aec8696af4f541b93a7bb8f86e304a2f54de",
+    "internal/panels/sanaei/config_lock.go": "162d7b68fefd6bbc8071f94eff7c6bc4f0db889ac1d3dffcbf9f8d364ffd0fed"
   },
   "risk": {
     "schema": 1,
@@ -74,13 +84,14 @@
     ]
   },
   "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence",
-  "updated_at": "2026-10-15T23:02:10.442448+00:00",
+  "updated_at": "2026-10-15T23:27:47.748243+00:00",
   "adjudication": {
     "disagreements": [],
     "freshness": "Keep15sec output and60sec routing proof; no stale fallback. Under persistent failure, output remains withheld.",
     "empty_panels": "Both had3eligible target observations and subsequently created actual users without forced change; no bootstrap defect established.",
     "initial_test_failures": "Legacy roundtrip required explicit includeExtra option under new defaults; corrected fixture. Slow simulation8ticks insufficient capacity for36at2sec; ten ticks is under15sec and passes. Real HTTP fixture initially omitted deployment.host and was corrected; final real scheduler-racePASS.",
-    "bootstrap": "Existing detached canonical named-branch guard still fails. Exact baseline/origin equality and clean tracked canonical verified; no mastery READY claim."
+    "bootstrap": "Existing detached canonical named-branch guard still fails. Exact baseline/origin equality and clean tracked canonical verified; no mastery READY claim.",
+    "lock_followup": "Busy collector advisory waits consume5sec budget and defer retry another fleet rotation. Try-only output path releases slots promptly; no stale fallback. Shared lock keeps same key/ownership and independently bounded2sec cleanup/discard; five-second work budget is not a totalwalltime including cleanup. Scheduler SQL explicitly orders IDs; snapshots asserted after6one-second admission ticks plus bounded drain and cover completed persistence,not just HTTP starts. Arbitrary long native mutation or network outage may legitimately hide stale output. Release/live gates required."
   },
   "api_usage": [
     {
@@ -201,7 +212,92 @@
         },
         "total_tokens": 14013
       }
+    },
+    {
+      "role": "adversary",
+      "model": "gpt-6-astra",
+      "id": "resp_04e8625a9605d5ca006ad15dc5d25487d19bac1b111332511e",
+      "usage": {
+        "input_tokens": 5846,
+        "input_tokens_details": {
+          "cache_write_tokens": 5843,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1115,
+        "output_tokens_details": {
+          "reasoning_tokens": 132
+        },
+        "total_tokens": 6961
+      }
+    },
+    {
+      "role": "architect",
+      "model": "gpt-6-astra",
+      "id": "resp_0723a5a6acb04f6b006ad15dc5bf3087d1881e57761d4bb16d",
+      "usage": {
+        "input_tokens": 5845,
+        "input_tokens_details": {
+          "cache_write_tokens": 5842,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1001,
+        "output_tokens_details": {
+          "reasoning_tokens": 95
+        },
+        "total_tokens": 6846
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_043ed051fdc7afe2006ad15dc548a087d1b6a5095f6131609f",
+      "usage": {
+        "input_tokens": 5845,
+        "input_tokens_details": {
+          "cache_write_tokens": 5842,
+          "cached_tokens": 0
+        },
+        "output_tokens": 685,
+        "output_tokens_details": {
+          "reasoning_tokens": 247
+        },
+        "total_tokens": 6530
+      }
+    },
+    {
+      "role": "test_designer",
+      "model": "gpt-6-sol",
+      "id": "resp_0da3eb7131feb67b006ad15dc5456c87d19307db14c5ef9ed5",
+      "usage": {
+        "input_tokens": 5847,
+        "input_tokens_details": {
+          "cache_write_tokens": 5844,
+          "cached_tokens": 0
+        },
+        "output_tokens": 884,
+        "output_tokens_details": {
+          "reasoning_tokens": 471
+        },
+        "total_tokens": 6731
+      }
+    },
+    {
+      "role": "reviewer",
+      "model": "gpt-6-sol",
+      "id": "resp_06d09b2014a9e96e006ad15ebaa6a087d1a5801e6da1f6f164",
+      "usage": {
+        "input_tokens": 10264,
+        "input_tokens_details": {
+          "cache_write_tokens": 10261,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1002,
+        "output_tokens_details": {
+          "reasoning_tokens": 714
+        },
+        "total_tokens": 11266
+      }
     }
   ],
-  "api_tokens": 80638
+  "api_tokens": 118972
 }

@@ -48,9 +48,9 @@ func outputMap(raw json.RawMessage) (map[string]any, error) {
 }
 
 func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel) string {
-	ctx, cancel := context.WithTimeout(parent, 90*time.Second)
+	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
 	defer cancel()
-	_ = sanaei.WithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) error {
+	acquired, err := sanaei.TryWithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) error {
 		var busy bool
 		if err := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM reality_transport_apply_jobs WHERE panel_id=$1 AND state IN('RUNNING','BLOCKED'))", p.ID).Scan(&busy); err != nil {
 			return err
@@ -60,6 +60,11 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 		}
 		return nil
 	})
+	if err != nil {
+		log.Printf("output refresh panel=%s lock_error=%v", p.ID, err)
+	} else if !acquired {
+		log.Printf("output refresh panel=%s skipped=config_lock_busy", p.ID)
+	}
 	return ""
 }
 func (s *Server) refreshPanelOutputLocked(parent context.Context, p readyworker.Panel) string {
