@@ -1,21 +1,22 @@
 {
   "id": "transport-apply-20261015",
-  "updated_at": "2026-10-15T20:48:20.525837+00:00",
-  "status": "VERIFIED_PUBLICATION_PENDING",
+  "updated_at": "2026-10-15T21:06:24.614073+00:00",
+  "status": "POOL_FIX_VERIFIED_CORRECTED_PUBLICATION_PENDING",
   "base_revision": "74d645823470bc8a8aea08457e8c9244ff1b608c",
   "stage_status": {
     "diagnosis": "PASS_OLD_LISTENER_PIN",
     "implementation": "PASS",
-    "postgres_browser_full": "PASS",
-    "race_vet": "PASS",
+    "postgres_browser_full": "PASS_R7",
+    "race_vet": "PASS_R7",
     "native_core_apply_restore": "PASS",
-    "api_review": "PASS_R5_R6",
-    "publication": "PENDING",
-    "normal_updates": "PENDING",
+    "api_review": "PASS_R7",
+    "publication": "CORRECTED_RELEASE_PENDING",
+    "normal_updates": "INITIAL_PRIMARY_RESTORED_NO_APPLY",
     "live_apply": "PENDING",
     "live_output": "PENDING",
     "browser_dialer": "UNAVAILABLE_WITH_REALITY",
-    "phone": "DISCONNECTED_REFRESH_REQUIRED"
+    "phone": "DISCONNECTED_REFRESH_REQUIRED",
+    "pool_regression": "BASELINE_FAIL_FIXED_PASS_6_AND_24"
   },
   "reviewed_source_hashes": {
     "cmd/worker/main.go": "b9ef5bb954390343f6aee9ef5aed34546c4a3c36773b739340246c5ff618628f",
@@ -23,7 +24,7 @@
     "cmd/worker/supervision.go": "0d416c150c3e17d2b49f69ca890b9f34fbb24a903ff321fdb2515e280da1d37b",
     "internal/adminapi/config_transport.go": "0dd62bc91b0ab545b01e5d5a152fcda6ed351f27f1d187636eef9ae1b11424ff",
     "internal/adminapi/config_transport_apply_test.go": "86b04565717cd0f5cef8b77573191c8acb1c548dc1446ee78d6dd66e05d9ce67",
-    "internal/adminapi/output.go": "fe0abf44e703cea62e4deb301238c0c15c6b5ff56ddfb22ccd84ddab9f230025",
+    "internal/adminapi/output.go": "023b550be168294f0d0266ef977148d231b40c71d47b00eff8d0730fe4dd5142",
     "internal/adminapi/output_snapshot.go": "89396725da78e3c039f57d54c4f82b11cf00ad472bd94d8a84e02123a69a0689",
     "internal/adminapi/server.go": "bf2213df65b42dbf6843d189f380e718f08ebc802b84051d306f124e2faf8926",
     "internal/panels/clientops/bulk_test.go": "2b326956c48fd5f340d2c31c6f17e8edc5e72ca21b814b8a9750f8791c311ccc",
@@ -43,7 +44,9 @@
     "migrations/000180_transport_apply.down.sql": "8f871c6e4071f139fb47c1dd7b9896d7520dacb3976449ede46e0b5eb5c406cc",
     "migrations/000180_transport_apply.up.sql": "8fae34267e4ae02b2685b7a01e5cd82b9f50c394d7e65a8c732abefbd1fe8c71",
     "web/static/config-transport.js": "2b182c8066a85a01ff4b721341476a6db144a96d2047904f7b67f48994ccf33e",
-    "web/tests/config-transport.cjs": "dc2fd9691c7c90d33438160341b3d1bcbd24622acfd36691a3de80830a6f4262"
+    "web/tests/config-transport.cjs": "dc2fd9691c7c90d33438160341b3d1bcbd24622acfd36691a3de80830a6f4262",
+    "internal/adminapi/output_coordinator_test.go": "1b66661142106dc46ecccb532266a2172fd10d2f4e1fb1d159b44cfaa01bccb8",
+    "internal/adminapi/output_pool_postgres_test.go": "5e1dbd661950834428ed6be86082a6c68b766eb204726cdf0bcd9565663ab3e9"
   },
   "api_usage": [
     {
@@ -153,8 +156,27 @@
         "total_tokens": 6448
       },
       "decision": "PASS"
+    },
+    {
+      "review": "review-r7",
+      "id": "resp_07b9d20445be03ae006ad13e35963087d1bc7f1aea139e3342",
+      "model": "gpt-6-sol",
+      "usage": {
+        "input_tokens": 6317,
+        "input_tokens_details": {
+          "cache_write_tokens": 6314,
+          "cached_tokens": 0
+        },
+        "output_tokens": 799,
+        "output_tokens_details": {
+          "reasoning_tokens": 691
+        },
+        "total_tokens": 7116
+      },
+      "decision": "PASS"
     }
   ],
-  "api_tokens": 162022,
-  "evidence_directory": "/root/projects/dob-transport-apply-20261015/.local/apply-evidence"
+  "api_tokens": 169138,
+  "evidence_directory": "/root/projects/dob-transport-apply-20261015/.local/apply-evidence",
+  "initial_public_revision": "23268f68da5b3caefbb8abd4e73324db83a4aed0"
 }

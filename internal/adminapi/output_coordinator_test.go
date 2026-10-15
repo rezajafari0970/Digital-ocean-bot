@@ -108,19 +108,6 @@ func TestOutputRefreshConcurrencyIsBounded(t *testing.T) {
 	}
 }
 
-func TestOutputRefreshDefaultCapacity(t *testing.T) {
-	s := &Server{OutputPanelRun: map[string]bool{}}
-	s.OutputPanelMu.Lock()
-	if s.OutputRefreshSem == nil {
-		s.OutputRefreshSem = make(chan struct{}, 64)
-	}
-	capacity := cap(s.OutputRefreshSem)
-	s.OutputPanelMu.Unlock()
-	if capacity != 64 {
-		t.Fatalf("capacity=%d want 64", capacity)
-	}
-}
-
 func TestRotateOutputPanelsPreventsFixedTailStarvation(t *testing.T) {
 	in := []readyworker.Panel{{ID: "a"}, {ID: "b"}, {ID: "c"}, {ID: "d"}}
 	got := rotateOutputPanels(in, 2)

@@ -21,3 +21,7 @@ Browser Dialer remains unavailable with REALITY. Its saved preference is shown h
 
 Normal gated publication, secondary/primary updates, first-listener application and remaining eligible fleet application are pending at this source checkpoint. Primary saved policy revision6 (aparat.com, XHTTP stream-up, VisionUDP443, FinalMask both) and secondary revision3 are preserved. No provider purchases, unrelated IP changes or client credential rotation.
 Private evidence: .local/apply-evidence and /root/backups/dob-transport-apply-20261015.
+
+## Live acceptance correction
+
+The first public release23268f6 exposed API database pool starvation under the real primary fleet:64 collectors pinned connections for the new config lock and waited for nested SQL. No listener jobs had been queued. Primary was restored through the normal installer to approved0219700 and readiness5/5 recovered; schema180 remains. Output admission now reserves pool headroom using min(8,maxOpen/3). Actual PostgreSQL regression fails before and passes after at pool sizes6 and24; affected race, full isolated PostgreSQL/Chromium suite, and vet pass. R7 reviewer PASS. Total task7API responses 169138tokens; billed money unknown. Corrected normal release and live application remain pending at this checkpoint.

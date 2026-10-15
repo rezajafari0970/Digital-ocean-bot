@@ -333,7 +333,19 @@ func (s *Server) startPanelOutputRefresh(parent context.Context, panel readywork
 		s.OutputPanelRun = map[string]bool{}
 	}
 	if s.OutputRefreshSem == nil {
-		s.OutputRefreshSem = make(chan struct{}, 64)
+		// Each collector pins a SQL connection while holding the config lock
+		// and needs another for nested reads. Reserve headroom for API work.
+		limit := 8
+		if s.DB != nil {
+			if budget := s.DB.Stats().MaxOpenConnections; budget > 0 {
+				limit = min(limit, budget/3)
+			}
+		}
+		if limit < 1 {
+			s.OutputPanelMu.Unlock()
+			return false
+		}
+		s.OutputRefreshSem = make(chan struct{}, limit)
 	}
 	if s.OutputPanelRun[panel.ID] {
 		s.OutputPanelMu.Unlock()
