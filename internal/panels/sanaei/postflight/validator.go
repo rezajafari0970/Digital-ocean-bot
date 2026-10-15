@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
+	"reflect"
 	"sort"
 )
 
 var ErrMismatch = errors.New("sanaei inbound semantic mismatch")
 
 type Expected struct {
+	Transport   transportprofile.Config
 	RemoteID    int64
 	Remark      string
 	Port        int
@@ -78,7 +81,11 @@ func Validate(in Inbound, w Expected) error {
 		if err != nil {
 			continue
 		}
-		if c["id"] == w.UUID && c["flow"] == w.Flow {
+		flow, _ := c["flow"].(string)
+		if w.Transport.NetworkName() == "xhttp" && flow != "" {
+			return fmt.Errorf("%w: XHTTP flow", ErrMismatch)
+		}
+		if c["id"] == w.UUID && flow == w.Flow {
 			matched++
 		}
 	}
@@ -89,8 +96,22 @@ func Validate(in Inbound, w Expected) error {
 	if e != nil {
 		return e
 	}
-	if st["network"] != "tcp" || st["security"] != "reality" {
+	if st["network"] != w.Transport.NetworkName() || st["security"] != "reality" {
 		return fmt.Errorf("%w: stream contract", ErrMismatch)
+	}
+	if w.Transport.NetworkName() == "xhttp" {
+		got, e := transportprofile.FromStream(st)
+		if e != nil {
+			return fmt.Errorf("%w: XHTTP settings", ErrMismatch)
+		}
+		a, _ := json.Marshal(got.WireSettings())
+		b, _ := json.Marshal(w.Transport.WireSettings())
+		var av, bv any
+		_ = json.Unmarshal(a, &av)
+		_ = json.Unmarshal(b, &bv)
+		if !reflect.DeepEqual(av, bv) {
+			return fmt.Errorf("%w: XHTTP settings", ErrMismatch)
+		}
 	}
 	rs, e := object(st["realitySettings"])
 	if e != nil {

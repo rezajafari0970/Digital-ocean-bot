@@ -2,14 +2,15 @@
   "schema": 2,
   "status": "source_verified_publication_gates_required",
   "date": "2026-10-15",
-  "feature": "Read-only additional-IP inventory and explicit disabled execution gates",
+  "feature": "Pinned XHTTP Reality creation defaults and transport-aware lifecycle/output",
   "current_evidence": {
-    "focused_postgres_and_browser": "PASS focused-r4",
-    "unit_and_provider_contracts": "PASS",
-    "full_regression_r1": "PASS prior source; not final gate",
-    "exact_final": "PASS full-final exact source; isolated PostgreSQL; sequential packages",
-    "race": "PASS focused race",
-    "vet": "PASS",
+    "exact_source_review": "PASS",
+    "full_project_isolated_postgres_browser": "PASS",
+    "affected_race_final": "PASS",
+    "transport_browser": "PASS",
+    "vet_diff": "PASS",
+    "native_panel_create_retry_restart_readback": "PASS",
+    "phone_allowed_requests": "16/16",
     "publication": "PENDING",
     "deployment": "PENDING"
   },
@@ -20,9 +21,10 @@
     "atomic_main_and_stable": "required"
   },
   "notes": [
-    "Four provider inventory adapters are fixture-tested; UpCloud has no live account in current validation.",
-    "Unknown quota remains nullable and historical capacity evidence is preserved.",
-    "CLI and panel share durable account admission; late rate-limit deadlines survive takeover and successful newer reads.",
-    "No paid allocation, guest change, rotation, release or additional-IP config publication is implemented or enabled."
+    "Existing TCP listeners are unchanged; new physical listeners use the selected creation default.",
+    "4096bytes is a tested path limit, not a universal protocol maximum.",
+    "Exact requested FinalMask remains disabled due to tested core compatibility; WebView disabled and XHTTP Flow empty.",
+    "No provider allocation or IP rotation is enabled by this release.",
+    "Phone tests download static advertising assets; no SDK display or long-term stability claim."
   ]
 }

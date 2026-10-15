@@ -3,6 +3,7 @@ package export
 import (
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"net"
 	"net/url"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 var ErrInvalidVLESS = errors.New("invalid vless export")
 
 type VLESSReality struct {
+	Transport   transportprofile.Config
 	UUID        string
 	Host        string
 	Port        int
@@ -35,18 +37,32 @@ func VLESSRealityURI(x VLESSReality) (string, error) {
 	}
 	// URI is a client-side setting. The server keeps ordinary Vision; this
 	// suffix permits QUIC instead of silently rejecting UDP port 443.
-	if x.Flow == "" || x.Flow == "xtls-rprx-vision" {
+	if err := x.Transport.Validate(x.Transport.NetworkName() == "xhttp"); err != nil {
+		return "", err
+	}
+	if x.Transport.NetworkName() == "xhttp" && x.Flow != "" {
+		return "", ErrInvalidVLESS
+	}
+	if x.Transport.NetworkName() == "tcp" && (x.Flow == "" || x.Flow == "xtls-rprx-vision") {
 		x.Flow = "xtls-rprx-vision-udp443"
 	}
 	q := url.Values{}
 	q.Set("encryption", "none")
-	q.Set("flow", x.Flow)
+	if x.Flow != "" {
+		q.Set("flow", x.Flow)
+	}
 	q.Set("security", "reality")
 	q.Set("sni", x.SNI)
 	q.Set("fp", x.Fingerprint)
 	q.Set("pbk", x.PublicKey)
 	q.Set("sid", x.ShortID)
-	q.Set("type", "tcp")
+	q.Set("type", x.Transport.NetworkName())
+	if x.Transport.NetworkName() == "xhttp" {
+		q.Set("mode", x.Transport.Mode)
+		q.Set("host", x.Transport.Host)
+		q.Set("path", x.Transport.Path)
+		q.Set("extra", string(x.Transport.Extra))
+	}
 	hostport := net.JoinHostPort(x.Host, strconv.Itoa(x.Port))
 	return fmt.Sprintf("vless://%s@%s?%s#%s", url.PathEscape(x.UUID), hostport, q.Encode(), url.QueryEscape(x.Remark)), nil
 }

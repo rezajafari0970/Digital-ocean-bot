@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 )
 
 // ObserveVerifiedSnapshot reuses a fresh complete native inventory already read
@@ -29,7 +30,7 @@ func (s Service) ObserveVerifiedSnapshot(ctx context.Context, panel string, raws
 		if json.Unmarshal(streamRaw, &encoded) == nil {
 			streamRaw = []byte(encoded)
 		}
-		if json.Unmarshal(streamRaw, &stream) != nil || stream.Network != "tcp" || stream.Security != "reality" {
+		if json.Unmarshal(streamRaw, &stream) != nil || !transportprofile.Supported(stream.Network) || stream.Security != "reality" {
 			continue
 		}
 		var bulk bool

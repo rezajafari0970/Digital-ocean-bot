@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
@@ -18,7 +19,7 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 	now := time.Now().UnixMilli()
 	mutated := false
 	for _, rec := range snap.Records {
-		if !wanted[rec.Port] || !rec.Enabled || rec.Protocol != "vless" || rec.Transport != "tcp" || rec.Security != "reality" {
+		if !wanted[rec.Port] || !rec.Enabled || rec.Protocol != "vless" || !transportprofile.Supported(rec.Transport) || rec.Security != "reality" {
 			continue
 		}
 		effectiveTarget, effectiveRate, err := s.effectiveTargetRate(ctx, p.ID, rec.RemoteID, target, rate)
@@ -98,7 +99,7 @@ func (s Service) LegacyFastFill(ctx context.Context, p readyworker.Panel, runtim
 				return mutated, e
 			}
 			email := ownershipEmail(generation.Marker, id)
-			clients = append(clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: "xtls-rprx-vision"})
+			clients = append(clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitIP: limit, Flow: transportprofile.Flow(rec.Transport)})
 			owned = append(owned, ownedClient{ID: id, Email: email})
 		}
 		if err = s.planOwnedClients(ctx, generation.ID, owned); err != nil {

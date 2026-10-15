@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"net/http"
 	"strings"
 	"time"
@@ -91,9 +92,18 @@ func (s *Server) clientMutations(w http.ResponseWriter, r *http.Request) {
 		if req.LimitIP != nil {
 			limit = *req.LimitIP
 		}
-		flow := "xtls-rprx-vision"
+		var network string
+		if err := s.DB.QueryRowContext(r.Context(), "SELECT transport FROM panel_inbound_inventory WHERE panel_id=$1 AND remote_id=$2 AND present AND enabled", req.PanelID, req.InboundID).Scan(&network); err != nil || !transportprofile.Supported(network) {
+			writeJSON(w, 409, map[string]string{"error": "unsupported_inbound_transport"})
+			return
+		}
+		flow := transportprofile.Flow(network)
 		if req.Flow != nil {
 			flow = *req.Flow
+			if network == "xhttp" && flow != "" {
+				writeJSON(w, 400, map[string]string{"error": "xhttp_requires_empty_flow"})
+				return
+			}
 		}
 		payload = map[string]any{"Client": sanaei.Client{
 			ID: req.ClientID, Email: req.Email, Enable: enable,

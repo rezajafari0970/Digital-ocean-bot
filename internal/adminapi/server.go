@@ -92,6 +92,8 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("PUT /api/v1/residential-proxies/{id}", s.require(s.updateResidentialProxy, true))
 	m.HandleFunc("DELETE /api/v1/residential-proxies/{id}", s.require(s.deleteResidentialProxy, true))
 	m.HandleFunc("POST /api/v1/residential-proxies/{id}/test", s.require(s.testResidentialProxy, true))
+	m.HandleFunc("GET /api/v1/configs/transport", s.require(s.getConfigTransport, false))
+	m.HandleFunc("PUT /api/v1/configs/transport", s.require(s.putConfigTransport, true))
 	m.HandleFunc("GET /api/v1/configs", s.require(s.getGlobalConfigs, false))
 	m.HandleFunc("GET /api/v1/configs/dns", s.require(s.getDNSCatalog, false))
 	m.HandleFunc("GET /api/v1/server-protection", s.require(s.serverProtectionStatus, false))

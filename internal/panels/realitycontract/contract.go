@@ -2,6 +2,7 @@ package realitycontract
 
 import (
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 
 	exporter "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei/realityconfig"
@@ -10,6 +11,7 @@ import (
 var ErrInvalid = errors.New("invalid managed reality contract")
 
 type Managed struct {
+	Transport   transportprofile.Config
 	Remark      string
 	Host        string
 	Port        int
@@ -27,7 +29,7 @@ type Managed struct {
 }
 
 func (m Managed) normalized() Managed {
-	if m.Flow == "" {
+	if m.Flow == "" && m.Transport.NetworkName() == "tcp" {
 		m.Flow = "xtls-rprx-vision"
 	}
 	if m.Fingerprint == "" {
@@ -48,7 +50,7 @@ func (m Managed) Payload() (realityconfig.Payload, error) {
 		return realityconfig.Payload{}, ErrInvalid
 	}
 	return realityconfig.Build(realityconfig.Input{
-		Remark: m.Remark, Port: m.Port, UUID: m.UUID, Email: m.Email, Flow: m.Flow,
+		Remark: m.Remark, Port: m.Port, UUID: m.UUID, Email: m.Email, Flow: m.Flow, Transport: m.Transport,
 		Target: m.Target, TargetPort: m.TargetPort, ServerName: m.SNI, ServerNames: m.ServerNames,
 		PrivateKey: m.PrivateKey, ShortID: m.ShortID, Fingerprint: m.Fingerprint,
 	})
@@ -61,6 +63,6 @@ func (m Managed) URI() (string, error) {
 	}
 	return exporter.VLESSRealityURI(exporter.VLESSReality{
 		UUID: m.UUID, Host: m.Host, Port: m.Port, SNI: m.SNI, PublicKey: m.PublicKey,
-		ShortID: m.ShortID, Fingerprint: m.Fingerprint, Flow: m.Flow, Remark: m.Remark,
+		ShortID: m.ShortID, Fingerprint: m.Fingerprint, Flow: m.Flow, Remark: m.Remark, Transport: m.Transport,
 	})
 }

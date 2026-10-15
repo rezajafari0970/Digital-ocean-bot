@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/panelbootstrap"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
 )
@@ -109,7 +110,7 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 		var existingEnabled bool
 		err := s.DB.QueryRowContext(ctx, `SELECT protocol,transport,security,enabled FROM panel_inbound_inventory WHERE panel_id=$1 AND port=$2 AND present=true ORDER BY remote_id LIMIT 1`, p.ID, port).Scan(&existingProtocol, &existingTransport, &existingSecurity, &existingEnabled)
 		if err == nil {
-			if existingEnabled && existingProtocol == "vless" && existingTransport == "tcp" && existingSecurity == "reality" {
+			if existingEnabled && existingProtocol == "vless" && transportprofile.Supported(existingTransport) && existingSecurity == "reality" {
 				managed := fmt.Sprintf("dob:global-reality:%05d", port)
 				d := desired.Service{DB: s.DB, Secrets: s.Secrets, SSH: s.SSH, ManagedKey: managed, Port: port, MutationPanels: map[string]bool{p.ID: true}, Runtime: runtime}
 				if e = d.ReconcilePanel(ctx, p, false); e != nil {

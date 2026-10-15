@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"strings"
 )
 
@@ -12,7 +13,8 @@ var ErrInvalidConfig = errors.New(
 )
 
 type Input struct {
-	Remark string
+	Transport transportprofile.Config
+	Remark    string
 
 	Port   int
 	Listen string
@@ -97,7 +99,13 @@ func Build(
 		input.Fingerprint = "chrome"
 	}
 
-	if input.Flow == "" {
+	if err := input.Transport.Validate(input.Transport.NetworkName() == "xhttp"); err != nil {
+		return Payload{}, err
+	}
+	if input.Transport.NetworkName() == "xhttp" && input.Flow != "" {
+		return Payload{}, ErrInvalidConfig
+	}
+	if input.Flow == "" && input.Transport.NetworkName() == "tcp" {
 		input.Flow =
 			"xtls-rprx-vision"
 	}
@@ -148,7 +156,7 @@ func Build(
 
 	streamSettings :=
 		map[string]any{
-			"network": "tcp",
+			"network": input.Transport.NetworkName(),
 
 			"security": "reality",
 
@@ -177,6 +185,10 @@ func Build(
 
 			"routeOnly": false,
 		}
+
+	if input.Transport.NetworkName() == "xhttp" {
+		streamSettings["xhttpSettings"] = input.Transport.WireSettings()
+	}
 
 	return Payload{
 		Enable: true,

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"log"
 
 	"github.com/lib/pq"
@@ -222,7 +223,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 			continue
 		}
 		var stream map[string]any
-		if json.Unmarshal(in.StreamSettings, &stream) != nil || fmt.Sprint(stream["network"]) != "tcp" || fmt.Sprint(stream["security"]) != "reality" {
+		if json.Unmarshal(in.StreamSettings, &stream) != nil || !transportprofile.Supported(fmt.Sprint(stream["network"])) || fmt.Sprint(stream["security"]) != "reality" {
 			continue
 		}
 		var st map[string]any

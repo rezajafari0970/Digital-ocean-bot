@@ -152,7 +152,7 @@ func ParsePorts(r io.Reader, excluded []int) ([]int, error) {
 	}
 	seen := map[int]bool{}
 	for _, i := range c.Inbounds {
-		if i.Protocol != "vless" || (i.Stream.Network != "" && i.Stream.Network != "tcp" && i.Stream.Network != "raw") {
+		if i.Protocol != "vless" || (i.Stream.Network != "" && i.Stream.Network != "tcp" && i.Stream.Network != "raw" && i.Stream.Network != "xhttp") {
 			continue
 		}
 		if i.Listen != "" {

@@ -268,7 +268,7 @@ func (j Journal) planProfiles(ctx context.Context, tx *sql.Tx, rt *sanaei.PanelR
 				return false, e
 			}
 			email := "u-" + scope.Marker + "-" + strings.ReplaceAll(id, "-", "")[:8]
-			p.Clients = append(p.Clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: pol.Quota, ExpiryTime: expiry, LimitHWID: pol.DeviceLimit, Flow: "xtls-rprx-vision"})
+			p.Clients = append(p.Clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: pol.Quota, ExpiryTime: expiry, LimitHWID: pol.DeviceLimit, Flow: scope.Flow})
 		}
 		raw, _ := json.Marshal(p)
 		jobID, e := insertLifecycleJob(ctx, tx, rt, inbound, KindBulkCreate, "", raw)

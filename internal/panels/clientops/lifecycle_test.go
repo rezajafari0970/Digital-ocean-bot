@@ -19,6 +19,7 @@ const lifePanel = "33333333-3333-4333-8333-333333333333"
 const lifeGeneration = "44444444-4444-4444-8444-444444444444"
 
 type lifeServer struct {
+	network                                  string
 	mu                                       sync.Mutex
 	clients                                  map[string]sanaei.Client
 	used                                     map[string]int64
@@ -39,7 +40,11 @@ func (s *lifeServer) serve(w http.ResponseWriter, r *http.Request) {
 			c.LimitHWID = 0
 			cs = append(cs, c)
 		}
-		obj([]any{map[string]any{"id": 1, "port": 443, "enable": true, "protocol": "vless", "streamSettings": map[string]any{"network": "tcp", "security": "reality"}, "settings": map[string]any{"clients": cs}}})
+		network := s.network
+		if network == "" {
+			network = "tcp"
+		}
+		obj([]any{map[string]any{"id": 1, "port": 443, "enable": true, "protocol": "vless", "streamSettings": map[string]any{"network": network, "security": "reality"}, "settings": map[string]any{"clients": cs}}})
 	case strings.HasSuffix(r.URL.Path, "clients/list"):
 		cs := []sanaei.GlobalClient{}
 		for _, c := range s.clients {

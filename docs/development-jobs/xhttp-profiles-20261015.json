@@ -1,0 +1,122 @@
+{
+  "id": "xhttp-profiles-20261015",
+  "status": "VALIDATED_AWAITING_PUBLIC_GATES",
+  "base_revision": "63ed1345aa6500d792f44d34ce8f722b15b79b63",
+  "goal": "Generate managed Direct and Residential XHTTP Reality stream-up configs with long nonrepeating stable paths, Host apart.com, exact user Extra and FinalMask preset, with compatibility evidence before rollout. Implement API/UI, server payload, fresh export, lifecycle client flow and migration concurrency. Preserve credentials and account isolation; no provider or IP lifecycle mutations.",
+  "allowed_paths": [
+    "internal/panels/",
+    "internal/adminapi/",
+    "web/",
+    "migrations/",
+    "docs/development-jobs/xhttp-profiles-20261015.json",
+    "docs/XHTTP_PROFILES_20261015.md",
+    "internal/serverprotection/nft.go",
+    "internal/serverprotection/xhttp_test.go",
+    "public-release/",
+    "HANDOFF.md",
+    "PROJECT_STATE.md",
+    "docs/DEVELOPMENT_READY_HANDOFF.md",
+    "docs/PROJECT_BRAIN.md"
+  ],
+  "context": "Shared physical listener per panel+port; one path per inbound, not per client. Current TCP only; transition must not silently force stale Vision clients. Browser WebView incompatible with stream-up Reality IP/custom Host; Flow Vision incompatible encryption=none XHTTP. Exact FinalMask runtime compatibility unresolved (26.9.9 rejects numeric brutalUp and UDP exp). Keep requested preset available but do not claim runtime applied if unsupported. Need stable bounded 4096-byte path (not universal max) with random unique suffix and distinct words. Mutation worker and planners must serialize transition; no pending mutation plans at switch. New schema177 reserved by separate IP work; resolve additive migration numbering without skipping pending source. Existing global default TCP until explicit canary/verified activation. Rollback63ed134; no deployment until deterministic gates and canary.",
+  "scope_adjudication": "Creation defaults and immutable new-listener pins only. Existing TCP listeners remain TCP; no in-place conversion. The user was told this scope. Server-side header budget32768 required and tested to support4096-byte paths without HTTP431; client Extra unchanged. Migration runner keys full filenames so178 leaves177 independently applicable. Protection TCP port parsing must include XHTTP. Publication and activation of tested creation default are authorized by user continuation; no existing-listener conversion.",
+  "updated_at": "2026-10-15T16:12:24.814032+00:00",
+  "stage_status": [
+    {
+      "stage": "baseline",
+      "status": "PASS",
+      "evidence": "base63ed134 matches canonical remote; isolated worktree preserved"
+    },
+    {
+      "stage": "paths_and_persistence",
+      "status": "PASS",
+      "evidence": "4096-byte unique paths, PostgreSQL pin concurrency and unique digest"
+    },
+    {
+      "stage": "client_uri_ui",
+      "status": "PASS",
+      "evidence": "full-final, browser-r3 and identical reviewed source"
+    },
+    {
+      "stage": "finalmask",
+      "status": "BLOCKED_COMPATIBILITY",
+      "evidence": "exact preset preserved disabled; core26.9.9 rejects numeric brutalUp and UDP exp"
+    },
+    {
+      "stage": "native_canary",
+      "status": "PASS",
+      "evidence": "16/16 actual phone; create retry/restart/payload readback; scoped cleanup verified"
+    },
+    {
+      "stage": "regression",
+      "status": "PASS",
+      "evidence": "full-final.exit0; source review identical"
+    },
+    {
+      "stage": "race_final",
+      "status": "PASS",
+      "evidence": "prior filtered race skipped transportprofile tests; exact affected race now required"
+    },
+    {
+      "stage": "publication",
+      "status": "PENDING"
+    },
+    {
+      "stage": "deployment",
+      "status": "PENDING"
+    },
+    {
+      "stage": "activation_and_health",
+      "status": "PENDING"
+    }
+  ],
+  "api_usage": {
+    "responses": 7,
+    "receipts_with_usage": 7,
+    "input_tokens": 61103,
+    "output_tokens": 13941,
+    "total_tokens": 75044,
+    "new_inference_requests_this_continuation": 0,
+    "receipt_get_requests_this_continuation": 5,
+    "billed_usd": null
+  },
+  "source_hashes": {
+    "internal/adminapi/client_mutations.go": "dd2e74e191d0c3114b2dbc4c59263749fb9cc7bd73a8a02218afdb666e1cd40a",
+    "internal/adminapi/config_transport.go": "41d9f031ea7cd9b8564015f29c421246ba6495747bc9903205ebc8b140841321",
+    "internal/adminapi/config_transport_test.go": "90c987715b66b45f2a2b1b39233c729a9c4950d2009ea5a0cb2a2ba298fbe537",
+    "internal/adminapi/output.go": "ae2babc02a2594047be6e498a5ae133204e8f14a0bdae93222e883980c35e608",
+    "internal/adminapi/server.go": "d2004785172971025d4420754c04e54a2371cca44a6649b34dcf45ff0b90a077",
+    "internal/panels/clientops/executor.go": "012c7cbde2bb6a42261a57259724348c4b50b98a8fa91f7a233d2f13ce21bd08",
+    "internal/panels/clientops/lifecycle.go": "3059c5879ee238745fbd2bdf4c0b1aa0d86678a842fcfba17933679ad37591b2",
+    "internal/panels/clientops/lifecycle_snapshot.go": "9a4107acfe57d6c12e409d6e0ee943e8805840517285d854ab5f58322acafd9d",
+    "internal/panels/clientops/lifecycle_test.go": "093d0e36115e81c502d86dc40f28ee0cba218fe36220aa991c7da2df49b50656",
+    "internal/panels/clientops/profile_lifecycle.go": "9f3176882843027fde6d6341bbe1cec22f755d2f33ed692ada441e643ea634ee",
+    "internal/panels/clientops/transport.go": "8011a73f7e708ccf43c9b1860a439359e213609201c17629ac256034bfb255e4",
+    "internal/panels/clientops/transport_test.go": "a21ed693b2704b107e26e2d8ef3c17328c579a6ce37b77459e9b3700bbf7f666",
+    "internal/panels/desired/service.go": "bd65578d22ead91daa8339568375b681abc5488961a41378ac17fc9fdf32e8b4",
+    "internal/panels/export/vless.go": "2bf33149c172d901b98880f43d3d6e6bcefc2dd59d31ddbc74103266c1fcdaaf",
+    "internal/panels/globalreality/service.go": "520056964d0b3fb5a5b8db417d4cf6aac5a075e9cdd83690ac284321d4a69dee",
+    "internal/panels/realitycontract/contract.go": "ab78372ceba57b4ab1d633f15924558ed7461e3620b46f2d8da495c03ed4058a",
+    "internal/panels/sanaei/postflight/payload.go": "175f38b327f1e54b450b360935307ac3b1032b60b009dd43ba227d4f3fa36b44",
+    "internal/panels/sanaei/postflight/validator.go": "74ea9969f0c0124411f7381fa9dced84988650cb32cfc2ea1c02c40fba7984b8",
+    "internal/panels/sanaei/realityconfig/builder.go": "7cc1edf3d2a96bdb06a12967739d2ad5306f2668b5d6c9bef47bb31e29a4b3d0",
+    "internal/panels/transportprofile/profile.go": "8f3459b84e0426e2c4cf4c597618bc20e16fbdc01e0f235dbdab2c49b32efa8a",
+    "internal/panels/transportprofile/profile_test.go": "f12ebda0f07300639913e717a89c28f4d1892d3630b9f90855897a6ddfbd7504",
+    "internal/panels/transportprofile/store.go": "d7b822b407549a676823f4ba721df977f5beee5bd908a3c83e772cbab5e532c3",
+    "internal/panels/transportprofile/words.go": "8067acf864470a067250f765ae931807bd3d2c15beb39ce764aff0433c20615e",
+    "internal/panels/usercapacity/fastfill.go": "ee6066ed73a11404c78e1766494fed07b33c038bf6b45acc3b9983636fdd0680",
+    "internal/panels/usercapacity/legacy_fill.go": "a2bbec82aab4e37af462b52cf66b0ad08dbabbdaee668f7eb8b1ac4fc0188bec",
+    "internal/panels/usercapacity/lifecycle_admission.go": "7cb35f4471e0178ec1fbddd6454060bf28e500907e9c52fa32bd53dde3534fa3",
+    "internal/panels/usercapacity/service.go": "16fa8c566ea2c5fd98a5854acc7441b96eb2ee89527190181d7d5ebb8eff6f87",
+    "internal/panels/usercapacity/verified_observation.go": "499f41db7e95aa7d062f36249fb9876897f8fa242329c651a505006ff598c62b",
+    "internal/serverprotection/nft.go": "3bcde96e710cee73bdf120e4b28484ff6afccac55a774ef36d127d1a7f0cfb60",
+    "internal/serverprotection/xhttp_test.go": "bd28b7ce4da516faf41447ec63c69ee43d21e17fb0a3505ae66103a91b25ca90",
+    "migrations/000178_xhttp_listener_profiles.down.sql": "840c92ab6cbbc35d5511a89daaa975a5290118bab30e160bbb461610ac907ed7",
+    "migrations/000178_xhttp_listener_profiles.up.sql": "59a9f3de226e944313a072476f2a589574617fe196957089c3dd3d29bf2944c1",
+    "web/static/app.js": "3847fbdfe5c00b8836f5fd2902a25d17e8d75caac9747e0761010cfc183dd09d",
+    "web/static/config-transport.js": "909855c7b5c0f0712deb64fa6454a8483b4365facf50b223c4cf34d77bfba838",
+    "web/static/index.html": "db6f4045da52e991ded78e1ce11ccafc944714f415d5c89017f57285fb162151",
+    "web/tests/config-transport.cjs": "348f950a6f715401fb21957d8e310a256b43161924d7248070e20dfbfbcebeda"
+  },
+  "evidence_directory": "/root/projects/dob-xhttp-20261015/.local/xhttp-evidence"
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
@@ -36,7 +37,7 @@ func (s Service) FastFill(ctx context.Context, p readyworker.Panel, runtime *san
 		return false, err
 	}
 	for _, in := range snap.Records {
-		if in.RemoteID != inboundID || !wanted[in.Port] || !in.Enabled || in.Protocol != "vless" || in.Transport != "tcp" || in.Security != "reality" {
+		if in.RemoteID != inboundID || !wanted[in.Port] || !in.Enabled || in.Protocol != "vless" || !transportprofile.Supported(in.Transport) || in.Security != "reality" {
 			continue
 		}
 		effectiveTarget, effectiveRate, err := s.effectiveTargetRate(ctx, p.ID, inboundID, target, rate)
@@ -73,7 +74,7 @@ func (s Service) FastFill(ctx context.Context, p readyworker.Panel, runtime *san
 			if err != nil {
 				return false, err
 			}
-			payload.Clients = append(payload.Clients, sanaei.Client{ID: id, Email: ownershipEmail(generation.Marker, id), Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitHWID: limit, Flow: "xtls-rprx-vision"})
+			payload.Clients = append(payload.Clients, sanaei.Client{ID: id, Email: ownershipEmail(generation.Marker, id), Enable: true, TotalGB: quota, ExpiryTime: expiry, LimitHWID: limit, Flow: transportprofile.Flow(in.Transport)})
 		}
 		_, planned, err := (clientops.Journal{DB: s.DB}).ReserveBulk(ctx, runtime.AccountID, p.ID, inboundID, payload)
 		return planned, err

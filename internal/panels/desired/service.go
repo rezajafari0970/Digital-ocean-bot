@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"strconv"
 
 	createflow "github.com/rezajafari0970/Digital-ocean-bot/internal/panels/create"
@@ -67,7 +68,8 @@ func operationalLifecycle(state string) bool {
 }
 
 type panelDeps struct {
-	db *sql.DB
+	transport transportprofile.Config
+	db        *sql.DB
 
 	secrets Secrets
 
@@ -234,6 +236,7 @@ func (d *panelDeps) Build(
 	)
 
 	managed := realitycontract.Managed{
+		Transport:   d.transport,
 		Remark:      d.managedKey,
 		Port:        d.port,
 		UUID:        string(uuid),
@@ -602,6 +605,9 @@ WHERE pi.id=$1
 		}
 
 	run := func(runCtx context.Context) error {
+		if dependencies.runtime != nil && dependencies.runtime.Session != nil {
+			dependencies.runtime.Session.Invalidate()
+		}
 		records, err := dependencies.RefreshInventory(runCtx)
 		if err != nil {
 			return err
@@ -611,6 +617,26 @@ WHERE pi.id=$1
 			if rec.Remark == s.ManagedKey {
 				owned = append(owned, rec)
 			}
+		}
+		observedNetwork := ""
+		if len(owned) > 1 {
+			return transportprofile.ErrPinned
+		}
+		if len(owned) == 1 {
+			if owned[0].Port != s.Port || owned[0].Protocol != "vless" || owned[0].Security != "reality" {
+				return transportprofile.ErrPinned
+			}
+			observedNetwork = owned[0].Transport
+		} else {
+			for _, rec := range records {
+				if rec.Port == s.Port {
+					return transportprofile.ErrPinned
+				}
+			}
+		}
+		dependencies.transport, err = transportprofile.Resolve(runCtx, s.DB, panel.ID, s.ManagedKey, observedNetwork)
+		if err != nil {
+			return err
 		}
 		if len(owned) == 1 && owned[0].RemoteID > 0 && owned[0].Port == s.Port {
 			payload, err := dependencies.Build(runCtx, createflow.Request{ManagedKey: s.ManagedKey, Port: s.Port})

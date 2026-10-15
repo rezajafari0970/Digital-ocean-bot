@@ -201,6 +201,9 @@ func (e Executor) execute(ctx context.Context, job Job) error {
 // executeRuntime is called with the runtime mutation lock held by execute.
 func (e Executor) executeRuntime(ctx context.Context, rt *sanaei.PanelRuntime, job Job) error {
 	runCtx := ctx
+	if err := validateJobTransport(ctx, rt, job); err != nil {
+		return err
+	}
 	if job.Kind == KindBulkDelete {
 		return e.executeBulkDelete(runCtx, rt, job)
 	}

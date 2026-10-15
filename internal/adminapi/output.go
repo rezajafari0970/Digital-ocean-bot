@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"log"
 	"net/http"
 	"time"
@@ -157,8 +158,13 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 		clients, _ := settings["clients"].([]any)
 		stream, e := outputMap(in.StreamSettings)
-		if e != nil || fmt.Sprint(stream["network"]) != "tcp" || fmt.Sprint(stream["security"]) != "reality" {
+		if e != nil || !transportprofile.Supported(fmt.Sprint(stream["network"])) || fmt.Sprint(stream["security"]) != "reality" {
 			notReality++
+			continue
+		}
+		transport, err := transportprofile.FromStream(stream)
+		if err != nil {
+			exportErrors++
 			continue
 		}
 		structSettings := make(map[string]any, len(settings))
@@ -209,7 +215,8 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			if email := fmt.Sprint(cl["email"]); email != "" {
 				remark += "-" + email
 			}
-			link, e := export.VLESSRealityURI(export.VLESSReality{UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Flow: fmt.Sprint(cl["flow"]), Remark: remark})
+			flow, _ := cl["flow"].(string)
+			link, e := export.VLESSRealityURI(export.VLESSReality{Transport: transport, UUID: id, Host: host, Port: in.Port, SNI: names[0], PublicKey: publicKey, ShortID: shorts[0], Fingerprint: "chrome", Flow: flow, Remark: remark})
 			if e == nil {
 				visibleUntil := outputVisibleUntil(cl["expiryTime"])
 				records = append(records, outputRecord{ClientID: id, URI: link, VisibleUntil: visibleUntil})

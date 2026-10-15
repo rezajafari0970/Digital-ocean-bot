@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"time"
 )
 
@@ -90,7 +91,7 @@ func lifecycleInventoryOnce(ctx context.Context, rt *sanaei.PanelRuntime, inboun
 			Network  string `json:"network"`
 			Security string `json:"security"`
 		}
-		if json.Unmarshal(in.Stream, &stream) != nil || stream.Network != "tcp" || stream.Security != "reality" {
+		if json.Unmarshal(in.Stream, &stream) != nil || !transportprofile.Supported(stream.Network) || stream.Security != "reality" {
 			return nil, 0, ErrClientConflict
 		}
 		b := in.Settings

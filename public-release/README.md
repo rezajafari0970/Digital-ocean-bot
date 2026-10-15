@@ -101,3 +101,7 @@ Build Activity خطای جاری، اجرای بازیابی‌شده و ساب�
 ## Additional IP inventory
 The Additional IPs page reads official IP inventory per account for DigitalOcean, Vultr, Linode and UpCloud. Unknown quotas remain unknown; the last valid capacity and its provenance remain visible after failed reads. Panel and CLI reads share durable admission and provider cooldowns, including late rate-limit replies.
 Allocation, attachment, rotation, release, guest-network changes and config publication using additional IPs are unavailable in this release. Discovered resources remain protected. Operational settings and canary cost/impact approval are still required. Reading IPv6 inventory does not change the existing IPv4 execution policy. The planning library is not an execution or availability guarantee.
+
+### XHTTP Reality creation defaults
+The Configs page can select TCP or XHTTP Reality stream-up for new physical listeners. XHTTP uses apart.com Host and a saved unique path of256–4096bytes. Direct and Residential clients on one physical listener share its path. Existing listeners retain their transport and credentials.
+The exact requested FinalMask preset is visible but disabled because it is incompatible with the tested core. This profile uses native dialing, disabled WebView and empty Flow. Changing the creation default does not convert active listeners.

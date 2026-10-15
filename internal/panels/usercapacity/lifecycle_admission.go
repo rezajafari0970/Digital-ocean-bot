@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"strings"
 	"time"
 )
@@ -50,7 +51,7 @@ func (s Service) autoEnrollLifecycle(ctx context.Context, p readyworker.Panel, r
 		return err
 	}
 	for _, in := range inv.Records {
-		if !in.Enabled || in.Protocol != "vless" || in.Transport != "tcp" || in.Security != "reality" || !wanted[in.Port] {
+		if !in.Enabled || in.Protocol != "vless" || !transportprofile.Supported(in.Transport) || in.Security != "reality" || !wanted[in.Port] {
 			continue
 		}
 		var existing bool

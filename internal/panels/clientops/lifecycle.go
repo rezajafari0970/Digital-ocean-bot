@@ -21,6 +21,7 @@ type LifecyclePolicy struct {
 	Create                                               bool
 }
 type lifecycleScope struct {
+	Flow               string
 	Generation, Marker string
 	Global             bool
 	Policy             LifecyclePolicy
@@ -77,6 +78,10 @@ func (j Journal) PlanLifecycle(ctx context.Context, rt *sanaei.PanelRuntime, inb
 		return false, err
 	}
 	observed, port, err := LifecycleInventory(ctx, rt, inbound)
+	if err != nil {
+		return false, err
+	}
+	scope.Flow, err = InboundFlow(ctx, rt, inbound)
 	if err != nil {
 		return false, err
 	}
@@ -244,7 +249,7 @@ func (j Journal) PlanLifecycle(ctx context.Context, rt *sanaei.PanelRuntime, inb
 				return false, e
 			}
 			email := "u-" + scope.Marker + "-" + strings.ReplaceAll(id, "-", "")[:8]
-			p.Clients = append(p.Clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: scope.Policy.Quota, ExpiryTime: expiry, LimitHWID: scope.Policy.DeviceLimit, Flow: "xtls-rprx-vision"})
+			p.Clients = append(p.Clients, sanaei.Client{ID: id, Email: email, Enable: true, TotalGB: scope.Policy.Quota, ExpiryTime: expiry, LimitHWID: scope.Policy.DeviceLimit, Flow: scope.Flow})
 		}
 		raw, _ := json.Marshal(p)
 		jobID, e := insertLifecycleJob(ctx, tx, rt, inbound, KindBulkCreate, "", raw)
