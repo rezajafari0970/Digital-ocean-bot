@@ -144,6 +144,12 @@ func (s *Sampler) Read(now time.Time) (Metrics, error) {
 	if m.ConntrackSupported {
 		m.ConntrackPercent = ratio(count, max)
 	}
+	// TCP has its own unswappable kernel budget, independent of MemAvailable.
+	if sockets, err := os.ReadFile("/proc/net/sockstat"); err == nil {
+		if limits, err := os.ReadFile("/proc/sys/net/ipv4/tcp_mem"); err == nil {
+			m.TCPMemoryUsedMB, m.TCPMemoryPressureMB, m.TCPMemoryMaxMB, m.TCPMemorySupported = tcpMemory(sockets, limits, os.Getpagesize())
+		}
+	}
 	var fs syscall.Statfs_t
 	if e = syscall.Statfs("/", &fs); e != nil {
 		return m, e

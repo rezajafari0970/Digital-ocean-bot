@@ -1,7 +1,8 @@
 package provisioning
 
 // MemoryHeadroomCommand adds at most 1 GiB on a small Linux host without
-// sufficient swap. It never replaces an existing swap file or disables swap.
+// sufficient swap, including 1 GiB servers. The 1.5 GiB cutoff accounts for
+// reserved kernel memory without enrolling 2 GiB hosts. It never replaces an existing swap file or disables swap.
 // A root-only journal and fresh /proc/swaps reads recover interrupted activation.
 func MemoryHeadroomCommand() string {
 	return `set -eu
@@ -25,7 +26,7 @@ def run(*args):
  return subprocess.run(args,check=True,capture_output=True,text=True).stdout
 require(os.geteuid()==0,'memory headroom requires root')
 m=memory()
-if not ROOT.exists() and not ROOT.is_symlink() and (m['MemTotal']>=768*1024 or m.get('SwapTotal',0)>=512*1024):
+if not ROOT.exists() and not ROOT.is_symlink() and (m['MemTotal']>=1536*1024 or m.get('SwapTotal',0)>=512*1024):
  print('memory headroom already sufficient')
  raise SystemExit(0)
 # Unsupported/missing fstab must fail before activating swap.
@@ -119,7 +120,7 @@ import pathlib,json,sys,os,stat
 root=pathlib.Path('/var/lib/digital-ocean-bot-memory')
 mem={line.split(':')[0]:int(line.split()[1]) for line in pathlib.Path('/proc/meminfo').read_text().splitlines()}
 if not root.exists() and not root.is_symlink():
- sys.exit(0 if mem['MemTotal']>=768*1024 or mem.get('SwapTotal',0)>=512*1024 else 1)
+ sys.exit(0 if mem['MemTotal']>=1536*1024 or mem.get('SwapTotal',0)>=512*1024 else 1)
 try:
  s=root.lstat()
  assert stat.S_ISDIR(s.st_mode) and s.st_uid==0 and stat.S_IMODE(s.st_mode)==0o700

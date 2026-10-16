@@ -15,7 +15,7 @@ func TestInstallerPrerequisites(t *testing.T) {
 		want        []string
 		placeholder string
 	}{
-		{"default", Plan{Scripts: DefaultPreInstallerSteps()}, true, []string{"ssh", "readiness", "bootstrap-memory-headroom", "bootstrap-cloud-init", "bootstrap-package-state", "bootstrap-package-index", "bootstrap-prerequisites", "bootstrap-kernel-memory-guard", "bootstrap-host-firewall-off", "bootstrap-verify"}, "panel"},
+		{"default", Plan{Scripts: DefaultPreInstallerSteps()}, true, []string{"ssh", "readiness", "bootstrap-memory-headroom", "bootstrap-cloud-init", "bootstrap-package-state", "bootstrap-package-index", "bootstrap-prerequisites", "bootstrap-ssh-admission", "bootstrap-kernel-memory-guard", "bootstrap-host-firewall-off", "bootstrap-verify"}, "panel"},
 		{"legacy", Plan{Bootstrap: "prep", InstallPanel: "true", Verify: "verify"}, false, []string{"ssh", "bootstrap"}, "panel"},
 		{"custom", Plan{Scripts: []ScriptStep{{Name: "custom", Category: "bootstrap", Execute: "prep"}, {Name: "selected", Category: "install", Execute: ":"}}}, true, []string{"ssh", "readiness", "custom"}, "selected"},
 	} {

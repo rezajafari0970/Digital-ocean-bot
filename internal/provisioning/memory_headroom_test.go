@@ -13,7 +13,7 @@ func TestMemoryHeadroomFreshReadRecoveryAndIsolation(t *testing.T) {
 	if os.Geteuid() != 0 {
 		t.Skip("root ownership checks require root")
 	}
-	for _, tc := range []string{"healthy", "existing_swap", "lost_activation_response", "unmanaged_file", "fstab_atomic_fault", "missing_fstab"} {
+	for _, tc := range []string{"healthy", "existing_swap", "one_gib", "lost_activation_response", "unmanaged_file", "fstab_atomic_fault", "missing_fstab"} {
 		t.Run(tc, func(t *testing.T) {
 			dir := t.TempDir()
 			root := filepath.Join(dir, "managed")
@@ -28,6 +28,9 @@ func TestMemoryHeadroomFreshReadRecoveryAndIsolation(t *testing.T) {
 				}
 			}
 			memory := "MemTotal: 453000 kB\nSwapTotal: 0 kB\n"
+			if tc == "one_gib" {
+				memory = "MemTotal: 979268 kB\nSwapTotal: 0 kB\n"
+			}
 			if tc == "healthy" {
 				memory = "MemTotal: 2048000 kB\nSwapTotal: 0 kB\n"
 			}

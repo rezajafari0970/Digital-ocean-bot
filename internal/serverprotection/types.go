@@ -34,28 +34,32 @@ func (p Policy) Validate() error {
 }
 
 type Metrics struct {
-	MemTotalMB         float64 `json:"mem_total_mb"`
-	MemAvailableMB     float64 `json:"mem_available_mb"`
-	SwapUsedMB         float64 `json:"swap_used_mb"`
-	MemoryPSI          float64 `json:"memory_psi_percent"`
-	CPUPSI             float64 `json:"cpu_psi_percent"`
-	IOPSI              float64 `json:"io_psi_percent"`
-	CPUPercent         float64 `json:"cpu_percent"`
-	CPUHotCorePercent  float64 `json:"cpu_hot_core_percent"`
-	CPUStealPercent    float64 `json:"cpu_steal_percent"`
-	FDPercent          float64 `json:"fd_percent"`
-	ProcessFDPercent   float64 `json:"process_fd_percent"`
-	ProcessFDKnown     bool    `json:"process_fd_known"`
-	ConntrackPercent   float64 `json:"conntrack_percent"`
-	DiskFreeMB         float64 `json:"disk_free_mb"`
-	DiskFreePercent    float64 `json:"disk_free_percent"`
-	InodeFreePercent   float64 `json:"inode_free_percent"`
-	RXMbps             float64 `json:"rx_mbps"`
-	TXMbps             float64 `json:"tx_mbps"`
-	PacketsPerSecond   float64 `json:"packets_per_second"`
-	DroppedPerSecond   float64 `json:"dropped_per_second"`
-	PSISupported       bool    `json:"psi_supported"`
-	ConntrackSupported bool    `json:"conntrack_supported"`
+	MemTotalMB          float64 `json:"mem_total_mb"`
+	MemAvailableMB      float64 `json:"mem_available_mb"`
+	SwapUsedMB          float64 `json:"swap_used_mb"`
+	MemoryPSI           float64 `json:"memory_psi_percent"`
+	CPUPSI              float64 `json:"cpu_psi_percent"`
+	IOPSI               float64 `json:"io_psi_percent"`
+	CPUPercent          float64 `json:"cpu_percent"`
+	CPUHotCorePercent   float64 `json:"cpu_hot_core_percent"`
+	CPUStealPercent     float64 `json:"cpu_steal_percent"`
+	FDPercent           float64 `json:"fd_percent"`
+	ProcessFDPercent    float64 `json:"process_fd_percent"`
+	ProcessFDKnown      bool    `json:"process_fd_known"`
+	ConntrackPercent    float64 `json:"conntrack_percent"`
+	DiskFreeMB          float64 `json:"disk_free_mb"`
+	DiskFreePercent     float64 `json:"disk_free_percent"`
+	InodeFreePercent    float64 `json:"inode_free_percent"`
+	RXMbps              float64 `json:"rx_mbps"`
+	TXMbps              float64 `json:"tx_mbps"`
+	PacketsPerSecond    float64 `json:"packets_per_second"`
+	DroppedPerSecond    float64 `json:"dropped_per_second"`
+	PSISupported        bool    `json:"psi_supported"`
+	ConntrackSupported  bool    `json:"conntrack_supported"`
+	TCPMemorySupported  bool    `json:"tcp_memory_supported"`
+	TCPMemoryUsedMB     float64 `json:"tcp_memory_used_mb"`
+	TCPMemoryPressureMB float64 `json:"tcp_memory_pressure_mb"`
+	TCPMemoryMaxMB      float64 `json:"tcp_memory_max_mb"`
 }
 type Status struct {
 	AgentPID          int       `json:"agent_pid,omitempty"`

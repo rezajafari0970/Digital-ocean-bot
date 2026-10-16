@@ -9,10 +9,17 @@ import (
 type Engine struct {
 	criticalSince, healthySince time.Time
 	blocked                     bool
+	tcpBlocked                  bool
 }
 
 func (e *Engine) Evaluate(m Metrics, now time.Time) (string, string, bool) {
 	reason := ""
+	tcpKnown := m.TCPMemorySupported && m.TCPMemoryMaxMB > 0 && m.TCPMemoryPressureMB > 0 && m.TCPMemoryPressureMB <= m.TCPMemoryMaxMB && m.TCPMemoryUsedMB >= 0
+	tcpCritical := tcpKnown && m.TCPMemoryUsedMB >= .90*m.TCPMemoryMaxMB
+	// Once TCP pressure closes admission, require a valid sample below the
+	// kernel's pressure watermark before starting the normal recovery window.
+	tcpRecovering := e.blocked && e.tcpBlocked && (!tcpKnown || m.TCPMemoryUsedMB >= m.TCPMemoryPressureMB)
+
 	emergency := m.MemTotalMB > 0 && m.MemAvailableMB < math.Max(32, m.MemTotalMB*.04)
 	switch {
 	case emergency:
@@ -25,6 +32,12 @@ func (e *Engine) Evaluate(m Metrics, now time.Time) (string, string, bool) {
 		reason = "file descriptor pressure"
 	case m.ConntrackSupported && m.ConntrackPercent >= 90:
 		reason = "connection table pressure"
+	case tcpCritical || tcpRecovering:
+		if !tcpKnown {
+			reason = "TCP memory sample unavailable during recovery"
+		} else {
+			reason = fmt.Sprintf("TCP memory pressure (%.1f / %.1f MiB)", m.TCPMemoryUsedMB, m.TCPMemoryMaxMB)
+		}
 	case m.DiskFreeMB < 32 && m.IOPSI >= 10:
 		reason = "disk pressure"
 	case m.InodeFreePercent >= 0 && m.InodeFreePercent < .5:
@@ -37,6 +50,7 @@ func (e *Engine) Evaluate(m Metrics, now time.Time) (string, string, bool) {
 		}
 		if emergency || e.blocked || now.Sub(e.criticalSince) >= 2*time.Second {
 			e.blocked = true
+			e.tcpBlocked = e.tcpBlocked || tcpCritical
 			return "CRITICAL", reason, true
 		}
 		return "WARM", reason, false
@@ -50,6 +64,10 @@ func (e *Engine) Evaluate(m Metrics, now time.Time) (string, string, bool) {
 			return "RECOVERING", "waiting for 30 seconds of stable resources", true
 		}
 		e.blocked = false
+		e.tcpBlocked = false
+	}
+	if tcpKnown && m.TCPMemoryUsedMB >= m.TCPMemoryPressureMB {
+		return "WARM", "TCP memory above kernel pressure watermark", false
 	}
 	if m.MemTotalMB > 0 && m.MemAvailableMB < m.MemTotalMB*.20 || m.CPUPSI >= 10 || m.CPUStealPercent >= 15 || m.IOPSI >= 5 {
 		return "WARM", "reduced resource headroom", false

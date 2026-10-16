@@ -509,50 +509,20 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 
 	}
 
-	// User capacity fast fill: time-budgeted per inbound; the one-second cadence
-	// makes users_per_second match its configured wall-clock meaning.
+	// Rolling discovery keeps newly ready panels from waiting for a slow fleet batch.
 	modules.Add(worker.RolePanels, "capacity-fill", func(ctx context.Context) {
-		t := time.NewTicker(1 * time.Second)
-		defer t.Stop()
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
-		run := func() {
-			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
-			if watchErr != nil {
-				return
+		runCapacityFill(ctx, panelPollWork.Do, source.EligibleReadyPanels, func(work context.Context, panel readyworker.Panel) error {
+			runtime, err := sanaeiRuntimes.Acquire(work, panel.ID)
+			if err == nil {
+				_, err = capacity.FastFillFromPolicy(work, panel, runtime)
 			}
-			defer finish()
-
-			panels, err := source.EligibleReadyPanels(ctx)
-			if err != nil {
-				log.Printf("user capacity discovery: %v", err)
-				return
+			if err != nil && ctx.Err() == nil {
+				log.Printf("user capacity fast fill %s: %v", panel.ID, err)
 			}
-			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelPollWork.Do, func(ctx context.Context, index int) error {
-				panel := panels[index]
-				cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-				defer cancel()
-				runtime, err := sanaeiRuntimes.Acquire(cctx, panel.ID)
-				if err == nil {
-					_, err = capacity.FastFillFromPolicy(cctx, panel, runtime)
-				}
-				if err != nil && ctx.Err() == nil {
-					log.Printf("user capacity fast fill %s: %v", panel.ID, err)
-				}
-				return err
-			})
-		}
-		run()
-		for {
-			supervision.Pulse(ctx)
-			supervision.Idle(ctx)
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				run()
-			}
-		}
+			return err
+		}, capacityScheduleDefaults)
 	})
 
 	// User capacity cleanup: expensive full snapshot on a slower cadence.

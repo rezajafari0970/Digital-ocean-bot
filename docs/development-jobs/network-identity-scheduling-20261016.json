@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "IDENTITY_COVERAGE_DEPLOYED_CLEANUP_DISPLAY_VERIFIED",
+  "status": "HOST_PRESSURE_CANARY_VERIFIED_RELEASE_PENDING",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -186,14 +186,14 @@
     "Qualify10accounts with slow/failed/rotating account plus provider2 and bulk work, cancellation, stale lease ownership, and real PostgreSQL pool pressure before rollout."
   ],
   "not_yet_done": [
-    "Publish and deploy the verified cleanup display correction",
-    "Finish observed Direct1/Residential3 coverage and record remaining genuine transient failures",
-    "Do not claim live enabled-protection acceptance while desired policy is OFF"
+    "Publish and deploy tested host-pressure correction on both hosts",
+    "Complete per-host infrastructure rollout and final observed coverage",
+    "Enabled protection under live load not tested while operator policy remains OFF"
   ],
   "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
   "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
-  "updated_at": "2026-10-16T09:24:37.915061+00:00",
+  "updated_at": "2026-10-16T10:59:04.131209+00:00",
   "api_usage_current_task": {
     "requests": 0,
     "tokens": 0,
@@ -253,7 +253,7 @@
     "primary": "SAFE_ROLLBACK_TO_124f51f; populated retention rejected policy64to0 migration",
     "new_regression": "baseline failed with identical production error; corrected retained upgrade passes and rejects unrelated budget overwrite"
   },
-  "installed_public": "b57da31c1180f488d2004765815ac3e526fbbe75",
+  "installed_public": "06c03b8977549f62527740852ca49994633f72d7",
   "cleanup_candidate_hashes": {
     "internal/adminapi/server_protection.go": "4d95035fb933178b10d7485a5beb3d8c8b33ca3711e6ce5d25faaf7a2d1e262f",
     "internal/adminapi/protection_cleanup_status_test.go": "9be624ea1f2f698bf79b7665a0a10e4c28f9983646487f363530c4931e9d7b49",
@@ -271,5 +271,27 @@
     "enabled": false,
     "revision": 50,
     "changed_by_this_task": false
+  },
+  "host_pressure_checks": {
+    "host-pressure-focused": "PASS",
+    "host-pressure-provisioning-race": "PASS",
+    "host-pressure-full-serial": "PASS",
+    "host-pressure-vet": "PASS",
+    "tcp-pressure-race": "PASS",
+    "tcp-pressure-final-full": "PASS",
+    "isolated-deployment-guards-v3": "PASS",
+    "capacity-lane-race-v2": "PASS",
+    "capacity-scheduling-full": "PASS",
+    "capacity-scheduling-vet": "PASS",
+    "isolated-proof-capacity-v2": "PASS",
+    "tcp-pressure-vet": "PASS"
+  },
+  "host_pressure_candidate_hashes": {
+    "internal/provisioning/bootstrap_plan.go": "0a91c546293cb0f2d9987c9b3e3d16fc9f1b6d7aa31ba7e9904704cf4c392a9f",
+    "internal/provisioning/memory_headroom.go": "103bacfba4063ece6f4176a10ec8cdabe84b669bf1d2f3f6f919f4bfe40a1511",
+    "internal/provisioning/memory_headroom_test.go": "137e2a63d814076836e86b8d35b785f91cad648c4adb89af5661f818e93aee5b",
+    "internal/provisioning/ssh_admission.go": "d719fa0bd92ac15f357a5ae6fc4cf3f73742f8ba024e278cc4765fcca34d4999",
+    "internal/provisioning/ssh_admission_test.go": "1fd48df653ec9616c2932ebf536d8bb68f9c92ec90905913a76a53bbaca23ec6",
+    "internal/provisioning/installer_checkpoint_test.go": "5417384038ad7217faa86f101a7bfa3767473fe9f1ed442b82d8e9242acde245"
   }
 }
