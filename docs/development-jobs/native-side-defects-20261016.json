@@ -1,8 +1,8 @@
 {
   "id": "native-side-defects-20261016",
-  "updated_at": "2026-10-16T02:47:13.625112+00:00",
-  "phase": "PUBLISH",
-  "status": "THREE_FIXES_VERIFIED_RELEASE_PENDING",
+  "updated_at": "2026-10-16T02:59:05.807064+00:00",
+  "phase": "COMPLETE",
+  "status": "THREE_SIDE_DEFECTS_DEPLOYED_VERIFIED",
   "user_authorization": "User explicitly requested fixing the three side defects without OpenAI API until credit is replenished. This overrides the API council requirement for this bounded task only. No model API calls or subagents used. Deterministic regression/race/publisher/rollout gates remain required.",
   "base_checkpoint": "13b84afe1b3e048f41c3943b7143c460ebe52489",
   "prior_continuation": "51120e6e931bc86734b280b274a3239c973793e9",
@@ -93,11 +93,7 @@
     "internal/panels/globalreality/policy_error_postgres_test.go": "40e59ad9c465f1010d17ab4c420b39dd930e4280bc0f8ed58da7bb6766eb221e",
     "internal/panels/sanaei/panel_session_context_test.go": "62bdce0ae3dc8b1e644234bc98fc41176dc49522096d7dc6b0af3bc015eea81b"
   },
-  "remaining": [
-    "Finish race/full/static verification",
-    "Normal publisher and exact Ubuntu installation",
-    "Secondary then primary rollout and runtime checks"
-  ],
+  "remaining": [],
   "deferred": [
     "Native route-proof config-lock contention and strict output coverage; remain on feat/output-controls-20261016.",
     "Additional IP work."
@@ -110,7 +106,11 @@
     "full": "PASS go test ./... with isolated PostgreSQL/browser",
     "static": "PASS go vet ./... and git diff --check",
     "api": "NOT_USED_EXPLICIT_USER_REQUEST",
-    "publication": "PENDING",
-    "deployment": "PENDING"
-  }
+    "publication": "PASS normal publisher, unprivileged full suite, exact Ubuntu24 installation, main/stable CI",
+    "deployment": "PASS secondary then primary; matching binaries,3active services,5readiness samples each; settings/pins/accounts/environment preserved",
+    "live": "PASS all8output surfaces and15readiness samples; output-count limitation remains separately OPEN"
+  },
+  "source_revision": "c7e62eecc5e8addaaac89d0a91a96af6ee93c3ac",
+  "public_revision": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+  "acceptance": "docs/NATIVE_SIDE_DEFECTS_ACCEPTANCE_20261016.json"
 }
