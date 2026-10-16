@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"strings"
 
@@ -11,6 +12,9 @@ import (
 // PublishProviderObservation commits snapshot and state together. A read started
 // before a newer account observation or credential change cannot clear its result.
 func (c Container) PublishProviderObservation(ctx context.Context, rt AccountRuntime, attempt ProviderAttempt, obs providers.Observation, runtimeStatus, detail string) (bool, error) {
+	return c.publishProviderObservation(ctx, rt, attempt, obs, runtimeStatus, detail, nil)
+}
+func (c Container) publishProviderObservation(ctx context.Context, rt AccountRuntime, attempt ProviderAttempt, obs providers.Observation, runtimeStatus, detail string, metadata func(context.Context, *sql.Tx) error) (bool, error) {
 	state := ProviderStateActive
 	if strings.EqualFold(strings.TrimSpace(obs.Account.Status), "locked") {
 		state = ProviderStateLocked
@@ -100,6 +104,11 @@ func (c Container) PublishProviderObservation(ctx context.Context, rt AccountRun
 	n, err := result.RowsAffected()
 	if err != nil || n == 0 {
 		return false, err
+	}
+	if metadata != nil {
+		if err = metadata(ctx, tx); err != nil {
+			return false, err
+		}
 	}
 	var oldLimit int
 	if err = tx.QueryRowContext(ctx, `SELECT COALESCE((SELECT COALESCE((canonical->'Capacity'->>'ComputeLimit')::int,(data->'Limits'->>'DropletLimit')::int,0) FROM provider_snapshots WHERE account_id=$1 ORDER BY created_at DESC LIMIT 1),0)`, rt.Config.ID).Scan(&oldLimit); err != nil {

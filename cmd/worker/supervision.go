@@ -40,7 +40,8 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		p.Work = time.Minute
 		p.Idle = 10 * time.Second
 	case "provider-capacity":
-		p.Work = 15 * time.Minute
+		p.AsyncLoop = true
+		p.Work = 55 * time.Second
 		p.Idle = 15 * time.Second
 	case "panel-registry":
 		p.Work = 30 * time.Second

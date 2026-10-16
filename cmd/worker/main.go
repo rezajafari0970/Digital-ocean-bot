@@ -139,11 +139,8 @@ func main() {
 func buildModules(application *app.Application, role worker.Role, roleLease *worker.RoleLease) worker.Modules {
 	var modules worker.Modules
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
-	controlWork := worker.NewWorkBudget(3)
-	panelWork := worker.NewWorkBudget(10)
-	// Keep bulk observation/policy scans from filling the proof admission queue.
-	// The existing shared SQL budget still bounds every admitted handler.
-	panelPollWork := worker.NewWorkClass(panelWork, 2)
+	controlWork, controlBulkWork, providerWork := newControlWorkBudgets()
+	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets()
 
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
@@ -164,7 +161,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					lanes.Stalled = 1
 				}
 			}
-			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "provider_work": providerWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -189,7 +186,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			case <-ctx.Done():
 				return
 			case <-t.C:
-				_ = controlWork.Do(ctx, func(ctx context.Context) error { application.Container.ReconcileLocalState(ctx); return ctx.Err() })
+				_ = controlBulkWork.Do(ctx, func(ctx context.Context) error { application.Container.ReconcileLocalState(ctx); return ctx.Err() })
 				if n, err := (rollingreboot.Service{DB: application.DB}).ReconcileDeferred(ctx); err != nil {
 					log.Printf("rolling reboot deferred reconcile: %v", err)
 				} else if n > 0 {
@@ -204,7 +201,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		for {
 			supervision.Pulse(ctx)
 			jobCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-			if err := controlWork.Do(jobCtx, func(ctx context.Context) error { return application.Container.ProcessAccountDeletions(ctx) }); err != nil && ctx.Err() == nil {
+			if err := controlBulkWork.Do(jobCtx, func(ctx context.Context) error { return application.Container.ProcessAccountDeletions(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("account deletion remains pending")
 			}
 			cancel()
@@ -222,7 +219,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		for {
 			supervision.Pulse(ctx)
 			billingCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
-			if err := controlWork.Do(billingCtx, func(ctx context.Context) error { return application.Container.RefreshOneBillingAccount(ctx) }); err != nil && ctx.Err() == nil {
+			if err := controlBulkWork.Do(billingCtx, func(ctx context.Context) error { return application.Container.RefreshOneBillingAccount(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("billing observation persistence failed")
 			}
 			cancel()
@@ -239,7 +236,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer t.Stop()
 		for {
 			supervision.Pulse(ctx)
-			_ = controlWork.Do(ctx, func(ctx context.Context) error { application.Container.SyncCatalogs(ctx); return ctx.Err() })
+			_ = controlBulkWork.Do(ctx, func(ctx context.Context) error { application.Container.SyncCatalogs(ctx); return ctx.Err() })
 			supervision.Idle(ctx)
 			select {
 			case <-ctx.Done():
@@ -321,7 +318,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					}
 					cctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 					defer cancel()
-					_ = controlWork.Do(cctx, func(ctx context.Context) error { return application.Container.MaintainProxyControlPlane(ctx, id) })
+					_ = controlBulkWork.Do(cctx, func(ctx context.Context) error { return application.Container.MaintainProxyControlPlane(ctx, id) })
 				}()
 			}
 			wg.Wait()
@@ -339,29 +336,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	// Capacity refresh coordinator: one full provider refresh per account only
-	// when the shared snapshot is older than 60s. The 15s cadence leaves room for network latency before
-	// the unchanged 2m freshness/safety boundary. Provider backoff still applies.
+	// One joined rolling coordinator; no permanent batch-wide admission.
 	modules.Add(worker.RoleControl, "provider-capacity", func(ctx context.Context) {
-		t := time.NewTicker(15 * time.Second)
-		defer t.Stop()
-		_ = controlWork.Do(ctx, func(ctx context.Context) error {
-			application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
-			return ctx.Err()
-		})
-		for {
-			supervision.Pulse(ctx)
-			supervision.Idle(ctx)
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				_ = controlWork.Do(ctx, func(ctx context.Context) error {
-					application.Container.RefreshProviderSnapshots(ctx, 60*time.Second)
-					return ctx.Err()
-				})
-			}
-		}
+		application.Container.RunProviderSnapshots(ctx, providerWork.Do)
 	})
 	// Panel registry: materialize every completed READY Sanaei deployment into panel_instances.
 	modules.Add(worker.RolePanels, "panel-registry", func(ctx context.Context) {
@@ -437,7 +414,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				return
 			}
 			var n int
-			err = panelWork.Do(ctx, func(ctx context.Context) error {
+			err = panelMaintenance(ctx, func(ctx context.Context) error {
 				var drainErr error
 				n, drainErr = exec.Drain(ctx)
 				return drainErr
@@ -481,7 +458,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				if err := panelWork.Do(ctx, executor.RunOne); err != nil {
+				if err := panelMaintenance(ctx, executor.RunOne); err != nil {
 					log.Printf("panel cleanup paused: %v", err)
 				}
 			}
@@ -504,7 +481,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					continue
 				}
 				bounded, cancel := context.WithTimeout(cctx, 240*time.Second)
-				err = panelWork.Do(bounded, service.RunOne)
+				err = panelMaintenance(bounded, service.RunOne)
 				cancel()
 				finish()
 				if err != nil && ctx.Err() == nil {
@@ -695,7 +672,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 							continue
 						}
 						panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-						err = panelWork.Do(panelCtx, func(ctx context.Context) error { return syncer.ReconcilePanel(ctx, p, false) })
+						err = panelMaintenance(panelCtx, func(ctx context.Context) error { return syncer.ReconcilePanel(ctx, p, false) })
 						cancel()
 						if persistErr := failures.RecordOutcome(ctx, "residential_sync", p.ID, "", err); persistErr != nil {
 							log.Printf("residential sync persistence %s: %v", p.ID, persistErr)
@@ -735,7 +712,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		defer ticker.Stop()
 		for {
 			supervision.Pulse(ctx)
-			if err := controlWork.Do(ctx, func(ctx context.Context) error { return application.Container.ProcessAccountRuleApplications(ctx) }); err != nil && ctx.Err() == nil {
+			if err := controlBulkWork.Do(ctx, func(ctx context.Context) error { return application.Container.ProcessAccountRuleApplications(ctx) }); err != nil && ctx.Err() == nil {
 				log.Printf("account rule application: %v", err)
 			}
 			supervision.Idle(ctx)
@@ -749,7 +726,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	failures := worker.FailureStore{DB: application.DB}
 	lw := worker.LifecycleWorker{
 		Dispatcher: lifecycleLanes,
-		Store:      droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Admit: controlWork.Do, Failures: failures, Batch: 100,
+		Store:      droplets.LifecycleStore{DB: application.DB}, Handler: application.Container, Admit: controlBulkWork.Do, Failures: failures, Batch: 100,
 		Concurrency: 6, ItemTimeout: 90 * time.Second, Interval: 10 * time.Second,
 		Progress: func(t time.Time) { lifecycleProgress.Store(t.Unix()) },
 	}
@@ -760,14 +737,14 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Admit: controlWork.Do, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Admit: controlBulkWork.Do, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
 	modules.Add(worker.RoleControl, "scheduler", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		engine := scheduler.Engine{DB: application.DB, Store: scheduler.SQLStore{DB: application.DB}, Leases: scheduler.LeaseStore{DB: application.DB}, Starter: app.ScheduledStarter{Container: application.Container}}
 		for {
 			supervision.Pulse(ctx)
-			if err := controlWork.Do(ctx, func(ctx context.Context) error { return engine.RunDue(ctx, time.Now().UTC()) }); err != nil {
+			if err := controlBulkWork.Do(ctx, func(ctx context.Context) error { return engine.RunDue(ctx, time.Now().UTC()) }); err != nil {
 				if ctx.Err() == nil {
 					log.Printf("scheduler: %v", err)
 				}

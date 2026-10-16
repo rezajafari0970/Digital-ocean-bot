@@ -1,3 +1,7 @@
+## Provider and guardian admission repair verified; deployment pending — 2026-10-16T06:05:48.979173+00:00
+
+Primarypublicd18c882 is verified; secondarypublic8abcacc remains healthy. Primary disk-full installation was safely recovered through normal guarded recover before successful retry; currentcandidateadds pre-stop disk reserve checks. Candidate fixes provider rolling observations/fenced metadata and panel parent-slot starvation. Exact-source full/race/parity/vet and disk tests passed; Astra max R1 reproduced/fixed/PASS. Source and deployment gates remain separate. Guardian canary allowlist still active until new live fleet acceptance. Residential/output longlock redtest remains open. API usage {"requests": 21, "completed_with_usage": 21, "input_tokens": 480794, "output_tokens": 312018, "total_tokens": 792812, "estimated_usd": 20.183092}.
+
 ## Guardian rolling scheduling verified; deployment pending — 2026-10-16T05:22:23.445136+00:00
 
 Production source8225c312/public8abcacc verified on both hosts. Third source candidate removes the round barrier, enforces running executable identity, and stabilizes guardian artifacts across unrelated releases. Exact-source full/race/kernel/artifact/vet passed; Astra max review B1 fixed and accepted. Normal publication, staged canary and both-host acceptance next. API 420695 tokens, estimated $11.569912 across 14 requests. Provider observation starvation is reproduced and isolated; residential/output lock regression remains open. No permanent no-warning or mastery claim.

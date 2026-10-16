@@ -62,3 +62,15 @@ Live provider warnings recurred with five overdue accounts, twenty stale-provide
 ### Third candidate verified 2026-10-16T05:22:23.445136+00:00
 
 Exact-source full regression and vet passed after B1 fix. Astra final review PASS closes B1: live or unknown systemd process with unproven/malformed sample cannot trigger installer. Stable PID0 permits stopped-agent repair. Rolling scheduler, real kernel producer proof and deterministic guardian artifact gates passed. API cumulative usage across guardian and provider planning: {"requests": 14, "input_tokens": 226183, "output_tokens": 194512, "total_tokens": 420695, "estimated_usd": 11.569912}. Deployment and fleet verification pending; provider scheduling and residential lock issues are not closed.
+
+### Fourth candidate and primary recovery checkpoint
+
+Primary sourcea8e748e/publicd18c882 installed, 3 running executable hashes and 5 readiness samples passed; all154 retained pins/policies/env/accountidentity unchanged. Canary executing approved guardian SHA and PID/start proof; Xray PID7494 unchanged. Fleet acceptance NOT complete: live parent-slot starvation still causes late observations; canary upgrade scope retained. Secondary remains public8abcacc.
+
+First install attempt failed from disk exhaustion (118GB root, 0free; Go build cache14GB). Normal recover succeeded after removing only reproducible Go cache; previous version ready. A second recorded attempt with13GB free succeeded. No checkpoint guard bypass; rollback/evidence in /root/backups/dob-server-protection-rolling-20261016. Candidate adds disk reserve checks before build and, including database/persistent-data backup budget, before runtime stop.
+
+Isolated provider-observation candidate: rolling 2-account coordinator, parent3 with observations2 and aggregate other controls1; admitted45s work plus3s bounded finalization, live-account attempt authorization, actual-failure backoff, healthy30s early eligibility with published60/300 cadence/UI+30/precreate120 unchanged. Credential-rejected metadata writes reproduced in Vultr/UpCloud/Linode; all scheduled registry/capacity writes now share accepted observation transaction.
+
+Panel parent10 now bounds maintenance2 independently from periodic proof2 and initial bootstrap1, reserving at least5 positions for guardian loops; query deadlines start after admission. Initial baseline tests reproduced starvation and premature deadline; combined race suite passed. New Astra review found SQL alias correlation error, reproduced in2-account idle-to-active case and corrected; final exact-source full regression and follow-up review pending. Disk tests and parity16-provider-mode combinations passed. Residential/output long-lock regression remains open in separate branch.
+
+Fourth exact-source final full regression and vet passed; R1 follow-up Astra PASS. Combined race, provider parity and disk gates passed. API usage at publication: {"requests": 21, "completed_with_usage": 21, "input_tokens": 480794, "output_tokens": 312018, "total_tokens": 792812, "estimated_usd": 20.183092}. Normal publication and both-host verification pending.

@@ -117,10 +117,11 @@ func (c Controller) runLane(parent context.Context, enabled bool, concurrency in
 				reset(time.Second)
 				continue
 			}
-			queryCtx, done := context.WithTimeout(ctx, 5*time.Second)
 			var err error
 			var targets []nodeTarget
-			discover := func(queryCtx context.Context) error {
+			discover := func(work context.Context) error {
+				queryCtx, done := context.WithTimeout(work, 5*time.Second)
+				defer done()
 				if c.DB == nil || c.Secrets == nil {
 					err = fmt.Errorf("protection controller not configured")
 				} else if lastSync.IsZero() || time.Since(lastSync) >= 5*time.Second {
@@ -146,11 +147,10 @@ func (c Controller) runLane(parent context.Context, enabled bool, concurrency in
 				return err
 			}
 			if c.Admit != nil {
-				err = c.Admit(queryCtx, discover)
+				err = c.Admit(ctx, discover)
 			} else {
-				err = discover(queryCtx)
+				err = discover(ctx)
 			}
-			done()
 			if err != nil {
 				if ctx.Err() == nil {
 					log.Printf("server protection discovery (enabled=%t): %v", enabled, err)
