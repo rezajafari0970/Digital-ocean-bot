@@ -1,3 +1,8 @@
+
+## Populated upgrade correction — 2026-10-16T08:58:51.169961+00:00
+
+Firstpublic4d156e passedbothCIandsecondaryactivation; primaryinstaller correctly rolled back to124f51f when PreserveData rejected the intended scope64to0policy transition. No data/retention/checksum guard was disabled. Added a populated retained-upgrade regression: it reproduced the identical error on baseline. The existing per-version expected-transformation mechanism (previously used for172) now declares only migration182bulk_lifecycle_control max64to0andits transactiontimestamp under the exact enabled/auto/global/unscoped/gate predicate. Everyothercolumn,row,budget andgate is retained. A negative regression proves an unrelated operation_budget overwrite is rejected and rolled back. The immutable182migration bytes/checksum remain unchanged; an already-upgraded secondary skips it normally. Targeted retained/race,full andvet gates PASS. New publication and bothhost verification pending. APIcalls0.
+
 ## Fleet identity / coverage deterministic verification — 2026-10-16T08:37:17.331008+00:00
 
 Explicit user authorization to proceed without OpenAI API recorded; zero APIcalls/cost. Candidate fixes bulk-blocked identity maintenance with independent bounded identity2/provider2/bulk1,24SQLpool retained, and global client scope cap64 preventing full fleet coverage. Migration182 scope0=all eligible, custom/paused/scoped limits preserved. Targeted race/realPG/full/vet gates pass. Normal publication and runtime acceptance pending. Desired protection changed externally toOFFrevision45; preserve it. Real pressure and transientSSH observation errors remain diagnosable. Xraycore and guardianbinary unchanged. See docs/FLEET_IDENTITY_COVERAGE_20261016.md and docs/FLEET_VIDEO_REVIEW_20261016.md.

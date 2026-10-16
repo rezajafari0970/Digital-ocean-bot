@@ -68,6 +68,15 @@ func captureRetention(ctx context.Context, tx *sql.Tx, version string) (*retenti
 				projection += " || jsonb_build_object('listen_host','0.0.0.0')"
 			}
 		}
+		// This version declares one reviewed policy transition, not arbitrary
+		// overwrite permission. Match migration182's exact authorization predicate
+		// and transaction timestamp; every other field and row remains retained.
+		if version == "000182_fleet_client_coverage" && name == "bulk_lifecycle_control" {
+			projection = `CASE WHEN t.singleton AND t.enabled AND t.auto_enroll AND t.max_active_scopes=64
+ AND EXISTS(SELECT 1 FROM client_mutation_execution_gate g WHERE g.singleton AND g.enabled AND NOT g.kill_switch
+ AND g.panel_id IS NULL AND g.inbound_id IS NULL AND g.concurrency=1)
+ THEN to_jsonb(t) || jsonb_build_object('max_active_scopes',0,'updated_at',now()) ELSE to_jsonb(t) END`
+		}
 		_, err = tx.ExecContext(ctx, "CREATE TEMP TABLE "+pq.QuoteIdentifier(snapshot)+" ON COMMIT DROP AS SELECT "+projection+" AS data FROM "+pq.QuoteIdentifier(g.schema)+"."+pq.QuoteIdentifier(name)+" t")
 		if err != nil {
 			return nil, err

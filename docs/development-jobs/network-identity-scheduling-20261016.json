@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "VERIFIED_PUBLICATION_PENDING",
+  "status": "RETAINED_UPGRADE_FIXED_VERIFIED_PUBLICATION_PENDING",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -186,15 +186,14 @@
     "Qualify10accounts with slow/failed/rotating account plus provider2 and bulk work, cancellation, stale lease ownership, and real PostgreSQL pool pressure before rollout."
   ],
   "not_yet_done": [
-    "Independent architect/reviewer/adversary/test-design council for this new correction",
-    "Production source implementation and complete regression",
-    "Publication and both-host rollout",
-    "Repeated live identity age below validity and provider-state recovery acceptance"
+    "Publish retention compatibility correction and verify both hosts",
+    "Observe full Direct1/Residential3 fleet coverage and identity age",
+    "Report genuine resource pressure separately; desired protectionOFF preserved"
   ],
   "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
   "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
-  "updated_at": "2026-10-16T08:37:17.331008+00:00",
+  "updated_at": "2026-10-16T08:58:51.169961+00:00",
   "api_usage_current_task": {
     "requests": 0,
     "tokens": 0,
@@ -238,5 +237,20 @@
     "fleet-migration": "PASS",
     "fleet-full": "PASS",
     "fleet-vet": "PASS"
+  },
+  "retention_candidate_hashes": {
+    "internal/migrate/preserve.go": "8ffafd91de557a1bf70de69a00ff700fd8a4d26240e71a5caad8d4872e24bfad",
+    "internal/adminapi/fleet_retention_test.go": "c39f64135b5c6779b4d984b9d67a6dc9465706177f34133c6a5fb54210df92eb"
+  },
+  "retention_checks": {
+    "retained-upgrade-race": "PASS",
+    "retained-upgrade-full": "PASS",
+    "retained-upgrade-vet": "PASS"
+  },
+  "first_rollout": {
+    "public": "4d156e334119149eaf3c821047c7f72db2caead2",
+    "secondary": "VERIFIED",
+    "primary": "SAFE_ROLLBACK_TO_124f51f; populated retention rejected policy64to0 migration",
+    "new_regression": "baseline failed with identical production error; corrected retained upgrade passes and rejects unrelated budget overwrite"
   }
 }
