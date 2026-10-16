@@ -1,0 +1,203 @@
+{
+  "id": "network-identity-scheduling-20261016",
+  "at": "2026-10-16T07:59:08.347661+00:00",
+  "status": "REPRODUCED_PLAN_REVIEW_BLOCKED_API_CREDIT",
+  "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
+  "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
+  "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
+  "risk": {
+    "schema": 1,
+    "profile": "critical",
+    "score": 35,
+    "reasons": [
+      "high_risk_path:cmd/worker/control_budget.go",
+      "high_risk_path:cmd/worker/main.go",
+      "high_risk_path:cmd/worker/network_identity_lane.go",
+      "high_risk_path:cmd/worker/network_identity_lane_test.go",
+      "lifecycle",
+      "medium_risk_path:internal/app/account_network_maintenance.go",
+      "production",
+      "provider",
+      "proxy",
+      "push",
+      "sql",
+      "timeout"
+    ]
+  },
+  "reproduction": {
+    "at": "2026-10-16T07:56:59.010651+00:00",
+    "risk": {
+      "schema": 1,
+      "profile": "critical",
+      "score": 35,
+      "reasons": [
+        "high_risk_path:cmd/worker/control_budget.go",
+        "high_risk_path:cmd/worker/main.go",
+        "high_risk_path:cmd/worker/network_identity_lane.go",
+        "high_risk_path:cmd/worker/network_identity_lane_test.go",
+        "lifecycle",
+        "medium_risk_path:internal/app/account_network_maintenance.go",
+        "production",
+        "provider",
+        "proxy",
+        "push",
+        "sql",
+        "timeout"
+      ]
+    },
+    "budget_source_sha256": "7481f2619086dd3dfc97a39f4f1c8b1289040320982a35230c22f287d61dc76d",
+    "baseline_exit": 1,
+    "baseline_proven": "pre-admission identity deadline expires behind unrelated bulk holder with2free parent permits",
+    "candidate_mechanism": "Separate identity class uses existing parent3; mechanism-only PASS; actual scheduling/fleet/pool and independent review pending",
+    "product_changes": false,
+    "api_calls": 0
+  },
+  "live_accounts": [
+    {
+      "id": "5860de60-300b-4870-ab49-61fee45f8003",
+      "provider": "vultr",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 120.232326,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "b8d5680e-94f0-431b-9569-503f4c42cc80",
+      "provider": "linode",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 0.499043,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "c3b02da1-9f48-4d7a-bbfe-ddc1d9a955b9",
+      "provider": "vultr",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 117.337976,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "3a589c92-6f01-46e1-af16-a2fb7bbe1b45",
+      "provider": "digitalocean",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 118.195151,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "6b1e5dc2-1daf-4b3a-a990-82134d12ec6b",
+      "provider": "vultr",
+      "provider_error_state": "PROXY_ERROR",
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 2.50412,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "e8b12bf5-c003-437c-ab87-7b73e372293f",
+      "provider": "linode",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 122.077158,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "c12dcdcb-7d16-440d-82a3-5f76bc277c92",
+      "provider": "digitalocean",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 120.889206,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "2fd12e1c-a307-483e-bf2a-d0fdb90241c1",
+      "provider": "linode",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 119.305003,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "a9b4646b-2a58-4386-8201-736b725257e0",
+      "provider": "digitalocean",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 118.687273,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    },
+    {
+      "id": "816e03c0-ee86-43b4-a0ce-5816917dc72a",
+      "provider": "vultr",
+      "provider_error_state": null,
+      "proxy_status": "healthy",
+      "last_health_ok": true,
+      "health_age": 119.837687,
+      "proxy_success_age": 218.16125,
+      "rotating": false
+    }
+  ],
+  "control_heartbeat": {
+    "last_seen_at": "2026-10-16T07:59:00.217156+00:00",
+    "pool": {
+      "Idle": 5,
+      "InUse": 3,
+      "WaitCount": 0,
+      "WaitDuration": 0,
+      "MaxIdleClosed": 2,
+      "OpenConnections": 8,
+      "MaxIdleTimeClosed": 5,
+      "MaxLifetimeClosed": 0,
+      "MaxOpenConnections": 24
+    },
+    "control": {
+      "limit": 3,
+      "active": 1,
+      "waiting": 0
+    },
+    "bulk": {
+      "limit": 1,
+      "waiting": 8,
+      "admitted": 1
+    }
+  },
+  "proposed_change": [
+    "Separate identity admission from long bulk-control work while preserving a validated aggregate SQL/work budget.",
+    "Start the45s operation deadline only after admission; queueing must hold no SQL or account lease.",
+    "Use bounded completion-driven workers and fair/oldest-due selection; one slow account must not hold a whole refresh round.",
+    "Retain proxy-keeper transaction ownership, identity/country/collision/rotation checks and180s/360s evidence validity; never mark skipped checks as fresh.",
+    "Qualify10accounts with slow/failed/rotating account plus provider2 and bulk work, cancellation, stale lease ownership, and real PostgreSQL pool pressure before rollout."
+  ],
+  "not_yet_done": [
+    "Independent architect/reviewer/adversary/test-design council for this new correction",
+    "Production source implementation and complete regression",
+    "Publication and both-host rollout",
+    "Repeated live identity age below validity and provider-state recovery acceptance"
+  ],
+  "blocker": {
+    "policy": "docs/PROJECT_AI_OPERATING_SYSTEM.md Multi-Model Parallel Council and critical risk profile",
+    "last_api_error": "credit_balance_exhausted",
+    "new_api_calls": 0,
+    "explanation": "Existing full council reviewed the prior output/proof correction, not this newly discovered identity scheduling change. No independent review is invented or reused as approval for new code."
+  },
+  "product_changes": false,
+  "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
+  "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e"
+}

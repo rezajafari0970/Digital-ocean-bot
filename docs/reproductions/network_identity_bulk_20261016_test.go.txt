@@ -1,0 +1,31 @@
+package main
+import (
+ "context"
+ "errors"
+ "testing"
+ "time"
+ "github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
+)
+func holdControlBulk(t *testing.T, bulk *worker.WorkClass) func() {
+ t.Helper(); entered:=make(chan struct{}); release:=make(chan struct{});done:=make(chan error,1)
+ go func(){done<-bulk.Do(context.Background(),func(context.Context)error{close(entered);<-release;return nil})}()
+ select{case <-entered:case <-time.After(time.Second):t.Fatal("bulk holder did not enter")}
+ return func(){close(release);if err:=<-done;err!=nil{t.Fatal(err)}}
+}
+// Exact current production budget and caller ordering; deadline scaled to45ms.
+func TestIdentityRefreshNotStarvedByUnrelatedBulk(t *testing.T){
+ parent,bulk,_:=newControlWorkBudgets();release:=holdControlBulk(t,bulk);defer release()
+ if s:=parent.Snapshot();s["active"]!=1||s["limit"]!=3{t.Fatalf("unexpected parent: %v",s)}
+ ctx,cancel:=context.WithTimeout(context.Background(),45*time.Millisecond);defer cancel();entered:=false
+ err:=bulk.Do(ctx,func(context.Context)error{entered=true;return nil})
+ if !entered&&errors.Is(err,context.DeadlineExceeded){t.Fatal("identity operation expired behind unrelated bulk work while 2 parent slots were unused")}
+ if err!=nil{t.Fatal(err)}
+}
+// Candidate mechanism only; not production wiring or complete qualification.
+func TestSeparateIdentityClassCanUseIdleParentWithoutRaisingTotal(t *testing.T){
+ parent,bulk,provider:=newControlWorkBudgets();release:=holdControlBulk(t,bulk);defer release()
+ identity:=worker.NewWorkClass(parent,1);ctx,cancel:=context.WithTimeout(context.Background(),time.Second);defer cancel()
+ err:=provider.Do(ctx,func(ctx context.Context)error{return identity.Do(ctx,func(context.Context)error{
+  s:=parent.Snapshot();if s["active"]!=3||s["limit"]!=3{t.Errorf("aggregate capacity changed: %v",s)};return nil
+ })});if err!=nil{t.Fatal(err)}
+}
