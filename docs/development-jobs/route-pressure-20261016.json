@@ -1,6 +1,6 @@
 {
-  "status": "NATIVE_CANARIES_PASSED_PRODUCT_PUBLICATION_PENDING",
-  "updated_at": "2026-10-16T21:02:35.409052+00:00",
+  "status": "DEPLOYED_VERIFIED",
+  "updated_at": "2026-10-16T21:34:41.334710+00:00",
   "base_source": "491ce8245949dffcbb0af7e5331cf5392363a536",
   "branch": "fix/route-pressure-20261016",
   "native_artifact": "eafb3c6ce3db743ec2350d94249f6cf05cf9ec46",
@@ -12,19 +12,24 @@
     "prewrite retry regression/fix",
     "six proven prewrite cancellations",
     "native fallback and handshake diagnosis",
-    "native race tests and both architecture builds"
-  ],
-  "pending": [
-    "final native canaries",
-    "product publication",
+    "native race tests and both architecture builds",
+    "final native canaries and sustained resources",
+    "product publication and main/stable CI",
     "both host guarded updates",
-    "fleet native convergence",
-    "public output and live health acceptance"
+    "78 panel native rollout",
+    "85-panel running-image/capability audit plus two later arrivals",
+    "public subscription and live health acceptance"
   ],
+  "pending": [],
   "native_version": "dob-fm-0.2.2",
   "canary_panels": [
     "24116b55-e148-440d-ad7f-d04083482afb",
     "0054f1ae-6eb4-412b-993d-b68b07ae32b6",
     "a456d5de-71c3-46d4-b0ad-e277777f4f8c"
-  ]
+  ],
+  "product_source": "294bd152633e32014e7ce3bb2649fa89f78e4e89",
+  "public_revision": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+  "native_selected_verified": 81,
+  "acceptance_record": "docs/development-jobs/route-pressure-20261016.acceptance.json",
+  "native_distinct_verified": 87
 }

@@ -1,0 +1,98 @@
+{
+  "at": "2026-10-16T21:33:59.710870+00:00",
+  "product_source": "294bd152633e32014e7ce3bb2649fa89f78e4e89",
+  "public_revision": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+  "native_artifact": "eafb3c6ce3db743ec2350d94249f6cf05cf9ec46",
+  "native_version": "dob-fm-0.2.2",
+  "selected_native_installations_verified": 81,
+  "current_cohort_native_audit_verified": 85,
+  "later_arrivals_native_verified": 2,
+  "distinct_native_panels_verified": 87,
+  "both_product_hosts_verified": true,
+  "primary_retained_listener_pins": 319,
+  "stable_healthy_servers": 85,
+  "health_reasons": {
+    "HEALTHY": 85,
+    "PENDING_DELETION": 5,
+    "PROVISIONING": 3
+  },
+  "outputs": {
+    "DIRECT": {
+      "servers": 85,
+      "links": 85,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    },
+    "RESIDENTIAL": {
+      "servers": 85,
+      "links": 255,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    },
+    "ALL": {
+      "servers": 85,
+      "links": 425,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    },
+    "SHARE_ALL": {
+      "servers": 85,
+      "links": 425,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    },
+    "SHARE_DIRECT": {
+      "servers": 85,
+      "links": 85,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    },
+    "SHARE_RESIDENTIAL": {
+      "servers": 85,
+      "links": 255,
+      "invalid": 0,
+      "missing_healthy_servers": 0,
+      "servers_below_profile_target": 0
+    }
+  },
+  "six_sample_all_and_public_all_complete": true,
+  "six_sample_degraded_zero": true,
+  "terminal_samples": 3,
+  "terminal_all_and_public_all_complete": true,
+  "tests_exit_zero": [
+    "retry-limit-green",
+    "retry-limit-targeted-race",
+    "retry-limit-full-db",
+    "runtime-product-race",
+    "final-state-race",
+    "release-affected-race",
+    "final-product-vet",
+    "fallback-bounded-race",
+    "xray-compat-race",
+    "xray-v022-build-amd64",
+    "xray-v022-build-arm64"
+  ],
+  "ci_main": 38967109693,
+  "ci_stable": 38967109473,
+  "model_api_requests": 0,
+  "model_api_tokens": 0,
+  "model_api_cost_usd": 0,
+  "limits": [
+    "Fleet counts change with creation and expiry. Provisioning and first verification are retained as real lifecycle states.",
+    "Profile population follows saved creation intervals; startup output gaps seen during earlier observations were retained in the report.",
+    "The complete database suite covered the retry correction; focused final-source race suites covered later runtime integration.",
+    "No permanent external-provider availability guarantee."
+  ],
+  "provider_network_transient": {
+    "code": "PROXY_ERROR",
+    "affected_dashboard_servers": 10,
+    "at": "2026-10-16T21:33:31.384338Z",
+    "automatic_recovery_verified_at": "2026-10-16T21:33:48.548577Z",
+    "final_provider_unavailable": 0
+  }
+}

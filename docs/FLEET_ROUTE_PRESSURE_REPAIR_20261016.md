@@ -13,7 +13,7 @@ Authenticated transport configuration, listener pins and client credentials are 
 - The six reviewed jobs were cancelled using the existing transportapply.Rollback operation, under executor/config locks and a fresh empty native snapshot. Every result was FAILED / CANCELLED_BEFORE_WRITE. This proves release of the blocking jobs; it does not establish what originally removed the native inbounds.
 - Subsequent ordinary reconciliation restored ALL output coverage of the stable healthy cohort in the sampled 20:25 UTC window. Some Residential profiles were still filling; final coverage acceptance is pending.
 - First resource canary (dob-fm-0.2.0), installed at 20:41 UTC on 172.237.8.215, passed config and native identity preservation. At uptime 112 seconds: available memory 953,220 KiB, Xray swap zero, statistics response 42 ms; a nearby profile counted six pipe descriptors. The pre-installation sample had roughly 54 MiB available, about 307 MiB of Xray swap and over 21,000 pipe descriptors. Restart also releases old connections; sustained observation is required before attributing all improvement to the correction.
-- Final native candidate dob-fm-0.2.1 includes both defects and is published with complete modified source, patches, licenses, dependency locks and SHA-256 manifests at artifact revision 7c587e6952e17dbd967aaade3f6be4dd6a3b9da2. Product publication and fleet rollout remain pending until live canaries pass.
+- The intermediate native candidate dob-fm-0.2.1 addressed both defects and is published with complete modified source, patches, licenses, dependency locks and SHA-256 manifests at artifact revision 7c587e6952e17dbd967aaade3f6be4dd6a3b9da2. This intermediate revision was superseded by dob-fm-0.2.2 after the concurrency follow-up below.
 - The operator protection policy observed in this turn was OFF revision 51. No policy toggle, health override, freshness relaxation, provider deletion, or model API call was used.
 - The historical retained test panel 21727ecc-3871-4c7b-9653-f1db84b81d44 was already recorded DELETED when checked in this turn, with an earlier 13:04 UTC expiry. This task did not delete it and did not treat that historical record as a usable canary.
 
@@ -26,9 +26,9 @@ Authenticated transport configuration, listener pins and client credentials are 
 - Early isolated-test setup failures and one invocation naming a nonexistent package were retained separately; neither is counted as successful verification or as the product regression.
 - Completed task-owned PostgreSQL fixtures were removed only after test clients closed; production databases and backups were untouched.
 
-## Acceptance still in progress
+## Acceptance scope
 
-Final live canary receipts, sustained resources, product source/public revisions, both-service-host installation, fleet native upgrade coverage and actual public subscription coverage will be appended before completion. No permanent all-green or upstream-availability guarantee is claimed.
+Final acceptance below records the live canary receipts, sustained resources, source/public revisions, both-service-host installation, native fleet audit and actual public subscription coverage. No permanent all-green or upstream-availability guarantee is claimed.
 
 ## Bounded concurrency follow-up and final native candidate
 
@@ -38,6 +38,45 @@ The additional race tests verify admission saturation, no double reservation, re
 
 All three selected canaries installed v0.2.2 successfully between 21:00:30 and 21:00:50 UTC with config validation, actual running-image checks and native identity preservation. Busy initial configuration locks were skipped and then acquired in a bounded subsequent attempt before mutation. The final pre-write SQL guard also blocks noncanonical/changed saved JSON for review instead of letting that job indefinitely occupy the front of the executor queue; the tenth regression case covers an unknown saved source field.
 
-Disk preflight refused publication/build reserves without stopping services. Completed isolated test fixtures and 35 redundant cached candidate archives from clean, published source clones were reclaimed. Source clones, exports, validation/installation logs, current release and production backups remain intact. Further reserve checks precede installation.
+Disk preflight refused publication/build reserves without stopping services. Completed isolated test fixtures and 35 redundant cached candidate archives from clean, published source clones were reclaimed. A later reserve check also reclaimed 35 redundant clean, published publisher-cache clones. Exports, validation/installation logs, current and rollback releases, canonical source history, production databases and backups were retained. Both isolated test fixtures were removed after all test clients closed. Installer reserve checks passed before stopping services.
 
 Final v0.2.2 canary resource sample at 71–89 seconds uptime: 45.33.68.241 available memory 343,180 KiB / stats 69 ms; 172.236.162.223 available 503,292 KiB / stats 93 ms; 172.237.8.215 available 1,266,688 KiB / stats 66 ms. Recent memory PSI was zero or near zero. These are measured post-installation samples, not a permanent availability guarantee.
+
+
+## Product release and fleet installation
+
+Product source 294bd152633e32014e7ce3bb2649fa89f78e4e89 was published as public revision 2471b22a90dead5468d3ed1a2acc9dc7d16a0f71. Main/stable CI runs 38967109693 and 38967109473 succeeded. Both service hosts installed this revision: secondary verified at 21:10:54 UTC and primary at 21:12:40 UTC. All three services on each host were active, their running hashes matched, automatic restart counts were zero, and each host passed five readiness observations. Schema remained 000182_fleet_client_coverage. Account/environment hashes and creation, output and protection policies were preserved. All 319 retained primary listener pins were unchanged.
+
+The two-worker native rollout completed 78 eligible non-canary panels: wave 1 verified 50 and skipped 28 busy configuration locks; wave 2 acquired those locks with bounded waiting and verified all 28 without errors. Together with the three canaries, 81 distinct selected panels had validated installation receipts. Current-cohort running-image audit results follow separately, including nodes created during rollout. No native identities or client credentials were rewritten by the upgrade.
+
+At 1,279–1,298 seconds of uninterrupted final-core uptime, the three resource canaries retained 410,460 / 525,216 / 1,325,680 KiB available memory (hosts 45.33.68.241 / 172.236.162.223 / 172.237.8.215). Xray swap was zero; memory PSI full avg10 and avg60 were zero; statistics calls completed in 59 / 81 / 57 ms. Earlier immediate restart samples are not used alone as evidence of sustained recovery.
+
+Evidence: primary-product-verify.json, secondary-product-verify.json, fleet-native-wave1-progress.json, fleet-native-wave2-progress.json and native-v022-resources-post-fleet.json under the recorded evidence root.
+
+
+An independent read-only SSH audit verified all 85 current eligible panels: on-disk and running executable SHA-256 values matched the immutable architecture-specific manifest, bounded fallback and handshake capabilities were present, and the fallback limit was exactly 512. There were no mismatches or SSH audit failures. This cohort included four newly created panels outside the reviewed 81-panel installation set; each had already acquired dob-fm-0.2.2 through normal product provisioning. This validates the future-node integration as well as the one-time fleet upgrade. Receipts: fleet-native-final-audit.json, fleet-native-final-summary.json, fleet-native-new-nodes.json.
+
+
+## Subscription observation windows
+
+The first ten post-rollout samples preserved startup and refresh transitions rather than filtering them out. A short provider-error observation recovered on the next inspection. Two newly provisioned panels initially had no published snapshot; normal reconciliation subsequently admitted them. Intermittent route APPLYING and one stale inventory observation also recovered. These observations do not support a claim of perpetual, instantaneous all-green counts during fleet churn.
+
+In the subsequent six-sample window (21:28:22–21:30:56 UTC), both authenticated ALL output and the existing public ALL share covered every server healthy immediately before and after each sample. All six samples had zero missing healthy hosts and zero invalid configuration links. Dashboard degraded count was zero throughout. Direct coverage also converged to the full healthy cohort. Newly arriving Residential profiles continued filling under the unchanged 60-second creation interval. Two bounded uses of the standard user-capacity reconciler retained execution gates, operation budgets, policy cadence and configuration locks; no direct client-table or native-configuration edits were used. Final per-profile results follow below.
+
+The two later arrivals also passed independent on-disk/running-image hash and capability checks, bringing distinct verified native panels to 87 across the changing fleet. This is a cumulative verified count, not a claim that all 87 remained simultaneously active. Evidence: fleet-native-latest-arrivals.json.
+
+
+## Final acceptance record
+
+Observed at 2026-10-16T21:33:59.710870+00:00. Stable healthy servers: 85. Health reasons: {"HEALTHY": 85, "PENDING_DELETION": 5, "PROVISIONING": 3}. Authenticated and existing public-share results are recorded in `docs/development-jobs/route-pressure-20261016.acceptance.json`.
+
+- DIRECT: 85 servers, 85 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+- RESIDENTIAL: 85 servers, 255 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+- ALL: 85 servers, 425 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+- SHARE_ALL: 85 servers, 425 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+- SHARE_DIRECT: 85 servers, 85 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+- SHARE_RESIDENTIAL: 85 servers, 255 links, 0 missing healthy hosts, 0 below profile target, 0 invalid links.
+
+Both confirmed blocking/resource causes are corrected in installed product code and the pinned native core. Creation and expiry continue normally; provisioning and initial verification can still produce temporary inactive counts. The ALL subscription passed the six-sample complete-coverage window and final terminal checks. No health flags or freshness gates were relaxed. The final-source focused race checks, native race/compatibility tests, architecture builds, publication gates and both CI runs passed. Model API usage remained zero.
+
+A final transient provider-network observation affected ten dashboard server entries: one Vultr account reported PROXY_ERROR at 21:33:31 UTC while its network identity was rotating. The normal recovery path restored ACTIVE / READY with no provider error by 21:33:48 UTC. The final 21:33:59 UTC sample had no provider-unavailable servers. All three public output classes retained coverage during that observation. This real transient was retained, not cleared manually or concealed by a health override.
