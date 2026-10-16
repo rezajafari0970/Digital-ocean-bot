@@ -14,6 +14,8 @@ type ProviderAttempt struct {
 	AccountID, SecretRef string
 	CredentialAt         sql.NullTime
 	Started              time.Time
+	// Zero leaves cadence unchanged for unscheduled observations.
+	InventoryIntervalSeconds int
 }
 
 func (c Container) BeginProviderAttempt(ctx context.Context, id string, scheduled bool) (ProviderAttempt, error) {
@@ -86,6 +88,9 @@ func (c Container) RecordProviderObservation(ctx context.Context, a ProviderAtte
 	if err != nil || n == 0 {
 		return false, err
 	}
+	if err = publishProviderCadence(ctx, tx, a); err != nil {
+		return false, err
+	}
 	return true, tx.Commit()
 }
 
@@ -96,4 +101,19 @@ func recordProviderRestrictionTx(ctx context.Context, tx *sql.Tx, a ProviderAtte
    provider_account_observed_at=CASE WHEN $2='LOCKED' THEN clock_timestamp() ELSE provider_account_observed_at END,
    runtime_status=$6,runtime_status_detail=$3,runtime_status_at=clock_timestamp(),next_build_at=NULL,updated_at=clock_timestamp()
    WHERE id=$1 AND COALESCE(provider_restriction_started_at,CASE WHEN provider_observation_started_at IS NULL AND provider_state IN ('LOCKED','TOKEN_INVALID','PERMISSION_DENIED','BILLING_BLOCKED') THEN provider_state_at END,'epoch')<=$4`, a.AccountID, state, detail, a.Started, contacted, ProviderStateRuntimeStatus(state))
+}
+
+// Called only after an accepted observation, inside its existing transaction.
+// This does not refresh evidence timestamps or weaken pre-create freshness.
+func publishProviderCadence(ctx context.Context, tx *sql.Tx, a ProviderAttempt) error {
+	if a.InventoryIntervalSeconds == 0 {
+		return nil
+	}
+	if a.InventoryIntervalSeconds < 1 || a.InventoryIntervalSeconds > 300 {
+		return errors.New("invalid provider observation cadence")
+	}
+	_, err := tx.ExecContext(ctx, `UPDATE accounts SET provider_inventory_interval_seconds=$2
+ WHERE id=$1 AND GREATEST(COALESCE(provider_refresh_attempt_at,'epoch'),
+ COALESCE(provider_observation_started_at,'epoch'),COALESCE(provider_error_started_at,'epoch'))<=$3`, a.AccountID, a.InventoryIntervalSeconds, a.Started)
+	return err
 }

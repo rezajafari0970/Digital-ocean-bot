@@ -50,6 +50,9 @@ func (c Container) PublishProviderObservation(ctx context.Context, rt AccountRun
 			if e != nil || n == 0 {
 				return false, e
 			}
+			if e = publishProviderCadence(ctx, tx, attempt); e != nil {
+				return false, e
+			}
 			return true, tx.Commit()
 		}
 	}
@@ -110,6 +113,9 @@ func (c Container) PublishProviderObservation(ctx context.Context, rt AccountRun
 		if _, err = tx.ExecContext(ctx, `INSERT INTO account_capacity_events(account_id,old_limit,new_limit,delta,snapshot_id) VALUES($1,$2,$3,$4,$5)`, rt.Config.ID, oldLimit, obs.Capacity.ComputeLimit, obs.Capacity.ComputeLimit-oldLimit, snapshotID); err != nil {
 			return false, err
 		}
+	}
+	if err = publishProviderCadence(ctx, tx, attempt); err != nil {
+		return false, err
 	}
 	if err = tx.Commit(); err != nil {
 		return false, err

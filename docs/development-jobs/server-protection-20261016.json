@@ -16,7 +16,9 @@
     "Canonical bootstrap fails pre-existing detached HEAD; no READY/mastery claim",
     "User no-model-API preference retained; deterministic adversarial/race/native checks required",
     "Six unsupported nodes truly lack public listeners; bootstrap scans contend with periodic bulk work",
-    "Resource pressure on separate active nodes is real; no infinite capacity promise"
+    "Resource pressure on separate active nodes is real; no infinite capacity promise",
+    "Native panel API responds while repeated SSH bootstrap times out. Use bounded native-first discovery/scans; retain pinned SSH fallback and repair cooldown. Reuse existing local X25519 generator and registry identity.",
+    "Two five-second samples exposed false provider-overdue on 300s-to-60s cadence changes. Baseline lock-contention test reproduces early cadence publication. Publish cadence only with accepted observation transaction; force one observation on either cadence transition; retain timestamp, credential/order fences and strict pre-create checks."
   ],
   "allowed_paths": [
     "internal/serverprotection/",
@@ -26,9 +28,14 @@
     "internal/panels/globalreality/",
     "internal/adminapi/",
     "web/static/server_protection.js",
-    "web/tests/server-protection.cjs"
+    "web/tests/server-protection.cjs",
+    "internal/panels/panelbootstrap/",
+    "internal/app/provider_refresh.go",
+    "internal/app/provider_observation_attempt.go",
+    "internal/app/provider_observation_publish.go",
+    "internal/app/provider_cadence_test.go"
   ],
-  "updated_at": "2026-10-16T03:36:04.661437+00:00",
+  "updated_at": "2026-10-16T04:15:31.673937+00:00",
   "source_hashes": {
     "cmd/server-guardian/main.go": "507b32a583f16eefd965e5f28413daa5a79eb4cb5411c35e4cb12d5efd7aa88c",
     "cmd/worker/main.go": "3c8bcbe306076989debd394ae303155372c41647b46fa28581e65692f41c7742",
@@ -42,7 +49,13 @@
     "cmd/worker/reality_lane.go": "3c3969f6314bcc5c4a009b5833e58ca246c515a0a951bea274def5cb24a3ea66",
     "cmd/worker/reality_lane_test.go": "2fdb34f67ae9f00f6e8eb43f640c188c0582f900544a249de9b65d3478a4f33d",
     "internal/adminapi/protection_bootstrap_test.go": "b50318250327c7dcb79724a5c3cabe773f295d586b29ccae636e05700922db92",
-    "internal/serverprotection/steady_poll_test.go": "21a47c237d2bc15e2f3ac59c96f7ea18cf95805b6bc3e4848490f2b9309943ee"
+    "internal/serverprotection/steady_poll_test.go": "21a47c237d2bc15e2f3ac59c96f7ea18cf95805b6bc3e4848490f2b9309943ee",
+    "internal/panels/panelbootstrap/service.go": "37e08f3aa8ecb17195a553917efed4a0006b3fe4a61a436757d618ae17b0568d",
+    "internal/panels/panelbootstrap/native_bootstrap_test.go": "cee99e322b6cb2937b82078bd5e7d23d051a0b1d293d2fe7c931c45e24fc347e",
+    "internal/app/provider_refresh.go": "9215c7c6db67be9306b172d2dafcb6f87708fbe808a23f85547c639080b505f1",
+    "internal/app/provider_observation_attempt.go": "9862c3082759ba5b9ea3040f05ba8b607c659e4117a10ddaaeb1773a157c85b8",
+    "internal/app/provider_observation_publish.go": "c4f0c7583382304e94e0d016b9c1c39886eca195a11588f663313d5baaefc092",
+    "internal/app/provider_cadence_test.go": "7ec412161a9aa2814bd32e601bbfeffc7b411bfb9e8913277ec60a2f40844e05"
   },
   "checks": {
     "focused": "PASS",
@@ -53,5 +66,14 @@
     "vet": "PASS"
   },
   "publication": "PENDING",
-  "deployment": "PENDING"
+  "deployment": "PENDING",
+  "first_release": {
+    "source": "8ceb426c9331af624fccef344f9e18d4f46212ea",
+    "public": "61e398be9f6d87c5b3f9b7335018276098598da0",
+    "ci": "main/stable PASS",
+    "secondary": "5 readiness samples PASS",
+    "primary": "5 readiness samples PASS",
+    "guardian_canary": "PASS; fleet released; Xray predates rollout",
+    "policies_and_retained_pins": "unchanged"
+  }
 }

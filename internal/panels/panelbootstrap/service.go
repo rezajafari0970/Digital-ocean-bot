@@ -15,7 +15,6 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/reality/credentials"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/runtimecap"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 )
 
@@ -57,8 +56,27 @@ WHERE pi.id=$1 AND pi.enabled=true
 		return errors.New("panel not operational")
 	}
 	target := provisioning.Target{AccountID: acc, DropletID: did, Host: host, User: user, KeySecretRef: keyref}
-	exec := sanaei.SSHSessionExecutor{SSH: s.SSH, Target: target, PrivateKeySecretRef: keyref, PanelPasswordSecretRef: pref, AccountID: acc, Username: puser, Port: pport, BasePath: path, DialHost: "127.0.0.1", Secrets: s.Secrets}
-	disc, err := sanaei.DiscoverWithExecutor(ctx, exec, "")
+	sshExec := sanaei.SSHSessionExecutor{SSH: s.SSH, Target: target, PrivateKeySecretRef: keyref, PanelPasswordSecretRef: pref, AccountID: acc, Username: puser, Port: pport, BasePath: path, DialHost: "127.0.0.1", Secrets: s.Secrets}
+	// Use the authenticated panel API first. Reopening SSH for every inventory
+	// read and target scan makes healthy panels depend on an unrelated port.
+	// Bound discovery as a whole so unavailable native HTTP leaves time for
+	// the existing pinned SSH fallback and fenced runtime repair.
+	var exec sanaei.SessionExecutor = sshExec
+	nativeCtx, cancelNative := context.WithTimeout(ctx, 8*time.Second)
+	rt, nativeErr := (sanaei.RuntimeFactory{DB: s.DB, Secrets: s.Secrets, Timeout: 8 * time.Second}).Open(nativeCtx, p.ID)
+	var disc panels.Discovery
+	if nativeErr == nil {
+		exec = rt.Session.Exec
+		disc, nativeErr = sanaei.DiscoverWithExecutor(nativeCtx, exec, "")
+	}
+	cancelNative()
+	if nativeErr != nil {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		exec = sshExec
+		disc, err = sanaei.DiscoverWithExecutor(ctx, exec, "")
+	}
 	if err != nil {
 		claimed, claimErr := s.claimRuntimeRepair(ctx, p.ID)
 		if claimErr != nil {
@@ -88,12 +106,6 @@ WHERE pi.id=$1 AND pi.enabled=true
 	if _, err = (inventory.SQLStore{DB: s.DB}).Sync(ctx, snap); err != nil {
 		return err
 	}
-	key, err := s.Secrets.Get(ctx, acc, keyref)
-	if err != nil {
-		return err
-	}
-	defer credentials.Wipe(key)
-	run := func(ctx context.Context, cmd string) (string, error) { return s.SSH.Run(ctx, target, key, cmd) }
 	var mode string
 	var manualRaw []byte
 	if err = s.DB.QueryRowContext(ctx, "SELECT sni_selection_mode,manual_snis FROM global_config_policies WHERE policy_key='reality'").Scan(&mode, &manualRaw); err != nil {
@@ -175,11 +187,9 @@ WHERE pi.id=$1 AND pi.enabled=true
 	if err = store.SaveScanSelection(ctx, reality.ScanSelection{PanelID: p.ID, ServerNames: selected.ServerNames, TLSVersion: selected.TLSVersion, ALPN: selected.ALPN, CurveID: selected.CurveID, CertValid: selected.CertValid, CertChainValid: selected.CertChainValid, LatencyMS: selected.LatencyMS, ScannedAt: now}); err != nil {
 		return err
 	}
-	xrayPath, err := (runtimecap.XrayResolver{Run: run}).Resolve(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = (credentials.Registry{DB: s.DB, Secrets: s.Secrets, Keys: credentials.XrayGenerator{Run: run, Binary: xrayPath}}).Ensure(ctx, acc, p.ID, s.ManagedKey)
+	// The same secure local generator is used by global REALITY reconciliation.
+	// Registry.Ensure preserves existing keys and serializes their creation.
+	_, err = (credentials.Registry{DB: s.DB, Secrets: s.Secrets, Keys: credentials.LocalX25519Generator{}}).Ensure(ctx, acc, p.ID, s.ManagedKey)
 	return err
 }
 
