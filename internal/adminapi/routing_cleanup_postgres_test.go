@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/cleanup"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
@@ -14,6 +15,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -234,7 +236,19 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	running := template
 	saves, reloads := 0, 0
 	rejectProof := false
+	var holdProof atomic.Bool
+	proofEntered, proofRelease := make(chan struct{}), make(chan struct{})
+	var enterOnce, releaseOnce sync.Once
+	releaseProof := func() { releaseOnce.Do(func() { close(proofRelease) }) }
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/panel/api/xray/routeTest" && holdProof.Load() {
+			enterOnce.Do(func() { close(proofEntered) })
+			select {
+			case <-proofRelease:
+			case <-r.Context().Done():
+				return
+			}
+		}
 		mu.Lock()
 		defer mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
@@ -245,7 +259,7 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 		case "/login":
 			result(nil)
 		case "/panel/api/inbounds/list":
-			fmt.Fprint(w, `{"success":true,"obj":[{"id":1,"tag":"in-443-tcp","port":443,"protocol":"vless","sniffing":{"enabled":true,"destOverride":["http","tls","quic"]},"settings":{"clients":[{"id":"a","email":"a"},{"id":"b","email":"b"}]}}]}`)
+			fmt.Fprint(w, `{"success":true,"obj":[{"id":1,"tag":"in-443-tcp","port":443,"protocol":"vless","enable":true,"remark":"proof-output","streamSettings":{"network":"tcp","security":"reality","realitySettings":{"serverNames":["www.example.com"],"shortIds":["aabb"]}},"sniffing":{"enabled":true,"destOverride":["http","tls","quic"]},"settings":{"decryption":"none","clients":[{"id":"a","email":"a"},{"id":"b","email":"b"}]}}]}`)
 		case "/panel/api/xray/":
 			result(map[string]any{"xraySetting": template})
 		case "/panel/api/xray/update":
@@ -345,7 +359,10 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 		}
 	}))
 	defer remote.Close()
+	defer releaseProof()
 	_, _, panel := seedPanel(t, db, remote.URL)
+	sqlMust(t, db, "UPDATE deployments SET host='fixture.invalid' WHERE droplet_id=(SELECT droplet_id FROM panel_instances WHERE id=$1)", panel)
+	sqlMust(t, db, "INSERT INTO inbound_export_metadata(panel_id,remote_id,public_key) VALUES($1,1,'public')", panel)
 	proxy, _ := sanaei.UUIDv4()
 	sqlMust(t, db, "INSERT INTO global_config_policies(policy_key,enabled,ports,target_users_per_inbound,users_per_second,generate_residential,generate_direct) VALUES('reality',true,'[443]',2,1,true,true) ON CONFLICT(policy_key) DO UPDATE SET generate_residential=true,generate_direct=true")
 	sqlMust(t, db, "INSERT INTO proxies(id,name,type,host,port,status,last_success_at) VALUES($1,'residential-test','socks5','127.0.0.1',1080,'healthy',now())", proxy)
@@ -362,6 +379,47 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 		}
 		if err := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); err != nil {
 			t.Fatal(i, err)
+		}
+		if i == 0 {
+			// A lengthy proof of an unchanged plan must allow a real output
+			// observation while continuing to exclude every structural writer.
+			sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+			holdProof.Store(true)
+			proofDone := make(chan error, 1)
+			go func() { proofDone <- service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false) }()
+			select {
+			case <-proofEntered:
+			case err := <-proofDone:
+				t.Fatalf("proof never reached native checks: %v", err)
+			case <-time.After(5 * time.Second):
+				t.Fatal("proof did not start")
+			}
+			writer, err := db.Conn(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var acquired bool
+			err = writer.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,0))", "panel-config:"+panel).Scan(&acquired)
+			if err != nil || acquired {
+				t.Errorf("structural writer entered active proof: acquired=%v err=%v", acquired, err)
+			}
+			writer.ExecContext(ctx, "SELECT pg_advisory_unlock_all()")
+			writer.Close()
+			output := New(db, app.Container{})
+			output.OutputRuntimes = &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: time.Second}}
+			output.refreshPanelOutput(ctx, readyworker.Panel{ID: panel})
+			var fresh int
+			if err = db.QueryRow("SELECT count(*) FROM output_config_snapshots WHERE panel_id=$1 AND last_seen_at>now()-interval '15 seconds'", panel).Scan(&fresh); err != nil || fresh != 2 {
+				t.Errorf("unchanged native proof withheld real fresh outputs: count=%d err=%v", fresh, err)
+			}
+			holdProof.Store(false)
+			releaseProof()
+			if err = <-proofDone; err != nil {
+				t.Errorf("unchanged native proof failed: %v", err)
+			}
+			if saves != 1 || reloads != 1 {
+				t.Errorf("no-op proof mutated native config: saves=%d restarts=%d", saves, reloads)
+			}
 		}
 		var state string
 		if err := db.QueryRow("SELECT state FROM panel_routing_state WHERE panel_id=$1", panel).Scan(&state); err != nil || state != "APPLIED" {

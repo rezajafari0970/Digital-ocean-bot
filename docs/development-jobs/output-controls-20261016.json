@@ -93,7 +93,7 @@
     ]
   },
   "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence",
-  "updated_at": "2026-10-15T23:59:36.464962+00:00",
+  "updated_at": "2026-10-16T00:40:53.419936+00:00",
   "adjudication": {
     "disagreements": [],
     "freshness": "Keep15sec output and60sec routing proof; no stale fallback. Under persistent failure, output remains withheld.",
@@ -392,10 +392,53 @@
         },
         "total_tokens": 15315
       }
+    },
+    {
+      "role": "test_designer",
+      "model": "gpt-6-astra",
+      "id": "resp_09ccaa30393b6b90006ad16a971dfc87d18ebe44e345d01975",
+      "status": "completed",
+      "requested_reasoning": {
+        "mode": "pro",
+        "effort": "max"
+      },
+      "returned_reasoning": {
+        "context": "all_turns",
+        "effort": "max",
+        "mode": "pro",
+        "summary": null
+      },
+      "usage": {
+        "input_tokens": 88469,
+        "input_tokens_details": {
+          "cache_write_tokens": 13522,
+          "cached_tokens": 13522
+        },
+        "output_tokens": 59893,
+        "output_tokens_details": {
+          "reasoning_tokens": 52753
+        },
+        "total_tokens": 148362
+      },
+      "started_at": "2026-10-16T00:06:46.247909+00:00",
+      "completed_at": "2026-10-16T00:21:20.007375+00:00"
     }
   ],
   "api_tokens": 180087,
   "public_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
   "acceptance": "docs/OUTPUT_CONTROLS_ACCEPTANCE_20261016.json",
-  "remaining": "Decide output freshness semantics with user; current15sec maintained. Full count equality is NOT delivered. Any further native-worker lock-scope change needs its own invariant-driven design; do not bypass locks, fakefreshness, disableworker or change tests to obtain green."
+  "remaining": "Decide output freshness semantics with user; current15sec maintained. Full count equality is NOT delivered. Any further native-worker lock-scope change needs its own invariant-driven design; do not bypass locks, fakefreshness, disableworker or change tests to obtain green.",
+  "phase": "BLOCKED_API_CREDIT",
+  "native_lock_continuation": {
+    "report": "docs/OUTPUT_NATIVE_LOCK_DIAGNOSIS_20261016.json",
+    "product_runtime_code_changed": false,
+    "expected_failing_tests": [
+      "internal/panels/sanaei/panel_session_context_test.go",
+      "internal/panels/globalreality/policy_error_postgres_test.go",
+      "internal/adminapi/desired_verification_postgres_test.go",
+      "internal/adminapi/routing_cleanup_postgres_test.go"
+    ],
+    "api_credit_blocked": true,
+    "requests_pending": 0
+  }
 }
