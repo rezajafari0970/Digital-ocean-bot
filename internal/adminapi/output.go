@@ -148,8 +148,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	}
 	// Output is a near-real-time materialized view. Client mutations happen in the
 	// worker process, so the API process must not reuse its in-memory Sanaei snapshot.
-	runtime.Session.Invalidate()
-	raws, err := runtime.Session.Snapshot(ctx)
+	raws, err := runtime.Session.FreshSnapshot(ctx)
 	if err != nil {
 		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
 		return nil, false

@@ -308,8 +308,7 @@ func (d *panelDeps) Verify(
 		raw, ok, err = d.runtime.Session.RawInbound(ctx, remoteID)
 		if err == nil && !ok {
 			// Cached snapshot may be stale after a concurrent panel mutation.
-			d.runtime.Session.Invalidate()
-			raw, ok, err = d.runtime.Session.RawInbound(ctx, remoteID)
+			raw, ok, err = d.runtime.Session.FreshRawInbound(ctx, remoteID)
 		}
 		if err == nil && ok {
 			err = json.Unmarshal(raw, &inbound)
@@ -326,11 +325,17 @@ func (d *panelDeps) Verify(
 		return err
 	}
 
-	if err := postflight.ValidatePayload(inbound, remoteID, payload); err != nil {
-		return err
-	}
 	if d.publicKey == "" {
 		return errors.New("reality public key unavailable")
+	}
+	if err := postflight.ValidatePayload(inbound, remoteID, payload); err != nil {
+		if errors.Is(err, postflight.ErrMismatch) {
+			// A malformed/incomplete read is not evidence authorizing a repair.
+			if observationErr := validateRepairObservation(inbound, remoteID, payload); observationErr != nil {
+				return observationErr
+			}
+		}
+		return err
 	}
 	_, err = d.db.ExecContext(ctx, `INSERT INTO inbound_export_metadata(panel_id,remote_id,public_key) VALUES($1,$2,$3) ON CONFLICT(panel_id,remote_id) DO UPDATE SET public_key=excluded.public_key,updated_at=now()`, d.panelID, remoteID, d.publicKey)
 	return err
@@ -613,7 +618,9 @@ WHERE pi.id=$1
 
 	run := func(runCtx context.Context) error {
 		if dependencies.runtime != nil && dependencies.runtime.Session != nil {
-			dependencies.runtime.Session.Invalidate()
+			if err := dependencies.runtime.Session.InvalidateContext(runCtx); err != nil {
+				return err
+			}
 		}
 		records, err := dependencies.RefreshInventory(runCtx)
 		if err != nil {
@@ -652,6 +659,9 @@ WHERE pi.id=$1
 			}
 			if err = dependencies.Verify(runCtx, owned[0].RemoteID, payload); err == nil {
 				return nil
+			}
+			if !errors.Is(err, postflight.ErrMismatch) {
+				return err
 			}
 			_, err = updateflow.Run(runCtx, updateDeps{dependencies}, updateflow.Request{ManagedKey: s.ManagedKey, Port: s.Port})
 			return err

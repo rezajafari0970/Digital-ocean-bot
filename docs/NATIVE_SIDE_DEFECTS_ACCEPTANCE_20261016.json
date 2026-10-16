@@ -1,0 +1,590 @@
+{
+  "fleet_protection_observation": {
+    "rows": [
+      {
+        "state": "APPLIED",
+        "error": "",
+        "checked_at": "2026-10-16T02:56:35.739455+00:00",
+        "verified_at": "2026-10-16T02:56:35.739455+00:00",
+        "updated_at": "2026-10-16T02:56:35.739455+00:00",
+        "admission_blocked": "true",
+        "reason": "CPU queue pressure"
+      },
+      {
+        "state": "APPLIED",
+        "error": "",
+        "checked_at": "2026-10-16T02:56:49.505443+00:00",
+        "verified_at": "2026-10-16T02:56:49.505443+00:00",
+        "updated_at": "2026-10-16T02:56:49.505443+00:00",
+        "admission_blocked": "true",
+        "reason": "CPU queue pressure"
+      },
+      {
+        "state": "ERROR",
+        "error": "local protection not ready: resources within initial conservative limits",
+        "checked_at": "2026-10-16T02:56:22.359932+00:00",
+        "verified_at": "2026-10-16T02:53:03.724697+00:00",
+        "updated_at": "2026-10-16T02:56:22.359932+00:00",
+        "admission_blocked": "false",
+        "reason": "resources within initial conservative limits"
+      },
+      {
+        "state": "ERROR",
+        "error": "local protection not ready: reduced resource headroom",
+        "checked_at": "2026-10-16T02:56:24.715189+00:00",
+        "verified_at": "2026-10-16T02:53:04.403787+00:00",
+        "updated_at": "2026-10-16T02:56:24.715189+00:00",
+        "admission_blocked": "false",
+        "reason": "reduced resource headroom"
+      },
+      {
+        "state": "APPLIED",
+        "error": "",
+        "checked_at": "2026-10-16T02:56:22.839294+00:00",
+        "verified_at": "2026-10-16T02:56:22.839294+00:00",
+        "updated_at": "2026-10-16T02:56:22.839294+00:00",
+        "admission_blocked": "true",
+        "reason": "connection table pressure"
+      },
+      {
+        "state": "APPLIED",
+        "error": "",
+        "checked_at": "2026-10-16T02:56:29.646271+00:00",
+        "verified_at": "2026-10-16T02:56:29.646271+00:00",
+        "updated_at": "2026-10-16T02:56:29.646271+00:00",
+        "admission_blocked": "true",
+        "reason": "waiting for 30 seconds of stable resources"
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:21.584859+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:21.584859+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:46.605369+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:46.605369+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:57:13.024754+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:57:13.024754+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:25.913448+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:25.913448+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:28.809149+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:28.809149+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:51.451149+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:51.451149+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:56:38.339587+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:56:38.339587+00:00",
+        "admission_blocked": null,
+        "reason": null
+      },
+      {
+        "state": "UNSUPPORTED",
+        "error": "local protection not ready: no eligible public VLESS TCP ports",
+        "checked_at": "2026-10-16T02:57:15.451603+00:00",
+        "verified_at": null,
+        "updated_at": "2026-10-16T02:57:15.451603+00:00",
+        "admission_blocked": null,
+        "reason": null
+      }
+    ],
+    "pre_install_log_counts": {
+      "context deadline": 1,
+      "protection": 1
+    },
+    "protection_source_unchanged": true,
+    "at": "2026-10-16T02:58:52.077973+00:00",
+    "pre_release_protection_error_at": "2026-10-16T02:32:35Z",
+    "new_panel_worker_started_at": "2026-10-16T02:53:26Z",
+    "last_health_counts": {
+      "active": 40,
+      "degraded": 11,
+      "pending": 4
+    },
+    "interpretation": "Observed degradation flags come from server protection resource/admission/port checks while routing remains APPLIED. Protection code unchanged; protection reconciliation timeout is logged before this release. Individual historical flags cannot all be reconstructed; no zero-fleet-fault claim. Separate follow-up, no protection settings changed."
+  },
+  "at": "2026-10-16T02:59:05.807064+00:00",
+  "status": "THREE_SIDE_DEFECTS_DEPLOYED_VERIFIED",
+  "source_revision": "c7e62eecc5e8addaaac89d0a91a96af6ee93c3ac",
+  "public_revision": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+  "api_calls": 0,
+  "api_tokens": 0,
+  "api_review": "Not used, explicitly requested by user for these three fixes",
+  "primary": {
+    "at": "2026-10-16T02:54:23.998680+00:00",
+    "commit": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+    "schema": "000181_output_policy",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-16T02:54:24.03946854Z"
+    },
+    "checks": {
+      "accounts_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "retained_pins_unchanged": true
+    },
+    "retained_pins": 101,
+    "expired_pins": 0,
+    "readiness_samples": 5
+  },
+  "secondary": {
+    "at": "2026-10-16T02:52:39.076335+00:00",
+    "commit": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+    "schema": "000181_output_policy",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-16T02:52:39.116712048Z"
+    },
+    "checks": {
+      "accounts_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "retained_pins_unchanged": true
+    },
+    "retained_pins": 0,
+    "expired_pins": 0,
+    "readiness_samples": 5
+  },
+  "publisher": {
+    "status": "published",
+    "source_revision": "c7e62eecc5e8addaaac89d0a91a96af6ee93c3ac",
+    "public_revision": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+    "evidence": "/var/lib/datacenter-publisher/release-fayowgng"
+  },
+  "github_actions": [
+    {
+      "id": 38842372210,
+      "head_sha": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+      "head_branch": "stable",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38842372210"
+    },
+    {
+      "id": 38842372305,
+      "head_sha": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+      "head_branch": "main",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/38842372305"
+    }
+  ],
+  "tests": {
+    "side-focused": 0,
+    "side-race": 0,
+    "side-full": 0,
+    "side-vet": 0
+  },
+  "baseline_exit": 1,
+  "source_hashes": {
+    "internal/adminapi/output.go": "636ebf0c33b74dba554fb8656bbc51dea5e850127b4680c7e49828c2307c0b59",
+    "internal/panels/clientops/bulk.go": "779ddb6f3445a7266f5b129586f971ea870db2279522d6f82815c074182252b5",
+    "internal/panels/clientops/bulk_delete.go": "e58e44be977806f078e82b5b33c6b55cc4a18ed7d50b91fb7f52c7921464a47c",
+    "internal/panels/clientops/executor.go": "a5c01daaa413f3494574c519b3d209746d55733fc9590e2ca0c5e7c8425c32d9",
+    "internal/panels/clientops/lifecycle_snapshot.go": "c74219e0a4ff08642b94609f9f6b035834ae125071abcf6bbb9be79ca3ed6b2c",
+    "internal/panels/clientops/transport.go": "260537baa24c1c646f24897cb9963af710cb73ef29895f43b503edd886ea728b",
+    "internal/panels/desired/service.go": "624441f55ba1706f3ddf43c23779f33857da572ddadf74acfdead750cbc885e8",
+    "internal/panels/globalreality/service.go": "2ae4c0e29600568f7a2164ec53d20fa7957132601a5e0194315afd5ec42c0010",
+    "internal/panels/residentialsync/relay_provision.go": "e261dd9f3d94aa2d7e39d6d8b959d9d0f97ef9cc297e5d730814934a55c68aab",
+    "internal/panels/residentialsync/service.go": "8f141fde3e7b95c68b6b2cdb15e2986e3f98e18c690b3eca81fdf10dc0aa4c75",
+    "internal/panels/sanaei/panel_session.go": "19babdac2d335b34b9cf74274afbf14d3f79c15e98c13e1977246ad8f79d9d31",
+    "internal/panels/transportapply/service.go": "e190c1ea87725dcdf7e96071db081a8709dd006ae0f6ed9230d11da3074cc100",
+    "internal/panels/usercapacity/fastfill.go": "c0b02c51aba821e5269b58052021b00ae1780fafa93d969fdb5d78186d6abdc0",
+    "internal/panels/usercapacity/lifecycle_admission.go": "c4c1116e16522fdb0071803c46ba42301285a3e3416500b0fbdefcfefbb06bc8",
+    "internal/panels/usercapacity/ownership_rollback.go": "698320ab2ce9632115cd0d8ec4368bb0afad3a7be8bc7cfadda1de86b5208d5f",
+    "internal/panels/usercapacity/service.go": "d18a45ba7cd0dee52fbef8262ca4b673dc6eadea7702acca44fae0b432f2dbb9",
+    "internal/adminapi/desired_verification_postgres_test.go": "90b8be7a0a0e188a17fb78c20b649af4b2af1de325f40088395030edadff65b4",
+    "internal/panels/desired/verification_observation.go": "5cd2da7708788155e70d5d26875e7ff725aad8f68c6af2e73151295f029d659d",
+    "internal/panels/globalreality/policy_error_postgres_test.go": "40e59ad9c465f1010d17ab4c420b39dd930e4280bc0f8ed58da7bb6766eb221e",
+    "internal/panels/sanaei/panel_session_context_test.go": "62bdce0ae3dc8b1e644234bc98fc41176dc49522096d7dc6b0af3bc015eea81b"
+  },
+  "live": {
+    "at": "2026-10-16T02:54:39.807749+00:00",
+    "surfaces": {
+      "api:ALL": {
+        "links": 148,
+        "servers": 31,
+        "types": {
+          "xhttp": 148
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:DIRECT": {
+        "links": 30,
+        "servers": 30,
+        "types": {
+          "xhttp": 30
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:RESIDENTIAL": {
+        "links": 87,
+        "servers": 30,
+        "types": {
+          "xhttp": 87
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:ALL": {
+        "links": 148,
+        "servers": 31,
+        "types": {
+          "xhttp": 148
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:DIRECT": {
+        "links": 30,
+        "servers": 30,
+        "types": {
+          "xhttp": 30
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:RESIDENTIAL": {
+        "links": 87,
+        "servers": 30,
+        "types": {
+          "xhttp": 87
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+        "links": 18,
+        "servers": 6,
+        "types": {
+          "xhttp": 18
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+        "links": 6,
+        "servers": 6,
+        "types": {
+          "xhttp": 6
+        },
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "samples": [
+      {
+        "at": "2026-10-16T02:54:41.058511+00:00",
+        "active_servers": 13,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 13,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:54:44.222449+00:00",
+        "active_servers": 11,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 7,
+        "stable_direct_ready_servers": 11,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:54:47.381198+00:00",
+        "active_servers": 9,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 6,
+        "stable_direct_ready_servers": 9,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:54:50.554835+00:00",
+        "active_servers": 9,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 5,
+        "stable_direct_ready_servers": 9,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:54:53.737779+00:00",
+        "active_servers": 8,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 5,
+        "stable_direct_ready_servers": 8,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:54:56.932390+00:00",
+        "active_servers": 6,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 6,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:00.100501+00:00",
+        "active_servers": 4,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 4,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:03.279533+00:00",
+        "active_servers": 4,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 4,
+        "direct_servers": 30,
+        "direct_links": 30,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:06.456343+00:00",
+        "active_servers": 3,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 3,
+        "direct_servers": 31,
+        "direct_links": 31,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:09.640622+00:00",
+        "active_servers": 3,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 0,
+        "stable_direct_ready_servers": 3,
+        "direct_servers": 31,
+        "direct_links": 31,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:12.817331+00:00",
+        "active_servers": 3,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 3,
+        "direct_servers": 31,
+        "direct_links": 31,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:16.034619+00:00",
+        "active_servers": 3,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 3,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:19.481586+00:00",
+        "active_servers": 1,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 1,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:22.673477+00:00",
+        "active_servers": 0,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 0,
+        "stable_direct_ready_servers": 0,
+        "direct_servers": 36,
+        "direct_links": 36,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T02:55:25.842787+00:00",
+        "active_servers": 1,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 1,
+        "stable_direct_ready_servers": 1,
+        "direct_servers": 37,
+        "direct_links": 37,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      }
+    ],
+    "pass": true
+  },
+  "scope_limit": "The separate long advisory-lock/output-count defect remains OPEN regardless of this short observation. No change to Xray or server-native configuration.",
+  "remaining_output_checkpoint": "feat/output-controls-20261016"
+}

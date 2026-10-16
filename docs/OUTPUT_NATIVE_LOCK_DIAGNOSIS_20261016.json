@@ -1,6 +1,6 @@
 {
   "at": "2026-10-16T00:40:53.419936+00:00",
-  "status": "BLOCKED_API_CREDIT_NO_PRODUCT_FIX",
+  "status": "ROOT_LOCK_DEFECT_OPEN_THREE_SIDE_FIXES_DEPLOYED",
   "base_checkpoint": "13b84afe1b3e048f41c3943b7143c460ebe52489",
   "runtime_public": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
   "runtime_source": "097fc640d909715d99dd6665ed290b9c7d1d966e",
@@ -670,5 +670,16 @@
       "prior_strict_acceptance_still_failed": true,
       "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/resume-20261016-0046"
     }
-  ]
+  ],
+  "side_defect_followup": {
+    "at": "2026-10-16T02:59:05.807064+00:00",
+    "status": "THREE_SIDE_DEFECTS_DEPLOYED_VERIFIED",
+    "source_revision": "c7e62eecc5e8addaaac89d0a91a96af6ee93c3ac",
+    "public_revision": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+    "acceptance": "docs/NATIVE_SIDE_DEFECTS_ACCEPTANCE_20261016.json",
+    "api_calls": 0,
+    "root_lock_defect_still_open": true
+  },
+  "original_status": "BLOCKED_API_CREDIT_NO_PRODUCT_FIX",
+  "updated_at": "2026-10-16T02:59:05.807064+00:00"
 }

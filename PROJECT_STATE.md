@@ -1,3 +1,11 @@
+## Three side defects deployed without model API — 2026-10-16T02:59:05.807064+00:00
+
+Source c7e62eec/public 936896af installed on both hosts. Context cancellation/fresh-read pairing, globalpolicy SQL-error propagation and no unjustified native repair are fixed. Baseline failed/focused PASS, complete panel+admin race with isolated PostgreSQL/browser, fullgo/vet, normal publisher/exact Ubuntu24/main+stable CI PASS. All3services active and matching,5readiness samples perhost and15additional live samples PASS;8output surfaces preserve defaults. Settings, retained listener pins, accounts and environment preserved. APIcalls0/tokens0 by explicit user request. No Xray replacement. Separate long config-lock/output-count defect remains OPEN for work after API credit replenishment; do not claim fleet-count acceptance from short healthy samples. Independent fleet observation still has protection/admission warnings (pre-release reconciliation timeout documented); no zero-fleet-fault claim. AdditionalIPwork paused. See docs/NATIVE_SIDE_DEFECTS_ACCEPTANCE_20261016.json.
+
+## Three side defects verified without model API — 2026-10-16T02:47:13.625112+00:00
+
+User authorized these three fixes without OpenAI API. Context-aware session reads/fresh reads, policy SQL-error propagation and guarded structural repairs pass baseline-to-fixed, fault, race and full PostgreSQL/browser regression plus vet. No API calls/tokens. Main long-lock/output-count defect remains deferred; its failing regression is retained separately on feat/output-controls-20261016. No change to Xray, native policy, output defaults,15s freshness or60s route proof. Normal publication and both-host rollout are next. See docs/NATIVE_SIDE_DEFECTS_20261016.md and its development job.
+
 ## Native-lock diagnosis checkpoint — 2026-10-16T00:40:53.419936+00:00
 
 **Status: BLOCKED_API_CREDIT_NO_PRODUCT_FIX.** Runtime remains public90fe8c3/source097fc640 on both hosts. No Xray replacement or runtime logic change in this continuation. Export Extra/FinalMask controls still pass all8surfaces, defaultsOFF and native settings preserved. Strict newlive30sample FAIL:9samples missing ready output, oldest snapshot32sec.15secfreshness/60secrouteproof unchanged.

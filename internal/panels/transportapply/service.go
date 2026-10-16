@@ -253,8 +253,7 @@ func (s Service) RunOne(ctx context.Context) error {
 	})
 }
 func read(ctx context.Context, rt *sanaei.PanelRuntime, key string) ([]byte, int64, error) {
-	rt.Session.Invalidate()
-	raws, e := rt.Session.Snapshot(ctx)
+	raws, e := rt.Session.FreshSnapshot(ctx)
 	if e != nil {
 		return nil, 0, e
 	}

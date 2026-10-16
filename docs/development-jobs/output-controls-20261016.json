@@ -5,7 +5,7 @@
   "source_base": "d5f0668052bc3ae1d1fc08a9a860fdc7d77279ce",
   "branch": "feat/output-controls-20261016",
   "worktree": "/root/projects/dob-output-controls-20261016",
-  "status": "DEPLOYED_OUTPUT_CONTROLS_LIVE_COVERAGE_NOT_ACCEPTED",
+  "status": "LIVE_COVERAGE_NOT_ACCEPTED",
   "stage_status": {
     "diagnosis": "COMPLETE: sliding admission cursor causes >15sec stale snapshots; two empty panels completed normal target warmup",
     "output_policy": "IMPLEMENTED: separate singleton, emission-only policy, UI; defaults omit both fields",
@@ -93,7 +93,7 @@
     ]
   },
   "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence",
-  "updated_at": "2026-10-16T00:40:53.419936+00:00",
+  "updated_at": "2026-10-16T02:59:28.892924+00:00",
   "adjudication": {
     "disagreements": [],
     "freshness": "Keep15sec output and60sec routing proof; no stale fallback. Under persistent failure, output remains withheld.",
@@ -428,7 +428,7 @@
   "public_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
   "acceptance": "docs/OUTPUT_CONTROLS_ACCEPTANCE_20261016.json",
   "remaining": "Decide output freshness semantics with user; current15sec maintained. Full count equality is NOT delivered. Any further native-worker lock-scope change needs its own invariant-driven design; do not bypass locks, fakefreshness, disableworker or change tests to obtain green.",
-  "phase": "BLOCKED_API_CREDIT",
+  "phase": "AWAITING_API_CREDIT_FOR_LOCK_FIX",
   "native_lock_continuation": {
     "report": "docs/OUTPUT_NATIVE_LOCK_DIAGNOSIS_20261016.json",
     "product_runtime_code_changed": false,
@@ -440,5 +440,8 @@
     ],
     "api_credit_blocked": true,
     "requests_pending": 0
-  }
+  },
+  "integrated_side_fix_source": "c7e62eecc5e8addaaac89d0a91a96af6ee93c3ac",
+  "integrated_side_fix_checkpoint": "fba86a0fdb344c97735b29fb39aed44b51ea99fd",
+  "remaining_scope": "Long native route-proof advisory-lock contention/output count coverage only. Three side defects are fixed/deployed. Pending root reproduction retained unchanged; do not publish this intentionally red branch before the root fix and gates."
 }

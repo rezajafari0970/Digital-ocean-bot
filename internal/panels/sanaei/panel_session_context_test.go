@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -13,7 +14,7 @@ import (
 // A canceled caller must not wait behind another caller's network read or
 // report that caller's cached result as a successful observation.
 func TestPanelSessionCanceledReadersDoNotWaitForNetwork(t *testing.T) {
-	for _, method := range []string{"Snapshot", "RawInbound", "Index"} {
+	for _, method := range []string{"Snapshot", "RawInbound", "Index", "FreshSnapshot", "FreshRawInbound", "InvalidateContext"} {
 		t.Run(method, func(t *testing.T) {
 			entered, release := make(chan struct{}), make(chan struct{})
 			var once sync.Once
@@ -47,6 +48,12 @@ func TestPanelSessionCanceledReadersDoNotWaitForNetwork(t *testing.T) {
 					_, _, err = session.RawInbound(ctx, 7)
 				case "Index":
 					_, err = session.Index(ctx)
+				case "FreshSnapshot":
+					_, err = session.FreshSnapshot(ctx)
+				case "FreshRawInbound":
+					_, _, err = session.FreshRawInbound(ctx, 7)
+				case "InvalidateContext":
+					err = session.InvalidateContext(ctx)
 				}
 				result <- err
 			}()
@@ -129,4 +136,56 @@ func TestPanelSessionDeadlineExpiresWhileWaitingForAnotherRead(t *testing.T) {
 	if !returned {
 		<-result
 	}
+}
+
+func TestPanelSessionCanceledLoadDoesNotPoisonNextReader(t *testing.T) {
+	var requests atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if requests.Add(1) == 1 {
+			<-r.Context().Done()
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"success":true,"obj":[{"id":7,"remark":"r","port":443}]}`))
+	}))
+	defer srv.Close()
+	session := NewPanelSession(&APIClient{BaseURL: srv.URL, HTTP: srv.Client()})
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	if _, err := session.Snapshot(ctx); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("first load: %v", err)
+	}
+	raw, ok, err := session.RawInbound(context.Background(), 7)
+	if err != nil || !ok || len(raw) == 0 || requests.Load() != 2 {
+		t.Fatalf("live reader poisoned: found=%v requests=%d err=%v", ok, requests.Load(), err)
+	}
+}
+
+func TestPanelSessionFreshReadAndIndexStayPaired(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"success":true,"obj":[{"id":7,"remark":"r","port":443}]}`))
+	}))
+	defer srv.Close()
+	session := NewPanelSession(&APIClient{BaseURL: srv.URL, HTTP: srv.Client()})
+	var workers sync.WaitGroup
+	for worker := 0; worker < 4; worker++ {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for i := 0; i < 25; i++ {
+				session.Invalidate()
+				if _, ok, err := session.RawInbound(context.Background(), 7); err != nil || !ok {
+					t.Errorf("raw/index detached from loaded snapshot: %v %v", ok, err)
+				}
+				if index, err := session.Index(context.Background()); err != nil || index == nil || len(index.ByRemoteID[7]) == 0 {
+					t.Errorf("index detached: %v", err)
+				}
+				if _, ok, err := session.FreshRawInbound(context.Background(), 7); err != nil || !ok {
+					t.Errorf("fresh raw: %v %v", ok, err)
+				}
+			}
+		}()
+	}
+	workers.Wait()
 }

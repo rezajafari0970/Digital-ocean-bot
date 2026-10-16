@@ -199,8 +199,7 @@ func (s Service) reconcileRuntimeLocked(ctx context.Context, p readyworker.Panel
 	if !clientMutationLifecycleAllowed(lifecycle) {
 		return nil
 	}
-	runtime.Session.Invalidate()
-	raws, e := runtime.Session.Snapshot(ctx)
+	raws, e := runtime.Session.FreshSnapshot(ctx)
 	if e != nil {
 		return e
 	}

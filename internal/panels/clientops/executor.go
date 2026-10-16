@@ -132,8 +132,7 @@ func decideObserved(kind Kind, exists bool, current, wanted sanaei.Client) obser
 }
 
 func (e Executor) desiredSatisfied(ctx context.Context, rt *sanaei.PanelRuntime, job Job) (bool, error) {
-	rt.Session.Invalidate()
-	raw, found, err := rt.Session.RawInbound(ctx, job.InboundID)
+	raw, found, err := rt.Session.FreshRawInbound(ctx, job.InboundID)
 	if err != nil {
 		return false, err
 	}
@@ -250,8 +249,7 @@ func (e Executor) executeRuntime(ctx context.Context, rt *sanaei.PanelRuntime, j
 		}
 		err = sanaei.AddClientCompatibleSession(runCtx, rt.Session.Exec, int(job.InboundID), client)
 	case KindDelete:
-		rt.Session.Invalidate()
-		raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+		raw, found, readErr := rt.Session.FreshRawInbound(runCtx, job.InboundID)
 		if readErr != nil {
 			return readErr
 		}
@@ -277,8 +275,7 @@ func (e Executor) executeRuntime(ctx context.Context, rt *sanaei.PanelRuntime, j
 		if patch.Email != nil {
 			return ErrUnsupportedKind
 		}
-		rt.Session.Invalidate()
-		raw, found, readErr := rt.Session.RawInbound(runCtx, job.InboundID)
+		raw, found, readErr := rt.Session.FreshRawInbound(runCtx, job.InboundID)
 		if readErr != nil {
 			return readErr
 		}
@@ -412,8 +409,7 @@ func retryResult(execErr, journalErr error) error {
 }
 
 func updateSatisfiedEverywhere(ctx context.Context, rt *sanaei.PanelRuntime, clientID string, patch ClientPatch) (bool, error) {
-	rt.Session.Invalidate()
-	raws, err := rt.Session.Snapshot(ctx)
+	raws, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return false, err
 	}

@@ -36,7 +36,7 @@ func (desiredFaultSecrets) Put(context.Context, string, string, string, []byte) 
 }
 
 func TestDesiredVerificationFailureDoesNotInitiateNativeMutation(t *testing.T) {
-	for _, fault := range []string{"metadata_sql", "missing_public_key", "matching", "structural_mismatch"} {
+	for _, fault := range []string{"metadata_sql", "missing_public_key", "missing_key_and_mismatch", "malformed_reality", "incomplete_reality", "malformed_clients", "matching", "structural_mismatch"} {
 		t.Run(fault, func(t *testing.T) {
 			db := adminTestDB(t)
 			const managed = "dob:global-reality:00443"
@@ -50,8 +50,17 @@ func TestDesiredVerificationFailureDoesNotInitiateNativeMutation(t *testing.T) {
 				t.Fatal(err)
 			}
 			inbound["id"] = 1
-			if fault == "structural_mismatch" {
+			if fault == "structural_mismatch" || fault == "missing_key_and_mismatch" {
 				inbound["streamSettings"].(map[string]any)["realitySettings"].(map[string]any)["dest"] = "changed.example:443"
+			}
+			if fault == "malformed_reality" {
+				inbound["streamSettings"].(map[string]any)["realitySettings"].(map[string]any)["dest"] = 123
+			}
+			if fault == "incomplete_reality" {
+				delete(inbound["streamSettings"].(map[string]any)["realitySettings"].(map[string]any), "serverNames")
+			}
+			if fault == "malformed_clients" {
+				inbound["settings"].(map[string]any)["clients"] = []any{123}
 			}
 			var mu sync.Mutex
 			mutations := 0
@@ -89,7 +98,7 @@ func TestDesiredVerificationFailureDoesNotInitiateNativeMutation(t *testing.T) {
 			sqlMust(t, db, `UPDATE deployments SET host='127.0.0.1',profile_snapshot='{"ssh_user":"root","ssh_key_secret_ref":"ssh"}' WHERE droplet_id=$1`, droplet)
 			sqlMust(t, db, `INSERT INTO reality_target_selections(panel_id,target,server_name,port,score,selected_at,server_names) VALUES($1,'www.example.com','www.example.com',443,1,now(),'["www.example.com"]')`, panel)
 			pub := "public"
-			if fault == "missing_public_key" {
+			if fault == "missing_public_key" || fault == "missing_key_and_mismatch" {
 				pub = ""
 			}
 			sqlMust(t, db, `INSERT INTO reality_credentials(panel_id,managed_key,uuid_secret_ref,private_key_secret_ref,public_key,short_id) VALUES($1,$2,'uuid','private',$3,'aabb')`, panel, managed, pub)
@@ -111,7 +120,7 @@ func TestDesiredVerificationFailureDoesNotInitiateNativeMutation(t *testing.T) {
 			got := mutations
 			mu.Unlock()
 			switch fault {
-			case "metadata_sql", "missing_public_key":
+			case "metadata_sql", "missing_public_key", "missing_key_and_mismatch", "malformed_reality", "incomplete_reality", "malformed_clients":
 				if err == nil {
 					t.Error("verification failure hidden")
 				}
