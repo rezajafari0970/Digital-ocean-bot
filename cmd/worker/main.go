@@ -31,7 +31,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -139,7 +138,7 @@ func main() {
 func buildModules(application *app.Application, role worker.Role, roleLease *worker.RoleLease) worker.Modules {
 	var modules worker.Modules
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
-	controlWork, controlBulkWork, providerWork := newControlWorkBudgets()
+	controlWork, controlBulkWork, providerWork, identityWork := newControlWorkBudgets()
 	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets()
 	proofServing, proofRetired, proofConsumers := configuredProofWorkBudgets(role)
 	proofMetrics := &proofLaneMetrics{}
@@ -174,7 +173,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					coverage = observed
 				}
 			}
-			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "provider_work": providerWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "proof_serving": proofServing.Snapshot(), "proof_retired": proofRetired.Snapshot(), "proof_attempts": proofMetrics.snapshot(), "proof_coverage": coverage, "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "provider_work": providerWork.Snapshot(), "identity_work": identityWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "proof_serving": proofServing.Snapshot(), "proof_retired": proofRetired.Snapshot(), "proof_attempts": proofMetrics.snapshot(), "proof_coverage": coverage, "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -302,51 +301,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	// On failure retry the previous session every 10s for two minutes, then
 	// rotate within the preferred country until five minutes, then allow fallback.
 	modules.Add(worker.RoleControl, "network-identity", func(ctx context.Context) {
-		t := time.NewTicker(10 * time.Second)
-		defer t.Stop()
-		run := func() {
-			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
-			if watchErr != nil {
-				return
-			}
-			defer finish()
-
-			ids, err := application.Container.AccountNetworkMaintenanceIDs(ctx)
-			if err != nil {
-				return
-			}
-			// Keep advisory-lease holders below the worker connection budget.
-			sem := make(chan struct{}, 4)
-			var wg sync.WaitGroup
-			for _, id := range ids {
-				id := id
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					select {
-					case sem <- struct{}{}:
-						defer func() { <-sem }()
-					case <-ctx.Done():
-						return
-					}
-					cctx, cancel := context.WithTimeout(ctx, 45*time.Second)
-					defer cancel()
-					_ = controlBulkWork.Do(cctx, func(ctx context.Context) error { return application.Container.MaintainProxyControlPlane(ctx, id) })
-				}()
-			}
-			wg.Wait()
-		}
-		run()
-		for {
-			supervision.Pulse(ctx)
-			supervision.Idle(ctx)
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				run()
-			}
-		}
+		runNetworkIdentities(ctx, identityWork.Do,
+			application.Container.AccountNetworkMaintenanceIDs,
+			application.Container.MaintainProxyControlPlane, identityScheduleDefaults)
 	})
 
 	// One joined rolling coordinator; no permanent batch-wide admission.

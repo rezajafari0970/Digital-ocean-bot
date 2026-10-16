@@ -1,0 +1,4 @@
+UPDATE bulk_lifecycle_control SET max_active_scopes=256 WHERE max_active_scopes=0;
+ALTER TABLE bulk_lifecycle_control DROP CONSTRAINT bulk_lifecycle_control_max_active_scopes_check;
+ALTER TABLE bulk_lifecycle_control ADD CONSTRAINT bulk_lifecycle_control_max_active_scopes_check CHECK(max_active_scopes BETWEEN 1 AND 256);
+ALTER TABLE bulk_lifecycle_control ALTER COLUMN max_active_scopes SET DEFAULT 64;

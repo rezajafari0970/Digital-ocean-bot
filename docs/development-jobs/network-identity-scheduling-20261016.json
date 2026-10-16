@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "REPRODUCED_PLAN_REVIEW_BLOCKED_API_CREDIT",
+  "status": "VERIFIED_PUBLICATION_PENDING",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -191,13 +191,52 @@
     "Publication and both-host rollout",
     "Repeated live identity age below validity and provider-state recovery acceptance"
   ],
-  "blocker": {
-    "policy": "docs/PROJECT_AI_OPERATING_SYSTEM.md Multi-Model Parallel Council and critical risk profile",
-    "last_api_error": "credit_balance_exhausted",
-    "new_api_calls": 0,
-    "explanation": "Existing full council reviewed the prior output/proof correction, not this newly discovered identity scheduling change. No independent review is invented or reused as approval for new code."
-  },
-  "product_changes": false,
+  "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
-  "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e"
+  "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
+  "updated_at": "2026-10-16T08:37:17.331008+00:00",
+  "api_usage_current_task": {
+    "requests": 0,
+    "tokens": 0,
+    "cost_usd": 0
+  },
+  "user_exception": {
+    "instruction": "بدون open api ادامه بدیم باید همه چیز را دقیق حل کنیم",
+    "scope": "Current network identity, fleet protection and output coverage repairs; external model council waived by explicit user instruction; deterministic safety, isolation, concurrency and rollout gates retained."
+  },
+  "candidate_hashes": {
+    "cmd/worker/identity_pool_test.go": "f59f6a8103b2614dc87066692c026b0f995f605192b32ec3389c66f991c34270",
+    "cmd/worker/network_identity_lane.go": "cbd8ae900efa0465ceebe6acdfa0f028b648838b5388173a98e299f6f2a40f46",
+    "cmd/worker/network_identity_lane_test.go": "4cfbb787f2f5637ef86ff0eac210ac73918bb15d3e39b6ad58e79db1f99a29f4",
+    "internal/panels/usercapacity/fleet_coverage_test.go": "4f7fdf0544f04065fab0f8ce4374a26a845eafa98f38ef99a934ac19f2186d2a",
+    "internal/panels/usercapacity/fleet_migration_test.go": "bd28c4ffb858ec767eddac9b4e687efa7c4115a4fd027dbb753e73cb882c1e92",
+    "migrations/000182_fleet_client_coverage.down.sql": "cf8d74e83c5e6dbf1d32ca9aca8b771bceda269185f3665049483266eed07aa2",
+    "migrations/000182_fleet_client_coverage.up.sql": "e183e7c851ac8ceeb49e6dc1261b54666cc954e7860a14602ccc1bd4c403c1e9",
+    "cmd/worker/control_budget.go": "0c338ad192406980aaac2451ad844f388f4f5bb44bf774df5a216b5eb48f2b66",
+    "cmd/worker/control_budget_test.go": "7602281f9ce6dcdee789ce52a18a082f5cc4861fbdba9cf02dde11fbd89ab5eb",
+    "cmd/worker/main.go": "e1b59a55aa9e3cf878ad1f3fc50c3ab8a3ef72c5e0f460e1acc8548b9338e8f0",
+    "internal/adminapi/capacity_resume.go": "ad905697a3d528f0871ac7b2eb6d669ae78e37c2f41d1f02dd57d57cef3415bf",
+    "internal/adminapi/config_capacity.go": "39afe44b0fdebf21307ea1b3584ebe6300dc0975ce6734d2440070294a67cc68",
+    "internal/app/account_network_maintenance.go": "50966da704b805fd472200cd5481070d7b34e75371e5b18510ecafb50efd05ec",
+    "internal/panels/usercapacity/lifecycle_admission.go": "6345f7ef704774bd78f1dd44df94be46b65b092c106c8c9e8598490756ecb1c6",
+    "internal/panels/usercapacity/lifecycle_admission_test.go": "6816faf634e37452d70797104363a4927f5e161ff99d7a1f1d34a921098c1223",
+    "web/static/app.js": "a5623c9e824a315b485b71ae286c81c5cfb6f50b7b14d13dfda9ddd1e2a9f17b"
+  },
+  "rollback": {
+    "public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
+    "schema": "000182 adds scope_limit0; old code treats0as no new enrollment; rollback existing clients remain. Set scope cap to256 transactionally before old code if enrollment continuity needed; never delete existing users."
+  },
+  "design": {
+    "identity": "bulk1/provider2/identity2 shared parent5; operation45s starts after admission; rolling coordinator2; retry10s,oldest health first; pool24unchanged",
+    "coverage": "0=all eligible inbounds; former authorized global default64 upgraded; custom limits and paused/scoped gates retained; execution remains1; finite scope budget/expiry preserved",
+    "protected_invariants": "proxy-required isolation,country/collision/rotation,180sidentity/360sbasefreshness,per-account keeper lock,clientownership,quarantine,kill-switch,routeproof/native locks unchanged"
+  },
+  "checks": {
+    "identity-focused-v2": "PASS",
+    "fleet-coverage-race": "PASS",
+    "identity-pool-race": "PASS",
+    "fleet-migration": "PASS",
+    "fleet-full": "PASS",
+    "fleet-vet": "PASS"
+  }
 }

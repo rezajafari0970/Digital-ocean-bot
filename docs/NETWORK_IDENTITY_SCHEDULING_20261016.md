@@ -1,6 +1,6 @@
 # Network identity admission starvation — 2026-10-16
 
-Status: reproduced; new plan review blocked by exhausted model API credit. No production source change or deployment for this follow-up.
+Status: reproduced; implementation authorized without external model API by explicit user instruction on 2026-10-16. No independent council review is claimed. Deterministic regression/race/fault and staged deployment gates remain mandatory.
 
 ## Evidence
 
@@ -17,3 +17,7 @@ Current network-identity work shares controlBulkWork with lifecycle, deletion an
 5. Require baseline-to-fixed, cancellation/fairness, real PostgreSQL pool/ownership, full regression and independent critical council gates; then normal publisher, both-host canary activation and repeated live age/provider acceptance.
 
 The last external model request failed credit_balance_exhausted. No new calls were made in this continuation. The previous council cannot approve new code it has never seen. Project rules require architect/reviewer/adversary/test-design review for this critical change. Resume after API availability is restored, or an explicit user exception authorizes work without that council; do not silently reinterpret the prior three-side-defect exception as applying here.
+
+## Current user exception
+
+2026-10-16T08:19:26.117190+00:00: User explicitly requested proceeding without OpenAI API for the current remaining fleet/proxy/output problems. API use for this task: zero. The earlier API-credit blocker is superseded for this scope.

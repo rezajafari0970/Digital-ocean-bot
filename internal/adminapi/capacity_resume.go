@@ -76,7 +76,7 @@ func resumeCapacityTx(ctx context.Context, tx *sql.Tx) error {
  AND NOT EXISTS(SELECT 1 FROM client_mutation_jobs j WHERE j.panel_id=sc.panel_id AND j.inbound_id=sc.inbound_id AND j.state='FAILED')
  AND NOT EXISTS(SELECT 1 FROM client_mutation_panel_health ph WHERE ph.panel_id=sc.panel_id AND (ph.state='QUARANTINED' OR ph.retry_after>now()))
  ORDER BY sc.panel_id,sc.inbound_id
- LIMIT GREATEST(0,(SELECT max_active_scopes FROM bulk_lifecycle_control WHERE singleton)-(SELECT count(*) FROM bulk_lifecycle_scopes WHERE enabled AND expires_at>now()))
+ LIMIT (SELECT CASE WHEN max_active_scopes=0 THEN NULL ELSE GREATEST(0,max_active_scopes-(SELECT count(*) FROM bulk_lifecycle_scopes WHERE enabled AND expires_at>now())) END FROM bulk_lifecycle_control WHERE singleton)
  )`)
 	if err != nil {
 		return err

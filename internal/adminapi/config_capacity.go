@@ -85,11 +85,30 @@ func (s *Server) configCapacity(w http.ResponseWriter, r *http.Request) {
 func (s *Server) capacityAutomationStatus(r *http.Request) (map[string]any, error) {
 	var enabled, kill, lifecycle, autoEnroll, policy bool
 	var code, panel, job string
+	var scopeLimit int
 	var failureAt any
 	err := s.DB.QueryRowContext(r.Context(), `SELECT g.enabled,g.kill_switch,c.enabled,c.auto_enroll,
  EXISTS(SELECT 1 FROM global_config_policies WHERE policy_key='reality' AND enabled),
- g.last_failure_code,g.last_failure_at,g.last_failure_panel_id,g.last_failure_job_id
- FROM client_mutation_execution_gate g CROSS JOIN bulk_lifecycle_control c WHERE g.singleton AND c.singleton`).Scan(&enabled, &kill, &lifecycle, &autoEnroll, &policy, &code, &failureAt, &panel, &job)
+ g.last_failure_code,g.last_failure_at,g.last_failure_panel_id,g.last_failure_job_id,c.max_active_scopes
+ FROM client_mutation_execution_gate g CROSS JOIN bulk_lifecycle_control c WHERE g.singleton AND c.singleton`).Scan(&enabled, &kill, &lifecycle, &autoEnroll, &policy, &code, &failureAt, &panel, &job, &scopeLimit)
+	if err != nil {
+		return nil, err
+	}
+	var eligible, enrolled, missing, paused int
+	err = s.DB.QueryRowContext(r.Context(), `SELECT count(*),
+ count(*) FILTER(WHERE sc.enabled AND sc.remaining_operations>0 AND sc.expires_at>now()),
+ count(*) FILTER(WHERE sc.panel_id IS NULL),
+ count(*) FILTER(WHERE sc.panel_id IS NOT NULL AND NOT(sc.enabled AND sc.remaining_operations>0 AND sc.expires_at>now()))
+ FROM panel_instances p JOIN droplets d ON d.id=p.droplet_id JOIN accounts a ON a.id=p.account_id
+ JOIN panel_inbound_inventory i ON i.panel_id=p.id
+ CROSS JOIN global_config_policies pol CROSS JOIN client_mutation_execution_gate g
+ LEFT JOIN bulk_lifecycle_scopes sc ON sc.panel_id=p.id AND sc.inbound_id=i.remote_id
+ WHERE p.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
+ AND d.state IN('READY','EXPIRING') AND(d.expires_at IS NULL OR d.expires_at>now()+interval '60 seconds')
+ AND EXISTS(SELECT 1 FROM deployments dep WHERE dep.droplet_id=d.id AND dep.state='PANEL_COMPLETE')
+ AND i.present AND i.enabled AND i.protocol='vless' AND i.security='reality'
+ AND pol.policy_key='reality' AND pol.enabled AND pol.ports @> to_jsonb(ARRAY[i.port])
+ AND(g.panel_id IS NULL OR g.panel_id=p.id) AND(g.inbound_id IS NULL OR g.inbound_id=i.remote_id)`).Scan(&eligible, &enrolled, &missing, &paused)
 	if err != nil {
 		return nil, err
 	}
@@ -122,5 +141,6 @@ func (s *Server) capacityAutomationStatus(r *http.Request) (map[string]any, erro
 	return map[string]any{"running": enabled && !kill && lifecycle && autoEnroll && policy,
 		"gate_enabled": enabled && !kill, "policy_enabled": policy, "lifecycle_enabled": lifecycle && autoEnroll,
 		"last_failure_code": code, "last_failure_at": failureAt, "last_failure_panel_id": panel, "last_failure_job_id": job,
+		"scope_limit": scopeLimit, "eligible_inbounds": eligible, "enrolled_inbounds": enrolled, "awaiting_enrollment": missing, "paused_scopes": paused,
 		"cooldown_panels": cooldown, "quarantined_panels": quarantined, "panels": issues}, nil
 }

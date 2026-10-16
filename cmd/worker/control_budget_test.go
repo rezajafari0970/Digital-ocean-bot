@@ -7,7 +7,7 @@ import (
 )
 
 func TestControlBudgetReservesProviderProgress(t *testing.T) {
-	parent, bulk, provider := newControlWorkBudgets()
+	parent, bulk, provider, _ := newControlWorkBudgets()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	hold := make(chan struct{})
