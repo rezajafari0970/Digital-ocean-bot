@@ -14,6 +14,15 @@ func (r SQLRegistry) Sync(ctx context.Context, accountID string, items []Resourc
 		return err
 	}
 	defer tx.Rollback()
+	if err = r.SyncTx(ctx, tx, accountID, items); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// SyncTx joins the caller's fenced observation transaction.
+func (r SQLRegistry) SyncTx(ctx context.Context, tx *sql.Tx, accountID string, items []Resource) error {
+	var err error
 	for _, item := range items {
 		if item.AccountID != accountID {
 			return ErrTenantMismatch
@@ -24,7 +33,7 @@ func (r SQLRegistry) Sync(ctx context.Context, accountID string, items []Resourc
 			return err
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (r SQLRegistry) Find(ctx context.Context, accountID string) ([]Resource, error) {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -14,6 +15,14 @@ func (c Container) SyncUpCloudResources(ctx context.Context, accountID string, i
 		return e
 	}
 	defer tx.Rollback()
+	if e = syncUpCloudResourcesTx(ctx, tx, accountID, inv); e != nil {
+		return e
+	}
+	return tx.Commit()
+}
+func syncUpCloudResourcesTx(ctx context.Context, tx *sql.Tx, accountID string, inv providers.Inventory) error {
+	var e error
+
 	serverIDs := []string{}
 	storageIDs := []string{}
 	put := func(id, kind, state string, managed bool, meta map[string]any) error {
@@ -50,5 +59,5 @@ func (c Container) SyncUpCloudResources(ctx context.Context, accountID string, i
 			return e
 		}
 	}
-	return tx.Commit()
+	return nil
 }

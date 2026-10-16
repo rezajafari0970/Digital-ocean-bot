@@ -184,3 +184,32 @@ func TestProtectionRollingCoversBeyondPageAndRenews(t *testing.T) {
 		t.Fatal("rolling lane bound broken", ssh.active, ssh.peak)
 	}
 }
+
+func TestProtectionDiscoveryDeadlineBeginsAfterAdmission(t *testing.T) {
+	db := pollingDB(t)
+	pollingSeed(t, db, 1, true)
+	c, _ := newPollController(t, db)
+	entered := make(chan struct{})
+	var calls atomic.Int32
+	c.Admit = func(ctx context.Context, fn func(context.Context) error) error {
+		if calls.Add(1) == 1 {
+			close(entered)
+			// Simulate a shared permit becoming available after the query's 5s budget.
+			select {
+			case <-time.After(5500 * time.Millisecond):
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+		return fn(ctx)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() { defer close(done); c.Run(ctx) }()
+	defer func() { cancel(); <-done }()
+	<-entered
+	waitPoll(t, 7*time.Second, func() bool {
+		var n int
+		return db.QueryRow("SELECT count(*) FROM server_protection_nodes WHERE state='APPLIED'").Scan(&n) == nil && n == 1
+	})
+}

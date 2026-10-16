@@ -14,6 +14,7 @@ dob_acquire_deploy_lock
 if [ -f "$ETC/deployment.pending" ]; then
  echo 'An interrupted deployment needs recovery: sudo datacenter-bot recover' >&2; exit 1
 fi
+python3 "$SRC/deploy/disk-preflight.py" build
 echo '[3/7] Installing system packages and verified Go toolchain'
 export DEBIAN_FRONTEND=noninteractive
 apt-get -o DPkg::Lock::Timeout=180 update
@@ -32,6 +33,7 @@ install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$DATA" "$DATA/template
 install -d -o digitaloceanbot -g digitaloceanbot -m 0700 "$DATA/browser-sessions"
 install -d -o root -g digitaloceanbot -m 0750 "$ETC"
 python3 "$SRC/deploy/install-state.py" prepare
+python3 "$SRC/deploy/disk-preflight.py" publish --etc "$ETC"
 echo '[5/7] Publishing, applying migrations and preserving users'
 dob_backup_runtime
 DOB_PENDING="$ETC/deployment.pending"

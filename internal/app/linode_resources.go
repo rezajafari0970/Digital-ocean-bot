@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
@@ -12,6 +13,19 @@ import (
 // SyncLinodeResources accepts only a successful complete inventory. Management
 // requires both local ownership and this account's tags; foreign resources stay read-only.
 func (c Container) SyncLinodeResources(ctx context.Context, accountID string, inv providers.Inventory) error {
+	tx, e := c.DB.BeginTx(ctx, nil)
+	if e != nil {
+		return e
+	}
+	defer tx.Rollback()
+	if e = syncLinodeResourcesTx(ctx, tx, accountID, inv); e != nil {
+		return e
+	}
+	return tx.Commit()
+}
+func syncLinodeResourcesTx(ctx context.Context, tx *sql.Tx, accountID string, inv providers.Inventory) error {
+	var e error
+
 	if inv.Servers == nil || inv.ObservedAt.IsZero() || inv.ObservedAt.After(time.Now().Add(time.Minute)) || time.Since(inv.ObservedAt) > 2*time.Minute {
 		return fmt.Errorf("Linode inventory is missing or stale")
 	}
@@ -22,11 +36,7 @@ func (c Container) SyncLinodeResources(ctx context.Context, accountID string, in
 		}
 		seen[s.ID] = true
 	}
-	tx, e := c.DB.BeginTx(ctx, nil)
-	if e != nil {
-		return e
-	}
-	defer tx.Rollback()
+
 	ids := []string{}
 	for _, s := range inv.Servers {
 		var local bool
@@ -52,5 +62,5 @@ func (c Container) SyncLinodeResources(ctx context.Context, accountID string, in
 	if _, e = tx.ExecContext(ctx, "UPDATE resources SET state='deleted',managed=false,updated_at=now() WHERE account_id=$1 AND provider='linode' AND type='server' AND state<>'deleted' AND NOT(provider_resource_id=ANY($2))", accountID, pq.Array(ids)); e != nil {
 		return e
 	}
-	return tx.Commit()
+	return nil
 }

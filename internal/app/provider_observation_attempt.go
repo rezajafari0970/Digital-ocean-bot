@@ -20,12 +20,18 @@ type ProviderAttempt struct {
 
 func (c Container) BeginProviderAttempt(ctx context.Context, id string, scheduled bool) (ProviderAttempt, error) {
 	a := ProviderAttempt{AccountID: id}
-	err := c.DB.QueryRowContext(ctx, `SELECT a.secret_ref,s.updated_at,clock_timestamp() FROM accounts a LEFT JOIN secrets s ON s.account_id=a.id AND s.id=a.secret_ref WHERE a.id=$1`, id).Scan(&a.SecretRef, &a.CredentialAt, &a.Started)
-	if err != nil {
-		return a, err
-	}
+	var err error
 	if scheduled {
-		_, err = c.DB.ExecContext(ctx, `UPDATE accounts SET provider_refresh_attempt_at=$2 WHERE id=$1`, id, a.Started)
+		// The attempt is authorized atomically with its timestamp. Publication
+		// fencing alone must not start reads for disabled or retiring accounts.
+		err = c.DB.QueryRowContext(ctx, `WITH started AS (
+   UPDATE accounts SET provider_refresh_attempt_at=clock_timestamp()
+   WHERE id=$1 AND enabled AND deleted_at IS NULL AND deletion_requested_at IS NULL
+   RETURNING id,secret_ref,provider_refresh_attempt_at
+  ) SELECT a.secret_ref,s.updated_at,a.provider_refresh_attempt_at
+  FROM started a LEFT JOIN secrets s ON s.account_id=a.id AND s.id=a.secret_ref`, id).Scan(&a.SecretRef, &a.CredentialAt, &a.Started)
+	} else {
+		err = c.DB.QueryRowContext(ctx, `SELECT a.secret_ref,s.updated_at,clock_timestamp() FROM accounts a LEFT JOIN secrets s ON s.account_id=a.id AND s.id=a.secret_ref WHERE a.id=$1`, id).Scan(&a.SecretRef, &a.CredentialAt, &a.Started)
 	}
 	return a, err
 }
