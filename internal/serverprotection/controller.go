@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
@@ -359,6 +360,21 @@ func (c Controller) apply(ctx context.Context, t nodeTarget, key []byte) (Status
 	default:
 		return st, fmt.Errorf("unsupported architecture")
 	}
+	// Turning protection off must not wait for a binary transfer on a pressured
+	// host. The compatible owned installation can apply the revision fence,
+	// stop its service and remove its rules using the existing cleanup path.
+	// Fresh receipt validation remains authoritative; enabled nodes still
+	// require the desired artifact and executing-image proof.
+	if compatibleDisabledCleanup(fields, t.Policy) {
+		out, err := c.remote(ctx, t, key, installCommand(t.Policy, "", ""))
+		if err != nil {
+			return st, fmt.Errorf("guardian cleanup: %w: %.300s", err, strings.TrimSpace(out))
+		}
+		if err = json.Unmarshal([]byte(strings.TrimSpace(out)), &st); err != nil {
+			return st, fmt.Errorf("invalid guardian cleanup receipt")
+		}
+		return st, st.ValidateReceipt(t.Policy)
+	}
 	dir := c.ArtifactDir
 	if dir == "" {
 		dir = "/opt/digital-ocean-bot/bin"
@@ -433,6 +449,22 @@ func (c Controller) apply(ctx context.Context, t nodeTarget, key []byte) (Status
 		return verified, nil
 	}
 	return st, nil
+}
+
+// Inventory only reports the unit hash/status for an owned installation.
+// installCommand rechecks ownership and unsafe paths before any mutation.
+func compatibleDisabledCleanup(fields []string, p Policy) bool {
+	if p.Enabled || len(fields) != 7 || len(fields[1]) != sha256.Size*2 {
+		return false
+	}
+	if _, err := hex.DecodeString(fields[1]); err != nil {
+		return false
+	}
+	if fields[3] != fmt.Sprintf("%x", sha256.Sum256([]byte(Unit))) {
+		return false
+	}
+	var st Status
+	return json.Unmarshal([]byte(fields[6]), &st) == nil && st.Version == Version
 }
 
 const guardianInventoryCommand = `set -eu

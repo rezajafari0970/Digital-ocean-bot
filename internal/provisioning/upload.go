@@ -84,10 +84,11 @@ func (s SSHClient) Upload(ctx context.Context, target Target, privateKey []byte,
 	if err != nil {
 		return err
 	}
-	stderr, err := session.StderrPipe()
-	if err != nil {
-		return err
-	}
+	// SSH stderr shares channel flow control with stdout. Drain it while the
+	// payload is being written; waiting until session.Wait can deadlock SCP.
+	// Session.Wait joins the copy before the diagnostic is inspected.
+	var diagnostic scpDiagnostic
+	session.Stderr = &diagnostic
 	if err = session.Start("scp -qt " + shellArg(remotePath)); err != nil {
 		return scpStageError(ctx, "scp-start", err, false)
 	}
@@ -128,13 +129,24 @@ func (s SSHClient) Upload(ctx context.Context, target Target, privateKey []byte,
 		return scpStageError(ctx, "scp-close", err, started)
 	}
 	if err = session.Wait(); err != nil {
-		b, _ := io.ReadAll(io.LimitReader(stderr, 1024))
 		if ctx.Err() != nil {
 			return scpStageError(ctx, "scp-wait", err, started)
 		}
-		return fmt.Errorf("scp-wait: %w; diagnostic=%s", err, strings.TrimSpace(string(b)))
+		return fmt.Errorf("scp-wait: %w; diagnostic=%s", err, strings.TrimSpace(diagnostic.String()))
 	}
 	return nil
 }
 
 func shellArg(s string) string { return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'" }
+
+// Retain a bounded prefix while continuing to consume all remote diagnostics.
+type scpDiagnostic struct {
+	data [1024]byte
+	n    int
+}
+
+func (d *scpDiagnostic) Write(p []byte) (int, error) {
+	d.n += copy(d.data[d.n:], p)
+	return len(p), nil
+}
+func (d *scpDiagnostic) String() string { return string(d.data[:d.n]) }

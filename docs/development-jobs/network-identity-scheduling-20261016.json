@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "HOST_PRESSURE_CANARY_VERIFIED_RELEASE_PENDING",
+  "status": "TRANSFER_FIX_TESTED_PUBLICATION_PENDING",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -193,14 +193,14 @@
   "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
   "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
-  "updated_at": "2026-10-16T10:59:04.131209+00:00",
+  "updated_at": "2026-10-16T11:28:04.709647+00:00",
   "api_usage_current_task": {
     "requests": 0,
     "tokens": 0,
     "cost_usd": 0
   },
   "user_exception": {
-    "instruction": "بدون open api ادامه بدیم باید همه چیز را دقیق حل کنیم",
+    "instruction": "\u0628\u062f\u0648\u0646 open api \u0627\u062f\u0627\u0645\u0647 \u0628\u062f\u06cc\u0645 \u0628\u0627\u06cc\u062f \u0647\u0645\u0647 \u0686\u06cc\u0632 \u0631\u0627 \u062f\u0642\u06cc\u0642 \u062d\u0644 \u06a9\u0646\u06cc\u0645",
     "scope": "Current network identity, fleet protection and output coverage repairs; external model council waived by explicit user instruction; deterministic safety, isolation, concurrency and rollout gates retained."
   },
   "candidate_hashes": {
@@ -253,7 +253,7 @@
     "primary": "SAFE_ROLLBACK_TO_124f51f; populated retention rejected policy64to0 migration",
     "new_regression": "baseline failed with identical production error; corrected retained upgrade passes and rejects unrelated budget overwrite"
   },
-  "installed_public": "06c03b8977549f62527740852ca49994633f72d7",
+  "installed_public": "2ad243bcfa26a8a2254175e2c3da6fa4af2cd9d0",
   "cleanup_candidate_hashes": {
     "internal/adminapi/server_protection.go": "4d95035fb933178b10d7485a5beb3d8c8b33ca3711e6ce5d25faaf7a2d1e262f",
     "internal/adminapi/protection_cleanup_status_test.go": "9be624ea1f2f698bf79b7665a0a10e4c28f9983646487f363530c4931e9d7b49",
@@ -293,5 +293,17 @@
     "internal/provisioning/ssh_admission.go": "d719fa0bd92ac15f357a5ae6fc4cf3f73742f8ba024e278cc4765fcca34d4999",
     "internal/provisioning/ssh_admission_test.go": "1fd48df653ec9616c2932ebf536d8bb68f9c92ec90905913a76a53bbaca23ec6",
     "internal/provisioning/installer_checkpoint_test.go": "5417384038ad7217faa86f101a7bfa3767473fe9f1ed442b82d8e9242acde245"
+  },
+  "transfer_gates": {
+    "transfer-protection-race": "PASS",
+    "scp-drain-focused": "PASS",
+    "transfer-vet": "PASS",
+    "transfer-full-offline": "PASS"
+  },
+  "transfer_candidate_hashes": {
+    "internal/provisioning/upload.go": "182004247bcd5ea981e3813cb1ff26b2bb5a2f5abc82f2c6a28c65af47c59536",
+    "internal/provisioning/upload_flow_test.go": "f4ffe35eb2487ff8e49322fe071f2eac92ec9fb31d865a5a11f6e60a01e91d69",
+    "internal/serverprotection/controller.go": "d401e7ae83cd8fad4832ad7b9319befcd6cbcb3292c4c5c3a9c7c64afe75504e",
+    "internal/serverprotection/cleanup_upgrade_test.go": "9617d85fcae2d4ded7bd55d1f3211ddbc831e4387084bdd911eddc5fe3d9df79"
   }
 }
