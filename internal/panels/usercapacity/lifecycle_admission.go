@@ -41,8 +41,7 @@ func (s Service) autoEnrollLifecycle(ctx context.Context, p readyworker.Panel, r
 	for _, port := range ports {
 		wanted[port] = true
 	}
-	rt.Session.Invalidate()
-	raws, err := rt.Session.Snapshot(ctx)
+	raws, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return err
 	}

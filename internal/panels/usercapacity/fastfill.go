@@ -27,8 +27,7 @@ func (s Service) FastFill(ctx context.Context, p readyworker.Panel, runtime *san
 	if err != nil {
 		return false, err
 	}
-	runtime.Session.Invalidate()
-	raws, err := runtime.Session.Snapshot(ctx)
+	raws, err := runtime.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return false, err
 	}

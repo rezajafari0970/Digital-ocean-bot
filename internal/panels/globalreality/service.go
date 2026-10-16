@@ -43,11 +43,14 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	var enabled bool
 	var portsRaw []byte
 	e := s.DB.QueryRowContext(ctx, `SELECT enabled,ports FROM global_config_policies WHERE policy_key='reality'`).Scan(&enabled, &portsRaw)
-	if errors.Is(e, sql.ErrNoRows) || !enabled {
+	if errors.Is(e, sql.ErrNoRows) {
 		return nil
 	}
 	if e != nil {
 		return e
+	}
+	if !enabled {
+		return nil
 	}
 	var rolloutMode string
 	if e = s.DB.QueryRowContext(ctx, `SELECT mode FROM reality_rollout_control WHERE policy_key='reality'`).Scan(&rolloutMode); errors.Is(e, sql.ErrNoRows) {

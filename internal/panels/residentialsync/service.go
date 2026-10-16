@@ -222,8 +222,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		return err
 	}
 	failureStage = "panel_snapshot"
-	rt.Session.Invalidate()
-	raws, err := rt.Session.Snapshot(ctx)
+	raws, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return err
 	}

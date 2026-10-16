@@ -98,8 +98,7 @@ func (s Service) RollbackOwnedGeneration(ctx context.Context, runtime *sanaei.Pa
 		return false, err
 	}
 	_, _ = s.DB.ExecContext(ctx, "UPDATE bulk_user_generations SET state='ROLLING_BACK' WHERE id=$1 AND state='ACTIVE'", generationID)
-	runtime.Session.Invalidate()
-	raw, found, err := runtime.Session.RawInbound(ctx, inboundID)
+	raw, found, err := runtime.Session.FreshRawInbound(ctx, inboundID)
 	if err != nil {
 		return false, err
 	}

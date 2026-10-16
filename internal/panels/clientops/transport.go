@@ -66,7 +66,9 @@ func validateJobTransport(ctx context.Context, rt *sanaei.PanelRuntime, job Job)
 	if job.Kind != KindCreate && job.Kind != KindBulkCreate && job.Kind != KindUpdate {
 		return nil
 	}
-	rt.Session.Invalidate()
+	if err := rt.Session.InvalidateContext(ctx); err != nil {
+		return err
+	}
 	flow, network, e := inboundContract(ctx, rt, job.InboundID)
 	if e != nil {
 		return e

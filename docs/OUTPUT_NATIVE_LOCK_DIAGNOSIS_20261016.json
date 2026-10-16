@@ -1,0 +1,681 @@
+{
+  "at": "2026-10-16T00:40:53.419936+00:00",
+  "status": "BLOCKED_API_CREDIT_NO_PRODUCT_FIX",
+  "base_checkpoint": "13b84afe1b3e048f41c3943b7143c460ebe52489",
+  "runtime_public": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+  "runtime_source": "097fc640d909715d99dd6665ed290b9c7d1d966e",
+  "product_runtime_code_changed": false,
+  "freshness_seconds": 15,
+  "route_proof_seconds": 60,
+  "live": {
+    "pass": false,
+    "samples": [
+      {
+        "at": "2026-10-16T00:07:24.594317+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 22,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:27.772281+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 25,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:30.985540+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 28,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:34.181744+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 32,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:37.346175+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:40.533967+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:43.686303+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:46.875416+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:50.039667+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:53.205641+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:56.369275+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:07:59.522237+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:02.715006+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 15,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:05.886976+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 18,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:09.045487+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 5,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:12.207783+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:15.368179+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 12,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:18.567164+00:00",
+        "active_servers": 34,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 9,
+        "stable_direct_ready_servers": 34,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:21.725426+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 7,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 34,
+        "direct_links": 34,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:24.887165+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:28.055165+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:31.230038+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:34.430119+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 11,
+        "stable_direct_ready_servers": 31,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:37.620638+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 10,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:40.812912+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 13,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:43.970846+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 16,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:47.133802+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 19,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:50.301553+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 23,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:53.487053+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 1,
+        "oldest_active_snapshot_seconds": 26,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 32,
+        "direct_links": 32,
+        "missing_stable_direct_servers": 1,
+        "ready": true
+      },
+      {
+        "at": "2026-10-16T00:08:56.657816+00:00",
+        "active_servers": 33,
+        "active_without_snapshots": 0,
+        "active_stale_snapshots": 0,
+        "oldest_active_snapshot_seconds": 8,
+        "stable_direct_ready_servers": 33,
+        "direct_servers": 33,
+        "direct_links": 33,
+        "missing_stable_direct_servers": 0,
+        "ready": true
+      }
+    ],
+    "invalid_surface_count": 0,
+    "surface_count": 8
+  },
+  "root_reproduction": "An unchanged Residential native route proof holds the exclusive panel config lock and prevents the actual output collector from recording a fresh snapshot. Real isolated PostgreSQL + native HTTP fixture reproduces count0/config_lock_busy while native config remains unchanged and other structural writers remain excluded.",
+  "confirmed_defects": [
+    "PanelSession ordinary mutex waits ignore cancellation/deadline and cached success can be returned after cancellation.",
+    "Global Reality policy read error can be swallowed as disabled policy.",
+    "Desired verification metadata SQL failure or missing public key causes one native update without demonstrated structural mismatch."
+  ],
+  "baseline_tests": {
+    "session": {
+      "exit": 1,
+      "log": "/root/projects/dob-output-controls-20261016/.local/evidence/native-locks-max/session-context-baseline-2.log"
+    },
+    "policy": {
+      "exit": 1,
+      "log": "/root/projects/dob-output-controls-20261016/.local/evidence/native-policy-baseline.log"
+    },
+    "verification": {
+      "exit": 1,
+      "log": "/root/projects/dob-output-controls-20261016/.local/evidence/native-verification-baseline-json.log",
+      "controls": "matching and genuine structural mismatch pass; only infrastructure fault cases fail"
+    },
+    "output_during_proof": {
+      "exit": 1,
+      "log": "/root/projects/dob-output-controls-20261016/.local/evidence/native-proof-output-baseline.log"
+    }
+  },
+  "postgres_queue_probe": {
+    "exclusive_writer_queued": true,
+    "isolated_database": true,
+    "new_reader_acquired": false,
+    "owner_downgraded_to_shared": true
+  },
+  "test_sha256": {
+    "internal/panels/sanaei/panel_session_context_test.go": "076bae0a861a82623e82ecfdb682ed67fe53c2be5618b23eab358df1aae58630",
+    "internal/panels/globalreality/policy_error_postgres_test.go": "40e59ad9c465f1010d17ab4c420b39dd930e4280bc0f8ed58da7bb6766eb221e",
+    "internal/adminapi/desired_verification_postgres_test.go": "aad1810c3fb98d7b5d174fa4ca2c9aedc2433f5f5d2b3d41165f9d01e9b08cd3",
+    "internal/adminapi/routing_cleanup_postgres_test.go": "84d188575a9e5c1d14abd4d184147306ef6bff5e1d3bc4c2195f3ba9f3934c88"
+  },
+  "api_success": {
+    "role": "test_designer",
+    "model": "gpt-6-astra",
+    "id": "resp_09ccaa30393b6b90006ad16a971dfc87d18ebe44e345d01975",
+    "status": "completed",
+    "requested_reasoning": {
+      "mode": "pro",
+      "effort": "max"
+    },
+    "returned_reasoning": {
+      "context": "all_turns",
+      "effort": "max",
+      "mode": "pro",
+      "summary": null
+    },
+    "usage": {
+      "input_tokens": 88469,
+      "input_tokens_details": {
+        "cache_write_tokens": 13522,
+        "cached_tokens": 13522
+      },
+      "output_tokens": 59893,
+      "output_tokens_details": {
+        "reasoning_tokens": 52753
+      },
+      "total_tokens": 148362
+    },
+    "started_at": "2026-10-16T00:06:46.247909+00:00",
+    "completed_at": "2026-10-16T00:21:20.007375+00:00"
+  },
+  "api_background_failures": {
+    "adjudicator": {
+      "id": "resp_0b075095f3ce935a006ad16e17a1f087d1bf6d58403c90a609",
+      "model": "gpt-6-astra",
+      "status": "failed",
+      "reasoning": {
+        "context": "all_turns",
+        "effort": "max",
+        "mode": "pro",
+        "summary": null
+      },
+      "error": {
+        "type": "insufficient_quota",
+        "code": "credit_balance_exhausted",
+        "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+        "param": null
+      },
+      "usage": null
+    },
+    "architect": {
+      "id": "resp_0408f0eec361837e006ad16e6997c887d1af78832a9fe0c745",
+      "model": "gpt-6-astra",
+      "status": "failed",
+      "reasoning": {
+        "context": "all_turns",
+        "effort": "max",
+        "mode": "pro",
+        "summary": null
+      },
+      "error": {
+        "type": "insufficient_quota",
+        "code": "credit_balance_exhausted",
+        "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+        "param": null
+      },
+      "usage": null
+    },
+    "reviewer": {
+      "id": "resp_094792a35c23bbba006ad16e6967f487d1948146cf19b19f82",
+      "model": "gpt-6-astra",
+      "status": "failed",
+      "reasoning": {
+        "context": "all_turns",
+        "effort": "max",
+        "mode": "pro",
+        "summary": null
+      },
+      "error": {
+        "type": "insufficient_quota",
+        "code": "credit_balance_exhausted",
+        "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+        "param": null
+      },
+      "usage": null
+    },
+    "adversary": {
+      "id": "resp_01b551149c5a48a0006ad16e69629487d1a197044ec58be39c",
+      "model": "gpt-6-astra",
+      "status": "failed",
+      "reasoning": {
+        "context": "all_turns",
+        "effort": "max",
+        "mode": "pro",
+        "summary": null
+      },
+      "error": {
+        "type": "insufficient_quota",
+        "code": "credit_balance_exhausted",
+        "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+        "param": null
+      },
+      "usage": null
+    }
+  },
+  "sync_timeouts_unknown_usage": 3,
+  "known_successful_tokens_this_continuation": 148362,
+  "known_successful_task_tokens": 328449,
+  "api_requests_pending": 0,
+  "no_completed_critical_council": true,
+  "next": "Replenish authorized API credit, finish critical independent planning/review at requestedAstra6pro/max, adjudicate candidate lock design with observed PostgreSQL writer queue, then implement and turn the preserved baseline failures green. Run race/full/publisher/exactinstall/rollout and strict livecoverage. Do not relaxfreshness, claimfixed, or deploy tests as a productfix.",
+  "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/native-locks-max",
+  "resume_checks": [
+    {
+      "at": "2026-10-16T00:48:40.392916+00:00",
+      "status": "BLOCKED_API_CREDIT_NO_PRODUCT_FIX",
+      "api_probe": {
+        "id": "resp_00d92c27f7795a4f006ad17400661487d1b49faacea7f98130",
+        "model": "gpt-6-astra",
+        "status": "failed",
+        "reasoning": {
+          "context": "all_turns",
+          "effort": "max",
+          "mode": "pro",
+          "summary": null
+        },
+        "error": {
+          "type": "insufficient_quota",
+          "code": "credit_balance_exhausted",
+          "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+          "param": null
+        },
+        "usage": null
+      },
+      "pending_api_requests": 0,
+      "new_successful_api_responses": 0,
+      "product_code_changed": false,
+      "runtime_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+      "both_hosts_services_active": true,
+      "both_hosts_binary_hashes_match": true,
+      "short_observation_only": true,
+      "live": {
+        "at": "2026-10-16T00:47:41.130400+00:00",
+        "surfaces": {
+          "api:ALL": {
+            "links": 175,
+            "servers": 35,
+            "types": {
+              "xhttp": 175
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "api:DIRECT": {
+            "links": 35,
+            "servers": 35,
+            "types": {
+              "xhttp": 35
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "api:RESIDENTIAL": {
+            "links": 105,
+            "servers": 35,
+            "types": {
+              "xhttp": 105
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:ALL": {
+            "links": 175,
+            "servers": 35,
+            "types": {
+              "xhttp": 175
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:DIRECT": {
+            "links": 35,
+            "servers": 35,
+            "types": {
+              "xhttp": 35
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:RESIDENTIAL": {
+            "links": 105,
+            "servers": 35,
+            "types": {
+              "xhttp": 105
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+            "links": 30,
+            "servers": 10,
+            "types": {
+              "xhttp": 30
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+            "links": 10,
+            "servers": 10,
+            "types": {
+              "xhttp": 10
+            },
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "samples": [
+          {
+            "at": "2026-10-16T00:47:42.305678+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 8,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          },
+          {
+            "at": "2026-10-16T00:47:45.498661+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 8,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          },
+          {
+            "at": "2026-10-16T00:47:48.672929+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 9,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          }
+        ],
+        "pass": true
+      },
+      "prior_strict_acceptance_still_failed": true,
+      "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/resume-20261016-0046"
+    }
+  ],
+  "side_defect_followup": {
+    "at": "2026-10-16T02:47:13.625112+00:00",
+    "status": "THREE_SIDE_FIXES_TESTED_RELEASE_PENDING",
+    "job": "docs/development-jobs/native-side-defects-20261016.json",
+    "api_calls": 0,
+    "root_lock_defect_still_open": true
+  }
+}

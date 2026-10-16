@@ -117,8 +117,7 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
 			return e
 		}
 	}
-	rt.Session.Invalidate()
-	raws, e := rt.Session.Snapshot(ctx)
+	raws, e := rt.Session.FreshSnapshot(ctx)
 	if e != nil {
 		return e
 	}

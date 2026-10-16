@@ -153,8 +153,7 @@ func bulkDeleteObserved(raws []json.RawMessage, inbound int64, wanted []sanaei.C
 	return
 }
 func observeBulkDelete(ctx context.Context, rt *sanaei.PanelRuntime, job Job, p BulkPayload) ([]sanaei.Client, []sanaei.Client, error) {
-	rt.Session.Invalidate()
-	raws, err := rt.Session.Snapshot(ctx)
+	raws, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return nil, nil, err
 	}

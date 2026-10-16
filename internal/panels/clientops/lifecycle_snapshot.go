@@ -59,8 +59,7 @@ func LifecycleInventory(ctx context.Context, rt *sanaei.PanelRuntime, inbound in
 }
 
 func lifecycleInventoryOnce(ctx context.Context, rt *sanaei.PanelRuntime, inbound int64) (map[string]LifecycleClient, int, error) {
-	rt.Session.Invalidate()
-	raws, err := rt.Session.Snapshot(ctx)
+	raws, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
