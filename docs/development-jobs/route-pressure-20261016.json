@@ -1,0 +1,30 @@
+{
+  "status": "NATIVE_CANARIES_PASSED_PRODUCT_PUBLICATION_PENDING",
+  "updated_at": "2026-10-16T21:02:35.409052+00:00",
+  "base_source": "491ce8245949dffcbb0af7e5331cf5392363a536",
+  "branch": "fix/route-pressure-20261016",
+  "native_artifact": "eafb3c6ce3db743ec2350d94249f6cf05cf9ec46",
+  "new_api_calls": 0,
+  "new_api_tokens": 0,
+  "new_api_cost_usd": 0,
+  "evidence_root": ".local/evidence",
+  "completed": [
+    "prewrite retry regression/fix",
+    "six proven prewrite cancellations",
+    "native fallback and handshake diagnosis",
+    "native race tests and both architecture builds"
+  ],
+  "pending": [
+    "final native canaries",
+    "product publication",
+    "both host guarded updates",
+    "fleet native convergence",
+    "public output and live health acceptance"
+  ],
+  "native_version": "dob-fm-0.2.2",
+  "canary_panels": [
+    "24116b55-e148-440d-ad7f-d04083482afb",
+    "0054f1ae-6eb4-412b-993d-b68b07ae32b6",
+    "a456d5de-71c3-46d4-b0ad-e277777f4f8c"
+  ]
+}

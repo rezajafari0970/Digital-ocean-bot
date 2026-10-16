@@ -74,6 +74,36 @@ func (s Service) RunOne(ctx context.Context) error {
 		return blocked(ctx, s.DB, j.id, "INVALID_SAVED_PROFILE")
 	}
 	if j.attempts >= 5 {
+		// Exhausted reads must not permanently freeze missing-listener repair
+		// or client admission. Native mutation is only possible after the backup
+		// and remote ID are durable. Keep ambiguous and rollback work blocked.
+		if !j.rollback && j.ref == "" && !j.remote.Valid && !j.restartSent &&
+			(j.phase == "QUEUED" || j.phase == "RECHECK_REQUESTED") && jsonEqual(j.source, j.before) {
+			// Use the connection holding the executor fence: losing that session
+			// must not let a stale worker release another worker's admission.
+			res, err := conn.ExecContext(ctx, `UPDATE reality_transport_apply_jobs
+ SET state='FAILED',phase='FAILED_BEFORE_WRITE',last_error='RETRY_LIMIT_BEFORE_WRITE',completed_at=now(),updated_at=now()
+ WHERE id=$1 AND state IN('PENDING','RUNNING') AND attempts>=5
+ AND phase IN('QUEUED','RECHECK_REQUESTED') AND before_secret_ref='' AND remote_id IS NULL
+ AND restart_sent_at IS NULL AND rollback_of IS NULL AND source_config=before_config`, j.id)
+			if err != nil {
+				return err
+			}
+			n, err := res.RowsAffected()
+			if err != nil {
+				return err
+			}
+			if n == 1 {
+				return nil
+			}
+			// A saved JSON mismatch (including fields unknown to this binary)
+			// still needs review, but must not head-of-line block unrelated jobs.
+			_, err = conn.ExecContext(ctx, "UPDATE reality_transport_apply_jobs SET state='BLOCKED',phase='REVIEW_REQUIRED',last_error='RETRY_STATE_CHANGED',updated_at=now() WHERE id=$1 AND state IN('PENDING','RUNNING')", j.id)
+			if err != nil {
+				return err
+			}
+			return ErrConflict
+		}
 		return blocked(ctx, s.DB, j.id, "RETRY_LIMIT")
 	}
 	// A lost advisory connection must never authorize the next mutation.

@@ -1,3 +1,7 @@
+## Route/resource repair continuation — 2026-10-16T20:48:55.389071+00:00
+
+Active worktree /root/projects/dob-route-pressure-20261016, branch fix/route-pressure-20261016. See docs/FLEET_ROUTE_PRESSURE_REPAIR_20261016.md and job JSON. Pre-write transport locks corrected; six live jobs cancelled through the supported guarded path. Native REALITY fallback and handshake resource retention reproduced; dob-fm-0.2.2 artifacts built/tested/published, all three native canary installations validated. Product source publication, both-host update and final fleet/output acceptance are still pending. API usage remains zero; operator protection OFF revision 51 preserved. Do not delete any retained/test node.
+
 ## Final acceptance checkpoint — 2026-10-16T11:55:19.252923+00:00
 
 Installed public 5dacef92ffeea214cfc6e977bb4341f0b3d40cc4, product source 11b311b66de595a4b103ed9d41b52935f4fd3281; both hosts verified. See docs/FLEET_REPAIR_ACCEPTANCE_20261016.md for exact counts, passing gates and remaining limits. Protection OFF revision 50 preserved; cleanup need-attention zero at final dashboard snapshot. The complete task is not represented as permanent all-green uptime: real resource pressure, enabled live-load acceptance and upstream availability remain explicit limitations. OpenAI API usage zero.

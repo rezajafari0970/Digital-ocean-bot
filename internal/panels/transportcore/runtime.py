@@ -77,21 +77,24 @@ def stage(asset,cache):
 
 def main(spec):
  os.umask(0o077)
- panel=pathlib.Path('/usr/local/x-ui/x-ui');core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-amd64');db=pathlib.Path('/etc/x-ui/x-ui.db')
+ panel=pathlib.Path('/usr/local/x-ui/x-ui');machine=os.uname().machine
+ core=panel.parent/('bin/xray-linux-arm64' if machine in ('aarch64','arm64') else 'bin/xray-linux-amd64');db=pathlib.Path('/etc/x-ui/x-ui.db')
  candidate=pathlib.Path(spec['candidate'])
  if not str(candidate).startswith('/root/.dob-transport-check-') or candidate.is_symlink():raise RuntimeError('invalid_candidate_path')
  env=dict(os.environ,XRAY_LOCATION_ASSET=str(core.parent))
  with open(candidate) as f:config=json.load(f)
- needs_install=any(i.get('streamSettings',{}).get('network')=='xhttp' and i.get('streamSettings',{}).get('finalmask',{}).get('tcp') for i in config.get('inbounds',[]))
+ needs_panel=any(i.get('streamSettings',{}).get('network')=='xhttp' and i.get('streamSettings',{}).get('finalmask',{}).get('tcp') for i in config.get('inbounds',[]))
+ needs_install=needs_panel or any(i.get('streamSettings',{}).get('security')=='reality' for i in config.get('inbounds',[]))
  if not needs_install:
   run([str(core),'run','-test','-config',str(candidate)],30,env);print('{"validated":true,"installed":false}');return
- if os.uname().machine!='x86_64':raise RuntimeError('unsupported_runtime_architecture')
+ if machine not in ('x86_64','aarch64','arm64') or (needs_panel and machine!='x86_64'):raise RuntimeError('unsupported_runtime_architecture')
  manifest=spec['manifest'];version=manifest['version']
- if version!='dob-fm-0.1.0':raise RuntimeError('unknown_runtime_version')
- cache=pathlib.Path('/var/lib/dob-transport-runtime')/version;cache.mkdir(parents=True,exist_ok=True,mode=0o700);cache.chmod(0o700)
+ if version!='dob-fm-0.2.2':raise RuntimeError('unknown_runtime_version')
+ core_asset=manifest['core'] if machine=='x86_64' else manifest['core_arm64']
+ cache=pathlib.Path('/var/lib/dob-transport-runtime')/(version+('-fragment' if needs_panel else '-core'));cache.mkdir(parents=True,exist_ok=True,mode=0o700);cache.chmod(0o700)
  lock=open('/run/lock/dob-transport-runtime.lock','w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
  state_path=cache/'state.json';state=json.loads(state_path.read_text()) if state_path.exists() else None
- want_core=manifest['core']['sha256'];want_panel=manifest['panel']['sha256']
+ want_core=core_asset['sha256'];want_panel=manifest['panel']['sha256'] if needs_panel else digest(panel)
  current_identity,url=identity(db)
  def restore(previous):
   for key in ('panel','core'):
@@ -113,12 +116,12 @@ def main(spec):
   if not ready(panel,core,want_panel,want_core,url):raise RuntimeError('installed_runtime_not_ready')
   print('{"validated":true,"installed":true,"changed":false}');return
  if state and state['phase']=='applied':raise RuntimeError('runtime_changed_after_installation')
- if run([str(panel),'-v'],5).decode().strip()!='3.8.5':raise RuntimeError('unsupported_native_panel_version')
+ if run([str(panel),'-v'],5).decode().strip() not in ('3.8.5','3.8.5-dob-fm.1'):raise RuntimeError('unsupported_native_panel_version')
  run(['systemctl','is-active','--quiet','x-ui'],5)
- staged_core=stage(manifest['core'],cache);staged_panel=stage(manifest['panel'],cache)
+ staged_core=stage(core_asset,cache);staged_panel=stage(manifest['panel'],cache) if needs_panel else panel
  caps=json.loads(run([str(staged_core),'dob-capabilities'],5))
- if caps.get('schema')!=1 or caps.get('reality_finalmask_fragment') is not True:raise RuntimeError('core_capability_missing')
- if run([str(staged_panel),'-v'],5).decode().strip()!='3.8.5-dob-fm.1':raise RuntimeError('panel_capability_missing')
+ if caps.get('schema')!=1 or caps.get('reality_fallback_bounded') is not True or caps.get('reality_handshake_deadline') is not True or caps.get('reality_fallback_max_connections')!=512 or (needs_panel and caps.get('reality_finalmask_fragment') is not True):raise RuntimeError('core_capability_missing')
+ if needs_panel and run([str(staged_panel),'-v'],5).decode().strip()!='3.8.5-dob-fm.1':raise RuntimeError('panel_capability_missing')
  run([str(staged_core),'run','-test','-config',str(candidate)],30,env)
  current=core.parent/'config.json'
  if current.exists():run([str(staged_core),'run','-test','-config',str(current)],30,env)

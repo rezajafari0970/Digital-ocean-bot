@@ -29,14 +29,25 @@ func (s *failedUpload) Run(ctx context.Context, _ provisioning.Target, _ []byte,
 	return "", nil
 }
 func TestPartialUploadIsCleanedAfterCancellation(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	ssh := &failedUpload{cancel: cancel}
-	err := Prepare(ctx, ssh, provisioning.Target{}, nil, realityconfig.Payload{StreamSettings: map[string]any{"network": "xhttp"}})
-	if err == nil || !ssh.cleaned || !strings.HasPrefix(ssh.remote, "/root/.dob-transport-check-") {
-		t.Fatal("partial secret file not cleaned")
+	for _, network := range []string{"xhttp", "tcp", "raw"} {
+		t.Run(network, func(t *testing.T) {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			ssh := &failedUpload{cancel: cancel}
+			err := Prepare(ctx, ssh, provisioning.Target{}, nil, realityconfig.Payload{StreamSettings: map[string]any{"network": network, "security": "reality"}})
+			if err == nil || !ssh.cleaned || !strings.HasPrefix(ssh.remote, "/root/.dob-transport-check-") {
+				t.Fatal("partial secret file not cleaned")
+			}
+			if _, err = os.Stat(ssh.local); !os.IsNotExist(err) {
+				t.Fatal("local candidate retained")
+			}
+		})
 	}
-	if _, err = os.Stat(ssh.local); !os.IsNotExist(err) {
-		t.Fatal("local candidate retained")
+}
+func TestUnrelatedTransportsDoNotInstallRealityRuntime(t *testing.T) {
+	for _, settings := range []map[string]any{nil, {"network": "tcp", "security": "tls"}, {"network": "ws", "security": "tls"}} {
+		if err := Prepare(context.Background(), nil, provisioning.Target{}, nil, realityconfig.Payload{StreamSettings: settings}); err != nil {
+			t.Fatal(err)
+		}
 	}
 }

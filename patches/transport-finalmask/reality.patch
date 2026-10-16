@@ -1,0 +1,647 @@
+--- a/tls.go
++++ b/tls.go
+@@ -105,6 +105,7 @@
+ 	net.Conn
+ 	After  int64
+ 	Bucket *ratelimit.Bucket
++	cancel <-chan struct{}
+ }
+ 
+ func (c *RatelimitedConn) Read(b []byte) (int, error) {
+@@ -113,7 +114,17 @@
+ 		if c.After > 0 {
+ 			c.After -= int64(n)
+ 		} else {
+-			c.Bucket.Wait(int64(n))
++			if c.cancel == nil {
++				c.Bucket.Wait(int64(n))
++			} else if delay := c.Bucket.Take(int64(n)); delay > 0 {
++				timer := time.NewTimer(delay)
++				defer timer.Stop()
++				select {
++				case <-timer.C:
++				case <-c.cancel:
++					return n, net.ErrClosed
++				}
++			}
+ 		}
+ 	}
+ 	return n, err
+@@ -185,6 +196,12 @@
+ 	}
+ 	underlying := raw.(CloseWriteConn) // *net.TCPConn or *net.UnixConn
+ 
++	handshakeLimit := newHandshakeDeadline(underlying, target, 60*time.Second)
++	defer handshakeLimit.release()
++	fallback := newFallbackCopier(underlying, target, 60*time.Second)
++	fallback.onStart = handshakeLimit.release
++	defer fallback.stop()
++
+ 	mutex := new(sync.Mutex)
+ 
+ 	hs := serverHandshakeStateTLS13{
+@@ -216,7 +233,7 @@
+ 				if keyShare.group == X25519MLKEM768 && len(keyShare.data) == mlkem.EncapsulationKeySize768+32 {
+ 					if peerPub2 != nil {
+ 						peerPub2 = nil // ensure fail
+-						break // ensure once
++						break          // ensure once
+ 					}
+ 					peerPub2 = keyShare.data[mlkem.EncapsulationKeySize768:]
+ 					continue // fast continue
+@@ -224,7 +241,7 @@
+ 				if keyShare.group == X25519 && len(keyShare.data) == 32 {
+ 					if peerPub != nil {
+ 						peerPub2 = nil // ensure fail
+-						break // ensure once
++						break          // ensure once
+ 					}
+ 					peerPub = keyShare.data
+ 					break // ensure order
+@@ -282,7 +299,7 @@
+ 			if config.Show && hs.clientHello != nil {
+ 				fmt.Printf("REALITY remoteAddr: %v\tforwarded SNI: %v\n", remoteAddr, hs.clientHello.serverName)
+ 			}
+-			_, err := io.Copy(target, NewRatelimitedConn(underlying, &config.LimitFallbackUpload))
++			_, err := fallback.copy(target, underlying, &config.LimitFallbackUpload)
+ 			// close target writer when received FIN (err==nil)
+ 			if err == nil {
+ 				targetWriterCloser, ok := target.(CloseWriteConn)
+@@ -436,6 +453,9 @@
+ 					hs.c.MaxUselessRecords = maxUseless.(int)
+ 				}
+ 			}
++			if !handshakeLimit.release() {
++				break
++			}
+ 			hs.c.isHandshakeComplete.Store(true)
+ 			break
+ 		}
+@@ -444,12 +464,12 @@
+ 			if hs.c.conn == conn { // if we processed the Client Hello successfully but the target did not
+ 				waitGroup.Add(1)
+ 				go func() {
+-					io.Copy(target, NewRatelimitedConn(underlying, &config.LimitFallbackUpload))
++					fallback.copy(target, underlying, &config.LimitFallbackUpload)
+ 					waitGroup.Done()
+ 				}()
+ 			}
+ 			conn.Write(s2cSaved)
+-			io.Copy(underlying, NewRatelimitedConn(target, &config.LimitFallbackDownload))
++			fallback.copy(underlying, target, &config.LimitFallbackDownload)
+ 			// Here is bidirectional direct forwarding:
+ 			// client ---underlying--- server ---target--- dest
+ 			// Call `underlying.CloseWrite()` once `io.Copy()` returned
+--- /dev/null
++++ b/fallback_copy.go
+@@ -0,0 +1,138 @@
++package reality
++
++import (
++	"io"
++	"net"
++	"sync"
++	"time"
++)
++
++// At most 512 unauthenticated fallback connections can retain forwarding
++// buffers in one process. Authenticated REALITY never acquires these slots.
++var fallbackSlots = make(chan struct{}, 512)
++
++// fallbackCopier bounds buffers and releases idle unauthenticated forwarding.
++// Both directions share one activity clock: a download need not upload data to
++// stay alive. Authenticated REALITY connections never start this timer.
++type fallbackCopier struct {
++	client, target                net.Conn
++	idle                          time.Duration
++	mu                            sync.Mutex
++	last                          time.Time
++	timer                         *time.Timer
++	stopped                       bool
++	done                          chan struct{}
++	onStart                       func() bool
++	slots                         chan struct{}
++	attempted, admitted, released bool
++}
++
++func newFallbackCopier(client, target net.Conn, idle time.Duration) *fallbackCopier {
++	return &fallbackCopier{client: client, target: target, idle: idle, done: make(chan struct{}), slots: fallbackSlots}
++}
++
++func (f *fallbackCopier) touch() {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if f.stopped {
++		return
++	}
++	f.last = time.Now()
++	if f.timer == nil {
++		f.timer = time.AfterFunc(f.idle, f.expire)
++	}
++}
++func (f *fallbackCopier) expire() {
++	f.mu.Lock()
++	if f.stopped {
++		f.mu.Unlock()
++		return
++	}
++	if remaining := f.idle - time.Since(f.last); remaining > 0 {
++		f.timer.Reset(remaining)
++		f.mu.Unlock()
++		return
++	}
++	f.stopped = true
++	close(f.done)
++	f.mu.Unlock()
++	// Interrupt both pending reads and writes; the owner joins both copy tasks.
++	closeExpiredConn(f.client)
++	closeExpiredConn(f.target)
++}
++func (f *fallbackCopier) stop() {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if !f.stopped {
++		f.stopped = true
++		close(f.done)
++		if f.timer != nil {
++			f.timer.Stop()
++		}
++	}
++	// The Server owner calls stop only after joining both copy tasks.
++	if f.admitted && !f.released {
++		<-f.slots
++		f.released = true
++	}
++}
++func (f *fallbackCopier) admit() bool {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if f.stopped {
++		return false
++	}
++	if !f.attempted {
++		f.attempted = true
++		select {
++		case f.slots <- struct{}{}:
++			f.admitted = true
++		default:
++		}
++	}
++	return f.admitted
++}
++
++type fallbackReader struct {
++	reader io.Reader
++	owner  *fallbackCopier
++}
++
++func (r fallbackReader) Read(p []byte) (int, error) {
++	n, e := r.reader.Read(p)
++	if n > 0 {
++		r.owner.touch()
++	}
++	return n, e
++}
++
++type fallbackWriter struct {
++	writer io.Writer
++	owner  *fallbackCopier
++}
++
++func (w fallbackWriter) Write(p []byte) (int, error) {
++	n, e := w.writer.Write(p)
++	if n > 0 {
++		w.owner.touch()
++	}
++	return n, e
++}
++func (f *fallbackCopier) copy(dst, src net.Conn, limit *LimitFallback) (int64, error) {
++	if f.onStart != nil && !f.onStart() {
++		return 0, net.ErrClosed
++	}
++	if !f.admit() {
++		closeExpiredConn(f.client)
++		closeExpiredConn(f.target)
++		return 0, net.ErrClosed
++	}
++	f.touch()
++	// Hide ReaderFrom/WriterTo to prevent Go's TCP splice path from allocating
++	// large kernel pipe buffers for unauthenticated connections.
++	reader := NewRatelimitedConn(src, limit)
++	if limited, ok := reader.(*RatelimitedConn); ok {
++		limited.cancel = f.done
++	}
++	return io.CopyBuffer(fallbackWriter{dst, f}, fallbackReader{reader, f}, make([]byte, 16*1024))
++}
+--- /dev/null
++++ b/fallback_copy_test.go
+@@ -0,0 +1,363 @@
++package reality
++
++import (
++	"bytes"
++	"context"
++	"io"
++	"net"
++	"sync"
++	"sync/atomic"
++	"testing"
++	"time"
++)
++
++func TestFallbackIdleClosesBothDirections(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer ap.Close()
++	defer bp.Close()
++	f := newFallbackCopier(a, b, 30*time.Millisecond)
++	defer f.stop()
++	done := make(chan struct{}, 2)
++	go func() { f.copy(b, a, &LimitFallback{}); done <- struct{}{} }()
++	go func() { f.copy(a, b, &LimitFallback{}); done <- struct{}{} }()
++	for i := 0; i < 2; i++ {
++		select {
++		case <-done:
++		case <-time.After(time.Second):
++			t.Fatal("idle forwarding retained a connection")
++		}
++	}
++}
++
++type forbiddenFastPath struct{ net.Conn }
++
++func (c forbiddenFastPath) WriteTo(io.Writer) (int64, error) {
++	panic("unauthenticated splice WriterTo used")
++}
++func (c forbiddenFastPath) ReadFrom(io.Reader) (int64, error) {
++	panic("unauthenticated splice ReaderFrom used")
++}
++func TestFallbackUnidirectionalActivityAndBoundedCopy(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer ap.Close()
++	defer bp.Close()
++	f := newFallbackCopier(a, b, 120*time.Millisecond)
++	defer f.stop()
++	done := make(chan struct{}, 2)
++	go func() { f.copy(forbiddenFastPath{b}, forbiddenFastPath{a}, &LimitFallback{}); done <- struct{}{} }()
++	go func() { f.copy(forbiddenFastPath{a}, forbiddenFastPath{b}, &LimitFallback{}); done <- struct{}{} }()
++	payload := bytes.Repeat([]byte("fallback-data"), 4096)
++	received := make(chan error, 1)
++	go func() {
++		for i := 0; i < 12; i++ {
++			v := make([]byte, len(payload))
++			if _, e := io.ReadFull(bp, v); e != nil {
++				received <- e
++				return
++			}
++			if !bytes.Equal(v, payload) {
++				received <- io.ErrUnexpectedEOF
++				return
++			}
++		}
++		received <- nil
++	}()
++	for i := 0; i < 12; i++ {
++		if _, e := ap.Write(payload); e != nil {
++			t.Fatal(e)
++		}
++		time.Sleep(25 * time.Millisecond)
++	}
++	if e := <-received; e != nil {
++		t.Fatal(e)
++	}
++	select {
++	case <-done:
++		t.Fatal("one-way active fallback closed")
++	default:
++	}
++	for i := 0; i < 2; i++ {
++		select {
++		case <-done:
++		case <-time.After(time.Second):
++			t.Fatal("forwarding did not expire after activity stopped")
++		}
++	}
++}
++func TestUnusedFallbackTimerDoesNotCloseAuthenticatedTransport(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer a.Close()
++	defer ap.Close()
++	defer b.Close()
++	defer bp.Close()
++	f := newFallbackCopier(a, b, time.Millisecond)
++	f.stop()
++	time.Sleep(5 * time.Millisecond)
++	done := make(chan error, 1)
++	go func() { _, e := ap.Write([]byte("x")); done <- e }()
++	var v [1]byte
++	if _, e := io.ReadFull(a, v[:]); e != nil {
++		t.Fatal(e)
++	}
++	if e := <-done; e != nil {
++		t.Fatal(e)
++	}
++}
++func TestFallbackStopAndExpiryRace(t *testing.T) {
++	for i := 0; i < 50; i++ {
++		a, ap := net.Pipe()
++		b, bp := net.Pipe()
++		f := newFallbackCopier(a, b, time.Microsecond)
++		f.touch()
++		var w sync.WaitGroup
++		w.Add(2)
++		go func() { defer w.Done(); f.touch() }()
++		go func() { defer w.Done(); f.stop() }()
++		w.Wait()
++		a.Close()
++		ap.Close()
++		b.Close()
++		bp.Close()
++	}
++}
++func TestServerInvalidTLSFallbackPreservesHalfCloseResponse(t *testing.T) {
++	target, e := net.Listen("tcp", "127.0.0.1:0")
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer target.Close()
++	request := []byte("GET / HTTP/1.1\r\nHost: example.test\r\n\r\n")
++	response := []byte("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok")
++	targetDone := make(chan error, 1)
++	go func() {
++		c, e := target.Accept()
++		if e != nil {
++			targetDone <- e
++			return
++		}
++		defer c.Close()
++		c.SetDeadline(time.Now().Add(2 * time.Second))
++		got, e := io.ReadAll(c)
++		if e == nil && !bytes.Equal(got, request) {
++			e = io.ErrUnexpectedEOF
++		}
++		if e == nil {
++			_, e = c.Write(response)
++		}
++		if tc, ok := c.(*net.TCPConn); ok {
++			tc.CloseWrite()
++		}
++		targetDone <- e
++	}()
++	listener, e := net.Listen("tcp", "127.0.0.1:0")
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer listener.Close()
++	serverDone := make(chan error, 1)
++	go func() {
++		c, e := listener.Accept()
++		if e != nil {
++			serverDone <- e
++			return
++		}
++		c.SetDeadline(time.Now().Add(2 * time.Second))
++		_, e = Server(context.Background(), c, &Config{Type: "tcp", Dest: target.Addr().String(), DialContext: (&net.Dialer{}).DialContext})
++		serverDone <- e
++	}()
++	client, e := net.Dial("tcp", listener.Addr().String())
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer client.Close()
++	client.SetDeadline(time.Now().Add(2 * time.Second))
++	if _, e = client.Write(request); e != nil {
++		t.Fatal(e)
++	}
++	client.(*net.TCPConn).CloseWrite()
++	got, e := io.ReadAll(client)
++	if e != nil {
++		t.Fatal(e)
++	}
++	if !bytes.Equal(got, response) {
++		t.Fatalf("fallback response mismatch: %q", got)
++	}
++	if e = <-targetDone; e != nil {
++		t.Fatal(e)
++	}
++	select {
++	case e = <-serverDone:
++		if e == nil {
++			t.Fatal("invalid handshake was accepted")
++		}
++	case <-time.After(3 * time.Second):
++		t.Fatal("fallback server did not exit")
++	}
++}
++
++func TestFallbackIdleCancelsRateLimitWait(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer ap.Close()
++	defer bp.Close()
++	f := newFallbackCopier(a, b, 30*time.Millisecond)
++	defer f.stop()
++	done := make(chan struct{})
++	go func() { f.copy(b, a, &LimitFallback{BytesPerSec: 1, BurstBytesPerSec: 1}); close(done) }()
++	go ap.Write(bytes.Repeat([]byte("x"), 16384))
++	select {
++	case <-done:
++	case <-time.After(time.Second):
++		t.Fatal("rate-limit delay retained expired fallback")
++	}
++}
++
++func TestHandshakeDeadlineInterruptsBlockedWrite(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer ap.Close()
++	defer bp.Close()
++	d := newHandshakeDeadline(a, b, 30*time.Millisecond)
++	defer d.release()
++	done := make(chan error, 2)
++	go func() { _, e := a.Write([]byte("TLS handshake response")); done <- e }()
++	go func() { var v [1]byte; _, e := b.Read(v[:]); done <- e }()
++	for i := 0; i < 2; i++ {
++		select {
++		case e := <-done:
++			if e == nil {
++				t.Fatal("expired handshake was not interrupted")
++			}
++		case <-time.After(time.Second):
++			t.Fatal("handshake retained blocked IO")
++		}
++	}
++	if d.release() {
++		t.Fatal("expired handshake accepted as authenticated")
++	}
++}
++func TestHandshakeHandoffKeepsActiveFallbackAlive(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer a.Close()
++	defer ap.Close()
++	defer b.Close()
++	defer bp.Close()
++	d := newHandshakeDeadline(a, b, 25*time.Millisecond)
++	f := newFallbackCopier(a, b, 120*time.Millisecond)
++	f.onStart = d.release
++	defer f.stop()
++	done := make(chan struct{})
++	go func() { f.copy(b, a, &LimitFallback{}); close(done) }()
++	go io.Copy(io.Discard, bp)
++	for i := 0; i < 10; i++ {
++		if _, e := ap.Write([]byte("active")); e != nil {
++			t.Fatal(e)
++		}
++		time.Sleep(15 * time.Millisecond)
++	}
++	select {
++	case <-done:
++		t.Fatal("handshake deadline closed active fallback after handoff")
++	default:
++	}
++}
++func TestAuthenticatedHandshakeHandoffClearsDeadline(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer a.Close()
++	defer ap.Close()
++	defer b.Close()
++	defer bp.Close()
++	d := newHandshakeDeadline(a, b, 10*time.Millisecond)
++	if !d.release() {
++		t.Fatal("unexpected expiry")
++	}
++	time.Sleep(30 * time.Millisecond)
++	go ap.Write([]byte("valid"))
++	v := make([]byte, 5)
++	a.SetReadDeadline(time.Now().Add(time.Second))
++	if _, e := io.ReadFull(a, v); e != nil {
++		t.Fatal(e)
++	}
++}
++
++func TestFallbackAdmissionLimitAndExpiredSlotRelease(t *testing.T) {
++	slots := make(chan struct{}, 1)
++	makeCopy := func() (*fallbackCopier, net.Conn, net.Conn) {
++		a, ap := net.Pipe()
++		b, bp := net.Pipe()
++		f := newFallbackCopier(a, b, 25*time.Millisecond)
++		f.slots = slots
++		t.Cleanup(func() { f.stop(); a.Close(); ap.Close(); b.Close(); bp.Close() })
++		return f, ap, bp
++	}
++	first, _, _ := makeCopy()
++	if !first.admit() {
++		t.Fatal("first fallback refused")
++	}
++	if !first.admit() || len(slots) != 1 {
++		t.Fatal("directions acquired duplicate slots")
++	}
++	first.touch()
++	second, _, _ := makeCopy()
++	done := make(chan error, 1)
++	go func() { _, e := second.copy(second.target, second.client, &LimitFallback{}); done <- e }()
++	select {
++	case e := <-done:
++		if e == nil {
++			t.Fatal("over-limit fallback accepted")
++		}
++	case <-time.After(time.Second):
++		t.Fatal("fallback limit blocked waiting for a slot")
++	}
++	<-first.done
++	first.stop()
++	first.stop()
++	if len(slots) != 0 {
++		t.Fatal("expired fallback slot leaked")
++	}
++	third, _, _ := makeCopy()
++	if !third.admit() {
++		t.Fatal("released slot not reusable")
++	}
++}
++
++type lingerProbe struct {
++	net.Conn
++	zero atomic.Bool
++}
++
++func (c *lingerProbe) SetLinger(n int) error { c.zero.Store(n == 0); return nil }
++func TestOnlyExpiredHandshakeAbortsTCPQueues(t *testing.T) {
++	a, ap := net.Pipe()
++	b, bp := net.Pipe()
++	defer ap.Close()
++	defer bp.Close()
++	client := &lingerProbe{Conn: a}
++	target := &lingerProbe{Conn: b}
++	d := newHandshakeDeadline(client, target, 10*time.Millisecond)
++	time.Sleep(30 * time.Millisecond)
++	if d.release() || !client.zero.Load() || !target.zero.Load() {
++		t.Fatal("expired handshake retained TCP queues")
++	}
++	c, cp := net.Pipe()
++	e, ep := net.Pipe()
++	defer c.Close()
++	defer cp.Close()
++	defer e.Close()
++	defer ep.Close()
++	valid := &lingerProbe{Conn: c}
++	peer := &lingerProbe{Conn: e}
++	d = newHandshakeDeadline(valid, peer, 10*time.Millisecond)
++	if !d.release() {
++		t.Fatal("handoff failed")
++	}
++	time.Sleep(30 * time.Millisecond)
++	if valid.zero.Load() || peer.zero.Load() {
++		t.Fatal("authenticated transport was aborted")
++	}
++}
+--- /dev/null
++++ b/handshake_deadline.go
+@@ -0,0 +1,43 @@
++package reality
++
++import (
++	"net"
++	"sync/atomic"
++	"time"
++)
++
++// handshakeDeadline interrupts clients which never finish reading or writing
++// their handshake. Releasing it transfers lifetime ownership to authenticated
++// transport or the fallback's separate idle clock.
++type handshakeDeadline struct {
++	state atomic.Int32 // 0=pending, 1=released, 2=expired
++	timer *time.Timer
++}
++
++func newHandshakeDeadline(client, target net.Conn, timeout time.Duration) *handshakeDeadline {
++	d := &handshakeDeadline{}
++	d.timer = time.AfterFunc(timeout, func() {
++		if d.state.CompareAndSwap(0, 2) {
++			closeExpiredConn(client)
++			closeExpiredConn(target)
++		}
++	})
++	return d
++}
++func (d *handshakeDeadline) release() bool {
++	if d.state.CompareAndSwap(0, 1) {
++		d.timer.Stop()
++		return true
++	}
++	return d.state.Load() == 1
++}
++
++// An expired unauthenticated connection has no remaining useful payload.
++// Abort TCP queues as well as userspace IO instead of leaving orphaned
++// retransmission buffers charged to the kernel after Close returns.
++func closeExpiredConn(c net.Conn) {
++	if tcp, ok := c.(interface{ SetLinger(int) error }); ok {
++		_ = tcp.SetLinger(0)
++	}
++	_ = c.Close()
++}

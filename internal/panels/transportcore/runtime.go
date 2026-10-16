@@ -29,8 +29,15 @@ type remoteSSH interface {
 	Run(context.Context, provisioning.Target, []byte, string) (string, error)
 }
 
+// RequiresPreparation keeps the Fragment preflight and also prepares managed
+// REALITY TCP listeners with bounded unauthenticated fallback forwarding.
+func RequiresPreparation(payload realityconfig.Payload) bool {
+	network := payload.StreamSettings["network"]
+	return network == "xhttp" || ((network == "tcp" || network == "raw") && payload.StreamSettings["security"] == "reality")
+}
+
 func Prepare(ctx context.Context, ssh remoteSSH, target provisioning.Target, key []byte, payload realityconfig.Payload) error {
-	if payload.StreamSettings["network"] != "xhttp" {
+	if !RequiresPreparation(payload) {
 		return nil
 	}
 	data, err := json.Marshal(map[string]any{"log": map[string]any{"loglevel": "none"}, "inbounds": []any{payload}, "outbounds": []any{map[string]any{"protocol": "freedom"}}})

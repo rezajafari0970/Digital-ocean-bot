@@ -677,7 +677,7 @@ WHERE pi.id=$1
 }
 
 func (d *panelDeps) prepareTransport(ctx context.Context, payload realityconfig.Payload) error {
-	if payload.StreamSettings["network"] != "xhttp" {
+	if !transportcore.RequiresPreparation(payload) {
 		return nil
 	}
 	key, err := d.secrets.Get(ctx, d.accountID, d.target.KeySecretRef)

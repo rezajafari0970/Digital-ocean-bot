@@ -1,15 +1,21 @@
 {
-  "version": "dob-fm-0.1.0",
+  "version": "dob-fm-0.2.2",
   "core": {
     "name": "xray",
-    "sha256": "d639f884fcdf5d11b2ccb100f4fd8bc8f49ceaad8f2a043452e2545e14e48d13",
-    "gzip_sha256": "a8afb9ce60654b8ad9060391f136cea3077462bcca8170a404a7d1017cf6e847",
-    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/5793567513420e536bdfca28464dbe831d13caa2/xray.gz"
+    "sha256": "f0e35cb830cd58756dae9744a0d9372f972dfba1ba6a50a30422ba3e8727eeed",
+    "gzip_sha256": "14bf7a0d740805ced7a7886e3ece204f1417e7483438f459b499d3d53f797fae",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/xray.gz"
+  },
+  "core_arm64": {
+    "name": "xray-arm64",
+    "sha256": "d39f86129ec689fe7791365de08017c0b3ba0acb231467eac6da92f938c530a8",
+    "gzip_sha256": "6157ed20f12ac7ce7307a60b8ba087c4ffdd495785547d00eaaaa9ec7e7bfb63",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/xray-arm64.gz"
   },
   "panel": {
     "name": "x-ui",
     "sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
     "gzip_sha256": "8d1f45b1d79f79c78038a53cf900282e562617a8ba656fa22dee666802ea460a",
-    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/5793567513420e536bdfca28464dbe831d13caa2/x-ui.gz"
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/x-ui.gz"
   }
 }
