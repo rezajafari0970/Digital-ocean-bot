@@ -15,6 +15,8 @@ const serverProtectionOutputPredicate = `
  AND (pn.verified_status->>'admission_blocked'='true'
  OR (pn.verified_status->>'enabled'='true' AND pn.verified_status->>'xui_state' IN ('failed','inactive','active_xray_failed')))) `
 
+// Cleanup is a completed, revision-fenced action; telemetry freshness is a
+// separate observation. A stale timestamp must not invent pending cleanup.
 func (s *Server) serverProtectionStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	if !residentialAdmin(w, r) {
@@ -38,6 +40,10 @@ func (s *Server) serverProtectionStatus(w http.ResponseWriter, r *http.Request) 
  'verified',COALESCE(n.control_revision=c.revision AND n.applied_revision=n.desired_revision
  AND n.state=CASE WHEN n.desired_enabled THEN 'APPLIED' ELSE 'DISABLED' END
  AND n.checked_at>now()-interval '60 seconds',false),
+ 'cleanup_verified',COALESCE(NOT n.desired_enabled AND n.control_revision=c.revision
+ AND n.applied_revision=n.desired_revision AND n.state='DISABLED' AND n.verified_at IS NOT NULL
+ AND n.verified_status->>'enabled'='false' AND n.verified_status->>'agent_running'='false'
+ AND n.verified_status->>'admission_blocked'='false' AND n.verified_status->>'state'='DISABLED',false),
  'last_verified_at',n.verified_at,'last_verified_status',COALESCE(n.verified_status,'{}'::jsonb),
  'output_withheld',COALESCE(n.verified_status->>'admission_blocked'='true' OR (n.verified_status->>'enabled'='true' AND n.verified_status->>'xui_state' IN ('failed','inactive','active_xray_failed')),false),
  'status',COALESCE(n.status,'{}'::jsonb)) ORDER BY p.id)

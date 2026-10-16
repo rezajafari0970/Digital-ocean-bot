@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "RETAINED_UPGRADE_FIXED_VERIFIED_PUBLICATION_PENDING",
+  "status": "IDENTITY_COVERAGE_DEPLOYED_CLEANUP_DISPLAY_VERIFIED",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -186,14 +186,14 @@
     "Qualify10accounts with slow/failed/rotating account plus provider2 and bulk work, cancellation, stale lease ownership, and real PostgreSQL pool pressure before rollout."
   ],
   "not_yet_done": [
-    "Publish retention compatibility correction and verify both hosts",
-    "Observe full Direct1/Residential3 fleet coverage and identity age",
-    "Report genuine resource pressure separately; desired protectionOFF preserved"
+    "Publish and deploy the verified cleanup display correction",
+    "Finish observed Direct1/Residential3 coverage and record remaining genuine transient failures",
+    "Do not claim live enabled-protection acceptance while desired policy is OFF"
   ],
   "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
   "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
-  "updated_at": "2026-10-16T08:58:51.169961+00:00",
+  "updated_at": "2026-10-16T09:24:37.915061+00:00",
   "api_usage_current_task": {
     "requests": 0,
     "tokens": 0,
@@ -252,5 +252,24 @@
     "secondary": "VERIFIED",
     "primary": "SAFE_ROLLBACK_TO_124f51f; populated retention rejected policy64to0 migration",
     "new_regression": "baseline failed with identical production error; corrected retained upgrade passes and rejects unrelated budget overwrite"
+  },
+  "installed_public": "b57da31c1180f488d2004765815ac3e526fbbe75",
+  "cleanup_candidate_hashes": {
+    "internal/adminapi/server_protection.go": "4d95035fb933178b10d7485a5beb3d8c8b33ca3711e6ce5d25faaf7a2d1e262f",
+    "internal/adminapi/protection_cleanup_status_test.go": "9be624ea1f2f698bf79b7665a0a10e4c28f9983646487f363530c4931e9d7b49",
+    "web/static/server_protection.js": "a6fcbde496a5cec9c106e929ab2e27da281ca0adf805b374181fa175c7f728ea",
+    "web/tests/server-protection.cjs": "1a2591dc911e95f4e210a25a642eafed4a7fc284349f523a603450ad743bd351"
+  },
+  "cleanup_checks": {
+    "cleanup-status-race": "PASS",
+    "cleanup-status-full": "PASS",
+    "cleanup-status-vet": "PASS",
+    "cleanup-status-browser": "PASS"
+  },
+  "new_api_calls": 0,
+  "protection_policy": {
+    "enabled": false,
+    "revision": 50,
+    "changed_by_this_task": false
   }
 }

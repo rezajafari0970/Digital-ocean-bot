@@ -53,6 +53,14 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("#protectionDisable").click()');
   await waitFor('!protectionBusy&&protectionData?.control?.enabled===false');
   assert.ok(await evaluate('document.querySelector("#protectionStatus").textContent.includes("awaiting verified cleanup")'));
+  await evaluate('window.cleanupFixture=structuredClone(protectionData);Object.assign(window.cleanupFixture.panels[0],{desired_enabled:false,verified:false,cleanup_verified:true,state:"DISABLED",error:""});renderProtection(window.cleanupFixture)');
+  assert.ok(await evaluate('document.querySelector("#protectionStatus").textContent.includes("cleanup verified")'));
+  assert.equal(await evaluate('document.querySelector("#protectionStatus").textContent.includes("awaiting verified cleanup")'),false);
+  assert.ok(await evaluate('document.querySelector("#protectionResults").textContent.includes("cleanup verified")'));
+  await evaluate('Object.assign(window.cleanupFixture.panels[0],{cleanup_verified:false,state:"ERROR",error:"SSH unavailable"});renderProtection(window.cleanupFixture)');
+  assert.ok(await evaluate('document.querySelector("#protectionStatus").textContent.includes("1 need attention")'));
+  assert.ok(await evaluate('document.querySelector("#protectionStatus").textContent.includes("1 server(s) awaiting verified cleanup")'));
+  await evaluate('refreshServerProtection()');
   await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
   await evaluate('document.querySelector("#serverProtectionSlot").scrollIntoView()');
   const desktop=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'server-protection-desktop.png'),Buffer.from(desktop.data,'base64'));

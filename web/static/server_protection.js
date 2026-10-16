@@ -10,10 +10,11 @@ function protectionShell(){
  '<p class="muted">Local resource sampling: 250 ms. Fleet verification is slower. Existing connections remain open; changing an active connection to another server requires app support. Automatic app failover and per-user admission are not included.</p>'+
  '<details id="protectionDetails"><summary>Server results</summary><div id="protectionResults"></div></details></div>';
 }
+function protectionCleanupVerified(p){return p.cleanup_verified===true||(p.cleanup_verified===undefined&&!p.desired_enabled&&p.verified)}
 function renderProtection(d){
  const c=d.control,panels=d.panels||[],assigned=panels.filter(p=>p.assigned);
  const on=assigned.filter(p=>p.desired_enabled),verified=on.filter(p=>p.verified);
- const cleanup=assigned.filter(p=>(c.enabled?!p.desired_enabled&&!p.verified:p.desired_enabled||!p.verified));
+ const cleanup=assigned.filter(p=>p.desired_enabled?!c.enabled:!protectionCleanupVerified(p));
  const bad=assigned.filter(p=>['ERROR','UNSUPPORTED'].includes(p.state));
  const paused=on.filter(p=>p.verified&&p.status?.admission_blocked);
  const stale=on.filter(p=>!p.verified&&p.state==='APPLIED');
@@ -24,8 +25,8 @@ function renderProtection(d){
  (c.enabled?verified.length+' / '+on.length+' enabled servers freshly verified':(cleanup.length?'Disabling: '+cleanup.length+' server(s) awaiting verified cleanup.':'Protection disabled; assigned server cleanup verified.'))+
  (bad.length?' · '+bad.length+' need attention':'')+'</p><p>'+paused.length+' temporarily paused by resource protection · '+stale.length+' reports overdue'+(waiting.length?' · '+waiting.length+' awaiting an eligible public listener':'')+'</p><p class="muted">'+(d.inherits_future?'New eligible servers inherit this policy automatically.':'Future servers do not inherit protection.')+'</p>';
  document.getElementById('protectionResults').innerHTML=assigned.length?assigned.map(p=>{
- const st=p.status||{},m=st.metrics||{};
- return '<div class="card section"><strong>'+esc(p.label)+'</strong><p>'+esc(p.state)+' · '+(p.verified?'verified':'pending / unverified')+' · '+esc(st.state||'unknown')+'</p>'+
+ const st=p.status||{},m=st.metrics||{},cleaned=!p.desired_enabled&&protectionCleanupVerified(p);
+ return '<div class="card section"><strong>'+esc(p.label)+'</strong><p>'+esc(p.state)+' · '+(cleaned?'cleanup verified':p.verified?'verified':'pending / unverified')+' · '+esc(st.state||'unknown')+'</p>'+
  '<p>'+esc(p.error||st.reason||'Waiting for a server receipt')+'</p>'+
  (p.verified&&st.admission_blocked?'<p>Protection is active. New connections reopen automatically after resources stabilize; existing sessions remain open.</p>':'')+
  (p.output_withheld&&!p.verified?'<p>Output remains withheld until a fresh recovery receipt is verified.</p>':'')+

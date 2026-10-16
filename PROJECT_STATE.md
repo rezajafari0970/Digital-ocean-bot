@@ -1,4 +1,15 @@
 
+## Disabled cleanup status correction
+
+The retained upgrade was successfully deployed on both hosts as public b57da31/source 10c2254. Both hosts passed service hash, readiness and policy preservation checks. Primary retained all 196 existing listener pins. Identity observations recovered within the existing 180-second limit; the first sustained window reached a maximum age of 128 seconds, with no provider proxy errors or SQL pool waits. Enrollment reached all 92 eligible inbounds. Direct output covered every healthy server in repeated samples; Residential creation was still converging under the configured 60-second per-profile cadence.
+
+A further live defect was reproduced: 61 completed, revision-matched disabled cleanups were displayed as pending solely because their receipt age exceeded 60 seconds. A new cleanup_verified field records completion separately from fresh telemetry. It requires matching control and desired/applied revisions, DISABLED state, a validated receipt, stopped agent and no admission block. An actual current error, new policy revision, or disable intent without a receipt remains unverified. Enabled telemetry still expires after 60 seconds. Output admission guards, agent behavior and resource thresholds are unchanged.
+
+The actual PostgreSQL regression failed on the prior implementation and passed after the correction. Race tests, full regression, vet and headless Chromium mobile/desktop tests passed. Browser assertions prove completed cleanup is displayed correctly and an actual SSH error remains visible. The desired protection policy is currently OFF revision 50, updated externally at 08:48:21 UTC; this task did not change it. Enabled protection under live load is not claimed verified by these OFF-state observations. OpenAI API usage remains zero.
+
+This correction still requires normal publication and both-host activation. Final profile coverage and transient route/provisioning exceptions will be recorded after convergence.
+
+
 ## Populated upgrade correction — 2026-10-16T08:58:51.169961+00:00
 
 Firstpublic4d156e passedbothCIandsecondaryactivation; primaryinstaller correctly rolled back to124f51f when PreserveData rejected the intended scope64to0policy transition. No data/retention/checksum guard was disabled. Added a populated retained-upgrade regression: it reproduced the identical error on baseline. The existing per-version expected-transformation mechanism (previously used for172) now declares only migration182bulk_lifecycle_control max64to0andits transactiontimestamp under the exact enabled/auto/global/unscoped/gate predicate. Everyothercolumn,row,budget andgate is retained. A negative regression proves an unrelated operation_budget overwrite is rejected and rolled back. The immutable182migration bytes/checksum remain unchanged; an already-upgraded secondary skips it normally. Targeted retained/race,full andvet gates PASS. New publication and bothhost verification pending. APIcalls0.
