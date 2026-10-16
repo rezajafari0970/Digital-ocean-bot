@@ -1,7 +1,7 @@
 {
   "id": "output-proof-reliability-20261016",
-  "status": "VERIFIED_PUBLICATION_PENDING",
-  "updated_at": "2026-10-16T07:17:11.456915+00:00",
+  "status": "OUTPUT_AND_GUARDIAN_ROLLOUT_ACCEPTED_NETWORK_IDENTITY_FOLLOWUP_OPEN",
+  "updated_at": "2026-10-16T07:52:27.642706+00:00",
   "risk": {
     "schema": 1,
     "profile": "critical",
@@ -101,9 +101,9 @@
     "total_tokens": 1213193,
     "estimated_usd": 30.4068445
   },
-  "publication": "PENDING",
-  "deployment": "PENDING",
-  "production_both_hosts": "152a45a65dddfbcef564983fb81ee041aa0d12dd",
+  "publication": "COMPLETE",
+  "deployment": "BOTH_HOSTS_VERIFIED",
+  "production_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
   "capacity_qualification": {
     "serving": 18,
     "retired": 1,
@@ -118,17 +118,17 @@
     "real_pg_renewal_cycles": 3
   },
   "remaining": [
-    "final throughput independent review",
-    "exact-source complete regression",
-    "normal publisher and both-host binary verification with observation OFF",
-    "guardian canary then staged fleet rollout",
-    "observation canary then serving capacity 2 -> 8 -> 18",
-    "production repeated freshness and subscription coverage acceptance; genuine pressure/network failures remain visible"
+    "Network identity keeper shares one bulk-control permit; identity ages >180s observed while healthy base proxy; follow-up scheduling correction required.",
+    "Real resource pressure/admission pauses and bounded native/SSH/network failures remain visible."
   ],
   "review": {
     "reviewer": "PASS",
     "adversary": "No correctness blocker; sole G1 full-validation condition satisfied by unchanged-source deterministic gates",
     "corrective_reviews": "both PASS",
     "followup": "API credit_balance_exhausted; no source edits or unreviewed code bypass"
-  }
+  },
+  "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
+  "observation_scope": "all",
+  "proof_capacity": 18,
+  "acceptance": "docs/OUTPUT_PROOF_ACCEPTANCE_20261016.json"
 }

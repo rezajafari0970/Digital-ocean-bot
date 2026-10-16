@@ -1,0 +1,294 @@
+{
+  "at": "2026-10-16T07:52:27.642706+00:00",
+  "status": "OUTPUT_AND_GUARDIAN_ROLLOUT_ACCEPTED_NETWORK_IDENTITY_FOLLOWUP_OPEN",
+  "source_revision": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
+  "public_revision": "124f51f835629a36d0a073ba087859c54af7d20a",
+  "primary": {
+    "at": "2026-10-16T07:45:45.239277+00:00",
+    "commit": "124f51f835629a36d0a073ba087859c54af7d20a",
+    "schema": "000181_output_policy",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-16T07:45:45.290962617Z"
+    },
+    "checks": {
+      "accounts_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "retained_pins_unchanged": true
+    },
+    "retained_pins": 186,
+    "expired_pins": 0,
+    "readiness_samples": 5
+  },
+  "secondary": {
+    "stage": "ACTIVATED_VERIFIED",
+    "public_revision": "124f51f835629a36d0a073ba087859c54af7d20a",
+    "counts": {
+      "enabled_accounts": 0,
+      "enabled_panels": 0,
+      "ready_servers": 0
+    },
+    "primary_gate": "24 real-output samples: zero missing eligible servers or invalid fields; pool40 max34 used, zero waits; guardian91 new artifact verified",
+    "at": "2026-10-16T07:45:15.064837+00:00",
+    "scope": "all",
+    "capacity": 18,
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "checks": {
+      "accounts_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "pins": true
+    },
+    "readiness_samples": 5,
+    "proof_serving": {
+      "limit": 18,
+      "active": 0,
+      "waiting": 0
+    },
+    "verification_note": "Initial post-activation helper COALESCE json/jsonb type mismatch corrected by read-only verification; no repeated restart or activation",
+    "verified_at": "2026-10-16T07:46:26.455212+00:00"
+  },
+  "output_samples": {
+    "count": 24,
+    "first": "2026-10-16T07:39:11.448993+00:00",
+    "last": "2026-10-16T07:43:09.142929+00:00",
+    "missing_eligible_total": 0,
+    "invalid_total": 0,
+    "pool_max_in_use": 34,
+    "pool_wait_count_max": 0,
+    "proof_fresh_min_after_warmup": 89,
+    "proof_fresh_max": 91,
+    "eligible": 91,
+    "last_proof_coverage": {
+      "due": 31,
+      "observed_at": "2026-10-16T07:43:07.159772Z",
+      "raw_under_15s": 91,
+      "never_verified": 0,
+      "current_applied": 90,
+      "eligible_serving": 91,
+      "oldest_due_seconds": 13.958069,
+      "verified_under_60s": 90,
+      "proof_age_max_seconds": 33.958069,
+      "proof_age_p95_seconds": 30.147461,
+      "raw_fresh_proof_stale": 1,
+      "proof_age_median_seconds": 15.748135
+    },
+    "failed_attempts": 3
+  },
+  "surfaces": {
+    "at": "2026-10-16T07:45:44.448033+00:00",
+    "surfaces": {
+      "api:ALL": {
+        "links": 243,
+        "servers": 71,
+        "types": {
+          "xhttp": 243
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:DIRECT": {
+        "links": 43,
+        "servers": 43,
+        "types": {
+          "xhttp": 43
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "api:RESIDENTIAL": {
+        "links": 129,
+        "servers": 43,
+        "types": {
+          "xhttp": 129
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:ALL": {
+        "links": 243,
+        "servers": 71,
+        "types": {
+          "xhttp": 243
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:DIRECT": {
+        "links": 43,
+        "servers": 43,
+        "types": {
+          "xhttp": 43
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "share:RESIDENTIAL": {
+        "links": 129,
+        "servers": 43,
+        "types": {
+          "xhttp": 129
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+        "links": 18,
+        "servers": 6,
+        "types": {
+          "xhttp": 18
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+        "links": 6,
+        "servers": 6,
+        "types": {
+          "xhttp": 6
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:a9b4646b-2a58-4386-8201-736b725257e0:DIRECT": {
+        "links": 6,
+        "servers": 6,
+        "types": {
+          "xhttp": 6
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:a9b4646b-2a58-4386-8201-736b725257e0:RESIDENTIAL": {
+        "links": 18,
+        "servers": 6,
+        "types": {
+          "xhttp": 18
+        },
+        "invalid": 0,
+        "reasons": {}
+      },
+      "account:b8d5680e-94f0-431b-9569-503f4c42cc80:DIRECT": {
+        "links": 3,
+        "servers": 3,
+        "types": {
+          "xhttp": 3
+        },
+        "invalid": 0,
+        "reasons": {}
+      }
+    },
+    "all_coverage": {
+      "stable_active": 65,
+      "missing_stable_active": []
+    },
+    "ready": true,
+    "pass": true
+  },
+  "guardian_rollout": "1/10/fleet verified; all91 observed new artifact; Xray PIDs/policies/listeners preserved in native canaries",
+  "provider_overdue_max": 0,
+  "latest_fleet": {
+    "at": "2026-10-16T07:47:12.698841+00:00",
+    "health": {
+      "HEALTHY": 64,
+      "PANEL_DEGRADED": 21,
+      "PENDING_DELETION": 1,
+      "PROVIDER_UNAVAILABLE": 6,
+      "PROVISIONING": 1
+    },
+    "enabled": 91,
+    "fresh": 91,
+    "errors": 0,
+    "paused": 21
+  },
+  "api_usage": {
+    "requests": 30,
+    "usage_available": 29,
+    "failed_without_usage": 1,
+    "input_tokens": 768667,
+    "output_tokens": 444526,
+    "total_tokens": 1213193,
+    "estimated_usd": 30.4068445,
+    "at": "2026-10-16T07:17:11.456915+00:00"
+  },
+  "new_api_calls_this_continuation": 0,
+  "remaining": [
+    "Network identity keeper shares one bulk-control permit; identity ages >180s observed while healthy base proxy; follow-up scheduling correction required.",
+    "Real resource pressure/admission pauses and bounded native/SSH/network failures remain visible."
+  ],
+  "evidence": {
+    "output-capacity8.json": "7530fcdd5c6d43df40982bbc31ecd0d70bb1aaab90c4e254e556e41e1a95acda",
+    "output-capacity18.json": "319bc37279582d0ce5d391d42cb1c88fed4046ad9e552201bf359846d0a03eca",
+    "guardian-output-rollout.json": "e23a271622d4817128b8b80660a22dbf278bbbc294c6f99a56cd9da92d324d84",
+    "observation-activation.json": "67c14c693e6f02106d8a0dbdb8883d2bf8ee9a30345dbb29222be34e23cc8daa",
+    "secondary-observation-verify.json": "f0b5e86d61a389b01a7840cb9d62e44ad03118400bbe012cda2d9ba22206790f",
+    "fifth-output-surfaces-final.json": "418ce105970ab2b4b46c5b3d49367b0f2c9f310e515b0509bedb4df9212f3b7f",
+    "fifth-final-provider-errors.json": "863466495b602d9b2f1a9371ad8b835d92546941ba20ae994df65433c1ff29c4"
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Fourth release source bf94c565 / public 152a45a is installed on both hosts, with all three service executable hashes and readiness verified. Its guardian 1/10/fleet rollout completed. The changes in this report are a separate candidate; publication and live acceptance are still pending.
+Source e4e1e544 / public 124f51f is installed and verified on both hosts. Guardian 1/10/fleet rollout completed; observation scope all and serving capacity18 are active on both hosts. Output/proof acceptance passed. A separate network-identity scheduling defect discovered during acceptance remains open.
 
 ## Reproduced causes and fixes
 
@@ -27,4 +27,15 @@ Normal publisher only. First update every API/control/panel writer on both hosts
 
 Production can correctly report resource-pressure admission pauses and external proxy/provider failures. Such states are not erased to make dashboard counts zero. No permanent no-failure guarantee or full-project mastery claim is made.
 
-Exact-source final full regression, vet and critical race/native/fault gates passed. Independent reviewer PASS; adversary found no correctness blocker, with sole G1 incomplete-test gate now satisfied by the retained results. Follow-up API request failed credit_balance_exhausted; no new model calls attempted. Evidence adjudication follows the project protocol; no missing code review is claimed as performed. API usage: {"requests": 30, "usage_available": 29, "failed_without_usage": 1, "input_tokens": 768667, "output_tokens": 444526, "total_tokens": 1213193, "estimated_usd": 30.4068445}. Publication and runtime acceptance pending.
+Exact-source final full regression, vet and critical race/native/fault gates passed. Independent reviewer PASS; adversary found no correctness blocker, with sole G1 incomplete-test gate now satisfied by the retained results. Follow-up API request failed credit_balance_exhausted; no new model calls attempted. Evidence adjudication follows the project protocol; no missing code review is claimed as performed. API usage: {"requests": 30, "usage_available": 29, "failed_without_usage": 1, "input_tokens": 768667, "output_tokens": 444526, "total_tokens": 1213193, "estimated_usd": 30.4068445}. Publication and output runtime acceptance completed; network-identity follow-up remains open.
+
+
+## Actual runtime acceptance
+
+24 live DIRECT samples over 238 seconds found zero missing stable eligible servers and zero malformed/unwanted fields. Both complete checks of all11 existing API/global/account share surfaces passed; final ALL exported243 links across71 hosts and omitted zero of65 stable active hosts. DIRECT43 and RESIDENTIAL43 hosts reflect profile membership, not all-server counts. The output freshness window remains15s and route proof60s.
+
+At capacity18, 89..91 of91 eligible route proofs remained current/fresh after warm-up; raw snapshots were fresh for91. Transient structural APPLYING states and three native HTTP header timeouts withheld affected class output until normal recovery. Pool40 used at most34 connections with zero pool waits. Old capacity2 had18 fresh proofs among93 eligible; capacity8 was insufficient for uniform60s coverage. No claim is made that failures or configuration transitions can never withhold output.
+
+All91 guardians were observed on the new artifact after 1/10/fleet verification. Final policy/pin checks preserved186 primary pins and all account/environment/creation/output/protection policy fingerprints. Both hosts had all3 matching active service binaries and repeated readiness checks. Secondary has zero enabled accounts/panels/servers; all-scope observation/capacity18 are activated for future scope. A secondary verification-helper json/jsonb COALESCE type error was corrected by read-only verification without repeating activation.
+
+Provider observation overdue remained0 throughout18 fleet samples. Recurrent PROXY_ERROR was traced further: network identity maintenance shares the single bulk-control slot with long lifecycle work, with a45s deadline starting before that queue. Healthy base proxy observations coexist with identity ages205..228s, beyond the unchanged180s economy guard. This separate scheduling problem remains OPEN; prior transient recovery is not evidence of its permanent resolution. Real CPU/PSI/conntrack pressure also legitimately keeps admission paused. The full project is not declared fault-free.
