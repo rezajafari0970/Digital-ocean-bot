@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -35,6 +37,7 @@ type pollSSH struct {
 	active, peak              map[bool]int
 	total, peakTotal, uploads int
 	calls                     []string
+	postInventory             map[string]string
 }
 
 func newPollController(t *testing.T, db *sql.DB) (Controller, *pollSSH) {
@@ -44,7 +47,7 @@ func newPollController(t *testing.T, db *sql.DB) (Controller, *pollSSH) {
 	if e := os.WriteFile(filepath.Join(dir, "server-guardian-linux-amd64"), data, 0600); e != nil {
 		t.Fatal(e)
 	}
-	ssh := &pollSSH{db: db, hash: fmt.Sprintf("%x", sha256.Sum256(data)), entered: make(chan string, 1000), active: map[bool]int{}, peak: map[bool]int{}}
+	ssh := &pollSSH{db: db, hash: fmt.Sprintf("%x", sha256.Sum256(data)), entered: make(chan string, 1000), active: map[bool]int{}, peak: map[bool]int{}, postInventory: map[string]string{}}
 	return Controller{DB: db, Secrets: pollSecrets{}, SSH: ssh, ArtifactDir: dir}, ssh
 }
 func (s *pollSSH) Upload(context.Context, provisioning.Target, []byte, string, string, os.FileMode) error {
@@ -58,6 +61,13 @@ func (s *pollSSH) Run(ctx context.Context, t provisioning.Target, key []byte, cm
 		return "", s.failure
 	}
 	if strings.Contains(cmd, "uname -m") {
+		s.mu.Lock()
+		out := s.postInventory[t.DropletID]
+		delete(s.postInventory, t.DropletID)
+		s.mu.Unlock()
+		if out != "" {
+			return out, nil
+		}
 		return "x86_64\n" + s.hash + "\n", nil
 	}
 	var revision int64
@@ -85,11 +95,25 @@ func (s *pollSSH) Run(ctx context.Context, t provisioning.Target, key []byte, cm
 		case <-s.cleanup:
 		}
 	}
-	st := Status{Version: Version, Revision: revision, Enabled: enabled, AgentRunning: enabled, NFTSupported: true, Ports: []int{443}, State: "READY", XUIState: "active", ObservedAt: time.Now()}
+	st := Status{AgentPID: 42, AgentStartTicks: "1", AgentBinarySHA256: s.hash, Version: Version, Revision: revision, Enabled: enabled, AgentRunning: enabled, NFTSupported: true, Ports: []int{443}, State: "READY", XUIState: "active", ObservedAt: time.Now()}
 	if !enabled {
 		st.State = "DISABLED"
 	}
 	raw, e := json.Marshal(st)
+	if enabled {
+		matches := regexp.MustCompile("printf %s '([^']+)' " + regexp.QuoteMeta("| base64 -d | "+BinaryPath+" configure")).FindStringSubmatch(cmd)
+		if len(matches) != 2 {
+			return "", fmt.Errorf("fixture policy not found")
+		}
+		policy, err := base64.StdEncoding.DecodeString(matches[1])
+		if err != nil {
+			return "", err
+		}
+		inventory := fmt.Sprintf("x86_64\n%s\n%x\n%x\nenabled\n42\n%s\n", s.hash, sha256.Sum256(append(policy, '\n')), sha256.Sum256([]byte(Unit)), raw)
+		s.mu.Lock()
+		s.postInventory[t.DropletID] = inventory
+		s.mu.Unlock()
+	}
 	return string(raw), e
 }
 func waitPoll(t *testing.T, timeout time.Duration, fn func() bool) {

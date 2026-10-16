@@ -58,19 +58,22 @@ type Metrics struct {
 	ConntrackSupported bool    `json:"conntrack_supported"`
 }
 type Status struct {
-	Version          string    `json:"version"`
-	Revision         int64     `json:"revision"`
-	Enabled          bool      `json:"enabled"`
-	State            string    `json:"state"`
-	Reason           string    `json:"reason"`
-	ObservedAt       time.Time `json:"observed_at"`
-	SampleAgeMS      int64     `json:"sample_age_ms"`
-	AgentRunning     bool      `json:"agent_running"`
-	AdmissionBlocked bool      `json:"admission_blocked"`
-	NFTSupported     bool      `json:"nft_supported"`
-	Ports            []int     `json:"ports"`
-	Metrics          Metrics   `json:"metrics"`
-	ActuationMS      float64   `json:"actuation_ms"`
-	XUIState         string    `json:"xui_state"`
-	Recovery         string    `json:"recovery"`
+	AgentPID          int       `json:"agent_pid,omitempty"`
+	AgentStartTicks   string    `json:"agent_start_ticks,omitempty"`
+	AgentBinarySHA256 string    `json:"agent_binary_sha256,omitempty"`
+	Version           string    `json:"version"`
+	Revision          int64     `json:"revision"`
+	Enabled           bool      `json:"enabled"`
+	State             string    `json:"state"`
+	Reason            string    `json:"reason"`
+	ObservedAt        time.Time `json:"observed_at"`
+	SampleAgeMS       int64     `json:"sample_age_ms"`
+	AgentRunning      bool      `json:"agent_running"`
+	AdmissionBlocked  bool      `json:"admission_blocked"`
+	NFTSupported      bool      `json:"nft_supported"`
+	Ports             []int     `json:"ports"`
+	Metrics           Metrics   `json:"metrics"`
+	ActuationMS       float64   `json:"actuation_ms"`
+	XUIState          string    `json:"xui_state"`
+	Recovery          string    `json:"recovery"`
 }

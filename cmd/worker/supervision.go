@@ -29,6 +29,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		p.Work = 20 * time.Minute
 		p.Idle = 24 * time.Hour
 	case "server-protection", "server-protection-cleanup":
+		p.AsyncLoop = true
 		p.Loop = 2 * time.Minute
 		p.Work = 45 * time.Second
 		p.Idle = 5 * time.Second

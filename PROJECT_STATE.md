@@ -1,3 +1,7 @@
+## Guardian rolling scheduling verified; deployment pending — 2026-10-16T05:22:23.445136+00:00
+
+Production source8225c312/public8abcacc verified on both hosts. Third source candidate removes the round barrier, enforces running executable identity, and stabilizes guardian artifacts across unrelated releases. Exact-source full/race/kernel/artifact/vet passed; Astra max review B1 fixed and accepted. Normal publication, staged canary and both-host acceptance next. API 420695 tokens, estimated $11.569912 across 14 requests. Provider observation starvation is reproduced and isolated; residential/output lock regression remains open. No permanent no-warning or mastery claim.
+
 ## Native bootstrap follow-up verified; release pending — 2026-10-16T04:15:31.673937+00:00
 
 First protection release source8ceb426/public61e398b deployed and verified on both hosts; guardian canary passed and fleet released. Follow-up uses bounded authenticated native API for bootstrap/local X25519 and atomically publishes provider cadence with accepted observation; preserves fallback, safety, freshness, locks and credential/order fences. New baseline regression failed; focused/race/fullgo/vet passed. API calls0. Normal publication and host acceptance next. No zero-warning or mastery claim. See docs/SERVER_PROTECTION_RELIABILITY_20261016.md; separate residential/output config-lock issue remains open.

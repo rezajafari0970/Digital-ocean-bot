@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
 	"net/url"
@@ -62,24 +63,126 @@ func (c Controller) upgradeAllowed(panel string) bool {
 type nodeTarget struct {
 	Panel, Account, Droplet, Host, User, KeyRef, URL string
 	Policy                                           Policy
+	RequireDue                                       bool
 }
 
 // Run observes enabled nodes; cleanup has its own independently supervised loop.
 func (c Controller) Run(ctx context.Context)        { c.runLane(ctx, true, 6) }
 func (c Controller) RunCleanup(ctx context.Context) { c.runLane(ctx, false, 2) }
-func (c Controller) runLane(ctx context.Context, enabled bool, concurrency int) {
-	for {
-		supervision.Pulse(ctx)
-		rctx, cancel := context.WithTimeout(ctx, 90*time.Second)
-		if e := c.round(rctx, &enabled, concurrency); e != nil && ctx.Err() == nil {
-			log.Printf("server protection reconciliation (enabled=%t): %v", enabled, e)
+
+// Rolling discovery never waits for the slowest peer before renewing healthy
+// receipts. Only lane-sized work is admitted; no SQL lease is held while waiting
+// for the shared parent budget. The local set prevents duplicate queued work;
+// PostgreSQL advisory locks and revision fences remain authoritative across owners.
+func (c Controller) runLane(parent context.Context, enabled bool, concurrency int) {
+	ctx, cancel := context.WithCancel(parent)
+	var wg sync.WaitGroup
+	defer func() { cancel(); wg.Wait() }()
+	completed := make(chan string, concurrency)
+	inFlight := make(map[string]bool)
+	retryAfter := make(map[string]time.Time)
+	var discoveryRetry time.Time
+	timer := time.NewTimer(0)
+	defer timer.Stop()
+	reset := func(delay time.Duration) {
+		if !timer.Stop() {
+			select {
+			case <-timer.C:
+			default:
+			}
 		}
-		cancel()
-		supervision.Idle(ctx)
+		timer.Reset(delay)
+	}
+	var lastSync time.Time
+	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(5 * time.Second):
+		case panel := <-completed:
+			delete(inFlight, panel)
+			// A competing owner or unavailable database may leave next_check_at due.
+			// Keep retries bounded without inventing or advancing a receipt.
+			retryAfter[panel] = time.Now().Add(time.Second)
+			reset(0)
+		case <-timer.C:
+			if ctx.Err() != nil {
+				return
+			}
+			supervision.Pulse(ctx)
+			if delay := time.Until(discoveryRetry); delay > 0 {
+				reset(delay)
+				continue
+			}
+			if len(inFlight) >= concurrency {
+				reset(time.Second)
+				continue
+			}
+			queryCtx, done := context.WithTimeout(ctx, 5*time.Second)
+			var err error
+			var targets []nodeTarget
+			discover := func(queryCtx context.Context) error {
+				if c.DB == nil || c.Secrets == nil {
+					err = fmt.Errorf("protection controller not configured")
+				} else if lastSync.IsZero() || time.Since(lastSync) >= 5*time.Second {
+					err = (Store{DB: c.DB}).Sync(queryCtx)
+					if err == nil {
+						lastSync = time.Now()
+					}
+				}
+				if err == nil {
+					excluded := make([]string, 0, len(inFlight)+len(retryAfter))
+					for panel, until := range retryAfter {
+						if time.Now().Before(until) {
+							excluded = append(excluded, panel)
+						} else {
+							delete(retryAfter, panel)
+						}
+					}
+					for panel := range inFlight {
+						excluded = append(excluded, panel)
+					}
+					targets, err = c.selectTargets(queryCtx, &enabled, concurrency-len(inFlight), excluded)
+				}
+				return err
+			}
+			if c.Admit != nil {
+				err = c.Admit(queryCtx, discover)
+			} else {
+				err = discover(queryCtx)
+			}
+			done()
+			if err != nil {
+				if ctx.Err() == nil {
+					log.Printf("server protection discovery (enabled=%t): %v", enabled, err)
+				}
+				discoveryRetry = time.Now().Add(5 * time.Second)
+				reset(5 * time.Second)
+				continue
+			}
+			for _, target := range targets {
+				if ctx.Err() != nil {
+					break
+				}
+				target.RequireDue = true
+				inFlight[target.Panel] = true
+				wg.Add(1)
+				go func(t nodeTarget) {
+					defer wg.Done()
+					if c.Admit != nil {
+						_ = c.Admit(ctx, func(work context.Context) error { c.reconcile(work, t); return work.Err() })
+					} else {
+						c.reconcile(ctx, t)
+					}
+					select {
+					case completed <- t.Panel:
+					case <-ctx.Done():
+					}
+				}(target)
+			}
+			if len(inFlight) == 0 {
+				supervision.Idle(ctx)
+			}
+			reset(time.Second)
 		}
 	}
 }
@@ -93,50 +196,7 @@ func (c Controller) round(ctx context.Context, enabled *bool, concurrency int) e
 	if e := (Store{DB: c.DB}).Sync(ctx); e != nil {
 		return e
 	}
-	rows, e := c.DB.QueryContext(ctx, `SELECT n.panel_id::text,p.account_id::text,p.droplet_id::text,COALESCE(dp.host,''),
- COALESCE(NULLIF(dp.profile_snapshot->>'ssh_user',''),'root'),COALESCE(dp.profile_snapshot->>'ssh_key_secret_ref',''),p.base_url,
- n.desired_revision,n.desired_enabled
- FROM server_protection_nodes n JOIN panel_instances p ON p.id=n.panel_id
- JOIN droplets dr ON dr.id=p.droplet_id JOIN deployments dp ON dp.droplet_id=dr.id
- WHERE dr.state<>'DELETED' AND n.next_check_at<=now() AND ($1::boolean IS NULL OR n.desired_enabled=$1)
- ORDER BY n.next_check_at,n.panel_id LIMIT 64`, enabled)
-	if e != nil {
-		return e
-	}
-	var targets []nodeTarget
-	for rows.Next() {
-		var t nodeTarget
-		if e = rows.Scan(&t.Panel, &t.Account, &t.Droplet, &t.Host, &t.User, &t.KeyRef, &t.URL, &t.Policy.Revision, &t.Policy.Enabled); e != nil {
-			rows.Close()
-			return e
-		}
-		t.Policy.PanelID = t.Panel
-		t.Policy.ExcludedPorts = []int{22}
-		u, err := url.Parse(t.URL)
-		if err != nil {
-			rows.Close()
-			return fmt.Errorf("invalid panel URL")
-		}
-		port := u.Port()
-		if port == "" {
-			if u.Scheme == "https" {
-				port = "443"
-			} else {
-				port = "80"
-			}
-		}
-		n, err := strconv.Atoi(port)
-		if err != nil {
-			rows.Close()
-			return err
-		}
-		if n != 22 {
-			t.Policy.ExcludedPorts = append(t.Policy.ExcludedPorts, n)
-		}
-		targets = append(targets, t)
-	}
-	e = rows.Err()
-	rows.Close()
+	targets, e := c.selectTargets(ctx, enabled, 64, nil)
 	if e != nil {
 		return e
 	}
@@ -163,6 +223,60 @@ func (c Controller) round(ctx context.Context, enabled *bool, concurrency int) e
 	wg.Wait()
 	return ctx.Err()
 }
+func (c Controller) selectTargets(ctx context.Context, enabled *bool, limit int, excluded []string) ([]nodeTarget, error) {
+	if excluded == nil {
+		excluded = []string{}
+	}
+	rows, e := c.DB.QueryContext(ctx, `SELECT n.panel_id::text,p.account_id::text,p.droplet_id::text,COALESCE(dp.host,''),
+ COALESCE(NULLIF(dp.profile_snapshot->>'ssh_user',''),'root'),COALESCE(dp.profile_snapshot->>'ssh_key_secret_ref',''),p.base_url,
+ n.desired_revision,n.desired_enabled
+ FROM server_protection_nodes n JOIN panel_instances p ON p.id=n.panel_id
+ JOIN droplets dr ON dr.id=p.droplet_id JOIN deployments dp ON dp.droplet_id=dr.id
+ WHERE dr.state<>'DELETED' AND n.next_check_at<=now() AND ($1::boolean IS NULL OR n.desired_enabled=$1) AND NOT(n.panel_id=ANY($2::uuid[]))
+ ORDER BY n.next_check_at,n.panel_id LIMIT $3`, enabled, pq.Array(excluded), limit)
+	if e != nil {
+		return nil, e
+	}
+	var targets []nodeTarget
+	for rows.Next() {
+		var t nodeTarget
+		if e = rows.Scan(&t.Panel, &t.Account, &t.Droplet, &t.Host, &t.User, &t.KeyRef, &t.URL, &t.Policy.Revision, &t.Policy.Enabled); e != nil {
+			rows.Close()
+			return nil, e
+		}
+		t.Policy.PanelID = t.Panel
+		t.Policy.ExcludedPorts = []int{22}
+		u, err := url.Parse(t.URL)
+		if err != nil {
+			rows.Close()
+			return nil, fmt.Errorf("invalid panel URL")
+		}
+		port := u.Port()
+		if port == "" {
+			if u.Scheme == "https" {
+				port = "443"
+			} else {
+				port = "80"
+			}
+		}
+		n, err := strconv.Atoi(port)
+		if err != nil {
+			rows.Close()
+			return nil, err
+		}
+		if n != 22 {
+			t.Policy.ExcludedPorts = append(t.Policy.ExcludedPorts, n)
+		}
+		targets = append(targets, t)
+	}
+	e = rows.Err()
+	rows.Close()
+	if e != nil {
+		return nil, e
+	}
+	return targets, nil
+}
+
 func (c Controller) reconcile(ctx context.Context, t nodeTarget) {
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -184,7 +298,7 @@ func (c Controller) reconcile(ctx context.Context, t nodeTarget) {
 		}
 	}()
 	// Reject superseded work before opening a network connection.
-	result, e := conn.ExecContext(ctx, "UPDATE server_protection_nodes SET next_check_at=now()+interval '35 seconds' WHERE panel_id=$1 AND desired_revision=$2 AND desired_enabled=$3", t.Panel, t.Policy.Revision, t.Policy.Enabled)
+	result, e := conn.ExecContext(ctx, "UPDATE server_protection_nodes SET next_check_at=now()+interval '35 seconds' WHERE panel_id=$1 AND desired_revision=$2 AND desired_enabled=$3 AND (NOT $4 OR next_check_at<=now())", t.Panel, t.Policy.Revision, t.Policy.Enabled, t.RequireDue)
 	if e != nil {
 		return
 	}
@@ -221,21 +335,13 @@ func (c Controller) remote(ctx context.Context, t nodeTarget, key []byte, comman
 func (c Controller) apply(ctx context.Context, t nodeTarget, key []byte) (Status, error) {
 	var st Status
 	probeCtx, stopProbe := context.WithTimeout(ctx, 6*time.Second)
-	out, e := c.remote(probeCtx, t, key, `set -eu
-uname -m
-if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libexec/dob-server-guardian | cut -d' ' -f1; else printf 'missing\n'; fi
-for path in /etc/dob-server-guardian/policy.json /etc/systemd/system/dob-server-guardian.service; do
- if [ -f "$path" ] && [ ! -L "$path" ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then sha256sum "$path" | cut -d' ' -f1; else printf 'missing\n'; fi
-done
-unit_state=$(systemctl is-enabled dob-server-guardian.service 2>/dev/null) || true
-printf '%s\n' "${unit_state:-unknown}"
-if [ -x /usr/local/libexec/dob-server-guardian ] && [ ! -L /usr/local/libexec/dob-server-guardian ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then /usr/local/libexec/dob-server-guardian status 2>/dev/null || printf '{}\n'; else printf '{}\n'; fi`)
+	out, e := c.remote(probeCtx, t, key, guardianInventoryCommand)
 	stopProbe()
 	if e != nil {
 		return st, e
 	}
-	fields := strings.SplitN(strings.TrimSpace(out), "\n", 6)
-	if len(fields) != 2 && len(fields) != 6 {
+	fields := strings.SplitN(strings.TrimSpace(out), "\n", 7)
+	if len(fields) != 2 && len(fields) != 7 {
 		return st, fmt.Errorf("invalid guardian inventory")
 	}
 	arch := ""
@@ -261,13 +367,17 @@ if [ -x /usr/local/libexec/dob-server-guardian ] && [ ! -L /usr/local/libexec/do
 	// A matching owned installation needs observation only. Do not repeatedly
 	// configure files or call systemctl start on every telemetry poll. Genuine
 	// resource pressure/unsupported ports are reported, never "repaired" by restart.
-	if p := t.Policy; p.Enabled && fields[1] == hash && len(fields) == 6 {
-		raw, _ := json.Marshal(p)
-		policyHash := fmt.Sprintf("%x", sha256.Sum256(append(raw, '\n')))
-		unitHash := fmt.Sprintf("%x", sha256.Sum256([]byte(Unit)))
-		if fields[2] == policyHash && fields[3] == unitHash && fields[4] == "enabled" &&
-			json.Unmarshal([]byte(fields[5]), &st) == nil && st.CurrentAgent(p) {
-			return st, nil
+	if t.Policy.Enabled && fields[1] == hash && len(fields) == 7 {
+		if observed, ok := verifiedInventory(fields, t.Policy, hash); ok {
+			return observed, nil
+		}
+		// A fresh/live cached sample without executing-image proof must not trigger
+		// generic installation. Preserve the running protector and report uncertainty.
+		decodeErr := json.Unmarshal([]byte(fields[6]), &st)
+		pid, pidErr := strconv.Atoi(fields[5])
+		if pidErr != nil || pid < 0 || (pid == 0 && st.AgentRunning) ||
+			(pid > 0 && (decodeErr != nil || !st.AgentRunning || st.AgentPID != pid || st.AgentStartTicks == "" || st.AgentBinarySHA256 != hash)) {
+			return st, fmt.Errorf("running guardian artifact or sample producer is unproven; observation required")
 		}
 	}
 
@@ -302,7 +412,52 @@ if [ -x /usr/local/libexec/dob-server-guardian ] && [ ! -L /usr/local/libexec/do
 	if e = json.Unmarshal([]byte(strings.TrimSpace(out)), &st); e != nil {
 		return st, fmt.Errorf("invalid guardian status receipt")
 	}
+	if t.Policy.Enabled && c.upgradeAllowed(t.Panel) {
+		verifyCtx, finish := context.WithTimeout(ctx, 6*time.Second)
+		observation, err := c.remote(verifyCtx, t, key, guardianInventoryCommand)
+		finish()
+		if err != nil {
+			return st, fmt.Errorf("guardian activation observation: %w", err)
+		}
+		fields := strings.SplitN(strings.TrimSpace(observation), "\n", 7)
+		verified, ok := verifiedInventory(fields, t.Policy, hash)
+		if !ok {
+			return st, fmt.Errorf("guardian activation lacks executing artifact proof")
+		}
+		return verified, nil
+	}
 	return st, nil
+}
+
+const guardianInventoryCommand = `set -eu
+uname -m
+if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libexec/dob-server-guardian | cut -d' ' -f1; else printf 'missing\n'; fi
+for path in /etc/dob-server-guardian/policy.json /etc/systemd/system/dob-server-guardian.service; do
+ if [ -f "$path" ] && [ ! -L "$path" ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then sha256sum "$path" | cut -d' ' -f1; else printf 'missing\n'; fi
+done
+unit_state=$(systemctl is-enabled dob-server-guardian.service 2>/dev/null) || true
+printf '%s\n' "${unit_state:-unknown}"
+identity_before=$(systemctl show dob-server-guardian.service -p MainPID -p InvocationID 2>/dev/null) || identity_before=''
+sample='{}'
+if [ -x /usr/local/libexec/dob-server-guardian ] && [ ! -L /usr/local/libexec/dob-server-guardian ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then sample=$(/usr/local/libexec/dob-server-guardian status 2>/dev/null) || sample='{}'; fi
+identity_after=$(systemctl show dob-server-guardian.service -p MainPID -p InvocationID 2>/dev/null) || identity_after=''
+pid=unknown
+if [ -n "$identity_before" ] && [ "$identity_before" = "$identity_after" ]; then pid=$(printf '%s\n' "$identity_after" | sed -n 's/^MainPID=//p'); fi
+printf '%s\n%s\n' "${pid:-unknown}" "$sample"
+`
+
+func verifiedInventory(fields []string, p Policy, hash string) (Status, bool) {
+	var st Status
+	if len(fields) != 7 || fields[1] != hash {
+		return st, false
+	}
+	raw, _ := json.Marshal(p)
+	policyHash := fmt.Sprintf("%x", sha256.Sum256(append(raw, '\n')))
+	unitHash := fmt.Sprintf("%x", sha256.Sum256([]byte(Unit)))
+	if fields[2] != policyHash || fields[3] != unitHash || fields[4] != "enabled" || json.Unmarshal([]byte(fields[6]), &st) != nil {
+		return st, false
+	}
+	return st, st.CurrentAgent(p) && st.AgentPID > 0 && strconv.Itoa(st.AgentPID) == fields[5] && st.AgentStartTicks != "" && st.AgentBinarySHA256 == hash
 }
 
 const Unit = `# Managed by digital-ocean-bot server-protection v1

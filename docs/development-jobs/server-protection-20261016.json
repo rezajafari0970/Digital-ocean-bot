@@ -2,8 +2,8 @@
   "id": "server-protection-20261016",
   "base_commit": "fba86a0fdb344c97735b29fb39aed44b51ea99fd",
   "public_rollback": "936896afc1d1301bfcfc10297db1d16446af8bcb",
-  "status": "VERIFIED_PUBLICATION_PENDING",
-  "model_api_calls": 0,
+  "status": "ROLLING_VERIFIED_PUBLICATION_PENDING",
+  "model_api_calls": 14,
   "requirements": [
     "Preserve existing sessions and management access",
     "No fake health, freshness relaxation or safety disable",
@@ -14,7 +14,6 @@
   "evidence": ".local/evidence/",
   "notes": [
     "Canonical bootstrap fails pre-existing detached HEAD; no READY/mastery claim",
-    "User no-model-API preference retained; deterministic adversarial/race/native checks required",
     "Six unsupported nodes truly lack public listeners; bootstrap scans contend with periodic bulk work",
     "Resource pressure on separate active nodes is real; no infinite capacity promise",
     "Native panel API responds while repeated SSH bootstrap times out. Use bounded native-first discovery/scans; retain pinned SSH fallback and repair cooldown. Reuse existing local X25519 generator and registry identity.",
@@ -33,9 +32,11 @@
     "internal/app/provider_refresh.go",
     "internal/app/provider_observation_attempt.go",
     "internal/app/provider_observation_publish.go",
-    "internal/app/provider_cadence_test.go"
+    "internal/app/provider_cadence_test.go",
+    "deploy/service-topology.sh",
+    "tools/guardian-artifact-stability-test.py"
   ],
-  "updated_at": "2026-10-16T04:15:31.673937+00:00",
+  "updated_at": "2026-10-16T05:22:23.445136+00:00",
   "source_hashes": {
     "cmd/server-guardian/main.go": "507b32a583f16eefd965e5f28413daa5a79eb4cb5411c35e4cb12d5efd7aa88c",
     "cmd/worker/main.go": "3c8bcbe306076989debd394ae303155372c41647b46fa28581e65692f41c7742",
@@ -58,14 +59,19 @@
     "internal/app/provider_cadence_test.go": "7ec412161a9aa2814bd32e601bbfeffc7b411bfb9e8913277ec60a2f40844e05"
   },
   "checks": {
-    "focused": "PASS",
-    "race": "PASS",
-    "kernel_faults": "PASS",
-    "browser": "PASS",
-    "full": "PASS",
-    "vet": "PASS"
+    "rolling-corrected": "PASS",
+    "rolling-race": "PASS",
+    "proof-final-corrected": "PASS",
+    "proof-kernel-race": "PASS",
+    "artifact-final": "PASS",
+    "proof-missing-status-corrected": "PASS",
+    "protection-rolling-final-full": "PASS",
+    "protection-rolling-final-vet": "PASS"
   },
-  "publication": "PENDING",
+  "publication": {
+    "installed": "8abcacc90e63709d7135011842d73c6f4a8112e7",
+    "candidate": "PENDING"
+  },
   "deployment": "PENDING",
   "first_release": {
     "source": "8ceb426c9331af624fccef344f9e18d4f46212ea",
@@ -75,5 +81,40 @@
     "primary": "5 readiness samples PASS",
     "guardian_canary": "PASS; fleet released; Xray predates rollout",
     "policies_and_retained_pins": "unchanged"
+  },
+  "model_api_authorized": true,
+  "model_api_authorization": "User recharged API and explicitly requests Astra highest effort, actual usage reporting",
+  "known_api_usage": {
+    "completed_calls": 8,
+    "total_tokens": 214140,
+    "estimated_standard_usd": 5.6680145,
+    "pending_calls": 5
+  },
+  "candidate_hashes": {
+    "internal/serverprotection/controller.go": "b4018263a9520325485dbde482b0dd6ca9e949c4cd192fcb8ed2e54ad018bc95",
+    "internal/serverprotection/agent.go": "ea3358841f7ee9d0a99feb82ceb8dcec770089fa0737100d139396fe4f78a0f2",
+    "internal/serverprotection/process_proof.go": "1be3532472c6815f61afbd807144c42ec6772c1fd381da65bbd952d1cca66922",
+    "internal/serverprotection/process_proof_test.go": "7b2b4b51a60fb06db0617a2f2cae13d87728960388f2b7b816c123bcd10cde1e",
+    "internal/serverprotection/types.go": "7588c568270aba79de3e7b4c7d34198fc108578c098d64ecbd7dcd3474216f90",
+    "internal/serverprotection/engine.go": "99ab3ced93f124218e91555d647b7e1ab0ce718b1560f931cba331ffcc787bd2",
+    "internal/serverprotection/rolling_poll_test.go": "7dfee88497f1c65f9a072a330afbff1fb42a2b2c6c6fe46d05f78b80dc3d4c77",
+    "internal/serverprotection/steady_poll_test.go": "85d863b3d44958d27a0415a7d2ab9a3837150f1c744fedf4f9c99eebaffeef7f",
+    "internal/serverprotection/polling_test.go": "805fc5e4988b80d8e041d9997c0fef01336303e0016f144a261656b5cd5fbf70",
+    "cmd/server-guardian/main.go": "efc0ac54d91ca78c0e9607740aede75de2a00f53c9e312c09ff4e8656eb6628c",
+    "cmd/worker/supervision.go": "8f42dda096f0fedd79fc94f855b7faa829033add09aee06eef3b740bd7a83fbf",
+    "deploy/service-topology.sh": "c3e622e32f9062c03341884d574b82ea6d9b538b934d175491a9d55d023ff677",
+    "tools/guardian-artifact-stability-test.py": "baf057c065334daa2a59c7e38b68aaa2228dd8b209de20db4e80117527b2d61d"
+  },
+  "remaining": [
+    "provider observation scheduling repair isolated in fix/provider-observation-20261016",
+    "residential/output lock regression remains open",
+    "real resource pressure and external SSH/proxy failures remain visible"
+  ],
+  "model_api_usage": {
+    "requests": 14,
+    "input_tokens": 226183,
+    "output_tokens": 194512,
+    "total_tokens": 420695,
+    "estimated_usd": 11.569912
   }
 }

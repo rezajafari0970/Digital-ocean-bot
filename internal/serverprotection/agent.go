@@ -122,8 +122,9 @@ func Configure(r io.Reader) error {
 
 type statusFile struct {
 	Status
-	Uptime float64 `json:"sample_uptime"`
-	BootID string  `json:"boot_id"`
+	Producer processIdentity `json:"producer"`
+	Uptime   float64         `json:"sample_uptime"`
+	BootID   string          `json:"boot_id"`
 }
 
 func ReadStatus() (Status, error) {
@@ -136,6 +137,10 @@ func ReadStatus() (Status, error) {
 		return data.Status, e
 	}
 	s := data.Status
+	// Public proof is calculated from the kernel, never trusted from cached JSON.
+	s.AgentPID = 0
+	s.AgentStartTicks = ""
+	s.AgentBinarySHA256 = ""
 	up, boot, e := uptime()
 	if e != nil {
 		return s, e
@@ -151,6 +156,11 @@ func ReadStatus() (Status, error) {
 		s.AgentRunning = false
 	} else if errors.Is(e, syscall.EWOULDBLOCK) {
 		s.AgentRunning = true
+		if current, err := verifyProducer(data.Producer); err == nil && data.BootID == boot {
+			s.AgentPID = current.PID
+			s.AgentStartTicks = current.StartTicks
+			s.AgentBinarySHA256 = current.SHA256
+		}
 	} else {
 		return s, e
 	}
@@ -177,7 +187,11 @@ func saveStatus(s Status) error {
 	if e != nil {
 		return e
 	}
-	return atomicJSON(RuntimeDir+"/status.json", statusFile{Status: s, Uptime: u - float64(s.SampleAgeMS)/1000, BootID: b})
+	producer, e := writerIdentity()
+	if e != nil {
+		return e
+	}
+	return atomicJSON(RuntimeDir+"/status.json", statusFile{Status: s, Producer: producer, Uptime: u - float64(s.SampleAgeMS)/1000, BootID: b})
 }
 func nftBinary() (NFT, error) { p, e := exec.LookPath("nft"); return NFT{Path: p}, e }
 func Cleanup(ctx context.Context) error {
