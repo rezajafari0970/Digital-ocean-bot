@@ -1,7 +1,7 @@
 {
   "id": "network-identity-scheduling-20261016",
   "at": "2026-10-16T07:59:08.347661+00:00",
-  "status": "TRANSFER_FIX_TESTED_PUBLICATION_PENDING",
+  "status": "DEPLOYED_VERIFIED_WITH_CAPACITY_LIMITATIONS",
   "source_base": "23a7938624f2e1548b47e558e83f568f4613eb5b",
   "installed_source": "e4e1e544d6b4372d34fdfbe796995af6ba0c8181",
   "installed_public_both_hosts": "124f51f835629a36d0a073ba087859c54af7d20a",
@@ -186,14 +186,15 @@
     "Qualify10accounts with slow/failed/rotating account plus provider2 and bulk work, cancellation, stale lease ownership, and real PostgreSQL pool pressure before rollout."
   ],
   "not_yet_done": [
-    "Publish and deploy tested host-pressure correction on both hosts",
-    "Complete per-host infrastructure rollout and final observed coverage",
-    "Enabled protection under live load not tested while operator policy remains OFF"
+    "Enabled protection under real load; desired policy remains OFF",
+    "Slow enabled artifact upgrades under TCP pressure",
+    "Capacity decision for pressured nodes",
+    "Permanent third-party availability cannot be guaranteed"
   ],
   "product_changes": true,
   "test_artifact": "docs/reproductions/network_identity_bulk_20261016_test.go.txt",
   "baseline_log_sha256": "7a651bd47fdd186af308970266e5b985032b91c0dc81b2a36d32ac3abfe1dc6e",
-  "updated_at": "2026-10-16T11:28:04.709647+00:00",
+  "updated_at": "2026-10-16T11:55:19.252923+00:00",
   "api_usage_current_task": {
     "requests": 0,
     "tokens": 0,
@@ -253,7 +254,7 @@
     "primary": "SAFE_ROLLBACK_TO_124f51f; populated retention rejected policy64to0 migration",
     "new_regression": "baseline failed with identical production error; corrected retained upgrade passes and rejects unrelated budget overwrite"
   },
-  "installed_public": "2ad243bcfa26a8a2254175e2c3da6fa4af2cd9d0",
+  "installed_public": "5dacef92ffeea214cfc6e977bb4341f0b3d40cc4",
   "cleanup_candidate_hashes": {
     "internal/adminapi/server_protection.go": "4d95035fb933178b10d7485a5beb3d8c8b33ca3711e6ce5d25faaf7a2d1e262f",
     "internal/adminapi/protection_cleanup_status_test.go": "9be624ea1f2f698bf79b7665a0a10e4c28f9983646487f363530c4931e9d7b49",
@@ -305,5 +306,42 @@
     "internal/provisioning/upload_flow_test.go": "f4ffe35eb2487ff8e49322fe071f2eac92ec9fb31d865a5a11f6e60a01e91d69",
     "internal/serverprotection/controller.go": "d401e7ae83cd8fad4832ad7b9319befcd6cbcb3292c4c5c3a9c7c64afe75504e",
     "internal/serverprotection/cleanup_upgrade_test.go": "9617d85fcae2d4ded7bd55d1f3211ddbc831e4387084bdd911eddc5fe3d9df79"
+  },
+  "product_source": "11b311b66de595a4b103ed9d41b52935f4fd3281",
+  "acceptance_report": "docs/FLEET_REPAIR_ACCEPTANCE_20261016.md",
+  "final_dashboard": {
+    "active_servers": 90,
+    "total_servers": 92,
+    "inactive_servers": 1,
+    "provisioning_servers": 1,
+    "provider_stale_servers": 0,
+    "pending_deletion_servers": 0,
+    "broken_servers": 0,
+    "degraded_servers": 1,
+    "panel_attention_servers": 1,
+    "degraded_accounts": 0
+  },
+  "final_protection": {
+    "control": {
+      "enabled": false,
+      "scope": "fleet",
+      "panel_ids": [],
+      "revision": 50
+    },
+    "assigned": 60,
+    "desired_on": 0,
+    "fresh_on": 0,
+    "cleanup_pending": 0,
+    "need_attention": 0,
+    "temporarily_paused": 0,
+    "reports_overdue": 0,
+    "output_withheld": 0,
+    "exceptions": []
+  },
+  "host_unique_verified": 102,
+  "api_usage": {
+    "calls": 0,
+    "tokens": 0,
+    "cost_usd": 0
   }
 }

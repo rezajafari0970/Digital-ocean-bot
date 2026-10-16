@@ -19,9 +19,4 @@ Input: Screenrecorder-2026-10-16-11-32-06-821.mp4, duration84.474150seconds,864x
 
 ## Work status
 
-- Visual review: completed as described above; issues recorded here.
-- Proxy identity starvation: reproduced; implementation authorized without API, validation pending.
-- Protection pressure / monitor cost: diagnosis pending; current desired policy changed to OFF during observation, not changed by this task. Respect latest desired policy and retain historical receipts for diagnosis.
-- Per-profile output coverage: audit pending; global DIRECT1 and RESIDENTIAL3 policy confirmed.
-- Publication and production acceptance: pending. No new core modification or deployment claimed.
-- OpenAI API calls/tokens/cost for this task:0/0/0.
+Video review and issue registration completed. Identity scheduling, fleet enrollment, export validation, host pressure remediation, TCP sampling and disabled-cleanup repairs are deployed and verified as described in FLEET_REPAIR_ACCEPTANCE_20261016.md. Genuine resource pressure and ON-under-load acceptance remain explicit limitations. No OpenAI API usage or Xray core modification occurred.
