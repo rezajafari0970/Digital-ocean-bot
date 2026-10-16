@@ -15,15 +15,20 @@ function renderProtection(d){
  const on=assigned.filter(p=>p.desired_enabled),verified=on.filter(p=>p.verified);
  const cleanup=assigned.filter(p=>(c.enabled?!p.desired_enabled&&!p.verified:p.desired_enabled||!p.verified));
  const bad=assigned.filter(p=>['ERROR','UNSUPPORTED'].includes(p.state));
+ const paused=on.filter(p=>p.verified&&p.status?.admission_blocked);
+ const stale=on.filter(p=>!p.verified&&p.state==='APPLIED');
+ const waiting=bad.filter(p=>p.state==='UNSUPPORTED'&&/no eligible public VLESS TCP ports/.test(p.status?.reason||''));
  const status=document.getElementById('protectionStatus');
  if(!status)return;
  status.innerHTML='<p><strong>'+(c.enabled?'ON requested':'OFF requested')+'</strong> · Revision '+esc(c.revision)+'</p><p>'+
  (c.enabled?verified.length+' / '+on.length+' enabled servers freshly verified':(cleanup.length?'Disabling: '+cleanup.length+' server(s) awaiting verified cleanup.':'Protection disabled; assigned server cleanup verified.'))+
- (bad.length?' · '+bad.length+' need attention':'')+'</p><p class="muted">'+(d.inherits_future?'New eligible servers inherit this policy automatically.':'Future servers do not inherit protection.')+'</p>';
+ (bad.length?' · '+bad.length+' need attention':'')+'</p><p>'+paused.length+' temporarily paused by resource protection · '+stale.length+' reports overdue'+(waiting.length?' · '+waiting.length+' awaiting an eligible public listener':'')+'</p><p class="muted">'+(d.inherits_future?'New eligible servers inherit this policy automatically.':'Future servers do not inherit protection.')+'</p>';
  document.getElementById('protectionResults').innerHTML=assigned.length?assigned.map(p=>{
  const st=p.status||{},m=st.metrics||{};
  return '<div class="card section"><strong>'+esc(p.label)+'</strong><p>'+esc(p.state)+' · '+(p.verified?'verified':'pending / unverified')+' · '+esc(st.state||'unknown')+'</p>'+
  '<p>'+esc(p.error||st.reason||'Waiting for a server receipt')+'</p>'+
+ (p.verified&&st.admission_blocked?'<p>Protection is active. New connections reopen automatically after resources stabilize; existing sessions remain open.</p>':'')+
+ (p.output_withheld&&!p.verified?'<p>Output remains withheld until a fresh recovery receipt is verified.</p>':'')+
  '<p class="muted">RAM available: '+esc(Math.round(m.mem_available_mb||0))+' MiB · CPU: '+esc(Math.round(m.cpu_percent||0))+'% · New connections: '+(!p.verified?'unknown (unverified)':(st.admission_blocked?'paused':'not paused'))+'</p>'+
  '<p class="muted">Last receipt: '+esc(p.checked_at||'never')+'</p></div>';
  }).join(''):'<p class="muted">No servers assigned yet.</p>';

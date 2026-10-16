@@ -86,8 +86,10 @@ dob_stage_runtime() {
   case "$binary" in digital-ocean-bot-api) command=api ;; digital-ocean-bot-worker) command=worker ;; esac
   (cd "$SRC" && go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/$binary" "./cmd/$command")
  done
+ # Guardian identity follows its code, dependencies and toolchain, not unrelated
+ # controlplane release metadata. The manifest still records the release commit.
  for arch in amd64 arm64; do
-  (cd "$SRC" && CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/server-guardian-linux-$arch" ./cmd/server-guardian)
+  (cd "$SRC" && CGO_ENABLED=0 GOOS=linux GOARCH="$arch" GOTOOLCHAIN=local GOWORK=off GOENV=off GOFLAGS= GOEXPERIMENT= GOAMD64=v1 GOARM64=v8.0 go build -mod=readonly -buildvcs=false -trimpath -ldflags="-s -w" -o "$DOB_STAGE/bin/server-guardian-linux-$arch" ./cmd/server-guardian)
  done
  install -m 0750 "$SRC/deploy/project-update.py" "$DOB_STAGE/bin/project-update.py"
  cp -a "$SRC/migrations" "$DOB_STAGE/"

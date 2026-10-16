@@ -514,49 +514,53 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 	// Global Reality policy: every READY Sanaei panel converges to the globally configured ports.
-	modules.Add(worker.RolePanels, "global-reality", func(ctx context.Context) {
-		t := time.NewTicker(10 * time.Second)
-		defer t.Stop()
-		source := readyworker.SQLSource{DB: application.DB}
-		ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
-		reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, Runtimes: sanaeiRuntimes}
-		run := func() {
-			ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
-			if watchErr != nil {
-				return
-			}
-			defer finish()
-
-			panels, err := source.EligibleReadyPanels(ctx)
-			if err != nil {
-				log.Printf("global reality discovery: %v", err)
-				return
-			}
-			// Queue waiting must not consume the native reconciliation deadline.
-			// The shared batch helper admits work before invoking this handler.
-			_ = worker.RunBoundedBatch(ctx, len(panels), 8, panelPollWork.Do, func(ctx context.Context, index int) error {
-				panel := panels[index]
-				cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-				defer cancel()
-				err := reconciler.ReconcilePanel(cctx, panel, false)
-				if err != nil && ctx.Err() == nil {
-					log.Printf("global reality panel %s: %v", panel.ID, err)
+	for _, initial := range []bool{true, false} {
+		name, concurrency, admit := realityLane(panelWork, panelPollWork, initial)
+		modules.Add(worker.RolePanels, name, func(ctx context.Context) {
+			t := time.NewTicker(10 * time.Second)
+			defer t.Stop()
+			source := readyworker.SQLSource{DB: application.DB}
+			ssh := provisioning.SSHClient{HostKeys: provisioning.SQLHostKeyPins{DB: application.DB}}
+			reconciler := globalreality.Service{DB: application.DB, Secrets: application.Container.Secrets, SSH: ssh, Runtimes: sanaeiRuntimes}
+			run := func() {
+				ctx, finish, watchErr := supervision.Begin(ctx, "work", 0)
+				if watchErr != nil {
+					return
 				}
-				return err
-			})
-		}
-		run()
-		for {
-			supervision.Pulse(ctx)
-			supervision.Idle(ctx)
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				run()
+				defer finish()
+
+				panels, err := source.EligibleRealityPanels(ctx, initial)
+				if err != nil {
+					log.Printf("global reality discovery: %v", err)
+					return
+				}
+				// Queue waiting must not consume the native reconciliation deadline.
+				// The shared batch helper admits work before invoking this handler.
+				_ = worker.RunBoundedBatch(ctx, len(panels), concurrency, admit, func(ctx context.Context, index int) error {
+					panel := panels[index]
+					cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+					defer cancel()
+					err := reconciler.TryReconcilePanel(cctx, panel, false)
+					if err != nil && ctx.Err() == nil {
+						log.Printf("global reality panel %s: %v", panel.ID, err)
+					}
+					return err
+				})
 			}
-		}
-	})
+			run()
+			for {
+				supervision.Pulse(ctx)
+				supervision.Idle(ctx)
+				select {
+				case <-ctx.Done():
+					return
+				case <-t.C:
+					run()
+				}
+			}
+		})
+
+	}
 
 	// User capacity fast fill: time-budgeted per inbound; the one-second cadence
 	// makes users_per_second match its configured wall-clock meaning.

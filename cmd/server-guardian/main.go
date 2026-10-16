@@ -47,7 +47,7 @@ func main() {
 		for {
 			var s serverprotection.Status
 			s, e = serverprotection.ReadStatus()
-			if e == nil && s.Revision == rev && s.SampleAgeMS < 5000 {
+			if e == nil && s.CurrentAgent(serverprotection.Policy{Revision: rev, Enabled: true}) && s.AgentPID > 0 && s.AgentBinarySHA256 != "" {
 				e = json.NewEncoder(os.Stdout).Encode(s)
 				break
 			}

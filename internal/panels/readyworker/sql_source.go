@@ -8,6 +8,15 @@ import (
 type SQLSource struct{ DB *sql.DB }
 
 func (s SQLSource) EligibleReadyPanels(ctx context.Context) ([]Panel, error) {
+	return s.eligibleReadyPanels(ctx, nil)
+}
+
+// EligibleRealityPanels partitions work using observed public VLESS listeners.
+// Both lanes still reconcile authoritative state under the same config lock.
+func (s SQLSource) EligibleRealityPanels(ctx context.Context, initial bool) ([]Panel, error) {
+	return s.eligibleReadyPanels(ctx, &initial)
+}
+func (s SQLSource) eligibleReadyPanels(ctx context.Context, initial *bool) ([]Panel, error) {
 	if s.DB == nil {
 		return nil, ErrAdapterConfig
 	}
@@ -23,11 +32,15 @@ JOIN xui_panel_deployments x
 WHERE pi.enabled=true
   AND r.state IN ('READY','EXPIRING')
   AND (r.expires_at IS NULL OR r.expires_at > now()+interval '10 seconds')
-  AND a.provider_state = 'ACTIVE'
+  AND a.provider_state = 'ACTIVE' AND a.enabled AND a.deletion_requested_at IS NULL
   AND d.state='PANEL_COMPLETE'
   AND x.state='COMPLETED'
+  AND ($1::boolean IS NULL OR $1 = NOT EXISTS(
+    SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=pi.id
+    AND i.present AND i.enabled AND i.protocol='vless' AND i.security='reality'
+    AND i.transport IN ('tcp','raw','xhttp')))
 ORDER BY pi.id
-`)
+`, initial)
 	if err != nil {
 		return nil, err
 	}
