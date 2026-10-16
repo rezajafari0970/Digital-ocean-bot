@@ -1,0 +1,57 @@
+{
+  "id": "server-protection-20261016",
+  "base_commit": "fba86a0fdb344c97735b29fb39aed44b51ea99fd",
+  "public_rollback": "936896afc1d1301bfcfc10297db1d16446af8bcb",
+  "status": "VERIFIED_PUBLICATION_PENDING",
+  "model_api_calls": 0,
+  "requirements": [
+    "Preserve existing sessions and management access",
+    "No fake health, freshness relaxation or safety disable",
+    "Shorten repeated guardian reconciliation and isolate initial listener setup",
+    "Keep genuine pressure visible, distinguish service failure from automatic admission pause",
+    "Verify provider observation freshness without inventing an overdue fault"
+  ],
+  "evidence": ".local/evidence/",
+  "notes": [
+    "Canonical bootstrap fails pre-existing detached HEAD; no READY/mastery claim",
+    "User no-model-API preference retained; deterministic adversarial/race/native checks required",
+    "Six unsupported nodes truly lack public listeners; bootstrap scans contend with periodic bulk work",
+    "Resource pressure on separate active nodes is real; no infinite capacity promise"
+  ],
+  "allowed_paths": [
+    "internal/serverprotection/",
+    "cmd/server-guardian/",
+    "cmd/worker/",
+    "internal/panels/readyworker/",
+    "internal/panels/globalreality/",
+    "internal/adminapi/",
+    "web/static/server_protection.js",
+    "web/tests/server-protection.cjs"
+  ],
+  "updated_at": "2026-10-16T03:36:04.661437+00:00",
+  "source_hashes": {
+    "cmd/server-guardian/main.go": "507b32a583f16eefd965e5f28413daa5a79eb4cb5411c35e4cb12d5efd7aa88c",
+    "cmd/worker/main.go": "3c8bcbe306076989debd394ae303155372c41647b46fa28581e65692f41c7742",
+    "cmd/worker/main_test.go": "fd39a20a0884b068e15b2ec54e8dac0303889f085aad56a642379095e3876977",
+    "cmd/worker/supervision.go": "0ac67d3c691de47d42a3a4200a3a03481c2584be263726c5356ecf6363e9330f",
+    "internal/panels/globalreality/service.go": "ab381e422641b7ae08a0570bc2a74cf421312f66ca8cfc5d7e60c1ec84f92fc1",
+    "internal/panels/readyworker/sql_source.go": "9927645d2405f905f91943fa8914f7c4c10439d029b9ac140e3190ebd818896b",
+    "internal/serverprotection/controller.go": "9b27033042cf799010cee4c031e97d629c279b87d36ee97c9577ccf94d1fd83b",
+    "internal/serverprotection/engine.go": "99ab3ced93f124218e91555d647b7e1ab0ce718b1560f931cba331ffcc787bd2",
+    "web/static/server_protection.js": "07737f27e6fce824077acd3fe56a87ab1cde5cf226c5f305667edf8771374168",
+    "cmd/worker/reality_lane.go": "3c3969f6314bcc5c4a009b5833e58ca246c515a0a951bea274def5cb24a3ea66",
+    "cmd/worker/reality_lane_test.go": "2fdb34f67ae9f00f6e8eb43f640c188c0582f900544a249de9b65d3478a4f33d",
+    "internal/adminapi/protection_bootstrap_test.go": "b50318250327c7dcb79724a5c3cabe773f295d586b29ccae636e05700922db92",
+    "internal/serverprotection/steady_poll_test.go": "21a47c237d2bc15e2f3ac59c96f7ea18cf95805b6bc3e4848490f2b9309943ee"
+  },
+  "checks": {
+    "focused": "PASS",
+    "race": "PASS",
+    "kernel_faults": "PASS",
+    "browser": "PASS",
+    "full": "PASS",
+    "vet": "PASS"
+  },
+  "publication": "PENDING",
+  "deployment": "PENDING"
+}

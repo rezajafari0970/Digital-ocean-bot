@@ -220,14 +220,22 @@ func (c Controller) remote(ctx context.Context, t nodeTarget, key []byte, comman
 }
 func (c Controller) apply(ctx context.Context, t nodeTarget, key []byte) (Status, error) {
 	var st Status
-	out, e := c.remote(ctx, t, key, `set -eu
+	probeCtx, stopProbe := context.WithTimeout(ctx, 6*time.Second)
+	out, e := c.remote(probeCtx, t, key, `set -eu
 uname -m
-if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libexec/dob-server-guardian | cut -d' ' -f1; else printf 'missing\n'; fi`)
+if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libexec/dob-server-guardian | cut -d' ' -f1; else printf 'missing\n'; fi
+for path in /etc/dob-server-guardian/policy.json /etc/systemd/system/dob-server-guardian.service; do
+ if [ -f "$path" ] && [ ! -L "$path" ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then sha256sum "$path" | cut -d' ' -f1; else printf 'missing\n'; fi
+done
+unit_state=$(systemctl is-enabled dob-server-guardian.service 2>/dev/null) || true
+printf '%s\n' "${unit_state:-unknown}"
+if [ -x /usr/local/libexec/dob-server-guardian ] && [ ! -L /usr/local/libexec/dob-server-guardian ] && grep -Fxq 'digital-ocean-bot server-protection v1' /etc/dob-server-guardian/owner 2>/dev/null; then /usr/local/libexec/dob-server-guardian status 2>/dev/null || printf '{}\n'; else printf '{}\n'; fi`)
+	stopProbe()
 	if e != nil {
 		return st, e
 	}
-	fields := strings.Fields(out)
-	if len(fields) != 2 {
+	fields := strings.SplitN(strings.TrimSpace(out), "\n", 6)
+	if len(fields) != 2 && len(fields) != 6 {
 		return st, fmt.Errorf("invalid guardian inventory")
 	}
 	arch := ""
@@ -250,6 +258,19 @@ if [ -f /usr/local/libexec/dob-server-guardian ]; then sha256sum /usr/local/libe
 	}
 	hash := fmt.Sprintf("%x", sha256.Sum256(b))
 	b = nil
+	// A matching owned installation needs observation only. Do not repeatedly
+	// configure files or call systemctl start on every telemetry poll. Genuine
+	// resource pressure/unsupported ports are reported, never "repaired" by restart.
+	if p := t.Policy; p.Enabled && fields[1] == hash && len(fields) == 6 {
+		raw, _ := json.Marshal(p)
+		policyHash := fmt.Sprintf("%x", sha256.Sum256(append(raw, '\n')))
+		unitHash := fmt.Sprintf("%x", sha256.Sum256([]byte(Unit)))
+		if fields[2] == policyHash && fields[3] == unitHash && fields[4] == "enabled" &&
+			json.Unmarshal([]byte(fields[5]), &st) == nil && st.CurrentAgent(p) {
+			return st, nil
+		}
+	}
+
 	stage := ""
 	if fields[1] == "missing" && !c.upgradeAllowed(t.Panel) {
 		return st, fmt.Errorf("guardian initial installation pending staged rollout")

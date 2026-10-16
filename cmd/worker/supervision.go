@@ -55,7 +55,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "panel-cleanup":
 		p.Work = 10 * time.Minute
 		p.Idle = time.Second
-	case "global-reality":
+	case "global-reality", "global-reality-bootstrap":
 		p.Work = 30 * time.Second
 		p.Idle = 10 * time.Second
 	case "capacity-fill":

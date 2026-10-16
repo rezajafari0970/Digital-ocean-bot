@@ -63,8 +63,16 @@ func (s Status) ValidateReceipt(p Policy) error {
 	if s.SampleAgeMS < 0 || s.SampleAgeMS > 5000 {
 		return fmt.Errorf("stale local sample")
 	}
-	if p.Enabled && (!s.AgentRunning || !s.NFTSupported || len(s.Ports) == 0) {
-		return fmt.Errorf("local protection not ready: %s", s.Reason)
+	if p.Enabled {
+		if !s.AgentRunning {
+			return fmt.Errorf("local protection agent is not running")
+		}
+		if !s.NFTSupported {
+			return fmt.Errorf("local admission firewall unavailable: %s", s.Reason)
+		}
+		if len(s.Ports) == 0 {
+			return fmt.Errorf("local protection has no eligible listener: %s", s.Reason)
+		}
 	}
 	if p.Enabled {
 		switch s.State {
@@ -84,4 +92,11 @@ func (s Status) ValidateReceipt(p Policy) error {
 		return fmt.Errorf("disable cleanup not verified")
 	}
 	return nil
+}
+
+// CurrentAgent proves that the receipt belongs to the requested policy and a
+// currently running agent. Its health may legitimately be CRITICAL or ERROR.
+func (s Status) CurrentAgent(p Policy) bool {
+	return s.Revision == p.Revision && s.Enabled == p.Enabled && s.Version == Version &&
+		s.SampleAgeMS >= 0 && s.SampleAgeMS <= 5000 && s.AgentRunning == p.Enabled
 }
