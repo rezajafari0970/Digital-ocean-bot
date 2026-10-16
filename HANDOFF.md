@@ -1,3 +1,7 @@
+## Continuation recheck — 2026-10-16T00:48:40.392916+00:00
+
+Checkpoint 5db6004 verified locally and remotely. Both hosts still run public90fe8c3, all three services active and binary hashes match. Three short current-state samples show35active/35DIRECT, no missing ready servers; all8export surfaces pass. This does NOT supersede prior strict30sample failure (9missing samples), the reproduced lock defect, or the three unfixed bugs. One minimal Astra6pro/max availability probe again terminated credit_balance_exhausted; no successful response, usage null, zero requests pending. No product code, core, deployment or policy change. Resume remains blocked on requested API credit and the mandatory independent review. Full evidence appended to docs/OUTPUT_NATIVE_LOCK_DIAGNOSIS_20261016.json.
+
 ## Native-lock diagnosis checkpoint — 2026-10-16T00:40:53.419936+00:00
 
 **Status: BLOCKED_API_CREDIT_NO_PRODUCT_FIX.** Runtime remains public90fe8c3/source097fc640 on both hosts. No Xray replacement or runtime logic change in this continuation. Export Extra/FinalMask controls still pass all8surfaces, defaultsOFF and native settings preserved. Strict newlive30sample FAIL:9samples missing ready output, oldest snapshot32sec.15secfreshness/60secrouteproof unchanged.

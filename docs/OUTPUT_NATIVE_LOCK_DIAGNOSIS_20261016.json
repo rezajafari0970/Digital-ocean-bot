@@ -521,5 +521,154 @@
   "api_requests_pending": 0,
   "no_completed_critical_council": true,
   "next": "Replenish authorized API credit, finish critical independent planning/review at requestedAstra6pro/max, adjudicate candidate lock design with observed PostgreSQL writer queue, then implement and turn the preserved baseline failures green. Run race/full/publisher/exactinstall/rollout and strict livecoverage. Do not relaxfreshness, claimfixed, or deploy tests as a productfix.",
-  "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/native-locks-max"
+  "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/native-locks-max",
+  "resume_checks": [
+    {
+      "at": "2026-10-16T00:48:40.392916+00:00",
+      "status": "BLOCKED_API_CREDIT_NO_PRODUCT_FIX",
+      "api_probe": {
+        "id": "resp_00d92c27f7795a4f006ad17400661487d1b49faacea7f98130",
+        "model": "gpt-6-astra",
+        "status": "failed",
+        "reasoning": {
+          "context": "all_turns",
+          "effort": "max",
+          "mode": "pro",
+          "summary": null
+        },
+        "error": {
+          "type": "insufficient_quota",
+          "code": "credit_balance_exhausted",
+          "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+          "param": null
+        },
+        "usage": null
+      },
+      "pending_api_requests": 0,
+      "new_successful_api_responses": 0,
+      "product_code_changed": false,
+      "runtime_revision": "90fe8c3c71e513c0be7766cdc7a3a238ff8b2003",
+      "both_hosts_services_active": true,
+      "both_hosts_binary_hashes_match": true,
+      "short_observation_only": true,
+      "live": {
+        "at": "2026-10-16T00:47:41.130400+00:00",
+        "surfaces": {
+          "api:ALL": {
+            "links": 175,
+            "servers": 35,
+            "types": {
+              "xhttp": 175
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "api:DIRECT": {
+            "links": 35,
+            "servers": 35,
+            "types": {
+              "xhttp": 35
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "api:RESIDENTIAL": {
+            "links": 105,
+            "servers": 35,
+            "types": {
+              "xhttp": 105
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:ALL": {
+            "links": 175,
+            "servers": 35,
+            "types": {
+              "xhttp": 175
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:DIRECT": {
+            "links": 35,
+            "servers": 35,
+            "types": {
+              "xhttp": 35
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "share:RESIDENTIAL": {
+            "links": 105,
+            "servers": 35,
+            "types": {
+              "xhttp": 105
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "account:e8b12bf5-c003-437c-ab87-7b73e372293f:RESIDENTIAL": {
+            "links": 30,
+            "servers": 10,
+            "types": {
+              "xhttp": 30
+            },
+            "invalid": 0,
+            "reasons": {}
+          },
+          "account:e8b12bf5-c003-437c-ab87-7b73e372293f:DIRECT": {
+            "links": 10,
+            "servers": 10,
+            "types": {
+              "xhttp": 10
+            },
+            "invalid": 0,
+            "reasons": {}
+          }
+        },
+        "samples": [
+          {
+            "at": "2026-10-16T00:47:42.305678+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 8,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          },
+          {
+            "at": "2026-10-16T00:47:45.498661+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 8,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          },
+          {
+            "at": "2026-10-16T00:47:48.672929+00:00",
+            "active_servers": 35,
+            "active_without_snapshots": 0,
+            "active_stale_snapshots": 0,
+            "oldest_active_snapshot_seconds": 9,
+            "stable_direct_ready_servers": 35,
+            "direct_servers": 35,
+            "direct_links": 35,
+            "missing_stable_direct_servers": 0,
+            "ready": true
+          }
+        ],
+        "pass": true
+      },
+      "prior_strict_acceptance_still_failed": true,
+      "evidence_directory": "/root/projects/dob-output-controls-20261016/.local/evidence/resume-20261016-0046"
+    }
+  ]
 }
