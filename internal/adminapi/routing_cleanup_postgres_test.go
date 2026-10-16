@@ -229,6 +229,7 @@ func (panelTestSecrets) GetResidential(context.Context, string, string) ([]byte,
 	return []byte("test"), nil
 }
 func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
+	t.Setenv("DOB_CONFIG_OBSERVATION_PANELS", "all")
 	db := adminTestDB(t)
 	ctx := context.Background()
 	var mu sync.Mutex
@@ -237,10 +238,21 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	saves, reloads := 0, 0
 	rejectProof := false
 	var holdProof atomic.Bool
+	var proofDelay, proofRequests atomic.Int64
 	proofEntered, proofRelease := make(chan struct{}), make(chan struct{})
 	var enterOnce, releaseOnce sync.Once
 	releaseProof := func() { releaseOnce.Do(func() { close(proofRelease) }) }
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/panel/api/xray/routeTest" {
+			proofRequests.Add(1)
+			if delay := time.Duration(proofDelay.Load()); delay > 0 {
+				select {
+				case <-time.After(delay):
+				case <-r.Context().Done():
+					return
+				}
+			}
+		}
 		if r.URL.Path == "/panel/api/xray/routeTest" && holdProof.Load() {
 			enterOnce.Do(func() { close(proofEntered) })
 			select {
@@ -384,6 +396,7 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 			// A lengthy proof of an unchanged plan must allow a real output
 			// observation while continuing to exclude every structural writer.
 			sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+			requestsBefore := proofRequests.Load()
 			holdProof.Store(true)
 			proofDone := make(chan error, 1)
 			go func() { proofDone <- service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false) }()
@@ -405,6 +418,13 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 			}
 			writer.ExecContext(ctx, "SELECT pg_advisory_unlock_all()")
 			writer.Close()
+			queuedCtx, queuedCancel := context.WithTimeout(ctx, 10*time.Second)
+			defer queuedCancel()
+			queuedDone := make(chan error, 1)
+			go func() {
+				queuedDone <- sanaei.WithConfigLock(queuedCtx, db, panel, func(context.Context) error { return nil })
+			}()
+			waitConfigQueue(t, db, "panel-config:"+panel)
 			output := New(db, app.Container{})
 			output.OutputRuntimes = &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: panelTestSecrets{}, Timeout: time.Second}}
 			output.refreshPanelOutput(ctx, readyworker.Panel{ID: panel})
@@ -417,8 +437,50 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 			if err = <-proofDone; err != nil {
 				t.Errorf("unchanged native proof failed: %v", err)
 			}
+			receiveConfig(t, queuedDone)
 			if saves != 1 || reloads != 1 {
 				t.Errorf("no-op proof mutated native config: saves=%d restarts=%d", saves, reloads)
+			}
+			checks := proofRequests.Load() - requestsBefore
+			if checks < 5 {
+				t.Fatalf("insufficient native checks for long-proof test: %d", checks)
+			}
+			// Total proof exceeds the 15-second output TTL while every native request
+			// remains below its five-second timeout. Real output reads continue.
+			proofDelay.Store(int64(18*time.Second) / checks)
+			sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+			longDone := make(chan error, 1)
+			started := time.Now()
+			go func() { longDone <- service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false) }()
+			ticker := time.NewTicker(3 * time.Second)
+			deadline := time.NewTimer(35 * time.Second)
+			observed := 0
+		longProof:
+			for {
+				select {
+				case e := <-longDone:
+					if e != nil {
+						t.Fatal("long native proof failed", e)
+					}
+					if time.Since(started) < 15*time.Second || observed < 5 {
+						t.Fatal("proof did not cover output TTL", time.Since(started), observed)
+					}
+					break longProof
+				case <-ticker.C:
+					output.refreshPanelOutput(ctx, readyworker.Panel{ID: panel})
+					if e := db.QueryRow("SELECT count(*) FROM output_config_snapshots WHERE panel_id=$1 AND last_seen_at>now()-interval '2 seconds'", panel).Scan(&fresh); e != nil || fresh != 2 {
+						t.Fatal("real outputs became stale during long proof", fresh, e)
+					}
+					observed++
+				case <-deadline.C:
+					t.Fatal("long proof did not complete")
+				}
+			}
+			ticker.Stop()
+			deadline.Stop()
+			proofDelay.Store(0)
+			if saves != 1 || reloads != 1 {
+				t.Fatal("long no-op proof mutated native runtime", saves, reloads)
 			}
 		}
 		var state string
@@ -458,6 +520,32 @@ func TestResidentialWorkerAppliesChangesAndRemoval(t *testing.T) {
 	}
 	if err := db.QueryRow("SELECT count(*) FROM panel_inventory_syncs WHERE panel_id=$1 AND state='COMPLETED'", panel).Scan(&after); err != nil || after != before {
 		t.Fatal("failed proof fabricated fresh inventory", before, after, err)
+	}
+	// First restore the last known plan through a complete exclusive pass.
+	mu.Lock()
+	rejectProof = false
+	mu.Unlock()
+	sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+	if e := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); e != nil {
+		t.Fatal(e)
+	}
+	mu.Lock()
+	savedBefore, restartsBefore := saves, reloads
+	running = map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"rules": []any{}}}
+	mu.Unlock()
+	sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+	if e := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); e == nil {
+		t.Fatal("runtime drift accepted by read-only proof")
+	}
+	if saves != savedBefore || reloads != restartsBefore {
+		t.Fatal("read-only drift pass restarted or saved runtime")
+	}
+	sqlMust(t, db, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel)
+	if e := service.ReconcilePanel(ctx, readyworker.Panel{ID: panel}, false); e != nil {
+		t.Fatal("exclusive drift recovery failed", e)
+	}
+	if saves != savedBefore || reloads != restartsBefore+1 {
+		t.Fatal("fresh exclusive recovery did not repair exactly once", saves, reloads)
 	}
 
 }

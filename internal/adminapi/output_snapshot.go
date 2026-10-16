@@ -10,6 +10,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"io"
 	"log"
 	"net/http"
@@ -18,7 +19,12 @@ import (
 	"strings"
 )
 
-func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, records []outputRecord) (err error) {
+func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, records []outputRecord) error {
+	return sanaei.WithConfigLock(ctx, s.DB, panelID, func(ctx context.Context) error {
+		return s.persistOutputSnapshotOwned(ctx, panelID, records, nil)
+	})
+}
+func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string, records []outputRecord, structures []outputStructure) (err error) {
 	// Log the stage and SQLSTATE only: database error details can contain full
 	// credential-bearing URIs. A failed transaction retains the previous snapshot.
 	stage := "begin"
@@ -32,65 +38,67 @@ func (s *Server) persistOutputSnapshot(ctx context.Context, panelID string, reco
 			log.Printf("output persist panel=%s stage=%s sqlstate=%s error_type=%T", panelID, stage, code, err)
 		}
 	}()
-	tx, err := s.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return
-	}
-	defer tx.Rollback()
-	stage = "stage records"
-	if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text) ON COMMIT DROP`); err != nil {
-		return
-	}
-	copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id"))
-	if err != nil {
-		return
-	}
-	uniqueURIs := make(map[string]struct{}, len(records))
-	for _, rec := range records {
-		if !strings.HasPrefix(rec.URI, "vless://") {
-			continue
+	return sanaei.WithConfigEvidenceTx(ctx, s.DB, panelID, func(tx *sql.Tx) (err error) {
+		stage = "structural records"
+		for _, record := range structures {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO inbound_structural_snapshots(panel_id,remote_id,port,payload,updated_at) VALUES($1,$2,$3,$4,now()) ON CONFLICT(panel_id,remote_id) DO UPDATE SET port=excluded.port,payload=excluded.payload,updated_at=now()`, panelID, record.ID, record.Port, record.Payload); err != nil {
+				return err
+			}
 		}
-		uniqueURIs[rec.URI] = struct{}{}
-		if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID); err != nil {
+		stage = "stage records"
+		if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text) ON COMMIT DROP`); err != nil {
+			return err
+		}
+		copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id"))
+		if err != nil {
+			return err
+		}
+		uniqueURIs := make(map[string]struct{}, len(records))
+		for _, rec := range records {
+			if !strings.HasPrefix(rec.URI, "vless://") {
+				continue
+			}
+			uniqueURIs[rec.URI] = struct{}{}
+			if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID); err != nil {
+				_ = copyStmt.Close()
+				return err
+			}
+		}
+		if _, err = copyStmt.ExecContext(ctx); err != nil {
 			_ = copyStmt.Close()
-			return
+			return err
 		}
-	}
-	if _, err = copyStmt.ExecContext(ctx); err != nil {
-		_ = copyStmt.Close()
-		return
-	}
-	if err = copyStmt.Close(); err != nil {
-		return
-	}
-	stage = "upsert"
-	result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id)
+		if err = copyStmt.Close(); err != nil {
+			return err
+		}
+		stage = "upsert"
+		result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id)
 SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END,c.client_id
 FROM (SELECT DISTINCT ON(uri) uri,visible_until,client_id FROM current_output_uris ORDER BY uri) c
 JOIN panel_instances p ON p.id=$1 JOIN droplets dr ON dr.id=p.droplet_id
 ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until,client_id=excluded.client_id
 WHERE output_config_snapshots.uri=excluded.uri`, panelID)
-	if err != nil {
-		return
-	}
-	// A digest is an index key, not URI identity. Never overwrite a different
-	// URI even in the event of a hash collision.
-	var affected int64
-	affected, err = result.RowsAffected()
-	if err != nil {
-		return
-	}
-	if affected != int64(len(uniqueURIs)) {
-		err = errors.New("output snapshot URI digest collision")
-		return
-	}
-	stage = "remove stale"
-	if _, err = tx.ExecContext(ctx, `DELETE FROM output_config_snapshots o WHERE o.panel_id=$1 AND NOT EXISTS (SELECT 1 FROM current_output_uris c WHERE c.uri=o.uri)`, panelID); err != nil {
-		return
-	}
-	stage = "commit"
-	err = tx.Commit()
-	return
+		if err != nil {
+			return err
+		}
+		// A digest is an index key, not URI identity. Never overwrite a different
+		// URI even in the event of a hash collision.
+		var affected int64
+		affected, err = result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected != int64(len(uniqueURIs)) {
+			err = errors.New("output snapshot URI digest collision")
+			return err
+		}
+		stage = "remove stale"
+		if _, err = tx.ExecContext(ctx, `DELETE FROM output_config_snapshots o WHERE o.panel_id=$1 AND NOT EXISTS (SELECT 1 FROM current_output_uris c WHERE c.uri=o.uri)`, panelID); err != nil {
+			return err
+		}
+		stage = "commit"
+		return nil
+	})
 }
 func newShareToken() string {
 	b := make([]byte, 24)

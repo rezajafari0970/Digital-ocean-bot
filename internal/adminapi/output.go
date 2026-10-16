@@ -26,6 +26,12 @@ type outputInbound struct {
 
 const outputDropletStatePredicate = "dr.state IN ('READY','EXPIRING')"
 
+type outputStructure struct {
+	ID      int64
+	Port    int
+	Payload []byte
+}
+
 type outputRecord struct {
 	ClientID     string
 	URI          string
@@ -50,7 +56,7 @@ func outputMap(raw json.RawMessage) (map[string]any, error) {
 func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel) string {
 	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
 	defer cancel()
-	acquired, err := sanaei.TryWithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) error {
+	acquired, err := sanaei.TryWithConfigReadLock(ctx, s.DB, p.ID, func(ctx context.Context) error {
 		var busy bool
 		if err := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM reality_transport_apply_jobs WHERE panel_id=$1 AND state IN('RUNNING','BLOCKED'))", p.ID).Scan(&busy); err != nil {
 			return err
@@ -83,9 +89,9 @@ func (s *Server) refreshPanelOutputLocked(parent context.Context, p readyworker.
 		log.Printf("output refresh panel=%s acquire_error=%v", p.ID, err)
 		return ""
 	}
-	records, ok := s.collectRuntimeOutput(ctx, p, runtime)
+	records, structures, ok := s.collectRuntimeOutput(ctx, p, runtime)
 	if ok {
-		if err := s.persistOutputSnapshot(ctx, p.ID, records); err != nil {
+		if err := s.persistOutputSnapshotOwned(ctx, p.ID, records, structures); err != nil {
 			return ""
 		}
 		if len(records) == 0 {
@@ -120,16 +126,16 @@ func (s *Server) WarmOutputCache(ctx context.Context) {
 	s.refreshOutputLive(ctx)
 }
 
-func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) ([]outputRecord, bool) {
+func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, runtime *sanaei.PanelRuntime) ([]outputRecord, []outputStructure, bool) {
 	if runtime == nil || runtime.Session == nil {
-		return nil, false
+		return nil, nil, false
 	}
 	var host string
 	if s.DB.QueryRowContext(ctx,
 		"SELECT d.host FROM panel_instances pi JOIN deployments d ON d.droplet_id=pi.droplet_id WHERE pi.id=$1 AND pi.enabled=true",
 		p.ID,
 	).Scan(&host) != nil {
-		return nil, false
+		return nil, nil, false
 	}
 	keys := map[int64]string{}
 	rows, err := s.DB.QueryContext(ctx,
@@ -151,12 +157,12 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	raws, err := runtime.Session.FreshSnapshot(ctx)
 	if err != nil {
 		log.Printf("output collect panel=%s host=%s snapshot_error=%v", p.ID, host, err)
-		return nil, false
+		return nil, nil, false
 	}
 	pins := map[string]transportprofile.Config{}
 	pinRows, pinErr := s.DB.QueryContext(ctx, "SELECT managed_key,config FROM reality_listener_profiles WHERE panel_id=$1", p.ID)
 	if pinErr != nil {
-		return nil, false
+		return nil, nil, false
 	}
 	for pinRows.Next() {
 		var key string
@@ -164,16 +170,17 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		var c transportprofile.Config
 		if pinRows.Scan(&key, &raw) != nil || json.Unmarshal(raw, &c) != nil {
 			pinRows.Close()
-			return nil, false
+			return nil, nil, false
 		}
 		pins[key] = c
 	}
 	pinErr = pinRows.Err()
 	pinRows.Close()
 	if pinErr != nil {
-		return nil, false
+		return nil, nil, false
 	}
 	records := make([]outputRecord, 0)
+	structures := make([]outputStructure, 0)
 	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {
 		var in outputInbound
@@ -232,9 +239,11 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 		structSettings["clients"] = []any{}
 		structPayload := map[string]any{"enable": in.Enable, "remark": in.Remark, "port": in.Port, "protocol": in.Protocol, "settings": structSettings, "streamSettings": stream}
-		if sb, err := json.Marshal(structPayload); err == nil {
-			_, _ = s.DB.ExecContext(ctx, `INSERT INTO inbound_structural_snapshots(panel_id,remote_id,port,payload,updated_at) VALUES($1,$2,$3,$4,now()) ON CONFLICT(panel_id,remote_id) DO UPDATE SET port=excluded.port,payload=excluded.payload,updated_at=now()`, p.ID, in.ID, in.Port, sb)
+		sb, err := json.Marshal(structPayload)
+		if err != nil {
+			return nil, nil, false
 		}
+		structures = append(structures, outputStructure{ID: in.ID, Port: in.Port, Payload: sb})
 		if len(clients) == 0 {
 			noClients++
 			continue
@@ -291,7 +300,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		}
 	}
 	log.Printf("output collect panel=%s host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", p.ID, host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
-	return records, true
+	return records, structures, true
 }
 
 func (s *Server) outputConfigs(w http.ResponseWriter, r *http.Request) {

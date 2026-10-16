@@ -86,6 +86,10 @@ func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
  FROM panel_instances WHERE account_id=$1 ORDER BY id`, id); err != nil {
 		return err
 	}
+	if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended('panel-config-observe:'||id::text,0))
+ FROM panel_instances WHERE account_id=$1 ORDER BY id`, id); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -50,7 +50,7 @@ func TestManagedSOCKSProvisioningPostgres(t *testing.T) {
 	}
 	rt := &sanaei.PanelRuntime{PanelID: panel, AccountID: account, Session: sanaei.NewPanelSession(client)}
 	svc := Service{DB: db, Secrets: store}
-	if e = svc.prepareRelay(ctx, panel, rt); e != nil {
+	if e = sanaei.WithConfigLock(ctx, db, panel, func(ctx context.Context) error { return svc.prepareRelay(ctx, panel, rt) }); e != nil {
 		t.Fatal(e)
 	}
 	in, e := svc.loadRelayInlet(ctx, panel)
@@ -58,7 +58,7 @@ func TestManagedSOCKSProvisioningPostgres(t *testing.T) {
 		t.Fatal("inlet provisioning failed", e)
 	}
 	ref := in.SecretRef
-	if e = svc.prepareRelay(ctx, panel, rt); e != nil {
+	if e = sanaei.WithConfigLock(ctx, db, panel, func(ctx context.Context) error { return svc.prepareRelay(ctx, panel, rt) }); e != nil {
 		t.Fatal(e)
 	}
 	in, e = svc.loadRelayInlet(ctx, panel)
@@ -66,7 +66,7 @@ func TestManagedSOCKSProvisioningPostgres(t *testing.T) {
 		t.Fatal("retry rotated credential", e)
 	}
 	conflict = true
-	if e = svc.prepareRelay(ctx, panel, rt); e != nil {
+	if e = sanaei.WithConfigLock(ctx, db, panel, func(ctx context.Context) error { return svc.prepareRelay(ctx, panel, rt) }); e != nil {
 		t.Fatal(e)
 	}
 	in, e = svc.loadRelayInlet(ctx, panel)
@@ -74,7 +74,7 @@ func TestManagedSOCKSProvisioningPostgres(t *testing.T) {
 		t.Fatal("occupied port not preserved", e)
 	}
 	t.Setenv("DOB_UPCLOUD_RELAY_PANELS", "none")
-	if e = svc.prepareRelay(ctx, panel, rt); e != nil {
+	if e = sanaei.WithConfigLock(ctx, db, panel, func(ctx context.Context) error { return svc.prepareRelay(ctx, panel, rt) }); e != nil {
 		t.Fatal(e)
 	}
 	in, e = svc.loadRelayInlet(ctx, panel)

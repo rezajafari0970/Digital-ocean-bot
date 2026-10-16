@@ -277,8 +277,8 @@ func (c Controller) selectTargets(ctx context.Context, enabled *bool, limit int,
 	return targets, nil
 }
 
-func (c Controller) reconcile(ctx context.Context, t nodeTarget) {
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+func (c Controller) reconcile(parent context.Context, t nodeTarget) {
+	ctx, cancel := context.WithTimeout(parent, 30*time.Second)
 	defer cancel()
 	conn, e := c.DB.Conn(ctx)
 	if e != nil {
@@ -319,9 +319,15 @@ func (c Controller) reconcile(ctx context.Context, t nodeTarget) {
 			st, e = c.apply(ctx, t, private)
 		}
 	}
-	receiptCtx, done := context.WithTimeout(context.Background(), 3*time.Second)
+	// A planned worker shutdown is not evidence that the remote guardian failed.
+	if parent.Err() != nil {
+		return
+	}
+	receiptCtx, done := context.WithTimeout(parent, 3*time.Second)
 	defer done()
-	if err := (Store{DB: c.DB}).Receipt(receiptCtx, t.Panel, t.Policy, st, e); err != nil && err != ErrConflict {
+	// Publish on the session owning the advisory lock. A dead owner must never
+	// borrow a replacement session and overwrite its successor observation.
+	if err := receipt(receiptCtx, conn, t.Panel, t.Policy, st, e); err != nil && err != ErrConflict {
 		log.Printf("server protection receipt: %v", err)
 	}
 }

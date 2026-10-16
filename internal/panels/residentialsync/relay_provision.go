@@ -54,7 +54,7 @@ func (s Service) relaySources(ctx context.Context) ([]string, error) {
 // template+route transaction; no unauthenticated or temporarily direct inlet.
 func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.PanelRuntime) error {
 	if !relayConfigured() {
-		_, e := s.DB.ExecContext(ctx, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
+		_, e := s.relayExec(ctx, panel, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
 		return e
 	}
 	sources, e := s.relaySources(ctx)
@@ -71,7 +71,7 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
  AND NOT a.upcloud_trial_compatible AND NOT COALESCE((dep.profile_snapshot->>'upcloud_trial_compatible')::boolean,false)
  AND(dr.expires_at IS NULL OR dr.expires_at>now()+CASE WHEN EXISTS(SELECT 1 FROM panel_relay_endpoints ep WHERE ep.panel_id=p.id AND ep.enabled) THEN interval '5 minutes' ELSE interval '10 minutes' END)`, panel).Scan(&account, &host, &serverExpiry)
 	if errors.Is(e, sql.ErrNoRows) || len(sources) == 0 {
-		_, e = s.DB.ExecContext(ctx, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
+		_, e = s.relayExec(ctx, panel, "UPDATE panel_relay_endpoints SET enabled=false,state='DISABLED' WHERE panel_id=$1 AND enabled", panel)
 		return e
 	}
 	if e != nil {
@@ -140,7 +140,7 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
 	if e != nil {
 		return e
 	}
-	_, e = s.DB.ExecContext(ctx, `INSERT INTO panel_relay_endpoints(panel_id,account_id,host,port,secret_ref,transport_hash,allowed_sources,valid_until,enabled,state)
+	_, e = s.relayExec(ctx, panel, `INSERT INTO panel_relay_endpoints(panel_id,account_id,host,port,secret_ref,transport_hash,allowed_sources,valid_until,enabled,state)
  VALUES($1,$2,$3,$4,$5,$6,$7,$8,true,'PREPARING') ON CONFLICT(panel_id) DO UPDATE SET
  host=excluded.host,port=excluded.port,secret_ref=excluded.secret_ref,transport_hash=excluded.transport_hash,allowed_sources=excluded.allowed_sources,valid_until=excluded.valid_until,enabled=true,
  state=CASE WHEN panel_relay_endpoints.transport_hash=excluded.transport_hash AND panel_relay_endpoints.allowed_sources=excluded.allowed_sources AND panel_relay_endpoints.enabled THEN panel_relay_endpoints.state ELSE 'PREPARING' END,
@@ -169,4 +169,18 @@ func (s Service) loadRelayInlet(ctx context.Context, panel string) (*relayInlet,
 		return nil, errors.New("relay secret invalid")
 	}
 	return &in, nil
+}
+
+// relayExec binds preparation writes to the same session as the native owner.
+func (s Service) relayExec(ctx context.Context, panel, query string, args ...any) (sql.Result, error) {
+	if !sanaei.ConfigLockHeld(ctx, s.DB, panel) {
+		return nil, sanaei.ErrConfigOwnership
+	}
+	var result sql.Result
+	err := sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+		var err error
+		result, err = tx.ExecContext(ctx, query, args...)
+		return err
+	})
+	return result, err
 }

@@ -36,6 +36,12 @@ func publicationFence(ctx context.Context, tx *sql.Tx, account string) error {
 			return e
 		}
 	}
+	// Preserve output/publication exclusion after output stops taking the turnstile.
+	for _, id := range ids {
+		if _, e = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", "panel-config-observe:"+id); e != nil {
+			return e
+		}
+	}
 	var revision int64
 	if e = tx.QueryRowContext(ctx, "SELECT revision FROM residential_routing_control WHERE singleton FOR SHARE").Scan(&revision); e != nil {
 		return e

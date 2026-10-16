@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 	"testing"
 )
@@ -98,7 +99,9 @@ func TestManagedSOCKSSelectionAndPublicationPostgres(t *testing.T) {
 		t.Fatal(e)
 	}
 	hash := settingsHash(desired)
-	if e = svc.persistPlan(ctx, receiver, rev, hash, policy, nil, desired); e != nil {
+	if e = sanaei.WithConfigLock(ctx, db, receiver, func(ctx context.Context) error {
+		return svc.persistPlan(ctx, receiver, rev, hash, policy, nil, desired)
+	}); e != nil {
 		t.Fatal(e)
 	}
 	sqlMustTrial(t, db, "UPDATE panel_routing_state SET relay_mode=true,state='APPLIED',category_digest=$2,verified_at=now() WHERE panel_id=$1", receiver, categoryDigest(policy))

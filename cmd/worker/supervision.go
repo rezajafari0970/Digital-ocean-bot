@@ -99,7 +99,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		if !strings.HasPrefix(name, "residential-sync-") {
 			return p, false
 		}
-		p.Work = time.Minute
+		p.Work = 70 * time.Second
 		p.Idle = time.Second
 	}
 	return p, true

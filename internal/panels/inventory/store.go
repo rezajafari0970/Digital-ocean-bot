@@ -42,9 +42,21 @@ func (s SQLStore) Sync(
 
 	defer tx.Rollback()
 
+	result, err := s.SyncTx(ctx, tx, snapshot)
+	if err != nil {
+		return SyncResult{}, err
+	}
+	return result, tx.Commit()
+}
+
+// SyncTx publishes complete inventory atomically with the caller's fenced receipt.
+func (s SQLStore) SyncTx(ctx context.Context, tx *sql.Tx, snapshot Snapshot) (SyncResult, error) {
+	if tx == nil || snapshot.PanelID == "" || snapshot.ObservedAt.IsZero() {
+		return SyncResult{}, ErrInvalidSnapshot
+	}
 	var syncID string
 
-	err = tx.QueryRowContext(
+	err := tx.QueryRowContext(
 		ctx,
 		`
 INSERT INTO panel_inventory_syncs(
@@ -319,10 +331,6 @@ WHERE id=$1
 	)
 
 	if err != nil {
-		return SyncResult{}, err
-	}
-
-	if err = tx.Commit(); err != nil {
 		return SyncResult{}, err
 	}
 

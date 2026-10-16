@@ -2,6 +2,7 @@ package usercapacity
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/clientops"
@@ -13,6 +14,12 @@ import (
 // Legacy unmanaged inbounds retain their existing observer. Missing required
 // traffic leaves the previous capacity evidence untouched, not freshly zeroed.
 func (s Service) ObserveVerifiedSnapshot(ctx context.Context, panel string, raws []json.RawMessage) error {
+	return observeVerifiedSnapshot(ctx, s.DB, panel, raws)
+}
+func (s Service) ObserveVerifiedSnapshotTx(ctx context.Context, tx *sql.Tx, panel string, raws []json.RawMessage) error {
+	return observeVerifiedSnapshot(ctx, tx, panel, raws)
+}
+func observeVerifiedSnapshot(ctx context.Context, db observationDB, panel string, raws []json.RawMessage) error {
 	for _, raw := range raws {
 		var in rawInbound
 		if err := json.Unmarshal(raw, &in); err != nil {
@@ -34,13 +41,13 @@ func (s Service) ObserveVerifiedSnapshot(ctx context.Context, panel string, raws
 			continue
 		}
 		var bulk bool
-		if err := s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.mutation_job_id IS NOT NULL AND o.state IN ('PLANNED','ACTIVE','DELETE_PENDING'))`, panel, in.ID).Scan(&bulk); err != nil {
+		if err := db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND g.inbound_id=$2 AND o.mutation_job_id IS NOT NULL AND o.state IN ('PLANNED','ACTIVE','DELETE_PENDING'))`, panel, in.ID).Scan(&bulk); err != nil {
 			return err
 		}
 		if !bulk {
 			continue
 		}
-		if err := s.observeBulkCapacity(ctx, panel, in); err != nil && !errors.Is(err, clientops.ErrVerify) {
+		if err := observeBulkCapacity(ctx, db, panel, in); err != nil && !errors.Is(err, clientops.ErrVerify) {
 			return err
 		}
 	}

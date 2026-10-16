@@ -141,7 +141,16 @@ func syncTx(ctx context.Context, tx *sql.Tx) error {
  (c.enabled AND(c.scope='fleet' OR p.id=ANY(c.panel_ids)) AND p.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL AND EXISTS(SELECT 1 FROM deployments dp WHERE dp.droplet_id=d.id AND dp.state='PANEL_COMPLETE') AND d.state IN('READY','EXPIRING') AND(d.expires_at IS NULL OR d.expires_at>now()+interval '10 seconds')))`)
 	return e
 }
+
+type receiptExecutor interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}
+
 func (s Store) Receipt(ctx context.Context, panel string, p Policy, st Status, receiptErr error) error {
+	return receipt(ctx, s.DB, panel, p, st, receiptErr)
+}
+
+func receipt(ctx context.Context, db receiptExecutor, panel string, p Policy, st Status, receiptErr error) error {
 	state := "APPLIED"
 	msg := ""
 	if !p.Enabled {
@@ -161,7 +170,7 @@ func (s Store) Receipt(ctx context.Context, panel string, p Policy, st Status, r
 		}
 	}
 	raw, _ := json.Marshal(st)
-	res, e := s.DB.ExecContext(ctx, `UPDATE server_protection_nodes SET state=$4,status=$5,last_error=$6,checked_at=now(),next_check_at=now()+interval '15 seconds',updated_at=now(),
+	res, e := db.ExecContext(ctx, `UPDATE server_protection_nodes SET state=$4,status=$5,last_error=$6,checked_at=now(),next_check_at=now()+interval '15 seconds',updated_at=now(),
  verified_status=CASE WHEN $6='' THEN $5::jsonb ELSE verified_status END,
  verified_at=CASE WHEN $6='' THEN now() ELSE verified_at END,
  applied_revision=CASE WHEN $6='' THEN $2 ELSE applied_revision END

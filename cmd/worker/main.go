@@ -141,6 +141,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
 	controlWork, controlBulkWork, providerWork := newControlWorkBudgets()
 	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets()
+	proofServing, proofRetired, proofConsumers := configuredProofWorkBudgets(role)
+	proofMetrics := &proofLaneMetrics{}
 
 	// Each process has a distinct liveness record; stale processes age out.
 	host, _ := os.Hostname()
@@ -161,7 +163,18 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					lanes.Stalled = 1
 				}
 			}
-			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "provider_work": providerWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
+			var coverage any
+			if role.Owns(worker.RolePanels) {
+				c, done := context.WithTimeout(beatCtx, time.Second)
+				observed, err := (residentialsync.Service{DB: application.DB}).Coverage(c)
+				done()
+				if err != nil {
+					coverage = map[string]any{"available": false}
+				} else {
+					coverage = observed
+				}
+			}
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "provider_work": providerWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "proof_serving": proofServing.Snapshot(), "proof_retired": proofRetired.Snapshot(), "proof_attempts": proofMetrics.snapshot(), "proof_coverage": coverage, "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -630,65 +643,34 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	// Eight serving consumers share the due queue so a slow panel cannot strand
-	// peers in its hash lane. Durable claims and config locks serialize each panel.
-	// Retirement retains its own consumer; native per-panel route checks stay serial.
-	// Client mutation execution remains independently gated at concurrency=1.
+	// Fixed joined consumers share the oldest-due queue. Admission precedes
+	// discovery, claims and operation deadlines. Retirement never borrows live slots.
 	for _, serving := range []bool{true, false} {
 		lanes := 1
+		budget := proofRetired
 		if serving {
-			lanes = 8
+			lanes = proofConsumers
+			budget = proofServing
 		}
 		for shard := 0; shard < lanes; shard++ {
-			serving, shard := serving, shard
+			serving, budget := serving, budget
 			modules.Add(worker.RolePanels, fmt.Sprintf("residential-sync-%t-%d", serving, shard), func(ctx context.Context) {
-				t := time.NewTicker(time.Second)
-				defer t.Stop()
 				syncer := residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}
 				failures := worker.FailureStore{DB: application.DB}
-				after := ""
-				for {
-					supervision.Pulse(ctx)
-					p, found, err := syncer.NextDuePanelForWorker(ctx, serving, after)
-					if err != nil {
-						log.Printf("residential sync discovery: %v", err)
-					}
-					if err == nil && found {
-						after = p.ID
-						claimCtx, claimCancel := context.WithTimeout(ctx, 3*time.Second)
-						claimed, claimErr := failures.ReserveOutcome(claimCtx, "residential_sync", p.ID, "", 90*time.Second)
-						claimCancel()
-						if claimErr != nil {
-							log.Printf("residential sync reservation %s: %v", p.ID, claimErr)
-							supervision.Idle(ctx)
-							select {
-							case <-ctx.Done():
-								return
-							case <-t.C:
-							}
-							continue
-						}
-						if !claimed {
-							continue
-						}
-						panelCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
-						err = panelMaintenance(panelCtx, func(ctx context.Context) error { return syncer.ReconcilePanel(ctx, p, false) })
-						cancel()
-						if persistErr := failures.RecordOutcome(ctx, "residential_sync", p.ID, "", err); persistErr != nil {
-							log.Printf("residential sync persistence %s: %v", p.ID, persistErr)
-						}
-						if err != nil {
-							log.Printf("residential sync panel %s: %v", p.ID, err)
-						}
-						continue
-					}
-					supervision.Idle(ctx)
-					select {
-					case <-ctx.Done():
-						return
-					case <-t.C:
-					}
+				lane := proofLane{
+					admit: budget.Do, metrics: proofMetrics,
+					discover: func(c context.Context, after string) (readyworker.Panel, bool, error) {
+						return syncer.NextDuePanelForWorker(c, serving, after)
+					},
+					reserve: func(c context.Context, p readyworker.Panel) (worker.OutcomeReservation, bool, error) {
+						return failures.ReserveOwnedOutcome(c, "residential_sync", p.ID, "", 90*time.Second)
+					},
+					reconcile: func(c context.Context, p readyworker.Panel) error { return syncer.ReconcileDuePanel(c, p, serving) },
+					complete: func(c context.Context, p readyworker.Panel, l worker.OutcomeReservation, e error) error {
+						return failures.RecordOwnedOutcome(c, "residential_sync", p.ID, "", l, e)
+					},
 				}
+				lane.run(ctx)
 			})
 		}
 	}

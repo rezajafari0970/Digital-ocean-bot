@@ -47,6 +47,61 @@ func (s FailureStore) ReserveOutcome(ctx context.Context, kind, item, account st
 	return claimed, err
 }
 
+// OutcomeReservation identifies one scheduling claim. It is not proof authority.
+// The database-generated timestamp is compared under a row lock on completion.
+type OutcomeReservation struct {
+	Version time.Time
+}
+
+func (s FailureStore) ReserveOwnedOutcome(ctx context.Context, kind, item, account string, hold time.Duration) (OutcomeReservation, bool, error) {
+	var lease OutcomeReservation
+	if s.DB == nil || hold < time.Second || hold > 10*time.Minute {
+		return lease, false, errors.New("invalid outcome reservation")
+	}
+	err := s.DB.QueryRowContext(ctx, `INSERT INTO worker_item_failures(kind,item_id,account_id,failures,last_error,first_failed_at,last_failed_at,next_retry_at)
+ VALUES($1,$2,NULLIF($3,'')::uuid,0,'RECONCILIATION_OUTCOME_PENDING',now(),now(),clock_timestamp()+($4*interval '1 second'))
+ ON CONFLICT(kind,item_id) DO UPDATE SET next_retry_at=EXCLUDED.next_retry_at
+ WHERE worker_item_failures.next_retry_at IS NULL OR worker_item_failures.next_retry_at<=now()
+ RETURNING next_retry_at`, kind, item, account, int64(hold/time.Second)).Scan(&lease.Version)
+	if errors.Is(err, sql.ErrNoRows) {
+		return lease, false, nil
+	}
+	return lease, err == nil, err
+}
+
+// RecordOwnedOutcome cannot clear or fail a replacement claim. The comparison,
+// failure increment and retry timestamp commit atomically.
+func (s FailureStore) RecordOwnedOutcome(ctx context.Context, kind, item, account string, lease OutcomeReservation, cause error) error {
+	if s.DB == nil || lease.Version.IsZero() {
+		return errors.New("invalid outcome ownership")
+	}
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var version time.Time
+	err = tx.QueryRowContext(ctx, "SELECT next_retry_at FROM worker_item_failures WHERE kind=$1 AND item_id=$2 FOR UPDATE", kind, item).Scan(&version)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !version.Equal(lease.Version) {
+		return nil
+	}
+	if cause == nil {
+		err = clearFailureTx(ctx, tx, kind, item)
+	} else {
+		err = failTx(ctx, tx, kind, item, account, cause)
+	}
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 // RecordOutcome reports essential writes and enforces cancellation-aware pacing
 // when no durable retry can be stored. Native ambiguity guards remain separate.
 func (s FailureStore) RecordOutcome(ctx context.Context, kind, item, account string, cause error) error {

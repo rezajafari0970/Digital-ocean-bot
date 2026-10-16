@@ -375,9 +375,17 @@ type Assignment struct {
 }
 
 func (s Store) Load(ctx context.Context, panel string) (Assignment, error) {
+	return loadAssignment(ctx, s.DB, panel)
+}
+
+type assignmentQueryer interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func loadAssignment(ctx context.Context, db assignmentQueryer, panel string) (Assignment, error) {
 	var a Assignment
 	var c, b, o, p []byte
-	e := s.DB.QueryRowContext(ctx, "SELECT generation,config,baseline,observed,pending FROM residential_performance_panels WHERE panel_id=$1", panel).Scan(&a.Generation, &c, &b, &o, &p)
+	e := db.QueryRowContext(ctx, "SELECT generation,config,baseline,observed,pending FROM residential_performance_panels WHERE panel_id=$1", panel).Scan(&a.Generation, &c, &b, &o, &p)
 	if errors.Is(e, sql.ErrNoRows) {
 		return a, nil
 	}
@@ -402,6 +410,13 @@ func (s Store) Prepare(ctx context.Context, panel string, generation int64, curr
 		return Assignment{}, e
 	}
 	defer tx.Rollback()
+	a, e := s.PrepareTx(ctx, tx, panel, generation, current)
+	if e != nil {
+		return a, e
+	}
+	return a, tx.Commit()
+}
+func (s Store) PrepareTx(ctx context.Context, tx *sql.Tx, panel string, generation int64, current Fields) (Assignment, error) {
 	r, e := tx.ExecContext(ctx, "UPDATE residential_performance_panels SET baseline=COALESCE(baseline,$3::jsonb),observed=COALESCE(observed,$3::jsonb) WHERE panel_id=$1 AND generation=$2", panel, generation, string(raw(current)))
 	if e != nil {
 		return Assignment{}, e
@@ -410,10 +425,7 @@ func (s Store) Prepare(ctx context.Context, panel string, generation int64, curr
 	if n != 1 {
 		return Assignment{}, conflict("performance generation changed")
 	}
-	if e = tx.Commit(); e != nil {
-		return Assignment{}, e
-	}
-	a, e := s.Load(ctx, panel)
+	a, e := loadAssignment(ctx, tx, panel)
 	if e != nil {
 		return a, e
 	}
@@ -423,7 +435,18 @@ func (s Store) Prepare(ctx context.Context, panel string, generation int64, curr
 	return a, CheckOwned(current, a.Baseline, a.Observed, a.Pending)
 }
 func (s Store) Plan(ctx context.Context, panel string, gen int64, f Fields) error {
-	r, e := s.DB.ExecContext(ctx, "UPDATE residential_performance_panels SET pending=$3 WHERE panel_id=$1 AND generation=$2", panel, gen, string(raw(f)))
+	return planFields(ctx, s.DB, panel, gen, f)
+}
+func (s Store) PlanTx(ctx context.Context, tx *sql.Tx, panel string, gen int64, f Fields) error {
+	return planFields(ctx, tx, panel, gen, f)
+}
+
+type assignmentExecutor interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}
+
+func planFields(ctx context.Context, db assignmentExecutor, panel string, gen int64, f Fields) error {
+	r, e := db.ExecContext(ctx, "UPDATE residential_performance_panels SET pending=$3 WHERE panel_id=$1 AND generation=$2", panel, gen, string(raw(f)))
 	if e != nil {
 		return e
 	}
@@ -474,35 +497,40 @@ func (s Store) FailedAt(ctx context.Context, panel string, gen int64, cause erro
 		return
 	}
 	defer tx.Rollback()
-	if Lock(ctx, tx) != nil {
-		return
+	if s.FailedAtTx(ctx, tx, panel, gen, cause, stage) == nil {
+		_ = tx.Commit()
+	}
+}
+func (s Store) FailedAtTx(ctx context.Context, tx *sql.Tx, panel string, gen int64, cause error, stage string) error {
+	if err := Lock(ctx, tx); err != nil {
+		return err
 	}
 	message := "Runtime verification pending"
 	if strings.Contains(cause.Error(), "field conflict") {
 		message = "Rollback conflict: an owned setting changed outside this experiment"
 	}
 	var id string
-	e = tx.QueryRowContext(ctx, "UPDATE residential_performance_panels SET last_error=$3 WHERE panel_id=$1 AND generation=$2 RETURNING experiment_id::text", panel, gen, message).Scan(&id)
+	e := tx.QueryRowContext(ctx, "UPDATE residential_performance_panels SET last_error=$3 WHERE panel_id=$1 AND generation=$2 RETURNING experiment_id::text", panel, gen, message).Scan(&id)
 	if e != nil {
-		return
+		return e
 	}
 	var count int
 	e = tx.QueryRowContext(ctx, "UPDATE residential_performance_targets SET failures=failures+1 WHERE experiment_id=$1 AND panel_id=$2 AND generation=$3 RETURNING failures", id, panel, gen).Scan(&count)
 	if e != nil {
-		return
+		return e
 	}
 	if e = tuningFailure(ctx, tx, id, panel, gen, stage); e != nil {
-		return
+		return e
 	}
 	if count >= 3 {
 		var state string
 		if tx.QueryRowContext(ctx, "SELECT state FROM residential_performance_experiments WHERE id=$1", id).Scan(&state) == nil && state == "RUNNING" {
-			if rollback(ctx, tx, id, "verification failures") != nil {
-				return
+			if err := rollback(ctx, tx, id, "verification failures"); err != nil {
+				return err
 			}
 		}
 	}
-	_ = tx.Commit()
+	return nil
 }
 func (s Store) Tick(ctx context.Context) error {
 	if e := s.tickTuning(ctx); e != nil {

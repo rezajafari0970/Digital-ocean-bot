@@ -29,6 +29,15 @@ type Service struct {
 }
 
 func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bool) (err error) {
+	return s.reconcilePanel(ctx, p, dry, nil)
+}
+
+// ReconcileDuePanel rechecks worker eligibility after acquiring configuration and
+// runtime ownership. A claim is only a scheduling hint, never proof authority.
+func (s Service) ReconcileDuePanel(ctx context.Context, p readyworker.Panel, serving bool) error {
+	return s.reconcilePanel(ctx, p, false, &serving)
+}
+func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bool, serving *bool) (err error) {
 	if s.DB == nil || s.Secrets == nil || s.Runtimes == nil || p.ID == "" {
 		return errors.New("residential sync configuration")
 	}
@@ -41,21 +50,61 @@ func (s Service) ReconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 	}
 
 	return sanaei.WithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) (err error) {
+		attempted := false
 		defer func() {
-			if err != nil {
+			if err != nil && attempted {
 				c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 				defer cancel()
-				_, _ = s.DB.ExecContext(c, `INSERT INTO panel_routing_state(panel_id,state,last_error,next_check_at) VALUES($1,'FAILED','routing verification pending',now()+interval '10 seconds')
-  ON CONFLICT(panel_id) DO UPDATE SET state='FAILED',last_error=excluded.last_error,next_check_at=excluded.next_check_at`, p.ID)
+				_ = sanaei.WithConfigEvidenceTx(c, s.DB, p.ID, func(tx *sql.Tx) error {
+					_, e := tx.ExecContext(c, `UPDATE panel_routing_state r SET state='FAILED',last_error='routing verification pending',next_check_at=now()+interval '10 seconds'
+ WHERE r.panel_id=$1 AND r.revision=(SELECT revision FROM residential_routing_control WHERE singleton)
+ AND r.performance_generation=COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)`, p.ID)
+					return e
+				})
 			}
 		}()
+		due, e := s.dueWhileOwned(ctx, p.ID, serving)
+		if e != nil || !due {
+			return e
+		}
 		rt, e := s.Runtimes.Acquire(ctx, p.ID)
 		if e != nil {
 			return e
 		}
-		return rt.WithMutation(ctx, func(ctx context.Context) error { return s.apply(ctx, p.ID, rt) })
+		return rt.WithMutation(ctx, func(ctx context.Context) error {
+			due, err := s.dueWhileOwned(ctx, p.ID, serving)
+			if err != nil || !due {
+				return err
+			}
+			attempted = true
+			return s.apply(ctx, p.ID, rt)
+		})
 	})
 }
+
+// Never consult the failure-ledger exclusion here: this attempt owns that
+// reservation. Use the owning session for the authoritative due/scope recheck.
+func (s Service) dueWhileOwned(ctx context.Context, panel string, serving *bool) (bool, error) {
+	var due bool
+	var lane any
+	if serving != nil {
+		lane = *serving
+	}
+	err := sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+		return tx.QueryRowContext(ctx, `SELECT EXISTS(
+ SELECT 1 FROM residential_routing_control c
+ LEFT JOIN panel_routing_state r ON r.panel_id=$1
+ WHERE c.singleton AND c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids))
+ AND (r.panel_id IS NULL OR r.revision<>c.revision OR r.next_check_at<=now())
+ AND ($2::boolean IS NULL OR EXISTS(
+ SELECT 1 FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id
+ WHERE pi.id=$1 AND pi.enabled AND dr.state<>'DELETED'
+ AND ((dr.state IN('READY','EXPIRING') AND (dr.expires_at IS NULL OR dr.expires_at>now()))=$2)
+ AND EXISTS(SELECT 1 FROM deployments d WHERE d.droplet_id=pi.droplet_id AND d.state='PANEL_COMPLETE'))))`, panel, lane).Scan(&due)
+	})
+	return due, err
+}
+
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
 	p := (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
 	var revision int64
@@ -172,7 +221,9 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 			if retErr != nil {
 				c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 				defer cancel()
-				perf.FailedAt(c, panel, p.PerformanceGeneration, retErr, failureStage)
+				_ = sanaei.WithConfigEvidenceTx(c, s.DB, panel, func(tx *sql.Tx) error {
+					return perf.FailedAtTx(c, tx, panel, p.PerformanceGeneration, retErr, failureStage)
+				})
 			}
 		}()
 	}
@@ -248,7 +299,12 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}
 	failureStage = "ownership"
 	if p.PerformanceGeneration > 0 && (p.Performance != nil || p.PerformanceBaseline != nil) {
-		a, e := perf.Prepare(ctx, panel, p.PerformanceGeneration, residentialperf.Capture(current))
+		var a residentialperf.Assignment
+		e := sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+			var e error
+			a, e = perf.PrepareTx(ctx, tx, panel, p.PerformanceGeneration, residentialperf.Capture(current))
+			return e
+		})
 		if e != nil {
 			return e
 		}
@@ -261,7 +317,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	}
 	hash := settingsHash(desired)
 	var unchanged bool
-	if err = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM panel_routing_state WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND state='APPLIED')", panel, revision, hash).Scan(&unchanged); err != nil {
+	if err = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM panel_routing_state WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND performance_generation=$4 AND state='APPLIED')", panel, revision, hash, p.PerformanceGeneration).Scan(&unchanged); err != nil {
 		return err
 	}
 	if !unchanged || !sameRouteMembership(savedClients, clients) {
@@ -275,37 +331,57 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		return err
 	}
 	if p.PerformanceGeneration > 0 {
-		if e := perf.Plan(ctx, panel, p.PerformanceGeneration, residentialperf.Capture(desired)); e != nil {
+		if e := sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+			return perf.PlanTx(ctx, tx, panel, p.PerformanceGeneration, residentialperf.Capture(desired))
+		}); e != nil {
 			return e
+		}
+	}
+	proofOnly := sanaei.ConfigObservationEnabled(panel) && unchanged && sameRouteMembership(savedClients, clients) && settingsHash(current) == hash
+	if proofOnly {
+		if err = sanaei.ConfigProofOnly(ctx, s.DB, panel); err != nil {
+			return err
 		}
 	}
 	// The executor always reads the template and running routes before a retry.
 	failureStage = "runtime_apply"
-	if err = applyAndVerify(ctx, rt.Session.Exec, current, desired, testURL, clients, tags, p, func() error {
+	beforeMutation := func() error {
+		if !sanaei.ConfigLockHeld(ctx, s.DB, panel) {
+			return sanaei.ErrConfigOwnership
+		}
+
 		if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
 			if e := perf.ValidateAdmissionAssignment(ctx, panel, p.PerformanceGeneration); e != nil {
 				return e
 			}
 		}
-		result, e := s.DB.ExecContext(ctx, "UPDATE panel_routing_state SET state='APPLYING' WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$4", panel, revision, hash, p.PerformanceGeneration)
-		if e != nil {
-			return e
-		}
-		n, e := result.RowsAffected()
-		if e != nil {
-			return e
-		}
-		if n != 1 {
-			return errors.New("routing generation or plan changed before mutation")
-		}
-		return nil
-	}); err != nil {
+		return sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+			result, e := tx.ExecContext(ctx, "UPDATE panel_routing_state SET state='APPLYING' WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$4", panel, revision, hash, p.PerformanceGeneration)
+			if e != nil {
+				return e
+			}
+			n, e := result.RowsAffected()
+			if e != nil {
+				return e
+			}
+			if n != 1 {
+				return errors.New("routing generation or plan changed before mutation")
+			}
+			return nil
+		})
+	}
+	if proofOnly {
+		// Never upgrade or restart after releasing the observation barrier.
+		err = verifyWhenReady(ctx, rt.Session.Exec, desired, clients, tags, p)
+	} else {
+		err = applyAndVerify(ctx, rt.Session.Exec, current, desired, testURL, clients, tags, p, beforeMutation)
+	}
+	if err != nil {
 		return err
 	}
 	failureStage = "inventory_verify"
-	rt.Session.Invalidate()
 	// Membership may have changed through a panel operator while we held our lock.
-	after, err := rt.Session.Snapshot(ctx)
+	after, err := rt.Session.FreshSnapshot(ctx)
 	if err != nil {
 		return err
 	}
@@ -334,56 +410,53 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 	if observeErr != nil {
 		return observeErr
 	}
-	if _, observeErr = (inventory.SQLStore{DB: s.DB}).Sync(ctx, observed); observeErr != nil {
-		return observeErr
-	}
-	if observeErr = (usercapacity.Service{DB: s.DB}).ObserveVerifiedSnapshot(ctx, panel, after); observeErr != nil {
-		return observeErr
-	}
 	failureStage = "receipt_commit"
-	tx, err := s.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	if err = residentialperf.Lock(ctx, tx); err != nil {
-		return err
-	}
-	if p.PerformanceGeneration > 0 {
-		if err = perf.AppliedTx(ctx, tx, panel, p.PerformanceGeneration); err != nil {
+	return sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+		if err = residentialperf.Lock(ctx, tx); err != nil {
 			return err
 		}
-	}
-	res, err := tx.ExecContext(ctx, `UPDATE panel_routing_state SET performance_generation=$5,state='APPLIED',verified_at=now(),next_check_at=now()+CASE WHEN $6 THEN interval '10 seconds' ELSE interval '20 seconds' END,last_error='',healthy_count=CASE WHEN $6 THEN healthy_count ELSE $4 END,relay_mode=$6,category_digest=$7
- WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$5 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount, p.PerformanceGeneration, p.RelayMode, categoryDigest(p))
-	if err != nil {
-		return err
-	}
-	n, _ := res.RowsAffected()
-	if n != 1 {
-		return fmt.Errorf("routing revision changed during apply")
-	}
-	if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
-		return err
-	}
-	if p.RelayInlet != nil {
-		proxy, e := managedSOCKS(panel, p.RelayInlet.Host, p.RelayInlet.SecretRef, p.RelayInlet.Port, p.RelayInlet.Credential)
-		if e != nil {
+		if p.PerformanceGeneration > 0 {
+			if err = perf.AppliedTx(ctx, tx, panel, p.PerformanceGeneration); err != nil {
+				return err
+			}
+		}
+		if _, e := (inventory.SQLStore{DB: s.DB}).SyncTx(ctx, tx, observed); e != nil {
 			return e
 		}
-		res, e := tx.ExecContext(ctx, "UPDATE panel_relay_endpoints SET state='APPLIED',plan_hash=$2,verified_at=now() WHERE panel_id=$1 AND enabled AND transport_hash=$3", panel, hash, proxy.TransportHash)
-		if e != nil {
+		if e := (usercapacity.Service{DB: s.DB}).ObserveVerifiedSnapshotTx(ctx, tx, panel, after); e != nil {
 			return e
+		}
+		res, err := tx.ExecContext(ctx, `UPDATE panel_routing_state SET performance_generation=$5,state='APPLIED',verified_at=now(),next_check_at=now()+CASE WHEN $6 THEN interval '10 seconds' ELSE interval '20 seconds' END,last_error='',healthy_count=CASE WHEN $6 THEN healthy_count ELSE $4 END,relay_mode=$6,category_digest=$7
+ WHERE panel_id=$1 AND revision=$2 AND plan_hash=$3 AND COALESCE((SELECT generation FROM residential_performance_panels WHERE panel_id=$1),0)=$5 AND EXISTS(SELECT 1 FROM residential_routing_control WHERE singleton AND revision=$2 AND enabled AND(fleet OR $1::uuid=ANY(panel_ids)))`, panel, revision, hash, p.HealthyCount, p.PerformanceGeneration, p.RelayMode, categoryDigest(p))
+		if err != nil {
+			return err
 		}
 		n, _ := res.RowsAffected()
 		if n != 1 {
-			return errors.New("relay endpoint changed during apply")
+			return fmt.Errorf("routing revision changed during apply")
 		}
-	}
-	if _, err = tx.ExecContext(ctx, "UPDATE panel_relay_assignments SET applied=true WHERE receiver_panel_id=$1 AND receiver_plan_hash=$2 AND selected", panel, hash); err != nil {
-		return err
-	}
-	return tx.Commit()
+		if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
+			return err
+		}
+		if p.RelayInlet != nil {
+			proxy, e := managedSOCKS(panel, p.RelayInlet.Host, p.RelayInlet.SecretRef, p.RelayInlet.Port, p.RelayInlet.Credential)
+			if e != nil {
+				return e
+			}
+			res, e := tx.ExecContext(ctx, "UPDATE panel_relay_endpoints SET state='APPLIED',plan_hash=$2,verified_at=now() WHERE panel_id=$1 AND enabled AND transport_hash=$3", panel, hash, proxy.TransportHash)
+			if e != nil {
+				return e
+			}
+			n, _ := res.RowsAffected()
+			if n != 1 {
+				return errors.New("relay endpoint changed during apply")
+			}
+		}
+		if _, err = tx.ExecContext(ctx, "UPDATE panel_relay_assignments SET applied=true WHERE receiver_panel_id=$1 AND receiver_plan_hash=$2 AND selected", panel, hash); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 func routeMap(cs []clientRoute) map[string]clientRoute {
 	m := map[string]clientRoute{}
@@ -443,58 +516,53 @@ func (s Service) EligiblePanels(ctx context.Context) ([]readyworker.Panel, error
 
 func (s Service) persistPlan(ctx context.Context, panel string, revision int64, hash string, p routePolicy, clients []clientRoute, desired map[string]any) error {
 	// Persist exact membership before a request can change the remote router.
-	tx, err := s.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
-		if err = residentialperf.Lock(ctx, tx); err != nil {
+	return sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+		var err error
+		if p.Performance != nil && len(p.Performance.ExcludedProxyIDs) > 0 {
+			if err = residentialperf.Lock(ctx, tx); err != nil {
+				return err
+			}
+			if err = (residentialperf.Store{DB: s.DB}).BindAdmissionPlanTx(ctx, tx, panel, p.PerformanceGeneration, hash); err != nil {
+				return err
+			}
+		}
+		var fresh int64
+		if err = tx.QueryRowContext(ctx, "SELECT revision FROM residential_routing_control WHERE singleton FOR SHARE").Scan(&fresh); err != nil {
 			return err
 		}
-		if err = (residentialperf.Store{DB: s.DB}).BindAdmissionPlanTx(ctx, tx, panel, p.PerformanceGeneration, hash); err != nil {
+		if fresh != revision {
+			return errors.New("routing revision changed")
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled,performance_generation) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7,$8)
+ ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,performance_generation=excluded.performance_generation,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled, p.PerformanceGeneration); err != nil {
 			return err
 		}
-	}
-	var fresh int64
-	if err = tx.QueryRowContext(ctx, "SELECT revision FROM residential_routing_control WHERE singleton FOR SHARE").Scan(&fresh); err != nil {
-		return err
-	}
-	if fresh != revision {
-		return errors.New("routing revision changed")
-	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7)
- ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled); err != nil {
-		return err
-	}
-	if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
-		return err
-	}
-	if _, err = tx.ExecContext(ctx, "DELETE FROM panel_client_routes WHERE panel_id=$1", panel); err != nil {
-		return err
-	}
-	stmt, err := tx.PrepareContext(ctx, pq.CopyIn("panel_client_routes", "panel_id", "client_id", "email", "route_class", "effective_class", "revision"))
-	if err != nil {
-		return err
-	}
-	for _, c := range clients {
-		if _, err = stmt.ExecContext(ctx, panel, c.ID, c.Email, c.Class, c.Effective, revision); err != nil {
-			stmt.Close()
+		if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
 			return err
 		}
-	}
-	_, err = stmt.ExecContext(ctx)
-	closeErr := stmt.Close()
-	if err != nil {
-		return err
-	}
-	if closeErr != nil {
-		return closeErr
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+		if _, err = tx.ExecContext(ctx, "DELETE FROM panel_client_routes WHERE panel_id=$1", panel); err != nil {
+			return err
+		}
+		stmt, err := tx.PrepareContext(ctx, pq.CopyIn("panel_client_routes", "panel_id", "client_id", "email", "route_class", "effective_class", "revision"))
+		if err != nil {
+			return err
+		}
+		for _, c := range clients {
+			if _, err = stmt.ExecContext(ctx, panel, c.ID, c.Email, c.Class, c.Effective, revision); err != nil {
+				stmt.Close()
+				return err
+			}
+		}
+		_, err = stmt.ExecContext(ctx)
+		closeErr := stmt.Close()
+		if err != nil {
+			return err
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+		return nil
+	})
 }
 
 // NextDuePanel preserves the unsharded selection used by isolated callers.
