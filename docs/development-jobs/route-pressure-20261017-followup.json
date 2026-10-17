@@ -1,0 +1,861 @@
+{
+  "status": "VERIFIED_RECORDED",
+  "recorded_at_tehran": "2026-10-17T03:35:41.659061+03:30",
+  "base_source_checkpoint": "4653a9cf554f64db4c1bda9d3220e7f06ee0fd1c",
+  "installed_product_source": "294bd152633e32014e7ce3bb2649fa89f78e4e89",
+  "installed_public_revision": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+  "native_version": "dob-fm-0.2.2",
+  "steps": [
+    {
+      "step": "live host and output verification",
+      "status": "completed"
+    },
+    {
+      "step": "review remaining gaps",
+      "status": "completed",
+      "result": "one newly ready panel converged under existing policy; no reproduced code or policy regression"
+    },
+    {
+      "step": "record evidence and checkpoint",
+      "status": "completed"
+    }
+  ],
+  "services": {
+    "primary": {
+      "at": "2026-10-16T23:56:34.464412+00:00",
+      "manifest_commit": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "version": {
+        "commit": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+        "build_time": "2026-10-16T21:11:16Z",
+        "go_version": "go1.27.1",
+        "modified": false
+      },
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-16T23:56:34.547007059Z"
+      }
+    },
+    "secondary": {
+      "at": "2026-10-16T23:56:31.511045+00:00",
+      "manifest_commit": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "version": {
+        "commit": "2471b22a90dead5468d3ed1a2acc9dc7d16a0f71",
+        "build_time": "2026-10-16T21:09:51Z",
+        "go_version": "go1.27.1",
+        "modified": false
+      },
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-16T23:56:31.589027711Z"
+      }
+    }
+  },
+  "native_audit": {
+    "completed_at": "2026-10-16T23:58:01.042857+00:00",
+    "audited": 92,
+    "verified": 92,
+    "new_since_previous_audit": 31,
+    "issues": []
+  },
+  "later_arrival_native_verified": 1,
+  "distinct_native_panels_verified": 93,
+  "final_barriers": {
+    "at": "2026-10-17T00:05:24.917021+00:00",
+    "transport_jobs": [],
+    "client_jobs": [],
+    "protection": [
+      {
+        "desired_enabled": false,
+        "state": "DISABLED",
+        "count": 2,
+        "admission_blocked": 0
+      }
+    ],
+    "provider_issues": [],
+    "recent_provider_recoveries": [
+      {
+        "provider": "vultr",
+        "provider_state": "ACTIVE",
+        "provider_error_state": null,
+        "provider_error_at": "2026-10-17T00:04:37.066963+00:00",
+        "provider_checked_at": "2026-10-17T00:04:53.736246+00:00",
+        "runtime_status": "READY"
+      }
+    ]
+  },
+  "resource_followup": [
+    {
+      "panel": "a456d5de-71c3-46d4-b0ad-e277777f4f8c",
+      "host": "172.237.8.215",
+      "version": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.2.2 (go1.27.1 linux/amd64)",
+      "uptime_seconds": 10712,
+      "available_memory": "1453184 kB",
+      "memory_pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=875404861\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=659671745",
+      "stats_seconds": 0.037,
+      "stats_code": 0
+    }
+  ],
+  "initial_samples": [
+    {
+      "at": "2026-10-16T23:56:13.789158+00:00",
+      "stable_active": 92,
+      "health": {
+        "HEALTHY": 92,
+        "PROVISIONING": 1
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-16T23:56:44.376169+00:00",
+      "stable_active": 92,
+      "health": {
+        "HEALTHY": 92,
+        "PROVISIONING": 1
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-16T23:57:15.082350+00:00",
+      "stable_active": 92,
+      "health": {
+        "HEALTHY": 92,
+        "PROVISIONING": 1
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-16T23:57:45.766491+00:00",
+      "stable_active": 92,
+      "health": {
+        "HEALTHY": 92,
+        "PROVISIONING": 1
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-16T23:58:16.963913+00:00",
+      "stable_active": 92,
+      "health": {
+        "HEALTHY": 92,
+        "PROVISIONING": 1
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-16T23:58:47.562771+00:00",
+      "stable_active": 93,
+      "health": {
+        "HEALTHY": 93
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        },
+        "RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        },
+        "ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        },
+        "SHARE_DIRECT": {
+          "servers": 92,
+          "links": 92,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 92,
+          "links": 276,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        },
+        "SHARE_ALL": {
+          "servers": 92,
+          "links": 460,
+          "invalid": 0,
+          "missing_healthy_servers": 1,
+          "below_profile_target": 1
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 92,
+        "enrolled_inbounds": 92,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    }
+  ],
+  "initial_full_coverage_samples": 5,
+  "initial_startup_gap": {
+    "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+    "host": "172.236.162.223",
+    "panel_created_at": "2026-10-16T23:58:41.082678Z",
+    "observed_at": "2026-10-16T23:58:47.562771Z",
+    "observation": "new panel had not yet entered first output snapshot; retained as an observed gap"
+  },
+  "terminal_samples": [
+    {
+      "at": "2026-10-17T00:04:26.425531+00:00",
+      "stable_active": 83,
+      "health": {
+        "HEALTHY": 83,
+        "PROVIDER_UNAVAILABLE": 10
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 93,
+          "links": 278,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 1
+        },
+        "ALL": {
+          "servers": 93,
+          "links": 464,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 93,
+          "links": 278,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 1
+        },
+        "SHARE_ALL": {
+          "servers": 93,
+          "links": 464,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 93,
+        "enrolled_inbounds": 93,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 1,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-17T00:04:47.081880+00:00",
+      "stable_active": 83,
+      "health": {
+        "HEALTHY": 83,
+        "PROVIDER_UNAVAILABLE": 10
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 93,
+          "links": 278,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 1
+        },
+        "ALL": {
+          "servers": 93,
+          "links": 464,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 93,
+          "links": 278,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 1
+        },
+        "SHARE_ALL": {
+          "servers": 93,
+          "links": 464,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 93,
+        "enrolled_inbounds": 93,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 1,
+      "database_pool_wait_count": 0
+    },
+    {
+      "at": "2026-10-17T00:05:07.676196+00:00",
+      "stable_active": 93,
+      "health": {
+        "HEALTHY": 93
+      },
+      "outputs": {
+        "DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "RESIDENTIAL": {
+          "servers": 93,
+          "links": 279,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "ALL": {
+          "servers": 93,
+          "links": 465,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_DIRECT": {
+          "servers": 93,
+          "links": 93,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "servers": 93,
+          "links": 279,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        },
+        "SHARE_ALL": {
+          "servers": 93,
+          "links": 465,
+          "invalid": 0,
+          "missing_healthy_servers": 0,
+          "below_profile_target": 0
+        }
+      },
+      "automation": {
+        "running": true,
+        "eligible_inbounds": 93,
+        "enrolled_inbounds": 93,
+        "awaiting_enrollment": 0,
+        "paused_scopes": 0,
+        "cooldown_panels": 0,
+        "quarantined_panels": 0
+      },
+      "provider_errors": 0,
+      "database_pool_wait_count": 0
+    }
+  ],
+  "terminal_host_coverage_complete": true,
+  "final_profile_targets_complete": true,
+  "terminal_samples_with_full_profile_targets": 1,
+  "standard_policy_reconciliation": [
+    {
+      "at": "2026-10-17T00:00:03.670949+00:00",
+      "round": 1,
+      "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+      "before": {
+        "ready": true,
+        "owned": null,
+        "pending": 0
+      },
+      "missing": true,
+      "exit": 0
+    },
+    {
+      "at": "2026-10-17T00:01:08.683538+00:00",
+      "round": 2,
+      "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+      "before": {
+        "ready": true,
+        "owned": null,
+        "pending": 0
+      },
+      "missing": true,
+      "exit": 0
+    },
+    {
+      "at": "2026-10-17T00:02:13.675723+00:00",
+      "round": 3,
+      "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+      "before": {
+        "ready": true,
+        "owned": {
+          "DIRECT": 1,
+          "RESIDENTIAL": 1
+        },
+        "pending": 0
+      },
+      "missing": true,
+      "exit": 0
+    },
+    {
+      "at": "2026-10-17T00:03:18.689678+00:00",
+      "round": 4,
+      "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+      "before": {
+        "ready": true,
+        "owned": {
+          "DIRECT": 1,
+          "RESIDENTIAL": 1
+        },
+        "pending": 0
+      },
+      "missing": true,
+      "exit": 0
+    },
+    {
+      "at": "2026-10-17T00:04:23.673086+00:00",
+      "round": 5,
+      "panel": "12b1d400-fa8c-4552-840d-bd822869cf37",
+      "before": {
+        "ready": true,
+        "owned": {
+          "DIRECT": 1,
+          "RESIDENTIAL": 2
+        },
+        "pending": 0
+      },
+      "missing": true,
+      "exit": 0
+    }
+  ],
+  "source_code_changes": 0,
+  "deployments": 0,
+  "direct_native_or_client_table_writes": 0,
+  "new_model_api_requests": 0,
+  "new_model_api_tokens": 0,
+  "new_model_api_cost_usd": 0,
+  "evidence_root": "/root/projects/dob-route-pressure-20261016/.local/evidence",
+  "limits": [
+    "Live fleet counts change during provisioning, expiry and first verification.",
+    "Historical deleted canaries are not tested via reused IP addresses.",
+    "Accepted tests and release gates were not rerun because product source and installed executables were unchanged."
+  ],
+  "provider_network_transient_observations": [
+    {
+      "at": "2026-10-17T00:04:26.425531+00:00",
+      "affected_dashboard_servers": 10,
+      "codes": [
+        "PROXY_ERROR"
+      ]
+    },
+    {
+      "at": "2026-10-17T00:04:47.081880+00:00",
+      "affected_dashboard_servers": 10,
+      "codes": [
+        "PROXY_ERROR"
+      ]
+    }
+  ]
+}
