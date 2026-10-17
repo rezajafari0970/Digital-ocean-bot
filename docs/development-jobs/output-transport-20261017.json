@@ -1,7 +1,7 @@
 {
   "started_at": "2026-10-17T03:48:46.104496+03:30",
   "base_commit": "563ab0a74e307378291c86e21cb2fb6753c5b811",
-  "status": "investigating",
+  "status": "accepted",
   "operator_intent": "XHTTP policy revision 8; cleanup and recreation in progress; preserve operator settings",
   "stages": [
     {
@@ -61,11 +61,75 @@
       "at": "2026-10-17T04:17:45.011625+03:30",
       "stage": "conversion_nearly_complete",
       "result": "Latest monitor 87 XHTTP/5 TCP, five pending plus one running; every live TCP listener has active queued conversion. Profiles are rebuilding; no final acceptance claim yet."
+    },
+    {
+      "at": "2026-10-17T04:21:59.330650+03:30",
+      "stage": "operator_profile_change",
+      "result": "Live operator policy changed RESIDENTIAL target from 3/revision15 to 1/revision16 at 2026-10-17T00:48:00Z; DIRECT remains 1/revision11. Preserve new intent, do not restore target3. Acceptance helper now reads/fences actual profile revisions instead of assuming historical targets.",
+      "evidence": [
+        {
+          "target": "5",
+          "policy": {
+            "Rate": 100,
+            "Chunk": 100,
+            "Class": "",
+            "Quota": 0,
+            "Create": true,
+            "Target": 2,
+            "Lifetime": 0,
+            "Revision": 0,
+            "DeviceLimit": 0,
+            "CreationInterval": 0
+          },
+          "reasons": [
+            "EXCESS"
+          ]
+        },
+        {
+          "target": "4",
+          "policy": {
+            "Rate": 100,
+            "Chunk": 100,
+            "Class": "",
+            "Quota": 0,
+            "Create": true,
+            "Target": 2,
+            "Lifetime": 0,
+            "Revision": 0,
+            "DeviceLimit": 0,
+            "CreationInterval": 0
+          },
+          "reasons": [
+            "EXCESS"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-10-17T04:28:37.689894+03:30",
+      "stage": "native_output_and_connection_validation",
+      "result": "Direct strict proxy HTTPS probe passed85/85 selected XHTTP hosts. Initial Residential probes used disallowed example.com and ipify.org; retained as invalid positive-connectivity tests, not fleet transport failures. BrowserLeaks canary passed3/3 and full run is active. Post-restart verifier startup-membership precondition is inappropriate after live client additions; private read-only auditor now retains exact active API user/flow verification while skipping historical startup membership comparison. One TCP listener is an explicit successful Restore job b3867942 (target TCP, rollback_of a5b9c639, completed00:51:42Z), preserved independently of XHTTP default revision8.",
+      "evidence": [
+        ".local/evidence/public-probe-direct.json",
+        ".local/evidence/public-probe-residential-browserleaks-canary2.json",
+        ".local/evidence/diagnostic-corrections.json",
+        ".local/evidence/native-v6-canary.json"
+      ]
+    },
+    {
+      "at": "2026-10-17T04:36:11.342909+03:30",
+      "stage": "terminal_acceptance",
+      "result": "Three output observations cover every stable healthy server and current profile targets. Terminal cohort90: Direct90, Residential90, ALL270; every public/auth output hash matches verified native state.91 distinct native panels verified across churn (90 XHTTP plus1 explicit TCP Restore). Every terminal-cohort host passed HTTPS through both classes;2 initial allowed Residential failures passed targeted repeats. Both hosts run public4356ba7. No live transport jobs remain. Later dashboard91 active,1 provisioning/inactive,1 pending deletion,0 broken/degraded/attention. Real lifecycle/provider transients retained.",
+      "evidence": [
+        "docs/development-jobs/output-transport-20261017.acceptance.json"
+      ]
     }
   ],
   "model_api": {
     "requests": 0,
     "tokens": 0,
     "cost": 0
-  }
+  },
+  "completed_at": "2026-10-17T04:36:11.342909+03:30",
+  "acceptance": "docs/development-jobs/output-transport-20261017.acceptance.json"
 }

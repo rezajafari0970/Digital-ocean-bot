@@ -1,0 +1,509 @@
+{
+  "recorded_at": "2026-10-17T04:36:11.342909+03:30",
+  "status": "accepted_for_observed_cohort_and_current_operator_policies",
+  "source_fix": "ab7989e204dfa7909bcd7c44581a542009b2a3cb",
+  "source_test_followup": "cc2bd18eed7969cc74aa236e889eeb9791f2b058",
+  "installed_public": "4356ba77a28ffe548a2b30f538144375b67101e2",
+  "terminal_observation": {
+    "at": "2026-10-17T01:04:30.263028+00:00",
+    "stable_active": 90,
+    "profile_policy": {
+      "DIRECT": {
+        "enabled": true,
+        "target": 1,
+        "revision": 11
+      },
+      "RESIDENTIAL": {
+        "enabled": true,
+        "target": 1,
+        "revision": 16
+      }
+    },
+    "policy_stable": true,
+    "health": {
+      "HEALTHY": 90,
+      "PENDING_DELETION": 1,
+      "PANEL_MISSING": 1,
+      "PROVISIONING": 1
+    },
+    "outputs": {
+      "DIRECT": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      },
+      "RESIDENTIAL": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      },
+      "ALL": {
+        "links": 270,
+        "servers": 90,
+        "types": {
+          "xhttp": 267,
+          "tcp": 3
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      },
+      "SHARE_ALL": {
+        "links": 270,
+        "servers": 90,
+        "types": {
+          "xhttp": 267,
+          "tcp": 3
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      },
+      "SHARE_DIRECT": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      },
+      "SHARE_RESIDENTIAL": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "invalid": 0,
+        "reasons": {},
+        "missing_stable": [],
+        "below_target_stable": []
+      }
+    }
+  },
+  "coverage_window": [
+    {
+      "at": "2026-10-17T01:03:48.637229+00:00",
+      "stable_active": 81,
+      "health": {
+        "HEALTHY": 81,
+        "PROVIDER_UNAVAILABLE": 9,
+        "PENDING_DELETION": 1,
+        "PROVISIONING": 2
+      },
+      "all_links": 270,
+      "all_servers": 90,
+      "missing_any_output": 0,
+      "below_target_any_output": 0
+    },
+    {
+      "at": "2026-10-17T01:04:09.437684+00:00",
+      "stable_active": 90,
+      "health": {
+        "HEALTHY": 90,
+        "PENDING_DELETION": 1,
+        "PROVISIONING": 2
+      },
+      "all_links": 270,
+      "all_servers": 90,
+      "missing_any_output": 0,
+      "below_target_any_output": 0
+    },
+    {
+      "at": "2026-10-17T01:04:30.263028+00:00",
+      "stable_active": 90,
+      "health": {
+        "HEALTHY": 90,
+        "PENDING_DELETION": 1,
+        "PANEL_MISSING": 1,
+        "PROVISIONING": 1
+      },
+      "all_links": 270,
+      "all_servers": 90,
+      "missing_any_output": 0,
+      "below_target_any_output": 0
+    }
+  ],
+  "native_audit": {
+    "distinct_panels": 91,
+    "xhttp_running_verified": 90,
+    "checked_links_latest_per_panel": 273,
+    "mismatches": 0,
+    "tcp_runtime_proof": "Explicit restored TCP listener verified by successful native apply receipt and end-to-end probes in both classes; it is not counted as XHTTP runtime verification."
+  },
+  "public_native_hash_comparison": {
+    "at": "2026-10-17T01:04:31.615174+00:00",
+    "verified_native_panels": 91,
+    "outputs": {
+      "DIRECT": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      },
+      "RESIDENTIAL": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      },
+      "ALL": {
+        "links": 270,
+        "servers": 90,
+        "types": {
+          "xhttp": 267,
+          "tcp": 3
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      },
+      "SHARE_ALL": {
+        "links": 270,
+        "servers": 90,
+        "types": {
+          "xhttp": 267,
+          "tcp": 3
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      },
+      "SHARE_DIRECT": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      },
+      "SHARE_RESIDENTIAL": {
+        "links": 90,
+        "servers": 90,
+        "types": {
+          "xhttp": 89,
+          "tcp": 1
+        },
+        "unmatched_links": 0,
+        "unmatched_hosts": []
+      }
+    }
+  },
+  "connectivity": {
+    "DIRECT": {
+      "attempts": 93,
+      "first_or_intermediate_failures": 0,
+      "distinct_hosts": 92,
+      "terminal_cohort": 90,
+      "terminal_cohort_latest_success": 90,
+      "unverified_terminal_hosts": [],
+      "files": [
+        "public-probe-direct.json",
+        "public-probe-direct-catchup.json",
+        "public-probe-direct-restored-tcp.json",
+        "public-probe-direct-terminal.json"
+      ]
+    },
+    "RESIDENTIAL": {
+      "attempts": 93,
+      "first_or_intermediate_failures": 2,
+      "distinct_hosts": 91,
+      "terminal_cohort": 90,
+      "terminal_cohort_latest_success": 90,
+      "unverified_terminal_hosts": [],
+      "files": [
+        "public-probe-residential-browserleaks-full.json",
+        "public-probe-residential-catchup.json",
+        "public-probe-residential-terminal.json"
+      ]
+    }
+  },
+  "later_dashboard": {
+    "at": "2026-10-17T01:04:52.293690+00:00",
+    "dashboard": {
+      "active_servers": 91,
+      "inactive_servers": 1,
+      "broken_servers": 0,
+      "degraded_servers": 0,
+      "panel_attention_servers": 0,
+      "provisioning_servers": 1,
+      "pending_deletion_servers": 1,
+      "total_servers": 93
+    },
+    "transport_jobs": []
+  },
+  "installations": {
+    "primary": {
+      "at": "2026-10-17T00:42:42.969366+00:00",
+      "commit": "4356ba77a28ffe548a2b30f538144375b67101e2",
+      "schema": "000182_fleet_client_coverage",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-17T00:42:42.999914935Z"
+      },
+      "checks": {
+        "accounts_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "retained_pins_preserved_or_verified_apply": true
+      },
+      "retained_pins": 364,
+      "expired_pins": 0,
+      "readiness_samples": 5,
+      "verified_transport_changes": 2
+    },
+    "secondary": {
+      "at": "2026-10-17T00:40:47.376830+00:00",
+      "commit": "4356ba77a28ffe548a2b30f538144375b67101e2",
+      "schema": "000182_fleet_client_coverage",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-17T00:40:47.445979208Z"
+      },
+      "checks": {
+        "accounts_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "retained_pins_preserved_or_verified_apply": true
+      },
+      "retained_pins": 0,
+      "expired_pins": 0,
+      "readiness_samples": 5,
+      "verified_transport_changes": 0
+    }
+  },
+  "preserved_intent": {
+    "creation_network": "xhttp",
+    "transport_revision": 8,
+    "direct_target": 1,
+    "residential_target": 1,
+    "residential_revision": 16,
+    "include_xhttp_extra": false,
+    "include_finalmask": false,
+    "protection": "OFF revision51",
+    "explicit_tcp_restore": {
+      "panel": "38d91062-38c2-4cb6-af5e-65500352c196",
+      "job": "b3867942-2615-4f99-86a3-b0b45b1397f8",
+      "completed_at": "2026-10-17T00:51:42.252111Z"
+    }
+  },
+  "limitations": [
+    "Live fleet changes between observations; later dashboard has91 active versus90 in the terminal output/probe cohort.",
+    "Inactive count in later dashboard is1 and is entirely PROVISIONING; one pending deletion is separate. These are not forced green.",
+    "A transient provider-unavailable observation affected9 servers in the first window sample and recovered in both later samples.",
+    "Initial Residential disallowed-destination probes and startup-membership audit failures were invalid positive-connectivity/runtime diagnostics; corrected evidence is explicitly separated.",
+    "Two permitted Residential first-attempt connection failures passed targeted repeats; future upstream availability is not guaranteed.",
+    "Broader database/race run had3 fixture failures; corrected targeted reruns passed; no claim of a fresh full database-suite pass."
+  ],
+  "evidence": [
+    {
+      "path": ".local/evidence/output-terminal.json",
+      "sha256": "689cd7a498480fffa9cb832192b467fb3f2832bf2a7c9bcb097c31e3c8b62ed6"
+    },
+    {
+      "path": ".local/evidence/public-native-terminal.json",
+      "sha256": "54dbb02b339ab997f907a35114ab3863c5be6fd034df75530e4be5c0d1011d29"
+    },
+    {
+      "path": ".local/evidence/native-output-live-users.json",
+      "sha256": "a6771b368c5f4b1550c83df62e2e9c421c1d50e564792f4bc79c598ae5450e94"
+    },
+    {
+      "path": ".local/evidence/native-new-panels.json",
+      "sha256": "3241f0f212a8f0dfd52db1689a5868075761ed45c77fc4536f09459e68f66b34"
+    },
+    {
+      "path": ".local/evidence/dashboard-terminal.json",
+      "sha256": "f15d442804d31d88ef3f071a78d3999bbe627c43cf772bc7082df6a416bda65c"
+    },
+    {
+      "path": ".local/evidence/primary-final-verify.json",
+      "sha256": "3fe855a67e55abdb9e45584efdfd4ecb9e6895a7025f83e6ac81a2118b92ea39"
+    },
+    {
+      "path": ".local/evidence/secondary-final-verify.json",
+      "sha256": "3c1270b724f9b0d6e5f6b6c2b98f49492807184f66d53a9474844107fdd8791f"
+    },
+    {
+      "path": ".local/evidence/diagnostic-corrections.json",
+      "sha256": "c4cd2952c2466f335bf4081bed37bd9273eef4c3cfb4afce58724f28d77b3336"
+    },
+    {
+      "path": ".local/evidence/cleanup-regression-red-2.log",
+      "sha256": "d68c0bef74321d0c233f1bf370372049dd4377e73ad836a5a117e108643ff6ec"
+    },
+    {
+      "path": ".local/evidence/cleanup-regression-green.log",
+      "sha256": "8d269710cebbdc64b296f5be0c418a992e879f341a4aa8df0f6163ef360f7759"
+    },
+    {
+      "path": ".local/evidence/affected-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".local/evidence/affected-race.log",
+      "sha256": "ed3de9e8c54a90c755bd7434cea158cb5c0fda181fe88e6fa823cc1c26fdaa95"
+    },
+    {
+      "path": ".local/evidence/fixture-corrections-race.log",
+      "sha256": "f6d4b110751e8b383088cf02f727a1629132a40f71e109ae3c5e6e404d63d1ed"
+    },
+    {
+      "path": ".local/evidence/new-panel-capacity.json",
+      "sha256": "112c9b04ba06c5f75ffce6f809eb98bf83893f2e27220b4e6e8410391784fcc0"
+    },
+    {
+      "path": ".local/evidence/new-panel-capacity-residential.json",
+      "sha256": "295420ee66f605d42c2e3a5e5eda14b4577498ecbf6b7f418d90657e914c1de8"
+    },
+    {
+      "path": ".local/evidence/public-probe-direct.json",
+      "sha256": "a7f169be3b5166a7b80e59bd30a75a035308bc70cb509596aa86c75d9db42967"
+    },
+    {
+      "path": ".local/evidence/public-probe-direct-catchup.json",
+      "sha256": "d1dcbf604590fe7ab333d45f25f33955f539f1d5243052371869ba77ef812f03"
+    },
+    {
+      "path": ".local/evidence/public-probe-direct-restored-tcp.json",
+      "sha256": "f00fd95d88d811b875fb5ae10b9c9f85e75c3e57c6901af234b3b4be8be3350a"
+    },
+    {
+      "path": ".local/evidence/public-probe-direct-terminal.json",
+      "sha256": "7f81217f2002198e1bce7ab832d74ef6dcaaff2f0bec2635819fc33ccc7f7c1d"
+    },
+    {
+      "path": ".local/evidence/public-probe-residential-browserleaks-full.json",
+      "sha256": "9bebaa97fe2ddd754e75aaecc8888551bd361d791cb70b16307444bc8d95ca1c"
+    },
+    {
+      "path": ".local/evidence/public-probe-residential-catchup.json",
+      "sha256": "a6084c2a885636c160fba3c71a05e38bdd7eda0b4ab9f37b123b7b129bad5a88"
+    },
+    {
+      "path": ".local/evidence/public-probe-residential-terminal.json",
+      "sha256": "38388bc5a46b9e44ed44e8241d267c63e7b127cdcb2ef9eef166a8ba744362b5"
+    }
+  ],
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  }
+}
