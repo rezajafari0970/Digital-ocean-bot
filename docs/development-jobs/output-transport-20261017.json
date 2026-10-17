@@ -22,6 +22,27 @@
       "at": "2026-10-17T03:58:29.548709+03:30",
       "stage": "source_ready",
       "result": "Focused regressions and race tests passed; affected vet passed; full admin database/race suite running. Publication and installation not yet complete."
+    },
+    {
+      "at": "2026-10-17T04:03:22.146356+03:30",
+      "stage": "publication_and_secondary_install",
+      "result": "Published product source ab7989e as public 1bd8beb; publisher gates and main/stable CI passed; secondary installed and verified (five readiness samples, all process hashes, policies preserved). Primary update running. Three broad-suite failures investigated: two Unix-DSN deployment guard fixture incompatibilities fixed with isolated password-authenticated loopback; outdated TCP test corrected to require core preflight. All three reruns plus cleanup rollback guard passed with race detector.",
+      "evidence": [
+        ".local/evidence/publication.json",
+        ".local/evidence/actions.json",
+        ".local/evidence/affected-race.log",
+        ".local/evidence/fixture-corrections-race.log"
+      ]
+    },
+    {
+      "at": "2026-10-17T04:05:27.362720+03:30",
+      "stage": "both_hosts_installed",
+      "result": "Both service hosts installed/verified public 1bd8beb; six active matching process hashes, zero automatic restarts, five readiness observations each, policies unchanged. Primary first attempt stopped before services on disk reserve; cache cleanup and separate retry succeeded. Three end-to-end XHTTP DIRECT HTTPS probes passed.",
+      "evidence": [
+        ".local/evidence/cache-reclaim.json",
+        ".local/evidence/public-probe-canary.json",
+        "/root/backups/dob-output-transport-20261017-retry1/verify.json"
+      ]
     }
   ],
   "model_api": {

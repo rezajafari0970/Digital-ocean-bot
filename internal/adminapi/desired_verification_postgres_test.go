@@ -18,6 +18,8 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 )
 
+var errDesiredCorePreflightFixture = errors.New("fixture core preflight unavailable")
+
 type desiredFaultSecrets struct{}
 
 func (desiredFaultSecrets) Get(_ context.Context, _ string, ref string) ([]byte, error) {
@@ -26,6 +28,8 @@ func (desiredFaultSecrets) Get(_ context.Context, _ string, ref string) ([]byte,
 		return []byte("b530c072-21c6-405d-95d8-fa78afa2d62e"), nil
 	case "private":
 		return []byte("private"), nil
+	case "ssh":
+		return nil, errDesiredCorePreflightFixture
 	case "test":
 		return []byte("test"), nil
 	}
@@ -132,8 +136,11 @@ func TestDesiredVerificationFailureDoesNotInitiateNativeMutation(t *testing.T) {
 					t.Errorf("matching configuration: writes=%d err=%v", got, err)
 				}
 			case "structural_mismatch":
-				if err != nil || got != 1 {
-					t.Errorf("confirmed mismatch must still converge: writes=%d err=%v", got, err)
+				// TCP REALITY now requires verified core preparation too. This
+				// API-only fixture deliberately cannot prepare SSH; a confirmed
+				// mismatch reaches that gate but must not bypass it to write.
+				if !errors.Is(err, errDesiredCorePreflightFixture) || got != 0 {
+					t.Errorf("confirmed mismatch bypassed core preflight: writes=%d err=%v", got, err)
 				}
 			}
 		})
