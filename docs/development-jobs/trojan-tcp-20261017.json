@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "pre_release_verified",
+  "status": "canary_verified_sniffing_fix_release_pending",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T15:37:21.159260+00:00",
+  "updated_at": "2026-10-17T15:50:10.809880+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -35,7 +35,11 @@
     },
     {
       "name": "standard release and both-host rollout",
-      "status": "pending"
+      "status": "completed"
+    },
+    {
+      "name": "one-server native Trojan, VLESS and output verification",
+      "status": "completed"
     }
   ],
   "openai_model_api": {
@@ -50,5 +54,25 @@
     "browser_independence": "passed",
     "real_canary_ip_certificate": "trusted",
     "production_trojan_active": false
+  },
+  "release": {
+    "source": "c45f127eac57709482dfe6544957542ad71ab31e",
+    "public": "d852a5cd2499e688b23dc365f36d064351edac74",
+    "schema": "000183_trojan_tcp",
+    "both_hosts_verified": true,
+    "policy_environment_accounts_preserved": true,
+    "retained_reality_pins_unchanged": 514
+  },
+  "canary": {
+    "servers": 2,
+    "direct_protocol_probes_passed": 2,
+    "residential_protocol_probes_passed": 4,
+    "ports": {
+      "vless_reality": 443,
+      "trojan_tls": 8443
+    },
+    "native_vless_preserved": true,
+    "finding": "Trojan routeOnly=true blocked strict Residential routing; changed only owned Trojan sniffing to destination override, added required generated-payload compatibility regression",
+    "fleet_enabled": false
   }
 }

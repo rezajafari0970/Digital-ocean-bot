@@ -2,6 +2,7 @@ package residentialsync
 
 import (
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/trojantcp"
 	"testing"
 )
 
@@ -34,5 +35,28 @@ func TestManagedTrojanKeepsExplicitRoutingClasses(t *testing.T) {
 		if c.ID == "tr" && c.Effective != "BLOCKED" {
 			t.Fatal("Residential leaked Direct")
 		}
+	}
+}
+
+func TestGeneratedTrojanPassesStrictResidentialSniffing(t *testing.T) {
+	p := trojantcp.Policy{Port: 8443, Direct: true, Residential: true}
+	credentials, e := trojantcp.NewCredentials("fixture")
+	if e != nil {
+		t.Fatal(e)
+	}
+	payload, e := trojantcp.Build(p, "192.0.2.1", credentials.Clients(p))
+	if e != nil {
+		t.Fatal(e)
+	}
+	payload["id"] = 2
+	payload["tag"] = "inbound-8443"
+	raw, _ := json.Marshal(payload)
+	if e = validateAdSniffing([]json.RawMessage{raw}, true); e != nil {
+		t.Fatal("generated Trojan disables strict Residential routing", e)
+	}
+	payload["sniffing"].(map[string]any)["routeOnly"] = true
+	raw, _ = json.Marshal(payload)
+	if validateAdSniffing([]json.RawMessage{raw}, true) == nil {
+		t.Fatal("unsafe destination retention accepted")
 	}
 }

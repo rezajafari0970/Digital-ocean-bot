@@ -89,7 +89,7 @@ func Observe(raws []json.RawMessage, p Policy, host string, clients []Client, re
 			seen[id] = true
 		}
 		sniff, e := decode(in.Sniffing)
-		if e != nil || sniff["enabled"] != true || sniff["metadataOnly"] == true {
+		if e != nil || sniff["enabled"] != true || sniff["metadataOnly"] == true || sniff["routeOnly"] == true {
 			return 0, errors.New("trojan_sniffing_mismatch")
 		}
 		overrides, _ := sniff["destOverride"].([]any)

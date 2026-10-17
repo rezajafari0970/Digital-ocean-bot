@@ -15,6 +15,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing",),
     "internal/adminapi": (
         "TestTransportApplySaveIsAtomicAndScopesEligibleListeners",
         "TestOutputCountryNamesAllRoutesAndObservedRegion",

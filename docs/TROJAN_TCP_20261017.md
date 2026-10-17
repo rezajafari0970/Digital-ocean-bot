@@ -27,3 +27,7 @@ Creation, certificate work and native verification are bounded. Fast verificatio
 Implementation and pre-release validation complete. Standard immutable publication, both-host update and native Trojan output activation are pending at this checkpoint. The new policy is disabled by migration; activation requires the recorded canary verification before fleet scope.
 
 Detailed, non-secret stage records: `docs/development-jobs/trojan-tcp-20261017.json`. Private operational receipts remain on the control host. No OpenAI model API was called (requests/tokens/cost: zero).
+
+## Canary correction
+
+The first two-server canary found that Trojan routeOnly=true violated the existing strict Residential destination-override requirement. Only the owned Trojan sniffing setting was corrected; native VLESS configurations were compared before/after and unchanged. Both protocols subsequently passed real Residential HTTPS probes on both canary servers (4/4), and Direct probes passed (2/2). The generated Trojan payload now enables destination override, observation rejects the old incompatible mode, and the cross-package generated-payload regression is mandatory in publication. Fleet activation remains off until the corrected release is installed.

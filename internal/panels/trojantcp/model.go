@@ -101,7 +101,7 @@ func Build(p Policy, host string, clients []Client) (map[string]any, error) {
 		"streamSettings": map[string]any{"network": "tcp", "security": "tls", "tlsSettings": map[string]any{
 			"minVersion": "1.2", "certificates": []any{map[string]any{"certificateFile": CertificateFile, "keyFile": KeyFile, "oneTimeLoading": false}},
 		}},
-		"sniffing": map[string]any{"enabled": true, "destOverride": []string{"http", "tls", "quic"}, "metadataOnly": false, "routeOnly": true},
+		"sniffing": map[string]any{"enabled": true, "destOverride": []string{"http", "tls", "quic"}, "metadataOnly": false, "routeOnly": false},
 	}, nil
 }
 func decode(raw json.RawMessage) (map[string]any, error) {
