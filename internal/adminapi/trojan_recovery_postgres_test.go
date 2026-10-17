@@ -108,6 +108,74 @@ func TestTrojanCreateLostResponseAndRestart(t *testing.T) {
 		t.Fatal("closed gate mutated")
 	}
 	sqlMust(t, db, "UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false,concurrency=1,panel_id=NULL,inbound_id=NULL")
+	t.Run("queued executor leaves Reality readable and cancels safely", func(t *testing.T) {
+		holder, e := db.Conn(ctx)
+		if e != nil {
+			t.Fatal(e)
+		}
+		defer holder.Close()
+		if _, e = holder.ExecContext(ctx, "SELECT pg_advisory_lock(628341902731)"); e != nil {
+			t.Fatal(e)
+		}
+		defer holder.ExecContext(context.Background(), "SELECT pg_advisory_unlock(628341902731)")
+		waitQueued := func() {
+			t.Helper()
+			limit := time.Now().Add(3 * time.Second)
+			for time.Now().Before(limit) {
+				var waiting bool
+				e := db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM pg_locks WHERE locktype='advisory' AND classid=(628341902731>>32)::oid AND objid=(628341902731 & 4294967295)::oid AND NOT granted)").Scan(&waiting)
+				if e != nil {
+					t.Fatal(e)
+				}
+				if waiting {
+					return
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+			t.Fatal("creation did not join executor queue")
+		}
+		cancelled, stop := context.WithCancel(ctx)
+		done := make(chan error, 1)
+		go func() { done <- makeService().Reconcile(cancelled, panel) }()
+		waitQueued()
+		readable, cancelRead := context.WithTimeout(ctx, 300*time.Millisecond)
+		e = sanaei.WithConfigLock(readable, db, panel, func(context.Context) error { return nil })
+		cancelRead()
+		if e != nil {
+			stop()
+			t.Fatal("queued Trojan blocked Reality configuration reads", e)
+		}
+		mu.Lock()
+		noMutation := posts == 0
+		mu.Unlock()
+		if !noMutation {
+			stop()
+			t.Fatal("mutation crossed executor fence")
+		}
+		stop()
+		select {
+		case e := <-done:
+			if e == nil {
+				t.Fatal("cancelled queue succeeded")
+			}
+		case <-time.After(3 * time.Second):
+			t.Fatal("queue cancellation unbounded")
+		}
+		// A new attempt must acquire the released executor and complete normally.
+		go func() { done <- makeService().Reconcile(ctx, panel) }()
+		waitQueued()
+		if _, e = holder.ExecContext(ctx, "SELECT pg_advisory_unlock(628341902731)"); e != nil {
+			t.Fatal(e)
+		}
+		select {
+		case e := <-done:
+			if e != nil {
+				t.Fatal(e)
+			}
+		case <-time.After(5 * time.Second):
+			t.Fatal("released executor did not make progress")
+		}
+	})
 	if e := makeService().Reconcile(ctx, panel); e != nil {
 		t.Fatal(e)
 	}

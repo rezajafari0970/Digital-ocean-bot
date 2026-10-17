@@ -245,6 +245,17 @@ func (s Service) reconcile(ctx context.Context, panel string, verifyOnly bool) (
 			return e
 		}
 	}
+	// Join the shared executor before taking the native configuration lock.
+	// A contended creation must not block Reality reads or wait five minutes
+	// after losing a try-lock race with another creator.
+	if !verifyOnly {
+		stage = "executor_wait"
+		release, err := acquireCreationExecutor(ctx, conn)
+		defer release()
+		if err != nil {
+			return err
+		}
+	}
 	stage = "native"
 	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
 		current, e := ReadPolicy(ctx, s.DB)
@@ -275,20 +286,6 @@ func (s Service) reconcile(ctx context.Context, panel string, verifyOnly bool) (
 				if verifyOnly {
 					return errors.New("trojan_listener_missing")
 				}
-				var executionHeld bool
-				if e = conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(628341902731)").Scan(&executionHeld); e != nil {
-					return e
-				}
-				if !executionHeld {
-					return errors.New("trojan_executor_busy")
-				}
-				defer func() {
-					c, stop := context.WithTimeout(context.Background(), 3*time.Second)
-					defer stop()
-					if _, e := conn.ExecContext(c, "SELECT pg_advisory_unlock(628341902731)"); e != nil {
-						_ = conn.Raw(func(any) error { return driver.ErrBadConn })
-					}
-				}()
 				if e = s.preflightPort(ctx, t, p.Port); e != nil {
 					return e
 				}

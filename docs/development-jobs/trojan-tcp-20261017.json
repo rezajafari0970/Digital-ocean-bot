@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "fleet_generation_resumed_after_route_capacity_fix",
+  "status": "fleet_converging_executor_fairness_fix_validated",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T16:39:22.587128+00:00",
+  "updated_at": "2026-10-17T16:54:48.511556+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -89,6 +89,15 @@
         "proof_age_median_seconds": 20.410689
       },
       "post_release_direct_and_residential_probes_passed": 8
+    },
+    {
+      "name": "shared executor queue fairness without blocking Reality",
+      "status": "validated_pending_release",
+      "finding": "try-lock collisions sent groups of creators into synchronized five-minute retries",
+      "fix": "bounded FIFO wait on the same single executor, before acquiring native config lock; cancellation releases uncertain ownership; all admission gates remain",
+      "required_regression": "TestTrojanCreateLostResponseAndRestart/queued_executor_leaves_Reality_readable_and_cancels_safely",
+      "required_passed": 18,
+      "skipped": 0
     }
   ],
   "openai_model_api": {
@@ -144,26 +153,131 @@
     }
   ],
   "latest_fleet_observation": {
-    "at": "2026-10-17T16:29:05.872477+00:00",
-    "eligible": 56,
-    "states": {
-      "VERIFIED": 56
+    "at": "2026-10-17T16:54:43.441156+00:00",
+    "proof": {
+      "heartbeat_at": "2026-10-17T16:54:38.788363+00:00",
+      "coverage": {
+        "due": 51,
+        "observed_at": "2026-10-17T16:54:38.787629Z",
+        "raw_under_15s": 89,
+        "never_verified": 0,
+        "current_applied": 89,
+        "eligible_serving": 90,
+        "oldest_due_seconds": 38.700627,
+        "verified_under_60s": 89,
+        "proof_age_max_seconds": 221.877642,
+        "proof_age_p95_seconds": 40.989656,
+        "raw_fresh_proof_stale": 0,
+        "proof_age_median_seconds": 22.257618
+      },
+      "attempts": {
+        "failed": 42,
+        "completed": 2260,
+        "admission_wait": {
+          "count": 2912,
+          "max_ms": 0,
+          "buckets": [
+            2912,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "total_ms": 0,
+          "bucket_bounds_ms": [
+            100,
+            1000,
+            5000,
+            10000,
+            30000,
+            60000
+          ]
+        },
+        "reconciliation": {
+          "count": 2302,
+          "max_ms": 34512,
+          "buckets": [
+            4,
+            0,
+            17,
+            2062,
+            198,
+            21,
+            0
+          ],
+          "total_ms": 19406455,
+          "bucket_bounds_ms": [
+            100,
+            1000,
+            5000,
+            10000,
+            30000,
+            60000
+          ]
+        },
+        "admitted_attempt": {
+          "count": 2893,
+          "max_ms": 34522,
+          "buckets": [
+            587,
+            8,
+            17,
+            2062,
+            198,
+            21,
+            0
+          ],
+          "total_ms": 19423994,
+          "bucket_bounds_ms": [
+            100,
+            1000,
+            5000,
+            10000,
+            30000,
+            60000
+          ]
+        }
+      },
+      "serving_budget": {
+        "limit": 18,
+        "active": 18,
+        "waiting": 0
+      },
+      "database_pool": {
+        "Idle": 2,
+        "InUse": 29,
+        "WaitCount": 40,
+        "WaitDuration": 56548511,
+        "MaxIdleClosed": 741,
+        "OpenConnections": 31,
+        "MaxIdleTimeClosed": 0,
+        "MaxLifetimeClosed": 0,
+        "MaxOpenConnections": 40
+      }
     },
-    "verified_fresh": 56,
-    "errors": {},
+    "eligible": 90,
+    "states": {
+      "VERIFIED": 87,
+      "BLOCKED": 3
+    },
+    "verified_fresh": 87,
+    "errors": {
+      "trojan_executor_busy": 3
+    },
     "direct_links": {
-      "vless": 75,
-      "trojan": 46
+      "vless": 87,
+      "trojan": 86
     },
     "direct_servers": {
-      "vless": 75,
-      "trojan": 46
+      "vless": 87,
+      "trojan": 86
     },
-    "missing_trojan_of_eligible": 10,
-    "missing_trojan_among_vless_direct": 0,
+    "missing_trojan_of_eligible": 4,
+    "missing_trojan_among_vless_direct": 3,
     "ready": true,
-    "failed_checks": [],
-    "scope": "held installed-listener scope; not the full fleet"
+    "failed_checks": []
   },
   "operational_observations": [
     {

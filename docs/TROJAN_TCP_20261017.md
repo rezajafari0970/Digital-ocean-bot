@@ -49,3 +49,8 @@ Two independent live canaries checked all 66 native cases without any native mut
 ## Route-proof correction deployed
 
 Source f22c3d2e78b55a59586c0fc8eec93ae0cd0d560e was published as 01e8095b522b2ce806113ac5a706168c36290a84 after 18 mandatory no-skip regressions, full source checks and exact-candidate installation. Both hosts passed readiness and running hash verification. All 522 retained Reality pins and the held Trojan policy were unchanged. Three subsequent observations had zero fresh snapshots withheld for stale route proof; the final observation verified all 91 serving panels within 60 seconds (p95 37.19 seconds, maximum 40.13). Direct and Residential real HTTPS probes passed for both protocols on both canaries (8/8). Fleet expansion has resumed; complete fleet coverage is still being observed.
+
+
+## Creation queue fairness
+
+The final fleet tail exposed synchronized five-minute retries when several creators lost the shared global executor try-lock. Creation now joins a bounded FIFO queue on that same single executor after certificate work and before the native configuration lock. It does not increase concurrency or bypass policy, cleanup or admission checks. Cancellation releases even uncertain lock ownership. The mandatory lost-response/restart regression now additionally holds the executor, verifies Reality configuration remains readable, cancels a queued attempt, releases the executor and verifies exactly one successful native creation. All 18 required regressions passed with zero skips. Deployment of this preventive queue correction is pending at this checkpoint.
