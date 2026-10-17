@@ -341,7 +341,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 
 	// Shared fast Sanaei runtime cache for high-frequency panel work.
 	sanaeiRuntimes := &sanaei.RuntimeManager{
-		Factory: sanaei.RuntimeFactory{DB: application.DB, Secrets: application.Container.Secrets, Timeout: 8 * time.Second},
+		Factory: sanaei.RuntimeFactory{DB: application.DB, Secrets: application.Container.Secrets, Timeout: 8 * time.Second, LocalRouteProof: true},
 		TTL:     5 * time.Second,
 	}
 	modules.Add(worker.RolePanels, "sanaei-cache", func(ctx context.Context) {

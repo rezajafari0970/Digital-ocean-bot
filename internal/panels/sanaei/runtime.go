@@ -43,9 +43,10 @@ func (r *PanelRuntime) WithMutation(ctx context.Context, fn func(context.Context
 }
 
 type RuntimeFactory struct {
-	DB      *sql.DB
-	Secrets RuntimeSecrets
-	Timeout time.Duration
+	LocalRouteProof bool
+	DB              *sql.DB
+	Secrets         RuntimeSecrets
+	Timeout         time.Duration
 }
 
 func (f RuntimeFactory) Open(ctx context.Context, panelID string) (*PanelRuntime, error) {
@@ -85,5 +86,11 @@ WHERE pi.id=$1 AND pi.enabled=true
 	if err = client.Login(ctx); err != nil {
 		return nil, err
 	}
-	return &PanelRuntime{PanelID: panelID, AccountID: accountID, BaseURL: baseURL, Client: client, Session: NewPanelSession(client)}, nil
+	session := NewPanelSession(client)
+	if f.LocalRouteProof {
+		session.Exec.BatchRouteReads = func(ctx context.Context, requests []SessionRequest) ([]SessionResponse, error) {
+			return f.routeProofBatch(ctx, panelID, client, requests)
+		}
+	}
+	return &PanelRuntime{PanelID: panelID, AccountID: accountID, BaseURL: baseURL, Client: client, Session: session}, nil
 }

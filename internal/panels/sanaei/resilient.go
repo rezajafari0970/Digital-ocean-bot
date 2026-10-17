@@ -29,9 +29,10 @@ func DefaultRetryPolicy() RetryPolicy {
 }
 
 type ResilientSession struct {
-	Client  *APIClient
-	Policy  RetryPolicy
-	Observe func(success bool, transient bool)
+	BatchRouteReads func(context.Context, []SessionRequest) ([]SessionResponse, error)
+	Client          *APIClient
+	Policy          RetryPolicy
+	Observe         func(success bool, transient bool)
 
 	loginMu         sync.Mutex
 	loginGeneration atomic.Uint64

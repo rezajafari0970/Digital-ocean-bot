@@ -24,7 +24,7 @@ Creation, certificate work and native verification are bounded. Fast verificatio
 
 ## Release status
 
-Implementation and pre-release validation complete. Standard immutable publication, both-host update and native Trojan output activation are pending at this checkpoint. The new policy is disabled by migration; activation requires the recorded canary verification before fleet scope.
+At the initial implementation checkpoint, standard immutable publication, both-host update and native Trojan output activation were pending; subsequent outcomes are recorded below. The new policy is disabled by migration; activation requires the recorded canary verification before fleet scope.
 
 Detailed, non-secret stage records: `docs/development-jobs/trojan-tcp-20261017.json`. Private operational receipts remain on the control host. No OpenAI model API was called (requests/tokens/cost: zero).
 
@@ -35,3 +35,12 @@ The first two-server canary found that Trojan routeOnly=true violated the existi
 ## Corrected release and fleet activation
 
 Corrected product source 7d8ce6198af30dae6906eed6c31d72a28751521f, public release ff9f7ab756ab1d239cf07e4b360afa191c2e66bb, schema 000183_trojan_tcp. Both hosts passed running-binary hash/readiness/preservation verification; all 516 retained Reality configuration pins were unchanged on the primary. The publisher passed all 15 mandatory regressions, complete Go tests/vet, installer checks and exact-candidate isolated installation. Fleet policy revision 4 was enabled at 2026-10-17T15:57:55Z. Generation is in progress; no complete-coverage claim is made at this checkpoint.
+
+
+## Full-matrix route-proof capacity correction
+
+Fleet expansion exposed a capacity limit in the existing full native routing proof: a second inbound doubles the matrix to 66 native requests. At 87 eligible servers, proof age p95 reached 62.39 seconds and ten otherwise fresh panels lacked a proof inside the unchanged 60-second publication limit. Expansion was held at 16:12:32 UTC, retaining the 56 already installed listeners.
+
+The correction sends the exact same routeTest forms through one host-key-pinned SSH session and executes them sequentially over the node's loopback interface. Native Sanaei closes a shared gRPC client after each request, so per-panel concurrency remains one. Controller concurrency, fresh-proof deadlines, expected route validators, internal DNS/relay/pool checks and fail-closed output remain unchanged. At most eight SSH batches run concurrently. Credentials are encrypted stdin, never shell arguments or node files; destination, path, request count, size, duration and returned results are bounded. If local execution is unavailable, the original complete HTTP matrix runs.
+
+Two independent live canaries checked all 66 native cases without any native mutation. Execution fell from 11,152 to 3,414 ms and from 15,596 to 3,337 ms. Both methods produced equivalent validated routes; automatically selected pool lanes were required to be exact members of the native loopback outbounds with the same network and content-addressed plan. Tests cover the full matrix, missing/mismatched results, cancellation, complete fallback, fixed read-only endpoint and pinned SSH stdin. The required publication gate now includes these tests. Rollout and resumed fleet coverage are pending this correction's immutable release.

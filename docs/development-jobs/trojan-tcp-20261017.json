@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "fleet_generation_in_progress",
+  "status": "fleet_expansion_held_pending_full_route_proof_capacity_fix",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T15:58:43.497812+00:00",
+  "updated_at": "2026-10-17T16:30:13.502374+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -46,6 +46,32 @@
       "status": "in_progress",
       "started_at": "2026-10-17T15:57:55Z",
       "policy_revision": 4
+    },
+    {
+      "name": "full native route proof capacity with two protocols",
+      "status": "validated_pending_release",
+      "benchmarks": [
+        {
+          "all_results_semantically_equivalent": true,
+          "at": "2026-10-17T16:27:36.614262644Z",
+          "local_batch_ms": 3414,
+          "native_cases": 66,
+          "native_mutations": 0,
+          "panel": "933db9ac-b6e1-4dfa-b516-bf2679a740f5",
+          "pool_lane_validation": "exact membership in native loopback outbounds, same network and plan hash",
+          "serial_ms": 11152
+        },
+        {
+          "all_results_semantically_equivalent": true,
+          "at": "2026-10-17T16:28:31.038289208Z",
+          "local_batch_ms": 3337,
+          "native_cases": 66,
+          "native_mutations": 0,
+          "panel": "5ad0b0b2-752e-4e90-b50b-bc792a26bb13",
+          "pool_lane_validation": "exact membership in native loopback outbounds, same network and plan hash",
+          "serial_ms": 15596
+        }
+      ]
     }
   ],
   "openai_model_api": {
@@ -54,12 +80,13 @@
     "cost": 0
   },
   "verification": {
-    "database_required_passed": 15,
+    "database_required_passed": 18,
     "database_skipped": 0,
     "native_tls_password_test": "passed",
     "browser_independence": "passed",
     "real_canary_ip_certificate": "trusted",
-    "production_trojan_active": true
+    "production_trojan_active": true,
+    "route_batch_targeted_units": "all passed"
   },
   "release": {
     "source": "7d8ce6198af30dae6906eed6c31d72a28751521f",
@@ -79,7 +106,7 @@
     },
     "native_vless_preserved": true,
     "finding": "Trojan routeOnly=true blocked strict Residential routing; changed only owned Trojan sniffing to destination override, added required generated-payload compatibility regression",
-    "fleet_enabled": true
+    "fleet_enabled": false
   },
   "release_history": [
     {
@@ -89,6 +116,52 @@
       "both_hosts_verified": true,
       "policy_environment_accounts_preserved": true,
       "retained_reality_pins_unchanged": 514
+    }
+  ],
+  "latest_fleet_observation": {
+    "at": "2026-10-17T16:29:05.872477+00:00",
+    "eligible": 56,
+    "states": {
+      "VERIFIED": 56
+    },
+    "verified_fresh": 56,
+    "errors": {},
+    "direct_links": {
+      "vless": 75,
+      "trojan": 46
+    },
+    "direct_servers": {
+      "vless": 75,
+      "trojan": 46
+    },
+    "missing_trojan_of_eligible": 10,
+    "missing_trojan_among_vless_direct": 0,
+    "ready": true,
+    "failed_checks": [],
+    "scope": "held installed-listener scope; not the full fleet"
+  },
+  "operational_observations": [
+    {
+      "at": "2026-10-17T16:02:37Z",
+      "event": "readiness control-worker progress stale; panel worker, mutation and account-lane checks healthy",
+      "recovered_at": "2026-10-17T16:04:13Z",
+      "action": "observed normal scan recovery without restart or relaxing readiness; control DB pool had zero waits",
+      "fleet_observer": "records readiness failures and continues collecting evidence"
+    },
+    {
+      "at": "2026-10-17T16:12:32Z",
+      "event": "fleet expansion held after full native route matrix doubled with second inbound",
+      "action": "scope retained all 56 already installed Trojan listeners; publication freshness checks unchanged",
+      "capacity_before": {
+        "eligible_serving": 87,
+        "verified_under_60_seconds": 75,
+        "raw_fresh_proof_stale": 10,
+        "proof_age_p95_seconds": 62.39,
+        "proof_age_max_seconds": 72.17,
+        "proof_workers": 18,
+        "database_pool_max": 40
+      },
+      "fix": "execute identical serial native routeTest requests on node through pinned SSH; same validators, 60-second freshness, complete HTTP fallback, at most 8 SSH batches"
     }
   ]
 }

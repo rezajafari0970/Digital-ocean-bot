@@ -106,6 +106,8 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 		return errors.New("native plan proof requires an inbound or hardened internal DNS route")
 	}
 	checks := []func(context.Context) error{}
+	requests := []sanaei.SessionRequest{}
+	validators := []func(sanaei.SessionResponse, error) error{}
 	for _, tag := range tags {
 		for _, c := range samples {
 			for _, probe := range []struct {
@@ -173,8 +175,8 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				} else {
 					form.Set("ip", probe.ip)
 				}
-				checks = append(checks, func(checkCtx context.Context) error {
-					response, e := exec.Do(checkCtx, sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5})
+				request := sanaei.SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte(form.Encode()), TimeoutSeconds: 5}
+				validate := func(response sanaei.SessionResponse, e error) error {
 					if e = envelope(response, e); e != nil {
 						return e
 					}
@@ -192,13 +194,43 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						return errRouteNotApplied
 					}
 					return nil
+				}
+				requests = append(requests, request)
+				validators = append(validators, validate)
+				checks = append(checks, func(checkCtx context.Context) error {
+					response, e := exec.Do(checkCtx, request)
+					return validate(response, e)
 				})
 			}
 		}
 	}
 
-	if err := runRouteProofChecks(ctx, exec, checks); err != nil {
-		return err
+	batchVerified := false
+	if batch, ok := exec.(interface {
+		RouteProofBatch(context.Context, []sanaei.SessionRequest) ([]sanaei.SessionResponse, error)
+	}); ok {
+		responses, e := batch.RouteProofBatch(ctx, requests)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		if e == nil {
+			if len(responses) != len(validators) {
+				return errors.New("incomplete native route proof batch")
+			}
+			for i, response := range responses {
+				if e = validators[i](response, nil); e != nil {
+					return e
+				}
+			}
+			batchVerified = true
+		} else if !errors.Is(e, sanaei.ErrRouteBatchUnavailable) {
+			return e
+		}
+	}
+	if !batchVerified {
+		if err := runRouteProofChecks(ctx, exec, checks); err != nil {
+			return err
+		}
 	}
 
 	if p.Harden {

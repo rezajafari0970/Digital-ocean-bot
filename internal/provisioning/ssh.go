@@ -103,7 +103,13 @@ func (s SSHClient) Run(ctx context.Context, t Target, key []byte, command string
 func (s SSHClient) RunDetailed(ctx context.Context, t Target, key []byte, command string) (CommandResult, error) {
 	return s.RunDetailedObserved(ctx, t, key, command, nil)
 }
+func (s SSHClient) RunInput(ctx context.Context, t Target, key []byte, command string, input []byte) (CommandResult, error) {
+	return s.runDetailedInput(ctx, t, key, command, input, nil)
+}
 func (s SSHClient) RunDetailedObserved(ctx context.Context, t Target, key []byte, command string, observe StageObserver) (CommandResult, error) {
+	return s.runDetailedInput(ctx, t, key, command, nil, observe)
+}
+func (s SSHClient) runDetailedInput(ctx context.Context, t Target, key []byte, command string, input []byte, observe StageObserver) (CommandResult, error) {
 	client, err := s.connectStages(ctx, t, key, observe)
 	if err != nil {
 		return CommandResult{}, err
@@ -119,6 +125,7 @@ func (s SSHClient) RunDetailedObserved(ctx context.Context, t Target, key []byte
 	}
 	defer session.Close()
 	var stdout, stderr bytes.Buffer
+	session.Stdin = bytes.NewReader(input)
 	session.Stdout = &stdout
 	session.Stderr = &stderr
 	start = time.Now()

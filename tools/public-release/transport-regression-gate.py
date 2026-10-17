@@ -15,7 +15,9 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
-    "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing",),
+    "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
+    "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
+    "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),
     "internal/adminapi": (
         "TestTransportApplySaveIsAtomicAndScopesEligibleListeners",
         "TestOutputCountryNamesAllRoutesAndObservedRegion",

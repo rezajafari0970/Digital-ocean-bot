@@ -1,12 +1,14 @@
 package provisioning
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"golang.org/x/crypto/ssh"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -73,7 +75,20 @@ func guardSSH(t *testing.T, mode string) (Target, []byte) {
 						}
 						if req.Type == "exec" {
 							req.Reply(true, nil)
-							channel.Write([]byte("ok"))
+							if mode == "input" {
+								data, err := io.ReadAll(channel)
+								if err != nil || !bytes.Equal(data, []byte("private-stdin-fixture")) {
+									t.Error("stdin was not delivered intact")
+								}
+								var command struct{ Command string }
+								ssh.Unmarshal(req.Payload, &command)
+								if command.Command != "fixed-read-only-command" {
+									t.Error("input leaked into shell command")
+								}
+								channel.Write([]byte("input-verified"))
+							} else {
+								channel.Write([]byte("ok"))
+							}
 							channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{0}))
 							channel.Close()
 							return
@@ -133,5 +148,26 @@ func TestSSHGuardNormalAndHostKeyVerification(t *testing.T) {
 	target2, key2 := guardSSH(t, "normal")
 	if _, e = (SSHClient{}).Run(ctx, target2, key2, "true"); e == nil {
 		t.Fatal("missing host verifier accepted")
+	}
+}
+
+func TestSSHInputUsesPinnedEncryptedStdin(t *testing.T) {
+	target, key := guardSSH(t, "input")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	out, e := (SSHClient{HostKeys: guardPins{}}).RunInput(ctx, target, key, "fixed-read-only-command", []byte("private-stdin-fixture"))
+	if e != nil || out.Stdout != "input-verified" {
+		t.Fatal(out, e)
+	}
+	target2, key2 := guardSSH(t, "normal")
+	if _, e = (SSHClient{}).RunInput(ctx, target2, key2, "fixed-read-only-command", []byte("private-stdin-fixture")); e == nil {
+		t.Fatal("missing host verifier accepted")
+	}
+	target3, key3 := guardSSH(t, "start")
+	bounded, stop := context.WithTimeout(context.Background(), 150*time.Millisecond)
+	defer stop()
+	at := time.Now()
+	if _, e = (SSHClient{HostKeys: guardPins{}}).RunInput(bounded, target3, key3, "fixed-read-only-command", []byte("private-stdin-fixture")); e == nil || time.Since(at) > time.Second {
+		t.Fatal("stdin session cancellation unbounded", e)
 	}
 }
