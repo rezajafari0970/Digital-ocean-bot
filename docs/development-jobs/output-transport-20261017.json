@@ -43,6 +43,24 @@
         ".local/evidence/public-probe-canary.json",
         "/root/backups/dob-output-transport-20261017-retry1/verify.json"
       ]
+    },
+    {
+      "at": "2026-10-17T04:15:05.341879+03:30",
+      "stage": "final_release_installed",
+      "result": "Both hosts installed and verified public 4356ba7 from source cc2bd18 (test fixture follow-up); all six process images match, zero automatic restarts, five readiness samples per host, saved policies unchanged. Two primary pin changes during update were verified successful applications. CI main/stable succeeded. Bounded extra RunOne driver ended after 70 attempts while respecting the global executor fence; remaining queue continues in standard worker. Latest monitor: 74 XHTTP/15 TCP; 15 pending + 1 running conversion, no blocked live job.",
+      "evidence": [
+        ".local/evidence/publication-final.json",
+        ".local/evidence/actions-final.json",
+        ".local/evidence/primary-final-verify.json",
+        ".local/evidence/secondary-final-verify.json",
+        ".local/evidence/progress-monitor.json",
+        ".local/evidence/drain-transport.jsonl"
+      ]
+    },
+    {
+      "at": "2026-10-17T04:17:45.011625+03:30",
+      "stage": "conversion_nearly_complete",
+      "result": "Latest monitor 87 XHTTP/5 TCP, five pending plus one running; every live TCP listener has active queued conversion. Profiles are rebuilding; no final acceptance claim yet."
     }
   ],
   "model_api": {
