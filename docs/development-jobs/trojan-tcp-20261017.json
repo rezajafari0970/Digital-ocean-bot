@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "fleet_expansion_held_pending_full_route_proof_capacity_fix",
+  "status": "fleet_generation_resumed_after_route_capacity_fix",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T16:30:13.502374+00:00",
+  "updated_at": "2026-10-17T16:39:22.587128+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -45,11 +45,13 @@
       "name": "fleet certificate issuance, native verification and output coverage",
       "status": "in_progress",
       "started_at": "2026-10-17T15:57:55Z",
-      "policy_revision": 4
+      "policy_revision": 4,
+      "resumed_at": "2026-10-17T16:38:58.030888+00:00",
+      "resumed_policy_revision": 6
     },
     {
       "name": "full native route proof capacity with two protocols",
-      "status": "validated_pending_release",
+      "status": "completed",
       "benchmarks": [
         {
           "all_results_semantically_equivalent": true,
@@ -71,7 +73,22 @@
           "pool_lane_validation": "exact membership in native loopback outbounds, same network and plan hash",
           "serial_ms": 15596
         }
-      ]
+      ],
+      "fleet_proof_after": {
+        "due": 46,
+        "observed_at": "2026-10-17T16:38:28.786586Z",
+        "raw_under_15s": 89,
+        "never_verified": 0,
+        "current_applied": 91,
+        "eligible_serving": 91,
+        "oldest_due_seconds": 20.12533,
+        "verified_under_60s": 91,
+        "proof_age_max_seconds": 40.12533,
+        "proof_age_p95_seconds": 37.1889245,
+        "raw_fresh_proof_stale": 0,
+        "proof_age_median_seconds": 20.410689
+      },
+      "post_release_direct_and_residential_probes_passed": 8
     }
   ],
   "openai_model_api": {
@@ -89,12 +106,12 @@
     "route_batch_targeted_units": "all passed"
   },
   "release": {
-    "source": "7d8ce6198af30dae6906eed6c31d72a28751521f",
-    "public": "ff9f7ab756ab1d239cf07e4b360afa191c2e66bb",
+    "source": "f22c3d2e78b55a59586c0fc8eec93ae0cd0d560e",
+    "public": "01e8095b522b2ce806113ac5a706168c36290a84",
     "schema": "000183_trojan_tcp",
     "both_hosts_verified": true,
     "policy_environment_accounts_preserved": true,
-    "retained_reality_pins_unchanged": 516
+    "retained_reality_pins_unchanged": 522
   },
   "canary": {
     "servers": 2,
@@ -106,7 +123,7 @@
     },
     "native_vless_preserved": true,
     "finding": "Trojan routeOnly=true blocked strict Residential routing; changed only owned Trojan sniffing to destination override, added required generated-payload compatibility regression",
-    "fleet_enabled": false
+    "fleet_enabled": true
   },
   "release_history": [
     {
@@ -116,6 +133,14 @@
       "both_hosts_verified": true,
       "policy_environment_accounts_preserved": true,
       "retained_reality_pins_unchanged": 514
+    },
+    {
+      "source": "7d8ce6198af30dae6906eed6c31d72a28751521f",
+      "public": "ff9f7ab756ab1d239cf07e4b360afa191c2e66bb",
+      "schema": "000183_trojan_tcp",
+      "both_hosts_verified": true,
+      "policy_environment_accounts_preserved": true,
+      "retained_reality_pins_unchanged": 516
     }
   ],
   "latest_fleet_observation": {
