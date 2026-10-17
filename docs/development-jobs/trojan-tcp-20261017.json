@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "canary_verified_sniffing_fix_release_pending",
+  "status": "fleet_generation_in_progress",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T15:50:10.809880+00:00",
+  "updated_at": "2026-10-17T15:58:43.497812+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -40,6 +40,12 @@
     {
       "name": "one-server native Trojan, VLESS and output verification",
       "status": "completed"
+    },
+    {
+      "name": "fleet certificate issuance, native verification and output coverage",
+      "status": "in_progress",
+      "started_at": "2026-10-17T15:57:55Z",
+      "policy_revision": 4
     }
   ],
   "openai_model_api": {
@@ -48,20 +54,20 @@
     "cost": 0
   },
   "verification": {
-    "database_required_passed": 14,
+    "database_required_passed": 15,
     "database_skipped": 0,
     "native_tls_password_test": "passed",
     "browser_independence": "passed",
     "real_canary_ip_certificate": "trusted",
-    "production_trojan_active": false
+    "production_trojan_active": true
   },
   "release": {
-    "source": "c45f127eac57709482dfe6544957542ad71ab31e",
-    "public": "d852a5cd2499e688b23dc365f36d064351edac74",
+    "source": "7d8ce6198af30dae6906eed6c31d72a28751521f",
+    "public": "ff9f7ab756ab1d239cf07e4b360afa191c2e66bb",
     "schema": "000183_trojan_tcp",
     "both_hosts_verified": true,
     "policy_environment_accounts_preserved": true,
-    "retained_reality_pins_unchanged": 514
+    "retained_reality_pins_unchanged": 516
   },
   "canary": {
     "servers": 2,
@@ -73,6 +79,16 @@
     },
     "native_vless_preserved": true,
     "finding": "Trojan routeOnly=true blocked strict Residential routing; changed only owned Trojan sniffing to destination override, added required generated-payload compatibility regression",
-    "fleet_enabled": false
-  }
+    "fleet_enabled": true
+  },
+  "release_history": [
+    {
+      "source": "c45f127eac57709482dfe6544957542ad71ab31e",
+      "public": "d852a5cd2499e688b23dc365f36d064351edac74",
+      "schema": "000183_trojan_tcp",
+      "both_hosts_verified": true,
+      "policy_environment_accounts_preserved": true,
+      "retained_reality_pins_unchanged": 514
+    }
+  ]
 }

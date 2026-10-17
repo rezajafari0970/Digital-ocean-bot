@@ -31,3 +31,7 @@ Detailed, non-secret stage records: `docs/development-jobs/trojan-tcp-20261017.j
 ## Canary correction
 
 The first two-server canary found that Trojan routeOnly=true violated the existing strict Residential destination-override requirement. Only the owned Trojan sniffing setting was corrected; native VLESS configurations were compared before/after and unchanged. Both protocols subsequently passed real Residential HTTPS probes on both canary servers (4/4), and Direct probes passed (2/2). The generated Trojan payload now enables destination override, observation rejects the old incompatible mode, and the cross-package generated-payload regression is mandatory in publication. Fleet activation remains off until the corrected release is installed.
+
+## Corrected release and fleet activation
+
+Corrected product source 7d8ce6198af30dae6906eed6c31d72a28751521f, public release ff9f7ab756ab1d239cf07e4b360afa191c2e66bb, schema 000183_trojan_tcp. Both hosts passed running-binary hash/readiness/preservation verification; all 516 retained Reality configuration pins were unchanged on the primary. The publisher passed all 15 mandatory regressions, complete Go tests/vet, installer checks and exact-candidate isolated installation. Fleet policy revision 4 was enabled at 2026-10-17T15:57:55Z. Generation is in progress; no complete-coverage claim is made at this checkpoint.
