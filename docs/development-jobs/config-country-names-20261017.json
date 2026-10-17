@@ -2,7 +2,7 @@
   "task": "config-country-names-20261017",
   "started_at": "2026-10-17T06:14:11.929833+03:30",
   "baseline": "fcad64d6c94b743f27983985f7d1d1aa1869c902",
-  "status": "VERIFIED_PENDING_PUBLICATION",
+  "status": "ACCEPTED",
   "stages": [
     {
       "stage": "inspection",
@@ -82,6 +82,136 @@
       "skipped": 0,
       "evidence": ".local/evidence/required-db-race.log",
       "output_suite_composition": "30/31 output tests passed in broad run; final corrected health assertion passed in fresh mandatory gate. No broad full-green run claimed."
+    },
+    {
+      "stage": "secondary_install",
+      "status": "verified",
+      "at": "2026-10-17T02:56:57.235395+00:00",
+      "public_release": "53ec1c322d6b61d8e81f9370c8b6e2dd462fa2ee",
+      "readiness_samples": 5,
+      "services_active_and_hash_matching": 3,
+      "automatic_restarts": 0,
+      "accounts_environment_creation_output_protection_preserved": true,
+      "schema": "000182_fleet_client_coverage",
+      "evidence": "limited-lime.ptr.network:/root/backups/dob-country-names-20261017/verify.json"
+    },
+    {
+      "stage": "primary_install",
+      "status": "verified",
+      "evidence": "/root/backups/dob-country-names-20261017/verify.json",
+      "receipt": {
+        "at": "2026-10-17T02:58:08.518818+00:00",
+        "commit": "53ec1c322d6b61d8e81f9370c8b6e2dd462fa2ee",
+        "schema": "000182_fleet_client_coverage",
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ],
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-17T02:58:08.552984766Z"
+        },
+        "checks": {
+          "accounts_hash": true,
+          "environment_hash": true,
+          "creation_policy": true,
+          "output_policy": true,
+          "protection_policy": true,
+          "retained_pins_preserved_or_verified_apply": true
+        },
+        "retained_pins": 387,
+        "expired_pins": 0,
+        "readiness_samples": 5,
+        "verified_transport_changes": 0
+      }
+    },
+    {
+      "stage": "first_live_name_acceptance",
+      "status": "passed_names_connection_invariance",
+      "at": "2026-10-17T02:58:26.445988+00:00",
+      "surfaces": 10,
+      "wrong_country": 0,
+      "technical_names": 0,
+      "unknown": 0,
+      "connection_mismatches": 0,
+      "response_ms_range": [
+        23.96,
+        37.98
+      ],
+      "coverage": "Startup observation 84/90 stable healthy in ALL; subsequent steady observations required."
+    },
+    {
+      "stage": "steady_live_name_acceptance",
+      "status": "passed",
+      "evidence": ".local/evidence/post-release-2.json",
+      "at": "2026-10-17T02:59:15.891303+00:00",
+      "surfaces": 10,
+      "wrong_country": 0,
+      "technical_names": 0,
+      "unknown": 0,
+      "connection_mismatches": 0,
+      "metadata_unknown": 0,
+      "healthy": 91,
+      "ALL": {
+        "links": 272,
+        "servers": 91
+      },
+      "DIRECT": 91,
+      "RESIDENTIAL": 90,
+      "note": "Remaining Residential client converging under existing profile cadence. No manual fleet mutation performed."
+    },
+    {
+      "stage": "final_acceptance",
+      "status": "passed",
+      "at": "2026-10-17T03:01:34.253391+00:00",
+      "healthy_servers": 91,
+      "ALL_links": 273,
+      "DIRECT_links": 91,
+      "RESIDENTIAL_links": 91,
+      "all_public_shares_match": true,
+      "surfaces": 10,
+      "wrong_country_technical_unknown_connection_mismatch": 0,
+      "missing_healthy_hosts": 0,
+      "real_provisioning": 2,
+      "profile_catchup": "One bounded standard policy reconciliation completed the one missing Residential profile; no policy/cadence/budget overrides."
     }
   ],
   "model_api_usage": {
@@ -89,5 +219,27 @@
     "tokens": 0,
     "cost": 0
   },
-  "updated_at": "2026-10-17T06:23:11.814627+03:30"
+  "updated_at": "2026-10-17T06:32:26.042689+03:30",
+  "ci": [
+    {
+      "id": 38996831276,
+      "branch": "stable",
+      "conclusion": "success"
+    },
+    {
+      "id": 38996831293,
+      "branch": "main",
+      "conclusion": "success"
+    }
+  ],
+  "evidence_hashes": {
+    "required-db-race.log": "a131ae476e9c9e8c9cbd06fc568cba5ef5f02e394f88fb1ca66ead1abb33e0a0",
+    "final-unit-race.log": "b156144aab80fe348e1d347d7156ead5b29b22f5425b28b37e04770a051329ed",
+    "baseline-negative.log": "36efd2311d6048e467f5a6ae72c522a0cb0e8b5ce2bedf868ce84e93215f9c93",
+    "pre-release.json": "07c6f974e4d98863a0285a6e6726585d8d44076163029406ce1d8a77f40859af",
+    "publisher-gate-install.json": "504b2b2f15b4adc12223f3e6bb9c65c7fed277c14b3b2e67f4e916cf5cefb91c",
+    "disk-reclaim.json": "4e23e441c71508d3e835b3ba1640969c4e94afcaecb5ee45f1c7d9fc79ca1524",
+    "post-release-2.json": "8f957796ce79e8ebc0b0e4efab7cbe7c7b98c6199b9df486f2a012d9ba4b881b",
+    "post-release-final.json": "20eacccbc23b33f022b343f59166d97edc53a0696280c1acf7abef67b9bf224c"
+  }
 }

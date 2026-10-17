@@ -1,0 +1,295 @@
+{
+  "status": "ACCEPTED",
+  "recorded_at": "2026-10-17T06:32:26.042689+03:30",
+  "product_source": "000b369d263eab2cfcb7822a6fd4289467b4b013",
+  "public_release": "53ec1c322d6b61d8e81f9370c8b6e2dd462fa2ee",
+  "primary_install": {
+    "at": "2026-10-17T02:58:08.518818+00:00",
+    "commit": "53ec1c322d6b61d8e81f9370c8b6e2dd462fa2ee",
+    "schema": "000182_fleet_client_coverage",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-17T02:58:08.552984766Z"
+    },
+    "checks": {
+      "accounts_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "retained_pins_preserved_or_verified_apply": true
+    },
+    "retained_pins": 387,
+    "expired_pins": 0,
+    "readiness_samples": 5,
+    "verified_transport_changes": 0
+  },
+  "secondary_install": {
+    "verified_at": "2026-10-17T02:56:57.235395+00:00",
+    "three_services_active_hash_match": true,
+    "readiness_samples": 5,
+    "automatic_restarts": 0,
+    "accounts_env_policies_preserved": true,
+    "evidence": "limited-lime.ptr.network:/root/backups/dob-country-names-20261017/verify.json"
+  },
+  "live": {
+    "at": "2026-10-17T03:01:34.253391+00:00",
+    "stable_healthy_servers": 91,
+    "metadata_servers": 91,
+    "metadata_unknown": 0,
+    "health": {
+      "HEALTHY": 91,
+      "PROVISIONING": 2
+    },
+    "outputs": {
+      "ALL": {
+        "links": 273,
+        "servers": 91,
+        "response_ms": 44.77,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 60,
+          "🇰🇷 South Korea": 15,
+          "🇮🇳 India": 72,
+          "🇵🇱 Poland": 57,
+          "🇯🇵 Japan": 33,
+          "🇺🇸 United States": 27,
+          "🇲🇽 Mexico": 3,
+          "🇧🇷 Brazil": 6
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "DIRECT": {
+        "links": 91,
+        "servers": 91,
+        "response_ms": 32.17,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇺🇸 United States": 9,
+          "🇮🇳 India": 24,
+          "🇸🇬 Singapore": 20,
+          "🇲🇽 Mexico": 1,
+          "🇵🇱 Poland": 19,
+          "🇰🇷 South Korea": 5,
+          "🇯🇵 Japan": 11,
+          "🇧🇷 Brazil": 2
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "RESIDENTIAL": {
+        "links": 91,
+        "servers": 91,
+        "response_ms": 31.34,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇺🇸 United States": 9,
+          "🇵🇱 Poland": 19,
+          "🇸🇬 Singapore": 20,
+          "🇮🇳 India": 24,
+          "🇰🇷 South Korea": 5,
+          "🇯🇵 Japan": 11,
+          "🇲🇽 Mexico": 1,
+          "🇧🇷 Brazil": 2
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_ALL": {
+        "links": 273,
+        "servers": 91,
+        "response_ms": 28.5,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇮🇳 India": 72,
+          "🇸🇬 Singapore": 60,
+          "🇰🇷 South Korea": 15,
+          "🇺🇸 United States": 27,
+          "🇯🇵 Japan": 33,
+          "🇧🇷 Brazil": 6,
+          "🇵🇱 Poland": 57,
+          "🇲🇽 Mexico": 3
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_DIRECT": {
+        "links": 91,
+        "servers": 91,
+        "response_ms": 29.62,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇺🇸 United States": 9,
+          "🇵🇱 Poland": 19,
+          "🇯🇵 Japan": 11,
+          "🇮🇳 India": 24,
+          "🇸🇬 Singapore": 20,
+          "🇧🇷 Brazil": 2,
+          "🇰🇷 South Korea": 5,
+          "🇲🇽 Mexico": 1
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_RESIDENTIAL": {
+        "links": 91,
+        "servers": 91,
+        "response_ms": 27.95,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇺🇸 United States": 9,
+          "🇮🇳 India": 24,
+          "🇵🇱 Poland": 19,
+          "🇸🇬 Singapore": 20,
+          "🇰🇷 South Korea": 5,
+          "🇯🇵 Japan": 11,
+          "🇧🇷 Brazil": 2,
+          "🇲🇽 Mexico": 1
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "ACCOUNT_digitalocean_DIRECT": {
+        "links": 10,
+        "servers": 10,
+        "response_ms": 24.67,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇮🇳 India": 10
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_digitalocean_RESIDENTIAL": {
+        "links": 10,
+        "servers": 10,
+        "response_ms": 20.79,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇮🇳 India": 10
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_linode_DIRECT": {
+        "links": 10,
+        "servers": 10,
+        "response_ms": 19.84,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇮🇳 India": 4,
+          "🇸🇬 Singapore": 1,
+          "🇺🇸 United States": 2,
+          "🇧🇷 Brazil": 2,
+          "🇯🇵 Japan": 1
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_linode_RESIDENTIAL": {
+        "links": 10,
+        "servers": 10,
+        "response_ms": 22.27,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 10
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      }
+    }
+  },
+  "tests": {
+    "iso_country_territory_codes": 249,
+    "additional_country_extension": "XK",
+    "required_db_race_passed": 11,
+    "required_skipped": 0,
+    "provider_geo_export_race": "passed",
+    "publisher_full_regression_vet_deploy_frontend": "passed",
+    "publisher_exact_candidate_install": "passed",
+    "negative_regression": "old output implementation fails new country test",
+    "broad_output_suite": "30/31 passed; remaining old-format assertion corrected and passed in fresh mandatory gate. Earlier failures retained."
+  },
+  "profile_catchup": {
+    "panel": "42238efb-c610-4820-afbc-e924a8ae38da",
+    "standard_policy_reconcile_calls": 1,
+    "exit": 0,
+    "final_direct": 1,
+    "final_residential": 1,
+    "policy_override": false
+  },
+  "model_api_usage": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  },
+  "limitations": [
+    "Two servers were provisioning at final observation.",
+    "Future unknown provider metadata displays Unknown country; it is not guessed.",
+    "Existing standalone saved links require reimport; subscriptions require refresh.",
+    "A completed naming regression gate is not a guarantee of perpetual provider availability."
+  ]
+}
