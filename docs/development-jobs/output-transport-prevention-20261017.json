@@ -1,0 +1,400 @@
+{
+  "started_at": "2026-10-17T04:49:09.082521+03:30",
+  "status": "verified_and_installed",
+  "base_commit": "300e5e4fba9c45892bb9dbf55e361dc9b929e996",
+  "scope": "Require actual database/race pass of transport cleanup, output and fleet coverage regressions before any future product publication. No live database use.",
+  "stages": [
+    {
+      "stage": "evidence_verifier_unit_tests",
+      "result": "7 passed: missing/renamed/skipped/malformed/failing evidence rejected"
+    },
+    {
+      "at": "2026-10-17T04:51:12.044036+03:30",
+      "stage": "real_database_race_gate",
+      "result": "All10 required tests passed on exact public4356ba7 candidate; zero skips. PostgreSQL disposable, unprivileged, private socket only; fixture stopped and removed."
+    },
+    {
+      "at": "2026-10-17T04:53:23.878868+03:30",
+      "stage": "publisher_execution_path_correction",
+      "result": "Negative integration initially exposed0700 private publisher-directory access failure. Publisher now copies only the credential-free gate into root-owned candidate evidence with0644 mode; private directory permissions unchanged. Exact staging statements exercised. Initial failure retained."
+    },
+    {
+      "at": "2026-10-17T04:55:42.442191+03:30",
+      "stage": "real_skipped_fixture_rejected",
+      "result": "An actual Go test without database environment exited0 and skipped its fixture. New gate rejected that stream; corrected negative integration passed."
+    },
+    {
+      "at": "2026-10-17T04:55:42.442191+03:30",
+      "stage": "live_continuation",
+      "result": "Three consecutive observations:93 healthy, Direct93/Residential93/ALL279 including matching public shares, invalid0/missing0/deficit0. All93 lifecycle scopes enrolled; no cooldown, paused or quarantined scopes. Two newly ready panels were reconciled once through the standard current-policy capacity path to complete profiles; no gate/cadence/rate/ownership overrides. Explicit TCP Restore remains one server; new creation stays XHTTP revision8."
+    },
+    {
+      "at": "2026-10-17T04:55:42.442191+03:30",
+      "stage": "service_verification",
+      "result": "All6 services across both hosts active with0 automatic restarts. Application/public release4356ba7 unchanged; only private publisher tooling changed."
+    }
+  ],
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  },
+  "completed_at": "2026-10-17T04:55:42.442191+03:30",
+  "installation": {
+    "at": "2026-10-17T04:51:12.044036+03:30",
+    "state": "installed",
+    "required_tests": 10,
+    "unit_tests": 7,
+    "candidate_public": "4356ba77a28ffe548a2b30f538144375b67101e2",
+    "schema_or_application_change": false,
+    "publisher_lock_held_during_install": true,
+    "backup": "/root/backups/dob-transport-gate-20261017",
+    "hashes": {
+      "publish.py": "f36a878bca757c2f18e27bc18724043db32ad9fd438e0f7109fd5f429e4f9e6b",
+      "transport-regression-gate.py": "be6b99d5a85d62fcecf61d62a618876a06827bb9797aaeaefde1b076c6cc0885"
+    },
+    "validation_log_sha256": "bb315773506363d23dee084adeb86d3d4c305aae025b03727aa2fe48ea340a44",
+    "path_correction": {
+      "at": "2026-10-17T04:53:23.878868+03:30",
+      "reason": "Private publisher directory is0700; copy only credential-free gate to root-owned readable candidate evidence before unprivileged execution. Keep private directory permissions unchanged.",
+      "initial_negative_probe": "failed before test launch with PermissionError; retained in negative.log"
+    }
+  },
+  "negative_test": {
+    "case": "database_environment_absent",
+    "go_test_exit": 0,
+    "gate_rejected_skipped_regression": true
+  },
+  "observations": [
+    {
+      "at": "2026-10-17T01:23:44.444468+00:00",
+      "stable_active": 93,
+      "health": {
+        "HEALTHY": 93
+      },
+      "profile_policy": {
+        "DIRECT": {
+          "enabled": true,
+          "target": 1,
+          "revision": 11
+        },
+        "RESIDENTIAL": {
+          "enabled": true,
+          "target": 1,
+          "revision": 16
+        }
+      },
+      "policy_stable": true,
+      "outputs": {
+        "DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        }
+      }
+    },
+    {
+      "at": "2026-10-17T01:24:05.265625+00:00",
+      "stable_active": 93,
+      "health": {
+        "HEALTHY": 93
+      },
+      "profile_policy": {
+        "DIRECT": {
+          "enabled": true,
+          "target": 1,
+          "revision": 11
+        },
+        "RESIDENTIAL": {
+          "enabled": true,
+          "target": 1,
+          "revision": 16
+        }
+      },
+      "policy_stable": true,
+      "outputs": {
+        "DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        }
+      }
+    },
+    {
+      "at": "2026-10-17T01:24:26.075853+00:00",
+      "stable_active": 93,
+      "health": {
+        "HEALTHY": 93
+      },
+      "profile_policy": {
+        "DIRECT": {
+          "enabled": true,
+          "target": 1,
+          "revision": 11
+        },
+        "RESIDENTIAL": {
+          "enabled": true,
+          "target": 1,
+          "revision": 16
+        }
+      },
+      "policy_stable": true,
+      "outputs": {
+        "DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_ALL": {
+          "links": 279,
+          "servers": 93,
+          "types": {
+            "xhttp": 276,
+            "tcp": 3
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_DIRECT": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        },
+        "SHARE_RESIDENTIAL": {
+          "links": 93,
+          "servers": 93,
+          "types": {
+            "xhttp": 92,
+            "tcp": 1
+          },
+          "invalid": 0,
+          "reasons": {},
+          "missing_stable": [],
+          "below_target_stable": []
+        }
+      }
+    }
+  ],
+  "automation": {
+    "running": true,
+    "eligible_inbounds": 93,
+    "enrolled_inbounds": 93,
+    "awaiting_enrollment": 0,
+    "paused_scopes": 0,
+    "cooldown_panels": 0,
+    "quarantined_panels": 0
+  },
+  "evidence": [
+    {
+      "path": "/var/lib/datacenter-publisher/transport-gate-20261017/validation.log",
+      "sha256": "bb315773506363d23dee084adeb86d3d4c305aae025b03727aa2fe48ea340a44"
+    },
+    {
+      "path": "/var/lib/datacenter-publisher/transport-gate-20261017/negative.log",
+      "sha256": "bd75b2ba2e7427bf0838e538d3eb239df4bda81700b2f230e7bc9d01a0e05d32"
+    },
+    {
+      "path": "/var/lib/datacenter-publisher/transport-gate-20261017/negative-corrected.log",
+      "sha256": "526d9a2c0ee3f938d2b37d804f4c46318773164ee5bcb509827b6fb522f6a48d"
+    },
+    {
+      "path": "/var/lib/datacenter-publisher/transport-gate-20261017/installation.json",
+      "sha256": "a879a66c5346c914d1ef24c67697b14fa901898ed8124f2ae136baab9fafc0fc"
+    },
+    {
+      "path": ".local/evidence/output-continuation-0445.json",
+      "sha256": "10dbbd4fe088d15c3b1836eee8e70bf8721362accd91070e769ecc7cfc50831e"
+    },
+    {
+      "path": ".local/evidence/output-prevention-live.json",
+      "sha256": "4521670a1cfb50cff7c3f20da0f316cba03234c3f759b20b92f3799852ddbbfc"
+    },
+    {
+      "path": ".local/evidence/output-prevention-terminal.json",
+      "sha256": "fbf28f5f0fd9e54be27572b800e6bb470c48bee763c139b9cee71f16e5066670"
+    },
+    {
+      "path": ".local/evidence/prevention-new-profiles.json",
+      "sha256": "a49e4acfd436a146a91c422108e165ec049a4925eef82be0f0734a63d57a539c"
+    }
+  ],
+  "limits": [
+    "This is a mandatory gate in the standard private publisher before a changed product is publicly pushed; metadata-only commits do not trigger a product release.",
+    "Live creation and retirement remain asynchronous; real provider/host failures are not hidden or reclassified to promise permanent uptime.",
+    "No new full-fleet connectivity claim is made in this follow-up; prior verified connectivity evidence remains separately timestamped."
+  ]
+}
