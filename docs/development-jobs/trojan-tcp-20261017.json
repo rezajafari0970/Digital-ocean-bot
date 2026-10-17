@@ -2,7 +2,7 @@
   "task": "Trojan TCP alongside VLESS Reality",
   "status": "completed",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T19:54:46.522078+00:00",
+  "updated_at": "2026-10-17T23:36:21.396183+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -567,7 +567,7 @@
     "primary_and_secondary_running_hashes_verified": true
   },
   "continuation": {
-    "status": "in_progress",
+    "status": "completed_with_external_blocker",
     "started_at": "2026-10-17T19:47:59Z",
     "live_release": "b843c75eaa4648810f3b6227e88349a91b3f7422",
     "findings": [
@@ -587,7 +587,7 @@
       },
       {
         "name": "tests, publication, rollout and live verification",
-        "status": "in_progress"
+        "status": "completed"
       }
     ],
     "candidate_canary": {
@@ -601,6 +601,109 @@
       "serial_ms": 16988
     },
     "targeted_regressions": "passed including fallback_failed",
-    "external_blocker": "DigitalOcean account_locked; ten nodes at initial observation; provider account owner action required"
+    "external_blocker": "DigitalOcean account Oceano new 1 remains provider-LOCKED. Two non-lifecycle unhealthy nodes and its pending retirements require provider account-owner action. No status override performed.",
+    "release": {
+      "source": "33073f65cc4532b60dff319af7dc1cb4e9a0dbe4",
+      "public": "26c2dc5dd193072a1afbc491aa758cad384b7d28",
+      "required_passed": 18,
+      "skipped": 0,
+      "full_validation": "passed",
+      "exact_candidate_installation": "passed",
+      "secondary_rollout": "verified",
+      "primary_rollout": "verified",
+      "both_hosts_verified": true,
+      "retained_reality_pins_unchanged": 580
+    },
+    "primary_preflight": {
+      "first_attempt": "stopped before service shutdown: 5716 MiB available, 5750 MiB required",
+      "reconciliation": "old version ready, no pending transaction; duplicate disposable test source/archive reclaimed",
+      "retry": "new intent and baseline; reserve verified; database/config backup and migrations completed"
+    },
+    "completed_at": "2026-10-17T23:36:21.396183+00:00",
+    "final": {
+      "at": "2026-10-17T23:34:25.723824+00:00",
+      "observation_samples": 13,
+      "consecutive_complete_samples": 8,
+      "last_watch": {
+        "at": "2026-10-17T23:33:36.480260+00:00",
+        "eligible": 79,
+        "states": {
+          "VERIFIED": 79
+        },
+        "verified_fresh": 79,
+        "errors": {},
+        "direct_servers": {
+          "vless": 78,
+          "trojan": 79
+        },
+        "missing_trojan_of_eligible": 0,
+        "ready": true
+      },
+      "native_https_checks": 20,
+      "native_https_success": 20,
+      "health": {
+        "HEALTHY": 80,
+        "PENDING_DELETION": 10,
+        "PANEL_DEGRADED": 1,
+        "PROVIDER_UNAVAILABLE": 1,
+        "PROVISIONING": 1
+      },
+      "active_account_route_proof": {
+        "eligible": 80,
+        "applied_fresh": 80,
+        "max_age_seconds": 41.474867
+      },
+      "openai_model_api": {
+        "requests": 0,
+        "tokens": 0,
+        "cost": 0
+      },
+      "protocol_output_at": "2026-10-17T23:34:55.659790+00:00",
+      "protocol_outputs": {
+        "ALL": {
+          "counts": {
+            "trojan": 160,
+            "vless": 235
+          },
+          "servers": {
+            "trojan": 80,
+            "vless": 79
+          },
+          "bad": {}
+        },
+        "DIRECT": {
+          "counts": {
+            "trojan": 80,
+            "vless": 78
+          },
+          "servers": {
+            "trojan": 80,
+            "vless": 78
+          },
+          "bad": {}
+        },
+        "RESIDENTIAL": {
+          "counts": {
+            "trojan": 80,
+            "vless": 78
+          },
+          "servers": {
+            "trojan": 80,
+            "vless": 78
+          },
+          "bad": {}
+        }
+      },
+      "country_and_scope_audit": {
+        "surfaces": 10,
+        "stable_healthy_servers": 80,
+        "mismatches": 0,
+        "unknown": 0,
+        "missing_stable": 0
+      },
+      "post_deploy_route_error_accounts": "all classified errors belong to provider-LOCKED account; none from active provider accounts in this observation"
+    },
+    "restart_observation": "Two credential-stage verification errors were observed during restart window and recovered automatically by 23:31:35 UTC. Stored credentials were not changed; stage code alone does not establish invalid passwords.",
+    "storage": "Disk reserve check stopped the first attempt before shutdown. Only reproducible caches and disposable test artifacts were reclaimed; operational backups preserved. Approximately 5.2 GiB remained after deployment; future updates retain their space gate and may require capacity management."
   }
 }
