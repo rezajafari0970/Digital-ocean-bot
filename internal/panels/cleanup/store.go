@@ -71,6 +71,7 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 	}
 	for _, q := range []string{
 		"UPDATE global_config_policies SET enabled=false,revision=revision+1,updated_at=now() WHERE policy_key='reality'",
+		"UPDATE trojan_tcp_policy SET enabled=false,revision=revision+1,updated_at=now() WHERE singleton",
 		"UPDATE bulk_lifecycle_scopes SET enabled=false WHERE enabled",
 		"UPDATE bulk_client_execution_gate SET enabled=false,kill_switch=true,updated_at=now()",
 		"UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,updated_at=now()",

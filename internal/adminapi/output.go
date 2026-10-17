@@ -179,7 +179,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 	if pinErr != nil {
 		return nil, nil, false
 	}
-	records := make([]outputRecord, 0)
+	records := s.collectTrojanOutput(ctx, p.ID, host, raws)
 	structures := make([]outputStructure, 0)
 	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {

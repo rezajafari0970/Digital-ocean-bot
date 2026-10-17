@@ -359,6 +359,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
+	addTrojanModules(&modules, application, sanaeiRuntimes, panelWork)
 	// Durable client mutations retain global concurrency1 and the advisory lock.
 	modules.Add(worker.RolePanels, "client-mutation", func(ctx context.Context) {
 		ticker := time.NewTicker(time.Second)

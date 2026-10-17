@@ -1,0 +1,54 @@
+{
+  "task": "Trojan TCP alongside VLESS Reality",
+  "status": "pre_release_verified",
+  "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
+  "updated_at": "2026-10-17T15:37:21.159260+00:00",
+  "decisions": {
+    "tls": "automatic publicly trusted IP certificate; user selected",
+    "transport": "tcp",
+    "preferred_port": 8443,
+    "existing_reality_ports": [
+      443
+    ],
+    "port_collision": "reject before mutation; never move or reuse existing listeners",
+    "naming": "country flag and English country name"
+  },
+  "observations": {
+    "active_inventory_at_audit": {
+      "vless_tcp_reality_443": 86,
+      "tls_inbounds": 0
+    },
+    "certificate_management_existing": false
+  },
+  "stages": [
+    {
+      "name": "source and live policy audit",
+      "status": "completed"
+    },
+    {
+      "name": "implementation and protocol isolation",
+      "status": "completed"
+    },
+    {
+      "name": "unit, database, native TLS and VLESS preservation tests",
+      "status": "completed"
+    },
+    {
+      "name": "standard release and both-host rollout",
+      "status": "pending"
+    }
+  ],
+  "openai_model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  },
+  "verification": {
+    "database_required_passed": 14,
+    "database_skipped": 0,
+    "native_tls_password_test": "passed",
+    "browser_independence": "passed",
+    "real_canary_ip_certificate": "trusted",
+    "production_trojan_active": false
+  }
+}

@@ -18,6 +18,9 @@ REQUIRED = {
     "internal/adminapi": (
         "TestTransportApplySaveIsAtomicAndScopesEligibleListeners",
         "TestOutputCountryNamesAllRoutesAndObservedRegion",
+        "TestTrojanMixedOutputKeepsRealityAndScope",
+        "TestTrojanPolicyPortsCleanupAndRealityPreservation",
+        "TestTrojanCreateLostResponseAndRestart",
         "TestTransportApplyExcludesUnfinishedCleanup",
         "TestTransportRollbackCannotCrossConfirmedCleanup",
         "TestDurableCleanupLostResponseAndWorkerRestart",

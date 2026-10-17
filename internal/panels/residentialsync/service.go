@@ -251,7 +251,7 @@ func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntim
 		savedClients[id] = c
 	}
 	// A newly observed client must use the class committed before its POST.
-	rows, err = s.DB.QueryContext(ctx, `SELECT o.client_id,o.email,o.route_class FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND o.route_class<>'' AND o.state IN('PLANNED','ACTIVE','DELETE_PENDING')`, panel)
+	rows, err = s.DB.QueryContext(ctx, `SELECT o.client_id,o.email,o.route_class FROM bulk_user_ownership o JOIN bulk_user_generations g ON g.id=o.generation_id WHERE g.panel_id=$1 AND o.route_class<>'' AND o.state IN('PLANNED','ACTIVE','DELETE_PENDING') UNION ALL SELECT client_id,email,route_class FROM trojan_tcp_clients WHERE panel_id=$1`, panel)
 	if err != nil {
 		return err
 	}

@@ -135,10 +135,14 @@ func normalizeDiagnostic(s string) string {
 	return strings.Join(fields, " ")
 }
 
-func tailDiagnostic(s string) string {
+func tailDiagnostic(s string) string { return tailDiagnosticLimit(s, 4096) }
+func tailDiagnosticLimit(s string, limit int) string {
+	if limit < 4096 || limit > 65536 {
+		limit = 4096
+	}
 	s = redact.Text(strings.ReplaceAll(s, "\x00", ""))
-	if len(s) > 4096 {
-		s = s[len(s)-4096:]
+	if len(s) > limit {
+		s = s[len(s)-limit:]
 	}
 	return s
 }

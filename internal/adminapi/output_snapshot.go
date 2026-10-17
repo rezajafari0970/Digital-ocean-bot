@@ -57,7 +57,7 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 		}
 		uniqueURIs := make(map[string]struct{}, len(records))
 		for _, rec := range records {
-			if !strings.HasPrefix(rec.URI, "vless://") {
+			if !strings.HasPrefix(rec.URI, "vless://") && !strings.HasPrefix(rec.URI, "trojan://") {
 				continue
 			}
 			uniqueURIs[rec.URI] = struct{}{}
@@ -179,6 +179,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
 	where += serverProtectionOutputPredicate
 	where += " AND NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED')) "
+	where += ` AND (o.uri NOT LIKE 'trojan://%' OR EXISTS(SELECT 1 FROM trojan_tcp_listeners tl CROSS JOIN trojan_tcp_policy tp WHERE tl.panel_id=p.id AND tp.enabled AND (tp.fleet OR p.id=ANY(tp.panel_ids)) AND tl.state='VERIFIED' AND tl.verified_at>now()-interval '5 minutes' AND tl.certificate_not_after>now()+interval '5 minutes')) `
 	args := []any{}
 	// Class publication requires a fresh running-core proof of the current revision.
 	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `
@@ -192,7 +193,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
          SELECT 1 FROM bulk_user_ownership own JOIN bulk_user_generations gen ON gen.id=own.generation_id
          JOIN reality_config_profiles profile ON profile.route_class=own.route_class
          WHERE gen.panel_id=p.id AND own.client_id=o.client_id AND own.email=cr.email
-         AND own.state='ACTIVE' AND own.route_class=$1)) `
+         AND own.state='ACTIVE' AND own.route_class=$1) OR EXISTS(SELECT 1 FROM trojan_tcp_clients tc JOIN trojan_tcp_listeners tl ON tl.panel_id=tc.panel_id WHERE tc.panel_id=p.id AND tc.client_id=o.client_id AND tc.email=cr.email AND tc.route_class=$1 AND tl.state='VERIFIED' AND o.uri LIKE 'trojan://%')) `
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
 	}
@@ -228,7 +229,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	}
 	columns := `o.uri,NULL::jsonb AS ports`
 	if class != "ALL" {
-		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1) AS ports`
+		columns = `o.uri,CASE WHEN o.uri LIKE 'trojan://%' THEN (SELECT jsonb_build_array(port) FROM trojan_tcp_listeners WHERE panel_id=p.id) ELSE (SELECT ports FROM reality_config_profiles WHERE route_class=$1) END AS ports`
 	}
 	columns += `,loc.provider,loc.region_id,loc.region_name,loc.country_code`
 	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id LEFT JOIN output_locations loc ON loc.droplet_id=dr.id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
@@ -291,7 +292,7 @@ func outputProfilePortAllowed(uri string, raw []byte) bool {
 		return false
 	}
 	u, err := url.Parse(uri)
-	if err != nil || u.Scheme != "vless" {
+	if err != nil || (u.Scheme != "vless" && u.Scheme != "trojan") {
 		return false
 	}
 	port, err := strconv.Atoi(u.Port())

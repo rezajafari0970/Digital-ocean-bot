@@ -48,6 +48,9 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		p.Idle = 5 * time.Second
 	case "sanaei-cache":
 		p.Idle = 5 * time.Second
+	case "trojan-tcp-0", "trojan-tcp-1", "trojan-verify-0", "trojan-verify-1":
+		p.Work = 8 * time.Minute
+		p.Idle = 3 * time.Second
 	case "transport-apply":
 		p.Work = 5 * time.Minute
 		p.Idle = 3 * time.Second

@@ -79,6 +79,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		var in struct {
 			ID       int64
 			Tag      string
+			Remark   string
 			Protocol string
 			Settings json.RawMessage
 		}
@@ -89,13 +90,14 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			return nil, nil, errors.New("duplicate inbound routing tag")
 		}
 		seenTags[in.Tag] = true
+		managedTrojan := in.Protocol == "trojan" && strings.HasPrefix(in.Remark, "dob:trojan-tcp:")
 		if p.StrictAllowlist {
 			if err := validateStrictInboundTags([]string{in.Tag}, nil); err != nil {
 				return nil, nil, err
 			}
-			// These exported subscription protocols authenticate current UUID clients.
+			// Exported protocols retain stable non-secret client IDs for route ownership.
 			// Other inlets must retain the terminal deny instead of gaining DNS/probes.
-			if !p.LegacyClientPaths && in.Protocol != "vless" && in.Protocol != "vmess" {
+			if !p.LegacyClientPaths && in.Protocol != "vless" && in.Protocol != "vmess" && !managedTrojan {
 				continue
 			}
 		}
@@ -118,8 +120,8 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			}
 			id, _ := m["id"].(string)
 			email, _ := m["email"].(string)
-			// Non-UUID protocols remain under the inbound default; Output exports VLESS.
-			if in.Protocol != "vless" && in.Protocol != "vmess" {
+			// Unmanaged protocols remain under the inbound default.
+			if in.Protocol != "vless" && in.Protocol != "vmess" && !managedTrojan {
 				continue
 			}
 			if id == "" || email == "" || strings.HasPrefix(email, "regexp:") {

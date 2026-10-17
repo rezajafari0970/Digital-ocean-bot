@@ -22,8 +22,10 @@ type CommandResult struct {
 }
 type ProbeObserver func(error, time.Duration)
 type SSHClient struct {
-	Timeout  time.Duration
-	HostKeys HostKeyPins
+	// OutputLimit permits bounded structured public-certificate responses; zero keeps the default.
+	OutputLimit int
+	Timeout     time.Duration
+	HostKeys    HostKeyPins
 }
 
 func (s SSHClient) Wait(ctx context.Context, t Target, key []byte) error {
@@ -122,7 +124,7 @@ func (s SSHClient) RunDetailedObserved(ctx context.Context, t Target, key []byte
 	start = time.Now()
 	err = runSessionContext(ctx, session, command)
 	emitStage(observe, StageCommand, start, err)
-	res := CommandResult{Stdout: tailDiagnostic(stdout.String()), Stderr: tailDiagnostic(stderr.String())}
+	res := CommandResult{Stdout: tailDiagnosticLimit(stdout.String(), s.OutputLimit), Stderr: tailDiagnosticLimit(stderr.String(), s.OutputLimit)}
 	if err != nil {
 		var exit *ssh.ExitError
 		if errors.As(err, &exit) {

@@ -38,3 +38,8 @@ test('an in-flight request cannot republish configs after the page is hidden',as
  assert.equal(h.out.textContent,'');
  assert.equal(h.status.hidden,true);
 });
+
+test('mixed Reality and Trojan output keeps both complete country names',async()=>{
+ const lines='vless://id@192.0.2.1:443?security=reality#Germany\n'+'trojan://secret@192.0.2.1:8443?security=tls&type=tcp#Germany\n';
+ const h=harness([lines]);await h.settle();assert.equal(h.out.textContent,lines);assert.equal(h.status.hidden,true);
+});

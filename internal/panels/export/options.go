@@ -16,6 +16,18 @@ type OutputOptions struct {
 // particular, it must not form-decode '+' or re-encode existing URI values.
 func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 	u, err := url.Parse(uri)
+	if err == nil && u.Scheme == "trojan" && u.User != nil && u.Host != "" {
+		q, e := url.ParseQuery(u.RawQuery)
+		if e != nil || q.Get("security") != "tls" || q.Get("type") != "tcp" {
+			return "", ErrInvalidVLESS
+		}
+		for k := range q {
+			if k != "security" && k != "type" {
+				return "", ErrInvalidVLESS
+			}
+		}
+		return uri, nil
+	}
 	if err != nil || u.Scheme != "vless" || u.User == nil || u.Host == "" {
 		return "", ErrInvalidVLESS
 	}
