@@ -206,6 +206,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 	}
 
 	batchVerified := false
+	var batchUnavailable error
 	if batch, ok := exec.(interface {
 		RouteProofBatch(context.Context, []sanaei.SessionRequest) ([]sanaei.SessionResponse, error)
 	}); ok {
@@ -225,10 +226,15 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			batchVerified = true
 		} else if !errors.Is(e, sanaei.ErrRouteBatchUnavailable) {
 			return e
+		} else {
+			batchUnavailable = e
 		}
 	}
 	if !batchVerified {
 		if err := runRouteProofChecks(ctx, exec, checks); err != nil {
+			if batchUnavailable != nil {
+				return fmt.Errorf("HTTP route proof after %v: %w", batchUnavailable, err)
+			}
 			return err
 		}
 	}

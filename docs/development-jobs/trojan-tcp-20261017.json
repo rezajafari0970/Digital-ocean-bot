@@ -2,7 +2,7 @@
   "task": "Trojan TCP alongside VLESS Reality",
   "status": "completed",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T17:15:42.987231+00:00",
+  "updated_at": "2026-10-17T19:54:46.522078+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -363,9 +363,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇰🇷 South Korea": 34,
-            "🇯🇵 Japan": 230,
-            "🇸🇬 Singapore": 190
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 34,
+            "\ud83c\uddef\ud83c\uddf5 Japan": 230,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 190
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -378,9 +378,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 92,
-            "🇸🇬 Singapore": 76,
-            "🇰🇷 South Korea": 14
+            "\ud83c\uddef\ud83c\uddf5 Japan": 92,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 76,
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 14
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -393,9 +393,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 92,
-            "🇸🇬 Singapore": 76,
-            "🇰🇷 South Korea": 13
+            "\ud83c\uddef\ud83c\uddf5 Japan": 92,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 76,
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 13
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -408,9 +408,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 230,
-            "🇸🇬 Singapore": 190,
-            "🇰🇷 South Korea": 34
+            "\ud83c\uddef\ud83c\uddf5 Japan": 230,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 190,
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 34
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -423,9 +423,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 92,
-            "🇰🇷 South Korea": 14,
-            "🇸🇬 Singapore": 76
+            "\ud83c\uddef\ud83c\uddf5 Japan": 92,
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 14,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 76
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -438,9 +438,9 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 92,
-            "🇸🇬 Singapore": 76,
-            "🇰🇷 South Korea": 13
+            "\ud83c\uddef\ud83c\uddf5 Japan": 92,
+            "\ud83c\uddf8\ud83c\uddec Singapore": 76,
+            "\ud83c\uddf0\ud83c\uddf7 South Korea": 13
           },
           "connection_mismatches": 0,
           "missing_stable": 0
@@ -453,7 +453,7 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇸🇬 Singapore": 20
+            "\ud83c\uddf8\ud83c\uddec Singapore": 20
           },
           "connection_mismatches": 0,
           "missing_stable": null
@@ -466,7 +466,7 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇸🇬 Singapore": 20
+            "\ud83c\uddf8\ud83c\uddec Singapore": 20
           },
           "connection_mismatches": 0,
           "missing_stable": null
@@ -479,7 +479,7 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇯🇵 Japan": 20
+            "\ud83c\uddef\ud83c\uddf5 Japan": 20
           },
           "connection_mismatches": 0,
           "missing_stable": null
@@ -492,7 +492,7 @@
           "country_mismatches": 0,
           "unknown": 0,
           "country_counts": {
-            "🇸🇬 Singapore": 18
+            "\ud83c\uddf8\ud83c\uddec Singapore": 18
           },
           "connection_mismatches": 0,
           "missing_stable": null
@@ -565,5 +565,42 @@
     "required_publication_regressions_skipped": 0,
     "all_retained_reality_pins_unchanged": 527,
     "primary_and_secondary_running_hashes_verified": true
+  },
+  "continuation": {
+    "status": "in_progress",
+    "started_at": "2026-10-17T19:47:59Z",
+    "live_release": "b843c75eaa4648810f3b6227e88349a91b3f7422",
+    "findings": [
+      "Both control hosts ready with unchanged release and zero service restarts",
+      "DigitalOcean reports account_locked; ten existing servers unavailable; provider action required",
+      "Vultr current panel: 66 of 66 local route tests passed in 2067 ms, full SSH diagnostic 11017 ms exceeds current 10-second batch budget",
+      "Ten output surfaces: country/connection mismatch zero; all 79 stable healthy servers included"
+    ],
+    "stages": [
+      {
+        "name": "fresh audit",
+        "status": "completed"
+      },
+      {
+        "name": "bounded SSH setup budget and fallback diagnostic correction",
+        "status": "completed"
+      },
+      {
+        "name": "tests, publication, rollout and live verification",
+        "status": "in_progress"
+      }
+    ],
+    "candidate_canary": {
+      "all_results_semantically_equivalent": true,
+      "at": "2026-10-17T19:54:03.778435714Z",
+      "local_batch_ms": 8494,
+      "native_cases": 66,
+      "native_mutations": 0,
+      "panel": "08143df2-1588-4a17-aad7-d1a907cc3e53",
+      "pool_lane_validation": "exact membership in native loopback outbounds, same network and plan hash",
+      "serial_ms": 16988
+    },
+    "targeted_regressions": "passed including fallback_failed",
+    "external_blocker": "DigitalOcean account_locked; ten nodes at initial observation; provider account owner action required"
   }
 }

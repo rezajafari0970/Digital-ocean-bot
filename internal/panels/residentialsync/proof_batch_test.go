@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"strings"
 	"testing"
 )
 
@@ -18,12 +20,18 @@ type batchProofCore struct {
 func (f *batchProofCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.SessionResponse, error) {
 	if r.Path == "panel/api/xray/routeTest" {
 		f.reads++
+		if f.fault == "fallback_failed" {
+			return sanaei.SessionResponse{}, context.DeadlineExceeded
+		}
 	}
 	return f.fakeCore.Do(ctx, r)
 }
 func (f *batchProofCore) RouteProofBatch(ctx context.Context, rs []sanaei.SessionRequest) ([]sanaei.SessionResponse, error) {
 	f.calls++
 	f.batch = append([]sanaei.SessionRequest(nil), rs...)
+	if f.fault == "fallback_failed" {
+		return nil, fmt.Errorf("%w: ssh transport", sanaei.ErrRouteBatchUnavailable)
+	}
 	if f.fault == "unavailable" {
 		return nil, sanaei.ErrRouteBatchUnavailable
 	}
@@ -55,7 +63,7 @@ func TestNativeRouteBatchPreservesCompleteMatrix(t *testing.T) {
 		t.Fatal(e)
 	}
 	total := len(tags) * 3 * 11
-	for _, fault := range []string{"", "unavailable", "missing", "mismatch", "cancelled"} {
+	for _, fault := range []string{"", "unavailable", "missing", "mismatch", "cancelled", "fallback_failed"} {
 		t.Run(fault, func(t *testing.T) {
 			f := &batchProofCore{fakeCore: &fakeCore{saved: desired, running: desired}, fault: fault}
 			e := verifyRunning(context.Background(), f, desired, clients, tags, p)
@@ -74,6 +82,9 @@ func TestNativeRouteBatchPreservesCompleteMatrix(t *testing.T) {
 			}
 			if fault == "mismatch" && !errors.Is(e, errRouteNotApplied) {
 				t.Fatal(e)
+			}
+			if fault == "fallback_failed" && (!errors.Is(e, context.DeadlineExceeded) || !strings.Contains(e.Error(), "native route batch unavailable: ssh transport") || f.reads != 1) {
+				t.Fatal("fallback lost its cause or continued after deadline", e, f.reads)
 			}
 			if f.saves != 0 || f.restarts != 0 {
 				t.Fatal("read optimization mutated native core")
