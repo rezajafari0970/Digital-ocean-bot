@@ -50,6 +50,9 @@ func TestReadContracts(t *testing.T) {
 	if e != nil || len(cat.Regions) != 1 || len(cat.Plans) != 1 || len(cat.Images) != 2 {
 		t.Fatalf("catalog=%+v err=%v", cat, e)
 	}
+	if cat.Regions[0].CountryCode != "US" {
+		t.Fatal("country metadata lost", cat.Regions[0])
+	}
 	if cat.Plans[0].AvailableRegions[0] != "ewr" {
 		t.Fatalf("plan=%+v", cat.Plans[0])
 	}

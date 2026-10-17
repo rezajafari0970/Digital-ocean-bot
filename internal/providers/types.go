@@ -31,9 +31,10 @@ type Capacity struct {
 }
 
 type Region struct {
-	ID        string
-	Name      string
-	Available bool
+	CountryCode string `json:",omitempty"`
+	ID          string
+	Name        string
+	Available   bool
 }
 
 type Plan struct {

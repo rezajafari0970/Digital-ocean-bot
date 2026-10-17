@@ -53,7 +53,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		}
 	}
 	for _, r := range rs {
-		out.Regions = append(out.Regions, providers.Region{ID: r.ID, Name: strings.TrimSpace(r.City + ", " + r.Country), Available: availableRegions[r.ID]})
+		out.Regions = append(out.Regions, providers.Region{ID: r.ID, CountryCode: providers.RegionCountry("vultr", r.ID, "", r.Country), Name: strings.TrimSpace(r.City + ", " + r.Country), Available: availableRegions[r.ID]})
 	}
 	for _, p := range ps {
 		out.Plans = append(out.Plans, providers.Plan{ID: p.ID, Name: p.ID, CPU: p.VCPUCount, MemoryMB: p.RAM, DiskGB: p.Disk, PriceMonthly: p.MonthlyCost, Available: len(p.Locations) > 0, AvailableRegions: append([]string(nil), p.Locations...)})

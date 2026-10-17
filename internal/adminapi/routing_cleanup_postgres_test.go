@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/cleanup"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -72,7 +73,7 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 		if class == "DIRECT" {
 			expected = "vless://1@panel.test"
 		}
-		if out.Code != 200 || strings.TrimSpace(out.Body.String()) != expected {
+		if out.Code != 200 || strings.TrimSpace(out.Body.String()) != export.WithRemark(expected, "🌐 Unknown country") {
 			t.Fatal(class, out.Code, out.Body.String())
 		}
 		viewRequest := httptest.NewRequest("GET", "/?view=1", nil)
@@ -112,6 +113,9 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 					want = "vless://0@panel.test"
 				}
 			}
+			if want != "" {
+				want = export.WithRemark(want, "🌐 Unknown country")
+			}
 			if response.Code != 200 || strings.TrimSpace(response.Body.String()) != want {
 				t.Fatal("health publication boundary", class, status, response.Code)
 			}
@@ -122,7 +126,7 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 	sqlMust(t, db, "UPDATE panel_client_routes SET effective_class='DIRECT' WHERE panel_id=$1 AND route_class='RESIDENTIAL'", panel)
 	directOnly := httptest.NewRecorder()
 	s.outputSnapshotResponse(directOnly, httptest.NewRequest("GET", "/?route_class=DIRECT", nil))
-	if directOnly.Code != 200 || strings.TrimSpace(directOnly.Body.String()) != "vless://1@panel.test" {
+	if directOnly.Code != 200 || strings.TrimSpace(directOnly.Body.String()) != export.WithRemark("vless://1@panel.test", "🌐 Unknown country") {
 		t.Fatal("residential identity leaked into direct subscription")
 	}
 	sqlMust(t, db, "UPDATE panel_routing_state SET verified_at=now()-interval '2 minutes'")

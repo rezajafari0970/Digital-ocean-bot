@@ -1,6 +1,7 @@
 package adminapi
 
 import (
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -38,7 +39,7 @@ func TestProfileOutputExcludesManualAndOtherOwnershipClass(t *testing.T) {
 	sqlMust(t, db, `INSERT INTO output_config_snapshots(panel_id,uri,client_id) VALUES($1,'vless://owned@panel.test:1212','owned')`, panel)
 	w := httptest.NewRecorder()
 	(&Server{DB: db}).outputSnapshotClass(w, httptest.NewRequest("GET", "/", nil), "DIRECT")
-	if w.Code != 200 || strings.TrimSpace(w.Body.String()) != "vless://owned@panel.test:443" {
+	if w.Code != 200 || strings.TrimSpace(w.Body.String()) != export.WithRemark("vless://owned@panel.test:443", "🌐 Unknown country") {
 		t.Fatal(w.Code, w.Body.String())
 	}
 }

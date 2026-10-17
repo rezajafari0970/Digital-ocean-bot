@@ -1,0 +1,93 @@
+{
+  "task": "config-country-names-20261017",
+  "started_at": "2026-10-17T06:14:11.929833+03:30",
+  "baseline": "fcad64d6c94b743f27983985f7d1d1aa1869c902",
+  "status": "VERIFIED_PENDING_PUBLICATION",
+  "stages": [
+    {
+      "stage": "inspection",
+      "status": "complete",
+      "findings": [
+        "Technical fragment comes from managed listener plus client email.",
+        "Actual provider inventory region takes precedence over requested creation profile.",
+        "All output/share/account routes converge on outputSnapshotScoped.",
+        "No network GeoIP requests needed.",
+        "Linode city/state suffix is not a reliable country."
+      ]
+    },
+    {
+      "stage": "implementation",
+      "status": "complete",
+      "details": [
+        "ISO249 + explicit Unicode XK support; UK normalized to GB.",
+        "Actual inventory resource region preferred over creation profile.",
+        "Single statement materialized region context, no provider/GeoIP HTTP.",
+        "All output routes replace only fragment; stored snapshot and native management names untouched.",
+        "Explicit CountryCode retained by four provider adapters."
+      ]
+    },
+    {
+      "stage": "unit_validation",
+      "status": "passed",
+      "details": [
+        "Race: geoctx, providers and all provider adapters, panels/export",
+        "Seven publisher verifier tests pass.",
+        "31 real database output regressions running."
+      ],
+      "setup_failure": "First database wrapper could not find runuser in PATH; exited127 before database start. Retried with absolute /usr/sbin/runuser."
+    },
+    {
+      "stage": "database_validation_first_run",
+      "status": "failed_then_corrected_fixture_expectations",
+      "passed": 29,
+      "failed": [
+        "TestAccountOutputEligibilityAndRevocation",
+        "TestClassOutputDisjointImmutableAndFresh"
+      ],
+      "cause": [
+        "Account fixture restoration mistakenly inserted expected display URI alongside unchanged source URI; restored distinct source/expected representations.",
+        "One existing health-boundary expectation still used the old fragment."
+      ],
+      "country_integration": "passed",
+      "rerun": "31 output regressions running"
+    },
+    {
+      "stage": "database_validation_second_run",
+      "status": "30_passed_1_fixture_expectation_remaining",
+      "remaining": "TestClassOutputDisjointImmutableAndFresh final assertion still expected unlabelled URI; exact expected fragment corrected without changing boundary assertion.",
+      "next": "Fresh mandatory 11-test database/race gate including country regression."
+    },
+    {
+      "stage": "live_baseline",
+      "status": "recorded",
+      "healthy": 91,
+      "global_links": 267,
+      "direct_links": 90,
+      "residential_links": 87,
+      "metadata_unknown": 0,
+      "technical_names": "all published links",
+      "connection_mismatches": 0,
+      "preexisting_coverage_deficit": {
+        "all": 1,
+        "direct": 1,
+        "residential": 4
+      },
+      "evidence": ".local/evidence/pre-release.json",
+      "note": "Baseline deficits precede naming release; preserve actual lifecycle status."
+    },
+    {
+      "stage": "mandatory_database_race_gate",
+      "status": "passed",
+      "required_passed": 11,
+      "skipped": 0,
+      "evidence": ".local/evidence/required-db-race.log",
+      "output_suite_composition": "30/31 output tests passed in broad run; final corrected health assertion passed in fresh mandatory gate. No broad full-green run claimed."
+    }
+  ],
+  "model_api_usage": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  },
+  "updated_at": "2026-10-17T06:23:11.814627+03:30"
+}

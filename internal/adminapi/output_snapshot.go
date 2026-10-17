@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/geoctx"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"io"
 	"log"
 	"net/http"
@@ -228,10 +230,11 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	if class != "ALL" {
 		columns = `o.uri,(SELECT ports FROM reality_config_profiles WHERE route_class=$1) AS ports`
 	}
-	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
+	columns += `,loc.provider,loc.region_id,loc.region_name,loc.country_code`
+	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id LEFT JOIN output_locations loc ON loc.droplet_id=dr.id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
 	// The sentinel retains a row even for empty output or a missing policy.
 	// Both policy and eligible URIs use this one statement snapshot.
-	q = `SELECT ep.revision,ep.include_xhttp_extra,ep.include_finalmask,published.uri,published.ports
+	q = outputCountryLocationsSQL + `SELECT ep.revision,ep.include_xhttp_extra,ep.include_finalmask,published.uri,published.ports,published.provider,published.region_id,published.region_name,published.country_code
  FROM (SELECT true AS singleton) anchor
  LEFT JOIN output_export_policy ep ON ep.singleton=anchor.singleton
  LEFT JOIN LATERAL (` + q + `) published ON true`
@@ -243,11 +246,11 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	defer rows.Close()
 	var out strings.Builder
 	for rows.Next() {
-		var raw sql.NullString
+		var raw, provider, regionID, regionName, countryCode sql.NullString
 		var revision sql.NullInt64
 		var extra, mask sql.NullBool
 		var ports []byte
-		if err := rows.Scan(&revision, &extra, &mask, &raw, &ports); err != nil {
+		if err := rows.Scan(&revision, &extra, &mask, &raw, &ports, &provider, &regionID, &regionName, &countryCode); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
@@ -264,7 +267,8 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 				writeJSON(w, 500, errorBody())
 				return
 			}
-			out.WriteString(u)
+			country := providers.RegionCountry(provider.String, regionID.String, regionName.String, countryCode.String)
+			out.WriteString(export.WithRemark(u, geoctx.CountryLabel(country)))
 			out.WriteByte('\n')
 		}
 	}

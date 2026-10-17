@@ -105,3 +105,9 @@ Allocation, attachment, rotation, release, guest-network changes and config publ
 ### XHTTP Reality creation defaults
 The Configs page can select TCP or XHTTP Reality stream-up for new physical listeners. XHTTP uses apart.com Host and a saved unique path of256–4096bytes. Direct and Residential clients on one physical listener share its path. Existing listeners retain their transport and credentials.
 The exact requested FinalMask preset is visible but disabled because it is incompatible with the tested core. This profile uses native dialing, disabled WebView and empty Flow. Changing the creation default does not convert active listeners.
+
+### Country names in exported configurations
+
+VLESS names show the server's country flag and English name, such as 🇩🇪 Germany, in every global and account subscription. The country comes from provider region metadata, using the observed server region before the requested creation region. Names are resolved locally without a GeoIP request on each download. Existing connections, transport settings and native managed listener names are unchanged.
+
+All 249 ISO country/territory codes are supported, plus the explicit Kosovo flag extension. Unrecognized metadata shows 🌐 Unknown country rather than an invented location. Refresh your subscription to receive the new display names; previously saved standalone links need to be imported again.

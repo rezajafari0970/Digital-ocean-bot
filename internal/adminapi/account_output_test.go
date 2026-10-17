@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"net/http/httptest"
 	"strings"
 	"sync"
@@ -97,7 +98,7 @@ func TestAccountOutputIsolationAndCompatibility(t *testing.T) {
 			token := accountOutputToken(t, s, x.Account, class)
 			for _, q := range []string{"", "?created_within_minutes=1", "?expires_within_minutes=120", "?created_within_minutes=1&expires_within_minutes=120"} {
 				w := readAccountOutput(s, token, q)
-				if w.Code != 200 || w.Body.String() != x.URIs[class]+"\n" || w.Header().Get("Cache-Control") != "no-store" {
+				if w.Code != 200 || w.Body.String() != export.WithRemark(x.URIs[class], "🌐 Unknown country")+"\n" || w.Header().Get("Cache-Control") != "no-store" {
 					t.Fatal("scope/raw URI", w.Code, w.Body.String())
 				}
 			}
@@ -121,7 +122,7 @@ func TestAccountOutputIsolationAndCompatibility(t *testing.T) {
 	for _, x := range f {
 		for _, class := range []string{"DIRECT", "RESIDENTIAL"} {
 			token := accountOutputToken(t, s, x.Account, class)
-			want := x.URIs[class] + "\n"
+			want := export.WithRemark(x.URIs[class], "🌐 Unknown country") + "\n"
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -175,7 +176,7 @@ func TestAccountOutputEligibilityAndRevocation(t *testing.T) {
 		for class, uri := range x.URIs {
 			sqlMust(t, db, "INSERT INTO output_config_snapshots(panel_id,uri,client_id,visible_until) VALUES($1,$2,$3,now()+interval '30 minutes') ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until", x.Panel, uri, "client-"+class+"-"+x.Panel)
 		}
-		if w := readAccountOutput(s, token, ""); w.Code != 200 || w.Body.String() != x.URIs["DIRECT"]+"\n" {
+		if w := readAccountOutput(s, token, ""); w.Code != 200 || w.Body.String() != export.WithRemark(x.URIs["DIRECT"], "🌐 Unknown country")+"\n" {
 			t.Fatal("eligibility restore", i, w.Code, w.Body.String())
 		}
 	}
@@ -184,7 +185,7 @@ func TestAccountOutputEligibilityAndRevocation(t *testing.T) {
 	if w := readAccountOutput(s, res, ""); w.Code != 200 || w.Body.Len() != 0 {
 		t.Fatal("residential unhealthy", w.Code)
 	}
-	if w := readAccountOutput(s, token, ""); w.Code != 200 || w.Body.String() != x.URIs["DIRECT"]+"\n" {
+	if w := readAccountOutput(s, token, ""); w.Code != 200 || w.Body.String() != export.WithRemark(x.URIs["DIRECT"], "🌐 Unknown country")+"\n" {
 		t.Fatal("direct impacted")
 	}
 	sqlMust(t, db, "UPDATE account_output_share_tokens SET revoked_at=now() WHERE token=$1", token)
@@ -286,7 +287,7 @@ func TestAccountOutputIncludesEveryOwnedPanel(t *testing.T) {
 		token := accountOutputToken(t, s, f[0].Account, class)
 		w := readAccountOutput(s, token, "")
 		got := strings.Fields(w.Body.String())
-		if w.Code != 200 || len(got) != 2 || !strings.Contains(w.Body.String(), f[0].URIs[class]+"\n") || !strings.Contains(w.Body.String(), f[1].URIs[class]+"\n") {
+		if w.Code != 200 || len(got) != 2 || !strings.Contains(w.Body.String(), export.WithRemark(f[0].URIs[class], "🌐 Unknown country")+"\n") || !strings.Contains(w.Body.String(), export.WithRemark(f[1].URIs[class], "🌐 Unknown country")+"\n") {
 			t.Fatal("multiple panels", w.Code, w.Body.String())
 		}
 		other := accountOutputToken(t, s, f[1].Account, class)

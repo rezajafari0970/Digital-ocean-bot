@@ -17,6 +17,7 @@ from urllib.parse import urlencode
 REQUIRED = {
     "internal/adminapi": (
         "TestTransportApplySaveIsAtomicAndScopesEligibleListeners",
+        "TestOutputCountryNamesAllRoutesAndObservedRegion",
         "TestTransportApplyExcludesUnfinishedCleanup",
         "TestTransportRollbackCannotCrossConfirmedCleanup",
         "TestDurableCleanupLostResponseAndWorkerRestart",

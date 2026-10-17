@@ -12,7 +12,7 @@ import (
 func catalogFixture(path string) string {
 	switch path {
 	case "/v4/regions":
-		return page(`[{"id":"us-east","label":"Newark","status":"ok","site_type":"core","capabilities":["Linodes"]},{"id":"id-cgk","label":"Jakarta","status":"ok","site_type":"core","capabilities":["Linodes"]},{"id":"outage","status":"outage","site_type":"core","capabilities":["Linodes"]},{"id":"blocked","status":"ok","site_type":"core","capabilities":["Linodes"]}]`, 1, 1, 4)
+		return page(`[{"id":"us-east","country":"us","label":"Newark","status":"ok","site_type":"core","capabilities":["Linodes"]},{"id":"id-cgk","country":"id","label":"Jakarta","status":"ok","site_type":"core","capabilities":["Linodes"]},{"id":"outage","status":"outage","site_type":"core","capabilities":["Linodes"]},{"id":"blocked","status":"ok","site_type":"core","capabilities":["Linodes"]}]`, 1, 1, 4)
 	case "/v4/account/availability":
 		return page(`[{"region":"us-east","available":["Linodes"],"unavailable":[]},{"region":"id-cgk","available":["Linodes"],"unavailable":[]},{"region":"outage","available":["Linodes"],"unavailable":[]},{"region":"blocked","available":[],"unavailable":["Linodes"]}]`, 1, 1, 4)
 	case "/v4/linode/types":
@@ -38,6 +38,12 @@ func TestCatalogAvailabilityPriceAndImages(t *testing.T) {
 	}
 	if len(cat.Regions) != 2 || len(cat.Plans) != 2 || len(cat.Images) != 1 || cat.Images[0].ID != "linode/ubuntu24.04" {
 		t.Fatal(cat)
+	}
+	for _, r := range cat.Regions {
+		want := map[string]string{"us-east": "US", "id-cgk": "ID"}[r.ID]
+		if r.CountryCode != want {
+			t.Fatal("country metadata lost", r)
+		}
 	}
 	p := cat.Plans[0]
 	if p.DiskGB != 25 || p.PriceMonthly != 5 || p.PricesByRegion["id-cgk"].MonthlyEstimate != 6 || len(p.AvailableRegions) != 2 {

@@ -9,6 +9,7 @@ import (
 )
 
 type regionData struct {
+	Country      string   `json:"country"`
 	SiteType     string   `json:"site_type"`
 	ID           string   `json:"id"`
 	Label        string   `json:"label"`
@@ -112,7 +113,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	for _, r := range regions {
 		if r.SiteType == "core" && r.Status == "ok" && contains(r.Capabilities, "Linodes") && allowed[r.ID] {
 			regionOK[r.ID] = true
-			out.Regions = append(out.Regions, providers.Region{ID: r.ID, Name: r.Label, Available: true})
+			out.Regions = append(out.Regions, providers.Region{ID: r.ID, Name: r.Label, CountryCode: providers.RegionCountry("linode", r.ID, r.Label, r.Country), Available: true})
 		}
 	}
 	available := map[string][]string{}

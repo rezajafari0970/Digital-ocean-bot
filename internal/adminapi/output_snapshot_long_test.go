@@ -84,7 +84,7 @@ func TestOutputSnapshotLongXHTTPRoundTrip(t *testing.T) {
 		t.Fatalf("share status %d", w.Code)
 	}
 	for _, rec := range records {
-		if !strings.Contains(w.Body.String(), rec.URI+"\n") {
+		if !strings.Contains(w.Body.String(), export.WithRemark(rec.URI, "🌐 Unknown country")+"\n") {
 			t.Fatal("shared output lost a complete URI")
 		}
 		u, err := url.Parse(rec.URI)

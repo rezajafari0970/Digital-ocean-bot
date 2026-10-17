@@ -231,7 +231,7 @@ func (d *Driver) ObserveFast(ctx context.Context) (providers.Observation, error)
 func normalizeCatalog(raw DiscoveryResult) providers.Catalog {
 	out := providers.Catalog{Regions: make([]providers.Region, 0, len(raw.Regions)), Plans: make([]providers.Plan, 0, len(raw.Sizes)), Images: make([]providers.Image, 0, len(raw.Images))}
 	for _, r := range raw.Regions {
-		out.Regions = append(out.Regions, providers.Region{ID: r.Slug, Name: r.Name, Available: r.Available})
+		out.Regions = append(out.Regions, providers.Region{ID: r.Slug, Name: r.Name, CountryCode: providers.RegionCountry("digitalocean", r.Slug, r.Name, ""), Available: r.Available})
 	}
 	for _, s := range raw.Sizes {
 		out.Plans = append(out.Plans, providers.Plan{ID: s.Slug, Name: s.Slug, CPU: s.VCPUs, MemoryMB: s.Memory, DiskGB: s.Disk, PriceHourly: s.PriceHourly, PriceMonthly: s.PriceMonthly, Available: s.Available, AvailableRegions: append([]string(nil), s.Regions...)})

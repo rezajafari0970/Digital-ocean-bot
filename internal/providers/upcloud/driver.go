@@ -156,7 +156,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	regions := []string{}
 	for _, z := range zs {
 		if z.Public == "yes" && z.ID != "" {
-			out.Regions = append(out.Regions, providers.Region{ID: z.ID, Name: z.Description, Available: true})
+			out.Regions = append(out.Regions, providers.Region{ID: z.ID, Name: z.Description, CountryCode: providers.RegionCountry("upcloud", z.ID, z.Description, ""), Available: true})
 			regions = append(regions, z.ID)
 		}
 	}
