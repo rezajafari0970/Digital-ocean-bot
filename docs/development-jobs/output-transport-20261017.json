@@ -1,0 +1,32 @@
+{
+  "started_at": "2026-10-17T03:48:46.104496+03:30",
+  "base_commit": "563ab0a74e307378291c86e21cb2fb6753c5b811",
+  "status": "investigating",
+  "operator_intent": "XHTTP policy revision 8; cleanup and recreation in progress; preserve operator settings",
+  "stages": [
+    {
+      "stage": "initial_read",
+      "result": "Cleanup succeeded for 93 panels; XHTTP apply revision 8 has pending/running jobs and 11 FAILED_BEFORE_WRITE; output rebuilding, DIRECT 23/89 healthy. Cause not yet established."
+    },
+    {
+      "at": "2026-10-17T03:53:21.810953+03:30",
+      "stage": "regression_and_fix",
+      "result": "Stale pins survived verified delete-all; transport queue adopted inventory during QUEUED/RUNNING/PAUSED cleanup. Both reproduced with isolated PostgreSQL and corrected; focused race passed. 32 eligible retained listeners requeued through revision-fenced public API. Broader race tests running.",
+      "evidence": [
+        ".local/evidence/cleanup-regression-red-2.log",
+        ".local/evidence/cleanup-regression-green.log",
+        ".local/evidence/transport-requeue.json"
+      ]
+    },
+    {
+      "at": "2026-10-17T03:58:29.548709+03:30",
+      "stage": "source_ready",
+      "result": "Focused regressions and race tests passed; affected vet passed; full admin database/race suite running. Publication and installation not yet complete."
+    }
+  ],
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
+  }
+}

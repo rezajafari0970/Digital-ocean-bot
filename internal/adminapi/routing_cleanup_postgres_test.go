@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -193,6 +194,14 @@ func TestDurableCleanupLostResponseAndWorkerRestart(t *testing.T) {
 	_, _, panel := seedPanel(t, db, remote.URL)
 	_, _, other := seedPanel(t, db, "http://untouched.test")
 	sqlMust(t, db, "INSERT INTO global_config_policies(policy_key,enabled,ports,target_users_per_inbound,users_per_second) VALUES('reality',true,'[443]',2,1) ON CONFLICT(policy_key) DO UPDATE SET enabled=true")
+	const key = "dob:global-reality:00443"
+	for _, p := range []string{panel, other} {
+		sqlMust(t, db, "INSERT INTO reality_listener_profiles(panel_id,managed_key,config,policy_revision) VALUES($1,$2,'{\"network\":\"tcp\",\"finalmask_enabled\":false}',1)", p, key)
+		sqlMust(t, db, "INSERT INTO reality_transport_apply_jobs(id,panel_id,managed_key,policy_revision,before_config,target_config,source_config,state,phase,before_secret_ref) VALUES(gen_random_uuid(),$1,$2,1,'{}','{}','{}','BLOCKED','REVIEW_REQUIRED','retained-backup')", p, key)
+	}
+	defaults := transportprofile.Recommended()
+	raw, _ := json.Marshal(defaults)
+	sqlMust(t, db, "UPDATE reality_transport_policy SET revision=2,config=$1", raw)
 	id, err := (cleanup.Store{DB: db}).Start(ctx, []string{panel})
 	if err != nil {
 		t.Fatal(err)
@@ -207,6 +216,30 @@ func TestDurableCleanupLostResponseAndWorkerRestart(t *testing.T) {
 		if err = svc.RunOne(ctx); err != nil {
 			t.Fatal(err)
 		}
+		if i == 0 {
+			var n int
+			if e := db.QueryRow("SELECT count(*) FROM reality_listener_profiles WHERE panel_id=$1", panel).Scan(&n); e != nil || n != 1 {
+				t.Fatal("pin retired before native listener absence", n, e)
+			}
+		}
+	}
+	var pins int
+	if e := db.QueryRow("SELECT count(*) FROM reality_listener_profiles WHERE panel_id=$1", panel).Scan(&pins); e != nil || pins != 0 {
+		t.Fatal("verified deletion retained stale transport pin", pins, e)
+	}
+	var state, phase, backup string
+	if e := db.QueryRow("SELECT state,phase,before_secret_ref FROM reality_transport_apply_jobs WHERE panel_id=$1", panel).Scan(&state, &phase, &backup); e != nil || state != "OBSOLETE" || phase != "CLEANUP_VERIFIED_ABSENT" || backup != "retained-backup" {
+		t.Fatal("deleted listener retained transport barrier or lost audit backup", state, phase, e)
+	}
+	if e := db.QueryRow("SELECT count(*) FROM reality_listener_profiles WHERE panel_id=$1", other).Scan(&pins); e != nil || pins != 1 {
+		t.Fatal("unrelated listener pin changed", pins, e)
+	}
+	if e := db.QueryRow("SELECT state FROM reality_transport_apply_jobs WHERE panel_id=$1", other).Scan(&state); e != nil || state != "BLOCKED" {
+		t.Fatal("unrelated transport barrier changed", state, e)
+	}
+	recreated, e := transportprofile.Resolve(ctx, db, panel, key, "")
+	if e != nil || recreated.NetworkName() != "xhttp" || len(recreated.Path) != defaults.PathBytes {
+		t.Fatal("recreated listener did not adopt current default", e)
 	}
 	st, err := (cleanup.Store{DB: db}).Status(ctx, id)
 	if err != nil || st.Status != "done" || st.Succeeded != 1 || st.Results[0].Deleted != 1 || st.Results[0].DeletedInbounds != 1 {

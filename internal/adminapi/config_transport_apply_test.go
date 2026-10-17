@@ -3,7 +3,10 @@ package adminapi
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportapply"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"net/http/httptest"
 	"testing"
@@ -91,5 +94,61 @@ func TestTransportApplySaveIsAtomicAndScopesEligibleListeners(t *testing.T) {
 	s.rollbackConfigTransport(w, req)
 	if w.Code != 400 {
 		t.Fatal("invalid rollback ID", w.Code)
+	}
+}
+
+// A policy save during delete-all must not adopt stale TCP inventory or queue
+// work against listeners already removed by the serialized cleanup executor.
+func TestTransportApplyExcludesUnfinishedCleanup(t *testing.T) {
+	for _, state := range []string{"QUEUED", "RUNNING", "PAUSED", "SUCCEEDED", "CANCELLED"} {
+		t.Run(state, func(t *testing.T) {
+			db := adminTestDB(t)
+			_, _, panel := seedPanel(t, db, "http://fixture")
+			const key = "dob:global-reality:00443"
+			sqlMust(t, db, "INSERT INTO panel_inbound_inventory(panel_id,remote_id,remark,protocol,transport,security,port,present,enabled,raw_hash,first_seen_at,last_seen_at) VALUES($1,1,$2,'vless','tcp','reality',443,true,true,'fixture',now(),now())", panel, key)
+			sqlMust(t, db, "INSERT INTO panel_cleanup_jobs(id,state) VALUES('11111111-1111-4111-8111-111111111111',$1)", state)
+			sqlMust(t, db, "INSERT INTO panel_cleanup_targets(job_id,panel_id,state) VALUES('11111111-1111-4111-8111-111111111111',$1,'PENDING')", panel)
+			ctx := context.Background()
+			tx, e := db.BeginTx(ctx, nil)
+			if e != nil {
+				t.Fatal(e)
+			}
+			defer tx.Rollback()
+			result, e := transportapply.Queue(ctx, tx, transportprofile.Policy{Revision: 2, Config: transportprofile.Recommended()})
+			if e != nil {
+				t.Fatal(e)
+			}
+			if e = tx.Commit(); e != nil {
+				t.Fatal(e)
+			}
+			want := 0
+			if state == "SUCCEEDED" || state == "CANCELLED" {
+				want = 1
+			}
+			var pins int
+			if e := db.QueryRow("SELECT count(*) FROM reality_listener_profiles WHERE panel_id=$1", panel).Scan(&pins); e != nil || pins != want || result.Queued != want {
+				t.Fatal("cleanup scope admitted transport work", state, result, pins, e)
+			}
+		})
+	}
+}
+
+func TestTransportRollbackCannotCrossConfirmedCleanup(t *testing.T) {
+	db := adminTestDB(t)
+	_, _, panel := seedPanel(t, db, "http://fixture")
+	const key = "dob:global-reality:00443"
+	sqlMust(t, db, "INSERT INTO reality_listener_profiles(panel_id,managed_key,config,policy_revision) VALUES($1,$2,'{}',1)", panel, key)
+	const job = "11111111-1111-4111-8111-111111111111"
+	sqlMust(t, db, "INSERT INTO reality_transport_apply_jobs(id,panel_id,managed_key,policy_revision,before_config,target_config,source_config,state,created_at) VALUES($1,$2,$3,1,'{}','{}','{}','SUCCEEDED',now()-interval '1 minute')", job, panel, key)
+	sqlMust(t, db, "INSERT INTO panel_cleanup_jobs(id,state) VALUES('22222222-2222-4222-8222-222222222222','SUCCEEDED')")
+	sqlMust(t, db, "INSERT INTO panel_cleanup_targets(job_id,panel_id,state) VALUES('22222222-2222-4222-8222-222222222222',$1,'SUCCEEDED')", panel)
+	ctx := context.Background()
+	tx, e := db.BeginTx(ctx, nil)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tx.Rollback()
+	if e = transportapply.Rollback(ctx, tx, job); !errors.Is(e, sql.ErrNoRows) {
+		t.Fatal("old restore crossed deleted listener lifecycle", e)
 	}
 }

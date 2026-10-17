@@ -226,7 +226,16 @@ func (s Service) complete(ctx context.Context, job, panel string) error {
 		return err
 	}
 	defer tx.Rollback()
+	// This function is reached only after fresh native absence (or verified
+	// provider deletion), under the shared executor fence. End the deleted
+	// listener's lifecycle atomically with cleanup completion. Missing inventory
+	// alone must never reset a pin or release an ambiguous transport write.
+	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(180061015)"); err != nil {
+		return err
+	}
 	for _, q := range []string{
+		"UPDATE reality_transport_apply_jobs SET state='OBSOLETE',phase='CLEANUP_VERIFIED_ABSENT',last_error='',completed_at=now(),updated_at=now() WHERE panel_id=$1 AND state IN('PENDING','RUNNING','BLOCKED')",
+		"DELETE FROM reality_listener_profiles WHERE panel_id=$1",
 		"DELETE FROM output_config_snapshots WHERE panel_id=$1",
 		"DELETE FROM panel_client_routes WHERE panel_id=$1",
 		"DELETE FROM inbound_export_metadata WHERE panel_id=$1",

@@ -44,6 +44,10 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(628341902732)"); err != nil {
 		return "", err
 	}
+	// Serialize transport admissions with the cleanup scope/freeze publication.
+	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(180061015)"); err != nil {
+		return "", err
+	}
 	var id string
 	err = tx.QueryRowContext(ctx, "SELECT id::text FROM panel_cleanup_jobs WHERE state NOT IN('SUCCEEDED','CANCELLED') FOR UPDATE").Scan(&id)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {

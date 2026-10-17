@@ -136,6 +136,7 @@ func (s Service) RunOne(ctx context.Context) error {
  d.state IN('READY','EXPIRING') AND (d.expires_at IS NULL OR d.expires_at>now()+interval '90 seconds'),
  pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND dep.state='PANEL_COMPLETE'
  AND EXISTS(SELECT 1 FROM global_config_policies g WHERE g.policy_key='reality' AND g.enabled)
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
  AND NOT EXISTS(SELECT 1 FROM reality_rollout_control c WHERE c.mode='canary' AND NOT EXISTS(SELECT 1 FROM reality_rollout_panels rp WHERE rp.panel_id=pi.id AND rp.enabled))
  FROM panel_instances pi JOIN droplets d ON d.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=d.id WHERE pi.id=$1`, j.panel).Scan(&account, &droplet, &host, &user, &keyRef, &alive, &allowed)
 	if e != nil {

@@ -37,6 +37,7 @@ func Queue(ctx context.Context, tx *sql.Tx, policy transportprofile.Policy, pane
  WHERE i.remark LIKE 'dob:global-reality:%' AND i.transport='tcp' AND i.protocol='vless' AND i.security='reality' AND i.present AND i.enabled
  AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND d.state IN('READY','EXPIRING') AND dep.state='PANEL_COMPLETE'
  AND (d.expires_at IS NULL OR d.expires_at>now()+interval '2 minutes')
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
  AND (COALESCE(array_length($2::text[],1),0)=0 OR pi.id::text=ANY($2::text[]))
  ON CONFLICT(panel_id,managed_key) DO NOTHING`, policy.Revision, pq.Array(panels)); e != nil {
 		return result, e
@@ -48,6 +49,7 @@ func Queue(ctx context.Context, tx *sql.Tx, policy transportprofile.Policy, pane
  WHERE p.managed_key LIKE 'dob:global-reality:%' AND pi.enabled AND a.enabled
  AND a.provider_state='ACTIVE' AND d.state IN('READY','EXPIRING') AND dep.state='PANEL_COMPLETE'
  AND (d.expires_at IS NULL OR d.expires_at>now()+interval '2 minutes')
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
  AND EXISTS(SELECT 1 FROM panel_inbound_inventory i WHERE i.panel_id=p.panel_id AND i.remark=p.managed_key AND i.present AND i.enabled AND i.protocol='vless' AND i.security='reality')
  ORDER BY p.panel_id,p.managed_key FOR UPDATE OF p`)
 	if e != nil {
@@ -147,7 +149,9 @@ func Rollback(ctx context.Context, tx *sql.Tx, id string) error {
 	var beforeRaw, targetRaw, currentRaw, sourceRaw []byte
 	e := tx.QueryRowContext(ctx, `SELECT j.panel_id::text,j.managed_key,j.policy_revision,j.before_config,j.target_config,p.config,j.state,j.before_secret_ref,j.source_config
  FROM reality_transport_apply_jobs j JOIN reality_listener_profiles p ON p.panel_id=j.panel_id AND p.managed_key=j.managed_key
- WHERE j.id=$1 AND j.state IN('SUCCEEDED','BLOCKED') FOR UPDATE OF p,j`, id).Scan(&panel, &key, &revision, &beforeRaw, &targetRaw, &currentRaw, &state, &ref, &sourceRaw)
+ WHERE j.id=$1 AND j.state IN('SUCCEEDED','BLOCKED')
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct WHERE ct.panel_id=j.panel_id AND ct.state='SUCCEEDED' AND ct.updated_at>=j.created_at)
+ FOR UPDATE OF p,j`, id).Scan(&panel, &key, &revision, &beforeRaw, &targetRaw, &currentRaw, &state, &ref, &sourceRaw)
 	if e != nil {
 		return e
 	}
