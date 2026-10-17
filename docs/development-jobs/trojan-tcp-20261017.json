@@ -1,8 +1,8 @@
 {
   "task": "Trojan TCP alongside VLESS Reality",
-  "status": "fleet_converging_executor_fairness_fix_validated",
+  "status": "completed",
   "baseline_source": "0d6df15968f0682840ca1469ce908faccaf11971",
-  "updated_at": "2026-10-17T16:54:48.511556+00:00",
+  "updated_at": "2026-10-17T17:15:42.987231+00:00",
   "decisions": {
     "tls": "automatic publicly trusted IP certificate; user selected",
     "transport": "tcp",
@@ -43,11 +43,13 @@
     },
     {
       "name": "fleet certificate issuance, native verification and output coverage",
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-17T15:57:55Z",
       "policy_revision": 4,
       "resumed_at": "2026-10-17T16:38:58.030888+00:00",
-      "resumed_policy_revision": 6
+      "resumed_policy_revision": 6,
+      "completed_at": "2026-10-17T17:13:31.194262+00:00",
+      "eligible_verified": 91
     },
     {
       "name": "full native route proof capacity with two protocols",
@@ -92,12 +94,13 @@
     },
     {
       "name": "shared executor queue fairness without blocking Reality",
-      "status": "validated_pending_release",
+      "status": "completed",
       "finding": "try-lock collisions sent groups of creators into synchronized five-minute retries",
       "fix": "bounded FIFO wait on the same single executor, before acquiring native config lock; cancellation releases uncertain ownership; all admission gates remain",
       "required_regression": "TestTrojanCreateLostResponseAndRestart/queued_executor_leaves_Reality_readable_and_cancels_safely",
       "required_passed": 18,
-      "skipped": 0
+      "skipped": 0,
+      "completed_at": "2026-10-17T17:02:35.810773+00:00"
     }
   ],
   "openai_model_api": {
@@ -115,12 +118,12 @@
     "route_batch_targeted_units": "all passed"
   },
   "release": {
-    "source": "f22c3d2e78b55a59586c0fc8eec93ae0cd0d560e",
-    "public": "01e8095b522b2ce806113ac5a706168c36290a84",
+    "source": "d61c5fa1099ebce866860f9f959ef8718c003ac3",
+    "public": "b843c75eaa4648810f3b6227e88349a91b3f7422",
     "schema": "000183_trojan_tcp",
     "both_hosts_verified": true,
     "policy_environment_accounts_preserved": true,
-    "retained_reality_pins_unchanged": 522
+    "retained_reality_pins_unchanged": 527
   },
   "canary": {
     "servers": 2,
@@ -150,34 +153,42 @@
       "both_hosts_verified": true,
       "policy_environment_accounts_preserved": true,
       "retained_reality_pins_unchanged": 516
+    },
+    {
+      "source": "f22c3d2e78b55a59586c0fc8eec93ae0cd0d560e",
+      "public": "01e8095b522b2ce806113ac5a706168c36290a84",
+      "schema": "000183_trojan_tcp",
+      "both_hosts_verified": true,
+      "policy_environment_accounts_preserved": true,
+      "retained_reality_pins_unchanged": 522
     }
   ],
   "latest_fleet_observation": {
-    "at": "2026-10-17T16:54:43.441156+00:00",
+    "at": "2026-10-17T17:09:11.137018+00:00",
     "proof": {
-      "heartbeat_at": "2026-10-17T16:54:38.788363+00:00",
+      "heartbeat_at": "2026-10-17T17:09:08.870659+00:00",
       "coverage": {
-        "due": 51,
-        "observed_at": "2026-10-17T16:54:38.787629Z",
-        "raw_under_15s": 89,
+        "due": 49,
+        "observed_at": "2026-10-17T17:09:08.870225Z",
+        "raw_under_15s": 91,
         "never_verified": 0,
-        "current_applied": 89,
-        "eligible_serving": 90,
-        "oldest_due_seconds": 38.700627,
-        "verified_under_60s": 89,
-        "proof_age_max_seconds": 221.877642,
-        "proof_age_p95_seconds": 40.989656,
+        "current_applied": 91,
+        "eligible_serving": 91,
+        "oldest_due_seconds": 22.817816,
+        "verified_under_60s": 91,
+        "proof_age_max_seconds": 42.817816,
+        "proof_age_p95_seconds": 39.0105425,
         "raw_fresh_proof_stale": 0,
-        "proof_age_median_seconds": 22.257618
+        "proof_age_median_seconds": 21.272985
       },
       "attempts": {
-        "failed": 42,
-        "completed": 2260,
+        "failed": 9,
+        "completed": 900,
         "admission_wait": {
-          "count": 2912,
-          "max_ms": 0,
+          "count": 1349,
+          "max_ms": 2,
           "buckets": [
-            2912,
+            1349,
             0,
             0,
             0,
@@ -185,7 +196,7 @@
             0,
             0
           ],
-          "total_ms": 0,
+          "total_ms": 2,
           "bucket_bounds_ms": [
             100,
             1000,
@@ -196,18 +207,18 @@
           ]
         },
         "reconciliation": {
-          "count": 2302,
-          "max_ms": 34512,
+          "count": 909,
+          "max_ms": 32069,
           "buckets": [
-            4,
             0,
-            17,
-            2062,
-            198,
-            21,
+            0,
+            8,
+            791,
+            102,
+            8,
             0
           ],
-          "total_ms": 19406455,
+          "total_ms": 7674373,
           "bucket_bounds_ms": [
             100,
             1000,
@@ -218,18 +229,18 @@
           ]
         },
         "admitted_attempt": {
-          "count": 2893,
-          "max_ms": 34522,
+          "count": 1331,
+          "max_ms": 32074,
           "buckets": [
-            587,
+            415,
+            7,
             8,
-            17,
-            2062,
-            198,
-            21,
+            791,
+            102,
+            8,
             0
           ],
-          "total_ms": 19423994,
+          "total_ms": 7682263,
           "bucket_bounds_ms": [
             100,
             1000,
@@ -246,36 +257,33 @@
         "waiting": 0
       },
       "database_pool": {
-        "Idle": 2,
-        "InUse": 29,
-        "WaitCount": 40,
-        "WaitDuration": 56548511,
-        "MaxIdleClosed": 741,
-        "OpenConnections": 31,
+        "Idle": 3,
+        "InUse": 30,
+        "WaitCount": 42,
+        "WaitDuration": 35112174,
+        "MaxIdleClosed": 383,
+        "OpenConnections": 33,
         "MaxIdleTimeClosed": 0,
         "MaxLifetimeClosed": 0,
         "MaxOpenConnections": 40
       }
     },
-    "eligible": 90,
+    "eligible": 91,
     "states": {
-      "VERIFIED": 87,
-      "BLOCKED": 3
+      "VERIFIED": 91
     },
-    "verified_fresh": 87,
-    "errors": {
-      "trojan_executor_busy": 3
-    },
+    "verified_fresh": 91,
+    "errors": {},
     "direct_links": {
-      "vless": 87,
-      "trojan": 86
+      "trojan": 91,
+      "vless": 90
     },
     "direct_servers": {
-      "vless": 87,
-      "trojan": 86
+      "trojan": 91,
+      "vless": 90
     },
-    "missing_trojan_of_eligible": 4,
-    "missing_trojan_among_vless_direct": 3,
+    "missing_trojan_of_eligible": 0,
+    "missing_trojan_among_vless_direct": 0,
     "ready": true,
     "failed_checks": []
   },
@@ -301,6 +309,261 @@
         "database_pool_max": 40
       },
       "fix": "execute identical serial native routeTest requests on node through pinned SSH; same validators, 60-second freshness, complete HTTP fallback, at most 8 SSH batches"
+    },
+    {
+      "event": "one Vultr panel had intermittent slow native proof during rollout",
+      "host": "45.32.13.3",
+      "native_local_cases_passed": 66,
+      "native_local_matrix_ms": 2257,
+      "diagnostic_ssh_total_ms": 10868,
+      "expires_at": "2026-10-17T17:07:57.437763Z",
+      "retired_at": "2026-10-17T17:08:39.292171Z",
+      "resolution": "existing lifecycle expired the node during investigation; no manual retirement or health override performed",
+      "limitation": "the latency cause was not conclusively resolved before expiry; the experimental connection-budget change was reverted and not released"
     }
-  ]
+  ],
+  "final_verification": {
+    "at": "2026-10-17T17:13:31.194262+00:00",
+    "policy": {
+      "enabled": true,
+      "port": 8443,
+      "direct_enabled": true,
+      "residential_enabled": true,
+      "fleet": true,
+      "panel_ids": [],
+      "revision": 6
+    },
+    "trojan_listener_states": {
+      "VERIFIED": 91
+    },
+    "trojan_errors": {},
+    "native_direct_probe_coverage": {
+      "at": "2026-10-17T17:13:30.124939+00:00",
+      "current_output_servers": 91,
+      "current_output_servers_with_successful_native_probe": 91,
+      "unprobed_current_servers": [],
+      "stable_output_servers": 91,
+      "total_successfully_probed_hosts": 91
+    },
+    "country_and_scope_audit": {
+      "at": "2026-10-17T17:13:31.032161+00:00",
+      "stable_healthy_servers": 91,
+      "metadata_servers": 91,
+      "metadata_unknown": 0,
+      "health": {
+        "HEALTHY": 91,
+        "PROVISIONING": 2
+      },
+      "outputs": {
+        "ALL": {
+          "links": 454,
+          "servers": 91,
+          "response_ms": 37.26,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇰🇷 South Korea": 34,
+            "🇯🇵 Japan": 230,
+            "🇸🇬 Singapore": 190
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "DIRECT": {
+          "links": 182,
+          "servers": 91,
+          "response_ms": 36.96,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 92,
+            "🇸🇬 Singapore": 76,
+            "🇰🇷 South Korea": 14
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "RESIDENTIAL": {
+          "links": 181,
+          "servers": 91,
+          "response_ms": 39.13,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 92,
+            "🇸🇬 Singapore": 76,
+            "🇰🇷 South Korea": 13
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "SHARE_ALL": {
+          "links": 454,
+          "servers": 91,
+          "response_ms": 36.77,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 230,
+            "🇸🇬 Singapore": 190,
+            "🇰🇷 South Korea": 34
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "SHARE_DIRECT": {
+          "links": 182,
+          "servers": 91,
+          "response_ms": 38.09,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 92,
+            "🇰🇷 South Korea": 14,
+            "🇸🇬 Singapore": 76
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "SHARE_RESIDENTIAL": {
+          "links": 181,
+          "servers": 91,
+          "response_ms": 38.3,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 92,
+            "🇸🇬 Singapore": 76,
+            "🇰🇷 South Korea": 13
+          },
+          "connection_mismatches": 0,
+          "missing_stable": 0
+        },
+        "ACCOUNT_digitalocean_DIRECT": {
+          "links": 20,
+          "servers": 10,
+          "response_ms": 35.86,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇸🇬 Singapore": 20
+          },
+          "connection_mismatches": 0,
+          "missing_stable": null
+        },
+        "ACCOUNT_digitalocean_RESIDENTIAL": {
+          "links": 20,
+          "servers": 10,
+          "response_ms": 30.85,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇸🇬 Singapore": 20
+          },
+          "connection_mismatches": 0,
+          "missing_stable": null
+        },
+        "ACCOUNT_linode_DIRECT": {
+          "links": 20,
+          "servers": 10,
+          "response_ms": 30.59,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇯🇵 Japan": 20
+          },
+          "connection_mismatches": 0,
+          "missing_stable": null
+        },
+        "ACCOUNT_linode_RESIDENTIAL": {
+          "links": 18,
+          "servers": 9,
+          "response_ms": 30.79,
+          "technical_names": 0,
+          "country_mismatches": 0,
+          "unknown": 0,
+          "country_counts": {
+            "🇸🇬 Singapore": 18
+          },
+          "connection_mismatches": 0,
+          "missing_stable": null
+        }
+      }
+    },
+    "protocol_surfaces": {
+      "ALL": {
+        "counts": {
+          "vless": 272,
+          "trojan": 182
+        },
+        "servers": {
+          "vless": 91,
+          "trojan": 91
+        },
+        "bad": {}
+      },
+      "DIRECT": {
+        "counts": {
+          "vless": 91,
+          "trojan": 91
+        },
+        "servers": {
+          "vless": 91,
+          "trojan": 91
+        },
+        "bad": {}
+      },
+      "RESIDENTIAL": {
+        "counts": {
+          "trojan": 91,
+          "vless": 90
+        },
+        "servers": {
+          "trojan": 91,
+          "vless": 90
+        },
+        "bad": {}
+      }
+    },
+    "ready": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-17T17:13:31.303887612Z"
+    },
+    "post_route_release_both_protocol_direct_residential_sample_probes_passed": 20,
+    "required_publication_regressions_passed": 18,
+    "required_publication_regressions_skipped": 0,
+    "all_retained_reality_pins_unchanged": 527,
+    "primary_and_secondary_running_hashes_verified": true
+  }
 }

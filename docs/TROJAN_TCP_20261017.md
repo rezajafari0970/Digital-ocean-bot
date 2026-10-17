@@ -54,3 +54,20 @@ Source f22c3d2e78b55a59586c0fc8eec93ae0cd0d560e was published as 01e8095b522b2ce
 ## Creation queue fairness
 
 The final fleet tail exposed synchronized five-minute retries when several creators lost the shared global executor try-lock. Creation now joins a bounded FIFO queue on that same single executor after certificate work and before the native configuration lock. It does not increase concurrency or bypass policy, cleanup or admission checks. Cancellation releases even uncertain lock ownership. The mandatory lost-response/restart regression now additionally holds the executor, verifies Reality configuration remains readable, cancels a queued attempt, releases the executor and verifies exactly one successful native creation. All 18 required regressions passed with zero skips. Deployment of this preventive queue correction is pending at this checkpoint.
+
+
+## Final production result — 2026-10-17 17:13 UTC
+
+Completed on both control hosts. Final product source: d61c5fa1099ebce866860f9f959ef8718c003ac3; public main/stable release: b843c75eaa4648810f3b6227e88349a91b3f7422; schema: 000183_trojan_tcp. All running service hashes and readiness checks passed. All 527 retained Reality pins were unchanged, as were accounts, environment, protection, Reality creation and output policies.
+
+- Fleet policy revision 6 is enabled on port 8443 for DIRECT and RESIDENTIAL. Existing Reality remains on 443.
+- All 91 eligible Trojan listeners were VERIFIED, with zero recorded errors. Actual publicly trusted TLS/Trojan HTTPS traffic succeeded on all 91 current output servers using the pinned native client, normal certificate validation and no insecure fallback.
+- DIRECT contained 91 Trojan and 91 VLESS server entries. RESIDENTIAL contained 91 Trojan and 90 VLESS entries in its existing client-class scope. ALL contained 182 Trojan links and 272 VLESS links across all 91 servers; existing client memberships were not rewritten to equalize counts.
+- All 91 healthy servers appeared in ALL, DIRECT, RESIDENTIAL and their public share outputs. Ten global/shared/account surfaces had zero technical names, country mismatches, unknown countries or connection-byte mismatches. Maximum observed response time was 39.13 ms.
+- Health at the final observation: 91 HEALTHY and two new servers still PROVISIONING. There were no degraded serving panels in that observation.
+- Real Direct and Residential probes for both protocols passed on DigitalOcean, Linode and Vultr samples. After the route-proof release, these sampled checks passed 20/20, in addition to the complete 91-server Trojan Direct pass.
+- Publication required all 18 named regressions and their selected subtests to pass without skips, followed by complete Go tests/vet, installer/browser checks, secret/manifest checks and exact-candidate isolated installation.
+
+One Vultr panel showed intermittent slow route-proof behavior during rollout. Its 66 local native cases passed in 2,257 ms, while one diagnostic SSH invocation took 10,868 ms. Its recorded lifetime expired at 17:07:57 UTC and the existing lifecycle marked it deleted at 17:08:39, before the latency cause was conclusively resolved. No manual retirement or health override was performed. The experimental connection-budget change was reverted and was not released; full case counts, the 60-second publication freshness bound and concurrency limits remain in force.
+
+Operational receipts are retained privately on the control hosts; no passwords, tokens or raw subscriptions are included in this report. OpenAI model API requests/tokens/cost remained zero.
