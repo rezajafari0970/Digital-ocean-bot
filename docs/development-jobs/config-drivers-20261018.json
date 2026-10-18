@@ -35,7 +35,7 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T00:49:21.654992+00:00",
+  "updated_at": "2026-10-18T01:11:01.314896+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
@@ -44,12 +44,17 @@
     {
       "finding": "Primary installer retention guard rejected migration 184 legacy enabled-flag delegation; transaction and binaries rolled back automatically",
       "result": "Primary ready on prior 26c2dc5. Added version-specific complete-copy verification for policy, ownership, credential references and output revisions; migration checksum remains unchanged; missing copies are rejected in production-preserving regression."
+    },
+    {
+      "finding": "Runtime probe falsely blocked healthy Residential Trojan clients by requesting example.com, intentionally denied by route policy.",
+      "result": "Probe destinations now follow explicit client class, not array position. Real native authenticated proof passed both classes; TLS and routing restrictions preserved."
     }
   ],
   "release_attempt": {
-    "source": "8465bb3c2aa75cc62259cd0348ef7fbc3e908103",
-    "public": "45f49553137dc07d1bd2c01fb0ed2a88d1b1b4a7",
+    "source": "c9d0c16cb402d78ff06913355caf79d52e08f63b",
+    "public": "0129983d297f30077e62a00fda4846212e97b8ff",
+    "primary": "verified schema 184, 592 Reality pins retained",
     "secondary": "verified schema 184",
-    "primary": "rolled back by retention guard; ready schema 183"
+    "runtime_followup": "Residential proof used a Direct-only destination; native clients unchanged, class-aware correction passed authenticated traffic on a real server; publishing corrective release."
   }
 }

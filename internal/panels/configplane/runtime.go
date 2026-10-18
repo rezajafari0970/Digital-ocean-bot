@@ -55,7 +55,7 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 		}
 		emails = append(emails, email)
 	}
-	wanted := map[string]any{"protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "core_hashes": transportcore.CoreHashes()}
+	wanted := map[string]any{"protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "probe_classes": obj["probe_classes"], "core_hashes": transportcore.CoreHashes()}
 	input, err := json.Marshal(wanted)
 	if err != nil {
 		return err

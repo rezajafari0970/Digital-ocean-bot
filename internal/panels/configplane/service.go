@@ -359,6 +359,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				return errors.New("profile_native_tag_missing")
 			}
 			probes := []any{}
+			probeClasses := []string{}
 			seenClasses := map[string]bool{}
 			for _, cl := range credentials.Clients {
 				if !seenClasses[cl.Class] {
@@ -367,10 +368,12 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 						return e
 					}
 					probes = append(probes, out)
+					probeClasses = append(probeClasses, cl.Class)
 					seenClasses[cl.Class] = true
 				}
 			}
 			payload["probe_outbounds"] = probes
+			payload["probe_classes"] = probeClasses
 			stage = "runtime"
 			verifier := s.Verify
 			if verifier == nil {

@@ -2,6 +2,13 @@
 import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time
 want=json.load(sys.stdin)
 def sha(v):return hashlib.sha256(v).hexdigest()
+def probe_targets(probes,classes):
+ # This is the same destination contract as route verification. Residential
+ # intentionally denies arbitrary websites, including the Direct probe.
+ targets={'DIRECT':('example.com','/'),'RESIDENTIAL':('browserleaks.com','/ip')}
+ if not 1<=len(probes)<=2 or len(classes)!=len(probes) or any(c not in targets for c in classes):
+  raise ValueError('invalid probe classes')
+ return [targets[c] for c in classes]
 def check():
  global stage
  stage="binary"
@@ -45,7 +52,8 @@ def check():
  if sorted(u.get('email','') for u in users)!=sorted(want['emails']):return False
  stage="traffic"
  probes=want.get('probes',[])
- if not 1<=len(probes)<=2:return False
+ classes=want.get('probe_classes',[])
+ targets=probe_targets(probes,classes)
  ports=[];inbounds=[];outbounds=[];rules=[]
  for i,outbound in enumerate(probes):
   with socket.socket() as sock:
@@ -58,7 +66,7 @@ def check():
  child=subprocess.Popen([str(core),'run','-config','stdin:'],stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  try:
   child.stdin.write(json.dumps(client,separators=(',',':')).encode());child.stdin.close()
-  for port in ports:
+  for index,port in enumerate(ports):
    deadline=time.monotonic()+3
    while True:
     if child.poll() is not None:return False
@@ -70,8 +78,9 @@ def check():
      time.sleep(.05)
    conn=http.client.HTTPSConnection('127.0.0.1',port,timeout=8,context=ssl.create_default_context())
    try:
-    conn.set_tunnel('example.com',443)
-    conn.request('GET','/',headers={'Host':'example.com','Connection':'close'})
+    probe_host,probe_path=targets[index]
+    conn.set_tunnel(probe_host,443)
+    conn.request('GET',probe_path,headers={'Host':probe_host,'Connection':'close'})
     response=conn.getresponse()
     if not 200<=response.status<400 or not response.read(1024):return False
    finally:conn.close()

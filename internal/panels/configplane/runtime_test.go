@@ -6,6 +6,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"net"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -27,6 +28,10 @@ func (s runtimeProofSSH) RunInput(_ context.Context, _ provisioning.Target, _ []
 	var wanted map[string]any
 	if json.Unmarshal(input, &wanted) != nil || wanted["tag"] != "fixture" || !strings.Contains(string(input), s.secret) {
 		s.t.Fatal("missing encrypted-stdin proof")
+	}
+	classes, ok := wanted["probe_classes"].([]any)
+	if !ok || len(classes) != 1 || classes[0] != "DIRECT" {
+		s.t.Fatal("runtime proof lost client routing class")
 	}
 	raw, _ := json.Marshal(map[string]bool{"verified": s.verified})
 	return provisioning.CommandResult{Stdout: string(raw)}, nil
@@ -54,6 +59,7 @@ func TestRuntimeProofRequiresPublicEndpointAndEncryptedStdin(t *testing.T) {
 	}
 	payload["tag"] = "fixture"
 	payload["probe_outbounds"] = []any{outbound}
+	payload["probe_classes"] = []string{"DIRECT"}
 	target := provisioning.Target{Host: "127.0.0.1"}
 	service := Service{SSH: runtimeProofSSH{t, credentials.Clients[0].Password, true}}
 	if e := service.verifyRuntime(context.Background(), target, nil, payload); e != nil {
@@ -67,5 +73,30 @@ func TestRuntimeProofRequiresPublicEndpointAndEncryptedStdin(t *testing.T) {
 	listener.Close()
 	if e := service.verifyRuntime(context.Background(), target, nil, payload); e == nil {
 		t.Fatal("unreachable published port accepted")
+	}
+}
+
+// Reproduces the production route contract: a Residential client cannot use
+// the Direct-only destination. Order comes from credentials, never a fixed index.
+func TestRuntimeProbeMatchesRouteClass(t *testing.T) {
+	script := `
+import ast,pathlib
+tree=ast.parse(pathlib.Path("runtime.py").read_text())
+function=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=="probe_targets")
+scope={}
+exec(compile(ast.Module(body=[function],type_ignores=[]),"runtime.py","exec"),scope)
+targets=scope["probe_targets"]
+allowed={"DIRECT":("example.com","/"),"RESIDENTIAL":("browserleaks.com","/ip")}
+for classes in (["DIRECT"],["RESIDENTIAL"],["DIRECT","RESIDENTIAL"],["RESIDENTIAL","DIRECT"]):
+ actual=targets([{} for _ in classes],classes)
+ for cls,target in zip(classes,actual):
+  assert target==allowed[cls],(cls,target)
+for probes,classes in (([],[]),([{}],[]),([{}],["unknown"]),([{},{}],["DIRECT"]),([{},{},{}],["DIRECT"]*3)):
+ try: targets(probes,classes)
+ except ValueError: pass
+ else: raise AssertionError("invalid probe metadata accepted")
+`
+	if output, err := exec.Command("python3", "-c", script).CombinedOutput(); err != nil {
+		t.Fatalf("class-aware proof: %v: %s", err, output)
 	}
 }
