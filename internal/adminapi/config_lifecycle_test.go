@@ -408,6 +408,22 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if batch.jobs != 1 {
 		t.Fatal("not-due healthy profile re-probed", batch.jobs)
 	}
+	// A known older core schedules exactly one shared-runtime replacement,
+	// without revoking successful profile proof or changing client identities.
+	batch.oldCore = true
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 minute' WHERE panel_id=$1", panel)
+	if e := batchService.VerifyPanel(ctx, panel, p.ID); e != nil {
+		t.Fatal(e)
+	}
+	var pending int
+	if e := db.QueryRow("SELECT count(*) FROM config_driver_listeners WHERE panel_id=$1 AND needs_reconcile AND next_attempt_at<=now()", panel).Scan(&pending); e != nil || pending != 1 {
+		t.Fatal("shared runtime upgrade not isolated", pending, e)
+	}
+	if e := db.QueryRow("SELECT state FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&goodState); e != nil || goodState != "VERIFIED" {
+		t.Fatal("runtime upgrade revoked positive proof", goodState, e)
+	}
+	batch.oldCore = false
+	sqlMust(t, db, "UPDATE config_driver_listeners SET needs_reconcile=false WHERE panel_id=$1", panel)
 	sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
 	var siblingRemote int64
 	if e := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1", sibling.ID).Scan(&siblingRemote); e != nil {
@@ -573,9 +589,10 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 // No credentials enter command arguments. The fixture returns per-profile and
 // per-class outcomes exactly like the encrypted remote verifier.
 type profileBatchFixtureSSH struct {
-	cancel context.CancelFunc
-	failed string
-	jobs   int
+	oldCore bool
+	cancel  context.CancelFunc
+	failed  string
+	jobs    int
 }
 
 func (s *profileBatchFixtureSSH) Run(context.Context, provisioning.Target, []byte, string) (string, error) {
@@ -600,7 +617,7 @@ func (s *profileBatchFixtureSSH) RunInput(ctx context.Context, _ provisioning.Ta
 		if !ok {
 			reason = "users"
 		}
-		out = append(out, map[string]any{"profile_id": j.ProfileID, "verified": ok, "reason": reason, "classes": map[string]bool{"DIRECT": ok, "RESIDENTIAL": false}})
+		out = append(out, map[string]any{"profile_id": j.ProfileID, "core_current": !s.oldCore, "verified": ok, "reason": reason, "classes": map[string]bool{"DIRECT": ok, "RESIDENTIAL": false}})
 	}
 	raw, _ := json.Marshal(map[string]any{"results": out})
 	return provisioning.CommandResult{Stdout: string(raw)}, nil

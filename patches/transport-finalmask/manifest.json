@@ -1,10 +1,10 @@
 {
-  "version": "dob-fm-0.2.2",
+  "version": "dob-fm-0.2.3",
   "upstreams": {
     "xray": {
       "commit": "701af60772cda123492f86e383e1fdba066614a9",
-      "patch_sha256": "098af0fa7b08df3e5789a8888fc2fb8048b3d0fad6bcf81431446d206fbbb7b5",
-      "source_archive_sha256": "e56f98ddb9ff3b725740072520f0ca99095b95b8781568f0f645a83a9f92f1aa",
+      "patch_sha256": "8030c84e58f0607c10f61fe765033210d128e6f8d4cb2dda46fd25c4b17b5bdd",
+      "source_archive_sha256": "cd5b6c9bafc4b4ea409489bef9307086d74c4248fed92555d2b4245c7b13da8f",
       "license_sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
     },
     "sanaei": {
@@ -23,14 +23,14 @@
   },
   "core": {
     "name": "xray",
-    "sha256": "f0e35cb830cd58756dae9744a0d9372f972dfba1ba6a50a30422ba3e8727eeed",
-    "gzip_sha256": "14bf7a0d740805ced7a7886e3ece204f1417e7483438f459b499d3d53f797fae",
+    "sha256": "782901022d6d8362d11eee3773c3e9807b56407d747a8f525b12c5a23fa72641",
+    "gzip_sha256": "64aa0f22a7e440655fa7f0e273c9044a9cd8c9dd498ced2d80e11e6b3cd0f9c0",
     "gzip_file": "xray.gz"
   },
   "core_arm64": {
     "name": "xray-arm64",
-    "sha256": "d39f86129ec689fe7791365de08017c0b3ba0acb231467eac6da92f938c530a8",
-    "gzip_sha256": "6157ed20f12ac7ce7307a60b8ba087c4ffdd495785547d00eaaaa9ec7e7bfb63",
+    "sha256": "1d168582fc48ba6277bd9ed0711d6b27192ed48b3d50524b528f3b57cff617be",
+    "gzip_sha256": "8bec7409db7d81b187385ce0dd548c655b8a5fa0c5b99eb23150c904f6f5f892",
     "gzip_file": "xray-arm64.gz"
   },
   "panel": {

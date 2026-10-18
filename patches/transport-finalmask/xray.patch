@@ -10,7 +10,7 @@ index b9abcee..62ace38 100644
 +replace github.com/xtls/reality => ./third_party/reality
 diff --git a/main/commands/all/dob_capabilities.go b/main/commands/all/dob_capabilities.go
 new file mode 100644
-index 0000000..2009fa8
+index 0000000..a08120d
 --- /dev/null
 +++ b/main/commands/all/dob_capabilities.go
 @@ -0,0 +1,16 @@
@@ -25,7 +25,7 @@ index 0000000..2009fa8
 +	UsageLine: "{{.Exec}} dob-capabilities",
 +	Short:     "Report verified Digital Ocean Bot transport extensions",
 +	Run: func(cmd *base.Command, args []string) {
-+		fmt.Println(`{"schema":1,"reality_fallback_bounded":true,"reality_handshake_deadline":true,"reality_fallback_max_connections":512,"reality_finalmask_fragment":true,"xhttp_vision_encryption":true}`)
++		fmt.Println(`{"schema":1,"websocket_graceful_close":true,"tls_certificate_snapshot":true,"reality_fallback_bounded":true,"reality_handshake_deadline":true,"reality_fallback_max_connections":512,"reality_finalmask_fragment":true,"xhttp_vision_encryption":true}`)
 +	},
 +}
 +
@@ -142,5 +142,271 @@ index 0000000..36407b4
 +	p := make([]byte, 1)
 +	if _, err := c.Read(p); err != nil || p[0] != 7 {
 +		t.Fatal("connection closed", err)
++	}
++}
+diff --git a/transport/internet/tls/certificate_snapshot_test.go b/transport/internet/tls/certificate_snapshot_test.go
+new file mode 100644
+index 0000000..1f729f0
+--- /dev/null
++++ b/transport/internet/tls/certificate_snapshot_test.go
+@@ -0,0 +1,69 @@
++package tls
++
++import (
++	"bytes"
++	cryptotls "crypto/tls"
++	"github.com/xtls/xray-core/common/protocol/tls/cert"
++	"sync"
++	"testing"
++)
++
++func TestCertificateReloadKeepsHandshakeSnapshotsImmutable(t *testing.T) {
++	ca, _ := cert.MustGenerate(nil, cert.CommonName("first.example"))
++	cb, _ := cert.MustGenerate(nil, cert.CommonName("second.example"))
++	first, second := ParseCertificate(ca), ParseCertificate(cb)
++	original := bytes.Clone(first.Certificate)
++	config := &Config{Certificate: []*Certificate{first}}
++	var owned *Certificate
++	var reload func(bool, bool)
++	entries := config.buildCertificateStoreWithTicker(func(c *Certificate, fn func(bool, bool)) { owned = c; reload = fn })
++	if len(entries) != 1 || reload == nil {
++		t.Fatal("reload callback missing")
++	}
++	old := entries[0].Load()
++	originalDER := bytes.Clone(old.Certificate[0])
++	get := getNewGetCertificateFunc(entries, false)
++	var readers sync.WaitGroup
++	for i := 0; i < 12; i++ {
++		readers.Add(1)
++		go func() {
++			defer readers.Done()
++			for n := 0; n < 1000; n++ {
++				c, e := get(&cryptotls.ClientHelloInfo{})
++				if e != nil || c == nil || c.Leaf == nil {
++					t.Error("incomplete handshake certificate")
++					return
++				}
++				name := c.Leaf.Subject.CommonName
++				if name != "first.example" && name != "second.example" {
++					t.Error("mixed certificate")
++					return
++				}
++				_ = len(c.OCSPStaple)
++			}
++		}()
++	}
++	for n := 0; n < 100; n++ {
++		next := first
++		if n%2 == 0 {
++			next = second
++		}
++		owned.Certificate = next.Certificate
++		owned.Key = next.Key
++		reload(true, false)
++	}
++	readers.Wait()
++	if !bytes.Equal(first.Certificate, original) {
++		t.Fatal("reload mutated input configuration")
++	}
++	if !bytes.Equal(old.Certificate[0], originalDER) || old.Leaf.Subject.CommonName != "first.example" {
++		t.Fatal("in-flight handshake certificate mutated")
++	}
++	owned.Certificate = second.Certificate
++	owned.Key = second.Key
++	reload(true, false)
++	current, e := get(&cryptotls.ClientHelloInfo{})
++	if e != nil || current.Leaf.Subject.CommonName != "second.example" {
++		t.Fatal("new handshake did not see reloaded certificate", e)
++	}
++}
+diff --git a/transport/internet/tls/config.go b/transport/internet/tls/config.go
+index 6fbe593..57af34a 100644
+--- a/transport/internet/tls/config.go
++++ b/transport/internet/tls/config.go
+@@ -7,10 +7,12 @@ import (
+ 	"crypto/rand"
+ 	"crypto/tls"
+ 	"crypto/x509"
++	"google.golang.org/protobuf/proto"
+ 	"os"
+ 	"slices"
+ 	"strings"
+ 	"sync"
++	"sync/atomic"
+ 	"time"
+ 
+ 	"github.com/xtls/xray-core/common/errors"
+@@ -48,8 +50,23 @@ func (c *Config) loadSelfCertPool() (*x509.CertPool, error) {
+ 
+ // BuildCertificates builds a list of TLS certificates from proto definition.
+ func (c *Config) BuildCertificates() []*tls.Certificate {
+-	certs := make([]*tls.Certificate, 0, len(c.Certificate))
++	entries := c.buildCertificateStore()
++	certs := make([]*tls.Certificate, 0, len(entries))
++	for _, entry := range entries {
++		certs = append(certs, entry.Load())
++	}
++	return certs
++}
++
++// A handshake owns an immutable certificate snapshot. Reload/OCSP callbacks
++// publish a new pointer, never modify a certificate already used by TLS.
++func (c *Config) buildCertificateStore() []*atomic.Pointer[tls.Certificate] {
++	return c.buildCertificateStoreWithTicker(setupOcspTicker)
++}
++func (c *Config) buildCertificateStoreWithTicker(ticker func(*Certificate, func(bool, bool))) []*atomic.Pointer[tls.Certificate] {
++	certs := make([]*atomic.Pointer[tls.Certificate], 0, len(c.Certificate))
+ 	for _, entry := range c.Certificate {
++		entry = proto.Clone(entry).(*Certificate)
+ 		if entry.Usage != Certificate_ENCIPHERMENT {
+ 			continue
+ 		}
+@@ -66,14 +83,19 @@ func (c *Config) BuildCertificates() []*tls.Certificate {
+ 			}
+ 			return &keyPair
+ 		}
++		store := new(atomic.Pointer[tls.Certificate])
+ 		if keyPair := getX509KeyPair(); keyPair != nil {
+-			certs = append(certs, keyPair)
++			store.Store(keyPair)
++			certs = append(certs, store)
+ 		} else {
+ 			continue
+ 		}
+-		index := len(certs) - 1
+-		setupOcspTicker(entry, func(isReloaded, isOcspstapling bool) {
+-			cert := certs[index]
++		ticker(entry, func(isReloaded, isOcspstapling bool) {
++			if !isReloaded && !isOcspstapling {
++				return
++			}
++			snapshot := *store.Load()
++			cert := &snapshot
+ 			if isReloaded {
+ 				if newKeyPair := getX509KeyPair(); newKeyPair != nil {
+ 					cert = newKeyPair
+@@ -88,7 +110,7 @@ func (c *Config) BuildCertificates() []*tls.Certificate {
+ 					cert.OCSPStaple = newOCSPData
+ 				}
+ 			}
+-			certs[index] = cert
++			store.Store(cert)
+ 		})
+ 	}
+ 	return certs
+@@ -244,8 +266,12 @@ func getGetCertificateFunc(c *tls.Config, ca []*Certificate) func(hello *tls.Cli
+ 	}
+ }
+ 
+-func getNewGetCertificateFunc(certs []*tls.Certificate, rejectUnknownSNI bool) func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
++func getNewGetCertificateFunc(entries []*atomic.Pointer[tls.Certificate], rejectUnknownSNI bool) func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+ 	return func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
++		certs := make([]*tls.Certificate, 0, len(entries))
++		for _, entry := range entries {
++			certs = append(certs, entry.Load())
++		}
+ 		if len(certs) == 0 {
+ 			return nil, errNoCertificates
+ 		}
+@@ -412,7 +438,7 @@ func (c *Config) GetTLSConfig(opts ...Option) *tls.Config {
+ 	if len(caCerts) > 0 {
+ 		config.GetCertificate = getGetCertificateFunc(config, caCerts)
+ 	} else {
+-		config.GetCertificate = getNewGetCertificateFunc(c.BuildCertificates(), c.RejectUnknownSni)
++		config.GetCertificate = getNewGetCertificateFunc(c.buildCertificateStore(), c.RejectUnknownSni)
+ 	}
+ 
+ 	if sn := c.parseServerName(); len(sn) > 0 {
+diff --git a/transport/internet/websocket/connection.go b/transport/internet/websocket/connection.go
+index 26082fc..40b6472 100644
+--- a/transport/internet/websocket/connection.go
++++ b/transport/internet/websocket/connection.go
+@@ -52,6 +52,9 @@ func (c *connection) Read(b []byte) (int, error) {
+ 		nBytes, err := reader.Read(b)
+ 		if errors.Cause(err) == io.EOF {
+ 			c.reader = nil
++			if nBytes > 0 {
++				return nBytes, nil
++			}
+ 			continue
+ 		}
+ 		return nBytes, err
+@@ -64,6 +67,9 @@ func (c *connection) getReader() (io.Reader, error) {
+ 	}
+ 
+ 	_, reader, err := c.conn.NextReader()
++	if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
++		return nil, io.EOF
++	}
+ 	if err != nil {
+ 		return nil, err
+ 	}
+diff --git a/transport/internet/websocket/connection_close_test.go b/transport/internet/websocket/connection_close_test.go
+new file mode 100644
+index 0000000..fcbc68d
+--- /dev/null
++++ b/transport/internet/websocket/connection_close_test.go
+@@ -0,0 +1,63 @@
++package websocket
++
++import (
++	"bytes"
++	gorilla "github.com/gorilla/websocket"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++	"testing/iotest"
++	"time"
++)
++
++func closeFixture(t *testing.T, payload []byte, code int) *gorilla.Conn {
++	t.Helper()
++	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++		c, e := (&gorilla.Upgrader{}).Upgrade(w, r, nil)
++		if e != nil {
++			return
++		}
++		defer c.Close()
++		if e = c.WriteMessage(gorilla.BinaryMessage, payload); e != nil {
++			return
++		}
++		_ = c.WriteControl(gorilla.CloseMessage, gorilla.FormatCloseMessage(code, ""), time.Now().Add(time.Second))
++	}))
++	t.Cleanup(server.Close)
++	c, _, e := gorilla.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
++	if e != nil {
++		t.Fatal(e)
++	}
++	t.Cleanup(func() { c.Close() })
++	return c
++}
++
++func TestNormalClosePreservesCompleteResponse(t *testing.T) {
++	payload := bytes.Repeat([]byte("complete-response-"), 8192)
++	for i := 0; i < 20; i++ {
++		conn := closeFixture(t, payload, gorilla.CloseNormalClosure)
++		wrapped := NewConnection(conn, conn.RemoteAddr(), nil, 0)
++		got, e := io.ReadAll(wrapped)
++		if e != nil || !bytes.Equal(got, payload) {
++			t.Fatalf("normal close lost response: bytes=%d err=%v", len(got), e)
++		}
++	}
++}
++func TestAbnormalCloseRemainsAnError(t *testing.T) {
++	conn := closeFixture(t, []byte("partial"), gorilla.ClosePolicyViolation)
++	_, e := io.ReadAll(NewConnection(conn, conn.RemoteAddr(), nil, 0))
++	if !gorilla.IsCloseError(e, gorilla.ClosePolicyViolation) {
++		t.Fatalf("abnormal close hidden: %v", e)
++	}
++}
++func TestFrameEndRetainsBytesReturnedWithEOF(t *testing.T) {
++	conn := closeFixture(t, []byte("suffix"), gorilla.CloseNormalClosure)
++	wrapped := NewConnection(conn, conn.RemoteAddr(), iotest.DataErrReader(strings.NewReader("prefix")), 0)
++	got := make([]byte, 32)
++	n, e := wrapped.Read(got)
++	if e != nil || string(got[:n]) != "prefix" {
++		t.Fatalf("last frame bytes discarded: %q %v", got[:n], e)
 +	}
 +}

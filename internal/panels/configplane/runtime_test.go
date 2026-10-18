@@ -115,7 +115,7 @@ func TestProfileRuntimeAcceptsPinnedOfficialAndCompatibilityCores(t *testing.T) 
 			t.Fatal("official core excluded")
 		}
 	}
-	if len(hashes) != 4 {
+	if len(hashes) != 6 {
 		t.Fatal("unexpected trust expansion")
 	}
 }

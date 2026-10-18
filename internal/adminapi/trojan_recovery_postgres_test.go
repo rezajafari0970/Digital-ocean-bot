@@ -10,6 +10,7 @@ import (
 	secretstore "github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -41,8 +42,11 @@ func (s *trojanTestSecrets) Put(_ context.Context, _, key, _ string, value []byt
 
 type trojanTestSSH struct{ calls int }
 
-func (s *trojanTestSSH) Run(context.Context, provisioning.Target, []byte, string) (string, error) {
+func (s *trojanTestSSH) Run(_ context.Context, _ provisioning.Target, _ []byte, command string) (string, error) {
 	s.calls++
+	if strings.Contains(command, "DOB_CURRENT_TRANSPORT_RUNTIME") {
+		return `{"validated":true,"installed":true}`, nil
+	}
 	return "free", nil
 }
 func TestTrojanCreateLostResponseAndRestart(t *testing.T) {

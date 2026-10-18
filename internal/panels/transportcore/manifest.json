@@ -1,21 +1,21 @@
 {
-  "version": "dob-fm-0.2.2",
+  "version": "dob-fm-0.2.3",
   "core": {
     "name": "xray",
-    "sha256": "f0e35cb830cd58756dae9744a0d9372f972dfba1ba6a50a30422ba3e8727eeed",
-    "gzip_sha256": "14bf7a0d740805ced7a7886e3ece204f1417e7483438f459b499d3d53f797fae",
-    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/xray.gz"
+    "sha256": "782901022d6d8362d11eee3773c3e9807b56407d747a8f525b12c5a23fa72641",
+    "gzip_sha256": "64aa0f22a7e440655fa7f0e273c9044a9cd8c9dd498ced2d80e11e6b3cd0f9c0",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/3dbe70e8a900cb540c7c6e38aea5e78027dfed57/xray.gz"
   },
   "core_arm64": {
     "name": "xray-arm64",
-    "sha256": "d39f86129ec689fe7791365de08017c0b3ba0acb231467eac6da92f938c530a8",
-    "gzip_sha256": "6157ed20f12ac7ce7307a60b8ba087c4ffdd495785547d00eaaaa9ec7e7bfb63",
-    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/xray-arm64.gz"
+    "sha256": "1d168582fc48ba6277bd9ed0711d6b27192ed48b3d50524b528f3b57cff617be",
+    "gzip_sha256": "8bec7409db7d81b187385ce0dd548c655b8a5fa0c5b99eb23150c904f6f5f892",
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/3dbe70e8a900cb540c7c6e38aea5e78027dfed57/xray-arm64.gz"
   },
   "panel": {
     "name": "x-ui",
     "sha256": "bff9cbadb6838fe02ddb4ad83581e274e43ae7b4ca70189a705eceb802043e8e",
     "gzip_sha256": "8d1f45b1d79f79c78038a53cf900282e562617a8ba656fa22dee666802ea460a",
-    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/eafb3c6ce3db743ec2350d94249f6cf05cf9ec46/x-ui.gz"
+    "url": "https://raw.githubusercontent.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/3dbe70e8a900cb540c7c6e38aea5e78027dfed57/x-ui.gz"
   }
 }

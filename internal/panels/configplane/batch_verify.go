@@ -11,6 +11,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportcore"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/trojantcp"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"net"
@@ -38,10 +39,11 @@ type batchJob struct {
 	input       map[string]any
 }
 type batchResult struct {
-	ID       string          `json:"profile_id"`
-	Verified bool            `json:"verified"`
-	Reason   string          `json:"reason"`
-	Classes  map[string]bool `json:"classes"`
+	CoreCurrent *bool           `json:"core_current"`
+	ID          string          `json:"profile_id"`
+	Verified    bool            `json:"verified"`
+	Reason      string          `json:"reason"`
+	Classes     map[string]bool `json:"classes"`
 }
 
 // VerifyPanel amortizes inventory, SSH and core startup across a panel's
@@ -195,7 +197,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 						seen[cl.Class] = true
 					}
 				}
-				input := map[string]any{"profile_id": p.ID, "port": p.Spec.Port, "tag": tag, "emails": emails, "probes": probes, "probe_classes": classes, "core_hashes": profileCoreHashes()}
+				input := map[string]any{"profile_id": p.ID, "port": p.Spec.Port, "tag": tag, "emails": emails, "probes": probes, "probe_classes": classes, "core_hashes": profileCoreHashes(), "current_core_hashes": transportcore.CoreHashes()}
 				jobs = append(jobs, batchJob{c, p, credentials, input})
 				inputs = append(inputs, input)
 				_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage='runtime',stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2", p.ID, panel)
@@ -242,6 +244,19 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					s.batchFailure(ctx, j.p.ID, panel, "profile_runtime_batch_invalid", false)
 				}
 				return err
+			}
+			// Upgrade at most one listener per panel; its core is shared. A valid
+			// prior binary may finish traffic proof while its pinned successor queues.
+			// No protocol has precedence and unrelated panels retain their lanes.
+			for _, j := range jobs {
+				proof := results[j.p.ID]
+				if proof.CoreCurrent != nil && !*proof.CoreCurrent {
+					_, e = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET needs_reconcile=true,next_attempt_at=now() WHERE profile_id=$1 AND panel_id=$2 AND mutation_state NOT IN('PREPARED','SENT') AND NOT EXISTS(SELECT 1 FROM config_driver_listeners q WHERE q.panel_id=$2 AND q.needs_reconcile)", j.p.ID, panel)
+					if e != nil {
+						return e
+					}
+					break
+				}
 			}
 			// Public probes share no SQL sessions and cannot consume another panel's lane.
 			public := map[string]bool{}
@@ -334,7 +349,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 							return e
 						}
 					}
-					_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code=$4,failures=0,verified_at=now(),next_attempt_at=$5 WHERE profile_id=$1 AND panel_id=$2 AND applied_revision=$3", j.p.ID, panel, j.p.Revision, code, next)
+					_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code=$4,failures=0,verified_at=now(),next_attempt_at=CASE WHEN needs_reconcile THEN now() ELSE $5 END WHERE profile_id=$1 AND panel_id=$2 AND applied_revision=$3", j.p.ID, panel, j.p.Revision, code, next)
 					return e
 				})
 				if e != nil {

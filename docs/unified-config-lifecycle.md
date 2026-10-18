@@ -73,3 +73,14 @@ Release 77068b5 was installed and verified on both hosts (07:11:46 and 07:14:17 
 The isolated lifecycle test now checks cancellation preservation. Separate worker tests cover queue wait beyond the operation duration and cancelled admission. All 37 mandatory regressions passed. An earlier VLESS/WS/TLS native loopback run returned HTTP 503 intermittently; its failure log is retained, and no gate or native assertion was relaxed.
 
 The canary SNI scanner selected www.microsoft.com after native checks (3 ms latency). All three canaries reached publication at 07:19:50. VLESS native Vision is intentionally exported as the documented client Vision-udp443 variant; the canary checker now uses that contract. Expiry/edit/output/deletion validation continues.
+
+
+## 2026-10-18 07:54 UTC — native transport repair and queue continuation
+
+Installed release remains 77068b527a05d7b79abbe08756f84c547a9fc116 on both controllers. Independent class policies and native device-limit readback are deployed. Queue-admission correction and the following core repair are pending product publication and staged installation.
+
+The publisher correctly blocked the prior candidate after a reproducible VLESS WebSocket TLS HTTP 503. Native WebSocket dropped n>0 bytes returned with frame EOF and propagated normal close 1000 as a transport failure. Fixes preserve final bytes and normal stream completion; abnormal close codes remain errors. Race validation then exposed certificate reload/OCSP mutating shared TLS storage. Immutable atomic certificate snapshots fix concurrent reload while retaining prior handshake certificates and configuration.
+
+Native artifact 3dbe70e8a900cb540c7c6e38aea5e78027dfed57 (dob-fm-0.2.3) includes complete source, patches, licenses and validation hashes. Final binaries passed three actual 16-public-variant roundtrip runs, the loopback-only Trojan none fixture, and three TLS/WebSocket race suites. Earlier focused WebSocket repair passed 30 consecutive native tests. No failed gate was relaxed.
+
+Unified reconciliation now prepares the pinned core under the existing per-panel writer lease, regardless of profile protocol. Native proof identifies an older recognized core and queues exactly one replacement per panel; previous positive traffic proof remains subject to its unchanged freshness fence. Unknown binaries never authorize output. Installation validates the actual configuration, journals identities/backups and supports rollback. Cancelling a controller worker does not invent negative remote evidence. Existing user profiles and credentials remain protected. Live expiry/edit/deletion acceptance and final fleet coverage are still pending.

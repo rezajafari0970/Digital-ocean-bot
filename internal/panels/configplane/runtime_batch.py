@@ -13,13 +13,15 @@ def sha(raw):
 
 def run_job(want):
  class_proofs={}
+ core_current=None
  def check():
-  nonlocal stage
+  nonlocal stage,core_current
   stage="binary"
   arch='arm64' if platform.machine() in ('aarch64','arm64') else 'amd64'
   core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-'+arch);conf=core.parent/'config.json'
   config=json.loads(conf.read_text())
   expected_hash=sha(core.read_bytes())
+  if want.get('current_core_hashes'):core_current=expected_hash in want['current_core_hashes']
   if expected_hash not in want['core_hashes']:return False
   running=[]
   for p in pathlib.Path('/proc').iterdir():
@@ -105,7 +107,7 @@ def run_job(want):
  verified=False
  try:verified=check()
  except Exception:pass
- return {'profile_id':want['profile_id'],'verified':verified,'reason':'' if verified else stage,'classes':class_proofs}
+ return {'profile_id':want['profile_id'],'verified':verified,'reason':'' if verified else stage,'classes':class_proofs,'core_current':core_current}
 
 jobs=json.load(sys.stdin)
 if not isinstance(jobs,list) or len(jobs)>64:raise ValueError('invalid batch')

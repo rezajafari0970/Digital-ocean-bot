@@ -100,6 +100,10 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 // these executable hashes. Unknown binaries still cannot authorize publication.
 func profileCoreHashes() []string {
 	return append(transportcore.CoreHashes(),
+		// Previous pinned binaries remain recognized only for the rolling
+		// transition. Each proof schedules replacement when core_current=false.
+		"f0e35cb830cd58756dae9744a0d9372f972dfba1ba6a50a30422ba3e8727eeed",
+		"d39f86129ec689fe7791365de08017c0b3ba0acb231467eac6da92f938c530a8",
 		"c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
 		"c1defe42b6db958a97c5e049a02a00a4baaedaca7b51c1c229f0830e288acef5")
 }

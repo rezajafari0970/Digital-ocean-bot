@@ -79,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T07:22:58.121103+00:00",
+  "updated_at": "2026-10-18T07:51:48.510461+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -242,11 +242,11 @@
     "per_task_timeout_seconds": 120,
     "unified_writers": "per-panel ownership lock, no global writer serialization"
   },
-  "latest_verified_release": "916fa81a8e07128918e0068293041d263888bf1a",
-  "latest_verified_source": "a3e794792363df5abe85b228c2176304a6b6ad22",
+  "latest_verified_release": "77068b527a05d7b79abbe08756f84c547a9fc116",
+  "latest_verified_source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
   "independent_controls": {
     "schema": 186,
-    "deployed": false,
+    "deployed": true,
     "policies": [
       "count",
       "lifetime_seconds",
@@ -378,10 +378,9 @@
       "ssh_ok": true
     },
     "remaining": [
-      "expanded isolated regression gate",
-      "publisher exact candidate checks",
-      "staged deployment",
-      "live class/output/deletion canary"
+      "queue/native-runtime release and staged rollout",
+      "live expiry/edit/delete acceptance",
+      "fresh eligible coverage audit"
     ],
     "database_required_37": "PASS including production batch SQL, partial-class traffic and due-only retry isolation",
     "full_go_test": "PASS",
@@ -436,9 +435,9 @@
     "scheduler": "busy panels requeue without degrading healthy profiles; native writes release panel before runtime/route proofs; proof batch limited to one parallel wave of four"
   },
   "remaining_live_validation": [
-    "deploy device-policy hotfix",
-    "canary expiry/edit/output and complete deletion",
-    "fresh eligible-server coverage and remaining failure attribution"
+    "queue/native-runtime release and staged rollout",
+    "live expiry/edit/delete acceptance",
+    "fresh eligible coverage audit"
   ],
   "installed_native_policy_release": {
     "source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
@@ -462,5 +461,29 @@
     "native_policies": "all three profiles read back exactly",
     "all_ready_at": "2026-10-18T07:19:50Z",
     "baseline_note": "URI checker corrected to documented client Vision-udp443 variant; native server keeps Vision; final mask/export check remains required"
+  },
+  "native_transport_023": {
+    "artifact_commit": "3dbe70e8a900cb540c7c6e38aea5e78027dfed57",
+    "source_version": "dob-fm-0.2.3",
+    "deployed": false,
+    "root_causes": [
+      "WebSocket frame EOF discarded returned bytes and normal close 1000 aborted buffered VLESS response",
+      "TLS OCSP/certificate reload mutated shared handshake certificate storage"
+    ],
+    "before": "native VLESS WS TLS failed 3/10; deterministic EOF tests failed; race test detected TLS shared mutation",
+    "after": {
+      "native_protocol_roundtrips": "16 public and one loopback-only variant passed, three full runs",
+      "websocket_focused": "30 consecutive runs passed",
+      "tls_and_websocket_race": "three complete runs passed"
+    },
+    "rollout": "pinned full source/licenses/patches; current native config validation, immutable identity journal, rollback; each outdated panel schedules one replacement; all profile types share preparation",
+    "public_trojan_none": "not supported by official native core; loopback-only test is not public support",
+    "product_regressions": {
+      "mandatory_passed": 37,
+      "skipped": 0,
+      "shared_runtime_single_replacement": "PASS",
+      "current_runtime_receipt_cleanup": "PASS",
+      "worker_queue_deadline": "PASS"
+    }
   }
 }

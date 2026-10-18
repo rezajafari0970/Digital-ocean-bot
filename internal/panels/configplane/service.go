@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportcore"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/trojantcp"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	secretstore "github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
@@ -176,6 +177,10 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
+		if errors.Is(ctx.Err(), context.Canceled) {
+			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
+			return
+		}
 		if code == "profile_panel_busy" {
 			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
 			return
@@ -376,6 +381,14 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		if _, e = s.target(ctx, id, panel); e != nil && !recovering {
 			return errors.New("profile_target_not_eligible")
+		}
+		// Never install during observation-only recovery of an ambiguous write.
+		if !recovering {
+			setStage("runtime_prepare")
+			if e = transportcore.PrepareCurrent(ctx, s.SSH, t.Target, key); e != nil {
+				return errors.New("profile_runtime_prepare_failed")
+			}
+			setStage("native")
 		}
 		rt, e := s.Runtimes.Acquire(ctx, panel)
 		if e != nil {
