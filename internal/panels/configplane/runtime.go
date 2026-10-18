@@ -6,6 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net"
+	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportcore"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
@@ -64,5 +67,14 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	if err != nil || json.Unmarshal([]byte(out.Stdout), &result) != nil || !result.Verified {
 		return errors.New("profile_runtime_unverified")
 	}
+	// A node-local successful client does not prove its cloud firewall admits
+	// the published endpoint. Require reachability from the controller too.
+	probe, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	conn, e := (net.Dialer{}).DialContext(probe, "tcp", net.JoinHostPort(t.Host, fmt.Sprint(payload["port"])))
+	if e != nil {
+		return errors.New("profile_public_port_unreachable")
+	}
+	_ = conn.Close()
 	return nil
 }

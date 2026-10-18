@@ -377,6 +377,9 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				verifier = s.verifyRuntime
 			}
 			if e = verifier(ctx, t.Target, key, payload); e != nil {
+				if s.Verify == nil {
+					return e
+				}
 				return errors.New("profile_runtime_unverified")
 			}
 			if p.Spec.Security == "tls" {

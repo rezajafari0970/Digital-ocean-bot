@@ -24,7 +24,8 @@ is resolved by observing the same owned inbound; it never authorizes a blind
 second POST.
 
 Verification checks the pinned running core, its listening socket, active user
-membership and an authenticated HTTPS round trip for each routing class.
+membership and an authenticated HTTPS round trip for each routing class. The controller also
+checks reachability of the published port, independently of the node-local probe.
 TLS profiles also require a valid publicly trusted server-IP certificate.
 Certificates renew automatically. A fresh routing proof, enabled account,
 eligible server and current verified profile revision are required for output.
