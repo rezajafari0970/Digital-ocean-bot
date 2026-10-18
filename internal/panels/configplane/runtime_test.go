@@ -100,3 +100,22 @@ for probes,classes in (([],[]),([{}],[]),([{}],["unknown"]),([{},{}],["DIRECT"])
 		t.Fatalf("class-aware proof: %v: %s", err, output)
 	}
 }
+
+func TestProfileRuntimeAcceptsPinnedOfficialAndCompatibilityCores(t *testing.T) {
+	hashes := profileCoreHashes()
+	seen := map[string]bool{}
+	for _, h := range hashes {
+		if len(h) != 64 || seen[h] {
+			t.Fatal("invalid or duplicate core pin")
+		}
+		seen[h] = true
+	}
+	for _, h := range []string{"c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a", "c1defe42b6db958a97c5e049a02a00a4baaedaca7b51c1c229f0830e288acef5"} {
+		if !seen[h] {
+			t.Fatal("official core excluded")
+		}
+	}
+	if len(hashes) != 4 {
+		t.Fatal("unexpected trust expansion")
+	}
+}

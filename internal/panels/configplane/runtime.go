@@ -55,7 +55,7 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 		}
 		emails = append(emails, email)
 	}
-	wanted := map[string]any{"protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "probe_classes": obj["probe_classes"], "core_hashes": transportcore.CoreHashes()}
+	wanted := map[string]any{"protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "probe_classes": obj["probe_classes"], "core_hashes": profileCoreHashes()}
 	input, err := json.Marshal(wanted)
 	if err != nil {
 		return err
@@ -85,4 +85,13 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	}
 	_ = conn.Close()
 	return nil
+}
+
+// Official v26.9.9 assets are pinned alongside the installed compatibility core.
+// Their archives were verified against the release .dgst files before deriving
+// these executable hashes. Unknown binaries still cannot authorize publication.
+func profileCoreHashes() []string {
+	return append(transportcore.CoreHashes(),
+		"c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
+		"c1defe42b6db958a97c5e049a02a00a4baaedaca7b51c1c229f0830e288acef5")
 }

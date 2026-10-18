@@ -102,6 +102,20 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	}))
 	defer remote.Close()
 	_, droplet, panel := seedPanel(t, db, remote.URL)
+	// A legacy writer on another panel must not serialize unified create/delete.
+	sqlMust(t, db, "UPDATE config_control_authority SET unified=true WHERE singleton")
+	legacyWriter, e := db.Conn(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = legacyWriter.ExecContext(ctx, "SELECT pg_advisory_lock(628341902731)"); e != nil {
+		t.Fatal(e)
+	}
+	defer func() {
+		_, _ = legacyWriter.ExecContext(context.Background(), "SELECT pg_advisory_unlock_all()")
+		legacyWriter.Close()
+	}()
+
 	sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
 	// Every server counted as eligible must be enrolled, even near retirement.
 	sqlMust(t, db, "UPDATE droplets SET expires_at=now()+interval '5 minutes' WHERE id=$1", droplet)

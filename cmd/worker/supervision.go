@@ -51,7 +51,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "trojan-tcp-0", "trojan-tcp-1", "trojan-verify-0", "trojan-verify-1":
 		p.Work = 8 * time.Minute
 		p.Idle = 3 * time.Second
-	case "profiles-create-0", "profiles-create-1":
+	case "profiles-create-0", "profiles-create-1", "profiles-create-2", "profiles-create-3", "profiles-create-4", "profiles-create-5":
 		p.Work = 8 * time.Minute
 		p.Idle = time.Second
 	case "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7":

@@ -1,5 +1,5 @@
 # Credentials arrive only over encrypted stdin, never argv, disk or logs.
-import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time
+import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time,platform
 want=json.load(sys.stdin)
 def sha(v):return hashlib.sha256(v).hexdigest()
 def probe_targets(probes,classes):
@@ -12,7 +12,8 @@ def probe_targets(probes,classes):
 def check():
  global stage
  stage="binary"
- core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-amd64');conf=core.parent/'config.json'
+ arch='arm64' if platform.machine() in ('aarch64','arm64') else 'amd64'
+ core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-'+arch);conf=core.parent/'config.json'
  config=json.loads(conf.read_text())
  expected_hash=sha(core.read_bytes())
  if expected_hash not in want['core_hashes']:return False

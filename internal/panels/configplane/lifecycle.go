@@ -90,7 +90,7 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 		return e
 	}
 	defer func() {
-		if ret != nil && ctx.Err() == nil {
+		if ret != nil {
 			c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 			defer cancel()
 			code := "profile_delete_unverified"
@@ -115,8 +115,14 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 		}
 	}()
 	// Use the same writer order as creation. Retirement never grabs siblings.
-	if _, e = conn.ExecContext(ctx, "SELECT pg_advisory_lock(628341902731)"); e != nil {
+	var unified bool
+	if e = s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
 		return e
+	}
+	if !unified {
+		if _, e = conn.ExecContext(ctx, "SELECT pg_advisory_lock(628341902731)"); e != nil {
+			return e
+		}
 	}
 	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
 		current, e := Read(ctx, s.DB, p.ID)

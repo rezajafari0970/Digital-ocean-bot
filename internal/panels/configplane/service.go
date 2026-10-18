@@ -147,10 +147,13 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	}
 	stage := "prepare"
 	defer func() {
-		if ret == nil || ctx.Err() != nil {
+		if ret == nil {
 			return
 		}
 		code := "profile_" + stage + "_failed"
+		if errors.Is(ret, context.DeadlineExceeded) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			code = "profile_" + stage + "_timeout"
+		}
 		if strings.HasPrefix(ret.Error(), "profile_") && !strings.ContainsAny(ret.Error(), " \n") {
 			code = ret.Error()
 		}
@@ -314,7 +317,11 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	wantsWrite = wantsWrite || retiredClients
 	executorHeld := false
 	// SENT recovery is observation-only: it must never queue behind writers.
-	if wantsWrite && mutation != "SENT" {
+	var unified bool
+	if e = s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+		return e
+	}
+	if wantsWrite && mutation != "SENT" && !unified {
 		wait, cancel := context.WithTimeout(ctx, 30*time.Second)
 		_, e = conn.ExecContext(wait, "SELECT pg_advisory_lock(628341902731)")
 		cancel()
@@ -444,7 +451,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			if e = s.confirmNative(ctx, p, panel, observed, remark, ref, credentials, cert); e != nil {
 				return e
 			}
-			if executorHeld {
+			if wantsWrite {
 				if e = s.retireUnusedClients(ctx, rt, id, panel, raws); e != nil {
 					return e
 				}

@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "repairing_health_reporting_and_independent_profile_controls",
+  "status": "publishing_official_core_and_independent_writer_repair",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -67,7 +67,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T05:41:35.544210+00:00",
+  "updated_at": "2026-10-18T05:53:14.871652+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -215,6 +215,19 @@
   "budget_deployment": {
     "secondary": "cea340f1f23924a4e9a44ed2304226a0f1bd4bfd",
     "secondary_verified": true,
-    "primary": "pending, combining with readiness repair"
+    "primary": "b7fd155e469a57e709e559f3a1eaccfa79dc7118",
+    "primary_verified": true,
+    "proof_concurrency_restored": 18,
+    "live_sql_idle": 3
+  },
+  "runtime_repair": {
+    "observed_official_core": "v26.9.9",
+    "release_digests_verified": true,
+    "isolated_database_regressions": 32,
+    "legacy_global_lock_held_during_unified_lifecycle_test": "PASS",
+    "worker_modules": "PASS",
+    "profile_creation_lanes": 6,
+    "per_task_timeout_seconds": 120,
+    "unified_writers": "per-panel ownership lock, no global writer serialization"
   }
 }
