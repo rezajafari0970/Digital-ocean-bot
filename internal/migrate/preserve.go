@@ -17,9 +17,10 @@ type retainedTable struct {
 	snapshot string
 }
 type retentionGuard struct {
-	tables    []retainedTable
-	schema    string
-	sequences map[string]int64
+	tables          []retainedTable
+	schema          string
+	sequences       map[string]int64
+	profileAdoption bool
 }
 
 // Retention runs in the same transaction as reviewed migration SQL. It permits
@@ -76,6 +77,19 @@ func captureRetention(ctx context.Context, tx *sql.Tx, version string) (*retenti
  AND EXISTS(SELECT 1 FROM client_mutation_execution_gate g WHERE g.singleton AND g.enabled AND NOT g.kill_switch
  AND g.panel_id IS NULL AND g.inbound_id IS NULL AND g.concurrency=1)
  THEN to_jsonb(t) || jsonb_build_object('max_active_scopes',0,'updated_at',now()) ELSE to_jsonb(t) END`
+		}
+		// Version 184 transfers the enabled policy to an independent profile.
+		// Retain the original policy separately, then permit only its delegation
+		// flag transition. verifyProfileAdoption proves every copied identity,
+		// credential reference, scope and limit before this transaction commits.
+		if version == "000184_config_profiles" && name == "trojan_tcp_policy" {
+			if _, err = tx.ExecContext(ctx, "CREATE TEMP TABLE dob_profile_original_policy ON COMMIT DROP AS SELECT to_jsonb(t) AS data FROM "+pq.QuoteIdentifier(g.schema)+"."+pq.QuoteIdentifier(name)+" t"); err != nil {
+				return nil, err
+			}
+			g.profileAdoption = true
+			projection = `CASE WHEN (t.enabled OR EXISTS(SELECT 1 FROM trojan_tcp_listeners))
+ AND (t.direct_enabled OR t.residential_enabled)
+ THEN to_jsonb(t) || jsonb_build_object('enabled',false) ELSE to_jsonb(t) END`
 		}
 		_, err = tx.ExecContext(ctx, "CREATE TEMP TABLE "+pq.QuoteIdentifier(snapshot)+" ON COMMIT DROP AS SELECT "+projection+" AS data FROM "+pq.QuoteIdentifier(g.schema)+"."+pq.QuoteIdentifier(name)+" t")
 		if err != nil {
@@ -149,6 +163,11 @@ func (g *retentionGuard) verify(ctx context.Context, tx *sql.Tx) error {
 		}
 		if missing {
 			return fmt.Errorf("data retention blocked deletion or overwrite: %s", t.name)
+		}
+	}
+	if g.profileAdoption {
+		if err := verifyProfileAdoption(ctx, tx); err != nil {
+			return err
 		}
 	}
 	for name, prior := range g.sequences {

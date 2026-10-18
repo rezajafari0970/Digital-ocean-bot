@@ -35,11 +35,21 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T00:27:47.495133+00:00",
+  "updated_at": "2026-10-18T00:49:21.654992+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
       "result": "Publication blocked before production change; policies and role regression updated"
+    },
+    {
+      "finding": "Primary installer retention guard rejected migration 184 legacy enabled-flag delegation; transaction and binaries rolled back automatically",
+      "result": "Primary ready on prior 26c2dc5. Added version-specific complete-copy verification for policy, ownership, credential references and output revisions; migration checksum remains unchanged; missing copies are rejected in production-preserving regression."
     }
-  ]
+  ],
+  "release_attempt": {
+    "source": "8465bb3c2aa75cc62259cd0348ef7fbc3e908103",
+    "public": "45f49553137dc07d1bd2c01fb0ed2a88d1b1b4a7",
+    "secondary": "verified schema 184",
+    "primary": "rolled back by retention guard; ready schema 183"
+  }
 }

@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/migrate"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -72,7 +75,35 @@ func TestConfigProfileAdoptionPreservesNativeCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sqlMust(t, db, string(up))
+	// Use the production retention guard, including rollback of incomplete
+	// adoption. Raw Exec would miss the installer's data-preservation contract.
+	for _, mutation := range []string{
+		"DELETE FROM config_driver_clients;",
+		"UPDATE config_driver_profiles SET enabled=false;",
+		"UPDATE config_driver_listeners SET credential_ref='incorrect';",
+	} {
+		dir := t.TempDir()
+		file := filepath.Join(dir, "000184_config_profiles.up.sql")
+		if e := os.WriteFile(file, append(append([]byte{}, up...), []byte("\n"+mutation)...), 0600); e != nil {
+			t.Fatal(e)
+		}
+		e := (migrate.Runner{DB: db, Dir: dir, PreserveData: true}).Up(ctx)
+		if e == nil || !strings.Contains(e.Error(), "profile adoption") {
+			t.Fatal("incomplete adoption not rejected by retention", e)
+		}
+		var stillEnabled bool
+		if e := db.QueryRow("SELECT enabled FROM trojan_tcp_policy").Scan(&stillEnabled); e != nil || !stillEnabled {
+			t.Fatal("rejected migration changed old policy", e)
+		}
+	}
+	dir := t.TempDir()
+	if e := os.WriteFile(filepath.Join(dir, "000184_config_profiles.up.sql"), up, 0600); e != nil {
+		t.Fatal(e)
+	}
+	if e := (migrate.Runner{DB: db, Dir: dir, PreserveData: true}).Up(ctx); e != nil {
+		t.Fatal("production-preserving migration", e)
+	}
+
 	const id = "00000000-0000-4000-8000-000000000001"
 	p, err := configplane.Read(ctx, db, id)
 	if err != nil || !p.Enabled || p.Revision != 8 || p.Spec.Port != 8443 {
