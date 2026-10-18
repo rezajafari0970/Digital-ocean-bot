@@ -35,5 +35,11 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T00:27:47.495133+00:00"
+  "updated_at": "2026-10-18T00:27:47.495133+00:00",
+  "release_gate_findings": [
+    {
+      "finding": "Worker supervision policy and role inventory lacked new profile modules",
+      "result": "Publication blocked before production change; policies and role regression updated"
+    }
+  ]
 }

@@ -51,6 +51,12 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "trojan-tcp-0", "trojan-tcp-1", "trojan-verify-0", "trojan-verify-1":
 		p.Work = 8 * time.Minute
 		p.Idle = 3 * time.Second
+	case "profiles-create-0", "profiles-create-1":
+		p.Work = 8 * time.Minute
+		p.Idle = time.Second
+	case "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3":
+		p.Work = time.Minute
+		p.Idle = time.Second
 	case "transport-apply":
 		p.Work = 5 * time.Minute
 		p.Idle = 3 * time.Second
