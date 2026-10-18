@@ -71,7 +71,7 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	// the published endpoint. Require reachability from the controller too.
 	probe, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	conn, e := (net.Dialer{}).DialContext(probe, "tcp", net.JoinHostPort(t.Host, fmt.Sprint(payload["port"])))
+	conn, e := (&net.Dialer{}).DialContext(probe, "tcp", net.JoinHostPort(t.Host, fmt.Sprint(payload["port"])))
 	if e != nil {
 		return errors.New("profile_public_port_unreachable")
 	}
