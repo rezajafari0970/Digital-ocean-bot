@@ -255,7 +255,7 @@ func (s *Server) deleteConfigProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
-	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision,l.attempted_at,l.stage_started_at,COALESCE(l.failures,0),COALESCE(l.applied_spec->>'sni','')
+	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision,l.attempted_at,l.stage_started_at,COALESCE(l.failures,0),COALESCE(l.applied_spec->>'sni',''),(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR pi.id=ANY(cp.panel_ids)))
  FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id
  LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
  WHERE cp.id=$1 AND cp.deleted_at IS NULL AND dr.state IN('READY','EXPIRING') AND (cp.fleet OR pi.id=ANY(cp.panel_ids) OR l.profile_id IS NOT NULL) ORDER BY dep.host`, r.PathValue("id"))
@@ -271,11 +271,12 @@ func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
 		var failures int
 		var sni string
 		var applied, desired int64
-		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired, &attempted, &started, &failures, &sni); e != nil {
+		var removing bool
+		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired, &attempted, &started, &failures, &sni, &removing); e != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired, "attempted_at": attempted.Time, "stage_started_at": started.Time, "failures": failures, "sni": sni})
+		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired, "attempted_at": attempted.Time, "stage_started_at": started.Time, "failures": failures, "sni": sni, "removing": removing})
 	}
 	if rows.Err() != nil {
 		writeJSON(w, 500, errorBody())

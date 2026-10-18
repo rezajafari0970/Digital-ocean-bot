@@ -21,7 +21,7 @@ test('prints only complete URI lines and preserves the share filter',async()=>{
  assert.match(h.status.textContent,/No configs currently match/);assert.equal(h.status.hidden,false);
 });
 test('faults and malformed responses clear old credentials without extra text',async()=>{
- for(const failure of [Error('offline'),'<html>error</html>','vless://a@host\nnot a URI',()=>({ok:false})]){
+ for(const failure of [Error('offline'),'<html>error</html>',()=>({ok:false})]){
   const h=harness(['vless://a@host\n',failure,'vless://b@host\n']);
   await h.settle();await h.refresh();assert.equal(h.out.textContent,'');
   assert.match(h.status.textContent,/temporarily unavailable/);
@@ -47,4 +47,11 @@ test('mixed Reality and Trojan output keeps both complete country names',async()
 test('all registered output protocols coexist without discarding siblings',async()=>{
  const lines=['vless://id@192.0.2.1:443?security=reality#Germany','trojan://secret@192.0.2.1:8443?security=tls&type=tcp#Germany','vmess://eyJ2IjoiMiJ9','ss://YWVzLTEyOC1nY206c2VjcmV0@192.0.2.1:10001#Germany'].join('\n')+'\n';
  const h=harness([lines]);await h.settle();assert.equal(h.out.textContent,lines);assert.equal(h.status.hidden,true);
+});
+
+test('one malformed entry cannot hide valid independent configs',async()=>{
+ const h=harness(['vless://a@host\ninvalid entry\nss://b@host\n','vless://a@host\nss://b@host\n']);
+ await h.settle();assert.equal(h.out.textContent,'vless://a@host\nss://b@host\n');
+ assert.match(h.status.textContent,/Some entries/);
+ await h.refresh();assert.equal(h.status.hidden,true);
 });

@@ -16,6 +16,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/cleanup"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configplane"
@@ -478,6 +479,15 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if res.Code != 202 {
 		t.Fatal(res.Code, res.Body.String())
 	}
+	detailRequest := httptest.NewRequest("GET", "/", nil)
+	detailRequest.SetPathValue("id", p.ID)
+	detailResponse := httptest.NewRecorder()
+	api.configProfileServers(detailResponse, detailRequest)
+	var detail struct{ Servers []struct{ Removing bool } }
+	if e := json.Unmarshal(detailResponse.Body.Bytes(), &detail); e != nil || detailResponse.Code != 200 || len(detail.Servers) != 1 || !detail.Servers[0].Removing {
+		t.Fatal("server details lost desired deletion state", detailResponse.Code, detailResponse.Body.String(), e)
+	}
+
 	reuse := sibling
 	reuse.ID = ""
 	reuse.Revision = 0
@@ -567,13 +577,40 @@ func TestUnifiedProfileCreationIdempotency(t *testing.T) {
 		body, _ := json.Marshal(map[string]any{"profiles": request})
 		for attempt := 0; attempt < 2; attempt++ {
 			res := httptest.NewRecorder()
-			api.deleteConfigProfiles(res, httptest.NewRequest("POST", "/", bytes.NewReader(body)))
+			req := httptest.NewRequest("POST", "/", bytes.NewReader(body))
+			req = req.WithContext(context.WithValue(req.Context(), principalKey{}, auth.Principal{Username: "bulk-delete-admin", Role: auth.Admin}))
+			api.deleteConfigProfiles(res, req)
 			var reply struct{ Accepted, Conflicts int }
 			json.Unmarshal(res.Body.Bytes(), &reply)
 			if res.Code != 202 || reply.Accepted != 1 || reply.Conflicts != 2 {
 				t.Fatal("partial deletion", res.Code, res.Body.String())
 			}
 		}
+		rows, e := db.Query(`SELECT actor,result,metadata FROM audit_events WHERE action='config_profiles_delete_requested' ORDER BY id`)
+		if e != nil {
+			t.Fatal(e)
+		}
+		attempts := 0
+		for rows.Next() {
+			var actor, result string
+			var raw []byte
+			if e = rows.Scan(&actor, &result, &raw); e != nil {
+				t.Fatal(e)
+			}
+			var audit struct {
+				Profiles            []profileDeleteItem
+				Accepted, Conflicts int
+				NewIntents          int `json:"new_intents"`
+			}
+			if e = json.Unmarshal(raw, &audit); e != nil || actor != "bulk-delete-admin" || result != "partial" || !reflect.DeepEqual(audit.Profiles, request) || audit.Accepted != 1 || audit.Conflicts != 2 || audit.NewIntents != 1-attempts {
+				t.Fatal("audit lost actor, frozen scope, or idempotent result", actor, result, string(raw), e)
+			}
+			attempts++
+		}
+		if e = rows.Err(); e != nil || attempts != 2 {
+			t.Fatal("missing audit attempt", attempts, e)
+		}
+		rows.Close()
 		for _, id := range []string{sibling.ID, late.ID} {
 			current, e := configplane.Read(context.Background(), db, id)
 			if e != nil || current.DeleteRequestedAt != nil || !current.Enabled {

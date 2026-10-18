@@ -113,6 +113,24 @@ func (s *Server) deleteConfigProfiles(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// Commit the authenticated actor and the exact reviewed snapshot together
+	// with its intent. A response retry is a separate audit attempt, never a
+	// second native deletion or an expansion to newly-created profiles.
+	actor, _ := principal(r.Context())
+	result := "ok"
+	if conflicts > 0 {
+		result = "partial"
+	}
+	metadata, _ := json.Marshal(map[string]any{
+		"profiles": body.Profiles, "results": results,
+		"accepted": len(results) - conflicts, "conflicts": conflicts,
+		"new_intents": len(changes),
+	})
+	if _, e = tx.ExecContext(r.Context(), `INSERT INTO audit_events(actor,action,resource_type,result,metadata)
+ VALUES($1,'config_profiles_delete_requested','config_profile_batch',$2,$3::jsonb)`, actor.Username, result, string(metadata)); e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if e = tx.Commit(); e != nil {
 		writeJSON(w, 409, map[string]string{"error": "profile_save_unconfirmed"})
 		return

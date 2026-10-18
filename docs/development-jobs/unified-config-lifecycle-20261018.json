@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "deadline_and_delete_followup_validated",
+  "status": "bulk_delete_video_followup_validated",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -68,7 +68,7 @@
     },
     {
       "name": "native_global_device_policy",
-      "status": "live_trojan_readback_passed; 37 mandatory regressions passed; hotfix not yet released"
+      "status": "installed; live create/edit/expiry/delete native readback verified"
     }
   ],
   "design": [
@@ -79,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T07:51:48.510461+00:00",
+  "updated_at": "2026-10-18T09:58:54.842512+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -242,8 +242,8 @@
     "per_task_timeout_seconds": 120,
     "unified_writers": "per-panel ownership lock, no global writer serialization"
   },
-  "latest_verified_release": "77068b527a05d7b79abbe08756f84c547a9fc116",
-  "latest_verified_source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
+  "latest_verified_release": "2de6fd92e62ad933f2ff7c80a8f1d98e402944a5",
+  "latest_verified_source": "4737cc3e5a87ff4b06aeb4d964fc12a49bff0c23",
   "independent_controls": {
     "schema": 186,
     "deployed": true,
@@ -435,9 +435,9 @@
     "scheduler": "busy panels requeue without degrading healthy profiles; native writes release panel before runtime/route proofs; proof batch limited to one parallel wave of four"
   },
   "remaining_live_validation": [
-    "queue/native-runtime release and staged rollout",
-    "live expiry/edit/delete acceptance",
-    "fresh eligible coverage audit"
+    "publish bulk-delete capacity and audit plus video status/output isolation fixes",
+    "staged installation",
+    "observe existing bulk deletion to native absence"
   ],
   "installed_native_policy_release": {
     "source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
@@ -465,7 +465,7 @@
   "native_transport_023": {
     "artifact_commit": "3dbe70e8a900cb540c7c6e38aea5e78027dfed57",
     "source_version": "dob-fm-0.2.3",
-    "deployed": false,
+    "deployed": true,
     "root_causes": [
       "WebSocket frame EOF discarded returned bytes and normal close 1000 aborted buffered VLESS response",
       "TLS OCSP/certificate reload mutated shared handshake certificate storage"
@@ -477,26 +477,31 @@
       "tls_and_websocket_race": "three complete runs passed"
     },
     "rollout": "pinned full source/licenses/patches; current native config validation, immutable identity journal, rollback; each outdated panel schedules one replacement; all profile types share preparation",
-    "public_trojan_none": "not supported by official native core; loopback-only test is not public support",
+    "public_trojan_none": "server creation supported; recent official Xray clients reject public unencrypted outbounds; no client modifications",
     "product_regressions": {
       "mandatory_passed": 37,
       "skipped": 0,
       "shared_runtime_single_replacement": "PASS",
       "current_runtime_receipt_cleanup": "PASS",
       "worker_queue_deadline": "PASS"
+    },
+    "live_audit": {
+      "panels": 81,
+      "correct_running_and_file_hashes": 81,
+      "needs_review": 0,
+      "evidence": ".local/native-023-final-fleet-audit.json"
     }
   },
   "continued_at": "2026-10-18T08:31:30.958969+00:00",
   "current_followup": {
-    "state": "deadline_and_delete_followup_validated",
-    "installed_source": "18aa6ce1d29829e12e3ce07028e32be5260975b0",
-    "installed_public": "91cce828c3c8cceb583c2aad60d5ec6d26c5ff2a",
+    "state": "bulk_delete_video_followup_validated",
+    "installed_source": "4737cc3e5a87ff4b06aeb4d964fc12a49bff0c23",
+    "installed_public": "2de6fd92e62ad933f2ff7c80a8f1d98e402944a5",
     "user_profiles_preserved": 14,
     "native_core_audit": {
       "total": 81,
-      "current": 79,
-      "rolled_back_requires_review": 2,
-      "reviewed_remaining_upgrades": "both succeeded, identities retained, original rollback journals archived with exact hashes"
+      "current": 81,
+      "needs_review": 0
     },
     "confirmed_defects": [
       "output viewer rejected VMess and Shadowsocks and cleared all links",
@@ -504,38 +509,34 @@
       "profile work classes could exceed small parent budgets",
       "server details replaced during aggregate refresh and lacked independent polling"
     ],
-    "implemented_pending_release": [
-      "four-protocol output viewer, 5 browser unit tests pass",
-      "journaled global Flow completion with strict final observation",
-      "work-class limits clamped to parent",
-      "snapshot-scoped idempotent batch deletion endpoint and confirmation UI",
-      "independent 2-second server-details polling with coalescing and retained open DOM",
-      "native confirmed ownership fence excludes staged reservations from counts and publication",
-      "public plain TCP server catalog for all four protocols with explicit client compatibility metadata"
-    ],
     "pending": [
-      "publish deadline/delete followup",
+      "publish bulk-delete capacity and audit plus video status/output isolation fixes",
       "staged installation",
-      "verify canary native absence",
-      "measure fresh eligible fleet coverage"
+      "observe existing bulk deletion to native absence"
     ],
     "canaries": {
-      "owned": 3,
+      "owned": 4,
       "user_profiles_deleted": 0,
-      "edit": "PASS: Direct 2 to 1, Vision to empty Flow, exported FinalMask removed; all three Residential identities retained",
+      "edit": "PASS Direct 2 to 1, lifetime600s/device5, Vision to empty Flow, no exported mask; Residential three identities preserved",
       "native_policy": "PASS 09:22 UTC: exact expiry, quota, device limits and Flow for all three profiles",
-      "delete": "Initial live batch request accepted three; VMess removed, VLESS/Trojan exposed omitted policy context in deletion observation; regression and fix passed, native acceptance pending"
+      "delete": "All four task-owned canaries have fresh native/global absence proof; no task canaries remain",
+      "automatic_cycle": {
+        "create_to_output_seconds": 64.419,
+        "delete_to_absence_seconds": 32.16,
+        "native_policy": "PASS Direct 2/900s/device3, Residential 1/3600s/device4",
+        "manual_reconcile": false
+      }
     },
     "limitations": [
       "Recent official Xray clients reject public unencrypted VLESS/Trojan; server generation cannot remove a client-side restriction.",
       "No promise of zero future faults; acceptance requires measured checks."
     ],
-    "updated_at": "2026-10-18T09:28:32.162736+00:00",
+    "updated_at": "2026-10-18T09:58:54.842512+00:00",
     "validation": {
       "database_gate": "PASS 37/37 zero skips including deadline fairness both protocol directions, prompt busy requeue, native global HWID deletion and lost-delete recovery",
       "browser": "config transport and refresh recovery PASS; batch snapshot deletion and details single flight exercised",
       "runtime_batch_sample": "8 profiles / 16 class probes all pass; before 10.79s, after 9.69s on one panel, not a fleet throughput guarantee",
-      "flow": "Exact native/global blank Flow readback and authenticated HTTP 200 for both classes; full edited-output acceptance remains pending installed scheduler",
+      "flow": "PASS actual native/global blank Flow and both class HTTP200; edited output accepted",
       "full_go_test": "PASS",
       "go_vet": "PASS",
       "batch_16": {
@@ -555,7 +556,8 @@
       "redundant_proof_sql_lease_removed": true,
       "verification_supervision_seconds": 150,
       "selection": "oldest due verification first; no protocol priority",
-      "busy_retry_seconds": 2
+      "busy_retry_seconds": 2,
+      "delete_lanes_pending_release": 8
     },
     "source_revision": "0d5d1fec1202666b214e279efd0568c63f662ac3",
     "public_revision": "acb6a001b2853ee124e6307d4ae903460880258e",
@@ -567,8 +569,8 @@
       "installer": "PASS"
     },
     "deployment": {
-      "secondary": "PASS at 2026-10-18T09:05:14Z: schema187, exact binary hashes, three active services, five readiness samples, all preservation checks",
-      "primary": "PASS 2026-10-18T09:14:13Z: schema187, exact binaries, three services, five readiness samples, 441 pins and user policies/identities preserved"
+      "primary": "2de6fd9 verified 09:36:09 UTC; exact binaries, schema187, three services, five readiness samples",
+      "secondary": "2de6fd9 verified 09:34:41 UTC; same gates"
     },
     "disk_recovery": {
       "backups_deleted": 0,
@@ -581,6 +583,40 @@
       "claim timestamps could move old proof behind fresh routine checks",
       "production proof/deletion contention backed off as failure or delayed for 30 seconds",
       "native deletion omitted credentials policy context and rejected Sanaei global HWID limits"
-    ]
+    ],
+    "implemented_and_deployed": [
+      "four-protocol output viewer, 5 browser unit tests pass",
+      "journaled global Flow completion with strict final observation",
+      "work-class limits clamped to parent",
+      "snapshot-scoped idempotent batch deletion endpoint and confirmation UI",
+      "independent 2-second server-details polling with coalescing and retained open DOM",
+      "native confirmed ownership fence excludes staged reservations from counts and publication",
+      "public plain TCP server catalog for all four protocols with explicit client compatibility metadata"
+    ],
+    "user_profiles_preserved_as_of": "2026-10-18T09:39:16Z",
+    "subsequent_bulk_intent": {
+      "at": "2026-10-18T09:41:21.795273Z",
+      "profiles": 14,
+      "actor": "unavailable in previous endpoint audit; not attributed",
+      "submitted_by_this_task": false,
+      "observed_remaining": 775,
+      "observed_at": "2026-10-18T09:58:08Z",
+      "effect": "all user profiles disabled/deleting; empty output expected; do not restore without instruction"
+    },
+    "video_followup": {
+      "file": "Screenrecorder-2026-10-18-13-15-54-757.mp4",
+      "duration_seconds": 166.975,
+      "findings": [
+        "deleting listeners mislabeled Applying saved changes due to revision increment",
+        "empty output during all-profile deletion is expected, not a fetch error",
+        "viewer should isolate malformed entries instead of clearing valid sibling protocols"
+      ],
+      "fixes": [
+        "explicit desired-removal state from API",
+        "native removal vs queued removal labels",
+        "retain valid fresh output lines while reporting malformed entries"
+      ],
+      "status": "PASS 37 mandatory database/race/native regressions; mobile Chromium; 6 output viewer cases; worker tests"
+    }
   }
 }

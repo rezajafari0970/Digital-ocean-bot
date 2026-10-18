@@ -139,6 +139,11 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("finishRead('details-once',{servers:[]});detailsRead");
   catalog.profiles[0].published++;await evaluate('refreshConfigProfiles()');assert.equal(await evaluate("document.querySelector('[data-profile-servers]')===keptDetails"),true);
   mark('server details coalesce overlapping reads and retain open DOM during aggregate changes');
+  assert.equal(await evaluate("profileServerStatus({state:'VERIFIED',removing:true,applied_revision:1,desired_revision:2,code:'profile_class_traffic_retrying'})"),'Queued for removal');
+  assert.equal(await evaluate("profileServerStatus({state:'APPLYING',stage:'deleting',removing:true,applied_revision:1,desired_revision:2})"),'Removing clients and listener');
+  assert.equal(await evaluate("profileServerStatus({state:'RETIRED',removing:true,code:'profile_delete_unverified'})"),'Removed');
+  mark('deletion status overrides revision drift and obsolete connection errors');
+
   const reviewed=catalog.profiles.map(x=>({id:x.profile.id,revision:x.profile.revision}));
   await evaluate("document.querySelector('[data-delete-all-profiles]').click()");await waitFor("document.querySelector('#modal').open");assert.equal(deletions.length,1);
   const late={...catalog.profiles[0],profile:{...catalog.profiles[0].profile,id:'late-profile',name:'Created later'}};catalog.profiles.push(late);
