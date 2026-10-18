@@ -46,8 +46,16 @@ func subset(got, want any) bool {
 
 // Observe requires the durable ownership name, optional native ID, exact client
 // membership and desired transport. It never adopts an arbitrary matching port.
-func Observe(raws []json.RawMessage, desired map[string]any, remote int64) (int64, error) {
+func Observe(raws []json.RawMessage, desired map[string]any, remote int64, policies ...Credentials) (int64, error) {
 	want := normalized(desired).(map[string]any)
+	globalPolicy := map[string]bool{}
+	for _, creds := range policies {
+		for _, cl := range creds.Clients {
+			if cl.PolicySet {
+				globalPolicy[cl.ID] = true
+			}
+		}
+	}
 	id := int64(0)
 	for _, raw := range raws {
 		in, e := Object(raw)
@@ -128,6 +136,10 @@ func Observe(raws []json.RawMessage, desired map[string]any, remote int64) (int6
 							}
 						}
 					}
+					if globalPolicy[c["id"].(string)] {
+						delete(c, "limitHwid")
+						delete(g, "limitHwid")
+					}
 					if !ok || !subset(g, c) {
 						return 0, errors.New("profile_client_identity_changed")
 					}
@@ -136,6 +148,9 @@ func Observe(raws []json.RawMessage, desired map[string]any, remote int64) (int6
 					}
 					// Do not silently erase limits introduced outside this profile.
 					for _, limit := range []string{"totalGB", "expiryTime", "limitIp", "limitHwid"} {
+						if limit == "limitHwid" && globalPolicy[c["id"].(string)] {
+							continue
+						}
 						wantLimit := c[limit]
 						if wantLimit == nil {
 							wantLimit = float64(0)

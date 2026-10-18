@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "publishing_independent_controls",
+  "status": "native_device_policy_hotfix_verified_pending_release",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -52,19 +52,23 @@
     },
     {
       "name": "retire_legacy_and_verify",
-      "status": "legacy_retirement_verified; final worker headroom rollout pending"
+      "status": "installed_and_verified_on_both_hosts"
     },
     {
       "name": "production_sql_headroom",
-      "status": "regression_verified; publishing"
+      "status": "installed_and_verified_on_both_hosts"
     },
     {
       "name": "independent_class_controls",
-      "status": "tests_passed_not_deployed"
+      "status": "installed_and_verified_on_both_hosts"
     },
     {
       "name": "batched_runtime_proofs",
-      "status": "live_read_only_probe_completed_not_deployed"
+      "status": "installed_and_verified_on_both_hosts"
+    },
+    {
+      "name": "native_global_device_policy",
+      "status": "live_trojan_readback_passed; 37 mandatory regressions passed; hotfix not yet released"
     }
   ],
   "design": [
@@ -75,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T06:33:51.311362+00:00",
+  "updated_at": "2026-10-18T07:01:17.241727+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -391,6 +395,49 @@
       "responses": 429,
       "seconds": 8.061825703
     },
-    "route_batch_receipts": "bounded gzip/base64; full indexed matrix; 429-request regression; 18 distributed SSH slots, one sequential stream per panel"
-  }
+    "route_batch_receipts": "bounded gzip/base64; full indexed matrix; 429-request regression; 18 distributed SSH slots, one sequential stream per panel",
+    "source_revision": "5f799e4ca3198ca3a91ce005fd7e1d451b862b51",
+    "public_revision": "a11eb583a25145ab261539a36200ebf7eebf777a",
+    "publisher": "PASS: exact source/manifest, secret scan, 37 mandatory regressions, full Go/vet/Python/Chromium and installer checks"
+  },
+  "installed_independent_release": {
+    "source": "5f799e4ca3198ca3a91ce005fd7e1d451b862b51",
+    "public": "a11eb583a25145ab261539a36200ebf7eebf777a",
+    "primary_verified_at": "2026-10-18T06:43:42Z",
+    "secondary_verified_at": "2026-10-18T06:39:05Z",
+    "schema": "000186_independent_profile_controls"
+  },
+  "native_device_policy_hotfix": {
+    "cause": "Sanaei v3 ignores inbound limitHwid; device limit is stored in the global client record",
+    "fix": "Observe the exact owned native UUID/email; preserve native fields; SET only expiry/quota/device; verify fresh global read even after lost acknowledgement",
+    "real_canary": {
+      "protocol": "trojan/tcp/tls",
+      "direct": {
+        "count": 1,
+        "device_limit": 3,
+        "lifetime_seconds": 0
+      },
+      "residential": {
+        "count": 1,
+        "device_limit": 4,
+        "lifetime_seconds": 7200
+      },
+      "readback_at": "2026-10-18T06:57:42Z",
+      "verified": true
+    },
+    "regressions": {
+      "mandatory_passed": 37,
+      "skipped": 0,
+      "unit_packages": [
+        "configplane",
+        "configdriver"
+      ]
+    },
+    "scheduler": "busy panels requeue without degrading healthy profiles; native writes release panel before runtime/route proofs; proof batch limited to one parallel wave of four"
+  },
+  "remaining_live_validation": [
+    "deploy device-policy hotfix",
+    "canary expiry/edit/output and complete deletion",
+    "fresh eligible-server coverage and remaining failure attribution"
+  ]
 }

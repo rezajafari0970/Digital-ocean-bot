@@ -62,7 +62,7 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 		if e != nil {
 			continue
 		}
-		id, e := configdriver.Observe(raws, desired, v.remote)
+		id, e := configdriver.Observe(raws, desired, v.remote, credentials)
 		if e != nil || id != v.remote {
 			continue
 		}

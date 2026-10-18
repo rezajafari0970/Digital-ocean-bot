@@ -79,7 +79,7 @@ func (s Service) run(ctx context.Context, verify bool) error {
  JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
  WHERE l.next_attempt_at<=now() AND (l.lease_until IS NULL OR l.lease_until<now()) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners busy WHERE busy.panel_id=l.panel_id AND busy.lease_until>now()) AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
  AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
- AND `+lane+` ORDER BY date_trunc('minute',l.next_attempt_at),cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
+ AND `+lane+` ORDER BY CASE WHEN l.attempted_at IS NOT NULL AND l.next_attempt_at<now()-interval '90 seconds' THEN 0 ELSE 1 END,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
  UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
  FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
  SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
@@ -176,6 +176,10 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
+		if code == "profile_panel_busy" {
+			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
+			return
+		}
 		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage=$3,error_code=$4,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second' WHERE profile_id=$1 AND panel_id=$2", id, panel, stage, code)
 		Event(c, s.DB, p, panel, stage, code)
 	}()
@@ -382,7 +386,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			if e != nil {
 				return errors.New("profile_inventory_unavailable")
 			}
-			observed, matchErr := configdriver.Observe(raws, payload, remote.Int64)
+			observed, matchErr := configdriver.Observe(raws, payload, remote.Int64, credentials)
 			before := configdriver.ProtectedHash(raws, remark)
 			if matchErr != nil || observed == 0 {
 				if !wantsWrite {
@@ -396,7 +400,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 					if e != nil {
 						return e
 					}
-					got, e := configdriver.Observe(raws, prior, remote.Int64)
+					got, e := configdriver.Observe(raws, prior, remote.Int64, priorCredentials)
 					if e != nil || got != remote.Int64 {
 						return errors.New("profile_existing_state_conflict")
 					}
@@ -458,7 +462,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				if e != nil {
 					return errors.New("profile_write_outcome_unconfirmed")
 				}
-				observed, e = configdriver.Observe(raws, payload, remote.Int64)
+				observed, e = configdriver.Observe(raws, payload, remote.Int64, credentials)
 				if e != nil || observed == 0 {
 					return errors.New("profile_write_outcome_unconfirmed")
 				}
@@ -466,6 +470,10 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 					return errors.New("profile_sibling_changed")
 				}
 				Event(ctx, s.DB, p, panel, "native_observed", "")
+			}
+			setStage("client_policy")
+			if e = s.applyGlobalPolicies(ctx, panel, rt.Session.Exec, credentials); e != nil {
+				return e
 			}
 			// Native confirmation and traffic proof are different durable phases.
 			// Failed traffic never leaves an already-observed write in SENT forever.
@@ -487,6 +495,11 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			if removing {
 				return nil
 			}
+			if s.Verify == nil { // Runtime/route proofs have their own scheduling lane.
+				_, e = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET state='APPLYING',stage='routes_pending',stage_started_at=now(),needs_reconcile=false,error_code='',failures=0,next_attempt_at=now()+interval '3 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
+				return e
+			}
+
 			for _, raw := range raws {
 				var native struct {
 					ID  int64

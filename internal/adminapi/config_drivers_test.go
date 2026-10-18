@@ -124,6 +124,18 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 				rows = append(rows, b)
 			}
 			_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": rows})
+		case r.URL.Path == "/panel/api/clients/list":
+			out := []any{}
+			for _, n := range native {
+				raw, _ := n["settings"].(string)
+				var settings struct{ Clients []map[string]any }
+				_ = json.Unmarshal([]byte(raw), &settings)
+				for _, c := range settings.Clients {
+					c["uuid"] = c["id"]
+					out = append(out, c)
+				}
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": out})
 		case r.URL.Path == "/panel/api/inbounds/add":
 			checkWriter(false)
 			posts++

@@ -29,6 +29,7 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	var mu sync.Mutex
 	native := map[int64]map[string]any{}
 	users := map[string]string{}
+	globalDetails := map[string]map[string]any{}
 	nextID := int64(20)
 	writes, deletes := 0, 0
 	dropReads, dropAfterDelete, failProof := false, false, true
@@ -79,6 +80,27 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 			for _, c := range settings.Clients {
 				users[c.Email] = c.ID
 			}
+			var full map[string]any
+			_ = json.Unmarshal([]byte(raw), &full)
+			for _, item := range full["clients"].([]any) {
+				c := item.(map[string]any)
+				email := c["email"].(string)
+				hw := any(float64(0))
+				if previous := globalDetails[email]; previous != nil {
+					hw = previous["limitHwid"]
+				}
+				g := map[string]any{}
+				for k, v := range c {
+					g[k] = v
+				}
+				g["uuid"] = c["id"]
+				g["limitHwid"] = hw
+				globalDetails[email] = g
+				delete(c, "limitHwid")
+			}
+			rewritten, _ := json.Marshal(full)
+			body["settings"] = string(rewritten)
+
 			w.WriteHeader(503) // fresh observation, never status alone, confirms it
 		case strings.HasPrefix(r.URL.Path, "/panel/api/inbounds/del/"):
 			deletes++
@@ -89,9 +111,28 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 		case r.URL.Path == "/panel/api/clients/list":
 			out := []any{}
 			for email, id := range users {
-				out = append(out, map[string]any{"uuid": id, "email": email, "enable": true})
+				if g := globalDetails[email]; g != nil {
+					out = append(out, g)
+				} else {
+					out = append(out, map[string]any{"uuid": id, "email": email, "enable": true})
+				}
 			}
 			envelope(out)
+		case strings.HasPrefix(r.URL.Path, "/panel/api/clients/get/"):
+			envelope(map[string]any{"client": globalDetails[strings.TrimPrefix(r.URL.Path, "/panel/api/clients/get/")]})
+		case strings.HasPrefix(r.URL.Path, "/panel/api/clients/update/"):
+			email := strings.TrimPrefix(r.URL.Path, "/panel/api/clients/update/")
+			var patch map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&patch)
+			g := globalDetails[email]
+			if g == nil {
+				w.WriteHeader(404)
+				return
+			}
+			for k, v := range patch {
+				g[k] = v
+			}
+			w.WriteHeader(503) // successful SET with lost acknowledgement
 		case r.URL.Path == "/panel/api/clients/bulkDel":
 			var body struct{ Emails []string }
 			_ = json.NewDecoder(r.Body).Decode(&body)
@@ -187,6 +228,9 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	}
 	for _, c := range saved.Clients {
 		want := p.ClassSettings[c.Class]
+		if globalDetails[c.Email]["limitHwid"] != float64(want.DeviceLimit) {
+			t.Fatal("native global device limit was not observed")
+		}
 		if c.ExpiresAt-c.CreatedAt != int64(want.LifetimeSeconds)*1000 || c.DeviceLimit != want.DeviceLimit || c.Publish != want.Publish {
 			t.Fatal("class limit mismatch")
 		}
@@ -198,7 +242,7 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 			t.Fatal("native settings")
 		}
 		for _, c := range settings.Clients {
-			if c["expiryTime"] == float64(0) || c["limitHwid"] == nil {
+			if c["expiryTime"] == float64(0) {
 				t.Fatal("native limits missing")
 			}
 		}
@@ -211,6 +255,20 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	}
 	if e := svc.Reconcile(ctx, p.ID, panel); e != nil {
 		t.Fatal(e)
+	}
+	// The production writer finishes native policy independently and releases the
+	// panel for route reconciliation; a later proof worker completes publication.
+	production := svc
+	production.Verify = nil
+	if e := production.Reconcile(ctx, p.ID, panel); e != nil {
+		t.Fatal("deferred production proof", e)
+	}
+	var queuedStage string
+	if e := db.QueryRow("SELECT mutation_state,state,stage FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&mutation, &state, &queuedStage); e != nil || mutation != "CONFIRMED" || state != "APPLYING" || queuedStage != "routes_pending" {
+		t.Fatal("native writer waited for runtime", mutation, state, queuedStage, e)
+	}
+	if e := svc.Reconcile(ctx, p.ID, panel); e != nil {
+		t.Fatal("deferred proof recovery", e)
 	}
 	original := map[string]string{}
 	for k, v := range users {

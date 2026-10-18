@@ -51,3 +51,14 @@ Runtime verification batches a panel's profiles through one SSH connection, with
 Live diagnosis found that 13 inbounds require 429 routing matrix entries. The old 256 cap forced remote HTTP fallback until timeout. The revised local batch accepts a bounded 4096 entries, keeps every indexed response, and compresses receipts to fit the existing SSH output bound. A real 429/429 read-only check completed in 8.06 seconds. Each panel remains sequential; distributed serving proofs have 18 bounded slots.
 
 Validation before rollout: all Go tests and vet passed; mobile Chromium verified independent lifetime units/count/device/publication, stale response recovery and deletion isolation; 37 required isolated PostgreSQL/race/native regressions passed with no skips. The job JSON records deployment separately from source validation. Production is not considered updated until exact installed manifests and canaries pass.
+
+
+## Native device policies and bounded proof waves — 2026-10-18
+
+Release a11eb583 (source 5f799e4, schema 186) was installed and verified on both hosts. The production route-batch correction restored publication; later inventory contained 990 VERIFIED listeners plus nine with a partial class proof. These are time-bound observations, not a claim of complete current coverage.
+
+A real canary exposed a native v3 behavior absent from the old mock: inbound writes ignore `limitHwid`; the global client record owns this policy. The controller now confirms exact UUID/email ownership, preserves native update fields, applies expiry/quota/device values to that record and requires fresh readback. A lost SET acknowledgement is handled by observation. Unrelated global records cannot block the owned policy. The lifecycle fixture now models this behavior and asserts actual global values.
+
+Native confirmation is a separate persisted phase (`routes_pending`). The writer releases the panel before route/runtime tests; the proof lane completes publication. A busy panel only reschedules the operation and does not erase healthy state. Runtime batches use one parallel wave of four profiles, avoiding several timeout waves exhausting the 45-second worker deadline.
+
+Read-only native proof at 06:57:42 UTC confirmed the recorded Trojan canary: Direct = one client, unlimited lifetime, device limit 3; Residential = one client, 7200 seconds, device limit 4. All 37 mandatory isolated database/race/native regressions passed with zero skips; policy unit tests passed. Deployment and the full canary expiry/edit/delete cycle remain pending for this hotfix. Existing user profiles are preserved; previous legacy retirement must not be repeated.

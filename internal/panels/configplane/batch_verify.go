@@ -23,6 +23,8 @@ import (
 //go:embed runtime_batch.py
 var runtimeBatchScript string
 
+// One wave of four jobs fits the 45-second worker deadline even when peers time out.
+
 type batchCandidate struct {
 	id, ref, remark, account string
 	remote                   int64
@@ -83,7 +85,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 			}
 			rows, e := s.DB.QueryContext(ctx, `SELECT l.profile_id::text,l.credential_ref,l.managed_key,pi.account_id::text,l.remote_id,l.applied_spec,l.certificate_not_after
  FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
- WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.next_attempt_at,l.profile_id LIMIT 16`, panel, claimedProfile)
+ WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.next_attempt_at,l.profile_id LIMIT 4`, panel, claimedProfile)
 			if e != nil {
 				return e
 			}
@@ -105,6 +107,8 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 			jobs := []batchJob{}
 			inputs := []map[string]any{}
 			registry := configdriver.Builtins()
+			var globals []sanaei.GlobalClient
+			globalsLoaded := false
 			for _, c := range candidates {
 				p, e := Read(ctx, s.DB, c.id)
 				if e != nil {
@@ -134,6 +138,19 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET needs_reconcile=true,next_attempt_at=now() WHERE profile_id=$1 AND panel_id=$2", c.id, panel)
 					continue
 				}
+				if managedClientPolicies(credentials) {
+					if !globalsLoaded {
+						globals, e = sanaei.ReadGlobalClientsSession(ctx, rt.Session.Exec)
+						if e != nil {
+							return errors.New("profile_global_policy_inventory_unavailable")
+						}
+						globalsLoaded = true
+					}
+					if verifyGlobalPolicies(credentials, globals) != nil {
+						s.batchFailure(ctx, c.id, panel, "profile_global_policy_unverified", true)
+						continue
+					}
+				}
 				if json.Unmarshal(c.spec, &p.Spec) != nil {
 					s.batchFailure(ctx, c.id, panel, "profile_saved_spec_invalid", true)
 					continue
@@ -143,7 +160,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					s.batchFailure(ctx, c.id, panel, "profile_saved_spec_invalid", true)
 					continue
 				}
-				observed, e := configdriver.Observe(raws, payload, c.remote)
+				observed, e := configdriver.Observe(raws, payload, c.remote, credentials)
 				if e != nil || observed != c.remote {
 					s.batchFailure(ctx, c.id, panel, "profile_observed_drift", true)
 					continue
