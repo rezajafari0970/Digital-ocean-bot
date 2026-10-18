@@ -35,7 +35,7 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T01:11:01.314896+00:00",
+  "updated_at": "2026-10-18T01:22:44.634654+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
@@ -48,13 +48,17 @@
     {
       "finding": "Runtime probe falsely blocked healthy Residential Trojan clients by requesting example.com, intentionally denied by route policy.",
       "result": "Probe destinations now follow explicit client class, not array position. Real native authenticated proof passed both classes; TLS and routing restrictions preserved."
+    },
+    {
+      "finding": "Native profile reconciliation held the shared writer during read-only authenticated traffic verification; a pending Reality client creation could be delayed by the fleet queue.",
+      "result": "SENT recovery is observation-only without the shared writer; successful native writes release it before traffic proof while retaining the panel lock. Database regression checks writes retain ownership, proofs release it, and uncertain writes recover under an unrelated writer without another POST."
     }
   ],
   "release_attempt": {
-    "source": "c9d0c16cb402d78ff06913355caf79d52e08f63b",
-    "public": "0129983d297f30077e62a00fda4846212e97b8ff",
-    "primary": "verified schema 184, 592 Reality pins retained",
+    "source": "ada5d477cde2c0e4123560732f8df0a695d5ab4d",
+    "public": "09cd915ed76c6d55041a2f6fe51b63f274fbd2ff",
+    "primary": "verified schema 184, 595 Reality pins unchanged, credentials and policies preserved",
     "secondary": "verified schema 184",
-    "runtime_followup": "Residential proof used a Direct-only destination; native clients unchanged, class-aware correction passed authenticated traffic on a real server; publishing corrective release."
+    "runtime_followup": "Class-aware proof restored Trojan output. 52 real external tests passed, including concurrent VLESS:443 and Trojan:8443/10000 on both route classes. Full new-profile convergence still under observation."
   }
 }

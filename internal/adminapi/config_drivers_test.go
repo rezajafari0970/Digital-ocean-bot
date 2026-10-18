@@ -79,6 +79,26 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 	ctx := context.Background()
 	var mu sync.Mutex
 	posts, updates := 0, 0
+	externalWriter := false
+	checkWriter := func(wantAvailable bool) {
+		conn, e := db.Conn(ctx)
+		if e != nil {
+			t.Fatal(e)
+		}
+		defer conn.Close()
+		var available bool
+		if e = conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(628341902731)").Scan(&available); e != nil {
+			t.Fatal(e)
+		}
+		if available {
+			if _, e = conn.ExecContext(ctx, "SELECT pg_advisory_unlock(628341902731)"); e != nil {
+				t.Fatal(e)
+			}
+		}
+		if available != wantAvailable {
+			t.Errorf("shared writer availability=%v, want %v", available, wantAvailable)
+		}
+	}
 	native := map[int]map[string]any{}
 	sibling := json.RawMessage(`{"id":1,"tag":"inbound-443","remark":"dob:global-reality:00443","protocol":"vless","port":443,"enable":true,"settings":{"clients":[]},"streamSettings":{"network":"tcp","security":"reality"}}`)
 	dropReads := false
@@ -105,6 +125,7 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 			}
 			_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "obj": rows})
 		case r.URL.Path == "/panel/api/inbounds/add":
+			checkWriter(false)
 			posts++
 			var body map[string]any
 			if json.NewDecoder(r.Body).Decode(&body) != nil {
@@ -121,6 +142,7 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 			w.WriteHeader(503)
 			fmt.Fprint(w, `{"success":false}`)
 		case strings.HasPrefix(r.URL.Path, "/panel/api/inbounds/update/"):
+			checkWriter(false)
 			updates++
 			var body map[string]any
 			if json.NewDecoder(r.Body).Decode(&body) != nil {
@@ -146,7 +168,10 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 	}
 	secrets := &trojanTestSecrets{values: map[string][]byte{}}
 	service := func() configplane.Service {
-		return configplane.Service{DB: db, Secrets: secrets, SSH: &trojanTestSSH{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: secrets, Timeout: time.Second}}, Verify: func(context.Context, provisioning.Target, []byte, map[string]any) error { return nil }}
+		return configplane.Service{DB: db, Secrets: secrets, SSH: &trojanTestSSH{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: secrets, Timeout: time.Second}}, Verify: func(context.Context, provisioning.Target, []byte, map[string]any) error {
+			checkWriter(!externalWriter)
+			return nil
+		}}
 	}
 	if e := service().Reconcile(ctx, p.ID, panel); e == nil {
 		t.Fatal("lost read falsely confirmed")
@@ -158,8 +183,27 @@ func TestConfigDriverRecoveryAndIndependentPortChange(t *testing.T) {
 	mu.Lock()
 	dropReads = false
 	mu.Unlock()
-	if e := service().Reconcile(ctx, p.ID, panel); e != nil {
-		t.Fatal("recovery", e)
+	// A SENT write can be observed while an unrelated writer holds the global
+	// lease. It must not POST again, and normal writes must still own that lease.
+	writer, e := db.Conn(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer writer.Close()
+	if _, e = writer.ExecContext(ctx, "SELECT pg_advisory_lock(628341902731)"); e != nil {
+		t.Fatal(e)
+	}
+	defer writer.ExecContext(context.Background(), "SELECT pg_advisory_unlock_all()")
+	externalWriter = true
+	recovery, stop := context.WithTimeout(ctx, 3*time.Second)
+	e = service().Reconcile(recovery, p.ID, panel)
+	stop()
+	externalWriter = false
+	if _, unlockErr := writer.ExecContext(ctx, "SELECT pg_advisory_unlock(628341902731)"); unlockErr != nil {
+		t.Fatal(unlockErr)
+	}
+	if e != nil {
+		t.Fatal("observation recovery blocked behind unrelated writer", e)
 	}
 	if posts != 1 {
 		t.Fatal("ambiguous create repeated")

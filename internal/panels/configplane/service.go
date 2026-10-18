@@ -230,13 +230,16 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	// A short queue timeout prevents a slow/offline profile from starving siblings.
 	stage = "executor_wait"
 	wantsWrite := !remote.Valid || applied != p.Spec || mutation == "PREPARED" || mutation == "SENT"
-	if wantsWrite {
+	executorHeld := false
+	// SENT recovery is observation-only: it must never queue behind writers.
+	if wantsWrite && mutation != "SENT" {
 		wait, cancel := context.WithTimeout(ctx, 30*time.Second)
 		_, e = conn.ExecContext(wait, "SELECT pg_advisory_lock(628341902731)")
 		cancel()
 		if e != nil {
 			return e
 		}
+		executorHeld = true
 	}
 	stage = "native"
 	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
@@ -357,6 +360,18 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			}
 			if payload["tag"] == nil || payload["tag"] == "" {
 				return errors.New("profile_native_tag_missing")
+			}
+			// Native writes and sibling checks are complete. Keep the panel lock for
+			// proof consistency, but let unrelated panels use the shared writer.
+			if executorHeld {
+				var unlocked bool
+				if e = conn.QueryRowContext(ctx, "SELECT pg_advisory_unlock(628341902731)").Scan(&unlocked); e != nil {
+					return e
+				}
+				if !unlocked {
+					return errors.New("profile_executor_ownership_lost")
+				}
+				executorHeld = false
 			}
 			probes := []any{}
 			probeClasses := []string{}
