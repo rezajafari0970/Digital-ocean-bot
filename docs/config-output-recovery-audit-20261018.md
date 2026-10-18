@@ -71,3 +71,5 @@ At18:14:10 UTC a separate follow-up catalog reported75 eligible servers, target4
 | Record evidence | Completed in this continuation |
 
 The prior41 mandatory,11 mobile and6 Output test results remain historical evidence for the unchanged release; they were not rerun or represented as fresh tests. No production SQL repair, policy relaxation, credentials change, native restart or new installation was performed. Next work should investigate the remaining Residential connectivity under the existing policy; complete output must be revalidated after that bottleneck is resolved. Machine-readable evidence: `docs/development-jobs/config-resume-evening-20261018.json`. External OpenAI API calls: zero.
+
+Closing follow-up at18:16:23 UTC: catalog before and after Output retrieval both showed432/450 across three profiles on75 eligible servers, and the intervening HTTP200 Output contained432 lines. These matching consecutive reads confirm18 links were still withheld at that checkpoint; they do not establish permanent availability or an atomic transaction across HTTP requests.

@@ -561,6 +561,36 @@
     {
       "file": "isolation-187-metrics-resume-evening-final-20261018.json",
       "sha256": "c0289f38acab73b9351dd4b00ea7b5a4a4600cc584d6e69ae6e24bd4c63da0e9"
+    },
+    {
+      "file": "config-resume-evening-closing-read.json",
+      "sha256": "eb9c56729c33011be6e51059596c32c2f321519b69fcb6e3c2ac0c914a62f6aa"
     }
-  ]
+  ],
+  "closing_consistent_read": {
+    "at": "2026-10-18T18:16:23.561768+00:00",
+    "catalog_before": {
+      "profiles": 3,
+      "eligible": [
+        75,
+        75,
+        75
+      ],
+      "published": 432,
+      "target": 450
+    },
+    "output_lines": 432,
+    "http_status": 200,
+    "catalog_after": {
+      "profiles": 3,
+      "eligible": [
+        75,
+        75,
+        75
+      ],
+      "published": 432,
+      "target": 450
+    },
+    "consistent_consecutive_reads": true
+  }
 }
