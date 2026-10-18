@@ -1,0 +1,575 @@
+{
+  "final_public_release": "16f3b682f638fba5021588fe9818b91db917ef66",
+  "code_source": "44e8b1aa508e13efbf4077ad30691d63fa37c435",
+  "schema": 187,
+  "controllers": {
+    "primary": {
+      "at": "2026-10-18T12:38:06.349184+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T12:38:06.389825132Z"
+      },
+      "checks": {
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "accounts_preserved_except_previously_acknowledged_purge": true,
+        "retained_pins_preserved_or_verified_apply": true,
+        "legacy_policy_unchanged": true,
+        "profile_policy_preserved_except_journaled_delete": true,
+        "profile_credentials_preserved_and_native_identity_or_provider_retirement_verified": true,
+        "new_native_ids_journal_confirmed": true
+      },
+      "retained_pins": 441,
+      "expired_pins": 0,
+      "readiness_samples": 5,
+      "verified_transport_changes": 0
+    },
+    "secondary": {
+      "at": "2026-10-18T12:34:44.170743+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T12:34:44.207354153Z"
+      },
+      "checks": {
+        "accounts_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "retained_pins_preserved_or_verified_apply": true,
+        "legacy_policy_unchanged": true,
+        "profile_policy_unchanged": true,
+        "profile_credentials_preserved_and_native_identity_or_provider_retirement_verified": true,
+        "new_native_ids_journal_confirmed": true
+      },
+      "retained_pins": 0,
+      "expired_pins": 0,
+      "readiness_samples": 5,
+      "verified_transport_changes": 0
+    }
+  },
+  "validation": {
+    "required_regressions_passed": 41,
+    "required_skipped": 0,
+    "go_test_and_vet": "PASS",
+    "output_viewer_cases": 6,
+    "mobile_cases": 11,
+    "mobile_page_errors": 0,
+    "sandbox_installation": "PASS",
+    "provider_retirement_races": [
+      "late SSH failure",
+      "late deadline"
+    ],
+    "baseline_retired_obsolete_errors": 2,
+    "final_retired_obsolete_errors": 0
+  },
+  "preservation": {
+    "shared_listener_records": 1985,
+    "unexpected_changes": 0,
+    "confirmed_provider_retirements": 15,
+    "credential_hashes_unchanged": true
+  },
+  "observation": {
+    "start": "2026-10-18T12:38:28.497706+00:00",
+    "end": "2026-10-18T12:44:33.337124+00:00",
+    "duration_seconds": 364.839,
+    "samples": 25,
+    "complete_samples": 23,
+    "all_readiness_and_output_requests_passed": true,
+    "coverage_min_percent": 96.25,
+    "coverage_max_percent": 100.0,
+    "output_latency_ms": {
+      "min": 34,
+      "median": 40,
+      "max": 51
+    },
+    "minimum_available_memory_mib": 4302,
+    "initial": {
+      "at": "2026-10-18T12:38:28.497706+00:00",
+      "sample": 0,
+      "profiles": [
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 3,
+          "blocked": 0,
+          "ready": 77,
+          "published": 154,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 3,
+          "blocked": 0,
+          "ready": 77,
+          "published": 154,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 3,
+          "blocked": 0,
+          "ready": 77,
+          "published": 154,
+          "target": 160
+        }
+      ],
+      "catalog_seconds": 0.072,
+      "output_status": 200,
+      "output_lines": 462,
+      "output_seconds": 0.041,
+      "details": [
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1,
+            "profile_routes_refresh_pending": 3
+          }
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1,
+            "profile_routes_refresh_pending": 3
+          }
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1,
+            "profile_routes_refresh_pending": 3
+          }
+        }
+      ],
+      "ready": "ready",
+      "load_1m": 2.609375,
+      "available_memory_mib": 4701,
+      "target": 480,
+      "published": 462,
+      "complete": false
+    },
+    "final": {
+      "at": "2026-10-18T12:44:33.337124+00:00",
+      "sample": 24,
+      "profiles": [
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        }
+      ],
+      "catalog_seconds": 0.057,
+      "output_status": 200,
+      "output_lines": 480,
+      "output_seconds": 0.039,
+      "details": [
+        {
+          "servers": 80,
+          "hold_reasons": {}
+        },
+        {
+          "servers": 80,
+          "hold_reasons": {}
+        },
+        {
+          "servers": 80,
+          "hold_reasons": {}
+        }
+      ],
+      "ready": "ready",
+      "load_1m": 7.7734375,
+      "available_memory_mib": 4403,
+      "target": 480,
+      "published": 480,
+      "complete": true
+    },
+    "publication_hold_observations": {
+      "profile_server_ineligible": 3,
+      "profile_routes_refresh_pending": 9,
+      "profile_class_traffic_retrying": 1
+    }
+  },
+  "atomic_diagnostics": {
+    "samples": 181,
+    "samples_with_gap": 12,
+    "last_gap_at": "2026-10-18T12:44:42.687585+00:00",
+    "last_sample_at": "2026-10-18T12:44:42.687585+00:00",
+    "final_followup_at": "2026-10-18T12:47:38.428476+00:00",
+    "final_followup_gaps": 0,
+    "main_final_gap_reason": "Three new profile listeners on one newly eligible panel; PENDING with no error and no native listener yet."
+  },
+  "external_openai_api_calls": 0,
+  "limits": "Samples establish behavior during this interval, not permanent freedom from provider/network failure. No publication proof or TLS guard was relaxed.",
+  "evidence_sha256": {
+    "config-recovery-observation.jsonl": "4a2b47469d68e4c9a7572e0f837aaff207dc6dd661d2929227cb10ac125e6b9b",
+    "config-recovery-gaps.jsonl": "4a66593b56177451c5519b1832489c9b2bf11ddd065302ccecf0ae5c8bca89cb",
+    "transport-result.json": "4c01481c88fef8f436ef7ff87b4750ece05856a82a0f2a3a1c6c11be67bfd58c",
+    "validation.log": "92eb2cbecf36da7673f4c3b14f00ca8668e03d025877810667b3208688d880e3",
+    "installation.log": "1390b838a50da21b87442cd1271a0ce957200682d02961c6b848e565b6b7ed04",
+    "config-recovery-scope-followup.jsonl": "2927525495ce65650476038406c2d238f0e57e6fa1387cbe2ac2dadb5e6a84ba"
+  },
+  "scope_change_followup": {
+    "samples": 6,
+    "complete_samples": 5,
+    "start": "2026-10-18T12:46:03.415964+00:00",
+    "end": "2026-10-18T12:47:19.396244+00:00",
+    "initial": {
+      "at": "2026-10-18T12:46:03.415964+00:00",
+      "sample": 0,
+      "profiles": [
+        {
+          "eligible": 81,
+          "verified": 81,
+          "pending": 1,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 162
+        },
+        {
+          "eligible": 81,
+          "verified": 81,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 81,
+          "published": 162,
+          "target": 162
+        },
+        {
+          "eligible": 81,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 1,
+          "ready": 80,
+          "published": 160,
+          "target": 162
+        }
+      ],
+      "catalog_seconds": 0.064,
+      "output_status": 200,
+      "output_lines": 482,
+      "output_seconds": 0.038,
+      "details": [
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_output_refresh_pending": 1
+          }
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {}
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_runtime_traffic_unverified": 1
+          }
+        }
+      ],
+      "ready": "ready",
+      "load_1m": 12.39306640625,
+      "available_memory_mib": 4327,
+      "target": 486,
+      "published": 482,
+      "complete": false
+    },
+    "final": {
+      "at": "2026-10-18T12:47:19.396244+00:00",
+      "sample": 5,
+      "profiles": [
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        },
+        {
+          "eligible": 80,
+          "verified": 80,
+          "pending": 0,
+          "blocked": 0,
+          "ready": 80,
+          "published": 160,
+          "target": 160
+        }
+      ],
+      "catalog_seconds": 0.068,
+      "output_status": 200,
+      "output_lines": 480,
+      "output_seconds": 0.041,
+      "details": [
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1
+          }
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1
+          }
+        },
+        {
+          "servers": 81,
+          "hold_reasons": {
+            "profile_server_ineligible": 1
+          }
+        }
+      ],
+      "ready": "ready",
+      "load_1m": 11.09228515625,
+      "available_memory_mib": 4294,
+      "target": 480,
+      "published": 480,
+      "complete": true
+    },
+    "reason": "One new eligible server enrolled after the main observation; automatic three-profile creation and proof completed without manual reconciliation."
+  },
+  "live_timeout_recovery": {
+    "at": "2026-10-18T12:45:08.126049+00:00",
+    "state": "VERIFIED",
+    "stage": "runtime_verified",
+    "code": "",
+    "attempted_at": "2026-10-18T12:44:01.418559+00:00",
+    "verified_at": "2026-10-18T12:44:09.324197+00:00",
+    "class_verified_at": "2026-10-18T12:44:09.325208+00:00",
+    "class_code": "",
+    "failure_committed_at": "2026-10-18T12:43:50.255065+00:00",
+    "failure_kind": "timeout",
+    "https_attempts": 2,
+    "automatic_recovery_started_seconds": 11.163,
+    "automatic_recovery_completed_seconds": 19.069
+  },
+  "controllers_final_runtime": {
+    "primary": {
+      "at": "2026-10-18T12:45:32.231290+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T12:45:32.268702762Z"
+      }
+    },
+    "secondary": {
+      "at": "2026-10-18T12:42:20.296213+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T12:42:20.341722467Z"
+      }
+    }
+  }
+}
