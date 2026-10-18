@@ -1,0 +1,566 @@
+{
+  "recorded_at": "2026-10-18T18:15:34.846196+00:00",
+  "result": "operational_checks_passed_output_completeness_not_accepted",
+  "release": "16f3b682f638fba5021588fe9818b91db917ef66",
+  "new_production_code_changes": false,
+  "new_installs": false,
+  "hosts": {
+    "primary": {
+      "at": "2026-10-18T18:14:09.212340+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T18:14:09.255872057Z"
+      },
+      "checks": {
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_settings_unchanged": true
+      }
+    },
+    "secondary": {
+      "at": "2026-10-18T18:14:11.862205+00:00",
+      "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+      "schema": "000187_profile_client_confirmation",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-18T18:14:11.914392916Z"
+      },
+      "checks": {
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_settings_unchanged": true
+      }
+    }
+  },
+  "preservation": {
+    "shared_listener_records": 1985,
+    "credentials_and_identity_preserved": true,
+    "confirmed_provider_retirements": 117,
+    "unexpected_changes": 0,
+    "obsolete_provider_retirement_errors": 0
+  },
+  "observation": {
+    "start": "2026-10-18T18:06:22.227059+00:00",
+    "end": "2026-10-18T18:11:26.189511+00:00",
+    "samples": 21,
+    "all_http200": true,
+    "all_ready": true,
+    "complete_samples": 0,
+    "published_range": [
+      408,
+      425
+    ],
+    "target_range": [
+      438,
+      444
+    ],
+    "latency_ms": {
+      "min": 32,
+      "median": 37,
+      "max": 51
+    },
+    "last": {
+      "at": "2026-10-18T18:11:26.189511+00:00",
+      "sample": 20,
+      "profiles": [
+        {
+          "eligible": 74,
+          "verified": 73,
+          "pending": 9,
+          "blocked": 8,
+          "ready": 65,
+          "published": 138,
+          "target": 148
+        },
+        {
+          "eligible": 74,
+          "verified": 73,
+          "pending": 11,
+          "blocked": 10,
+          "ready": 63,
+          "published": 136,
+          "target": 148
+        },
+        {
+          "eligible": 74,
+          "verified": 73,
+          "pending": 13,
+          "blocked": 12,
+          "ready": 61,
+          "published": 134,
+          "target": 148
+        }
+      ],
+      "catalog_seconds": 0.064,
+      "output_status": 200,
+      "output_lines": 408,
+      "output_seconds": 0.037,
+      "details": [
+        {
+          "servers": 77,
+          "hold_reasons": {
+            "profile_server_ineligible": 3,
+            "profile_class_traffic_retrying": 8,
+            "runtime_prepare": 1
+          }
+        },
+        {
+          "servers": 77,
+          "hold_reasons": {
+            "profile_server_ineligible": 3,
+            "profile_class_traffic_retrying": 10,
+            "prepare": 1
+          }
+        },
+        {
+          "servers": 77,
+          "hold_reasons": {
+            "profile_server_ineligible": 3,
+            "profile_class_traffic_retrying": 12,
+            "credentials": 1
+          }
+        }
+      ],
+      "ready": "ready",
+      "load_1m": 2.671875,
+      "available_memory_mib": 4351,
+      "target": 444,
+      "published": 408,
+      "complete": false
+    }
+  },
+  "atomic_observation": {
+    "start": "2026-10-18T18:06:38.21799+00:00",
+    "end": "2026-10-18T18:11:46.894848+00:00",
+    "samples": 151,
+    "zero_gap_frames": 0,
+    "final_listeners": 225,
+    "final_gap_count": 30
+  },
+  "latest_metrics": {
+    "at": "2026-10-18T18:14:10.680713+00:00",
+    "catalog_seconds": 0.085,
+    "profiles": [
+      {
+        "protocol": "trojan",
+        "port": 500,
+        "state": "retrying",
+        "eligible": 75,
+        "verified": 74,
+        "pending": 5,
+        "blocked": 4,
+        "ready": 70,
+        "published": 144,
+        "target": 150
+      },
+      {
+        "protocol": "vless",
+        "port": 443,
+        "state": "retrying",
+        "eligible": 75,
+        "verified": 74,
+        "pending": 7,
+        "blocked": 6,
+        "ready": 68,
+        "published": 142,
+        "target": 150
+      },
+      {
+        "protocol": "vless",
+        "port": 8443,
+        "state": "retrying",
+        "eligible": 75,
+        "verified": 75,
+        "pending": 9,
+        "blocked": 9,
+        "ready": 66,
+        "published": 141,
+        "target": 150
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-18T18:14:10.797285+00:00",
+      "proof_age": {
+        "under_5m": 223,
+        "over_5m": 2,
+        "never": 0,
+        "median_seconds": 118.44352,
+        "max_seconds": 302.132569
+      },
+      "routing_age": {
+        "under_60s": 78,
+        "over_60s": 0,
+        "median_seconds": 14.0297315
+      },
+      "sql": {
+        "active": 1,
+        "idle": 53
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.048,
+        "status": 200,
+        "bytes": 95629,
+        "lines": 429
+      }
+    }
+  },
+  "native_diagnostics": [
+    {
+      "proof": {
+        "classes": {
+          "DIRECT": true,
+          "RESIDENTIAL": true
+        },
+        "core_current": null,
+        "probe_events": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 50,
+            "ok": true,
+            "reason": "http_body",
+            "status": 200,
+            "target": "example.com"
+          },
+          {
+            "attempts": 1,
+            "elapsed_ms": 10292,
+            "ok": true,
+            "reason": "http_body",
+            "status": 200,
+            "target": "browserleaks.com"
+          }
+        ],
+        "reason": "",
+        "verified": true
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    },
+    {
+      "proof": {
+        "classes": {
+          "DIRECT": true,
+          "RESIDENTIAL": true
+        },
+        "core_current": null,
+        "probe_events": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 33,
+            "ok": true,
+            "reason": "http_body",
+            "status": 200,
+            "target": "example.com"
+          },
+          {
+            "attempts": 1,
+            "elapsed_ms": 3456,
+            "ok": true,
+            "reason": "http_body",
+            "status": 200,
+            "target": "browserleaks.com"
+          }
+        ],
+        "reason": "",
+        "verified": true
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "native_failure_detail": [
+    {
+      "proof": {
+        "class_diagnostics": {
+          "DIRECT": {},
+          "RESIDENTIAL": {}
+        },
+        "classes": {
+          "DIRECT": true,
+          "RESIDENTIAL": false
+        },
+        "core_current": null,
+        "probe_events": [
+          {
+            "attempt": 1,
+            "code": "SSLEOFError",
+            "elapsed_ms": 71,
+            "errno": 8,
+            "ok": false,
+            "stage": "connect",
+            "target": "browserleaks.com"
+          },
+          {
+            "attempt": 1,
+            "code": "ok",
+            "elapsed_ms": 102,
+            "ok": true,
+            "status": 200,
+            "target": "example.com"
+          },
+          {
+            "attempt": 2,
+            "code": "SSLEOFError",
+            "elapsed_ms": 365,
+            "errno": 8,
+            "ok": false,
+            "stage": "connect",
+            "target": "browserleaks.com"
+          }
+        ],
+        "reason": "",
+        "verified": true
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    },
+    {
+      "proof": {
+        "class_diagnostics": {
+          "DIRECT": {},
+          "RESIDENTIAL": {}
+        },
+        "classes": {
+          "DIRECT": true,
+          "RESIDENTIAL": false
+        },
+        "core_current": null,
+        "probe_events": [
+          {
+            "attempt": 1,
+            "code": "SSLEOFError",
+            "elapsed_ms": 1026,
+            "errno": 8,
+            "ok": false,
+            "stage": "connect",
+            "target": "browserleaks.com"
+          },
+          {
+            "attempt": 1,
+            "code": "ok",
+            "elapsed_ms": 1211,
+            "ok": true,
+            "status": 200,
+            "target": "example.com"
+          },
+          {
+            "attempt": 2,
+            "code": "SSLEOFError",
+            "elapsed_ms": 1503,
+            "errno": 8,
+            "ok": false,
+            "stage": "connect",
+            "target": "browserleaks.com"
+          }
+        ],
+        "reason": "",
+        "verified": true
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "egress_sample": [
+    {
+      "proof": {
+        "proxies_sampled": 4,
+        "results": [
+          {
+            "body_present": false,
+            "elapsed_ms": 3012,
+            "proxy_slot": 0,
+            "status": 204,
+            "target": "connectivitycheck.gstatic.com",
+            "tls_ok": true
+          },
+          {
+            "body_present": true,
+            "elapsed_ms": 4094,
+            "proxy_slot": 0,
+            "status": 200,
+            "target": "browserleaks.com",
+            "tls_ok": true
+          },
+          {
+            "body_present": false,
+            "elapsed_ms": 3990,
+            "proxy_slot": 1,
+            "status": 204,
+            "target": "connectivitycheck.gstatic.com",
+            "tls_ok": true
+          },
+          {
+            "code": "TimeoutError",
+            "elapsed_ms": 3072,
+            "proxy_slot": 1,
+            "target": "browserleaks.com"
+          },
+          {
+            "code": "TimeoutError",
+            "elapsed_ms": 3015,
+            "proxy_slot": 2,
+            "target": "connectivitycheck.gstatic.com"
+          },
+          {
+            "code": "TimeoutError",
+            "elapsed_ms": 3016,
+            "proxy_slot": 2,
+            "target": "browserleaks.com"
+          },
+          {
+            "code": "TimeoutError",
+            "elapsed_ms": 3015,
+            "proxy_slot": 3,
+            "target": "connectivitycheck.gstatic.com"
+          },
+          {
+            "code": "TimeoutError",
+            "elapsed_ms": 3021,
+            "proxy_slot": 3,
+            "target": "browserleaks.com"
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "remaining_issue": "Repeated Residential TLS EOF and timeout failures; current output completeness is not accepted. New fleet enrollment also temporarily changes the denominator. No specific new config-code defect was established by this observation.",
+  "scope": "No policy, credentials, native runtime, installed version or publication safeguards changed. Native diagnostics create and remove temporary loopback clients and never authorize production proof. Catalog and Output requests are separate reads and may differ while workers progress.",
+  "previous_tests": "Prior deployed release: 41 mandatory regressions, 11 mobile scenarios and 6 Output viewer cases. Not rerun in this continuation because production source was unchanged.",
+  "external_openai_api_calls": 0,
+  "evidence": [
+    {
+      "file": "config-resume-evening-observation.jsonl",
+      "sha256": "bfad999a7b13385ae70eb97d67e5ec2662e6cb32350a4e8c079adb97ef7fe31b"
+    },
+    {
+      "file": "config-resume-evening-gaps.jsonl",
+      "sha256": "675ad3d60c294bebd38796fcc85824a3cb6dc1d78387a4bf892a56727fb3fdda"
+    },
+    {
+      "file": "config-resume-evening-preservation.json",
+      "sha256": "bd4ca43742f334e3eebee5fdeb424ebbf85febb457b98565eaec2fd90b6601be"
+    },
+    {
+      "file": "config-resume-evening-primary-final.json",
+      "sha256": "10fe240b1d5f86d06492ce8e4a20ef10a986eb7c4132f124ce5e32aff0fcbd18"
+    },
+    {
+      "file": "config-resume-evening-secondary-final.json",
+      "sha256": "fe1b0e6bca36511b7bf10c744cb84432b5ad28bf04b5d2f3ef4f8b91deeab0f0"
+    },
+    {
+      "file": "config-resume-evening-native-diagnostic.json",
+      "sha256": "73373c18814c606c632f0003ac181e7dfae9bb856e4670b7f7cf48a33156d557"
+    },
+    {
+      "file": "config-resume-evening-native-detail.json",
+      "sha256": "14740d1c877cc83285606e77da4e51c63ecadce15682922392ba4383e78b7854"
+    },
+    {
+      "file": "config-resume-evening-egress-comparison.json",
+      "sha256": "b5b17addc58ec5a60e0c5fb0d2fb0b2fd2cf30ae53e95a1764bc091241792248"
+    },
+    {
+      "file": "isolation-187-metrics-resume-evening-final-20261018.json",
+      "sha256": "c0289f38acab73b9351dd4b00ea7b5a4a4600cc584d6e69ae6e24bd4c63da0e9"
+    }
+  ]
+}

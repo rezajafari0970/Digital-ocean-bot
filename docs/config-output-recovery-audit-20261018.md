@@ -46,3 +46,28 @@ Main observation ran 12:38:28–12:44:33 UTC, 364.839 seconds and 25 samples. Al
 The 181 two-second diagnostic frames retained twelve incomplete observations, including the startup refresh, the class timeout and one newly enrolled server at the end of the interval. This last event increased the cohort from 240 to243 profile listeners and was not discarded. A separate six-sample follow-up verified automatic creation and proof for all three profiles on the new server: output reached486/486 on81 eligible servers. At the last follow-up at12:47:19 UTC, the eligible cohort had changed to80 servers and remained complete at480/480, with zero pending or blocked profiles. The final atomic check at12:47:38 UTC had240 eligible listeners and zero gaps. All follow-up readiness/Output requests passed.
 
 All implementation, validation, publication and deployment stages in this audit are complete. Publication/TLS/ownership safeguards and independent class policies remain enforced. No percentage speedup, arbitrary hot-loaded plugin capability or permanently fault-free operation is claimed. External OpenAI API calls: zero. Machine-readable evidence is in `docs/development-jobs/config-output-recovery-acceptance-20261018.json`.
+
+
+## Evening continuation: output completeness remains open
+
+Fresh checks at 18:05 UTC and 18:14 UTC found both controllers still on `16f3b68`, schema187, with exact binary hashes, all three services active, no unexpected restarts and successful readiness. Environment, creation, Output, protection, legacy and unified policies are unchanged. Profile settings are unchanged after excluding only the expected worker scheduling timestamp. Longitudinal identity/credential preservation still passes for 1985 shared listeners; 117 native retirements are independently supported by provider-confirmed absence, and obsolete terminal errors remain zero.
+
+This new observation does **not** repeat the earlier complete-output acceptance. At 18:05:59 UTC the current fleet had72 eligible servers and430/432 links. The five-minute sampler from18:06:22 to18:11:26 UTC collected21 successful Output/readiness responses, but zero fully complete samples. Published counts ranged408–425 while the target changed438–444 as the live fleet enrolled servers. Output response time was32–51ms, median37ms. All151 atomic diagnostic frames are retained, including incomplete ones.
+
+Failures predominantly concern Residential class traffic. Two read-only native probes reproduced TLS EOF during connection establishment while the corresponding Direct requests succeeded. Other native probes on two initially affected servers returned valid TLS/HTTP200/body evidence for both classes; subsequent ordinary-worker database receipts confirmed all three profiles on both servers with two current class proofs. Recovery therefore works for observed instances, but recurring new failures prevented overall completeness.
+
+An isolated diagnostic on one affected node tested four existing proxy outbounds directly, without changing the running configuration or publishing evidence. Two proxies timed out against both the observatory and Residential test destinations. One returned valid HTTPS from both; another reached the observatory but timed out against the Residential destination. This supports a current egress/connectivity bottleneck; it does not establish a new config-code defect or prove that any single threshold change would solve it. The existing3-second local observatory/selection settings and all publication safeguards were retained.
+
+At18:14:10 UTC a separate follow-up catalog reported75 eligible servers, target450 and427 published links; the immediately subsequent Output request returned429 lines in48ms. These are separate reads while workers are progressing, not an atomic count mismatch. Two native proofs had just crossed the five-minute freshness limit. This snapshot is not labeled complete.
+
+| Stage | Fresh status |
+| --- | --- |
+| Recover checkpoint and compare releases | Passed |
+| Runtime readiness and exact installed binaries on both controllers | Passed |
+| Configuration, credentials and native identity preservation | Passed |
+| Ordinary-worker recovery and new-server reconciliation | Observed, with recurring new failures |
+| Complete Config/Output acceptance | Not passed; Residential connectivity remains open |
+| New code fix or deployment | None; no new software defect established |
+| Record evidence | Completed in this continuation |
+
+The prior41 mandatory,11 mobile and6 Output test results remain historical evidence for the unchanged release; they were not rerun or represented as fresh tests. No production SQL repair, policy relaxation, credentials change, native restart or new installation was performed. Next work should investigate the remaining Residential connectivity under the existing policy; complete output must be revalidated after that bottleneck is resolved. Machine-readable evidence: `docs/development-jobs/config-resume-evening-20261018.json`. External OpenAI API calls: zero.
