@@ -27,7 +27,7 @@ Verification checks the pinned running core, its listening socket, active user
 membership and an authenticated HTTPS round trip for each routing class. The controller also
 checks reachability of the published port, independently of the node-local probe.
 TLS profiles also require a valid publicly trusted server-IP certificate.
-Certificates renew automatically. A fresh routing proof, enabled account,
+Certificates renew automatically. Runtime probes use the allowed destination for each route class. Eight supervised verification lanes share the existing panel-work budget; native writes release their shared executor before read-only traffic proof. Uncertain SENT writes recover by observation without queuing behind unrelated writers. A fresh routing proof, enabled account,
 eligible server and current verified profile revision are required for output.
 A saved port/transport change immediately fences the previous revision from
 new output until the change verifies. Existing imported clients need to refresh
@@ -81,3 +81,5 @@ For this change, the installed Sanaei panel additionally passed creation,
 independent port change and fresh runtime verification for all 16 public
 combinations in a disposable container. Production rollout evidence and progress
 are recorded separately in the development job.
+
+The final rollout also isolates scheduler admission and billing observations from the bulk recovery queue, preserving the five-operation control budget and 24-connection SQL pool. Production stage results and explicitly retained limitations are in [the development job](development-jobs/config-drivers-20261018.json).

@@ -1,6 +1,6 @@
 {
   "id": "config-drivers-20261018",
-  "status": "in_progress",
+  "status": "completed_with_documented_limits",
   "baseline": "efcd78acc8c118149ec3bdb3bd0c12d61d5c485b",
   "stages": [
     {
@@ -25,7 +25,13 @@
     },
     {
       "name": "release_and_rollout",
-      "status": "in_progress"
+      "status": "verified",
+      "evidence": "Release 3bb0417 installed on both hosts; source 4a5041c; five readiness checks per host, matching running binary hashes, 600 existing Reality pins and existing credentials/policies preserved."
+    },
+    {
+      "name": "production_output_and_control_progress",
+      "status": "verified",
+      "evidence": "Seven repeated ready observations; scheduler advanced throughout bulk recovery backlog. Final two Trojan profiles each verified 73/73. General and shared output covered all 73 healthy servers; country and connection mismatches zero."
     }
   ],
   "constraints": [
@@ -35,7 +41,7 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T01:44:02.973946+00:00",
+  "updated_at": "2026-10-18T02:02:15.777326+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
@@ -60,13 +66,338 @@
     {
       "finding": "Post-rollout readiness exposed an older control-plane convoy: scheduler and billing waited behind the single bulk recovery lane; scheduler progress exceeded five minutes despite healthy panel output.",
       "result": "Scheduler gets an independent admission class under the unchanged five-operation parent; billing uses bounded provider-observation capacity. Account/capacity locks unchanged. Saturated-lane and actual 24-connection PostgreSQL pool regressions are required for publication."
+    },
+    {
+      "finding": "Final control scheduler qualification initially exceeded zero-wait SQL headroom with six simultaneous owners.",
+      "result": "Rejected before publication; retained the original five-operation and 24-connection limits, with separate scheduler admission. Worst admitted PostgreSQL pool regression passed with zero wait/leak."
     }
   ],
   "release_attempt": {
-    "source": "9170fca4e7387bf0730eb5d8b89a029e9dfcd5a6",
-    "public": "6092a330f8c98d5321d8d0ef8e23c8876b8c575a",
-    "primary": "installed, 598 Reality pins retained",
-    "secondary": "installed and verified",
-    "coverage": "Both Trojan profiles reached 74/74; all output classes covered stable healthy servers in six consecutive samples after startup. Scheduler readiness follow-up in progress."
+    "source": "4a5041c66ba646f3525da4e891035d505b2f48e7",
+    "public": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
+    "primary": "verified",
+    "secondary": "verified",
+    "schema": "000184_config_profiles"
+  },
+  "validation": {
+    "mandatory_regressions_passed": 26,
+    "mandatory_regressions_skipped": 0,
+    "native_core_uri_roundtrips": 17,
+    "native_sanaei_public_driver_lifecycles": 16,
+    "external_authenticated_uri_probes_passed": 52,
+    "external_authenticated_uri_probes_total": 52,
+    "readiness_samples": 7,
+    "ready_samples": 7,
+    "fully_covered_samples": 4,
+    "startup_and_rotation_samples_preserved": true,
+    "scheduler_distinct_progress_observations": 7,
+    "scheduler_max_observed_age_seconds": 11.896095,
+    "control_db_wait_count": 0,
+    "billing_errors_since_final_rollout": 0
+  },
+  "production_snapshot": {
+    "observed_at": "2026-10-18T01:59:15.065318+00:00",
+    "dashboard": {
+      "degraded_accounts": 0,
+      "pending_deletion_accounts": 0,
+      "active_servers": 73,
+      "inactive_servers": 4,
+      "broken_servers": 0,
+      "degraded_servers": 0,
+      "pending_deletion_servers": 16,
+      "total_servers": 93,
+      "provisioning_servers": 4,
+      "provider_stale_servers": 0,
+      "panel_attention_servers": 0,
+      "active_deployments": 4
+    },
+    "profiles": [
+      {
+        "port": 8443,
+        "protocol": "trojan",
+        "eligible": 73,
+        "verified": 73,
+        "blocked": 0,
+        "pending": 0
+      },
+      {
+        "port": 10000,
+        "protocol": "trojan",
+        "eligible": 73,
+        "verified": 73,
+        "blocked": 0,
+        "pending": 0
+      }
+    ],
+    "outputs": {
+      "ALL": {
+        "by_port": {
+          "trojan:10000": 146,
+          "vless:443": 212,
+          "trojan:8443": 146
+        },
+        "servers_by_port": {
+          "trojan:10000": 73,
+          "vless:443": 73,
+          "trojan:8443": 73
+        },
+        "counts": {
+          "trojan": 292,
+          "vless": 212
+        },
+        "servers": {
+          "trojan": 73,
+          "vless": 73
+        },
+        "ports": {
+          "trojan": [
+            8443,
+            10000
+          ],
+          "vless": [
+            443
+          ]
+        },
+        "bad": {},
+        "missing_stable_by_protocol": {
+          "trojan": 0,
+          "vless": 0
+        }
+      },
+      "DIRECT": {
+        "by_port": {
+          "trojan:8443": 73,
+          "vless:443": 70,
+          "trojan:10000": 73
+        },
+        "servers_by_port": {
+          "trojan:8443": 73,
+          "vless:443": 70,
+          "trojan:10000": 73
+        },
+        "counts": {
+          "trojan": 146,
+          "vless": 70
+        },
+        "servers": {
+          "trojan": 73,
+          "vless": 70
+        },
+        "ports": {
+          "trojan": [
+            8443,
+            10000
+          ],
+          "vless": [
+            443
+          ]
+        },
+        "bad": {},
+        "missing_stable_by_protocol": {
+          "trojan": 0,
+          "vless": 3
+        }
+      },
+      "RESIDENTIAL": {
+        "by_port": {
+          "vless:443": 69,
+          "trojan:10000": 73,
+          "trojan:8443": 73
+        },
+        "servers_by_port": {
+          "vless:443": 69,
+          "trojan:10000": 73,
+          "trojan:8443": 73
+        },
+        "counts": {
+          "vless": 69,
+          "trojan": 146
+        },
+        "servers": {
+          "vless": 69,
+          "trojan": 73
+        },
+        "ports": {
+          "vless": [
+            443
+          ],
+          "trojan": [
+            8443,
+            10000
+          ]
+        },
+        "bad": {},
+        "missing_stable_by_protocol": {
+          "vless": 4,
+          "trojan": 0
+        }
+      }
+    },
+    "country_outputs": {
+      "ALL": {
+        "links": 504,
+        "servers": 73,
+        "response_ms": 33.1,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇯🇵 Japan": 262,
+          "🇸🇬 Singapore": 172,
+          "🇰🇷 South Korea": 70
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "DIRECT": {
+        "links": 216,
+        "servers": 73,
+        "response_ms": 33.48,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇯🇵 Japan": 112,
+          "🇸🇬 Singapore": 74,
+          "🇰🇷 South Korea": 30
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "RESIDENTIAL": {
+        "links": 215,
+        "servers": 73,
+        "response_ms": 29.17,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇰🇷 South Korea": 30,
+          "🇸🇬 Singapore": 73,
+          "🇯🇵 Japan": 112
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_ALL": {
+        "links": 504,
+        "servers": 73,
+        "response_ms": 29.45,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 172,
+          "🇯🇵 Japan": 262,
+          "🇰🇷 South Korea": 70
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_DIRECT": {
+        "links": 216,
+        "servers": 73,
+        "response_ms": 30.78,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇰🇷 South Korea": 30,
+          "🇸🇬 Singapore": 74,
+          "🇯🇵 Japan": 112
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "SHARE_RESIDENTIAL": {
+        "links": 215,
+        "servers": 73,
+        "response_ms": 42.35,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇯🇵 Japan": 112,
+          "🇸🇬 Singapore": 73,
+          "🇰🇷 South Korea": 30
+        },
+        "connection_mismatches": 0,
+        "missing_stable": 0
+      },
+      "ACCOUNT_digitalocean_DIRECT": {
+        "links": 24,
+        "servers": 8,
+        "response_ms": 26.99,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 24
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_digitalocean_RESIDENTIAL": {
+        "links": 24,
+        "servers": 8,
+        "response_ms": 23.12,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 24
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_linode_DIRECT": {
+        "links": 29,
+        "servers": 10,
+        "response_ms": 23.85,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇯🇵 Japan": 29
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      },
+      "ACCOUNT_linode_RESIDENTIAL": {
+        "links": 26,
+        "servers": 9,
+        "response_ms": 23.02,
+        "technical_names": 0,
+        "country_mismatches": 0,
+        "unknown": 0,
+        "country_counts": {
+          "🇸🇬 Singapore": 26
+        },
+        "connection_mismatches": 0,
+        "missing_stable": null
+      }
+    }
+  },
+  "preservation": {
+    "existing_reality_pins": 600,
+    "changed_existing_reality_pins": 0,
+    "account_ids_preserved": true,
+    "environment_preserved": true,
+    "existing_credentials_and_native_ids_preserved": true,
+    "new_server_creation_continued_during_rollout": true
+  },
+  "limitations": [
+    "Current official pinned Xray rejects plaintext Trojan to public IPs. Public Trojan profiles use TLS; private-only plain capability is explicitly unavailable for this public fleet.",
+    "New independent profile credentials follow server lifetime and have no per-client quota or expiry. Existing Reality quotas, expiries and rotation remain under their preserved controller.",
+    "Protocol and credential membership are immutable after profile creation; port, compatible transport, name, server scope and enabled state remain editable.",
+    "Drivers are compiled, reviewed modules, not arbitrary executable uploads.",
+    "Live counts change during provisioning/expiry. Legacy VLESS class-specific output was 70/73 Direct and 69/73 Residential in the final snapshot while automatic capacity fill continued; general VLESS output covered 73/73, and both Trojan profiles covered every class on 73/73.",
+    "Provider/network outages can cause real verification failures and temporary withholding; automated retries and regression gates reduce recurrence but cannot guarantee zero future outages.",
+    "Primary disk reserve is tight. Installer preflight safely blocked two attempts before service changes; only reproducible build copies/caches were reclaimed. Database/configuration backups were preserved."
+  ],
+  "openai_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost": 0
   }
 }
