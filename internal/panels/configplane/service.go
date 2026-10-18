@@ -58,7 +58,7 @@ func (s Service) run(ctx context.Context, verify bool) error {
  SELECT cp.id,pi.id,'dob:profile:'||cp.id::text,'config-profile:'||cp.id::text||':'||pi.id::text,cp.spec
  FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id
  JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE `+Eligible+`
- AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 minutes') ON CONFLICT DO NOTHING`); e != nil {
+ ON CONFLICT DO NOTHING`); e != nil {
 			return e
 		}
 		if e := s.finishRetired(ctx); e != nil {

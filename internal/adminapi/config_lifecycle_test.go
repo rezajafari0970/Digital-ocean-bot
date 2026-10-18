@@ -102,6 +102,8 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	defer remote.Close()
 	_, droplet, panel := seedPanel(t, db, remote.URL)
 	sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
+	// Every server counted as eligible must be enrolled, even near retirement.
+	sqlMust(t, db, "UPDATE droplets SET expires_at=now()+interval '5 minutes' WHERE id=$1", droplet)
 	sqlMust(t, db, "UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false,concurrency=1,panel_id=NULL,inbound_id=NULL")
 	secrets := &trojanTestSecrets{values: map[string][]byte{}}
 	svc := configplane.Service{DB: db, Secrets: secrets, SSH: &trojanTestSSH{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: secrets, Timeout: time.Second}}, Verify: func(context.Context, provisioning.Target, []byte, map[string]any) error {
@@ -116,8 +118,8 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if status != 200 {
 		t.Fatal(status)
 	}
-	if e := svc.Reconcile(ctx, p.ID, panel); e == nil {
-		t.Fatal("failed proof reported success")
+	if e := svc.RunOne(ctx); e == nil {
+		t.Fatal("eligible near-expiry server was not enrolled or failed proof reported success")
 	}
 	var mutation, state string
 	var revision int64
