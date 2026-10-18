@@ -14,7 +14,7 @@ import (
 func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, raws []json.RawMessage) []outputRecord {
 	rows, e := s.DB.QueryContext(ctx, `SELECT l.profile_id::text,l.credential_ref,l.remote_id,l.managed_key,pi.account_id::text,l.certificate_not_after
  FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id JOIN panel_instances pi ON pi.id=l.panel_id
- WHERE l.panel_id=$1 AND cp.enabled AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))
+ WHERE l.panel_id=$1 AND cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))
  AND l.state='VERIFIED' AND l.applied_revision=cp.revision AND l.applied_spec=cp.spec AND l.verified_at>now()-interval '5 minutes'
  AND (cp.spec->>'security'<>'tls' OR l.certificate_not_after>now()+interval '5 minutes')`, panel)
 	if e != nil {
@@ -91,7 +91,9 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 }
 
 const profileOutputVerified = ` EXISTS(SELECT 1 FROM config_driver_clients dc JOIN config_driver_listeners dl ON dl.profile_id=dc.profile_id AND dl.panel_id=dc.panel_id JOIN config_driver_profiles dp ON dp.id=dc.profile_id
- WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND o.config_profile_id=dp.id AND o.config_profile_revision=dp.revision AND dp.enabled AND (dp.fleet OR p.id=ANY(dp.panel_ids))
+ WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND o.config_profile_id=dp.id AND o.config_profile_revision=dp.revision AND dp.enabled AND dp.delete_requested_at IS NULL AND (dp.fleet OR p.id=ANY(dp.panel_ids))
+ AND dc.email=cr.email AND dc.route_class=cr.route_class AND dc.route_class=cr.effective_class
+ AND rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids)) AND rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds'
  AND dl.state='VERIFIED' AND dl.applied_revision=dp.revision AND dl.applied_spec=dp.spec AND dl.verified_at>now()-interval '5 minutes'
  AND (dp.spec->>'security'<>'tls' OR dl.certificate_not_after>now()+interval '5 minutes')) `
 const profileOutputOwned = ` EXISTS(SELECT 1 FROM config_driver_clients dc WHERE dc.panel_id=p.id AND dc.client_id=o.client_id) `

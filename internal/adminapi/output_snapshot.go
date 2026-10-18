@@ -176,31 +176,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 		http.Error(w, "invalid output scope", http.StatusBadRequest)
 		return
 	}
-	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
-	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
-	// A last verified admission closure stays withheld across stale/failed polls.
-	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
-	where += serverProtectionOutputPredicate
-	where += " AND (" + profileOutputOwned + " OR NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED'))) "
-	where += " AND ((o.config_profile_id IS NULL AND NOT (" + profileOutputOwned + ")) OR (" + profileOutputVerified + ")) "
-	where += ` AND (` + profileOutputOwned + ` OR o.uri NOT LIKE 'trojan://%' OR EXISTS(SELECT 1 FROM trojan_tcp_listeners tl CROSS JOIN trojan_tcp_policy tp WHERE tl.panel_id=p.id AND tp.enabled AND (tp.fleet OR p.id=ANY(tp.panel_ids)) AND tl.state='VERIFIED' AND tl.verified_at>now()-interval '5 minutes' AND tl.certificate_not_after>now()+interval '5 minutes')) `
-	args := []any{}
-	// Class publication requires a fresh running-core proof of the current revision.
-	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `
-	scoped := ` rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids)) `
-	if class != "ALL" {
-		args = append(args, class)
-		where += " AND (" + scoped + ") AND (" + proof + ") AND cr.effective_class=$1 AND cr.route_class=$1 "
-		// Profile links publish only clients whose immutable ownership carries
-		// that profile. Preserved manual/default clients retain their own limits.
-		where += ` AND (NOT EXISTS(SELECT 1 FROM reality_config_profiles) OR EXISTS(
-         SELECT 1 FROM bulk_user_ownership own JOIN bulk_user_generations gen ON gen.id=own.generation_id
-         JOIN reality_config_profiles profile ON profile.route_class=own.route_class
-         WHERE gen.panel_id=p.id AND own.client_id=o.client_id AND own.email=cr.email
-         AND own.state='ACTIVE' AND own.route_class=$1) OR EXISTS(SELECT 1 FROM trojan_tcp_clients tc JOIN trojan_tcp_listeners tl ON tl.panel_id=tc.panel_id WHERE tc.panel_id=p.id AND tc.client_id=o.client_id AND tc.email=cr.email AND tc.route_class=$1 AND tl.state='VERIFIED' AND o.uri LIKE 'trojan://%') OR EXISTS(SELECT 1 FROM config_driver_clients dc WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND dc.email=cr.email AND dc.route_class=$1)) `
-	} else {
-		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
-	}
+	where, args := outputPublicationFilter(class)
 	if scope != nil {
 		args = append(args, scope.AccountID, scope.Token)
 		// Revalidate capability and ownership in the same statement snapshot as output.
@@ -208,11 +184,6 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
    AND a.deleted_at IS NULL AND EXISTS(SELECT 1 FROM account_output_share_tokens ast
     WHERE ast.token=$3 AND ast.account_id=dr.account_id AND ast.route_class=$1 AND ast.revoked_at IS NULL) `
 	}
-	// A failed health check hides residential links immediately, ahead of reconciliation.
-	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR
- (rs.relay_mode AND (` + residentialsync.RelayOutputHealthySQL + `)) OR
- (NOT rs.relay_mode AND EXISTS(
- SELECT 1 FROM residential_proxies rp WHERE (rs.pool_enabled OR rp.proxy_id=rs.selected_proxy_id) AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'))) `
 	if raw := r.URL.Query().Get("expires_within_minutes"); raw != "" {
 		n, e := strconv.Atoi(raw)
 		if e != nil || n < 1 || n > 1440 {
@@ -305,4 +276,41 @@ func outputProfilePortAllowed(uri string, raw []byte) bool {
 		}
 	}
 	return false
+}
+
+// Status and subscription publication use the same SQL eligibility predicate.
+func outputPublicationFilter(class string) (string, []any) {
+	where := ` WHERE o.last_seen_at>=now()-interval '15 seconds' AND p.enabled=true AND d.state='PANEL_COMPLETE' AND a.enabled AND a.deletion_requested_at IS NULL AND a.provider_state='ACTIVE' AND ` + outputDropletStatePredicate + ` AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds') AND (o.visible_until IS NULL OR o.visible_until>now()) `
+	where += ` AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED')) `
+	// A last verified admission closure stays withheld across stale/failed polls.
+	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
+	where += serverProtectionOutputPredicate
+	where += " AND (" + profileOutputOwned + " OR NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED'))) "
+	where += " AND ((o.config_profile_id IS NULL AND NOT (" + profileOutputOwned + ")) OR (" + profileOutputVerified + ")) "
+	where += ` AND (` + profileOutputOwned + ` OR o.uri NOT LIKE 'trojan://%' OR EXISTS(SELECT 1 FROM trojan_tcp_listeners tl CROSS JOIN trojan_tcp_policy tp WHERE tl.panel_id=p.id AND tp.enabled AND (tp.fleet OR p.id=ANY(tp.panel_ids)) AND tl.state='VERIFIED' AND tl.verified_at>now()-interval '5 minutes' AND tl.certificate_not_after>now()+interval '5 minutes')) `
+	args := []any{}
+	// Class publication requires a fresh running-core proof of the current revision.
+	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `
+	scoped := ` rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids)) `
+	if class != "ALL" {
+		args = append(args, class)
+		where += " AND (" + scoped + ") AND (" + proof + ") AND cr.effective_class=$1 AND cr.route_class=$1 "
+		// Profile links publish only clients whose immutable ownership carries
+		// that profile. Preserved manual/default clients retain their own limits.
+		where += ` AND (NOT EXISTS(SELECT 1 FROM reality_config_profiles) OR EXISTS(
+         SELECT 1 FROM bulk_user_ownership own JOIN bulk_user_generations gen ON gen.id=own.generation_id
+         JOIN reality_config_profiles profile ON profile.route_class=own.route_class
+         WHERE gen.panel_id=p.id AND own.client_id=o.client_id AND own.email=cr.email
+         AND own.state='ACTIVE' AND own.route_class=$1) OR EXISTS(SELECT 1 FROM trojan_tcp_clients tc JOIN trojan_tcp_listeners tl ON tl.panel_id=tc.panel_id WHERE tc.panel_id=p.id AND tc.client_id=o.client_id AND tc.email=cr.email AND tc.route_class=$1 AND tl.state='VERIFIED' AND o.uri LIKE 'trojan://%') OR EXISTS(SELECT 1 FROM config_driver_clients dc WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND dc.email=cr.email AND dc.route_class=$1)) `
+	} else {
+		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
+	}
+	// A failed health check hides residential links immediately, ahead of reconciliation.
+	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR
+ (rs.relay_mode AND (` + residentialsync.RelayOutputHealthySQL + `)) OR
+ (NOT rs.relay_mode AND EXISTS(
+ SELECT 1 FROM residential_proxies rp WHERE (rs.pool_enabled OR rp.proxy_id=rs.selected_proxy_id) AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'))) `
+
+	where += ` AND (NOT EXISTS(SELECT 1 FROM config_control_authority WHERE unified) OR o.config_profile_id IS NOT NULL) `
+	return where, args
 }

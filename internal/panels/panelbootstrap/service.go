@@ -37,6 +37,13 @@ func (s Service) BootstrapPanel(ctx context.Context, p readyworker.Panel) error 
 	if s.DB == nil || s.Secrets == nil || p.ID == "" || s.ManagedKey == "" {
 		return errors.New("bootstrap config")
 	}
+	var unified bool
+	if e := s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+		return e
+	}
+	if unified {
+		return nil
+	}
 	var acc, did, host, user, keyref, puser, pref, path, state string
 	var pport int
 	err := s.DB.QueryRowContext(ctx, `

@@ -38,6 +38,15 @@ func (s Service) TryReconcilePanel(ctx context.Context, p readyworker.Panel, dry
 }
 
 func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bool) error {
+	if s.DB != nil {
+		var unified bool
+		if e := s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+			return e
+		}
+		if unified {
+			return nil
+		}
+	}
 	if s.DB == nil || s.Secrets == nil || p.ID == "" {
 		return errors.New("global reality config")
 	}

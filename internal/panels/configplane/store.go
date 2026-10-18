@@ -8,19 +8,23 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"strings"
+	"time"
 )
 
 type Profile struct {
-	ID       string            `json:"id"`
-	Name     string            `json:"name"`
-	Spec     configdriver.Spec `json:"spec"`
-	Enabled  bool              `json:"enabled"`
-	Fleet    bool              `json:"fleet"`
-	Panels   []string          `json:"panel_ids"`
-	Classes  []string          `json:"classes"`
-	Count    int               `json:"clients_per_class"`
-	Revision int64             `json:"revision"`
-	Legacy   string            `json:"legacy_key,omitempty"`
+	ID                string            `json:"id"`
+	Name              string            `json:"name"`
+	Spec              configdriver.Spec `json:"spec"`
+	Enabled           bool              `json:"enabled"`
+	Fleet             bool              `json:"fleet"`
+	Panels            []string          `json:"panel_ids"`
+	Classes           []string          `json:"classes"`
+	Count             int               `json:"clients_per_class"`
+	Revision          int64             `json:"revision"`
+	Legacy            string            `json:"legacy_key,omitempty"`
+	RequestID         string            `json:"request_id,omitempty"`
+	DeleteRequestedAt *time.Time        `json:"delete_requested_at,omitempty"`
+	DeletedAt         *time.Time        `json:"deleted_at,omitempty"`
 }
 type queryer interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -30,7 +34,7 @@ func Read(ctx context.Context, db queryer, id string) (Profile, error) {
 	p := Profile{}
 	var raw []byte
 	var legacy sql.NullString
-	e := db.QueryRowContext(ctx, "SELECT id::text,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,revision,legacy_key FROM config_driver_profiles WHERE id=$1", id).Scan(&p.ID, &p.Name, &raw, &p.Enabled, &p.Fleet, pq.Array(&p.Panels), pq.Array(&p.Classes), &p.Count, &p.Revision, &legacy)
+	e := db.QueryRowContext(ctx, "SELECT id::text,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,revision,legacy_key,delete_requested_at,deleted_at,COALESCE(request_id::text,'') FROM config_driver_profiles WHERE id=$1", id).Scan(&p.ID, &p.Name, &raw, &p.Enabled, &p.Fleet, pq.Array(&p.Panels), pq.Array(&p.Classes), &p.Count, &p.Revision, &legacy, &p.DeleteRequestedAt, &p.DeletedAt, &p.RequestID)
 	if e != nil {
 		return p, e
 	}
@@ -54,11 +58,12 @@ func Validate(p Profile) error {
 	return configdriver.Builtins().Validate(p.Spec, true)
 }
 
-const Eligible = `pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
+const EligibleTarget = `pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
  AND dr.state IN('READY','EXPIRING') AND dep.state='PANEL_COMPLETE'
  AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 seconds')
- AND cp.enabled AND (cp.fleet OR pi.id=ANY(cp.panel_ids))
- AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))`
+ AND (cp.fleet OR pi.id=ANY(cp.panel_ids))
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))`
+const Eligible = EligibleTarget + ` AND cp.enabled AND cp.delete_requested_at IS NULL `
 
 func Event(ctx context.Context, db *sql.DB, p Profile, panel, stage, code string) {
 	var target any

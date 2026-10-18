@@ -14,6 +14,13 @@ func (s SQLSource) EligibleReadyPanels(ctx context.Context) ([]Panel, error) {
 // EligibleRealityPanels partitions work using observed public VLESS listeners.
 // Both lanes still reconcile authoritative state under the same config lock.
 func (s SQLSource) EligibleRealityPanels(ctx context.Context, initial bool) ([]Panel, error) {
+	var unified bool
+	if err := s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); err != nil {
+		return nil, err
+	}
+	if unified {
+		return nil, nil
+	}
 	return s.eligibleReadyPanels(ctx, &initial)
 }
 func (s SQLSource) eligibleReadyPanels(ctx context.Context, initial *bool) ([]Panel, error) {

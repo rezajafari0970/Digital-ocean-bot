@@ -10,6 +10,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/trojantcp"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"strings"
@@ -80,6 +81,22 @@ func TestNativeProfileControlPlane(t *testing.T) {
 	service := configplane.Service{DB: db, Secrets: secrets, Runtimes: rt, SSH: profileFixtureSSH{}, ProbeTLS: func(context.Context, string, int) (trojantcp.TLSProof, error) {
 		return trojantcp.TLSProof{NotAfter: time.Now().Add(5 * 24 * time.Hour)}, nil
 	}}
+	reconcile := func(id string) error {
+		var err error
+		for attempt := 0; attempt < 3; attempt++ {
+			err = service.Reconcile(ctx, id, panel)
+			if err == nil || !strings.HasPrefix(err.Error(), "profile_runtime_") {
+				return err
+			}
+			t.Logf("runtime confirmation pending; observing again, attempt %d", attempt+1)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(2 * time.Second):
+			}
+		}
+		return err
+	}
 	catalog := configdriver.Builtins().Catalog()
 	for i, cap := range catalog {
 		if !cap.Public {
@@ -106,36 +123,75 @@ func TestNativeProfileControlPlane(t *testing.T) {
 			}
 			raw, _ := json.Marshal(spec)
 			sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,credential_ref,applied_spec,certificate_not_after) VALUES($1,$2,$3,$4,$5,now()+interval '5 days')", p.ID, panel, configdriver.ManagedPrefix+p.ID, "fixture:"+p.ID, raw)
-			if e := service.Reconcile(ctx, p.ID, panel); e != nil {
+			if e := reconcile(p.ID); e != nil {
 				t.Fatal("native create", e)
 			}
-			var id int64
-			if e := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1", p.ID).Scan(&id); e != nil {
-				t.Fatal(e)
+			// Exercise the public lifecycle, including confirmed native removal.
+			remove := func(profile configplane.Profile) {
+				t.Helper()
+				body, _ := json.Marshal(map[string]any{"revision": profile.Revision})
+				req := httptest.NewRequest("DELETE", "/", bytes.NewReader(body))
+				req.SetPathValue("id", profile.ID)
+				w := httptest.NewRecorder()
+				(&Server{DB: db}).deleteConfigProfile(w, req)
+				if w.Code != 202 {
+					t.Fatal("native delete request", w.Code)
+				}
+				if e := service.Reconcile(ctx, profile.ID, panel); e != nil {
+					t.Fatal("native delete", e)
+				}
+				var state string
+				if e := db.QueryRow("SELECT state FROM config_driver_listeners WHERE profile_id=$1", profile.ID).Scan(&state); e != nil || state != "RETIRED" {
+					t.Fatal("native delete incomplete", state, e)
+				}
 			}
-			t.Cleanup(func() {
-				cleanup, stop := context.WithTimeout(context.Background(), 20*time.Second)
-				defer stop()
-				session, e := rt.Acquire(cleanup, panel)
-				if e != nil {
-					t.Error(e)
-					return
-				}
-				if e = sanaei.DeleteInbound(cleanup, session.Session.Exec, id); e != nil {
-					t.Error("fixture cleanup", e)
-				}
-			})
 			p.Spec.Port += 100
 			code, p = profileSave(t, &Server{DB: db}, p, "PUT")
 			if code != 200 {
 				t.Fatal(code)
 			}
-			if e := service.Reconcile(ctx, p.ID, panel); e != nil {
+			if e := reconcile(p.ID); e != nil {
 				t.Fatal("native port change", e)
 			}
-			if e := service.Reconcile(ctx, p.ID, panel); e != nil {
+			if e := reconcile(p.ID); e != nil {
 				t.Fatal("native fresh verify", e)
 			}
+			p.Count = 2
+			code, p = profileSave(t, &Server{DB: db}, p, "PUT")
+			if code != 200 {
+				t.Fatal("native grow request", code)
+			}
+			if e := reconcile(p.ID); e != nil {
+				t.Fatal("native grow", e)
+			}
+			p.Count = 1
+			code, p = profileSave(t, &Server{DB: db}, p, "PUT")
+			if code != 200 {
+				t.Fatal("native shrink request", code)
+			}
+			if e := reconcile(p.ID); e != nil {
+				t.Fatal("native shrink", e)
+			}
+			if i == 0 {
+				p.Enabled = false
+				code, p = profileSave(t, &Server{DB: db}, p, "PUT")
+				if code != 200 {
+					t.Fatal(code)
+				}
+				if e := reconcile(p.ID); e != nil {
+					t.Fatal("native pause", e)
+				}
+				p.Enabled = true
+				code, p = profileSave(t, &Server{DB: db}, p, "PUT")
+				if code != 200 {
+					t.Fatal(code)
+				}
+				if e := reconcile(p.ID); e != nil {
+					t.Fatal("native resume", e)
+				}
+			}
+			remove(p)
+
 		})
 	}
 }

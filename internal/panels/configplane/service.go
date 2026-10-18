@@ -13,6 +13,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/trojantcp"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	secretstore "github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -25,8 +26,9 @@ type Service struct {
 	SSH      interface {
 		Run(context.Context, provisioning.Target, []byte, string) (string, error)
 	}
-	Verify   func(context.Context, provisioning.Target, []byte, map[string]any) error
-	ProbeTLS func(context.Context, string, int) (trojantcp.TLSProof, error)
+	Verify       func(context.Context, provisioning.Target, []byte, map[string]any) error
+	VerifyAbsent func(context.Context, provisioning.Target, []byte, int) error
+	ProbeTLS     func(context.Context, string, int) (trojantcp.TLSProof, error)
 }
 type target struct {
 	provisioning.Target
@@ -46,17 +48,36 @@ func (s Service) target(ctx context.Context, id, panel string) (target, error) {
 func (s Service) RunOne(ctx context.Context) error       { return s.run(ctx, false) }
 func (s Service) RunVerifyOne(ctx context.Context) error { return s.run(ctx, true) }
 func (s Service) run(ctx context.Context, verify bool) error {
-	lane := " AND (l.remote_id IS NULL OR l.applied_revision<>cp.revision OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours')) "
+	// Enrolment is idempotent. Claim due rows atomically so parallel workers do
+	// not repeatedly select the same slow server.
+	if !verify {
+		if e := s.initializeEmpty(ctx); e != nil {
+			return e
+		}
+		if _, e := s.DB.ExecContext(ctx, `INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,credential_ref,applied_spec)
+ SELECT cp.id,pi.id,'dob:profile:'||cp.id::text,'config-profile:'||cp.id::text||':'||pi.id::text,cp.spec
+ FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id
+ JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE `+Eligible+`
+ AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 minutes') ON CONFLICT DO NOTHING`); e != nil {
+			return e
+		}
+		if e := s.finishRetired(ctx); e != nil {
+			return e
+		}
+	}
+	lane := `(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)) OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
 	if verify {
-		lane = " AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision "
+		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT')`
 	}
 	var id, panel string
-	e := s.DB.QueryRowContext(ctx, `SELECT cp.id::text,pi.id::text FROM config_driver_profiles cp CROSS JOIN panel_instances pi
- JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
- LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
- WHERE `+Eligible+` AND (l.next_attempt_at IS NULL OR l.next_attempt_at<=now())
- AND (l.remote_id IS NOT NULL OR dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 minutes')
- `+lane+` ORDER BY l.attempted_at NULLS FIRST,cp.id,pi.id LIMIT 1`).Scan(&id, &panel)
+	e := s.DB.QueryRowContext(ctx, `WITH candidate AS (
+ SELECT l.profile_id,l.panel_id FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id
+ JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
+ WHERE l.next_attempt_at<=now() AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
+ AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
+ AND `+lane+` ORDER BY l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l SKIP LOCKED LIMIT 1)
+ UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds'
+ FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id::text,l.panel_id::text`).Scan(&id, &panel)
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil
 	}
@@ -84,10 +105,37 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 	}()
 	p, e := Read(ctx, s.DB, id)
-	if e != nil || !p.Enabled {
+	if e != nil || p.DeletedAt != nil {
 		return e
 	}
-	t, e := s.target(ctx, id, panel)
+	var existingMutation, existingOperation string
+	var mutationProfile []byte
+	var mutationCredential sql.NullString
+	err := s.DB.QueryRowContext(ctx, "SELECT mutation_state,mutation_profile,mutation_credential_ref,mutation_operation FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", id, panel).Scan(&existingMutation, &mutationProfile, &mutationCredential, &existingOperation)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if existingOperation == "DELETE" && existingMutation == "SENT" {
+		return s.retireListener(ctx, conn, p, panel)
+	}
+	recovering := existingMutation == "SENT"
+	if recovering {
+		if json.Unmarshal(mutationProfile, &p) != nil {
+			return errors.New("profile_journal_invalid")
+		}
+	}
+	desired, e := Read(ctx, s.DB, id)
+	if e != nil {
+		return e
+	}
+	removing := !desired.Enabled || desired.DeleteRequestedAt != nil || (!desired.Fleet && !containsPanel(desired.Panels, panel))
+	if removing && !recovering {
+		return s.retireListener(ctx, conn, desired, panel)
+	}
+	t, e := s.listenerTarget(ctx, panel)
+	if !recovering {
+		t, e = s.target(ctx, id, panel)
+	}
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil
 	}
@@ -108,7 +156,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
-		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage=$3,error_code=$4,next_attempt_at=now()+interval '30 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel, stage, code)
+		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage=$3,error_code=$4,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second' WHERE profile_id=$1 AND panel_id=$2", id, panel, stage, code)
 		Event(c, s.DB, p, panel, stage, code)
 	}()
 	generation, e := sanaei.UUIDv4()
@@ -142,47 +190,76 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	if json.Unmarshal(appliedRaw, &applied) != nil {
 		return errors.New("profile_saved_spec_invalid")
 	}
-	if mutation == "SENT" || mutation == "PREPARED" {
+	if mutation == "SENT" {
 		if json.Unmarshal(mutationRaw, &p.Spec) != nil || !mutationRevision.Valid {
 			return errors.New("profile_journal_invalid")
 		}
 		p.Revision = mutationRevision.Int64
 	}
-	var credentials configdriver.Credentials
+	var credentials, priorCredentials configdriver.Credentials
 	stage = "credentials"
 	e = sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
-		raw, e := s.Secrets.Get(ctx, t.AccountID, ref)
-		if errors.Is(e, secretstore.ErrSecretNotFound) {
-			if remote.Valid || mutation != "" {
+		raw, err := s.Secrets.Get(ctx, t.AccountID, ref)
+		if errors.Is(err, secretstore.ErrSecretNotFound) {
+			if remote.Valid || mutation == "SENT" {
 				return errors.New("profile_credentials_missing")
 			}
-			credentials, e = configdriver.NewCredentials(p.ID, panel, p.Classes, p.Count)
-			if e != nil {
-				return e
+			priorCredentials, err = configdriver.NewCredentials(p.ID, panel, p.Classes, p.Count)
+			if err != nil {
+				return err
 			}
-			raw, e = json.Marshal(credentials)
-			if e != nil {
-				return e
+			raw, _ = json.Marshal(priorCredentials)
+			if err = s.Secrets.Put(ctx, t.AccountID, ref, "config_profile_credentials", raw); err != nil {
+				return err
 			}
-			if !sanaei.ConfigLockHeld(ctx, s.DB, panel) {
-				return sanaei.ErrConfigOwnership
+		} else if err != nil {
+			return err
+		} else if err = DecodeCredentials(raw, p, &priorCredentials); err != nil {
+			return err
+		}
+		credentials = priorCredentials
+		if recovering {
+			if !mutationCredential.Valid {
+				return errors.New("profile_journal_invalid")
 			}
-			if e = s.Secrets.Put(ctx, t.AccountID, ref, "config_profile_credentials", raw); e != nil {
-				return e
+			raw, err = s.Secrets.Get(ctx, t.AccountID, mutationCredential.String)
+			if err != nil {
+				return err
 			}
-		} else if e != nil {
-			return e
-		} else if e = DecodeCredentials(raw, p, &credentials); e != nil {
-			return e
+			if err = DecodeCredentials(raw, p, &credentials); err != nil {
+				return err
+			}
+			ref = mutationCredential.String
+		} else {
+			resized, err := configdriver.Resize(priorCredentials, id, panel, p.Classes, p.Count)
+			if err != nil {
+				return err
+			}
+			if !reflect.DeepEqual(resized, priorCredentials) {
+				nextRef := "config-profile:" + id + ":" + panel + ":revision:" + strconv.FormatInt(p.Revision, 10)
+				raw, err = s.Secrets.Get(ctx, t.AccountID, nextRef)
+				if errors.Is(err, secretstore.ErrSecretNotFound) {
+					credentials = resized
+					raw, _ = json.Marshal(credentials)
+					if err = s.Secrets.Put(ctx, t.AccountID, nextRef, "config_profile_credentials", raw); err != nil {
+						return err
+					}
+				} else if err != nil {
+					return err
+				} else if err = DecodeCredentials(raw, p, &credentials); err != nil {
+					return err
+				}
+				ref = nextRef
+			}
+
 		}
 		for _, c := range credentials.Clients {
-			_, e = s.DB.ExecContext(ctx, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class) VALUES($1,$2,$3,$4,$5) ON CONFLICT(panel_id,client_id) DO NOTHING", id, panel, c.ID, c.Email, c.Class)
-			if e != nil {
-				return e
+			if _, err = s.DB.ExecContext(ctx, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class) VALUES($1,$2,$3,$4,$5) ON CONFLICT(panel_id,client_id) DO NOTHING", id, panel, c.ID, c.Email, c.Class); err != nil {
+				return err
 			}
 			var same bool
-			if e = s.DB.QueryRowContext(ctx, "SELECT profile_id=$3 AND email=$4 AND route_class=$5 FROM config_driver_clients WHERE panel_id=$1 AND client_id=$2", panel, c.ID, id, c.Email, c.Class).Scan(&same); e != nil {
-				return e
+			if err = s.DB.QueryRowContext(ctx, "SELECT profile_id=$3 AND email=$4 AND route_class=$5 FROM config_driver_clients WHERE panel_id=$1 AND client_id=$2", panel, c.ID, id, c.Email, c.Class).Scan(&same); err != nil {
+				return err
 			}
 			if !same {
 				return errors.New("profile_identity_conflict")
@@ -229,7 +306,12 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	// The global executor is acquired before the panel lock, matching legacy writers.
 	// A short queue timeout prevents a slow/offline profile from starving siblings.
 	stage = "executor_wait"
-	wantsWrite := !remote.Valid || applied != p.Spec || mutation == "PREPARED" || mutation == "SENT"
+	wantsWrite := !remote.Valid || applied != p.Spec || mutation == "PREPARED" || mutation == "SENT" || !reflect.DeepEqual(credentials, priorCredentials)
+	var retiredClients bool
+	if e = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_client_retirements WHERE profile_id=$1 AND panel_id=$2 AND confirmed_absent_at IS NULL)", id, panel).Scan(&retiredClients); e != nil {
+		return e
+	}
+	wantsWrite = wantsWrite || retiredClients
 	executorHeld := false
 	// SENT recovery is observation-only: it must never queue behind writers.
 	if wantsWrite && mutation != "SENT" {
@@ -247,13 +329,13 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		if e != nil {
 			return e
 		}
-		if !current.Enabled {
+		if !current.Enabled && !recovering {
 			return errors.New("profile_disabled")
 		}
-		if mutation != "SENT" && mutation != "PREPARED" && current.Revision != p.Revision {
+		if !recovering && current.Revision != p.Revision {
 			return errors.New("profile_revision_changed")
 		}
-		if _, e = s.target(ctx, id, panel); e != nil {
+		if _, e = s.target(ctx, id, panel); e != nil && !recovering {
 			return errors.New("profile_target_not_eligible")
 		}
 		rt, e := s.Runtimes.Acquire(ctx, panel)
@@ -275,7 +357,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 					return errors.New("profile_write_outcome_unconfirmed")
 				}
 				if remote.Valid {
-					prior, e := registry.Build(applied, t.Host, remark, credentials)
+					prior, e := registry.Build(applied, t.Host, remark, priorCredentials)
 					if e != nil {
 						return e
 					}
@@ -301,9 +383,9 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 						return e
 					}
 					var allowed bool
-					e := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM config_driver_profiles cp WHERE cp.id=$1 AND cp.enabled AND cp.revision=$3 AND (cp.fleet OR $2::uuid=ANY(cp.panel_ids))
+					e := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM config_driver_profiles cp WHERE cp.id=$1 AND cp.enabled AND cp.delete_requested_at IS NULL AND cp.revision=$3 AND (cp.fleet OR $2::uuid=ANY(cp.panel_ids))
       AND EXISTS(SELECT 1 FROM client_mutation_execution_gate g WHERE g.singleton AND g.enabled AND NOT g.kill_switch AND g.concurrency=1 AND (g.panel_id IS NULL OR g.panel_id=$2) AND g.inbound_id IS NULL)
-      AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=$2 AND cj.state NOT IN('SUCCEEDED','CANCELLED')))`, id, panel, p.Revision).Scan(&allowed)
+      AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=$2 AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED')))`, id, panel, p.Revision).Scan(&allowed)
 					if e != nil {
 						return e
 					}
@@ -311,7 +393,8 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 						return errors.New("profile_creation_blocked")
 					}
 					spec, _ := json.Marshal(p.Spec)
-					_, e = tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='APPLYING',stage='write_prepared',mutation_state='PREPARED',mutation_spec=$3,mutation_revision=$4,verified_at=NULL WHERE profile_id=$1 AND panel_id=$2", id, panel, spec, p.Revision)
+					frozen, _ := json.Marshal(p)
+					_, e = tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='APPLYING',stage='write_prepared',mutation_state='PREPARED',mutation_spec=$3,mutation_revision=$4,mutation_profile=$5,mutation_credential_ref=$6,mutation_operation='UPSERT',verified_at=NULL WHERE profile_id=$1 AND panel_id=$2", id, panel, spec, p.Revision, frozen, ref)
 					return e
 				})
 				if e != nil {
@@ -348,6 +431,26 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 					return errors.New("profile_sibling_changed")
 				}
 				Event(ctx, s.DB, p, panel, "native_observed", "")
+			}
+			// Native confirmation and traffic proof are different durable phases.
+			// Failed traffic never leaves an already-observed write in SENT forever.
+			nativeSnap, err := sanaei.InventoryFromRaw(panel, raws)
+			if err != nil {
+				return err
+			}
+			if _, err = (inventory.SQLStore{DB: s.DB}).Sync(ctx, nativeSnap); err != nil {
+				return err
+			}
+			if e = s.confirmNative(ctx, p, panel, observed, remark, ref, credentials, cert); e != nil {
+				return e
+			}
+			if executorHeld {
+				if e = s.retireUnusedClients(ctx, rt, id, panel, raws); e != nil {
+					return e
+				}
+			}
+			if removing {
+				return nil
 			}
 			for _, raw := range raws {
 				var native struct {
@@ -427,7 +530,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 						return e
 					}
 				}
-				_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code='',remote_id=$3,applied_spec=$4,applied_revision=$5,mutation_state='CONFIRMED',certificate_not_after=$6,verified_at=now(),next_attempt_at=now()+interval '2 minutes' WHERE profile_id=$1 AND panel_id=$2", id, panel, observed, spec, p.Revision, cert)
+				_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code='',failures=0,remote_id=$3,applied_spec=$4,applied_revision=$5,mutation_state='CONFIRMED',certificate_not_after=$6,verified_at=now(),next_attempt_at=now()+interval '2 minutes' WHERE profile_id=$1 AND panel_id=$2", id, panel, observed, spec, p.Revision, cert)
 				return e
 			})
 		})

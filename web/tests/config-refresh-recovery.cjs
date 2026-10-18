@@ -14,7 +14,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
   if(url.pathname==='/share/output/view-fixture'){res.setHeader('Content-Type',url.searchParams.get('view')==='1'?'text/html':'text/plain');res.end(url.searchParams.get('view')==='1'?outputHTML:'vless://fixture@host.test:443?note='+('long'.repeat(200))+'\n');return}
-  const data={'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'runtime-new-revision',installed_revision:'historical-old-revision',ended_at:'2026-10-12T10:00:00Z'},'/api/v1/residential-proxies':[],'/api/v1/residential-routing':{enabled:true,verified_panels:1,scoped_panels:1,configured_proxies:1,healthy_proxies:1},'/api/v1/residential-performance':{panels:[],experiment:null,routing_enabled:true,defaults:{}},'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
+  const data={'/api/v1/configs/profiles':{unified:true,drivers:[],profiles:[],servers:[],observed_at:new Date().toISOString()},'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'runtime-new-revision',installed_revision:'historical-old-revision',ended_at:'2026-10-12T10:00:00Z'},'/api/v1/residential-proxies':[],'/api/v1/residential-routing':{enabled:true,verified_panels:1,scoped_panels:1,configured_proxies:1,healthy_proxies:1},'/api/v1/residential-performance':{panels:[],experiment:null,routing_enabled:true,defaults:{}},'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(url.pathname in data?data[url.pathname]:{status:'ready',checks:[],active_servers:1}));
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
@@ -47,16 +47,9 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   const evaluate=async (expression,userGesture=false)=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture});if(r.exceptionDetails)throw Error('Evaluation failed: '+JSON.stringify(r.exceptionDetails));return r.result.value};
   async function waitFor(expression,ms=12000){const end=Date.now()+ms;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' body='+await evaluate('document.body.innerText.slice(-3000)'))}
   const mark=x=>{passed.push(x);console.log('PASS',x)};
-  await call('Page.navigate',{url:base+'/admin/#configs'});await waitFor('!!document.querySelector("#capacityStatusSlot")&&!activePageView.loading');
+  await call('Page.navigate',{url:base+'/admin/#configs'});await waitFor('!!document.querySelector("#configProfilesSlot")&&!activePageView.loading');
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
   await evaluate('window.testCap='+JSON.stringify(capacity));mark('initial mobile render');
-  // Older same-page response cannot overwrite the new DOM, even when transport ignores abort.
-  await evaluate("holdRead('old');window.oldPoll=refreshConfigStatus();void 0");await waitFor("fixtureHolds.some(x=>x.id==='old')");
-  await evaluate("load('configs')");await evaluate("finishRead('old',{...testCap,active:999});oldPoll");
-  assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('999')"),false);mark('same-page reload drops stale refresh');
-  // Navigation invalidates in-flight rendering and each freshly mounted slot.
-  await evaluate("holdRead('nav');window.navLoad=load('configs');void 0");await waitFor("fixtureHolds.some(x=>x.id==='nav')");
-  await evaluate("load('output')");await evaluate("finishRead('nav',testCap);navLoad");assert.equal(await evaluate("!!document.querySelector('#outputAutomationStatus')&&!document.querySelector('#capacityStatusSlot')"),true);mark('late full render cannot overwrite navigation');
   await evaluate("holdRead('account','/api/v1/accounts/123/dashboard');window.oldAccount=accountDash(123);void 0");await waitFor("fixtureHolds.some(x=>x.id==='account')");
   await evaluate("load('configs')");await evaluate("finishRead('account',{account:{name:'Old account'}});oldAccount");assert.equal(await evaluate('fixtureAlerts.length'),0);mark('superseded account read does not alert or replace current page');
   await evaluate("fixtureQueue.push({url:'/api/v1/accounts/123/dashboard',kind:'network'});accountDash(123)");await waitFor('activePageView.loadFailed');
@@ -75,44 +68,6 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
 
   await evaluate("load('configs')");
   await evaluate("window.previousView=activePageView;accountDash(123,{preserveHash:true})");assert.equal(await evaluate("current==='configs'&&activePageView===previousView"),true);mark('late account action cannot invalidate another route');
-  // Removing only one target while a request is in-flight is harmless and does not partially update.
-  await evaluate("holdRead('target');window.targetPoll=refreshConfigStatus();void 0");await waitFor("fixtureHolds.some(x=>x.id==='target')");
-  await evaluate("document.querySelector('#cleanupStatusSlot').remove();finishRead('target',{...testCap,active:888});targetPoll");
-  assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('888')"),false);await evaluate("load('configs')");mark('immutable target fences prevent null DOM and partial writes');
-  // Background failures retain last successful counters and recover without mutation.
-  for(const fault of [{kind:'network'},{kind:'json',body:null},{kind:'malformed'},{kind:'json',status:503,body:{error:'unavailable'}}]){
-   await evaluate('fixtureQueue.push({url:"/api/v1/config-capacity",...'+JSON.stringify(fault)+'});refreshConfigStatus()');
-   assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('last successful data')"),true);
-   assert.equal(await evaluate("document.querySelector('#capacityStatusSlot .stat b').textContent"),'20');
-   await evaluate("window.dispatchEvent(new Event('online'))");await waitFor("!document.querySelector('[data-read-status=configs]')");
-  }mark('network, null, malformed and HTTP errors preserve status and auto-recover');
-  await evaluate("holdRead('single');window.singlePoll=refreshConfigStatus();void 0");await waitFor("fixtureHolds.some(x=>x.id==='single')");
-  const before=await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity').length");await evaluate("Promise.all(Array.from({length:8},()=>refreshConfigStatus()))");assert.equal(await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity').length"),before);
-  await evaluate("finishRead('single',testCap);singlePoll");mark('polls are single-flight');
-  await evaluate("holdRead('hung');window.hungPoll=refreshConfigStatus();void 0");await waitFor("fixtureHolds.some(x=>x.id==='hung')");
-  await waitFor("document.querySelector('[data-read-status=configs]')",18000);assert.equal(await evaluate("fixtureHolds.find(x=>x.id==='hung').signal.aborted"),true);
-  await evaluate("window.dispatchEvent(new Event('online'))");await waitFor("!document.querySelector('[data-read-status=configs]')");await evaluate("finishRead('hung',{...testCap,active:777});hungPoll");assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('777')"),false);mark('hung reads timeout, recover, and ignore late completion');
-  // No successful initial render still recovers on its scheduled retry.
-  await evaluate("load('output');fixtureQueue.push({url:'/api/v1/config-capacity',kind:'network'});load('configs')");await waitFor("activePageView.loadFailed");
-  await waitFor("!!document.querySelector('#capacityStatusSlot')&&!activePageView.loadFailed",9000);mark('initial failed load recovers automatically');
-  // Modal edits are left untouched; paused reads resume after visibility change.
-  await evaluate("document.querySelector('#modalFields').innerHTML='<input id=fixtureEdit value=keep>';document.querySelector('#modal').showModal()");
-  const reads=await evaluate('fixtureCalls.length');await evaluate('refreshConfigStatus()');assert.equal(await evaluate('fixtureCalls.length'),reads);assert.equal(await evaluate("document.querySelector('#fixtureEdit').value"),'keep');
-  await evaluate("document.querySelector('#modal').close();document.dispatchEvent(new Event('visibilitychange'))");mark('modal edit preserved and visibility wake supported');
-  // Confirmed empty inventory is unavailable, not an invented zero count.
-  await waitFor("![...activePageView.polls.values()].some(x=>x.busy)");
-  await evaluate("fixtureQueue.push({url:'/api/v1/config-capacity',kind:'json',body:{...testCap,inbounds:[],target:0,active:0,deficit:0}});refreshConfigStatus()");
-  assert.equal(await evaluate("document.querySelector('#capacityStatusSlot .stat b').textContent"),'—');assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('Counts are unavailable')"),true);await evaluate("load('configs')");mark('empty snapshot explicitly unavailable');
-  // Missing and stale rows remain visible with accurate labels on both screen sizes.
-  const covered={...capacity,coverage:{eligible:3,observed:2,fresh:1,stale:1,missing:1},inbounds:[{...capacity.inbounds[0],observation_status:'fresh',observed_at:new Date().toISOString()},{...capacity.inbounds[0],panel_id:'stale',observation_status:'stale',observed_at:'2026-10-01T00:00:00Z'},{...capacity.inbounds[0],panel_id:'missing',target:null,active:null,deficit:null,observation_status:'missing'}]};
-  for(const width of [390,1280]){
-   await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<800});
-   await evaluate('fixtureQueue.push({url:"/api/v1/config-capacity",kind:"json",body:'+JSON.stringify(covered)+'});refreshConfigStatus()');
-   assert.equal(await evaluate("document.querySelector('[data-capacity-coverage]').innerText.includes('2 / 3 eligible')"),true);
-   assert.equal(await evaluate("document.querySelector('#capacityStatusSlot').innerText.includes('Unknown')"),true);
-   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
-  }mark('stale and missing coverage visible on mobile and desktop');
-  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   const accountHealth=[{id:'locked-fixture',name:'Locked <img src=x onerror=alert(1)>',provider:'digitalocean',health:'broken',reason:'LOCKED',provider_state:'LOCKED',provider_error_state:'PROXY_ERROR',observed_provider_status:'locked'},{id:'full-fixture',name:'Full account',provider:'digitalocean',health:'capacity',reason:'CAPACITY_FULL',provider_state:'ACTIVE'},{id:'transient-fixture',name:'Temporary network issue',provider:'vultr',health:'degraded',reason:'TRANSPORT_ERROR',provider_state:'ACTIVE'}];
   const health={account_health:accountHealth,account_health_total:3,account_health_truncated:false,broken_accounts:1,degraded_accounts:1,status:'ready',active_servers:45,inactive_servers:1,observed_at:new Date().toISOString(),server_health:[{account_name:'Fixture',provider:'upcloud',provider_resource_id:'fixture-resource',lifecycle_state:'READY',reason:'ROUTING_UNVERIFIED',provider_state:'TOKEN_INVALID'}]};
   await evaluate('fixtureQueue.push({url:"/api/v1/system",kind:"json",body:'+JSON.stringify(health)+'});load("dashboard")');
@@ -127,19 +82,12 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate("document.querySelector('#dashboardStatus .stat b').textContent"),'46');mark('dashboard refreshes without navigation and mobile reasons fit');
   await evaluate("holdRead('dashboard-old','/api/v1/system');window.dashboardOld=refreshDashboard();void 0");await waitFor("fixtureHolds.some(x=>x.id==='dashboard-old')");
   await evaluate('load("configs")');await evaluate('finishRead("dashboard-old",'+JSON.stringify(health)+');dashboardOld');
-  assert.equal(await evaluate("!!document.querySelector('#capacityStatusSlot')&&!document.querySelector('#dashboardStatus')"),true);mark('dashboard refresh cannot overwrite a different page');
+  assert.equal(await evaluate("!!document.querySelector('#configProfilesSlot')&&!document.querySelector('#dashboardStatus')"),true);mark('dashboard refresh cannot overwrite a different page');
   await evaluate("load('residential')");await waitFor("document.querySelector('#residentialPerformance')?.innerText.includes('No performance profile')");
   await evaluate("holdRead('performance-old','/api/v1/residential-performance');window.oldPerformance=refreshResidentialPerformance();void 0");await waitFor("fixtureHolds.some(x=>x.id==='performance-old')");
   const perfReads=await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length");await evaluate("Promise.all(Array.from({length:8},()=>refreshResidentialPerformance()))");assert.equal(await evaluate("fixtureCalls.filter(x=>x.url==='/api/v1/residential-performance').length"),perfReads);
   await evaluate("load('configs')");await evaluate("finishRead('performance-old',{panels:[],experiment:{id:'late'}});oldPerformance");
-  assert.equal(await evaluate("performanceStatus.experiment===null&&!!document.querySelector('#capacityStatusSlot')"),true);mark('residential status is single-flight and ignores obsolete responses');
-  // One click is one mutation; recoveries issue no POSTs.
-  const postBefore=await evaluate("fixtureCalls.filter(x=>x.method!=='GET').length");assert.equal(postBefore,0);
-  assert.equal(await evaluate("document.querySelector('[data-action=resume-capacity]').textContent"),'Recheck eligible client scopes');mark('running automation exposes explicit scope recovery');
-  await evaluate('fixtureQueue.push({url:"/api/v1/config-capacity",kind:"json",body:{...testCap,automation:{...testCap.automation,running:false}}});refreshConfigStatus()');
-  assert.equal(await evaluate("document.querySelector('[data-action=resume-capacity]').disabled"),false);
-  await evaluate("document.querySelector('[data-action=resume-capacity]').click();document.querySelector('[data-action=resume-capacity]').dispatchEvent(new MouseEvent('click',{bubbles:true}))");await waitFor("fixtureCalls.filter(x=>x.url==='/api/v1/config-capacity/resume').length===1&&!activePageView.loading");
-  await evaluate("refreshConfigStatus()");assert.equal(await evaluate("fixtureCalls.filter(x=>x.method!=='GET').length"),1);mark('resume sent once; automatic recovery is read-only');
+  assert.equal(await evaluate("performanceStatus.experiment===null&&!!document.querySelector('#configProfilesSlot')"),true);mark('residential status is single-flight and ignores obsolete responses');
   // The visible popup exists before any asynchronous sharing request begins.
   assert.deepEqual(await evaluate("(()=>{const w=openOutputWindow();const result=[!!w,w?.document.body.innerText.includes('Preparing your output'),w?.opener===null];w?.close();return result})()",true),[true,true,true]);mark('output popup immediately explains pending loading');
   // The popup can steal focus; restore the tested tab before visibility-gated reads.
@@ -150,11 +98,11 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate("document.querySelector('#projectUpdateStatus').innerText.includes('Last update installed revision: historical-o')"),true);mark('running version and old update receipt are distinct');
   await evaluate("load('configs')");
   // An expired admin session stops automatic reads, without automatically signing in.
-  await evaluate("fixtureQueue.push({url:'/api/v1/config-capacity',kind:'json',status:401,body:{error:'unauthorized'}});refreshConfigStatus()");assert.equal(await evaluate("token===''&&!document.querySelector('#login').hidden&&activePageView===null"),true);
-  const afterLogout=await evaluate('fixtureCalls.length');await evaluate("wakePageReads();refreshConfigStatus();refreshClientOpsStatus();refreshOutputAutomationStatus()");assert.equal(await evaluate('fixtureCalls.length'),afterLogout);mark('expired session invalidates reads and respects authentication');
+  await evaluate("fixtureQueue.push({url:'/api/v1/configs/profiles',kind:'json',status:401,body:{error:'unauthorized'}});refreshConfigProfiles()");assert.equal(await evaluate("token===''&&!document.querySelector('#login').hidden&&activePageView===null"),true);
+  const afterLogout=await evaluate('fixtureCalls.length');await evaluate("wakePageReads();refreshConfigProfiles()");assert.equal(await evaluate('fixtureCalls.length'),afterLogout);mark('expired session invalidates reads and respects authentication');
   // Only the local fixture establishes a replacement session; production login is never bypassed.
-  await evaluate("token='local-new-fixture';showApp()");await waitFor("!!document.querySelector('#capacityStatusSlot')&&!activePageView.loading");
-  assert.deepEqual(errors,[]);await evaluate("document.querySelector('#capacityStatusSlot').scrollIntoView();document.querySelector('#toast').hidden=true");const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'configs-mobile.png'),Buffer.from(shot.data,'base64'));
+  await evaluate("token='local-new-fixture';showApp()");await waitFor("!!document.querySelector('#configProfilesSlot')&&!activePageView.loading");
+  assert.deepEqual(errors,[]);await evaluate("document.querySelector('#configProfilesSlot').scrollIntoView();document.querySelector('#toast').hidden=true");const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'configs-mobile.png'),Buffer.from(shot.data,'base64'));
   await call('Page.navigate',{url:base+'/share/output/view-fixture?view=1'});await waitFor("document.querySelector('#configs')?.textContent.startsWith('vless://')");
   assert.equal(await evaluate("document.querySelector('#outputStatus').hidden"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);mark('human output wraps long URI lines on mobile without altering their text');
@@ -162,6 +110,6 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await waitFor("document.querySelector('#outputStatus').textContent.includes('temporarily unavailable')");
   assert.equal(await evaluate("document.querySelector('#configs').textContent"),'');
   await waitFor("document.querySelector('#configs').textContent.startsWith('vless://')&&document.querySelector('#outputStatus').hidden");mark('human output explains failure, clears stale URIs and recovers');
-  fs.writeFileSync(path.join(root,'result.json'),JSON.stringify({status:'PASS',passed,page_errors:errors,mutation_count:1},null,2));console.log('UI_REFRESH_RECOVERY_BROWSER_PASS');
+  fs.writeFileSync(path.join(root,'result.json'),JSON.stringify({status:'PASS',passed,page_errors:errors,mutation_count:0},null,2));console.log('UI_REFRESH_RECOVERY_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}
 })().catch(e=>{console.error(e);process.exitCode=1});

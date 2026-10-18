@@ -63,8 +63,16 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	// Only the fixed program is in argv; credentials stay in encrypted SSH stdin.
 	command := "python3 -c \"import base64;exec(base64.b64decode('" + base64.StdEncoding.EncodeToString([]byte(runtimeScript)) + "'))\""
 	out, err := ssh.RunInput(ctx, t, key, command, input)
-	var result struct{ Verified bool }
-	if err != nil || json.Unmarshal([]byte(out.Stdout), &result) != nil || !result.Verified {
+	var result struct {
+		Verified bool
+		Reason   string
+	}
+	decodeErr := json.Unmarshal([]byte(out.Stdout), &result)
+	if err != nil || decodeErr != nil || !result.Verified {
+		switch result.Reason {
+		case "binary", "socket", "users", "traffic":
+			return errors.New("profile_runtime_" + result.Reason + "_unverified")
+		}
 		return errors.New("profile_runtime_unverified")
 	}
 	// A node-local successful client does not prove its cloud firewall admits

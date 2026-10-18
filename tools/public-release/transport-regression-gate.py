@@ -19,11 +19,15 @@ from urllib.parse import urlencode
 
 REQUIRED = {
     "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom"),
-    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips"),
+    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),
     "internal/adminapi": (
+        "TestUnifiedProfileResizeDeleteAndRecovery",
+        "TestUnifiedProfileCreationIdempotency",
+        "TestUnifiedAuthorityRetiresLegacyWithoutBlockingCompletedPanels",
+        "TestUnifiedStatusCountsActualPublishedOutput",
         "TestProfileOutputRevisionScopeAndCountries",
         "TestConfigProfileAdoptionPreservesNativeCredentials",
         "TestConfigDriverProfileAdmission",

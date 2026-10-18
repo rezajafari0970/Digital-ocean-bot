@@ -41,6 +41,15 @@ type job struct {
 }
 
 func (s Service) RunOne(ctx context.Context) error {
+	if s.DB != nil {
+		var unified bool
+		if e := s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+			return e
+		}
+		if unified {
+			return nil
+		}
+	}
 	conn, e := s.DB.Conn(ctx)
 	if e != nil {
 		return e

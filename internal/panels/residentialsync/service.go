@@ -109,7 +109,7 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 	p := (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
 	var revision int64
 	var allowed bool
-	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),g.generate_residential,g.generate_direct,(SELECT count(*) FROM residential_proxies)
+	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),(g.generate_residential OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(g.generate_direct OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(SELECT count(*) FROM residential_proxies)
  FROM residential_routing_control c CROSS JOIN global_config_policies g WHERE c.singleton AND g.policy_key='reality'`, panel).Scan(&revision, &allowed, &p.Residential, &p.Direct, &p.Configured)
 	if err != nil {
 		return p, 0, err

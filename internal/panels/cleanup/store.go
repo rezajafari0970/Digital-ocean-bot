@@ -30,6 +30,10 @@ type Status struct {
 // Start snapshots scope and closes every automatic creation path atomically.
 // A repeated request returns the same immutable plan. Only explicit Resume retries failures.
 func (s Store) Start(ctx context.Context, scope []string) (string, error) {
+	return s.start(ctx, scope, false)
+}
+func (s Store) StartUnified(ctx context.Context) (string, error) { return s.start(ctx, nil, true) }
+func (s Store) start(ctx context.Context, scope []string, unified bool) (string, error) {
 	if scope == nil {
 		scope = []string{}
 	}
@@ -47,6 +51,16 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 	// Serialize transport admissions with the cleanup scope/freeze publication.
 	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(180061015)"); err != nil {
 		return "", err
+	}
+	if unified {
+		var active bool
+		var prior sql.NullString
+		if err = tx.QueryRowContext(ctx, "SELECT unified,reset_job_id::text FROM config_control_authority WHERE singleton FOR UPDATE").Scan(&active, &prior); err != nil {
+			return "", err
+		}
+		if active {
+			return prior.String, tx.Commit()
+		}
 	}
 	var id string
 	err = tx.QueryRowContext(ctx, "SELECT id::text FROM panel_cleanup_jobs WHERE state NOT IN('SUCCEEDED','CANCELLED') FOR UPDATE").Scan(&id)
@@ -67,6 +81,9 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 			}
 		}
 	} else {
+		if unified {
+			return "", errors.New("existing cleanup must finish before authority transition")
+		}
 		return id, tx.Commit()
 	}
 	for _, q := range []string{
@@ -78,6 +95,27 @@ func (s Store) Start(ctx context.Context, scope []string) (string, error) {
 		"UPDATE client_mutation_execution_gate SET enabled=false,kill_switch=true,updated_at=now()",
 	} {
 		if _, err = tx.ExecContext(ctx, q); err != nil {
+			return "", err
+		}
+	}
+	if unified {
+		for _, q := range []string{
+			"UPDATE reality_config_profiles SET enabled=false",
+			"UPDATE bulk_lifecycle_control SET enabled=false,auto_enroll=false",
+			"UPDATE config_driver_profiles SET delete_requested_at=now() WHERE deleted_at IS NULL",
+			"UPDATE client_mutation_jobs SET state='OBSOLETE',last_error='superseded by unified configuration authority',completed_at=now() WHERE state IN('PENDING','RUNNING')",
+			"UPDATE reality_transport_apply_jobs SET state='OBSOLETE',phase='UNIFIED_AUTHORITY',completed_at=now(),updated_at=now() WHERE state IN('PENDING','RUNNING','BLOCKED')",
+		} {
+			if _, err = tx.ExecContext(ctx, q); err != nil {
+				return "", err
+			}
+		}
+		if _, err = tx.ExecContext(ctx, "UPDATE config_control_authority SET unified=true,reset_job_id=$1,activated_at=now() WHERE singleton", id); err != nil {
+			return "", err
+		}
+		// Legacy controllers are closed; the existing serialized mutation safety
+		// gate now admits only the unified controller on completed cleanup panels.
+		if _, err = tx.ExecContext(ctx, "UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false,concurrency=1,panel_id=NULL,inbound_id=NULL,updated_at=now() WHERE singleton"); err != nil {
 			return "", err
 		}
 	}

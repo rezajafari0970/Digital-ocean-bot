@@ -39,8 +39,17 @@ func (s Service) RunOne(parent context.Context) (err error) {
 			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
 		}
 	}()
+	// Automatic recovery is scoped to the one-time unified retirement job.
+	// Each retry still starts with a fresh native inventory and exact identity.
+	if _, err = s.DB.ExecContext(ctx, `UPDATE panel_cleanup_targets t SET state='PENDING',updated_at=now()
+ FROM config_control_authority c WHERE c.unified AND t.job_id=c.reset_job_id AND t.state='FAILED' AND t.updated_at<now()-interval '30 seconds'`); err != nil {
+		return err
+	}
+	if _, err = s.DB.ExecContext(ctx, `UPDATE panel_cleanup_jobs j SET state='QUEUED' FROM config_control_authority c WHERE c.unified AND j.id=c.reset_job_id AND j.state='PAUSED' AND EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state='PENDING')`); err != nil {
+		return err
+	}
 	var job, panel string
-	err = s.DB.QueryRowContext(ctx, `SELECT t.job_id::text,t.panel_id::text FROM panel_cleanup_targets t JOIN panel_cleanup_jobs j ON j.id=t.job_id WHERE j.state IN('QUEUED','RUNNING') AND t.state IN('PENDING','RUNNING') ORDER BY j.created_at,t.panel_id LIMIT 1`).Scan(&job, &panel)
+	err = s.DB.QueryRowContext(ctx, `SELECT t.job_id::text,t.panel_id::text FROM panel_cleanup_targets t JOIN panel_cleanup_jobs j ON j.id=t.job_id WHERE j.state IN('QUEUED','RUNNING') AND t.state IN('PENDING','RUNNING') ORDER BY j.created_at,t.updated_at,t.panel_id LIMIT 1`).Scan(&job, &panel)
 	if errors.Is(err, sql.ErrNoRows) {
 		_, err = s.DB.ExecContext(ctx, `UPDATE panel_cleanup_jobs j SET state=CASE WHEN EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state='FAILED') THEN 'PAUSED' ELSE 'SUCCEEDED' END,completed_at=CASE WHEN EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state='FAILED') THEN NULL ELSE now() END WHERE state IN('QUEUED','RUNNING') AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets t WHERE t.job_id=j.id AND t.state IN('PENDING','RUNNING'))`)
 		return err
@@ -88,9 +97,9 @@ func (s Service) RunOne(parent context.Context) (err error) {
 }
 func (s Service) execute(ctx context.Context, job, panel string, exec sanaei.SessionExecutor) error {
 	var frozen bool
-	if err := s.DB.QueryRowContext(ctx, `SELECT NOT g.enabled AND (NOT m.enabled OR m.kill_switch) AND (NOT b.enabled OR b.kill_switch)
+	if err := s.DB.QueryRowContext(ctx, `SELECT NOT g.enabled AND ((NOT m.enabled OR m.kill_switch) OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified AND reset_job_id=$2)) AND (NOT b.enabled OR b.kill_switch)
  AND NOT EXISTS(SELECT 1 FROM bulk_lifecycle_scopes WHERE enabled)
- FROM global_config_policies g CROSS JOIN client_mutation_execution_gate m CROSS JOIN bulk_client_execution_gate b WHERE g.policy_key='reality'`).Scan(&frozen); err != nil {
+ FROM global_config_policies g CROSS JOIN client_mutation_execution_gate m CROSS JOIN bulk_client_execution_gate b WHERE g.policy_key='reality' AND NOT EXISTS(SELECT 1 FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id WHERE l.panel_id=$1 AND cp.delete_requested_at IS NULL AND l.remote_id IS NOT NULL AND l.state<>'RETIRED')`, panel, job).Scan(&frozen); err != nil {
 		return err
 	}
 	if !frozen {

@@ -1,47 +1,35 @@
+// Real mobile Chromium regression for the single configuration lifecycle.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),os=require('node:os'),{spawn}=require('node:child_process'),assert=require('node:assert/strict');
 (async()=>{
- const root=process.env.DOB_UI_ARTIFACT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'dob-view-test-'));
- fs.mkdirSync(root,{recursive:true});
- const staticRoot=path.resolve(__dirname,'../static');
- const profileData=[{route_class:'RESIDENTIAL',enabled:true,master_enabled:true,ports:[443],target_users_per_inbound:20,user_lifetime_seconds:600,users_per_second:1,revision:1}];
- const capacity={target:20,active:7,expired:0,quota_exhausted:0,deficit:13,created_last_cycle:1,inbounds:[{panel_id:'fixture',inbound_id:1,base_url:'http://fixture.invalid',port:443,target:20,active:7,deficit:13,created_last_cycle:1}],automation:{running:true,panels:[],cooldown_panels:0,quarantined_panels:0}};
- const outputHTML=fs.readFileSync(path.resolve(__dirname,'../../internal/adminapi/output_view.go'),'utf8').match(/io.WriteString\(w, `([\s\S]*?)`\)/)[1];
- const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};preset.flow="xtls-rprx-vision-udp443";preset.finalmask={tcp:preset.finalmask.tcp};preset.finalmask_enabled=true;preset.finalmask_scope="both";preset.browser_dialer="WebView";let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'Saved defaults apply to new listeners. Select Apply to existing to update managed listeners in sequence. Existing client IDs and limits are preserved; clients must refresh subscriptions.',finalmask_status:'TCP Fragment requires verified core; UDP and QUIC settings do not act on HTTP/2.',compatibility:'Vision uses VLESS Encryption; Browser Dialer requires TLS.'};const saves=[],actions=[];let trojan={policy:{enabled:false,port:8443,direct_enabled:true,residential_enabled:true,fleet:false,panel_ids:[],revision:1},listeners:[]};const trojanSaves=[];
- let profileCatalog={drivers:[],profiles:[],issues:[]};const driverSaves=[];
+ const root=process.env.DOB_UI_ARTIFACT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'dob-unified-ui-'));
+ fs.mkdirSync(root,{recursive:true});const staticRoot=path.resolve(__dirname,'../static');
+ const saves=[],deletions=[],requests=[];
+ let catalog={unified:true,automatic:true,observed_at:new Date().toISOString(),drivers:[],profiles:[],servers:[{id:'11111111-1111-4111-a111-111111111111',host:'192.0.2.10',region:'de-fra'},{id:'22222222-2222-4222-a222-222222222222',host:'192.0.2.20',region:'nl-ams'}]};
  for(const protocol of ['vless','vmess','trojan','shadowsocks'])for(const network of ['tcp','ws','grpc','xhttp'])for(const security of ['none','tls','reality']){
   const supported=protocol==='vless'&&(security==='reality'&&network!=='ws'||security==='tls'&&network!=='xhttp')||protocol==='vmess'&&network!=='xhttp'&&security!=='reality'||protocol==='trojan'&&(network!=='xhttp'&&security==='tls'||network==='tcp'&&security==='none')||protocol==='shadowsocks'&&network==='tcp'&&security==='none';
-  if(supported)profileCatalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:!(protocol==='trojan'&&security==='none')});
+  if(supported)catalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:!(protocol==='trojan'&&security==='none')});
  }
- let outputPolicy={revision:1,include_xhttp_extra:false,include_finalmask:false};const outputSaves=[];
  const server=http.createServer((req,res)=>{
-  const url=new URL(req.url,'http://127.0.0.1');
-  if(url.pathname==='/api/v1/configs/profiles'||url.pathname.startsWith('/api/v1/configs/profiles/')){
-   if(req.method==='POST'||req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);driverSaves.push(p);const profile={...p,id:p.id||'profile-'+driverSaves.length,revision:p.revision+1,spec:{...p.spec,port:p.spec.port||10000+driverSaves.length}};profileCatalog.profiles=[...profileCatalog.profiles.filter(x=>x.profile.id!==profile.id),{profile,eligible:2,verified:0,pending:2,blocked:0}];res.setHeader('Content-Type','application/json');res.end(JSON.stringify({profile,state:'queued'}))});return}
-   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(profileCatalog));return;
-  }
-  if(url.pathname==='/api/v1/configs/trojan'){
-   if(req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);trojanSaves.push(p);trojan.policy={...p,revision:p.revision+1};res.setHeader('Content-Type','application/json');res.end(JSON.stringify(trojan))});return}
-   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(trojan));return;
-  }
-  if(url.pathname==='/api/v1/configs/output-settings'){
-   if(req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);outputSaves.push(p);if(p.revision!==outputPolicy.revision){res.writeHead(409);res.end(JSON.stringify({error:'output_settings_changed'}));return}outputPolicy={...p,revision:p.revision+1};res.setHeader('Content-Type','application/json');res.end(JSON.stringify(outputPolicy))});return}
-   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(outputPolicy));return;
-  }
-  if(url.pathname==='/api/v1/configs/transport/apply'||url.pathname.startsWith('/api/v1/configs/transport/rollback/')){
-   actions.push(url.pathname);transport.applications=[{id:'00000000-0000-4000-8000-000000000001',panel_id:'fixture-panel',managed_key:'dob:global-reality:00443',state:actions.length===1?'SUCCEEDED':'PENDING',error:''}];res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport));return;
-  }
-  if(url.pathname==='/api/v1/configs/transport'){
-   if(req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);saves.push(p);if(p.revision!==transport.policy.revision){res.writeHead(409);res.end(JSON.stringify({error:'transport_revision_changed'}));return}transport.policy={revision:p.revision+1,config:p.config};res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport))});return}
-   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(transport));return;
+  const url=new URL(req.url,'http://127.0.0.1');requests.push([req.method,url.pathname]);
+  const json=(body,status=200)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(body))};
+  if(url.pathname.startsWith('/api/v1/configs/profiles')){
+   if(url.pathname.endsWith('/servers'))return json({servers:[{host:'192.0.2.10',state:'VERIFIED',applied_revision:1,desired_revision:1,verified_at:new Date().toISOString()}]});
+   if(req.method==='GET')return json(catalog);
+   let raw='';req.on('data',x=>raw+=x);req.on('end',()=>{
+    const body=JSON.parse(raw),id=url.pathname.split('/')[5],current=catalog.profiles.find(x=>x.profile.id===id);
+    if(id&&current&&body.revision!==current.profile.revision)return json({error:'profile_revision_changed'},409);
+    if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({state:'deleting'},202)}
+    saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||10000+saves.length}};
+    const item={profile,state:profile.enabled?'syncing':'paused',eligible:2,verified:2,ready:0,published:0,target:2*profile.clients_per_class*profile.classes.length,pending:2,blocked:0,deleting:0};
+    catalog.profiles=[...catalog.profiles.filter(x=>x.profile.id!==profile.id),item];json({profile,state:'queued'});
+   });return;
   }
   if(url.pathname.startsWith('/static/')||url.pathname==='/admin/'){
-   const name=url.pathname==='/admin/'?'index.html':path.basename(url.pathname);
-   const file=path.join(staticRoot,name);if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
+   const name=url.pathname==='/admin/'?'index.html':path.basename(url.pathname),file=path.join(staticRoot,name);
+   if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
-  if(url.pathname==='/share/output/view-fixture'){res.setHeader('Content-Type',url.searchParams.get('view')==='1'?'text/html':'text/plain');res.end(url.searchParams.get('view')==='1'?outputHTML:'vless://fixture@host.test:443?note='+('long'.repeat(200))+'\n');return}
-  const data={'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'runtime-new-revision',installed_revision:'historical-old-revision',ended_at:'2026-10-12T10:00:00Z'},'/api/v1/residential-proxies':[],'/api/v1/residential-routing':{enabled:true,verified_panels:1,scoped_panels:1,configured_proxies:1,healthy_proxies:1},'/api/v1/residential-performance':{panels:[],experiment:null,routing_enabled:true,defaults:{}},'/api/v1/configs':profileData,'/api/v1/config-capacity':capacity,'/api/v1/config-capacity/cleanup/current':null,'/api/v1/client-mutations':{counts:{SUCCEEDED:1},recent:[],execution_enabled:true},'/api/v1/server-protection':{control:{enabled:false,scope:'fleet',revision:1},panels:[]},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[],'/api/v1/config-capacity/resume':{detail:'Fixture resumed'}};
-  res.setHeader('Content-Type','application/json');res.end(JSON.stringify(url.pathname in data?data[url.pathname]:{status:'ready',checks:[],active_servers:1}));
+  const data={'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'fixture'},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[]};json(data[url.pathname]||{status:'ready',checks:[],active_servers:2});
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const profile=fs.mkdtempSync(path.join(root,'ui-profile-')),log=fs.openSync(path.join(root,'browser.log'),'w');
@@ -74,96 +62,68 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   async function waitFor(expression,ms=12000){const end=Date.now()+ms;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' body='+await evaluate('document.body.innerText.slice(-3000)'))}
   const mark=x=>{passed.push(x);console.log('PASS',x)};
 
-  await call('Page.navigate',{url:base+'/admin/#configs'});await waitFor("!!document.querySelector('#editTransport')");
-  await waitFor("document.querySelector('#configProfilesSlot')?.innerText.includes('Config profiles')");
-  await evaluate("document.querySelector('#primaryAction').click()");
-  await waitFor("document.querySelector('[name=profile_protocol]')");
-  assert.deepEqual(await evaluate("[...document.querySelector('[name=profile_protocol]').options].map(x=>x.value).sort()"),['shadowsocks','trojan','vless','vmess']);
-  await evaluate("var p=document.querySelector('[name=profile_protocol]');p.value='trojan';p.dispatchEvent(new Event('change'));var sec=document.querySelector('[name=profile_security]');sec.value='none';sec.dispatchEvent(new Event('change'))");
-  assert.equal(await evaluate("document.querySelector('#modalSubmit').disabled"),true);
-  assert.equal(await evaluate("document.querySelector('#profileCompatibility').textContent.includes('private networks')"),true);
-  await evaluate("var sec=document.querySelector('[name=profile_security]');sec.value='tls';sec.dispatchEvent(new Event('change'));document.querySelector('[name=profile_name]').value='Trojan independent';document.querySelector('[name=profile_port]').value='9443';document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configProfilesSlot').textContent.includes('Trojan independent')");
-  assert.equal(driverSaves.length,1);assert.equal(driverSaves[0].spec.port,9443);assert.equal(driverSaves[0].spec.security,'tls');assert.equal(saves.length,0);assert.equal(trojanSaves.length,0);
-  await evaluate("document.querySelector('[data-edit-profile]').click()");
+
+  await call('Page.navigate',{url:base+'/admin/#configs'});
+  await waitFor("document.querySelector('#configProfilesSlot')?.innerText.includes('No configurations')");
+  assert.equal(await evaluate("/Manual client maintenance|Reality transport change history|Apply saved settings/.test(document.body.innerText)"),false);
+  assert.equal(requests.some(x=>['/api/v1/configs','/api/v1/config-capacity','/api/v1/client-mutations','/api/v1/configs/transport','/api/v1/configs/trojan'].includes(x[1])),false);
+  // HTTP deployment must not depend on crypto.randomUUID's secure-context API.
+  await evaluate("Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true});document.querySelector('#primaryAction').click()");
   await waitFor("document.querySelector('#modal').open");
-  assert.equal(await evaluate("document.querySelector('[name=profile_port]').disabled"),false);
-  await evaluate("document.querySelector('[name=profile_port]').value='500';document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open");
-  assert.equal(driverSaves[1].spec.port,500);
-  await evaluate("document.querySelector('#primaryAction').click()");
-  await waitFor("document.querySelector('#modal').open");
-  await evaluate("var p=document.querySelector('[name=profile_protocol]');p.value='vmess';p.dispatchEvent(new Event('change'));document.querySelector('[name=profile_name]').value='VMess auto port';document.querySelector('[name=profile_port]').value='';document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open");
-  assert.equal(driverSaves[2].spec.port,0);
-  assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
-  await waitFor("document.querySelector('#configProfilesSlot')?.textContent.includes('VMess auto port')&&!activePageView.loading&&!!document.querySelector('#editTrojanConfig')&&!!document.querySelector('#editTransport')");
-  mark('unified New, compatibility, independent editable port, automatic reservation and preserved legacy settings');
-  await evaluate("document.querySelector('#configTransportSlot').closest('details').open=true");
-  await waitFor("!!document.querySelector('#editTrojanConfig')");
-  await evaluate("document.querySelector('#editTrojanConfig').click()");
-  await waitFor("document.querySelector('#modal').open");
-  assert.equal(await evaluate("document.querySelector('[name=trojan_port]').value"),'8443');
-  await evaluate("document.querySelector('[name=trojan_enabled]').checked=true;document.querySelector('[name=trojan_fleet]').checked=true;document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open");
-  assert.equal(trojanSaves.length,1);assert.equal(trojanSaves[0].port,8443);assert.equal(trojanSaves[0].enabled,true);assert.equal(saves.length,0);assert.equal(actions.length,0);
-  mark('independent Trojan settings preserve Reality controls');
-  await waitFor("!!document.querySelector('#editOutputSettings')");
-  for(const [extra,mask] of [[false,false],[true,false],[false,true],[true,true]]){
-   await evaluate("document.querySelector('#editOutputSettings').click()");
-   await waitFor("document.querySelector('#modal').open");
-   assert.equal(await evaluate("document.querySelector('#modal').innerText.includes('server-only')"),true);
-   await evaluate('document.querySelector("[name=include_xhttp_extra]").checked='+extra+';document.querySelector("[name=include_finalmask]").checked='+mask+';document.querySelector("#modalSubmit").click()');
-   await waitFor("!document.querySelector('#modal').open");
-   assert.equal(outputPolicy.include_xhttp_extra,extra);assert.equal(outputPolicy.include_finalmask,mask);
-   assert.equal(saves.length,0);assert.equal(actions.length,0);
-   await waitFor("!!document.querySelector('#editOutputSettings')");
-  }
-  await evaluate("document.querySelector('#editOutputSettings').click()");
-  await waitFor("document.querySelector('#modal').open");
-  await evaluate("fixtureQueue.push({url:'/api/v1/configs/output-settings',kind:'json',status:409,body:{error:'output_settings_changed',detail:'Reload output settings before saving.'}});document.querySelector('#modalSubmit').click()");
-  await waitFor("document.querySelector('#modalError').innerText.includes('Reload')");
-  assert.equal(await evaluate("document.querySelector('#modal').open&&!document.querySelector('#modalSubmit').disabled"),true);
-  const outputShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'output-fields-mobile.png'),Buffer.from(outputShot.data,'base64'));
-  assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
+  assert.equal(await evaluate("document.querySelector('[name=profile_protocol]').value"),'');
+  assert.deepEqual(await evaluate("[...document.querySelector('[name=profile_protocol]').options].map(x=>x.value).sort()"),['','shadowsocks','trojan','vless','vmess']);
+  await evaluate("var f=n=>document.querySelector('[name=profile_'+n+']');var change=(n,v)=>{f(n).value=v;f(n).dispatchEvent(new Event('change'))};change('protocol','trojan')");
+  assert.deepEqual(await evaluate("[...f('security').options].map(x=>x.value)"),['tls']);
+  await evaluate("change('protocol','vless');change('security','reality');f('name').value='My Reality';f('port').value='443';f('count').value='3';f('residential').checked=false;document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-id]')");
+  assert.equal(saves.length,1);assert.equal(saves[0].spec.port,443);assert.equal(saves[0].clients_per_class,3);assert.equal(saves[0].spec.security,'reality');assert.match(saves[0].request_id,/^[0-9a-f-]{36}$/);
+  assert.equal(await evaluate("document.querySelector('[data-profile-id]').innerText.includes('0 / 6')"),true);
+  mark('one New flow, no default protocol, supported public capabilities, exact published counts');
+
+  await evaluate("document.querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("change('network','grpc');f('path').value='my_service';change('network','ws')");assert.match(await evaluate("f('path').value"),/^\//);
+  await evaluate("change('network','grpc')");assert.equal(await evaluate("f('path').value"),'my_service');
+  await evaluate("change('network','xhttp')");assert.match(await evaluate("f('path').value"),/^\//);
+  await evaluate("change('network','tcp');change('protocol','vmess');change('security','none');f('port').value='500';f('count').value='2';f('fleet').checked=false;f('fleet').dispatchEvent(new Event('change'));document.querySelector('[name=profile_selected]').checked=true;document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-revision=\"2\"]')");assert.equal(saves[1].spec.protocol,'vmess');assert.equal(saves[1].spec.port,500);assert.equal(saves[1].clients_per_class,2);assert.equal(saves[1].panel_ids.length,1);assert.equal('path' in saves[1].spec,false);
+  mark('editable protocol/count/port/server scope; transport paths remain independent');
+
+  await evaluate("document.querySelector('[data-toggle-profile]').click()");await waitFor("document.querySelector('[data-toggle-profile]')?.textContent==='Resume'");assert.equal(saves.at(-1).enabled,false);
+  await evaluate("document.querySelector('[data-toggle-profile]').click()");await waitFor("document.querySelector('[data-toggle-profile]')?.textContent==='Pause'");assert.equal(saves.at(-1).enabled,true);
+  await evaluate("document.querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("fixtureQueue.push({url:'/api/v1/configs/profiles/profile-1',status:409,body:{error:'profile_revision_changed'}});document.querySelector('#modalSubmit').click()");
+  await waitFor("document.querySelector('#modalError').innerText.includes('Reopen')");assert.equal(await evaluate("document.querySelector('#modalSubmit').disabled"),false);
   await evaluate("document.querySelector('#modalCancel').click()");
-  mark('independent output toggles, reload, conflict, mobile, no listener mutations');
-  await evaluate("document.querySelector('#editTransport').click()");
-  await waitFor("document.querySelector('#modal').open");
-  await evaluate("var sel=document.querySelector('[name=transport_network]');sel.value='xhttp';sel.dispatchEvent(new Event('change'))");
-  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'apart.com');
-  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').readOnly"),false);
-  assert.equal(await evaluate("document.querySelector('[name=path_bytes]').value"),'4096');
-  assert.equal(await evaluate("document.querySelectorAll('#xhttpFields select[disabled]:not([name=browser_dialer])').length"),0);
-  assert.equal(await evaluate("document.querySelector('[name=browser_dialer]').disabled"),true);
-  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('REALITY')"),true);
+  mark('pause/resume and stale edit recovery');
+
+  await evaluate("fixtureQueue.push({url:'/api/v1/configs/profiles',kind:'network'});refreshConfigProfiles()");
+  await waitFor("document.querySelector('[data-profile-read-error]')");assert.equal(await evaluate("!!document.querySelector('[data-profile-id]')"),true);
+  await evaluate("document.querySelector('[data-retry-profiles]').click()");await waitFor("!document.querySelector('[data-profile-read-error]')");
+  await evaluate("holdRead('hung-profiles','/api/v1/configs/profiles');window.hungProfiles=refreshConfigProfiles();void 0");
+  await waitFor("fixtureHolds.some(x=>x.id==='hung-profiles')");
+  await waitFor("document.querySelector('[data-profile-read-error]')",18000);
+  assert.equal(await evaluate("fixtureHolds.find(x=>x.id==='hung-profiles').signal.aborted"),true);
+  await evaluate("document.querySelector('[data-retry-profiles]').click()");await waitFor("!document.querySelector('[data-profile-read-error]')");
+  await evaluate("finishRead('hung-profiles',{drivers:[],profiles:[],servers:[]});hungProfiles");
+  assert.equal(await evaluate("!!document.querySelector('[data-profile-id]')"),true);
+  mark('hung reads have a hard deadline and recover even if transport ignores abort');
+  await evaluate("holdRead('old-profiles','/api/v1/configs/profiles');void refreshConfigProfiles()");await waitFor("fixtureHolds.some(x=>x.id==='old-profiles')");
+  await evaluate("location.hash='#dashboard'");await waitFor("!document.querySelector('#configProfilesSlot')");
+  await evaluate("location.hash='#configs'");await waitFor("document.querySelector('[data-profile-id]')");
+  await evaluate("finishRead('old-profiles',{drivers:[],profiles:[],servers:[],unified:true,observed_at:'2000-01-01T00:00:00Z'})");
+  assert.equal(await evaluate("document.querySelector('#configProfilesSlot').innerText.includes('My Reality')"),true);
+  mark('failed reads preserve counts with a stale notice; late responses cannot overwrite a new page');
+
+  await evaluate("document.querySelector('#primaryAction').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("change('protocol','shadowsocks');f('name').value='Independent SS';document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&document.querySelectorAll('[data-profile-id]').length===2");
+  assert.equal(saves.at(-1).spec.port,0);assert.equal(saves.at(-1).spec.protocol,'shadowsocks');
+  await evaluate("document.querySelector('[data-delete-profile]').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&document.querySelectorAll('[data-profile-id]').length===1");
+  assert.equal(deletions.length,1);assert.equal(await evaluate("document.querySelector('[data-profile-id]').innerText.includes('Independent SS')"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
-  const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'xhttp-mobile.png'),Buffer.from(shot.data,'base64'));
-  await evaluate("document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configTransportSlot').innerText.includes('apart.com')");
-  assert.equal(saves.length,1);assert.deepEqual(saves[0].config,preset);assert.equal(saves[0].apply_existing,true);
-  await evaluate("document.querySelector('#editTransport').click()");
-  await waitFor("document.querySelector('#modal').open");
-  await evaluate("document.querySelector('[name=path_bytes]').value='4097';document.querySelector('#modalSubmit').click()");
-  assert.equal(saves.length,1);
-  await evaluate("document.querySelector('[name=path_bytes]').value='1024';document.querySelector('[name=xhttp_host]').value='custom.example.org';document.querySelector('[name=xhttp_mode]').value='packet-up';document.querySelector('[name=xhttp_extra]').value=JSON.stringify({xPaddingBytes:'256-512',noGRPCHeader:false});document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open");
-  assert.equal(saves.length,2);assert.equal(saves[1].config.path_bytes,1024);assert.equal(saves[1].config.host,'custom.example.org');assert.equal(saves[1].config.mode,'packet-up');assert.equal(saves[1].config.browser_dialer,'WebView');assert.deepEqual(saves[1].config.extra,{xPaddingBytes:'256-512',noGRPCHeader:false});
-  await evaluate("document.querySelector('#editTransport').click()");
-  await waitFor("document.querySelector('#modal').open");
-  assert.equal(await evaluate("document.querySelector('[name=xhttp_host]').value"),'custom.example.org');
-  assert.equal(await evaluate("document.querySelector('[name=browser_dialer]').value"),'WebView');
-  assert.equal(await evaluate("document.querySelector('#browserDialerNotice').innerText.includes('not active or exported for REALITY')"),true);
-  await evaluate("var sel=document.querySelector('[name=transport_network]');sel.value='tcp';sel.dispatchEvent(new Event('change'));document.querySelector('#modalSubmit').click()");
-  await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configTransportSlot').innerText.includes('TCP Reality')");
-  assert.deepEqual(saves[2].config,{network:'tcp',finalmask_enabled:false});
-  await evaluate("document.querySelector('#applyExistingTransport').click()");
-  await waitFor("!!document.querySelector('[data-transport-rollback]')");
-  assert.equal(await evaluate("document.querySelector('#configTransportSlot').innerText.includes('Verified: 1')"),true);
-  await evaluate("document.querySelector('[data-transport-rollback]').click()");
-  await waitFor("document.querySelector('#configTransportSlot').innerText.includes('Queued: 1')");
-  assert.equal(actions.length,2);
+  const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'unified-configs-mobile.png'),Buffer.from(shot.data,'base64'));
+  mark('automatic port, confirmed delete UI, sibling preservation, mobile layout');
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:['independent output toggles and conflict','mobile layout','exact preset','editable settings survive reload','dialer limitation explicit','boundary validation','revision save','TCP creation-default rollback'],page_errors:errors},null,2));console.log('XHTTP_TRANSPORT_BROWSER_PASS');
+  fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}
 })().catch(e=>{console.error(e);process.exitCode=1});

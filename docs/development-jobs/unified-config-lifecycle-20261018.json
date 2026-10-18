@@ -1,0 +1,93 @@
+{
+  "id": "unified-config-lifecycle-20261018",
+  "status": "ready_for_release",
+  "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
+  "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
+  "worktree": "/root/projects/dob-unified-configs-20261018",
+  "branch": "feat/unified-config-lifecycle-20261018",
+  "authorization": {
+    "replace_legacy_controllers": true,
+    "delete_previous_managed_configs": true,
+    "unified_create_edit_resize_delete": true,
+    "no_openai_api": true
+  },
+  "evidence": {
+    "video": "Screenrecorder-2026-10-18-06-42-59-947.mp4",
+    "baseline_snapshot": "/root/projects/dob-config-drivers-20261018/.local/live-unified-before.json",
+    "active_servers": 78,
+    "legacy_trojan_port": 844,
+    "legacy_trojan_verified": 31,
+    "legacy_trojan_blocked": 47
+  },
+  "findings": [
+    "Two authorities: privileged legacy Reality versus independent profiles",
+    "Credential count, routing classes and protocol immutable after creation",
+    "No profile DELETE lifecycle; disable only hides output",
+    "Network-switch form retains incompatible path (profile_path_invalid in video)",
+    "Native write confirmation is coupled to traffic proof; need separate persisted stages",
+    "Profile health counts omit actual publication eligibility",
+    "Legacy manual maintenance and transport history remain in Configs"
+  ],
+  "stages": [
+    {
+      "name": "audit_and_checkpoint",
+      "status": "verified"
+    },
+    {
+      "name": "unified_lifecycle",
+      "status": "verified_in_tests"
+    },
+    {
+      "name": "simple_management_ui",
+      "status": "verified_in_tests"
+    },
+    {
+      "name": "regression_and_canary",
+      "status": "verified_in_disposable_native_environment"
+    },
+    {
+      "name": "publish_and_rollout",
+      "status": "in_progress"
+    },
+    {
+      "name": "retire_legacy_and_verify",
+      "status": "pending"
+    }
+  ],
+  "design": [
+    "One desired profile and controller for every protocol; per-profile revision, credentials and port ownership",
+    "Automatic create/update/resize/delete with native observation before retry; no blind POST replay",
+    "Confirm native changes independently from traffic verification; retain fresh output fences",
+    "Pause/delete/scope removal retire only the owned listener; siblings remain unchanged",
+    "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
+    "One simple card per profile, exact publication counts and understandable per-server retry state"
+  ],
+  "updated_at": "2026-10-18T04:12:48.050779+00:00",
+  "validation": {
+    "required_database_regressions": {
+      "passed": 31,
+      "skipped": 0,
+      "result": "PASS"
+    },
+    "production_deployed": false,
+    "previous_configs_deleted": false,
+    "full_go_test": "PASS",
+    "go_vet": "PASS",
+    "mobile_browser": "PASS including hard timeout, stale response, authentication and surrounding pages",
+    "native_lifecycle": {
+      "passed": 16,
+      "failed": 0,
+      "core": "pinned official",
+      "panel": "pinned native",
+      "operations": [
+        "create",
+        "port_edit",
+        "resize_up",
+        "resize_down",
+        "delete",
+        "pause_resume"
+      ]
+    },
+    "native_initial_result": "15/16 passed; gRPC Reality transient traffic proof needs bounded observation recovery"
+  }
+}

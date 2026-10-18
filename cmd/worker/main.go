@@ -381,6 +381,15 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 				clientProgress.Finish("FAILED", err)
 				return
 			}
+			var unified bool
+			if err = application.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); err != nil {
+				clientProgress.Finish("FAILED", err)
+				return
+			}
+			if unified {
+				clientProgress.Finish("RETIRED", nil)
+				return
+			}
 			if !gate.Enabled || gate.KillSwitch || gate.Concurrency != 1 {
 				clientProgress.Finish("GATED", nil)
 				return
@@ -515,7 +524,16 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	modules.Add(worker.RolePanels, "capacity-fill", func(ctx context.Context) {
 		source := readyworker.SQLSource{DB: application.DB}
 		capacity := usercapacity.Service{DB: application.DB, Secrets: application.Container.Secrets}
-		runCapacityFill(ctx, panelPollWork.Do, source.EligibleReadyPanels, func(work context.Context, panel readyworker.Panel) error {
+		runCapacityFill(ctx, panelPollWork.Do, func(ctx context.Context) ([]readyworker.Panel, error) {
+			var unified bool
+			if e := application.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+				return nil, e
+			}
+			if unified {
+				return nil, nil
+			}
+			return source.EligibleReadyPanels(ctx)
+		}, func(work context.Context, panel readyworker.Panel) error {
 			runtime, err := sanaeiRuntimes.Acquire(work, panel.ID)
 			if err == nil {
 				_, err = capacity.FastFillFromPolicy(work, panel, runtime)

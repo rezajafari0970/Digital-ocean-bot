@@ -100,6 +100,15 @@ func TestConfigProfileAdoptionPreservesNativeCredentials(t *testing.T) {
 	if e := os.WriteFile(filepath.Join(dir, "000184_config_profiles.up.sql"), up, 0600); e != nil {
 		t.Fatal(e)
 	}
+	// Exercise adoption followed by the current lifecycle schema, as the real
+	// installer does before the new worker reads adopted profiles.
+	lifecycle, e := os.ReadFile("../../migrations/000185_unified_config_lifecycle.up.sql")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile(filepath.Join(dir, "000185_unified_config_lifecycle.up.sql"), lifecycle, 0600); e != nil {
+		t.Fatal(e)
+	}
 	if e := (migrate.Runner{DB: db, Dir: dir, PreserveData: true}).Up(ctx); e != nil {
 		t.Fatal("production-preserving migration", e)
 	}

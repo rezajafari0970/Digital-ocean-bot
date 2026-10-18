@@ -359,6 +359,13 @@ func (s Service) ReconcilePanel(
 		)
 	}
 
+	var unified bool
+	if e := s.DB.QueryRowContext(ctx, "SELECT unified FROM config_control_authority WHERE singleton").Scan(&unified); e != nil {
+		return e
+	}
+	if unified {
+		return nil
+	}
 	var (
 		accountID string
 
