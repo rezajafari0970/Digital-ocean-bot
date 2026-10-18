@@ -64,3 +64,12 @@ Native confirmation is a separate persisted phase (`routes_pending`). The writer
 Read-only native proof at 06:57:42 UTC confirmed the recorded Trojan canary: Direct = one client, unlimited lifetime, device limit 3; Residential = one client, 7200 seconds, device limit 4. All 37 mandatory isolated database/race/native regressions passed with zero skips; policy unit tests passed. Deployment and the full canary expiry/edit/delete cycle remain pending for this hotfix. Existing user profiles are preserved; previous legacy retirement must not be repeated.
 
 Server-detail refresh also runs when aggregate counts are unchanged. A progressing stage or retry can no longer remain visually frozen solely because the profile totals have not changed. Native-policy, routing and queued-operation stages have explicit user-facing labels.
+
+
+## Admission deadline and first-publication follow-up
+
+Release 77068b5 was installed and verified on both hosts (07:11:46 and 07:14:17 UTC), preserving all user profiles and five readiness samples each. Live follow-up identified that the verification deadline began before admission to the shared work budget. Queued operations therefore could begin SSH with too little time. Execution deadlines now begin after admission; cancellation still follows worker shutdown. First publication and applied native changes are scheduled ahead of routine refreshes without privileging a protocol. Cancellation during a proof read leaves prior positive evidence governed by the unchanged five-minute freshness fence instead of inventing a negative connection result.
+
+The isolated lifecycle test now checks cancellation preservation. Separate worker tests cover queue wait beyond the operation duration and cancelled admission. All 37 mandatory regressions passed. An earlier VLESS/WS/TLS native loopback run returned HTTP 503 intermittently; its failure log is retained, and no gate or native assertion was relaxed.
+
+The canary SNI scanner selected www.microsoft.com after native checks (3 ms latency). All three canaries reached publication at 07:19:50. VLESS native Vision is intentionally exported as the documented client Vision-udp443 variant; the canary checker now uses that contract. Expiry/edit/output/deletion validation continues.

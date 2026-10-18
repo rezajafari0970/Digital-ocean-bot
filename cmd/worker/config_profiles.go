@@ -15,9 +15,8 @@ import (
 
 func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sanaei.RuntimeManager, budget *worker.WorkBudget) {
 	create := worker.NewWorkClass(budget, 6)
-	// Two full-fleet profiles require more than four lanes to renew real
-	// per-class traffic proofs within the five-minute output freshness fence.
-	// The shared ten-slot budget still bounds total panel work.
+	// Proof workers share the SQL-derived panel budget. Queue wait must not
+	// consume an admitted operation's runtime deadline.
 	verify := worker.NewWorkClass(budget, 8)
 	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-create-2", "profiles-create-3", "profiles-create-4", "profiles-create-5", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7"} {
 		modules.Add(worker.RolePanels, name, func(ctx context.Context) {
@@ -40,13 +39,11 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 				if strings.Contains(name, "verify") {
 					duration = 45 * time.Second
 				}
-				bounded, cancel := context.WithTimeout(work, duration)
 				if strings.Contains(name, "verify") {
-					e = verify.Do(bounded, service.RunVerifyOne)
+					e = runConfigProfileWork(work, verify.Do, duration, service.RunVerifyOne)
 				} else {
-					e = create.Do(bounded, service.RunOne)
+					e = runConfigProfileWork(work, create.Do, duration, service.RunOne)
 				}
-				cancel()
 				finish()
 				if e != nil && ctx.Err() == nil {
 					log.Printf("config profile reconcile: %v", e)
@@ -54,4 +51,14 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 			}
 		})
 	}
+}
+
+// Waiting retains no database session. Give the admitted handler its full
+// deadline while preserving worker shutdown cancellation and supervision context.
+func runConfigProfileWork(ctx context.Context, admit func(context.Context, func(context.Context) error) error, duration time.Duration, run func(context.Context) error) error {
+	return admit(ctx, func(admitted context.Context) error {
+		bounded, cancel := context.WithTimeout(admitted, duration)
+		defer cancel()
+		return run(bounded)
+	})
 }

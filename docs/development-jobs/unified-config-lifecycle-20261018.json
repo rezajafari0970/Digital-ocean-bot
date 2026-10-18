@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "native_device_policy_hotfix_verified_pending_release",
+  "status": "queue_deadline_followup_verified_pending_release",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -79,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T07:01:17.241727+00:00",
+  "updated_at": "2026-10-18T07:22:58.121103+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -439,5 +439,28 @@
     "deploy device-policy hotfix",
     "canary expiry/edit/output and complete deletion",
     "fresh eligible-server coverage and remaining failure attribution"
-  ]
+  ],
+  "installed_native_policy_release": {
+    "source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
+    "public": "77068b527a05d7b79abbe08756f84c547a9fc116",
+    "primary_verified_at": "2026-10-18T07:14:17Z",
+    "secondary_verified_at": "2026-10-18T07:11:46Z",
+    "user_profile_preservation": "PASS",
+    "readiness_samples_per_host": 5
+  },
+  "queue_deadline_followup": {
+    "cause": "45-second verification deadline started before WorkClass admission, consuming execution budget while queued",
+    "fix": "start execution deadline only after shared-budget admission; worker cancellation remains effective",
+    "scheduling": "first publication/changed native state precedes routine refreshes, without protocol preference",
+    "cancellation": "interrupted SSH during worker shutdown does not revoke prior positive evidence; existing five-minute proof fence remains unchanged",
+    "regressions": "37 mandatory tests passed with zero skips; admission wait/cancellation unit tests passed",
+    "native_test_note": "An earlier isolated run had intermittent VLESS/WS/TLS loopback HTTP 503. Failure log retained at .local/database-gate-0718-failed.log; no gate relaxed. Final full mandatory run passed."
+  },
+  "canary_observed": {
+    "sni": "www.microsoft.com",
+    "scanner_latency_ms": 3,
+    "native_policies": "all three profiles read back exactly",
+    "all_ready_at": "2026-10-18T07:19:50Z",
+    "baseline_note": "URI checker corrected to documented client Vision-udp443 variant; native server keeps Vision; final mask/export check remains required"
+  }
 }

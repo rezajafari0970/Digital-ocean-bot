@@ -388,6 +388,17 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if e := db.QueryRow("SELECT bool_or(route_class='DIRECT' AND verified_at IS NOT NULL),bool_or(route_class='RESIDENTIAL' AND verified_at IS NOT NULL) FROM config_driver_class_proofs WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&directProof, &residentialProof); e != nil || !directProof || residentialProof {
 		t.Fatal("batch class proof coupled", e)
 	}
+	// Cancelling a worker during deployment must not revoke fresh completed
+	// proof for healthy profiles merely because its SSH read was interrupted.
+	proofContext, cancelProof := context.WithCancel(ctx)
+	batch.cancel = cancelProof
+	if e := batchService.VerifyPanel(proofContext, panel, p.ID); !errors.Is(e, context.Canceled) {
+		t.Fatal("cancelled proof", e)
+	}
+	batch.cancel = nil
+	if e := db.QueryRow("SELECT state FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&goodState); e != nil || goodState != "VERIFIED" {
+		t.Fatal("cancel erased previous positive proof", goodState, e)
+	}
 	// A failed sibling's early retry must not re-probe a healthy, not-due profile.
 	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour' WHERE profile_id=$1", p.ID)
 	batch.jobs = 0
@@ -562,6 +573,7 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 // No credentials enter command arguments. The fixture returns per-profile and
 // per-class outcomes exactly like the encrypted remote verifier.
 type profileBatchFixtureSSH struct {
+	cancel context.CancelFunc
 	failed string
 	jobs   int
 }
@@ -569,7 +581,11 @@ type profileBatchFixtureSSH struct {
 func (s *profileBatchFixtureSSH) Run(context.Context, provisioning.Target, []byte, string) (string, error) {
 	return "", errors.New("unexpected argv request")
 }
-func (s *profileBatchFixtureSSH) RunInput(_ context.Context, _ provisioning.Target, _ []byte, _ string, input []byte) (provisioning.CommandResult, error) {
+func (s *profileBatchFixtureSSH) RunInput(ctx context.Context, _ provisioning.Target, _ []byte, _ string, input []byte) (provisioning.CommandResult, error) {
+	if s.cancel != nil {
+		s.cancel()
+		return provisioning.CommandResult{}, ctx.Err()
+	}
 	var jobs []struct {
 		ProfileID string `json:"profile_id"`
 	}

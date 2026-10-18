@@ -218,6 +218,11 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 			input, _ := json.Marshal(inputs)
 			command := "python3 -c \"import base64;exec(base64.b64decode('" + base64.StdEncoding.EncodeToString([]byte(runtimeBatchScript)) + "'))\""
 			out, runErr := ssh.RunInput(ctx, t.Target, key, command, input)
+			// Shutdown/deadline cancellation is not negative native evidence. Keep
+			// previous proofs subject to their unchanged freshness fence and retry.
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
 			var response struct {
 				Results []batchResult `json:"results"`
 			}
