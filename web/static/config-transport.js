@@ -21,7 +21,7 @@ async function refreshConfigTransport(){
   const stateNames={PENDING:'Queued',RUNNING:'Applying / verifying',SUCCEEDED:'Verified',BLOCKED:'Needs review',FAILED:'Failed',OBSOLETE:'Server retired'};
   const status=Object.entries(counts).map(([k,v])=>esc(stateNames[k]||k)+': '+v).join(' · ')||'No existing-listener application requested';
   const area=document.createElement('div');area.className='card section';
-  area.innerHTML='<h3>Apply saved settings</h3><p>'+status+'</p><p class="muted">Updates existing managed listeners one at a time. UUIDs, quotas and expiry are preserved. Imported clients must refresh their subscriptions after verification.</p><button class="small" id="applyExistingTransport">Apply to existing listeners</button><button class="small ghost" id="refreshTransportStatus">Refresh status</button><div id="transportApplyError"></div>'+
+  area.innerHTML='<h3>Reality transport change history</h3><p>'+status+'</p><p class="muted">Saving Reality transport queues its application automatically. This history includes completed changes and retired servers; it is not the current fleet health. UUIDs, quotas and expiry are preserved.</p><button class="small" id="applyExistingTransport">Reconcile saved transport now</button><button class="small ghost" id="refreshTransportStatus">Refresh status</button><div id="transportApplyError"></div>'+
    jobs.slice(0,80).map(j=>'<div class="kv"><span>'+esc(j.panel_id.slice(0,8))+' · '+esc(j.managed_key)+'</span><span>'+esc(stateNames[j.state]||j.state)+' '+esc(j.error||'')+((j.state==='SUCCEEDED'||j.state==='BLOCKED')?'<button type="button" class="small ghost" data-transport-rollback="'+esc(j.id)+'">Restore previous transport</button>':'')+(j.state==='BLOCKED'?'<button type="button" class="small ghost" data-transport-retry="'+esc(j.id)+'">Recheck and retry</button>':'')+'</span></div>').join('');
   slot.appendChild(area);
   document.querySelector('#refreshTransportStatus').onclick=refreshConfigTransport;
@@ -51,7 +51,7 @@ function openConfigTransport(data){
  $('#modalForm').noValidate=false;$('#modalSubmit').hidden=false;
  $('#modalTitle').textContent='Listener transport settings';
  $('#modalFields').innerHTML='<p>'+esc(data.scope)+'</p>'+
- '<label><input type="checkbox" name="apply_existing" checked> Apply these settings to existing managed listeners as well as new listeners</label>'+
+ '<input type="checkbox" name="apply_existing" checked hidden><p class="muted">Changes apply automatically to current and future managed Reality listeners.</p>'+
  '<label>Transport<select name="transport_network"><option value="tcp">TCP Reality</option><option value="xhttp">XHTTP Reality</option></select></label>'+
  '<div id="xhttpFields">'+
  '<label>XHTTP Mode<select name="xhttp_mode"><option value="stream-up">stream-up</option><option value="packet-up">packet-up</option><option value="stream-one">stream-one</option><option value="auto">auto</option></select></label>'+

@@ -18,7 +18,7 @@ func (s *Server) collectTrojanOutput(ctx context.Context, panel, host string, ra
 	var p trojantcp.Policy
 	err := s.DB.QueryRowContext(ctx, `SELECT pi.account_id::text,t.credential_ref,t.remote_id,t.port,t.certificate_not_after,pol.direct_enabled,pol.residential_enabled
  FROM trojan_tcp_listeners t JOIN panel_instances pi ON pi.id=t.panel_id CROSS JOIN trojan_tcp_policy pol
- WHERE t.panel_id=$1 AND pol.enabled AND (pol.fleet OR t.panel_id=ANY(pol.panel_ids)) AND t.state='VERIFIED' AND t.verified_at>now()-interval '5 minutes' AND t.certificate_not_after>now()+interval '5 minutes'`, panel).Scan(&account, &ref, &id, &p.Port, &until, &p.Direct, &p.Residential)
+ WHERE NOT EXISTS(SELECT 1 FROM config_driver_profiles WHERE legacy_key='trojan') AND t.panel_id=$1 AND pol.enabled AND (pol.fleet OR t.panel_id=ANY(pol.panel_ids)) AND t.state='VERIFIED' AND t.verified_at>now()-interval '5 minutes' AND t.certificate_not_after>now()+interval '5 minutes'`, panel).Scan(&account, &ref, &id, &p.Port, &until, &p.Direct, &p.Residential)
 	if err != nil {
 		return nil
 	}

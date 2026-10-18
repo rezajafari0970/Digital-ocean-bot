@@ -7,9 +7,18 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  const capacity={target:20,active:7,expired:0,quota_exhausted:0,deficit:13,created_last_cycle:1,inbounds:[{panel_id:'fixture',inbound_id:1,base_url:'http://fixture.invalid',port:443,target:20,active:7,deficit:13,created_last_cycle:1}],automation:{running:true,panels:[],cooldown_panels:0,quarantined_panels:0}};
  const outputHTML=fs.readFileSync(path.resolve(__dirname,'../../internal/adminapi/output_view.go'),'utf8').match(/io.WriteString\(w, `([\s\S]*?)`\)/)[1];
  const preset={"network": "xhttp", "mode": "stream-up", "host": "apart.com", "path_bytes": 4096, "extra": {"xPaddingBytes": "100-1000", "noGRPCHeader": true, "scStreamUpServerSecs": "20-80", "scMaxEachPostBytes": 1000000, "scMinPostsIntervalMs": 30, "scMaxConcurrentPosts": 4}, "finalmask": {"tcp": [{"type": "fragment", "settings": {"packets": "tlshello", "lengths": ["48-80", "80-128", "128-192", "192-288", "288-448"], "delays": ["0-1", "1-2", "1-2", "0-1", "0-1"], "maxSplit": "3-5"}}], "udp": [{"type": "noise", "settings": {"reset": "90-150", "noise": [{"type": "exp", "packet": "<t><c><r 12-24>", "delay": "0-1"}, {"type": "exp", "packet": "<n><rc 8-16><rd 4-8>", "delay": "0-2"}, {"rand": "12-32", "randRange": "0-255", "delay": "0-1"}]}}], "quicParams": {"congestion": "bbr", "bbrProfile": "standard", "debug": false, "brutalUp": 0, "brutalDown": 0, "initStreamReceiveWindow": 8388608, "maxStreamReceiveWindow": 16777216, "initConnectionReceiveWindow": 20971520, "maxConnectionReceiveWindow": 41943040, "maxIdleTimeout": 45, "keepAlivePeriod": 15, "disablePathMTUDiscovery": false, "maxIncomingStreams": 512}}, "finalmask_enabled": false};preset.flow="xtls-rprx-vision-udp443";preset.finalmask={tcp:preset.finalmask.tcp};preset.finalmask_enabled=true;preset.finalmask_scope="both";preset.browser_dialer="WebView";let transport={policy:{revision:1,config:{network:'tcp',finalmask_enabled:false}},preset,max_path_bytes:4096,scope:'Saved defaults apply to new listeners. Select Apply to existing to update managed listeners in sequence. Existing client IDs and limits are preserved; clients must refresh subscriptions.',finalmask_status:'TCP Fragment requires verified core; UDP and QUIC settings do not act on HTTP/2.',compatibility:'Vision uses VLESS Encryption; Browser Dialer requires TLS.'};const saves=[],actions=[];let trojan={policy:{enabled:false,port:8443,direct_enabled:true,residential_enabled:true,fleet:false,panel_ids:[],revision:1},listeners:[]};const trojanSaves=[];
+ let profileCatalog={drivers:[],profiles:[],issues:[]};const driverSaves=[];
+ for(const protocol of ['vless','vmess','trojan','shadowsocks'])for(const network of ['tcp','ws','grpc','xhttp'])for(const security of ['none','tls','reality']){
+  const supported=protocol==='vless'&&(security==='reality'&&network!=='ws'||security==='tls'&&network!=='xhttp')||protocol==='vmess'&&network!=='xhttp'&&security!=='reality'||protocol==='trojan'&&(network!=='xhttp'&&security==='tls'||network==='tcp'&&security==='none')||protocol==='shadowsocks'&&network==='tcp'&&security==='none';
+  if(supported)profileCatalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:!(protocol==='trojan'&&security==='none')});
+ }
  let outputPolicy={revision:1,include_xhttp_extra:false,include_finalmask:false};const outputSaves=[];
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
+  if(url.pathname==='/api/v1/configs/profiles'||url.pathname.startsWith('/api/v1/configs/profiles/')){
+   if(req.method==='POST'||req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);driverSaves.push(p);const profile={...p,id:p.id||'profile-'+driverSaves.length,revision:p.revision+1,spec:{...p.spec,port:p.spec.port||10000+driverSaves.length}};profileCatalog.profiles=[...profileCatalog.profiles.filter(x=>x.profile.id!==profile.id),{profile,eligible:2,verified:0,pending:2,blocked:0}];res.setHeader('Content-Type','application/json');res.end(JSON.stringify({profile,state:'queued'}))});return}
+   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(profileCatalog));return;
+  }
   if(url.pathname==='/api/v1/configs/trojan'){
    if(req.method==='PUT'){let body='';req.on('data',x=>body+=x);req.on('end',()=>{const p=JSON.parse(body);trojanSaves.push(p);trojan.policy={...p,revision:p.revision+1};res.setHeader('Content-Type','application/json');res.end(JSON.stringify(trojan))});return}
    res.setHeader('Content-Type','application/json');res.end(JSON.stringify(trojan));return;
@@ -66,6 +75,31 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   const mark=x=>{passed.push(x);console.log('PASS',x)};
 
   await call('Page.navigate',{url:base+'/admin/#configs'});await waitFor("!!document.querySelector('#editTransport')");
+  await waitFor("document.querySelector('#configProfilesSlot')?.innerText.includes('Config profiles')");
+  await evaluate("document.querySelector('#primaryAction').click()");
+  await waitFor("document.querySelector('[name=profile_protocol]')");
+  assert.deepEqual(await evaluate("[...document.querySelector('[name=profile_protocol]').options].map(x=>x.value).sort()"),['shadowsocks','trojan','vless','vmess']);
+  await evaluate("var p=document.querySelector('[name=profile_protocol]');p.value='trojan';p.dispatchEvent(new Event('change'));var sec=document.querySelector('[name=profile_security]');sec.value='none';sec.dispatchEvent(new Event('change'))");
+  assert.equal(await evaluate("document.querySelector('#modalSubmit').disabled"),true);
+  assert.equal(await evaluate("document.querySelector('#profileCompatibility').textContent.includes('private networks')"),true);
+  await evaluate("var sec=document.querySelector('[name=profile_security]');sec.value='tls';sec.dispatchEvent(new Event('change'));document.querySelector('[name=profile_name]').value='Trojan independent';document.querySelector('[name=profile_port]').value='9443';document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open&&document.querySelector('#configProfilesSlot').textContent.includes('Trojan independent')");
+  assert.equal(driverSaves.length,1);assert.equal(driverSaves[0].spec.port,9443);assert.equal(driverSaves[0].spec.security,'tls');assert.equal(saves.length,0);assert.equal(trojanSaves.length,0);
+  await evaluate("document.querySelector('[data-edit-profile]').click()");
+  await waitFor("document.querySelector('#modal').open");
+  assert.equal(await evaluate("document.querySelector('[name=profile_port]').disabled"),false);
+  await evaluate("document.querySelector('[name=profile_port]').value='500';document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open");
+  assert.equal(driverSaves[1].spec.port,500);
+  await evaluate("document.querySelector('#primaryAction').click()");
+  await waitFor("document.querySelector('#modal').open");
+  await evaluate("var p=document.querySelector('[name=profile_protocol]');p.value='vmess';p.dispatchEvent(new Event('change'));document.querySelector('[name=profile_name]').value='VMess auto port';document.querySelector('[name=profile_port]').value='';document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open");
+  assert.equal(driverSaves[2].spec.port,0);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
+  await waitFor("document.querySelector('#configProfilesSlot')?.textContent.includes('VMess auto port')&&!activePageView.loading&&!!document.querySelector('#editTrojanConfig')&&!!document.querySelector('#editTransport')");
+  mark('unified New, compatibility, independent editable port, automatic reservation and preserved legacy settings');
+  await evaluate("document.querySelector('#configTransportSlot').closest('details').open=true");
   await waitFor("!!document.querySelector('#editTrojanConfig')");
   await evaluate("document.querySelector('#editTrojanConfig').click()");
   await waitFor("document.querySelector('#modal').open");

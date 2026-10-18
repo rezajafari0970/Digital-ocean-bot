@@ -33,9 +33,11 @@ type outputStructure struct {
 }
 
 type outputRecord struct {
-	ClientID     string
-	URI          string
-	VisibleUntil *time.Time
+	ProfileID       string
+	ProfileRevision int64
+	ClientID        string
+	URI             string
+	VisibleUntil    *time.Time
 }
 
 func outputVisibleUntil(raw any) *time.Time {
@@ -180,6 +182,7 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		return nil, nil, false
 	}
 	records := s.collectTrojanOutput(ctx, p.ID, host, raws)
+	records = append(records, s.collectProfileOutput(ctx, p.ID, host, raws)...)
 	structures := make([]outputStructure, 0)
 	rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated := len(raws), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	for _, raw := range raws {

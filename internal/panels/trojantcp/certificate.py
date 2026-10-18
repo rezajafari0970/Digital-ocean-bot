@@ -30,7 +30,7 @@ def main(plan):
     ip = ipaddress.ip_address(plan['host'])
     if not ip.is_global or ip.version != 4: raise RuntimeError('public_ipv4_required')
     port, panel_port = int(plan['port']), int(plan['panel_port'])
-    if not 1024 <= port <= 65535 or port in (panel_port, 18080): raise RuntimeError('reserved_port')
+    if not 1 <= port <= 65535 or port in (panel_port, 22, 80, 18080): raise RuntimeError('reserved_port')
     if ROOT.is_symlink() or not ROOT.is_dir(): raise RuntimeError('unsafe_owner_directory')
     if json.loads((ROOT/'owner.json').read_text()) != {'panel':plan['panel'],'host':str(ip)}:
         raise RuntimeError('owner_mismatch')

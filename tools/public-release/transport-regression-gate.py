@@ -6,6 +6,9 @@ A successful `go test` exit alone is insufficient: every named test must pass
 and no selected test or subtest may be skipped.
 """
 import json
+import gzip
+import hashlib
+import urllib.request
 import os
 from pathlib import Path
 import shutil
@@ -15,10 +18,15 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),
     "internal/adminapi": (
+        "TestProfileOutputRevisionScopeAndCountries",
+        "TestConfigProfileAdoptionPreservesNativeCredentials",
+        "TestConfigDriverProfileAdmission",
+        "TestConfigDriverRecoveryAndIndependentPortChange",
         "TestTransportApplySaveIsAtomicAndScopesEligibleListeners",
         "TestOutputCountryNamesAllRoutesAndObservedRegion",
         "TestTrojanMixedOutputKeepsRealityAndScope",
@@ -95,6 +103,18 @@ def main(repo):
             run([pg / 'createdb', 'bulk_test_transport'], stdout=output, stderr=subprocess.STDOUT)
             run([pg / 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-c', 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'], stdout=output, stderr=subprocess.STDOUT)
         env['BULK_TEST_DATABASE_URL'] = 'postgresql://dob_gate@/bulk_test_transport?' + urlencode({'host': str(socket), 'port': '55435', 'sslmode': 'disable'})
+        # Execute protocol/transport exports against the exact release-pinned core.
+        # Neither an absent binary nor an environment-selected unverified core can skip this gate.
+        core = json.loads((repo/'internal/panels/transportcore/manifest.json').read_text())['core']
+        packed = (repo/'xray.gz')
+        payload = packed.read_bytes() if packed.is_file() else urllib.request.urlopen(core['url'], timeout=45).read(100_000_001)
+        if len(payload)>100_000_000 or hashlib.sha256(payload).hexdigest()!=core['gzip_sha256']:
+            raise RuntimeError('native test core archive hash mismatch')
+        binary=gzip.decompress(payload)
+        if hashlib.sha256(binary).hexdigest()!=core['sha256']:
+            raise RuntimeError('native test core binary hash mismatch')
+        native=work/'xray';native.write_bytes(binary);native.chmod(0o700)
+        env['XRAY_TEST_BINARY']=str(native)
         names = [name for group in REQUIRED.values() for name in group]
         args = ['go', 'test', '-json', '-race', '-count=1', '-p', '1', '-timeout', '5m', '-run', '^(' + '|'.join(names) + ')$'] + ['./' + p for p in REQUIRED]
         result = subprocess.run(args, cwd=repo, env=env, capture_output=True, text=True, timeout=900)

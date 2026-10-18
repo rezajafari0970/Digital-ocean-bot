@@ -2,6 +2,7 @@ async function refreshTrojanConfig(){
  const slot=document.querySelector('#configTrojanSlot');if(!slot)return;
  try{
   const data=await api('/api/v1/configs/trojan');if(!slot.isConnected)return;
+  if(data.managed_as_profile){slot.innerHTML='';return}
   const p=data.policy,list=data.listeners||[],verified=list.filter(x=>x.state==='VERIFIED').length;
   slot.innerHTML='<div class="card section"><div class="cardHeader"><h3>Trojan TCP · TLS</h3><button class="small ghost" id="editTrojanConfig">Settings</button></div>'+
    '<p>'+(p.enabled?'Enabled':'Disabled')+' · Port '+esc(p.port)+' · '+verified+' / '+list.length+' verified</p>'+

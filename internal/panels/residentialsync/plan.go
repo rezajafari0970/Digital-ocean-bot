@@ -90,7 +90,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			return nil, nil, errors.New("duplicate inbound routing tag")
 		}
 		seenTags[in.Tag] = true
-		managedTrojan := in.Protocol == "trojan" && strings.HasPrefix(in.Remark, "dob:trojan-tcp:")
+		managedTrojan := in.Protocol == "trojan" && strings.HasPrefix(in.Remark, "dob:trojan-tcp:") || (in.Protocol == "trojan" || in.Protocol == "shadowsocks") && strings.HasPrefix(in.Remark, "dob:profile:")
 		if p.StrictAllowlist {
 			if err := validateStrictInboundTags([]string{in.Tag}, nil); err != nil {
 				return nil, nil, err
@@ -120,6 +120,12 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			}
 			id, _ := m["id"].(string)
 			email, _ := m["email"].(string)
+			if managedTrojan && strings.HasPrefix(in.Remark, "dob:profile:") {
+				old, owned := previous[id]
+				if !owned || old.Email != email {
+					return nil, nil, errors.New("profile route ownership missing")
+				}
+			}
 			// Unmanaged protocols remain under the inbound default.
 			if in.Protocol != "vless" && in.Protocol != "vmess" && !managedTrojan {
 				continue

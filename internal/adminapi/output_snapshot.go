@@ -16,7 +16,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 )
@@ -48,20 +47,24 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 			}
 		}
 		stage = "stage records"
-		if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text) ON COMMIT DROP`); err != nil {
+		if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text,config_profile_id uuid,config_profile_revision bigint) ON COMMIT DROP`); err != nil {
 			return err
 		}
-		copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id"))
+		copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id", "config_profile_id", "config_profile_revision"))
 		if err != nil {
 			return err
 		}
 		uniqueURIs := make(map[string]struct{}, len(records))
 		for _, rec := range records {
-			if !strings.HasPrefix(rec.URI, "vless://") && !strings.HasPrefix(rec.URI, "trojan://") {
+			if !strings.HasPrefix(rec.URI, "vless://") && !strings.HasPrefix(rec.URI, "trojan://") && !strings.HasPrefix(rec.URI, "vmess://") && !strings.HasPrefix(rec.URI, "ss://") {
 				continue
 			}
 			uniqueURIs[rec.URI] = struct{}{}
-			if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID); err != nil {
+			var profile any
+			if rec.ProfileID != "" {
+				profile = rec.ProfileID
+			}
+			if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID, profile, rec.ProfileRevision); err != nil {
 				_ = copyStmt.Close()
 				return err
 			}
@@ -74,11 +77,11 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 			return err
 		}
 		stage = "upsert"
-		result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id)
-SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END,c.client_id
-FROM (SELECT DISTINCT ON(uri) uri,visible_until,client_id FROM current_output_uris ORDER BY uri) c
+		result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id,config_profile_id,config_profile_revision)
+SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END,c.client_id,c.config_profile_id,c.config_profile_revision
+FROM (SELECT DISTINCT ON(uri) uri,visible_until,client_id,config_profile_id,config_profile_revision FROM current_output_uris ORDER BY uri) c
 JOIN panel_instances p ON p.id=$1 JOIN droplets dr ON dr.id=p.droplet_id
-ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until,client_id=excluded.client_id
+ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until,client_id=excluded.client_id,config_profile_id=excluded.config_profile_id,config_profile_revision=excluded.config_profile_revision
 WHERE output_config_snapshots.uri=excluded.uri`, panelID)
 		if err != nil {
 			return err
@@ -178,8 +181,9 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	// A last verified admission closure stays withheld across stale/failed polls.
 	// Only a valid open/disabled receipt proves recovery; a policy intent does not.
 	where += serverProtectionOutputPredicate
-	where += " AND NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED')) "
-	where += ` AND (o.uri NOT LIKE 'trojan://%' OR EXISTS(SELECT 1 FROM trojan_tcp_listeners tl CROSS JOIN trojan_tcp_policy tp WHERE tl.panel_id=p.id AND tp.enabled AND (tp.fleet OR p.id=ANY(tp.panel_ids)) AND tl.state='VERIFIED' AND tl.verified_at>now()-interval '5 minutes' AND tl.certificate_not_after>now()+interval '5 minutes')) `
+	where += " AND (" + profileOutputOwned + " OR NOT EXISTS(SELECT 1 FROM reality_transport_apply_jobs ta WHERE ta.panel_id=p.id AND ta.state IN('RUNNING','BLOCKED'))) "
+	where += " AND ((o.config_profile_id IS NULL AND NOT (" + profileOutputOwned + ")) OR (" + profileOutputVerified + ")) "
+	where += ` AND (` + profileOutputOwned + ` OR o.uri NOT LIKE 'trojan://%' OR EXISTS(SELECT 1 FROM trojan_tcp_listeners tl CROSS JOIN trojan_tcp_policy tp WHERE tl.panel_id=p.id AND tp.enabled AND (tp.fleet OR p.id=ANY(tp.panel_ids)) AND tl.state='VERIFIED' AND tl.verified_at>now()-interval '5 minutes' AND tl.certificate_not_after>now()+interval '5 minutes')) `
 	args := []any{}
 	// Class publication requires a fresh running-core proof of the current revision.
 	proof := ` rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds' `
@@ -193,7 +197,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
          SELECT 1 FROM bulk_user_ownership own JOIN bulk_user_generations gen ON gen.id=own.generation_id
          JOIN reality_config_profiles profile ON profile.route_class=own.route_class
          WHERE gen.panel_id=p.id AND own.client_id=o.client_id AND own.email=cr.email
-         AND own.state='ACTIVE' AND own.route_class=$1) OR EXISTS(SELECT 1 FROM trojan_tcp_clients tc JOIN trojan_tcp_listeners tl ON tl.panel_id=tc.panel_id WHERE tc.panel_id=p.id AND tc.client_id=o.client_id AND tc.email=cr.email AND tc.route_class=$1 AND tl.state='VERIFIED' AND o.uri LIKE 'trojan://%')) `
+         AND own.state='ACTIVE' AND own.route_class=$1) OR EXISTS(SELECT 1 FROM trojan_tcp_clients tc JOIN trojan_tcp_listeners tl ON tl.panel_id=tc.panel_id WHERE tc.panel_id=p.id AND tc.client_id=o.client_id AND tc.email=cr.email AND tc.route_class=$1 AND tl.state='VERIFIED' AND o.uri LIKE 'trojan://%') OR EXISTS(SELECT 1 FROM config_driver_clients dc WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND dc.email=cr.email AND dc.route_class=$1)) `
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
 	}
@@ -227,9 +231,9 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 		args = append(args, n)
 		where += ` AND o.first_seen_at>=now()-($` + strconv.Itoa(len(args)) + `*interval '1 minute') `
 	}
-	columns := `o.uri,NULL::jsonb AS ports`
+	columns := `o.uri,CASE WHEN ` + profileOutputOwned + ` THEN (SELECT jsonb_build_array((dp.spec->>'port')::integer) FROM config_driver_clients dc JOIN config_driver_profiles dp ON dp.id=dc.profile_id WHERE dc.panel_id=p.id AND dc.client_id=o.client_id) ELSE NULL::jsonb END AS ports`
 	if class != "ALL" {
-		columns = `o.uri,CASE WHEN o.uri LIKE 'trojan://%' THEN (SELECT jsonb_build_array(port) FROM trojan_tcp_listeners WHERE panel_id=p.id) ELSE (SELECT ports FROM reality_config_profiles WHERE route_class=$1) END AS ports`
+		columns = `o.uri,CASE WHEN ` + profileOutputOwned + ` THEN (SELECT jsonb_build_array((dp.spec->>'port')::integer) FROM config_driver_clients dc JOIN config_driver_profiles dp ON dp.id=dc.profile_id WHERE dc.panel_id=p.id AND dc.client_id=o.client_id) WHEN o.uri LIKE 'trojan://%' THEN (SELECT jsonb_build_array(port) FROM trojan_tcp_listeners WHERE panel_id=p.id) ELSE (SELECT ports FROM reality_config_profiles WHERE route_class=$1) END AS ports`
 	}
 	columns += `,loc.provider,loc.region_id,loc.region_name,loc.country_code`
 	q := `SELECT ` + columns + ` FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id LEFT JOIN output_locations loc ON loc.droplet_id=dr.id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` ORDER BY random()`
@@ -291,11 +295,7 @@ func outputProfilePortAllowed(uri string, raw []byte) bool {
 	if json.Unmarshal(raw, &ports) != nil {
 		return false
 	}
-	u, err := url.Parse(uri)
-	if err != nil || (u.Scheme != "vless" && u.Scheme != "trojan") {
-		return false
-	}
-	port, err := strconv.Atoi(u.Port())
+	port, err := export.URIPort(uri)
 	if err != nil {
 		return false
 	}

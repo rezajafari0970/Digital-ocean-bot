@@ -50,6 +50,15 @@ const eligible = `p.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.de
  AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=p.id AND cj.state NOT IN('SUCCEEDED','CANCELLED'))`
 
 func (s Service) RunOne(ctx context.Context) error {
+	var delegated bool
+	if s.DB != nil {
+		if e := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_profiles WHERE legacy_key='trojan')").Scan(&delegated); e != nil {
+			return e
+		}
+		if delegated {
+			return nil
+		}
+	}
 	if s.DB == nil || s.Secrets == nil || s.Runtimes == nil {
 		return errors.New("trojan_service_unconfigured")
 	}
@@ -75,6 +84,15 @@ func (s Service) Reconcile(ctx context.Context, panel string) error {
 
 // Verification has its own bounded lane: ACME cannot starve existing listeners.
 func (s Service) RunVerifyOne(ctx context.Context) error {
+	var delegated bool
+	if s.DB != nil {
+		if e := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_profiles WHERE legacy_key='trojan')").Scan(&delegated); e != nil {
+			return e
+		}
+		if delegated {
+			return nil
+		}
+	}
 	var panel string
 	e := s.DB.QueryRowContext(ctx, `WITH candidate AS (
  SELECT t.panel_id FROM trojan_tcp_listeners t JOIN panel_instances p ON p.id=t.panel_id

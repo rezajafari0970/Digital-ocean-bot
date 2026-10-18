@@ -24,6 +24,19 @@ func CertificateCommand(panel, host string, port, panelPort int) (string, error)
 	if ip == nil || ip.To4() == nil || panel == "" || ValidatePort(port, panelPort, nil, nil) != nil {
 		return "", errors.New("trojan_invalid_certificate_target")
 	}
+	return certificateCommand(panel, host, port, panelPort)
+}
+
+// ProfileCertificateCommand accepts independently reserved listener ports.
+func ProfileCertificateCommand(panel, host string, port, panelPort int) (string, error) {
+	ip := net.ParseIP(host)
+	if ip == nil || ip.To4() == nil || panel == "" || port < 1 || port > 65535 || port == 22 || port == 80 || port == 18080 || port == panelPort {
+		return "", errors.New("profile_invalid_certificate_target")
+	}
+	return certificateCommand(panel, host, port, panelPort)
+}
+func certificateCommand(panel, host string, port, panelPort int) (string, error) {
+	ip := net.ParseIP(host)
 	plan, _ := json.Marshal(map[string]any{"panel": panel, "host": ip.String(), "port": port, "panel_port": panelPort})
 	script := base64.StdEncoding.EncodeToString([]byte(certificateScript))
 	encoded := base64.StdEncoding.EncodeToString(plan)

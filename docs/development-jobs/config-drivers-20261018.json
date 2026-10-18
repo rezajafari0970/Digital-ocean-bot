@@ -1,0 +1,39 @@
+{
+  "id": "config-drivers-20261018",
+  "status": "in_progress",
+  "baseline": "efcd78acc8c118149ec3bdb3bd0c12d61d5c485b",
+  "stages": [
+    {
+      "name": "compatibility",
+      "status": "verified",
+      "evidence": "Pinned Xray 26.10.10 rejects public-IP Trojan security=none (exit 23); loopback accepted (exit 0). No live configuration changed."
+    },
+    {
+      "name": "profiles_and_drivers",
+      "status": "verified",
+      "evidence": "24 mandatory PostgreSQL/race/native regressions passed; legacy credentials and native listeners adopted without POST, applied ports remain reserved."
+    },
+    {
+      "name": "unified_ui",
+      "status": "verified",
+      "evidence": "Browser regression passed: common New, all four protocols, plain Trojan public restriction, port 9443/500/automatic, existing Reality controls."
+    },
+    {
+      "name": "regression_and_canary",
+      "status": "verified",
+      "evidence": "17 isolated real core URI round trips and 16 native Sanaei create/port-change/fresh-verify lifecycles passed; actual active-core traffic proof handles API-hot-added listeners; SS Client-model mapping fixed."
+    },
+    {
+      "name": "release_and_rollout",
+      "status": "in_progress"
+    }
+  ],
+  "constraints": [
+    "Preserve credentials and existing Reality pins",
+    "No TLS stripping from TLS listeners",
+    "No unsupported public plaintext Trojan",
+    "Keep cleanup, ownership, fresh route proof and output scope fences",
+    "No OpenAI API calls"
+  ],
+  "updated_at": "2026-10-18T00:27:47.495133+00:00"
+}

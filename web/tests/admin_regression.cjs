@@ -105,9 +105,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   console.log('UI_SIX_MINUTE_CREATION_INTERVAL PASS');
   assert.deepEqual(await evaluate('window.profileSaves.slice(0,2).map(x=>[x.route_class,x.target_users_per_inbound,x.users_per_second])'),[['DIRECT',1,1],['RESIDENTIAL',1,1]]);
   await evaluate('api=window.originalProfileAPI');
-  await evaluate('openConfigForm()');
-  assert.equal(await evaluate('document.querySelectorAll("[data-profile-choice]").length'),2);
-  await evaluate('document.querySelector("[data-profile-choice=RESIDENTIAL]").click()');
+  await evaluate('openConfigForm(cache.configs.find(x=>x.route_class==="RESIDENTIAL"))');
   assert.match(await evaluate('document.querySelector("#modalTitle").textContent'),/Residential/);
   await evaluate('document.querySelector("[name=users_per_second]").value="10000";document.querySelector("#modalForm").requestSubmit()');
   assert.match(await evaluate('document.querySelector("#modalError").textContent'),/does not limit user connections/);

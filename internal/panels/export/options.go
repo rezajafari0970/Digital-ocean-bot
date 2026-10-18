@@ -15,14 +15,20 @@ type OutputOptions struct {
 // ApplyOutputOptions preserves retained components byte-for-byte. In
 // particular, it must not form-decode '+' or re-encode existing URI values.
 func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
+	if strings.HasPrefix(uri, "vmess://") || strings.HasPrefix(uri, "ss://") {
+		if !validAdditionalURI(uri) {
+			return "", ErrInvalidVLESS
+		}
+		return uri, nil
+	}
 	u, err := url.Parse(uri)
 	if err == nil && u.Scheme == "trojan" && u.User != nil && u.Host != "" {
 		q, e := url.ParseQuery(u.RawQuery)
-		if e != nil || q.Get("security") != "tls" || q.Get("type") != "tcp" {
+		if e != nil || q.Get("security") != "tls" || (q.Get("type") != "tcp" && q.Get("type") != "ws" && q.Get("type") != "grpc") {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
-			if k != "security" && k != "type" {
+			if k != "security" && k != "type" && k != "path" && k != "host" && k != "serviceName" && k != "mode" {
 				return "", ErrInvalidVLESS
 			}
 		}

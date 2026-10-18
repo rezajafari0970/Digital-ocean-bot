@@ -14,6 +14,7 @@ import (
 )
 
 func addTrojanModules(modules *worker.Modules, a *app.Application, rt *sanaei.RuntimeManager, budget *worker.WorkBudget) {
+	addConfigProfileModules(modules, a, rt, budget)
 	// Two dedicated bounded slots keep ACME waits out of existing Reality,
 	// capacity, route-proof and output admission lanes.
 	creation := worker.NewWorkClass(budget, 2)

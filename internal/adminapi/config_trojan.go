@@ -8,6 +8,15 @@ import (
 )
 
 func (s *Server) getTrojanConfig(w http.ResponseWriter, r *http.Request) {
+	var migrated bool
+	if e := s.DB.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM config_driver_profiles WHERE legacy_key='trojan')").Scan(&migrated); e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if migrated {
+		writeJSON(w, 200, map[string]any{"managed_as_profile": true})
+		return
+	}
 	p, e := trojantcp.ReadPolicy(r.Context(), s.DB)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
@@ -39,6 +48,15 @@ func (s *Server) getTrojanConfig(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"policy": p, "listeners": listeners, "certificate_mode": "automatic_ip_tls", "configs_per_class_per_server": 1})
 }
 func (s *Server) putTrojanConfig(w http.ResponseWriter, r *http.Request) {
+	var delegated bool
+	if e := s.DB.QueryRowContext(r.Context(), "SELECT EXISTS(SELECT 1 FROM config_driver_profiles WHERE legacy_key='trojan')").Scan(&delegated); e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if delegated {
+		writeJSON(w, 409, map[string]string{"error": "trojan_managed_as_profile", "detail": "Use Configs > Profiles to edit the migrated Trojan profile."})
+		return
+	}
 	var p trojantcp.Policy
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32768))
 	dec.DisallowUnknownFields()
