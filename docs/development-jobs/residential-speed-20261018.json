@@ -1,0 +1,1950 @@
+{
+  "recorded_at": "2026-10-18T18:39:28.343701+00:00",
+  "status": "CANDIDATE_REJECTED_RESTORED_UPSTREAM_PERFORMANCE_OPEN",
+  "release": "16f3b682f638fba5021588fe9818b91db917ef66",
+  "source": "0b3332aecb26b401d8e65a3cbdc8048aca7d9a2c",
+  "plan": {
+    "created_at": "2026-10-18T18:23:25.955922+00:00",
+    "source": "0b3332aecb26b401d8e65a3cbdc8048aca7d9a2c",
+    "windows": 3,
+    "cases_per_window": 4,
+    "request_deadline_seconds": 8,
+    "connect_deadline_seconds": 4,
+    "max_concurrent_per_node": 2,
+    "maximum_download_bytes": 1048576,
+    "candidate": {
+      "fast_share": 90,
+      "fast_count": 2,
+      "probe_interval_seconds": 10,
+      "probe_timeout_ms": 5000,
+      "max_rtt_ms": 5000,
+      "dns_mode": "tcp",
+      "gateway_ipv4": false,
+      "tcp_options": false,
+      "tcp_fast_open": false,
+      "keepalive_idle_seconds": 30,
+      "keepalive_interval_seconds": 20,
+      "tcp_user_timeout_ms": 20000,
+      "routing_strategy": "preserve",
+      "buffer_kb": 0
+    },
+    "acceptance": {
+      "candidate_successes_at_least_baseline": true,
+      "candidate_successes_minimum": 11,
+      "median_improvement_if_baseline_fully_successful": 0.15,
+      "candidate_p90_ceiling": "max(baseline p90*1.2, baseline p90+0.5 seconds)",
+      "direct_and_deny_controls_required": true
+    },
+    "scope": "Fixed static JavaScript transfers only. No ad requests, impressions, clicks, redirects or retries. Native protected client path; not Android SDK load/show latency."
+  },
+  "phases": {
+    "baseline": {
+      "summary": {
+        "target": {
+          "attempts": 12,
+          "completed": 2,
+          "curl_codes": {
+            "28": 9,
+            "0": 2,
+            "35": 1
+          }
+        },
+        "control": {
+          "attempts": 12,
+          "completed": 1,
+          "curl_codes": {
+            "28": 7,
+            "35": 4,
+            "0": 1
+          }
+        }
+      },
+      "observations": [
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:23:30.905152+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 5503,
+          "speed_download": 687,
+          "success": false,
+          "time_appconnect": 3.536171,
+          "time_connect": 0.000245,
+          "time_starttransfer": 5.732899,
+          "time_total": 8.001946,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:23:38.935817+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 16518,
+          "speed_download": 2064,
+          "success": false,
+          "time_appconnect": 3.071344,
+          "time_connect": 0.000149,
+          "time_starttransfer": 4.435931,
+          "time_total": 8.000414,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:23:46.955286+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 25351,
+          "speed_download": 3168,
+          "success": false,
+          "time_appconnect": 2.522261,
+          "time_connect": 9.3e-05,
+          "time_starttransfer": 3.709242,
+          "time_total": 8.000167,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:23:46.955901+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131730,
+          "speed_download": 40986,
+          "success": true,
+          "time_appconnect": 2.042522,
+          "time_connect": 0.001188,
+          "time_starttransfer": 2.525311,
+          "time_total": 3.214017,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:23:30.905367+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 8259,
+          "speed_download": 1032,
+          "success": false,
+          "time_appconnect": 3.084712,
+          "time_connect": 0.000426,
+          "time_starttransfer": 4.976423,
+          "time_total": 8.001137,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:23:38.935053+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 69754,
+          "speed_download": 8719,
+          "success": false,
+          "time_appconnect": 2.171542,
+          "time_connect": 0.000216,
+          "time_starttransfer": 2.828077,
+          "time_total": 8.00015,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:23:46.954468+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 68393,
+          "speed_download": 8548,
+          "success": false,
+          "time_appconnect": 2.145975,
+          "time_connect": 0.000431,
+          "time_starttransfer": 2.813555,
+          "time_total": 8.001011,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:23:46.955250+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 25351,
+          "speed_download": 3168,
+          "success": false,
+          "time_appconnect": 2.534815,
+          "time_connect": 0.002059,
+          "time_starttransfer": 3.731163,
+          "time_total": 8.00104,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:38.298803+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000359,
+          "time_starttransfer": 0,
+          "time_total": 4.002223,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:24:42.320144+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000152,
+          "time_starttransfer": 0,
+          "time_total": 3.727472,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:46.066105+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 6881,
+          "speed_download": 859,
+          "success": false,
+          "time_appconnect": 2.878458,
+          "time_connect": 0.001313,
+          "time_starttransfer": 4.629669,
+          "time_total": 8.001735,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:24:46.066616+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 30720,
+          "speed_download": 3839,
+          "success": false,
+          "time_appconnect": 2.615758,
+          "time_connect": 0.000113,
+          "time_starttransfer": 3.662041,
+          "time_total": 8.000497,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:38.288115+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000554,
+          "time_starttransfer": 0,
+          "time_total": 3.745882,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:24:42.053865+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000334,
+          "time_starttransfer": 0,
+          "time_total": 0.039959,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:42.110909+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 7e-05,
+          "time_starttransfer": 0,
+          "time_total": 0.076738,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:24:42.111662+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000166,
+          "time_starttransfer": 0,
+          "time_total": 0.078161,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:59.231731+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000206,
+          "time_starttransfer": 0,
+          "time_total": 4.003761,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:25:03.396472+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 131730,
+          "speed_download": 44692,
+          "success": true,
+          "time_appconnect": 1.763868,
+          "time_connect": 0.002568,
+          "time_starttransfer": 2.408866,
+          "time_total": 2.947472,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:25:06.496132+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 14336,
+          "speed_download": 1791,
+          "success": false,
+          "time_appconnect": 3.305841,
+          "time_connect": 7.4e-05,
+          "time_starttransfer": 4.699586,
+          "time_total": 8.001327,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:25:06.496806+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 37601,
+          "speed_download": 4699,
+          "success": false,
+          "time_appconnect": 2.365801,
+          "time_connect": 0.001806,
+          "time_starttransfer": 3.138555,
+          "time_total": 8.000369,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:24:59.738881+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 29485,
+          "speed_download": 3684,
+          "success": false,
+          "time_appconnect": 2.552493,
+          "time_connect": 0.000108,
+          "time_starttransfer": 3.425285,
+          "time_total": 8.002378,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:25:07.760899+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 131664,
+          "speed_download": 51721,
+          "success": true,
+          "time_appconnect": 1.357954,
+          "time_connect": 0.000192,
+          "time_starttransfer": 2.002552,
+          "time_total": 2.545636,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:25:10.332032+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 18461,
+          "speed_download": 2307,
+          "success": false,
+          "time_appconnect": 2.734152,
+          "time_connect": 0.000141,
+          "time_starttransfer": 4.0347,
+          "time_total": 8.000644,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:25:10.332720+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 19839,
+          "speed_download": 2479,
+          "success": false,
+          "time_appconnect": 2.763326,
+          "time_connect": 0.001061,
+          "time_starttransfer": 3.692919,
+          "time_total": 8.00182,
+          "window": 3,
+          "role": "control"
+        }
+      ]
+    },
+    "candidate": {
+      "summary": {
+        "target": {
+          "attempts": 12,
+          "completed": 2,
+          "curl_codes": {
+            "28": 10,
+            "0": 2
+          }
+        },
+        "control": {
+          "attempts": 12,
+          "completed": 3,
+          "curl_codes": {
+            "35": 1,
+            "0": 3,
+            "28": 8
+          }
+        }
+      },
+      "observations": [
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:26:54.555879+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 17083,
+          "speed_download": 2135,
+          "success": false,
+          "time_appconnect": 2.765521,
+          "time_connect": 0.000114,
+          "time_starttransfer": 4.274264,
+          "time_total": 8.000636,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:02.573967+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 19106,
+          "speed_download": 2388,
+          "success": false,
+          "time_appconnect": 2.333879,
+          "time_connect": 0.000521,
+          "time_starttransfer": 3.294986,
+          "time_total": 8.000741,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:10.598827+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 55363,
+          "speed_download": 6918,
+          "success": false,
+          "time_appconnect": 1.995219,
+          "time_connect": 0.00096,
+          "time_starttransfer": 2.547054,
+          "time_total": 8.00198,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:10.600191+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 6.9e-05,
+          "time_starttransfer": 0,
+          "time_total": 4.002005,
+          "window": 1,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:26:54.140039+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000149,
+          "time_starttransfer": 0,
+          "time_total": 3.736084,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:26:57.895121+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 131659,
+          "speed_download": 29905,
+          "success": true,
+          "time_appconnect": 2.231097,
+          "time_connect": 0.000638,
+          "time_starttransfer": 2.765164,
+          "time_total": 4.402445,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:02.317540+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 22595,
+          "speed_download": 2823,
+          "success": false,
+          "time_appconnect": 2.177055,
+          "time_connect": 0.000122,
+          "time_starttransfer": 2.997815,
+          "time_total": 8.001723,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:02.318180+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 25351,
+          "speed_download": 3168,
+          "success": false,
+          "time_appconnect": 2.150008,
+          "time_connect": 0.000551,
+          "time_starttransfer": 2.955815,
+          "time_total": 8.000294,
+          "window": 1,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:23.813471+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 11015,
+          "speed_download": 1376,
+          "success": false,
+          "time_appconnect": 2.996538,
+          "time_connect": 0.000335,
+          "time_starttransfer": 4.715271,
+          "time_total": 8.00026,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:31.830655+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 20652,
+          "speed_download": 2581,
+          "success": false,
+          "time_appconnect": 3.090027,
+          "time_connect": 0.00023,
+          "time_starttransfer": 4.387075,
+          "time_total": 8.001111,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:39.855609+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 38979,
+          "speed_download": 4871,
+          "success": false,
+          "time_appconnect": 2.601925,
+          "time_connect": 0.00116,
+          "time_starttransfer": 3.596513,
+          "time_total": 8.000836,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:39.856386+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 37601,
+          "speed_download": 4699,
+          "success": false,
+          "time_appconnect": 2.789716,
+          "time_connect": 0.000381,
+          "time_starttransfer": 3.827527,
+          "time_total": 8.000933,
+          "window": 2,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:23.886819+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 206040,
+          "speed_download": 77401,
+          "success": true,
+          "time_appconnect": 1.420122,
+          "time_connect": 0.000281,
+          "time_starttransfer": 1.983687,
+          "time_total": 2.661962,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:26.567768+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000629,
+          "time_starttransfer": 0,
+          "time_total": 4.002268,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:30.588272+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 5503,
+          "speed_download": 687,
+          "success": false,
+          "time_appconnect": 3.105273,
+          "time_connect": 0.00016,
+          "time_starttransfer": 5.287533,
+          "time_total": 8.000951,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:27:30.589287+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131659,
+          "speed_download": 27672,
+          "success": true,
+          "time_appconnect": 2.117156,
+          "time_connect": 0.001349,
+          "time_starttransfer": 2.661786,
+          "time_total": 4.757833,
+          "window": 2,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:53.009977+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 34845,
+          "speed_download": 4355,
+          "success": false,
+          "time_appconnect": 2.621565,
+          "time_connect": 0.000239,
+          "time_starttransfer": 3.621279,
+          "time_total": 8.00095,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:28:01.027725+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 52607,
+          "speed_download": 6575,
+          "success": false,
+          "time_appconnect": 2.283225,
+          "time_connect": 0.0003,
+          "time_starttransfer": 3.024602,
+          "time_total": 8.000377,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:28:09.047901+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 206057,
+          "speed_download": 38038,
+          "success": true,
+          "time_appconnect": 3.386036,
+          "time_connect": 0.000159,
+          "time_starttransfer": 4.839243,
+          "time_total": 5.417129,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:28:09.048396+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131659,
+          "speed_download": 43182,
+          "success": true,
+          "time_appconnect": 1.856249,
+          "time_connect": 8.4e-05,
+          "time_starttransfer": 2.499091,
+          "time_total": 3.048876,
+          "window": 3,
+          "role": "target"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:27:53.367003+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 14336,
+          "speed_download": 1791,
+          "success": false,
+          "time_appconnect": 3.31815,
+          "time_connect": 0.000348,
+          "time_starttransfer": 4.364527,
+          "time_total": 8.0009,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:28:01.383518+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 50791,
+          "speed_download": 6348,
+          "success": false,
+          "time_appconnect": 2.225671,
+          "time_connect": 0.000233,
+          "time_starttransfer": 2.987361,
+          "time_total": 8.00059,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:28:09.406413+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 12393,
+          "speed_download": 1548,
+          "success": false,
+          "time_appconnect": 2.767298,
+          "time_connect": 0.000103,
+          "time_starttransfer": 3.794745,
+          "time_total": 8.001066,
+          "window": 3,
+          "role": "control"
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:28:09.407593+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 6881,
+          "speed_download": 859,
+          "success": false,
+          "time_appconnect": 3.199145,
+          "time_connect": 0.001983,
+          "time_starttransfer": 5.052753,
+          "time_total": 8.001387,
+          "window": 3,
+          "role": "control"
+        }
+      ]
+    }
+  },
+  "rejection": {
+    "at": "2026-10-18T18:28:35.870473+00:00",
+    "passed": 2,
+    "attempts": 12,
+    "reason": "Predeclared completion threshold not met; do not publish"
+  },
+  "rollback": {
+    "at": "2026-10-18T18:29:27.568914+00:00",
+    "experiment": {
+      "state": "ROLLED_BACK",
+      "version": 3
+    },
+    "assignment": {
+      "config": null,
+      "generation": 2,
+      "applied_generation": 2,
+      "verified_at": "2026-10-18T18:29:07.441136+00:00",
+      "plan_hash": "040014bf3326f99ec40d7be8672eac5ce1000f745dcc793d929ea8a870b19f32",
+      "route_state": "APPLIED",
+      "target_state": "RESTORED"
+    },
+    "proxy_counts": {
+      "endpoints": 12,
+      "gateway_hosts": 3,
+      "healthy": 2,
+      "down": 10
+    }
+  },
+  "final_experiment_inventory": {
+    "active_experiments": 0,
+    "assigned_configs": 0,
+    "at": "2026-10-18T18:39:28.338411+00:00"
+  },
+  "supplemental_late_transfer": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:30:44.062434+00:00",
+        "core_healthy": true,
+        "policy": {},
+        "pool": [
+          {
+            "strategy": {
+              "settings": {
+                "expected": 4,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "settings": {
+                "expected": 12,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "type": "random"
+            }
+          }
+        ],
+        "probe": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3s"
+        },
+        "proxy_sockopts": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "results": [
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:30:14.004119+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 156777,
+            "speed_download": 5225,
+            "success": false,
+            "time_appconnect": 4.013924,
+            "time_connect": 0.000173,
+            "time_starttransfer": 5.344561,
+            "time_total": 30.000711
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:30:14.006843+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 0,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 131659,
+            "speed_download": 40194,
+            "success": true,
+            "time_appconnect": 2.074682,
+            "time_connect": 0.003535,
+            "time_starttransfer": 2.575569,
+            "time_total": 3.275517
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    },
+    {
+      "proof": {
+        "at": "2026-10-18T18:30:43.612274+00:00",
+        "core_healthy": true,
+        "policy": {},
+        "pool": [
+          {
+            "strategy": {
+              "settings": {
+                "expected": 4,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "settings": {
+                "expected": 12,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "type": "random"
+            }
+          }
+        ],
+        "probe": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3s"
+        },
+        "proxy_sockopts": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "results": [
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:30:13.572160+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 130393,
+            "speed_download": 4346,
+            "success": false,
+            "time_appconnect": 2.672706,
+            "time_connect": 0.001007,
+            "time_starttransfer": 3.816919,
+            "time_total": 30.000588
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:30:13.574515+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 0,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 131730,
+            "speed_download": 4396,
+            "success": true,
+            "time_appconnect": 2.440475,
+            "time_connect": 0.000126,
+            "time_starttransfer": 3.548675,
+            "time_total": 29.964115
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "supplemental_compression_requested": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:33:49.885725+00:00",
+        "core_healthy": true,
+        "policy": {},
+        "pool": [
+          {
+            "strategy": {
+              "settings": {
+                "expected": 4,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "settings": {
+                "expected": 12,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "type": "random"
+            }
+          }
+        ],
+        "probe": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3s"
+        },
+        "proxy_sockopts": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "results": [
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:33:41.687221+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "sequential",
+            "size_download": 37601,
+            "speed_download": 4699,
+            "success": false,
+            "time_appconnect": 2.155484,
+            "time_connect": 0.000406,
+            "time_starttransfer": 2.933328,
+            "time_total": 8.001487
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:33:49.708367+00:00",
+            "content_type": null,
+            "curl_code": 35,
+            "http_code": 0,
+            "mode": "sequential",
+            "size_download": 0,
+            "speed_download": 0,
+            "success": false,
+            "time_appconnect": 0,
+            "time_connect": 0.000278,
+            "time_starttransfer": 0,
+            "time_total": 0.039944
+          },
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:33:49.772964+00:00",
+            "content_type": null,
+            "curl_code": 35,
+            "http_code": 0,
+            "mode": "concurrent",
+            "size_download": 0,
+            "speed_download": 0,
+            "success": false,
+            "time_appconnect": 0,
+            "time_connect": 0.001312,
+            "time_starttransfer": 0,
+            "time_total": 0.080167
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:33:49.774157+00:00",
+            "content_type": null,
+            "curl_code": 35,
+            "http_code": 0,
+            "mode": "concurrent",
+            "size_download": 0,
+            "speed_download": 0,
+            "success": false,
+            "time_appconnect": 0,
+            "time_connect": 0.000153,
+            "time_starttransfer": 0,
+            "time_total": 0.077768
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    },
+    {
+      "proof": {
+        "at": "2026-10-18T18:34:06.526549+00:00",
+        "core_healthy": true,
+        "policy": {},
+        "pool": [
+          {
+            "strategy": {
+              "settings": {
+                "expected": 4,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "settings": {
+                "expected": 12,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "type": "random"
+            }
+          }
+        ],
+        "probe": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3s"
+        },
+        "proxy_sockopts": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "results": [
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:33:42.423717+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "sequential",
+            "size_download": 22595,
+            "speed_download": 2823,
+            "success": false,
+            "time_appconnect": 2.670004,
+            "time_connect": 0.000551,
+            "time_starttransfer": 3.860638,
+            "time_total": 8.001122
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:33:50.444029+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "sequential",
+            "size_download": 116908,
+            "speed_download": 14611,
+            "success": false,
+            "time_appconnect": 1.871963,
+            "time_connect": 0.000523,
+            "time_starttransfer": 2.312393,
+            "time_total": 8.001142
+          },
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:33:58.468475+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 14336,
+            "speed_download": 1791,
+            "success": false,
+            "time_appconnect": 3.142362,
+            "time_connect": 0.002324,
+            "time_starttransfer": 4.518759,
+            "time_total": 8.000526
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:33:58.470119+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 11015,
+            "speed_download": 1376,
+            "success": false,
+            "time_appconnect": 3.240011,
+            "time_connect": 0.000159,
+            "time_starttransfer": 4.841363,
+            "time_total": 8.000316
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "provider_capacity": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:35:28.907718+00:00",
+        "gateways": [
+          {
+            "protocol": "socks"
+          },
+          {
+            "protocol": "socks"
+          },
+          {
+            "protocol": "socks"
+          }
+        ],
+        "proxy_outbound_count": 12,
+        "results": [
+          {
+            "elapsed_ms": 5003,
+            "endpoint": "stats",
+            "error_type": "TimeoutError",
+            "gateway_index": 0
+          },
+          {
+            "elapsed_ms": 5005,
+            "endpoint": "concurrent",
+            "error_type": "TimeoutError",
+            "gateway_index": 0
+          },
+          {
+            "elapsed_ms": 5005,
+            "endpoint": "stats",
+            "error_type": "TimeoutError",
+            "gateway_index": 1
+          },
+          {
+            "elapsed_ms": 5005,
+            "endpoint": "concurrent",
+            "error_type": "TimeoutError",
+            "gateway_index": 1
+          },
+          {
+            "bandwidth_numeric": {
+              "allowed": 3750000,
+              "usage": 41631
+            },
+            "elapsed_ms": 1010,
+            "endpoint": "stats",
+            "gateway_index": 2,
+            "keys": [
+              "bandwidth",
+              "concurrent",
+              "dedicatedPortLimit",
+              "interval",
+              "ipinfo",
+              "release",
+              "requestParams",
+              "stickyPortLimit",
+              "threadLimit",
+              "transferGB"
+            ],
+            "metrics": {
+              "concurrent": 233,
+              "dedicatedPortLimit": 0,
+              "stickyPortLimit": 15,
+              "threadLimit": 2100
+            },
+            "status": 200
+          },
+          {
+            "elapsed_ms": 920,
+            "endpoint": "concurrent",
+            "gateway_index": 2,
+            "open_threads": 233,
+            "status": 200
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "provider_capacity_first": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:34:24.444128+00:00",
+        "gateways": [
+          {
+            "protocol": "socks"
+          }
+        ],
+        "proxy_outbound_count": 12,
+        "results": [
+          {
+            "elapsed_ms": 950,
+            "endpoint": "stats",
+            "gateway_index": 0,
+            "keys": [
+              "bandwidth",
+              "concurrent",
+              "dedicatedPortLimit",
+              "interval",
+              "ipinfo",
+              "release",
+              "requestParams",
+              "stickyPortLimit",
+              "threadLimit",
+              "transferGB"
+            ],
+            "metrics": {
+              "concurrent": 149,
+              "threadLimit": 2100
+            },
+            "status": 200
+          },
+          {
+            "elapsed_ms": 1013,
+            "endpoint": "concurrent",
+            "gateway_index": 0,
+            "open_threads": 149,
+            "status": 200
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "per_egress": {
+    "at": "2026-10-18T18:37:22.966881+00:00",
+    "rows": [
+      {
+        "at": "2026-10-18T18:37:02.113389+00:00",
+        "slot": 0,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 5503,
+        "time_appconnect": 3.656567,
+        "time_starttransfer": 5.836755,
+        "time_total": 8.004404,
+        "speed_download": 687
+      },
+      {
+        "at": "2026-10-18T18:37:02.113839+00:00",
+        "slot": 1,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 29485,
+        "time_appconnect": 2.569587,
+        "time_starttransfer": 3.727605,
+        "time_total": 8.000897,
+        "speed_download": 3685
+      },
+      {
+        "at": "2026-10-18T18:37:02.116493+00:00",
+        "slot": 2,
+        "gateway_index": 1,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 12393,
+        "time_appconnect": 3.238654,
+        "time_starttransfer": 4.781759,
+        "time_total": 8.001069,
+        "speed_download": 1548
+      },
+      {
+        "at": "2026-10-18T18:37:02.119431+00:00",
+        "slot": 3,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": true,
+        "curl_code": 0,
+        "http_code": 200,
+        "size_download": 206117,
+        "time_appconnect": 2.165032,
+        "time_starttransfer": 2.710761,
+        "time_total": 3.685279,
+        "speed_download": 55929
+      },
+      {
+        "at": "2026-10-18T18:37:05.836078+00:00",
+        "slot": 4,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 8259,
+        "time_appconnect": 3.445714,
+        "time_starttransfer": 5.297392,
+        "time_total": 8.000606,
+        "speed_download": 1032
+      },
+      {
+        "at": "2026-10-18T18:37:10.160871+00:00",
+        "slot": 5,
+        "gateway_index": 1,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 37601,
+        "time_appconnect": 2.738055,
+        "time_starttransfer": 3.874801,
+        "time_total": 8.001049,
+        "speed_download": 4699
+      },
+      {
+        "at": "2026-10-18T18:37:10.163162+00:00",
+        "slot": 6,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 0,
+        "size_download": 0,
+        "time_appconnect": 0,
+        "time_starttransfer": 0,
+        "time_total": 4.002192,
+        "speed_download": 0
+      },
+      {
+        "at": "2026-10-18T18:37:10.163903+00:00",
+        "slot": 7,
+        "gateway_index": 0,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 0,
+        "size_download": 0,
+        "time_appconnect": 0,
+        "time_starttransfer": 0,
+        "time_total": 4.002591,
+        "speed_download": 0
+      },
+      {
+        "at": "2026-10-18T18:37:13.850001+00:00",
+        "slot": 8,
+        "gateway_index": 1,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 143149,
+        "time_appconnect": 2.312317,
+        "time_starttransfer": 3.094759,
+        "time_total": 8.001671,
+        "speed_download": 17889
+      },
+      {
+        "at": "2026-10-18T18:37:14.200442+00:00",
+        "slot": 9,
+        "gateway_index": 1,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 128000,
+        "time_appconnect": 2.434539,
+        "time_starttransfer": 3.190715,
+        "time_total": 8.000981,
+        "speed_download": 15998
+      },
+      {
+        "at": "2026-10-18T18:37:14.205443+00:00",
+        "slot": 10,
+        "gateway_index": 2,
+        "route": "residential",
+        "success": false,
+        "curl_code": 35,
+        "http_code": 0,
+        "size_download": 0,
+        "time_appconnect": 0,
+        "time_starttransfer": 0,
+        "time_total": 0.721716,
+        "speed_download": 0
+      },
+      {
+        "at": "2026-10-18T18:37:14.950214+00:00",
+        "slot": 11,
+        "gateway_index": 1,
+        "route": "residential",
+        "success": false,
+        "curl_code": 28,
+        "http_code": 200,
+        "size_download": 59497,
+        "time_appconnect": 2.476651,
+        "time_starttransfer": 3.41156,
+        "time_total": 8.000964,
+        "speed_download": 7436
+      },
+      {
+        "at": "2026-10-18T18:37:18.198640+00:00",
+        "slot": 12,
+        "gateway_index": 3,
+        "route": "direct",
+        "success": true,
+        "curl_code": 0,
+        "http_code": 200,
+        "size_download": 206040,
+        "time_appconnect": 0.071945,
+        "time_starttransfer": 0.110024,
+        "time_total": 0.214962,
+        "speed_download": 958494
+      }
+    ],
+    "max_concurrency": 4,
+    "limits": "Single observation per endpoint; not sufficient admission evidence. Direct is diagnostic only; no production ad route changed."
+  },
+  "invalid_collection": [
+    {
+      "proof": "invalid proof",
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "final_primary": {
+    "at": "2026-10-18T18:37:50.925241+00:00",
+    "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+    "schema": "000187_profile_client_confirmation",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-18T18:37:50.972329242Z"
+    },
+    "checks": {
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "accounts_preserved_except_previously_acknowledged_purge": true,
+      "retained_pins_preserved_or_verified_apply": true,
+      "legacy_policy_unchanged": true,
+      "profile_policy_preserved_except_journaled_delete": true,
+      "profile_credentials_preserved_and_native_identity_or_provider_retirement_verified": true,
+      "new_native_ids_journal_confirmed": true
+    },
+    "retained_pins": 441,
+    "expired_pins": 0,
+    "readiness_samples": 5,
+    "verified_transport_changes": 0
+  },
+  "final_secondary": {
+    "at": "2026-10-18T18:37:44.998838+00:00",
+    "release": "16f3b682f638fba5021588fe9818b91db917ef66",
+    "three_services_active": true,
+    "exact_binary_hashes": true,
+    "unexpected_restarts": 0,
+    "readiness": "ready"
+  },
+  "latest_output": {
+    "at": "2026-10-18T18:37:01.272531+00:00",
+    "catalog_seconds": 0.077,
+    "profiles": [
+      {
+        "protocol": "trojan",
+        "port": 500,
+        "state": "retrying",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 2,
+        "blocked": 2,
+        "ready": 70,
+        "published": 142,
+        "target": 144
+      },
+      {
+        "protocol": "vless",
+        "port": 443,
+        "state": "retrying",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 2,
+        "blocked": 2,
+        "ready": 70,
+        "published": 142,
+        "target": 144
+      },
+      {
+        "protocol": "vless",
+        "port": 8443,
+        "state": "retrying",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 3,
+        "blocked": 3,
+        "ready": 69,
+        "published": 141,
+        "target": 144
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-18T18:37:01.380769+00:00",
+      "proof_age": {
+        "under_5m": 216,
+        "over_5m": 0,
+        "never": 0,
+        "median_seconds": 124.22726399999999,
+        "max_seconds": 265.10493
+      },
+      "routing_age": {
+        "under_60s": 78,
+        "over_60s": 0,
+        "median_seconds": 15.429997499999999
+      },
+      "sql": {
+        "active": 1,
+        "idle": 60
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.042,
+        "status": 200,
+        "bytes": 94811,
+        "lines": 425
+      }
+    }
+  },
+  "remaining": [
+    "Recurring Residential slow and failed transfers",
+    "Complete Output acceptance",
+    "Actual app SDK load/show success and rendering latency; app source/traces required"
+  ],
+  "not_claimed": [
+    "99 percent ad load or speed increase",
+    "Provider account globally saturated",
+    "Production ad request timeout is eight seconds",
+    "Automatic quarantine or permanent no-error operation"
+  ],
+  "production_source_changed": false,
+  "new_runtime_deployments": 0,
+  "external_openai_api_calls": 0,
+  "evidence": [
+    {
+      "file": "after-start-status.json",
+      "sha256": "2c4c97ebda1d5b5c7dafb86fd5abebe3e365173ea368d2196e6b79af3edb7fc0"
+    },
+    {
+      "file": "baseline-1.json",
+      "sha256": "81505c1dfb8c892ec99e5d0a14279d55690c43db75a9c54050278b585b0855d2"
+    },
+    {
+      "file": "baseline-2.json",
+      "sha256": "f8f3c6b3a1ee60e7d5e8e52bbdf2cb1f438e30484a5b214866efbb2aa92a5cc6"
+    },
+    {
+      "file": "baseline-3.json",
+      "sha256": "117241e26b8096f8a603a8bba561262ae26a0ab1e8ba831849e66e3d753c1361"
+    },
+    {
+      "file": "before-status.json",
+      "sha256": "e224300654c1d660052b005405a93800c0938ec464b736098281d12a141cecd9"
+    },
+    {
+      "file": "candidate-1-context.json",
+      "sha256": "643c3bd33731bc68267efdd8b9f8786cac6d27cd465655bdfa2672ed16b174ac"
+    },
+    {
+      "file": "candidate-1.json",
+      "sha256": "b51d11df432f40e1c9088add7d868cdc6466ec94404d69490f97d85595ffc922"
+    },
+    {
+      "file": "candidate-2-context.json",
+      "sha256": "d15d8647611ee45a88905f2b891a8d0f1c3c6d7f14cc1cb99834eec1fc75a02b"
+    },
+    {
+      "file": "candidate-2.json",
+      "sha256": "dc068b36f47a3f1d7ffba98c061a1043f8aa2f8c72f13176882ab0988cc6a3c9"
+    },
+    {
+      "file": "candidate-3-context.json",
+      "sha256": "46320e815ca460d0366a9d6debd67c5a9a439c77f1ba1ffb9e90d438aac7d8c9"
+    },
+    {
+      "file": "candidate-3.json",
+      "sha256": "7466b878dab7750e539096d6165663130e9a4fae29f8051ecac6da2a0518b754"
+    },
+    {
+      "file": "final-canary-renewal-scope.json",
+      "sha256": "932432bdaab1f586823d43cf01f0e021a27ed216dfeb089fbcea4edfe31c2d0f"
+    },
+    {
+      "file": "final-verified-account-purge-exceptions.json",
+      "sha256": "ce7d8c0403d6ef6b9de37211c0b6ffd1ce1251c95b9c6601bd63ce38cf7314c0"
+    },
+    {
+      "file": "final-verified-profile-delete-exceptions.json",
+      "sha256": "374f2d1f4a434ce2351ae9345f101b42939486ec9254b187895bb1dbee8c0941"
+    },
+    {
+      "file": "final-verify.json",
+      "sha256": "5e2cf5f5e1f6b39176eafe809d31694a706c87118ee478f750d9af023a8c5987"
+    },
+    {
+      "file": "per-egress-assets-compact.json",
+      "sha256": "c7b92fd40a7bd2d5748dede6a171ba54e6bba2bc57289702510cb3211489e9fe"
+    },
+    {
+      "file": "per-egress-assets.json",
+      "sha256": "2c207df8d81b3667704d0f2ce4b7800fe029c11f2b4811d7eb8fc5aebfc803b3"
+    },
+    {
+      "file": "plan.json",
+      "sha256": "a8095d01671f286a3852cfc3aa6e683f17df22501c6e9bc75c22040c744a62b4"
+    },
+    {
+      "file": "provider-capacity-all.json",
+      "sha256": "37e05fd9f82f1bf40284d053bb924dcc1ffd2cb432de27ba43f34c369207de37"
+    },
+    {
+      "file": "provider-capacity.json",
+      "sha256": "3e20172ba2fc169faaf3038796951267e0f4abbe0dc0369f727e3f6a92a10176"
+    },
+    {
+      "file": "rejection.json",
+      "sha256": "f5d319d43228151faa0e6657b640eaba25d44c3d51a258c08f19ca42551c69ae"
+    },
+    {
+      "file": "restored-compressed-transfer.json",
+      "sha256": "1d543aa7319575a0dcf204d978b5ab16b9aa1810e0bcef162d53b399ee8ddc78"
+    },
+    {
+      "file": "restored-late-transfer.json",
+      "sha256": "30213c89ae54c91b5c86833e6f6d2695e679364cfafe48abd303b20be4b443e7"
+    },
+    {
+      "file": "rollback-observation.json",
+      "sha256": "e996332e4c248e0105bb3cde014ae269d0b594218eade5141814832fba63b3e4"
+    },
+    {
+      "file": "rollback-receipt.json",
+      "sha256": "f3b600d42abf96b0ee17e47bd29ccd5f4e70c19a629e3f56b21a510b959d4475"
+    },
+    {
+      "file": "rollback-request.json",
+      "sha256": "5c497a19dba2f2e6d91c90311c86032ba324e10300b8b4129c996b79cace31b6"
+    },
+    {
+      "file": "start-receipt.json",
+      "sha256": "98941378df170e6d929e9d56608fb0007de8c33f0d42367ced00bf4054d462e7"
+    },
+    {
+      "file": "start-request.json",
+      "sha256": "d82393714aac1469b60b9e01d9b9bef906b75776fa89a087e33d64c6362b7d36"
+    },
+    {
+      "file": "supplemental-plan.json",
+      "sha256": "52549f24579d4dd0ecf300f747526d271deba9976cff4a458a37207fee71719b"
+    }
+  ]
+}
