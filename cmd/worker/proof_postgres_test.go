@@ -131,8 +131,9 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 	}
 	defer global.ExecContext(context.Background(), "SELECT pg_advisory_unlock(628341902731)")
 	live, retired, _ := newProofWorkBudgets(worker.RolePanels, "18")
-	parent, _, _ := newPanelWorkBudgets()
-	ready, work, hold := make(chan struct{}, 29), make(chan struct{}), make(chan struct{})
+	parent, _, _ := newPanelWorkBudgets(worker.RolePanels, 18)
+	slots := int(parent.Snapshot()["limit"])
+	ready, work, hold := make(chan struct{}, 19+slots), make(chan struct{}), make(chan struct{})
 	errs := make(chan error, 40)
 	var wg sync.WaitGroup
 	defer func() { cancel(); wg.Wait() }()
@@ -191,12 +192,23 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 			})
 		}()
 	}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < slots; i++ {
 		i := i
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			errs <- parent.Do(ctx, func(c context.Context) error {
+				// Profiles retain their own lease in addition to the panel fence.
+				// Holding only one connection here missed the production deadlock.
+				lease, e := db.Conn(c)
+				if e != nil {
+					return e
+				}
+				defer lease.Close()
+				if _, e = lease.ExecContext(c, "SELECT pg_advisory_lock(hashtextextended($1,0))", fmt.Sprintf("profile-%d", i)); e != nil {
+					return e
+				}
+				defer lease.ExecContext(context.Background(), "SELECT pg_advisory_unlock_all()")
 				conn, e := db.Conn(c)
 				if e != nil {
 					return e
@@ -231,7 +243,7 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 			})
 		}()
 	}
-	for range 29 {
+	for range 19 + slots {
 		select {
 		case <-ready:
 		case e := <-errs:
@@ -240,7 +252,7 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 			t.Fatal(ctx.Err())
 		}
 	}
-	if db.Stats().InUse != 31 || db.Stats().MaxOpenConnections != 40 {
+	if db.Stats().InUse != 21+2*slots || db.Stats().MaxOpenConnections != 40 {
 		t.Fatal("physical ledger", db.Stats())
 	}
 	// A writer queued through the separate API pool must not steal worker headroom.
@@ -272,7 +284,7 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		if count == 29 && total == 87 {
+		if count == 19+slots && total == 3*(19+slots) {
 			break
 		}
 		if ctx.Err() != nil {
@@ -284,10 +296,10 @@ func TestProofPoolFortyPhysicalPinsAndProgress(t *testing.T) {
 		t.Fatal("role heartbeat lost", e)
 	}
 	stats := db.Stats()
-	t.Logf("long_pins=31 reserved_short=9 max_open=40 pool_waits=%d", stats.WaitCount)
+	t.Logf("long_pins=%d reserved_short=%d max_open=40 pool_waits=%d", 21+2*slots, 40-(21+2*slots), stats.WaitCount)
 	close(hold)
 	wg.Wait()
-	for range 29 {
+	for range 19 + slots {
 		if e := <-errs; e != nil {
 			t.Fatal(e)
 		}

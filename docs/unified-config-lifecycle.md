@@ -18,6 +18,7 @@ The count is per routing class per server. Direct and Residential remain separat
 - Updates and deletion verify the owned native identity and a hash of sibling listeners. Foreign changes block only the affected operation.
 - Port admission reserves desired, applied and uncertain pending ports. Native absence plus running-core socket absence is required before releasing an applied reservation.
 - Removed global users remain journaled until their exact identities are observed absent. Restarting a worker does not forget unfinished cleanup.
+- SQL admission accounts for both profile sessions and independent routing-proof reservations. With a 40-connection panel pool and 18 serving proofs, ordinary panel work is capped at eight operations; nested queries and heartbeat publication retain headroom.
 - Failures have bounded retries and recorded stages. Runtime failure withholds that profile's output until verification succeeds.
 
 ## Statistics and interface recovery

@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"sync"
 	"testing"
 	"time"
 )
 
 func TestPanelMaintenanceCannotStarveGuardianLanes(t *testing.T) {
-	parent, poll, maintenance := newPanelWorkBudgets()
+	parent, poll, maintenance := newPanelWorkBudgets(worker.RolePanels, 2)
 	ctx, cancel := context.WithCancel(context.Background())
 	release := make(chan struct{})
 	maintStarted := make(chan struct{}, 8)
@@ -74,5 +75,14 @@ func TestPanelMaintenanceCannotStarveGuardianLanes(t *testing.T) {
 	}
 	if parent.Snapshot()["active"] != 10 {
 		t.Fatal("shared parent limit/ownership incorrect", parent.Snapshot())
+	}
+}
+
+func TestPanelAdmissionAccountsForProofReservations(t *testing.T) {
+	for _, tt := range []struct{ proofs, slots int }{{2, 10}, {16, 9}, {18, 8}} {
+		parent, _, _ := newPanelWorkBudgets(worker.RolePanels, tt.proofs)
+		if got := int(parent.Snapshot()["limit"]); got != tt.slots {
+			t.Fatalf("proofs=%d got=%d want=%d", tt.proofs, got, tt.slots)
+		}
 	}
 }

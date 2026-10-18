@@ -140,8 +140,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
 	controlWork, controlBulkWork, providerWork, identityWork := newControlWorkBudgets()
 	schedulerWork := newSchedulerWorkBudget(controlWork)
-	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets()
 	proofServing, proofRetired, proofConsumers := configuredProofWorkBudgets(role)
+	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets(role, proofConsumers)
 	proofMetrics := &proofLaneMetrics{}
 
 	// Each process has a distinct liveness record; stale processes age out.

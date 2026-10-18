@@ -18,7 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
-    "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom"),
+    "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
     "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),

@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "retiring_legacy",
+  "status": "publishing_sql_headroom_fix",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -52,7 +52,11 @@
     },
     {
       "name": "retire_legacy_and_verify",
-      "status": "in_progress"
+      "status": "legacy_retirement_verified; final worker headroom rollout pending"
+    },
+    {
+      "name": "production_sql_headroom",
+      "status": "regression_verified; publishing"
     }
   ],
   "design": [
@@ -63,15 +67,15 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T04:41:33.268265+00:00",
+  "updated_at": "2026-10-18T05:07:25.747082+00:00",
   "validation": {
     "required_database_regressions": {
-      "passed": 31,
+      "passed": 32,
       "skipped": 0,
       "result": "PASS"
     },
     "production_deployed": true,
-    "previous_configs_deleted": false,
+    "previous_configs_deleted": true,
     "full_go_test": "PASS",
     "go_vet": "PASS",
     "mobile_browser": "PASS including hard timeout, stale response, authentication and surrounding pages",
@@ -107,6 +111,46 @@
     "deployment": {
       "primary": "PASS: manifest, live binaries, five readiness samples, preservation with exact journaled concurrent deletions",
       "secondary": "PASS: manifest, live binaries, five readiness samples, preservation"
+    },
+    "new_live_output": {
+      "at": "2026-10-18T04:50:30.086502+00:00",
+      "outputs": {
+        "ALL": {
+          "http_status": 200,
+          "lines": 24,
+          "bytes": 6556,
+          "matches_current_profiles": true,
+          "country_flag_names": 24,
+          "combinations": {
+            "vless/tcp/reality/21443": 24
+          }
+        },
+        "DIRECT": {
+          "http_status": 200,
+          "lines": 12,
+          "bytes": 3278,
+          "matches_current_profiles": true,
+          "country_flag_names": 12,
+          "combinations": {
+            "vless/tcp/reality/21443": 12
+          }
+        },
+        "RESIDENTIAL": {
+          "http_status": 200,
+          "lines": 12,
+          "bytes": 3278,
+          "matches_current_profiles": true,
+          "country_flag_names": 12,
+          "combinations": {
+            "vless/tcp/reality/21443": 12
+          }
+        }
+      }
+    },
+    "retired_runtime_listeners": {
+      "tested": 75,
+      "passed": 75,
+      "failed": 0
     }
   },
   "first_release": "b2922aa2e3b435fe6514f277bdc75bc6d4c6db7e",
@@ -116,8 +160,44 @@
     "job_id": "4bda43a9-f1ac-4d19-9a93-235b8410bf26",
     "activated_at": "2026-10-18T04:40:51.195445Z",
     "targets": 78,
-    "state": "RUNNING",
+    "state": "SUCCEEDED",
     "backup_bytes": 292464132,
-    "backup_archive_readable": true
+    "backup_archive_readable": true,
+    "new_profile_preserved": {
+      "id": "e4f825a6-d3e2-4d85-9ef9-582ff8c6b343",
+      "name": "TcpReality",
+      "port": 21443,
+      "created_after_authority_transition": true,
+      "scope": "fleet",
+      "classes": [
+        "DIRECT",
+        "RESIDENTIAL"
+      ],
+      "clients_per_class": 1
+    },
+    "output_empty_before_new_profile": "PASS: ALL/DIRECT/RESIDENTIAL returned HTTP 200 and zero lines",
+    "latest_observation": {
+      "at": "2026-10-18T04:52:19.851126+00:00",
+      "done": 48,
+      "total": 78,
+      "retrying": 0,
+      "confirmed": {
+        "total_inbounds": 175,
+        "inbounds": 144,
+        "clients": 424
+      }
+    },
+    "done": 78,
+    "confirmed_absent_inbounds": 175,
+    "confirmed_absent_clients": 424
+  },
+  "sql_headroom_incident": {
+    "observed_at": "2026-10-18T04:57:40Z",
+    "cause": "Independent 18-proof and 10-panel admission pools exhausted 40 SQL connections when profiles retained two sessions",
+    "reproduced_before_fix": true,
+    "regression_after_fix": "PASS",
+    "temporary_serving_proofs": 16,
+    "final_strategy": "Derive panel concurrency from role pool, serving proofs, one retired proof, role ownership, and four short-query reservations; 18 proofs permit eight two-session panel operations",
+    "required_release_regression": "TestProofPoolFortyPhysicalPinsAndProgress"
   }
 }
