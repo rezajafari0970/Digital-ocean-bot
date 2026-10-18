@@ -74,6 +74,12 @@ func (s Service) run(ctx context.Context, verify, deleting bool) error {
 	if verify {
 		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT') AND NOT l.needs_reconcile`
 	}
+	order := "CASE WHEN l.verified_at IS NULL OR l.state='APPLYING' THEN 0 WHEN l.attempted_at IS NOT NULL AND l.next_attempt_at<now()-interval '90 seconds' THEN 1 ELSE 2 END,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id"
+	if verify {
+		// The oldest due proof has the earliest publication deadline. Claim
+		// retries must not move stale evidence behind healthy routine refreshes.
+		order = "l.verified_at NULLS FIRST,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.profile_id,l.panel_id"
+	}
 	var id, panel string
 	claim, e := sanaei.UUIDv4()
 	if e != nil {
@@ -84,7 +90,7 @@ func (s Service) run(ctx context.Context, verify, deleting bool) error {
  JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
  WHERE l.next_attempt_at<=now() AND (l.lease_until IS NULL OR l.lease_until<now()) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners busy WHERE busy.panel_id=l.panel_id AND busy.lease_until>now()) AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
  AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
- AND `+lane+` ORDER BY CASE WHEN l.verified_at IS NULL OR l.state='APPLYING' THEN 0 WHEN l.attempted_at IS NOT NULL AND l.next_attempt_at<now()-interval '90 seconds' THEN 1 ELSE 2 END,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
+ AND `+lane+` ORDER BY `+order+` FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
  UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
  FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
  SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
@@ -100,7 +106,23 @@ func (s Service) run(ctx context.Context, verify, deleting bool) error {
 		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET lease_until=NULL,claim_token=NULL WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim)
 	}()
 	if verify && s.Verify == nil {
-		return s.VerifyPanel(ctx, panel, id)
+		err := s.VerifyPanel(ctx, panel, id)
+		if err != nil {
+			// A busy panel is scheduling contention, not negative evidence.
+			// Retry promptly without clearing a still-valid sibling/class proof.
+			c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+			defer cancel()
+			if err.Error() == "profile_panel_busy" || errors.Is(ctx.Err(), context.Canceled) {
+				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim)
+			} else {
+				code := "profile_verification_retry"
+				if errors.Is(err, context.DeadlineExceeded) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
+					code = "profile_verification_timeout"
+				}
+				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET stage='runtime_retry',stage_started_at=now(),error_code=$4,next_attempt_at=now()+interval '10 seconds' WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim, code)
+			}
+		}
+		return err
 	}
 	return s.Reconcile(ctx, id, panel)
 }

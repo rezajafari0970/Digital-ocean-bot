@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "regressions_passed_pending_publication",
+  "status": "deadline_and_delete_followup_validated",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -488,7 +488,7 @@
   },
   "continued_at": "2026-10-18T08:31:30.958969+00:00",
   "current_followup": {
-    "state": "regressions_passed_pending_publication",
+    "state": "deadline_and_delete_followup_validated",
     "installed_source": "18aa6ce1d29829e12e3ce07028e32be5260975b0",
     "installed_public": "91cce828c3c8cceb583c2aad60d5ec6d26c5ff2a",
     "user_profiles_preserved": 14,
@@ -514,37 +514,73 @@
       "public plain TCP server catalog for all four protocols with explicit client compatibility metadata"
     ],
     "pending": [
-      "publisher release gates",
-      "staged installation with preservation",
-      "live independent edit/output and exact canary batch-delete acceptance",
-      "fresh fleet coverage and latency observation"
+      "publish deadline/delete followup",
+      "staged installation",
+      "verify canary native absence",
+      "measure fresh eligible fleet coverage"
     ],
     "canaries": {
       "owned": 3,
       "user_profiles_deleted": 0,
-      "edit": "Native Flow and traffic pass; scheduler/output acceptance pending"
+      "edit": "PASS: Direct 2 to 1, Vision to empty Flow, exported FinalMask removed; all three Residential identities retained",
+      "native_policy": "PASS 09:22 UTC: exact expiry, quota, device limits and Flow for all three profiles",
+      "delete": "Initial live batch request accepted three; VMess removed, VLESS/Trojan exposed omitted policy context in deletion observation; regression and fix passed, native acceptance pending"
     },
     "limitations": [
       "Recent official Xray clients reject public unencrypted VLESS/Trojan; server generation cannot remove a client-side restriction.",
       "No promise of zero future faults; acceptance requires measured checks."
     ],
-    "updated_at": "2026-10-18T08:58:33.502131+00:00",
+    "updated_at": "2026-10-18T09:28:32.162736+00:00",
     "validation": {
-      "database_gate": "PASS 37/37 zero skips at 08:55 UTC, including migration 187 and bulk delete isolation",
+      "database_gate": "PASS 37/37 zero skips including deadline fairness both protocol directions, prompt busy requeue, native global HWID deletion and lost-delete recovery",
       "browser": "config transport and refresh recovery PASS; batch snapshot deletion and details single flight exercised",
       "runtime_batch_sample": "8 profiles / 16 class probes all pass; before 10.79s, after 9.69s on one panel, not a fleet throughput guarantee",
       "flow": "Exact native/global blank Flow readback and authenticated HTTP 200 for both classes; full edited-output acceptance remains pending installed scheduler",
       "full_go_test": "PASS",
-      "go_vet": "PASS"
+      "go_vet": "PASS",
+      "batch_16": {
+        "seconds": 16.862918918,
+        "profiles": 16,
+        "class_probes": 31,
+        "all_passed": true
+      }
     },
     "scheduler": {
       "create_lanes": 4,
       "delete_lanes": 2,
       "verify_lanes": 8,
       "shared_budget": "unchanged SQL-derived parent",
-      "batch_profiles": 8,
-      "verification_timeout_seconds": 75,
-      "redundant_proof_sql_lease_removed": true
-    }
+      "batch_profiles": 16,
+      "verification_timeout_seconds": 120,
+      "redundant_proof_sql_lease_removed": true,
+      "verification_supervision_seconds": 150,
+      "selection": "oldest due verification first; no protocol priority",
+      "busy_retry_seconds": 2
+    },
+    "source_revision": "0d5d1fec1202666b214e279efd0568c63f662ac3",
+    "public_revision": "acb6a001b2853ee124e6307d4ae903460880258e",
+    "publisher": {
+      "result": "PASS",
+      "evidence": "/var/lib/datacenter-publisher/release-hvrup3gk",
+      "required_regressions": 37,
+      "skipped": 0,
+      "installer": "PASS"
+    },
+    "deployment": {
+      "secondary": "PASS at 2026-10-18T09:05:14Z: schema187, exact binary hashes, three active services, five readiness samples, all preservation checks",
+      "primary": "PASS 2026-10-18T09:14:13Z: schema187, exact binaries, three services, five readiness samples, 441 pins and user policies/identities preserved"
+    },
+    "disk_recovery": {
+      "backups_deleted": 0,
+      "archives_losslessly_compressed": 14,
+      "verification": "decompressed SHA256 and exact tar members/metadata",
+      "reproducible_caches_removed": true,
+      "installation_reserve_gate": "PASS on retry"
+    },
+    "remaining_defects_addressed": [
+      "claim timestamps could move old proof behind fresh routine checks",
+      "production proof/deletion contention backed off as failure or delayed for 30 seconds",
+      "native deletion omitted credentials policy context and rejected Sanaei global HWID limits"
+    ]
   }
 }

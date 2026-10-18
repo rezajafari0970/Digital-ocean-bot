@@ -352,6 +352,35 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
 		t.Fatal("overdue proof starved behind scheduled refresh")
 	}
+	// Repeated lock contention must not postpone an older proof behind a
+	// healthy protocol simply because its claim timestamp was refreshed.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now()-interval '10 minutes',next_attempt_at=now()-interval '1 second' WHERE profile_id=$1", p.ID)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now(),next_attempt_at=now()-interval '10 minutes' WHERE profile_id=$1", sibling.ID)
+	if e := svc.RunVerifyOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
+		t.Fatal("older Reality proof lost its publication deadline", e)
+	}
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now()-interval '10 minutes',next_attempt_at=now()-interval '1 second' WHERE profile_id=$1", sibling.ID)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now(),next_attempt_at=now()-interval '10 minutes' WHERE profile_id=$1", p.ID)
+	if e := svc.RunVerifyOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+sibling.ID {
+		t.Fatal("older Shadowsocks proof lost its publication deadline", e)
+	}
+	busyService := svc
+	busyService.Verify = nil
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour' WHERE panel_id=$1", panel)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second' WHERE profile_id=$1", p.ID)
+	if e := sanaei.WithConfigLock(ctx, db, panel, func(c context.Context) error {
+		err := busyService.RunVerifyOne(c)
+		if err == nil || err.Error() != "profile_panel_busy" {
+			t.Fatal("expected isolated panel contention", err)
+		}
+		var prompt, retained, unleased bool
+		if err := db.QueryRow("SELECT next_attempt_at<now()+interval '3 seconds',state='VERIFIED' AND verified_at IS NOT NULL AND error_code='',lease_until IS NULL FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&prompt, &retained, &unleased); err != nil || !prompt || !retained || !unleased {
+			t.Fatal("busy proof did not requeue promptly with prior evidence", prompt, retained, unleased, err)
+		}
+		return nil
+	}); e != nil {
+		t.Fatal(e)
+	}
 	// Exercise the production batch SQL, independent class publication and
 	// a sibling runtime failure, with actual public TCP sockets.
 	tcpA, e := net.Listen("tcp", "127.0.0.1:17444")
@@ -425,6 +454,17 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	batch.oldCore = false
 	sqlMust(t, db, "UPDATE config_driver_listeners SET needs_reconcile=false WHERE panel_id=$1", panel)
 	sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
+	// Sanaei v3 stores HWID limits in the global client, omitting them from
+	// inbound inventory. Deletion must use the same owned-policy observation
+	// contract as creation, including expiring clients and nonzero device caps.
+	p.ClassSettings = map[string]configdriver.ClassSettings{"DIRECT": {Count: 1, Publish: true, DeviceLimit: 5, LifetimeSeconds: 600}, "RESIDENTIAL": {Count: 1, Publish: true, DeviceLimit: 7, LifetimeSeconds: 3600}}
+	status, p = profileSave(t, api, p, "PUT")
+	if status != 200 {
+		t.Fatal("managed limits before deletion", status)
+	}
+	if e := svc.Reconcile(ctx, p.ID, panel); e != nil {
+		t.Fatal("managed limits before deletion", e)
+	}
 	var siblingRemote int64
 	if e := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1", sibling.ID).Scan(&siblingRemote); e != nil {
 		t.Fatal(e)
@@ -444,6 +484,19 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	reuse.Spec.Port = p.Spec.Port
 	if code, _ := profileSave(t, api, reuse, "POST"); code != 409 {
 		t.Fatal("port released before native removal")
+	}
+	if e := sanaei.WithConfigLock(ctx, db, panel, func(c context.Context) error {
+		err := svc.Reconcile(c, p.ID, panel)
+		if err == nil || err.Error() != "profile_panel_busy" {
+			t.Fatal("expected isolated delete contention", err)
+		}
+		var prompt bool
+		if err := db.QueryRow("SELECT next_attempt_at<now()+interval '3 seconds' AND error_code='' FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&prompt); err != nil || !prompt {
+			t.Fatal("busy delete became a blocked failure", prompt, err)
+		}
+		return nil
+	}); e != nil {
+		t.Fatal(e)
 	}
 	dropAfterDelete = true
 	if e := svc.Reconcile(ctx, p.ID, panel); e == nil {

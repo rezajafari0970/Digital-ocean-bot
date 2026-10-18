@@ -55,7 +55,7 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 		p.Work = 8 * time.Minute
 		p.Idle = time.Second
 	case "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7":
-		p.Work = 90 * time.Second
+		p.Work = 150 * time.Second
 		p.Idle = time.Second
 	case "transport-apply":
 		p.Work = 5 * time.Minute

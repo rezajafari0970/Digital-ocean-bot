@@ -39,7 +39,7 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 				}
 				duration := 2 * time.Minute
 				if strings.Contains(name, "verify") {
-					duration = 75 * time.Second
+					duration = 2 * time.Minute
 				}
 				if strings.Contains(name, "verify") {
 					e = runConfigProfileWork(work, verify.Do, duration, service.RunVerifyOne)

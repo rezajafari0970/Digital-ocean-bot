@@ -108,6 +108,10 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 		if ret != nil {
 			c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 			defer cancel()
+			if ret.Error() == "profile_panel_busy" || errors.Is(ctx.Err(), context.Canceled) {
+				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", p.ID, panel)
+				return
+			}
 			code := "profile_delete_unverified"
 			if ret.Error() == "profile_delete_identity_changed" {
 				code = ret.Error()
@@ -194,7 +198,7 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 				if err != nil {
 					return err
 				}
-				got, err := configdriver.Observe(raws, payload, remote.Int64)
+				got, err := configdriver.Observe(raws, payload, remote.Int64, credentials)
 				if err != nil || got != found {
 					return errors.New("profile_delete_identity_changed")
 				}

@@ -24,7 +24,7 @@ import (
 //go:embed runtime_batch.py
 var runtimeBatchScript string
 
-// Two bounded waves amortize native observation and SSH. Each profile and class
+// Four bounded waves amortize native observation and SSH. Each profile and class
 // keeps its own result; the worker deadline includes both waves and public probes.
 
 type batchCandidate struct {
@@ -75,7 +75,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 			}
 			rows, e := s.DB.QueryContext(ctx, `SELECT l.profile_id::text,l.credential_ref,l.managed_key,pi.account_id::text,l.remote_id,l.applied_spec,l.certificate_not_after
  FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
- WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.next_attempt_at,l.profile_id LIMIT 8`, panel, claimedProfile)
+ WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.verified_at NULLS FIRST,l.next_attempt_at,l.profile_id LIMIT 16`, panel, claimedProfile)
 			if e != nil {
 				return e
 			}
