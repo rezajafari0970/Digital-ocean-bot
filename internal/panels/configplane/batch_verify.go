@@ -22,7 +22,9 @@ import (
 )
 
 //go:embed runtime_batch.py
-var runtimeBatchScript string
+var runtimeBatchBody string
+
+var runtimeBatchScript = trafficProbeScript + "\n" + runtimeBatchBody
 
 // Four bounded waves amortize native observation and SSH. Each profile and class
 // keeps its own result; the worker deadline includes both waves and public probes.

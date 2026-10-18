@@ -93,13 +93,8 @@ def run_job(want,observation=None):
       except OSError:
        if time.monotonic()>deadline:return False
        time.sleep(.05)
-     conn=http.client.HTTPSConnection('127.0.0.1',port,timeout=8,context=ssl.create_default_context())
-     try:
-      probe_host,probe_path=targets[index];conn.set_tunnel(probe_host,443)
-      conn.request('GET',probe_path,headers={'Host':probe_host,'Connection':'close'})
-      response=conn.getresponse()
-      return 200<=response.status<400 and bool(response.read(1024))
-     finally:conn.close()
+     probe_host,probe_path=targets[index]
+     return probe_profile_https(port,probe_host,probe_path)
     except Exception:return False
    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
     results=list(pool.map(probe,range(len(ports))))

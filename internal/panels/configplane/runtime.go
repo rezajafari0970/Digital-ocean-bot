@@ -14,8 +14,13 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 )
 
+//go:embed traffic_probe.py
+var trafficProbeScript string
+
 //go:embed runtime.py
-var runtimeScript string
+var runtimeBody string
+
+var runtimeScript = trafficProbeScript + "\n" + runtimeBody
 
 // The native panel can hot-add inbounds through Xray's API without changing its
 // startup file. Verify the running process, its actual socket, active users and

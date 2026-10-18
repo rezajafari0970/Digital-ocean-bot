@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "bulk_release_installed_creation_capacity_followup",
+  "status": "bounded_traffic_retry_validated",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -79,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T10:49:09.850957+00:00",
+  "updated_at": "2026-10-18T11:02:07.001773+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -621,8 +621,8 @@
   },
   "resume_20261018": {
     "at": "2026-10-18T10:49:09.850957+00:00",
-    "installed_source": "dd0f4c3a09f40873a3fe1f0ed84a0a394ce041c8",
-    "installed_public": "033bf2c46dd01564dd8a27034629c10bfe819d4c",
+    "installed_source": "e6a866e1aa7f951f2cc759ede0211bb3aae30ae1",
+    "installed_public": "75ba684f84920eaf4806d24581b979978d1785a4",
     "hosts": {
       "primary": "exact binaries, five readiness samples, policy and credential preservation PASS",
       "secondary": "exact binaries, five readiness samples, preservation PASS"
@@ -646,6 +646,28 @@
       "publish and install eight creation lanes",
       "finish concurrent live create/delete acceptance",
       "measure sustained nonempty output coverage and any remaining fleet errors"
-    ]
+    ],
+    "automatic_cycle": {
+      "create_to_output_seconds": 37.519076,
+      "delete_to_absence_seconds": 7.284081,
+      "native_policy": "PASS",
+      "native_absence": "PASS",
+      "user_profiles_preserved": 3
+    },
+    "backup_compression": {
+      "archives": 12,
+      "saved_mib": 2141,
+      "content_hashes_verified": true
+    },
+    "followup": {
+      "reason": "Some independent Residential proofs failed once and fresh read-only native tests seconds later returned HTTP200; no permanent failure inferred",
+      "change": "one bounded fresh HTTPS retry for transport errors and selected 5xx; no retry/acceptance for certificate errors or 4xx; both runtime programs share one helper",
+      "tests": "race PASS with timeout/reset recovery, persistent failure, certificate rejection, 403/429 rejection, empty response and exact attempt/cleanup bounds",
+      "remaining": [
+        "full release gates",
+        "staged installation",
+        "fresh sustained observation"
+      ]
+    }
   }
 }
