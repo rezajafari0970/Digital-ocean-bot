@@ -143,3 +143,13 @@ Post-release observation ran from 2026-10-18T11:11:02.460894+00:00 through 2026-
 Nineteen closed backup archives were losslessly compressed, saving 3,554,673,865 bytes; decompressed SHA256 and exact archive members/metadata were verified. No backup was deleted and no install reserve gate was bypassed. No external OpenAI API calls were made in this continuation.
 
 All identified implementation and deployment steps in this continuation are complete. These live samples establish observed behavior during the stated interval, not a 99% fleet-wide speedup or a guarantee against future provider/network failures. The documented recent official Xray client restriction on public unencrypted VLESS/Trojan remains an external compatibility constraint.
+
+## 2026-10-18 15:13 Tehran continuation: fresh status check
+
+Both hosts still run public release 35aa1fd with all readiness checks passing, three active services each and zero restarts. No product code changed and prior test results were not presented as newly rerun tests. The source and acceptance checkpoint were synchronized at 0a2093b before this recheck.
+
+Initial observations included 462/468, 465/468 and 461/468 output lines while a routing proof and a Trojan class proof retried. A read-only native test of the affected panel passed Direct and Residential at 11:46:14 UTC. No manual reconciliation or weakening of publication evidence was used. The next five observations from 2026-10-18T11:47:21.199664+00:00 through 2026-10-18T11:48:21.670426+00:00 had 3/5 complete samples and all readiness/Output requests succeeded. Final output was 462/468, with 3 pending and 0 blocked; each profile had 78 eligible servers. Output latency was 37–53 ms (median 45 ms). Transient route/class proof failures can recur; this does not establish a permanent native configuration failure or a fault-free future.
+
+Fresh deletion checks still show all 14 old profiles completed, 1101 confirmed removals and zero native references. Three active user profiles remain and both continuation canaries are absent. External OpenAI API calls in this recheck: zero.
+
+A subsequent snapshot at 11:49:41 UTC (15:19:41 Tehran) recovered automatically to 468/468 outputs, all three profiles ready on 78 eligible servers, zero pending and zero blocked. All 234 profile runtime proofs and all 80 sampled routing proofs were fresh. This later complete snapshot does not erase the preceding transient gaps; continuous full publication coverage was not established.

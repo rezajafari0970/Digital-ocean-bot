@@ -95,7 +95,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T11:15:57.188495+00:00",
+  "updated_at": "2026-10-18T11:49:41.304968+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 37,
@@ -833,5 +833,100 @@
     "remove cross-panel writer serialization with bounded panel ownership",
     "explicit durable timeout/retry stages",
     "complete verified native deletion and publication isolation"
-  ]
+  ],
+  "status_recheck_20261018_1513": {
+    "at": "2026-10-18T11:48:29.507238+00:00",
+    "installed_release": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+    "code_changes": false,
+    "both_hosts": "same expected release; all readiness checks passed; all three services active, zero restarts",
+    "initial_observations": [
+      {
+        "at": "2026-10-18T11:44:43.416989+00:00",
+        "published": 462,
+        "target": 468,
+        "output_lines": 462,
+        "http_status": 200
+      },
+      {
+        "at": "2026-10-18T11:46:10.817122+00:00",
+        "published": 465,
+        "target": 468,
+        "output_lines": 465,
+        "http_status": 200
+      },
+      {
+        "at": "2026-10-18T11:46:48.353223+00:00",
+        "published": 461,
+        "target": 468,
+        "output_lines": 461,
+        "http_status": 200
+      }
+    ],
+    "diagnostic": {
+      "panel": "eddd888a-ff35-42cd-995f-6f145ef1ff71",
+      "at": "2026-10-18T11:46:14.055101+00:00",
+      "direct": true,
+      "residential": true,
+      "read_only": true,
+      "manual_reconcile": false
+    },
+    "interpretation": "Transient route/class proofs were observed and recovered automatically; no permanent native configuration fault established. This is time-bounded operational evidence.",
+    "final_observation": {
+      "started_at": "2026-10-18T11:47:21.199664+00:00",
+      "finished_at": "2026-10-18T11:48:21.670426+00:00",
+      "samples": 5,
+      "complete_samples": 3,
+      "all_ready_and_http_200": true,
+      "latency_ms": {
+        "min": 37,
+        "median": 45,
+        "max": 53
+      },
+      "eligible_servers_per_profile": [
+        78,
+        78,
+        78
+      ],
+      "published": 462,
+      "target": 468,
+      "output_lines": 462,
+      "pending": 3,
+      "blocked": 0,
+      "available_memory_mib_min": 4316
+    },
+    "old_deletions": {
+      "completed": 14,
+      "native_remaining": 0,
+      "removed": 1101
+    },
+    "active_user_profiles": 3,
+    "continuation_canaries_remaining": 0,
+    "openai_api_calls": 0,
+    "evidence": [
+      ".local/status1518-observation.jsonl",
+      ".local/status1518-inventory.json",
+      ".local/status1516-native-proof.json",
+      ".local/isolation-187-metrics-resume-status1519.json"
+    ],
+    "latest_snapshot": {
+      "at": "2026-10-18T11:49:41.304968+00:00",
+      "published": 468,
+      "target": 468,
+      "pending": 0,
+      "blocked": 0,
+      "eligible_servers_per_profile": [
+        78,
+        78,
+        78
+      ],
+      "output": {
+        "seconds": 0.05,
+        "status": 200,
+        "bytes": 104680,
+        "lines": 468
+      }
+    },
+    "operational_status": "Latest snapshot complete after automatic recovery; continuous full publication coverage was not established across all samples.",
+    "validation_scope": "Fresh operational recheck only. Product code unchanged; the prior 37 mandatory and six Output tests were not rerun or relabeled as new results."
+  }
 }
