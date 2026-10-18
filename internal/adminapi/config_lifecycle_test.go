@@ -550,6 +550,59 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if code, _ := profileSave(t, api, reuse, "POST"); code != 200 {
 		t.Fatal("verified deleted port not reusable")
 	}
+
+	// A provider can confirm server removal while a native proof is in flight.
+	// Neither a late SSH failure nor the outer deadline handler may resurrect it.
+	for _, mode := range []string{"ssh_failure", "deadline"} {
+		t.Run("provider_retirement_"+mode, func(t *testing.T) {
+			sqlMust(t, db, "UPDATE droplets SET state='READY',expires_at=now()+interval '5 minutes' WHERE id=$1", droplet)
+			sqlMust(t, db, "UPDATE deployments SET host='127.0.0.1' WHERE droplet_id=$1", droplet)
+			sqlMust(t, db, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code='',remote_id=$3,applied_revision=$4,needs_reconcile=false,mutation_state='CONFIRMED',lease_until=NULL,claim_token=NULL,next_attempt_at=now()-interval '1 second' WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel, siblingRemote, sibling.Revision)
+			var credentialBefore string
+			if e := db.QueryRow("SELECT credential_ref FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel).Scan(&credentialBefore); e != nil {
+				t.Fatal(e)
+			}
+			batch.beforeReturn = func(proofContext context.Context) error {
+				sqlMust(t, db, "UPDATE droplets SET state='DELETED' WHERE id=$1", droplet)
+				sqlMust(t, db, "UPDATE resources SET state='deleted' WHERE account_id=(SELECT account_id FROM droplets WHERE id=$1) AND provider_resource_id=(SELECT provider_resource_id FROM droplets WHERE id=$1)", droplet)
+				if e := svc.RunOne(ctx); e != nil {
+					t.Fatal("provider retirement", e)
+				}
+				if mode == "deadline" {
+					<-proofContext.Done()
+					return proofContext.Err()
+				}
+				return errors.New("native proof lost during confirmed provider retirement")
+			}
+			proofContext, cancel := context.WithTimeout(ctx, time.Second)
+			defer cancel()
+			batchService.Verify = nil
+			e := batchService.RunVerifyOne(proofContext)
+			if mode == "deadline" && !errors.Is(e, context.DeadlineExceeded) {
+				t.Fatal("deadline not exercised", e)
+			}
+			if mode == "ssh_failure" && e != nil {
+				t.Fatal(e)
+			}
+			assertRetired := func() {
+				t.Helper()
+				var safe bool
+				e := db.QueryRow("SELECT state='RETIRED' AND stage='server_removed' AND error_code='' AND remote_id IS NULL AND verified_at IS NULL AND applied_revision=0 AND mutation_state='CONFIRMED' AND claim_token IS NULL AND lease_until IS NULL AND credential_ref=$3 FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel, credentialBefore).Scan(&safe)
+				if e != nil || !safe {
+					t.Fatal("late proof overwrote provider tombstone", mode, safe, e)
+				}
+			}
+			assertRetired()
+			// Existing inconsistent tombstones from an older worker self-repair only
+			// after the same provider deletion / managed resource absence evidence.
+			sqlMust(t, db, "UPDATE config_driver_listeners SET stage='runtime_retry',error_code='profile_verification_timeout' WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel)
+			if e := svc.RunOne(ctx); e != nil {
+				t.Fatal(e)
+			}
+			assertRetired()
+			batch.beforeReturn = nil
+		})
+	}
 }
 
 func TestUnifiedProfileCreationIdempotency(t *testing.T) {
@@ -771,10 +824,11 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 // No credentials enter command arguments. The fixture returns per-profile and
 // per-class outcomes exactly like the encrypted remote verifier.
 type profileBatchFixtureSSH struct {
-	oldCore bool
-	cancel  context.CancelFunc
-	failed  string
-	jobs    int
+	beforeReturn func(context.Context) error
+	oldCore      bool
+	cancel       context.CancelFunc
+	failed       string
+	jobs         int
 }
 
 func (s *profileBatchFixtureSSH) Run(context.Context, provisioning.Target, []byte, string) (string, error) {
@@ -792,6 +846,11 @@ func (s *profileBatchFixtureSSH) RunInput(ctx context.Context, _ provisioning.Ta
 		return provisioning.CommandResult{}, e
 	}
 	s.jobs = len(jobs)
+	if s.beforeReturn != nil {
+		if e := s.beforeReturn(ctx); e != nil {
+			return provisioning.CommandResult{}, e
+		}
+	}
 	out := []any{}
 	for _, j := range jobs {
 		ok := j.ProfileID != s.failed

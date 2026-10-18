@@ -357,8 +357,8 @@ PY`, port)
 func (s Service) finishRetired(ctx context.Context) error {
 	// Provider-confirmed deletion is also conclusive absence. Disabled accounts
 	// or failed polls alone never release ownership or claim successful deletion.
-	if _, e := s.DB.ExecContext(ctx, `UPDATE config_driver_listeners l SET state='RETIRED',stage='server_removed',error_code='',retired_at=now(),verified_at=NULL,remote_id=NULL,applied_revision=0,mutation_state='CONFIRMED'
- FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id WHERE l.panel_id=pi.id AND l.state<>'RETIRED' AND dr.state='DELETED'
+	if _, e := s.DB.ExecContext(ctx, `UPDATE config_driver_listeners l SET state='RETIRED',stage='server_removed',error_code='',retired_at=COALESCE(retired_at,now()),verified_at=NULL,remote_id=NULL,applied_revision=0,mutation_state='CONFIRMED',claim_token=NULL,lease_until=NULL
+ FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id WHERE l.panel_id=pi.id AND (l.state<>'RETIRED' OR l.stage NOT IN('server_removed','deleted') OR l.error_code<>'' OR l.remote_id IS NOT NULL OR l.verified_at IS NOT NULL OR l.applied_revision<>0 OR l.claim_token IS NOT NULL OR l.lease_until IS NOT NULL) AND dr.state='DELETED'
  AND NOT EXISTS(SELECT 1 FROM resources r WHERE r.account_id=dr.account_id AND r.provider_resource_id=dr.provider_resource_id AND r.managed AND r.state<>'deleted')`); e != nil {
 		return e
 	}

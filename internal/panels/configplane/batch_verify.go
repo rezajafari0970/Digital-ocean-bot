@@ -365,7 +365,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 func (s Service) batchFailure(ctx context.Context, id, panel, code string, reconcile bool) {
 	c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 	defer cancel()
-	_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='runtime',error_code=$3,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second',needs_reconcile=needs_reconcile OR $4 OR ($3='profile_runtime_traffic_unverified' AND failures>=2 AND EXISTS(SELECT 1 FROM config_driver_profiles p WHERE p.id=$1 AND p.spec->>'sni_mode'='auto')) WHERE profile_id=$1 AND panel_id=$2", id, panel, code, reconcile)
+	_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='runtime',error_code=$3,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second',needs_reconcile=needs_reconcile OR $4 OR ($3='profile_runtime_traffic_unverified' AND failures>=2 AND EXISTS(SELECT 1 FROM config_driver_profiles p WHERE p.id=$1 AND p.spec->>'sni_mode'='auto')) WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", id, panel, code, reconcile)
 	if code == "profile_runtime_traffic_unverified" {
 		_, _ = s.DB.ExecContext(c, "DELETE FROM config_driver_sni_selections ss USING config_driver_listeners l,config_driver_profiles p WHERE ss.profile_id=$1 AND ss.panel_id=$2 AND l.profile_id=ss.profile_id AND l.panel_id=ss.panel_id AND l.needs_reconcile AND l.failures>=3 AND p.id=ss.profile_id AND p.spec->>'sni_mode'='auto'", id, panel)
 	}

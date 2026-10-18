@@ -24,3 +24,11 @@ Publication still requires current ownership and revision, confirmed clients, el
 - A four-minute baseline sampler found no gap in 121 atomic observations before deployment. Earlier baseline samples did have intermittent gaps; the zero-gap interval is not evidence that this candidate was already installed.
 
 Full publisher gates, staged installation and post-release observations are pending at this checkpoint. No external OpenAI API calls were made.
+
+## Live acceptance finding: provider retirement versus late proof
+
+The first candidate was published as b42471e4a3c88bab1aedda362ae5bc91c2bf727c and installed on both controllers. The secondary passed all preservation checks. Primary readiness, exact binaries, configuration and secret hashes passed, but the native-identity acceptance correctly refused one inconsistent terminal status. Two servers had reached their pre-existing expiry/deletion lifecycle; all six profile remote IDs were retired and their credential references/hashes were unchanged. One late deadline receipt from the previous worker had overwritten `server_removed` with `runtime_retry` after confirmed provider deletion. A subsequent inventory found two retired rows with obsolete errors and no remaining managed provider resource for deleted servers.
+
+The follow-up invalidates the durable work claim when provider-confirmed absence becomes terminal. Late batch failures, stage writes and outer retry receipts cannot overwrite RETIRED state. The ordinary reconciliation loop also normalizes old inconsistent terminal rows, retaining the original retirement timestamp and requiring the same DELETED provider state plus absence of any managed resource not marked deleted. No manual production SQL repair is used.
+
+The mandatory lifecycle regression now reproduces both SSH failure and deadline completion after provider retirement, checks claim invalidation and unchanged credentials, and verifies automatic repair of a pre-existing obsolete status. All 41 required isolated database/race/native regressions passed again with zero skips. The previous mobile/Output result remains applicable because this follow-up changes no web assets. Follow-up publication and deployment are pending at this checkpoint.

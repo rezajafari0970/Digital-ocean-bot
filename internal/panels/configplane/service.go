@@ -135,7 +135,7 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 				if errors.Is(err, context.DeadlineExceeded) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
 					code = "profile_verification_timeout"
 				}
-				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET stage='runtime_retry',stage_started_at=now(),error_code=$4,next_attempt_at=now()+interval '10 seconds' WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim, code)
+				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET stage='runtime_retry',stage_started_at=now(),error_code=$4,next_attempt_at=now()+interval '10 seconds' WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3 AND state<>'RETIRED'", id, panel, claim, code)
 			}
 		}
 		return err
@@ -204,7 +204,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	stage := "prepare"
 	setStage := func(value string) {
 		stage = value
-		_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage=$3,stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2 AND stage<>$3", id, panel, value)
+		_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage=$3,stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2 AND stage<>$3 AND state<>'RETIRED'", id, panel, value)
 	}
 	defer func() {
 		if ret == nil {
@@ -227,7 +227,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
 			return
 		}
-		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage=$3,error_code=$4,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second' WHERE profile_id=$1 AND panel_id=$2", id, panel, stage, code)
+		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage=$3,error_code=$4,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second' WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", id, panel, stage, code)
 		Event(c, s.DB, p, panel, stage, code)
 	}()
 	generation, e := sanaei.UUIDv4()
