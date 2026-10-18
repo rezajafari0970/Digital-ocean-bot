@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom"),
     "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
@@ -56,7 +57,7 @@ def verify_events(lines, required=REQUIRED):
         except json.JSONDecodeError as exc:
             raise RuntimeError("invalid test-event stream") from exc
         package = event.get("Package", "")
-        package = package[package.find("internal/"):] if "internal/" in package else package
+        package = next((p for p in required if package == p or package.endswith("/"+p)), package)
         test = event.get("Test", "")
         root = test.split("/", 1)[0]
         if event.get("Action") == "fail":

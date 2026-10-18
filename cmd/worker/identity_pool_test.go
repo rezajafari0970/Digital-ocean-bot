@@ -32,14 +32,15 @@ func TestIdentityProviderBulkPostgresPoolHeadroom(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer role.Close()
-	_, bulk, provider, identity := newControlWorkBudgets()
-	// Worst-case pinned call graphs: bulk6, each provider2, each identity3,
-	// plus role1. All five owners then need one additional SQL connection.
+	parent, bulk, provider, identity := newControlWorkBudgets()
+	scheduler := newSchedulerWorkBudget(parent)
+	// Worst admitted call graph under the shared five-slot limit: bulk6,
+	// provider2, two identity3, scheduler3 and role1. Each owner then needs one SQL connection.
 	type lane struct {
 		held  int
 		admit func(context.Context, func(context.Context) error) error
 	}
-	lanes := []lane{{6, bulk.Do}, {2, provider.Do}, {2, provider.Do}, {3, identity.Do}, {3, identity.Do}}
+	lanes := []lane{{6, bulk.Do}, {2, provider.Do}, {3, identity.Do}, {3, identity.Do}, {3, scheduler.Do}}
 	held := make(chan struct{}, 5)
 	query := make(chan struct{})
 	release := make(chan struct{})
@@ -89,7 +90,7 @@ func TestIdentityProviderBulkPostgresPoolHeadroom(t *testing.T) {
 			t.Fatal("pool stalled admitting owners")
 		}
 	}
-	if n := db.Stats().InUse; n != 17 {
+	if n := db.Stats().InUse; n != 18 {
 		t.Fatal("unexpected long owner count", n)
 	}
 	close(query)

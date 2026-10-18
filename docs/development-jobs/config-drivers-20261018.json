@@ -35,7 +35,7 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T01:28:26.125970+00:00",
+  "updated_at": "2026-10-18T01:44:02.973946+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
@@ -56,13 +56,17 @@
     {
       "finding": "Two fleet profiles require roughly 150 authenticated verifications; measured proofs averaged 9-12 seconds, exceeding the five-minute freshness budget with four lanes.",
       "result": "Eight supervised verification lanes share the existing ten-slot panel budget. Creation remains capped at two and native writes remain globally serialized. Freshness checks are unchanged."
+    },
+    {
+      "finding": "Post-rollout readiness exposed an older control-plane convoy: scheduler and billing waited behind the single bulk recovery lane; scheduler progress exceeded five minutes despite healthy panel output.",
+      "result": "Scheduler gets an independent admission class under the unchanged five-operation parent; billing uses bounded provider-observation capacity. Account/capacity locks unchanged. Saturated-lane and actual 24-connection PostgreSQL pool regressions are required for publication."
     }
   ],
   "release_attempt": {
-    "source": "ada5d477cde2c0e4123560732f8df0a695d5ab4d",
-    "public": "09cd915ed76c6d55041a2f6fe51b63f274fbd2ff",
-    "primary": "verified schema 184, 595 Reality pins unchanged, credentials and policies preserved",
-    "secondary": "verified schema 184",
-    "runtime_followup": "Class-aware proof restored Trojan output. 52 real external tests passed, including concurrent VLESS:443 and Trojan:8443/10000 on both route classes. Full new-profile convergence still under observation."
+    "source": "9170fca4e7387bf0730eb5d8b89a029e9dfcd5a6",
+    "public": "6092a330f8c98d5321d8d0ef8e23c8876b8c575a",
+    "primary": "installed, 598 Reality pins retained",
+    "secondary": "installed and verified",
+    "coverage": "Both Trojan profiles reached 74/74; all output classes covered stable healthy servers in six consecutive samples after startup. Scheduler readiness follow-up in progress."
   }
 }
