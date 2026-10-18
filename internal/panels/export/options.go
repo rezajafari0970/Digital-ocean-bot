@@ -28,7 +28,7 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
-			if k != "security" && k != "type" && k != "path" && k != "host" && k != "serviceName" && k != "mode" {
+			if k != "security" && k != "type" && k != "path" && k != "host" && k != "serviceName" && k != "mode" && k != "authority" {
 				return "", ErrInvalidVLESS
 			}
 		}
