@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"time"
 )
 
 func Object(raw json.RawMessage) (map[string]any, error) {
@@ -115,6 +116,18 @@ func Observe(raws []json.RawMessage, desired map[string]any, remote int64) (int6
 							g["method"] = method
 						}
 					}
+					if ok {
+						if expiry, ok := c["expiryTime"].(float64); ok && expiry > 0 && expiry <= float64(time.Now().UnixMilli()) && g["enable"] == false {
+							c["enable"] = false
+						}
+					}
+					if ok {
+						for _, k := range []string{"totalGB", "expiryTime", "limitHwid"} {
+							if g[k] == nil && c[k] == float64(0) {
+								g[k] = float64(0)
+							}
+						}
+					}
 					if !ok || !subset(g, c) {
 						return 0, errors.New("profile_client_identity_changed")
 					}
@@ -122,8 +135,16 @@ func Observe(raws []json.RawMessage, desired map[string]any, remote int64) (int6
 						return 0, errors.New("profile_client_flow_changed")
 					}
 					// Do not silently erase limits introduced outside this profile.
-					for _, limit := range []string{"totalGB", "expiryTime", "limitIp"} {
-						if v, ok := g[limit]; ok && v != nil && v != float64(0) {
+					for _, limit := range []string{"totalGB", "expiryTime", "limitIp", "limitHwid"} {
+						wantLimit := c[limit]
+						if wantLimit == nil {
+							wantLimit = float64(0)
+						}
+						gotLimit := g[limit]
+						if gotLimit == nil {
+							gotLimit = float64(0)
+						}
+						if !reflect.DeepEqual(gotLimit, wantLimit) {
 							return 0, errors.New("profile_client_limits_changed")
 						}
 					}

@@ -25,6 +25,7 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, errorBody())
 		return
 	}
+	p.Normalize()
 	automaticPort := p.Spec.Port == 0
 	if automaticPort {
 		p.Spec.Port = 10000
@@ -74,7 +75,7 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 			if automaticPort {
 				requested.Port = prior.Spec.Port
 			}
-			if prior.Name != p.Name || prior.Spec != requested || prior.Enabled != p.Enabled || prior.Fleet != p.Fleet || prior.Count != p.Count || !reflect.DeepEqual(prior.Classes, p.Classes) || !(len(prior.Panels) == 0 && len(p.Panels) == 0) && !reflect.DeepEqual(prior.Panels, p.Panels) {
+			if prior.Name != p.Name || prior.Spec != requested || prior.Enabled != p.Enabled || prior.Fleet != p.Fleet || prior.Count != p.Count || !reflect.DeepEqual(prior.ClassSettings, p.ClassSettings) || !reflect.DeepEqual(prior.Classes, p.Classes) || !(len(prior.Panels) == 0 && len(p.Panels) == 0) && !reflect.DeepEqual(prior.Panels, p.Panels) {
 				writeJSON(w, 409, map[string]string{"error": "profile_request_already_used"})
 				return
 			}
@@ -124,6 +125,13 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 409, map[string]string{"error": "profile_revision_changed", "detail": "Reload this profile before saving."})
 			return
 		}
+		if p.Count != current.Count && reflect.DeepEqual(p.ClassSettings, current.ClassSettings) {
+			for _, cl := range p.Classes {
+				policy := p.ClassSettings[cl]
+				policy.Count = p.Count
+				p.ClassSettings[cl] = policy
+			}
+		}
 		p.Legacy = current.Legacy
 		p.RequestID = current.RequestID
 		if current.DeleteRequestedAt != nil {
@@ -151,12 +159,13 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	raw, _ := json.Marshal(p.Spec)
+	policies, _ := json.Marshal(p.ClassSettings)
 	if creating {
 		p.Revision = 1
-		_, e = tx.ExecContext(r.Context(), "INSERT INTO config_driver_profiles(id,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,request_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9,'')::uuid)", p.ID, p.Name, raw, p.Enabled, p.Fleet, pq.Array(p.Panels), pq.Array(p.Classes), p.Count, p.RequestID)
+		_, e = tx.ExecContext(r.Context(), "INSERT INTO config_driver_profiles(id,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,request_id,class_settings) VALUES($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9,'')::uuid,$10)", p.ID, p.Name, raw, p.Enabled, p.Fleet, pq.Array(p.Panels), pq.Array(p.Classes), p.Count, p.RequestID, policies)
 	} else {
 		p.Revision++
-		_, e = tx.ExecContext(r.Context(), "UPDATE config_driver_profiles SET name=$2,spec=$3,enabled=$4,fleet=$5,panel_ids=$6,classes=$7,clients_per_class=$8,revision=$9,updated_at=now() WHERE id=$1", p.ID, p.Name, raw, p.Enabled, p.Fleet, pq.Array(p.Panels), pq.Array(p.Classes), p.Count, p.Revision)
+		_, e = tx.ExecContext(r.Context(), "UPDATE config_driver_profiles SET name=$2,spec=$3,enabled=$4,fleet=$5,panel_ids=$6,classes=$7,clients_per_class=$8,revision=$9,class_settings=$10,updated_at=now() WHERE id=$1", p.ID, p.Name, raw, p.Enabled, p.Fleet, pq.Array(p.Panels), pq.Array(p.Classes), p.Count, p.Revision, policies)
 	}
 	if e != nil {
 		writeJSON(w, 409, map[string]string{"error": "profile_save_conflict"})

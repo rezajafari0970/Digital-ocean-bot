@@ -19,7 +19,8 @@ from urllib.parse import urlencode
 
 REQUIRED = {
     "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
-    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities"),
+    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
+    "internal/panels/configplane": ("TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),

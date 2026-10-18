@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"net"
 	"net/netip"
 	"net/url"
@@ -24,26 +25,38 @@ const CertificateFile = "/opt/dob-trojan/tls/fullchain.pem"
 const KeyFile = "/opt/dob-trojan/tls/privkey.pem"
 
 type Spec struct {
-	Protocol string `json:"protocol"`
-	Network  string `json:"network"`
-	Security string `json:"security"`
-	Port     int    `json:"port"`
-	Path     string `json:"path,omitempty"`
-	Host     string `json:"host,omitempty"`
-	SNI      string `json:"sni,omitempty"`
-	Flow     string `json:"flow,omitempty"`
+	Protocol      string `json:"protocol"`
+	Network       string `json:"network"`
+	Security      string `json:"security"`
+	Port          int    `json:"port"`
+	Path          string `json:"path,omitempty"`
+	Host          string `json:"host,omitempty"`
+	SNI           string `json:"sni,omitempty"`
+	SNIMode       string `json:"sni_mode,omitempty"`
+	SNICandidates string `json:"sni_candidates,omitempty"`
+	Flow          string `json:"flow,omitempty"`
 }
 type Client struct {
-	ID       string `json:"id"`
-	Password string `json:"password,omitempty"`
-	Email    string `json:"email"`
-	Class    string `json:"route_class"`
+	ID            string `json:"id"`
+	Password      string `json:"password,omitempty"`
+	Email         string `json:"email"`
+	Class         string `json:"route_class"`
+	CreatedAt     int64  `json:"created_at,omitempty"`
+	ExpiresAt     int64  `json:"expires_at,omitempty"`
+	DeviceLimit   int    `json:"device_limit,omitempty"`
+	QuotaBytes    int64  `json:"quota_bytes,omitempty"`
+	PolicySet     bool   `json:"policy_set,omitempty"`
+	Flow          string `json:"flow,omitempty"`
+	Publish       bool   `json:"publish,omitempty"`
+	AllowInsecure bool   `json:"allow_insecure,omitempty"`
+	FinalMask     string `json:"final_mask,omitempty"`
 }
 type Credentials struct {
-	Clients    []Client `json:"clients"`
-	PrivateKey string   `json:"private_key,omitempty"`
-	PublicKey  string   `json:"public_key,omitempty"`
-	ShortID    string   `json:"short_id,omitempty"`
+	Clients     []Client         `json:"clients"`
+	LastCreated map[string]int64 `json:"last_created,omitempty"`
+	PrivateKey  string           `json:"private_key,omitempty"`
+	PublicKey   string           `json:"public_key,omitempty"`
+	ShortID     string           `json:"short_id,omitempty"`
 }
 type Capability struct {
 	ID       string `json:"id"`
@@ -140,8 +153,25 @@ func (r *Registry) Validate(s Spec, public bool) error {
 	if len(s.Host) > 253 || s.Host != "" && !hostname.MatchString(s.Host) {
 		return errors.New("profile_host_invalid")
 	}
+	if s.SNIMode != "" && s.SNIMode != "manual" && s.SNIMode != "auto" {
+		return errors.New("profile_sni_mode_invalid")
+	}
+	if s.Security != "reality" && (s.SNIMode != "" || s.SNICandidates != "") {
+		return errors.New("profile_sni_not_applicable")
+	}
+	if s.SNICandidates != "" {
+		names := strings.Split(s.SNICandidates, ",")
+		if len(names) > 20 {
+			return errors.New("profile_sni_candidates_invalid")
+		}
+		for _, name := range names {
+			if !hostname.MatchString(name) || !strings.Contains(name, ".") || net.ParseIP(name) != nil {
+				return errors.New("profile_sni_candidates_invalid")
+			}
+		}
+	}
 	if s.Security == "reality" {
-		if !hostname.MatchString(s.SNI) || !strings.Contains(s.SNI, ".") || net.ParseIP(s.SNI) != nil {
+		if !(s.SNIMode == "auto" && s.SNI == "") && (!hostname.MatchString(s.SNI) || !strings.Contains(s.SNI, ".") || net.ParseIP(s.SNI) != nil) {
 			return errors.New("profile_reality_sni_required")
 		}
 	} else if s.SNI != "" {
@@ -190,7 +220,7 @@ func NewCredentials(profile, panel string, classes []string, count int) (Credent
 			if _, e := rand.Read(pw); e != nil {
 				return c, e
 			}
-			c.Clients = append(c.Clients, Client{id, base64.RawURLEncoding.EncodeToString(pw), "dob-p-" + profile + "-" + panel + "-" + id, cl})
+			c.Clients = append(c.Clients, Client{ID: id, Password: base64.RawURLEncoding.EncodeToString(pw), Email: "dob-p-" + profile + "-" + panel + "-" + id, Class: cl})
 		}
 	}
 	k, e := ecdh.X25519().GenerateKey(rand.Reader)
@@ -213,7 +243,7 @@ func (r *Registry) Build(s Spec, host, remark string, c Credentials) (map[string
 	if e := r.Validate(s, !privateHost(host)); e != nil {
 		return nil, e
 	}
-	if remark == "" || len(c.Clients) == 0 {
+	if remark == "" {
 		return nil, errors.New("profile_identity_missing")
 	}
 	ids, emails, pws := map[string]bool{}, map[string]bool{}, map[string]bool{}
@@ -226,6 +256,9 @@ func (r *Registry) Build(s Spec, host, remark string, c Credentials) (map[string
 		pws[cl.Password] = true
 	}
 	if s.Security == "reality" {
+		if s.SNI == "" {
+			return nil, errors.New("profile_reality_sni_not_verified")
+		}
 		k, e := base64.RawURLEncoding.DecodeString(c.PrivateKey)
 		if e != nil || len(k) != 32 {
 			return nil, errors.New("profile_reality_key_invalid")
@@ -271,6 +304,16 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 			typ = "gun"
 		}
 		data := map[string]any{"v": "2", "ps": remark, "add": host, "port": strconv.Itoa(s.Port), "id": cl.ID, "aid": "0", "scy": "auto", "net": s.Network, "type": typ, "host": s.Host, "path": path, "tls": tls}
+		if s.Security == "tls" && cl.PolicySet {
+			data["allowInsecure"] = strconv.FormatBool(cl.AllowInsecure)
+		}
+		if cl.FinalMask != "" {
+			mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
+			if e != nil {
+				return "", e
+			}
+			data["finalmask"] = string(mask)
+		}
 		b, _ := json.Marshal(data)
 		return "vmess://" + base64.StdEncoding.EncodeToString(b), nil
 	}
@@ -279,9 +322,19 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 	r.securities[s.Security].Query(s, c, q)
 	if s.Protocol == "vless" {
 		q.Set("encryption", "none")
-		if s.Flow != "" {
-			q.Set("flow", s.Flow+"-udp443")
+		if flow := ClientFlow(s, cl); flow != "" {
+			q.Set("flow", flow+"-udp443")
 		}
+	}
+	if s.Security == "tls" && cl.PolicySet {
+		q.Set("allowInsecure", strconv.FormatBool(cl.AllowInsecure))
+	}
+	if cl.FinalMask != "" {
+		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
+		if e != nil {
+			return "", e
+		}
+		q.Set("finalmask", string(mask))
 	}
 	scheme := s.Protocol
 	user := r.protocols[s.Protocol].User(s, cl)
@@ -289,7 +342,7 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 		scheme = "ss"
 		q = url.Values{}
 	}
-	u := url.URL{Scheme: scheme, User: url.User(user), Host: net.JoinHostPort(host, strconv.Itoa(s.Port)), RawQuery: q.Encode(), Fragment: remark}
+	u := url.URL{Scheme: scheme, User: url.User(user), Host: net.JoinHostPort(host, strconv.Itoa(s.Port)), RawQuery: strings.ReplaceAll(q.Encode(), "+", "%20"), Fragment: remark}
 	return u.String(), nil
 }
 
@@ -310,6 +363,11 @@ func (p protocolPlugin) Settings(s Spec, cs []Client) map[string]any {
 	clients := []any{}
 	for _, c := range cs {
 		x := map[string]any{"id": c.ID, "email": c.Email, "enable": true}
+		if c.PolicySet {
+			x["expiryTime"] = c.ExpiresAt
+			x["totalGB"] = c.QuotaBytes
+			x["limitHwid"] = c.DeviceLimit
+		}
 		switch p {
 		case "trojan":
 			x["password"] = c.Password
@@ -317,8 +375,8 @@ func (p protocolPlugin) Settings(s Spec, cs []Client) map[string]any {
 			x["password"] = c.Password
 			x["method"] = "aes-128-gcm"
 		case "vless":
-			if s.Flow != "" {
-				x["flow"] = s.Flow
+			if flow := ClientFlow(s, c); flow != "" {
+				x["flow"] = flow
 			}
 		case "vmess":
 			x["security"] = "auto"

@@ -63,7 +63,22 @@ func (s Service) confirmNative(ctx context.Context, p Profile, panel string, rem
 		if _, e := tx.ExecContext(ctx, "DELETE FROM config_driver_clients WHERE profile_id=$1 AND panel_id=$2 AND NOT(client_id=ANY($3::text[]))", p.ID, panel, pq.Array(ids)); e != nil {
 			return e
 		}
+		for _, cl := range credentials.Clients {
+			var expires any
+			if cl.ExpiresAt > 0 {
+				expires = time.UnixMilli(cl.ExpiresAt)
+			}
+			if _, e := tx.ExecContext(ctx, "UPDATE config_driver_clients SET expires_at=$4,publish=$5 WHERE profile_id=$1 AND panel_id=$2 AND client_id=$3", p.ID, panel, cl.ID, expires, !cl.PolicySet || cl.Publish); e != nil {
+				return e
+			}
+		}
 		if changed {
+			if _, e := tx.ExecContext(ctx, "DELETE FROM output_config_snapshots WHERE panel_id=$1 AND config_profile_id=$2", panel, p.ID); e != nil {
+				return e
+			}
+			if _, e := tx.ExecContext(ctx, "UPDATE config_driver_class_proofs SET verified_at=NULL WHERE profile_id=$1 AND panel_id=$2", p.ID, panel); e != nil {
+				return e
+			}
 			if _, e := tx.ExecContext(ctx, "UPDATE panel_routing_state SET next_check_at=now() WHERE panel_id=$1", panel); e != nil {
 				return e
 			}
@@ -124,7 +139,7 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 			return e
 		}
 	}
-	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
+	return s.withPanelLock(ctx, panel, func(ctx context.Context) error {
 		current, e := Read(ctx, s.DB, p.ID)
 		if e != nil {
 			return e

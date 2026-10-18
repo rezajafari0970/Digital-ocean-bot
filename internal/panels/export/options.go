@@ -1,6 +1,7 @@
 package export
 
 import (
+	"encoding/json"
 	"net/url"
 	"strings"
 )
@@ -8,8 +9,9 @@ import (
 // OutputOptions control publication only. Stored native contracts and complete
 // snapshot URIs remain unchanged.
 type OutputOptions struct {
-	IncludeXHTTPExtra bool `json:"include_xhttp_extra"`
-	IncludeFinalMask  bool `json:"include_finalmask"`
+	IndependentProfile bool `json:"-"`
+	IncludeXHTTPExtra  bool `json:"include_xhttp_extra"`
+	IncludeFinalMask   bool `json:"include_finalmask"`
 }
 
 // ApplyOutputOptions preserves retained components byte-for-byte. In
@@ -28,6 +30,19 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
+			if options.IndependentProfile && k == "allowInsecure" {
+				if q.Get(k) != "true" && q.Get(k) != "false" {
+					return "", ErrInvalidVLESS
+				}
+				continue
+			}
+			if options.IndependentProfile && k == "finalmask" {
+				var mask map[string]any
+				if len(q.Get(k)) > 32768 || json.Unmarshal([]byte(q.Get(k)), &mask) != nil || mask == nil {
+					return "", ErrInvalidVLESS
+				}
+				continue
+			}
 			if k != "security" && k != "type" && k != "path" && k != "host" && k != "serviceName" && k != "mode" && k != "authority" {
 				return "", ErrInvalidVLESS
 			}
@@ -57,11 +72,11 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 		}
 		switch name {
 		case "extra":
-			if !options.IncludeXHTTPExtra {
+			if !options.IncludeXHTTPExtra && !options.IndependentProfile {
 				continue
 			}
 		case "fm", "finalmask":
-			if !options.IncludeFinalMask {
+			if !options.IncludeFinalMask && !options.IndependentProfile {
 				continue
 			}
 		case "browserDialer", "browserDialerMode", "browser_dialer":

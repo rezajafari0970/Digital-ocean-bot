@@ -12,19 +12,20 @@ import (
 )
 
 type Profile struct {
-	ID                string            `json:"id"`
-	Name              string            `json:"name"`
-	Spec              configdriver.Spec `json:"spec"`
-	Enabled           bool              `json:"enabled"`
-	Fleet             bool              `json:"fleet"`
-	Panels            []string          `json:"panel_ids"`
-	Classes           []string          `json:"classes"`
-	Count             int               `json:"clients_per_class"`
-	Revision          int64             `json:"revision"`
-	Legacy            string            `json:"legacy_key,omitempty"`
-	RequestID         string            `json:"request_id,omitempty"`
-	DeleteRequestedAt *time.Time        `json:"delete_requested_at,omitempty"`
-	DeletedAt         *time.Time        `json:"deleted_at,omitempty"`
+	ID                string                                `json:"id"`
+	Name              string                                `json:"name"`
+	Spec              configdriver.Spec                     `json:"spec"`
+	Enabled           bool                                  `json:"enabled"`
+	Fleet             bool                                  `json:"fleet"`
+	Panels            []string                              `json:"panel_ids"`
+	Classes           []string                              `json:"classes"`
+	Count             int                                   `json:"clients_per_class"`
+	ClassSettings     map[string]configdriver.ClassSettings `json:"class_settings,omitempty"`
+	Revision          int64                                 `json:"revision"`
+	Legacy            string                                `json:"legacy_key,omitempty"`
+	RequestID         string                                `json:"request_id,omitempty"`
+	DeleteRequestedAt *time.Time                            `json:"delete_requested_at,omitempty"`
+	DeletedAt         *time.Time                            `json:"deleted_at,omitempty"`
 }
 type queryer interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -32,17 +33,48 @@ type queryer interface {
 
 func Read(ctx context.Context, db queryer, id string) (Profile, error) {
 	p := Profile{}
-	var raw []byte
+	var raw, policies []byte
 	var legacy sql.NullString
-	e := db.QueryRowContext(ctx, "SELECT id::text,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,revision,legacy_key,delete_requested_at,deleted_at,COALESCE(request_id::text,'') FROM config_driver_profiles WHERE id=$1", id).Scan(&p.ID, &p.Name, &raw, &p.Enabled, &p.Fleet, pq.Array(&p.Panels), pq.Array(&p.Classes), &p.Count, &p.Revision, &legacy, &p.DeleteRequestedAt, &p.DeletedAt, &p.RequestID)
+	e := db.QueryRowContext(ctx, "SELECT id::text,name,spec,enabled,fleet,panel_ids,classes,clients_per_class,revision,legacy_key,delete_requested_at,deleted_at,COALESCE(request_id::text,''),class_settings FROM config_driver_profiles WHERE id=$1", id).Scan(&p.ID, &p.Name, &raw, &p.Enabled, &p.Fleet, pq.Array(&p.Panels), pq.Array(&p.Classes), &p.Count, &p.Revision, &legacy, &p.DeleteRequestedAt, &p.DeletedAt, &p.RequestID, &policies)
 	if e != nil {
 		return p, e
 	}
 	p.Legacy = legacy.String
 	e = json.Unmarshal(raw, &p.Spec)
+	if e == nil {
+		e = json.Unmarshal(policies, &p.ClassSettings)
+	}
+	p.Normalize()
 	return p, e
 }
+func (p *Profile) Normalize() {
+	if len(p.ClassSettings) == 0 {
+		p.ClassSettings = map[string]configdriver.ClassSettings{}
+		for _, cl := range p.Classes {
+			p.ClassSettings[cl] = configdriver.ClassSettings{Count: p.Count, Flow: p.Spec.Flow, Publish: true}
+		}
+	}
+}
+func (p Profile) Total() int {
+	p.Normalize()
+	n := 0
+	for _, cl := range p.Classes {
+		n += p.ClassSettings[cl].Count
+	}
+	return n
+}
+func (p Profile) PublishedTarget() int {
+	p.Normalize()
+	n := 0
+	for _, cl := range p.Classes {
+		if p.ClassSettings[cl].Publish {
+			n += p.ClassSettings[cl].Count
+		}
+	}
+	return n
+}
 func Validate(p Profile) error {
+	p.Normalize()
 	if strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || p.Count < 1 || p.Count > 100 || len(p.Classes) < 1 || len(p.Classes) > 2 || len(p.Panels) > 1000 || p.Enabled && !p.Fleet && len(p.Panels) == 0 {
 		return errors.New("profile_invalid")
 	}
@@ -52,6 +84,18 @@ func Validate(p Profile) error {
 			return errors.New("profile_classes_invalid")
 		}
 		seen[c] = true
+		settings, ok := p.ClassSettings[c]
+		if !ok {
+			return errors.New("profile_class_settings_missing")
+		}
+		if e := settings.Validate(p.Spec); e != nil {
+			return e
+		}
+	}
+	for cl := range p.ClassSettings {
+		if cl != "DIRECT" && cl != "RESIDENTIAL" {
+			return errors.New("profile_classes_invalid")
+		}
 	}
 	// This control plane provisions public cloud nodes. A private-only driver
 	// cannot be enabled merely because its protocol exists in the core.

@@ -1,6 +1,8 @@
 package sanaei
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	_ "embed"
 	"encoding/base64"
@@ -8,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -20,13 +23,15 @@ var ErrRouteBatchUnavailable = errors.New("native route batch unavailable")
 
 //go:embed route_batch.py
 var routeBatchScript string
-var routeBatchSlots = make(chan struct{}, 8)
+
+// Match the bounded serving-proof lane; each panel still runs sequentially.
+var routeBatchSlots = make(chan struct{}, 18)
 
 // Includes TCP, authenticated SSH, channel setup and all native reads. A live
 // distant node needed 11 seconds end-to-end for a two-second native matrix.
-// Keep the native script's ten-second cap and the caller's thirty-second
+// Keep the native script's twenty-second cap and the caller's thirty-second
 // verification deadline; reserve enough time for setup without weakening proof.
-const routeBatchTimeout = 15 * time.Second
+const routeBatchTimeout = 25 * time.Second
 const routeBatchHandshakeTimeout = 8 * time.Second
 
 // Only fixed stages are exposed: SSH errors can contain connection details.
@@ -41,7 +46,7 @@ func (s *ResilientSession) RouteProofBatch(ctx context.Context, requests []Sessi
 	return s.BatchRouteReads(ctx, requests)
 }
 func routeBatchForms(requests []SessionRequest) ([]string, error) {
-	if len(requests) == 0 || len(requests) > 256 {
+	if len(requests) == 0 || len(requests) > 4096 {
 		return nil, routeBatchUnavailable("request")
 	}
 	out := make([]string, len(requests))
@@ -64,6 +69,30 @@ func routeBatchForms(requests []SessionRequest) ([]string, error) {
 	return out, nil
 }
 func parseRouteBatch(raw string, count int) ([]SessionResponse, error) {
+	var packed struct {
+		Encoding string
+		Data     string
+	}
+	if json.Unmarshal([]byte(raw), &packed) == nil && packed.Encoding != "" {
+		if packed.Encoding != "gzip/base64" || len(packed.Data) > 65536 {
+			return nil, routeBatchUnavailable("result encoding")
+		}
+		compressed, e := base64.StdEncoding.DecodeString(packed.Data)
+		if e != nil {
+			return nil, routeBatchUnavailable("result encoding")
+		}
+		reader, e := gzip.NewReader(bytes.NewReader(compressed))
+		if e != nil {
+			return nil, routeBatchUnavailable("result encoding")
+		}
+		decoded, e := io.ReadAll(io.LimitReader(reader, (2<<20)+1))
+		reader.Close()
+		if e != nil || len(decoded) > 2<<20 {
+			return nil, routeBatchUnavailable("result size")
+		}
+		raw = string(decoded)
+	}
+
 	var data struct {
 		Error   string
 		Results []struct {
@@ -72,8 +101,14 @@ func parseRouteBatch(raw string, count int) ([]SessionResponse, error) {
 			Tag                        string
 		}
 	}
-	if json.Unmarshal([]byte(raw), &data) != nil || data.Error != "" || len(data.Results) != count {
-		return nil, routeBatchUnavailable("result")
+	if json.Unmarshal([]byte(raw), &data) != nil {
+		return nil, routeBatchUnavailable("result decoding")
+	}
+	if data.Error != "" {
+		return nil, routeBatchUnavailable("native result")
+	}
+	if len(data.Results) != count {
+		return nil, routeBatchUnavailable(fmt.Sprintf("incomplete result %d/%d", len(data.Results), count))
 	}
 	out := make([]SessionResponse, count)
 	for i, v := range data.Results {

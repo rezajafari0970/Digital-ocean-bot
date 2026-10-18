@@ -65,24 +65,37 @@ func (s Service) run(ctx context.Context, verify bool) error {
 			return e
 		}
 	}
-	lane := `(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)) OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
+	lane := `(l.needs_reconcile OR NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)) OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
 	if verify {
-		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT')`
+		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT') AND NOT l.needs_reconcile`
 	}
 	var id, panel string
-	e := s.DB.QueryRowContext(ctx, `WITH candidate AS (
+	claim, e := sanaei.UUIDv4()
+	if e != nil {
+		return e
+	}
+	e = s.DB.QueryRowContext(ctx, `WITH candidate AS (
  SELECT l.profile_id,l.panel_id FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id
  JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
- WHERE l.next_attempt_at<=now() AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
+ WHERE l.next_attempt_at<=now() AND (l.lease_until IS NULL OR l.lease_until<now()) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners busy WHERE busy.panel_id=l.panel_id AND busy.lease_until>now()) AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
  AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
- AND `+lane+` ORDER BY l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l SKIP LOCKED LIMIT 1)
- UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds'
- FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id::text,l.panel_id::text`).Scan(&id, &panel)
+ AND `+lane+` ORDER BY date_trunc('minute',l.next_attempt_at),cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
+ UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
+ FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
+ SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil
 	}
 	if e != nil {
 		return e
+	}
+	defer func() {
+		c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		defer cancel()
+		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET lease_until=NULL,claim_token=NULL WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim)
+	}()
+	if verify && s.Verify == nil {
+		return s.VerifyPanel(ctx, panel, id)
 	}
 	return s.Reconcile(ctx, id, panel)
 }
@@ -146,6 +159,10 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		return e
 	}
 	stage := "prepare"
+	setStage := func(value string) {
+		stage = value
+		_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage=$3,stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2 AND stage<>$3", id, panel, value)
+	}
 	defer func() {
 		if ret == nil {
 			return
@@ -199,15 +216,26 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		p.Revision = mutationRevision.Int64
 	}
+	if !recovering && p.Spec.Security == "reality" && p.Spec.SNIMode != "" {
+		setStage("sni_scan")
+		p.Spec, e = s.resolveSNI(ctx, p, panel)
+		if e != nil {
+			return e
+		}
+	}
 	var credentials, priorCredentials configdriver.Credentials
-	stage = "credentials"
-	e = sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
+	setStage("credentials")
+	e = s.withPanelLock(ctx, panel, func(ctx context.Context) error {
 		raw, err := s.Secrets.Get(ctx, t.AccountID, ref)
 		if errors.Is(err, secretstore.ErrSecretNotFound) {
 			if remote.Valid || mutation == "SENT" {
 				return errors.New("profile_credentials_missing")
 			}
-			priorCredentials, err = configdriver.NewCredentials(p.ID, panel, p.Classes, p.Count)
+			priorCredentials, err = configdriver.NewCredentials(p.ID, panel, p.Classes, 1)
+			priorCredentials.Clients = nil
+			if err == nil {
+				priorCredentials, err = configdriver.ResizePolicies(priorCredentials, p.ID, panel, p.Classes, p.ClassSettings, time.Now(), p.Spec.Flow)
+			}
 			if err != nil {
 				return err
 			}
@@ -234,12 +262,12 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			}
 			ref = mutationCredential.String
 		} else {
-			resized, err := configdriver.Resize(priorCredentials, id, panel, p.Classes, p.Count)
+			resized, err := configdriver.ResizePolicies(priorCredentials, id, panel, p.Classes, p.ClassSettings, time.Now(), p.Spec.Flow)
 			if err != nil {
 				return err
 			}
 			if !reflect.DeepEqual(resized, priorCredentials) {
-				nextRef := "config-profile:" + id + ":" + panel + ":revision:" + strconv.FormatInt(p.Revision, 10)
+				nextRef := "config-profile:" + id + ":" + panel + ":generation:" + generation
 				raw, err = s.Secrets.Get(ctx, t.AccountID, nextRef)
 				if errors.Is(err, secretstore.ErrSecretNotFound) {
 					credentials = resized
@@ -288,7 +316,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 	}()
 	if p.Spec.Security == "tls" && (!cert.Valid || cert.Time.Before(time.Now().Add(48*time.Hour))) {
-		stage = "certificate"
+		setStage("certificate")
 		command, e := trojantcp.ProfileCertificateCommand(panel, t.Host, p.Spec.Port, t.PanelPort)
 		if e != nil {
 			return e
@@ -308,7 +336,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	}
 	// The global executor is acquired before the panel lock, matching legacy writers.
 	// A short queue timeout prevents a slow/offline profile from starving siblings.
-	stage = "executor_wait"
+	setStage("executor_wait")
 	wantsWrite := !remote.Valid || applied != p.Spec || mutation == "PREPARED" || mutation == "SENT" || !reflect.DeepEqual(credentials, priorCredentials)
 	var retiredClients bool
 	if e = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_client_retirements WHERE profile_id=$1 AND panel_id=$2 AND confirmed_absent_at IS NULL)", id, panel).Scan(&retiredClients); e != nil {
@@ -330,8 +358,8 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		executorHeld = true
 	}
-	stage = "native"
-	return sanaei.WithConfigLock(ctx, s.DB, panel, func(ctx context.Context) error {
+	setStage("native")
+	return s.withPanelLock(ctx, panel, func(ctx context.Context) error {
 		current, e := Read(ctx, s.DB, id)
 		if e != nil {
 			return e
@@ -376,7 +404,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 					return matchErr
 				}
 				if !remote.Valid || applied.Port != p.Spec.Port {
-					stage = "port"
+					setStage("port")
 					if e = s.checkPort(ctx, t, key, p.Spec.Port); e != nil {
 						return e
 					}
@@ -384,7 +412,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				if !sanaei.ConfigLockHeld(ctx, s.DB, panel) {
 					return sanaei.ErrConfigOwnership
 				}
-				stage = "admission"
+				setStage("admission")
 				e = sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
 					if _, e := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(180061015)"); e != nil {
 						return e
@@ -407,7 +435,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				if e != nil {
 					return e
 				}
-				stage = "write"
+				setStage("write")
 				// Mark SENT durably before POST. After cancellation/restart only observation
 				// may confirm it; another blind POST is never authorized by a timeout.
 				if _, e = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET mutation_state='SENT',stage='write_sent' WHERE profile_id=$1 AND panel_id=$2", id, panel); e != nil {
@@ -499,7 +527,12 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			}
 			payload["probe_outbounds"] = probes
 			payload["probe_classes"] = probeClasses
-			stage = "runtime"
+			if sanaei.ConfigObservationEnabled(panel) {
+				if e = sanaei.ConfigProofOnly(ctx, s.DB, panel); e != nil {
+					return e
+				}
+			}
+			setStage("runtime")
 			verifier := s.Verify
 			if verifier == nil {
 				verifier = s.verifyRuntime
@@ -531,20 +564,53 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				return e
 			}
 			spec, _ := json.Marshal(p.Spec)
+			verifiedClasses, hasClassProofs := payload["verified_classes"].([]string)
+			if !hasClassProofs && s.Verify != nil {
+				verifiedClasses = probeClasses
+			}
+			proofSet := map[string]bool{}
+			for _, cl := range verifiedClasses {
+				proofSet[cl] = true
+			}
+			partial := false
+			for _, cl := range probeClasses {
+				if !proofSet[cl] {
+					partial = true
+				}
+			}
+			next := nextProfileCheck(p, credentials, time.Now())
+			code := ""
+			if partial {
+				code = "profile_class_traffic_retrying"
+				if due := time.Now().Add(10 * time.Second); due.Before(next) {
+					next = due
+				}
+			}
 			return sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+				for _, class := range p.Classes {
+					var verified any
+					failure := "profile_runtime_traffic_unverified"
+					if proofSet[class] {
+						verified = time.Now()
+						failure = ""
+					}
+					if _, e := tx.ExecContext(ctx, "INSERT INTO config_driver_class_proofs(profile_id,panel_id,route_class,verified_at,error_code) VALUES($1,$2,$3,$4,$5) ON CONFLICT(profile_id,panel_id,route_class) DO UPDATE SET verified_at=EXCLUDED.verified_at,error_code=EXCLUDED.error_code", id, panel, class, verified, failure); e != nil {
+						return e
+					}
+				}
 				if p.Legacy == "trojan" {
 					if _, e := tx.ExecContext(ctx, "UPDATE trojan_tcp_listeners SET state='RETIRED' WHERE panel_id=$1", panel); e != nil {
 						return e
 					}
 				}
-				_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code='',failures=0,remote_id=$3,applied_spec=$4,applied_revision=$5,mutation_state='CONFIRMED',certificate_not_after=$6,verified_at=now(),next_attempt_at=now()+interval '2 minutes' WHERE profile_id=$1 AND panel_id=$2", id, panel, observed, spec, p.Revision, cert)
+				_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',needs_reconcile=false,error_code=$8,failures=0,remote_id=$3,applied_spec=$4,applied_revision=$5,mutation_state='CONFIRMED',certificate_not_after=$6,verified_at=now(),next_attempt_at=$7 WHERE profile_id=$1 AND panel_id=$2", id, panel, observed, spec, p.Revision, cert, next, code)
 				return e
 			})
 		})
 	})
 }
 func DecodeCredentials(raw []byte, p Profile, c *configdriver.Credentials) error {
-	if json.Unmarshal(raw, c) == nil && len(c.Clients) > 0 {
+	if json.Unmarshal(raw, c) == nil && (len(c.Clients) > 0 || c.LastCreated != nil) {
 		return nil
 	}
 	if p.Legacy != "trojan" {

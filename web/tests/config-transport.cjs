@@ -20,7 +20,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
     if(id&&current&&body.revision!==current.profile.revision)return json({error:'profile_revision_changed'},409);
     if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({state:'deleting'},202)}
     saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||10000+saves.length}};
-    const item={profile,state:profile.enabled?'syncing':'paused',eligible:2,verified:2,ready:0,published:0,target:2*profile.clients_per_class*profile.classes.length,pending:2,blocked:0,deleting:0};
+    const item={profile,state:profile.enabled?'syncing':'paused',eligible:2,verified:2,ready:0,published:0,target:2*profile.classes.reduce((n,c)=>n+(profile.class_settings?.[c]?.count??profile.clients_per_class),0),pending:2,blocked:0,deleting:0};
     catalog.profiles=[...catalog.profiles.filter(x=>x.profile.id!==profile.id),item];json({profile,state:'queued'});
    });return;
   }
@@ -74,7 +74,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.deepEqual(await evaluate("[...document.querySelector('[name=profile_protocol]').options].map(x=>x.value).sort()"),['','shadowsocks','trojan','vless','vmess']);
   await evaluate("var f=n=>document.querySelector('[name=profile_'+n+']');var change=(n,v)=>{f(n).value=v;f(n).dispatchEvent(new Event('change'))};change('protocol','trojan')");
   assert.deepEqual(await evaluate("[...f('security').options].map(x=>x.value)"),['tls']);
-  await evaluate("change('protocol','vless');change('security','reality');f('name').value='My Reality';f('port').value='443';f('count').value='3';f('residential').checked=false;document.querySelector('#modalSubmit').click()");
+  await evaluate("change('protocol','vless');change('security','reality');f('name').value='My Reality';f('port').value='443';f('direct_count').value='3';f('residential').checked=false;document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-id]')");
   assert.equal(saves.length,1);assert.equal(saves[0].spec.port,443);assert.equal(saves[0].clients_per_class,3);assert.equal(saves[0].spec.security,'reality');assert.match(saves[0].request_id,/^[0-9a-f-]{36}$/);
   assert.equal(await evaluate("document.querySelector('[data-profile-id]').innerText.includes('0 / 6')"),true);
@@ -84,9 +84,16 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("change('network','grpc');f('path').value='my_service';change('network','ws')");assert.match(await evaluate("f('path').value"),/^\//);
   await evaluate("change('network','grpc')");assert.equal(await evaluate("f('path').value"),'my_service');
   await evaluate("change('network','xhttp')");assert.match(await evaluate("f('path').value"),/^\//);
-  await evaluate("change('network','tcp');change('protocol','vmess');change('security','none');f('port').value='500';f('count').value='2';f('fleet').checked=false;f('fleet').dispatchEvent(new Event('change'));document.querySelector('[name=profile_selected]').checked=true;document.querySelector('#modalSubmit').click()");
+  await evaluate("change('network','tcp');change('protocol','vmess');change('security','none');f('port').value='500';f('direct_count').value='2';f('fleet').checked=false;f('fleet').dispatchEvent(new Event('change'));document.querySelector('[name=profile_selected]').checked=true;document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-revision=\"2\"]')");assert.equal(saves[1].spec.protocol,'vmess');assert.equal(saves[1].spec.port,500);assert.equal(saves[1].clients_per_class,2);assert.equal(saves[1].panel_ids.length,1);assert.equal('path' in saves[1].spec,false);
   mark('editable protocol/count/port/server scope; transport paths remain independent');
+  await evaluate("document.querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("f('direct_count').value='2';f('direct_lifetime').value='5';f('direct_lifetime_unit').value='minutes';f('direct_devices').value='2';f('residential').checked=true;f('residential').dispatchEvent(new Event('change'));f('residential_count').value='5';f('residential_lifetime').value='2';f('residential_lifetime_unit').value='hours';f('residential_devices').value='7';f('residential_publish').checked=false;document.querySelector('#modalSubmit').click()");
+  await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-revision=\"3\"]')");
+  assert.equal(saves.at(-1).class_settings.DIRECT.lifetime_seconds,300);assert.equal(saves.at(-1).class_settings.RESIDENTIAL.lifetime_seconds,7200);
+  assert.equal(saves.at(-1).class_settings.DIRECT.count,2);assert.equal(saves.at(-1).class_settings.RESIDENTIAL.count,5);assert.equal(saves.at(-1).class_settings.RESIDENTIAL.device_limit,7);assert.equal(saves.at(-1).class_settings.RESIDENTIAL.publish,false);
+  mark('Direct and Residential save independent counts, units, device limits and publication');
+
 
   await evaluate("document.querySelector('[data-toggle-profile]').click()");await waitFor("document.querySelector('[data-toggle-profile]')?.textContent==='Resume'");assert.equal(saves.at(-1).enabled,false);
   await evaluate("document.querySelector('[data-toggle-profile]').click()");await waitFor("document.querySelector('[data-toggle-profile]')?.textContent==='Pause'");assert.equal(saves.at(-1).enabled,true);

@@ -10,7 +10,7 @@ func TestOutputOptionsPreserveWireBytes(t *testing.T) {
 	extras := "&extra=%7B%22number%22%3A1%7D&extr%61=%7B%7D&fm=%7B%7D&finalmask=%7B%7D"
 	browser := "&browserDialerMode=WebView&browserDialer=OkHttp&browser_dialer=WebView"
 	tail := "&literal=a+b&encoded=a%20b#label%20a+b"
-	for _, opt := range []OutputOptions{{}, {true, false}, {false, true}, {true, true}} {
+	for _, opt := range []OutputOptions{{}, {IncludeXHTTPExtra: true}, {IncludeFinalMask: true}, {IncludeXHTTPExtra: true, IncludeFinalMask: true}} {
 		got, err := ApplyOutputOptions(base+extras+browser+tail, opt)
 		expected := base
 		if opt.IncludeXHTTPExtra {

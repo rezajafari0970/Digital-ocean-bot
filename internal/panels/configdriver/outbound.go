@@ -1,5 +1,10 @@
 package configdriver
 
+import (
+	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
+)
+
 // Outbound is used only for an authenticated, read-only live connection probe.
 // Credentials travel over encrypted SSH stdin and never enter shell arguments.
 func (r *Registry) Outbound(s Spec, host string, c Credentials, cl Client) (map[string]any, error) {
@@ -19,10 +24,21 @@ func (r *Registry) Outbound(s Spec, host string, c Credentials, cl Client) (map[
 	if s.Security == "reality" {
 		stream["realitySettings"] = map[string]any{"serverName": s.SNI, "publicKey": c.PublicKey, "shortId": c.ShortID, "fingerprint": "chrome"}
 	}
+	if cl.FinalMask != "" {
+		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
+		if e != nil {
+			return nil, e
+		}
+		var v any
+		if e = json.Unmarshal(mask, &v); e != nil {
+			return nil, e
+		}
+		stream["finalmask"] = v
+	}
 	settings := map[string]any{}
 	switch s.Protocol {
 	case "vless":
-		settings["vnext"] = []any{map[string]any{"address": "127.0.0.1", "port": s.Port, "users": []any{map[string]any{"id": cl.ID, "encryption": "none", "flow": s.Flow}}}}
+		settings["vnext"] = []any{map[string]any{"address": "127.0.0.1", "port": s.Port, "users": []any{map[string]any{"id": cl.ID, "encryption": "none", "flow": ClientFlow(s, cl)}}}}
 	case "vmess":
 		settings["vnext"] = []any{map[string]any{"address": "127.0.0.1", "port": s.Port, "users": []any{map[string]any{"id": cl.ID, "security": "auto"}}}}
 	case "trojan":

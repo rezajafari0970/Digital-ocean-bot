@@ -31,7 +31,7 @@ func TestLocalRouteBatchReadOnlyAndComplete(t *testing.T) {
 	defer server.Close()
 	u, _ := url.Parse(server.URL)
 	port, _ := strconv.Atoi(u.Port())
-	requests := make([]SessionRequest, 66)
+	requests := make([]SessionRequest, 429)
 	for i := range requests {
 		requests[i] = SessionRequest{Method: "POST", Path: "panel/api/xray/routeTest", ContentType: "application/x-www-form-urlencoded", Body: []byte("network=tcp&port=443&inboundTag=inbound-" + strconv.Itoa(i/33) + "&email=fixture-" + strconv.Itoa(i) + "&domain=example.com")}
 	}
@@ -49,7 +49,7 @@ func TestLocalRouteBatchReadOnlyAndComplete(t *testing.T) {
 		t.Fatalf("local proof process: %v %s", e, raw)
 	}
 	responses, e := parseRouteBatch(string(raw), len(requests))
-	if e != nil || count.Load() != 66 || len(responses) != 66 {
+	if e != nil || count.Load() != 429 || len(responses) != 429 {
 		t.Fatal("partial native proof accepted", count.Load(), len(responses), e)
 	}
 	if strings.Contains(string(raw), "private-cookie") || strings.Contains(string(raw), "private-csrf") {
@@ -60,7 +60,7 @@ func TestLocalRouteBatchReadOnlyAndComplete(t *testing.T) {
 			t.Fatal("wrong proof result")
 		}
 	}
-	if _, e = parseRouteBatch(string(raw), 67); e == nil {
+	if _, e = parseRouteBatch(string(raw), 430); e == nil {
 		t.Fatal("missing result accepted")
 	}
 	bad := requests[0]

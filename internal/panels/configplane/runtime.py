@@ -1,6 +1,7 @@
 # Credentials arrive only over encrypted stdin, never argv, disk or logs.
-import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time,platform
+import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time,platform,concurrent.futures
 want=json.load(sys.stdin)
+class_proofs={}
 def sha(v):return hashlib.sha256(v).hexdigest()
 def probe_targets(probes,classes):
  # This is the same destination contract as route verification. Residential
@@ -54,6 +55,7 @@ def check():
  stage="traffic"
  probes=want.get('probes',[])
  classes=want.get('probe_classes',[])
+ if not probes and not classes:return True
  targets=probe_targets(probes,classes)
  ports=[];inbounds=[];outbounds=[];rules=[]
  for i,outbound in enumerate(probes):
@@ -67,25 +69,31 @@ def check():
  child=subprocess.Popen([str(core),'run','-config','stdin:'],stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
  try:
   child.stdin.write(json.dumps(client,separators=(',',':')).encode());child.stdin.close()
-  for index,port in enumerate(ports):
-   deadline=time.monotonic()+3
-   while True:
-    if child.poll() is not None:return False
-    try:
-     with socket.create_connection(('127.0.0.1',port),timeout=.2):pass
-     break
-    except OSError:
-     if time.monotonic()>deadline:return False
-     time.sleep(.05)
-   conn=http.client.HTTPSConnection('127.0.0.1',port,timeout=8,context=ssl.create_default_context())
+  def probe(index):
+   port=ports[index]
    try:
-    probe_host,probe_path=targets[index]
-    conn.set_tunnel(probe_host,443)
-    conn.request('GET',probe_path,headers={'Host':probe_host,'Connection':'close'})
-    response=conn.getresponse()
-    if not 200<=response.status<400 or not response.read(1024):return False
-   finally:conn.close()
-  return True
+    deadline=time.monotonic()+3
+    while True:
+     if child.poll() is not None:return False
+     try:
+      with socket.create_connection(('127.0.0.1',port),timeout=.2):pass
+      break
+     except OSError:
+      if time.monotonic()>deadline:return False
+      time.sleep(.05)
+    conn=http.client.HTTPSConnection('127.0.0.1',port,timeout=8,context=ssl.create_default_context())
+    try:
+     probe_host,probe_path=targets[index];conn.set_tunnel(probe_host,443)
+     conn.request('GET',probe_path,headers={'Host':probe_host,'Connection':'close'})
+     response=conn.getresponse()
+     return 200<=response.status<400 and bool(response.read(1024))
+    finally:conn.close()
+   except Exception:return False
+  with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+   results=list(pool.map(probe,range(len(ports))))
+  class_proofs.update(dict(zip(classes,results)))
+  return any(results)
+
  finally:
   if child.poll() is None:child.terminate()
   try:child.wait(timeout=2)
@@ -94,5 +102,5 @@ stage="initial"
 verified=False
 try:verified=check()
 except Exception:pass
-print(json.dumps({'verified':verified,'reason':'' if verified else stage},separators=(',',':')))
+print(json.dumps({'verified':verified,'reason':'' if verified else stage,'classes':class_proofs},separators=(',',':')))
 raise SystemExit(0 if verified else 1)

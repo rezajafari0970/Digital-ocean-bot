@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "publishing_official_core_and_independent_writer_repair",
+  "status": "publishing_independent_controls",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -57,6 +57,14 @@
     {
       "name": "production_sql_headroom",
       "status": "regression_verified; publishing"
+    },
+    {
+      "name": "independent_class_controls",
+      "status": "tests_passed_not_deployed"
+    },
+    {
+      "name": "batched_runtime_proofs",
+      "status": "live_read_only_probe_completed_not_deployed"
     }
   ],
   "design": [
@@ -67,7 +75,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T05:53:14.871652+00:00",
+  "updated_at": "2026-10-18T06:33:51.311362+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -229,5 +237,160 @@
     "profile_creation_lanes": 6,
     "per_task_timeout_seconds": 120,
     "unified_writers": "per-panel ownership lock, no global writer serialization"
+  },
+  "latest_verified_release": "916fa81a8e07128918e0068293041d263888bf1a",
+  "latest_verified_source": "a3e794792363df5abe85b228c2176304a6b6ad22",
+  "independent_controls": {
+    "schema": 186,
+    "deployed": false,
+    "policies": [
+      "count",
+      "lifetime_seconds",
+      "device_limit",
+      "quota_bytes",
+      "users_per_second",
+      "creation_interval_seconds",
+      "flow",
+      "publish",
+      "allow_insecure",
+      "final_mask",
+      "export_final_mask"
+    ],
+    "mobile_browser": "PASS",
+    "database_required_32": "PASS",
+    "batch_live": {
+      "elapsed_seconds": 17.561248562,
+      "panel": "0811c738-7b22-4085-bbe9-b3b9b54eb5da",
+      "profiles": 11,
+      "result": {
+        "results": [
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "e4f825a6-d3e2-4d85-9ef9-582ff8c6b343",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "a2a10101-1c77-4437-abec-e5e3c66966da",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "ac67ad9c-088e-4cdc-a2cd-310022e3d103",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "630ef838-0462-4145-a3d3-8fdd6a5a3ec3",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "7866b891-4f81-47fb-8237-555e79dd6b63",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "2b9d7a4e-e291-4ccd-baea-5985df3dd7ec",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "59f4226b-effe-467a-8357-c58704d4c8f5",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "9ae6319a-8412-476a-a270-d84289c44efd",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "0823c1a3-47df-4ef8-97e9-2e7dff031934",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": true,
+              "RESIDENTIAL": true
+            },
+            "profile_id": "a696810e-4713-455c-a168-fc2bcfd7a7bd",
+            "reason": "",
+            "verified": true
+          },
+          {
+            "classes": {
+              "DIRECT": false,
+              "RESIDENTIAL": false
+            },
+            "profile_id": "0af062b5-73d0-4aa0-94d5-1e6da4632831",
+            "reason": "traffic",
+            "verified": false
+          },
+          {
+            "classes": {},
+            "profile_id": "injected-invalid-membership",
+            "reason": "users",
+            "verified": false
+          }
+        ]
+      },
+      "ssh_ok": true
+    },
+    "remaining": [
+      "expanded isolated regression gate",
+      "publisher exact candidate checks",
+      "staged deployment",
+      "live class/output/deletion canary"
+    ],
+    "database_required_37": "PASS including production batch SQL, partial-class traffic and due-only retry isolation",
+    "full_go_test": "PASS",
+    "go_vet": "PASS",
+    "route_batch_root_cause": "256 request bound rejected >7 profile inbounds, forcing hundreds of remote HTTP calls past the operation deadline",
+    "route_batch_live": {
+      "error": "",
+      "matched": 429,
+      "panel": "0811c738-7b22-4085-bbe9-b3b9b54eb5da",
+      "requests": 429,
+      "responses": 429,
+      "seconds": 8.061825703
+    },
+    "route_batch_receipts": "bounded gzip/base64; full indexed matrix; 429-request regression; 18 distributed SSH slots, one sequential stream per panel"
   }
 }

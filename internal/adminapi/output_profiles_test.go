@@ -33,6 +33,7 @@ func TestProfileOutputRevisionScopeAndCountries(t *testing.T) {
 		raw, _ := json.Marshal(spec)
 		sqlMust(t, db, "INSERT INTO config_driver_profiles(id,name,spec,enabled,fleet,classes) VALUES($1,$2,$3,true,true,ARRAY['DIRECT'])", id, protocol, raw)
 		sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,remote_id,credential_ref,applied_spec,applied_revision,state,verified_at,certificate_not_after) VALUES($1,$2,$3,$4,'fixture',$5,1,'VERIFIED',now(),now()+interval '5 days')", id, x.Panel, "dob:profile:"+id, i+20, raw)
+		sqlMust(t, db, "INSERT INTO config_driver_class_proofs(profile_id,panel_id,route_class,verified_at) VALUES($1,$2,'DIRECT',now())", id, x.Panel)
 		creds, e := configdriver.NewCredentials(id, x.Panel, []string{"DIRECT"}, 1)
 		if e != nil {
 			t.Fatal(e)

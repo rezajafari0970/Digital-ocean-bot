@@ -66,6 +66,7 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	var result struct {
 		Verified bool
 		Reason   string
+		Classes  map[string]bool
 	}
 	decodeErr := json.Unmarshal([]byte(out.Stdout), &result)
 	if err != nil || decodeErr != nil || !result.Verified {
@@ -75,6 +76,13 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 		}
 		return errors.New("profile_runtime_unverified")
 	}
+	verifiedClasses := []string{}
+	for class, valid := range result.Classes {
+		if valid {
+			verifiedClasses = append(verifiedClasses, class)
+		}
+	}
+	payload["verified_classes"] = verifiedClasses
 	// A node-local successful client does not prove its cloud firewall admits
 	// the published endpoint. Require reachability from the controller too.
 	probe, cancel := context.WithTimeout(ctx, 5*time.Second)

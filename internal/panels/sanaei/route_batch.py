@@ -1,14 +1,14 @@
 """Read-only sequential native route proofs through one encrypted SSH input."""
-import http.client,json,signal,sys,time,urllib.parse
+import http.client,json,signal,sys,time,urllib.parse,gzip,base64
 def main():
  p=json.load(sys.stdin)
  forms=p['forms']
- if not 1<=len(forms)<=256 or not 1<=p['port']<=65535:raise ValueError()
+ if not 1<=len(forms)<=4096 or not 1<=p['port']<=65535:raise ValueError()
  path=p['path']
  if not path.startswith('/') or any(x in path for x in ('\r','\n','?','#','..')):raise ValueError()
  headers={'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':p['csrf'],'Cookie':p['cookie']}
  if any('\r' in v or '\n' in v for v in headers.values()):raise ValueError()
- deadline=min(float(p['deadline']),time.time()+10)
+ deadline=min(float(p['deadline']),time.time()+20)
  conn=http.client.HTTPConnection('127.0.0.1',p['port'],timeout=3)
  out=[]
  try:
@@ -33,7 +33,8 @@ def main():
    # Native Sanaei closes its shared gRPC client per call: never parallelize a panel.
    if i+1<len(forms):time.sleep(.005)
  finally:conn.close()
- print(json.dumps({'results':out},separators=(',',':')))
+ raw=json.dumps({'results':out},separators=(',',':')).encode()
+ print(json.dumps({'encoding':'gzip/base64','data':base64.b64encode(gzip.compress(raw)).decode()},separators=(',',':')))
 if __name__=='__main__':
  try:main()
  except Exception:print('{"error":"native_route_batch_unavailable"}');sys.exit(1)

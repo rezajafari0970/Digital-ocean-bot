@@ -64,16 +64,17 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var eligible, verified, pending, retrying, ready, links, deleting int
-		e = tx.QueryRowContext(ctx, `WITH published AS (`+published+`) SELECT count(*),
+		e = tx.QueryRowContext(ctx, `WITH published AS (`+published+`), created AS (SELECT c.profile_id,c.panel_id,count(*) n FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles p ON p.id=c.profile_id WHERE l.applied_revision=p.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) GROUP BY c.profile_id,c.panel_id) SELECT count(*),
    count(*) FILTER(WHERE l.state='VERIFIED' AND l.applied_revision=cp.revision AND l.verified_at>now()-interval '5 minutes'),
-   count(*) FILTER(WHERE COALESCE(l.state,'PENDING')<>'BLOCKED' AND COALESCE(pub.n,0)<cp.clients_per_class*cardinality(cp.classes)),
-   count(*) FILTER(WHERE l.state='BLOCKED'),
-   count(*) FILTER(WHERE COALESCE(pub.n,0)=cp.clients_per_class*cardinality(cp.classes)),COALESCE(sum(pub.n),0)
+   count(*) FILTER(WHERE COALESCE(l.state,'PENDING')<>'BLOCKED' AND (COALESCE(pub.n,0)<$2 OR COALESCE(made.n,0)<$3 OR COALESCE(l.applied_revision,0)<>cp.revision OR l.state IS DISTINCT FROM 'VERIFIED' OR l.verified_at IS NULL OR l.verified_at<=now()-interval '5 minutes')),
+   count(*) FILTER(WHERE l.state='BLOCKED' OR COALESCE(l.error_code,'')<>''),
+   count(*) FILTER(WHERE COALESCE(pub.n,0)=$2 AND COALESCE(made.n,0)=$3 AND l.state='VERIFIED' AND l.applied_revision=cp.revision AND l.verified_at>now()-interval '5 minutes'),COALESCE(sum(pub.n),0)
    FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id
    JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
    LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
    LEFT JOIN published pub ON pub.config_profile_id=cp.id AND pub.panel_id=pi.id
-   WHERE cp.id=$1 AND `+configplane.Eligible, id).Scan(&eligible, &verified, &pending, &retrying, &ready, &links)
+   LEFT JOIN created made ON made.profile_id=cp.id AND made.panel_id=pi.id
+   WHERE cp.id=$1 AND `+configplane.Eligible, id, p.PublishedTarget(), p.Total()).Scan(&eligible, &verified, &pending, &retrying, &ready, &links)
 		if e != nil {
 			writeJSON(w, 500, errorBody())
 			return
@@ -99,7 +100,28 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 		if p.DeleteRequestedAt != nil {
 			state = "deleting"
 		}
-		profiles = append(profiles, map[string]any{"profile": p, "state": state, "eligible": eligible, "verified": verified, "pending": pending, "blocked": retrying, "ready": ready, "published": links, "target": eligible * p.Count * len(p.Classes), "deleting": deleting})
+		classStats := map[string]any{}
+		for _, class := range p.Classes {
+			var publishedCount, active int
+			if e = tx.QueryRowContext(ctx, `SELECT count(DISTINCT (o.panel_id,o.client_id)) FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id
+ JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id
+ CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id
+ LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id `+where+` AND o.config_profile_id=$1 AND cr.route_class=$2`, id, class).Scan(&publishedCount); e != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
+			if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles cp ON cp.id=c.profile_id JOIN panel_instances pi ON pi.id=c.panel_id JOIN accounts a ON a.id=pi.account_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE c.profile_id=$1 AND c.route_class=$2 AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) AND `+configplane.Eligible, id, class).Scan(&active); e != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
+			policy := p.ClassSettings[class]
+			publicationTarget := 0
+			if policy.Publish {
+				publicationTarget = eligible * policy.Count
+			}
+			classStats[class] = map[string]any{"active": active, "target": eligible * policy.Count, "published": publishedCount, "publication_target": publicationTarget, "publish": policy.Publish}
+		}
+		profiles = append(profiles, map[string]any{"profile": p, "state": state, "eligible": eligible, "verified": verified, "pending": pending, "blocked": retrying, "ready": ready, "published": links, "target": eligible * p.PublishedTarget(), "deleting": deleting, "class_stats": classStats})
 	}
 	rows, e = tx.QueryContext(ctx, `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(dr.profile->>'Region',''),dr.state FROM panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE dr.state IN('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' ORDER BY dep.host`)
 	if e != nil {
@@ -193,7 +215,7 @@ func (s *Server) deleteConfigProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
-	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision
+	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision,l.attempted_at,l.stage_started_at,COALESCE(l.failures,0),COALESCE(l.applied_spec->>'sni','')
  FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id
  LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
  WHERE cp.id=$1 AND cp.deleted_at IS NULL AND dr.state IN('READY','EXPIRING') AND (cp.fleet OR pi.id=ANY(cp.panel_ids) OR l.profile_id IS NOT NULL) ORDER BY dep.host`, r.PathValue("id"))
@@ -205,13 +227,15 @@ func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
 	out := []map[string]any{}
 	for rows.Next() {
 		var id, host, state, stage, code string
-		var at, next sql.NullTime
+		var at, next, attempted, started sql.NullTime
+		var failures int
+		var sni string
 		var applied, desired int64
-		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired); e != nil {
+		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired, &attempted, &started, &failures, &sni); e != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired})
+		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired, "attempted_at": attempted.Time, "stage_started_at": started.Time, "failures": failures, "sni": sni})
 	}
 	if rows.Err() != nil {
 		writeJSON(w, 500, errorBody())

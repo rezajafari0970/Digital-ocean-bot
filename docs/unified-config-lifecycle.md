@@ -38,3 +38,16 @@ Cleanup proceeds independently per server and retries recoverable failures. A co
 The required disposable-PostgreSQL gate includes profile resize, preserved identities, pause/resume, lost mutation responses, sibling preservation, confirmed deletion, port reuse, idempotent creation, migration retention, exact publication counts, cleanup isolation and legacy-authority retirement. Native integration exercises all 16 publicly supported combinations through the pinned panel and official Xray, including authenticated traffic. Mobile Chromium tests cover the unified workflow, transport-specific paths, stale edits, failed and hung reads, navigation, authentication and layout.
 
 External provider, network and certificate failures remain possible. The controller reports them and retries without claiming successful output or changing unrelated profiles.
+
+
+## Independent class controls — 2026-10-18 continuation
+
+Schema 186 stores Direct and Residential count, lifetime (seconds; UI minutes/hours), device limit, quota, creation rate/cadence, Flow, publish, TLS allowInsecure and client FinalMask/export independently. Existing credentials retain identity. Expired clients are retired and replenished by their own policy. Each class requires its own authenticated traffic proof before publication. The old global output formatter cannot erase a profile's chosen mask. Profiles continue to reserve independent ports and native ownership.
+
+Reality SNI selection is profile/server/revision-scoped, validates public TLS 1.3/h2/certificate results, caches six hours and retries only the affected profile. Repeated automatic-target failures trigger re-selection; manual names never silently change. Public Trojan without TLS remains unsupported by the official Xray client: advertising it as a working public configuration would be incorrect.
+
+Runtime verification batches a panel's profiles through one SSH connection, with separate membership/traffic outcomes and bounded four-profile concurrency. Native mutation remains fenced per panel; proof-only readers can observe after the final write. Durable leases and next-attempt/stage timestamps prevent abandoned workers from claiming permanent ownership. Counts come from one repeatable-read snapshot and show per-class created and published totals; zero publication does not imply an uncreated listener is ready.
+
+Live diagnosis found that 13 inbounds require 429 routing matrix entries. The old 256 cap forced remote HTTP fallback until timeout. The revised local batch accepts a bounded 4096 entries, keeps every indexed response, and compresses receipts to fit the existing SSH output bound. A real 429/429 read-only check completed in 8.06 seconds. Each panel remains sequential; distributed serving proofs have 18 bounded slots.
+
+Validation before rollout: all Go tests and vet passed; mobile Chromium verified independent lifetime units/count/device/publication, stale response recovery and deletion isolation; 37 required isolated PostgreSQL/race/native regressions passed with no skips. The job JSON records deployment separately from source validation. Production is not considered updated until exact installed manifests and canaries pass.

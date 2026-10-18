@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -42,6 +43,8 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 			envelope("csrf")
 		case r.URL.Path == "/login":
 			envelope(nil)
+		case r.URL.Path == "/panel/api/server/scanRealityTargets":
+			envelope([]any{map[string]any{"host": "example.com", "port": 443, "feasible": true, "certValid": true, "certChainValid": true, "tlsVersion": "1.3", "alpn": "h2", "latencyMs": 10}})
 		case r.URL.Path == "/panel/api/inbounds/list":
 			if dropReads {
 				w.WriteHeader(503)
@@ -149,6 +152,66 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if writes != 1 {
 		t.Fatal("proof retry repeated native write")
 	}
+	// Independent limits reach native settings, and a failed Residential proof
+	// cannot erase the authenticated Direct proof.
+	p.ClassSettings = map[string]configdriver.ClassSettings{
+		"DIRECT":      {Count: 1, LifetimeSeconds: 300, DeviceLimit: 2, Publish: true},
+		"RESIDENTIAL": {Count: 1, LifetimeSeconds: 7200, DeviceLimit: 7, Publish: false},
+	}
+	status, p = profileSave(t, api, p, "PUT")
+	if status != 200 {
+		t.Fatal("independent settings rejected")
+	}
+	priorVerifier := svc.Verify
+	svc.Verify = func(_ context.Context, _ provisioning.Target, _ []byte, payload map[string]any) error {
+		payload["verified_classes"] = []string{"DIRECT"}
+		return nil
+	}
+	if e := svc.Reconcile(ctx, p.ID, panel); e != nil {
+		t.Fatal(e)
+	}
+	var directProof, residentialProof bool
+	if e := db.QueryRow("SELECT bool_or(route_class='DIRECT' AND verified_at IS NOT NULL),bool_or(route_class='RESIDENTIAL' AND verified_at IS NOT NULL) FROM config_driver_class_proofs WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&directProof, &residentialProof); e != nil || !directProof || residentialProof {
+		t.Fatal("class proof coupled", e)
+	}
+	var proofRef string
+	if e := db.QueryRow("SELECT credential_ref FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&proofRef); e != nil {
+		t.Fatal(e)
+	}
+	var saved configdriver.Credentials
+	if json.Unmarshal(secrets.values[proofRef], &saved) != nil {
+		t.Fatal("saved credentials decode")
+	}
+	if len(saved.Clients) != 2 {
+		t.Fatal("class credentials absent")
+	}
+	for _, c := range saved.Clients {
+		want := p.ClassSettings[c.Class]
+		if c.ExpiresAt-c.CreatedAt != int64(want.LifetimeSeconds)*1000 || c.DeviceLimit != want.DeviceLimit || c.Publish != want.Publish {
+			t.Fatal("class limit mismatch")
+		}
+	}
+	for _, n := range native {
+		raw, _ := n["settings"].(string)
+		var settings struct{ Clients []map[string]any }
+		if json.Unmarshal([]byte(raw), &settings) != nil {
+			t.Fatal("native settings")
+		}
+		for _, c := range settings.Clients {
+			if c["expiryTime"] == float64(0) || c["limitHwid"] == nil {
+				t.Fatal("native limits missing")
+			}
+		}
+	}
+	svc.Verify = priorVerifier
+	p.ClassSettings = map[string]configdriver.ClassSettings{"DIRECT": {Count: 1, Publish: true}, "RESIDENTIAL": {Count: 1, Publish: true}}
+	status, p = profileSave(t, api, p, "PUT")
+	if status != 200 {
+		t.Fatal(status)
+	}
+	if e := svc.Reconcile(ctx, p.ID, panel); e != nil {
+		t.Fatal(e)
+	}
 	original := map[string]string{}
 	for k, v := range users {
 		original[k] = v
@@ -203,7 +266,7 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if !reflect.DeepEqual(users, original) {
 		t.Fatal("shrink left global users or replaced retained identity")
 	}
-	p.Spec = configdriver.Spec{Protocol: "vless", Network: "tcp", Security: "reality", Port: 17444, SNI: "example.com", Flow: "xtls-rprx-vision"}
+	p.Spec = configdriver.Spec{Protocol: "vless", Network: "tcp", Security: "reality", Port: 17444, SNI: "example.com", SNIMode: "manual", Flow: "xtls-rprx-vision"}
 	status, p = profileSave(t, api, p, "PUT")
 	if status != 200 {
 		t.Fatal("protocol/port edit rejected")
@@ -231,6 +294,52 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
 		t.Fatal("overdue proof starved behind scheduled refresh")
 	}
+	// Exercise the production batch SQL, independent class publication and
+	// a sibling runtime failure, with actual public TCP sockets.
+	tcpA, e := net.Listen("tcp", "127.0.0.1:17444")
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tcpA.Close()
+	tcpB, e := net.Listen("tcp", "127.0.0.1:17445")
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tcpB.Close()
+	sqlMust(t, db, "UPDATE deployments SET host='127.0.0.1' WHERE droplet_id=$1", droplet)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 minute' WHERE panel_id=$1", panel)
+	batch := &profileBatchFixtureSSH{failed: sibling.ID}
+	batchService := svc
+	batchService.SSH = batch
+	if e := batchService.VerifyPanel(ctx, panel, p.ID); e != nil {
+		t.Fatal("production batch", e)
+	}
+	if batch.jobs != 2 {
+		t.Fatal("batch lost sibling", batch.jobs)
+	}
+	var goodState, badState string
+	if e := db.QueryRow("SELECT state FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&goodState); e != nil {
+		t.Fatal(e)
+	}
+	if e := db.QueryRow("SELECT state FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel).Scan(&badState); e != nil {
+		t.Fatal(e)
+	}
+	if goodState != "VERIFIED" || badState != "BLOCKED" {
+		t.Fatal("batch failures coupled", goodState, badState)
+	}
+	if e := db.QueryRow("SELECT bool_or(route_class='DIRECT' AND verified_at IS NOT NULL),bool_or(route_class='RESIDENTIAL' AND verified_at IS NOT NULL) FROM config_driver_class_proofs WHERE profile_id=$1 AND panel_id=$2", p.ID, panel).Scan(&directProof, &residentialProof); e != nil || !directProof || residentialProof {
+		t.Fatal("batch class proof coupled", e)
+	}
+	// A failed sibling's early retry must not re-probe a healthy, not-due profile.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour' WHERE profile_id=$1", p.ID)
+	batch.jobs = 0
+	if e := batchService.VerifyPanel(ctx, panel, sibling.ID); e != nil {
+		t.Fatal(e)
+	}
+	if batch.jobs != 1 {
+		t.Fatal("not-due healthy profile re-probed", batch.jobs)
+	}
+	sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
 	var siblingRemote int64
 	if e := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1", sibling.ID).Scan(&siblingRemote); e != nil {
 		t.Fatal(e)
@@ -343,7 +452,7 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 		t.Fatal(status)
 	}
 	raw, _ := json.Marshal(p.Spec)
-	sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,remote_id,credential_ref,applied_spec,applied_revision,state,verified_at) VALUES($1,$2,'fixture',20,'ref',$3,1,'VERIFIED',now())", p.ID, x.Panel, raw)
+	sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,remote_id,credential_ref,applied_spec,applied_revision,state,verified_at,mutation_state) VALUES($1,$2,'fixture',20,'ref',$3,1,'VERIFIED',now(),'CONFIRMED')", p.ID, x.Panel, raw)
 	read := func() map[string]any {
 		t.Helper()
 		w := httptest.NewRecorder()
@@ -361,6 +470,7 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 	if item["ready"] != float64(0) || item["published"] != float64(0) || item["target"] != float64(2) {
 		t.Fatal("verified listener was incorrectly counted as published", item)
 	}
+	sqlMust(t, db, "INSERT INTO config_driver_class_proofs(profile_id,panel_id,route_class,verified_at) VALUES($1,$2,'DIRECT',now())", p.ID, x.Panel)
 	creds, e := configdriver.NewCredentials(p.ID, x.Panel, p.Classes, p.Count)
 	if e != nil {
 		t.Fatal(e)
@@ -389,4 +499,35 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 		t.Fatal("disabled account counted as eligible", item)
 	}
 
+}
+
+// No credentials enter command arguments. The fixture returns per-profile and
+// per-class outcomes exactly like the encrypted remote verifier.
+type profileBatchFixtureSSH struct {
+	failed string
+	jobs   int
+}
+
+func (s *profileBatchFixtureSSH) Run(context.Context, provisioning.Target, []byte, string) (string, error) {
+	return "", errors.New("unexpected argv request")
+}
+func (s *profileBatchFixtureSSH) RunInput(_ context.Context, _ provisioning.Target, _ []byte, _ string, input []byte) (provisioning.CommandResult, error) {
+	var jobs []struct {
+		ProfileID string `json:"profile_id"`
+	}
+	if e := json.Unmarshal(input, &jobs); e != nil {
+		return provisioning.CommandResult{}, e
+	}
+	s.jobs = len(jobs)
+	out := []any{}
+	for _, j := range jobs {
+		ok := j.ProfileID != s.failed
+		reason := ""
+		if !ok {
+			reason = "users"
+		}
+		out = append(out, map[string]any{"profile_id": j.ProfileID, "verified": ok, "reason": reason, "classes": map[string]bool{"DIRECT": ok, "RESIDENTIAL": false}})
+	}
+	raw, _ := json.Marshal(map[string]any{"results": out})
+	return provisioning.CommandResult{Stdout: string(raw)}, nil
 }
