@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "bounded_traffic_retry_validated",
+  "status": "completed_and_verified_on_both_hosts",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -69,6 +69,22 @@
     {
       "name": "native_global_device_policy",
       "status": "installed; live create/edit/expiry/delete native readback verified"
+    },
+    {
+      "name": "bulk_delete_completion_and_status_audit",
+      "status": "verified: 14 completed, 1101 removed, zero native references"
+    },
+    {
+      "name": "bounded_create_delete_verify_lanes",
+      "status": "installed_and_verified_on_both_hosts"
+    },
+    {
+      "name": "output_entry_isolation_and_strict_transient_retry",
+      "status": "installed_and_verified_on_both_hosts"
+    },
+    {
+      "name": "final_live_observation",
+      "status": "verified: see exact time-bounded observation and limitations"
     }
   ],
   "design": [
@@ -79,10 +95,10 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T11:02:07.001773+00:00",
+  "updated_at": "2026-10-18T11:15:57.188495+00:00",
   "validation": {
     "required_database_regressions": {
-      "passed": 32,
+      "passed": 37,
       "skipped": 0,
       "result": "PASS"
     },
@@ -163,11 +179,18 @@
       "tested": 75,
       "passed": 75,
       "failed": 0
+    },
+    "latest_acceptance": {
+      "result": "PASS",
+      "details": "resume_20261018.observation",
+      "release": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+      "ready_samples": 19,
+      "http_200_samples": 19
     }
   },
   "first_release": "b2922aa2e3b435fe6514f277bdc75bc6d4c6db7e",
-  "final_release": "511137a18996759fc854414d90e30e00470b673d",
-  "final_code_commit": "f365c9aed85655c9d6f4c5176c5aa4f76877078e",
+  "final_release": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+  "final_code_commit": "93808b0fc95946d162db38e6df4495f2cc3b6bea",
   "retirement": {
     "job_id": "4bda43a9-f1ac-4d19-9a93-235b8410bf26",
     "activated_at": "2026-10-18T04:40:51.195445Z",
@@ -212,13 +235,6 @@
     "final_strategy": "Derive panel concurrency from role pool, serving proofs, one retired proof, role ownership, and four short-query reservations; 18 proofs permit eight two-session panel operations",
     "required_release_regression": "TestProofPoolFortyPhysicalPinsAndProgress"
   },
-  "next_requirements": [
-    "separate Direct and Residential count/lifetime/device limits and creation cadence",
-    "Reality SNI scanner and per-profile Flow/SNI/mask/output settings",
-    "remove cross-panel writer serialization with bounded panel ownership",
-    "explicit durable timeout/retry stages",
-    "complete verified native deletion and publication isolation"
-  ],
   "readiness_defect": {
     "cause": "legacy client executor reports RETIRED after unified authority; health accepted only IDLE/GATED/COMPLETED",
     "fix": "accept fresh RETIRED progress; stale RETIRED remains unhealthy",
@@ -242,8 +258,8 @@
     "per_task_timeout_seconds": 120,
     "unified_writers": "per-panel ownership lock, no global writer serialization"
   },
-  "latest_verified_release": "2de6fd92e62ad933f2ff7c80a8f1d98e402944a5",
-  "latest_verified_source": "4737cc3e5a87ff4b06aeb4d964fc12a49bff0c23",
+  "latest_verified_release": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+  "latest_verified_source": "93808b0fc95946d162db38e6df4495f2cc3b6bea",
   "independent_controls": {
     "schema": 186,
     "deployed": true,
@@ -434,11 +450,7 @@
     },
     "scheduler": "busy panels requeue without degrading healthy profiles; native writes release panel before runtime/route proofs; proof batch limited to one parallel wave of four"
   },
-  "remaining_live_validation": [
-    "publish bulk-delete capacity and audit plus video status/output isolation fixes",
-    "staged installation",
-    "observe existing bulk deletion to native absence"
-  ],
+  "remaining_live_validation": [],
   "installed_native_policy_release": {
     "source": "9c86e6eb08ea84c15eb9ee80c711d4a4d861baf9",
     "public": "77068b527a05d7b79abbe08756f84c547a9fc116",
@@ -494,14 +506,15 @@
   },
   "continued_at": "2026-10-18T08:31:30.958969+00:00",
   "current_followup": {
-    "state": "bulk_delete_video_followup_validated",
-    "installed_source": "4737cc3e5a87ff4b06aeb4d964fc12a49bff0c23",
-    "installed_public": "2de6fd92e62ad933f2ff7c80a8f1d98e402944a5",
-    "user_profiles_preserved": 14,
+    "state": "completed_and_verified_on_both_hosts",
+    "installed_source": "93808b0fc95946d162db38e6df4495f2cc3b6bea",
+    "installed_public": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+    "user_profiles_preserved": 3,
     "native_core_audit": {
       "total": 81,
       "current": 81,
-      "needs_review": 0
+      "needs_review": 0,
+      "scope": "Historical audit in the earlier phase, not a new fleet count"
     },
     "confirmed_defects": [
       "output viewer rejected VMess and Shadowsocks and cleared all links",
@@ -509,11 +522,7 @@
       "profile work classes could exceed small parent budgets",
       "server details replaced during aggregate refresh and lacked independent polling"
     ],
-    "pending": [
-      "publish bulk-delete capacity and audit plus video status/output isolation fixes",
-      "staged installation",
-      "observe existing bulk deletion to native absence"
-    ],
+    "pending": [],
     "canaries": {
       "owned": 4,
       "user_profiles_deleted": 0,
@@ -531,7 +540,7 @@
       "Recent official Xray clients reject public unencrypted VLESS/Trojan; server generation cannot remove a client-side restriction.",
       "No promise of zero future faults; acceptance requires measured checks."
     ],
-    "updated_at": "2026-10-18T09:58:54.842512+00:00",
+    "updated_at": "2026-10-18T11:15:57.188495+00:00",
     "validation": {
       "database_gate": "PASS 37/37 zero skips including deadline fairness both protocol directions, prompt busy requeue, native global HWID deletion and lost-delete recovery",
       "browser": "config transport and refresh recovery PASS; batch snapshot deletion and details single flight exercised",
@@ -544,11 +553,19 @@
         "profiles": 16,
         "class_probes": 31,
         "all_passed": true
+      },
+      "post_retry_observation": {
+        "result": "PASS",
+        "details": "resume_20261018.observation",
+        "published": 492,
+        "target": 492,
+        "pending": 0,
+        "blocked": 0
       }
     },
     "scheduler": {
-      "create_lanes": 4,
-      "delete_lanes": 2,
+      "create_lanes": 8,
+      "delete_lanes": 8,
       "verify_lanes": 8,
       "shared_budget": "unchanged SQL-derived parent",
       "batch_profiles": 16,
@@ -556,21 +573,23 @@
       "redundant_proof_sql_lease_removed": true,
       "verification_supervision_seconds": 150,
       "selection": "oldest due verification first; no protocol priority",
-      "busy_retry_seconds": 2,
-      "delete_lanes_pending_release": 8
+      "busy_retry_seconds": 2
     },
-    "source_revision": "0d5d1fec1202666b214e279efd0568c63f662ac3",
-    "public_revision": "acb6a001b2853ee124e6307d4ae903460880258e",
+    "source_revision": "93808b0fc95946d162db38e6df4495f2cc3b6bea",
+    "public_revision": "35aa1fd203826810ba68821b8873a2446d4d9d83",
     "publisher": {
       "result": "PASS",
-      "evidence": "/var/lib/datacenter-publisher/release-hvrup3gk",
+      "evidence": "/var/lib/datacenter-publisher/release-k30u92os",
       "required_regressions": 37,
       "skipped": 0,
+      "full_go_test": "PASS",
+      "go_vet": "PASS",
+      "output_viewer_tests": 6,
       "installer": "PASS"
     },
     "deployment": {
-      "primary": "2de6fd9 verified 09:36:09 UTC; exact binaries, schema187, three services, five readiness samples",
-      "secondary": "2de6fd9 verified 09:34:41 UTC; same gates"
+      "primary": "35aa1fd verified 11:10:44 UTC; exact binaries, schema187, three services, five readiness samples, preservation PASS",
+      "secondary": "35aa1fd verified 11:07:27 UTC; same gates"
     },
     "disk_recovery": {
       "backups_deleted": 0,
@@ -591,17 +610,23 @@
       "snapshot-scoped idempotent batch deletion endpoint and confirmation UI",
       "independent 2-second server-details polling with coalescing and retained open DOM",
       "native confirmed ownership fence excludes staged reservations from counts and publication",
-      "public plain TCP server catalog for all four protocols with explicit client compatibility metadata"
+      "public plain TCP server catalog for all four protocols with explicit client compatibility metadata",
+      "eight creation, deletion and verification class lanes under unchanged shared parent budget",
+      "explicit native removal versus queued removal status and transactional actor/snapshot audit",
+      "retain valid output entries when malformed sibling entries are omitted",
+      "one bounded strict-TLS fresh-connection traffic retry for transient transport/selected 5xx failures"
     ],
-    "user_profiles_preserved_as_of": "2026-10-18T09:39:16Z",
+    "user_profiles_preserved_as_of": "2026-10-18T11:11:39.858721+00:00",
     "subsequent_bulk_intent": {
       "at": "2026-10-18T09:41:21.795273Z",
       "profiles": 14,
       "actor": "unavailable in previous endpoint audit; not attributed",
       "submitted_by_this_task": false,
-      "observed_remaining": 775,
-      "observed_at": "2026-10-18T09:58:08Z",
-      "effect": "all user profiles disabled/deleting; empty output expected; do not restore without instruction"
+      "observed_remaining": 0,
+      "observed_at": "2026-10-18T11:11:39.858721+00:00",
+      "effect": "Previously requested deletion complete; three later user profiles preserved; do not restore deleted profiles",
+      "profiles_completed": 14,
+      "native_removed": 1101
     },
     "video_followup": {
       "file": "Screenrecorder-2026-10-18-13-15-54-757.mp4",
@@ -616,16 +641,17 @@
         "native removal vs queued removal labels",
         "retain valid fresh output lines while reporting malformed entries"
       ],
-      "status": "PASS 37 mandatory database/race/native regressions; mobile Chromium; 6 output viewer cases; worker tests"
+      "status": "PASS 37 mandatory database/race/native regressions; mobile Chromium; 6 output viewer cases; worker tests",
+      "deployment": "Installed and verified on both hosts"
     }
   },
   "resume_20261018": {
-    "at": "2026-10-18T10:49:09.850957+00:00",
-    "installed_source": "e6a866e1aa7f951f2cc759ede0211bb3aae30ae1",
-    "installed_public": "75ba684f84920eaf4806d24581b979978d1785a4",
+    "at": "2026-10-18T11:15:57.188495+00:00",
+    "installed_source": "93808b0fc95946d162db38e6df4495f2cc3b6bea",
+    "installed_public": "35aa1fd203826810ba68821b8873a2446d4d9d83",
     "hosts": {
-      "primary": "exact binaries, five readiness samples, policy and credential preservation PASS",
-      "secondary": "exact binaries, five readiness samples, preservation PASS"
+      "primary": "PASS at 11:10:44 UTC: exact live binaries, three active services, zero restarts, five readiness samples and policy/credential/native identity preservation",
+      "secondary": "PASS at 11:07:27 UTC: same gates"
     },
     "prior_delete_cohort": {
       "profiles_completed": 14,
@@ -635,18 +661,24 @@
     },
     "current_user_profiles": 3,
     "creation_followup": "8 creation lanes share the unchanged SQL-derived panel ceiling; 8 delete and 8 verify lanes retain independent class ceilings",
-    "validation": "cmd/worker and internal/worker race PASS; complete publisher gate pending",
+    "validation": "PASS: 37 mandatory database/race/native regressions, zero skips; full Go/vet, targeted race/helper tests, six Output tests and sandbox installer",
     "openai_api_calls": 0,
     "evidence": [
       "/root/backups/dob-bulk-resume-20261018/verify.json",
       ".local/resume-bulk-final.json",
-      ".local/resume-create-lanes-tests.log"
+      ".local/resume-create-lanes-tests.log",
+      "/root/backups/dob-proof-retry-20261018/verify.json",
+      ".local/resume-final-inventory.json",
+      ".local/resume-retry-observation.jsonl",
+      ".local/resume-retry-observation-summary.json",
+      ".local/resume-lifecycle-followup.jsonl",
+      ".local/resume-final-pending-diagnostic.json",
+      ".local/resume-probe-retry-tests.log",
+      ".local/resume-retry-native-proof.json",
+      ".local/resume-backup-compression-receipt.json",
+      ".local/retry-backup-compression-receipt.json"
     ],
-    "remaining": [
-      "publish and install eight creation lanes",
-      "finish concurrent live create/delete acceptance",
-      "measure sustained nonempty output coverage and any remaining fleet errors"
-    ],
+    "remaining": [],
     "automatic_cycle": {
       "create_to_output_seconds": 37.519076,
       "delete_to_absence_seconds": 7.284081,
@@ -655,19 +687,151 @@
       "user_profiles_preserved": 3
     },
     "backup_compression": {
-      "archives": 12,
-      "saved_mib": 2141,
-      "content_hashes_verified": true
+      "archives": 19,
+      "saved_bytes": 3554673865,
+      "content_hashes_verified": true,
+      "tar_members_and_metadata_verified": true,
+      "backups_deleted": 0,
+      "free_disk_bytes_at_final_record": 5740183552
     },
     "followup": {
       "reason": "Some independent Residential proofs failed once and fresh read-only native tests seconds later returned HTTP200; no permanent failure inferred",
       "change": "one bounded fresh HTTPS retry for transport errors and selected 5xx; no retry/acceptance for certificate errors or 4xx; both runtime programs share one helper",
       "tests": "race PASS with timeout/reset recovery, persistent failure, certificate rejection, 403/429 rejection, empty response and exact attempt/cleanup bounds",
-      "remaining": [
-        "full release gates",
-        "staged installation",
-        "fresh sustained observation"
+      "remaining": [],
+      "deployment": "Final release installed and preservation-verified on both hosts",
+      "full_release_gates": "PASS",
+      "observation": "See resume_20261018.observation; complete original and follow-up windows retained"
+    },
+    "final_inventory": {
+      "at": "2026-10-18T11:11:39.858721+00:00",
+      "profiles": 14,
+      "profiles_completed": 14,
+      "native_remaining": 0,
+      "removed": 1101,
+      "running": 0,
+      "retry_errors": [],
+      "active_new_profiles": 3,
+      "database_connections": 64,
+      "database_active": 1,
+      "active_profiles": [
+        {
+          "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+          "name": "VLESS · TCP · REALITY"
+        },
+        {
+          "id": "67702c1a-7084-463c-bba0-382596d237ce",
+          "name": "Tcp reality 8443"
+        },
+        {
+          "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+          "name": "Tcp 500"
+        }
+      ],
+      "continuation_canaries": [
+        {
+          "id": "11d325a4-4430-4c8e-9389-5aa1bac5e30e",
+          "deleted_at": "2026-10-18T10:57:08.78406+00:00",
+          "native_remaining": 0
+        },
+        {
+          "id": "e4996a66-d929-42ef-a6b9-cd2a8bf77762",
+          "deleted_at": "2026-10-18T10:49:38.490384+00:00",
+          "native_remaining": 0
+        }
       ]
-    }
-  }
+    },
+    "observation": {
+      "release": "35aa1fd203826810ba68821b8873a2446d4d9d83",
+      "started_at": "2026-10-18T11:11:02.460894+00:00",
+      "finished_at": "2026-10-18T11:14:03.994076+00:00",
+      "samples": 13,
+      "duration_seconds": 181.533,
+      "ready_samples": 13,
+      "output_http_200_samples": 13,
+      "complete_samples": 9,
+      "coverage_percent_min": 98.78,
+      "coverage_percent_max": 100.0,
+      "output_latency_ms": {
+        "min": 39,
+        "median": 49,
+        "max": 58
+      },
+      "available_memory_mib_min": 4360,
+      "overall_output_latency_ms": {
+        "min": 39,
+        "median": 48,
+        "max": 67
+      },
+      "overall_samples": 19,
+      "overall_ready_samples": 19,
+      "overall_http_200_samples": 19,
+      "final": {
+        "at": "2026-10-18T11:15:56.726963+00:00",
+        "sample": 5,
+        "profiles": [
+          {
+            "eligible": 82,
+            "verified": 82,
+            "pending": 0,
+            "blocked": 0,
+            "ready": 82,
+            "published": 164,
+            "target": 164,
+            "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707"
+          },
+          {
+            "eligible": 82,
+            "verified": 82,
+            "pending": 0,
+            "blocked": 0,
+            "ready": 82,
+            "published": 164,
+            "target": 164,
+            "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67"
+          },
+          {
+            "eligible": 82,
+            "verified": 82,
+            "pending": 0,
+            "blocked": 0,
+            "ready": 82,
+            "published": 164,
+            "target": 164,
+            "id": "67702c1a-7084-463c-bba0-382596d237ce"
+          }
+        ],
+        "catalog_seconds": 0.095,
+        "output_status": 200,
+        "output_lines": 492,
+        "output_seconds": 0.051,
+        "ready": "ready",
+        "load_1m": 2.40380859375,
+        "available_memory_mib": 4326,
+        "target": 492,
+        "published": 492,
+        "complete": true
+      },
+      "lifecycle_followup": {
+        "samples": 6,
+        "complete_samples": 5,
+        "started_at": "2026-10-18T11:14:41.070312+00:00",
+        "finished_at": "2026-10-18T11:15:56.726963+00:00",
+        "new_panel_completed_without_manual_reconciliation": true,
+        "evidence": ".local/resume-lifecycle-followup.jsonl"
+      }
+    },
+    "limitations": [
+      "The create/delete samples are isolated live automatic cycles, not a fleet-wide speedup percentage.",
+      "Complete sampled coverage does not guarantee zero future network/provider faults.",
+      "Recent official Xray client restrictions on public unencrypted VLESS/Trojan remain client-side compatibility constraints."
+    ]
+  },
+  "completed_requirements": [
+    "separate Direct and Residential count/lifetime/device limits and creation cadence",
+    "Reality SNI scanner and per-profile Flow/SNI/mask/output settings",
+    "remove cross-panel writer serialization with bounded panel ownership",
+    "explicit durable timeout/retry stages",
+    "complete verified native deletion and publication isolation"
+  ]
 }
