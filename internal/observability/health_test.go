@@ -16,6 +16,7 @@ func TestClientProgressReadinessSeparatesIdleGateFailureAndStall(t *testing.T) {
 		want              bool
 	}{
 		{"", 0, 0, false}, {"IDLE", old, fresh, true}, {"GATED", old, fresh, true},
+		{"RETIRED", old, fresh, true}, {"RETIRED", fresh, old, false},
 		{"COMPLETED", old, fresh, true}, {"FAILED", fresh, fresh, false},
 		{"RUNNING", fresh, old, true}, {"RUNNING", old, fresh, false},
 		{"IDLE", fresh, old, false}, {"RUNNING", now.Add(time.Hour).Unix(), fresh, false},

@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "publishing_sql_headroom_fix",
+  "status": "repairing_health_reporting_and_independent_profile_controls",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -67,7 +67,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T05:07:25.747082+00:00",
+  "updated_at": "2026-10-18T05:41:35.544210+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -199,5 +199,22 @@
     "temporary_serving_proofs": 16,
     "final_strategy": "Derive panel concurrency from role pool, serving proofs, one retired proof, role ownership, and four short-query reservations; 18 proofs permit eight two-session panel operations",
     "required_release_regression": "TestProofPoolFortyPhysicalPinsAndProgress"
+  },
+  "next_requirements": [
+    "separate Direct and Residential count/lifetime/device limits and creation cadence",
+    "Reality SNI scanner and per-profile Flow/SNI/mask/output settings",
+    "remove cross-panel writer serialization with bounded panel ownership",
+    "explicit durable timeout/retry stages",
+    "complete verified native deletion and publication isolation"
+  ],
+  "readiness_defect": {
+    "cause": "legacy client executor reports RETIRED after unified authority; health accepted only IDLE/GATED/COMPLETED",
+    "fix": "accept fresh RETIRED progress; stale RETIRED remains unhealthy",
+    "test": "internal/observability PASS"
+  },
+  "budget_deployment": {
+    "secondary": "cea340f1f23924a4e9a44ed2304226a0f1bd4bfd",
+    "secondary_verified": true,
+    "primary": "pending, combining with readiness repair"
   }
 }

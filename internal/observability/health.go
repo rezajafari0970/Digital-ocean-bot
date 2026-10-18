@@ -94,7 +94,7 @@ func clientProgressReady(metadata []byte, now time.Time) bool {
 	switch m.Client.State {
 	case "RUNNING":
 		return fresh(m.Client.Started)
-	case "IDLE", "GATED", "COMPLETED":
+	case "IDLE", "GATED", "COMPLETED", "RETIRED":
 		return fresh(m.Client.Finished)
 	default:
 		return false
