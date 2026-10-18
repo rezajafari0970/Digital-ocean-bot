@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "bulk_delete_video_followup_validated",
+  "status": "bulk_release_installed_creation_capacity_followup",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -79,7 +79,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T09:58:54.842512+00:00",
+  "updated_at": "2026-10-18T10:49:09.850957+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 32,
@@ -618,5 +618,34 @@
       ],
       "status": "PASS 37 mandatory database/race/native regressions; mobile Chromium; 6 output viewer cases; worker tests"
     }
+  },
+  "resume_20261018": {
+    "at": "2026-10-18T10:49:09.850957+00:00",
+    "installed_source": "dd0f4c3a09f40873a3fe1f0ed84a0a394ce041c8",
+    "installed_public": "033bf2c46dd01564dd8a27034629c10bfe819d4c",
+    "hosts": {
+      "primary": "exact binaries, five readiness samples, policy and credential preservation PASS",
+      "secondary": "exact binaries, five readiness samples, preservation PASS"
+    },
+    "prior_delete_cohort": {
+      "profiles_completed": 14,
+      "native_remaining": 0,
+      "removed": 1101,
+      "recorded_at": "2026-10-18T10:43:19Z"
+    },
+    "current_user_profiles": 3,
+    "creation_followup": "8 creation lanes share the unchanged SQL-derived panel ceiling; 8 delete and 8 verify lanes retain independent class ceilings",
+    "validation": "cmd/worker and internal/worker race PASS; complete publisher gate pending",
+    "openai_api_calls": 0,
+    "evidence": [
+      "/root/backups/dob-bulk-resume-20261018/verify.json",
+      ".local/resume-bulk-final.json",
+      ".local/resume-create-lanes-tests.log"
+    ],
+    "remaining": [
+      "publish and install eight creation lanes",
+      "finish concurrent live create/delete acceptance",
+      "measure sustained nonempty output coverage and any remaining fleet errors"
+    ]
   }
 }

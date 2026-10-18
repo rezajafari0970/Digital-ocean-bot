@@ -117,3 +117,9 @@ At 09:41:21.795273 UTC a separate authenticated batch request marked all fourtee
 The 13:15 phone recording exposes a status defect: deletion increments the desired revision, which made server details incorrectly say Applying saved changes. API details now carry explicit removal intent; the view distinguishes queued removal, actual deletion and confirmed absence, ignoring obsolete connection errors during deletion. Output keeps valid freshly fetched protocol entries if another line is malformed, reports the omitted entries separately, and still clears credentials on failed requests, hidden pages and authoritative empty responses.
 
 Before the bulk deletion, the four-minute observation had 975 fresh proofs out of 1134 eligible listeners and 1864 exported links. Complete sustained fleet coverage was not established; zero eligible profiles after deletion must not be reported as 100% coverage. No 99% speedup or permanent absence of faults is claimed.
+
+## 2026-10-18 continuation: bounded creation capacity
+
+Bulk release 033bf2c (source dd0f4c3) is installed on both hosts with exact live binary hashes, five readiness samples and preserved policies/credentials. The previous fourteen-profile removal completed: zero native references remain and 1101 listeners carry confirmed deletion. Three subsequently created user profiles are preserved.
+
+Fleet creation still had only four lanes while deletion/proof had eight. Creation now has eight independently supervised lanes under the same SQL-derived shared admission ceiling; this does not increase the total admitted long-running work or permit concurrent writers on one panel. Worker/work-budget race suites passed. Publication gates and live acceptance remain required; no fleet-wide speed percentage is asserted.
