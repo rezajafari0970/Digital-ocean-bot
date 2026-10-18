@@ -1,0 +1,2870 @@
+{
+  "recorded_at": "2026-10-18T19:04:32.135220+00:00",
+  "status": "WEIGHTED_CANDIDATE_REJECTED_EXACTLY_RESTORED_UPSTREAM_TRANSFER_OPEN",
+  "release": "16f3b682f638fba5021588fe9818b91db917ef66",
+  "source": "2c49caa7fdcae4867b54fe7ac1ceb1ec5259283d",
+  "production_source_changes": false,
+  "new_runtime_deployments": 0,
+  "external_openai_api_calls": 0,
+  "plan": {
+    "created_at": "2026-10-18T18:49:26.007277+00:00",
+    "source": "2c49caa7fdcae4867b54fe7ac1ceb1ec5259283d",
+    "windows": 3,
+    "cases_per_window": 4,
+    "request_deadline_seconds": 8,
+    "connect_deadline_seconds": 4,
+    "max_concurrent_per_node": 2,
+    "maximum_download_bytes": 1048576,
+    "candidate": {
+      "fast_share": 90,
+      "fast_count": 1,
+      "probe_interval_seconds": 10,
+      "probe_timeout_ms": 5000,
+      "max_rtt_ms": 5000,
+      "dns_mode": "tcp",
+      "gateway_ipv4": false,
+      "tcp_options": false,
+      "tcp_fast_open": false,
+      "keepalive_idle_seconds": 30,
+      "keepalive_interval_seconds": 20,
+      "tcp_user_timeout_ms": 20000,
+      "routing_strategy": "preserve",
+      "buffer_kb": 0,
+      "costs": {
+        "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+        "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+        "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+        "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+        "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+        "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+        "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+        "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+        "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+        "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+        "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+        "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+      }
+    },
+    "acceptance": {
+      "candidate_successes_at_least_baseline": true,
+      "candidate_successes_minimum": 11,
+      "median_improvement_if_baseline_fully_successful": 0.15,
+      "candidate_p90_ceiling": "max(baseline p90*1.2, baseline p90+0.5 seconds)",
+      "direct_and_deny_controls_required": true
+    },
+    "scope": "Fixed static JavaScript transfers only. No ad requests, impressions, clicks, redirects or retries. Native protected client path; not Android SDK load/show latency.",
+    "hypothesis": "Bias one locally alive fast choice using repeated full AdsJS completion evidence, while retaining all endpoints and native fail-closed recovery. Static costs are experimental and can age; no automatic learning or global quarantine is claimed.",
+    "score_rule": "3/3 completion -> 0.25; 2/3 -> 1; 1/3 -> 2; 0/3 -> 4. Frozen before baseline and trial."
+  },
+  "runtime_inspection": [
+    {
+      "proof": {
+        "api_help": {
+          "code": 2,
+          "text": "xray api --help: unknown command\nRun 'xray help api' for usage.\n"
+        },
+        "kernel": {
+          "code": 0,
+          "text": "net.ipv4.tcp_congestion_control = bbr\nnet.ipv4.tcp_available_congestion_control = reno cubic bbr\nnet.ipv4.tcp_rmem = 4096\t87380\t33554432\nnet.ipv4.tcp_wmem = 4096\t87380\t33554432\nnet.ipv4.tcp_moderate_rcvbuf = 1\nnet.ipv4.tcp_fastopen = 1\n"
+        },
+        "version": {
+          "code": 0,
+          "text": "Xray 26.10.10 (Xray, Penetrates Everything.) dob-fm-0.2.3 (go1.27.1 linux/amd64)\nA unified platform for anti-censorship.\n"
+        }
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "qualification_summary": {
+    "0": {
+      "passed": 2,
+      "attempts": 3,
+      "successful_seconds": [
+        7.2022,
+        6.930087
+      ]
+    },
+    "1": {
+      "passed": 1,
+      "attempts": 3,
+      "successful_seconds": [
+        3.93008
+      ]
+    },
+    "2": {
+      "passed": 3,
+      "attempts": 3,
+      "successful_seconds": [
+        6.26128,
+        4.874847,
+        5.845773
+      ]
+    },
+    "3": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "4": {
+      "passed": 1,
+      "attempts": 3,
+      "successful_seconds": [
+        6.535162
+      ]
+    },
+    "5": {
+      "passed": 1,
+      "attempts": 3,
+      "successful_seconds": [
+        4.888179
+      ]
+    },
+    "6": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "7": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "8": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "9": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "10": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    },
+    "11": {
+      "passed": 0,
+      "attempts": 3,
+      "successful_seconds": []
+    }
+  },
+  "qualification_windows": [
+    [
+      {
+        "role": "target",
+        "ssh_success": true,
+        "proof": {
+          "at": "2026-10-18T18:46:45.184048+00:00",
+          "probe_max_concurrency": 3,
+          "proxy_count": 12,
+          "results": [
+            {
+              "at": "2026-10-18T18:46:13.892214+00:00",
+              "slot": 0,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206039,
+              "time_appconnect": 2.125488,
+              "time_starttransfer": 2.769815,
+              "time_total": 7.2022,
+              "speed_download": 28607
+            },
+            {
+              "at": "2026-10-18T18:46:13.893235+00:00",
+              "slot": 1,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206048,
+              "time_appconnect": 2.487036,
+              "time_starttransfer": 3.020543,
+              "time_total": 3.93008,
+              "speed_download": 52428
+            },
+            {
+              "at": "2026-10-18T18:46:13.896753+00:00",
+              "slot": 2,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206117,
+              "time_appconnect": 2.431971,
+              "time_starttransfer": 3.094877,
+              "time_total": 6.26128,
+              "speed_download": 32919
+            },
+            {
+              "at": "2026-10-18T18:46:17.863668+00:00",
+              "slot": 3,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 8259,
+              "time_appconnect": 3.535268,
+              "time_starttransfer": 5.340369,
+              "time_total": 8.001505,
+              "speed_download": 1032
+            },
+            {
+              "at": "2026-10-18T18:46:20.197615+00:00",
+              "slot": 4,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 26729,
+              "time_appconnect": 2.744394,
+              "time_starttransfer": 3.923091,
+              "time_total": 8.000441,
+              "speed_download": 3340
+            },
+            {
+              "at": "2026-10-18T18:46:21.134822+00:00",
+              "slot": 5,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 26729,
+              "time_appconnect": 2.472681,
+              "time_starttransfer": 3.438323,
+              "time_total": 8.000451,
+              "speed_download": 3340
+            },
+            {
+              "at": "2026-10-18T18:46:25.886504+00:00",
+              "slot": 6,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 34839,
+              "time_appconnect": 2.772877,
+              "time_starttransfer": 3.974646,
+              "time_total": 8.00056,
+              "speed_download": 4354
+            },
+            {
+              "at": "2026-10-18T18:46:28.213835+00:00",
+              "slot": 7,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 48590,
+              "time_appconnect": 2.748455,
+              "time_starttransfer": 3.85652,
+              "time_total": 8.000256,
+              "speed_download": 6073
+            },
+            {
+              "at": "2026-10-18T18:46:29.150408+00:00",
+              "slot": 8,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 17083,
+              "time_appconnect": 2.829488,
+              "time_starttransfer": 4.157797,
+              "time_total": 8.000533,
+              "speed_download": 2135
+            },
+            {
+              "at": "2026-10-18T18:46:33.908759+00:00",
+              "slot": 9,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 8259,
+              "time_appconnect": 2.917945,
+              "time_starttransfer": 4.5772,
+              "time_total": 8.00149,
+              "speed_download": 1032
+            },
+            {
+              "at": "2026-10-18T18:46:36.227843+00:00",
+              "slot": 10,
+              "gateway_index": 2,
+              "route": "residential",
+              "success": false,
+              "curl_code": 35,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 2.648042,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:46:37.166196+00:00",
+              "slot": 11,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 156423,
+              "time_appconnect": 2.354285,
+              "time_starttransfer": 3.125941,
+              "time_total": 8.000988,
+              "speed_download": 19550
+            },
+            {
+              "at": "2026-10-18T18:46:38.890077+00:00",
+              "slot": 12,
+              "gateway_index": 3,
+              "route": "direct",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206048,
+              "time_appconnect": 0.07204,
+              "time_starttransfer": 0.110492,
+              "time_total": 0.220418,
+              "speed_download": 934805
+            }
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "role": "target",
+        "ssh_success": true,
+        "proof": {
+          "at": "2026-10-18T18:47:32.984498+00:00",
+          "probe_max_concurrency": 3,
+          "proxy_count": 12,
+          "results": [
+            {
+              "at": "2026-10-18T18:47:01.063903+00:00",
+              "slot": 0,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206058,
+              "time_appconnect": 2.369394,
+              "time_starttransfer": 3.088756,
+              "time_total": 6.930087,
+              "speed_download": 29733
+            },
+            {
+              "at": "2026-10-18T18:47:01.065548+00:00",
+              "slot": 1,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 25351,
+              "time_appconnect": 2.58542,
+              "time_starttransfer": 3.592653,
+              "time_total": 8.0011,
+              "speed_download": 3168
+            },
+            {
+              "at": "2026-10-18T18:47:01.066557+00:00",
+              "slot": 2,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206049,
+              "time_appconnect": 2.015234,
+              "time_starttransfer": 2.510151,
+              "time_total": 4.874847,
+              "speed_download": 42267
+            },
+            {
+              "at": "2026-10-18T18:47:05.974675+00:00",
+              "slot": 3,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 6881,
+              "time_appconnect": 3.553597,
+              "time_starttransfer": 5.523876,
+              "time_total": 8.001612,
+              "speed_download": 859
+            },
+            {
+              "at": "2026-10-18T18:47:08.035021+00:00",
+              "slot": 4,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206057,
+              "time_appconnect": 2.315563,
+              "time_starttransfer": 3.031818,
+              "time_total": 6.535162,
+              "speed_download": 31530
+            },
+            {
+              "at": "2026-10-18T18:47:09.098730+00:00",
+              "slot": 5,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 6881,
+              "time_appconnect": 3.530348,
+              "time_starttransfer": 5.509088,
+              "time_total": 8.000568,
+              "speed_download": 860
+            },
+            {
+              "at": "2026-10-18T18:47:13.995755+00:00",
+              "slot": 6,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 6871,
+              "time_appconnect": 3.616759,
+              "time_starttransfer": 5.783181,
+              "time_total": 8.000079,
+              "speed_download": 858
+            },
+            {
+              "at": "2026-10-18T18:47:14.586940+00:00",
+              "slot": 7,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 6871,
+              "time_appconnect": 3.776457,
+              "time_starttransfer": 5.795621,
+              "time_total": 8.000538,
+              "speed_download": 858
+            },
+            {
+              "at": "2026-10-18T18:47:17.122869+00:00",
+              "slot": 8,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 34845,
+              "time_appconnect": 2.67232,
+              "time_starttransfer": 3.759967,
+              "time_total": 8.000922,
+              "speed_download": 4355
+            },
+            {
+              "at": "2026-10-18T18:47:22.021155+00:00",
+              "slot": 9,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 5503,
+              "time_appconnect": 3.6646,
+              "time_starttransfer": 5.935158,
+              "time_total": 8.000505,
+              "speed_download": 687
+            },
+            {
+              "at": "2026-10-18T18:47:22.601032+00:00",
+              "slot": 10,
+              "gateway_index": 2,
+              "route": "residential",
+              "success": false,
+              "curl_code": 35,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 2.354486,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:47:24.968577+00:00",
+              "slot": 11,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 71149,
+              "time_appconnect": 2.127279,
+              "time_starttransfer": 2.751872,
+              "time_total": 8.001013,
+              "speed_download": 8892
+            },
+            {
+              "at": "2026-10-18T18:47:25.150055+00:00",
+              "slot": 12,
+              "gateway_index": 3,
+              "route": "direct",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206116,
+              "time_appconnect": 0.074602,
+              "time_starttransfer": 0.112173,
+              "time_total": 0.217027,
+              "speed_download": 949725
+            }
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "role": "target",
+        "ssh_success": true,
+        "proof": {
+          "at": "2026-10-18T18:48:05.523995+00:00",
+          "probe_max_concurrency": 3,
+          "proxy_count": 12,
+          "results": [
+            {
+              "at": "2026-10-18T18:47:38.235504+00:00",
+              "slot": 0,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 59073,
+              "time_appconnect": 2.546818,
+              "time_starttransfer": 3.471792,
+              "time_total": 8.000997,
+              "speed_download": 7383
+            },
+            {
+              "at": "2026-10-18T18:47:38.236030+00:00",
+              "slot": 1,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 4.001327,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:47:38.238391+00:00",
+              "slot": 2,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206048,
+              "time_appconnect": 2.17337,
+              "time_starttransfer": 2.818661,
+              "time_total": 5.845773,
+              "speed_download": 35247
+            },
+            {
+              "at": "2026-10-18T18:47:42.269147+00:00",
+              "slot": 3,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 22595,
+              "time_appconnect": 2.568659,
+              "time_starttransfer": 3.497217,
+              "time_total": 8.00078,
+              "speed_download": 2824
+            },
+            {
+              "at": "2026-10-18T18:47:44.114317+00:00",
+              "slot": 4,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 30720,
+              "time_appconnect": 2.69245,
+              "time_starttransfer": 3.819382,
+              "time_total": 8.001083,
+              "speed_download": 3839
+            },
+            {
+              "at": "2026-10-18T18:47:46.269107+00:00",
+              "slot": 5,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206058,
+              "time_appconnect": 2.218776,
+              "time_starttransfer": 2.77429,
+              "time_total": 4.888179,
+              "speed_download": 42154
+            },
+            {
+              "at": "2026-10-18T18:47:50.287152+00:00",
+              "slot": 6,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 4.002115,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:47:51.172981+00:00",
+              "slot": 7,
+              "gateway_index": 0,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 4.002245,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:47:52.131188+00:00",
+              "slot": 8,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 14336,
+              "time_appconnect": 3.297788,
+              "time_starttransfer": 4.758652,
+              "time_total": 8.000362,
+              "speed_download": 1791
+            },
+            {
+              "at": "2026-10-18T18:47:54.307200+00:00",
+              "slot": 9,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 62253,
+              "time_appconnect": 2.300411,
+              "time_starttransfer": 3.054048,
+              "time_total": 8.000671,
+              "speed_download": 7780
+            },
+            {
+              "at": "2026-10-18T18:47:55.189624+00:00",
+              "slot": 10,
+              "gateway_index": 2,
+              "route": "residential",
+              "success": false,
+              "curl_code": 35,
+              "http_code": 0,
+              "size_download": 0,
+              "time_appconnect": 0,
+              "time_starttransfer": 0,
+              "time_total": 2.295056,
+              "speed_download": 0
+            },
+            {
+              "at": "2026-10-18T18:47:57.502247+00:00",
+              "slot": 11,
+              "gateway_index": 1,
+              "route": "residential",
+              "success": false,
+              "curl_code": 28,
+              "http_code": 200,
+              "size_download": 34845,
+              "time_appconnect": 2.574161,
+              "time_starttransfer": 3.668001,
+              "time_total": 8.000389,
+              "speed_download": 4355
+            },
+            {
+              "at": "2026-10-18T18:48:00.149810+00:00",
+              "slot": 12,
+              "gateway_index": 3,
+              "route": "direct",
+              "success": true,
+              "curl_code": 0,
+              "http_code": 200,
+              "size_download": 206056,
+              "time_appconnect": 0.072787,
+              "time_starttransfer": 0.110835,
+              "time_total": 0.212505,
+              "speed_download": 969652
+            }
+          ]
+        }
+      }
+    ]
+  ],
+  "paired_dns": [
+    {
+      "role": "control",
+      "ssh_success": true,
+      "proof": {
+        "at": "2026-10-18T18:48:45.440540+00:00",
+        "core_healthy": true,
+        "max_concurrency": 2,
+        "results": [
+          {
+            "at": "2026-10-18T18:48:21.666171+00:00",
+            "slot": 0,
+            "variant": "inherited",
+            "success": false,
+            "curl_code": 28,
+            "http_code": 200,
+            "size_download": 5503,
+            "time_appconnect": 3.995952,
+            "time_starttransfer": 6.397769,
+            "time_total": 8.000815,
+            "speed_download": 687
+          },
+          {
+            "at": "2026-10-18T18:48:21.666478+00:00",
+            "slot": 0,
+            "variant": "ipv4",
+            "success": false,
+            "curl_code": 28,
+            "http_code": 200,
+            "size_download": 5503,
+            "time_appconnect": 3.989318,
+            "time_starttransfer": 6.439323,
+            "time_total": 8.000654,
+            "speed_download": 687
+          },
+          {
+            "at": "2026-10-18T18:48:29.690456+00:00",
+            "slot": 3,
+            "variant": "ipv4",
+            "success": false,
+            "curl_code": 28,
+            "http_code": 200,
+            "size_download": 25351,
+            "time_appconnect": 2.768591,
+            "time_starttransfer": 4.045176,
+            "time_total": 8.000488,
+            "speed_download": 3168
+          },
+          {
+            "at": "2026-10-18T18:48:29.690892+00:00",
+            "slot": 3,
+            "variant": "inherited",
+            "success": false,
+            "curl_code": 28,
+            "http_code": 200,
+            "size_download": 25351,
+            "time_appconnect": 2.512689,
+            "time_starttransfer": 3.752439,
+            "time_total": 8.000572,
+            "speed_download": 3168
+          },
+          {
+            "at": "2026-10-18T18:48:37.718011+00:00",
+            "slot": 8,
+            "variant": "inherited",
+            "success": false,
+            "curl_code": 28,
+            "http_code": 0,
+            "size_download": 0,
+            "time_appconnect": 0,
+            "time_starttransfer": 0,
+            "time_total": 4.002155,
+            "speed_download": 0
+          },
+          {
+            "at": "2026-10-18T18:48:37.718672+00:00",
+            "slot": 8,
+            "variant": "ipv4",
+            "success": true,
+            "curl_code": 0,
+            "http_code": 200,
+            "size_download": 206058,
+            "time_appconnect": 2.421882,
+            "time_starttransfer": 3.091904,
+            "time_total": 6.571298,
+            "speed_download": 31357
+          },
+          {
+            "at": "2026-10-18T18:48:41.746446+00:00",
+            "slot": 10,
+            "variant": "ipv4",
+            "success": false,
+            "curl_code": 35,
+            "http_code": 0,
+            "size_download": 0,
+            "time_appconnect": 0,
+            "time_starttransfer": 0,
+            "time_total": 1.339917,
+            "speed_download": 0
+          },
+          {
+            "at": "2026-10-18T18:48:43.104127+00:00",
+            "slot": 10,
+            "variant": "inherited",
+            "success": false,
+            "curl_code": 35,
+            "http_code": 0,
+            "size_download": 0,
+            "time_appconnect": 0,
+            "time_starttransfer": 0,
+            "time_total": 2.308667,
+            "speed_download": 0
+          }
+        ]
+      }
+    }
+  ],
+  "comparison": {
+    "baseline": {
+      "summary": {
+        "target": {
+          "attempts": 12,
+          "completed": 0
+        },
+        "control": {
+          "attempts": 12,
+          "completed": 0
+        }
+      },
+      "results": [
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:31.134089+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 24786,
+          "speed_download": 3097,
+          "success": false,
+          "time_appconnect": 2.458627,
+          "time_connect": 0.000398,
+          "time_starttransfer": 3.44492,
+          "time_total": 8.000783,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:39.152830+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 6881,
+          "speed_download": 859,
+          "success": false,
+          "time_appconnect": 3.501384,
+          "time_connect": 0.000945,
+          "time_starttransfer": 5.423452,
+          "time_total": 8.001249,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:47.179973+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 9.9e-05,
+          "time_starttransfer": 0,
+          "time_total": 2.260362,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:47.180430+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000139,
+          "time_starttransfer": 0,
+          "time_total": 0.770517,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:31.689785+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 21217,
+          "speed_download": 2651,
+          "success": false,
+          "time_appconnect": 2.57473,
+          "time_connect": 0.00029,
+          "time_starttransfer": 3.631475,
+          "time_total": 8.000677,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:39.706533+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000158,
+          "time_starttransfer": 0,
+          "time_total": 0.733612,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:40.458566+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 11015,
+          "speed_download": 1376,
+          "success": false,
+          "time_appconnect": 3.181386,
+          "time_connect": 0.000811,
+          "time_starttransfer": 4.713437,
+          "time_total": 8.001117,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:40.460394+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 14336,
+          "speed_download": 1791,
+          "success": false,
+          "time_appconnect": 2.805417,
+          "time_connect": 0.000421,
+          "time_starttransfer": 4.143369,
+          "time_total": 8.001109,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:54.916687+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 59497,
+          "speed_download": 7376,
+          "success": false,
+          "time_appconnect": 2.239073,
+          "time_connect": 0.000113,
+          "time_starttransfer": 2.922326,
+          "time_total": 8.065634,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:03.054742+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.002034,
+          "time_starttransfer": 0,
+          "time_total": 4.002457,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:50:07.118232+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 33467,
+          "speed_download": 4182,
+          "success": false,
+          "time_appconnect": 2.952853,
+          "time_connect": 0.001918,
+          "time_starttransfer": 4.01484,
+          "time_total": 8.000719,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:07.119288+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 33467,
+          "speed_download": 4182,
+          "success": false,
+          "time_appconnect": 2.946184,
+          "time_connect": 0.001384,
+          "time_starttransfer": 3.992848,
+          "time_total": 8.001151,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:54.705083+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000318,
+          "time_starttransfer": 0,
+          "time_total": 2.308188,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:57.031638+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000195,
+          "time_starttransfer": 0,
+          "time_total": 0.748915,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:49:57.799119+00:00",
+          "content_type": null,
+          "curl_code": 35,
+          "http_code": 0,
+          "mode": "concurrent",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000108,
+          "time_starttransfer": 0,
+          "time_total": 2.314225,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:49:57.800852+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 95021,
+          "speed_download": 11876,
+          "success": false,
+          "time_appconnect": 2.226645,
+          "time_connect": 7.6e-05,
+          "time_starttransfer": 2.793468,
+          "time_total": 8.000636,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:50:20.455604+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 5503,
+          "speed_download": 687,
+          "success": false,
+          "time_appconnect": 3.426455,
+          "time_connect": 0.000307,
+          "time_starttransfer": 5.62967,
+          "time_total": 8.001503,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:28.480241+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 11015,
+          "speed_download": 1376,
+          "success": false,
+          "time_appconnect": 3.032148,
+          "time_connect": 0.000531,
+          "time_starttransfer": 4.585592,
+          "time_total": 8.000617,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:50:36.501377+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 8259,
+          "speed_download": 1032,
+          "success": false,
+          "time_appconnect": 3.266075,
+          "time_connect": 8.8e-05,
+          "time_starttransfer": 4.924026,
+          "time_total": 8.000766,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:36.502009+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 8259,
+          "speed_download": 1032,
+          "success": false,
+          "time_appconnect": 3.351219,
+          "time_connect": 0.000504,
+          "time_starttransfer": 5.122833,
+          "time_total": 8.001207,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:50:20.458487+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 12393,
+          "speed_download": 1549,
+          "success": false,
+          "time_appconnect": 2.770651,
+          "time_connect": 0.000357,
+          "time_starttransfer": 4.073412,
+          "time_total": 8.000438,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:28.472722+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 49851,
+          "speed_download": 6230,
+          "success": false,
+          "time_appconnect": 2.218265,
+          "time_connect": 0.000313,
+          "time_starttransfer": 2.76139,
+          "time_total": 8.000597,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:50:36.494533+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 18461,
+          "speed_download": 2307,
+          "success": false,
+          "time_appconnect": 2.40976,
+          "time_connect": 0.002608,
+          "time_starttransfer": 3.345221,
+          "time_total": 8.001202,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:50:36.495126+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 18461,
+          "speed_download": 2307,
+          "success": false,
+          "time_appconnect": 2.349579,
+          "time_connect": 9.9e-05,
+          "time_starttransfer": 3.266054,
+          "time_total": 8.001692,
+          "role": "control",
+          "window": 3
+        }
+      ]
+    },
+    "candidate-compact": {
+      "summary": {
+        "target": {
+          "attempts": 12,
+          "completed": 4
+        },
+        "control": {
+          "attempts": 12,
+          "completed": 3
+        }
+      },
+      "results": [
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:53:35.204356+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000508,
+          "time_starttransfer": 0,
+          "time_total": 4.002236,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:53:39.223028+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000301,
+          "time_starttransfer": 0,
+          "time_total": 4.002444,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:53:43.243566+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 55363,
+          "speed_download": 6919,
+          "success": false,
+          "time_appconnect": 2.342769,
+          "time_connect": 0.000455,
+          "time_starttransfer": 2.959525,
+          "time_total": 8.000473,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:53:43.244060+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131730,
+          "speed_download": 58323,
+          "success": true,
+          "time_appconnect": 1.13559,
+          "time_connect": 0.001316,
+          "time_starttransfer": 1.721471,
+          "time_total": 2.25861,
+          "role": "target",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:53:35.309268+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 206057,
+          "speed_download": 40551,
+          "success": true,
+          "time_appconnect": 3.963527,
+          "time_connect": 0.000154,
+          "time_starttransfer": 4.365066,
+          "time_total": 5.081356,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:53:40.405820+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 47104,
+          "speed_download": 5887,
+          "success": false,
+          "time_appconnect": 2.428804,
+          "time_connect": 0.001321,
+          "time_starttransfer": 3.207678,
+          "time_total": 8.000605,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:53:48.430987+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 206049,
+          "speed_download": 64532,
+          "success": true,
+          "time_appconnect": 1.160502,
+          "time_connect": 0.001227,
+          "time_starttransfer": 1.904885,
+          "time_total": 3.192954,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:53:48.431485+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 22595,
+          "speed_download": 2824,
+          "success": false,
+          "time_appconnect": 2.843242,
+          "time_connect": 7.3e-05,
+          "time_starttransfer": 4.07493,
+          "time_total": 8.000851,
+          "role": "control",
+          "window": 1
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:01.814420+00:00",
+          "content_type": null,
+          "curl_code": 28,
+          "http_code": 0,
+          "mode": "sequential",
+          "size_download": 0,
+          "speed_download": 0,
+          "success": false,
+          "time_appconnect": 0,
+          "time_connect": 0.000501,
+          "time_starttransfer": 0,
+          "time_total": 4.002967,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:05.833946+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 83997,
+          "speed_download": 10498,
+          "success": false,
+          "time_appconnect": 2.532657,
+          "time_connect": 0.000128,
+          "time_starttransfer": 3.502256,
+          "time_total": 8.000789,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:13.852440+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 55363,
+          "speed_download": 6919,
+          "success": false,
+          "time_appconnect": 2.277016,
+          "time_connect": 0.001691,
+          "time_starttransfer": 2.947265,
+          "time_total": 8.000671,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:13.852919+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131658,
+          "speed_download": 23801,
+          "success": true,
+          "time_appconnect": 2.368726,
+          "time_connect": 9.7e-05,
+          "time_starttransfer": 3.075102,
+          "time_total": 5.531574,
+          "role": "target",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:02.183831+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 15705,
+          "speed_download": 1962,
+          "success": false,
+          "time_appconnect": 2.708152,
+          "time_connect": 0.000248,
+          "time_starttransfer": 3.627426,
+          "time_total": 8.000982,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:10.199067+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 14336,
+          "speed_download": 1791,
+          "success": false,
+          "time_appconnect": 2.699308,
+          "time_connect": 0.000147,
+          "time_starttransfer": 4.280192,
+          "time_total": 8.000936,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:18.218058+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 21217,
+          "speed_download": 2651,
+          "success": false,
+          "time_appconnect": 2.700241,
+          "time_connect": 0.001789,
+          "time_starttransfer": 3.822009,
+          "time_total": 8.001067,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:18.218647+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 17083,
+          "speed_download": 2135,
+          "success": false,
+          "time_appconnect": 2.546112,
+          "time_connect": 0.000109,
+          "time_starttransfer": 3.702987,
+          "time_total": 8.000641,
+          "role": "control",
+          "window": 2
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:31.643901+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 22595,
+          "speed_download": 2823,
+          "success": false,
+          "time_appconnect": 2.873476,
+          "time_connect": 0.000193,
+          "time_starttransfer": 4.192316,
+          "time_total": 8.001082,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:39.668272+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 41735,
+          "speed_download": 5216,
+          "success": false,
+          "time_appconnect": 2.927552,
+          "time_connect": 0.001436,
+          "time_starttransfer": 4.013026,
+          "time_total": 8.000452,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:47.700378+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 206058,
+          "speed_download": 40555,
+          "success": true,
+          "time_appconnect": 2.325715,
+          "time_connect": 9.5e-05,
+          "time_starttransfer": 3.053135,
+          "time_total": 5.080862,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:47.701380+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131658,
+          "speed_download": 31553,
+          "success": true,
+          "time_appconnect": 2.170971,
+          "time_connect": 0.00132,
+          "time_starttransfer": 2.742008,
+          "time_total": 4.172568,
+          "role": "target",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:31.641289+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 19839,
+          "speed_download": 2479,
+          "success": false,
+          "time_appconnect": 3.126826,
+          "time_connect": 0.000293,
+          "time_starttransfer": 4.142799,
+          "time_total": 8.001151,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:39.662565+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "sequential",
+          "size_download": 28920,
+          "speed_download": 3614,
+          "success": false,
+          "time_appconnect": 2.907363,
+          "time_connect": 0.000359,
+          "time_starttransfer": 3.940562,
+          "time_total": 8.000356,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "ads",
+          "at": "2026-10-18T18:54:47.686379+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 28,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 24786,
+          "speed_download": 3097,
+          "success": false,
+          "time_appconnect": 2.291489,
+          "time_connect": 0.000498,
+          "time_starttransfer": 3.24083,
+          "time_total": 8.00074,
+          "role": "control",
+          "window": 3
+        },
+        {
+          "asset": "gpt",
+          "at": "2026-10-18T18:54:47.686829+00:00",
+          "content_type": "text/javascript; charset=ISO-8859-1",
+          "curl_code": 0,
+          "http_code": 200,
+          "mode": "concurrent",
+          "size_download": 131730,
+          "speed_download": 39778,
+          "success": true,
+          "time_appconnect": 2.254943,
+          "time_connect": 0.000732,
+          "time_starttransfer": 2.767301,
+          "time_total": 3.311553,
+          "role": "control",
+          "window": 3
+        }
+      ]
+    }
+  },
+  "comparison_by_asset": {
+    "baseline": {
+      "by_asset": {
+        "target/ads/completed": 0,
+        "target/ads/attempts": 6,
+        "target/gpt/completed": 0,
+        "target/gpt/attempts": 6,
+        "control/ads/completed": 0,
+        "control/ads/attempts": 6,
+        "control/gpt/completed": 0,
+        "control/gpt/attempts": 6
+      },
+      "codes": {
+        "target/28": 10,
+        "target/35": 2,
+        "control/28": 8,
+        "control/35": 4
+      }
+    },
+    "candidate-compact": {
+      "by_asset": {
+        "target/ads/completed": 1,
+        "target/ads/attempts": 6,
+        "target/gpt/completed": 3,
+        "target/gpt/attempts": 6,
+        "control/ads/completed": 2,
+        "control/ads/attempts": 6,
+        "control/gpt/completed": 1,
+        "control/gpt/attempts": 6
+      },
+      "codes": {
+        "target/28": 8,
+        "target/0": 4,
+        "control/0": 3,
+        "control/28": 9
+      }
+    }
+  },
+  "applied": {
+    "at": "2026-10-18T18:51:31.026894+00:00",
+    "experiment": {
+      "state": "RUNNING",
+      "deadline": "2026-10-18T19:01:01.060494+00:00"
+    },
+    "assignment": {
+      "config": {
+        "costs": {
+          "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+          "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+          "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+          "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+          "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+          "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+          "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+          "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+          "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+          "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+          "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+          "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+        },
+        "dns_mode": "tcp",
+        "buffer_kb": 0,
+        "fast_count": 1,
+        "fast_share": 90,
+        "max_rtt_ms": 5000,
+        "tcp_options": false,
+        "gateway_ipv4": false,
+        "tcp_fast_open": false,
+        "probe_timeout_ms": 5000,
+        "routing_strategy": "preserve",
+        "tcp_user_timeout_ms": 20000,
+        "keepalive_idle_seconds": 30,
+        "probe_interval_seconds": 10,
+        "keepalive_interval_seconds": 20
+      },
+      "generation": 3,
+      "applied_generation": 3,
+      "verified_at": "2026-10-18T18:51:15.31158+00:00",
+      "last_error": ""
+    }
+  },
+  "candidate_contexts": [
+    {
+      "before": {
+        "at": "2026-10-18T18:53:30.194518+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:53:13.242331+00:00"
+        }
+      },
+      "after": {
+        "at": "2026-10-18T18:53:56.69077+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:53:44.232377+00:00"
+        }
+      }
+    },
+    {
+      "before": {
+        "at": "2026-10-18T18:53:56.736629+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:53:44.232377+00:00"
+        }
+      },
+      "after": {
+        "at": "2026-10-18T18:54:26.5194+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:54:14.434862+00:00"
+        }
+      }
+    },
+    {
+      "before": {
+        "at": "2026-10-18T18:54:26.561135+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:54:14.434862+00:00"
+        }
+      },
+      "after": {
+        "at": "2026-10-18T18:54:55.944559+00:00",
+        "experiment": {
+          "state": "RUNNING",
+          "version": 1,
+          "deadline": "2026-10-18T19:01:01.060494+00:00"
+        },
+        "assignment": {
+          "config": {
+            "costs": {
+              "0e93ed07-3318-42fc-886c-7383cf670617": 1,
+              "1b501e9a-8015-4020-8bea-f67f11407335": 2,
+              "275df9fd-0189-4a34-a716-efd8c7230486": 0.25,
+              "631fa5c1-f557-41d7-817b-9b6e293dd4b9": 4,
+              "87292131-e46b-43e0-a8c7-768a4b57786e": 2,
+              "90015742-6da6-4faa-b1a7-2dbea336894f": 2,
+              "93faef8a-d941-4a67-9b2f-f4084d2774da": 4,
+              "a8087e22-d1ee-417c-b453-cc3709c75fae": 4,
+              "a9fd2638-bc81-4f4f-b2d8-45911de5c035": 4,
+              "baa61b9a-3581-4ba6-a561-079e3a4764b3": 4,
+              "e67fad8c-ca6c-4f0a-9021-e46218cdd93c": 4,
+              "eaa9974a-98a2-4d71-a769-e1bce45ebc83": 4
+            },
+            "dns_mode": "tcp",
+            "buffer_kb": 0,
+            "fast_count": 1,
+            "fast_share": 90,
+            "max_rtt_ms": 5000,
+            "tcp_options": false,
+            "gateway_ipv4": false,
+            "tcp_fast_open": false,
+            "probe_timeout_ms": 5000,
+            "routing_strategy": "preserve",
+            "tcp_user_timeout_ms": 20000,
+            "keepalive_idle_seconds": 30,
+            "probe_interval_seconds": 10,
+            "keepalive_interval_seconds": 20
+          },
+          "generation": 3,
+          "applied_generation": 3,
+          "verified_at": "2026-10-18T18:54:43.971425+00:00"
+        }
+      }
+    }
+  ],
+  "actual_weight_cost_digest_verified": true,
+  "native_selection_before_count": 3,
+  "native_selection_candidate_fast_count": 1,
+  "native_selection_candidate_chose_three_of_three_qualified_endpoint": true,
+  "rejection": {
+    "at": "2026-10-18T18:55:28.991510+00:00",
+    "passed": 4,
+    "attempts": 12,
+    "reason": "Predeclared completion threshold not met; do not publish"
+  },
+  "rollback": {
+    "at": "2026-10-18T18:56:46.636279+00:00",
+    "experiment": {
+      "state": "ROLLED_BACK",
+      "version": 3
+    },
+    "assignment": {
+      "config": null,
+      "generation": 4,
+      "applied_generation": 4,
+      "verified_at": "2026-10-18T18:56:37.634735+00:00",
+      "plan_hash": "040014bf3326f99ec40d7be8672eac5ce1000f745dcc793d929ea8a870b19f32",
+      "route_state": "APPLIED",
+      "target_state": "RESTORED"
+    }
+  },
+  "active_inventory": {
+    "at": "2026-10-18T19:04:32.128032+00:00",
+    "active_experiments": 0,
+    "assigned_configs": 0
+  },
+  "socks_stages": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:57:02.332024+00:00",
+        "results": [
+          {
+            "auth_code": 0,
+            "elapsed_ms": 2618,
+            "http_status": 200,
+            "method": 2,
+            "slot": 0,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 3675,
+            "http_status": 200,
+            "method": 2,
+            "slot": 1,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 3418,
+            "http_status": 200,
+            "method": 2,
+            "slot": 2,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 4277,
+            "http_status": 200,
+            "method": 2,
+            "slot": 3,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 4840,
+            "error_type": "TimeoutError",
+            "method": 2,
+            "slot": 4,
+            "socks_reply": 0,
+            "stage": "tls"
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 2730,
+            "http_status": 200,
+            "method": 2,
+            "slot": 5,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 2784,
+            "http_status": 200,
+            "method": 2,
+            "slot": 6,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 2712,
+            "http_status": 200,
+            "method": 2,
+            "slot": 7,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 3212,
+            "http_status": 200,
+            "method": 2,
+            "slot": 8,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 3846,
+            "http_status": 200,
+            "method": 2,
+            "slot": 9,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 5166,
+            "error_type": "TimeoutError",
+            "method": 2,
+            "slot": 10,
+            "socks_reply": 0,
+            "stage": "http",
+            "tls_verified": true
+          },
+          {
+            "auth_code": 0,
+            "elapsed_ms": 3299,
+            "http_status": 200,
+            "method": 2,
+            "slot": 11,
+            "socks_reply": 0,
+            "stage": "complete",
+            "tls_verified": true
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "provider_sessions_before": [
+    {
+      "proof": {
+        "at": "2026-10-18T18:52:11.756185+00:00",
+        "configured_port": 10000,
+        "results": [
+          {
+            "endpoint": "stats",
+            "numeric": {
+              "concurrent": 52,
+              "stickyPortLimit": 15,
+              "threadLimit": 2100
+            },
+            "request_parameters": {
+              "autoReplace": "none",
+              "country": "TW"
+            },
+            "status": 200
+          },
+          {
+            "endpoint": "v1-beta/sessions",
+            "session_count": 1,
+            "sessions": [
+              {
+                "country": "TW",
+                "online": true,
+                "parameters": {
+                  "autoReplace": "none",
+                  "country": "TW",
+                  "timeout": "15s",
+                  "ttl": "600s"
+                },
+                "port": 10000
+              }
+            ],
+            "status": 200
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "fresh_provider_probe": [
+    {
+      "proof": {
+        "after_count": 1,
+        "assets": [
+          {
+            "content_type": null,
+            "curl_code": 35,
+            "http_code": 0,
+            "label": "ads",
+            "size_download": 0,
+            "time_appconnect": 0,
+            "time_total": 2.374647
+          },
+          {
+            "content_type": null,
+            "curl_code": 35,
+            "http_code": 0,
+            "label": "gpt",
+            "size_download": 0,
+            "time_appconnect": 0,
+            "time_total": 0.743469
+          }
+        ],
+        "at": "2026-10-18T19:00:25.243751+00:00",
+        "before_count": 1,
+        "cleanup_response_success": true,
+        "diagnostic_session_absent": true,
+        "online": true,
+        "original_unchanged_after": true,
+        "original_unchanged_during": true,
+        "production_config_changed": false,
+        "provider_applied": {
+          "autoReplace": "none",
+          "country": "TW",
+          "timeout": "60s",
+          "ttl": "180s"
+        },
+        "seed": {
+          "content_type": "text/html; charset=utf-8",
+          "curl_code": 0,
+          "http_code": 200,
+          "label": "seed",
+          "size_download": 334,
+          "time_appconnect": 0,
+          "time_total": 2.164432
+        },
+        "separate_session_confirmed": true,
+        "sticky_limit": 15
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "first_session_probe_invalid_identity_lookup": [
+    {
+      "proof": {
+        "after_count": 2,
+        "at": "2026-10-18T18:57:53.836746+00:00",
+        "before_count": 1,
+        "diagnostic_session_absent": true,
+        "error_type": "AssertionError",
+        "original_unchanged_after": true,
+        "production_config_changed": false,
+        "seed": {
+          "content_type": "text/html; charset=utf-8",
+          "curl_code": 0,
+          "http_code": 200,
+          "label": "seed",
+          "size_download": 334,
+          "time_appconnect": 0,
+          "time_total": 1.575393
+        },
+        "separate_session_confirmed": false,
+        "sticky_limit": 15
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "first_session_cleanup": [
+    {
+      "proof": {
+        "after": [
+          {
+            "id_contains_marker": false,
+            "parameter_keys": [
+              "autoReplace",
+              "country",
+              "timeout",
+              "ttl"
+            ],
+            "parameters": {
+              "autoReplace": "none",
+              "country": "TW",
+              "timeout": "15s",
+              "ttl": "600s"
+            },
+            "port": 10000,
+            "session_parameter_matches": false
+          }
+        ],
+        "at": "2026-10-18T18:59:29.877716+00:00",
+        "at_end": "2026-10-18T18:59:32.739706+00:00",
+        "before": [
+          {
+            "id_contains_marker": true,
+            "parameter_keys": [
+              "autoReplace",
+              "country",
+              "timeout",
+              "ttl"
+            ],
+            "parameters": {
+              "autoReplace": "none",
+              "country": "TW",
+              "timeout": "60s",
+              "ttl": "180s"
+            },
+            "port": 10000,
+            "session_parameter_matches": false
+          },
+          {
+            "id_contains_marker": false,
+            "parameter_keys": [
+              "autoReplace",
+              "country",
+              "timeout",
+              "ttl"
+            ],
+            "parameters": {
+              "autoReplace": "none",
+              "country": "TW",
+              "timeout": "15s",
+              "ttl": "600s"
+            },
+            "port": 10000,
+            "session_parameter_matches": false
+          }
+        ],
+        "original_identity_preserved": true,
+        "original_session_present_before": true,
+        "production_config_changed": false,
+        "release_success": true
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "collector_correction": {
+    "at": "2026-10-18T18:53:30.111025+00:00",
+    "reason": "Target JSON exceeded the diagnostic SSH output budget after per-proxy costs were included. Original first window retained as invalid; target transfer outcomes unavailable, not counted as successes.",
+    "original": [
+      {
+        "role": "target",
+        "valid": false
+      },
+      {
+        "role": "control",
+        "valid": true
+      }
+    ],
+    "next": "Three fresh complete comparison windows with cost count and canonical digest instead of full repeated cost entries. Same candidate, limits, targets and acceptance thresholds. No production mutation replay."
+  },
+  "invalid_first_weighted_window": [
+    {
+      "proof": "invalid proof",
+      "ssh_success": true,
+      "stderr_bytes": 0
+    },
+    {
+      "proof": {
+        "at": "2026-10-18T18:52:15.249477+00:00",
+        "core_healthy": true,
+        "policy": {},
+        "pool": [
+          {
+            "strategy": {
+              "settings": {
+                "expected": 4,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "settings": {
+                "expected": 12,
+                "maxRTT": "3s"
+              },
+              "type": "leastLoad"
+            }
+          },
+          {
+            "strategy": {
+              "type": "random"
+            }
+          }
+        ],
+        "probe": {
+          "destination": "https://connectivitycheck.gstatic.com/generate_204",
+          "httpMethod": "HEAD",
+          "interval": "10s",
+          "sampling": 1,
+          "timeout": "3s"
+        },
+        "proxy_sockopts": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "results": [
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:51:51.171103+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "sequential",
+            "size_download": 2747,
+            "speed_download": 343,
+            "success": false,
+            "time_appconnect": 3.930361,
+            "time_connect": 0.000397,
+            "time_starttransfer": 6.634866,
+            "time_total": 8.000643
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:51:59.189581+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "sequential",
+            "size_download": 25351,
+            "speed_download": 3168,
+            "success": false,
+            "time_appconnect": 2.3096,
+            "time_connect": 0.000368,
+            "time_starttransfer": 3.351922,
+            "time_total": 8.000497
+          },
+          {
+            "asset": "ads",
+            "at": "2026-10-18T18:52:07.213504+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 17083,
+            "speed_download": 2135,
+            "success": false,
+            "time_appconnect": 3.29411,
+            "time_connect": 0.000187,
+            "time_starttransfer": 4.754239,
+            "time_total": 8.000163
+          },
+          {
+            "asset": "gpt",
+            "at": "2026-10-18T18:52:07.214059+00:00",
+            "content_type": "text/javascript; charset=ISO-8859-1",
+            "curl_code": 28,
+            "http_code": 200,
+            "mode": "concurrent",
+            "size_download": 34845,
+            "speed_download": 4354,
+            "success": false,
+            "time_appconnect": 2.385274,
+            "time_connect": 0.000648,
+            "time_starttransfer": 3.32285,
+            "time_total": 8.002055
+          }
+        ]
+      },
+      "ssh_success": true,
+      "stderr_bytes": 0
+    }
+  ],
+  "closing_primary": {
+    "at": "2026-10-18T19:02:29.301980+00:00",
+    "commit": "16f3b682f638fba5021588fe9818b91db917ef66",
+    "schema": "000187_profile_client_confirmation",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-18T19:02:29.337357187Z"
+    },
+    "checks": {
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "accounts_preserved_except_previously_acknowledged_purge": true,
+      "retained_pins_preserved_or_verified_apply": true,
+      "legacy_policy_unchanged": true,
+      "profile_policy_preserved_except_journaled_delete": true,
+      "profile_credentials_preserved_and_native_identity_or_provider_retirement_verified": true,
+      "new_native_ids_journal_confirmed": true
+    },
+    "retained_pins": 441,
+    "expired_pins": 0,
+    "readiness_samples": 5,
+    "verified_transport_changes": 0
+  },
+  "closing_secondary": {
+    "at": "2026-10-18T19:02:24.126213+00:00",
+    "release": "16f3b682f638fba5021588fe9818b91db917ef66",
+    "readiness": "ready",
+    "three_services_active": true,
+    "exact_binary_hashes": true,
+    "unexpected_restarts": 0
+  },
+  "closing_output": {
+    "at": "2026-10-18T19:03:06.064721+00:00",
+    "catalog_seconds": 0.062,
+    "profiles": [
+      {
+        "protocol": "trojan",
+        "port": 500,
+        "state": "retrying",
+        "eligible": 77,
+        "verified": 76,
+        "pending": 3,
+        "blocked": 2,
+        "ready": 74,
+        "published": 150,
+        "target": 154
+      },
+      {
+        "protocol": "vless",
+        "port": 443,
+        "state": "retrying",
+        "eligible": 77,
+        "verified": 76,
+        "pending": 3,
+        "blocked": 2,
+        "ready": 74,
+        "published": 150,
+        "target": 154
+      },
+      {
+        "protocol": "vless",
+        "port": 8443,
+        "state": "retrying",
+        "eligible": 77,
+        "verified": 76,
+        "pending": 2,
+        "blocked": 1,
+        "ready": 75,
+        "published": 151,
+        "target": 154
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-18T19:03:06.15971+00:00",
+      "proof_age": {
+        "under_5m": 228,
+        "over_5m": 0,
+        "never": 3,
+        "median_seconds": 109.3008825,
+        "max_seconds": 243.143811
+      },
+      "routing_age": {
+        "under_60s": 79,
+        "over_60s": 0,
+        "median_seconds": 15.905204
+      },
+      "sql": {
+        "active": 1,
+        "idle": 56,
+        "idle in transaction": 1
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.046,
+        "status": 200,
+        "bytes": 100772,
+        "lines": 451
+      }
+    }
+  },
+  "limits": [
+    "Measurements use static resources, not real ad impressions or app show-rate.",
+    "Initial weighted target window had four unavailable transfer outcomes due diagnostic output truncation. Original record retained; three new valid comparison windows recorded separately.",
+    "The first temporary provider-session lookup incorrectly assumed a bare session name. Its absent=true field is not valid evidence; follow-up used the observed port-name format, released exactly the diagnostic selector and verified original identity.",
+    "No DNS speed claim from one four-pair sample; destination wire DNS behavior was not independently instrumented.",
+    "All diagnostic sessions released; original provider identity and policies preserved. No provider plan purchase, production endpoint import, original-session release or fleet publication."
+  ],
+  "remaining": [
+    "Reliable fast Residential full-body delivery",
+    "Complete Config/Output acceptance",
+    "Actual client-side ad load/show performance, unmeasured in this server-only task"
+  ],
+  "evidence": [
+    {
+      "file": "after-start-status.json",
+      "sha256": "f4e7e0e522f6cad8e1654853ae30f757620a71ba2dc8d5a7e74efe3640b1e41c"
+    },
+    {
+      "file": "applied-observation.json",
+      "sha256": "e151e053a9265d72624e947529c0414b52a94444ff8e1f47dd6666fac81f5a23"
+    },
+    {
+      "file": "baseline-1.json",
+      "sha256": "c88e4b29ab342de175cbea6fe79e4b782e8dc8fba698be02073b314dae719026"
+    },
+    {
+      "file": "baseline-2.json",
+      "sha256": "baff281d27698ab9eede136cda32ca8250e6b9b0f60b2393adb958becc6ba1f8"
+    },
+    {
+      "file": "baseline-3.json",
+      "sha256": "27bb97e81babd7526870603b6889ca08db9efed56005a52bf5fc43c60867b85d"
+    },
+    {
+      "file": "candidate-1.json",
+      "sha256": "555987d64f1b5c834007cf3158246b7cce7937a70782be93782ca28a481e08d5"
+    },
+    {
+      "file": "candidate-compact-1-context.json",
+      "sha256": "7457200aca0cf8a44bd5a037dd0e0021adff53b1552535b1e9daeaa25d46ba4e"
+    },
+    {
+      "file": "candidate-compact-1.json",
+      "sha256": "4daf460736e45e1e291ddd61a467ebf1cf6e183421de923a5a0db77ab8200d56"
+    },
+    {
+      "file": "candidate-compact-2-context.json",
+      "sha256": "5a336cbe5f50f6e9f45ca8ac112a704994ab26ba426fd5d1486016955af3a21d"
+    },
+    {
+      "file": "candidate-compact-2.json",
+      "sha256": "a37206714a145e41a34f677c9248d8d56e6a104b5e37d5a098bbddf1fb93ab5b"
+    },
+    {
+      "file": "candidate-compact-3-context.json",
+      "sha256": "7eeddc4e805e32ed9ef89521b291a382ec0bf3f78573b709ffd6706ca61cc7b6"
+    },
+    {
+      "file": "candidate-compact-3.json",
+      "sha256": "b17e692aee561eff9c5e02e4810fa4e21740c0006455d39e02ad929d38b0933f"
+    },
+    {
+      "file": "collector-correction.json",
+      "sha256": "0e188db67f0380e4ad64f38f8e9f2825995c05dbff9ae7889d245b7edbf8c603"
+    },
+    {
+      "file": "comparison-summary.json",
+      "sha256": "666102b6302af13f50693fbfd1ade5ce9d1c5bb32a8dadebc2367fa14532f42b"
+    },
+    {
+      "file": "dns-pair-1.json",
+      "sha256": "b3ea7533259f26d61bd9198079adcb5c843bcfa639230ddc85c6a6ac0e285d10"
+    },
+    {
+      "file": "final-canary-renewal-scope.json",
+      "sha256": "932432bdaab1f586823d43cf01f0e021a27ed216dfeb089fbcea4edfe31c2d0f"
+    },
+    {
+      "file": "final-verified-account-purge-exceptions.json",
+      "sha256": "ce7d8c0403d6ef6b9de37211c0b6ffd1ce1251c95b9c6601bd63ce38cf7314c0"
+    },
+    {
+      "file": "final-verified-profile-delete-exceptions.json",
+      "sha256": "374f2d1f4a434ce2351ae9345f101b42939486ec9254b187895bb1dbee8c0941"
+    },
+    {
+      "file": "final-verify.json",
+      "sha256": "75706ad3625071dc26b4e814a54b8a694d33ebc7d8716497584925955ccb3026"
+    },
+    {
+      "file": "fresh-provider-cleanup.json",
+      "sha256": "4bddde0bfe58af9ceeff16a9514777d3762bf3bfd95bcc4a76bcb8e6e88732af"
+    },
+    {
+      "file": "fresh-provider-probe-v2.json",
+      "sha256": "013c43e22d5dac4c87a0553fbec0ad788fcd65201154eaf9a5f00116df9a0242"
+    },
+    {
+      "file": "fresh-provider-probe.json",
+      "sha256": "3a4f2148b0723a2211ce2fd9a0ce6364ecc0d07a978d4e6c0d531eed7011d3fd"
+    },
+    {
+      "file": "fresh-session-intent-v2.json",
+      "sha256": "74f7998ad6da69a6be5f34efe38612375a28cd425430dce42cd767ad9aaef643"
+    },
+    {
+      "file": "fresh-session-intent.json",
+      "sha256": "04fe71c963ae04c09c98e8669fb5fd5493431634fcb40dd01501ec136c526127"
+    },
+    {
+      "file": "inspection.json",
+      "sha256": "41ce75f3e08878354020004fd357c9bfabb8be0e08a2514ec36c1cdc4a187526"
+    },
+    {
+      "file": "plan.json",
+      "sha256": "71d6cb25f7b7bec103e39a0d7014084da647d43a30dd2d725472b7fe5a84f01b"
+    },
+    {
+      "file": "provider-sessions.json",
+      "sha256": "67b1bc30cc983d5686d7d3ba4a0372e1580e89b235e454394014e4e0b21c2d6f"
+    },
+    {
+      "file": "proxy-metadata.json",
+      "sha256": "1a40b93866a2e060326718d828f3dd15a1d24040873dc92b17b12f7404367e84"
+    },
+    {
+      "file": "qualification-1.json",
+      "sha256": "e68059018d62b5703132a08e0d3f7c68280cac840c17eba1e9710f78718e23b3"
+    },
+    {
+      "file": "qualification-2.json",
+      "sha256": "057303ae9e5d1359f9aacf0422bc7e24edc34c38bf136381b6174b2654337221"
+    },
+    {
+      "file": "qualification-3.json",
+      "sha256": "f73671b033ba242fee5230a39acab108a705144386a680ed8ffc92753e37d851"
+    },
+    {
+      "file": "qualification-plan.json",
+      "sha256": "0c675c2e20946ea98eaa0a4ab017b3efcb1ae2859955243c2601883933922d66"
+    },
+    {
+      "file": "qualification-summary.json",
+      "sha256": "79c5df2e6970038657c58bdaf4fe17ba4b1a5f396f68c11c4c5855583a0354b2"
+    },
+    {
+      "file": "rejection.json",
+      "sha256": "9914ff8ff018c854eda3d9d1b649f47ebc4b5d179e8d03def6ec7b7bee0d7622"
+    },
+    {
+      "file": "rollback-observation.json",
+      "sha256": "3c6f006ef666a9ab6d0c998e53420eec975aad3c693ffbd1172a0d8faa3f01ec"
+    },
+    {
+      "file": "rollback-receipt.json",
+      "sha256": "4e9f088b448c082be29fa96db0ac1c6c1630be46d9a9763ca777d21fc840ddbe"
+    },
+    {
+      "file": "rollback-request.json",
+      "sha256": "3e0ad00951bc3b68613b7c1e52d481677d7c7ead57c76a8a56d2f75e7bbaf8e9"
+    },
+    {
+      "file": "selection-before.json",
+      "sha256": "9afaff90dfdb320ed74afa426c0fdc22653d2da4895e32b879fdad6b60907307"
+    },
+    {
+      "file": "selection-weighted.json",
+      "sha256": "ee79bf7acbf8cffea81a888d27fae9f17f2759c03684ff0be2f659c7ab711a89"
+    },
+    {
+      "file": "socks-stage.json",
+      "sha256": "ced96791cdc1b54f8265c14de2ff1ce6c572e0cce2cee6397d1c7fae9a1a561f"
+    },
+    {
+      "file": "start-receipt.json",
+      "sha256": "e717a9ffefa99a6fe96941768a0458a16a5153c500d185c1199e613ccc6e9503"
+    },
+    {
+      "file": "start-request.json",
+      "sha256": "ff6c29cb395529e35d5a71e826065634054afbe2af08fccd99773b4be4ca40ce"
+    }
+  ]
+}

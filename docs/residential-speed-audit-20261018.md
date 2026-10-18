@@ -50,3 +50,8 @@ Machine-readable observations and evidence digests: docs/development-jobs/reside
 Provider API references:
 - https://help.proxyrack.com/en/articles/5829914-get-current-thread-usage
 - https://help.proxyrack.com/en/articles/5741065-is-there-any-thread-simultaneous-connection-limit-for-residential-proxies
+
+
+## Later server-only continuation
+
+See [the weighted-selection and provider-timeout continuation](residential-transport-audit-20261018.md). The later trial also failed acceptance and was fully restored; both temporary provider sessions were cleaned up. Latest output checkpoint and detailed limits are in that report.
