@@ -12,7 +12,7 @@ The count is per routing class per server. Direct and Residential remain separat
 
 - Desired state, applied native state, runtime verification and published output are separate recorded stages.
 - Every profile/server pair has an advisory lease. Panel mutations use the existing panel lock and serialized admission gate.
-- Atomic due-row claims and attempt-time ordering distribute work fairly across profiles and servers.
+- Atomic due-row claims prioritize the earliest due work, then the oldest attempt, distributing retries fairly across profiles and servers. Status and enrollment use the same eligibility predicate, including servers near the end of their lifetime.
 - Prepared and sent mutations freeze the exact specification, membership and credential reference. Lost responses trigger fresh observation before any further mutation.
 - Native confirmation is persisted before connection proof. A slow connection test does not repeat creation or monopolize the creation lanes.
 - Updates and deletion verify the owned native identity and a hash of sibling listeners. Foreign changes block only the affected operation.

@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "rollout",
+  "status": "retiring_legacy",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -48,11 +48,11 @@
     },
     {
       "name": "publish_and_rollout",
-      "status": "in_progress"
+      "status": "verified_on_both_hosts"
     },
     {
       "name": "retire_legacy_and_verify",
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
   "design": [
@@ -63,14 +63,14 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T04:29:32.463935+00:00",
+  "updated_at": "2026-10-18T04:41:33.268265+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 31,
       "skipped": 0,
       "result": "PASS"
     },
-    "production_deployed": false,
+    "production_deployed": true,
     "previous_configs_deleted": false,
     "full_go_test": "PASS",
     "go_vet": "PASS",
@@ -101,8 +101,23 @@
       ],
       "published": 2,
       "ready": 2,
-      "resize": "in_progress"
+      "resize": "PASS: VLESS count 1 to 2, sibling SS remained 1",
+      "delete": "PASS: both profiles fully retired, native IDs absent and owned clients zero"
+    },
+    "deployment": {
+      "primary": "PASS: manifest, live binaries, five readiness samples, preservation with exact journaled concurrent deletions",
+      "secondary": "PASS: manifest, live binaries, five readiness samples, preservation"
     }
   },
-  "first_release": "b2922aa2e3b435fe6514f277bdc75bc6d4c6db7e"
+  "first_release": "b2922aa2e3b435fe6514f277bdc75bc6d4c6db7e",
+  "final_release": "511137a18996759fc854414d90e30e00470b673d",
+  "final_code_commit": "f365c9aed85655c9d6f4c5176c5aa4f76877078e",
+  "retirement": {
+    "job_id": "4bda43a9-f1ac-4d19-9a93-235b8410bf26",
+    "activated_at": "2026-10-18T04:40:51.195445Z",
+    "targets": 78,
+    "state": "RUNNING",
+    "backup_bytes": 292464132,
+    "backup_archive_readable": true
+  }
 }
