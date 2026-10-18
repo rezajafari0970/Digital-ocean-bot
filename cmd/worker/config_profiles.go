@@ -15,8 +15,11 @@ import (
 
 func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sanaei.RuntimeManager, budget *worker.WorkBudget) {
 	create := worker.NewWorkClass(budget, 2)
-	verify := worker.NewWorkClass(budget, 4)
-	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3"} {
+	// Two full-fleet profiles require more than four lanes to renew real
+	// per-class traffic proofs within the five-minute output freshness fence.
+	// The shared ten-slot budget still bounds total panel work.
+	verify := worker.NewWorkClass(budget, 8)
+	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7"} {
 		modules.Add(worker.RolePanels, name, func(ctx context.Context) {
 			service := configplane.Service{DB: a.DB, Secrets: a.Container.Secrets, Runtimes: rt, SSH: provisioning.SSHClient{OutputLimit: 16384, Timeout: 420 * time.Second, HostKeys: provisioning.SQLHostKeyPins{DB: a.DB}}}
 			ticker := time.NewTicker(time.Second)

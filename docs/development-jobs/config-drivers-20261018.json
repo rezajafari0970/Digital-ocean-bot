@@ -35,7 +35,7 @@
     "Keep cleanup, ownership, fresh route proof and output scope fences",
     "No OpenAI API calls"
   ],
-  "updated_at": "2026-10-18T01:22:44.634654+00:00",
+  "updated_at": "2026-10-18T01:28:26.125970+00:00",
   "release_gate_findings": [
     {
       "finding": "Worker supervision policy and role inventory lacked new profile modules",
@@ -52,6 +52,10 @@
     {
       "finding": "Native profile reconciliation held the shared writer during read-only authenticated traffic verification; a pending Reality client creation could be delayed by the fleet queue.",
       "result": "SENT recovery is observation-only without the shared writer; successful native writes release it before traffic proof while retaining the panel lock. Database regression checks writes retain ownership, proofs release it, and uncertain writes recover under an unrelated writer without another POST."
+    },
+    {
+      "finding": "Two fleet profiles require roughly 150 authenticated verifications; measured proofs averaged 9-12 seconds, exceeding the five-minute freshness budget with four lanes.",
+      "result": "Eight supervised verification lanes share the existing ten-slot panel budget. Creation remains capped at two and native writes remain globally serialized. Freshness checks are unchanged."
     }
   ],
   "release_attempt": {
