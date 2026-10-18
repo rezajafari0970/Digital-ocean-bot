@@ -47,6 +47,16 @@ func subset(got, want any) bool {
 // Observe requires the durable ownership name, optional native ID, exact client
 // membership and desired transport. It never adopts an arbitrary matching port.
 func Observe(raws []json.RawMessage, desired map[string]any, remote int64, policies ...Credentials) (int64, error) {
+	return observe(raws, desired, remote, false, policies...)
+}
+
+// ObservePendingFlow checks an already-journaled native write before its separate
+// global-client Flow SET. Only owned policy-managed Flow may differ; identity,
+// membership, transport and all other limits retain strict checks.
+func ObservePendingFlow(raws []json.RawMessage, desired map[string]any, remote int64, policies Credentials) (int64, error) {
+	return observe(raws, desired, remote, true, policies)
+}
+func observe(raws []json.RawMessage, desired map[string]any, remote int64, pendingFlow bool, policies ...Credentials) (int64, error) {
 	want := normalized(desired).(map[string]any)
 	globalPolicy := map[string]bool{}
 	for _, creds := range policies {
@@ -139,6 +149,10 @@ func Observe(raws []json.RawMessage, desired map[string]any, remote int64, polic
 					if globalPolicy[c["id"].(string)] {
 						delete(c, "limitHwid")
 						delete(g, "limitHwid")
+					}
+					if pendingFlow && globalPolicy[c["id"].(string)] {
+						delete(c, "flow")
+						delete(g, "flow")
 					}
 					if !ok || !subset(g, c) {
 						return 0, errors.New("profile_client_identity_changed")

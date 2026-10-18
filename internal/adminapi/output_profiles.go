@@ -73,7 +73,7 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 				continue
 			}
 			var owned bool
-			e = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_clients WHERE profile_id=$1 AND panel_id=$2 AND client_id=$3 AND email=$4 AND route_class=$5)", p.ID, panel, cl.ID, cl.Email, cl.Class).Scan(&owned)
+			e = s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM config_driver_clients WHERE profile_id=$1 AND panel_id=$2 AND client_id=$3 AND email=$4 AND route_class=$5 AND confirmed)", p.ID, panel, cl.ID, cl.Email, cl.Class).Scan(&owned)
 			if e != nil || !owned {
 				valid = false
 				break
@@ -106,7 +106,7 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 const profileOutputVerified = ` EXISTS(SELECT 1 FROM config_driver_clients dc JOIN config_driver_listeners dl ON dl.profile_id=dc.profile_id AND dl.panel_id=dc.panel_id JOIN config_driver_profiles dp ON dp.id=dc.profile_id
  WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND o.config_profile_id=dp.id AND o.config_profile_revision=dp.revision AND dp.enabled AND dp.delete_requested_at IS NULL AND (dp.fleet OR p.id=ANY(dp.panel_ids))
  AND EXISTS(SELECT 1 FROM config_driver_class_proofs proof WHERE proof.profile_id=dp.id AND proof.panel_id=p.id AND proof.route_class=dc.route_class AND proof.verified_at>now()-interval '5 minutes' AND proof.error_code='')
- AND dc.publish AND (dc.expires_at IS NULL OR dc.expires_at>now())
+ AND dc.confirmed AND dc.publish AND (dc.expires_at IS NULL OR dc.expires_at>now())
  AND COALESCE((dp.class_settings->dc.route_class->>'publish')::boolean,true)
  AND dc.email=cr.email AND dc.route_class=cr.route_class AND dc.route_class=cr.effective_class
  AND rc.enabled AND (rc.fleet OR p.id=ANY(rc.panel_ids)) AND rs.state='APPLIED' AND rs.revision=rc.revision AND cr.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds'

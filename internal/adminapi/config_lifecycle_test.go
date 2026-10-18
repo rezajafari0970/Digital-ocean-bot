@@ -489,6 +489,49 @@ func TestUnifiedProfileCreationIdempotency(t *testing.T) {
 	if code, _ = profileSave(t, api, p, "POST"); code != 409 {
 		t.Fatal("reused request identity changed desired state")
 	}
+
+	t.Run("snapshot batch deletion isolates edits and retries", func(t *testing.T) {
+		sibling := p
+		sibling.RequestID = ""
+		sibling.Name = "Sibling"
+		code, sibling = profileSave(t, api, sibling, "POST")
+		if code != 200 {
+			t.Fatal(code)
+		}
+		request := []profileDeleteItem{{first.ID, first.Revision}, {sibling.ID, sibling.Revision}, {"00000000-0000-0000-0000-000000000001", 1}}
+		sibling.Name = "Concurrent edit"
+		code, sibling = profileSave(t, api, sibling, "PUT")
+		if code != 200 {
+			t.Fatal(code)
+		}
+		late := p
+		late.RequestID = ""
+		late.Name = "Created after selection"
+		code, late = profileSave(t, api, late, "POST")
+		if code != 200 {
+			t.Fatal(code)
+		}
+		body, _ := json.Marshal(map[string]any{"profiles": request})
+		for attempt := 0; attempt < 2; attempt++ {
+			res := httptest.NewRecorder()
+			api.deleteConfigProfiles(res, httptest.NewRequest("POST", "/", bytes.NewReader(body)))
+			var reply struct{ Accepted, Conflicts int }
+			json.Unmarshal(res.Body.Bytes(), &reply)
+			if res.Code != 202 || reply.Accepted != 1 || reply.Conflicts != 2 {
+				t.Fatal("partial deletion", res.Code, res.Body.String())
+			}
+		}
+		for _, id := range []string{sibling.ID, late.ID} {
+			current, e := configplane.Read(context.Background(), db, id)
+			if e != nil || current.DeleteRequestedAt != nil || !current.Enabled {
+				t.Fatal("unselected or edited profile removed", id, e)
+			}
+		}
+		var events int
+		if e := db.QueryRow("SELECT count(*) FROM config_driver_events WHERE profile_id=$1 AND stage='delete_requested'", first.ID).Scan(&events); e != nil || events != 1 {
+			t.Fatal("retry duplicated deletion intent", events, e)
+		}
+	})
 }
 
 func TestUnifiedAuthorityRetiresLegacyWithoutBlockingCompletedPanels(t *testing.T) {
@@ -572,6 +615,13 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 	item = read()
 	if item["ready"] != float64(1) || item["published"] != float64(2) || item["state"] != "ready" {
 		t.Fatal("fresh output count", item)
+	}
+
+	sqlMust(t, db, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class,confirmed) VALUES($1,$2,'pending-reservation','pending-email','DIRECT',false)", p.ID, x.Panel)
+	item = read()
+	stats := item["class_stats"].(map[string]any)["DIRECT"].(map[string]any)
+	if stats["active"] != float64(2) || item["ready"] != float64(1) {
+		t.Fatal("unconfirmed reservation counted as native creation", item)
 	}
 	sqlMust(t, db, "UPDATE output_config_snapshots SET last_seen_at=now()-interval '20 seconds' WHERE config_profile_id=$1", p.ID)
 	item = read()

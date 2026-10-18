@@ -26,7 +26,7 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 	u, err := url.Parse(uri)
 	if err == nil && u.Scheme == "trojan" && u.User != nil && u.Host != "" {
 		q, e := url.ParseQuery(u.RawQuery)
-		if e != nil || q.Get("security") != "tls" || (q.Get("type") != "tcp" && q.Get("type") != "ws" && q.Get("type") != "grpc") {
+		if e != nil || (q.Get("security") != "tls" && !(q.Get("security") == "none" && q.Get("type") == "tcp")) || (q.Get("type") != "tcp" && q.Get("type") != "ws" && q.Get("type") != "grpc") {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {

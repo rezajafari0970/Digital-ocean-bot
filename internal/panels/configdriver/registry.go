@@ -59,12 +59,13 @@ type Credentials struct {
 	ShortID     string           `json:"short_id,omitempty"`
 }
 type Capability struct {
-	ID       string `json:"id"`
-	Protocol string `json:"protocol"`
-	Network  string `json:"network"`
-	Security string `json:"security"`
-	Public   bool   `json:"public"`
-	Reason   string `json:"reason,omitempty"`
+	ID                string `json:"id"`
+	Protocol          string `json:"protocol"`
+	Network           string `json:"network"`
+	Security          string `json:"security"`
+	Public            bool   `json:"public"`
+	Reason            string `json:"reason,omitempty"`
+	ClientRequirement string `json:"client_requirement,omitempty"`
 }
 type Protocol interface {
 	Name() string
@@ -485,7 +486,12 @@ func Builtins() *Registry {
 		add("vmess", n, "tls", true, "")
 		add("trojan", n, "tls", true, "")
 	}
-	add("trojan", "tcp", "none", false, "trojan_plain_tcp_private_network_only")
+	for _, protocol := range []string{"vless", "trojan"} {
+		add(protocol, "tcp", "none", true, "")
+		cap := r.capabilities[key(protocol, "tcp", "none")]
+		cap.ClientRequirement = "plain_tcp_compatible_client"
+		r.capabilities[cap.ID] = cap
+	}
 	add("shadowsocks", "tcp", "none", true, "")
 	return r
 }

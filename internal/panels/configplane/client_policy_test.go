@@ -37,12 +37,12 @@ func TestGlobalPolicyUpdatePreservesNativeFields(t *testing.T) {
 	cl := configdriver.Client{ID: "owned", Email: "email", DeviceLimit: 5, ExpiresAt: 9000, QuotaBytes: 512}
 	current := map[string]any{"uuid": "owned", "email": "email", "password": "secret", "enable": true, "flow": "xtls-rprx-vision", "limitIp": 4, "comment": "retain", "subId": "retain-sub", "allowedIPs": "192.0.2.1, 192.0.2.2", "limitHwid": 2, "totalGB": 10, "expiryTime": 100}
 	got := globalPolicyPayload(current, cl)
-	for _, key := range []string{"email", "password", "enable", "flow", "limitIp", "comment", "subId"} {
+	for _, key := range []string{"email", "password", "enable", "limitIp", "comment", "subId"} {
 		if !reflect.DeepEqual(got[key], current[key]) {
 			t.Fatalf("changed native field %s", key)
 		}
 	}
-	if got["id"] != cl.ID || got["uuid"] != cl.ID || got["limitHwid"] != cl.DeviceLimit || got["totalGB"] != cl.QuotaBytes || got["expiryTime"] != cl.ExpiresAt {
+	if got["flow"] != cl.Flow || got["id"] != cl.ID || got["uuid"] != cl.ID || got["limitHwid"] != cl.DeviceLimit || got["totalGB"] != cl.QuotaBytes || got["expiryTime"] != cl.ExpiresAt {
 		t.Fatal("requested policy absent")
 	}
 	if !reflect.DeepEqual(got["allowedIPs"], []string{"192.0.2.1", "192.0.2.2"}) {

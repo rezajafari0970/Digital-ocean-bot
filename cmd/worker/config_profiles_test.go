@@ -67,3 +67,10 @@ func TestQueuedProfileHonorsWorkerCancellation(t *testing.T) {
 		t.Fatal("cancelled queued operation ran", e)
 	}
 }
+
+func TestProfileModulesFitEveryParentBudget(t *testing.T) {
+	for limit := 1; limit <= 10; limit++ {
+		var modules worker.Modules
+		addConfigProfileModules(&modules, nil, nil, worker.NewWorkBudget(limit))
+	}
+}

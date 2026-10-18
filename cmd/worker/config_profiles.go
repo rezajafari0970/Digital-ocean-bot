@@ -14,11 +14,13 @@ import (
 )
 
 func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sanaei.RuntimeManager, budget *worker.WorkBudget) {
-	create := worker.NewWorkClass(budget, 6)
+	limit := int(budget.Snapshot()["limit"])
+	create := worker.NewWorkClass(budget, min(4, limit))
 	// Proof workers share the SQL-derived panel budget. Queue wait must not
 	// consume an admitted operation's runtime deadline.
-	verify := worker.NewWorkClass(budget, 8)
-	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-create-2", "profiles-create-3", "profiles-create-4", "profiles-create-5", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7"} {
+	verify := worker.NewWorkClass(budget, min(8, limit))
+	remove := worker.NewWorkClass(budget, min(2, limit))
+	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-create-2", "profiles-create-3", "profiles-delete-0", "profiles-delete-1", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7"} {
 		modules.Add(worker.RolePanels, name, func(ctx context.Context) {
 			service := configplane.Service{DB: a.DB, Secrets: a.Container.Secrets, Runtimes: rt, SSH: provisioning.SSHClient{OutputLimit: 16384, Timeout: 420 * time.Second, HostKeys: provisioning.SQLHostKeyPins{DB: a.DB}}}
 			ticker := time.NewTicker(time.Second)
@@ -37,10 +39,12 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 				}
 				duration := 2 * time.Minute
 				if strings.Contains(name, "verify") {
-					duration = 45 * time.Second
+					duration = 75 * time.Second
 				}
 				if strings.Contains(name, "verify") {
 					e = runConfigProfileWork(work, verify.Do, duration, service.RunVerifyOne)
+				} else if strings.Contains(name, "delete") {
+					e = runConfigProfileWork(work, remove.Do, duration, service.RunDeleteOne)
 				} else {
 					e = runConfigProfileWork(work, create.Do, duration, service.RunOne)
 				}

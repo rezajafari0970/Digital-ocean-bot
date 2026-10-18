@@ -178,7 +178,7 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 		t.Fatal(e)
 	}
 	registry := Builtins()
-	for _, cap := range registry.Catalog() {
+	for _, cap := range append(registry.Catalog(), Capability{ID: "vless/tcp/reality_no_flow", Protocol: "vless", Network: "tcp", Security: "reality", Public: true}) {
 		t.Run(strings.ReplaceAll(cap.ID, "/", "_"), func(t *testing.T) {
 			spec := Spec{Protocol: cap.Protocol, Network: cap.Network, Security: cap.Security, Port: freePort(t)}
 			if spec.Network == "ws" || spec.Network == "xhttp" {
@@ -189,7 +189,7 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 			}
 			if spec.Security == "reality" {
 				spec.SNI = "example.com"
-				if spec.Network == "tcp" {
+				if spec.Network == "tcp" && cap.ID != "vless/tcp/reality_no_flow" {
 					spec.Flow = "xtls-rprx-vision"
 				}
 			}

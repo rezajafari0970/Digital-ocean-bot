@@ -110,7 +110,16 @@ def main(spec):
   if ready(panel,core,want_panel,want_core,url) and current_identity==state['identity']:
    state['phase']='applied';save(state_path,state)
   else:restore(state);raise RuntimeError('recovered_previous_installation')
- if state and state['phase']=='rolled_back':raise RuntimeError('runtime_installation_requires_review')
+ if state and state['phase']=='rolled_back':
+  reviewed=spec.get('reviewed_retry',{})
+  expected=hashlib.sha256(json.dumps(state,sort_keys=True).encode()).hexdigest()
+  if reviewed.get('journal_sha256')!=expected or reviewed.get('reason')!='validated_binary_and_unchanged_native_identity':raise RuntimeError('runtime_installation_requires_review')
+  if current_identity!=state['identity'] or not ready(panel,core,state['old_panel'],state['old_core'],url):raise RuntimeError('reviewed_runtime_changed')
+  archived=cache/('reviewed-'+expected+'.json')
+  if archived.exists():raise RuntimeError('reviewed_retry_already_used')
+  save(archived,{'previous':state,'review':reviewed,'at':time.time()})
+  state=None
+
  if digest(core)==want_core and digest(panel)==want_panel:
   run([str(core),'run','-test','-config',str(candidate)],30,env)
   if not ready(panel,core,want_panel,want_core,url):raise RuntimeError('installed_runtime_not_ready')
@@ -132,16 +141,23 @@ def main(spec):
   with open(cache/name,'rb') as f:os.fsync(f.fileno())
  save(state_path,previous)
  try:
+  previous['action']='stop';save(state_path,previous)
   run(['systemctl','stop','x-ui'],45)
   previous['phase']='installing';save(state_path,previous)
+  previous['action']='install';save(state_path,previous)
   install_file(staged_core,core);install_file(staged_panel,panel)
+  previous['action']='start';save(state_path,previous)
   run(['systemctl','start','x-ui'],45)
+  previous['action']='readiness';save(state_path,previous)
   if not wait_ready(panel,core,want_panel,want_core,url):raise RuntimeError('new_runtime_not_ready')
+  previous['action']='identity';save(state_path,previous)
   after,_=identity(db)
   if after!=current_identity:raise RuntimeError('identity_or_inbound_changed')
   previous['phase']='applied';save(state_path,previous)
- except Exception:
-  restore(previous);raise RuntimeError('installation_rolled_back')
+ except Exception as exc:
+  previous['failure']=str(exc) if isinstance(exc,RuntimeError) else type(exc).__name__
+  save(state_path,previous)
+  restore(previous);raise RuntimeError('installation_rolled_back_'+previous.get('action','unknown')+'_'+previous['failure'])
  print('{"validated":true,"installed":true,"changed":true}')
 
 try:

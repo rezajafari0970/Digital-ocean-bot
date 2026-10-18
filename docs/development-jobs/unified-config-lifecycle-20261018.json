@@ -1,6 +1,6 @@
 {
   "id": "unified-config-lifecycle-20261018",
-  "status": "queue_deadline_followup_verified_pending_release",
+  "status": "regressions_passed_pending_publication",
   "baseline": "4069eb02c5563b8636823260e01b9ca3d44161a4",
   "production_baseline": "3bb0417a2c4abb901dbe1e5ade79f24e7937835b",
   "worktree": "/root/projects/dob-unified-configs-20261018",
@@ -484,6 +484,67 @@
       "shared_runtime_single_replacement": "PASS",
       "current_runtime_receipt_cleanup": "PASS",
       "worker_queue_deadline": "PASS"
+    }
+  },
+  "continued_at": "2026-10-18T08:31:30.958969+00:00",
+  "current_followup": {
+    "state": "regressions_passed_pending_publication",
+    "installed_source": "18aa6ce1d29829e12e3ce07028e32be5260975b0",
+    "installed_public": "91cce828c3c8cceb583c2aad60d5ec6d26c5ff2a",
+    "user_profiles_preserved": 14,
+    "native_core_audit": {
+      "total": 81,
+      "current": 79,
+      "rolled_back_requires_review": 2,
+      "reviewed_remaining_upgrades": "both succeeded, identities retained, original rollback journals archived with exact hashes"
+    },
+    "confirmed_defects": [
+      "output viewer rejected VMess and Shadowsocks and cleared all links",
+      "empty Flow update remained SENT because native global record retained Vision",
+      "profile work classes could exceed small parent budgets",
+      "server details replaced during aggregate refresh and lacked independent polling"
+    ],
+    "implemented_pending_release": [
+      "four-protocol output viewer, 5 browser unit tests pass",
+      "journaled global Flow completion with strict final observation",
+      "work-class limits clamped to parent",
+      "snapshot-scoped idempotent batch deletion endpoint and confirmation UI",
+      "independent 2-second server-details polling with coalescing and retained open DOM",
+      "native confirmed ownership fence excludes staged reservations from counts and publication",
+      "public plain TCP server catalog for all four protocols with explicit client compatibility metadata"
+    ],
+    "pending": [
+      "publisher release gates",
+      "staged installation with preservation",
+      "live independent edit/output and exact canary batch-delete acceptance",
+      "fresh fleet coverage and latency observation"
+    ],
+    "canaries": {
+      "owned": 3,
+      "user_profiles_deleted": 0,
+      "edit": "Native Flow and traffic pass; scheduler/output acceptance pending"
+    },
+    "limitations": [
+      "Recent official Xray clients reject public unencrypted VLESS/Trojan; server generation cannot remove a client-side restriction.",
+      "No promise of zero future faults; acceptance requires measured checks."
+    ],
+    "updated_at": "2026-10-18T08:58:33.502131+00:00",
+    "validation": {
+      "database_gate": "PASS 37/37 zero skips at 08:55 UTC, including migration 187 and bulk delete isolation",
+      "browser": "config transport and refresh recovery PASS; batch snapshot deletion and details single flight exercised",
+      "runtime_batch_sample": "8 profiles / 16 class probes all pass; before 10.79s, after 9.69s on one panel, not a fleet throughput guarantee",
+      "flow": "Exact native/global blank Flow readback and authenticated HTTP 200 for both classes; full edited-output acceptance remains pending installed scheduler",
+      "full_go_test": "PASS",
+      "go_vet": "PASS"
+    },
+    "scheduler": {
+      "create_lanes": 4,
+      "delete_lanes": 2,
+      "verify_lanes": 8,
+      "shared_budget": "unchanged SQL-derived parent",
+      "batch_profiles": 8,
+      "verification_timeout_seconds": 75,
+      "redundant_proof_sql_lease_removed": true
     }
   }
 }

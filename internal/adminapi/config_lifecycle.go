@@ -53,18 +53,52 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 	}
 	profiles := []map[string]any{}
 	where, _ := outputPublicationFilter("ALL")
-	published := `SELECT o.config_profile_id,o.panel_id,count(DISTINCT o.client_id) n FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id
+	// Evaluate the expensive publication fences once per consistent snapshot,
+	// rather than again for every profile and routing class.
+	publishedRows, e := tx.QueryContext(ctx, `SELECT o.config_profile_id::text,o.panel_id::text,cr.route_class,count(DISTINCT o.client_id) FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id
  JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id
  CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id
- LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` GROUP BY o.config_profile_id,o.panel_id`
+ LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id `+where+` AND o.config_profile_id IS NOT NULL GROUP BY o.config_profile_id,o.panel_id,cr.route_class`)
+	if e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	publishedPanels := map[string]map[string]int{}
+	publishedClasses := map[string]map[string]int{}
+	for publishedRows.Next() {
+		var id, panel, class string
+		var n int
+		if e = publishedRows.Scan(&id, &panel, &class, &n); e != nil {
+			break
+		}
+		if publishedPanels[id] == nil {
+			publishedPanels[id] = map[string]int{}
+			publishedClasses[id] = map[string]int{}
+		}
+		publishedPanels[id][panel] += n
+		publishedClasses[id][class] += n
+	}
+	if e == nil {
+		e = publishedRows.Err()
+	}
+	publishedRows.Close()
+	if e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	for _, id := range ids {
 		p, err := configplane.Read(ctx, tx, id)
 		if err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
+		panelCounts := []map[string]any{}
+		for panel, n := range publishedPanels[id] {
+			panelCounts = append(panelCounts, map[string]any{"panel_id": panel, "n": n})
+		}
+		publishedJSON, _ := json.Marshal(panelCounts)
 		var eligible, verified, pending, retrying, ready, links, deleting int
-		e = tx.QueryRowContext(ctx, `WITH published AS (`+published+`), created AS (SELECT c.profile_id,c.panel_id,count(*) n FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles p ON p.id=c.profile_id WHERE l.applied_revision=p.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) GROUP BY c.profile_id,c.panel_id) SELECT count(*),
+		e = tx.QueryRowContext(ctx, `WITH published AS (SELECT * FROM jsonb_to_recordset($4::jsonb) AS x(panel_id uuid,n bigint)), created AS (SELECT c.profile_id,c.panel_id,count(*) n FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles p ON p.id=c.profile_id WHERE c.confirmed AND l.applied_revision=p.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) GROUP BY c.profile_id,c.panel_id) SELECT count(*),
    count(*) FILTER(WHERE l.state='VERIFIED' AND l.applied_revision=cp.revision AND l.verified_at>now()-interval '5 minutes'),
    count(*) FILTER(WHERE COALESCE(l.state,'PENDING')<>'BLOCKED' AND (COALESCE(pub.n,0)<$2 OR COALESCE(made.n,0)<$3 OR COALESCE(l.applied_revision,0)<>cp.revision OR l.state IS DISTINCT FROM 'VERIFIED' OR l.verified_at IS NULL OR l.verified_at<=now()-interval '5 minutes')),
    count(*) FILTER(WHERE l.state='BLOCKED' OR COALESCE(l.error_code,'')<>''),
@@ -72,9 +106,9 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
    FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id
    JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
    LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
-   LEFT JOIN published pub ON pub.config_profile_id=cp.id AND pub.panel_id=pi.id
+   LEFT JOIN published pub ON pub.panel_id=pi.id
    LEFT JOIN created made ON made.profile_id=cp.id AND made.panel_id=pi.id
-   WHERE cp.id=$1 AND `+configplane.Eligible, id, p.PublishedTarget(), p.Total()).Scan(&eligible, &verified, &pending, &retrying, &ready, &links)
+   WHERE cp.id=$1 AND `+configplane.Eligible, id, p.PublishedTarget(), p.Total(), publishedJSON).Scan(&eligible, &verified, &pending, &retrying, &ready, &links)
 		if e != nil {
 			writeJSON(w, 500, errorBody())
 			return
@@ -103,14 +137,8 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 		classStats := map[string]any{}
 		for _, class := range p.Classes {
 			var publishedCount, active int
-			if e = tx.QueryRowContext(ctx, `SELECT count(DISTINCT (o.panel_id,o.client_id)) FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id
- JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id
- CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id
- LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id `+where+` AND o.config_profile_id=$1 AND cr.route_class=$2`, id, class).Scan(&publishedCount); e != nil {
-				writeJSON(w, 500, errorBody())
-				return
-			}
-			if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles cp ON cp.id=c.profile_id JOIN panel_instances pi ON pi.id=c.panel_id JOIN accounts a ON a.id=pi.account_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE c.profile_id=$1 AND c.route_class=$2 AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) AND `+configplane.Eligible, id, class).Scan(&active); e != nil {
+			publishedCount = publishedClasses[id][class]
+			if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM config_driver_clients c JOIN config_driver_listeners l ON l.profile_id=c.profile_id AND l.panel_id=c.panel_id JOIN config_driver_profiles cp ON cp.id=c.profile_id JOIN panel_instances pi ON pi.id=c.panel_id JOIN accounts a ON a.id=pi.account_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id WHERE c.profile_id=$1 AND c.route_class=$2 AND c.confirmed AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND (c.expires_at IS NULL OR c.expires_at>now()) AND `+configplane.Eligible, id, class).Scan(&active); e != nil {
 				writeJSON(w, 500, errorBody())
 				return
 			}
@@ -120,6 +148,18 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 				publicationTarget = eligible * policy.Count
 			}
 			classStats[class] = map[string]any{"active": active, "target": eligible * policy.Count, "published": publishedCount, "publication_target": publicationTarget, "publish": policy.Publish}
+		}
+		if state == "syncing" && eligible > 0 {
+			complete := true
+			for _, raw := range classStats {
+				v := raw.(map[string]any)
+				if v["active"] != v["target"] {
+					complete = false
+				}
+			}
+			if complete {
+				state = "verifying"
+			}
 		}
 		profiles = append(profiles, map[string]any{"profile": p, "state": state, "eligible": eligible, "verified": verified, "pending": pending, "blocked": retrying, "ready": ready, "published": links, "target": eligible * p.PublishedTarget(), "deleting": deleting, "class_stats": classStats})
 	}

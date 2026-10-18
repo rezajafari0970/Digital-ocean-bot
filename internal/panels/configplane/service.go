@@ -46,12 +46,13 @@ func (s Service) target(ctx context.Context, id, panel string) (target, error) {
 	t.Port = 22
 	return t, e
 }
-func (s Service) RunOne(ctx context.Context) error       { return s.run(ctx, false) }
-func (s Service) RunVerifyOne(ctx context.Context) error { return s.run(ctx, true) }
-func (s Service) run(ctx context.Context, verify bool) error {
+func (s Service) RunOne(ctx context.Context) error       { return s.run(ctx, false, false) }
+func (s Service) RunVerifyOne(ctx context.Context) error { return s.run(ctx, true, false) }
+func (s Service) RunDeleteOne(ctx context.Context) error { return s.run(ctx, false, true) }
+func (s Service) run(ctx context.Context, verify, deleting bool) error {
 	// Enrolment is idempotent. Claim due rows atomically so parallel workers do
 	// not repeatedly select the same slow server.
-	if !verify {
+	if !verify && !deleting {
 		if e := s.initializeEmpty(ctx); e != nil {
 			return e
 		}
@@ -66,7 +67,10 @@ func (s Service) run(ctx context.Context, verify bool) error {
 			return e
 		}
 	}
-	lane := `(l.needs_reconcile OR NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)) OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
+	lane := `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND (l.needs_reconcile OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
+	if deleting {
+		lane = `(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)))`
+	}
 	if verify {
 		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT') AND NOT l.needs_reconcile`
 	}
@@ -294,7 +298,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 
 		}
 		for _, c := range credentials.Clients {
-			if _, err = s.DB.ExecContext(ctx, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class) VALUES($1,$2,$3,$4,$5) ON CONFLICT(panel_id,client_id) DO NOTHING", id, panel, c.ID, c.Email, c.Class); err != nil {
+			if _, err = s.DB.ExecContext(ctx, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class,confirmed) VALUES($1,$2,$3,$4,$5,false) ON CONFLICT(panel_id,client_id) DO NOTHING", id, panel, c.ID, c.Email, c.Class); err != nil {
 				return err
 			}
 			var same bool
@@ -400,6 +404,9 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				return errors.New("profile_inventory_unavailable")
 			}
 			observed, matchErr := configdriver.Observe(raws, payload, remote.Int64, credentials)
+			if mutation == "SENT" && (matchErr != nil || observed == 0) {
+				raws, observed, matchErr = s.observeJournaledWrite(ctx, panel, rt, raws, payload, remote.Int64, credentials)
+			}
 			before := configdriver.ProtectedHash(raws, remark)
 			if matchErr != nil || observed == 0 {
 				if !wantsWrite {
@@ -414,6 +421,11 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 						return e
 					}
 					got, e := configdriver.Observe(raws, prior, remote.Int64, priorCredentials)
+					if e != nil {
+						// The previous CONFIRMED journal still owns this exact native membership.
+						// Repair its managed global Flow before attempting a replacement generation.
+						raws, got, e = s.observeJournaledWrite(ctx, panel, rt, raws, prior, remote.Int64, priorCredentials)
+					}
 					if e != nil || got != remote.Int64 {
 						return errors.New("profile_existing_state_conflict")
 					}
@@ -475,7 +487,7 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 				if e != nil {
 					return errors.New("profile_write_outcome_unconfirmed")
 				}
-				observed, e = configdriver.Observe(raws, payload, remote.Int64, credentials)
+				raws, observed, e = s.observeJournaledWrite(ctx, panel, rt, raws, payload, remote.Int64, credentials)
 				if e != nil || observed == 0 {
 					return errors.New("profile_write_outcome_unconfirmed")
 				}

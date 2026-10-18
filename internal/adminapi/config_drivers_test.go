@@ -62,15 +62,15 @@ func TestConfigDriverProfileAdmission(t *testing.T) {
 		t.Fatal("stale save accepted")
 	}
 	p.Spec = configdriver.Spec{Protocol: "trojan", Network: "tcp", Security: "none", Port: 19000}
-	if code, _ := profileSave(t, s, p, "POST"); code != 400 {
-		t.Fatal("public plaintext Trojan accepted")
+	if code, _ := profileSave(t, s, p, "POST"); code != 200 {
+		t.Fatal("plain TCP server profile rejected")
 	}
 	p.Spec = configdriver.Spec{Protocol: "vless", Network: "ws", Security: "reality", Port: 19000, Path: "/profile", SNI: "example.com"}
 	if code, _ := profileSave(t, s, p, "POST"); code != 400 {
 		t.Fatal("unsupported combination accepted")
 	}
 	var n int
-	if db.QueryRow("SELECT count(*) FROM config_driver_profiles").Scan(&n) != nil || n != 2 {
+	if db.QueryRow("SELECT count(*) FROM config_driver_profiles").Scan(&n) != nil || n != 3 {
 		t.Fatal("rejected request persisted")
 	}
 }

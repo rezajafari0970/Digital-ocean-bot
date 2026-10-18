@@ -6,8 +6,8 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  const saves=[],deletions=[],requests=[];
  let catalog={unified:true,automatic:true,observed_at:new Date().toISOString(),drivers:[],profiles:[],servers:[{id:'11111111-1111-4111-a111-111111111111',host:'192.0.2.10',region:'de-fra'},{id:'22222222-2222-4222-a222-222222222222',host:'192.0.2.20',region:'nl-ams'}]};
  for(const protocol of ['vless','vmess','trojan','shadowsocks'])for(const network of ['tcp','ws','grpc','xhttp'])for(const security of ['none','tls','reality']){
-  const supported=protocol==='vless'&&(security==='reality'&&network!=='ws'||security==='tls'&&network!=='xhttp')||protocol==='vmess'&&network!=='xhttp'&&security!=='reality'||protocol==='trojan'&&(network!=='xhttp'&&security==='tls'||network==='tcp'&&security==='none')||protocol==='shadowsocks'&&network==='tcp'&&security==='none';
-  if(supported)catalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:!(protocol==='trojan'&&security==='none')});
+  const supported=protocol==='vless'&&(security==='reality'&&network!=='ws'||security==='tls'&&network!=='xhttp'||security==='none'&&network==='tcp')||protocol==='vmess'&&network!=='xhttp'&&security!=='reality'||protocol==='trojan'&&(network!=='xhttp'&&security==='tls'||network==='tcp'&&security==='none')||protocol==='shadowsocks'&&network==='tcp'&&security==='none';
+  if(supported)catalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:true,client_requirement:['vless','trojan'].includes(protocol)&&security==='none'?'plain_tcp_compatible_client':''});
  }
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');requests.push([req.method,url.pathname]);
@@ -17,6 +17,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    if(req.method==='GET')return json(catalog);
    let raw='';req.on('data',x=>raw+=x);req.on('end',()=>{
     const body=JSON.parse(raw),id=url.pathname.split('/')[5],current=catalog.profiles.find(x=>x.profile.id===id);
+    if(url.pathname.endsWith('/delete-batch')){deletions.push(body);const ids=new Set(body.profiles.map(x=>x.id));catalog.profiles=catalog.profiles.filter(x=>!ids.has(x.profile.id));return json({accepted:ids.size,conflicts:0},202)}
     if(id&&current&&body.revision!==current.profile.revision)return json({error:'profile_revision_changed'},409);
     if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({state:'deleting'},202)}
     saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||10000+saves.length}};
@@ -73,7 +74,8 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate("document.querySelector('[name=profile_protocol]').value"),'');
   assert.deepEqual(await evaluate("[...document.querySelector('[name=profile_protocol]').options].map(x=>x.value).sort()"),['','shadowsocks','trojan','vless','vmess']);
   await evaluate("var f=n=>document.querySelector('[name=profile_'+n+']');var change=(n,v)=>{f(n).value=v;f(n).dispatchEvent(new Event('change'))};change('protocol','trojan')");
-  assert.deepEqual(await evaluate("[...f('security').options].map(x=>x.value)"),['tls']);
+  assert.deepEqual(await evaluate("[...f('security').options].map(x=>x.value).sort()"),['none','tls']);
+  await evaluate("change('security','none')");assert.equal(await evaluate("document.querySelector('#profileCompatibility').innerText.includes('recent official Xray clients reject')"),true);
   await evaluate("change('protocol','vless');change('security','reality');f('name').value='My Reality';f('port').value='443';f('direct_count').value='3';f('residential').checked=false;document.querySelector('#modalSubmit').click()");
   await waitFor("!document.querySelector('#modal').open&&document.querySelector('[data-profile-id]')");
   assert.equal(saves.length,1);assert.equal(saves[0].spec.port,443);assert.equal(saves[0].clients_per_class,3);assert.equal(saves[0].spec.security,'reality');assert.match(saves[0].request_id,/^[0-9a-f-]{36}$/);
@@ -130,6 +132,18 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'unified-configs-mobile.png'),Buffer.from(shot.data,'base64'));
   mark('automatic port, confirmed delete UI, sibling preservation, mobile layout');
+  await evaluate("window.keptDetails=document.querySelector('[data-profile-servers]');keptDetails.open=true");await waitFor("keptDetails.querySelector('table')");
+  await evaluate("holdRead('details-once','/api/v1/configs/profiles/'+keptDetails.dataset.profileServers+'/servers');window.detailsRead=refreshProfileServers(keptDetails);void 0");await waitFor("fixtureHolds.some(x=>x.id==='details-once')");
+  const detailCalls=await evaluate("fixtureCalls.filter(x=>x.url.endsWith('/servers')).length");
+  await evaluate("void refreshProfileServers(keptDetails)");assert.equal(await evaluate("fixtureCalls.filter(x=>x.url.endsWith('/servers')).length"),detailCalls);
+  await evaluate("finishRead('details-once',{servers:[]});detailsRead");
+  catalog.profiles[0].published++;await evaluate('refreshConfigProfiles()');assert.equal(await evaluate("document.querySelector('[data-profile-servers]')===keptDetails"),true);
+  mark('server details coalesce overlapping reads and retain open DOM during aggregate changes');
+  const reviewed=catalog.profiles.map(x=>({id:x.profile.id,revision:x.profile.revision}));
+  await evaluate("document.querySelector('[data-delete-all-profiles]').click()");await waitFor("document.querySelector('#modal').open");assert.equal(deletions.length,1);
+  const late={...catalog.profiles[0],profile:{...catalog.profiles[0].profile,id:'late-profile',name:'Created later'}};catalog.profiles.push(late);
+  await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&document.querySelectorAll('[data-profile-id]').length===1");assert.deepEqual(deletions.at(-1).profiles,reviewed);assert.equal(catalog.profiles[0].profile.id,'late-profile');
+  mark('delete all confirms exact snapshot and excludes later creations');
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

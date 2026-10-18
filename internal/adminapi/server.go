@@ -95,6 +95,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/residential-proxies/{id}/test", s.require(s.testResidentialProxy, true))
 	m.HandleFunc("GET /api/v1/configs/profiles", s.require(s.getConfigProfiles, false))
 	m.HandleFunc("DELETE /api/v1/configs/profiles/{id}", s.require(s.deleteConfigProfile, true))
+	m.HandleFunc("POST /api/v1/configs/profiles/delete-batch", s.require(s.deleteConfigProfiles, true))
 	m.HandleFunc("GET /api/v1/configs/profiles/{id}/servers", s.require(s.configProfileServers, false))
 	m.HandleFunc("POST /api/v1/configs/activate-unified", s.require(s.startUnifiedConfigs, true))
 	m.HandleFunc("POST /api/v1/configs/profiles", s.require(s.saveConfigProfile, true))

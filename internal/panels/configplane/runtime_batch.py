@@ -8,47 +8,54 @@ def probe_targets(probes,classes):
   raise ValueError('invalid probe classes')
  return [targets[c] for c in classes]
 
-def sha(raw):
- return hashlib.sha256(raw).hexdigest()
+def file_sha(path):
+ h=hashlib.sha256()
+ with path.open('rb') as f:
+  for block in iter(lambda:f.read(1048576),b''):h.update(block)
+ return h.hexdigest()
 
-def run_job(want):
- class_proofs={}
- core_current=None
+def observe_runtime():
+ # The panel configuration fence is held for this batch. Hash the same runtime
+ # once with bounded memory, while every job retains independent user/traffic checks.
+ arch='arm64' if platform.machine() in ('aarch64','arm64') else 'amd64'
+ core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-'+arch);conf=core.parent/'config.json'
+ config=json.loads(conf.read_text());expected_hash=file_sha(core);running=[]
+ for p in pathlib.Path('/proc').iterdir():
+  if not p.name.isdigit():continue
+  try:
+   if os.readlink(p/'exe')!=str(core):continue
+   args=(p/'cmdline').read_bytes().split(bytes([0]));actual_path=None
+   for flag in (b'-c',b'-config'):
+    if flag in args:
+     actual_path=pathlib.Path(os.fsdecode(args[args.index(flag)+1]))
+     if not actual_path.is_absolute():actual_path=(p/'cwd').resolve()/actual_path
+   if actual_path is not None and actual_path.resolve()==conf.resolve() and file_sha(p/'exe')==expected_hash:running.append(p)
+  except (OSError,ValueError,IndexError):pass
+ if len(running)!=1:return None
+ proc=running[0];owned=set();ports=set()
+ for fd in (proc/'fd').iterdir():
+  try:
+   link=os.readlink(fd)
+   if link.startswith('socket:['):owned.add(link[8:-1])
+  except OSError:pass
+ for family in ('tcp','tcp6'):
+  for line in (proc/'net'/family).read_text().splitlines()[1:]:
+   cols=line.split()
+   if cols[3]=='0A' and cols[9] in owned:ports.add(int(cols[1].split(':')[1],16))
+ return core,config,expected_hash,ports
+
+def run_job(want,observation=None):
+ class_proofs={};core_current=None
  def check():
   nonlocal stage,core_current
   stage="binary"
-  arch='arm64' if platform.machine() in ('aarch64','arm64') else 'amd64'
-  core=pathlib.Path('/usr/local/x-ui/bin/xray-linux-'+arch);conf=core.parent/'config.json'
-  config=json.loads(conf.read_text())
-  expected_hash=sha(core.read_bytes())
+  observed=observation if observation is not None else observe_runtime()
+  if observed is None:return False
+  core,config,expected_hash,ports=observed
   if want.get('current_core_hashes'):core_current=expected_hash in want['current_core_hashes']
   if expected_hash not in want['core_hashes']:return False
-  running=[]
-  for p in pathlib.Path('/proc').iterdir():
-   if not p.name.isdigit():continue
-   try:
-    if os.readlink(p/'exe')!=str(core):continue
-    args=(p/'cmdline').read_bytes().split(bytes([0]));actual_path=None
-    for flag in (b'-c',b'-config'):
-     if flag in args:
-      actual_path=pathlib.Path(os.fsdecode(args[args.index(flag)+1]))
-      if not actual_path.is_absolute():actual_path=(p/'cwd').resolve()/actual_path
-    if actual_path is not None and actual_path.resolve()==conf.resolve() and sha((p/'exe').read_bytes())==expected_hash:running.append(p)
-   except (OSError,ValueError,IndexError):pass
-  if len(running)!=1:return False
   stage="socket"
-  proc=running[0];owned=set()
-  for fd in (proc/'fd').iterdir():
-   try:
-    link=os.readlink(fd)
-    if link.startswith('socket:['):owned.add(link[8:-1])
-   except OSError:pass
-  bound=False
-  for family in ('tcp','tcp6'):
-   for line in (proc/'net'/family).read_text().splitlines()[1:]:
-    cols=line.split()
-    if cols[3]=='0A' and int(cols[1].split(':')[1],16)==want['port'] and cols[9] in owned:bound=True
-  if not bound:return False
+  if want['port'] not in ports:return False
   stage="users"
   api=[i for i in config.get('inbounds',[]) if i.get('tag')==config.get('api',{}).get('tag') and i.get('listen') in ('127.0.0.1','::1')]
   if len(api)!=1 or not want.get('tag'):return False
@@ -111,5 +118,10 @@ def run_job(want):
 
 jobs=json.load(sys.stdin)
 if not isinstance(jobs,list) or len(jobs)>64:raise ValueError('invalid batch')
-with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:results=list(pool.map(run_job,jobs))
+try:observation=observe_runtime()
+except Exception:observation=None
+if observation is None:
+ results=[{'profile_id':j['profile_id'],'verified':False,'reason':'binary','classes':{}} for j in jobs]
+else:
+ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:results=list(pool.map(lambda j:run_job(j,observation),jobs))
 print(json.dumps({'results':results},separators=(',',':')))

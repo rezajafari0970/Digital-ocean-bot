@@ -2,7 +2,7 @@
 let configProfileCatalog=null,configProfilesRead=null,configProfilesReadSlot=null,configProfilesAbort=null,configProfilesEpoch=0;
 function profileRandomHex(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('')}
 function profileRequestID(){const h=profileRandomHex();return h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20)}
-const profileStateLabels={ready:'Ready',syncing:'Applying automatically',retrying:'Retrying automatically',paused:'Paused',deleting:'Deleting',waiting_for_servers:'Waiting for servers'};
+const profileStateLabels={ready:'Ready',syncing:'Applying automatically',verifying:'Checking connections',retrying:'Retrying automatically',paused:'Paused',deleting:'Deleting',waiting_for_servers:'Waiting for servers'};
 const profileErrorLabels={runtime_prepare:'Checking and updating this server’s verified runtime',profile_runtime_prepare_failed:'Runtime preparation failed; an independent retry is scheduled',client_policy:'Applying and verifying client limits',routes_pending:'Saved; waiting for routing and connection verification',runtime:'Testing the running service and connection',executor_wait:'Queued for this server',credentials:'Preparing this profile’s clients',native:'Applying and observing this server',sni:'Checking Reality SNI candidates',profile_panel_busy:'Queued; another operation on this server is completing',profile_global_policy_inventory_unavailable:'Waiting for this panel’s client inventory',profile_global_policy_unverified:'Client limits need another verification',profile_global_policy_identity_conflict:'Client identity differs from this profile’s ownership',profile_global_policy_read_failed:'Retrying the client policy read',profile_global_policy_ambiguous:'Duplicate client identity needs review',profile_runtime_batch_unavailable:'Connection check timed out; retry scheduled independently',profile_sni_scan_failed:'SNI scan failed; this server will retry independently.',profile_sni_no_verified_target:'No candidate passed TLS 1.3, HTTP/2 and certificate validation.',profile_sni_scan_unavailable:'SNI scanner is waiting for this panel.',profile_class_traffic_retrying:'One routing class needs another connection test; verified classes remain published.',trojan_plain_tcp_private_network_only:'Trojan without TLS is supported only on private networks by the official core.',profile_final_mask_invalid:'FinalMask must contain a valid TCP fragment configuration.',profile_port_conflict:'This port belongs to another configuration.',profile_panel_port_conflict:'This port belongs to the panel.',profile_port_reserved:'This port is reserved for a system service.',profile_path_invalid:'HTTP paths must start with /.',profile_revision_changed:'This profile changed. Reopen it to edit the current version.',profile_is_deleting:'This profile is being deleted.',profile_runtime_binary_unverified:'Checking the running Xray service',profile_runtime_socket_unverified:'Waiting for the listener to start',profile_runtime_users_unverified:'Checking applied users',profile_runtime_traffic_unverified:'Retrying the connection test',profile_certificate_provision_failed:'Retrying certificate issuance',profile_public_port_unreachable:'Checking public port reachability',profile_write_outcome_unconfirmed:'Observing the previous change before any retry',profile_existing_state_conflict:'The server configuration differs from its saved ownership',profile_delete_unverified:'Verifying removal',profile_delete_runtime_unverified:'Waiting for the listener to stop'};
 const configMessage=code=>profileErrorLabels[code]||String(code||'').replace(/^profile_/,'').replaceAll('_',' ');
 function profileRequest(p){return {id:p.id,name:p.name,spec:p.spec,enabled:p.enabled,fleet:p.fleet,panel_ids:p.panel_ids,classes:p.classes,clients_per_class:p.clients_per_class,class_settings:p.class_settings,revision:p.revision,legacy_key:p.legacy_key||'',request_id:p.request_id||''}}
@@ -18,12 +18,13 @@ async function refreshConfigProfiles(){
    const data=await viewRead('/api/v1/configs/profiles',view,controller.signal);if(!currentPageView(view)||!slot.isConnected||epoch!==configProfilesEpoch)return;
    if(!Array.isArray(data.profiles)||!Array.isArray(data.drivers)||!Array.isArray(data.servers))throw Error('Configuration status unavailable');
    configProfileCatalog=data;slot.querySelector('[data-profile-read-error]')?.remove();
-   const open=new Set([...slot.querySelectorAll('details[open][data-profile-servers]')].map(x=>x.dataset.profileServers));
+   const retained=new Map([...slot.querySelectorAll('details[open][data-profile-servers]')].map(x=>[x.dataset.profileServers,x]));
+   const open=new Set(retained.keys());
    const stamp=JSON.stringify([data.profiles,data.reset,data.unified]);
    if(slot.dataset.snapshot===stamp){const at=slot.querySelector('[data-observed-at]');if(at)at.textContent=formatDate(data.observed_at);slot.querySelectorAll('details[open][data-profile-servers]').forEach(refreshProfileServers);return}
    slot.dataset.snapshot=stamp;
    const reset=data.reset&&data.reset.done<data.reset.total?'<div class="card section"><h3>Removing previous configurations</h3><p>'+esc(data.reset.done)+' / '+esc(data.reset.total)+' servers completed. Remaining servers are checked automatically.</p></div>':'';
-   slot.innerHTML='<div class="card section"><h3>Configurations</h3><p>Create a profile, choose its port and count, and save. Current and future selected servers are kept in sync automatically.</p><p class="muted">Status checked: <span data-observed-at>'+esc(formatDate(data.observed_at))+'</span></p></div>'+reset+
+   slot.innerHTML='<div class="card section"><h3>Configurations</h3><p>Create a profile, choose its port and count, and save. Current and future selected servers are kept in sync automatically.</p><p class="muted">Status checked: <span data-observed-at>'+esc(formatDate(data.observed_at))+'</span></p>'+(data.profiles.some(x=>!x.profile.delete_requested_at)?'<button class="small ghost" data-delete-all-profiles>Delete all configurations</button>':'')+'</div>'+reset+
     data.profiles.map(item=>{
      const p=item.profile,s=p.spec,deleting=!!p.delete_requested_at;
      return '<article class="card section" data-profile-id="'+esc(p.id)+'" data-profile-revision="'+esc(p.revision)+'"><div class="cardHeader"><h3>'+esc(p.name)+'</h3><span class="badge '+(item.state==='ready'?'ok':'')+'">'+esc(profileStateLabels[item.state]||item.state)+'</span></div>'+
@@ -36,6 +37,8 @@ async function refreshConfigProfiles(){
       (!deleting?'<div class="cardActions"><button class="small" data-edit-profile="'+esc(p.id)+'">Edit</button><button class="small ghost" data-toggle-profile="'+esc(p.id)+'">'+(p.enabled?'Pause':'Resume')+'</button><button class="small ghost" data-delete-profile="'+esc(p.id)+'">Delete</button></div>':'')+
       '<details data-profile-servers="'+esc(p.id)+'"'+(open.has(p.id)?' open':'')+'><summary>Server details</summary><div data-server-list><p class="muted">Loading…</p></div></details></article>';
     }).join('')+(!data.profiles.length?'<div class="card section"><h3>No configurations</h3><p>Tap New to create your first profile. No protocol is created automatically.</p></div>':'');
+   slot.querySelectorAll('details[data-profile-servers]').forEach(d=>{const old=retained.get(d.dataset.profileServers);if(old)d.replaceWith(old)});
+   const deleteAll=slot.querySelector('[data-delete-all-profiles]');if(deleteAll)deleteAll.onclick=()=>deleteAllConfigProfilesDialog(data.profiles.map(x=>x.profile).filter(p=>!p.delete_requested_at));
    const byID=id=>data.profiles.find(x=>x.profile.id===id)?.profile;
    slot.querySelectorAll('[data-edit-profile]').forEach(b=>b.onclick=()=>openConfigProfile(byID(b.dataset.editProfile)));
    slot.querySelectorAll('[data-toggle-profile]').forEach(b=>b.onclick=async()=>{const p=byID(b.dataset.toggleProfile);setProfileBusy(p.id,true);try{await api('/api/v1/configs/profiles/'+encodeURIComponent(p.id),{method:'PUT',body:JSON.stringify({...profileRequest(p),enabled:!p.enabled})});slot.dataset.snapshot='';await refreshConfigProfilesAfterRead()}catch(e){toast(configMessage(e.message),'error');setProfileBusy(p.id,false)}});
@@ -51,16 +54,34 @@ async function refreshConfigProfiles(){
  return configProfilesRead;
 }
 async function refreshConfigProfilesAfterRead(){if(configProfilesRead)await configProfilesRead;return refreshConfigProfiles()}
+const profileServerReads=new WeakMap();
 async function refreshProfileServers(details){
- try{const data=await viewRead('/api/v1/configs/profiles/'+encodeURIComponent(details.dataset.profileServers)+'/servers',activePageView);if(!details.isConnected||!details.open)return;
-  details.querySelector('[data-server-list]').innerHTML=data.servers.length?'<div class="tableWrap"><table class="table"><thead><tr><th>Server</th><th>Status</th><th>Last verified</th><th>Retry / SNI</th></tr></thead><tbody>'+data.servers.map(x=>'<tr><td>'+esc(x.host)+'</td><td>'+esc(x.code?configMessage(x.code):x.state==='VERIFIED'&&x.applied_revision===x.desired_revision?'Verified':x.state==='RETIRED'?'Removed':x.applied_revision!==x.desired_revision?'Applying saved changes':configMessage(x.stage))+'</td><td>'+esc(x.verified_at&&!x.verified_at.startsWith('0001')?formatDate(x.verified_at):'Pending')+'</td><td>'+esc(x.next_attempt_at&&!x.next_attempt_at.startsWith('0001')?formatDate(x.next_attempt_at):'Queued')+(x.failures?'<br>'+esc(x.failures)+' failed attempts':'')+(x.sni?'<br>'+esc(x.sni):'')+'</td></tr>').join('')+'</tbody></table></div>':'<p>No servers in this profile yet.</p>';
- }catch(e){if(details.isConnected)details.querySelector('[data-server-list]').innerHTML='<p>Server status unavailable. Close and reopen to retry.</p>'}
+ if(!details.open||!details.isConnected)return;
+ if(profileServerReads.has(details))return profileServerReads.get(details);
+ const view=activePageView;
+ const read=(async()=>{try{const data=await viewRead('/api/v1/configs/profiles/'+encodeURIComponent(details.dataset.profileServers)+'/servers',view);if(!currentPageView(view)||!details.isConnected||!details.open)return;
+  const stamp=JSON.stringify(data.servers);if(details.dataset.serverSnapshot===stamp)return;details.dataset.serverSnapshot=stamp;
+  details.querySelector('[data-server-list]').innerHTML=data.servers.length?'<div class="tableWrap"><table class="table"><thead><tr><th>Server</th><th>Status</th><th>Last verified</th><th>Retry / SNI</th></tr></thead><tbody>'+data.servers.map(x=>'<tr><td>'+esc(x.host)+'</td><td>'+esc(x.code?configMessage(x.code):x.state==='VERIFIED'&&x.applied_revision===x.desired_revision?(Date.now()-Date.parse(x.verified_at)<300000?'Verified':'Awaiting fresh verification'):x.state==='RETIRED'?'Removed':x.applied_revision!==x.desired_revision?'Applying saved changes':configMessage(x.stage))+'</td><td>'+esc(x.verified_at&&!x.verified_at.startsWith('0001')?formatDate(x.verified_at):'Pending')+'</td><td>'+esc(x.next_attempt_at&&!x.next_attempt_at.startsWith('0001')?formatDate(x.next_attempt_at):'Queued')+(x.failures?'<br>'+esc(x.failures)+' failed attempts':'')+(x.sni?'<br>'+esc(x.sni):'')+'</td></tr>').join('')+'</tbody></table></div>':'<p>No servers in this profile yet.</p>';
+ }catch(e){if(currentPageView(view)&&details.isConnected){delete details.dataset.serverSnapshot;details.querySelector('[data-server-list]').innerHTML='<p>Server status unavailable. Retrying automatically.</p>'}}
+ })().finally(()=>profileServerReads.delete(details));profileServerReads.set(details,read);return read;
 }
+setInterval(()=>{if(current==='configs'&&!document.hidden&&!document.querySelector('#modal')?.open)document.querySelectorAll('details[open][data-profile-servers]').forEach(refreshProfileServers)},2000);
+
 function deleteConfigProfileDialog(p){
  $('#modalTitle').textContent='Delete '+p.name+'?';$('#modalForm').noValidate=false;$('#modalForm').classList.remove('profileForm');
  $('#modalFields').innerHTML='<p>This removes this profile’s users and listeners from its servers and removes its links from output. Deletion continues automatically after you close this window.</p>';
  $('#modalError').textContent='';$('#modalSubmit').hidden=false;$('#modalSubmit').disabled=false;$('#modalSubmit').textContent='Delete profile';$('#modal').showModal();
  $('#modalForm').onsubmit=async e=>{e.preventDefault();$('#modalSubmit').disabled=true;setProfileBusy(p.id,true);try{await api('/api/v1/configs/profiles/'+encodeURIComponent(p.id),{method:'DELETE',body:JSON.stringify({revision:p.revision})});$('#modal').close();await refreshConfigProfilesAfterRead()}catch(err){setProfileBusy(p.id,false);$('#modalError').textContent=configMessage(err.message);$('#modalSubmit').disabled=false}};
+}
+function deleteAllConfigProfilesDialog(profiles){
+ const snapshot=profiles.map(p=>({id:p.id,revision:p.revision}));
+ $('#modalTitle').textContent='Delete all '+snapshot.length+' configurations?';$('#modalForm').classList.remove('profileForm');$('#modalForm').noValidate=false;
+ $('#modalFields').innerHTML='<p>This removes these profiles and their clients from every assigned server. Removal runs independently on each server and continues automatically. Profiles created after this selection are excluded.</p>';
+ $('#modalError').textContent='';$('#modalSubmit').hidden=false;$('#modalSubmit').disabled=false;$('#modalSubmit').textContent='Delete all configurations';$('#modal').showModal();
+ $('#modalForm').onsubmit=async e=>{e.preventDefault();$('#modalSubmit').disabled=true;
+  try{const result=await api('/api/v1/configs/profiles/delete-batch',{method:'POST',body:JSON.stringify({profiles:snapshot})});$('#modal').close();if(result.conflicts)toast(result.conflicts+' changed profiles were kept. Review them before deleting.','error');await refreshConfigProfilesAfterRead()}
+  catch(err){$('#modalError').textContent=configMessage(err.message);$('#modalSubmit').disabled=false}
+ };
 }
 async function openConfigProfile(existing=null){
  try{
@@ -98,7 +119,8 @@ async function openConfigProfile(existing=null){
    });
    f('sni').required=security==='reality'&&f('sni_mode').value!=='auto';f('sni').disabled=security!=='reality'||f('sni_mode').value==='auto';
    f('sni_candidates').disabled=security!=='reality'||f('sni_mode').value!=='auto';
-   if(f('protocol').value==='trojan')$('#profileCompatibility').textContent+=' Plain Trojan on a public IP is not supported by the official Xray core.';
+   const capability=catalog.find(x=>x.protocol===f('protocol').value&&x.network===network&&x.security===security);
+   if(capability?.client_requirement==='plain_tcp_compatible_client')$('#profileCompatibility').textContent='Plain TCP: no TLS or Reality. Requires a compatible client; recent official Xray clients reject unencrypted VLESS and Trojan on public IPs.';
   };
   const syncNetwork=()=>{
    if(previousNetwork)pathValues[previousNetwork]=f('path').value;

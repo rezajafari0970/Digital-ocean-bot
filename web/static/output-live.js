@@ -13,7 +13,7 @@ async function refresh(){
   const response=await fetch(url,{cache:'no-store',signal:controller.signal});
   if(!response.ok)throw Error('Output unavailable');
   const text=await response.text(),lines=text.trim()?text.trim().split(/\r?\n/):[];
-  if(lines.some(x=>!/^(?:vless|trojan):\/\/[^\s]+$/.test(x)))throw Error('Invalid Output');
+  if(lines.some(x=>!/^(?:vless|trojan|vmess|ss):\/\/[^\s]+$/.test(x)))throw Error('Invalid Output');
   // Status is separate from the copyable URI block and hidden when it has data.
   // A page hidden during a request must not republish stale credentials.
   out.textContent=document.hidden?'':lines.length?lines.join('\n')+'\n':'';

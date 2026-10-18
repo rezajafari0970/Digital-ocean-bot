@@ -68,7 +68,7 @@ func (s Service) confirmNative(ctx context.Context, p Profile, panel string, rem
 			if cl.ExpiresAt > 0 {
 				expires = time.UnixMilli(cl.ExpiresAt)
 			}
-			if _, e := tx.ExecContext(ctx, "UPDATE config_driver_clients SET expires_at=$4,publish=$5 WHERE profile_id=$1 AND panel_id=$2 AND client_id=$3", p.ID, panel, cl.ID, expires, !cl.PolicySet || cl.Publish); e != nil {
+			if _, e := tx.ExecContext(ctx, "UPDATE config_driver_clients SET expires_at=$4,publish=$5,confirmed=true WHERE profile_id=$1 AND panel_id=$2 AND client_id=$3", p.ID, panel, cl.ID, expires, !cl.PolicySet || cl.Publish); e != nil {
 				return e
 			}
 		}

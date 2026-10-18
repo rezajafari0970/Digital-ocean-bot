@@ -2,6 +2,7 @@ package configplane
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -17,7 +18,7 @@ func managedClientPolicies(c configdriver.Credentials) bool {
 	return false
 }
 func globalPolicyMatches(cl configdriver.Client, live sanaei.GlobalClient) bool {
-	return live.UUID == cl.ID && live.Email == cl.Email && live.ExpiryTime == cl.ExpiresAt && live.TotalGB == cl.QuotaBytes && live.LimitHWID == cl.DeviceLimit
+	return live.UUID == cl.ID && live.Email == cl.Email && live.ExpiryTime == cl.ExpiresAt && live.TotalGB == cl.QuotaBytes && live.LimitHWID == cl.DeviceLimit && live.Flow == cl.Flow
 }
 func ownedGlobalPolicies(c configdriver.Credentials, users []sanaei.GlobalClient) (map[string]sanaei.GlobalClient, error) {
 	owned := map[string]bool{}
@@ -128,5 +129,33 @@ func globalPolicyPayload(current map[string]any, cl configdriver.Client) map[str
 	out["expiryTime"] = cl.ExpiresAt
 	out["totalGB"] = cl.QuotaBytes
 	out["limitHwid"] = cl.DeviceLimit
+	out["flow"] = cl.Flow
 	return out
+}
+
+// A v3 inbound update preserves the existing global Flow. Complete its explicit
+// policy SET only after a durable SENT journal and exact membership observation.
+// Full observation after fresh read remains mandatory for native confirmation.
+func (s Service) observeJournaledWrite(ctx context.Context, panel string, rt *sanaei.PanelRuntime, raws []json.RawMessage, payload map[string]any, remote int64, credentials configdriver.Credentials) ([]json.RawMessage, int64, error) {
+	id, e := configdriver.Observe(raws, payload, remote, credentials)
+	if e == nil && id > 0 {
+		return raws, id, nil
+	}
+	id, e = configdriver.ObservePendingFlow(raws, payload, remote, credentials)
+	if e != nil || id == 0 {
+		return raws, 0, errors.New("profile_write_outcome_unconfirmed")
+	}
+	if e = s.applyGlobalPolicies(ctx, panel, rt.Session.Exec, credentials); e != nil {
+		return raws, 0, e
+	}
+	rt.Session.Invalidate()
+	raws, e = rt.Session.FreshSnapshot(ctx)
+	if e != nil {
+		return raws, 0, errors.New("profile_write_outcome_unconfirmed")
+	}
+	id, e = configdriver.Observe(raws, payload, remote, credentials)
+	if e != nil || id == 0 {
+		return raws, 0, errors.New("profile_write_outcome_unconfirmed")
+	}
+	return raws, id, nil
 }

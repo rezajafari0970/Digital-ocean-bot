@@ -13,6 +13,7 @@ type GlobalClient struct {
 	Traffic    *ClientTraffic `json:"traffic"`
 	UUID       string         `json:"uuid"`
 	Email      string         `json:"email"`
+	Flow       string         `json:"flow"`
 	Enable     bool           `json:"enable"`
 	TotalGB    int64          `json:"totalGB"`
 	ExpiryTime int64          `json:"expiryTime"`

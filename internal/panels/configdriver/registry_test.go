@@ -80,3 +80,25 @@ func mapPort(t *testing.T, raw []byte) map[string]any {
 	}
 	return v
 }
+
+func TestPlainTCPServerCatalogKeepsClientCompatibilityExplicit(t *testing.T) {
+	r := Builtins()
+	seen := map[string]bool{}
+	for _, c := range r.Catalog() {
+		if c.Network != "tcp" || c.Security != "none" {
+			continue
+		}
+		seen[c.Protocol] = true
+		if !c.Public {
+			t.Fatal("server capability hidden", c.ID)
+		}
+		if (c.Protocol == "vless" || c.Protocol == "trojan") && c.ClientRequirement != "plain_tcp_compatible_client" {
+			t.Fatal("client restriction hidden", c.ID)
+		}
+	}
+	for _, p := range []string{"vless", "trojan", "vmess", "shadowsocks"} {
+		if !seen[p] {
+			t.Fatal("missing plain TCP", p)
+		}
+	}
+}

@@ -22,7 +22,7 @@ func TestBatchProofRejectsMixedOrIncompleteResponses(t *testing.T) {
 // membership must neither succeed nor prevent a valid sibling from completing.
 func TestRuntimeBatchExecutesChecksAndIsolatesFailures(t *testing.T) {
 	script := `
-import ast,pathlib,json,hashlib,types
+import ast,pathlib,json,hashlib,types,io
 source=pathlib.Path('runtime_batch.py').read_text();tree=ast.parse(source)
 ns={};exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef))],type_ignores=[]),'runtime_batch.py','exec'),ns)
 core='/usr/local/x-ui/bin/xray-linux-amd64'
@@ -37,6 +37,7 @@ class P:
  def resolve(self):return self
  def is_absolute(self):return self.p.startswith('/')
  def __eq__(self,o):return isinstance(o,P) and self.p==o.p
+ def open(self,mode):return io.BytesIO(b'approved')
  def read_bytes(self):
   if self.p.endswith('cmdline'):return b'xray\0-c\0/usr/local/x-ui/bin/config.json\0'
   return b'approved'
@@ -51,10 +52,12 @@ ns['subprocess']=types.SimpleNamespace(run=lambda *a,**k:types.SimpleNamespace(r
 w={'profile_id':'good','port':17459,'core_hashes':[hashlib.sha256(b'approved').hexdigest()],'tag':'owned','emails':['owned'],'probes':[],'probe_classes':[]}
 bad=dict(w,profile_id='bad',emails=['missing'])
 from concurrent.futures import ThreadPoolExecutor
-with ThreadPoolExecutor(max_workers=2) as pool:out=list(pool.map(ns['run_job'],[bad,w]))
+observation=ns['observe_runtime']()
+ns['observe_runtime']=lambda: (_ for _ in ()).throw(AssertionError('runtime reread within batch'))
+with ThreadPoolExecutor(max_workers=2) as pool:out=list(pool.map(lambda x:ns['run_job'](x,observation),[bad,w]))
 assert out[0]['reason']=='users' and not out[0]['verified'],out
 assert out[1]['verified'] and out[1]['reason']=='',out
-assert not ns['run_job'](dict(w,core_hashes=['unknown']))['verified']
+assert not ns['run_job'](dict(w,core_hashes=['unknown']),observation)['verified']
 `
 	if out, e := exec.Command("python3", "-c", script).CombinedOutput(); e != nil {
 		t.Fatalf("batch runtime: %v %s", e, out)

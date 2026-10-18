@@ -116,6 +116,13 @@ func TestConfigProfileAdoptionPreservesNativeCredentials(t *testing.T) {
 	if e = os.WriteFile(filepath.Join(dir, "000186_independent_profile_controls.up.sql"), controls, 0600); e != nil {
 		t.Fatal(e)
 	}
+	confirmation, e := os.ReadFile("../../migrations/000187_profile_client_confirmation.up.sql")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile(filepath.Join(dir, "000187_profile_client_confirmation.up.sql"), confirmation, 0600); e != nil {
+		t.Fatal(e)
+	}
 	if e := (migrate.Runner{DB: db, Dir: dir, PreserveData: true}).Up(ctx); e != nil {
 		t.Fatal("production-preserving migration", e)
 	}

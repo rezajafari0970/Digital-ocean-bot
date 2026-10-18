@@ -43,3 +43,8 @@ test('mixed Reality and Trojan output keeps both complete country names',async()
  const lines='vless://id@192.0.2.1:443?security=reality#Germany\n'+'trojan://secret@192.0.2.1:8443?security=tls&type=tcp#Germany\n';
  const h=harness([lines]);await h.settle();assert.equal(h.out.textContent,lines);assert.equal(h.status.hidden,true);
 });
+
+test('all registered output protocols coexist without discarding siblings',async()=>{
+ const lines=['vless://id@192.0.2.1:443?security=reality#Germany','trojan://secret@192.0.2.1:8443?security=tls&type=tcp#Germany','vmess://eyJ2IjoiMiJ9','ss://YWVzLTEyOC1nY206c2VjcmV0@192.0.2.1:10001#Germany'].join('\n')+'\n';
+ const h=harness([lines]);await h.settle();assert.equal(h.out.textContent,lines);assert.equal(h.status.hidden,true);
+});

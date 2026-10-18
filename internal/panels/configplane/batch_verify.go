@@ -3,11 +3,11 @@ package configplane
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -24,7 +24,8 @@ import (
 //go:embed runtime_batch.py
 var runtimeBatchScript string
 
-// One wave of four jobs fits the 45-second worker deadline even when peers time out.
+// Two bounded waves amortize native observation and SSH. Each profile and class
+// keeps its own result; the worker deadline includes both waves and public probes.
 
 type batchCandidate struct {
 	id, ref, remark, account string
@@ -50,22 +51,9 @@ type batchResult struct {
 // independent profiles. One profile or route failure never aborts its siblings.
 // Each published class still requires authenticated traffic and public reachability.
 func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) error {
-	lease, e := s.DB.Conn(ctx)
-	if e != nil {
-		return e
-	}
-	defer lease.Close()
-	var held bool
-	if e = lease.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,0))", "config-profile-proof:"+panel).Scan(&held); e != nil || !held {
-		return e
-	}
-	defer func() {
-		c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
-		defer cancel()
-		if _, err := lease.ExecContext(c, "SELECT pg_advisory_unlock_all()"); err != nil {
-			_ = lease.Raw(func(any) error { return driver.ErrBadConn })
-		}
-	}()
+	// withPanelLock is the exclusive per-panel fence for this entire proof.
+	// A second session-level advisory lock held no extra invariant and doubled
+	// long-lived SQL occupancy while SSH and client traffic were running.
 	t, e := s.listenerTarget(ctx, panel)
 	if e != nil {
 		return e
@@ -87,7 +75,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 			}
 			rows, e := s.DB.QueryContext(ctx, `SELECT l.profile_id::text,l.credential_ref,l.managed_key,pi.account_id::text,l.remote_id,l.applied_spec,l.certificate_not_after
  FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
- WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.next_attempt_at,l.profile_id LIMIT 4`, panel, claimedProfile)
+ WHERE l.panel_id=$1 AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state='CONFIRMED' AND NOT l.needs_reconcile AND (l.next_attempt_at<=now() OR l.profile_id::text=$2) AND `+Eligible+` ORDER BY (l.profile_id::text=$2) DESC,l.next_attempt_at,l.profile_id LIMIT 8`, panel, claimedProfile)
 			if e != nil {
 				return e
 			}
@@ -337,6 +325,13 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					}
 					if !current {
 						return nil
+					}
+					observedIDs := []string{}
+					for _, client := range j.credentials.Clients {
+						observedIDs = append(observedIDs, client.ID)
+					}
+					if _, e := tx.ExecContext(ctx, "UPDATE config_driver_clients SET confirmed=true WHERE profile_id=$1 AND panel_id=$2 AND client_id=ANY($3::text[]) AND NOT confirmed", j.p.ID, panel, pq.Array(observedIDs)); e != nil {
+						return e
 					}
 					for _, class := range j.p.Classes {
 						var verified any
