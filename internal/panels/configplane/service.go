@@ -75,7 +75,7 @@ func (s Service) run(ctx context.Context, verify bool) error {
  JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
  WHERE l.next_attempt_at<=now() AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
  AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
- AND `+lane+` ORDER BY l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l SKIP LOCKED LIMIT 1)
+ AND `+lane+` ORDER BY l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id FOR UPDATE OF l SKIP LOCKED LIMIT 1)
  UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds'
  FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id::text,l.panel_id::text`).Scan(&id, &panel)
 	if errors.Is(e, sql.ErrNoRows) {

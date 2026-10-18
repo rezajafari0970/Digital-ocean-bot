@@ -31,6 +31,7 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	nextID := int64(20)
 	writes, deletes := 0, 0
 	dropReads, dropAfterDelete, failProof := false, false, true
+	verifiedTags := []string{}
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
@@ -106,7 +107,8 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	sqlMust(t, db, "UPDATE droplets SET expires_at=now()+interval '5 minutes' WHERE id=$1", droplet)
 	sqlMust(t, db, "UPDATE client_mutation_execution_gate SET enabled=true,kill_switch=false,concurrency=1,panel_id=NULL,inbound_id=NULL")
 	secrets := &trojanTestSecrets{values: map[string][]byte{}}
-	svc := configplane.Service{DB: db, Secrets: secrets, SSH: &trojanTestSSH{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: secrets, Timeout: time.Second}}, Verify: func(context.Context, provisioning.Target, []byte, map[string]any) error {
+	svc := configplane.Service{DB: db, Secrets: secrets, SSH: &trojanTestSSH{}, Runtimes: &sanaei.RuntimeManager{Factory: sanaei.RuntimeFactory{DB: db, Secrets: secrets, Timeout: time.Second}}, Verify: func(_ context.Context, _ provisioning.Target, _ []byte, payload map[string]any) error {
+		verifiedTags = append(verifiedTags, payload["remark"].(string))
 		if failProof {
 			return errors.New("temporary traffic failure")
 		}
@@ -205,6 +207,15 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	}
 	if e := svc.Reconcile(ctx, sibling.ID, panel); e != nil {
 		t.Fatal(e)
+	}
+	// An overdue first proof/retry must not wait behind a later scheduled refresh.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '2 minutes',attempted_at=now() WHERE profile_id=$1", p.ID)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 minute',attempted_at=now()-interval '10 minutes' WHERE profile_id=$1", sibling.ID)
+	if e := svc.RunVerifyOne(ctx); e != nil {
+		t.Fatal("due proof", e)
+	}
+	if verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
+		t.Fatal("overdue proof starved behind scheduled refresh")
 	}
 	var siblingRemote int64
 	if e := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1", sibling.ID).Scan(&siblingRemote); e != nil {

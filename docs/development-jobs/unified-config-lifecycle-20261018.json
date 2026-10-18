@@ -63,7 +63,7 @@
     "One-time durable reset retires prior configs and closes legacy creation permanently; cleanup per panel releases that panel independently",
     "One simple card per profile, exact publication counts and understandable per-server retry state"
   ],
-  "updated_at": "2026-10-18T04:24:47.924803+00:00",
+  "updated_at": "2026-10-18T04:29:32.463935+00:00",
   "validation": {
     "required_database_regressions": {
       "passed": 31,
@@ -90,7 +90,19 @@
       ]
     },
     "native_initial_result": "15/16 passed; gRPC Reality transient traffic proof needs bounded observation recovery",
-    "near_expiry_enrolment": "PASS: RunOne enrolls the same eligible 5-minute server counted by status"
+    "near_expiry_enrolment": "PASS: RunOne enrolls the same eligible 5-minute server counted by status",
+    "due_order": "PASS: oldest due retry is claimed before a later scheduled refresh",
+    "live_canary": {
+      "server_count": 1,
+      "profiles": 2,
+      "protocols": [
+        "vless/tcp/reality",
+        "shadowsocks/tcp/none"
+      ],
+      "published": 2,
+      "ready": 2,
+      "resize": "in_progress"
+    }
   },
   "first_release": "b2922aa2e3b435fe6514f277bdc75bc6d4c6db7e"
 }
