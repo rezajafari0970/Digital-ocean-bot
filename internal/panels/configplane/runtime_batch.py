@@ -45,7 +45,7 @@ def observe_runtime():
  return core,config,expected_hash,ports
 
 def run_job(want,observation=None):
- class_proofs={};core_current=None
+ class_proofs={};class_diagnostics={};core_current=None
  def check():
   nonlocal stage,core_current
   stage="binary"
@@ -94,7 +94,9 @@ def run_job(want,observation=None):
        if time.monotonic()>deadline:return False
        time.sleep(.05)
      probe_host,probe_path=targets[index]
-     return probe_profile_https(port,probe_host,probe_path)
+     detail={}
+     class_diagnostics[classes[index]]=detail
+     return probe_profile_https(port,probe_host,probe_path,detail)
     except Exception:return False
    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
     results=list(pool.map(probe,range(len(ports))))
@@ -109,7 +111,7 @@ def run_job(want,observation=None):
  verified=False
  try:verified=check()
  except Exception:pass
- return {'profile_id':want['profile_id'],'verified':verified,'reason':'' if verified else stage,'classes':class_proofs,'core_current':core_current}
+ return {'profile_id':want['profile_id'],'verified':verified,'reason':'' if verified else stage,'classes':class_proofs,'class_diagnostics':class_diagnostics,'core_current':core_current}
 
 jobs=json.load(sys.stdin)
 if not isinstance(jobs,list) or len(jobs)>64:raise ValueError('invalid batch')

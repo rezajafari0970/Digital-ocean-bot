@@ -143,6 +143,12 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   assert.equal(await evaluate("profileServerStatus({state:'APPLYING',stage:'deleting',removing:true,applied_revision:1,desired_revision:2})"),'Removing clients and listener');
   assert.equal(await evaluate("profileServerStatus({state:'RETIRED',removing:true,code:'profile_delete_unverified'})"),'Removed');
   mark('deletion status overrides revision drift and obsolete connection errors');
+  for(const [code,label] of [['profile_routes_refresh_pending','Refreshing verified routes; output resumes automatically'],['profile_output_refresh_pending','Refreshing the native output snapshot'],['profile_output_disabled','Publication is disabled in this profile’s settings']]){
+   const value={state:'VERIFIED',applied_revision:1,desired_revision:1,verified_at:new Date().toISOString(),publication_code:code};
+   assert.equal(await evaluate('profileServerStatus('+JSON.stringify(value)+')'),label);
+   assert.equal(await evaluate('profileServerStatus('+JSON.stringify({...value,removing:true})+')'),'Queued for removal');
+  }
+  mark('verified runtime exposes publication hold and deletion keeps precedence');
 
   const reviewed=catalog.profiles.map(x=>({id:x.profile.id,revision:x.profile.revision}));
   await evaluate("document.querySelector('[data-delete-all-profiles]').click()");await waitFor("document.querySelector('#modal').open");assert.equal(deletions.length,1);

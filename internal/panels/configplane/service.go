@@ -49,7 +49,16 @@ func (s Service) target(ctx context.Context, id, panel string) (target, error) {
 func (s Service) RunOne(ctx context.Context) error       { return s.run(ctx, false, false) }
 func (s Service) RunVerifyOne(ctx context.Context) error { return s.run(ctx, true, false) }
 func (s Service) RunDeleteOne(ctx context.Context) error { return s.run(ctx, false, true) }
+
+// Recovery consumers are bounded separately by the worker assignment. They
+// prioritize missing/failed evidence; ordinary consumers keep oldest-proof order.
+func (s Service) RunVerifyRecoveryOne(ctx context.Context) error {
+	return s.runPrioritized(ctx, true, false, true)
+}
 func (s Service) run(ctx context.Context, verify, deleting bool) error {
+	return s.runPrioritized(ctx, verify, deleting, false)
+}
+func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery bool) error {
 	// Enrolment is idempotent. Claim due rows atomically so parallel workers do
 	// not repeatedly select the same slow server.
 	if !verify && !deleting {
@@ -80,6 +89,10 @@ func (s Service) run(ctx context.Context, verify, deleting bool) error {
 		// retries must not move stale evidence behind healthy routine refreshes.
 		order = "l.verified_at NULLS FIRST,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.profile_id,l.panel_id"
 	}
+	if recovery {
+		lane += " AND (l.error_code<>'' OR l.verified_at IS NULL OR l.state='BLOCKED')"
+		order = "l.next_attempt_at,l.verified_at NULLS FIRST,cp.last_scheduled_at NULLS FIRST,l.profile_id,l.panel_id"
+	}
 	var id, panel string
 	claim, e := sanaei.UUIDv4()
 	if e != nil {
@@ -95,6 +108,9 @@ func (s Service) run(ctx context.Context, verify, deleting bool) error {
  FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
  SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
 	if errors.Is(e, sql.ErrNoRows) {
+		if recovery {
+			return s.runPrioritized(ctx, true, false, false)
+		}
 		return nil
 	}
 	if e != nil {

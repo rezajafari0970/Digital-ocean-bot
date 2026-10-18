@@ -18,12 +18,13 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
-    "cmd/worker": ("TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
+    "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
+    "cmd/worker": ("TestProofBusyIsDeferredWithoutFailure","TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
     "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
-    "internal/panels/configplane": ("TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
+    "internal/panels/configplane": ("TestTrafficProofRetriesTransientFailuresWithoutWeakeningTLS","TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
-    "internal/panels/residentialsync": ("TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),
+    "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix"),
     "internal/adminapi": (
         "TestUnifiedProfileResizeDeleteAndRecovery",
         "TestUnifiedProfileCreationIdempotency",

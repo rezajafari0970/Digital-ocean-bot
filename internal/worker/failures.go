@@ -102,6 +102,16 @@ func (s FailureStore) RecordOwnedOutcome(ctx context.Context, kind, item, accoun
 	return tx.Commit()
 }
 
+// DeferOwnedOutcome releases only this claim after neutral scheduling contention.
+// It preserves the real failure history and cannot overwrite a replacement owner.
+func (s FailureStore) DeferOwnedOutcome(ctx context.Context, kind, item string, lease OutcomeReservation, delay time.Duration) error {
+	if s.DB == nil || lease.Version.IsZero() || delay < time.Second || delay > time.Minute {
+		return errors.New("invalid outcome deferral")
+	}
+	_, err := s.DB.ExecContext(ctx, "UPDATE worker_item_failures SET next_retry_at=clock_timestamp()+($4*interval '1 millisecond') WHERE kind=$1 AND item_id=$2 AND next_retry_at=$3", kind, item, lease.Version, delay.Milliseconds())
+	return err
+}
+
 // RecordOutcome reports essential writes and enforces cancellation-aware pacing
 // when no durable retry can be stored. Native ambiguity guards remain separate.
 func (s FailureStore) RecordOutcome(ctx context.Context, kind, item, account string, cause error) error {

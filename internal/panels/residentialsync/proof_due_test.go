@@ -50,8 +50,19 @@ func TestProofRechecksDueAfterQueuedOwnership(t *testing.T) {
 		})
 	}()
 	<-held
+	started := time.Now()
+	if e := svc.ReconcileDuePanel(ctx, readyworker.Panel{ID: id}, true); !errors.Is(e, ErrProofBusy) {
+		t.Fatal("busy background proof did not yield", e)
+	}
+	if time.Since(started) > time.Second {
+		t.Fatal("busy proof waited for its native deadline")
+	}
+	var state string
+	if e := db.QueryRow("SELECT state FROM panel_routing_state WHERE panel_id=$1", id).Scan(&state); e != nil || state != "APPLIED" {
+		t.Fatal("contention invented negative route evidence", state, e)
+	}
 	done := make(chan error, 1)
-	go func() { done <- svc.ReconcileDuePanel(ctx, readyworker.Panel{ID: id}, true) }()
+	go func() { done <- svc.ReconcilePanel(ctx, readyworker.Panel{ID: id}, false) }()
 	for {
 		var queued bool
 		e := db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM pg_locks WHERE locktype='advisory' AND NOT granted AND classid::bigint=((hashtextextended($1,0)>>32)&4294967295) AND objid::bigint=(hashtextextended($1,0)&4294967295))`, "panel-config:"+id).Scan(&queued)

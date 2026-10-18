@@ -18,6 +18,9 @@ import (
 	"time"
 )
 
+// ErrProofBusy is neutral scheduling contention, never negative route evidence.
+var ErrProofBusy = errors.New("routing proof panel busy")
+
 type Secrets interface {
 	sanaei.RuntimeSecrets
 	GetResidential(context.Context, string, string) ([]byte, error)
@@ -49,7 +52,7 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 		return err
 	}
 
-	return sanaei.WithConfigLock(ctx, s.DB, p.ID, func(ctx context.Context) (err error) {
+	attempt := func(ctx context.Context) (err error) {
 		attempted := false
 		defer func() {
 			if err != nil && attempted {
@@ -79,7 +82,17 @@ func (s Service) reconcilePanel(ctx context.Context, p readyworker.Panel, dry bo
 			attempted = true
 			return s.apply(ctx, p.ID, rt)
 		})
-	})
+	}
+	// Background proof consumers must not spend their native deadline waiting
+	// behind a writer or a slow profile probe. Manual reconciliation may still wait.
+	if serving == nil {
+		return sanaei.WithConfigLock(ctx, s.DB, p.ID, attempt)
+	}
+	held, err := sanaei.TryWithConfigLock(ctx, s.DB, p.ID, attempt)
+	if err == nil && !held {
+		return ErrProofBusy
+	}
+	return err
 }
 
 // Never consult the failure-ledger exclusion here: this attempt owns that

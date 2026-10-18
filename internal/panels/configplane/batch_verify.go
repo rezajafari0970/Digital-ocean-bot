@@ -42,11 +42,12 @@ type batchJob struct {
 	input       map[string]any
 }
 type batchResult struct {
-	CoreCurrent *bool           `json:"core_current"`
-	ID          string          `json:"profile_id"`
-	Verified    bool            `json:"verified"`
-	Reason      string          `json:"reason"`
-	Classes     map[string]bool `json:"classes"`
+	CoreCurrent *bool                        `json:"core_current"`
+	ID          string                       `json:"profile_id"`
+	Verified    bool                         `json:"verified"`
+	Reason      string                       `json:"reason"`
+	Classes     map[string]bool              `json:"classes"`
+	Diagnostics map[string]trafficDiagnostic `json:"class_diagnostics"`
 }
 
 // VerifyPanel amortizes inventory, SSH and core startup across a panel's
@@ -234,6 +235,10 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					s.batchFailure(ctx, j.p.ID, panel, "profile_runtime_batch_invalid", false)
 				}
 				return err
+			}
+			for _, j := range jobs {
+				proof := results[j.p.ID]
+				logTrafficFailures(j.p.ID, panel, proof.Classes, proof.Diagnostics)
 			}
 			// Upgrade at most one listener per panel; its core is shared. A valid
 			// prior binary may finish traffic proof while its pinned successor queues.

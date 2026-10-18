@@ -365,6 +365,22 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if e := svc.RunVerifyOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+sibling.ID {
 		t.Fatal("older Shadowsocks proof lost its publication deadline", e)
 	}
+	// Recovery consumers repair a newly failed class ahead of routine work.
+	// Ordinary consumers still protect older positive proofs from starvation.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now()-interval '2 minutes',next_attempt_at=now()-interval '30 seconds',error_code='' WHERE profile_id=$1", p.ID)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now(),next_attempt_at=now()-interval '1 second',error_code='profile_class_traffic_retrying' WHERE profile_id=$1", sibling.ID)
+	if e := svc.RunVerifyRecoveryOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+sibling.ID {
+		t.Fatal("recovery waited behind a healthy routine proof", e)
+	}
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second',error_code='profile_class_traffic_retrying' WHERE profile_id=$1", sibling.ID)
+	if e := svc.RunVerifyOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
+		t.Fatal("recovery consumer assignment starved oldest routine proof", e)
+	}
+	sqlMust(t, db, "UPDATE config_driver_listeners SET error_code='',next_attempt_at=now()+interval '1 hour' WHERE panel_id=$1", panel)
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second' WHERE profile_id=$1", p.ID)
+	if e := svc.RunVerifyRecoveryOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
+		t.Fatal("idle recovery consumer did not help routine work", e)
+	}
 	busyService := svc
 	busyService.Verify = nil
 	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour' WHERE panel_id=$1", panel)
@@ -684,6 +700,18 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 		}
 		return d.Profiles[0]
 	}
+	readServer := func() map[string]any {
+		t.Helper()
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+		r.SetPathValue("id", p.ID)
+		api.configProfileServers(w, r)
+		var d struct{ Servers []map[string]any }
+		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &d) != nil || len(d.Servers) != 1 {
+			t.Fatal("server publication status", w.Code, w.Body.String())
+		}
+		return d.Servers[0]
+	}
 	item := read()
 	if item["ready"] != float64(0) || item["published"] != float64(0) || item["target"] != float64(2) {
 		t.Fatal("verified listener was incorrectly counted as published", item)
@@ -707,6 +735,16 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 		t.Fatal("fresh output count", item)
 	}
 
+	server := readServer()
+	if server["published"] != float64(2) || server["publication_target"] != float64(2) || server["publication_code"] != "" {
+		t.Fatal("server status diverged from actual output", server)
+	}
+	sqlMust(t, db, "UPDATE panel_routing_state SET verified_at=now()-interval '61 seconds' WHERE panel_id=$1", x.Panel)
+	server = readServer()
+	if server["published"] != float64(0) || server["publication_code"] != "profile_routes_refresh_pending" {
+		t.Fatal("stale route labeled published", server)
+	}
+	sqlMust(t, db, "UPDATE panel_routing_state SET verified_at=now() WHERE panel_id=$1", x.Panel)
 	sqlMust(t, db, "INSERT INTO config_driver_clients(profile_id,panel_id,client_id,email,route_class,confirmed) VALUES($1,$2,'pending-reservation','pending-email','DIRECT',false)", p.ID, x.Panel)
 	item = read()
 	stats := item["class_stats"].(map[string]any)["DIRECT"].(map[string]any)
@@ -717,6 +755,10 @@ func TestUnifiedStatusCountsActualPublishedOutput(t *testing.T) {
 	item = read()
 	if item["ready"] != float64(0) || item["published"] != float64(0) || item["verified"] != float64(1) {
 		t.Fatal("stale output counted as ready", item)
+	}
+	server = readServer()
+	if server["published"] != float64(0) || server["publication_code"] != "profile_output_refresh_pending" {
+		t.Fatal("stale snapshot labeled published", server)
 	}
 	sqlMust(t, db, "UPDATE accounts SET enabled=false WHERE id=$1", x.Account)
 	item = read()

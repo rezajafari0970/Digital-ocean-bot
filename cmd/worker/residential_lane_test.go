@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"sync"
 	"sync/atomic"
@@ -248,4 +249,46 @@ func TestProofClaimFailurePacesOutsideAdmission(t *testing.T) {
 			t.Fatal(next, progress, e)
 		}
 	})
+}
+
+// Neutral contention joins its receipt and releases admission, without becoming
+// a failed panel or consuming the next healthy panel's turn.
+func TestProofBusyIsDeferredWithoutFailure(t *testing.T) {
+	budget := worker.NewWorkBudget(1)
+	metrics := &proofLaneMetrics{}
+	calls, receipts := 0, 0
+	lane := proofLane{admit: budget.Do, metrics: metrics,
+		discover: func(context.Context, string) (readyworker.Panel, bool, error) {
+			calls++
+			return readyworker.Panel{ID: fmt.Sprint(calls)}, true, nil
+		},
+		reserve: func(context.Context, readyworker.Panel) (worker.OutcomeReservation, bool, error) {
+			return worker.OutcomeReservation{Version: time.Now()}, true, nil
+		},
+		reconcile: func(context.Context, readyworker.Panel) error {
+			if calls == 1 {
+				return residentialsync.ErrProofBusy
+			}
+			return nil
+		},
+		complete: func(_ context.Context, _ readyworker.Panel, _ worker.OutcomeReservation, e error) error {
+			if budget.Snapshot()["active"] != 1 {
+				t.Error("permit released before deferral receipt")
+			}
+			receipts++
+			if receipts == 1 && !errors.Is(e, residentialsync.ErrProofBusy) {
+				t.Error("deferral reason lost", e)
+			}
+			return nil
+		},
+	}
+	for i := 0; i < 2; i++ {
+		next, progress, e := lane.attempt(context.Background(), "")
+		if e != nil || !progress || next != "" {
+			t.Fatal(next, progress, e)
+		}
+	}
+	if metrics.deferred.Load() != 1 || metrics.failed.Load() != 0 || metrics.completed.Load() != 1 || receipts != 2 || budget.Snapshot()["active"] != 0 {
+		t.Fatal("wrong contention accounting", metrics.snapshot(), receipts, budget.Snapshot())
+	}
 }

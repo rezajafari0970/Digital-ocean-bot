@@ -614,6 +614,9 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					},
 					reconcile: func(c context.Context, p readyworker.Panel) error { return syncer.ReconcileDuePanel(c, p, serving) },
 					complete: func(c context.Context, p readyworker.Panel, l worker.OutcomeReservation, e error) error {
+						if errors.Is(e, residentialsync.ErrProofBusy) {
+							return failures.DeferOwnedOutcome(c, "residential_sync", p.ID, l, 2*time.Second)
+						}
 						return failures.RecordOwnedOutcome(c, "residential_sync", p.ID, "", l, e)
 					},
 				}

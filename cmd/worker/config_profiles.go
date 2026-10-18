@@ -46,7 +46,13 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 					duration = 2 * time.Minute
 				}
 				if strings.Contains(name, "verify") {
-					e = runConfigProfileWork(work, verify.Do, duration, service.RunVerifyOne)
+					run := service.RunVerifyOne
+					// Two of eight consumers recover failed classes promptly. Six retain
+					// deadline order so a failing provider cannot starve healthy refreshes.
+					if name == "profiles-verify-0" || name == "profiles-verify-1" {
+						run = service.RunVerifyRecoveryOne
+					}
+					e = runConfigProfileWork(work, verify.Do, duration, run)
 				} else if strings.Contains(name, "delete") {
 					e = runConfigProfileWork(work, remove.Do, duration, service.RunDeleteOne)
 				} else {

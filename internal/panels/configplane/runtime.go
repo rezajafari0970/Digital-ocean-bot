@@ -7,7 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportcore"
@@ -69,11 +72,15 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 	command := "python3 -c \"import base64;exec(base64.b64decode('" + base64.StdEncoding.EncodeToString([]byte(runtimeScript)) + "'))\""
 	out, err := ssh.RunInput(ctx, t, key, command, input)
 	var result struct {
-		Verified bool
-		Reason   string
-		Classes  map[string]bool
+		Verified    bool
+		Reason      string
+		Classes     map[string]bool
+		Diagnostics map[string]trafficDiagnostic `json:"class_diagnostics"`
 	}
 	decodeErr := json.Unmarshal([]byte(out.Stdout), &result)
+	if decodeErr == nil {
+		logTrafficFailures("", t.DropletID, result.Classes, result.Diagnostics)
+	}
 	if err != nil || decodeErr != nil || !result.Verified {
 		switch result.Reason {
 		case "binary", "socket", "users", "traffic":
@@ -111,4 +118,33 @@ func profileCoreHashes() []string {
 		"d39f86129ec689fe7791365de08017c0b3ba0acb231467eac6da92f938c530a8",
 		"c4ae6798c38e0e5343b192406746333cd0ba7ff3eb984f8c4b9939dcb68c3f8a",
 		"c1defe42b6db958a97c5e049a02a00a4baaedaca7b51c1c229f0830e288acef5")
+}
+
+type trafficDiagnostic struct {
+	Code     string `json:"code"`
+	Attempts int    `json:"attempts"`
+}
+
+// Diagnostics explain withheld evidence; they never participate in acceptance.
+func (d trafficDiagnostic) safe() bool {
+	if d.Attempts < 1 || d.Attempts > 2 {
+		return false
+	}
+	switch d.Code {
+	case "ok", "empty_body", "tls_certificate", "timeout", "transport":
+		return true
+	}
+	if strings.HasPrefix(d.Code, "http_") && len(d.Code) == 8 {
+		n, e := strconv.Atoi(d.Code[5:])
+		return e == nil && n >= 100 && n <= 599
+	}
+	return false
+}
+func logTrafficFailures(profile, target string, classes map[string]bool, details map[string]trafficDiagnostic) {
+	for _, class := range []string{"DIRECT", "RESIDENTIAL"} {
+		d, ok := details[class]
+		if ok && !classes[class] && d.safe() {
+			log.Printf("config traffic proof profile=%s target=%s class=%s code=%s attempts=%d", profile, target, class, d.Code, d.Attempts)
+		}
+	}
 }

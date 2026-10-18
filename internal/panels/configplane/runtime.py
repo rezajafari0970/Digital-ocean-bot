@@ -1,7 +1,7 @@
 # Credentials arrive only over encrypted stdin, never argv, disk or logs.
 import hashlib,http.client,json,os,pathlib,socket,ssl,subprocess,sys,time,platform,concurrent.futures
 want=json.load(sys.stdin)
-class_proofs={}
+class_proofs={};class_diagnostics={}
 def sha(v):return hashlib.sha256(v).hexdigest()
 def probe_targets(probes,classes):
  # This is the same destination contract as route verification. Residential
@@ -82,7 +82,9 @@ def check():
       if time.monotonic()>deadline:return False
       time.sleep(.05)
     probe_host,probe_path=targets[index]
-    return probe_profile_https(port,probe_host,probe_path)
+    detail={}
+    class_diagnostics[classes[index]]=detail
+    return probe_profile_https(port,probe_host,probe_path,detail)
    except Exception:return False
   with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
    results=list(pool.map(probe,range(len(ports))))
@@ -97,5 +99,5 @@ stage="initial"
 verified=False
 try:verified=check()
 except Exception:pass
-print(json.dumps({'verified':verified,'reason':'' if verified else stage,'classes':class_proofs},separators=(',',':')))
+print(json.dumps({'verified':verified,'reason':'' if verified else stage,'classes':class_proofs,'class_diagnostics':class_diagnostics},separators=(',',':')))
 raise SystemExit(0 if verified else 1)

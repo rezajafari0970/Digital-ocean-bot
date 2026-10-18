@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/residentialsync"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
@@ -53,7 +54,9 @@ func (l proofLane) attempt(ctx context.Context, after string) (next string, prog
 		stop()
 		if l.metrics != nil {
 			l.metrics.reconcile.observe(time.Since(started))
-			if result != nil {
+			if errors.Is(result, residentialsync.ErrProofBusy) {
+				l.metrics.deferred.Add(1)
+			} else if result != nil {
 				l.metrics.failed.Add(1)
 			} else {
 				l.metrics.completed.Add(1)
@@ -72,6 +75,9 @@ func (l proofLane) attempt(ctx context.Context, after string) (next string, prog
 		// Return to oldest-due selection after every claimed attempt, including failures.
 		next = ""
 		progress = true
+		if errors.Is(result, residentialsync.ErrProofBusy) {
+			return nil
+		}
 		return result
 	})
 	return
@@ -137,10 +143,10 @@ func (d *proofDuration) snapshot() map[string]any {
 }
 
 type proofLaneMetrics struct {
-	wait, attempt, reconcile proofDuration
-	completed, failed        atomic.Int64
+	wait, attempt, reconcile    proofDuration
+	completed, failed, deferred atomic.Int64
 }
 
 func (m *proofLaneMetrics) snapshot() map[string]any {
-	return map[string]any{"admission_wait": m.wait.snapshot(), "admitted_attempt": m.attempt.snapshot(), "reconciliation": m.reconcile.snapshot(), "completed": m.completed.Load(), "failed": m.failed.Load()}
+	return map[string]any{"admission_wait": m.wait.snapshot(), "admitted_attempt": m.attempt.snapshot(), "reconciliation": m.reconcile.snapshot(), "completed": m.completed.Load(), "failed": m.failed.Load(), "deferred": m.deferred.Load()}
 }

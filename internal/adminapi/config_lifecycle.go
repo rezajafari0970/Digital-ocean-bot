@@ -3,6 +3,7 @@ package adminapi
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"github.com/lib/pq"
 	"io"
 	"net/http"
@@ -254,11 +255,44 @@ func (s *Server) deleteConfigProfile(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 202, map[string]any{"id": p.ID, "state": "deleting"})
 }
 
+// Server details use the same publication predicate as subscriptions and totals.
+// Runtime verification alone must never be labeled as fully published output.
 func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
-	rows, e := s.DB.QueryContext(r.Context(), `SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision,l.attempted_at,l.stage_started_at,COALESCE(l.failures,0),COALESCE(l.applied_spec->>'sni',''),(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR pi.id=ANY(cp.panel_ids)))
- FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN deployments dep ON dep.droplet_id=dr.id
- LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id
- WHERE cp.id=$1 AND cp.deleted_at IS NULL AND dr.state IN('READY','EXPIRING') AND (cp.fleet OR pi.id=ANY(cp.panel_ids) OR l.profile_id IS NOT NULL) ORDER BY dep.host`, r.PathValue("id"))
+	ctx := r.Context()
+	tx, e := s.DB.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+	if e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	defer tx.Rollback()
+	profile, e := configplane.Read(ctx, tx, r.PathValue("id"))
+	if errors.Is(e, sql.ErrNoRows) {
+		writeJSON(w, 404, errorBody())
+		return
+	}
+	if e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	where, _ := outputPublicationFilter("ALL")
+	rows, e := tx.QueryContext(ctx, `WITH published AS (
+ SELECT o.panel_id,count(DISTINCT o.client_id) n FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id
+ JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id
+ CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id
+ LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id `+where+` AND o.config_profile_id=$1 GROUP BY o.panel_id
+ )
+ SELECT pi.id::text,COALESCE(dep.host,''),COALESCE(l.state,'PENDING'),COALESCE(l.stage,'queued'),COALESCE(l.error_code,''),
+ l.verified_at,l.next_attempt_at,COALESCE(l.applied_revision,0),cp.revision,l.attempted_at,l.stage_started_at,COALESCE(l.failures,0),
+ COALESCE(l.applied_spec->>'sni',''),(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR pi.id=ANY(cp.panel_ids))),
+ COALESCE(pub.n,0),COALESCE((`+configplane.Eligible+`),false),
+ COALESCE(rc.enabled AND(rc.fleet OR pi.id=ANY(rc.panel_ids)) AND rs.state='APPLIED' AND rs.revision=rc.revision AND rs.verified_at>now()-interval '60 seconds',false),
+ NOT EXISTS(SELECT 1 FROM unnest(cp.classes) cl WHERE COALESCE((cp.class_settings->cl->>'publish')::boolean,true) AND NOT EXISTS(
+ SELECT 1 FROM config_driver_class_proofs proof WHERE proof.profile_id=cp.id AND proof.panel_id=pi.id AND proof.route_class=cl AND proof.verified_at>now()-interval '5 minutes' AND proof.error_code='')),
+ EXISTS(SELECT 1 FROM output_config_snapshots o WHERE o.config_profile_id=cp.id AND o.panel_id=pi.id AND o.config_profile_revision=cp.revision AND o.last_seen_at>=now()-interval '15 seconds')
+ FROM config_driver_profiles cp CROSS JOIN panel_instances pi JOIN droplets dr ON dr.id=pi.droplet_id JOIN accounts a ON a.id=pi.account_id JOIN deployments dep ON dep.droplet_id=dr.id
+ CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=pi.id
+ LEFT JOIN config_driver_listeners l ON l.profile_id=cp.id AND l.panel_id=pi.id LEFT JOIN published pub ON pub.panel_id=pi.id
+ WHERE cp.id=$1 AND cp.deleted_at IS NULL AND dr.state IN('READY','EXPIRING') AND (cp.fleet OR pi.id=ANY(cp.panel_ids) OR l.profile_id IS NOT NULL) ORDER BY dep.host`, profile.ID)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -266,17 +300,34 @@ func (s *Server) configProfileServers(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	out := []map[string]any{}
 	for rows.Next() {
-		var id, host, state, stage, code string
+		var id, host, state, stage, code, sni string
 		var at, next, attempted, started sql.NullTime
-		var failures int
-		var sni string
+		var failures, published int
 		var applied, desired int64
-		var removing bool
-		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired, &attempted, &started, &failures, &sni, &removing); e != nil {
+		var removing, eligible, routesFresh, classesFresh, snapshotFresh bool
+		if e = rows.Scan(&id, &host, &state, &stage, &code, &at, &next, &applied, &desired, &attempted, &started, &failures, &sni, &removing, &published, &eligible, &routesFresh, &classesFresh, &snapshotFresh); e != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired, "attempted_at": attempted.Time, "stage_started_at": started.Time, "failures": failures, "sni": sni, "removing": removing})
+		target := profile.PublishedTarget()
+		publicationCode := ""
+		if !removing && state == "VERIFIED" && applied == desired {
+			switch {
+			case !eligible:
+				publicationCode = "profile_server_ineligible"
+			case target == 0:
+				publicationCode = "profile_output_disabled"
+			case published < target && !routesFresh:
+				publicationCode = "profile_routes_refresh_pending"
+			case published < target && !classesFresh:
+				publicationCode = "profile_class_verification_pending"
+			case published < target && !snapshotFresh:
+				publicationCode = "profile_output_refresh_pending"
+			case published < target:
+				publicationCode = "profile_output_verification_pending"
+			}
+		}
+		out = append(out, map[string]any{"panel_id": id, "host": host, "state": state, "stage": stage, "code": code, "verified_at": at.Time, "next_attempt_at": next.Time, "applied_revision": applied, "desired_revision": desired, "attempted_at": attempted.Time, "stage_started_at": started.Time, "failures": failures, "sni": sni, "removing": removing, "published": published, "publication_target": target, "publication_code": publicationCode})
 	}
 	if rows.Err() != nil {
 		writeJSON(w, 500, errorBody())
