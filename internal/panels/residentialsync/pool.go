@@ -106,7 +106,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 			}
 			balancers = append(balancers, map[string]any{"tag": tag, "selector": candidates, "fallbackTag": blockedTag, "strategy": map[string]any{"type": "leastLoad", "settings": settings}})
 			inbound := []string{poolPrefix + "in-" + network + "-" + kind}
-			if p.StrictAllowlist {
+			if p.protectedTransport() {
 				// Recheck the destination after loopback, not just at the public inlet.
 				internal = append(internal, map[string]any{"type": "field", "ruleTag": tag + "-dns-deny", "inboundTag": inbound, "network": network, "port": "53", "outboundTag": blockedTag})
 				if !p.LegacyClientPaths {
@@ -210,7 +210,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 	}
 	if p.RelayMode && len(tcp) > 0 {
 		ping := next["burstObservatory"].(map[string]any)["pingConfig"].(map[string]any)
-		ping["destination"] = RelayProbeURL
+		ping["destination"] = p.relayProbeURL()
 		ping["interval"] = "10s"
 		ping["timeout"] = "3s"
 	}

@@ -305,8 +305,10 @@ func outputPublicationFilter(class string) (string, []any) {
 	} else {
 		where += " AND (NOT (" + scoped + ") OR ((" + proof + ") AND cr.effective_class IN ('DIRECT','RESIDENTIAL'))) "
 	}
-	// A failed health check hides residential links immediately, ahead of reconciliation.
-	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR
+	// Selective clients retain ordinary server egress during a proxy outage.
+	// Publication still requires the current verified routing plan above; only
+	// its Ads subpath fails closed. Legacy strict links retain their health gate.
+	where += ` AND (cr.effective_class IS DISTINCT FROM 'RESIDENTIAL' OR rs.google_ads_selective OR
  (rs.relay_mode AND (` + residentialsync.RelayOutputHealthySQL + `)) OR
  (NOT rs.relay_mode AND EXISTS(
  SELECT 1 FROM residential_proxies rp WHERE (rs.pool_enabled OR rp.proxy_id=rs.selected_proxy_id) AND rp.enabled AND rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes'))) `

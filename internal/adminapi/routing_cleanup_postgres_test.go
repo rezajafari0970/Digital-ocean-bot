@@ -121,6 +121,22 @@ func TestClassOutputDisjointImmutableAndFresh(t *testing.T) {
 			}
 		}
 	}
+	// Selective mode retains public egress during proxy failure, but still
+	// refuses stale or unverified native routing plans.
+	sqlMust(t, db, "UPDATE residential_proxies SET status='down' WHERE proxy_id=$1", proxy)
+	sqlMust(t, db, "UPDATE panel_routing_state SET google_ads_selective=true WHERE panel_id=$1", panel)
+	for _, state := range []string{"APPLIED", "APPLYING", "APPLIED"} {
+		sqlMust(t, db, "UPDATE panel_routing_state SET state=$2 WHERE panel_id=$1", panel, state)
+		response := httptest.NewRecorder()
+		s.outputSnapshotResponse(response, httptest.NewRequest("GET", "/?route_class=RESIDENTIAL", nil))
+		want := ""
+		if state == "APPLIED" {
+			want = export.WithRemark("vless://0@panel.test", "🌐 Unknown country")
+		}
+		if response.Code != 200 || strings.TrimSpace(response.Body.String()) != want {
+			t.Fatal("selective output/proof boundary", state, response.Code, response.Body.String())
+		}
+	}
 	// Historical/corrupt effective state must not move residential identities
 	// into the never-residential subscription.
 	sqlMust(t, db, "UPDATE panel_client_routes SET effective_class='DIRECT' WHERE panel_id=$1 AND route_class='RESIDENTIAL'", panel)

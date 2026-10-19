@@ -159,6 +159,7 @@ func run() error {
 			}
 			protected, protectedUDP, direct, blocked, clientDNS, defaultRoute := "", "", "", "", "", ""
 			strict := false
+			selective := residentialsync.GoogleAdsSelectiveEnabled(id)
 			clientPaths := residentialsync.ClientPathsEnabled(id)
 			for _, v := range setting["outbounds"].([]any) {
 				o := v.(map[string]any)
@@ -167,7 +168,7 @@ func run() error {
 					direct = tag
 				}
 			}
-			poolAllowed, e := poolTargets(setting, assignment.Config)
+			poolAllowed, e := poolTargetsForPolicy(setting, selective, assignment.Config)
 			if e != nil {
 				return 0, e
 			}
@@ -229,6 +230,9 @@ func run() error {
 				return 0, fmt.Errorf("class route unavailable")
 			}
 
+			if selective && (strict || defaultRoute != direct) {
+				return 0, fmt.Errorf("selective public fallback is not direct")
+			}
 			if residentialsync.StrictAllowlistEnabled(id) && !strict {
 				return 0, fmt.Errorf("strict policy not applied")
 			}
@@ -281,8 +285,8 @@ func run() error {
 				}
 			}
 			sort.Strings(inboundTags)
-			if residentialsync.ExpandedCategoriesEnabled(id) {
-				if err := validateCategoryContract(setting, residentialsync.AllowedResidentialDomains(id), strict, poolAllowed, clientPaths, inboundTags); err != nil {
+			if residentialsync.ExpandedCategoriesEnabled(id) || selective {
+				if err := validateCategoryContract(setting, residentialsync.AllowedResidentialDomains(id), strict || selective, poolAllowed, clientPaths, inboundTags); err != nil {
 					return 0, err
 				}
 				if protectedUDP != "" {
@@ -353,7 +357,7 @@ func run() error {
 						domain, ip, port string
 						ad               bool
 					}{
-						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", residentialsync.ExpandedCategoriesEnabled(id)}, {"browserleaks.com", "", "443", true}, {"tls.browserleaks.com", "", "443", true}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
+						{"adservice.google.com", "", "443", true}, {"pixel.facebook.com", "", "443", residentialsync.ExpandedCategoriesEnabled(id)}, {"browserleaks.com", "", "443", !selective}, {"tls.browserleaks.com", "", "443", !selective}, {"browserleaks.com.example.org", "", "443", false}, {"www.example.com", "", "443", false}, {"", "1.1.1.1", "443", false}, {"", "1.1.1.1", "53", false},
 						{"www.gstatic.com", "", "443", false}, {"connectivitycheck.gstatic.com", "", "80", false}, {"www.google.com", "", "443", false}, {"cloudflare-dns.com", "", "443", false}, {"cloudflare-dns.com", "", "80", false}, {"dns.google", "", "443", false}, {"", "9.9.9.9", "53", false},
 						{"www.gstatic.com.evil.test", "", "443", false}, {"evil.www.gstatic.com", "", "443", false},
 						{"www.gstatic.com", "", "8443", false}, {"adservice.google.com", "", "53", true},
@@ -403,6 +407,15 @@ func run() error {
 				_ = n
 			}
 			dnsPort := "53"
+			if selective {
+				for _, host := range []string{"www.youtube.com", "firebase.google.com", "mtalk.google.com", "play.google.com", "fonts.googleapis.com", "scontent.xx.fbcdn.net", "ads.yahoo.com", "unityads.unity3d.com", "browserleaks.com"} {
+					for _, network := range []string{"tcp", "udp"} {
+						if e = check(url.Values{"inboundTag": {tag}, "email": {emails["RESIDENTIAL"]}, "network": {network}, "port": {"443"}, "domain": {host}}, direct); e != nil {
+							return 0, e
+						}
+					}
+				}
+			}
 			if strict && assignment.Config != nil && assignment.Config.DNSMode == "doh" {
 				dnsPort = "443"
 			}
@@ -417,7 +430,7 @@ func run() error {
 					key := "@inner:" + network + ":" + kind
 					if len(poolAllowed[key]) > 0 {
 						form := url.Values{"inboundTag": {"dob-route-pool-in-" + network + "-" + kind}, "network": {network}, "port": {"443"}}
-						if strict {
+						if strict || selective {
 							form.Set("domain", "adservice.google.com")
 						} else {
 							form.Set("ip", "1.1.1.1")
@@ -425,7 +438,7 @@ func run() error {
 						if e = check(form, key); e != nil {
 							return 0, e
 						}
-						if strict {
+						if strict || selective {
 							for _, domain := range []string{"www.example.com", "www.gstatic.com.evil.test", "www.gstatic.com", "www.google.com", "cloudflare-dns.com"} {
 								if residentialsync.ExpandedDomainAllowed(id, domain) {
 									continue

@@ -78,8 +78,8 @@ func (s Service) prepareRelay(ctx context.Context, panel string, rt *sanaei.Pane
 		return e
 	}
 	// A donor must itself enforce the requested protected routing contract.
-	donorPolicy := (routePolicy{StrictAllowlist: strictAllowlistPanel(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel)}).normalized()
-	if !donorPolicy.StrictAllowlist || !donorPolicy.AdsOnly || !donorPolicy.Harden || !ClientPathsEnabled(panel) || !poolPanel(panel) {
+	donorPolicy := (routePolicy{GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel)}).normalized()
+	if !donorPolicy.protectedTransport() || !donorPolicy.AdsOnly || !donorPolicy.Harden || !ClientPathsEnabled(panel) || !poolPanel(panel) {
 		return nil
 	}
 	writer, ok := s.Secrets.(relayWriter)

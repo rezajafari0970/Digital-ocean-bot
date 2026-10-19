@@ -11,6 +11,9 @@ import (
 
 // Validate the saved two-stage pool without emitting endpoint credentials.
 func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (map[string][]string, error) {
+	return poolTargetsForPolicy(setting, false, profile...)
+}
+func poolTargetsForPolicy(setting map[string]any, selective bool, profile ...*residentialperf.Config) (map[string][]string, error) {
 	targets := map[string][]string{}
 	var c *residentialperf.Config
 	if len(profile) > 0 {
@@ -79,6 +82,9 @@ func poolTargets(setting map[string]any, profile ...*residentialperf.Config) (ma
 		}
 		interval, timeout, maxRTT = 10*time.Second, 3*time.Second, 3*time.Second
 		probeURL = residentialsync.RelayProbeURL
+		if selective {
+			probeURL = residentialsync.GoogleAdsRelayProbeURL
+		}
 	}
 	if blocked == "" || outs[blocked]["protocol"] != "blackhole" {
 		return nil, fmt.Errorf("blocking outbound absent")

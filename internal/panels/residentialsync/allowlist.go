@@ -28,6 +28,13 @@ func (p routePolicy) normalized() routePolicy {
 		p.Proxies = effective
 	}
 
+	if p.GoogleAdsSelective {
+		p.StrictAllowlist = false
+		p.ExpandedCategories = false
+		p.LegacyClientPaths = false
+		p.Harden = true
+		p.AdsOnly = true
+	}
 	if p.StrictAllowlist {
 		p.Harden = true
 		p.AdsOnly = true
@@ -39,6 +46,9 @@ func (p routePolicy) normalized() routePolicy {
 // StrictAllowlistEnabled is shared with native acceptance so observed legacy
 // settings cannot silently downgrade the expected deployment policy.
 func StrictAllowlistEnabled(panel string) bool {
+	if GoogleAdsSelectiveEnabled(panel) {
+		return false
+	}
 	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_ALLOWLIST_PANELS"))
 	if scope == "" || scope == "all" {
 		return true

@@ -128,6 +128,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			} {
 				network := probe.network
 				ads := probe.ads || p.expandedDomainAllowed(probe.domain)
+				if p.GoogleAdsSelective && probe.domain == "browserleaks.com" {
+					ads = false
+				}
 				base := blockedTag
 				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && !p.Harden && (p.Residential || p.Direct)) {
 					base = directTag
@@ -141,6 +144,11 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 					switch {
 					case explicitDirect || (!p.StrictAllowlist && !p.Residential && p.Direct):
 						base = directTag
+					case p.GoogleAdsSelective && p.Residential && !ads:
+						base = directTag
+						if probe.port == "53" {
+							base = clientDNSTag
+						}
 					case !p.Residential || p.SniffingBlocked:
 						base = blockedTag
 					case p.StrictAllowlist && !p.LegacyClientPaths && probe.port == "53" && (probe.ip == "1.1.1.1" || probe.ip == "8.8.8.8"):
@@ -324,7 +332,7 @@ func verifyPoolOutcomes(ctx context.Context, exec sanaei.SessionExecutor, desire
 		}
 		for _, kind := range []string{"fast", "all"} {
 			form := url.Values{"inboundTag": {poolPrefix + "in-" + network + "-" + kind}, "network": {network}, "port": {"443"}, "ip": {"1.1.1.1"}}
-			if p.StrictAllowlist {
+			if p.protectedTransport() {
 				form.Del("ip")
 				form.Set("domain", "adservice.google.com")
 			}

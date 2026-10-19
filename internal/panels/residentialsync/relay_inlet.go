@@ -166,7 +166,7 @@ func configureRelayInlet(next, current map[string]any, p routePolicy, destinatio
 		return nil
 	}
 	in := p.RelayInlet
-	if p.RelayMode || !p.StrictAllowlist || !p.AdsOnly || !p.Harden || p.LegacyClientPaths {
+	if p.RelayMode || !p.protectedTransport() || !p.AdsOnly || !p.Harden || p.LegacyClientPaths {
 		return errors.New("relay inlet requires hardened category policy")
 	}
 	if len(in.Sources) == 0 || !relayCredentialValid(in.Credential) {

@@ -30,6 +30,7 @@ type routePolicy struct {
 	RelayMode             bool
 	RelayInlet            *relayInlet
 	StrictAllowlist       bool
+	GoogleAdsSelective    bool
 	ExpandedCategories    bool
 	LegacyClientPaths     bool
 	StableFingerprint     bool
@@ -91,7 +92,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		}
 		seenTags[in.Tag] = true
 		managedTrojan := in.Protocol == "trojan" && strings.HasPrefix(in.Remark, "dob:trojan-tcp:") || (in.Protocol == "trojan" || in.Protocol == "shadowsocks") && strings.HasPrefix(in.Remark, "dob:profile:")
-		if p.StrictAllowlist {
+		if p.protectedTransport() {
 			if err := validateStrictInboundTags([]string{in.Tag}, nil); err != nil {
 				return nil, nil, err
 			}
@@ -144,7 +145,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 			emails[key] = id
 		}
 	}
-	if p.StrictAllowlist {
+	if p.protectedTransport() {
 		if err := validateStrictInboundTags(tags, nil); err != nil {
 			return nil, nil, err
 		}
@@ -200,7 +201,7 @@ func planClients(raws []json.RawMessage, previous map[string]clientRoute, p rout
 		out[i].Effective = out[i].Class
 		if !p.Direct && !p.Residential {
 			out[i].Effective = "BLOCKED"
-		} else if out[i].Class == "RESIDENTIAL" {
+		} else if out[i].Class == "RESIDENTIAL" && !(p.GoogleAdsSelective && p.Residential) {
 			if p.SniffingBlocked {
 				out[i].Effective = "BLOCKED"
 			} else if p.Configured == 0 && !p.Harden && !p.AdsOnly {
@@ -224,7 +225,7 @@ func settingsHash(v map[string]any) string {
 }
 func buildSettings(current map[string]any, clients []clientRoute, tags []string, p routePolicy) (map[string]any, error) {
 	p = p.normalized()
-	if p.StrictAllowlist {
+	if p.protectedTransport() {
 		if err := validateStrictInboundTags(tags, current); err != nil {
 			return nil, err
 		}
@@ -370,7 +371,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			}
 			if p.Harden && (p.Residential || p.StrictAllowlist) {
 				dnsDestination := clientDNSTag
-				if p.SniffingBlocked || p.StrictAllowlist {
+				if (p.SniffingBlocked && !p.GoogleAdsSelective) || p.StrictAllowlist {
 					dnsDestination = blockedTag
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-client-dns", "inboundTag": tags, "port": "53", "network": "tcp,udp", "outboundTag": dnsDestination})
@@ -387,7 +388,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 				}
 			}
 			fallback := directTag
-			if p.StrictAllowlist || (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked) {
+			if p.StrictAllowlist || (!p.Residential && !p.Direct) || (p.Residential && p.SniffingBlocked && !p.GoogleAdsSelective) {
 				fallback = blockedTag
 			}
 			// Strict mode denies all unmatched requests, including opaque/IP traffic.

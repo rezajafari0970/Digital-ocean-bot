@@ -42,7 +42,7 @@ func (p routePolicy) expandedDomainAllowed(host string) bool {
 // ExpandedDomainAllowed checks only the explicit root-domain extension;
 // geosite membership is evaluated by the running Xray core.
 func ExpandedDomainAllowed(panel, host string) bool {
-	return (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel)}).expandedDomainAllowed(host)
+	return (routePolicy{GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), ExpandedCategories: ExpandedCategoriesEnabled(panel)}).expandedDomainAllowed(host)
 }
 
 // Older deployed geodata has HUAWEI/GOG but zero @ads entries. Preserve the
@@ -56,6 +56,9 @@ var residentialCategoryCompatibility = []string{
 // Empty/none/invalid scope preserves the previous policy. Explicit all covers
 // existing and future panels; a UUID list stages a bounded production canary.
 func ExpandedCategoriesEnabled(panel string) bool {
+	if GoogleAdsSelectiveEnabled(panel) {
+		return false
+	}
 	scope := strings.TrimSpace(os.Getenv("DOB_RESIDENTIAL_CATEGORIES_PANELS"))
 	if scope == "all" {
 		return true
@@ -75,6 +78,9 @@ func ExpandedCategoriesEnabled(panel string) bool {
 }
 
 func (p routePolicy) residentialDomains() []string {
+	if p.GoogleAdsSelective {
+		return append([]string{}, adDomains...)
+	}
 	domains := residentialDomains()
 	if p.ExpandedCategories {
 		domains = append(domains, expandedResidentialCategories...)
@@ -89,5 +95,5 @@ func (p routePolicy) residentialDomains() []string {
 // AllowedResidentialDomains is a copy of the expected deployment contract;
 // native acceptance must not infer policy from whatever the remote panel has.
 func AllowedResidentialDomains(panel string) []string {
-	return (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel)}).residentialDomains()
+	return (routePolicy{GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), ExpandedCategories: ExpandedCategoriesEnabled(panel)}).residentialDomains()
 }

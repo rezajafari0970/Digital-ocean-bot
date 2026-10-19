@@ -119,7 +119,7 @@ func (s Service) dueWhileOwned(ctx context.Context, panel string, serving *bool)
 }
 
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := (routePolicy{ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
+	p := (routePolicy{GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),(g.generate_residential OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(g.generate_direct OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(SELECT count(*) FROM residential_proxies)
@@ -153,7 +153,7 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		p.RelayMode = true
 		p.PoolEnabled = true
 		p.Configured = 1 // Keep an empty managed pool fail-closed.
-		if !p.StrictAllowlist || !p.AdsOnly {
+		if !p.protectedTransport() || !p.AdsOnly {
 			return p, 0, errors.New("relay requires strict residential category policy")
 		}
 		p.Proxies, err = s.relayProxies(ctx, panel, p)
@@ -546,8 +546,8 @@ func (s Service) persistPlan(ctx context.Context, panel string, revision int64, 
 		if fresh != revision {
 			return errors.New("routing revision changed")
 		}
-		if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled,performance_generation) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7,$8)
- ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,performance_generation=excluded.performance_generation,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled, p.PerformanceGeneration); err != nil {
+		if _, err = tx.ExecContext(ctx, `INSERT INTO panel_routing_state(panel_id,revision,plan_hash,state,configured_count,healthy_count,selected_proxy_id,pool_enabled,performance_generation,google_ads_selective) VALUES($1,$2,$3,'APPLYING',$4,$5,NULLIF($6,'')::uuid,$7,$8,$9)
+ ON CONFLICT(panel_id) DO UPDATE SET revision=excluded.revision,plan_hash=excluded.plan_hash,state='APPLYING',configured_count=excluded.configured_count,healthy_count=excluded.healthy_count,selected_proxy_id=excluded.selected_proxy_id,pool_enabled=excluded.pool_enabled,performance_generation=excluded.performance_generation,google_ads_selective=excluded.google_ads_selective,last_error=''`, panel, revision, hash, p.Configured, p.HealthyCount, selectedProxy(p), p.PoolEnabled, p.PerformanceGeneration, p.GoogleAdsSelective); err != nil {
 			return err
 		}
 		if err = persistRelays(ctx, tx, panel, hash, p, desired); err != nil {
