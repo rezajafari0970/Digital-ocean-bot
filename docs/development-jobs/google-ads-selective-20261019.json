@@ -1,0 +1,401 @@
+{
+  "recorded_at": "2026-10-19T13:16:38.956287+00:00",
+  "task": "Residential clients: only google@ads through Residential, ordinary traffic through server egress",
+  "source_revision": "3910db010b83163ef0799a488f6b7e7d6933cece",
+  "public_revision": "8c488709ba27d12d99772636e302d93c0973863b",
+  "schema": "000188_google_ads_selective",
+  "status": "routing rollout complete; one independent VLESS REALITY listener remains unverified",
+  "scope": {
+    "variable": "DOB_RESIDENTIAL_GOOGLE_ADS_SELECTIVE_PANELS",
+    "primary": "all",
+    "secondary": "all",
+    "future_panels_included": true
+  },
+  "routing_contract": {
+    "google_ads": "geosite:google@ads -> Residential pool",
+    "ordinary_tcp_udp": "server egress",
+    "residential_outage": "matching Ads blocked; ordinary traffic remains server egress",
+    "internal_pool_and_relay": "category restrictions and terminal denial preserved",
+    "direct_class": "unchanged",
+    "dns": "existing managed resolver",
+    "android_client_and_core": "unchanged",
+    "tls_validation": "preserved"
+  },
+  "validation": {
+    "mandatory_regressions": 44,
+    "skipped": 0,
+    "disposable_postgresql": true,
+    "race_enabled": true,
+    "canary_native_route_proofs": 124,
+    "canary_existing_client_connections": 6,
+    "canary_connections_passed": 6,
+    "canary_tls_validation": true,
+    "full_release_validation": "Go tests, vet, Python installer checks, JS checks, 6 Output UI tests and LXC installation/update validation passed"
+  },
+  "controllers": {
+    "primary": {
+      "at": "2026-10-19T13:06:52.371334+00:00",
+      "commit": "8c488709ba27d12d99772636e302d93c0973863b",
+      "schema": "000188_google_ads_selective",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-19T13:06:52.425618283Z"
+      },
+      "checks": {
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true
+      }
+    },
+    "secondary": {
+      "at": "2026-10-19T13:07:58.834703+00:00",
+      "commit": "8c488709ba27d12d99772636e302d93c0973863b",
+      "schema": "000188_google_ads_selective",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-19T13:07:58.887256625Z"
+      },
+      "checks": {
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true
+      },
+      "selective_scope": "all",
+      "active_servers_at_scope_enable": 0
+    }
+  },
+  "identity_preservation": {
+    "at": "2026-10-19T13:07:56.441151+00:00",
+    "retained_live_listeners": 228,
+    "identity_changes": [],
+    "retained_live_pins": 0,
+    "pin_changes": [],
+    "all_preserved": true
+  },
+  "fleet": {
+    "at": "2026-10-19T13:15:21.260443+00:00",
+    "total": 76,
+    "selective": 76,
+    "verified_selective": 76
+  },
+  "fleet_history": [
+    {
+      "receipt": "fleet-second.json",
+      "at": "2026-10-19T13:06:52.223201+00:00",
+      "total": 77,
+      "selective": 77,
+      "verified_selective": 77
+    },
+    {
+      "receipt": "fleet-final.json",
+      "at": "2026-10-19T13:08:49.638774+00:00",
+      "total": 77,
+      "selective": 77,
+      "verified_selective": 0
+    },
+    {
+      "receipt": "fleet-followup1312.json",
+      "at": "2026-10-19T13:11:51.098122+00:00",
+      "total": 77,
+      "selective": 77,
+      "verified_selective": 77
+    }
+  ],
+  "fleet_lifecycle_difference": {
+    "at": "2026-10-19T13:15:37.668061+00:00",
+    "previous_count": 77,
+    "current_count": 76,
+    "no_longer_eligible": [
+      {
+        "panel_id": "ada6ceb3-7855-4cae-892f-4647fa29c42c",
+        "enabled": true,
+        "state": "READY",
+        "expires_at": "2026-10-19T13:12:32.515977+00:00",
+        "expired": true
+      }
+    ]
+  },
+  "output": {
+    "at": "2026-10-19T13:15:18.773128+00:00",
+    "catalog_seconds": 0.09,
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 76,
+        "verified": 76,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 76,
+        "published": 152,
+        "target": 152
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "retrying",
+        "eligible": 76,
+        "verified": 75,
+        "pending": 0,
+        "blocked": 1,
+        "ready": 75,
+        "published": 150,
+        "target": 152
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 76,
+        "verified": 76,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 76,
+        "published": 152,
+        "target": 152
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-19T13:15:18.898069+00:00",
+      "proof_age": {
+        "under_5m": 227,
+        "over_5m": 1,
+        "never": 0,
+        "median_seconds": 74.0850955,
+        "max_seconds": 1047.471603
+      },
+      "routing_age": {
+        "under_60s": 79,
+        "over_60s": 0,
+        "median_seconds": 17.189029
+      },
+      "sql": {
+        "active": 1,
+        "idle": 56
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.054,
+        "status": 200,
+        "bytes": 101872,
+        "lines": 454
+      }
+    }
+  },
+  "output_transient": {
+    "observed_at": "2026-10-19T13:08:47.208035+00:00",
+    "http_status": 200,
+    "published_lines": 0,
+    "observation": "routing revision advanced from 644 through 646 to 690; previous proofs were withheld until current plans passed. At 13:11:51 UTC all 77 live plans were freshly verified at revision 690; at 13:12:12 Output returned 460 lines. This transient is retained, not reported as continuous availability."
+  },
+  "residual_issue": {
+    "state": "open",
+    "panel_id": "ee0165aa-0f8b-4e48-b001-432d6f4197bb",
+    "profile_id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+    "error_code": "profile_runtime_traffic_unverified",
+    "withheld_links": 2,
+    "transport": "VLESS TCP REALITY 443, manual www.microsoft.com SNI",
+    "observations": {
+      "at": "2026-10-19T13:15:16.024629+00:00",
+      "results": [
+        {
+          "panel": "ee0165aa-0f8b-4e48-b001-432d6f4197bb",
+          "proof": {
+            "network": "tcp",
+            "probes": [
+              {
+                "code": "OSError",
+                "label": "configured_reality_target",
+                "seconds": 6.011
+              },
+              {
+                "code": "ok",
+                "label": "profile_endpoint",
+                "seconds": 0,
+                "tcp": true
+              },
+              {
+                "code": "ok",
+                "label": "ordinary_egress",
+                "seconds": 0.022,
+                "tcp": true,
+                "tls": true
+              }
+            ],
+            "profile_id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+            "security": "reality",
+            "target_matches_sni": true
+          },
+          "ssh_success": true,
+          "stderr_bytes": 0,
+          "profile": "3a5372ee-3fce-4083-bad6-35a55dc3de67"
+        }
+      ]
+    },
+    "client_diagnostic": {
+      "at": "2026-10-19T13:14:00.536881+00:00",
+      "results": [
+        {
+          "panel": "ee0165aa-0f8b-4e48-b001-432d6f4197bb",
+          "proof": {
+            "class_diagnostics": {
+              "DIRECT": {
+                "attempts": 2,
+                "code": "timeout"
+              },
+              "RESIDENTIAL": {
+                "attempts": 2,
+                "code": "timeout"
+              }
+            },
+            "classes": {
+              "DIRECT": false,
+              "RESIDENTIAL": false
+            },
+            "core_current": null,
+            "diagnostic_target": "https://example.com/",
+            "profile_id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+            "purpose": "ordinary traffic through each existing client class; no production proof writes",
+            "reason": "traffic",
+            "verified": false
+          },
+          "ssh_success": true,
+          "stderr_bytes": 0,
+          "profile": "3a5372ee-3fce-4083-bad6-35a55dc3de67"
+        }
+      ]
+    },
+    "interpretation": "Configured REALITY target was unreachable from this server in the bounded diagnostic; profile TCP endpoint and ordinary TLS egress succeeded. This supports a target reachability problem, not a proven routing-policy failure. The other two profiles on that panel are verified. Existing retry remains active; no false proof, credential change, SNI override or validation bypass was applied."
+  },
+  "diagnostic_correction": {
+    "at": "2026-10-19T13:04:35.546624+00:00",
+    "invalid_initial_result": "canary-general-traffic.json",
+    "reason": "Diagnostic omitted traffic_probe.py which production embeds before runtime_batch.py. Undefined probe_profile_https was caught by the diagnostic exception handler. Initial results do not establish network failure.",
+    "production_mutation_replayed": false,
+    "initial_script_sha256": "9fbef2ecd4bedf296ac714687bd2800b54c793b5e19283fb1e56c767b2306efb",
+    "corrected_script_sha256": "7a2fd16bc093906c3a6bee14ec52569053d359819ec923cd36781597b2c6ce14"
+  },
+  "limitations": [
+    "No 99 percent ad load-rate or advertising latency claim is made.",
+    "The server can classify only traffic delivered to the tunnel and names exposed to routing or supported sniffing.",
+    "Existing private-destination protections remain.",
+    "Runtime client connectivity evidence is separate from Residential egress health.",
+    "Fleet size changes with normal expiry and creation."
+  ],
+  "external_openai_api_calls": 0,
+  "evidence_sha256": {
+    "verify.json": "e445ccd881274793ddfb9f09d81936f21d2b2b2b29767e1d0c1c0073b9d737ae",
+    "secondary-verify.json": "2be91e921936042dc11429e5ea444a0e8722cf707e1f21d9f57b203420c063dd",
+    "identity-preservation.json": "f5eefec1cfe96e817cd3ac1f3e0bdfefca1ca27e3eb3d6be5646c428a43cce4f",
+    "acceptance-canary.json": "5e7e44f445d809332f020275eaa7ede880f60090331da1863cdfd2ae9dc53c18",
+    "acceptance-canary.log": "552c0b2ab472a0e95adb43d12e39b3a1606e1cdeefe57bbeaca5638159e43d31",
+    "canary-general-traffic-v2.json": "a04ac9e3599471faad01d1a72f51974529c473a49d5d3ff880bde10496ec4c20",
+    "traffic-diagnostic-correction.json": "b750d7222d01a9261c2e8489aecab7714b160ddf07876f5f57bab7d867e9c7fb",
+    "fleet-first.json": "8013a927d93aa15b550682cfb10a9af3adc897f1dc53658680bb5df65ed3e160",
+    "fleet-second.json": "855a8836963dea5d44ad4f29ab54282263127626c7a7aa936b1224ad405339ec",
+    "fleet-final.json": "b4fd841eac3d379bc2aa1ceb594fa2a21c0d324757ef8b0690de4a51f28e51c3",
+    "fleet-followup1312.json": "424d4d241bccc592625c70add2c433ce1b0985781320039e19d5f9d45acf7424",
+    "fleet-report.json": "794d3264d7c78aad637ccb049b5419206e865e850ad96f88456b6e47fe89daa6",
+    "fleet-lifecycle-difference.json": "a88e41e098f4824f9e933b50e34ac46eae9c1be3def1a1a8190f2fe4ed3c3320",
+    "output-residual.json": "848ffbe3e03f92993de21b8dbc5f8fdd6e5a69d4e2384adebd2375eb07ba09ad",
+    "residual-general-traffic.json": "6b1abd5b23efd29e35d0e9dfafa5866e77eca5d89176279ec670186510b18e6c",
+    "residual-transport.json": "663a1b3cf69400ec62580c09d271cab550eef8efd16410664315b68f58ac98ba"
+  }
+}
