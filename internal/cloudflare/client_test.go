@@ -84,3 +84,30 @@ func TestCloudflareNamesLifetimeAndOwnership(t *testing.T) {
 		t.Fatal("different origin owned")
 	}
 }
+
+func TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(403)
+		w.Write([]byte(`{"success":false,"errors":[{"code":10000,"message":"sensitive-fixture-token domain.example.com"}]}`))
+	}))
+	defer server.Close()
+	c := NewClient(Auth{Token: "sensitive-fixture-token"})
+	c.base = server.URL
+	c.HTTP = server.Client()
+	for _, tc := range []struct {
+		name, want string
+		run        func() error
+	}{
+		{"dns read", "cloudflare_dns_read_permission_denied", func() error { _, e := c.Records(context.Background(), "zone", "domain.example.com"); return e }},
+		{"dns write", "cloudflare_dns_write_permission_denied", func() error { _, e := c.CreateRecord(context.Background(), "zone", Record{}); return e }},
+		{"certificate", "cloudflare_certificate_permission_denied", func() error { _, e := c.Certificates(context.Background(), "zone"); return e }},
+		{"settings", "cloudflare_ssl_permission_denied", func() error { _, e := c.Setting(context.Background(), "zone", "ssl"); return e }},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			e := tc.run()
+			if e == nil || e.Error() != tc.want || ErrorCode(e) != tc.want {
+				t.Fatal(e)
+			}
+		})
+	}
+}

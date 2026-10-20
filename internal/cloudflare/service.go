@@ -109,7 +109,17 @@ func (s Service) Refresh(ctx context.Context, id string) error {
 	if e != nil {
 		return e
 	}
-	return tx.Commit()
+	if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now() WHERE account_id=$1", id); e != nil {
+		return e
+	}
+	if e = tx.Commit(); e != nil {
+		return e
+	}
+	e = s.checkDNSAccess(ctx, id, d)
+	if e != nil {
+		_, _ = s.DB.ExecContext(ctx, "UPDATE cloudflare_accounts SET error_code=$2 WHERE id=$1", id, ErrorCode(e))
+	}
+	return e
 }
 func (s Service) RunOne(ctx context.Context) error {
 	var id string
@@ -126,9 +136,19 @@ func (s Service) RunOne(ctx context.Context) error {
 		if e != nil {
 			return e
 		}
+		if e = s.retireUnsentExpired(ctx, id); e != nil {
+			return e
+		}
+		accessError := s.checkDNSAccess(ctx, id, d)
 		zoneError := s.checkZone(ctx, id, d)
 		planError := s.plan(ctx, id)
 		if e = s.recordOne(ctx, id, d); e != nil {
+			return e
+		}
+		if accessError != nil {
+			return accessError
+		}
+		if e = s.dnsAccessFailure(ctx, id); e != nil {
 			return e
 		}
 		if zoneError != nil {
@@ -155,7 +175,7 @@ func ErrorCode(e error) string {
 		return ""
 	}
 	switch e.Error() {
-	case "cloudflare_permission_denied", "cloudflare_rate_limited", "cloudflare_busy", "cloudflare_record_conflict", "cloudflare_write_unconfirmed", "cloudflare_no_active_zones", "cloudflare_ssl_strict_required", "cloudflare_grpc_required", "cloudflare_credentials_unavailable", "cloudflare_certificate_issue_unconfirmed", "cloudflare_certificate_invalid", "cloudflare_certificate_node_retrying", "cloudflare_certificate_install_unconfirmed", "cloudflare_csr_invalid", "cloudflare_account_disabled":
+	case "cloudflare_dns_read_permission_denied", "cloudflare_dns_write_permission_denied", "cloudflare_certificate_permission_denied", "cloudflare_ssl_permission_denied", "cloudflare_permission_denied", "cloudflare_rate_limited", "cloudflare_busy", "cloudflare_record_conflict", "cloudflare_write_unconfirmed", "cloudflare_no_active_zones", "cloudflare_ssl_strict_required", "cloudflare_grpc_required", "cloudflare_credentials_unavailable", "cloudflare_certificate_issue_unconfirmed", "cloudflare_certificate_invalid", "cloudflare_certificate_node_retrying", "cloudflare_certificate_install_unconfirmed", "cloudflare_csr_invalid", "cloudflare_account_disabled":
 		return e.Error()
 	}
 	return "cloudflare_operation_retrying"

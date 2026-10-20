@@ -29,6 +29,13 @@ func (p Policy) Validate() error {
 
 // Durable scheduling uses wall time, never catch-up bursts after a restart.
 func (s Service) plan(ctx context.Context, account string) error {
+	var accessible bool
+	if e := s.DB.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM cloudflare_zones WHERE account_id=$1 AND enabled AND present AND status='active' AND dns_checked_at>now()-interval '10 minutes' AND dns_error_code='')", account).Scan(&accessible); e != nil {
+		return e
+	}
+	if !accessible {
+		return nil
+	}
 	tx, e := s.DB.BeginTx(ctx, nil)
 	if e != nil {
 		return e
@@ -94,7 +101,7 @@ func (s Service) plan(ctx context.Context, account string) error {
 		}
 		for i := 0; i < n; i++ {
 			var zone, name string
-			e = tx.QueryRowContext(ctx, `SELECT z.id,z.name FROM cloudflare_zones z WHERE z.account_id=$1 AND z.enabled AND z.present AND z.status='active'
+			e = tx.QueryRowContext(ctx, `SELECT z.id,z.name FROM cloudflare_zones z WHERE z.account_id=$1 AND z.enabled AND z.present AND z.status='active' AND z.dns_checked_at>now()-interval '10 minutes' AND z.dns_error_code=''
  AND (SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND r.state<>'DELETED')<500
  ORDER BY (SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND r.state<>'DELETED'),z.id LIMIT 1`, account).Scan(&zone, &name)
 			if errors.Is(e, sql.ErrNoRows) {
@@ -150,6 +157,7 @@ func (s Service) recordOne(ctx context.Context, account string, d Driver) error 
  FROM cloudflare_records r JOIN cloudflare_accounts ca ON ca.id=r.account_id JOIN cloudflare_zones z ON z.account_id=r.account_id AND z.id=r.zone_id
  JOIN config_driver_profiles cp ON cp.id=r.profile_id LEFT JOIN panel_instances pi ON pi.id=r.panel_id LEFT JOIN droplets dr ON dr.id=pi.droplet_id LEFT JOIN accounts a ON a.id=pi.account_id
  WHERE r.account_id=$1 AND r.state NOT IN('DELETED','CONFLICT') AND r.next_attempt_at<=now()
+ AND z.dns_error_code='' AND z.dns_checked_at>now()-interval '10 minutes'
  ORDER BY (r.expires_at<=now()) DESC,r.next_attempt_at LIMIT 1`, account).Scan(&r.id, &r.zone, &r.hostname, &r.ip, &r.state, &r.provider, &r.expired, &r.lifetime, &r.planned, &r.activated, &r.serverExpiry)
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil
@@ -216,6 +224,10 @@ func (s Service) recordOne(ctx context.Context, account string, d Driver) error 
 }
 func (s Service) recordError(ctx context.Context, id string, e error) error {
 	if ctx.Err() == nil {
+		var api *APIError
+		if errors.As(e, &api) && (api.Status == 401 || api.Status == 403) {
+			_, _ = s.DB.ExecContext(ctx, "UPDATE cloudflare_zones z SET dns_error_code=$2,dns_checked_at=now(),dns_next_attempt_at=now()+interval '5 minutes' FROM cloudflare_records r WHERE r.id=$1 AND z.account_id=r.account_id AND z.id=r.zone_id", id, ErrorCode(e))
+		}
 		_, _ = s.DB.ExecContext(ctx, "UPDATE cloudflare_records SET error_code=$2,failures=failures+1,next_attempt_at=now()+LEAST(300,15*power(2,LEAST(failures,4)))*interval '1 second' WHERE id=$1", id, ErrorCode(e))
 	}
 	return e

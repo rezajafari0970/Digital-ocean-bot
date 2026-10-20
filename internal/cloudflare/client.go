@@ -9,10 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type APIError struct {
+	Operation  string
 	Status     int
 	RetryAfter time.Duration
 }
@@ -20,6 +22,16 @@ type APIError struct {
 func (e *APIError) Error() string {
 	switch e.Status {
 	case 401, 403:
+		switch e.Operation {
+		case "dns_read":
+			return "cloudflare_dns_read_permission_denied"
+		case "dns_write":
+			return "cloudflare_dns_write_permission_denied"
+		case "certificate":
+			return "cloudflare_certificate_permission_denied"
+		case "ssl":
+			return "cloudflare_ssl_permission_denied"
+		}
 		return "cloudflare_permission_denied"
 	case 429:
 		return "cloudflare_rate_limited"
@@ -89,7 +101,7 @@ func (c *Client) request(ctx context.Context, method, path string, body any, out
 		if n, e := strconv.Atoi(resp.Header.Get("Retry-After")); e == nil && n > 0 {
 			delay = time.Duration(min(n, 3600)) * time.Second
 		}
-		return 0, &APIError{Status: resp.StatusCode, RetryAfter: delay}
+		return 0, &APIError{Status: resp.StatusCode, RetryAfter: delay, Operation: requestOperation(method, path)}
 	}
 	var env envelope
 	if json.Unmarshal(raw, &env) != nil || !env.Success {
@@ -159,4 +171,22 @@ func (c *Client) Issue(ctx context.Context, csr string, names []string) (Certifi
 	var out Certificate
 	_, e := c.request(ctx, "POST", "/certificates", map[string]any{"csr": csr, "hostnames": names, "request_type": "origin-rsa", "requested_validity": 7}, &out)
 	return out, e
+}
+
+// Operation labels are a fixed allowlist; URLs, tokens and provider bodies are
+// never included in persisted errors or API responses.
+func requestOperation(method, path string) string {
+	if strings.HasPrefix(path, "/certificates") {
+		return "certificate"
+	}
+	if strings.Contains(path, "/dns_records") {
+		if method == "GET" {
+			return "dns_read"
+		}
+		return "dns_write"
+	}
+	if strings.Contains(path, "/settings/") {
+		return "ssl"
+	}
+	return ""
 }

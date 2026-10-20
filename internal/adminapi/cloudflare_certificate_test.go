@@ -129,6 +129,7 @@ func TestCloudflareCertificateLostResponseRenewalAndNodeRepair(t *testing.T) {
 	if ensure() == nil || d.issues != 1 {
 		t.Fatal("lost issuance accepted")
 	}
+	sqlMust(t, db, "UPDATE cloudflare_zones SET dns_error_code='cloudflare_dns_read_permission_denied'")
 	if e = ensure(); e != nil {
 		t.Fatal(e)
 	}
@@ -138,6 +139,7 @@ func TestCloudflareCertificateLostResponseRenewalAndNodeRepair(t *testing.T) {
 	if e = ensure(); e != nil || node.installs != 1 {
 		t.Fatal("valid installed certificate replaced", e)
 	}
+	sqlMust(t, db, "UPDATE cloudflare_zones SET dns_error_code=''")
 	d.lost = false
 	node.broken = true
 	if e = ensure(); e != nil {

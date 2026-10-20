@@ -260,6 +260,34 @@ func TestCloudflareOutputRevocationAndRecordOwnership(t *testing.T) {
 		if w.Code != 200 || strings.Contains(w.Body.String(), "owned.example.com") != want {
 			t.Fatal("publication fence", w.Code, w.Body.String())
 		}
+		status := httptest.NewRecorder()
+		s.cloudflareStatus(status, httptest.NewRequest("GET", "/", nil))
+		var body struct {
+			Accounts []struct {
+				Records []struct {
+					ID    string
+					Probe bool `json:"probe_ready"`
+				}
+			}
+		}
+		if e := json.Unmarshal(status.Body.Bytes(), &body); e != nil || status.Code != 200 {
+			t.Fatal("probe readiness query", e, status.Code)
+		}
+		found := false
+		for _, a := range body.Accounts {
+			for _, r := range a.Records {
+				if r.ID == record {
+					found = true
+					if r.Probe != want {
+						t.Fatal("probe diverged from output publication")
+					}
+				}
+			}
+		}
+		if !found {
+			t.Fatal("tracked record missing")
+		}
+
 	}
 	read(true)
 	for _, x := range []struct{ set, restore string }{

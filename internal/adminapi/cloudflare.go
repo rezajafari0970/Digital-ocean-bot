@@ -17,10 +17,15 @@ func (s *Server) cloudflareService() cloudflare.Service {
 	return cloudflare.Service{DB: s.DB, Secrets: s.Container.Secrets}
 }
 func (s *Server) cloudflareStatus(w http.ResponseWriter, r *http.Request) {
-	rows, e := s.DB.QueryContext(r.Context(), `SELECT jsonb_build_object('id',a.id,'name',a.name,'enabled',a.enabled,'revision',a.revision,'manage_ssl',a.manage_ssl,'error_code',a.error_code,'refreshed_at',a.refreshed_at,
- 'zones',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'status',z.status,'enabled',z.enabled,'present',z.present,'ssl_strict',z.ssl_strict) ORDER BY z.name) FROM cloudflare_zones z WHERE z.account_id=a.id),'[]'::jsonb),
- 'records',COALESCE((SELECT jsonb_agg(t ORDER BY t.expires_at) FROM (SELECT r.id,r.hostname,r.profile_id,r.panel_id,r.state,r.expires_at,r.verified_at,r.error_code FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED' ORDER BY r.expires_at LIMIT 500)t),'[]'::jsonb),
- 'record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED'))
+	where, _ := outputPublicationFilter("ALL")
+	available := `SELECT DISTINCT o.cloudflare_record_id AS id FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` AND o.cloudflare_record_id IS NOT NULL`
+	rows, e := s.DB.QueryContext(r.Context(), "WITH probe_ready AS MATERIALIZED ("+available+") "+`SELECT jsonb_build_object('id',a.id,'name',a.name,'enabled',a.enabled,'revision',a.revision,'manage_ssl',a.manage_ssl,'error_code',a.error_code,'refreshed_at',a.refreshed_at,
+ 'zones',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'status',z.status,'enabled',z.enabled,'present',z.present,'ssl_strict',z.ssl_strict,'dns_checked_at',z.dns_checked_at,'dns_error_code',z.dns_error_code) ORDER BY z.name) FROM cloudflare_zones z WHERE z.account_id=a.id),'[]'::jsonb),
+ 'records',COALESCE((SELECT jsonb_agg(t ORDER BY t.expires_at) FROM (SELECT r.id,r.hostname,r.profile_id,r.panel_id,r.state,r.expires_at,r.verified_at,r.error_code,EXISTS(SELECT 1 FROM probe_ready pr WHERE pr.id=r.id) AS probe_ready FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED' ORDER BY r.expires_at LIMIT 500)t),'[]'::jsonb),
+ 'record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED'),
+ 'dns_record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED' AND r.provider_id<>''),
+ 'pending_record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state IN('PREPARED','SENT')),
+ 'probe_ready_count',(SELECT count(*) FROM cloudflare_records r JOIN probe_ready pr ON pr.id=r.id WHERE r.account_id=a.id))
  FROM cloudflare_accounts a ORDER BY a.created_at`)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
@@ -137,6 +142,9 @@ func (s *Server) saveCloudflareAccount(w http.ResponseWriter, r *http.Request) {
 		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET enabled=id=ANY($2::text[]) WHERE account_id=$1", body.ID, pq.Array(body.Zones)); e != nil {
 			return e
 		}
+		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now() WHERE account_id=$1", body.ID); e != nil {
+			return e
+		}
 		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_records SET next_attempt_at=now() WHERE account_id=$1 AND state<>'DELETED'", body.ID); e != nil {
 			return e
 		}
@@ -230,8 +238,12 @@ func (s *Server) cloudflareProbeTarget(w http.ResponseWriter, r *http.Request) {
 	where, _ := outputPublicationFilter("ALL")
 	var uri string
 	e := s.DB.QueryRowContext(r.Context(), `SELECT o.uri FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id `+where+` AND o.cloudflare_record_id=$1 ORDER BY (cr.route_class='DIRECT') DESC LIMIT 1`, id).Scan(&uri)
-	if e != nil {
+	if errors.Is(e, sql.ErrNoRows) {
 		writeJSON(w, 409, map[string]string{"error": "cloudflare_probe_target_not_ready"})
+		return
+	}
+	if e != nil {
+		writeJSON(w, 500, errorBody())
 		return
 	}
 	rows, e := s.DB.QueryContext(r.Context(), "SELECT network::text FROM cloudflare_ip_ranges WHERE fetched_at>now()-interval '7 days' ORDER BY network")

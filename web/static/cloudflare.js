@@ -4,12 +4,13 @@ async function openCloudflareSettings(){
   const data=await api('/api/v1/configs/cloudflare');
   $('#modalTitle').textContent='Cloudflare domains';$('#modalForm').classList.remove('profileForm');$('#modalError').textContent='';$('#modalSubmit').hidden=true;
   $('#modalFields').innerHTML='<p>API tokens are recommended. Allow Zone Read, DNS Edit, SSL and Certificates Edit, and Zone Settings Read for the domains you select. Zone Settings Edit is needed only for automatic Full (strict).</p><div class="cardActions"><button type="button" data-cf-new>Add Cloudflare account</button><button type="button" data-cf-status>Refresh status</button><button type="button" data-cf-ranges>Refresh official IP ranges</button></div><label>Import operator probe results<input type="file" accept="application/json,.json" data-cf-import></label>'+
-   (data.accounts.length?data.accounts.map(a=>'<fieldset><legend>'+esc(a.name)+'</legend><p>'+esc(a.enabled?'Enabled':'Paused')+' · '+esc(a.record_count)+' managed records'+(a.error_code?' · '+esc(configMessage(a.error_code)):'')+'</p><p>'+esc(a.zones.filter(z=>z.enabled).map(z=>z.name).join(', ')||'No domains selected')+'</p><div class="cardActions"><button type="button" data-cf-edit="'+esc(a.id)+'">Domains and settings</button><button type="button" data-cf-refresh="'+esc(a.id)+'">Refresh domains</button></div><details><summary>Record status</summary><p>Up to 500 records shown. DNS cache expiry may lag behind deletion. Old static links expire; refresh your subscription.</p><div class="tableWrap"><table class="table"><thead><tr><th>Hostname</th><th>State</th><th>Expires</th><th>Last verified</th></tr></thead><tbody>'+a.records.map(x=>'<tr><td>'+esc(x.hostname)+'<br><button type="button" data-cf-probe="'+esc(x.id)+'">Download probe target</button></td><td>'+esc(x.error_code||x.state)+'</td><td>'+esc(formatDate(x.expires_at))+'</td><td>'+esc(x.verified_at?formatDate(x.verified_at):'Pending')+'</td></tr>').join('')+'</tbody></table></div></details></fieldset>').join(''):'<p>No Cloudflare account connected yet.</p>')+
+   (data.accounts.length?data.accounts.map(cloudflareAccountCard).join(''):'<p>No Cloudflare account connected yet.</p>')+
    '<p>Official IP ranges: <a href="https://www.cloudflare.com/ips/" target="_blank" rel="noopener">cloudflare.com/ips</a>. Ranges identify Cloudflare ownership; operator speed requires measurements from that operator.</p>';
   $('#modalFields [data-cf-new]').onclick=()=>editCloudflareAccount();
   $('#modalFields [data-cf-status]').onclick=()=>openCloudflareSettings();
   $('#modalFields [data-cf-ranges]').onclick=async e=>{e.target.disabled=true;try{await api('/api/v1/configs/cloudflare/ips/refresh',{method:'POST'});toast('Official IP ranges refreshed')}catch(err){$('#modalError').textContent=configMessage(err.message)}finally{e.target.disabled=false}};
-  $('#modalFields').querySelectorAll('[data-cf-probe]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const target=await api('/api/v1/configs/cloudflare/records/'+encodeURIComponent(b.dataset.cfProbe)+'/probe'),url=URL.createObjectURL(new Blob([JSON.stringify(target,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='cloudflare-probe-'+b.dataset.cfProbe+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(err){$('#modalError').textContent=configMessage(err.message)}finally{b.disabled=false}});
+  data.accounts.forEach(a=>{const root=[...$('#modalFields').querySelectorAll('[data-cf-records]')].find(x=>x.dataset.cfRecords===a.id);if(root)bindCloudflareRecords(root,a.records,a.record_count)});
+
   $('#modalFields [data-cf-import]').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>65536)throw Error('Probe file is too large');const report=JSON.parse(await file.text());if(!Array.isArray(report.results)||report.results.length>64)throw Error('Invalid probe results');let saved=0;for(const result of report.results){if(!result.protocol_verified)continue;await api('/api/v1/configs/cloudflare/measurements',{method:'POST',body:JSON.stringify(result)});saved++}toast(saved+' operator measurements saved')}catch(err){$('#modalError').textContent=configMessage(err.message)}finally{e.target.value=''}};
 
   $('#modalFields').querySelectorAll('[data-cf-edit]').forEach(b=>b.onclick=()=>editCloudflareAccount(data.accounts.find(a=>a.id===b.dataset.cfEdit)));
@@ -79,4 +80,35 @@ function bindCloudflareSchedule(f){
   f('cf_'+name).addEventListener('input',update);f('cf_'+name).addEventListener('change',update);
  }
  return sync;
+}
+
+function cloudflareAccountCard(a){
+ return '<fieldset class="cloudflareAccount"><legend>'+esc(a.name)+'</legend><p>'+esc(a.enabled?'Enabled':'Paused')+'</p><p>'+esc(a.dns_record_count??0)+' confirmed DNS records · '+esc(a.pending_record_count??0)+' pending requests · '+esc(a.probe_ready_count??0)+' probe-ready records</p>'+
+ (a.error_code?'<p class="error">'+esc(configMessage(a.error_code))+'</p>':'')+
+ '<p>'+esc(a.zones.filter(z=>z.enabled).map(z=>z.name).join(', ')||'No domains selected')+'</p>'+
+ a.zones.filter(z=>z.enabled).map(z=>'<p>'+esc(z.name)+': '+esc(z.dns_error_code?configMessage(z.dns_error_code):z.dns_checked_at?'DNS read access verified; writes are verified during creation.':'DNS access check pending.')+'</p>').join('')+
+ '<div class="cardActions"><button type="button" data-cf-edit="'+esc(a.id)+'">Domains and settings</button><button type="button" data-cf-refresh="'+esc(a.id)+'">Refresh domains and access</button></div>'+
+ '<details><summary>Record status ('+esc(a.record_count)+' tracked requests)</summary><p>Pending requests are local work, not confirmed DNS records. Up to 500 tracked requests are available here. Old static links expire; refresh your subscription.</p><div data-cf-records="'+esc(a.id)+'"></div></details></fieldset>';
+}
+function bindCloudflareRecords(root,records,total){
+ let page=0;const size=25,pages=Math.max(1,Math.ceil(records.length/size));
+ const render=()=>{
+  root.innerHTML=records.slice(page*size,(page+1)*size).map(x=>{
+   const state={PREPARED:'Waiting to create DNS',SENT:'Creation outcome is being checked',DNS_READY:'DNS exists',DELETING:'Verifying DNS removal',CONFLICT:'Record ownership conflict'}[x.state]||x.state;
+   return '<article class="cloudflareRecord"><div class="cloudflareHostname">'+esc(x.hostname)+'</div><p>'+esc(state)+(x.error_code?' · '+esc(configMessage(x.error_code)):'')+'</p><p>'+esc(x.state==='PREPARED'||x.state==='SENT'?'Request deadline: ':'DNS expiry: ')+esc(formatDate(x.expires_at))+'</p><p>Last verified: '+esc(x.verified_at?formatDate(x.verified_at):'Pending')+'</p><button type="button" data-cf-probe="'+esc(x.id)+'"'+(x.probe_ready?'':' disabled')+'>'+(x.probe_ready?'Download probe target':'Probe unavailable until a config is published')+'</button></article>';
+  }).join('')||'<p>No tracked requests.</p>';
+  if(records.length)root.insertAdjacentHTML('beforeend','<div class="cloudflarePager"><button type="button" data-cf-prev'+(page===0?' disabled':'')+'>Previous</button><span>'+esc(page*size+1)+'–'+esc(Math.min((page+1)*size,records.length))+' / '+esc(total)+'</span><button type="button" data-cf-next'+(page+1===pages?' disabled':'')+'>Next</button></div>');
+  root.querySelector('[data-cf-prev]')?.addEventListener('click',()=>{page--;render();root.scrollIntoView({block:'start'})});
+  root.querySelector('[data-cf-next]')?.addEventListener('click',()=>{page++;render();root.scrollIntoView({block:'start'})});
+  root.querySelectorAll('[data-cf-probe]:not(:disabled)').forEach(b=>b.onclick=()=>downloadCloudflareProbe(b));
+ };
+ render();
+}
+async function downloadCloudflareProbe(b){
+ b.disabled=true;
+ try{
+  const target=await api('/api/v1/configs/cloudflare/records/'+encodeURIComponent(b.dataset.cfProbe)+'/probe'),url=URL.createObjectURL(new Blob([JSON.stringify(target,null,2)],{type:'application/json'})),a=document.createElement('a');
+  a.href=url;a.download='cloudflare-probe-'+b.dataset.cfProbe+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(err){$('#modalError').textContent=configMessage(err.message)}
+ finally{b.disabled=false}
 }

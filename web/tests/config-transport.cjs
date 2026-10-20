@@ -9,6 +9,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   const supported=protocol==='vless'&&(security==='reality'&&network!=='ws'||security==='tls'&&network!=='xhttp'||security==='none'&&network==='tcp')||protocol==='vmess'&&network!=='xhttp'&&security!=='reality'||protocol==='trojan'&&(network!=='xhttp'&&security==='tls'||network==='tcp'&&security==='none')||protocol==='shadowsocks'&&network==='tcp'&&security==='none';
   if(supported)catalog.drivers.push({id:[protocol,network,security].join('/'),protocol,network,security,public:true,client_requirement:['vless','trojan'].includes(protocol)&&security==='none'?'plain_tcp_compatible_client':''});
  }
+ const cfRecords=Array.from({length:28},(_,i)=>({id:'record-'+i,hostname:'assets-stream-delivery-'+String(i).padStart(32,'0')+'.example.com',state:i===27?'DNS_READY':'PREPARED',expires_at:new Date(Date.now()+3600000).toISOString(),verified_at:i===27?new Date().toISOString():null,error_code:i===27?'':'cloudflare_dns_read_permission_denied',probe_ready:i===27}));
  const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');requests.push([req.method,url.pathname]);
   const json=(body,status=200)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(body))};
@@ -30,7 +31,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
-  const data={'/api/v1/configs/cloudflare':{"accounts": [{"id": "11111111-1111-4111-8111-111111111111", "name": "Cloudflare fixture", "enabled": true, "revision": 1, "manage_ssl": true, "error_code": "", "record_count": 0, "records": [], "zones": [{"id": "zone-a", "name": "example.com", "status": "active", "enabled": true, "present": true, "ssl_strict": true}]}]},'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'fixture'},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[]};json(data[url.pathname]||{status:'ready',checks:[],active_servers:2});
+  const data={'/api/v1/configs/cloudflare':{"accounts": [{"id": "11111111-1111-4111-8111-111111111111", "name": "Cloudflare fixture", "enabled": true, "revision": 1, "manage_ssl": true, "error_code": "cloudflare_dns_read_permission_denied", "record_count": 28, "dns_record_count": 1, "pending_record_count": 27, "probe_ready_count": 1, "records": cfRecords, "zones": [{"id": "zone-a", "name": "example.com", "status": "active", "enabled": true, "present": true, "ssl_strict": true}]}]},'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'fixture'},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[]};json(data[url.pathname]||{status:'ready',checks:[],active_servers:2});
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const profile=fs.mkdtempSync(path.join(root,'ui-profile-')),log=fs.openSync(path.join(root,'browser.log'),'w');
@@ -191,6 +192,23 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("document.querySelector('[data-cf-edit]').click()");assert.equal(await evaluate("document.querySelector('[name=cf_secret]').type==='password'&&document.querySelector('[name=cf_secret]').value===''"),true);
   await evaluate("document.querySelector('#modalCancel').click()");
   mark('Cloudflare WS TLS toggle, random lifetime defaults, retained edit state, unsupported transport and write-only credentials');
+
+  await evaluate("document.querySelector('#cloudflareSettings').click()");await waitFor("document.querySelector('[data-cf-records]')");
+  assert.equal(await evaluate("document.querySelector('#modalFields').innerText.includes('1 confirmed DNS records · 27 pending requests · 1 probe-ready records')"),true);
+  assert.equal(await evaluate("document.querySelector('#modalFields').innerText.includes('Grant Zone / DNS / Edit')"),true);
+  await evaluate("document.querySelector('.cloudflareAccount details').open=true");
+  assert.equal(await evaluate("document.querySelectorAll('.cloudflareRecord').length"),25);
+  assert.equal(await evaluate("document.querySelectorAll('[data-cf-probe]:not(:disabled)').length"),0);
+  const probeCalls=requests.filter(x=>x[1].endsWith('/probe')).length;
+  await evaluate("document.querySelector('[data-cf-probe]').click()");
+  assert.equal(requests.filter(x=>x[1].endsWith('/probe')).length,probeCalls);
+  await evaluate("document.querySelector('[data-cf-next]').click()");
+  assert.equal(await evaluate("document.querySelectorAll('.cloudflareRecord').length"),3);
+  assert.equal(await evaluate("document.querySelectorAll('[data-cf-probe]:not(:disabled)').length"),1);
+  assert.equal(await evaluate("document.querySelector('#modal').scrollWidth<=document.querySelector('#modal').clientWidth+1"),true);
+  const accessShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'cloudflare-access-mobile.png'),Buffer.from(accessShot.data,'base64'));
+  await evaluate("document.querySelector('#modalCancel').click()");
+  mark('Cloudflare distinguishes pending requests from DNS; blocked probes cannot issue requests; mobile records paginate without horizontal overflow');
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

@@ -135,6 +135,13 @@ func (s Service) EnsureCertificate(ctx context.Context, account, panel string, n
 				return ctx.Err()
 			}
 		}
+		// Keep installed certificates and uncertain issuance independent of DNS access.
+		// Only new, unsent issuance waits for the domain to become usable.
+		if errors.Is(e, sql.ErrNoRows) || state == "PREPARED" {
+			if accessErr := s.dnsAccessFailure(ctx, account); accessErr != nil {
+				return accessErr
+			}
+		}
 		if errors.Is(e, sql.ErrNoRows) || state == "INSTALLED" {
 			generation, e = NewID()
 			if e != nil {

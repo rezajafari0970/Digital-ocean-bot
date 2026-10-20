@@ -37,3 +37,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
 /* Diagnostic messages stay readable on touch screens. */
 .buildDiagnostic{white-space:pre-wrap;overflow-wrap:anywhere;max-width:44rem;text-align:start}
 [data-error-details] summary{cursor:pointer}
+
+/* Keep Cloudflare diagnostics readable inside the mobile dialog. */
+#modalFields .cloudflareAccount{min-width:0;max-width:100%;box-sizing:border-box}
+.cloudflareAccount legend,.cloudflareAccount p,.cloudflareHostname{overflow-wrap:anywhere}
+.cloudflareRecord{border-top:1px solid #344264;padding:12px 0;min-width:0}
+.cloudflareRecord p{margin:8px 0}
+.cloudflareRecord button{max-width:100%;white-space:normal}
+.cloudflarePager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.cloudflarePager button{padding:10px}
