@@ -1,0 +1,388 @@
+{
+  "task": "config-verification-eligibility-20261021",
+  "status": "deployed_and_verified",
+  "recorded_at": "2026-10-20T23:26:47.410380+00:00",
+  "source_revision": "798c7578e0cb4e4f72b94943bb04771467a21ed1",
+  "public_revision": "46c958b13a9845073651c38ef5cf85b5107a4a5d",
+  "branch": "fix/proof-eligibility-20261021",
+  "stages": {
+    "live_resume_audit": "complete",
+    "root_cause": "complete",
+    "regression_reproduction": "failed_as_expected_before_fix",
+    "implementation": "complete",
+    "focused_race_tests": "passed",
+    "release_gate": "71_passed_zero_skipped",
+    "publication": "complete",
+    "primary_installation": "complete",
+    "secondary_installation": "complete",
+    "live_claim_observation": "passed",
+    "preservation": "passed"
+  },
+  "openai_api_usage": 0,
+  "primary": {
+    "at": "2026-10-20T23:23:01.817725+00:00",
+    "commit": "46c958b13a9845073651c38ef5cf85b5107a4a5d",
+    "schema": "000191_cloudflare_dns_quota",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-20T23:23:01.848197114Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 3266,
+        "unchanged": 3266,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 96,
+        "unchanged": 96,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 1,
+      "records": 2492,
+      "profiles": 1
+    }
+  },
+  "secondary": {
+    "at": "2026-10-20T23:25:26.844741+00:00",
+    "commit": "46c958b13a9845073651c38ef5cf85b5107a4a5d",
+    "schema": "000191_cloudflare_dns_quota",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-20T23:25:26.938131012Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "admission_observation": {
+    "observed": 292,
+    "eligible": 252,
+    "ineligible": 40,
+    "stable_ineligible": 40,
+    "ineligible_claim_changes": 0,
+    "elapsed_seconds": 93.174803
+  },
+  "final_metrics": {
+    "at": "2026-10-20T23:24:41.106479+00:00",
+    "catalog_seconds": 0.059,
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 63,
+        "verified": 63,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 63,
+        "published": 126,
+        "target": 126
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "ready",
+        "eligible": 63,
+        "verified": 63,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 63,
+        "published": 126,
+        "target": 126
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 63,
+        "verified": 63,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 63,
+        "published": 126,
+        "target": 126
+      },
+      {
+        "id": "90d989ac-977f-4b82-9495-597e92227ddd",
+        "protocol": "vless",
+        "port": 2087,
+        "state": "retrying",
+        "eligible": 63,
+        "verified": 61,
+        "pending": 0,
+        "blocked": 2,
+        "ready": 61,
+        "published": 122,
+        "target": 126
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-20T23:24:41.187405+00:00",
+      "proof_age": {
+        "under_5m": 252,
+        "over_5m": 0,
+        "never": 0,
+        "median_seconds": 62.341387499999996,
+        "max_seconds": 272.318402
+      },
+      "routing_age": {
+        "under_60s": 63,
+        "over_60s": 0,
+        "median_seconds": 15.107826
+      },
+      "sql": {
+        "active": 1,
+        "idle": 53
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.035,
+        "status": 200,
+        "bytes": 184312,
+        "lines": 626
+      }
+    }
+  },
+  "cloudflare": {
+    "at": "2026-10-20T23:25:02.739808+00:00",
+    "free_gib": 5.58,
+    "eligible_certificates": [
+      {
+        "state": "INSTALLED",
+        "n": 63
+      }
+    ],
+    "quota": [
+      {
+        "quota": 200,
+        "usage": 196,
+        "checked_at": "2026-10-20T23:24:40.038254+00:00",
+        "error": ""
+      }
+    ],
+    "records": [
+      {
+        "state": "DNS_READY",
+        "error_code": "",
+        "n": 182
+      },
+      {
+        "state": "SENT",
+        "error_code": "",
+        "n": 1
+      }
+    ],
+    "dns_wait_reasons": [
+      {
+        "panel_id": "47c7be46-4f49-4767-b577-c892b584b49c",
+        "unexpired_records": 2,
+        "records_with_safe_lifetime": 0,
+        "recently_observed_records": 2
+      },
+      {
+        "panel_id": "d702297c-76c0-4ec8-a135-b509521dd1f0",
+        "unexpired_records": 2,
+        "records_with_safe_lifetime": 0,
+        "recently_observed_records": 2
+      }
+    ]
+  },
+  "near_expiry_classification": {
+    "at": "2026-10-20T23:26:01.575557+00:00",
+    "servers": [
+      {
+        "panel_id": "d702297c-76c0-4ec8-a135-b509521dd1f0",
+        "server_state": "READY",
+        "server_expires_at": "2026-10-20T23:28:12.624096+00:00",
+        "remaining_seconds": 131.051881,
+        "all_live_record_expiries_equal_server": true
+      },
+      {
+        "panel_id": "47c7be46-4f49-4767-b577-c892b584b49c",
+        "server_state": "READY",
+        "server_expires_at": "2026-10-20T23:26:46.135962+00:00",
+        "remaining_seconds": 44.563747,
+        "all_live_record_expiries_equal_server": true
+      }
+    ]
+  },
+  "separate_audit_resumption": {
+    "exit": 0,
+    "at": "2026-10-20T23:23:07.840484+00:00",
+    "resource_thresholds_unchanged": true,
+    "observed": {
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "Result": "success",
+      "ExecMainStartTimestamp": "Tue 2026-10-20 23:23:07 UTC",
+      "ExecMainExitTimestamp": "Tue 2026-10-20 23:23:08 UTC",
+      "ExecMainStatus": "0"
+    },
+    "observed_at": "2026-10-20T23:23:52.692037+00:00"
+  },
+  "remaining_constraints": [
+    "Selected zone provider DNS quota is 200; configured generation can require more capacity.",
+    "Cloudflare endpoints with less than five minutes remaining are excluded by existing policy.",
+    "Host disk capacity and unrelated resource-gated one-shot jobs require deployment preflight care.",
+    "Iranian operator performance has not been measured."
+  ],
+  "evidence": {
+    "release": "/var/lib/datacenter-publisher/release-dqvz5pvf",
+    "primary": "/root/backups/dob-proof-eligibility-20261021",
+    "secondary": "limited-lime.ptr.network:/root/backups/dob-proof-eligibility-20261021",
+    "focused_failure": ".local/before.log",
+    "focused_pass": ".local/after.log",
+    "final_metrics": "/root/projects/dob-unified-configs-20261018/.local/isolation-187-metrics-proof-final-20261021.json"
+  }
+}

@@ -8,4 +8,19 @@ The verification claim now uses the same shared EligibleTarget predicate as down
 
 A PostgreSQL regression reproduces the defect before the fix for invalid-token, locked, disabled and deleting accounts, disabled panels and expired servers. For each case it exercises routine/recovery consumers and both the callback and production batch paths, requiring unchanged listener evidence and scheduling. The fix passes all cases and verifies automatic recovery after admission is restored. Focused race tests also cover lifecycle resize/delete/recovery, unfinished cleanup exclusion and legacy retirement.
 
-Evidence: `/root/projects/dob-proof-eligibility-20261021/.local/before.log` reproduces the failure; `after.log` passes. OpenAI API usage: zero. Release validation and sequential production rollout are pending.
+Evidence: `/root/projects/dob-proof-eligibility-20261021/.local/before.log` reproduces the failure; `after.log` passes. OpenAI API usage: zero. Release validation and sequential production rollout are complete.
+
+
+## Production result
+
+Source `798c7578e0cb4e4f72b94943bb04771467a21ed1` was published as `46c958b13a9845073651c38ef5cf85b5107a4a5d`. All 71 mandatory release checks passed with zero skips, followed by the full Go suite/vet, installer and output-browser tests, secret scans, and exact-candidate isolated installation/identity checks. Both production controllers run that revision with all five readiness checks passing and all three executable hashes matching.
+
+Primary preservation verification covered 3,266 profile identities and 96 Trojan identities: every common identity was unchanged. Both controllers preserve the master key, environment, Cloudflare domain/credential settings, configuration policies and selective Google Ads routing. A 93.17-second production observation found 40 targets ineligible at both ends, with zero changes to their claim timestamps. This confirms the repeating claim loop stopped without inventing positive runtime evidence.
+
+At 02:54:41 Tehran, the three ordinary profiles each published 126/126 class outputs across 63 eligible servers. Cloudflare published 122/126 across 61 servers, with two marked DNS pending. All 63 eligible Cloudflare certificates were installed. Follow-up correlated both pending records' expiry with their server expiry: the servers had approximately 45 and 131 seconds remaining, so the existing five-minute Cloudflare endpoint lifetime guard excluded them. This particular gap is near-expiry behavior, not evidence of failed certificate recovery or proof of quota exhaustion. The selected zone separately retains its provider capacity constraint: quota 200, observed usage 196 at 02:55 Tehran. No domain, record-count or lifetime policy was changed. Controller output HTTP latency was 0.035 seconds; Iranian mobile-network performance was not measured.
+
+The production installation encountered an OS package restart hook waiting for the separate `config-manager-xray-audit` one-shot service, whose disk resource gate held it in a sleep loop. Only that background audit was temporarily paused, then explicitly started after the installer completed. Its resumed invocation finished successfully with exit status zero. Resource-protection thresholds and timers were not changed. This is recorded as a host integration constraint, not a change to that separate project's policy.
+
+Space was recovered from verified clean old installer source caches (active and latest five preserved), completed compilation caches, and a byte-identical duplicate archive in the isolated test container. Twenty-eight old release source-evidence directories were compressed and every archived regular file verified by SHA-256 before removing its unpacked copy. Production data and historical database/configuration backups were retained. Free space at the final snapshot was 5.58 GiB; future installations must satisfy the unchanged disk guard.
+
+Evidence: `/var/lib/datacenter-publisher/release-dqvz5pvf`, `/root/backups/dob-proof-eligibility-20261021` on both controllers, and `.local/*cleanup*.json` / `.local/release-compression-result.json` in this worktree. No OpenAI API was used.
