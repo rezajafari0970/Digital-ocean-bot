@@ -39,3 +39,8 @@ One independent VLESS TCP REALITY 443 listener remains blocked by `profile_runti
 The routing change is complete. The residual listener problem and temporary Output withholding mean the entire pre-existing configuration system is not reported as fully fixed. No ad fill-rate, 99 percent load improvement or end-to-end phone speed improvement was measured.
 
 Machine-readable evidence summary: [google-ads-selective-20261019.json](development-jobs/google-ads-selective-20261019.json).
+
+
+## Follow-up — 20 October 2026
+
+The independent REALITY 443 issue described above was addressed by enabling verified automatic target selection on that profile. At the follow-up checkpoint, all 72 eligible servers were verified and Output published 432/432 links. The previous server had expired; expiry itself was not counted as a repair. See [the recovery report](reality-target-recovery-20261020.md) for the exact change, evidence and client refresh requirement.

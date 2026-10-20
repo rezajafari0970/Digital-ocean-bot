@@ -1,0 +1,199 @@
+{
+  "recorded_at": "2026-10-20T04:21:51.364870+00:00",
+  "task": "Close the VLESS TCP REALITY 443 target-reachability issue carried from 19 October",
+  "status": "resolved by enabling existing verified automatic target selection and recovery on the affected fleet profile",
+  "source_baseline": "74378da20b064a8f6e7fe6626ec1277f877d751b",
+  "installed_release_unchanged": "8c488709ba27d12d99772636e302d93c0973863b",
+  "original_incident": {
+    "panel_id": "ee0165aa-0f8b-4e48-b001-432d6f4197bb",
+    "baseline_state": "DELETED",
+    "expiry": "2026-10-19T14:02:39.830913+00:00",
+    "observation": "The old target failed reachability while ordinary TLS egress and the profile TCP endpoint succeeded. The old server expired before this follow-up. Its disappearance is not treated as a repair or proof of the underlying network cause."
+  },
+  "change": {
+    "profile_id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+    "from_revision": 1,
+    "to_revision": 2,
+    "from_sni_mode": "manual",
+    "to_sni_mode": "auto",
+    "candidates": [
+      "www.microsoft.com",
+      "www.cloudflare.com",
+      "www.apple.com"
+    ],
+    "scope": "existing fleet profile, current and future eligible servers",
+    "method": "revision-checked profile API; no direct database policy mutation",
+    "other_transport_fields_unchanged": true,
+    "client_credentials_unchanged": true
+  },
+  "recovery_behavior": {
+    "target_selection": "per profile, server and revision; publicly reachable target with verified certificate and chain, TLS 1.3 and h2",
+    "runtime_reselection": "existing batch verifier requests reconciliation and invalidates cached selection after repeated total traffic-proof failures in auto mode; selector prefers another verified candidate when available",
+    "all_targets_unavailable": "remain unverified and retry; no fabricated success or TLS bypass",
+    "limitations": "Live canary tested initial rejection of an unreachable candidate and successful selection. A sustained outage of a currently selected production target was not injected."
+  },
+  "checks": {
+    "selection_regression": "TestProfileSNISelectionRequiresVerifiedPublicTLS PASS",
+    "scan_servers": 3,
+    "scan_valid_candidates_per_server": 3,
+    "canary_real_https_connections": 2,
+    "production_real_https_connections": 6,
+    "all_connections_passed_first_attempt": true,
+    "tls_validation": true,
+    "canary_published": false,
+    "canary_removed": true
+  },
+  "fleet": {
+    "at": "2026-10-20T04:20:59.954342+00:00",
+    "eligible": 72,
+    "verified_auto": 72,
+    "sni_counts": {
+      "www.cloudflare.com": 27,
+      "www.microsoft.com": 33,
+      "www.apple.com": 12
+    },
+    "canary_cleanup": {
+      "enabled": false,
+      "delete_requested_at": "2026-10-20T04:18:33.031828+00:00",
+      "deleted_at": "2026-10-20T04:18:37.809077+00:00",
+      "listener_state": "RETIRED"
+    }
+  },
+  "output": {
+    "at": "2026-10-20T04:20:39.349047+00:00",
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 72,
+        "published": 144,
+        "target": 144
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "ready",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 72,
+        "published": 144,
+        "target": 144
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 72,
+        "verified": 72,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 72,
+        "published": 144,
+        "target": 144
+      }
+    ],
+    "status": 200,
+    "seconds": 0.035,
+    "output_lines": 432,
+    "profile443_lines": 144,
+    "profile443_sni_counts": {
+      "www.microsoft.com": 66,
+      "www.apple.com": 24,
+      "www.cloudflare.com": 54
+    },
+    "profile443_native_sni_matches": 144,
+    "profile443_native_sni_mismatches": 0
+  },
+  "preservation": {
+    "at": "2026-10-20T04:20:37.098633+00:00",
+    "commit": "8c488709ba27d12d99772636e302d93c0973863b",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-20T04:20:36.718412232Z"
+    },
+    "retained_listeners": 213,
+    "identity_changes": [],
+    "policy_checks": {
+      "environment_hash": true,
+      "protection_policy": true,
+      "creation_policy": true,
+      "trojan_policy": true,
+      "output_policy": true,
+      "unified": true
+    },
+    "all_preserved": true
+  },
+  "all_existing_profile_other_fields_preserved": true,
+  "routing": "Google Ads selective policy unchanged and freshly verified on all 72 eligible servers; other tunneled traffic continues through server egress",
+  "client_action": "Refresh subscription or import newly generated links because server-specific SNI may change; official v2rayNG and its core remain unchanged.",
+  "rollback": "Read current profile revision and PUT the saved original spec through the profile API, preserving all other current profile fields. Do not replay an old request revision or alter proofs.",
+  "secondary_controller": "Existing services observed active on the same installed release; no secondary profile was changed.",
+  "external_openai_api_calls": 0,
+  "evidence_sha256": {
+    "target-scan.json": "822af9151dd3ab73048bdd95ecbb835bd24a412a3afab3a5b65d72f3a5193ec2",
+    "canary-create-intent.json": "dae9af961d845ebc6b9d192cb9594527c44e6bf00dc38f55d5244a32b0f7e144",
+    "canary-create-result.json": "30e1017fb9389718a8d987e60feb65828badb1b6552a7d9f3fb3e3cd3c354831",
+    "canary-general-traffic.json": "7ae7978bc7a0971f7acd3c8bdb9f78a84936306a0f1aaa4fbe716e08cfcfe3b3",
+    "canary-verified.json": "96ec0a81d47b12a20e3f7130a81c5a6caf0d01b1aa30c2567ec2fc497070ffc8",
+    "profile-update-intent.json": "559148980978b487392e9fe282c3693a6d1c322c4a7abf88c2bf15c130bc995f",
+    "profile-update-result.json": "ecc7eaf0a9f484d0420dd542efe1a5a067a32b2e72ca0b525d16ab94c4819837",
+    "canary-delete-intent.json": "c0559e2cb95baed751f45adb273e178e3f86bca62500adf12aaf0cc2fd8f9be3",
+    "canary-delete-result.json": "a5ab8694fc350ad6c63e5a2d482634adca79ce7b43ca4fa091f3b886268fd96f",
+    "main-general-traffic.json": "3830eb76bfb9af71cefa2d9cc9210e68db50568a41836293f1e643451d2dafc6",
+    "preservation.json": "748c7196f9765074916b7b095e2777148b98f0bb980b37d365d964714e32e68e",
+    "output-first.json": "02d6a38ecb1ef76a752dd96298b8a1f32ed50fec01eb13a9119f86330aaf4a28",
+    "observe-final.json": "459c7dae59157c8d526be73df64ec60a84e52e8a8daa9802abd96a11659a2c09"
+  }
+}
