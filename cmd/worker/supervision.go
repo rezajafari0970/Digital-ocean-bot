@@ -13,6 +13,9 @@ import (
 func modulePolicy(name string) (supervision.Policy, bool) {
 	p := supervision.Policy{Loop: time.Minute, Work: 3 * time.Minute}
 	switch name {
+	case "cloudflare-resources":
+		p.Work = time.Minute
+		p.Idle = time.Second
 	case "heartbeat":
 		p.Loop = 30 * time.Second
 		p.Work = 10 * time.Second

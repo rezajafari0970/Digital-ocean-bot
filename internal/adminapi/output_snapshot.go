@@ -47,10 +47,10 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 			}
 		}
 		stage = "stage records"
-		if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text,config_profile_id uuid,config_profile_revision bigint) ON COMMIT DROP`); err != nil {
+		if _, err = tx.ExecContext(ctx, `CREATE TEMP TABLE current_output_uris(uri text, visible_until timestamptz,client_id text,config_profile_id uuid,config_profile_revision bigint,cloudflare_record_id uuid) ON COMMIT DROP`); err != nil {
 			return err
 		}
-		copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id", "config_profile_id", "config_profile_revision"))
+		copyStmt, err := tx.PrepareContext(ctx, pq.CopyIn("current_output_uris", "uri", "visible_until", "client_id", "config_profile_id", "config_profile_revision", "cloudflare_record_id"))
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,11 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 			if rec.ProfileID != "" {
 				profile = rec.ProfileID
 			}
-			if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID, profile, rec.ProfileRevision); err != nil {
+			var recordID any
+			if rec.CloudflareRecordID != "" {
+				recordID = rec.CloudflareRecordID
+			}
+			if _, err = copyStmt.ExecContext(ctx, rec.URI, rec.VisibleUntil, rec.ClientID, profile, rec.ProfileRevision, recordID); err != nil {
 				_ = copyStmt.Close()
 				return err
 			}
@@ -77,11 +81,11 @@ func (s *Server) persistOutputSnapshotOwned(ctx context.Context, panelID string,
 			return err
 		}
 		stage = "upsert"
-		result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id,config_profile_id,config_profile_revision)
-SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END,c.client_id,c.config_profile_id,c.config_profile_revision
-FROM (SELECT DISTINCT ON(uri) uri,visible_until,client_id,config_profile_id,config_profile_revision FROM current_output_uris ORDER BY uri) c
+		result, err := tx.ExecContext(ctx, `INSERT INTO output_config_snapshots(panel_id,uri,visible_until,client_id,config_profile_id,config_profile_revision,cloudflare_record_id)
+SELECT $1,c.uri,CASE WHEN dr.expires_at IS NULL THEN c.visible_until WHEN c.visible_until IS NULL THEN dr.expires_at-interval '10 seconds' ELSE LEAST(c.visible_until,dr.expires_at-interval '10 seconds') END,c.client_id,c.config_profile_id,c.config_profile_revision,c.cloudflare_record_id
+FROM (SELECT DISTINCT ON(uri) uri,visible_until,client_id,config_profile_id,config_profile_revision,cloudflare_record_id FROM current_output_uris ORDER BY uri) c
 JOIN panel_instances p ON p.id=$1 JOIN droplets dr ON dr.id=p.droplet_id
-ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until,client_id=excluded.client_id,config_profile_id=excluded.config_profile_id,config_profile_revision=excluded.config_profile_revision
+ON CONFLICT(panel_id,(md5(uri))) DO UPDATE SET last_seen_at=now(),visible_until=excluded.visible_until,client_id=excluded.client_id,config_profile_id=excluded.config_profile_id,config_profile_revision=excluded.config_profile_revision,cloudflare_record_id=excluded.cloudflare_record_id
 WHERE output_config_snapshots.uri=excluded.uri`, panelID)
 		if err != nil {
 			return err

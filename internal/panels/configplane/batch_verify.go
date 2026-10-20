@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflare"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/inventory"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -40,6 +41,7 @@ type batchJob struct {
 	p           Profile
 	credentials configdriver.Credentials
 	input       map[string]any
+	endpoint    cloudflare.Endpoint
 }
 type batchResult struct {
 	CoreCurrent *bool                        `json:"core_current"`
@@ -172,6 +174,14 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					s.batchFailure(ctx, c.id, panel, "profile_native_tag_missing", true)
 					continue
 				}
+				var endpoint cloudflare.Endpoint
+				if p.Spec.CloudflareAccount != "" {
+					endpoint, e = s.cloudflare().ProbeEndpoint(ctx, p.Spec.CloudflareAccount, p.ID, panel)
+					if e != nil {
+						s.batchFailure(ctx, p.ID, panel, "profile_cloudflare_dns_pending", false)
+						continue
+					}
+				}
 				emails := []string{}
 				probes := []any{}
 				classes := []string{}
@@ -180,6 +190,9 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					emails = append(emails, cl.Email)
 					if !seen[cl.Class] {
 						out, e := registry.Outbound(p.Spec, t.Host, credentials, cl)
+						if endpoint.ID != "" {
+							out, e = registry.CDNOutbound(p.Spec, t.Host, endpoint.Address, endpoint.Hostname, credentials, cl)
+						}
 						if e != nil {
 							return e
 						}
@@ -189,7 +202,7 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					}
 				}
 				input := map[string]any{"profile_id": p.ID, "port": p.Spec.Port, "tag": tag, "emails": emails, "probes": probes, "probe_classes": classes, "core_hashes": profileCoreHashes(), "current_core_hashes": transportcore.CoreHashes()}
-				jobs = append(jobs, batchJob{c, p, credentials, input})
+				jobs = append(jobs, batchJob{c, p, credentials, input, endpoint})
 				inputs = append(inputs, input)
 				_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage='runtime',stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2", p.ID, panel)
 			}
@@ -274,7 +287,9 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					probe, cancel := context.WithTimeout(ctx, 4*time.Second)
 					defer cancel()
 					good := false
-					if j.p.Spec.Security == "tls" {
+					if j.endpoint.ID != "" {
+						good = cloudflare.ProbeTLS(probe, j.endpoint.Address, j.endpoint.Hostname, j.p.Spec.Port) == nil
+					} else if j.p.Spec.Security == "tls" {
 						_, e := trojantcp.ProbeTLS(probe, t.Host, j.p.Spec.Port)
 						good = e == nil
 					} else {
@@ -314,6 +329,9 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					continue
 				}
 				next := nextProfileCheck(j.p, j.credentials, time.Now())
+				if j.endpoint.ID != "" {
+					next = time.Now().Add(15 * time.Second)
+				}
 				partial := false
 				for _, class := range j.p.Classes {
 					if !proof.Classes[class] {
@@ -332,6 +350,17 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					}
 					if !current {
 						return nil
+					}
+					if j.endpoint.ID != "" {
+						classes := []string{}
+						for class, good := range proof.Classes {
+							if good {
+								classes = append(classes, class)
+							}
+						}
+						if e := cloudflare.ConfirmEndpoint(ctx, tx, j.endpoint.ID, j.p.Revision, classes); e != nil {
+							return e
+						}
 					}
 					observedIDs := []string{}
 					for _, client := range j.credentials.Clients {
@@ -365,9 +394,17 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 func (s Service) batchFailure(ctx context.Context, id, panel, code string, reconcile bool) {
 	c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 	defer cancel()
-	_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='runtime',error_code=$3,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second',needs_reconcile=needs_reconcile OR $4 OR ($3='profile_runtime_traffic_unverified' AND failures>=2 AND EXISTS(SELECT 1 FROM config_driver_profiles p WHERE p.id=$1 AND p.spec->>'sni_mode'='auto')) WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", id, panel, code, reconcile)
+	var healthyCDN bool
+	if !reconcile {
+		_ = s.DB.QueryRowContext(c, `SELECT EXISTS(SELECT 1 FROM cloudflare_records r JOIN config_driver_profiles p ON p.id=r.profile_id WHERE r.profile_id=$1 AND r.panel_id=$2 AND r.account_id::text=p.spec->>'cloudflare_account' AND r.state='DNS_READY' AND r.verified_revision=p.revision AND r.verified_at>now()-interval '3 minutes' AND r.expires_at>now()+interval '5 minutes')`, id, panel).Scan(&healthyCDN)
+	}
+	if healthyCDN {
+		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '15 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
+		return
+	}
+	_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='runtime',error_code=$3,failures=failures+1,next_attempt_at=now()+LEAST(120,10*power(2,LEAST(failures,4))) * interval '1 second',needs_reconcile=needs_reconcile OR $4 OR ($3='profile_runtime_traffic_unverified' AND failures>=2 AND EXISTS(SELECT 1 FROM config_driver_profiles p WHERE p.id=$1 AND (p.spec->>'sni_mode'='auto' OR COALESCE(p.spec->>'cloudflare_account','')<>'' ))) WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", id, panel, code, reconcile)
 	if code == "profile_runtime_traffic_unverified" {
-		_, _ = s.DB.ExecContext(c, "DELETE FROM config_driver_sni_selections ss USING config_driver_listeners l,config_driver_profiles p WHERE ss.profile_id=$1 AND ss.panel_id=$2 AND l.profile_id=ss.profile_id AND l.panel_id=ss.panel_id AND l.needs_reconcile AND l.failures>=3 AND p.id=ss.profile_id AND p.spec->>'sni_mode'='auto'", id, panel)
+		_, _ = s.DB.ExecContext(c, "DELETE FROM config_driver_sni_selections ss USING config_driver_listeners l,config_driver_profiles p WHERE ss.profile_id=$1 AND ss.panel_id=$2 AND l.profile_id=ss.profile_id AND l.panel_id=ss.panel_id AND l.needs_reconcile AND l.failures>=3 AND p.id=ss.profile_id AND (p.spec->>'sni_mode'='auto' OR COALESCE(p.spec->>'cloudflare_account','')<>'' )", id, panel)
 	}
 }
 func validateBatchResults(expected []string, proofs []batchResult) (map[string]batchResult, error) {

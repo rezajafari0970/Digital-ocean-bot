@@ -366,7 +366,17 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 			key[i] = 0
 		}
 	}()
-	if p.Spec.Security == "tls" && (!cert.Valid || cert.Time.Before(time.Now().Add(48*time.Hour))) {
+	if p.Spec.CloudflareAccount != "" {
+		setStage("cloudflare_certificate")
+		expiry, err := s.ensureCloudflareCertificate(ctx, p, panel, t, key)
+		if err != nil {
+			return err
+		}
+		cert = sql.NullTime{Time: expiry, Valid: true}
+		if _, e = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET certificate_not_after=$3 WHERE profile_id=$1 AND panel_id=$2", id, panel, expiry); e != nil {
+			return e
+		}
+	} else if needsPublicIPCertificate(p.Spec, applied, cert, time.Now()) {
 		setStage("certificate")
 		command, e := trojantcp.ProfileCertificateCommand(panel, t.Host, p.Spec.Port, t.PanelPort)
 		if e != nil {
@@ -384,6 +394,9 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		if _, e = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET certificate_not_after=$3 WHERE profile_id=$1 AND panel_id=$2", id, panel, proof.NotAfter); e != nil {
 			return e
 		}
+	}
+	if p.Spec.Security != "tls" {
+		cert = sql.NullTime{}
 	}
 	// The global executor is acquired before the panel lock, matching legacy writers.
 	// A short queue timeout prevents a slow/offline profile from starving siblings.

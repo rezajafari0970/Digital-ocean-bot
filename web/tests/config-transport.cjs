@@ -20,7 +20,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
     if(url.pathname.endsWith('/delete-batch')){deletions.push(body);const ids=new Set(body.profiles.map(x=>x.id));catalog.profiles=catalog.profiles.filter(x=>!ids.has(x.profile.id));return json({accepted:ids.size,conflicts:0},202)}
     if(id&&current&&body.revision!==current.profile.revision)return json({error:'profile_revision_changed'},409);
     if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({state:'deleting'},202)}
-    saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||10000+saves.length}};
+    saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||(body.spec.cloudflare_account?2083:10000+saves.length)}};
     const item={profile,state:profile.enabled?'syncing':'paused',eligible:2,verified:2,ready:0,published:0,target:2*profile.classes.reduce((n,c)=>n+(profile.class_settings?.[c]?.count??profile.clients_per_class),0),pending:2,blocked:0,deleting:0};
     catalog.profiles=[...catalog.profiles.filter(x=>x.profile.id!==profile.id),item];json({profile,state:'queued'});
    });return;
@@ -30,7 +30,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    if(!fs.existsSync(file)){res.writeHead(404);res.end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));return;
   }
-  const data={'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'fixture'},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[]};json(data[url.pathname]||{status:'ready',checks:[],active_servers:2});
+  const data={'/api/v1/configs/cloudflare':{"accounts": [{"id": "11111111-1111-4111-8111-111111111111", "name": "Cloudflare fixture", "enabled": true, "revision": 1, "manage_ssl": true, "error_code": "", "record_count": 0, "records": [], "zones": [{"id": "zone-a", "name": "example.com", "status": "active", "enabled": true, "present": true, "ssl_strict": true}]}]},'/api/v1/project-update':{available:true,status:'succeeded',current_revision:'fixture'},'/api/v1/accounts':[],'/api/v1/build-activity':[],'/api/v1/provision-errors':[]};json(data[url.pathname]||{status:'ready',checks:[],active_servers:2});
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const profile=fs.mkdtempSync(path.join(root,'ui-profile-')),log=fs.openSync(path.join(root,'browser.log'),'w');
@@ -155,6 +155,18 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   const late={...catalog.profiles[0],profile:{...catalog.profiles[0].profile,id:'late-profile',name:'Created later'}};catalog.profiles.push(late);
   await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&document.querySelectorAll('[data-profile-id]').length===1");assert.deepEqual(deletions.at(-1).profiles,reviewed);assert.equal(catalog.profiles[0].profile.id,'late-profile');
   mark('delete all confirms exact snapshot and excludes later creations');
+  await evaluate("document.querySelector('#primaryAction').click()");await waitFor("document.querySelector('#modal').open");
+  await evaluate("change('protocol','vless');change('network','ws');change('security','tls');f('name').value='Cloudflare TLS';f('cf_account').value='11111111-1111-4111-8111-111111111111';f('cf_enabled').checked=true;f('cf_enabled').dispatchEvent(new Event('change'))");
+  assert.equal(await evaluate("f('direct_insecure').disabled&&f('residential_insecure').disabled&&f('host').disabled"),true);
+  await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&[...document.querySelectorAll('[data-profile-id]')].some(x=>x.innerText.includes('Cloudflare TLS'))");
+  assert.equal(saves.at(-1).spec.cloudflare_min_lifetime_seconds,2700);assert.equal(saves.at(-1).spec.cloudflare_max_lifetime_seconds,3600);assert.equal(saves.at(-1).spec.cloudflare_records,1);assert.equal(saves.at(-1).spec.host,'');
+  await evaluate("[...document.querySelectorAll('[data-profile-id]')].find(x=>x.innerText.includes('Cloudflare TLS')).querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
+  assert.equal(await evaluate("f('cf_enabled').checked"),true);
+  await evaluate("change('network','tcp')");assert.equal(await evaluate("f('cf_enabled').disabled&&!f('cf_enabled').checked"),true);
+  await evaluate("document.querySelector('#modalCancel').click();document.querySelector('#cloudflareSettings').click()");await waitFor("document.querySelector('#modal').open&&document.querySelector('[data-cf-edit]')");
+  await evaluate("document.querySelector('[data-cf-edit]').click()");assert.equal(await evaluate("document.querySelector('[name=cf_secret]').type==='password'&&document.querySelector('[name=cf_secret]').value===''"),true);
+  await evaluate("document.querySelector('#modalCancel').click()");
+  mark('Cloudflare WS TLS toggle, random lifetime defaults, retained edit state, unsupported transport and write-only credentials');
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

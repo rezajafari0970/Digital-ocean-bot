@@ -1,0 +1,20 @@
+{
+  "task": "cloudflare-tls-20261020",
+  "baseline": "4223cea404afa2ab5620cb24306f93e60fe7b4ac",
+  "branch": "feat/cloudflare-tls-20261020",
+  "stages": {
+    "design": "complete",
+    "implementation": "complete",
+    "ui_and_output": "complete",
+    "validation": "focused_18_and_browser_12_passed_exact_candidate_gate_pending",
+    "publication": "pending",
+    "deployment": "pending",
+    "live_cloudflare": "requires_user_account",
+    "iran_operator": "requires_operator_probe"
+  },
+  "openai_api_usage": 0,
+  "evidence": {
+    "focused_log": ".local/cloudflare-final.log",
+    "browser_log": ".local/ui-final2.log"
+  }
+}

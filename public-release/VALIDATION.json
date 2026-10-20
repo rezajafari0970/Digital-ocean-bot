@@ -1,30 +1,29 @@
 {
   "schema": 2,
   "status": "source_verified_publication_gates_required",
-  "date": "2026-10-15",
-  "feature": "Pinned XHTTP Reality creation defaults and transport-aware lifecycle/output",
+  "date": "2026-10-20",
+  "feature": "Optional modular Cloudflare WS TLS control plane, durable DNS rotation, Origin CA and measured edge selection",
   "current_evidence": {
-    "exact_source_review": "PASS",
-    "full_project_isolated_postgres_browser": "PASS",
-    "affected_race_final": "PASS",
-    "transport_browser": "PASS",
-    "vet_diff": "PASS",
-    "native_panel_create_retry_restart_readback": "PASS",
-    "phone_allowed_requests": "16/16",
+    "focused_race_database_native_openssl": "18/18 PASS",
+    "transport_browser": "12/12 PASS",
+    "exact_candidate_full_go_vet": "REQUIRED_BEFORE_PUBLICATION",
     "publication": "PENDING",
-    "deployment": "PENDING"
+    "deployment": "PENDING",
+    "live_cloudflare": "REQUIRES_USER_ACCOUNT",
+    "iran_operator": "REQUIRES_REAL_OPERATOR_PROBE"
   },
   "publication_gates": {
+    "cloudflare_transport_fleet_no_skip": "60 required cases with isolated PostgreSQL and pinned native core",
     "exact_candidate_ubuntu_24_amd64_install": "required before push",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
     "atomic_main_and_stable": "required"
   },
   "notes": [
-    "Existing TCP listeners are unchanged; new physical listeners use the selected creation default.",
-    "4096bytes is a tested path limit, not a universal protocol maximum.",
-    "Exact requested FinalMask remains disabled due to tested core compatibility; WebView disabled and XHTTP Flow empty.",
-    "No provider allocation or IP rotation is enabled by this release.",
-    "Phone tests download static advertising assets; no SDK display or long-term stability claim."
+    "Optional feature defaults off; existing profiles and Google Ads selective egress remain unchanged.",
+    "Only VLESS/VMess/Trojan WebSocket + TLS profiles are admitted by this CDN driver.",
+    "DNS and certificate tests use deterministic provider fixtures; no real Cloudflare credential is present.",
+    "Official Cloudflare IP ownership is verified separately from operator-reported protocol performance.",
+    "No absolute availability, advertisement success rate or zero-bug guarantee."
   ]
 }

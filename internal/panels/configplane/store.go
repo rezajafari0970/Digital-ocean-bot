@@ -85,6 +85,9 @@ func Validate(p Profile) error {
 		}
 		seen[c] = true
 		settings, ok := p.ClassSettings[c]
+		if p.Spec.CloudflareAccount != "" && settings.AllowInsecure {
+			return errors.New("profile_cloudflare_strict_tls_required")
+		}
 		if !ok {
 			return errors.New("profile_class_settings_missing")
 		}

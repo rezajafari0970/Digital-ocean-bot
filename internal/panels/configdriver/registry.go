@@ -25,16 +25,23 @@ const CertificateFile = "/opt/dob-trojan/tls/fullchain.pem"
 const KeyFile = "/opt/dob-trojan/tls/privkey.pem"
 
 type Spec struct {
-	Protocol      string `json:"protocol"`
-	Network       string `json:"network"`
-	Security      string `json:"security"`
-	Port          int    `json:"port"`
-	Path          string `json:"path,omitempty"`
-	Host          string `json:"host,omitempty"`
-	SNI           string `json:"sni,omitempty"`
-	SNIMode       string `json:"sni_mode,omitempty"`
-	SNICandidates string `json:"sni_candidates,omitempty"`
-	Flow          string `json:"flow,omitempty"`
+	CloudflareOperator    string `json:"cloudflare_operator,omitempty"`
+	CloudflareAccount     string `json:"cloudflare_account,omitempty"`
+	CloudflareRecords     int    `json:"cloudflare_records,omitempty"`
+	CloudflareInterval    int    `json:"cloudflare_interval_seconds,omitempty"`
+	CloudflareMinLifetime int    `json:"cloudflare_min_lifetime_seconds,omitempty"`
+	CloudflareMaxLifetime int    `json:"cloudflare_max_lifetime_seconds,omitempty"`
+	CloudflareMaxActive   int    `json:"cloudflare_max_active,omitempty"`
+	Protocol              string `json:"protocol"`
+	Network               string `json:"network"`
+	Security              string `json:"security"`
+	Port                  int    `json:"port"`
+	Path                  string `json:"path,omitempty"`
+	Host                  string `json:"host,omitempty"`
+	SNI                   string `json:"sni,omitempty"`
+	SNIMode               string `json:"sni_mode,omitempty"`
+	SNICandidates         string `json:"sni_candidates,omitempty"`
+	Flow                  string `json:"flow,omitempty"`
 }
 type Client struct {
 	ID            string `json:"id"`
@@ -141,6 +148,9 @@ func ValidatePort(port int) error {
 	return nil
 }
 func (r *Registry) Validate(s Spec, public bool) error {
+	if err := ValidateCloudflare(s); err != nil {
+		return err
+	}
 	c, ok := r.capabilities[key(s.Protocol, s.Network, s.Security)]
 	if !ok {
 		return errors.New("profile_combination_unsupported")
@@ -439,7 +449,7 @@ func (p securityPlugin) Name() string { return string(p) }
 func (p securityPlugin) Server(s Spec, c Credentials) map[string]any {
 	switch p {
 	case "tls":
-		return map[string]any{"tlsSettings": map[string]any{"minVersion": "1.2", "certificates": []any{map[string]any{"certificateFile": CertificateFile, "keyFile": KeyFile, "oneTimeLoading": false}}}}
+		return map[string]any{"tlsSettings": map[string]any{"minVersion": "1.2", "certificates": []any{map[string]any{"certificateFile": TLSFiles(s, false), "keyFile": TLSFiles(s, true), "oneTimeLoading": false}}}}
 	case "reality":
 		return map[string]any{"realitySettings": map[string]any{"show": false, "dest": s.SNI + ":443", "serverNames": []string{s.SNI}, "privateKey": c.PrivateKey, "shortIds": []string{c.ShortID}}}
 	default:

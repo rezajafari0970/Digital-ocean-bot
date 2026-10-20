@@ -18,14 +18,23 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/cloudflare": ("TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
     "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
     "cmd/worker": ("TestProofBusyIsDeferredWithoutFailure","TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
-    "internal/panels/configdriver": ("TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
-    "internal/panels/configplane": ("TestTrafficProofRetriesTransientFailuresWithoutWeakeningTLS","TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
+    "internal/panels/configdriver": ("TestCloudflareTransportPortsAndStrictOutput","TestCloudflareNativeOutboundSyntax","TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
+    "internal/panels/configplane": ("TestCloudflareCertificateDriverTransition","TestTrafficProofRetriesTransientFailuresWithoutWeakeningTLS","TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestCloudflareCertificateLostResponseRenewalAndNodeRepair",
+        "TestCloudflareDNSCleanupSurvivesPanelPurge",
+        "TestCloudflareLifecycleLostResponsesAndCleanupWithoutZones",
+        "TestCloudflareForeignRecordIsNeverDeleted",
+        "TestCloudflareSecretsIsolationAndKeyVersions",
+        "TestCloudflareStatusNeverReturnsCredentials",
+        "TestCloudflareOutputRevocationAndRecordOwnership",
+        "TestCloudflareOperatorMeasurementRangeFreshnessAndIdempotency",
         "TestUnifiedProfileResizeDeleteAndRecovery",
         "TestUnifiedProfileCreationIdempotency",
         "TestUnifiedAuthorityRetiresLegacyWithoutBlockingCompletedPanels",

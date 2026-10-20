@@ -111,3 +111,22 @@ The exact requested FinalMask preset is visible but disabled because it is incom
 VLESS names show the server's country flag and English name, such as 🇩🇪 Germany, in every global and account subscription. The country comes from provider region metadata, using the observed server region before the requested creation region. Names are resolved locally without a GeoIP request on each download. Existing connections, transport settings and native managed listener names are unchanged.
 
 All 249 ISO country/territory codes are supported, plus the explicit Kosovo flag extension. Unrecognized metadata shows 🌐 Unknown country rather than an invented location. Refresh your subscription to receive the new display names; previously saved standalone links need to be imported again.
+
+
+## دامنه و گواهی خودکار Cloudflare
+
+در **Configurations → Cloudflare domains** توکن API یا Global API key و ایمیل را ثبت کنید، سپس دامنه‌های فعال را انتخاب کنید. توکن محدود به دامنه‌های موردنیاز پیشنهاد می‌شود. مجوزهای Zone Read، DNS Edit، SSL and Certificates Edit و Zone Settings Read لازم‌اند؛ برای تغییر خودکار Full (strict)، مجوز Zone Settings Edit هم لازم است. گزینهٔ Full (strict) روی کل دامنه اعمال می‌شود.
+
+در پروفایل **WS + TLS**، گزینهٔ استفادهٔ خودکار از دامنه‌های Cloudflare را فعال کنید. درایور اولیه از VLESS، VMess و Trojan روی WS پشتیبانی می‌کند؛ TCP خام، REALITY، gRPC و XHTTP در این قابلیت فعال نمی‌شوند. پورت خودکار از پورت‌های HTTPS مجاز و آزاد انتخاب می‌شود.
+
+پیش‌فرض هر سرور یک رکورد در هر ۳۰ دقیقه، عمر مستقل تصادفی ۴۵ تا ۶۰ دقیقه و سقف چهار رکورد هم‌زمان است. تعداد و بازه قابل تنظیم‌اند؛ سقف نسخهٔ فعلی دو رکورد در هر نوبت و هشت رکورد فعال در هر پروفایل/سرور است. گواهی Origin CA روی سرور با کلید خصوصی محلی نصب و خودکار تمدید می‌شود. کلید Cloudflare فقط در کنترلر رمزگذاری می‌شود. خروجی تنها پس از آزمون واقعی مسیر CDN و بررسی کامل TLS منتشر می‌شود.
+
+برای IP اپراتور، منبع رسمی محدوده‌های Cloudflare استفاده می‌شود. محدودهٔ رسمی معادل IP آزمایش‌شده در ایران نیست. از رکورد آماده **Download probe target** بگیرید و با Xray رسمی روی شبکهٔ همان اپراتور اجرا کنید:
+
+```bash
+python3 tools/cloudflare/operator-probe.py --target-file cloudflare-probe-ID.json --operator mci --xray /path/to/xray > operator-results.json
+```
+
+نتیجه را از **Import operator probe results** وارد کنید. بدون نتیجهٔ تازه، دامنهٔ خودتان استفاده می‌شود. فایل هدف شامل کانفیگ کلاینت است؛ توکن Cloudflare به گوشی منتقل نمی‌شود. برای Irancell مقدار `irancell` و برای Rightel مقدار `rightel` را انتخاب کنید.
+
+لینک ثابت با حذف دامنهٔ قدیمی منقضی می‌شود؛ اشتراک باید به‌موقع تازه شود. TTL و کش DNS جدا از عمر رکورد هستند و قطعی API ممکن است حذف واقعی را عقب بیندازد. قابلیت برای کانفیگ‌های موجود خاموش است و قوانین خروجی Google Ads/Residential را تغییر نمی‌دهد. پذیرش زنده به حساب و دامنهٔ خودتان و اندازه‌گیری روی شبکهٔ واقعی اپراتور نیاز دارد؛ نرخ بارگذاری ۹۹٪ یا کارکرد بدون خطا تضمین نمی‌شود.

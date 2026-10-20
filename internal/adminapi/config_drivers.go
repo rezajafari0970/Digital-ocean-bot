@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +30,9 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 	automaticPort := p.Spec.Port == 0
 	if automaticPort {
 		p.Spec.Port = 10000
+		if p.Spec.CloudflareAccount != "" {
+			p.Spec.Port = 2083
+		}
 	}
 	if e := configplane.Validate(p); e != nil {
 		writeJSON(w, 400, map[string]string{"error": e.Error()})
@@ -88,16 +92,31 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if automaticPort {
-		e = tx.QueryRowContext(r.Context(), `SELECT n FROM generate_series(10000,60000) n WHERE n<>18080
+		portQuery := `SELECT n FROM generate_series(10000,60000) n WHERE n<>18080
   AND NOT EXISTS(SELECT 1 FROM config_driver_profiles WHERE enabled AND delete_requested_at IS NULL AND (spec->>'port')::integer=n)
   AND NOT EXISTS(SELECT 1 FROM config_driver_listeners WHERE state<>'RETIRED' AND ((remote_id IS NOT NULL AND (applied_spec->>'port')::integer=n) OR (mutation_state IN('PREPARED','SENT') AND (mutation_spec->>'port')::integer=n)))
   AND NOT EXISTS(SELECT 1 FROM panel_inbound_inventory WHERE present AND port=n)
   AND NOT EXISTS(SELECT 1 FROM xui_panel_deployments WHERE port=n)
   AND NOT EXISTS(SELECT 1 FROM trojan_tcp_policy WHERE enabled AND port=n)
   AND (EXISTS(SELECT 1 FROM config_control_authority WHERE unified) OR NOT EXISTS(SELECT 1 FROM (SELECT ports FROM reality_config_profiles UNION ALL SELECT ports FROM global_config_policies WHERE policy_key='reality') p CROSS JOIN LATERAL jsonb_array_elements_text(p.ports) port WHERE port::integer=n))
-  ORDER BY n LIMIT 1`).Scan(&p.Spec.Port)
+  ORDER BY n LIMIT 1`
+		if p.Spec.CloudflareAccount != "" {
+			portQuery = strings.Replace(portQuery, "generate_series(10000,60000)", "unnest(ARRAY[443,2053,2083,2087,2096,8443])", 1)
+		}
+		e = tx.QueryRowContext(r.Context(), portQuery).Scan(&p.Spec.Port)
 		if e != nil {
 			writeJSON(w, 409, map[string]string{"error": "profile_no_free_port"})
+			return
+		}
+	}
+	if p.Spec.CloudflareAccount != "" {
+		var ready bool
+		if e = tx.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM cloudflare_accounts a JOIN cloudflare_zones z ON z.account_id=a.id WHERE a.id=$1 AND a.enabled AND z.enabled AND z.present AND z.status='active')`, p.Spec.CloudflareAccount).Scan(&ready); e != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if !ready {
+			writeJSON(w, 400, map[string]string{"error": "profile_cloudflare_no_active_zones"})
 			return
 		}
 	}

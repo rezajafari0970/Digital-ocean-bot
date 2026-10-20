@@ -39,6 +39,14 @@ func New(db *sql.DB, c app.Container) *Server {
 }
 func (s *Server) Routes() *http.ServeMux {
 	m := http.NewServeMux()
+	m.HandleFunc("GET /api/v1/configs/cloudflare/records/{id}/probe", s.require(s.cloudflareProbeTarget, true))
+	m.HandleFunc("GET /api/v1/configs/cloudflare/ips", s.require(s.cloudflareIPPool, false))
+	m.HandleFunc("POST /api/v1/configs/cloudflare/ips/refresh", s.require(s.cloudflareIPRefresh, true))
+	m.HandleFunc("POST /api/v1/configs/cloudflare/measurements", s.require(s.cloudflareMeasurement, true))
+	m.HandleFunc("GET /api/v1/configs/cloudflare", s.require(s.cloudflareStatus, false))
+	m.HandleFunc("POST /api/v1/configs/cloudflare/accounts", s.require(s.saveCloudflareAccount, true))
+	m.HandleFunc("PUT /api/v1/configs/cloudflare/accounts/{id}", s.require(s.saveCloudflareAccount, true))
+	m.HandleFunc("POST /api/v1/configs/cloudflare/accounts/{id}/refresh", s.require(s.refreshCloudflareAccount, true))
 	m.HandleFunc("GET /api/v1/ip-inventory", s.require(s.ipInventory, false))
 	m.HandleFunc("PUT /api/v1/accounts/{id}/ip-policy/{family}", s.require(s.saveIPPolicy, true))
 	m.HandleFunc("PUT /api/v1/accounts/{id}/ip-funding", s.require(s.saveIPFunding, true))

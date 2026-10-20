@@ -33,11 +33,12 @@ type outputStructure struct {
 }
 
 type outputRecord struct {
-	ProfileID       string
-	ProfileRevision int64
-	ClientID        string
-	URI             string
-	VisibleUntil    *time.Time
+	CloudflareRecordID string
+	ProfileID          string
+	ProfileRevision    int64
+	ClientID           string
+	URI                string
+	VisibleUntil       *time.Time
 }
 
 func outputVisibleUntil(raw any) *time.Time {

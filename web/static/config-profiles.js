@@ -99,12 +99,14 @@ async function openConfigProfile(existing=null){
  try{
   const view=activePageView,data=await viewRead('/api/v1/configs/profiles',view);if(!currentPageView(view))return;if(!Array.isArray(data.drivers))throw Error('Configuration catalog unavailable');
   const catalog=data.drivers.filter(x=>x.public),p=existing||{name:'',enabled:true,fleet:true,panel_ids:[],classes:['DIRECT','RESIDENTIAL'],clients_per_class:1,revision:0,request_id:profileRequestID(),spec:{protocol:'',network:'',security:'',port:0}};
+  const cfData=await viewRead('/api/v1/configs/cloudflare',view);if(!currentPageView(view))return;
   const s=p.spec,pathValues={};if(s.network)pathValues[s.network]=s.path||'';
   $('#modalForm').classList.remove('profileForm');$('#modalForm').noValidate=false;$('#modalTitle').textContent=existing?'Edit configuration':'New configuration';$('#modalSubmit').hidden=false;$('#modalSubmit').disabled=false;$('#modalSubmit').textContent='Save';
   const options=(values,placeholder='')=>(placeholder?'<option value="">'+placeholder+'</option>':'')+values.map(x=>'<option value="'+esc(x)+'">'+esc(x.toUpperCase())+'</option>').join('');
   $('#modalFields').innerHTML='<label>Name (optional)<input name="profile_name" maxlength="100" value="'+esc(p.name)+'" placeholder="A name for this profile"></label>'+
    '<div class="grid"><label>Protocol<select name="profile_protocol" required>'+options([...new Set(catalog.map(x=>x.protocol))],'Select protocol')+'</select></label><label>Network<select name="profile_network" required></select></label><label>Security<select name="profile_security" required></select></label></div>'+
    '<p id="profileCompatibility" class="muted"></p><label>Port<input name="profile_port" type="number" step="any" min="1" max="65535" value="'+(s.port||'')+'" placeholder="Automatic free port"></label><p class="muted">Leave empty to reserve a free port. Each profile owns its port on its selected servers.</p>'+
+   cloudflareProfileFields(s,cfData.accounts)+
    ['DIRECT','RESIDENTIAL'].map(cls=>{
     const key=cls.toLowerCase(),v=p.class_settings?.[cls]||{count:p.clients_per_class,lifetime_seconds:0,device_limit:0,quota_bytes:0,users_per_second:0,creation_interval_seconds:0,flow:s.flow||'',publish:true,allow_insecure:false,export_final_mask:false};
     const n=(field,label,value,min=0,max=31536000)=>'<label>'+label+'<input name="profile_'+key+'_'+field+'" type="number" step="any" min="'+min+'" max="'+max+'" value="'+esc(value||0)+'" required></label>';
@@ -122,11 +124,15 @@ async function openConfigProfile(existing=null){
   const f=n=>$('#modalFields [name="profile_'+n+'"]');f('protocol').value=s.protocol;f('direct').checked=p.classes.includes('DIRECT');f('residential').checked=p.classes.includes('RESIDENTIAL');f('fleet').checked=p.fleet;f('enabled').checked=p.enabled;f('sni_mode').value=s.sni_mode||'manual';
   let previousNetwork='';
   const syncSecurity=()=>{const network=f('network').value,security=f('security').value;
+   const cdnSupported=network==='ws'&&security==='tls';f('cf_enabled').disabled=!cdnSupported;if(!cdnSupported)f('cf_enabled').checked=false;
+   const cdn=f('cf_enabled').checked&&!f('cf_enabled').disabled;$('#profileCloudflareFields [data-cf-profile-options]').hidden=!cdn;
+   $('#profileCloudflareFields [data-cf-compatibility]').textContent=cdnSupported?'Cloudflare manages domain, SNI and strict TLS certificates.':'Select WS + TLS to use Cloudflare CDN.';
+   f('cf_account').required=cdn;$('#profileCloudflareFields').querySelectorAll('input[type=number]').forEach(x=>x.required=cdn);
    $('#profileCompatibility').textContent=security==='tls'?'TLS certificates are issued and renewed automatically.':security==='reality'?'Reality keys are generated and retained independently for this profile.':'';
-   $('#profilePathFields').hidden=!network||network==='tcp';f('path').required=!!network&&network!=='tcp';f('path').disabled=!network||network==='tcp';f('host').disabled=f('path').disabled;
+   $('#profilePathFields').hidden=!network||network==='tcp';f('path').required=!!network&&network!=='tcp';f('path').disabled=!network||network==='tcp';f('host').disabled=f('path').disabled||cdn;
    $('#profileRealityFields').hidden=security!=='reality';f('sni').required=security==='reality';f('sni').disabled=security!=='reality';['direct','residential'].forEach(cls=>{
     const vision=f('protocol').value==='vless'&&network==='tcp'&&security==='reality';f(cls+'_flow').disabled=!vision;if(!vision)f(cls+'_flow').value='';
-    f(cls+'_insecure').disabled=security!=='tls';if(security!=='tls')f(cls+'_insecure').checked=false;
+    f(cls+'_insecure').disabled=security!=='tls'||cdn;if(security!=='tls'||cdn)f(cls+'_insecure').checked=false;
     f(cls+'_mask').disabled=security==='none';f(cls+'_export_mask').disabled=security==='none';if(security==='none')f(cls+'_export_mask').checked=false;
    });
    f('sni').required=security==='reality'&&f('sni_mode').value!=='auto';f('sni').disabled=security!=='reality'||f('sni_mode').value==='auto';
@@ -140,8 +146,8 @@ async function openConfigProfile(existing=null){
    const previous=f('security').value,choices=catalog.filter(x=>x.protocol===f('protocol').value&&x.network===network).map(x=>x.security);f('security').innerHTML=options(choices);f('security').value=choices.includes(previous)?previous:choices[0]||'';syncSecurity();
   };
   const syncProtocol=()=>{const previous=f('network').value,networks=[...new Set(catalog.filter(x=>x.protocol===f('protocol').value).map(x=>x.network))];f('network').innerHTML=options(networks);f('network').value=networks.includes(previous)?previous:networks.includes('tcp')?'tcp':networks[0]||'';syncNetwork()};
-  syncProtocol();if(existing){f('network').value=s.network;syncNetwork();f('security').value=s.security;syncSecurity()}
-  f('protocol').onchange=syncProtocol;f('network').onchange=syncNetwork;f('security').onchange=syncSecurity;f('sni_mode').onchange=syncSecurity;
+  syncProtocol();if(existing){f('network').value=s.network;syncNetwork();f('security').value=s.security;f('cf_enabled').checked=!!s.cloudflare_account;syncSecurity()}
+  f('protocol').onchange=syncProtocol;f('network').onchange=syncNetwork;f('security').onchange=syncSecurity;f('sni_mode').onchange=syncSecurity;f('cf_enabled').onchange=syncSecurity;
   const syncClasses=()=>{['direct','residential'].forEach(cls=>{$('[data-class-fields="'+cls+'"]').hidden=!f(cls).checked;document.querySelectorAll('[data-class-fields="'+cls+'"] input[type=number]').forEach(x=>x.required=f(cls).checked)});};f('direct').onchange=syncClasses;f('residential').onchange=syncClasses;syncClasses();
   const scope=()=>{$('#profileScopeLabel').hidden=f('fleet').checked};f('fleet').onchange=scope;scope();$('#modalError').textContent='';$('#modal').showModal();
   $('#modalForm').onsubmit=async e=>{
@@ -149,6 +155,9 @@ async function openConfigProfile(existing=null){
    const spec={protocol:f('protocol').value,network:f('network').value,security:f('security').value,port:Number(f('port').value||0)};
    if(spec.network!=='tcp'){spec.path=f('path').value.trim();spec.host=f('host').value.trim();if((spec.network==='ws'||spec.network==='xhttp')&&!spec.path.startsWith('/')){$('#modalError').textContent='The HTTP path must start with /.';return}}
    if(spec.security==='reality'){spec.sni_mode=f('sni_mode').value;spec.sni=spec.sni_mode==='auto'?'':f('sni').value.trim();if(spec.sni_mode==='auto')spec.sni_candidates=f('sni_candidates').value.split(',').map(x=>x.trim()).filter(Boolean).join(',')}
+   if(f('cf_enabled').checked&&!f('cf_enabled').disabled){
+    spec.cloudflare_operator=f('cf_operator').value;spec.cloudflare_account=f('cf_account').value;spec.cloudflare_records=Number(f('cf_count').value);spec.cloudflare_interval_seconds=Number(f('cf_interval').value)*60;spec.cloudflare_min_lifetime_seconds=Number(f('cf_min').value)*60;spec.cloudflare_max_lifetime_seconds=Number(f('cf_max').value)*60;spec.cloudflare_max_active=Number(f('cf_active').value);spec.host='';
+   }
    const class_settings={};
    for(const cls of ['DIRECT','RESIDENTIAL']){const k=cls.toLowerCase(),v={count:Number(f(k+'_count').value),lifetime_seconds:Math.round(Number(f(k+'_lifetime').value)*(f(k+'_lifetime_unit').value==='hours'?3600:60)),device_limit:Number(f(k+'_devices').value),quota_bytes:Number(f(k+'_quota').value),users_per_second:Number(f(k+'_rate').value),creation_interval_seconds:Number(f(k+'_interval').value),flow:f(k+'_flow').disabled?'':f(k+'_flow').value,publish:f(k+'_publish').checked,allow_insecure:!f(k+'_insecure').disabled&&f(k+'_insecure').checked,final_mask:f(k+'_mask').disabled?'':f(k+'_mask').value.trim(),export_final_mask:!f(k+'_export_mask').disabled&&f(k+'_export_mask').checked};
     if(v.final_mask){try{const mask=JSON.parse(v.final_mask);if(!mask||Array.isArray(mask)||typeof mask!=='object')throw Error();v.final_mask=JSON.stringify(mask)}catch{$('#modalError').textContent=cls+': FinalMask must be a JSON object.';return}}

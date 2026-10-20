@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflare"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configplane"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
@@ -15,6 +16,30 @@ import (
 
 func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sanaei.RuntimeManager, budget *worker.WorkBudget) {
 	limit := int(budget.Snapshot()["limit"])
+	cdnWork := worker.NewWorkClass(budget, 1)
+	modules.Add(worker.RolePanels, "cloudflare-resources", func(ctx context.Context) {
+		service := cloudflare.Service{DB: a.DB, Secrets: a.Container.Secrets}
+		ticker := time.NewTicker(250 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			supervision.Pulse(ctx)
+			supervision.Idle(ctx)
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+			work, finish, e := supervision.Begin(ctx, "work", 0)
+			if e != nil {
+				continue
+			}
+			e = runConfigProfileWork(work, cdnWork.Do, 45*time.Second, service.RunOne)
+			finish()
+			if e != nil && ctx.Err() == nil {
+				log.Printf("cloudflare resources: %s", cloudflare.ErrorCode(e))
+			}
+		}
+	})
 	// Fleet creation can use the available parent budget without increasing
 	// SQL occupancy; independent proof and removal classes still share that ceiling.
 	create := worker.NewWorkClass(budget, min(8, limit))

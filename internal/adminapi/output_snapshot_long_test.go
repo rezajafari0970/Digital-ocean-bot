@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -130,6 +131,21 @@ func TestOutputSnapshotDigestMigrationPreservesTCP(t *testing.T) {
 		t.Fatal(err)
 	}
 	sqlMust(t, db, string(raw))
+	// Verify the historical migration above, then bring the fixture to the schema
+	// required by today's snapshot writer before exercising its write contract.
+	files, e := filepath.Glob("../../migrations/*.up.sql")
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, file := range files {
+		if filepath.Base(file) > "000179_output_uri_digest.up.sql" {
+			b, e := os.ReadFile(file)
+			if e != nil {
+				t.Fatal(e)
+			}
+			sqlMust(t, db, strings.ReplaceAll(string(b), "tc.table_schema='public'", "tc.table_schema=current_schema()"))
+		}
+	}
 	s := &Server{DB: db}
 	if err := s.persistOutputSnapshot(context.Background(), panel, []outputRecord{{URI: uri, ClientID: "legacy"}}); err != nil {
 		t.Fatal(err)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflare"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configplane"
 	"time"
@@ -66,6 +67,13 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 		if e != nil || id != v.remote {
 			continue
 		}
+		endpoints := []cloudflare.Endpoint{{Address: host}}
+		if p.Spec.CloudflareAccount != "" {
+			endpoints, e = s.cloudflareService().Endpoints(ctx, p.Spec.CloudflareAccount, p.ID, panel, p.Revision)
+			if e != nil {
+				continue
+			}
+		}
 		candidateRecords := []outputRecord{}
 		valid := true
 		for _, cl := range credentials.Clients {
@@ -94,7 +102,28 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 					until = &expiry
 				}
 			}
-			candidateRecords = append(candidateRecords, outputRecord{ClientID: cl.ID, URI: uri, VisibleUntil: until, ProfileID: p.ID, ProfileRevision: p.Revision})
+			for _, endpoint := range endpoints {
+				endpointURI := uri
+				endpointUntil := until
+				if endpoint.ID != "" {
+					allowed := false
+					for _, class := range endpoint.Classes {
+						allowed = allowed || class == cl.Class
+					}
+					if !allowed {
+						continue
+					}
+					endpointURI, e = registry.CDNURI(p.Spec, host, endpoint.Address, endpoint.Hostname, p.Name, credentials, cl)
+					if e != nil {
+						continue
+					}
+					expiry := endpoint.ExpiresAt.Add(-5 * time.Minute)
+					if endpointUntil == nil || expiry.Before(*endpointUntil) {
+						endpointUntil = &expiry
+					}
+				}
+				candidateRecords = append(candidateRecords, outputRecord{CloudflareRecordID: endpoint.ID, ClientID: cl.ID, URI: endpointURI, VisibleUntil: endpointUntil, ProfileID: p.ID, ProfileRevision: p.Revision})
+			}
 		}
 		if valid {
 			out = append(out, candidateRecords...)
@@ -106,6 +135,10 @@ func (s *Server) collectProfileOutput(ctx context.Context, panel, host string, r
 const profileOutputVerified = ` EXISTS(SELECT 1 FROM config_driver_clients dc JOIN config_driver_listeners dl ON dl.profile_id=dc.profile_id AND dl.panel_id=dc.panel_id JOIN config_driver_profiles dp ON dp.id=dc.profile_id
  WHERE dc.panel_id=p.id AND dc.client_id=o.client_id AND o.config_profile_id=dp.id AND o.config_profile_revision=dp.revision AND dp.enabled AND dp.delete_requested_at IS NULL AND (dp.fleet OR p.id=ANY(dp.panel_ids))
  AND EXISTS(SELECT 1 FROM config_driver_class_proofs proof WHERE proof.profile_id=dp.id AND proof.panel_id=p.id AND proof.route_class=dc.route_class AND proof.verified_at>now()-interval '5 minutes' AND proof.error_code='')
+ AND (COALESCE(dp.spec->>'cloudflare_account','')='' AND o.cloudflare_record_id IS NULL OR EXISTS(
+ SELECT 1 FROM cloudflare_records cf JOIN cloudflare_accounts ca ON ca.id=cf.account_id JOIN cloudflare_zones cz ON cz.account_id=cf.account_id AND cz.id=cf.zone_id
+ WHERE cf.id=o.cloudflare_record_id AND cf.profile_id=dp.id AND cf.panel_id=p.id AND cf.account_id::text=dp.spec->>'cloudflare_account'
+ AND cf.operator=COALESCE(dp.spec->>'cloudflare_operator','') AND cf.state='DNS_READY' AND cf.expires_at>now()+interval '5 minutes' AND cf.observed_at>now()-interval '10 minutes' AND cf.verified_at>now()-interval '5 minutes' AND cf.verified_revision=dp.revision AND dc.route_class=ANY(cf.verified_classes) AND ca.enabled AND cz.ssl_strict AND cz.checked_at>now()-interval '10 minutes' AND cz.enabled AND cz.present AND cz.status='active'))
  AND dc.confirmed AND dc.publish AND (dc.expires_at IS NULL OR dc.expires_at>now())
  AND COALESCE((dp.class_settings->dc.route_class->>'publish')::boolean,true)
  AND dc.email=cr.email AND dc.route_class=cr.route_class AND dc.route_class=cr.effective_class
