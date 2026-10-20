@@ -20,4 +20,15 @@ The screenshot schedule (2 records, 30-minute interval, 45–60-minute lifetime)
 
 ## Rollout
 
-Pending exact-candidate release verification and sequential production installation. Account credentials, selected zones, existing profile settings and client identities must be compared before and after installation. This correction does not create a production profile or DNS records on the user's behalf.
+Completed at 2026-10-20 11:51 UTC (15:21 Tehran).
+
+- Source correction: c016673e5ce3eb8356e1634946a24be10a73db58.
+- Public release: 8c79a81652a50072498deb595072eb7cc286f45d, installed on both panels.
+- Publication: 62 mandatory regressions passed with zero skips, full Go tests and vet, installer tests, 6 output tests, isolated exact-candidate installation, exact source verification and private-secret scans.
+- Both panels: 3 service executable hashes match the release; all 5 readiness checks pass; no service restarts.
+- Primary: all 2,872 existing profile ownership entries and 96 Trojan ownership entries are unchanged. Account settings, selected Cloudflare zones, encrypted credential hashes, client keys, profile policies and Google Ads selective routing are preserved.
+- Authenticated primary API and both versioned form assets match the installed source.
+- Primary final observation: all 3 existing profiles ready on 66 eligible servers, 396 published config links, output HTTP 200 in 38 ms. These are a point-in-time observation, not a guaranteed latency.
+- No production Cloudflare profile or DNS records were created by this correction. The existing Cloudflare account and selected zone remain ready for the user to save the desired profile.
+- Rollout evidence on each host: /root/backups/dob-cloudflare-schedule-20261020/.
+- Publication evidence: /var/lib/datacenter-publisher/release-ijuflq3u/.

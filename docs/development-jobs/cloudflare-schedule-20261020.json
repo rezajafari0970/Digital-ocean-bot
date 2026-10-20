@@ -1,0 +1,135 @@
+{
+  "job": "cloudflare-schedule-20261020",
+  "status": "completed",
+  "completed_at": "2026-10-20T11:51:47.958582+00:00",
+  "source_revision": "c016673e5ce3eb8356e1634946a24be10a73db58",
+  "public_revision": "8c79a81652a50072498deb595072eb7cc286f45d",
+  "stages": {
+    "diagnosis": "completed",
+    "shared_policy_and_form": "completed",
+    "regression_tests": "completed",
+    "release": "completed",
+    "primary_install": "completed",
+    "secondary_install": "completed"
+  },
+  "verification": {
+    "mandatory_go_regressions": 62,
+    "mandatory_skips": 0,
+    "mobile_browser_cases": 13,
+    "release_verifier_cases": 7,
+    "output_cases": 6,
+    "both_panels_ready": true,
+    "primary_checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "primary_preservation": {
+      "profile_ownership": {
+        "common": 2872,
+        "unchanged": 2872,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 96,
+        "unchanged": 96,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "primary_assets": {
+      "cloudflare": "PASS",
+      "config-profiles": "PASS"
+    }
+  },
+  "final_metrics": {
+    "at": "2026-10-20T11:50:25.421976+00:00",
+    "catalog_seconds": 0.068,
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 66,
+        "verified": 66,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 66,
+        "published": 132,
+        "target": 132
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "ready",
+        "eligible": 66,
+        "verified": 66,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 66,
+        "published": 132,
+        "target": 132
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 66,
+        "verified": 66,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 66,
+        "published": 132,
+        "target": 132
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-20T11:50:25.519456+00:00",
+      "proof_age": {
+        "under_5m": 198,
+        "over_5m": 0,
+        "never": 0,
+        "median_seconds": 39.028739,
+        "max_seconds": 148.82114
+      },
+      "routing_age": {
+        "under_60s": 70,
+        "over_60s": 0,
+        "median_seconds": 13.6406675
+      },
+      "sql": {
+        "active": 2,
+        "idle": 52
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.038,
+        "status": 200,
+        "bytes": 88834,
+        "lines": 396
+      }
+    }
+  },
+  "live_cloudflare_mutations": 0,
+  "openai_api_calls": 0,
+  "remaining": "User may reload the panel and save the desired Cloudflare profile; real DNS/certificate lifecycle begins after that save."
+}
