@@ -51,10 +51,16 @@ An operator preference uses a fresh matching-zone measurement when creating a re
 ## Validation and rollout status
 
 - Implemented: provider interfaces, encrypted accounts, zone selection, record scheduling, certificate provisioning, profile toggle, strict CDN export gates, official IP ranges and operator probe workflow.
-- Fixture/native validation: 18 focused race/database/native/OpenSSL tests and 12 browser scenarios passed; individual results are retained in private task evidence. The publication gate includes the Cloudflare tests and refuses skipped required cases.
-- Production rollout: pending exact-candidate publication and installation checks. Feature defaults remain off.
+- Fixture/native validation: 18 focused race/database/native/OpenSSL tests and 12 browser scenarios passed; individual results are retained in private task evidence. The exact-candidate publication gate passed all 60 required race/database/native cases with zero skips, full `go test ./...`, `go vet ./...`, installer tests, six Output browser cases, secret scans and isolated installation/identity checks.
+- Production rollout: public revision `9208f9eebccfee8f700e3bed104d470a39bd0143` is installed and verified on both controllers. Migration `000189_cloudflare_tls` is applied. All six service processes match the installed binaries and both sets of five readiness checks pass. Feature defaults remain off.
 - Live Cloudflare acceptance: pending a user-supplied account, selected active zone and one canary profile. No live DNS or certificate was created during implementation.
 - Iranian operator acceptance: pending measurements from actual operator networks.
 - OpenAI API usage: zero.
 
 Official reference material consulted: Cloudflare API zones/list, DNS records/create, Origin CA certificates/create, Origin CA documentation, supported proxy ports, WebSockets, Universal SSL limitations, DNS TTL and API rate limits.
+
+## Deployment preservation evidence
+
+Final primary check at 2026-10-20 09:36 UTC: all three existing profiles were ready across 67 eligible panels, 402 links were exported, and no profile was pending or blocked. All 2,809 common profile credential references/ciphertexts and 96 common Trojan ownership records were retained. Nine listener remote IDs were cleared by the existing retirement workflow on three independently confirmed expired/deleted servers; no unexpected identity change occurred. Both controllers retained the master key, environment, profile settings and selective Google Ads egress. The authenticated Cloudflare status/IP routes and served Cloudflare JavaScript were verified on the primary controller.
+
+Two release blockers were resolved before completion: the export ignore list excluded the pinned public CA, and accumulated isolated-test build artifacts left insufficient installer disk reserve. The public CA now has an exact-file exception. Reproducible old test source caches and compiled binaries were pruned while retaining active/recent test versions and production backups. The first primary install attempt stopped before service changes; observed old version/schema/readiness were confirmed before a separately journaled retry.

@@ -6,15 +6,65 @@
     "design": "complete",
     "implementation": "complete",
     "ui_and_output": "complete",
-    "validation": "focused_18_and_browser_12_passed_exact_candidate_gate_pending",
-    "publication": "pending",
-    "deployment": "pending",
-    "live_cloudflare": "requires_user_account",
-    "iran_operator": "requires_operator_probe"
+    "validation": "complete",
+    "publication": "complete",
+    "deployment": "complete_both_controllers",
+    "live_cloudflare": "pending_user_account_and_canary",
+    "iran_operator": "pending_real_network_measurements"
   },
   "openai_api_usage": 0,
   "evidence": {
     "focused_log": ".local/cloudflare-final.log",
-    "browser_log": ".local/ui-final2.log"
-  }
+    "browser_log": ".local/ui-final2.log",
+    "publication": "/var/lib/datacenter-publisher/release-u8ph5ved",
+    "primary_rollout": "/root/backups/dob-cloudflare-20261020/verify.json",
+    "primary_api": "/root/backups/dob-cloudflare-20261020/api-verify.json",
+    "primary_final_metrics": "/root/projects/dob-unified-configs-20261018/.local/isolation-187-metrics-cloudflare-final.json",
+    "secondary_rollout": "limited-lime.ptr.network:/root/backups/dob-cloudflare-20261020/verify.json"
+  },
+  "source_revision": "d0eb70b8b6c6ce86dcf04a6d5c19708846bfee39",
+  "public_revision": "9208f9eebccfee8f700e3bed104d470a39bd0143",
+  "completed_at": "2026-10-20T09:37:30.914977+00:00",
+  "validation": {
+    "focused_race_database_native_openssl_passed": 18,
+    "required_publication_race_database_native_passed": 60,
+    "required_skipped": 0,
+    "transport_browser_cases_passed": 12,
+    "output_browser_cases_passed": 6,
+    "full_go_test": "PASS",
+    "go_vet": "PASS",
+    "installer_python_tests": "PASS",
+    "exact_export_secret_scans": "PASS",
+    "exact_candidate_installation_and_identity": "PASS"
+  },
+  "rollout": {
+    "primary": {
+      "at": "2026-10-20T09:36:34.755811+00:00",
+      "ready_checks": 5,
+      "services": 3,
+      "unexpected_identity_changes": 0,
+      "confirmed_expired_listener_retirements": 9,
+      "preserved_profile_credentials": 2809,
+      "preserved_trojan_ownership": 96,
+      "active_eligible_panels": 67,
+      "published_links": 402,
+      "pending_profiles": 0,
+      "blocked_profiles": 0
+    },
+    "secondary": {
+      "at": "2026-10-20T09:36:33.119547+00:00",
+      "ready_checks": 5,
+      "services": 3,
+      "all_preservation_checks": true
+    },
+    "cloudflare_accounts": 0,
+    "cloudflare_records": 0,
+    "cloudflare_profiles": 0,
+    "google_ads_selective": "preserved_on_both",
+    "master_key_environment_and_policies": "preserved_on_both"
+  },
+  "resolved_release_blockers": [
+    "Pinned public Cloudflare CA explicitly retained in exported gitignore.",
+    "Insufficient installer reserve resolved by pruning clean immutable source caches and obsolete compiled binaries in isolated test container; active source, latest five rollback sets, production backups and credentials preserved."
+  ]
 }
