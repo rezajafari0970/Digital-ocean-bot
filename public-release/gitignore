@@ -3,6 +3,8 @@
 .env.*
 *.key
 *.pem
+# Public, pinned Cloudflare Origin CA trust anchor; no private keys.
+!/internal/cloudflare/origin_ca_rsa_root.pem
 *.p12
 *.pfx
 *.db
