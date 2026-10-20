@@ -106,7 +106,13 @@ func (s Service) plan(ctx context.Context, account string) error {
  AND (z.dns_record_quota IS NULL OR z.dns_quota_checked_at IS NULL OR z.dns_quota_checked_at<now()-interval '2 minutes' OR z.dns_record_quota>z.dns_record_usage+(SELECT count(*) FROM cloudflare_records qr WHERE qr.account_id=z.account_id AND qr.zone_id=z.id AND (qr.state IN('PREPARED','SENT') OR qr.state='DNS_READY' AND qr.activated_at>z.dns_quota_checked_at)))
  ORDER BY (SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND r.state<>'DELETED'),z.id LIMIT 1`, account).Scan(&zone, &name)
 			if errors.Is(e, sql.ErrNoRows) {
-				// Preserve the scheduled backoff when every eligible zone is full.
+				// A partial batch still consumes its interval. Otherwise scarce
+				// capacity could create extra records every 30 seconds.
+				if i > 0 {
+					if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_schedules SET next_batch_at=now()+$3*interval '1 second' WHERE profile_id=$1 AND panel_id=$2", x.id, x.panel, p.Interval); e != nil {
+						return e
+					}
+				}
 				return tx.Commit()
 			}
 			if e != nil {

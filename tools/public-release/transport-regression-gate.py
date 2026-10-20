@@ -30,6 +30,7 @@ REQUIRED = {
     "internal/adminapi": (
         "TestCloudflareManualLockWaitDoesNotReplay",
         "TestCloudflareDNSQuotaAdmissionRecoveryAndCleanup",
+        "TestCloudflarePartialQuotaBatchPreservesInterval",
         "TestCloudflareDNSAccessIsolationAndRecovery",
         "TestCloudflareRetiresOnlyUnsentExpiredIntents",
         "TestCloudflareStatusSeparatesIntentsAndDNS",

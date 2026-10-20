@@ -20,7 +20,7 @@ The selected zone also reports `record_usage=201`, `record_quota=200`. Foreign D
 
 ## Validation and rollout
 
-Targeted race tests pass in all four packages. All 16 Chromium mobile cases and seven gate-verifier tests pass. Four new mandatory tests cover real certificate payloads/pagination, incomplete-list rejection, bounded lock acquisition without mutation replay, and quota exhaustion/recovery with independent cleanup. Existing lost-response tests now recover CSR-less certificates while rejecting forged metadata and checking the persisted provider receipt.
+Targeted race tests pass in all four packages. All 16 Chromium mobile cases and seven gate-verifier tests pass. Five new mandatory tests cover real certificate payloads/pagination, incomplete-list rejection, bounded lock acquisition without mutation replay, quota exhaustion/recovery with independent cleanup, and partial-batch interval preservation. Existing lost-response tests now recover CSR-less certificates while rejecting forged metadata and checking the persisted provider receipt.
 
 Publication and sequential installation are pending. Real TLS publication and the manual refresh action must be verified after deployment. Capacity above the selected zone's provider quota remains an external limit; do not claim all requested generations fit without additional selected domain capacity.
 
