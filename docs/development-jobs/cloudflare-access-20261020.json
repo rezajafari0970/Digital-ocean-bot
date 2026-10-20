@@ -1,0 +1,177 @@
+{
+  "job": "cloudflare-access-20261020",
+  "status": "software_complete_external_permission_required",
+  "updated_at": "2026-10-20T13:46:41.626124+00:00",
+  "source_revision": "ff09e25f192fb00ad6ab84aeec2d978707635627",
+  "public_revision": "b5f6143e9fe620ae467e4e32040e8fd5f0d2f59e",
+  "stages": {
+    "video_review": "completed",
+    "provider_read_only_diagnosis": "completed",
+    "software_fix": "completed",
+    "tests": "completed",
+    "publication": "completed",
+    "primary_install": "completed",
+    "secondary_install": "completed",
+    "real_dns_and_certificate_completion": "blocked_external_token_permissions"
+  },
+  "verification": {
+    "mandatory_go_regressions": 66,
+    "mandatory_skips": 0,
+    "mobile_browser_cases": 14,
+    "release_verifier_cases": 7,
+    "output_cases": 6,
+    "python_installer_cases": 14,
+    "both_panels_ready": true,
+    "primary_checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "secondary_checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "primary_preservation": {
+      "profile_ownership": {
+        "common": 2990,
+        "unchanged": 2987,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 3,
+        "retired_since_backup": 0,
+        "new_since_backup": 4
+      },
+      "trojan_ownership": {
+        "common": 96,
+        "unchanged": 96,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "served_assets": {
+      "cloudflare": "PASS",
+      "config-profiles": "PASS"
+    },
+    "no_new_intents_during_observation": true,
+    "observation_seconds": 52.22213,
+    "expired_unsent_intents_remaining": 0
+  },
+  "live_cloudflare": {
+    "dns_read_http_status": 403,
+    "dns_read_provider_code": 10000,
+    "confirmed_dns_records": 0,
+    "pending_unsent_requests": 144,
+    "retired_unsent_requests": 304,
+    "certificate_issuance_verified": false,
+    "dns_write_verified": false
+  },
+  "final_metrics": {
+    "at": "2026-10-20T13:45:02.794447+00:00",
+    "catalog_seconds": 0.097,
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 71,
+        "verified": 71,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 71,
+        "published": 142,
+        "target": 142
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "ready",
+        "eligible": 71,
+        "verified": 71,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 71,
+        "published": 142,
+        "target": 142
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 71,
+        "verified": 71,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 71,
+        "published": 142,
+        "target": 142
+      },
+      {
+        "id": "90d989ac-977f-4b82-9495-597e92227ddd",
+        "protocol": "vless",
+        "port": 2087,
+        "state": "retrying",
+        "eligible": 71,
+        "verified": 0,
+        "pending": 0,
+        "blocked": 71,
+        "ready": 0,
+        "published": 0,
+        "target": 142
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-20T13:45:02.930522+00:00",
+      "proof_age": {
+        "under_5m": 213,
+        "over_5m": 0,
+        "never": 71,
+        "median_seconds": 29.212706,
+        "max_seconds": 244.982111
+      },
+      "routing_age": {
+        "under_60s": 71,
+        "over_60s": 0,
+        "median_seconds": 14.620488
+      },
+      "sql": {
+        "active": 2,
+        "idle": 51
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.047,
+        "status": 200,
+        "bytes": 95442,
+        "lines": 426
+      }
+    }
+  },
+  "openai_api_calls": 0,
+  "remaining": "Grant the connected API token DNS Edit for the selected zone, then use Refresh domains and access. Certificate issuance and real publication must be verified after external permissions are corrected. Do not claim live Cloudflare success yet."
+}
