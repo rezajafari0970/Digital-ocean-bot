@@ -1,0 +1,440 @@
+{
+  "task": "cloudflare-tls-recovery-20261020",
+  "status": "software_deployed_external_dns_capacity_limited",
+  "source_revision": "ece3aa81a999199575cecd7432802062bba0e760",
+  "public_revision": "2a9d64bff8df46e85a28354caa0d4fc1444b6af6",
+  "branch": "fix/cloudflare-tls-20261020",
+  "recorded_at": "2026-10-20T14:43:46.081173+00:00",
+  "stages": {
+    "video_review": "complete_visual_review",
+    "diagnosis": "complete_provider_contract_verified",
+    "implementation": "complete",
+    "validation": "complete",
+    "publication": "complete",
+    "deployment": "complete_both_controllers",
+    "identity_preservation": "complete",
+    "live_certificate_recovery": "complete",
+    "full_scheduled_dns_capacity": "limited_by_selected_zone_provider_quota",
+    "iran_operator_measurements": "not_available"
+  },
+  "openai_api_usage": 0,
+  "validation": {
+    "required_release_tests_passed": 71,
+    "required_skipped": 0,
+    "targeted_mobile_cases_passed": 16,
+    "gate_verifier_tests_passed": 7,
+    "output_browser_cases_passed": 6,
+    "full_go_test": "PASS",
+    "go_vet": "PASS",
+    "installer_tests": "PASS",
+    "exact_candidate_installation": "PASS"
+  },
+  "primary": {
+    "at": "2026-10-20T14:41:13.138861+00:00",
+    "commit": "2a9d64bff8df46e85a28354caa0d4fc1444b6af6",
+    "schema": "000191_cloudflare_dns_quota",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-20T14:41:13.180213359Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 3006,
+        "unchanged": 2927,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 9,
+        "confirmed_initial_activations": 70,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 96,
+        "unchanged": 96,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 1,
+      "records": 726,
+      "profiles": 1
+    }
+  },
+  "secondary": {
+    "at": "2026-10-20T14:42:18.606095+00:00",
+    "commit": "2a9d64bff8df46e85a28354caa0d4fc1444b6af6",
+    "schema": "000191_cloudflare_dns_quota",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-20T14:42:18.654612498Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "manual_refresh": {
+    "success": true,
+    "seconds": 0.618
+  },
+  "live_snapshot": {
+    "at": "2026-10-20T14:42:37.855568+00:00",
+    "live_certificates": [
+      {
+        "state": "INSTALLED",
+        "n": 67
+      }
+    ],
+    "live_listeners": [
+      {
+        "state": "BLOCKED",
+        "error_code": "profile_cloudflare_dns_pending",
+        "n": 6
+      },
+      {
+        "state": "VERIFIED",
+        "error_code": "",
+        "n": 61
+      }
+    ],
+    "records": [
+      {
+        "state": "DELETED",
+        "n": 415,
+        "verified": 0
+      },
+      {
+        "state": "DNS_READY",
+        "n": 183,
+        "verified": 132
+      },
+      {
+        "state": "PREPARED",
+        "n": 128,
+        "verified": 0
+      }
+    ],
+    "quota": [
+      {
+        "limit": 200,
+        "usage": 194,
+        "checked": "2026-10-20T14:42:22.755137+00:00",
+        "error": ""
+      }
+    ],
+    "pending_expired": 0
+  },
+  "final_metrics": {
+    "at": "2026-10-20T14:42:39.291489+00:00",
+    "catalog_seconds": 0.074,
+    "profiles": [
+      {
+        "id": "c3dd4e57-87b2-4d3c-8489-3ca2ce764707",
+        "protocol": "trojan",
+        "port": 500,
+        "state": "ready",
+        "eligible": 67,
+        "verified": 67,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 67,
+        "published": 134,
+        "target": 134
+      },
+      {
+        "id": "3a5372ee-3fce-4083-bad6-35a55dc3de67",
+        "protocol": "vless",
+        "port": 443,
+        "state": "ready",
+        "eligible": 67,
+        "verified": 67,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 67,
+        "published": 134,
+        "target": 134
+      },
+      {
+        "id": "67702c1a-7084-463c-bba0-382596d237ce",
+        "protocol": "vless",
+        "port": 8443,
+        "state": "ready",
+        "eligible": 67,
+        "verified": 67,
+        "pending": 0,
+        "blocked": 0,
+        "ready": 67,
+        "published": 134,
+        "target": 134
+      },
+      {
+        "id": "90d989ac-977f-4b82-9495-597e92227ddd",
+        "protocol": "vless",
+        "port": 2087,
+        "state": "retrying",
+        "eligible": 67,
+        "verified": 61,
+        "pending": 2,
+        "blocked": 6,
+        "ready": 59,
+        "published": 118,
+        "target": 134
+      }
+    ],
+    "freshness": {
+      "at": "2026-10-20T14:42:39.392758+00:00",
+      "proof_age": {
+        "under_5m": 265,
+        "over_5m": 0,
+        "never": 3,
+        "median_seconds": 51.350483,
+        "max_seconds": 199.208255
+      },
+      "routing_age": {
+        "under_60s": 70,
+        "over_60s": 0,
+        "median_seconds": 14.062915499999999
+      },
+      "sql": {
+        "active": 1,
+        "idle": 55
+      }
+    },
+    "api_latency": {
+      "output": {
+        "seconds": 0.047,
+        "status": 200,
+        "bytes": 182742,
+        "lines": 632
+      }
+    }
+  },
+  "api_verification": {
+    "at": "2026-10-20T14:42:35.844094+00:00",
+    "authenticated_cloudflare_status": "PASS",
+    "official_ip_pool_route": "PASS",
+    "served_assets_match_installed_source": {
+      "cloudflare": "PASS",
+      "config-profiles": "PASS"
+    },
+    "account_count": 1,
+    "live_provider_mutations": 0,
+    "accounts": [
+      {
+        "error_code": "",
+        "dns_records": 184,
+        "pending_requests": 128,
+        "probe_ready": 115,
+        "zones": [
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          },
+          {
+            "enabled": true,
+            "dns_checked": true,
+            "dns_error_code": "",
+            "dns_quota": 200,
+            "dns_usage": 194,
+            "quota_checked": "2026-10-20T14:42:22.755137+00:00"
+          },
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          },
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          },
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          },
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          },
+          {
+            "enabled": false,
+            "dns_checked": false,
+            "dns_error_code": "",
+            "dns_quota": null,
+            "dns_usage": 0,
+            "quota_checked": null
+          }
+        ]
+      }
+    ]
+  },
+  "remaining": [
+    "Additional selected zone capacity or increased provider quota needed to sustain the chosen schedule across the fleet.",
+    "Real Iranian operator measurements have not been supplied."
+  ],
+  "evidence": {
+    "publication": "/var/lib/datacenter-publisher/release-7vnrjir1",
+    "primary": "/root/backups/dob-cloudflare-tls-20261020",
+    "secondary": "limited-lime.ptr.network:/root/backups/dob-cloudflare-tls-20261020",
+    "targeted_tests": ".local/check-status.log",
+    "mobile_cases": ".local/ui/transport-result.json",
+    "final_metrics": "/root/projects/dob-unified-configs-20261018/.local/isolation-187-metrics-cf-tls-final-20261020.json"
+  },
+  "prior_job_preserved": "docs/development-jobs/cloudflare-tls-20261020.json"
+}
