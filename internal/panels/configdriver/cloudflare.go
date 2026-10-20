@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflareschedule"
 	"net"
 	"net/url"
 	"regexp"
@@ -39,11 +40,9 @@ func ValidateCloudflare(s Spec) error {
 	if !CloudflarePort(s.Port) {
 		return errors.New("profile_cloudflare_port_invalid")
 	}
-	if s.CloudflareRecords < 1 || s.CloudflareRecords > 2 || s.CloudflareInterval < 300 || s.CloudflareMinLifetime < 900 || s.CloudflareMaxLifetime < s.CloudflareMinLifetime || s.CloudflareMaxLifetime > 86400 || s.CloudflareInterval > s.CloudflareMinLifetime-300 || s.CloudflareMaxActive < ((s.CloudflareMaxLifetime+s.CloudflareInterval-1)/s.CloudflareInterval+1)*s.CloudflareRecords || s.CloudflareMaxActive > 8 {
-		return errors.New("profile_cloudflare_schedule_invalid")
-	}
-	return nil
+	return (cloudflareschedule.Schedule{Records: s.CloudflareRecords, Interval: s.CloudflareInterval, MinLifetime: s.CloudflareMinLifetime, MaxLifetime: s.CloudflareMaxLifetime, MaxActive: s.CloudflareMaxActive}).Validate()
 }
+
 func CloudflarePort(p int) bool {
 	switch p {
 	case 443, 2053, 2083, 2087, 2096, 8443:

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/lib/pq"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflareschedule"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configplane"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"io"
@@ -35,7 +36,12 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if e := configplane.Validate(p); e != nil {
-		writeJSON(w, 400, map[string]string{"error": e.Error()})
+		var scheduleError *cloudflareschedule.ValidationError
+		if errors.As(e, &scheduleError) {
+			writeJSON(w, 400, map[string]any{"error": e.Error(), "detail": scheduleError.Detail, "field": scheduleError.Field, "required_active": scheduleError.RequiredActive})
+		} else {
+			writeJSON(w, 400, map[string]string{"error": e.Error()})
+		}
 		return
 	}
 	creating := r.Method == "POST"

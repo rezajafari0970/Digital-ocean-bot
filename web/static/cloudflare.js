@@ -32,6 +32,51 @@ function editCloudflareAccount(existing){
  if(!$('#modal').open)$('#modal').showModal();
 }
 function cloudflareProfileFields(s,accounts){
- const n=(name,label,value)=>'<label>'+label+'<input name="profile_cf_'+name+'" type="number" step="1" min="1" value="'+esc(value)+'"></label>';
- return '<fieldset id="profileCloudflareFields"><legend>Cloudflare CDN</legend><label><input type="checkbox" name="profile_cf_enabled"'+(s.cloudflare_account?' checked':'')+'> Automatically use active Cloudflare domains</label><p data-cf-compatibility>Available for WS + TLS. Certificates and transport host are managed automatically.</p><div data-cf-profile-options><label>Account<select name="profile_cf_account"><option value="">Select account</option>'+accounts.filter(a=>a.enabled).map(a=>'<option value="'+esc(a.id)+'"'+(a.id===s.cloudflare_account?' selected':'')+'>'+esc(a.name)+'</option>').join('')+'</select></label><div class="grid">'+n('count','Records per server per interval (1–2)',s.cloudflare_records||1)+n('interval','Creation interval (minutes)',(s.cloudflare_interval_seconds||1800)/60)+n('min','Minimum lifetime (minutes)',(s.cloudflare_min_lifetime_seconds||2700)/60)+n('max','Maximum lifetime (minutes)',(s.cloudflare_max_lifetime_seconds||3600)/60)+n('active','Maximum active records per server (up to 8)',s.cloudflare_max_active||4)+'</div><label>Operator IP preference<select name="profile_cf_operator">'+[['','Automatic DNS'],['mci','MCI'],['irancell','Irancell'],['rightel','Rightel'],['mokhaberat','Mokhaberat'],['shatel','Shatel'],['other','Other']].map(([v,l])=>'<option value="'+v+'"'+(s.cloudflare_operator===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label><p>Uses fresh operator probe results, then verifies the actual CDN connection. Without a fresh result, the owned domain is used.</p><p>Each record receives its own fixed random expiry. Keep capacity for overlapping generations. Refresh subscriptions before old domains expire.</p></div></fieldset>';
+ const n=(name,label,value,min,max)=>'<label>'+label+'<input name="profile_cf_'+name+'" type="number" step="1" min="'+min+'" max="'+max+'" aria-describedby="profileCFScheduleHint" value="'+esc(value)+'"></label>';
+ return '<fieldset id="profileCloudflareFields"><legend>Cloudflare CDN</legend><label><input type="checkbox" name="profile_cf_enabled"'+(s.cloudflare_account?' checked':'')+'> Automatically use active Cloudflare domains</label><p data-cf-compatibility>Available for WS + TLS. Certificates and transport host are managed automatically.</p><div data-cf-profile-options><label>Account<select name="profile_cf_account"><option value="">Select account</option>'+accounts.filter(a=>a.enabled).map(a=>'<option value="'+esc(a.id)+'"'+(a.id===s.cloudflare_account?' selected':'')+'>'+esc(a.name)+'</option>').join('')+'</select></label><div class="grid">'+n('count','Records per server per interval (1–2)',s.cloudflare_records||1,1,2)+n('interval','Creation interval (minutes)',(s.cloudflare_interval_seconds||1800)/60,5,1435)+n('min','Minimum lifetime (minutes)',(s.cloudflare_min_lifetime_seconds||2700)/60,15,1440)+n('max','Maximum lifetime (minutes)',(s.cloudflare_max_lifetime_seconds||3600)/60,15,1440)+n('active','Maximum active records per server (up to 8)',s.cloudflare_max_active||4,1,8)+'</div><p id="profileCFScheduleHint" aria-live="polite"></p><label>Operator IP preference<select name="profile_cf_operator">'+[['','Automatic DNS'],['mci','MCI'],['irancell','Irancell'],['rightel','Rightel'],['mokhaberat','Mokhaberat'],['shatel','Shatel'],['other','Other']].map(([v,l])=>'<option value="'+v+'"'+(s.cloudflare_operator===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label><p>Uses fresh operator probe results, then verifies the actual CDN connection. Without a fresh result, the owned domain is used.</p><p>Each record receives its own fixed random expiry. Keep capacity for overlapping generations. Refresh subscriptions before old domains expire.</p></div></fieldset>';
+}
+
+// Minutes in the form; the API and worker use the shared cloudflareschedule policy.
+function cloudflareScheduleFeedback(s){
+ const invalid=(field,detail,required=0)=>({field,detail,required});
+ for(const field of ['count','interval','min','max','active']){
+  if(!Number.isSafeInteger(s[field]))return invalid(field,'Enter a whole number for this schedule field.');
+ }
+ if(s.count<1||s.count>2)return invalid('count','Records per server per interval must be 1 or 2.');
+ if(s.interval<5)return invalid('interval','Creation interval must be at least 5 minutes.');
+ if(s.min<15||s.min>1440)return invalid('min','Minimum lifetime must be between 15 minutes and 24 hours.');
+ if(s.max<s.min||s.max>1440)return invalid('max','Maximum lifetime must be at least the minimum lifetime and no more than 24 hours.');
+ if(s.interval>s.min-5)return invalid('interval','Creation interval must be at least 5 minutes shorter than the minimum lifetime.');
+ const required=(Math.ceil(s.max/s.interval)+1)*s.count;
+ if(required>8)return invalid('interval','This schedule needs '+required+' active records per server; the limit is 8. Increase the creation interval, shorten the maximum lifetime, or reduce records per interval.',required);
+ if(s.active<required)return invalid('active','Maximum active records per server must be at least '+required+' for this schedule (up to 8).',required);
+ if(s.active>8)return invalid('active','Maximum active records per server cannot exceed 8.',required);
+ return {required};
+}
+function bindCloudflareSchedule(f){
+ const fields=['count','interval','min','max','active'],hint=document.getElementById('profileCFScheduleHint');
+ let adjustment='';
+ const sync=(adjust=false)=>{
+  const enabled=f('cf_enabled').checked&&!f('cf_enabled').disabled;
+  for(const name of ['account','operator',...fields]){
+   const input=f('cf_'+name);input.disabled=!enabled;input.required=enabled&&name!=='operator';input.setCustomValidity('');
+  }
+  if(!enabled){hint.textContent='';hint.classList.remove('error');adjustment='';return null}
+  const values=Object.fromEntries(fields.map(name=>[name,f('cf_'+name).value.trim()===''?NaN:Number(f('cf_'+name).value)]));
+  let result=cloudflareScheduleFeedback(values);
+  if(adjust&&result.field==='active'&&result.required<=8&&values.active<result.required){
+   values.active=result.required;f('cf_active').value=String(result.required);
+   adjustment='Active capacity was raised to '+result.required+'. ';
+   result=cloudflareScheduleFeedback(values);
+  }
+  hint.classList.toggle('error',!!result.detail);
+  hint.textContent=result.detail||adjustment+'This schedule needs at least '+result.required+' active records per server, including one spare generation during replacement.';
+  if(result.detail){f('cf_'+result.field).setCustomValidity(result.detail);return result}
+  return null;
+ };
+ for(const name of fields){
+  const update=()=>{adjustment='';sync(name!=='active')};
+  f('cf_'+name).addEventListener('input',update);f('cf_'+name).addEventListener('change',update);
+ }
+ return sync;
 }

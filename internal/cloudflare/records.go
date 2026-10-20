@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/cloudflareschedule"
 	"net/netip"
 	"time"
 )
@@ -20,10 +21,10 @@ type Policy struct {
 }
 
 func (p Policy) Validate() error {
-	if !ValidOperator(p.Operator) || !ValidID(p.Account) || p.Records < 1 || p.Records > 2 || p.Interval < 300 || p.MinLifetime < 900 || p.MaxLifetime < p.MinLifetime || p.MaxLifetime > 86400 || p.Interval > p.MinLifetime-300 || p.MaxActive < ((p.MaxLifetime+p.Interval-1)/p.Interval+1)*p.Records || p.MaxActive > 8 {
+	if !ValidOperator(p.Operator) || !ValidID(p.Account) {
 		return errors.New("profile_cloudflare_schedule_invalid")
 	}
-	return nil
+	return (cloudflareschedule.Schedule{Records: p.Records, Interval: p.Interval, MinLifetime: p.MinLifetime, MaxLifetime: p.MaxLifetime, MaxActive: p.MaxActive}).Validate()
 }
 
 // Durable scheduling uses wall time, never catch-up bursts after a restart.

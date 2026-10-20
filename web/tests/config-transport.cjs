@@ -158,10 +158,34 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("document.querySelector('#primaryAction').click()");await waitFor("document.querySelector('#modal').open");
   await evaluate("change('protocol','vless');change('network','ws');change('security','tls');f('name').value='Cloudflare TLS';f('cf_account').value='11111111-1111-4111-8111-111111111111';f('cf_enabled').checked=true;f('cf_enabled').dispatchEvent(new Event('change'))");
   assert.equal(await evaluate("f('direct_insecure').disabled&&f('residential_insecure').disabled&&f('host').disabled"),true);
+  await evaluate("change('cf_count','2')");
+  assert.equal(await evaluate("f('cf_active').value"),'6');
+  assert.equal(await evaluate("document.querySelector('#profileCFScheduleHint').innerText.includes('at least 6')"),true);
+  const beforeInvalid=saves.length;
+  await evaluate("change('cf_active','4');document.querySelector('#modalSubmit').click()");
+  assert.equal(await evaluate("document.querySelector('#modal').open&&!f('cf_active').checkValidity()"),true);
+  assert.equal(saves.length,beforeInvalid);
+  await evaluate("document.querySelector('#modalForm').dispatchEvent(new Event('submit',{cancelable:true}))");
+  await waitFor("document.querySelector('#modalError').innerText.includes('at least 6')");
+  assert.equal(saves.length,beforeInvalid);
+  await evaluate("change('cf_active','6');change('cf_interval','5')");
+  assert.equal(await evaluate("document.querySelector('#profileCFScheduleHint').innerText.includes('needs 26')&&!f('cf_interval').checkValidity()"),true);
+  await evaluate("change('cf_interval','30')");
+  assert.equal(await evaluate("f('cf_active').checkValidity()&&f('cf_interval').checkValidity()"),true);
+  const cfShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'cloudflare-schedule-mobile.png'),Buffer.from(cfShot.data,'base64'));
+  mark('Cloudflare screenshot schedule raises capacity to 6; invalid overlap is explained and blocked before POST');
+
   await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&[...document.querySelectorAll('[data-profile-id]')].some(x=>x.innerText.includes('Cloudflare TLS'))");
-  assert.equal(saves.at(-1).spec.cloudflare_min_lifetime_seconds,2700);assert.equal(saves.at(-1).spec.cloudflare_max_lifetime_seconds,3600);assert.equal(saves.at(-1).spec.cloudflare_records,1);assert.equal(saves.at(-1).spec.host,'');
+  assert.equal(saves.at(-1).spec.cloudflare_min_lifetime_seconds,2700);assert.equal(saves.at(-1).spec.cloudflare_max_lifetime_seconds,3600);assert.equal(saves.at(-1).spec.cloudflare_records,2);assert.equal(saves.at(-1).spec.cloudflare_max_active,6);assert.equal(saves.at(-1).spec.host,'');
   await evaluate("[...document.querySelectorAll('[data-profile-id]')].find(x=>x.innerText.includes('Cloudflare TLS')).querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
   assert.equal(await evaluate("f('cf_enabled').checked"),true);
+  assert.equal(await evaluate("f('cf_count').value==='2'&&f('cf_active').value==='6'"),true);
+  await evaluate("change('cf_active','1');f('cf_enabled').checked=false;f('cf_enabled').dispatchEvent(new Event('change'))");
+  assert.equal(await evaluate("f('cf_active').disabled&&f('cf_active').checkValidity()&&f('cf_account').disabled"),true);
+  await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open&&[...document.querySelectorAll('[data-profile-id]')].some(x=>x.innerText.includes('Cloudflare TLS')&&x.dataset.profileRevision==='2'&&!x.querySelector('[data-edit-profile]').disabled)");
+  assert.equal('cloudflare_account' in saves.at(-1).spec,false);
+  await evaluate("[...document.querySelectorAll('[data-profile-id]')].find(x=>x.innerText.includes('Cloudflare TLS')).querySelector('[data-edit-profile]').click()");await waitFor("document.querySelector('#modal').open");
+
   await evaluate("change('network','tcp')");assert.equal(await evaluate("f('cf_enabled').disabled&&!f('cf_enabled').checked"),true);
   await evaluate("document.querySelector('#modalCancel').click();document.querySelector('#cloudflareSettings').click()");await waitFor("document.querySelector('#modal').open&&document.querySelector('[data-cf-edit]')");
   await evaluate("document.querySelector('[data-cf-edit]').click()");assert.equal(await evaluate("document.querySelector('[name=cf_secret]').type==='password'&&document.querySelector('[name=cf_secret]').value===''"),true);

@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/cloudflareschedule": ("TestCloudflareScheduleValidation",),
     "internal/cloudflare": ("TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
     "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
     "cmd/worker": ("TestProofBusyIsDeferredWithoutFailure","TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
@@ -27,6 +28,7 @@ REQUIRED = {
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestCloudflareScheduleAdmissionDetailAndPersistence",
         "TestCloudflareCertificateLostResponseRenewalAndNodeRepair",
         "TestCloudflareDNSCleanupSurvivesPanelPurge",
         "TestCloudflareLifecycleLostResponsesAndCleanupWithoutZones",
