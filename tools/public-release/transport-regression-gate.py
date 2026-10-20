@@ -19,7 +19,7 @@ from urllib.parse import urlencode
 
 REQUIRED = {
     "internal/cloudflareschedule": ("TestCloudflareScheduleValidation",),
-    "internal/cloudflare": ("TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets","TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
+    "internal/cloudflare": ("TestCloudflareCertificateWireDatesAndPagination","TestCloudflareIncompleteCertificateListCannotProveAbsence","TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets","TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
     "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
     "cmd/worker": ("TestProofBusyIsDeferredWithoutFailure","TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
     "internal/panels/configdriver": ("TestCloudflareTransportPortsAndStrictOutput","TestCloudflareNativeOutboundSyntax","TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
@@ -28,6 +28,8 @@ REQUIRED = {
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestCloudflareManualLockWaitDoesNotReplay",
+        "TestCloudflareDNSQuotaAdmissionRecoveryAndCleanup",
         "TestCloudflareDNSAccessIsolationAndRecovery",
         "TestCloudflareRetiresOnlyUnsentExpiredIntents",
         "TestCloudflareStatusSeparatesIntentsAndDNS",

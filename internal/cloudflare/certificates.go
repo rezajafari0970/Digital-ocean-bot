@@ -174,6 +174,10 @@ func (s Service) EnsureCertificate(ctx context.Context, account, panel string, n
 				return e
 			}
 		}
+		roots := s.CertificateRoots
+		if len(roots) == 0 {
+			roots = originRoot
+		}
 		if state == "SENT" {
 			cert = "" // Only a fresh provider observation can resolve an ambiguous issue.
 			candidates, e := d.Certificates(ctx, zones[0].id)
@@ -181,8 +185,14 @@ func (s Service) EnsureCertificate(ctx context.Context, account, panel string, n
 				return e
 			}
 			for _, c := range candidates {
-				if sameCSR(c.CSR, csr) {
+				// Real list responses may omit CSR. Recover only a valid certificate
+				// whose public key matches the journaled CSR and whose SANs and
+				// chain verify. Provider metadata alone is never ownership proof.
+				if _, verifyErr := VerifyCertificate(c.Certificate, csr, names, roots, time.Now()); verifyErr == nil {
 					cert = c.Certificate
+					if _, e = s.DB.ExecContext(ctx, "UPDATE cloudflare_certificates SET provider_id=$3 WHERE account_id=$1 AND panel_id=$2 AND generation=$4", account, panel, c.ID, generation); e != nil {
+						return e
+					}
 					break
 				}
 			}
@@ -235,10 +245,6 @@ func (s Service) EnsureCertificate(ctx context.Context, account, panel string, n
 				return e
 			}
 		}
-		roots := s.CertificateRoots
-		if len(roots) == 0 {
-			roots = originRoot
-		}
 		expiry, e = VerifyCertificate(cert, csr, names, roots, time.Now())
 		if e != nil {
 			return e
@@ -264,11 +270,6 @@ func (s Service) EnsureCertificate(ctx context.Context, account, panel string, n
 		return e
 	})
 	return expiry, e
-}
-func sameCSR(a, b string) bool {
-	pa, _ := pem.Decode([]byte(a))
-	pb, _ := pem.Decode([]byte(b))
-	return pa != nil && pb != nil && bytes.Equal(pa.Bytes, pb.Bytes)
 }
 func VerifyCertificate(certPEM, csrPEM string, names []string, root []byte, now time.Time) (time.Time, error) {
 	fail := errors.New("cloudflare_certificate_invalid")

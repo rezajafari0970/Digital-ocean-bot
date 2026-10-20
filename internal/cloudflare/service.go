@@ -58,17 +58,39 @@ func (s Service) Budget(ctx context.Context) error {
 	}
 }
 func (s Service) Locked(ctx context.Context, key string, fn func() error) error {
+	return s.locked(ctx, key, 0, fn)
+}
+
+// Manual actions wait briefly for background work. Only lock acquisition is
+// retried; fn executes at most once, even when it returns an uncertain outcome.
+func (s Service) LockedWait(ctx context.Context, key string, fn func() error) error {
+	return s.locked(ctx, key, 5*time.Second, fn)
+}
+func (s Service) locked(ctx context.Context, key string, wait time.Duration, fn func() error) error {
 	c, e := s.DB.Conn(ctx)
 	if e != nil {
 		return e
 	}
 	defer c.Close()
-	var held bool
-	if e = c.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,0))", "cloudflare:"+key).Scan(&held); e != nil {
-		return e
-	}
-	if !held {
-		return errors.New("cloudflare_busy")
+	deadline := time.Now().Add(wait)
+	for {
+		var held bool
+		if e = c.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1,0))", "cloudflare:"+key).Scan(&held); e != nil {
+			return e
+		}
+		if held {
+			break
+		}
+		if wait <= 0 || !time.Now().Before(deadline) {
+			return errors.New("cloudflare_busy")
+		}
+		timer := time.NewTimer(min(50*time.Millisecond, time.Until(deadline)))
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
 	}
 	defer func() {
 		cleanup, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -109,7 +131,7 @@ func (s Service) Refresh(ctx context.Context, id string) error {
 	if e != nil {
 		return e
 	}
-	if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now() WHERE account_id=$1", id); e != nil {
+	if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now(),dns_quota_next_attempt_at=now() WHERE account_id=$1", id); e != nil {
 		return e
 	}
 	if e = tx.Commit(); e != nil {
@@ -141,6 +163,9 @@ func (s Service) RunOne(ctx context.Context) error {
 		}
 		accessError := s.checkDNSAccess(ctx, id, d)
 		zoneError := s.checkZone(ctx, id, d)
+		if e = s.checkDNSQuota(ctx, id, d); e != nil {
+			return e
+		}
 		planError := s.plan(ctx, id)
 		if e = s.recordOne(ctx, id, d); e != nil {
 			return e
@@ -175,7 +200,7 @@ func ErrorCode(e error) string {
 		return ""
 	}
 	switch e.Error() {
-	case "cloudflare_dns_read_permission_denied", "cloudflare_dns_write_permission_denied", "cloudflare_certificate_permission_denied", "cloudflare_ssl_permission_denied", "cloudflare_permission_denied", "cloudflare_rate_limited", "cloudflare_busy", "cloudflare_record_conflict", "cloudflare_write_unconfirmed", "cloudflare_no_active_zones", "cloudflare_ssl_strict_required", "cloudflare_grpc_required", "cloudflare_credentials_unavailable", "cloudflare_certificate_issue_unconfirmed", "cloudflare_certificate_invalid", "cloudflare_certificate_node_retrying", "cloudflare_certificate_install_unconfirmed", "cloudflare_csr_invalid", "cloudflare_account_disabled":
+	case "cloudflare_certificate_list_incomplete", "cloudflare_response_invalid", "cloudflare_response_unconfirmed", "cloudflare_transport_unconfirmed", "cloudflare_dns_read_permission_denied", "cloudflare_dns_write_permission_denied", "cloudflare_certificate_permission_denied", "cloudflare_ssl_permission_denied", "cloudflare_permission_denied", "cloudflare_rate_limited", "cloudflare_busy", "cloudflare_record_conflict", "cloudflare_write_unconfirmed", "cloudflare_no_active_zones", "cloudflare_ssl_strict_required", "cloudflare_grpc_required", "cloudflare_credentials_unavailable", "cloudflare_certificate_issue_unconfirmed", "cloudflare_certificate_invalid", "cloudflare_certificate_node_retrying", "cloudflare_certificate_install_unconfirmed", "cloudflare_csr_invalid", "cloudflare_account_disabled":
 		return e.Error()
 	}
 	return "cloudflare_operation_retrying"

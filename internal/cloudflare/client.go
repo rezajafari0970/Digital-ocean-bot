@@ -163,9 +163,33 @@ func (c *Client) SetSetting(ctx context.Context, z, key, value string) error {
 	return e
 }
 func (c *Client) Certificates(ctx context.Context, z string) ([]Certificate, error) {
-	var out []Certificate
-	_, e := c.request(ctx, "GET", "/certificates?zone_id="+url.QueryEscape(z), nil, &out)
-	return out, e
+	all := []Certificate{}
+	seen := map[string]bool{}
+	for page := 1; page <= 200; page++ {
+		var batch []Certificate
+		pages, e := c.request(ctx, "GET", "/certificates?zone_id="+url.QueryEscape(z)+"&per_page=50&page="+strconv.Itoa(page), nil, &batch)
+		if e != nil {
+			return nil, e
+		}
+		for _, cert := range batch {
+			if cert.ID == "" || seen[cert.ID] {
+				return nil, errors.New("cloudflare_certificate_list_incomplete")
+			}
+			seen[cert.ID] = true
+		}
+		all = append(all, batch...)
+		if pages > 0 {
+			if page > pages || len(batch) == 0 && (page > 1 || pages > 1) {
+				return nil, errors.New("cloudflare_certificate_list_incomplete")
+			}
+			if page == pages {
+				return all, nil
+			}
+		} else if len(batch) < 50 {
+			return all, nil
+		}
+	}
+	return nil, errors.New("cloudflare_certificate_list_incomplete")
 }
 func (c *Client) Issue(ctx context.Context, csr string, names []string) (Certificate, error) {
 	var out Certificate

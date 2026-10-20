@@ -103,9 +103,11 @@ func (s Service) plan(ctx context.Context, account string) error {
 			var zone, name string
 			e = tx.QueryRowContext(ctx, `SELECT z.id,z.name FROM cloudflare_zones z WHERE z.account_id=$1 AND z.enabled AND z.present AND z.status='active' AND z.dns_checked_at>now()-interval '10 minutes' AND z.dns_error_code=''
  AND (SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND r.state<>'DELETED')<500
+ AND (z.dns_record_quota IS NULL OR z.dns_quota_checked_at IS NULL OR z.dns_quota_checked_at<now()-interval '2 minutes' OR z.dns_record_quota>z.dns_record_usage+(SELECT count(*) FROM cloudflare_records qr WHERE qr.account_id=z.account_id AND qr.zone_id=z.id AND (qr.state IN('PREPARED','SENT') OR qr.state='DNS_READY' AND qr.activated_at>z.dns_quota_checked_at)))
  ORDER BY (SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND r.state<>'DELETED'),z.id LIMIT 1`, account).Scan(&zone, &name)
 			if errors.Is(e, sql.ErrNoRows) {
-				return errors.New("cloudflare_no_active_zones")
+				// Preserve the scheduled backoff when every eligible zone is full.
+				return tx.Commit()
 			}
 			if e != nil {
 				return e
@@ -158,6 +160,7 @@ func (s Service) recordOne(ctx context.Context, account string, d Driver) error 
  JOIN config_driver_profiles cp ON cp.id=r.profile_id LEFT JOIN panel_instances pi ON pi.id=r.panel_id LEFT JOIN droplets dr ON dr.id=pi.droplet_id LEFT JOIN accounts a ON a.id=pi.account_id
  WHERE r.account_id=$1 AND r.state NOT IN('DELETED','CONFLICT') AND r.next_attempt_at<=now()
  AND z.dns_error_code='' AND z.dns_checked_at>now()-interval '10 minutes'
+ AND NOT(r.state='PREPARED' AND r.expires_at>now() AND z.dns_record_quota IS NOT NULL AND z.dns_quota_checked_at>now()-interval '2 minutes' AND z.dns_record_usage+(SELECT count(*) FROM cloudflare_records qr WHERE qr.account_id=z.account_id AND qr.zone_id=z.id AND qr.state='DNS_READY' AND qr.activated_at>z.dns_quota_checked_at)>=z.dns_record_quota)
  ORDER BY (r.expires_at<=now()) DESC,r.next_attempt_at LIMIT 1`, account).Scan(&r.id, &r.zone, &r.hostname, &r.ip, &r.state, &r.provider, &r.expired, &r.lifetime, &r.planned, &r.activated, &r.serverExpiry)
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil

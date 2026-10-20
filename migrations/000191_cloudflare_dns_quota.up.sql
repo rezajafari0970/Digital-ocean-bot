@@ -1,0 +1,1 @@
+ALTER TABLE cloudflare_zones ADD COLUMN dns_record_quota bigint CHECK(dns_record_quota>=0), ADD COLUMN dns_record_usage bigint NOT NULL DEFAULT 0 CHECK(dns_record_usage>=0), ADD COLUMN dns_quota_checked_at timestamptz, ADD COLUMN dns_quota_next_attempt_at timestamptz NOT NULL DEFAULT now(), ADD COLUMN dns_quota_error_code text NOT NULL DEFAULT '';

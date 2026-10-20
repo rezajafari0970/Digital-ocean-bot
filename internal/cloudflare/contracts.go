@@ -46,11 +46,11 @@ type Record struct {
 	TTL       int       `json:"ttl"`
 }
 type Certificate struct {
-	ID          string    `json:"id"`
-	CSR         string    `json:"csr"`
-	Certificate string    `json:"certificate"`
-	Hostnames   []string  `json:"hostnames"`
-	ExpiresOn   time.Time `json:"expires_on"`
+	ID          string   `json:"id"`
+	CSR         string   `json:"csr"`
+	Certificate string   `json:"certificate"`
+	Hostnames   []string `json:"hostnames"`
+	ExpiresOn   string   `json:"expires_on"` // Informational API text; trust the signed certificate expiry only.
 }
 type DNSDriver interface {
 	Zones(context.Context) ([]Zone, error)

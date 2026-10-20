@@ -45,7 +45,7 @@ func (d *cfCertDriver) Issue(_ context.Context, csr string, names []string) (clo
 	if e != nil {
 		return cloudflare.Certificate{}, e
 	}
-	c := cloudflare.Certificate{ID: "fixture-issued", CSR: csr, Certificate: string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})), Hostnames: names, ExpiresOn: leaf.NotAfter}
+	c := cloudflare.Certificate{ID: "fixture-issued", CSR: csr, Certificate: string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})), Hostnames: names, ExpiresOn: leaf.NotAfter.Format("2006-01-02 15:04:05 -0700 MST")}
 	if d.commit {
 		d.certificates = append(d.certificates, c)
 	}
@@ -129,12 +129,26 @@ func TestCloudflareCertificateLostResponseRenewalAndNodeRepair(t *testing.T) {
 	if ensure() == nil || d.issues != 1 {
 		t.Fatal("lost issuance accepted")
 	}
+	// Production list payloads omit CSR. Forged metadata with the same CSR
+	// must not win over the certificate whose actual public key matches.
+	d.certificates[0].CSR = ""
+	forged := d.certificates[0]
+	var savedCSR string
+	if e = db.QueryRow("SELECT csr FROM cloudflare_certificates").Scan(&savedCSR); e != nil {
+		t.Fatal(e)
+	}
+	forged.ID, forged.CSR, forged.Certificate = "foreign-key", savedCSR, string(root)
+	d.certificates = append([]cloudflare.Certificate{forged}, d.certificates...)
 	sqlMust(t, db, "UPDATE cloudflare_zones SET dns_error_code='cloudflare_dns_read_permission_denied'")
 	if e = ensure(); e != nil {
 		t.Fatal(e)
 	}
 	if d.issues != 1 || node.installs != 1 {
 		t.Fatal("ambiguous issue replayed", d.issues, node.installs)
+	}
+	var receipt string
+	if e = db.QueryRow("SELECT provider_id FROM cloudflare_certificates").Scan(&receipt); e != nil || receipt != "fixture-issued" {
+		t.Fatal("wrong recovered certificate ownership", receipt, e)
 	}
 	if e = ensure(); e != nil || node.installs != 1 {
 		t.Fatal("valid installed certificate replaced", e)

@@ -209,6 +209,12 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   const accessShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(root,'cloudflare-access-mobile.png'),Buffer.from(accessShot.data,'base64'));
   await evaluate("document.querySelector('#modalCancel').click()");
   mark('Cloudflare distinguishes pending requests from DNS; blocked probes cannot issue requests; mobile records paginate without horizontal overflow');
+  assert.match(await evaluate("configMessage('profile_cloudflare_certificate_issue_unconfirmed')"),/Recovering the previously requested certificate/);
+  assert.match(await evaluate("configMessage('profile_cloudflare_dns_read_permission_denied')"),/Grant Zone/);
+  assert.match(await evaluate("configMessage('cloudflare_busy')"),/already running/);
+  mark('Cloudflare profile errors retain actionable messages and explain background lock contention');
+  assert.match(await evaluate("cloudflareAccountCard({id:'quota-fixture',name:'Quota',enabled:true,zones:[{name:'example.com',enabled:true,dns_checked_at:new Date().toISOString(),dns_quota_checked_at:new Date().toISOString(),dns_record_usage:201,dns_record_quota:200}],records:[],record_count:0})"),/DNS capacity: 201 \/ 200/);
+  mark('Cloudflare shows real provider capacity and explains that existing records and cleanup continue');
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

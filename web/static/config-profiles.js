@@ -11,9 +11,16 @@ Object.assign(profileErrorLabels,{
  cloudflare_ssl_permission_denied:'Cloudflare denied SSL settings access. Grant Zone Settings / Read; automatic Full (strict) also needs Zone Settings / Edit.',
  cloudflare_permission_denied:'Cloudflare rejected this credential or its permissions. Review the token and its selected domains.',
  cloudflare_probe_target_not_ready:'No verified published config is available for this record yet. Resolve its DNS or certificate status first.',
- cloudflare_operation_retrying:'Cloudflare access could not be verified; a bounded retry is scheduled.'
+ cloudflare_operation_retrying:'Cloudflare access could not be verified; a bounded retry is scheduled.',
+ cloudflare_dns_quota_unavailable:'DNS capacity could not be refreshed. Existing record checks and cleanup continue.',
+ cloudflare_busy:'A Cloudflare update is already running. Wait a moment, then refresh status.',
+ cloudflare_certificate_issue_unconfirmed:'Recovering the previously requested certificate before considering another issuance.',
+ cloudflare_certificate_list_incomplete:'The complete certificate list could not be read. Recovery will retry without issuing a duplicate.',
+ cloudflare_response_invalid:'Cloudflare returned an unexpected response. The existing operation is being checked before retrying.',
+ cloudflare_response_unconfirmed:'The Cloudflare response was incomplete. Checking the existing operation before retrying.',
+ cloudflare_transport_unconfirmed:'Cloudflare did not confirm the request. Checking its outcome before retrying.'
 });
-const configMessage=code=>profileErrorLabels[code]||String(code||'').replace(/^profile_/,'').replaceAll('_',' ');
+const configMessage=code=>{const base=String(code||'').replace(/^profile_/,'');return profileErrorLabels[code]||profileErrorLabels[base]||base.replaceAll('_',' ')};
 function profileServerStatus(x){
  if(x.state==='RETIRED')return 'Removed';
  if(x.removing){

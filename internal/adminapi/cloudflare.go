@@ -20,7 +20,7 @@ func (s *Server) cloudflareStatus(w http.ResponseWriter, r *http.Request) {
 	where, _ := outputPublicationFilter("ALL")
 	available := `SELECT DISTINCT o.cloudflare_record_id AS id FROM output_config_snapshots o JOIN panel_instances p ON p.id=o.panel_id JOIN droplets dr ON dr.id=p.droplet_id JOIN accounts a ON a.id=dr.account_id JOIN deployments d ON d.droplet_id=dr.id CROSS JOIN residential_routing_control rc LEFT JOIN panel_routing_state rs ON rs.panel_id=p.id LEFT JOIN panel_client_routes cr ON cr.panel_id=p.id AND cr.client_id=o.client_id ` + where + ` AND o.cloudflare_record_id IS NOT NULL`
 	rows, e := s.DB.QueryContext(r.Context(), "WITH probe_ready AS MATERIALIZED ("+available+") "+`SELECT jsonb_build_object('id',a.id,'name',a.name,'enabled',a.enabled,'revision',a.revision,'manage_ssl',a.manage_ssl,'error_code',a.error_code,'refreshed_at',a.refreshed_at,
- 'zones',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'status',z.status,'enabled',z.enabled,'present',z.present,'ssl_strict',z.ssl_strict,'dns_checked_at',z.dns_checked_at,'dns_error_code',z.dns_error_code) ORDER BY z.name) FROM cloudflare_zones z WHERE z.account_id=a.id),'[]'::jsonb),
+ 'zones',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'status',z.status,'enabled',z.enabled,'present',z.present,'ssl_strict',z.ssl_strict,'dns_checked_at',z.dns_checked_at,'dns_error_code',z.dns_error_code,'dns_record_quota',z.dns_record_quota,'dns_record_usage',z.dns_record_usage,'dns_quota_checked_at',z.dns_quota_checked_at,'dns_quota_error_code',z.dns_quota_error_code) ORDER BY z.name) FROM cloudflare_zones z WHERE z.account_id=a.id),'[]'::jsonb),
  'records',COALESCE((SELECT jsonb_agg(t ORDER BY t.expires_at) FROM (SELECT r.id,r.hostname,r.profile_id,r.panel_id,r.state,r.expires_at,r.verified_at,r.error_code,EXISTS(SELECT 1 FROM probe_ready pr WHERE pr.id=r.id) AS probe_ready FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED' ORDER BY r.expires_at LIMIT 500)t),'[]'::jsonb),
  'record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED'),
  'dns_record_count',(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=a.id AND r.state<>'DELETED' AND r.provider_id<>''),
@@ -85,7 +85,7 @@ func (s *Server) saveCloudflareAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	e := s.cloudflareService().Locked(ctx, "account:"+body.ID, func() error {
+	e := s.cloudflareService().LockedWait(ctx, "account:"+body.ID, func() error {
 		tx, e := s.DB.BeginTx(ctx, nil)
 		if e != nil {
 			return e
@@ -142,7 +142,7 @@ func (s *Server) saveCloudflareAccount(w http.ResponseWriter, r *http.Request) {
 		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET enabled=id=ANY($2::text[]) WHERE account_id=$1", body.ID, pq.Array(body.Zones)); e != nil {
 			return e
 		}
-		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now() WHERE account_id=$1", body.ID); e != nil {
+		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_zones SET dns_checked_at=NULL,dns_error_code='',dns_next_attempt_at=now(),dns_quota_next_attempt_at=now() WHERE account_id=$1", body.ID); e != nil {
 			return e
 		}
 		if _, e = tx.ExecContext(ctx, "UPDATE cloudflare_records SET next_attempt_at=now() WHERE account_id=$1 AND state<>'DELETED'", body.ID); e != nil {
@@ -172,7 +172,7 @@ func (s *Server) refreshCloudflareAccount(w http.ResponseWriter, r *http.Request
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
 	defer cancel()
-	e := s.cloudflareService().Locked(ctx, "account:"+id, func() error { return s.cloudflareService().Refresh(ctx, id) })
+	e := s.cloudflareService().LockedWait(ctx, "account:"+id, func() error { return s.cloudflareService().Refresh(ctx, id) })
 	if errors.Is(e, sql.ErrNoRows) {
 		writeJSON(w, 404, errorBody())
 		return
