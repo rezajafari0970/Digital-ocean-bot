@@ -82,6 +82,9 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 	}
 	if verify {
 		lane = `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND l.remote_id IS NOT NULL AND l.applied_revision=cp.revision AND l.mutation_state NOT IN('PREPARED','SENT') AND NOT l.needs_reconcile`
+		// Reject ineligible targets before reserving a worker or opening a panel
+		// session. Keep deletion and ambiguous mutation recovery independent.
+		lane += ` AND EXISTS(SELECT 1 FROM accounts a JOIN deployments dep ON dep.droplet_id=dr.id WHERE a.id=pi.account_id AND ` + EligibleTarget + `)`
 	}
 	order := "CASE WHEN l.verified_at IS NULL OR l.state='APPLYING' THEN 0 WHEN l.attempted_at IS NOT NULL AND l.next_attempt_at<now()-interval '90 seconds' THEN 1 ELSE 2 END,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.attempted_at NULLS FIRST,l.profile_id,l.panel_id"
 	if verify {

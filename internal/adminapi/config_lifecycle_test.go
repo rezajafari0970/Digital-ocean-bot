@@ -381,6 +381,67 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if e := svc.RunVerifyRecoveryOne(ctx); e != nil || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+p.ID {
 		t.Fatal("idle recovery consumer did not help routine work", e)
 	}
+	// Claim admission must match publication admission. An unavailable account
+	// must not occupy routine or recovery workers with a ten-second retry loop.
+	t.Run("ineligible_verification_does_not_claim_and_recovers", func(t *testing.T) {
+		var expires time.Time
+		if e := db.QueryRow("SELECT expires_at FROM droplets WHERE id=$1", droplet).Scan(&expires); e != nil {
+			t.Fatal(e)
+		}
+		cases := []struct{ name, block, restore string }{
+			{"invalid_token", "UPDATE accounts SET provider_state='TOKEN_INVALID' WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)", "UPDATE accounts SET provider_state='ACTIVE' WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)"},
+			{"locked_account", "UPDATE accounts SET provider_state='LOCKED' WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)", "UPDATE accounts SET provider_state='ACTIVE' WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)"},
+			{"disabled_account", "UPDATE accounts SET enabled=false WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)", "UPDATE accounts SET enabled=true WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)"},
+			{"deleting_account", "UPDATE accounts SET deletion_requested_at=now() WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)", "UPDATE accounts SET deletion_requested_at=NULL WHERE id=(SELECT account_id FROM panel_instances WHERE id=$1)"},
+			{"disabled_panel", "UPDATE panel_instances SET enabled=false WHERE id=$1", "UPDATE panel_instances SET enabled=true WHERE id=$1"},
+			{"expired_server", "UPDATE droplets SET expires_at=now()-interval '1 second' WHERE id=(SELECT droplet_id FROM panel_instances WHERE id=$1)", "UPDATE droplets SET expires_at=$2 WHERE id=(SELECT droplet_id FROM panel_instances WHERE id=$1)"},
+		}
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second',error_code='profile_verification_retry' WHERE panel_id=$1", panel)
+				sqlMust(t, db, tc.block, panel)
+				defer func() {
+					if tc.name == "expired_server" {
+						sqlMust(t, db, tc.restore, panel, expires)
+					} else {
+						sqlMust(t, db, tc.restore, panel)
+					}
+				}()
+				snapshot := func() string {
+					var raw string
+					if e := db.QueryRow("SELECT json_agg(to_jsonb(l) ORDER BY profile_id)::text FROM config_driver_listeners l WHERE panel_id=$1", panel).Scan(&raw); e != nil {
+						t.Fatal(e)
+					}
+					return raw
+				}
+				before := snapshot()
+				beforeProofs := len(verifiedTags)
+				for _, batch := range []bool{false, true} {
+					blockedService := svc
+					if batch {
+						blockedService.Verify = nil
+					}
+					for _, run := range []func(context.Context) error{blockedService.RunVerifyOne, blockedService.RunVerifyRecoveryOne} {
+						if e := run(ctx); e != nil {
+							t.Fatal("ineligible target consumed a verification attempt", e)
+						}
+						if snapshot() != before || len(verifiedTags) != beforeProofs {
+							t.Fatal("ineligible verification changed listener evidence or scheduling")
+						}
+					}
+				}
+			})
+		}
+		if t.Failed() {
+			return
+		}
+		sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour',error_code='' WHERE panel_id=$1", panel)
+		sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second',error_code='profile_verification_retry' WHERE profile_id=$1", p.ID)
+		beforeProofs := len(verifiedTags)
+		if e := svc.RunVerifyRecoveryOne(ctx); e != nil || len(verifiedTags) != beforeProofs+1 {
+			t.Fatal("restored target did not automatically resume verification", e)
+		}
+	})
 	busyService := svc
 	busyService.Verify = nil
 	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '1 hour' WHERE panel_id=$1", panel)
