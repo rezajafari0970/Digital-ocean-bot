@@ -137,17 +137,17 @@ python3 tools/cloudflare/operator-probe.py --target-file cloudflare-probe-ID.jso
 
 ### AWS
 
-برای هر منطقه یک حساب منطقه‌ای اضافه کنید. Access key ID، Secret access key، منطقه، Public subnet ID و فهرست Security group ID لازم‌اند. برای اعتبارنامهٔ موقت، Session token نیز وارد شود و پیش از انقضا با اعتبارنامهٔ همان حساب و منطقه جایگزین شود.
+برای هر منطقه یک حساب منطقه‌ای اضافه کنید. فقط Access key ID و Secret access key را وارد کنید؛ فهرست مناطق فعال و Subnet عمومی به‌صورت خودکار خوانده می‌شود. گزینهٔ انتخاب‌شده پیش از ذخیره نمایش داده می‌شود و ورود دستی شناسه‌های شبکه لازم نیست. برای اعتبارنامهٔ موقت، Session token نیز وارد شود و پیش از انقضا با اعتبارنامهٔ همان حساب و منطقه جایگزین شود.
 
-Subnet باید مسیر اینترنت عمومی داشته باشد؛ Security group و Network ACL باید SSH و پورت‌های سرویس انتخابی را مجاز کنند. برنامه VPC، subnet، gateway، security group یا Elastic IP ایجاد نمی‌کند. شناسهٔ حساب از STS تأیید می‌شود و تغییر اعتبارنامه به حساب/منطقهٔ دیگری رد می‌شود.
+کشف خودکار، مسیر پیش‌فرض فعال به Internet Gateway متصل و قواعد IPv4 شبکه را بررسی می‌کند. با تأیید گزینهٔ شبکهٔ خودکار در فرم، هنگام اولین ساخت سرور یک Security group اختصاصی ساخته می‌شود: ورودی IPv4 TCP/UDP پورت‌های ۱ تا ۶۵۵۳۵ برای SSH و پورت‌های متغیر سرویس، با قواعد خروجی پیش‌فرض AWS. گروه‌های موجود تغییر نمی‌کنند. می‌توانید در Advanced overrides گروه‌های موجود خود را معرفی کنید؛ قواعد دسترسی آن‌ها به عهدهٔ شما است. برنامه VPC، subnet، gateway، NAT یا Elastic IP ایجاد نمی‌کند. اگر شبکهٔ عمومی مناسب وجود نداشته باشد، منطقهٔ دیگری انتخاب کنید یا شبکه را در AWS آماده کنید. شناسهٔ حساب از STS تأیید می‌شود و تغییر اعتبارنامه به حساب/منطقهٔ دیگری رد می‌شود.
 
-مجوزهای EC2 موردنیاز: `DescribeInstances`، `DescribeImages`، `DescribeInstanceTypes`، `DescribeInstanceTypeOfferings`، `DescribeSubnets`، `DescribeSecurityGroups`، `RunInstances`، `CreateTags` برای برچسب‌های زمان ساخت، و `TerminateInstances`. سیاست IAM باید منابع وابستهٔ مجاز RunInstances را هم پوشش دهد؛ محدودکردن TerminateInstances به برچسب مالکیت برنامه توصیه می‌شود. STS GetCallerIdentity برای اثبات هویت فراخوانی می‌شود.
+مجوزهای EC2 موردنیاز: `DescribeInstances`، `DescribeImages`، `DescribeInstanceTypes`، `DescribeInstanceTypeOfferings`، `DescribeRegions`، `DescribeSubnets`، `DescribeRouteTables`، `DescribeNetworkAcls`، `DescribeInternetGateways`، `DescribeSecurityGroups`، `RunInstances`، `CreateTags` برای برچسب‌های زمان ساخت، و `TerminateInstances`. سیاست IAM باید منابع وابستهٔ مجاز RunInstances را هم پوشش دهد؛ محدودکردن TerminateInstances به برچسب مالکیت برنامه توصیه می‌شود. STS GetCallerIdentity برای اثبات هویت فراخوانی می‌شود. شبکهٔ خودکار همچنین به `CreateSecurityGroup`، `AuthorizeSecurityGroupIngress`، `DescribeNetworkInterfaces` و `DeleteSecurityGroup` نیاز دارد.
 
 دامنهٔ فعلی: EC2 On-Demand در پارتیشن تجاری AWS، Ubuntu رسمی Canonical روی x86_64، دیسک ریشهٔ gp3 با حذف همراه سرور، IPv4 عمومی و IMDSv2 اجباری. ARM، GovCloud/China، Spot، دیسک اضافه و Elastic IP در این درایور عرضه نمی‌شوند. سقف تعداد سرورها از سهمیهٔ vCPU حدس زده نمی‌شود و قیمت نامعلوم صریحاً نامعلوم می‌ماند. هزینهٔ واقعی نمونه، دیسک، IPv4 و ترافیک تابع حساب AWS است.
 
 ### OVH
 
-Endpoint یکی از `ovh-eu`، `ovh-ca` یا `ovh-us` است. Application key، Application secret، Consumer key و Public Cloud project ID لازم‌اند. دسترسی GET به پروژهٔ انتخاب‌شده و فرزندان آن، POST به `/cloud/project/PROJECT_ID/instance` و DELETE به `/cloud/project/PROJECT_ID/instance/*` بدهید. کلید باید متعلق به همان endpoint و پروژه باشد.
+فقط Application key، Application secret و Consumer key را وارد کنید. Application key به‌تنهایی احراز هویت نمی‌کند. Endpoint از میزبان‌های رسمی `ovh-eu`، `ovh-ca` یا `ovh-us` کشف می‌شود و پروژه‌های فعال خوانده می‌شوند. یک پروژه خودکار انتخاب می‌شود؛ برای چند پروژه فهرست انتخاب نمایش داده می‌شود. Endpoint و Project ID دستی در Advanced overrides در دسترس‌اند. دسترسی GET به `/cloud/project` برای کشف پروژه‌ها و GET به پروژهٔ انتخاب‌شده و فرزندان آن، POST به `/cloud/project/PROJECT_ID/instance` و DELETE به `/cloud/project/PROJECT_ID/instance/*` بدهید. کلید باید متعلق به همان endpoint و پروژه باشد.
 
 دامنهٔ فعلی: Public Cloud ساعتی، مناطق استاندارد 1-AZ، خانواده‌های محلی x86 یعنی b2/b3/c2/c3/r2/r3/d2/s1 و ایمیج عمومی رسمی Ubuntu. Dedicated Server، VPS، 3-AZ، Local Zones، ARM/GPU و دیسک‌های volume-backed عرضه نمی‌شوند؛ ساخت حالت‌های شبکهٔ پشتیبانی‌نشده پیش از درخواست هزینه‌زا رد می‌شود. برای جلوگیری از انتخاب اشتباه، ایمیج‌های مختص یک نوع flavor در کاتالوگ عمومی ارائه نمی‌شوند.
 
@@ -160,3 +160,9 @@ Endpoint یکی از `ovh-eu`، `ovh-ca` یا `ovh-us` است. Application key،
 نبود موقت یک سرور حذف قطعی محسوب نمی‌شود: شواهد نبود در PostgreSQL نگهداری می‌شوند و پس از حداقل سه مشاهده با فاصله، گذشت دو دقیقه و عمر محلی حداقل پنج دقیقه پذیرفته می‌شوند؛ وضعیت صریح terminated/deleted مدرک مستقل است. حساب‌های فاقد دادهٔ معتبر با ظرفیت صفر یا موجودی ساختگی نمایش داده نمی‌شوند.
 
 آزمون‌های قراردادی با پاسخ‌های شبیه‌سازی‌شده، امضای رسمی AWS، پایگاه دادهٔ جدا، رقابت هم‌زمان و مرورگر موبایل پوشش داده شده‌اند. ساخت/حذف زنده در AWS یا OVH بدون حساب عملیاتی آن ارائه‌دهنده تأیید نشده است. Billing و Additional IP inventory برای این دو درایور فعال نیستند. OpenAI فقط در توسعه و بازبینی استفاده شده و برای اجرای محصول لازم نیست.
+
+### راه‌اندازی خودکار و پاک‌سازی شبکه
+
+اعتبارسنجی و دریافت گزینه‌ها فقط خواندنی است و منبعی ایجاد نمی‌کند. مقادیر عمومی کشف‌شده با کلیدهای اصلی در مرورگر ترکیب و پس از ذخیره در فضای رمزگذاری‌شدهٔ همان حساب نگهداری می‌شوند. پاسخ API هرگز کلیدهای کاربر را برنمی‌گرداند. تغییر پروایدر یا ورودی‌ها پاسخ‌های قبلی را بی‌اعتبار می‌کند.
+
+قصد ساخت شبکهٔ اختصاصی AWS پیش از تماس API در PostgreSQL ثبت می‌شود. نام ثابت، شناسهٔ تصادفی مالکیت، قفل هم‌زمانی و مشاهدهٔ تازه از ساخت تکراری جلوگیری می‌کنند. نتیجهٔ نامعلوم شبکه مستقل از نتیجهٔ ساخت سرور بازیابی می‌شود. در حذف تأییدشدهٔ حساب، پس از حذف سرورها و نبود رابط شبکهٔ متصل، فقط گروه دارای اتصال محلی و مالکیت دقیق حذف می‌شود؛ پاک‌سازی حساب تا تأیید پایدار نبود شبکه نهایی نمی‌شود.

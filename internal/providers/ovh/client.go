@@ -35,10 +35,21 @@ type credential struct {
 func problem(class providers.ErrorClass, op, code string, status int) *providers.Error {
 	return cloudutil.Problem("OVH", class, op, code, status)
 }
-func credentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
+func signingCredentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
 	var c credential
-	if cloudutil.ReadCredential(ctx, s, &c) != nil || endpoints[c.Endpoint] == "" || !projectPattern.MatchString(c.Project) || c.ApplicationKey == "" || c.ApplicationSecret == "" || c.ConsumerKey == "" || strings.ContainsAny(c.ApplicationKey+c.ApplicationSecret+c.ConsumerKey, "\r\n\x00") {
+	if cloudutil.ReadCredential(ctx, s, &c) != nil || endpoints[c.Endpoint] == "" || c.ApplicationKey == "" || c.ApplicationSecret == "" || c.ConsumerKey == "" || strings.ContainsAny(c.ApplicationKey+c.ApplicationSecret+c.ConsumerKey, "\r\n\x00") {
 		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL_JSON", 0)
+	}
+	return c, nil
+}
+
+func credentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
+	c, e := signingCredentials(ctx, s)
+	if e != nil {
+		return c, e
+	}
+	if !projectPattern.MatchString(c.Project) {
+		return c, problem(providers.ErrorInvalidRequest, "credential", "PROJECT_SELECTION_REQUIRED", 0)
 	}
 	return c, nil
 }
@@ -86,7 +97,7 @@ func signature(secret, consumer, method, url, body, stamp string) string {
 	return "$1$" + hex.EncodeToString(sum[:])
 }
 func (c *client) do(ctx context.Context, method, path string, body, out any) error {
-	cred, e := credentials(ctx, c.credentials)
+	cred, e := signingCredentials(ctx, c.credentials)
 	if e != nil {
 		return e
 	}

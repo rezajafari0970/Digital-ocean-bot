@@ -215,6 +215,7 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		if req.ExpectedExternalID == "" {
 			return nil, errors.New("provider external identity is missing")
 		}
+		req.Resources = providers.SQLAccountResources{DB: c.DB, AccountID: cfg.ID, Provider: cfg.Provider}
 		req.Absence = providers.SQLAbsenceVerifier{DB: c.DB, AccountID: cfg.ID, Provider: cfg.Provider}
 	}
 	if cfg.Provider == "upcloud" {

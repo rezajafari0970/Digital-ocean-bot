@@ -107,9 +107,12 @@ const (
 )
 
 type CreateServerResult struct {
-	ServerID    string
-	OperationID string
-	Outcome     MutationOutcome
+	// ComputeNotDispatched is proof that no compute mutation was sent; auxiliary
+	// resources retain their independent journal and recovery obligations.
+	ComputeNotDispatched bool
+	ServerID             string
+	OperationID          string
+	Outcome              MutationOutcome
 }
 
 type SSHKey struct {

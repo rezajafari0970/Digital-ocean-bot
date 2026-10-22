@@ -1,0 +1,40 @@
+{
+  "task": "Automatic OVH and AWS onboarding",
+  "base_private": "c1a49cbafebe17e49a0119e1054cac430373a798",
+  "status": "implementation_verified_release_pending",
+  "stages": {
+    "discovery": "complete",
+    "implementation": "complete",
+    "browser": "passed_mobile_discovery_save_stale_response",
+    "mandatory_gate": "107 passed, zero skips before final two focused regressions",
+    "release": "pending",
+    "primary": "pending",
+    "secondary": "pending"
+  },
+  "scope": [
+    "OVH 3 keys, automatic endpoint and active project discovery",
+    "AWS key pair, enabled regions and verified public subnets",
+    "Explicit automatic SG consent, durable account resource journal and cleanup",
+    "Existing manual network credentials remain supported"
+  ],
+  "limits": [
+    "OVH application key alone is insufficient",
+    "AWS requires access key pair and optional temporary session token",
+    "Existing public subnet required; no VPC/NAT/EIP creation",
+    "No live AWS/OVH paid instance lifecycle exercised"
+  ],
+  "openai": {
+    "model": "gpt-5.6-sol",
+    "calls": 2,
+    "input_tokens": 17078,
+    "output_tokens": 7624,
+    "total_tokens": 24702,
+    "store": false,
+    "runtime_dependency": false
+  },
+  "review_disposition": [
+    "Subnet discovery changed to enumerate alternatives before selecting an override.",
+    "Broad SG consent is enforced in the visible Save flow and encoded explicitly as managed_network=true; discovery itself cannot mutate.",
+    "Region changes for existing AWS accounts already rejected by account external identity binding and credential replacement transaction."
+  ]
+}

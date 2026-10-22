@@ -16,9 +16,10 @@ import (
 )
 
 type previewAccount struct {
-	Provider string `json:"provider"`
-	Token    string `json:"token"`
-	ProxyID  string `json:"proxy_id"`
+	Selection map[string]string `json:"selection,omitempty"`
+	Provider  string            `json:"provider"`
+	Token     string            `json:"token"`
+	ProxyID   string            `json:"proxy_id"`
 }
 type previewCredential struct{ token []byte }
 
@@ -105,7 +106,18 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		closeFn = b.CloseIdleConnections
 	}
 	defer closeFn()
-	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, providers.OpenRequest{AccountID: "preview", HTTPClient: client, Credentials: previewCredential{[]byte(x.Token)}})
+	request := providers.OpenRequest{AccountID: "preview", HTTPClient: client, Credentials: previewCredential{[]byte(x.Token)}}
+	discovery, err := s.Container.Providers.Discover(r.Context(), x.Provider, request, x.Selection)
+	if err != nil {
+		fail(err, "discovery")
+		return
+	}
+	if !discovery.Complete {
+		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery})
+		return
+	}
+	request.Credentials = discovery.Credentials
+	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, request)
 	if err != nil {
 		writeJSON(w, 422, map[string]string{"error": "provider_validation_failed", "detail": err.Error()})
 		return
@@ -154,7 +166,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	meta, _ := s.Container.Providers.Metadata(driver.Name())
-	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "policy": meta, "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "limit_known": capacity.LimitKnown, "capacity_source": capacity.Source, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
+	writeJSON(w, 200, map[string]any{"provider": driver.Name(), "onboarding": discovery, "policy": meta, "account": account, "server_limit": capacity.ComputeLimit, "provider_servers": capacity.ComputeInUse, "limit_known": capacity.LimitKnown, "capacity_source": capacity.Source, "regions": regions, "plans": catalog.Plans, "sizes": catalog.Plans, "images": images, "proxies": proxies, "defaults": map[string]any{"interval_seconds": 300, "batch_size": 1, "max_concurrent": 1}})
 }
 func writeProviderPreviewError(w http.ResponseWriter, err error, exitIP string) {
 	switch providers.Class(err) {

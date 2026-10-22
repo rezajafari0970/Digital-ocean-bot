@@ -86,7 +86,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 			e.OnCreateError(ctx, err)
 		}
 		class := providers.Class(err)
-		if class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {
+		if (result.ComputeNotDispatched && result.Outcome == providers.OutcomeRejected) || class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {
 			reserved.State = jobs.OperationFailed
 		} else {
 			reserved.State = jobs.OperationUnknown

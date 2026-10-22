@@ -19,6 +19,7 @@ type Defaults struct {
 }
 
 type CredentialField struct {
+	Advanced bool   `json:"advanced,omitempty"`
 	Key      string `json:"key"`
 	Label    string `json:"label"`
 	Secret   bool   `json:"secret,omitempty"`

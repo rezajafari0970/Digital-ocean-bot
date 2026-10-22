@@ -80,6 +80,16 @@ REQUIRED['internal/app'] = REQUIRED.get('internal/app', ()) + ('TestAWSTerminati
 REQUIRED['internal/adminapi'] = REQUIRED.get('internal/adminapi', ()) + ('TestNewCloudInventoryOwnershipAndIncompleteSnapshot', 'TestNewCloudCapacityAndDashboardCount', 'TestNewCloudAbsenceEvidenceSurvivesRestart')
 
 
+# Automatic onboarding and account network resource recovery.
+REQUIRED['internal/providers'] += ('TestDiscoveryRegistryEnforcesReadOnlyAndSecretBoundary',)
+REQUIRED['internal/providers/aws'] += ('TestAWSAutomaticDiscoveryReadOnlyAndPinned', 'TestAWSPublicNetworkRejectsBlockedAndPartialReads', 'TestAWSManagedNetworkUnknownOutcomeAndOwnership', 'TestAWSManagedNetworkConcurrentIntent', 'TestAWSNetworkDeletionTargetStrict')
+REQUIRED['internal/providers/ovh'] += ('TestOVHAutomaticDiscoveryAndProjectChoice', 'TestOVHDiscoveryFailsClosed')
+REQUIRED['internal/droplets'] += ('TestNetworkPreparationFailureDoesNotStrandCompute',)
+REQUIRED['internal/adminapi'] += ('TestAccountResourceJournalConcurrencyAndRestart',)
+REQUIRED['internal/app'] += ('TestAWSNetworkCleanupFenceRequiresJournalAndSettledDeletion',)
+
+REQUIRED['internal/providers/aws'] += ('TestAWSDiscoverySelectionOverridesStaleSubnet','TestAWSNetworkReadFailureNeverDispatchesCompute')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

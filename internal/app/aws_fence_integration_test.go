@@ -69,3 +69,37 @@ func TestOVHDeletionRequiresExactLocalProjectBinding(t *testing.T) {
 		t.Fatal("stale local binding accepted", e, calls)
 	}
 }
+func TestAWSNetworkCleanupFenceRequiresJournalAndSettledDeletion(t *testing.T) {
+	db := installerBootstrapDB(t)
+	f := newBootstrapFixture(t, db)
+	id := f.d.AccountID
+	execBootstrap(t, db, "UPDATE accounts SET provider='aws' WHERE id=$1", id)
+	execBootstrap(t, db, "INSERT INTO provider_account_resources(account_id,provider,scope,name,resource_id) VALUES($1,'aws','eu-west-1:vpc-12345678','fixture-network','sg-12345678')", id)
+	calls := 0
+	tr := providerMutationFence{db: db, account: id, base: fenceTransport(func(*http.Request) (*http.Response, error) {
+		calls++
+		return &http.Response{StatusCode: 200, Body: http.NoBody}, nil
+	})}
+	request := func(region, group string) *http.Request {
+		r, _ := http.NewRequest("POST", "https://ec2."+region+".amazonaws.com/", strings.NewReader("Action=DeleteSecurityGroup&GroupId="+group+"&Version=2016-11-15"))
+		return r
+	}
+	if _, e := tr.RoundTrip(request("eu-west-1", "sg-12345678")); e == nil {
+		t.Fatal("active account network deleted")
+	}
+	execBootstrap(t, db, "UPDATE accounts SET enabled=false,deletion_requested_at=now() WHERE id=$1", id)
+	if _, e := tr.RoundTrip(request("eu-west-1", "sg-12345678")); e == nil {
+		t.Fatal("live server network deleted")
+	}
+	execBootstrap(t, db, "UPDATE droplets SET state='DELETED' WHERE account_id=$1", id)
+	for _, r := range []*http.Request{request("us-east-1", "sg-12345678"), request("eu-west-1", "sg-87654321")} {
+		if _, e := tr.RoundTrip(r); e == nil {
+			t.Fatal("foreign group deleted")
+		}
+	}
+	resp, e := tr.RoundTrip(request("eu-west-1", "sg-12345678"))
+	if e != nil || calls != 1 {
+		t.Fatal(e, calls)
+	}
+	resp.Body.Close()
+}

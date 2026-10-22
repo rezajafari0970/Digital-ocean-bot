@@ -178,7 +178,7 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
  OR EXISTS(SELECT 1 FROM resources WHERE account_id=$1 AND managed AND state<>'deleted')
  OR EXISTS(SELECT 1 FROM operations WHERE account_id=$1 AND state NOT IN ('succeeded','failed'))
  OR EXISTS(SELECT 1 FROM deployments WHERE account_id=$1 AND state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY')),
- EXISTS(SELECT 1 FROM droplets WHERE account_id=$1) OR EXISTS(SELECT 1 FROM resources WHERE account_id=$1) OR EXISTS(SELECT 1 FROM deployments WHERE account_id=$1) OR EXISTS(SELECT 1 FROM operations WHERE account_id=$1)`, id).Scan(&pending, &ever)
+ EXISTS(SELECT 1 FROM droplets WHERE account_id=$1) OR EXISTS(SELECT 1 FROM resources WHERE account_id=$1) OR EXISTS(SELECT 1 FROM deployments WHERE account_id=$1) OR EXISTS(SELECT 1 FROM operations WHERE account_id=$1) OR EXISTS(SELECT 1 FROM provider_account_resources WHERE account_id=$1)`, id).Scan(&pending, &ever)
 	if err != nil {
 		return err
 	}
@@ -227,6 +227,11 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
 		if err = c.cleanupDeletionKeys(ctx, id, rt); err != nil {
 			return err
 		}
+		if cleaner, ok := rt.Driver.(providers.AccountResourceCleaner); ok {
+			if err = cleaner.CleanupAccountResources(ctx); err != nil {
+				return err
+			}
+		}
 	}
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -246,7 +251,7 @@ func (c Container) finishAccountDeletion(ctx context.Context, id string) error {
  AND NOT EXISTS(SELECT 1 FROM droplets WHERE account_id=$1 AND state<>'DELETED')
  AND NOT EXISTS(SELECT 1 FROM resources WHERE account_id=$1 AND managed AND state<>'deleted')
  AND NOT EXISTS(SELECT 1 FROM operations WHERE account_id=$1 AND state NOT IN ('succeeded','failed'))
- AND NOT EXISTS(SELECT 1 FROM deployments WHERE account_id=$1 AND state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY')) AND NOT EXISTS(SELECT 1 FROM account_deletion_keys WHERE account_id=$1 AND state<>'SUCCEEDED')`, id).Scan(&safe)
+ AND NOT EXISTS(SELECT 1 FROM deployments WHERE account_id=$1 AND state NOT IN ('FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE','READY')) AND NOT EXISTS(SELECT 1 FROM account_deletion_keys WHERE account_id=$1 AND state<>'SUCCEEDED') AND NOT EXISTS(SELECT 1 FROM provider_account_resources WHERE account_id=$1 AND completed_at IS NULL)`, id).Scan(&safe)
 	if err != nil {
 		return err
 	}

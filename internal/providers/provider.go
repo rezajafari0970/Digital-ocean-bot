@@ -61,6 +61,7 @@ type CredentialSource interface {
 }
 
 type OpenRequest struct {
+	Resources          AccountResources
 	ExpectedExternalID string
 	Absence            AbsenceVerifier
 	AccountID          string

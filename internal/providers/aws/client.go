@@ -20,12 +20,13 @@ import (
 )
 
 type credential struct {
-	AccessKey    string   `json:"access_key_id"`
-	SecretKey    string   `json:"secret_access_key"`
-	SessionToken string   `json:"session_token,omitempty"`
-	Region       string   `json:"region"`
-	Subnet       string   `json:"subnet_id"`
-	Groups       []string `json:"security_group_ids"`
+	AccessKey      string   `json:"access_key_id"`
+	SecretKey      string   `json:"secret_access_key"`
+	SessionToken   string   `json:"session_token,omitempty"`
+	Region         string   `json:"region"`
+	Subnet         string   `json:"subnet_id"`
+	Groups         []string `json:"security_group_ids"`
+	ManagedNetwork bool     `json:"managed_network,omitempty"`
 }
 
 // Commercial partition only; opt-in/availability is verified against the API.
@@ -36,10 +37,20 @@ var accountPattern = regexp.MustCompile(`^[0-9]{12}$`)
 func problem(class providers.ErrorClass, op, code string, status int) *providers.Error {
 	return cloudutil.Problem("AWS", class, op, code, status)
 }
-func credentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
+func signingCredentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
 	var c credential
-	if cloudutil.ReadCredential(ctx, s, &c) != nil || !regionPattern.MatchString(c.Region) || c.AccessKey == "" || c.SecretKey == "" || strings.ContainsAny(c.AccessKey+c.SecretKey+c.SessionToken, "\r\n\x00") || !idPattern.MatchString(c.Subnet) || !strings.HasPrefix(c.Subnet, "subnet-") || len(c.Groups) == 0 || len(c.Groups) > 5 {
+	if cloudutil.ReadCredential(ctx, s, &c) != nil || !regionPattern.MatchString(c.Region) || c.AccessKey == "" || c.SecretKey == "" || strings.ContainsAny(c.AccessKey+c.SecretKey+c.SessionToken, "\r\n\x00") {
 		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL_JSON", 0)
+	}
+	return c, nil
+}
+func credentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
+	c, e := signingCredentials(ctx, s)
+	if e != nil {
+		return c, e
+	}
+	if !idPattern.MatchString(c.Subnet) || !strings.HasPrefix(c.Subnet, "subnet-") || len(c.Groups) > 5 || (len(c.Groups) == 0 && !c.ManagedNetwork) || (c.ManagedNetwork && len(c.Groups) > 0) {
+		return c, problem(providers.ErrorInvalidRequest, "credential", "NETWORK_SELECTION_REQUIRED", 0)
 	}
 	seen := map[string]bool{}
 	for _, g := range c.Groups {
@@ -85,7 +96,7 @@ func sign(req *http.Request, body string, c credential, service string, now time
 	req.Header.Set("Authorization", "AWS4-HMAC-SHA256 Credential="+c.AccessKey+"/"+scope+", SignedHeaders="+signed+", Signature="+signature)
 }
 func (c *client) call(ctx context.Context, service, action string, q url.Values, mutation bool, out any) error {
-	cred, e := credentials(ctx, c.credentials)
+	cred, e := signingCredentials(ctx, c.credentials)
 	if e != nil {
 		return e
 	}

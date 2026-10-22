@@ -38,11 +38,36 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('(()=>{const el=document.querySelector('+JSON.stringify(credentialSelector)+');el.value="fixture-credential";el.dispatchEvent(new Event("input"))})()');
    const serialized=JSON.parse(await evaluate('document.querySelector("#modalFields [name=token]").value'));
    assert.equal(serialized[provider==='aws'?'access_key_id':'application_key'],'fixture-credential');
-   if(provider==='aws'){assert.equal(serialized.region,'eu-west-1');assert.deepEqual(serialized.security_group_ids,[])}else assert.equal(serialized.endpoint,'ovh-eu');
+   assert.equal(serialized.region,undefined);assert.equal(serialized.subnet_id,undefined);assert.equal(serialized.endpoint,undefined);assert.equal(await evaluate('document.querySelector("#providerCredentialFields details")?.open'),false);
    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    const snap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,provider+'-account-mobile.png'),Buffer.from(snap.data,'base64'));
   }
+  for(const provider of ['aws','ovh']){
+   await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
+   await evaluate('(()=>{document.querySelector("#modalFields [name=name]").value="Automatic fixture";for(const el of document.querySelectorAll("[data-provider-credential]")){if(el.type==="password"){el.value=el.dataset.providerCredential.includes("secret")?"fixture-secret":"fixture-credential";el.dispatchEvent(new Event("input"))}}document.querySelector("#discoverAccount").click()})()');
+   if(provider==='ovh'){
+    await waitFor('document.querySelector("[data-discovery-key=project_id]")!==null');
+    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    await evaluate('document.querySelector("[data-discovery-key=project_id]").value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";document.querySelector("[data-discovery-key=project_id]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()');
+   }
+   await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden');
+   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+   if(provider==='aws'){
+    await evaluate('document.querySelector("#modalSubmit").click()');
+    assert.equal(await evaluate('document.querySelector("#modal").open'),true);
+    assert.match(await evaluate('document.querySelector("#modalError").textContent'),/automatic security group/);
+    await evaluate('document.querySelector("[name=approve_managed_network]").click()');
+   }
+   await evaluate('document.querySelector("#modalSubmit").click()');
+   await waitFor('!document.querySelector("#modal").open');
+   await evaluate('document.querySelector("#primaryAction").click()');
+   await waitFor('document.querySelector("#modal").open');
+  }
+  // An old preview must not repopulate credentials or Save after switching providers.
+  await evaluate('document.querySelector("#modalFields [name=provider]").value="aws";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click();document.querySelector("#modalFields [name=provider]").value="linode";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
+  await new Promise(r=>setTimeout(r,400));
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#providerDiscoveryChoices").textContent===""'),true);
   await evaluate('document.querySelector("#modalFields [name=provider]").value="linode";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
   assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").value'),'');
   assert.equal(await evaluate('document.querySelectorAll("[data-provider-credential]").length'),0);

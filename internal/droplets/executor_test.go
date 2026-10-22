@@ -152,3 +152,27 @@ func TestCreateResumesOnlyUndispatchedPlannedOperation(t *testing.T) {
 		})
 	}
 }
+
+type networkPreparationFailure struct {
+	computeStub
+	sent bool
+}
+
+func (d networkPreparationFailure) CreateServer(context.Context, providers.CreateServerRequest) (providers.CreateServerResult, error) {
+	return providers.CreateServerResult{Outcome: providers.OutcomeRejected, ComputeNotDispatched: !d.sent}, &providers.Error{Class: providers.ErrorTransport, Operation: "network_setup"}
+}
+func TestNetworkPreparationFailureDoesNotStrandCompute(t *testing.T) {
+	for _, sent := range []bool{false, true} {
+		store := &opStore{}
+		executor := Executor{Operations: store, Provider: &networkPreparationFailure{sent: sent}, Gate: gateStub{}}
+		p := Profile{Name: "p", Region: "eu-west-1", Size: "t3.micro", Image: "ubuntu"}
+		_, e := executor.Create(context.Background(), BuildCreateOperation("a", p), p)
+		want := jobs.OperationFailed
+		if sent {
+			want = jobs.OperationUnknown
+		}
+		if e == nil || store.saved.State != want {
+			t.Fatal(sent, store.saved.State, e)
+		}
+	}
+}

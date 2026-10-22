@@ -18,7 +18,11 @@ type Factory struct{}
 
 func (Factory) Name() string { return "aws" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "aws", DisplayName: "Amazon AWS EC2", CredentialLabel: "AWS credentials", CredentialFields: []providers.CredentialField{{Key: "access_key_id", Label: "Access key ID", Secret: true}, {Key: "secret_access_key", Label: "Secret access key", Secret: true}, {Key: "session_token", Label: "Session token (temporary credentials)", Secret: true, Optional: true}, {Key: "region", Label: "AWS region", Default: "eu-west-1"}, {Key: "subnet_id", Label: "Public subnet ID"}, {Key: "security_group_ids", Label: "Security group IDs (comma-separated)", List: true}}, CredentialHelp: `One regional account per AWS region. JSON: {"access_key_id":"…","secret_access_key":"…","session_token":"","region":"eu-west-1","subnet_id":"subnet-…","security_group_ids":["sg-…"]}. Use an existing public subnet and security groups allowing SSH and configured service ports. No network resources are created.`, Status: "ready", Defaults: cloudutil.Defaults()}
+	return providers.Metadata{Name: "aws", DisplayName: "Amazon AWS EC2", CredentialLabel: "AWS credentials", CredentialFields: []providers.CredentialField{
+		{Key: "access_key_id", Label: "Access key ID", Secret: true}, {Key: "secret_access_key", Label: "Secret access key", Secret: true}, {Key: "session_token", Label: "Session token (temporary credentials)", Secret: true, Optional: true},
+		{Key: "region", Label: "Region override", Optional: true, Advanced: true}, {Key: "subnet_id", Label: "Public subnet override", Optional: true, Advanced: true}, {Key: "security_group_ids", Label: "Existing security group IDs (comma-separated)", Optional: true, List: true, Advanced: true}},
+		CredentialHelp: "Enter the access key pair. Enabled regions and a public subnet are discovered automatically. Review the selected network before saving. Temporary credentials also require their session token. No server is created during validation.", Status: "ready", Defaults: cloudutil.Defaults()}
+
 }
 func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Driver, error) {
 	if strings.TrimSpace(r.AccountID) == "" || r.HTTPClient == nil || r.Credentials == nil {
@@ -28,10 +32,11 @@ func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Dri
 	if e != nil {
 		return nil, e
 	}
-	return &Driver{client: &client{http: cloudutil.HTTPClient(r.HTTPClient), credentials: r.Credentials, region: cred.Region, expected: r.ExpectedExternalID}, accountID: r.AccountID, absence: r.Absence}, nil
+	return &Driver{client: &client{http: cloudutil.HTTPClient(r.HTTPClient), credentials: r.Credentials, region: cred.Region, expected: r.ExpectedExternalID}, accountID: r.AccountID, absence: r.Absence, resources: r.Resources}, nil
 }
 
 type Driver struct {
+	resources providers.AccountResources
 	client    *client
 	accountID string
 	absence   providers.AbsenceVerifier
@@ -298,6 +303,16 @@ func (d *Driver) DeleteServer(ctx context.Context, id string) error {
 	return nil
 }
 func (d *Driver) validateNetwork(ctx context.Context, cred credential) error {
+	if cred.ManagedNetwork {
+		xs, e := d.publicSubnets(ctx, cred.Subnet)
+		if e != nil {
+			return e
+		}
+		if len(xs) != 1 {
+			return problem(providers.ErrorInvalidRequest, "network", "PUBLIC_SUBNET_UNAVAILABLE", 0)
+		}
+		return nil
+	}
 	var subnet struct {
 		Items []struct {
 			ID    string `xml:"subnetId"`
@@ -337,7 +352,7 @@ func (d *Driver) validateNetwork(ctx context.Context, cred credential) error {
 	return nil
 }
 func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerRequest) (providers.CreateServerResult, error) {
-	rejected := providers.CreateServerResult{Outcome: providers.OutcomeRejected}
+	rejected := providers.CreateServerResult{Outcome: providers.OutcomeRejected, ComputeNotDispatched: true}
 	invalid := func(code string) (providers.CreateServerResult, error) {
 		return rejected, problem(providers.ErrorInvalidRequest, "create_server", code, 0)
 	}
@@ -370,6 +385,13 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 	if len(ps) != 1 || ps[0].ID != r.PlanID {
 		return invalid("UNSUPPORTED_PLAN")
 	}
+	if cred.ManagedNetwork {
+		group, err := d.ensureNetwork(ctx, cred)
+		if err != nil {
+			return providers.CreateServerResult{Outcome: providers.OutcomeRejected, ComputeNotDispatched: true}, err
+		}
+		cred.Groups = []string{group}
+	}
 	q := url.Values{"ImageId": {r.ImageID}, "InstanceType": {r.PlanID}, "MinCount": {"1"}, "MaxCount": {"1"}, "ClientToken": {d.clientToken(r.Identity)}, "UserData": {base64.StdEncoding.EncodeToString([]byte(data))}, "MetadataOptions.HttpTokens": {"required"}, "MetadataOptions.HttpEndpoint": {"enabled"}, "NetworkInterface.1.DeviceIndex": {"0"}, "NetworkInterface.1.SubnetId": {cred.Subnet}, "NetworkInterface.1.AssociatePublicIpAddress": {"true"}, "NetworkInterface.1.DeleteOnTermination": {"true"}, "BlockDeviceMapping.1.DeviceName": {img.Root}, "BlockDeviceMapping.1.Ebs.DeleteOnTermination": {"true"}, "BlockDeviceMapping.1.Ebs.VolumeType": {"gp3"}, "BlockDeviceMapping.1.Ebs.VolumeSize": {strconv.Itoa(max(12, img.RootSize()))}}
 	for i, g := range cred.Groups {
 		q.Set(fmt.Sprintf("NetworkInterface.1.SecurityGroupId.%d", i+1), g)
@@ -388,6 +410,7 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 	var out struct {
 		Items []instance `xml:"instancesSet>item"`
 	}
+	rejected.ComputeNotDispatched = false
 	if e = d.client.call(ctx, "ec2", "RunInstances", q, true, &out); e != nil {
 		if cloudutil.Ambiguous(e) {
 			return providers.CreateServerResult{Outcome: providers.OutcomeAmbiguous}, problem(providers.ErrorAmbiguousOutcome, "create_server", "CREATE_UNCONFIRMED", 0)

@@ -105,7 +105,9 @@ func (d *Driver) plans(ctx context.Context, selected string) ([]providers.Plan, 
 	offers, e := pages(ctx, d.client, "DescribeInstanceTypeOfferings", "instanceTypeOfferingSet", url.Values{"LocationType": {"region"}, "Filter.1.Name": {"location"}, "Filter.1.Value.1": {d.client.region}}, func(x struct {
 		ID       string `xml:"instanceType"`
 		Location string `xml:"location"`
-	}) string { return x.ID })
+	}) string {
+		return x.ID
+	})
 	if e != nil {
 		return nil, e
 	}

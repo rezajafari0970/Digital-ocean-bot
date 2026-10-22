@@ -76,6 +76,12 @@ func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, err
 			return nil, errors.New("AWS termination requires local account resource binding")
 		}
 	}
+	if target := aws.NetworkDeletionTarget(req); target != "" {
+		if err = conn.QueryRowContext(req.Context(), `SELECT EXISTS(SELECT 1 FROM provider_account_resources m JOIN accounts a ON a.id=m.account_id WHERE a.id=$1 AND a.provider='aws' AND m.provider='aws' AND NOT a.enabled AND a.deletion_requested_at IS NOT NULL AND m.completed_at IS NULL AND split_part(m.scope,':',1)||':'||m.resource_id=$2) AND NOT EXISTS(SELECT 1 FROM droplets WHERE account_id=$1 AND state<>'DELETED') AND NOT EXISTS(SELECT 1 FROM operations WHERE account_id=$1 AND state NOT IN ('succeeded','failed'))`, f.account, target).Scan(&cleanupStop); err != nil || !cleanupStop {
+			release()
+			return nil, errors.New("AWS network deletion requires settled account deletion and journal binding")
+		}
+	}
 	if target, external := ovh.TerminationTarget(req); target != "" {
 		var bound bool
 		if err = conn.QueryRowContext(req.Context(), "SELECT EXISTS(SELECT 1 FROM droplets d JOIN accounts a ON a.id=d.account_id WHERE a.id=$1 AND a.provider='ovh' AND a.external_id=$3 AND d.provider_resource_id=$2 AND d.state<>'DELETED')", f.account, target, external).Scan(&bound); err != nil || !bound {
