@@ -29,11 +29,12 @@ type CredentialField struct {
 }
 
 type Metadata struct {
-	CredentialFields []CredentialField `json:"credential_fields,omitempty"`
-	CredentialHelp   string            `json:"credential_help,omitempty"`
-	Name             string            `json:"name"`
-	DisplayName      string            `json:"display_name"`
-	CredentialLabel  string            `json:"credential_label"`
-	Status           string            `json:"status"`
-	Defaults         Defaults          `json:"defaults"`
+	AutomaticAuthorization bool              `json:"automatic_authorization,omitempty"`
+	CredentialFields       []CredentialField `json:"credential_fields,omitempty"`
+	CredentialHelp         string            `json:"credential_help,omitempty"`
+	Name                   string            `json:"name"`
+	DisplayName            string            `json:"display_name"`
+	CredentialLabel        string            `json:"credential_label"`
+	Status                 string            `json:"status"`
+	Defaults               Defaults          `json:"defaults"`
 }

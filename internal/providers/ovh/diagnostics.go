@@ -30,7 +30,7 @@ func Diagnostic(err error) DiagnosticInfo {
 	if errors.As(err, &pe) {
 		switch pe.Code {
 		case "INVALID_KEY", "INVALID_CREDENTIAL", "NOT_CREDENTIAL", "NOT_GRANTED_CALL", "FORBIDDEN",
-			"IAM_PERMISSION_DENIED", "INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
+			"AUTHORIZATION_OUTCOME_UNKNOWN", "AUTHORIZATION_REFUSED_OR_EXPIRED", "AUTHORIZATION_RIGHTS_INCOMPLETE", "IAM_PERMISSION_DENIED", "INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
 			"INVALID_CREDENTIAL_JSON", "INVALID_PROJECT_ID", "PROJECT_SELECTION_REQUIRED",
 			"NO_ACTIVE_PUBLIC_CLOUD_PROJECT", "PROJECT_NOT_ACTIVE_OR_ACCESSIBLE",
 			"PROJECT_ID_MISMATCH", "PROJECT_SCOPE_CHANGED", "PROJECT_SCOPE_MISMATCH",
@@ -57,6 +57,12 @@ func Diagnostic(err error) DiagnosticInfo {
 		}
 	}
 	switch d.Code {
+	case "AUTHORIZATION_OUTCOME_UNKNOWN":
+		d.Guidance = "The credential request outcome is unknown. It will not be sent again automatically. Review OVH API keys before explicitly starting a new request."
+	case "AUTHORIZATION_REFUSED_OR_EXPIRED":
+		d.Guidance = "The authorization was refused or expired. Start a new connection and approve its permissions in OVH."
+	case "AUTHORIZATION_RIGHTS_INCOMPLETE":
+		d.Guidance = "OVH approved fewer rights than this connection requires. Start a new connection and approve the displayed project and instance permissions."
 	case "INVALID_KEY":
 		d.Guidance = "Application key is not recognized at this endpoint. Check the OVH region where the keys were created and copy all three keys from the same set."
 	case "INVALID_CREDENTIAL", "NOT_CREDENTIAL":
@@ -93,6 +99,12 @@ func safeRequest(method, path string) (string, string) {
 		return "unknown", ""
 	}
 	path = strings.SplitN(path, "?", 2)[0]
+	if method == "POST" && path == "/auth/credential" {
+		return "authorization_request", ""
+	}
+	if method == "GET" && path == "/auth/currentCredential" {
+		return "authorization_check", "GET /auth/currentCredential"
+	}
 	if method == "GET" && path == "/cloud/project" {
 		return "project_list", "GET /cloud/project"
 	}

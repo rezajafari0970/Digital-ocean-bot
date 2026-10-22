@@ -67,6 +67,9 @@ func NewStoreWithKeys(repo Repository, masterKey []byte, keyVersion int, retaine
 	if e := s.ValidateIPCleanupKeys(context.Background()); e != nil {
 		return nil, e
 	}
+	if e := s.validateAuthorizationKeys(context.Background()); e != nil {
+		return nil, e
+	}
 	return s, nil
 }
 

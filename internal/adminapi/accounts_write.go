@@ -1,6 +1,8 @@
 package adminapi
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,6 +12,7 @@ import (
 )
 
 type accountWrite struct {
+	AuthorizationID        string   `json:"authorization_id,omitempty"`
 	Provider               string   `json:"provider"`
 	Email                  string   `json:"email"`
 	ExternalID             string   `json:"external_id"`
@@ -58,6 +61,32 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if x.Provider == "" {
 		x.Provider = "digitalocean"
+	}
+	if x.AuthorizationID != "" {
+		if x.Token != "" || !authorizationIDPattern.MatchString(x.AuthorizationID) {
+			writeJSON(w, 400, map[string]string{"error": "invalid_authorization_request"})
+			return
+		}
+		unlock, ok := s.authorizationLock(w, r, x.AuthorizationID)
+		if !ok {
+			return
+		}
+		defer unlock()
+		previous, e := s.loadAuthorization(r.Context(), p.UserID, x.AuthorizationID)
+		if e == nil && previous.State == "USED" && previous.AccountID != "" && previous.Provider == x.Provider && previous.ExternalID == x.ExternalID && previous.ProxyID == x.ProxyID {
+			writeJSON(w, 200, map[string]string{"id": previous.AccountID})
+			return
+		}
+		flow, data, e := s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, true)
+		if e != nil || flow.ExternalID != x.ExternalID {
+			writeJSON(w, 409, map[string]string{"error": "authorization_preview_required"})
+			return
+		}
+		if (flow.ProxyID == "" && x.NetworkMode != "direct") || (flow.ProxyID != "" && x.NetworkMode != "proxy_required") {
+			writeJSON(w, 409, map[string]string{"error": "authorization_connection_changed"})
+			return
+		}
+		x.Token = data.Token
 	}
 	if s.Container.Providers == nil || !s.Container.Providers.Has(x.Provider) || x.Name == "" || x.Token == "" || x.ExternalID == "" || len(x.Regions) == 0 || len(x.Sizes) == 0 || len(x.Images) == 0 {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request"})
@@ -124,8 +153,24 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	if x.FallbackAnyRegion != nil {
 		fallbackAnyRegion = *x.FallbackAnyRegion
 	}
+
+	var writer interface {
+		QueryRowContext(context.Context, string, ...any) *sql.Row
+		ExecContext(context.Context, string, ...any) (sql.Result, error)
+	} = s.DB
+	var tx *sql.Tx
+	if x.AuthorizationID != "" {
+		var e error
+		tx, e = s.DB.BeginTx(r.Context(), nil)
+		if e != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		defer tx.Rollback()
+		writer = tx
+	}
 	var id string
-	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
+	err := writer.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
 VALUES(gen_random_uuid(),$1,$2,$3,NULLIF($4,''),$5,'provider-primary',$6,$7,$8,$9,$10,$11,$12,$13)
 ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO NOTHING
 RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes).Scan(&id)
@@ -140,16 +185,21 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		}
 		// Account-scoped secrets are removed by the secrets.account_id
 		// ON DELETE CASCADE foreign key when the account is deleted.
-		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 	}
 	defer cleanup()
-	if _, err = s.DB.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=$2::jsonb,preferred_sizes=$3::jsonb,preferred_images=$4::jsonb,preferred_image=$5,server_lifetime_min_seconds=$6,server_lifetime_max_seconds=$7,build_spacing_minutes=$8,build_spacing_max_minutes=$9,next_build_at=NULL WHERE id=$1`, id, mustJSON(x.Regions), mustJSON(x.Sizes), mustJSON(x.Images), x.Images[0], x.LifetimeMinSeconds, x.LifetimeMaxSeconds, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes); err != nil {
-		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+	if _, err = writer.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=$2::jsonb,preferred_sizes=$3::jsonb,preferred_images=$4::jsonb,preferred_image=$5,server_lifetime_min_seconds=$6,server_lifetime_max_seconds=$7,build_spacing_minutes=$8,build_spacing_max_minutes=$9,next_build_at=NULL WHERE id=$1`, id, mustJSON(x.Regions), mustJSON(x.Sizes), mustJSON(x.Images), x.Images[0], x.LifetimeMinSeconds, x.LifetimeMaxSeconds, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes); err != nil {
+		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
 		return
 	}
-	if err = s.Container.Secrets.Put(r.Context(), id, "provider-primary", x.Provider+"_credential", []byte(x.Token)); err != nil {
-		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+	if tx != nil {
+		err = s.Container.Secrets.PutInTransaction(r.Context(), tx, id, "provider-primary", x.Provider+"_credential", []byte(x.Token))
+	} else {
+		err = s.Container.Secrets.Put(r.Context(), id, "provider-primary", x.Provider+"_credential", []byte(x.Token))
+	}
+	if err != nil {
+		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "secret_store_failed", "detail": err.Error()})
 		return
 	}
@@ -160,22 +210,43 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 			return
 		}
 	}
-	if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT (account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
-		_, _ = s.DB.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
+	if _, err = writer.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT (account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
+		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "network_profile_failed", "detail": err.Error()})
 		return
 	}
 	if x.NetworkMode == "proxy_required" {
 		for i, pid := range x.ProxyIDs {
-			if _, err = s.DB.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,$3,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET priority=EXCLUDED.priority,enabled=true,updated_at=now()`, id, pid, i); err != nil {
+			if _, err = writer.ExecContext(r.Context(), `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2::uuid,$3,true) ON CONFLICT(account_id,proxy_id) DO UPDATE SET priority=EXCLUDED.priority,enabled=true,updated_at=now()`, id, pid, i); err != nil {
 				writeJSON(w, 500, map[string]string{"error": "proxy_pool_sync_failed", "detail": err.Error()})
 				return
 			}
 		}
 	}
-	if err := s.syncAccountAutomation(r.Context(), id); err != nil {
+	if tx != nil {
+		err = syncAccountAutomationTx(r.Context(), tx, id)
+	} else {
+		err = s.syncAccountAutomation(r.Context(), id)
+	}
+	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return
+	}
+
+	if tx != nil {
+		result, e := tx.ExecContext(r.Context(), `UPDATE provider_authorizations SET state='USED',account_id=$3,ciphertext=NULL,nonce=NULL,key_version=NULL,updated_at=now() WHERE id=$1 AND owner_id=$2 AND state='VERIFIED'`, x.AuthorizationID, p.UserID, id)
+		var n int64
+		if e == nil {
+			n, e = result.RowsAffected()
+		}
+		if e != nil || n != 1 {
+			writeJSON(w, 409, map[string]string{"error": "authorization_no_longer_active"})
+			return
+		}
+		if e = tx.Commit(); e != nil {
+			writeJSON(w, 503, map[string]string{"error": "account_commit_unconfirmed", "detail": "Check this connection request's status before retrying."})
+			return
+		}
 	}
 	created = false
 	log.Printf("account create committed id=%s provider=%s", id, x.Provider)

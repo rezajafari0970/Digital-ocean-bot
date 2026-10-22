@@ -73,6 +73,10 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
 	m.HandleFunc("POST /api/v1/accounts", s.require(s.createAccount, true))
 	m.HandleFunc("POST /api/v1/accounts/preview", s.require(s.accountPreview, true))
+	m.HandleFunc("POST /api/v1/providers/{provider}/authorizations", s.require(s.startProviderAuthorization, true))
+	m.HandleFunc("GET /api/v1/provider-authorizations/{id}", s.require(s.providerAuthorizationStatus, true))
+	m.HandleFunc("DELETE /api/v1/provider-authorizations/{id}", s.require(s.cancelProviderAuthorization, true))
+
 	m.HandleFunc("PUT /api/v1/accounts/{id}", s.require(s.updateAccount, true))
 	m.HandleFunc("DELETE /api/v1/accounts/{id}", s.require(s.deleteAccount, true))
 	m.HandleFunc("POST /api/v1/accounts/{id}/purge", s.require(s.purgeAccount, true))

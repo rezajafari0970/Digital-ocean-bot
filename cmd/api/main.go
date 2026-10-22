@@ -38,6 +38,7 @@ func run() error {
 	api.WebPath = settings.WebPath
 	api.ListenPort = settings.Port
 	go api.WarmOutputCache(ctx)
+	go api.RunProviderAuthorizationCleanup(ctx)
 	go func() {
 		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()

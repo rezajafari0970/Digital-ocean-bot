@@ -17,10 +17,10 @@ type Factory struct{}
 
 func (Factory) Name() string { return "ovh" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "ovh", DisplayName: "OVH Public Cloud", CredentialLabel: "OVH credentials", CredentialFields: []providers.CredentialField{
+	return providers.Metadata{AutomaticAuthorization: true, Name: "ovh", DisplayName: "OVH Public Cloud", CredentialLabel: "OVH credentials", CredentialFields: []providers.CredentialField{
 		{Key: "application_key", Label: "Application key", Secret: true}, {Key: "application_secret", Label: "Application secret", Secret: true}, {Key: "consumer_key", Label: "Consumer key", Secret: true},
 		{Key: "endpoint", Label: "Endpoint override: ovh-eu / ovh-ca / ovh-us", Optional: true, Advanced: true}, {Key: "project_id", Label: "Project ID override", Optional: true, Advanced: true}},
-		CredentialHelp: "Enter the three keys issued by OVH. Endpoint and Public Cloud projects are discovered automatically. Required rights: GET /cloud/project, GET /cloud/project/{project}, GET /cloud/project/{project}/*, POST /cloud/project/{project}/instance, DELETE /cloud/project/{project}/instance/*. Replace {project} with your project ID (or * for projects this key may manage). Keys must be created on the same OVH region. An Application key alone cannot authenticate.", Status: "ready", Defaults: cloudutil.Defaults()}
+		CredentialHelp: "Automatic connection needs Application key and Application secret, followed by your approval on OVH. Consumer key is requested automatically. Manual mode accepts all three keys. Endpoint and Public Cloud projects are discovered automatically. Required rights: GET /cloud/project, GET /cloud/project/{project}, GET /cloud/project/{project}/*, POST /cloud/project/{project}/instance, DELETE /cloud/project/{project}/instance/*. Replace {project} with your project ID (or * for projects this key may manage). Keys must be created on the same OVH region. An Application key alone cannot authenticate.", Status: "ready", Defaults: cloudutil.Defaults()}
 
 }
 func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Driver, error) {

@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
+	"sync/atomic"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
@@ -43,6 +44,44 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	})
 	mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
 	mux.HandleFunc("GET /api/v1/proxies", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
+
+	var starts atomic.Int32
+	var approved atomic.Bool
+	var activeID atomic.Value
+	mux.HandleFunc("POST /api/v1/providers/ovh/authorizations", func(w http.ResponseWriter, r *http.Request) {
+		var x struct {
+			ID, Token string
+			ProxyID   string `json:"proxy_id"`
+		}
+		if json.NewDecoder(r.Body).Decode(&x) != nil || !authorizationIDPattern.MatchString(x.ID) {
+			t.Error("invalid authorization start")
+			w.WriteHeader(400)
+			return
+		}
+		var creds map[string]string
+		json.Unmarshal([]byte(x.Token), &creds)
+		if creds["application_secret"] != "fixture-secret" || creds["consumer_key"] != "" {
+			t.Error("automatic flow requires only AK/AS")
+			w.WriteHeader(400)
+			return
+		}
+		starts.Add(1)
+		activeID.Store(x.ID)
+		// Simulate an issued credential whose response is lost. UI must observe, never repeat POST.
+		writeJSON(w, 503, map[string]string{"error": "simulated_lost_response"})
+	})
+	mux.HandleFunc("GET /api/v1/provider-authorizations/{id}", func(w http.ResponseWriter, r *http.Request) {
+		if activeID.Load() != r.PathValue("id") {
+			w.WriteHeader(404)
+			return
+		}
+		state := "PENDING"
+		if approved.Load() {
+			state = "READY"
+		}
+		writeJSON(w, 200, map[string]any{"id": r.PathValue("id"), "provider": "ovh", "proxy_id": "", "state": state, "validation_url": "https://eu.api.ovh.com/auth/?credentialToken=fixture-validation"})
+	})
+	mux.HandleFunc("POST /fixture/approve", func(w http.ResponseWriter, r *http.Request) { approved.Store(true); w.WriteHeader(204) })
 	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {
 		var x previewAccount
 		if json.NewDecoder(r.Body).Decode(&x) != nil {
@@ -55,6 +94,11 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		region := "eu-west-1"
 		providerID := "123456789012:" + region
 		if x.Provider == "ovh" {
+			if x.AuthorizationID == "" || x.Token != "" || activeID.Load() != x.AuthorizationID || !approved.Load() {
+				t.Error("authorization not used for preview")
+				w.WriteHeader(400)
+				return
+			}
 			region = "GRA11"
 			project := x.Selection["project_id"]
 			providerID = "ovh-us:" + project
@@ -79,7 +123,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			return
 		}
 		var credential map[string]any
-		if json.Unmarshal([]byte(x.Token), &credential) != nil {
+		if x.Provider != "ovh" && json.Unmarshal([]byte(x.Token), &credential) != nil {
 			t.Error("credential not JSON")
 			w.WriteHeader(400)
 			return
@@ -91,7 +135,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 				return
 			}
 		} else if x.Provider == "ovh" {
-			if credential["endpoint"] != "ovh-us" || credential["project_id"] != "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" || credential["application_secret"] != "fixture-secret" {
+			if x.AuthorizationID == "" || x.Token != "" || activeID.Load() != x.AuthorizationID || starts.Load() != 1 || x.ExternalID != "ovh-us:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" {
 				t.Error("OVH save lost pinned selection or secret")
 				w.WriteHeader(400)
 				return
@@ -117,6 +161,9 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	out, e := cmd.CombinedOutput()
 	if e != nil {
 		t.Fatalf("%v %s", e, out)
+	}
+	if starts.Load() != 1 {
+		t.Fatal("authorization dispatched multiple times", starts.Load())
 	}
 	t.Log(string(out))
 }

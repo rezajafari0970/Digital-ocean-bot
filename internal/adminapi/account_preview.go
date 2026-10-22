@@ -5,10 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
-	"io"
 	"net/http"
 	"sort"
 	"strings"
@@ -16,10 +13,11 @@ import (
 )
 
 type previewAccount struct {
-	Selection map[string]string `json:"selection,omitempty"`
-	Provider  string            `json:"provider"`
-	Token     string            `json:"token"`
-	ProxyID   string            `json:"proxy_id"`
+	AuthorizationID string            `json:"authorization_id,omitempty"`
+	Selection       map[string]string `json:"selection,omitempty"`
+	Provider        string            `json:"provider"`
+	Token           string            `json:"token"`
+	ProxyID         string            `json:"proxy_id"`
 }
 type previewCredential struct{ token []byte }
 
@@ -45,7 +43,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	fail := func(err error, stage string) {
 		writeStagedProviderPreviewError(w, err, previewDiagnosticContext{Provider: x.Provider, Stage: stage, RequestID: previewID, Started: started, ExitIP: previewExitIP})
 	}
-	if json.NewDecoder(r.Body).Decode(&x) != nil || strings.TrimSpace(x.Token) == "" {
+	if json.NewDecoder(r.Body).Decode(&x) != nil || (strings.TrimSpace(x.Token) == "" && x.AuthorizationID == "") {
 		writeJSON(w, 400, map[string]string{"error": "token_required"})
 		return
 	}
@@ -56,56 +54,45 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "provider_not_supported"})
 		return
 	}
-	var client *http.Client
-	var closeFn func()
-	if x.ProxyID != "" {
-		var px network.Proxy
-		var user, ref, adapter string
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(adapter,'generic') FROM proxies WHERE id=$1`, x.ProxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &adapter); err != nil || px.Status != network.StatusHealthy {
-			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
+	var flow authorizationRecord
+	var flowSecret authorizationSecret
+	if x.AuthorizationID != "" {
+		if x.Token != "" {
+			writeJSON(w, 400, map[string]string{"error": "authorization_token_conflict"})
 			return
 		}
-		pass := []byte(nil)
-		if ref != "" {
-			var err error
-			pass, err = s.Container.Secrets.GetProxy(r.Context(), px.ID, ref)
-			if err != nil {
-				writeJSON(w, 500, errorBody())
-				return
-			}
-			defer zeroBytes(pass)
-		}
-		cap := app.ProxyAdapterCapabilities(adapter)
-		if cap.StickySession {
-			user = app.ProxySessionUsername(adapter, user, "", "preview-vultr", false)
-		}
-		g, err := network.NewProxyGateway("preview", px, network.ProxyCredentials{Username: user, Password: string(pass)})
-		if err != nil {
-			writeJSON(w, 409, map[string]string{"error": "proxy_not_ready"})
+		unlock, ok := s.authorizationLock(w, r, x.AuthorizationID)
+		if !ok {
 			return
 		}
-		client = g.Client
-		closeFn = g.CloseIdleConnections
-		probeCtx, probeCancel := context.WithTimeout(r.Context(), 6*time.Second)
-		probeReq, _ := http.NewRequestWithContext(probeCtx, http.MethodGet, "https://api.ipify.org", nil)
-		if probeResp, probeErr := client.Do(probeReq); probeErr == nil && probeResp != nil {
-			b, _ := io.ReadAll(io.LimitReader(probeResp.Body, 128))
-			probeResp.Body.Close()
-			if probeResp.StatusCode >= 200 && probeResp.StatusCode < 300 {
-				previewExitIP = strings.TrimSpace(string(b))
-			}
+		defer unlock()
+		var e error
+		flow, flowSecret, e = s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, false)
+		if e != nil {
+			writeJSON(w, 409, map[string]string{"error": "authorization_not_ready"})
+			return
 		}
-		probeCancel()
-	} else {
-		b, err := network.NewIsolatedDirectClient("preview")
-		if err != nil {
+		x.Token = flowSecret.Token
+		var scope struct {
+			Endpoint string `json:"endpoint"`
+			Project  string `json:"project_id"`
+		}
+		if json.Unmarshal([]byte(x.Token), &scope) != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		client = b.Client
-		closeFn = b.CloseIdleConnections
+		if (x.Selection["endpoint"] != "" && x.Selection["endpoint"] != scope.Endpoint) || (scope.Project != "" && x.Selection["project_id"] != "" && x.Selection["project_id"] != scope.Project) {
+			writeJSON(w, 409, map[string]string{"error": "authorization_scope_changed"})
+			return
+		}
+	}
+	client, closeFn, observed, ok := s.previewClient(w, r, x.ProxyID, true)
+	if !ok {
+		return
 	}
 	defer closeFn()
+	previewExitIP = observed
+
 	request := providers.OpenRequest{AccountID: "preview", HTTPClient: client, Credentials: previewCredential{[]byte(x.Token)}}
 	discovery, err := s.Container.Providers.Discover(r.Context(), x.Provider, request, x.Selection)
 	if err != nil {
@@ -167,6 +154,19 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 			if rows.Scan(&id, &n, &st, &c) == nil {
 				proxies = append(proxies, map[string]any{"id": id, "name": n, "status": st, "country": c})
 			}
+		}
+	}
+	if x.AuthorizationID != "" {
+		raw, e := discovery.Credentials.Get(r.Context())
+		if e != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		defer zeroBytes(raw)
+		flowSecret.PreparedToken = string(raw)
+		if e = s.storeAuthorizationSecret(r.Context(), flow, "VERIFIED", flowSecret, account.ID); e != nil {
+			writeJSON(w, 409, map[string]string{"error": "authorization_no_longer_active"})
+			return
 		}
 	}
 	meta, _ := s.Container.Providers.Metadata(driver.Name())

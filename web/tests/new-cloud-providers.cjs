@@ -47,6 +47,28 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    await evaluate('(()=>{document.querySelector("#modalFields [name=name]").value="Automatic fixture";for(const el of document.querySelectorAll("[data-provider-credential]")){if(el.type==="password"){el.value=el.dataset.providerCredential.includes("secret")?"fixture-secret":"fixture-credential";el.dispatchEvent(new Event("input"))}}document.querySelector("#discoverAccount").click()})()');
    if(provider==='ovh'){
+    await waitFor('document.querySelector("[data-auth-link]")&&!document.querySelector("[data-auth-link]").hidden');
+    assert.equal(await evaluate('document.querySelector("[data-provider-credential=consumer_key]").closest("label").hidden'),true);
+    assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").value'),'');
+    assert.equal(await evaluate('document.querySelector("[data-auth-link]").rel'),'noopener noreferrer');
+    assert.equal(await evaluate('JSON.stringify(sessionStorage).includes("fixture-secret")'),false);
+    const saved=await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")');
+    assert.match(saved,/^[0-9a-f-]{36}$/);
+    // Close/reopen and then a full reload preserve the opaque request ID only.
+    await evaluate('document.querySelector("#modalCancel").click();document.querySelector("#primaryAction").click()');
+    await waitFor('document.querySelector("#modal").open');
+    await evaluate('document.querySelector("#modalFields [name=provider]").value="ovh";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
+    await waitFor('document.querySelector("[data-auth-link]")&&!document.querySelector("[data-auth-link]").hidden');
+    await call('Page.reload',{ignoreCache:true});
+    await waitFor('typeof activePageView!=="undefined"&&current==="accounts"&&activePageView&&!activePageView.loading&&!document.querySelector("#app").hidden');
+    await evaluate('document.querySelector("#primaryAction").click()');
+    await waitFor('document.querySelector("#modal").open');
+    await evaluate('document.querySelector("#modalFields [name=provider]").value="ovh";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"));document.querySelector("#modalFields [name=name]").value="Resumed fixture"');
+    await waitFor('document.querySelector("[data-auth-link]")&&!document.querySelector("[data-auth-link]").hidden');
+    assert.equal(await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")'),saved);
+    assert.equal(await evaluate('document.querySelector("[data-provider-credential=application_secret]").value'),'');
+    await evaluate('fetch("/fixture/approve",{method:"POST"})');
+    // Activation is polled automatically; no second Connect click.
     await waitFor('document.querySelector("[data-discovery-key=project_id]")!==null');
     assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
     await evaluate('document.querySelector("[data-discovery-key=project_id]").value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";document.querySelector("[data-discovery-key=project_id]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()');
@@ -72,7 +94,8 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").value'),'');
   assert.equal(await evaluate('document.querySelectorAll("[data-provider-credential]").length'),0);
   assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").type'),'password');
-  console.log('NEW_CLOUD_DRIVER_CREDENTIAL_FIELDS_ISOLATION_MOBILE PASS');
+  assert.equal(await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")'),null);
+  console.log('NEW_CLOUD_DRIVER_CREDENTIAL_FIELDS_ISOLATION_MOBILE_AND_OVH_AUTOMATIC_AUTHORIZATION PASS');
  }finally{
   if(ws)ws.close();chrome.kill('SIGTERM');fs.closeSync(log);
   await new Promise(r=>setTimeout(r,500));fs.rmSync(profile,{recursive:true,force:true});

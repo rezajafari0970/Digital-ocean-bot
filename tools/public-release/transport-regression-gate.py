@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/secrets": ("TestAuthorizationSecretsOwnerBindingAndRotation",),
     "internal/cloudflareschedule": ("TestCloudflareScheduleValidation",),
     "internal/cloudflare": ("TestCloudflareCertificateWireDatesAndPagination","TestCloudflareIncompleteCertificateListCannotProveAbsence","TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets","TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
     "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
@@ -28,6 +29,9 @@ REQUIRED = {
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestProviderAuthorizationJournalConcurrencyRestartAndOwnership",
+        "TestProviderAuthorizationUnknownExpiryAndRetainedKeys",
+        "TestProviderAuthorizationAtomicAccountHandoff",
         "TestCloudflareManualLockWaitDoesNotReplay",
         "TestCloudflareDNSQuotaAdmissionRecoveryAndCleanup",
         "TestCloudflarePartialQuotaBatchPreservesInterval",
@@ -95,6 +99,8 @@ REQUIRED['internal/adminapi'] += ('TestOVHPreviewActionableDiagnosticsAndSecretB
 
 REQUIRED['internal/providers/ovh'] += ('TestOVHNativeClassMessageErrorEnvelope','TestOVHNativeEnvelopeDiscoveryAndScopedPermissions','TestOVHResponseShapeNeverExposesUnknownData')
 REQUIRED['internal/adminapi'] += ('TestOVHPreviewNativeEnvelopeDiagnostics',)
+
+REQUIRED['internal/providers/ovh'] += ('TestOVHAuthorizationDelegationAndActualRights','TestOVHAuthorizationUnknownOutcomeAndURLBoundary','TestOVHAuthorizationEndpointFallbackAndExpiry')
 
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
