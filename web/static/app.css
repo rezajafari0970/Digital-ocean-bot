@@ -48,3 +48,5 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .cloudflarePager button{padding:10px}
 
 #accountCredentialHelp{display:block;overflow-wrap:anywhere;white-space:pre-wrap}
+
+#providerAuthorization{margin:14px 0;overflow-wrap:anywhere}#providerAuthorization .providerAuthAction{display:block;padding:12px 14px;margin:10px 0;border-radius:10px;background:#4f7cff;color:#fff;text-decoration:none;text-align:center;font-weight:600}#providerAuthorization [data-auth-reset]{width:100%;margin-bottom:10px}

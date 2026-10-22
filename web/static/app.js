@@ -206,8 +206,8 @@ const discovery=d.onboarding,choices=$('#providerDiscoveryChoices');
 if(discovery){
  if(discovery.resolved?.endpoint)discoverySelection.endpoint=discovery.resolved.endpoint;
  choices.innerHTML=(discovery.message?'<p class="muted" style="overflow-wrap:anywhere">'+esc(discovery.message)+'</p>':'')+(discovery.fields||[]).map(field=>'<label>'+esc(field.label)+'<select data-discovery-key="'+esc(field.key)+'">'+(!field.value?'<option value="">Select…</option>':'')+field.options.map(o=>'<option value="'+esc(o.value)+'" '+(field.value===o.value?'selected':'')+'>'+esc(o.label)+'</option>').join('')+'</select></label>').join('')+(discovery.resolved?.managed_network?'<label class="checkRow"><input type="checkbox" name="approve_managed_network">Use the dedicated automatic security group with the access rules shown above</label>':'');
- choices.querySelectorAll('[data-discovery-key]').forEach(el=>el.onchange=()=>{discoverySelection[el.dataset.discoveryKey]=el.value;if(el.dataset.discoveryKey==='region')delete discoverySelection.subnet_id;resetPreview(true)});
- if(!discovery.complete){$('#modalError').textContent='Select an available option and validate again.';return}
+ choices.querySelectorAll('[data-discovery-key]').forEach(el=>el.onchange=()=>{discoverySelection[el.dataset.discoveryKey]=el.value;if(el.dataset.discoveryKey==='region')delete discoverySelection.subnet_id;resetPreview(true);if(authorization&&el.value)$('#discoverAccount').click()});
+ if(!discovery.complete){authorization?.selectionRequired();$('#modalError').textContent=authorization?'':'Select an available option and validate again.';return}
 }
 cache.accountPreview=d;const pd=d.policy?.defaults||{};const regs=d.regions.filter(x=>x.Available);
 const defaultRegion=
@@ -235,7 +235,7 @@ if(regionEl){
   syncPlan();
 }
 
-$('#modalSubmit').hidden=false}catch(e){$('#modalError').textContent=e.message}finally{b.classList.remove('busy')}};$('#modalForm').onsubmit=null;$('#modalSubmit').onclick=async()=>{if(!cache.accountPreview)return;const f=new FormData($('#modalForm')),d=cache.accountPreview;const proxyIDs=[f.get('proxy_id'),f.get('proxy_id2'),f.get('proxy_id3')].filter((v,i,a)=>v&&a.indexOf(v)===i),proxy=proxyIDs[0]||'';if(
+$('#modalSubmit').hidden=false;authorization?.previewComplete()}catch(e){authorization?.previewFailed();$('#modalError').textContent=e.message}finally{b.classList.remove('busy')}};$('#modalForm').onsubmit=null;$('#modalSubmit').onclick=async()=>{if(!cache.accountPreview)return;const f=new FormData($('#modalForm')),d=cache.accountPreview;const proxyIDs=[f.get('proxy_id'),f.get('proxy_id2'),f.get('proxy_id3')].filter((v,i,a)=>v&&a.indexOf(v)===i),proxy=proxyIDs[0]||'';if(
   !f.get('region') ||
   !f.get('size') ||
   !f.get('image')

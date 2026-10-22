@@ -20,6 +20,8 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.enable');await call('Runtime.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'if(location.origin==='+JSON.stringify(base)+'){localStorage.setItem("token",'+JSON.stringify(token)+')}'});
+  await call('Page.addScriptToEvaluateOnNewDocument',{source:'if(location.origin==='+JSON.stringify(base)+'){window.__authWindows=[];window.__authOpenCalls=0;window.open=()=>{window.__authOpenCalls++;if('+JSON.stringify(process.env.DOB_TEST_AUTH_POPUP_BLOCKED==='1')+')return null;const w={opener:window,closed:false,document:document.implementation.createHTMLDocument(""),location:{href:"about:blank",replace(url){this.href=url}},close(){this.closed=true}};window.__authWindows.push(w);return w}}'});
+
   const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error('page evaluation failed: '+(r.exceptionDetails.exception?.description||r.exceptionDetails.text));return r.result.value};
 
   await call('Page.navigate',{url:base+'/admin/#accounts'});
@@ -53,6 +55,17 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     assert.equal(await evaluate('document.querySelector("[data-auth-link]").rel'),'noopener noreferrer');
     assert.equal(await evaluate('document.querySelector("[data-auth-link]").href'),'https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation');
     assert.equal(await evaluate('JSON.stringify(sessionStorage).includes("fixture-secret")'),false);
+    assert.equal(await evaluate('document.querySelector("#providerCredentialFields").hidden'),true);
+    assert.equal(await evaluate('document.querySelector("#discoverAccount").hidden'),true);
+    assert.equal(await evaluate('window.__authOpenCalls'),1);
+    if(process.env.DOB_TEST_AUTH_POPUP_BLOCKED!=='1'){
+     assert.equal(await evaluate('window.__authWindows[0].opener===null'),true);
+     assert.equal(await evaluate('window.__authWindows[0].document.querySelector("meta[name=referrer]").content'),'no-referrer');
+     assert.equal(await evaluate('window.__authWindows[0].location.href'),'https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation');
+    }
+    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+    const authSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'ovh-approval-mobile.png'),Buffer.from(authSnap.data,'base64'));
+
     const saved=await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")');
     assert.match(saved,/^[0-9a-f-]{36}$/);
     // Close/reopen and then a full reload preserve the opaque request ID only.
@@ -68,13 +81,16 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     await waitFor('document.querySelector("[data-auth-link]")&&!document.querySelector("[data-auth-link]").hidden');
     assert.equal(await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")'),saved);
     assert.equal(await evaluate('document.querySelector("[data-provider-credential=application_secret]").value'),'');
-    await evaluate('fetch("/fixture/approve",{method:"POST"})');
+    assert.equal(await evaluate('window.__authOpenCalls'),0);
+    await evaluate('fetch("/fixture/approve",{method:"POST"}).then(()=>window.dispatchEvent(new Event("focus")))');
     // Activation is polled automatically; no second Connect click.
     await waitFor('document.querySelector("[data-discovery-key=project_id]")!==null');
     assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
-    await evaluate('document.querySelector("[data-discovery-key=project_id]").value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";document.querySelector("[data-discovery-key=project_id]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()');
+    await evaluate('document.querySelector("[data-discovery-key=project_id]").value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";document.querySelector("[data-discovery-key=project_id]").dispatchEvent(new Event("change"))');
    }
    await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden');
+   if(provider==='ovh')assert.match(await evaluate('document.querySelector("[data-auth-status]").textContent'),/Connected to OVH/);
+
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    if(provider==='aws'){
     await evaluate('document.querySelector("#modalSubmit").click()');
@@ -96,7 +112,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelectorAll("[data-provider-credential]").length'),0);
   assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").type'),'password');
   assert.equal(await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")'),null);
-  console.log('NEW_CLOUD_DRIVER_CREDENTIAL_FIELDS_ISOLATION_MOBILE_AND_OVH_AUTOMATIC_AUTHORIZATION PASS');
+  console.log('NEW_CLOUD_DRIVER_CREDENTIAL_FIELDS_ISOLATION_MOBILE_AND_OVH_AUTOMATIC_AUTHORIZATION PASS popup=' + (process.env.DOB_TEST_AUTH_POPUP_BLOCKED==='1'?'blocked':'available') + '');
  }finally{
   if(ws)ws.close();chrome.kill('SIGTERM');fs.closeSync(log);
   await new Promise(r=>setTimeout(r,500));fs.rmSync(profile,{recursive:true,force:true});
