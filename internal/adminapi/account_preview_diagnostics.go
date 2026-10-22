@@ -26,6 +26,10 @@ func previewCode(s string) string {
 }
 
 func writeStagedProviderPreviewError(w http.ResponseWriter, err error, c previewDiagnosticContext) {
+	if c.Provider == "ovh" {
+		writeOVHPreviewError(w, err, c)
+		return
+	}
 	if c.Provider != "upcloud" {
 		writeProviderPreviewError(w, err, c.ExitIP)
 		return

@@ -25,7 +25,7 @@ func TestOVHAutomaticDiscoveryAndProjectChoice(t *testing.T) {
 			}
 			if r.URL.Host != "api.us.ovhcloud.com" {
 				x := response(`{"errorCode":"INVALID_KEY"}`)
-				x.StatusCode = 401
+				x.StatusCode = 403
 				return x, nil
 			}
 			if r.Header.Get("X-Ovh-Signature") == "" {

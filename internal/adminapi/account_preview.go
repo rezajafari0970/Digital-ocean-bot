@@ -119,6 +119,10 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	request.Credentials = discovery.Credentials
 	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, request)
 	if err != nil {
+		if x.Provider == "ovh" {
+			fail(err, "credential")
+			return
+		}
 		writeJSON(w, 422, map[string]string{"error": "provider_validation_failed", "detail": err.Error()})
 		return
 	}

@@ -1,0 +1,49 @@
+{
+  "task": "OVH credential permission diagnostics",
+  "base_private": "f31588f3de6edcfce38ad3479c01bc9f7d38d96b",
+  "status": "testing",
+  "findings": [
+    "OVH HTTP 403 INVALID_KEY incorrectly classified as permission denied",
+    "Discovery overwrote a meaningful endpoint error with later region errors",
+    "OVH preview lacked safe stage/operation diagnostics"
+  ],
+  "stages": {
+    "implementation": "complete",
+    "tests": "focused and race passed; 114-test publication gate pending",
+    "review": "complete",
+    "release": "ready for candidate validation",
+    "primary": "pending",
+    "secondary": "pending"
+  },
+  "limitations": [
+    "No OVH account saved; screenshot cannot establish native provider error",
+    "Live success requires user to validate credentials again after update"
+  ],
+  "verified_at": "2026-10-22T11:18:00.517542+00:00",
+  "openai": {
+    "model": "gpt-5.6-sol",
+    "calls": 1,
+    "usage": {
+      "input_tokens": 5449,
+      "input_tokens_details": {
+        "cache_write_tokens": 5446,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1702,
+      "output_tokens_details": {
+        "reasoning_tokens": 1552
+      },
+      "total_tokens": 7151
+    },
+    "store": false
+  },
+  "review_disposition": [
+    "Applied native error-code mapping only to HTTP403, matching official SDK; HTTP401 remains authentication failure. Updated old endpoint-discovery fixture to real HTTP403."
+  ],
+  "disk_reclamation": {
+    "receipt": "/root/backups/dob-ovh-permission-20261022/rollback-archive.json",
+    "directories": 46,
+    "verified_archive": true,
+    "reclaimed_bytes": 1513476096
+  }
+}

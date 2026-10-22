@@ -69,8 +69,10 @@ func (Factory) Discover(ctx context.Context, r providers.OpenRequest, selection 
 		if len(candidates) == 1 {
 			return providers.Discovery{}, last
 		}
-		// Only definitive credential rejection permits trying the next official endpoint.
-		if !providers.IsClass(last, providers.ErrorAuthentication) && !providers.IsClass(last, providers.ErrorPermissionDenied) {
+		// A missing access rule belongs to this endpoint. Never overwrite it
+		// with INVALID_KEY from another region. Only INVALID_KEY establishes
+		// that the application is not recognized at the current endpoint.
+		if Diagnostic(last).Code != "INVALID_KEY" {
 			return providers.Discovery{}, last
 		}
 	}

@@ -90,6 +90,9 @@ REQUIRED['internal/app'] += ('TestAWSNetworkCleanupFenceRequiresJournalAndSettle
 
 REQUIRED['internal/providers/aws'] += ('TestAWSDiscoverySelectionOverridesStaleSubnet','TestAWSNetworkReadFailureNeverDispatchesCompute')
 
+REQUIRED['internal/providers/ovh'] += ('TestOVHErrorCodesPreserveAuthenticationAndPermission','TestOVHDiscoveryDoesNotMaskPermissionWithAnotherEndpoint','TestOVHDiagnosticRedactsRequestAndProviderData','TestOVHMalformedErrorCannotTriggerEndpointFallback')
+REQUIRED['internal/adminapi'] += ('TestOVHPreviewActionableDiagnosticsAndSecretBoundary',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

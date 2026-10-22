@@ -166,3 +166,23 @@ python3 tools/cloudflare/operator-probe.py --target-file cloudflare-probe-ID.jso
 اعتبارسنجی و دریافت گزینه‌ها فقط خواندنی است و منبعی ایجاد نمی‌کند. مقادیر عمومی کشف‌شده با کلیدهای اصلی در مرورگر ترکیب و پس از ذخیره در فضای رمزگذاری‌شدهٔ همان حساب نگهداری می‌شوند. پاسخ API هرگز کلیدهای کاربر را برنمی‌گرداند. تغییر پروایدر یا ورودی‌ها پاسخ‌های قبلی را بی‌اعتبار می‌کند.
 
 قصد ساخت شبکهٔ اختصاصی AWS پیش از تماس API در PostgreSQL ثبت می‌شود. نام ثابت، شناسهٔ تصادفی مالکیت، قفل هم‌زمانی و مشاهدهٔ تازه از ساخت تکراری جلوگیری می‌کنند. نتیجهٔ نامعلوم شبکه مستقل از نتیجهٔ ساخت سرور بازیابی می‌شود. در حذف تأییدشدهٔ حساب، پس از حذف سرورها و نبود رابط شبکهٔ متصل، فقط گروه دارای اتصال محلی و مالکیت دقیق حذف می‌شود؛ پاک‌سازی حساب تا تأیید پایدار نبود شبکه نهایی نمی‌شود.
+
+### OVH credential validation
+
+OVH uses three matching keys from the same EU, Canada or US API region. The
+validator detects regions only after OVH explicitly reports `INVALID_KEY`. It
+preserves `NOT_GRANTED_CALL`, invalid Consumer key, signature and connection
+failures instead of replacing them with another region's error.
+
+For automatic project discovery grant `GET /cloud/project`. For the selected
+project grant `GET /cloud/project/{project}` and `GET /cloud/project/{project}/*`.
+Server lifecycle additionally requires `POST /cloud/project/{project}/instance`
+and `DELETE /cloud/project/{project}/instance/*`. Replace `{project}` with the
+project ID, or `*` for projects that the key is allowed to manage. No global
+write permission is required. A deliberately project-scoped key can omit the
+project-list right by setting Endpoint and Project ID under Advanced overrides.
+
+Validation failures show the stage, endpoint, safe route template, reason and
+reference ID. Logs contain only fixed diagnostic values, never credentials or
+raw provider responses. `PERMISSION_DENIED` without a recognized API reason
+does not establish that the credentials themselves are invalid.

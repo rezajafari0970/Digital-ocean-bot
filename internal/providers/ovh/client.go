@@ -96,7 +96,12 @@ func signature(secret, consumer, method, url, body, stamp string) string {
 	sum := sha1.Sum([]byte(strings.Join([]string{secret, consumer, method, url, body, stamp}, "+")))
 	return "$1$" + hex.EncodeToString(sum[:])
 }
-func (c *client) do(ctx context.Context, method, path string, body, out any) error {
+func (c *client) do(ctx context.Context, method, path string, body, out any) (err error) {
+	defer func() {
+		if err != nil {
+			err = &requestError{cause: err, endpoint: c.endpoint, method: method, path: path}
+		}
+	}()
 	cred, e := signingCredentials(ctx, c.credentials)
 	if e != nil {
 		return e
@@ -169,8 +174,27 @@ func classify(op string, status int, raw []byte) *providers.Error {
 		Code    string `json:"errorCode"`
 		Message string `json:"message"`
 	}
-	_ = json.Unmarshal(raw, &x)
-	if status == 400 || status == 409 {
+	decoded := json.Unmarshal(raw, &x) == nil
+	// OVH's official SDK distinguishes these 403 responses. In particular,
+	// INVALID_KEY is an endpoint/key rejection, not a missing access rule.
+	// Only fixed codes are retained; response messages may contain secrets.
+	if status == 403 && decoded {
+		switch x.Code {
+		case "INVALID_KEY", "INVALID_CREDENTIAL", "NOT_CREDENTIAL":
+			class, label = providers.ErrorAuthentication, x.Code
+		case "NOT_GRANTED_CALL", "FORBIDDEN":
+			class, label = providers.ErrorPermissionDenied, x.Code
+		}
+	}
+	if status == 400 && decoded {
+		switch x.Message {
+		case "Invalid signature":
+			class, label = providers.ErrorAuthentication, "INVALID_SIGNATURE"
+		case "Invalid timestamp":
+			class, label = providers.ErrorAuthentication, "INVALID_TIMESTAMP"
+		}
+	}
+	if decoded && (status == 400 || status == 409) {
 		m := strings.ToLower(x.Message)
 		if strings.Contains(m, "quota") {
 			class, label = providers.ErrorCapacity, "COMPUTE_QUOTA_EXCEEDED"
