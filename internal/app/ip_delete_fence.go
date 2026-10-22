@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"database/sql"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/aws"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"net/http"
 	"strings"
 
@@ -14,6 +16,12 @@ import (
 func nativeIPDeleteTarget(r *http.Request) string {
 	if r.URL.Scheme != "https" {
 		return ""
+	}
+	if target := aws.TerminationTarget(r); target != "" {
+		return target
+	}
+	if id, _ := ovh.TerminationTarget(r); id != "" {
+		return id
 	}
 	var prefix, suffix string
 	switch r.URL.Host {

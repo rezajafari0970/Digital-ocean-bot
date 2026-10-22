@@ -3,6 +3,7 @@ package workflow
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"time"
 )
@@ -34,26 +35,27 @@ func (r ProviderKeyRef) MarshalJSON() ([]byte, error) { return json.Marshal(stri
 func (r ProviderKeyRef) String() string               { return string(r) }
 
 type ProfileSnapshot struct {
-	UpCloudTrialCompatible bool                       `json:"upcloud_trial_compatible,omitempty"`
-	Name                   string                     `json:"name"`
-	Region                 string                     `json:"region"`
-	Regions                []string                   `json:"regions,omitempty"`
-	Size                   string                     `json:"size"`
-	Image                  string                     `json:"image"`
-	Lifetime               time.Duration              `json:"lifetime"`
-	SSHUser                string                     `json:"ssh_user"`
-	SSHKeySecretRef        string                     `json:"ssh_key_secret_ref"`
-	SSHProviderKeyID       ProviderKeyRef             `json:"ssh_provider_key_id,omitempty"`
-	SSHAuthorizedKey       string                     `json:"ssh_authorized_key,omitempty"`
-	SSHKeyFingerprint      string                     `json:"ssh_key_fingerprint,omitempty"`
-	InstallerURL           string                     `json:"installer_url"`
-	InstallerRef           *provisioning.InstallerRef `json:"installer_ref,omitempty"`
-	InstallScriptRefs      []provisioning.ScriptRef   `json:"install_script_refs,omitempty"`
-	InstallSteps           []provisioning.ScriptStep  `json:"install_steps,omitempty"`
-	DatabaseTemplateID     string                     `json:"database_template_id"`
-	InboundID              int                        `json:"inbound_id"`
-	ClientCount            int                        `json:"client_count"`
-	EmailPrefix            string                     `json:"email_prefix"`
+	RegionalLaunches       map[string]providers.RegionalLaunch `json:"regional_launches,omitempty"`
+	UpCloudTrialCompatible bool                                `json:"upcloud_trial_compatible,omitempty"`
+	Name                   string                              `json:"name"`
+	Region                 string                              `json:"region"`
+	Regions                []string                            `json:"regions,omitempty"`
+	Size                   string                              `json:"size"`
+	Image                  string                              `json:"image"`
+	Lifetime               time.Duration                       `json:"lifetime"`
+	SSHUser                string                              `json:"ssh_user"`
+	SSHKeySecretRef        string                              `json:"ssh_key_secret_ref"`
+	SSHProviderKeyID       ProviderKeyRef                      `json:"ssh_provider_key_id,omitempty"`
+	SSHAuthorizedKey       string                              `json:"ssh_authorized_key,omitempty"`
+	SSHKeyFingerprint      string                              `json:"ssh_key_fingerprint,omitempty"`
+	InstallerURL           string                              `json:"installer_url"`
+	InstallerRef           *provisioning.InstallerRef          `json:"installer_ref,omitempty"`
+	InstallScriptRefs      []provisioning.ScriptRef            `json:"install_script_refs,omitempty"`
+	InstallSteps           []provisioning.ScriptStep           `json:"install_steps,omitempty"`
+	DatabaseTemplateID     string                              `json:"database_template_id"`
+	InboundID              int                                 `json:"inbound_id"`
+	ClientCount            int                                 `json:"client_count"`
+	EmailPrefix            string                              `json:"email_prefix"`
 }
 
 type PersistentProfile struct {

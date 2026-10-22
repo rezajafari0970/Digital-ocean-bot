@@ -79,6 +79,12 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if runtime.Config.Provider == "aws" || runtime.Config.Provider == "ovh" {
+		if err := s.Container.SyncCloudResources(r.Context(), id, runtime.Config.Provider, obs.Inventory); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "inventory_store_failed"})
+			return
+		}
+	}
 	if runtime.Config.Provider == "linode" {
 		if err := s.Container.SyncLinodeResources(r.Context(), id, obs.Inventory); err != nil {
 			writeJSON(w, 500, map[string]string{"error": "inventory_store_failed"})

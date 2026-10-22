@@ -1,0 +1,69 @@
+{
+  "task": "Independent AWS EC2 and OVH Public Cloud provider drivers",
+  "status": "implemented_pre_release",
+  "base": "1b0c0d05118c6fe2a7bed2222349044d10994a07",
+  "openai_calls": [
+    {
+      "stage": "design",
+      "id": "resp_0d2a510507c94243016ad9c541dde887d18a8d3e498ed20b2a",
+      "model": "gpt-5.6-sol",
+      "status": "completed",
+      "usage": {
+        "input_tokens": 531,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3559,
+        "output_tokens_details": {
+          "reasoning_tokens": 2070
+        },
+        "total_tokens": 4090
+      }
+    },
+    {
+      "stage": "code",
+      "id": "resp_02fcd14d84bb7d82016ad9c9bb39f887d1aa4d897f9d1a5e10",
+      "model": "gpt-5.6-sol",
+      "status": "completed",
+      "usage": {
+        "input_tokens": 25961,
+        "input_tokens_details": {
+          "cache_write_tokens": 25958,
+          "cached_tokens": 0
+        },
+        "output_tokens": 5823,
+        "output_tokens_details": {
+          "reasoning_tokens": 4142
+        },
+        "total_tokens": 31784
+      }
+    }
+  ],
+  "usage_totals": {
+    "input_tokens": 26492,
+    "output_tokens": 9382,
+    "total_tokens": 35874
+  },
+  "verification": [
+    "Focused database tests passed",
+    "Mobile Chromium provider forms passed",
+    "Focused race tests passed",
+    "Official AWS signing vectors passed",
+    "12-way PostgreSQL create-resumption race passed",
+    "Release gate extended to 96 required tests; full release gate pending"
+  ],
+  "limits": [
+    "No live AWS or OVH credentials used; no paid test resources created",
+    "AWS commercial regional EC2 x86 On-Demand; existing subnet/security groups required",
+    "OVH standard 1-AZ Public Cloud x86 local-disk flavors; no 3-AZ/local-zone provisioning",
+    "Billing and additional-IP inventory are not implemented for these drivers"
+  ],
+  "primary_references": [
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RunInstances.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstanceTypes.html",
+    "https://github.com/awslabs/aws-c-auth/tree/main/tests/aws-signing-test-suite/v4",
+    "https://api.ovh.com/1.0/cloud.json",
+    "https://github.com/ovh/terraform-provider-ovh/blob/master/docs/data-sources/cloud_project_flavors.md"
+  ]
+}

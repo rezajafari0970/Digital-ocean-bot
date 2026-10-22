@@ -18,10 +18,21 @@ type Defaults struct {
 	FallbackAnyRegion      bool        `json:"fallback_any_region"`
 }
 
+type CredentialField struct {
+	Key      string `json:"key"`
+	Label    string `json:"label"`
+	Secret   bool   `json:"secret,omitempty"`
+	Optional bool   `json:"optional,omitempty"`
+	List     bool   `json:"list,omitempty"`
+	Default  string `json:"default,omitempty"`
+}
+
 type Metadata struct {
-	Name            string   `json:"name"`
-	DisplayName     string   `json:"display_name"`
-	CredentialLabel string   `json:"credential_label"`
-	Status          string   `json:"status"`
-	Defaults        Defaults `json:"defaults"`
+	CredentialFields []CredentialField `json:"credential_fields,omitempty"`
+	CredentialHelp   string            `json:"credential_help,omitempty"`
+	Name             string            `json:"name"`
+	DisplayName      string            `json:"display_name"`
+	CredentialLabel  string            `json:"credential_label"`
+	Status           string            `json:"status"`
+	Defaults         Defaults          `json:"defaults"`
 }

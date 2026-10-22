@@ -38,6 +38,7 @@ type Region struct {
 }
 
 type Plan struct {
+	IDsByRegion      map[string]string `json:",omitempty"`
 	ID               string
 	Name             string
 	CPU              int
@@ -58,6 +59,7 @@ type PlanPrice struct {
 }
 
 type Image struct {
+	IDsByRegion  map[string]string `json:",omitempty"`
 	ID           string
 	Name         string
 	Family       string
@@ -137,4 +139,10 @@ type Observation struct {
 	Catalog    Catalog
 	Inventory  Inventory
 	ObservedAt time.Time
+}
+
+// RegionalLaunch is pinned when a deployment is reserved, before any provider mutation.
+type RegionalLaunch struct {
+	PlanID  string `json:"plan_id"`
+	ImageID string `json:"image_id"`
 }

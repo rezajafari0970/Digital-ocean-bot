@@ -43,8 +43,15 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		if reserved.State == jobs.OperationUnknown && reserved.ResourceID == "" {
 			return (Reconciler{Operations: e.Operations, Provider: e.Provider}).AdoptUnknownCreate(ctx, reserved, profile.IdentityTag, profile.Name, profile.Region)
 		}
-		return reserved, nil
+		if reserved.State != jobs.OperationPlanned || reserved.Attempt != 0 {
+			return reserved, nil
+		}
+		if reserved.AccountID != op.AccountID || reserved.Kind != op.Kind || reserved.IdempotencyKey != op.IdempotencyKey || reserved.ResourceID != "" {
+			return reserved, jobs.ErrOperationConflict
+		}
 	}
+	// Update uses the operation lock version: only one caller may resume an
+	// undispatched planned create. Running/unknown operations are observation-only.
 	reserved.State = jobs.OperationRunning
 	reserved.Attempt++
 	if err := e.Operations.Update(ctx, &reserved); err != nil {
@@ -64,7 +71,16 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 	if profile.SSHAuthorizedKey != "" {
 		authorized = []string{profile.SSHAuthorizedKey}
 	}
-	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{UpCloudTrialCompatible: profile.UpCloudTrialCompatible, Name: profile.Name, RegionID: profile.Region, PlanID: profile.Size, ImageID: profile.Image, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
+	planID, imageID := profile.Size, profile.Image
+	if profile.RegionalLaunches != nil {
+		selected, ok := profile.RegionalLaunches[profile.Region]
+		if !ok || selected.PlanID == "" || selected.ImageID == "" {
+			reserved.State = jobs.OperationFailed
+			return e.recordOperationError(ctx, reserved, stagePreCreate, &providers.Error{Class: providers.ErrorInvalidRequest, Operation: "regional_launch", Message: "immutable regional launch selection missing"})
+		}
+		planID, imageID = selected.PlanID, selected.ImageID
+	}
+	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{UpCloudTrialCompatible: profile.UpCloudTrialCompatible, Name: profile.Name, RegionID: profile.Region, PlanID: planID, ImageID: imageID, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
 	if err != nil {
 		if e.OnCreateError != nil {
 			e.OnCreateError(ctx, err)

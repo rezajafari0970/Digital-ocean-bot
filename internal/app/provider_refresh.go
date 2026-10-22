@@ -119,6 +119,8 @@ func (c Container) refreshProviderAccount(parent context.Context, id string, max
 			err = syncVultrResourceRegistryTx(ctx, tx, id, obs.Inventory.Servers)
 		case "upcloud":
 			err = syncUpCloudResourcesTx(ctx, tx, id, obs.Inventory)
+		case "aws", "ovh":
+			err = syncCloudResourcesTx(ctx, tx, id, rt.Config.Provider, obs.Inventory)
 		case "linode":
 			err = syncLinodeResourcesTx(ctx, tx, id, obs.Inventory)
 		}

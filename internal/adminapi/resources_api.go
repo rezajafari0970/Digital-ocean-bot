@@ -24,6 +24,12 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		out = append(out, map[string]any{"id": rid, "provider_id": pid, "provider": provider, "provider_label": func() string {
+			if provider == "aws" {
+				return "Amazon AWS EC2"
+			}
+			if provider == "ovh" {
+				return "OVH Public Cloud"
+			}
 			if provider == "vultr" {
 				return "Vultr"
 			}
@@ -54,7 +60,7 @@ func (s *Server) accountCapacity(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	if provider == "linode" && !x.LimitKnown {
+	if (provider == "linode" || provider == "aws" || provider == "ovh") && !x.LimitKnown {
 		writeJSON(w, 200, map[string]any{"server_limit": nil, "limit_known": false, "provider_servers": x.InUse, "pending": x.Pending, "available": nil, "droplet_limit": nil, "active": x.InUse})
 		return
 	}

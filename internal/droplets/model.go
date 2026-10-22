@@ -1,6 +1,9 @@
 package droplets
 
-import "time"
+import (
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"time"
+)
 
 type State string
 
@@ -18,6 +21,7 @@ const (
 )
 
 type Profile struct {
+	RegionalLaunches       map[string]providers.RegionalLaunch
 	UpCloudTrialCompatible bool
 	Name                   string
 	Region                 string

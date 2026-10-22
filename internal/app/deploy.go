@@ -263,6 +263,18 @@ func (c Container) prepareDeployment(ctx context.Context, accountID, profileID s
 			return d, &providers.Error{Class: providers.ErrorImageUnavailable, Operation: "select_image", Message: "all configured available images are unavailable or in a one-hour boot-failure cooldown for this region and plan"}
 		}
 	}
+	if len(effective.Regions) == 0 {
+		effective.Regions = []string{effective.Region}
+	}
+	pinned, compatible, pinErr := providers.FreezeRegionalLaunches(catalog, effective.Size, effective.Image, effective.Regions)
+	if pinErr != nil {
+		return d, &providers.Error{Class: providers.ErrorImageUnavailable, Operation: "select_regional_image", Message: pinErr.Error()}
+	}
+	if pinned != nil {
+		effective.RegionalLaunches = pinned
+		effective.Regions = compatible
+		effective.Region = compatible[0]
+	}
 	if lifetimeMin > 0 {
 		if lifetimeMax < lifetimeMin {
 			lifetimeMax = lifetimeMin

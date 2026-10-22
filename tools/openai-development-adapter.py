@@ -26,4 +26,4 @@ parts=[]
 for o in data.get("output",[]):
     for c in o.get("content",[]):
         if c.get("type")=="output_text": parts.append(c.get("text",""))
-print(json.dumps({"id":data.get("id"),"text":"".join(parts).strip()},ensure_ascii=False))
+print(json.dumps({"id":data.get("id"),"model":data.get("model"),"status":data.get("status"),"usage":data.get("usage"),"text":"".join(parts).strip()},ensure_ascii=False))

@@ -208,6 +208,15 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		}
 	}
 	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef, db: c.DB, expected: credentialIdentity}}
+	if cfg.Provider == "aws" || cfg.Provider == "ovh" {
+		if err := c.DB.QueryRowContext(ctx, "SELECT COALESCE(external_id,'') FROM accounts WHERE id=$1", cfg.ID).Scan(&req.ExpectedExternalID); err != nil {
+			return nil, err
+		}
+		if req.ExpectedExternalID == "" {
+			return nil, errors.New("provider external identity is missing")
+		}
+		req.Absence = providers.SQLAbsenceVerifier{DB: c.DB, AccountID: cfg.ID, Provider: cfg.Provider}
+	}
 	if cfg.Provider == "upcloud" {
 		var raw []byte
 		if err := c.DB.QueryRowContext(ctx, "SELECT preferred_sizes FROM accounts WHERE id=$1", cfg.ID).Scan(&raw); err != nil {

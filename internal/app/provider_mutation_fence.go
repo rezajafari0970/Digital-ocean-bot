@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/aws"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"io"
 	"net/http"
 	"strings"
@@ -66,6 +68,19 @@ func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, err
 				release()
 				return nil, err
 			}
+		}
+	}
+	if target := aws.TerminationTarget(req); target != "" {
+		if err = conn.QueryRowContext(req.Context(), "SELECT EXISTS(SELECT 1 FROM droplets d JOIN accounts a ON a.id=d.account_id WHERE a.id=$1 AND a.provider='aws' AND d.provider_resource_id=$2 AND d.state<>'DELETED')", f.account, target).Scan(&cleanupStop); err != nil || !cleanupStop {
+			release()
+			return nil, errors.New("AWS termination requires local account resource binding")
+		}
+	}
+	if target, external := ovh.TerminationTarget(req); target != "" {
+		var bound bool
+		if err = conn.QueryRowContext(req.Context(), "SELECT EXISTS(SELECT 1 FROM droplets d JOIN accounts a ON a.id=d.account_id WHERE a.id=$1 AND a.provider='ovh' AND a.external_id=$3 AND d.provider_resource_id=$2 AND d.state<>'DELETED')", f.account, target, external).Scan(&bound); err != nil || !bound {
+			release()
+			return nil, errors.New("OVH deletion requires local project resource binding")
 		}
 	}
 	if req.Method != http.MethodDelete && !cleanupStop && (deleting || !enabled) {

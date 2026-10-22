@@ -131,3 +131,24 @@ func TestCreateTransportErrorStaysUnknownForReconciliation(t *testing.T) {
 		t.Fatalf("err=%v success=%v state=%s", err, successCalled, store.saved.State)
 	}
 }
+
+func TestCreateResumesOnlyUndispatchedPlannedOperation(t *testing.T) {
+	for _, state := range []jobs.OperationState{jobs.OperationPlanned, jobs.OperationRunning, jobs.OperationUnknown} {
+		t.Run(string(state), func(t *testing.T) {
+			p := Profile{Name: "fixed", Region: "r", Size: "p", Image: "i", IdentityTag: "identity"}
+			op := BuildCreateOperation("a", p)
+			op.State = state
+			store := &opStore{saved: op, exists: true}
+			driver := &computeStub{}
+			e := Executor{Operations: store, Provider: driver, Gate: gateStub{}}
+			_, _ = e.Create(context.Background(), op, p)
+			expected := 0
+			if state == jobs.OperationPlanned {
+				expected = 1
+			}
+			if driver.creates != expected {
+				t.Fatal("unsafe create resumption", state, driver.creates)
+			}
+		})
+	}
+}

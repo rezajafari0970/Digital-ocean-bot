@@ -46,3 +46,5 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .cloudflareRecord button{max-width:100%;white-space:normal}
 .cloudflarePager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
 .cloudflarePager button{padding:10px}
+
+#accountCredentialHelp{display:block;overflow-wrap:anywhere;white-space:pre-wrap}

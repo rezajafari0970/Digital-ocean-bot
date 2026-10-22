@@ -61,11 +61,13 @@ type CredentialSource interface {
 }
 
 type OpenRequest struct {
-	AccountID   string
-	HTTPClient  *http.Client
-	Credentials CredentialSource
-	PlanIDs     []string
-	Cleanup     CleanupJournal
+	ExpectedExternalID string
+	Absence            AbsenceVerifier
+	AccountID          string
+	HTTPClient         *http.Client
+	Credentials        CredentialSource
+	PlanIDs            []string
+	Cleanup            CleanupJournal
 }
 
 type Factory interface {

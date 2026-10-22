@@ -94,6 +94,8 @@ SELECT json_build_object(
  'digitalocean_accounts',(SELECT count(*) FROM live_accounts WHERE provider='digitalocean'),
  'vultr_accounts',(SELECT count(*) FROM live_accounts WHERE provider='vultr'),
  'upcloud_accounts',(SELECT count(*) FROM live_accounts WHERE provider='upcloud'),
+ 'aws_accounts',(SELECT count(*) FROM live_accounts WHERE provider='aws'),
+ 'ovh_accounts',(SELECT count(*) FROM live_accounts WHERE provider='ovh'),
  'linode_accounts',(SELECT count(*) FROM live_accounts WHERE provider='linode'),
  'enabled_accounts',(SELECT count(*) FROM live_accounts WHERE enabled),
  'healthy_accounts',(SELECT count(*) FROM live_accounts WHERE health='healthy'),

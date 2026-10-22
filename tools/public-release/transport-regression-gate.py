@@ -70,6 +70,15 @@ REQUIRED = {
     ),
 }
 
+# Provider admission/cleanup contracts are mandatory alongside fleet regressions.
+REQUIRED['internal/providers/aws'] = REQUIRED.get('internal/providers/aws', ()) + ('TestAWSCreateContractAndAmbiguousOutcome', 'TestAWSInventoryFailsClosed', 'TestAWSAccountCatalogAndScope', 'TestAWSDeleteOwnershipAndFenceTarget', 'TestAWSCredentialAndErrorIsolation', 'TestAWSSigningDeterministicAndSensitiveToBody', 'TestAWSExpectedAccountScopeRejectsCredentialRebind', 'TestAWSAbsenceWithoutEvidenceIsInconclusive', 'TestAWSSignatureOfficialVectors')
+REQUIRED['internal/providers/ovh'] = REQUIRED.get('internal/providers/ovh', ()) + ('TestOVHCreateContractAndAmbiguity', 'TestOVHRegionalCatalogAndQuota', 'TestOVHInventoryAndOwnership', 'TestOVHClockSingleFlightAndCredentialValidation', 'TestOVHAmbiguousCreateFindsAllMatches', 'TestOVHRejectsNonOfficialUbuntuNames', 'TestOVHUnsupportedNetworkModeNeverCreates')
+REQUIRED['internal/providers/cloudutil'] = REQUIRED.get('internal/providers/cloudutil', ()) + ('TestCredentialStrictAndHTTPIsolation',)
+REQUIRED['internal/providers'] = REQUIRED.get('internal/providers', ()) + ('TestRegionalLaunchPinsNativeIDsAndFiltersFallback',)
+REQUIRED['internal/droplets'] = REQUIRED.get('internal/droplets', ()) + ('TestCreateResumesOnlyUndispatchedPlannedOperation', 'TestCreateResumeConcurrentPostgres')
+REQUIRED['internal/app'] = REQUIRED.get('internal/app', ()) + ('TestAWSTerminationPreservesDisabledAccountCleanupFence', 'TestOVHDeletionRequiresExactLocalProjectBinding')
+REQUIRED['internal/adminapi'] = REQUIRED.get('internal/adminapi', ()) + ('TestNewCloudInventoryOwnershipAndIncompleteSnapshot', 'TestNewCloudCapacityAndDashboardCount', 'TestNewCloudAbsenceEvidenceSurvivesRestart')
+
 
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}

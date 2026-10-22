@@ -134,6 +134,17 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if x.Token != "" && (accountProvider == "aws" || accountProvider == "ovh") {
+		var original string
+		if err := tx.QueryRowContext(r.Context(), "SELECT COALESCE(external_id,'') FROM accounts WHERE id=$1 FOR UPDATE", id).Scan(&original); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if original != "" && original != candidateExternalID {
+			writeJSON(w, 409, map[string]string{"error": "provider_identity_mismatch", "detail": "Replacement credentials must belong to the same provider account, project and region. Create a separate account for a different scope."})
+			return
+		}
+	}
 	beforeRules, oldDesired, err := app.AccountBuildRulesTx(r.Context(), tx, id)
 	if err != nil {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
