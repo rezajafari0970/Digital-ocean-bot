@@ -1,6 +1,6 @@
 {
   "task": "Independent AWS EC2 and OVH Public Cloud provider drivers",
-  "status": "implemented_pre_release",
+  "status": "published_and_deployed_live_provider_canary_pending_credentials",
   "base": "1b0c0d05118c6fe2a7bed2222349044d10994a07",
   "openai_calls": [
     {
@@ -46,12 +46,14 @@
     "total_tokens": 35874
   },
   "verification": [
-    "Focused database tests passed",
-    "Mobile Chromium provider forms passed",
-    "Focused race tests passed",
-    "Official AWS signing vectors passed",
-    "12-way PostgreSQL create-resumption race passed",
-    "Release gate extended to 96 required tests; full release gate pending"
+    "96 mandatory database/native-core/race regressions passed with zero skips",
+    "Full go test ./...: 71 package success lines; go vet ./... passed",
+    "Bootstrap/update Python tests, Node output tests and shell checks passed",
+    "AWS/OVH Chromium mobile form tests passed",
+    "AWS official SigV4 signing vectors passed",
+    "12-way concurrent PostgreSQL create resumption issued exactly one provider mutation",
+    "Exact public candidate installed successfully in disposable LXC",
+    "Both production controllers updated sequentially and independently verified"
   ],
   "limits": [
     "No live AWS or OVH credentials used; no paid test resources created",
@@ -65,5 +67,45 @@
     "https://github.com/awslabs/aws-c-auth/tree/main/tests/aws-signing-test-suite/v4",
     "https://api.ovh.com/1.0/cloud.json",
     "https://github.com/ovh/terraform-provider-ovh/blob/master/docs/data-sources/cloud_project_flavors.md"
-  ]
+  ],
+  "implementation_commit": "a5a507a943b0107f73f8db6502fb82433361ae22",
+  "public_revision": "ee6e96757c8f29ed89b299fa1cd6b896bfa4b317",
+  "release_evidence": "/var/lib/datacenter-publisher/release-oe3ty9dg",
+  "deployments": [
+    {
+      "device": "serverprojects.ptr.network",
+      "verified_at": "2026-10-22T09:16:49.060138+00:00",
+      "readiness_checks_passed": 5,
+      "service_hashes_verified": 3,
+      "schema": "000192_provider_absence_evidence",
+      "unchanged_profile_identities": 3604,
+      "unchanged_trojan_identities": 77,
+      "unexpected_identity_changes": 0
+    },
+    {
+      "device": "limited-lime.ptr.network",
+      "verified_at": "2026-10-22T09:18:18.926707+00:00",
+      "readiness_checks_passed": 5,
+      "service_hashes_verified": 3,
+      "schema": "000192_provider_absence_evidence",
+      "unexpected_identity_changes": 0
+    }
+  ],
+  "preserved": [
+    "encrypted credentials and master key",
+    "environment",
+    "configuration profile policy and native identities",
+    "Cloudflare accounts/domains/secrets",
+    "selective Google Ads routing and output policy",
+    "server protection policy"
+  ],
+  "operational_evidence": "/root/backups/dob-ovh-aws-20261022 on each controller",
+  "space_remediation": {
+    "clean_inactive_checkouts_archived": 69,
+    "git_history_bundle_verified": true,
+    "restore_helper_retained": true,
+    "historical_backups_deleted": false,
+    "build_caches_reclaimed": true
+  },
+  "openai_runtime_required": false
 }
