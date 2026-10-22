@@ -1,15 +1,15 @@
 {
   "task": "Automatic OVH and AWS onboarding",
   "base_private": "c1a49cbafebe17e49a0119e1054cac430373a798",
-  "status": "implementation_verified_release_pending",
+  "status": "published_and_deployed",
   "stages": {
     "discovery": "complete",
     "implementation": "complete",
     "browser": "passed_mobile_discovery_save_stale_response",
-    "mandatory_gate": "107 passed, zero skips before final two focused regressions",
-    "release": "pending",
-    "primary": "pending",
-    "secondary": "pending"
+    "mandatory_gate": "109 passed, zero skips; 71 Go packages, go vet, Python, JavaScript and shell checks passed",
+    "release": "published; exact candidate installed in isolated test container",
+    "primary": "installed; all five readiness checks passed; three running binaries match manifest; restarts=0",
+    "secondary": "installed; all five readiness checks passed; three running binaries match manifest; restarts=0"
   },
   "scope": [
     "OVH 3 keys, automatic endpoint and active project discovery",
@@ -36,5 +36,51 @@
     "Subnet discovery changed to enumerate alternatives before selecting an override.",
     "Broad SG consent is enforced in the visible Save flow and encoded explicitly as managed_network=true; discovery itself cannot mutate.",
     "Region changes for existing AWS accounts already rejected by account external identity binding and credential replacement transaction."
-  ]
+  ],
+  "verified_at": "2026-10-22T10:19:37.928195+00:00",
+  "implementation_commit": "a45ca9c2fcdaa8005de474afb3ad43d8cd6fb11f",
+  "public_revision": "8208d9013f88b9da7c6b72ffc869f68aec05aa51",
+  "schema": "000193_provider_account_resources",
+  "preservation": {
+    "profile_ownership": {
+      "common": 3628,
+      "unchanged": 3628,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    },
+    "trojan_ownership": {
+      "common": 77,
+      "unchanged": 77,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    }
+  },
+  "preserved_controls": [
+    "master_key_hash",
+    "environment_hash",
+    "creation_policy",
+    "output_policy",
+    "protection_policy",
+    "trojan_policy",
+    "unified",
+    "profile_policy",
+    "selective_ads_enabled",
+    "cloudflare_settings",
+    "cloudflare_secret_hashes",
+    "profile_ownership",
+    "trojan_ownership"
+  ],
+  "evidence": {
+    "release": "/var/lib/datacenter-publisher/release-mrlic75f",
+    "browser": "/root/projects/dob-auto-onboarding-20261022/.local/browser-test.log",
+    "primary": "/root/backups/dob-auto-onboarding-20261022/verify.json",
+    "secondary": "limited-lime.ptr.network:/root/backups/dob-auto-onboarding-20261022/verify.json"
+  },
+  "disk_preflight": "Reproducible build/test checkout caches reclaimed with archive verification; database/configuration backups retained."
 }
