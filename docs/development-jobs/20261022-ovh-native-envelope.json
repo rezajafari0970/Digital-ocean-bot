@@ -2,7 +2,7 @@
   "task": "OVH native class/message envelope compatibility",
   "base_private": "6da50fd5f82448f3e9627502a41a6fc25aabc451",
   "base_public": "6be34fca343df879d2a1b0d042dee6e3b2ccc869",
-  "status": "tested_pending_release",
+  "status": "published_and_deployed",
   "at": "2026-10-22T12:02:18.590959+00:00",
   "findings": [
     "Screenshot request a2facde241752159 failed at EU project_list with unrecognized HTTP403",
@@ -17,8 +17,8 @@
   ],
   "tests": {
     "focused": "OVH provider and admin preview race tests passed",
-    "release": "pending",
-    "production": "pending"
+    "release": "118 mandatory race/database/native-core regressions passed, zero skipped; 71 tested Go packages plus29 packages without tests; go vet, Python, six JavaScript tests and shell validation passed; exact candidate installed and smoke-tested in isolated LXC",
+    "production": "both servers: readiness5/5, three active services with correct binary hashes and zero restarts"
   },
   "review": {
     "model": "gpt-5.6-sol",
@@ -42,5 +42,75 @@
     "Failed preview keys are not saved; actual user account rejection cannot be replayed",
     "User retry after deployment required for live authentication outcome",
     "No paid AWS/OVH resource creation or production credential use in probes"
-  ]
+  ],
+  "implementation_commit": "7510d45393e48a7cddddfa4703e5485a0e90c9d4",
+  "public_revision": "84b2bbc9698a97a5ed0d1d182b849f8214feeda2",
+  "verified_at": "2026-10-22T12:12:15.253088+00:00",
+  "schema": "000193_provider_account_resources",
+  "stages": {
+    "diagnosis": "complete; native envelope compatibility gap confirmed by control probes",
+    "implementation": "complete",
+    "release": "published",
+    "primary": "installed_and_verified",
+    "secondary": "installed_and_verified",
+    "live_user_authentication": "awaiting user retry; failed preview credentials were never persisted"
+  },
+  "preservation": {
+    "profile_ownership": {
+      "common": 3684,
+      "unchanged": 3680,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 4,
+      "confirmed_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 4
+    },
+    "trojan_ownership": {
+      "common": 77,
+      "unchanged": 77,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    }
+  },
+  "preserved_controls": [
+    "master_key_hash",
+    "environment_hash",
+    "creation_policy",
+    "output_policy",
+    "protection_policy",
+    "trojan_policy",
+    "unified",
+    "profile_policy",
+    "selective_ads_enabled",
+    "cloudflare_settings",
+    "cloudflare_secret_hashes",
+    "profile_ownership",
+    "trojan_ownership"
+  ],
+  "disk_reclamation": {
+    "at": "2026-10-22T12:02:04.847581+00:00",
+    "status": "archived_and_reclaimed",
+    "archive": "/var/log/syslog-dob-ovh-envelope-20261022T120144.gz",
+    "original_size": 4025026985,
+    "archive_size": 189250512,
+    "original_sha256": "0e4cbb9186cbb0a981f2dd408742b8dd4f3cee2ee780a1d8d9db7babf8723558",
+    "restore_command": "gzip -dc /var/log/syslog-dob-ovh-envelope-20261022T120144.gz > /var/log/syslog-dob-ovh-envelope-20261022T120144",
+    "metadata": {
+      "uid": 102,
+      "gid": 4,
+      "mode": "0o640",
+      "mtime": 1792670504.1952507
+    },
+    "free_MiB": 10426
+  },
+  "evidence": {
+    "release": "/var/lib/datacenter-publisher/release-iy_wsk5o",
+    "primary": "/root/backups/dob-ovh-envelope-20261022/verify.json",
+    "secondary": "/root/backups/dob-ovh-envelope-20261022/secondary-verify.json",
+    "review": "/root/projects/dob-ovh-envelope-20261022/.local/api-review-result.json",
+    "control_probe": "/root/projects/dob-ovh-envelope-20261022/.local/proxy-probe.log"
+  }
 }
