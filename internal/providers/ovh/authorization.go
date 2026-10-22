@@ -41,25 +41,43 @@ func validAuthorizationURL(raw, endpoint string) bool {
 	if e != nil || u.Scheme != "https" || u.User != nil || u.Port() != "" || u.Fragment != "" || u.RawPath != "" {
 		return false
 	}
-	hosts := map[string][]string{
-		"ovh-eu": {"eu.api.ovh.com", "api.eu.ovhcloud.com", "auth.eu.ovhcloud.com"},
-		"ovh-ca": {"ca.api.ovh.com", "api.ca.ovhcloud.com", "auth.ca.ovhcloud.com"},
-		"ovh-us": {"api.us.ovhcloud.com", "auth.us.ovhcloud.com"},
+	// Explicit region/host/path pairs include the historical SDK URL and the
+	// current official SSO route. No wildcard hosts or arbitrary redirect paths.
+	routes := map[string]map[string][]string{
+		"ovh-eu": {
+			"eu.api.ovh.com":       {"/auth", "/auth/"},
+			"api.ovh.com":          {"/auth", "/auth/"},
+			"api.eu.ovhcloud.com":  {"/auth", "/auth/"},
+			"www.ovh.com":          {"/auth/sso/api"},
+			"auth.eu.ovhcloud.com": {"/sso/api", "/api/credential", "/api/credential/"},
+		},
+		"ovh-ca": {
+			"ca.api.ovh.com":       {"/auth", "/auth/"},
+			"api.ca.ovhcloud.com":  {"/auth", "/auth/"},
+			"auth.ca.ovhcloud.com": {"/sso/api", "/api/credential", "/api/credential/"},
+		},
+		"ovh-us": {
+			"api.us.ovhcloud.com":  {"/auth", "/auth/"},
+			"auth.us.ovhcloud.com": {"/sso/api", "/api/credential", "/api/credential/"},
+		},
 	}
 	allowed := false
-	for _, h := range hosts[endpoint] {
-		if u.Host == h {
+	for _, path := range routes[endpoint][u.Host] {
+		if u.Path == path {
 			allowed = true
 		}
 	}
-	if !allowed || (u.Path != "/auth/" && u.Path != "/auth" && u.Path != "/api/credential" && u.Path != "/api/credential/") {
-		return false
-	}
-	query, e := url.ParseQuery(u.RawQuery)
-	if e != nil || len(query) != 1 || len(query["credentialToken"]) != 1 {
-		return false
-	}
-	return authorizationTokenPattern.MatchString(query.Get("credentialToken"))
+	// Keep a canonical single token query; reject encoded/duplicate keys,
+	// redirect parameters and control characters in both server and browser.
+	token := strings.TrimPrefix(u.RawQuery, "credentialToken=")
+	return allowed && raw == "https://"+u.Host+u.Path+"?"+u.RawQuery && u.RawQuery == "credentialToken="+token && authorizationTokenPattern.MatchString(token)
+
+}
+
+// Only fixed local classifications are retained. Never expose response bodies,
+// approval tokens, credentials or transport error text.
+func authorizationUnknown(endpoint, code string, status int) error {
+	return &requestError{cause: problem(providers.ErrorAmbiguousOutcome, "authorization", code, status), endpoint: endpoint, method: "POST", path: "/auth/credential"}
 }
 func (Factory) StartAuthorization(ctx context.Context, r providers.OpenRequest) (providers.AuthorizationGrant, error) {
 	var cred credential
@@ -83,12 +101,12 @@ func (Factory) StartAuthorization(ctx context.Context, r providers.OpenRequest) 
 		req.Header.Set("Accept", "application/json")
 		resp, e := h.Do(req)
 		if e != nil {
-			return providers.AuthorizationGrant{}, problem(providers.ErrorAmbiguousOutcome, "authorization", "AUTHORIZATION_OUTCOME_UNKNOWN", 0)
+			return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_TRANSPORT_UNKNOWN", 0)
 		}
 		raw, e := io.ReadAll(io.LimitReader(resp.Body, 65537))
 		resp.Body.Close()
 		if e != nil || len(raw) > 65536 {
-			return providers.AuthorizationGrant{}, problem(providers.ErrorAmbiguousOutcome, "authorization", "AUTHORIZATION_OUTCOME_UNKNOWN", resp.StatusCode)
+			return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_BODY_UNKNOWN", resp.StatusCode)
 		}
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			format, class := errorResponseShape(raw)
@@ -97,8 +115,11 @@ func (Factory) StartAuthorization(ctx context.Context, r providers.OpenRequest) 
 			if Diagnostic(last).Code == "INVALID_KEY" {
 				continue
 			}
-			if resp.StatusCode >= 500 || resp.StatusCode < 400 {
-				return providers.AuthorizationGrant{}, problem(providers.ErrorAmbiguousOutcome, "authorization", "AUTHORIZATION_OUTCOME_UNKNOWN", resp.StatusCode)
+			if resp.StatusCode >= 500 {
+				return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_SERVER_UNKNOWN", resp.StatusCode)
+			}
+			if resp.StatusCode < 400 {
+				return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_REDIRECT_UNKNOWN", resp.StatusCode)
 			}
 			return providers.AuthorizationGrant{}, last
 		}
@@ -107,8 +128,14 @@ func (Factory) StartAuthorization(ctx context.Context, r providers.OpenRequest) 
 			ConsumerKey   string `json:"consumerKey"`
 			ValidationURL string `json:"validationUrl"`
 		}
-		if json.Unmarshal(raw, &out) != nil || out.State != "pendingValidation" || !authorizationTokenPattern.MatchString(out.ConsumerKey) || !validAuthorizationURL(out.ValidationURL, endpoint) {
-			return providers.AuthorizationGrant{}, problem(providers.ErrorAmbiguousOutcome, "authorization", "AUTHORIZATION_OUTCOME_UNKNOWN", resp.StatusCode)
+		if json.Unmarshal(raw, &out) != nil {
+			return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_JSON_UNKNOWN", resp.StatusCode)
+		}
+		if out.State != "pendingValidation" || !authorizationTokenPattern.MatchString(out.ConsumerKey) {
+			return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_GRANT_UNKNOWN", resp.StatusCode)
+		}
+		if !validAuthorizationURL(out.ValidationURL, endpoint) {
+			return providers.AuthorizationGrant{}, authorizationUnknown(endpoint, "AUTHORIZATION_URL_UNKNOWN", resp.StatusCode)
 		}
 		cred.Endpoint = endpoint
 		cred.ConsumerKey = out.ConsumerKey

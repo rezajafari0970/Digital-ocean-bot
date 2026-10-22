@@ -32,7 +32,7 @@ func (f *authorizationFactoryFixture) StartAuthorization(ctx context.Context, r 
 	f.calls.Add(1)
 	time.Sleep(20 * time.Millisecond)
 	if f.unknown {
-		return providers.AuthorizationGrant{}, &providers.Error{Class: providers.ErrorAmbiguousOutcome, Code: "AUTHORIZATION_OUTCOME_UNKNOWN"}
+		return providers.AuthorizationGrant{}, &providers.Error{Class: providers.ErrorAmbiguousOutcome, Code: "AUTHORIZATION_URL_UNKNOWN"}
 	}
 	return providers.AuthorizationGrant{Credentials: previewCredential{[]byte(authorizationFixtureToken)}, ValidationURL: "https://eu.api.ovh.com/auth/?credentialToken=fixture-validation"}, nil
 }
@@ -291,4 +291,20 @@ func TestProviderAuthorizationAtomicAccountHandoff(t *testing.T) {
 	if count != 1 {
 		t.Fatal("duplicate account")
 	}
+}
+
+func TestProviderAuthorizationSafeDiagnosticSurvivesRestart(t *testing.T) {
+	s, f := authorizationTestServer(t)
+	f.unknown = true
+	w := authorizationRequest(s, "owner", "POST", "/start", authorizationStartBody(authorizationFixtureID))
+	if w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	restarted := &Server{DB: s.DB, Container: s.Container}
+	w = authorizationRequest(restarted, "owner", "GET", "/"+authorizationFixtureID, nil)
+	var out struct{ State, Diagnostic, Detail string }
+	if json.Unmarshal(w.Body.Bytes(), &out) != nil || out.State != "UNKNOWN" || out.Diagnostic != "AUTHORIZATION_URL_UNKNOWN" || !strings.Contains(out.Detail, "approval URL") || f.calls.Load() != 1 {
+		t.Fatalf("safe reason lost or dispatch replayed: %s", w.Body.String())
+	}
+	assertAuthorizationNoSecret(t, w)
 }

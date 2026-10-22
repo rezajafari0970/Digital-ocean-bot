@@ -30,7 +30,7 @@ func Diagnostic(err error) DiagnosticInfo {
 	if errors.As(err, &pe) {
 		switch pe.Code {
 		case "INVALID_KEY", "INVALID_CREDENTIAL", "NOT_CREDENTIAL", "NOT_GRANTED_CALL", "FORBIDDEN",
-			"AUTHORIZATION_OUTCOME_UNKNOWN", "AUTHORIZATION_REFUSED_OR_EXPIRED", "AUTHORIZATION_RIGHTS_INCOMPLETE", "IAM_PERMISSION_DENIED", "INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
+			"AUTHORIZATION_OUTCOME_UNKNOWN", "AUTHORIZATION_TRANSPORT_UNKNOWN", "AUTHORIZATION_BODY_UNKNOWN", "AUTHORIZATION_SERVER_UNKNOWN", "AUTHORIZATION_REDIRECT_UNKNOWN", "AUTHORIZATION_JSON_UNKNOWN", "AUTHORIZATION_GRANT_UNKNOWN", "AUTHORIZATION_URL_UNKNOWN", "AUTHORIZATION_REFUSED_OR_EXPIRED", "AUTHORIZATION_RIGHTS_INCOMPLETE", "IAM_PERMISSION_DENIED", "INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
 			"INVALID_CREDENTIAL_JSON", "INVALID_PROJECT_ID", "PROJECT_SELECTION_REQUIRED",
 			"NO_ACTIVE_PUBLIC_CLOUD_PROJECT", "PROJECT_NOT_ACTIVE_OR_ACCESSIBLE",
 			"PROJECT_ID_MISMATCH", "PROJECT_SCOPE_CHANGED", "PROJECT_SCOPE_MISMATCH",
@@ -59,6 +59,20 @@ func Diagnostic(err error) DiagnosticInfo {
 	switch d.Code {
 	case "AUTHORIZATION_OUTCOME_UNKNOWN":
 		d.Guidance = "The credential request outcome is unknown. It will not be sent again automatically. Review OVH API keys before explicitly starting a new request."
+	case "AUTHORIZATION_TRANSPORT_UNKNOWN":
+		d.Guidance = "The connection ended before an OVH response was available. Review the selected connection and OVH API keys before starting a new request."
+	case "AUTHORIZATION_BODY_UNKNOWN":
+		d.Guidance = "The OVH response was incomplete or exceeded the response limit. Review OVH API keys before starting a new request."
+	case "AUTHORIZATION_SERVER_UNKNOWN":
+		d.Guidance = "OVH returned a server error after submission. Review OVH API keys before starting a new request."
+	case "AUTHORIZATION_REDIRECT_UNKNOWN":
+		d.Guidance = "The credential endpoint returned a redirect. The request was not forwarded. Review the endpoint and OVH API keys."
+	case "AUTHORIZATION_JSON_UNKNOWN":
+		d.Guidance = "The credential endpoint did not return valid JSON. Review the selected connection and OVH API keys."
+	case "AUTHORIZATION_GRANT_UNKNOWN":
+		d.Guidance = "The OVH response did not contain a valid pending credential. Review OVH API keys before starting a new request."
+	case "AUTHORIZATION_URL_UNKNOWN":
+		d.Guidance = "The approval URL did not match a supported official OVH authorization route. Review OVH API keys and report this request reference."
 	case "AUTHORIZATION_REFUSED_OR_EXPIRED":
 		d.Guidance = "The authorization was refused or expired. Start a new connection and approve its permissions in OVH."
 	case "AUTHORIZATION_RIGHTS_INCOMPLETE":

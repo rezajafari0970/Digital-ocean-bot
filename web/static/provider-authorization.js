@@ -1,6 +1,27 @@
 /* OVH authorization owns only temporary connection state; credentials stay server-side. */
 (() => {
  'use strict';
+ // Keep this boundary aligned with the driver's region-specific allowlist.
+ function validApprovalURL(raw){
+  if(typeof raw!=='string'||raw.length>4096)return false;
+  const routes={
+   'eu.api.ovh.com':['/auth','/auth/'],'api.ovh.com':['/auth','/auth/'],
+   'api.eu.ovhcloud.com':['/auth','/auth/'],'www.ovh.com':['/auth/sso/api'],
+   'ca.api.ovh.com':['/auth','/auth/'],'api.ca.ovhcloud.com':['/auth','/auth/'],
+   'api.us.ovhcloud.com':['/auth','/auth/'],
+   'auth.eu.ovhcloud.com':['/sso/api','/api/credential','/api/credential/'],
+   'auth.ca.ovhcloud.com':['/sso/api','/api/credential','/api/credential/'],
+   'auth.us.ovhcloud.com':['/sso/api','/api/credential','/api/credential/']
+  };
+  try{
+   const u=new URL(raw);
+   return u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&!u.hash&&
+    routes[u.hostname]?.includes(u.pathname)===true&&
+    /^\?credentialToken=[A-Za-z0-9_-]{8,512}$/.test(u.search)&&
+    raw==='https://'+u.hostname+u.pathname+u.search;
+  }catch{return false}
+ }
+ if(typeof module==='object'&&module.exports){module.exports={validApprovalURL};return}
  const storageKey='provider-authorization:ovh:v1';
  const terminal=new Set(['FAILED','UNKNOWN','EXPIRED','CANCELLED','USED']);
  function uuid(){const b=crypto.getRandomValues(new Uint8Array(16));b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20)}
@@ -23,8 +44,8 @@
     if(closed||x.id!==id)return;
     state=x.state;if(['PENDING','READY','VERIFIED'].includes(state))clearSecrets();route=x.proxy_id||'';link.hidden=true;link.removeAttribute('href');reset.hidden=false;
     const labels={DISPATCHED:'Request submitted. Checking its outcome…',PENDING:'Waiting for your approval on OVH. This page checks automatically.',READY:'Access approved. Loading projects and provider options…',VERIFIED:'Access verified. Review the account settings and save.',FAILED:'OVH connection failed. '+(x.diagnostic||'Check the application keys and permissions.'),UNKNOWN:'OVH may have received the request. It will not be sent again automatically. Check your OVH API credentials before starting a new request.',EXPIRED:'This connection request expired. Start a new request.',CANCELLED:'Connection request cancelled.',USED:'This connection has already been saved as an account.'};
-    status.textContent=labels[state]||'Checking connection…';reset.textContent=terminal.has(state)?'Clear this connection request':'Cancel this connection request';
-    if(state==='PENDING'&&x.validation_url){const u=new URL(x.validation_url);if(u.protocol==='https:'&&/^(?:(?:eu|ca)\.api\.ovh\.com|api\.(?:eu|ca|us)\.ovhcloud\.com|auth\.(?:eu|ca|us)\.ovhcloud\.com)$/.test(u.hostname)){link.href=u.href;link.hidden=false}}
+    status.textContent=labels[state]||'Checking connection…';if(['FAILED','UNKNOWN'].includes(state)){if(x.detail)status.textContent+=' '+x.detail;status.textContent+=' Reference: '+id+(x.diagnostic?' · '+x.diagnostic:'')}reset.textContent=terminal.has(state)?'Clear this connection request':'Cancel this connection request';
+    if(state==='PENDING'&&validApprovalURL(x.validation_url)){link.href=x.validation_url;link.hidden=false}
     if(['READY','VERIFIED'].includes(state)&&!readyNotified){readyNotified=true;queueMicrotask(()=>{if(!closed)onReady()})}
     schedule();
    }

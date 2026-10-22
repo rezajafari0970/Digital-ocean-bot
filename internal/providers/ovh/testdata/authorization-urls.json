@@ -1,0 +1,188 @@
+[
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://eu.api.ovh.com/auth/?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.eu.ovhcloud.com/auth/?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://www.ovh.com/auth/sso/api?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://auth.eu.ovhcloud.com/api/credential?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-ca",
+    "url": "https://ca.api.ovh.com/auth/?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-ca",
+    "url": "https://api.ca.ovhcloud.com/auth?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-ca",
+    "url": "https://auth.ca.ovhcloud.com/sso/api?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-us",
+    "url": "https://api.us.ovhcloud.com/auth/?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-us",
+    "url": "https://auth.us.ovhcloud.com/sso/api?credentialToken=fixture-validation",
+    "valid": true,
+    "browser_valid": true
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com.evil.invalid/auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com@evil.invalid/auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://user@api.ovh.com/auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "http://api.ovh.com/auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com:443/auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://www.ovh.com/redirect?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://auth.eu.ovhcloud.com/redirect?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://www.ovh.com/auth/sso/api?credentialToken=fixture-validation&redirect=https://evil.invalid",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=fixture-validation&credentialToken=fixture-two",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=fixture-validation#",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=fixture-validation#fragment",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=%66ixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?%63redentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/%61uth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/a/../auth/?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=short",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "https://api.ovh.com/auth/?credentialToken=fixture-validation\n",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-eu",
+    "url": "not a URL",
+    "valid": false,
+    "browser_valid": false
+  },
+  {
+    "endpoint": "ovh-ca",
+    "url": "https://www.ovh.com/auth/sso/api?credentialToken=fixture-validation",
+    "valid": false,
+    "browser_valid": true
+  }
+]

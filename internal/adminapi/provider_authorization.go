@@ -84,6 +84,9 @@ func (s *Server) authorizationResponse(w http.ResponseWriter, r *http.Request, i
 		x.State = "EXPIRED"
 	}
 	out := map[string]any{"id": x.ID, "provider": x.Provider, "proxy_id": x.ProxyID, "state": x.State, "expires_at": x.ExpiresAt, "retry_after_seconds": 5, "diagnostic": x.LastError}
+	if x.LastError != "" && x.Provider == "ovh" {
+		out["detail"] = ovh.Diagnostic(&providers.Error{Code: x.LastError}).Guidance
+	}
 	if x.State == "PENDING" {
 		data, e := s.authorizationSecret(x)
 		if e != nil {
@@ -199,7 +202,14 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 		if providers.Class(e) == providers.ErrorAmbiguousOutcome || providers.Class(e) == providers.ErrorTransport || providers.Class(e) == providers.ErrorUnavailable {
 			state = "UNKNOWN"
 		}
-		code := ovh.Diagnostic(e).Code
+		diagnostic := ovh.Diagnostic(e)
+		code := diagnostic.Code
+		var providerError *providers.Error
+		httpStatus := 0
+		if errors.As(e, &providerError) {
+			httpStatus = providerError.StatusCode
+		}
+		log.Printf("provider authorization result ref=%s state=%s code=%s endpoint=%s operation=%s http=%d", req.ID, state, code, diagnostic.Endpoint, diagnostic.Operation, httpStatus)
 		_, _ = s.DB.ExecContext(saveCtx, `UPDATE provider_authorizations SET state=$2,last_error=$3,updated_at=now() WHERE id=$1 AND state='DISPATCHED'`, req.ID, state, code)
 		s.authorizationResponse(w, rr.WithContext(saveCtx), req.ID)
 		return

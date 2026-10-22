@@ -51,6 +51,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     assert.equal(await evaluate('document.querySelector("[data-provider-credential=consumer_key]").closest("label").hidden'),true);
     assert.equal(await evaluate('document.querySelector("#modalFields [name=token]").value'),'');
     assert.equal(await evaluate('document.querySelector("[data-auth-link]").rel'),'noopener noreferrer');
+    assert.equal(await evaluate('document.querySelector("[data-auth-link]").href'),'https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation');
     assert.equal(await evaluate('JSON.stringify(sessionStorage).includes("fixture-secret")'),false);
     const saved=await evaluate('sessionStorage.getItem("provider-authorization:ovh:v1")');
     assert.match(saved,/^[0-9a-f-]{36}$/);

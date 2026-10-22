@@ -79,7 +79,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		if approved.Load() {
 			state = "READY"
 		}
-		writeJSON(w, 200, map[string]any{"id": r.PathValue("id"), "provider": "ovh", "proxy_id": "", "state": state, "validation_url": "https://eu.api.ovh.com/auth/?credentialToken=fixture-validation"})
+		writeJSON(w, 200, map[string]any{"id": r.PathValue("id"), "provider": "ovh", "proxy_id": "", "state": state, "validation_url": "https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation"})
 	})
 	mux.HandleFunc("POST /fixture/approve", func(w http.ResponseWriter, r *http.Request) { approved.Store(true); w.WriteHeader(204) })
 	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {

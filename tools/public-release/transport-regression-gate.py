@@ -102,6 +102,9 @@ REQUIRED['internal/adminapi'] += ('TestOVHPreviewNativeEnvelopeDiagnostics',)
 
 REQUIRED['internal/providers/ovh'] += ('TestOVHAuthorizationDelegationAndActualRights','TestOVHAuthorizationUnknownOutcomeAndURLBoundary','TestOVHAuthorizationEndpointFallbackAndExpiry')
 
+REQUIRED['internal/providers/ovh'] += ('TestOVHAuthorizationOfficialRoutesAndDiagnostics',)
+REQUIRED['internal/adminapi'] += ('TestProviderAuthorizationSafeDiagnosticSurvivesRestart',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
@@ -180,6 +183,7 @@ def main(repo):
         if result.returncode:
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
+        subprocess.run(['node', 'web/tests/provider-authorization-urls.cjs'], cwd=repo, env=env, check=True, timeout=30)
         print(json.dumps({'gate': 'transport_and_fleet_regressions', 'required_passed': count, 'skipped': 0, 'database': 'disposable_private_socket_only'}), flush=True)
     finally:
         if (data / 'postmaster.pid').exists():
