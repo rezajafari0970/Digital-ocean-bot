@@ -53,7 +53,7 @@
     "release": "published",
     "primary": "installed_and_verified",
     "secondary": "installed_and_verified",
-    "live_user_authentication": "awaiting user retry; failed preview credentials were never persisted"
+    "live_user_authentication": "Native OVH response confirmed: NOT_GRANTED_CALL for GET /cloud/project; user must authorize the required Consumer Key rights before onboarding can continue"
   },
   "preservation": {
     "profile_ownership": {
@@ -112,5 +112,20 @@
     "secondary": "/root/backups/dob-ovh-envelope-20261022/secondary-verify.json",
     "review": "/root/projects/dob-ovh-envelope-20261022/.local/api-review-result.json",
     "control_probe": "/root/projects/dob-ovh-envelope-20261022/.local/proxy-probe.log"
+  },
+  "live_user_retry": {
+    "checked_at": "2026-10-22T12:17:13.805170+00:00",
+    "request_id": "d20be84dc9bf4d33",
+    "stage": "discovery",
+    "endpoint": "ovh-eu",
+    "operation": "project_list",
+    "provider_status": 403,
+    "diagnostic": "NOT_GRANTED_CALL",
+    "response_format": "class_message",
+    "response_class": "Client::Forbidden",
+    "elapsed_ms": 2801,
+    "required_right": "GET /cloud/project",
+    "status": "blocked_by_external_consumer_key_permissions",
+    "next_action": "User creates or authorizes a Consumer Key in OVH with required read and instance lifecycle rights, then retries preview. No raw credentials retained."
   }
 }
