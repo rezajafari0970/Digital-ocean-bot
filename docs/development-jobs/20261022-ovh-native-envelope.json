@@ -1,0 +1,46 @@
+{
+  "task": "OVH native class/message envelope compatibility",
+  "base_private": "6da50fd5f82448f3e9627502a41a6fc25aabc451",
+  "base_public": "6be34fca343df879d2a1b0d042dee6e3b2ccc869",
+  "status": "tested_pending_release",
+  "at": "2026-10-22T12:02:18.590959+00:00",
+  "findings": [
+    "Screenshot request a2facde241752159 failed at EU project_list with unrecognized HTTP403",
+    "Official OVH REST API currently returns class/message; previous fix covered only errorCode",
+    "Signed dummy-key control tests direct and through configured DataImpulse gateway reached native Client::Forbidden invalid-application-key response; no real provider credentials used"
+  ],
+  "changes": [
+    "Exact native403 mappings preserve authentication, scoped permission and IAM causes",
+    "Region fallback remains limited to recognized INVALID_KEY",
+    "Allowlisted response format and class diagnostics never retain raw provider text",
+    "Four mandatory regression tests added; total118"
+  ],
+  "tests": {
+    "focused": "OVH provider and admin preview race tests passed",
+    "release": "pending",
+    "production": "pending"
+  },
+  "review": {
+    "model": "gpt-5.6-sol",
+    "calls": 1,
+    "usage": {
+      "input_tokens": 6089,
+      "input_tokens_details": {
+        "cache_write_tokens": 6086,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1161,
+      "output_tokens_details": {
+        "reasoning_tokens": 1034
+      },
+      "total_tokens": 7250
+    },
+    "store": false,
+    "disposition": "Suggested redirect hardening already exists: both Factory.Open in driver.go and Discover in onboarding.go call cloudutil.HTTPClient, which clones client and sets ErrUseLastResponse; mandatory TestCredentialStrictAndHTTPIsolation covers clone isolation. No new defect confirmed."
+  },
+  "limits": [
+    "Failed preview keys are not saved; actual user account rejection cannot be replayed",
+    "User retry after deployment required for live authentication outcome",
+    "No paid AWS/OVH resource creation or production credential use in probes"
+  ]
+}

@@ -93,6 +93,9 @@ REQUIRED['internal/providers/aws'] += ('TestAWSDiscoverySelectionOverridesStaleS
 REQUIRED['internal/providers/ovh'] += ('TestOVHErrorCodesPreserveAuthenticationAndPermission','TestOVHDiscoveryDoesNotMaskPermissionWithAnotherEndpoint','TestOVHDiagnosticRedactsRequestAndProviderData','TestOVHMalformedErrorCannotTriggerEndpointFallback')
 REQUIRED['internal/adminapi'] += ('TestOVHPreviewActionableDiagnosticsAndSecretBoundary',)
 
+REQUIRED['internal/providers/ovh'] += ('TestOVHNativeClassMessageErrorEnvelope','TestOVHNativeEnvelopeDiscoveryAndScopedPermissions','TestOVHResponseShapeNeverExposesUnknownData')
+REQUIRED['internal/adminapi'] += ('TestOVHPreviewNativeEnvelopeDiagnostics',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

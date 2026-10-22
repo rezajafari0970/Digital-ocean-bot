@@ -1,6 +1,7 @@
 package ovh
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -10,8 +11,9 @@ import (
 // requestError carries local request context without changing the provider
 // error contract or exposing credentials, identifiers, query strings or bodies.
 type requestError struct {
-	cause                  error
-	endpoint, method, path string
+	cause                         error
+	endpoint, method, path        string
+	responseFormat, responseClass string
 }
 
 func (e *requestError) Error() string { return e.cause.Error() }
@@ -19,15 +21,16 @@ func (e *requestError) Unwrap() error { return e.cause }
 
 type DiagnosticInfo struct {
 	Code, Endpoint, Operation, RequiredRight, Guidance string
+	ResponseFormat, ResponseClass                      string
 }
 
 func Diagnostic(err error) DiagnosticInfo {
-	d := DiagnosticInfo{Code: "REQUEST_FAILED", Endpoint: "unknown", Operation: "unknown"}
+	d := DiagnosticInfo{Code: "REQUEST_FAILED", Endpoint: "unknown", Operation: "unknown", ResponseFormat: "none", ResponseClass: "unknown"}
 	var pe *providers.Error
 	if errors.As(err, &pe) {
 		switch pe.Code {
 		case "INVALID_KEY", "INVALID_CREDENTIAL", "NOT_CREDENTIAL", "NOT_GRANTED_CALL", "FORBIDDEN",
-			"INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
+			"IAM_PERMISSION_DENIED", "INVALID_SIGNATURE", "INVALID_TIMESTAMP", "AUTHENTICATION_FAILED", "PERMISSION_DENIED",
 			"INVALID_CREDENTIAL_JSON", "INVALID_PROJECT_ID", "PROJECT_SELECTION_REQUIRED",
 			"NO_ACTIVE_PUBLIC_CLOUD_PROJECT", "PROJECT_NOT_ACTIVE_OR_ACCESSIBLE",
 			"PROJECT_ID_MISMATCH", "PROJECT_SCOPE_CHANGED", "PROJECT_SCOPE_MISMATCH",
@@ -40,6 +43,11 @@ func Diagnostic(err error) DiagnosticInfo {
 	}
 	var re *requestError
 	if errors.As(err, &re) {
+		switch re.responseFormat {
+		case "none", "non_json", "json_other", "class_message", "error_code":
+			d.ResponseFormat = re.responseFormat
+		}
+		d.ResponseClass = safeResponseClass(re.responseClass)
 		if endpoints[re.endpoint] != "" {
 			d.Endpoint = re.endpoint
 		}
@@ -58,6 +66,8 @@ func Diagnostic(err error) DiagnosticInfo {
 		if d.Operation == "project_list" {
 			d.Guidance += " Automatic discovery needs GET /cloud/project. For a deliberately project-scoped key, enter Endpoint and Project ID in Advanced overrides."
 		}
+	case "IAM_PERMISSION_DENIED":
+		d.Guidance = "OVH account/user IAM policy does not grant this request. Grant access to the selected Public Cloud project in the OVH IAM policy; Consumer key rules alone may not be enough."
 	case "FORBIDDEN":
 		d.Guidance = "OVH forbids this request. Check the key access rules, account/user permissions and any source-IP restriction for the selected connection."
 	case "PERMISSION_DENIED":
@@ -123,4 +133,35 @@ func safeRequest(method, path string) (string, string) {
 		}
 	}
 	return "unknown", ""
+}
+
+// Preserve response shape for diagnosis without retaining raw messages or
+// headers. This distinguishes a native API error from a non-JSON denial.
+func errorResponseShape(raw []byte) (string, string) {
+	if !json.Valid(raw) {
+		return "non_json", "unknown"
+	}
+	var x struct {
+		Class string `json:"class"`
+		Code  string `json:"errorCode"`
+	}
+	if json.Unmarshal(raw, &x) != nil {
+		return "json_other", "unknown"
+	}
+	format := "json_other"
+	if x.Class != "" {
+		format = "class_message"
+	} else if x.Code != "" {
+		format = "error_code"
+	}
+	return format, safeResponseClass(x.Class)
+}
+func safeResponseClass(class string) string {
+	switch class {
+	case "Client::Forbidden", "Client::Unauthorized", "Client::BadRequest",
+		"Client::NotFound", "Client::Conflict", "Client::TooManyRequests",
+		"Server::InternalServerError", "Server::ServiceUnavailable":
+		return class
+	}
+	return "unknown"
 }

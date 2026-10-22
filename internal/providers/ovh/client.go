@@ -97,9 +97,10 @@ func signature(secret, consumer, method, url, body, stamp string) string {
 	return "$1$" + hex.EncodeToString(sum[:])
 }
 func (c *client) do(ctx context.Context, method, path string, body, out any) (err error) {
+	responseFormat, responseClass := "none", "unknown"
 	defer func() {
 		if err != nil {
-			err = &requestError{cause: err, endpoint: c.endpoint, method: method, path: path}
+			err = &requestError{cause: err, endpoint: c.endpoint, method: method, path: path, responseFormat: responseFormat, responseClass: responseClass}
 		}
 	}()
 	cred, e := signingCredentials(ctx, c.credentials)
@@ -144,6 +145,7 @@ func (c *client) do(ctx context.Context, method, path string, body, out any) (er
 		return problem(providers.ErrorUnavailable, path, "INVALID_RESPONSE_BODY", r.StatusCode)
 	}
 	if r.StatusCode < 200 || r.StatusCode >= 300 {
+		responseFormat, responseClass = errorResponseShape(raw)
 		return classify(path, r.StatusCode, raw)
 	}
 	if out != nil && (bytes.Equal(bytes.TrimSpace(raw), []byte("null")) || json.Unmarshal(raw, out) != nil) {
@@ -172,6 +174,7 @@ func classify(op string, status int, raw []byte) *providers.Error {
 	}
 	var x struct {
 		Code    string `json:"errorCode"`
+		Class   string `json:"class"`
 		Message string `json:"message"`
 	}
 	decoded := json.Unmarshal(raw, &x) == nil
@@ -184,6 +187,23 @@ func classify(op string, status int, raw []byte) *providers.Error {
 			class, label = providers.ErrorAuthentication, x.Code
 		case "NOT_GRANTED_CALL", "FORBIDDEN":
 			class, label = providers.ErrorPermissionDenied, x.Code
+		}
+		// The current OVH REST API also returns class/message without errorCode.
+		// Match exact documented/observed messages only within its native class.
+		// Unknown or conflicting envelopes must never permit endpoint fallback.
+		if x.Code == "" && x.Class == "Client::Forbidden" {
+			switch x.Message {
+			case "This application key is invalid":
+				class, label = providers.ErrorAuthentication, "INVALID_KEY"
+			case "This credential is not valid":
+				class, label = providers.ErrorAuthentication, "INVALID_CREDENTIAL"
+			case "This call has not been granted":
+				class, label = providers.ErrorPermissionDenied, "NOT_GRANTED_CALL"
+			case "User not granted for this request":
+				class, label = providers.ErrorPermissionDenied, "IAM_PERMISSION_DENIED"
+			case "Invalid signature":
+				class, label = providers.ErrorAuthentication, "INVALID_SIGNATURE"
+			}
 		}
 	}
 	if status == 400 && decoded {

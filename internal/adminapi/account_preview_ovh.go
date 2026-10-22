@@ -37,7 +37,7 @@ func writeOVHPreviewError(w http.ResponseWriter, err error, c previewDiagnosticC
 	id, stage := previewCode(c.RequestID), previewCode(c.Stage)
 	// Diagnostic returns only local allowlisted values; raw errors, keys,
 	// headers, provider messages and proxy addresses are never logged.
-	log.Printf("provider_preview_failed provider=ovh request_id=%s stage=%s class=%s endpoint=%s operation=%s provider_status=%d diagnostic=%s elapsed_ms=%d", id, stage, previewCode(string(class)), d.Endpoint, d.Operation, status, d.Code, time.Since(c.Started).Milliseconds())
+	log.Printf("provider_preview_failed provider=ovh request_id=%s stage=%s class=%s endpoint=%s operation=%s provider_status=%d diagnostic=%s response_format=%s response_class=%s elapsed_ms=%d", id, stage, previewCode(string(class)), d.Endpoint, d.Operation, status, d.Code, d.ResponseFormat, d.ResponseClass, time.Since(c.Started).Milliseconds())
 	detail := fmt.Sprintf("OVH %s. %s Stage: %s; endpoint: %s; operation: %s", d.Code, d.Guidance, stage, d.Endpoint, d.Operation)
 	if d.RequiredRight != "" {
 		detail += "; required right: " + d.RequiredRight
@@ -46,5 +46,5 @@ func writeOVHPreviewError(w http.ResponseWriter, err error, c previewDiagnosticC
 		detail += fmt.Sprintf("; HTTP %d", status)
 	}
 	detail += "; ref: " + id + "."
-	writeJSON(w, httpStatus, map[string]any{"error": code, "detail": detail, "request_id": id, "stage": stage, "endpoint": d.Endpoint, "operation": d.Operation, "provider_status": status, "diagnostic": d.Code, "required_right": d.RequiredRight})
+	writeJSON(w, httpStatus, map[string]any{"error": code, "detail": detail, "request_id": id, "stage": stage, "endpoint": d.Endpoint, "operation": d.Operation, "provider_status": status, "diagnostic": d.Code, "required_right": d.RequiredRight, "response_format": d.ResponseFormat, "response_class": d.ResponseClass})
 }
