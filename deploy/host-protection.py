@@ -69,8 +69,11 @@ def restic_env(vault=False):
     env = os.environ.copy()
     if vault:
         env["RESTIC_REPOSITORY"] = "/var/lib/datacenter-backup-vault/primary"
-        env.pop("RESTIC_PASSWORD_FILE", None)
-        env["RESTIC_PASSWORD"] = (CONFIG / "restic-password").read_text().strip()
+        credentials = os.environ.get("CREDENTIALS_DIRECTORY")
+        if not credentials:
+            raise RuntimeError("vault_service_credentials_required")
+        env.pop("RESTIC_PASSWORD", None)
+        env["RESTIC_PASSWORD_FILE"] = str(Path(credentials) / "restic-password")
     else:
         for line in (CONFIG / "client.env").read_text().splitlines():
             if line and not line.startswith("#"):
@@ -79,7 +82,7 @@ def restic_env(vault=False):
     return env
 
 def restic(args, vault=False, timeout=1800):
-    command = (["/usr/sbin/runuser", "--preserve-environment", "-u", "dob-backup-vault", "--", "/usr/bin/restic", "--json", "--no-cache"] if vault else ["/usr/bin/restic", "--json", "--cache-dir", str(STATE / "restic-cache")])
+    command = (["/usr/bin/restic", "--json", "--no-cache"] if vault else ["/usr/bin/restic", "--json", "--cache-dir", str(STATE / "restic-cache")])
     if not vault:
         command += ["--cacert", str(CONFIG / "vault.crt")]
     result = subprocess.run(command + args, env=restic_env(vault),
@@ -184,16 +187,22 @@ def retain():
     print("Vault integrity and retention completed.")
 
 def main():
+    global STATE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=["evidence", "backup", "retain", "status"])
     args = parser.parse_args()
-    if os.geteuid() != 0:
+    if args.operation == "retain":
+        import pwd
+        if os.geteuid() != pwd.getpwnam("dob-backup-vault").pw_uid:
+            raise SystemExit("Run systemctl start datacenter-host-retain.service.")
+        STATE = Path("/var/lib/datacenter-backup-maintenance")
+    elif os.geteuid() != 0:
         raise SystemExit("Run with sudo.")
     os.umask(0o077)
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     if args.operation == "status":
         for name in ["evidence-status.json", "offhost-status.json", "vault-status.json"]:
-            path = STATE / name
+            path = (Path("/var/lib/datacenter-backup-maintenance") if name == "vault-status.json" else STATE) / name
             if path.exists():
                 value = json.loads(path.read_text())
                 limit = {"evidence-status.json": 1200, "offhost-status.json": 21600, "vault-status.json": 172800}[name]
@@ -210,6 +219,8 @@ def main():
             {"evidence": evidence, "backup": backup, "retain": retain}[args.operation]()
         except Exception as exc:
             reason = str(exc) if isinstance(exc, RuntimeError) else "protection_job_incomplete"
+            if args.operation == "retain":
+                atomic_json(STATE / "vault-status.json", {"ok": False, "checked_at": time.time(), "reason": reason})
             print("Host protection needs attention: " + reason)
             raise SystemExit(1)
 

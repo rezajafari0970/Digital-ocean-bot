@@ -34,6 +34,14 @@ class ProtectionTests(unittest.TestCase):
   hp.atomic_json(p,{"ok":False,"reason":"test"})
   self.assertEqual(json.loads(p.read_text())["reason"],"test")
   self.assertEqual(len(list(self.path.iterdir())),1)
+ def test_vault_requires_systemd_private_credentials(self):
+  with patch.dict(hp.os.environ,{},clear=True):
+   with self.assertRaisesRegex(RuntimeError,"vault_service_credentials_required"):
+    hp.restic_env(vault=True)
+  with patch.dict(hp.os.environ,{"CREDENTIALS_DIRECTORY":str(self.path),"RESTIC_PASSWORD":"unexpected"},clear=True):
+   env=hp.restic_env(vault=True)
+   self.assertEqual(env["RESTIC_PASSWORD_FILE"],str(self.path/"restic-password"))
+   self.assertNotIn("RESTIC_PASSWORD",env)
  def test_restic_error_never_echoes_credentials(self):
   class Failed:
    returncode=1;stdout="secret";stderr="password-secret"

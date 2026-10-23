@@ -24,13 +24,14 @@ else: link.symlink_to(target/"host-protection.py")
 jobs={"evidence":("5min","1min"),"backup":("2h","5min")} if args.role=="client" else {"retain":("24h","30min")}
 for operation,(interval,boot) in jobs.items():
  unit="datacenter-host-"+operation
+ identity = ("User=dob-backup-vault\nGroup=dob-backup-vault\nLoadCredential=restic-password:/etc/datacenter-host-protection/restic-password\nStateDirectory=datacenter-backup-maintenance\nStateDirectoryMode=0700" if args.role=="vault" else "User=root")
  service=f"""[Unit]
 Description=Independent Datacenter host protection: {operation}
 After=network-online.target
 [Service]
 Type=oneshot
 ExecStart=/usr/local/sbin/datacenter-host-protection {operation}
-User=root
+{identity}
 UMask=0077
 Nice=10
 IOSchedulingClass=best-effort
