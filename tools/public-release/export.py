@@ -3,7 +3,7 @@
 import argparse,hashlib,json,pathlib,re,subprocess
 PREFIXES=('cmd/','internal/','migrations/','web/','deploy/')
 EXTENSIONS={'.go','.sql','.cjs','.js','.py','.sh','.conf','.service','.timer','.socket','.html','.css','.json'}
-EXACT={'go.mod','go.sum','install.sh','deploy/datacenter-bot','internal/cloudflare/origin_ca_rsa_root.pem','tools/cloudflare/operator-probe.py'}
+EXACT={'deploy/host-protection.md','go.mod','go.sum','install.sh','deploy/datacenter-bot','internal/cloudflare/origin_ca_rsa_root.pem','tools/cloudflare/operator-probe.py'}
 MAPPED={'public-release/README.md':'README.md','public-release/gitignore':'.gitignore','public-release/checks.yml':'.github/workflows/checks.yml','public-release/check-source.py':'release/check-source.py','public-release/VALIDATION.json':'release/VALIDATION.json'}
 def git(source,*args):return subprocess.check_output(['git','-C',str(source),*args])
 def selected(name):
