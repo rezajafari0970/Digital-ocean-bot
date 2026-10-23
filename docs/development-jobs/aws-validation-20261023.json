@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-23T05:03:59.972165+00:00",
-  "status": "validated_publication_pending_live_credential_retry_required",
+  "at": "2026-10-23T05:21:47.965211+00:00",
+  "status": "deployed_awaiting_live_aws_credential_retry",
   "input_video": "Screenrecorder-2026-10-23-07-31-12-137.mp4",
   "duration_seconds": 18.11152,
   "observed_error": "provider invalid_request: AWS: REQUEST_REJECTED",
@@ -10,7 +10,8 @@
     "AWS native error code and operation diagnostics with local request trace",
     "correct signature/token and account-locked classifications",
     "malformed/non-AWS responses do not blame credentials",
-    "secret-free diagnostic journals and UI"
+    "secret-free diagnostic journals and UI",
+    "Restore shared validation button caption when leaving OVH for AWS; enforce provider-switch browser assertion"
   ],
   "required_regressions": 138,
   "model_api": {
@@ -22,5 +23,236 @@
   "references": [
     "https://docs.aws.amazon.com/ec2/latest/devguide/errors-overview.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRegions.html"
+  ],
+  "source_revision": "26324e9dbb169bcea4c753f71f977916e8c77fdd",
+  "public_revision": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+  "publisher_evidence": "/var/lib/datacenter-publisher/release-rrzm5k0d",
+  "checks": {
+    "required_named_regressions": 138,
+    "required_skips": 0,
+    "full_tests_and_vet": "passed",
+    "mobile_browser": "passed",
+    "exact_candidate_ubuntu24_install": "passed",
+    "primary": {
+      "at": "2026-10-23T05:19:36.048319+00:00",
+      "commit": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+      "schema": "000194_provider_authorizations",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-23T05:19:36.078790267Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 4192,
+          "unchanged": 4184,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 8,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 12
+        },
+        "trojan_ownership": {
+          "common": 77,
+          "unchanged": 77,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 1,
+        "records": 13974,
+        "profiles": 1
+      }
+    },
+    "secondary": {
+      "at": "2026-10-23T05:20:44.512083+00:00",
+      "commit": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+      "schema": "000194_provider_authorizations",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-23T05:20:44.559013809Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    },
+    "live_asset": {
+      "aws_accounts_saved": 0,
+      "provider_asset_version_present": true,
+      "provider_button_restore_in_installed_source": true,
+      "at": "2026-10-23T05:20:31.774332+00:00",
+      "served_asset_matches_installed": true,
+      "installed_asset_matches_validated_source": true,
+      "asset_sha256": "165af07c1ff172910084626a897a096ca52ab09cbe77d7de24bfdc6ac337a100",
+      "initial_check_note": "Literal whitespace mismatch in the inspection expression; installed and served bytes checked against validated source."
+    },
+    "ci": [
+      {
+        "id": 39904954483,
+        "branch": "stable",
+        "status": "completed",
+        "conclusion": "success",
+        "sha": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39904954483"
+      },
+      {
+        "id": 39904954395,
+        "branch": "main",
+        "status": "completed",
+        "conclusion": "success",
+        "sha": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+        "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39904954395"
+      }
+    ]
+  },
+  "limitations": [
+    "Original AWS account failure requires one fresh user credential preview; no saved AWS account or live AWS create acceptance.",
+    "One initial final-candidate gate timed out waiting for the Trojan executor queue; a fresh full 138-test gate passed without test changes. Cause of the intermittent timing failure is unestablished.",
+    "One derived Go build cache hash mismatch was preserved/quarantined and recompiled; physical cause is unestablished."
   ]
 }
