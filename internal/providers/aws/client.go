@@ -218,15 +218,31 @@ func classify(op string, status int, b []byte) *providers.Error {
 	return wireProblem(problem(class, op, label, status), code, format)
 }
 
+// EC2 pagination limits belong to each operation, not to the service as a whole.
+// See API_DescribeRouteTables and API_DescribeInstanceTypes in the EC2 API reference.
+// A new paginated operation must declare its contract before any request is sent.
+func paginationSize(action string) (string, error) {
+	switch action {
+	case "DescribeRouteTables", "DescribeInstanceTypes":
+		return "100", nil
+	case "DescribeSubnets", "DescribeNetworkAcls", "DescribeInternetGateways",
+		"DescribeSecurityGroups", "DescribeNetworkInterfaces", "DescribeInstances",
+		"DescribeImages", "DescribeInstanceTypeOfferings":
+		return "1000", nil
+	default:
+		return "", problem(providers.ErrorInvalidRequest, action, "UNSUPPORTED_PAGINATION_OPERATION", 0)
+	}
+}
+
 // Every page must have the expected collection. Repeated tokens and duplicate
 // identities fail the entire read, never producing a false empty inventory.
 func pages[T any](ctx context.Context, c *client, action, set string, q url.Values, id func(T) string) ([]T, error) {
 	if q == nil {
 		q = url.Values{}
 	}
-	pageSize := "1000"
-	if action == "DescribeInstanceTypes" {
-		pageSize = "100"
+	pageSize, err := paginationSize(action)
+	if err != nil {
+		return nil, err
 	}
 	q.Set("MaxResults", pageSize)
 	out := []T{}

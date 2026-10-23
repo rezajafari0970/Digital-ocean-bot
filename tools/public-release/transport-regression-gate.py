@@ -114,6 +114,8 @@ REQUIRED['internal/adminapi'] += ('TestAccountSaveReturnsCommittedRuleReceipt','
 REQUIRED['internal/providers/aws'] += ('TestAWSErrorClassificationPreservesActionableCause','TestAWSNonProviderErrorNeverBlamesCredentials','TestAWSDiagnosticsAllowlistBothEnvelopes')
 REQUIRED['internal/adminapi'] += ('TestAWSPreviewActionableDiagnosticsAndSecretBoundary',)
 
+REQUIRED['internal/providers/aws'] += ('TestAWSPaginationOperationContracts','TestAWSDiscoveryFollowsRouteTablePageWithValidLimit','TestAWSUnregisteredPaginationFailsBeforeRequest')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

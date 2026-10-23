@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-23T15:35:07+03:30",
+  "status": "validated_awaiting_primary_management_access_and_live_repairs",
+  "private_base": "7cbe6b0d98db83c3e1718577fb966cfc93b269b5",
+  "installed_public": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+  "root_cause": "DescribeRouteTables MaxResults=1000 exceeds documented maximum 100",
+  "patch": "explicit per-operation pagination sizes; no guessed fallback",
+  "required_regressions": {
+    "passed": 141,
+    "skipped": 0
+  },
+  "full_validation": "passed",
+  "aws_race": "passed",
+  "production_deployed": false,
+  "exact_installer_acceptance": false,
+  "live_aws_onboarding": "pending",
+  "open_issues": [
+    "primary database_recovery_required; internal reason inaccessible",
+    "two SSH failures and one waiting installer require live reconciliation"
+  ],
+  "primary_access": "Remote Desktop offline; secondary SSH identity not authorized",
+  "evidence": "/root/backups/dob-video-20261023-afternoon",
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost_usd": 0
+  }
+}
