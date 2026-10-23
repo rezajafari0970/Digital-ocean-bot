@@ -7,12 +7,21 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/cloudutil"
 )
 
 type flavorData struct {
+	PlanCodes struct {
+		Hourly  string `json:"hourly"`
+		Monthly string `json:"monthly"`
+		License string `json:"license"`
+	} `json:"planCodes"`
+	Quota     *int   `json:"quota"`
+	Inbound   int    `json:"inboundBandwidth"`
+	Outbound  int    `json:"outboundBandwidth"`
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Region    string `json:"region"`
@@ -37,15 +46,6 @@ type imageData struct {
 	FlavorType string `json:"flavorType"`
 }
 
-// These public local-disk families are x86_64. GPU, ARM and volume-backed
-// families require separate capability/cleanup contracts before enabling them.
-var x86Flavor = regexp.MustCompile(`^([bcr][23]|d2|s1)-[0-9]+$`)
-
-// The legacy /flavor schema reports RAM in GiB; image minima and quota RAM use MiB/MB.
-func usableFlavor(f flavorData) bool {
-	return uuidPattern.MatchString(f.ID) && regionPattern.MatchString(f.Region) && x86Flavor.MatchString(f.Name) && f.Available && f.CPU > 0 && f.RAM > 0 && f.Disk > 0 && strings.EqualFold(f.OS, "linux")
-}
-
 var officialUbuntuName = regexp.MustCompile(`^Ubuntu (22\.04|24\.04|26\.04)( LTS)?$`)
 
 func usableImage(im imageData) bool {
@@ -66,20 +66,43 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	return list(ctx, d.client, p, func(x imageData) string { return x.Region + ":" + x.ID })
 }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	// Pricing has a bounded independent deadline and never makes discovery fail.
+	priced := make(chan priceEvidence, 1)
+	go func() { priced <- d.pricing(ctx) }()
 	rs, e := list(ctx, d.client, d.client.path("/region"), func(x string) string { return x })
 	if e != nil {
 		return providers.Catalog{}, e
 	}
+	details := make([]regionData, len(rs))
+	errs := make([]error, len(rs))
+	sem := make(chan struct{}, 4)
+	var wg sync.WaitGroup
+	for i, id := range rs {
+		wg.Add(1)
+		go func(i int, id string) {
+			defer wg.Done()
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
+				errs[i] = ctx.Err()
+				return
+			}
+			defer func() { <-sem }()
+			details[i], errs[i] = d.region(ctx, id)
+		}(i, id)
+	}
+	wg.Wait()
 	regions := []providers.Region{}
 	available := map[string]bool{}
-	for _, id := range rs {
-		r, e := d.region(ctx, id)
-		if e != nil {
-			return providers.Catalog{}, e
+	for i, r := range details {
+		if errs[i] != nil {
+			return providers.Catalog{}, errs[i]
 		}
 		if r.supported() {
-			available[id] = true
-			regions = append(regions, providers.Region{ID: id, Name: r.Location + " (" + id + ")", CountryCode: r.Country, Available: true})
+			available[r.Name] = true
+			regions = append(regions, providers.Region{ID: r.Name, Name: r.Location, CountryCode: r.Country, Available: true})
 		}
 	}
 	fs, e := d.flavors(ctx, "")
@@ -90,22 +113,36 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	if e != nil {
 		return providers.Catalog{}, e
 	}
+	pricing := <-priced
 	plans := map[string]providers.Plan{}
 	for _, f := range fs {
-		if !available[f.Region] || !usableFlavor(f) {
+		if f.Name == "" || !uuidPattern.MatchString(f.ID) || !regionPattern.MatchString(f.Region) {
 			continue
+		}
+		reason := flavorSupport(f)
+		supported := reason == "" && available[f.Region]
+		if reason == "" && !available[f.Region] {
+			reason = "Region is inactive or requires a 3-AZ/local-zone network driver"
+		}
+		if reason == "" && !f.Available {
+			reason = "Out of stock"
 		}
 		p, ok := plans[f.Name]
 		if !ok {
-			p = providers.Plan{ID: f.Name, Name: f.Name, CPU: f.CPU, MemoryMB: f.RAM * 1024, DiskGB: f.Disk, Available: true, IDsByRegion: map[string]string{}}
-		} else if p.CPU != f.CPU || p.MemoryMB != f.RAM*1024 || p.DiskGB != f.Disk {
-			return providers.Catalog{}, problem(providers.ErrorUnavailable, "catalog", "FLAVOR_SHAPE_MISMATCH", 200)
+			p = providers.Plan{ID: f.Name, Name: f.Name, CPU: f.CPU, MemoryMB: f.RAM * 1024, DiskGB: f.Disk, IDsByRegion: map[string]string{}, DetailsByRegion: map[string]providers.PlanRegionDetails{}, PricesByRegion: map[string]providers.PlanPrice{}}
 		}
-		if p.IDsByRegion[f.Region] != "" {
+		if _, duplicate := p.DetailsByRegion[f.Region]; duplicate {
 			return providers.Catalog{}, problem(providers.ErrorUnavailable, "catalog", "DUPLICATE_REGIONAL_FLAVOR", 200)
 		}
-		p.IDsByRegion[f.Region] = f.ID
-		p.AvailableRegions = append(p.AvailableRegions, f.Region)
+		p.DetailsByRegion[f.Region] = providers.PlanRegionDetails{NativeID: f.ID, OS: f.OS, Type: f.Type, StockAvailable: f.Available, Supported: supported, Reason: reason, Quota: f.Quota, CPU: f.CPU, MemoryMB: f.RAM * 1024, DiskGB: f.Disk, InboundMbps: f.Inbound, OutboundMbps: f.Outbound}
+		if supported && f.Available {
+			p.Available = true
+			p.IDsByRegion[f.Region] = f.ID
+			p.AvailableRegions = append(p.AvailableRegions, f.Region)
+		}
+		if price, known := pricing.flavor(f); known {
+			p.PricesByRegion[f.Region] = price
+		}
 		plans[f.Name] = p
 	}
 	latest := map[string]map[string]imageData{}
@@ -121,7 +158,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 			latest[v][im.Region] = im
 		}
 	}
-	out := providers.Catalog{Regions: regions, Plans: []providers.Plan{}, Images: []providers.Image{}}
+	out := providers.Catalog{Pricing: &pricing.meta, Regions: regions, Plans: []providers.Plan{}, Images: []providers.Image{}}
 	for _, p := range plans {
 		sort.Strings(p.AvailableRegions)
 		out.Plans = append(out.Plans, p)

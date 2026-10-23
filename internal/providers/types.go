@@ -38,7 +38,8 @@ type Region struct {
 }
 
 type Plan struct {
-	IDsByRegion      map[string]string `json:",omitempty"`
+	DetailsByRegion  map[string]PlanRegionDetails `json:",omitempty"`
+	IDsByRegion      map[string]string            `json:",omitempty"`
 	ID               string
 	Name             string
 	CPU              int
@@ -51,8 +52,43 @@ type Plan struct {
 	AvailableRegions []string
 }
 
+// PlanRegionDetails keeps full provider discovery separate from launch selection.
+type PlanRegionDetails struct {
+	NativeID       string
+	OS             string
+	Type           string
+	StockAvailable bool
+	Supported      bool
+	Reason         string
+	Quota          *int `json:",omitempty"`
+	CPU            int
+	MemoryMB       int
+	DiskGB         int
+	InboundMbps    int
+	OutboundMbps   int
+}
+type CatalogPricing struct {
+	Status      string
+	Basis       string
+	Subsidiary  string
+	Currency    string
+	Source      string
+	CatalogID   int64
+	ObservedAt  time.Time
+	TaxIncluded bool
+}
+type PriceComponent struct {
+	Name     string
+	PlanCode string
+	Quantity int
+	Hourly   float64
+}
+
 // PlanPrice is region-specific display metadata; it does not authorize spending.
 type PlanPrice struct {
+	Components      []PriceComponent `json:",omitempty"`
+	Complete        bool             `json:",omitempty"`
+	Scope           string           `json:",omitempty"`
 	Currency        string
 	Hourly          float64
 	MonthlyEstimate float64
@@ -69,6 +105,7 @@ type Image struct {
 }
 
 type Catalog struct {
+	Pricing *CatalogPricing `json:",omitempty"`
 	Regions []Region
 	Plans   []Plan
 	Images  []Image

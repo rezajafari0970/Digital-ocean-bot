@@ -25,6 +25,7 @@ var uuidPattern = regexp.MustCompile(`^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0
 var regionPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9-]{0,63}$`)
 
 type credential struct {
+	PricingSubsidiary string `json:"pricing_subsidiary,omitempty"`
 	Endpoint          string `json:"endpoint"`
 	ApplicationKey    string `json:"application_key"`
 	ApplicationSecret string `json:"application_secret"`

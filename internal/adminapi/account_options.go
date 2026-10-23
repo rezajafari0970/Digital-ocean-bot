@@ -20,7 +20,7 @@ func (s *Server) accountOptions(w http.ResponseWriter, r *http.Request) {
 					images = append(images, x)
 				}
 			}
-			writeJSON(w, 200, map[string]any{"regions": obs.Catalog.Regions, "plans": obs.Catalog.Plans, "sizes": obs.Catalog.Plans, "images": images, "source": "canonical", "cached_at": created.UTC().Format(time.RFC3339)})
+			writeJSON(w, 200, map[string]any{"regions": obs.Catalog.Regions, "plans": obs.Catalog.Plans, "sizes": obs.Catalog.Plans, "images": images, "pricing": obs.Catalog.Pricing, "source": "canonical", "cached_at": created.UTC().Format(time.RFC3339)})
 			return
 		}
 	}

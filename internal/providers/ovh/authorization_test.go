@@ -34,7 +34,7 @@ func TestOVHAuthorizationDelegationAndActualRights(t *testing.T) {
 			if json.Unmarshal(raw, &body) != nil {
 				t.Fatal("invalid body")
 			}
-			want, _ := json.Marshal(authorizationRules(scope))
+			want, _ := json.Marshal(append(authorizationRules(scope), accessRule{"GET", "/me"}))
 			got, _ := json.Marshal(body.Rules)
 			if string(want) != string(got) {
 				t.Fatal("wrong permission scope")

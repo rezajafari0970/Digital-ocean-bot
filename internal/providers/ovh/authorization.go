@@ -92,7 +92,7 @@ func (Factory) StartAuthorization(ctx context.Context, r providers.OpenRequest) 
 	}
 	h := cloudutil.HTTPClient(r.HTTPClient)
 	h.Timeout = 8 * time.Second
-	body, _ := json.Marshal(map[string]any{"accessRules": authorizationRules(cred.Project)})
+	body, _ := json.Marshal(map[string]any{"accessRules": append(authorizationRules(cred.Project), accessRule{"GET", "/me"})})
 	var last error
 	for _, endpoint := range candidates {
 		req, _ := http.NewRequestWithContext(ctx, http.MethodPost, endpoints[endpoint]+"/auth/credential", bytes.NewReader(body))

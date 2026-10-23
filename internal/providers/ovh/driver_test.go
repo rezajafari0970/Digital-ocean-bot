@@ -225,7 +225,7 @@ func TestOVHUnsupportedNetworkModeNeverCreates(t *testing.T) {
 				if e == nil {
 					t.Fatal("missing regional evidence accepted")
 				}
-			} else if e != nil || len(c.Regions) > 0 || len(c.Plans) > 0 || len(c.Images) > 0 {
+			} else if e != nil || len(c.Regions) > 0 || len(c.Plans) != 1 || c.Plans[0].Available || len(c.Plans[0].IDsByRegion) != 0 || c.Plans[0].DetailsByRegion["GRA11"].Reason == "" || len(c.Images) > 0 {
 				t.Fatal("unsupported mode advertised", c, e)
 			}
 			_, e = d.CreateServer(context.Background(), providers.CreateServerRequest{Identity: "fixed", RegionID: "GRA11", PlanID: flavorID, ImageID: imageID, SSHAuthorizedKeys: []string{key(t)}})

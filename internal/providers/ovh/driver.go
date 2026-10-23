@@ -19,7 +19,7 @@ func (Factory) Name() string { return "ovh" }
 func (Factory) Metadata() providers.Metadata {
 	return providers.Metadata{AutomaticAuthorization: true, Name: "ovh", DisplayName: "OVH Public Cloud", CredentialLabel: "OVH credentials", CredentialFields: []providers.CredentialField{
 		{Key: "application_key", Label: "Application key", Secret: true}, {Key: "application_secret", Label: "Application secret", Secret: true}, {Key: "consumer_key", Label: "Consumer key", Secret: true},
-		{Key: "endpoint", Label: "Endpoint override: ovh-eu / ovh-ca / ovh-us", Optional: true, Advanced: true}, {Key: "project_id", Label: "Project ID override", Optional: true, Advanced: true}},
+		{Key: "endpoint", Label: "Endpoint override: ovh-eu / ovh-ca / ovh-us", Optional: true, Advanced: true}, {Key: "project_id", Label: "Project ID override", Optional: true, Advanced: true}, {Key: "pricing_subsidiary", Label: "Pricing market override (e.g. FR, GB, CA, US)", Optional: true, Advanced: true}},
 		CredentialHelp: "Connect with Application key and Application secret, then approve access once on OVH. A previously authorized Consumer key can also be used. Endpoint, active project, regions, plans and images are detected automatically. An Application key alone cannot authenticate.", Status: "ready", Defaults: cloudutil.Defaults()}
 
 }
@@ -297,6 +297,9 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 	}
 	if flavor.ID == "" {
 		return invalid("FLAVOR_UNAVAILABLE")
+	}
+	if flavor.Quota != nil && *flavor.Quota == 0 {
+		return rejected, problem(providers.ErrorCapacity, "quota", "FLAVOR_QUOTA_EXCEEDED", 0)
 	}
 	ims, e := d.images(ctx, r.RegionID)
 	if e != nil {
