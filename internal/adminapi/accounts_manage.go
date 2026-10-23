@@ -218,6 +218,14 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	// Read the receipt in the same transaction as the saved rule revision.
+	// A later list request can fail or observe another edit; neither invalidates
+	// this successful commit acknowledgement.
+	var receipt []byte
+	if err = tx.QueryRowContext(r.Context(), `SELECT jsonb_build_object('id',a.id,'desired_server_count',a.desired_server_count,'rule_application',to_jsonb(p)-'account_id') FROM accounts a JOIN account_rule_application p ON p.account_id=a.id WHERE a.id=$1`, id).Scan(&receipt); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	var previousToken []byte
 	var credentialRef, providerForCredential string
 	if x.Token != "" {
@@ -238,7 +246,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	zeroBytes(previousToken)
-	writeJSON(w, 200, map[string]any{"ok": true})
+	writeJSON(w, 200, map[string]any{"ok": true, "account": json.RawMessage(receipt)})
 }
 func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())

@@ -108,6 +108,9 @@ REQUIRED['internal/adminapi'] += ('TestProviderAuthorizationSafeDiagnosticSurviv
 REQUIRED['internal/app'] += ('TestVersionedCatalogRefreshIndependentOfEconomy', 'TestVersionedCatalogHealthDoesNotFetch')
 REQUIRED['internal/adminapi'] += ('TestAccountOptionsUsesActualCatalogFetch',)
 
+REQUIRED['internal/provisioning'] += ('TestKernelMemoryGuardRootAliasRequiresMountedIdentity',)
+REQUIRED['internal/adminapi'] += ('TestAccountSaveReturnsCommittedRuleReceipt','TestAccountInventoryPendingCreationIsNotForeignOrManaged','TestAccountListNullInventoryDoesNotBreakSavedStatus')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
@@ -187,6 +190,8 @@ def main(repo):
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
         subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)
+        subprocess.run(['node', 'web/tests/account-save-receipt.cjs'], cwd=repo, env=env, check=True, timeout=30)
+        subprocess.run(['node', 'web/tests/account-rule-status.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/provider-authorization-urls.cjs'], cwd=repo, env=env, check=True, timeout=30)
         print(json.dumps({'gate': 'transport_and_fleet_regressions', 'required_passed': count, 'skipped': 0, 'database': 'disposable_private_socket_only'}), flush=True)
     finally:

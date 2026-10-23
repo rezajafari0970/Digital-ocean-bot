@@ -23,8 +23,6 @@ assert.match(ctx.accountRuleSaveMessage({desired_server_count:15,rule_applicatio
 assert.match(ctx.accountRuleSaveMessage({desired_server_count:14,rule_application:active},{}),/WAITING SPACING.*Desired target: 14/);
 assert.match(ctx.accountRuleSaveMessage(null,{}),/Saved.*status is unavailable/);
 assert.match(ctx.accountRuleSaveMessage({rule_application:idle,desired_server_count:15},{token:'not-printed'}),/Token validated/);
-assert.match(source,/const refreshed=await refreshAccountsInPlace\(\{force:true\}\);alert\(accountRuleSaveMessage\(refreshed\?cache\.accounts\?\.find/);
 assert.match(ctx.accountRuleApplicationView({...active,apply_to_existing:false}).label,/Pending work is stopped/);
-assert.match(source,/saved\?'Saved\. Replacement status could not be refreshed/);
 console.log('PASS: ON idle, pending, OFF admitted deletion, missing readback, Save feedback and escaping.');
 

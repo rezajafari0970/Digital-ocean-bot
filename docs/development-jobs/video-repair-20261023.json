@@ -1,0 +1,18 @@
+{
+  "status": "validated_publication_pending",
+  "at": "2026-10-23T04:14:38.931146+00:00",
+  "input_video": "Screenrecorder-2026-10-23-07-13-53-755.mp4",
+  "duration_seconds": 182.276599,
+  "fixes": [
+    "verified_root_label_uuid_alias",
+    "transactional_save_receipt",
+    "journal_backed_pending_ownership",
+    "null_inventory_regions"
+  ],
+  "required_regressions": 134,
+  "openai_api_this_continuation": {
+    "requests": 0,
+    "tokens": 0,
+    "cost_usd": 0
+  }
+}

@@ -58,6 +58,40 @@ def valid_grub():
  return bool(entries) and all([x for x in row if x.startswith('kho=')]==['kho=off'] for row in entries)
 def unrelated_entries():
  return [[x for x in row if not x.startswith('kho=')] for row in boot_entries()]
+def command_lines(args):
+ result=subprocess.run(args,capture_output=True,text=True,timeout=10)
+ require(result.returncode==0,'root device identity unavailable')
+ return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+def root_device_id(option):
+ # Cloud images may name the same root filesystem by LABEL before the first
+ # update-grub and UUID afterwards. Resolve uncached metadata, never just
+ # remove root= from the preservation check or accept the first match.
+ selector=option.removeprefix('root=')
+ require(re.fullmatch(r'(?:LABEL|UUID)=[A-Za-z0-9_.:-]+',selector),'unsupported root identity')
+ devices=command_lines(['blkid','-c','/dev/null','-t',selector,'-o','device'])
+ require(len(devices)==1 and devices[0].startswith('/dev/'),'ambiguous root identity')
+ numbers=command_lines(['lsblk','-dn','-o','MAJ:MIN','--',devices[0]])
+ require(len(numbers)==1 and re.fullmatch(r'[0-9]+:[0-9]+',numbers[0]) and int(numbers[0].split(':')[0])>0,'invalid root device identity')
+ return numbers[0]
+def preserved_entries(before):
+ after=unrelated_entries()
+ if after==before:return True
+ if len(after)!=len(before):return False
+ aliases={}
+ for old,new in zip(before,after):
+  if old==new:continue
+  if len(old)!=len(new):return False
+  roots_old=[x for x in old if x.startswith('root=')]
+  roots_new=[x for x in new if x.startswith('root=')]
+  if len(roots_old)!=1 or len(roots_new)!=1:return False
+  a,b=roots_old[0],roots_new[0]
+  if not ((a.startswith('root=LABEL=') and b.startswith('root=UUID=')) or (a.startswith('root=UUID=') and b.startswith('root=LABEL='))):return False
+  if [x for x in old if not x.startswith('root=')]!=[x for x in new if not x.startswith('root=')]:return False
+  for option in [a,b]:
+   if option not in aliases:aliases[option]=root_device_id(option)
+  if aliases[a]!=aliases[b]:return False
+ mounted=command_lines(['findmnt','-n','-o','MAJ:MIN','--target','/'])
+ return len(mounted)==1 and bool(aliases) and all(device==mounted[0] for device in aliases.values())
 def prepared():
  if not ROOT.exists():return False
  safe(ROOT,True)
@@ -147,7 +181,7 @@ with os.fdopen(fd,'a+') as f:
   completed=subprocess.run(['update-grub'],capture_output=True,text=True,timeout=90)
   # Read-back resolves a lost/nonzero response; never reboot on unchecked output.
   require(valid_grub(),'generated GRUB entries do not confirm kho=off')
- require(unrelated_entries()==v['boot_entries_before'],'unrelated boot entry changed during generation')
+ require(preserved_entries(v['boot_entries_before']),'unrelated boot entry changed during generation')
  v['phase']='PREPARED';v['boot_id_prepared']=boot
  atomic(state,json.dumps(v)+'\n')
  require(prepared(),'mitigation read-back failed')

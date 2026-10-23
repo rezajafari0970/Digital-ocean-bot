@@ -55,7 +55,7 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 			cca = capacityChangedAt.Time
 		}
 		builtRegionsRaw := []byte("[]")
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(jsonb_agg(region ORDER BY region),'[]'::jsonb) FROM (SELECT DISTINCT x->>'RegionID' region FROM (SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps CROSS JOIN LATERAL jsonb_array_elements(COALESCE(ps.canonical->'Inventory'->'Servers','[]'::jsonb)) x WHERE COALESCE(x->>'RegionID','')<>'') q`, id).Scan(&builtRegionsRaw); err != nil {
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(jsonb_agg(region ORDER BY region),'[]'::jsonb) FROM (SELECT DISTINCT x->>'RegionID' region FROM (SELECT canonical FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps CROSS JOIN LATERAL jsonb_array_elements(COALESCE(NULLIF(ps.canonical->'Inventory'->'Servers','null'::jsonb),'[]'::jsonb)) x WHERE COALESCE(x->>'RegionID','')<>'') q`, id).Scan(&builtRegionsRaw); err != nil {
 			writeDatabaseReadError(w, err, "accounts_regions_failed")
 			return
 		}

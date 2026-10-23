@@ -29,13 +29,19 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+15000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' BODY: '+await evaluate('document.body.innerText.slice(0,5000)'))}
   await waitFor('document.querySelectorAll(".accountCard").length===1');
-  await evaluate('window.ruleID='+JSON.stringify(id)+';window.alert=()=>{};window.confirm=()=>true');
+  await evaluate('window.ruleID='+JSON.stringify(id)+';window.ruleMessages=[];window.alert=m=>ruleMessages.push(m);window.originalToast=toast;toast=(m,k)=>{ruleMessages.push(m);originalToast(m,k)};window.confirm=()=>true');
   await evaluate('editAccount(ruleID)');
   const check='document.querySelector("[name=apply_to_existing]")';
   assert.equal(await evaluate(check+'.checked'),false);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+  await evaluate('window.savedWrites=0;window.failAccountRead=false;window.realFetch=fetch;fetch=async(u,o)=>{if(o?.method==="PUT"){const r=await realFetch(u,o);savedWrites++;failAccountRead=true;return r}if(failAccountRead&&String(u)==="/api/v1/accounts")throw Error("fixture read interruption");return realFetch(u,o)}');
   await evaluate('document.querySelector("[name=lifetime_min_minutes]").value="150";document.querySelector("[name=lifetime_max_minutes]").value="160";document.querySelector("#modalSubmit").click()');
+  await waitFor('!document.querySelector("#modal").open&&ruleMessages.some(m=>m.includes("Desired target: 3"))&&activePageView.loadFailed');
+  assert.equal(await evaluate('savedWrites'),1);
+  assert.doesNotMatch(await evaluate('ruleMessages.join(" ")'),/status is unavailable|Save failed/);
+  await evaluate('fetch=realFetch;load("accounts")');
   await waitFor('!document.querySelector("#modal").open&&cache.accounts?.[0].rule_application?.revision===1');
+  assert.match(await evaluate('ruleMessages.join(" ")'),/OFF · Future builds only.*Desired target: 3/);
   assert.equal((await evaluate('api("/__fixture/tick",{method:"POST"})')).retiring,0);
   await evaluate('editAccount(ruleID)');
   assert.equal(await evaluate(check+'.checked'),false);

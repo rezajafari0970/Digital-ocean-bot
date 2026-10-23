@@ -262,8 +262,32 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
+			// A provider can expose a newly created VM before its confirmation has
+			// created the lifecycle row. The exact local create journal identifies
+			// this read-only transitional state; it does not grant management rights.
+			pendingIDs := map[string]bool{}
+			pendingRows, err := s.DB.QueryContext(r.Context(), `SELECT DISTINCT o.resource_id FROM deployments d JOIN operations o ON o.account_id=d.account_id AND o.kind='CREATE_DROPLET' AND (o.idempotency_key='deploy:'||d.id::text||':create' OR o.idempotency_key LIKE 'deploy:'||d.id::text||':create:region:%') WHERE d.account_id=$1 AND d.droplet_id IS NULL AND (`+activeBuildPredicate+`) AND o.state IN ('running','verifying','unknown','succeeded') AND COALESCE(o.resource_id,'')<>'' AND (COALESCE(d.provider_id,'')='' OR d.provider_id=o.resource_id) AND NOT EXISTS(SELECT 1 FROM droplets gone WHERE gone.account_id=d.account_id AND gone.provider_resource_id=o.resource_id AND gone.state='DELETED')`, id)
+			if err != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
+			for pendingRows.Next() {
+				var pid string
+				if err = pendingRows.Scan(&pid); err != nil {
+					pendingRows.Close()
+					writeJSON(w, 500, errorBody())
+					return
+				}
+				pendingIDs[pid] = true
+			}
+			err = pendingRows.Err()
+			pendingRows.Close()
+			if err != nil {
+				writeJSON(w, 500, errorBody())
+				return
+			}
 			seen := map[string]bool{}
-			managedCount, activeCount := 0, 0
+			managedCount, activeCount, pendingCount := 0, 0, 0
 			for _, x := range obs.Inventory.Servers {
 				if x.ID == "" || seen[x.ID] {
 					continue
@@ -280,13 +304,21 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 				if x.State == providers.ServerStateReady {
 					activeCount++
 				}
+				ownership := "foreign"
+				if managed {
+					ownership = "managed"
+				} else if pendingIDs[x.ID] {
+					ownership = "creation_pending"
+					info.State = "CREATE_CONFIRMING"
+					pendingCount++
+				}
 				var expiresAt any
 				if info.ExpiresAt.Valid {
 					expiresAt = info.ExpiresAt.Time
 				}
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": map[bool]string{true: "managed", false: "foreign"}[managed], "tags": x.Tags})
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": ownership, "tags": x.Tags})
 			}
-			d.Resources = map[string]any{"total": len(d.Droplets), "managed": managedCount, "unmanaged": len(d.Droplets) - managedCount, "active": activeCount, "data_available": true}
+			d.Resources = map[string]any{"total": len(d.Droplets), "managed": managedCount, "unmanaged": len(d.Droplets) - managedCount - pendingCount, "pending_creation": pendingCount, "active": activeCount, "data_available": true}
 		}
 	}
 	writeJSON(w, 200, d)
