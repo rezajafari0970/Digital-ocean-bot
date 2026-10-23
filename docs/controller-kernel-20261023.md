@@ -10,6 +10,6 @@ Before recovery acknowledgement, the primary passed a full physical pg_basebacku
 
 The two SSH errors and waiting installer in the afternoon video were matched to exact runs: c2f32aeb-3c3f-4d85-bc01-21d16bc37b4e, cd28a84c-62bb-4ef0-b257-207f692ebefe, e6703e2c-50f8-4ee0-94fa-c09a7fc943f0. All three reached READY / COMPLETED / PANEL_COMPLETE with enabled panels through their existing recovery workflow. Historical error events were preserved.
 
-Evidence: /root/backups/dob-video-20261023-afternoon on both hosts. Production activation and final combined release acceptance remain in progress; do not infer task completion from this checkpoint.
+Evidence: /root/backups/dob-video-20261023-afternoon on both hosts. Final combined release is deployed and verified on both hosts. See docs/video-afternoon-20261023.md for the subsequent single-page database recovery, final acceptance and unresolved physical-origin limitation.
 
 Official parameter reference: https://docs.kernel.org/admin-guide/kernel-parameters.html (kho=off). Earlier project kernel investigation references Ubuntu bug 2163395; its current contents could not be re-fetched in this turn, so no new upstream-fix claim is made. Direct OpenAI model API usage: 0 requests, 0 tokens, USD 0.

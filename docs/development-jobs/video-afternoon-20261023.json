@@ -1,28 +1,55 @@
 {
-  "at": "2026-10-23T15:35:07+03:30",
-  "status": "validated_awaiting_primary_management_access_and_live_repairs",
+  "at": "2026-10-23T13:42:23.810274+00:00",
+  "status": "deployed_verified_with_explicit_external_limits",
   "private_base": "7cbe6b0d98db83c3e1718577fb966cfc93b269b5",
-  "installed_public": "cfdedbf2e0416e12dcaac87b72a01ec3592fa1b9",
+  "installed_public": "f548fb6115e896e8cca07fd2b958df7daccacdcf",
   "root_cause": "DescribeRouteTables MaxResults=1000 exceeds documented maximum 100",
   "patch": "explicit per-operation pagination sizes; no guessed fallback",
   "required_regressions": {
-    "passed": 141,
+    "passed": 143,
     "skipped": 0
   },
   "full_validation": "passed",
   "aws_race": "passed",
-  "production_deployed": false,
-  "exact_installer_acceptance": false,
-  "live_aws_onboarding": "pending",
+  "production_deployed": true,
+  "exact_installer_acceptance": true,
+  "live_aws_onboarding": "not_exercised_no_saved_aws_account",
   "open_issues": [
-    "primary database_recovery_required; internal reason inaccessible",
-    "two SSH failures and one waiting installer require live reconciliation"
+    "Physical cause of observed stored-page corruption is not proven; known controller KHO/CMA vulnerability is mitigated and monitored. Host-level memory/storage evidence remains needed.",
+    "No stored AWS account exists; real credential onboarding and paid EC2 creation are not claimed."
   ],
-  "primary_access": "Remote Desktop offline; secondary SSH identity not authorized",
+  "primary_access": "restored; both managed connections online",
   "evidence": "/root/backups/dob-video-20261023-afternoon",
   "model_api": {
     "requests": 0,
     "tokens": 0,
     "cost_usd": 0
+  },
+  "product_source": "024f24bd3927c410b3e50d0443d107cd15e13ca8",
+  "database_recovery": {
+    "single_page_restored_offline": true,
+    "original_cluster_preserved": true,
+    "full_offline_scan_bad_pages_after": 0,
+    "strict_amcheck": true,
+    "checksum_counters_reset": false,
+    "direct_disk_readback": true,
+    "offhost_snapshot": "d3e5acbb3f9b0496468dd77a23b8cc4735db72ae6bfcfec390970a1275573d2a"
+  },
+  "video_runs": "all three exact runs READY/COMPLETED/PANEL_COMPLETE; panels enabled",
+  "kernel_guard": "both controllers booted with kho=off; CMA counters zero; shared guard, preflight and five-minute monitor installed",
+  "github_ci": {
+    "main": 39962024281,
+    "stable": 39962025783,
+    "conclusion": "success"
+  },
+  "live_browser": {
+    "mobile_accounts_rendered": true,
+    "accounts": 10,
+    "initial_render_ms": 2636,
+    "horizontal_overflow": false,
+    "javascript_errors": 0,
+    "aws_form_rendered": true,
+    "credentials_submitted": false,
+    "readiness": "ready"
   }
 }
