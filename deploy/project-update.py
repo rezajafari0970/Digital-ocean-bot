@@ -23,6 +23,11 @@ PENDING = pathlib.Path("/etc/digital-ocean-bot/deployment.pending")
 INSTALLER_LOCK = "/run/lock/datacenter-bot-installer.lock"
 UPDATE_UNIT = "datacenter-bot-update.service"
 RESTART_UNIT = "datacenter-bot-restart-api.service"
+# Root-owned instance adapters can set these before calling main(). They are
+# never accepted from socket requests or inherited environment variables.
+UPDATE_COMMAND = ["/usr/local/bin/datacenter-bot", "update"]
+API_UNIT = "digital-ocean-bot-api"
+DEPLOY_LOCK = "/opt/.digital-ocean-bot-deploy.lock"
 STAGES = ["Queued", "Checking prerequisites", "Fetching release", "Installing dependencies",
           "Building release", "Backing up and preserving data", "Verifying services and panel", "Update complete"]
 
@@ -204,7 +209,7 @@ def run_update():
                            "HOME": "/root", "LANG": "C.UTF-8", "DEBIAN_FRONTEND": "noninteractive"}
             with (STATE / (state["job_id"] + ".log")).open("w") as log:
                 os.chmod(log.name, 0o600)
-                process = subprocess.Popen(["/usr/local/bin/datacenter-bot", "update"],
+                process = subprocess.Popen(UPDATE_COMMAND,
                                            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                            stderr=subprocess.STDOUT, text=True, env=environment)
                 for line in process.stdout:
@@ -228,17 +233,17 @@ def run_update():
 def restart_api():
     # Wait for the settings response, then serialize with all deployment writers.
     time.sleep(2)
-    fd = os.open("/opt/.digital-ocean-bot-deploy.lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    fd = os.open(DEPLOY_LOCK, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     try:
         fcntl.flock(fd, fcntl.LOCK_EX)
         if PENDING.exists():
             raise RuntimeError("recovery_required")
-        subprocess.run(["systemctl", "restart", "digital-ocean-bot-api"], check=True, timeout=60)
+        subprocess.run(["systemctl", "restart", API_UNIT], check=True, timeout=60)
     finally:
         os.close(fd)
 
 
-if __name__ == "__main__":
+def main():
     os.umask(0o077)
     prepare()
     mode = sys.argv[1] if len(sys.argv) == 2 else ""
@@ -250,3 +255,7 @@ if __name__ == "__main__":
         restart_api()
     else:
         raise SystemExit(64)
+
+
+if __name__ == "__main__":
+    main()

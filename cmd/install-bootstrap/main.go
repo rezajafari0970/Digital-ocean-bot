@@ -14,7 +14,11 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	// Existing installations verify retained row content in the same transaction.
+	// A multi-million-row database needs more than the former two-minute budget.
+	// Keep this bounded and below the installer service deadline; cancellation
+	// still rolls back the migration instead of bypassing retention checks.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {

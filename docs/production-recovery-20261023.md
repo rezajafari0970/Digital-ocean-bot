@@ -34,10 +34,16 @@ Mobile page header/action/status wrapping is corrected without hiding errors. Ac
 
 ## API budget
 
-Authorized OpenAI assistance used two bounded gpt-6.1-sol requests with no retry: recovery review and migration review. Total6487 tokens, estimatedUSD0.05555; capUSD0.50 and three requests. Ledger and response usage under primary evidence root. Credentials remained server-side. No claim of exact billed cost.
+Authorized OpenAI assistance used two bounded gpt-6.1-sol reviews and one gpt-4o-mini-transcribe request for the 32.257-second video audio. The transcription was empty. Total6809 tokens, estimatedUSD0.05716284695; capUSD0.50 and three requests. The request cap is reached; no further paid calls. Ledger and response usage under primary evidence root. Credentials remained server-side. No claim of exact billed cost.
 
 ## Evidence and remaining work
 
 Primary evidence `/root/backups/dob-video-2031-20261023`; secondary `/root/dob-production-recovery-20261023`. Source worktree `/root/projects/dob-production-recovery-20261023`, branch `fix/production-recovery-20261023`; prior authoritative private head e9f13e1404c035a79efe01b47cd3471caf2b6f6d; pinned production public380209b1388ca19ecb92fc9fbfa5b202893764ec.
 
 Remaining: finish new regression/full release/CI and deploy exact candidate to isolated production; verify repeat start/tunnel reconnection/retired-host fencing; complete independently recoverable off-host backup for new instance; inspect final TLS/DNS and residential/output coverage, not just page readiness; remove temporary broad migration key after copying necessary evidence; record final source/public revisions, tests and actual state. No saved AWS account exists; live AWS onboarding/create is not claimed verified. Existing provider capacities, normal expiry/deletion, upstream outages and in-progress DNS transitions must remain honest.
+
+## Populated upgrade limit and instance control
+
+Public51c9618 passed144 mandatory DB/race tests, full release gates, exact clean LXC installation and both branch CI runs. The existing secondary default project installed it successfully. The isolated production upgrade exposed a real scale limit: install-bootstrap canceled retained-row verification after two minutes on the 1.4GB / 2.4-million-row database. Its transaction rolled back, schema stayed194, and the old runtime380209b was restored; readiness and all three workers were verified with zero restarts. The concurrent account lookup index remains in place. No retention guard was disabled. The bounded bootstrap deadline is raised to15minutes, below the45-minute installer budget. Production-sized acceptance remains required.
+
+The update bridge now exposes root-owned module target constants and a callable main entry point, preserving its strict socket action allowlist. A regression proves an independent adapter targets its own updater, lock and API restart service; requests cannot supply commands or paths. This supports isolation of the migrated production updater from the existing default project.

@@ -105,6 +105,31 @@ class UpdateControl(unittest.TestCase):
         self.assertEqual(state["status"], "succeeded")
         self.assertEqual(state["installed_revision"], "1" * 40)
 
+    def test_root_instance_adapter_targets_its_own_runtime(self):
+        class Process:
+            stdout = iter(["[7/7] Done\n"])
+            def wait(self):
+                return 0
+        command = ["/usr/local/sbin/dob-production", "update"]
+        with patch.object(u, "UPDATE_UNIT", "dob-production-update.service"), \
+             patch.object(u, "RESTART_UNIT", "dob-production-restart-api.service"), \
+             patch.object(u, "UPDATE_COMMAND", command), \
+             patch.object(u, "API_UNIT", "dob-production-api"), \
+             patch.object(u, "DEPLOY_LOCK", str(self.root / "production.lock")), \
+             patch.object(u.subprocess, "run") as run, \
+             patch.object(u.subprocess, "Popen", return_value=Process()) as popen, \
+             patch.object(u.time, "sleep"):
+            u.dispatch({"action": "start"})
+            self.assertEqual(run.call_args.args[0][-1], "dob-production-update.service")
+            u.run_update()
+            self.assertEqual(popen.call_args.args[0], command)
+            u.dispatch({"action": "restart_api"})
+            self.assertEqual(run.call_args.args[0][-1], "dob-production-restart-api.service")
+            u.restart_api()
+            self.assertEqual(run.call_args.args[0], ["systemctl", "restart", "dob-production-api"])
+            with self.assertRaises(ValueError):
+                u.dispatch({"action": "start", "command": ["different-target"]})
+
     def test_repeated_restart_replaces_an_active_request(self):
         with patch.object(u.subprocess, "run") as execute:
             u.dispatch({"action": "restart_api"})
