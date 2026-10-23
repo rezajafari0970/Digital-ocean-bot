@@ -10,7 +10,7 @@
  function planLabel(plan,region){
   const x=plan.DetailsByRegion?.[region]||plan;
   const ram=x.MemoryMB>=1024?amount(x.MemoryMB/1024)+' GB':x.MemoryMB+' MB';
-  return plan.ID+' | '+ram+' RAM | '+x.CPU+' vCPU | '+x.DiskGB+' GB disk | '+priceLabel(plan,region);
+  return plan.ID+' | '+priceLabel(plan,region)+' | '+ram+' RAM | '+x.CPU+' vCPU | '+x.DiskGB+' GB disk';
  }
  function status(x){
   if(!x)return 'Not offered in this region';
@@ -37,10 +37,10 @@
      ?'Official OVH catalog '+pricing.CatalogID+' · '+pricing.Subsidiary+' / '+pricing.Currency+' · '+(pricing.Basis==='account_market'?'account market':pricing.Basis==='selected_market'?'selected market':'public reference; account market not verified')+'. Updated '+new Date(pricing.ObservedAt).toLocaleString()+'. Hourly compute + listed local disk; IPv4, network, taxes and other extras excluded. 730-hour amounts are estimates, not monthly caps or invoices.'
      :'OVH prices are temporarily unavailable. Plan discovery remains available. Reload provider data to retry.';
     const refreshSelected=()=>{
-     selected.replaceChildren();
+     selected.replaceChildren();const selectedIDs=new Set();
      for(const name of ['size','size2','size3']){
       const id=root.querySelector('[name='+name+']')?.value,p=(d.plans||[]).find(p=>p.ID===id),price=p?.PricesByRegion?.[r];
-      if(!p)continue;
+      if(!p||selectedIDs.has(id))continue;selectedIDs.add(id);
       const line=document.createElement('p');line.className='muted';
       const meta=p.DetailsByRegion?.[r];
       line.textContent=p.ID+' · '+r+' · '+status(meta)+(meta?' · network '+meta.InboundMbps+'/'+meta.OutboundMbps+' Mbps':'')+(price?' · '+(price.Components||[]).map(c=>c.Name+' ('+c.Quantity+'): '+price.Currency+' '+amount(c.Hourly)+'/h').join(' + '):'');
