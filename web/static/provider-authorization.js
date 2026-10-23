@@ -33,6 +33,7 @@
    const ui=document.createElement('section');ui.id='providerAuthorization';ui.innerHTML='<label class="checkRow"><input type="checkbox" data-auth-manual>Use an existing authorized Consumer key</label><p class="muted" data-auth-help>Enter your two application keys. OVH opens for one-time approval; projects and server options then load automatically.</p><p role="status" aria-live="polite" data-auth-status></p><a class="providerAuthAction" data-auth-link target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hidden>Open OVH and approve access</a><button type="button" class="ghost" data-auth-reset hidden>Cancel this connection request</button>';
    box.before(ui);
    const manual=ui.querySelector('[data-auth-manual]'),status=ui.querySelector('[data-auth-status]'),link=ui.querySelector('[data-auth-link]'),reset=ui.querySelector('[data-auth-reset]'),button=form.querySelector('#discoverAccount');
+   const originalButtonLabel=button.textContent;
    const proxies=['proxy_id','proxy_id2','proxy_id3'].map(n=>form.querySelector('[name='+n+']'));
    let id='',state='',timer=0,closed=false,busy=false,readyNotified=false,route='',approvalWindow=null;
    function remember(value){try{value?sessionStorage.setItem(storageKey,value):sessionStorage.removeItem(storageKey)}catch{}}
@@ -100,7 +101,7 @@
     previewFailed(){if(id&&['READY','VERIFIED'].includes(state))status.textContent='OVH access is approved. Provider options could not be loaded; use Reload provider options to retry.'},
     credential(){if(manual.checked)return null;if(!id||!['READY','VERIFIED'].includes(state))throw Error('Complete OVH authorization first.');if(proxies[0].value!==route)throw Error('Connection changed. Reconnect before saving.');return {authorization_id:id,token:''}},
     complete(){remember('');this.dispose()},
-    dispose(){closed=true;stop();closeBlankApprovalWindow();window.removeEventListener('focus',resume);window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',resume);box.hidden=false;credentialHeading.hidden=false;button.hidden=false;proxies.forEach(x=>{x.inert=false;x.removeAttribute('aria-disabled')});ui.remove()}
+    dispose(){closed=true;stop();closeBlankApprovalWindow();window.removeEventListener('focus',resume);window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',resume);box.hidden=false;credentialHeading.hidden=false;button.hidden=false;button.textContent=originalButtonLabel;proxies.forEach(x=>{x.inert=false;x.removeAttribute('aria-disabled')});ui.remove()}
    };
   }
  };

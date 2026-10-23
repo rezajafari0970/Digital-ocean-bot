@@ -49,6 +49,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    await evaluate('(()=>{document.querySelector("#modalFields [name=name]").value="Automatic fixture";for(const el of document.querySelectorAll("[data-provider-credential]")){if(el.type==="password"){el.value=el.dataset.providerCredential.includes("secret")?"fixture-secret":"fixture-credential";el.dispatchEvent(new Event("input"))}}document.querySelector("#discoverAccount").click()})()');
    if(provider==='aws'){
+    assert.equal(await evaluate('document.querySelector("#discoverAccount").textContent'),'Validate credential & load provider options');
     await waitFor('document.querySelector("#modalError").textContent.includes("InvalidParameterValue")');
     const message=await evaluate('document.querySelector("#modalError").textContent');
     for(const part of ['DescribeRegions','ec2:DescribeRegions','aws-browser-trace','HTTP 400'])assert.ok(message.includes(part));
