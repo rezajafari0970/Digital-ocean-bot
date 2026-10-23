@@ -23,9 +23,10 @@ const authorizationFixtureToken = `{"endpoint":"ovh-eu","application_key":"fixtu
 
 type authorizationFactoryFixture struct {
 	ovh.Factory
-	calls   atomic.Int32
-	checks  atomic.Int32
-	unknown bool
+	calls        atomic.Int32
+	checks       atomic.Int32
+	unknown      bool
+	emptyCatalog bool
 }
 
 func (f *authorizationFactoryFixture) StartAuthorization(ctx context.Context, r providers.OpenRequest) (providers.AuthorizationGrant, error) {
@@ -49,10 +50,10 @@ func (f *authorizationFactoryFixture) Discover(ctx context.Context, r providers.
 	return providers.Discovery{Complete: true, Resolved: map[string]any{"endpoint": "ovh-eu", "project_id": authorizationFixtureProject}, Credentials: previewCredential{b}}, nil
 }
 func (f *authorizationFactoryFixture) Open(context.Context, providers.OpenRequest) (providers.Driver, error) {
-	return authorizationDriverFixture{}, nil
+	return authorizationDriverFixture{emptyCatalog: f.emptyCatalog}, nil
 }
 
-type authorizationDriverFixture struct{}
+type authorizationDriverFixture struct{ emptyCatalog bool }
 
 func (authorizationDriverFixture) Name() string { return "ovh" }
 func (authorizationDriverFixture) Capabilities() providers.Capabilities {
@@ -65,8 +66,11 @@ func (authorizationDriverFixture) Account(context.Context) (providers.Account, e
 func (authorizationDriverFixture) Capacity(context.Context) (providers.Capacity, error) {
 	return providers.Capacity{ComputeLimit: 5, LimitKnown: true}, nil
 }
-func (authorizationDriverFixture) Catalog(context.Context) (providers.Catalog, error) {
-	return providers.Catalog{Regions: []providers.Region{{ID: "GRA11", Available: true}}, Plans: []providers.Plan{{ID: "b3-8", Available: true}}, Images: []providers.Image{{ID: "ubuntu", Available: true}}}, nil
+func (d authorizationDriverFixture) Catalog(context.Context) (providers.Catalog, error) {
+	if d.emptyCatalog {
+		return providers.Catalog{}, nil
+	}
+	return providers.Catalog{Regions: []providers.Region{{ID: "GRA11", Available: true}}, Plans: []providers.Plan{{ID: "b3-8", Available: true}}, Images: []providers.Image{{ID: "ubuntu", Available: true, Family: "ubuntu", Version: "24.04"}}}, nil
 }
 func authorizationTestServer(t *testing.T) (*Server, *authorizationFactoryFixture) {
 	t.Helper()
@@ -156,6 +160,17 @@ func TestProviderAuthorizationJournalConcurrencyRestartAndOwnership(t *testing.T
 	if w.Code != 409 {
 		t.Fatal("changed scope allowed", w.Code)
 	}
+	f.emptyCatalog = true
+	w = authorizationRequest(restarted, "owner", "POST", "/preview", map[string]string{"provider": "ovh", "authorization_id": authorizationFixtureID})
+	if w.Code != 422 || !strings.Contains(w.Body.String(), "provider_catalog_unavailable") {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	pending, e := s.loadAuthorization(context.Background(), "owner", authorizationFixtureID)
+	if e != nil || pending.State != "READY" || len(pending.Cipher.Ciphertext) == 0 {
+		t.Fatal("empty catalog falsely verified or lost approved credentials", e)
+	}
+	assertAuthorizationNoSecret(t, w)
+	f.emptyCatalog = false
 	w = authorizationRequest(restarted, "owner", "POST", "/preview", map[string]string{"provider": "ovh", "authorization_id": authorizationFixtureID})
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
