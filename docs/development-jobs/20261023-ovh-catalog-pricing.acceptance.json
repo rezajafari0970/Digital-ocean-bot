@@ -1,0 +1,120 @@
+{
+  "at": "2026-10-23T03:37:31.027949+00:00",
+  "product_source_revision": "738b28295885b02e54c2e8e92ee51125e103d44c",
+  "public_revision": "98ac1d7222bdf1668e0db12609e9e65912565a65",
+  "status": "deployed_and_live_verified",
+  "hosts": [
+    "serverprojects.ptr.network",
+    "limited-lime.ptr.network"
+  ],
+  "schema": "000194_provider_authorizations",
+  "mandatory_database_race_regressions": 130,
+  "skipped": 0,
+  "github_ci": [
+    {
+      "id": 39895464250,
+      "branch": "main",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39895464250"
+    },
+    {
+      "id": 39895464324,
+      "branch": "stable",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39895464324"
+    }
+  ],
+  "catalog": {
+    "plans": 204,
+    "buildable_somewhere": 82,
+    "priced_plans": 203,
+    "regional_prices": 1440,
+    "unpriced_plans": [
+      "h200-1920-eph"
+    ],
+    "regions": 7,
+    "pricing": {
+      "Status": "available",
+      "Basis": "public_reference",
+      "Subsidiary": "FR",
+      "Currency": "EUR",
+      "Source": "https://eu.api.ovh.com/1.0/order/catalog/public/cloud?ovhSubsidiary=FR",
+      "CatalogID": 9694,
+      "ObservedAt": "2026-10-23T03:33:40.78943232Z",
+      "TaxIncluded": false
+    }
+  },
+  "mobile_browser": {
+    "mobile_accounts_rendered": true,
+    "accounts": 10,
+    "edit": {
+      "open": true,
+      "region": "BHS5",
+      "plans": 82,
+      "prices": true,
+      "all": true,
+      "reference": true,
+      "overflow": false
+    },
+    "changed": {
+      "prices": true,
+      "quota": true,
+      "overflow": false
+    },
+    "ovh": {
+      "region": "SBG5",
+      "planCounts": [
+        82,
+        82,
+        82
+      ],
+      "imageCount": 3,
+      "saveEnabled": true,
+      "overflow": false
+    },
+    "javascript_errors": 0,
+    "provider_mutations": 0
+  },
+  "preservation": {
+    "profile_ownership": {
+      "common": 4148,
+      "unchanged": 4144,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 4,
+      "retired_since_backup": 0,
+      "new_since_backup": 4
+    },
+    "trojan_ownership": {
+      "common": 77,
+      "unchanged": 77,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    }
+  },
+  "provider_mutations_by_acceptance": 0,
+  "openai_api_this_continuation": {
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0
+  },
+  "limits": [
+    "H200 has no price in the observed official catalog.",
+    "FR/EUR prices are public references; account billing market was not verified. Network, IPv4, taxes and other extras are excluded; 730-hour amounts are estimates.",
+    "Catalog capability visibility does not claim GPU, volume-backed, 3-AZ, local-zone or architecture drivers are implemented.",
+    "Physical source of the observed bit corruption remains unresolved; host-level hardware and storage evidence is required."
+  ],
+  "evidence_roots": [
+    "/root/backups/dob-ovh-catalog-freshness-20261023",
+    "/root/backups/dob-ovh-catalog-pricing-20261023",
+    "/var/lib/datacenter-publisher/release-ugg7ors4"
+  ]
+}
