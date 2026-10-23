@@ -3,6 +3,8 @@ package adminapi
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -48,6 +50,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	var starts atomic.Int32
 	var approved atomic.Bool
 	var emptyCatalog atomic.Bool
+	var awsRejected atomic.Bool
 	var activeID atomic.Value
 	mux.HandleFunc("POST /api/v1/providers/ovh/authorizations", func(w http.ResponseWriter, r *http.Request) {
 		var x struct {
@@ -92,6 +95,19 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		if json.NewDecoder(r.Body).Decode(&x) != nil {
 			t.Error("preview request invalid")
 			w.WriteHeader(400)
+			return
+		}
+		if x.Provider == "aws" && !awsRejected.Swap(true) {
+			transport := quotaDiagnosticTransport(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 400, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<Response><Errors><Error><Code>InvalidParameterValue</Code><Message>private-provider-message</Message></Error></Errors></Response>`)), Request: req}, nil
+			})
+			_, err := (aws.Factory{}).Discover(r.Context(), providers.OpenRequest{AccountID: "preview", Credentials: previewCredential{[]byte(x.Token)}, HTTPClient: &http.Client{Transport: transport}}, nil)
+			if err == nil {
+				t.Error("AWS fixture rejection accepted")
+				w.WriteHeader(500)
+				return
+			}
+			writeStagedProviderPreviewError(w, err, previewDiagnosticContext{Provider: "aws", Stage: "discovery", RequestID: "aws-browser-trace", Started: time.Now()})
 			return
 		}
 		time.Sleep(100 * time.Millisecond)

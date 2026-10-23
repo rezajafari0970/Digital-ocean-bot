@@ -1,0 +1,11 @@
+# AWS credential preview repair — 2026-10-23
+
+The 18.11-second recording shows the new AWS account wizard (Aws usman337) failing validation with `provider invalid_request: AWS: REQUEST_REJECTED`. No AWS account is saved on the primary controller. The submitted credentials remain in the user's unsaved form, not in account secrets; neither their correctness nor the original provider error can be reconstructed from this recording. No paid resource was created for this repair.
+
+Reproduced defects: IncompleteSignature, MissingAuthenticationToken, InvalidSignatureException, Blocked and AccountDisabled were flattened to invalid_request; all unrecognized parameter errors lost their exact AWS reason, and the generic preview path did not journal the stage/operation/reference. HTML or malformed error bodies were also attributed to a request rejection. The new provider-specific diagnostic path carries only allowlisted codes/operations and fixed guidance, never raw response messages, headers, keys, account IDs or proxy addresses. Native EC2 and STS XML envelopes are distinguished. Untrusted error bodies stay inconclusive. Existing signing, scope checks, network ownership, retry guards and account policies are unchanged.
+
+The classification regressions failed before the change. Afterward all AWS package race tests and AWS/OVH/UpCloud preview tests passed. Four new named mandatory regressions bring the publisher gate to 138. The mobile browser fixture now exercises real AWS error decoding through the actual UI, preserves the entered credential in the form for an explicit retry, keeps Save unavailable after rejection, and then checks successful preview/recovery without a duplicate automatic submission. A stale browser fixture's OVH field list was updated to include the already-deployed pricing_subsidiary field; its initial failure is retained.
+
+Publication and both-host verification are recorded below after deployment. A fresh user submission through the repaired wizard remains required to identify the actual AWS account/permission/parameter/network cause. Do not claim live AWS onboarding or server creation has passed. Model API usage in this task is zero.
+
+Official contract references: https://docs.aws.amazon.com/ec2/latest/devguide/errors-overview.html and https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRegions.html.

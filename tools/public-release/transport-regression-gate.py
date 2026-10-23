@@ -111,6 +111,9 @@ REQUIRED['internal/adminapi'] += ('TestAccountOptionsUsesActualCatalogFetch',)
 REQUIRED['internal/provisioning'] += ('TestKernelMemoryGuardRootAliasRequiresMountedIdentity',)
 REQUIRED['internal/adminapi'] += ('TestAccountSaveReturnsCommittedRuleReceipt','TestAccountInventoryPendingCreationIsNotForeignOrManaged','TestAccountListNullInventoryDoesNotBreakSavedStatus')
 
+REQUIRED['internal/providers/aws'] += ('TestAWSErrorClassificationPreservesActionableCause','TestAWSNonProviderErrorNeverBlamesCredentials','TestAWSDiagnosticsAllowlistBothEnvelopes')
+REQUIRED['internal/adminapi'] += ('TestAWSPreviewActionableDiagnosticsAndSecretBoundary',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

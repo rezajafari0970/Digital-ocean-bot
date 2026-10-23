@@ -106,7 +106,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	request.Credentials = discovery.Credentials
 	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, request)
 	if err != nil {
-		if x.Provider == "ovh" {
+		if x.Provider == "ovh" || x.Provider == "aws" {
 			fail(err, "credential")
 			return
 		}

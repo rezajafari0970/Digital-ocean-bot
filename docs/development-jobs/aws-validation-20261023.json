@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-23T05:03:59.972165+00:00",
+  "status": "validated_publication_pending_live_credential_retry_required",
+  "input_video": "Screenrecorder-2026-10-23-07-31-12-137.mp4",
+  "duration_seconds": 18.11152,
+  "observed_error": "provider invalid_request: AWS: REQUEST_REJECTED",
+  "aws_accounts_saved": 0,
+  "actual_user_request_cause": "unknown; failed raw credential preview was intentionally not persisted",
+  "fixes": [
+    "AWS native error code and operation diagnostics with local request trace",
+    "correct signature/token and account-locked classifications",
+    "malformed/non-AWS responses do not blame credentials",
+    "secret-free diagnostic journals and UI"
+  ],
+  "required_regressions": 138,
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "cost_usd": 0
+  },
+  "evidence": "/root/backups/dob-aws-validation-20261023",
+  "references": [
+    "https://docs.aws.amazon.com/ec2/latest/devguide/errors-overview.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRegions.html"
+  ]
+}

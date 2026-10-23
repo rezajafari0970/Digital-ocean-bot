@@ -34,7 +34,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   for(const provider of ['aws','ovh']){
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    const fields=await evaluate('[...document.querySelectorAll("[data-provider-credential]")].map(x=>({key:x.dataset.providerCredential,type:x.type}))');
-   assert.equal(fields.length,provider==='aws'?6:5);
+   assert.deepEqual(fields.map(f=>f.key).sort(),(provider==='aws'?['access_key_id','secret_access_key','session_token','region','subnet_id','security_group_ids']:['application_key','application_secret','consumer_key','endpoint','project_id','pricing_subsidiary']).sort());
    for(const f of fields.filter(x=>/secret|key|token/.test(x.key)&&x.key!=='project_id'))assert.equal(f.type,'password');
    const credentialSelector='[data-provider-credential="'+(provider==='aws'?'access_key_id':'application_key')+'"]';
    await evaluate('(()=>{const el=document.querySelector('+JSON.stringify(credentialSelector)+');el.value="fixture-credential";el.dispatchEvent(new Event("input"))})()');
@@ -48,6 +48,18 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   for(const provider of ['aws','ovh']){
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    await evaluate('(()=>{document.querySelector("#modalFields [name=name]").value="Automatic fixture";for(const el of document.querySelectorAll("[data-provider-credential]")){if(el.type==="password"){el.value=el.dataset.providerCredential.includes("secret")?"fixture-secret":"fixture-credential";el.dispatchEvent(new Event("input"))}}document.querySelector("#discoverAccount").click()})()');
+   if(provider==='aws'){
+    await waitFor('document.querySelector("#modalError").textContent.includes("InvalidParameterValue")');
+    const message=await evaluate('document.querySelector("#modalError").textContent');
+    for(const part of ['DescribeRegions','ec2:DescribeRegions','aws-browser-trace','HTTP 400'])assert.ok(message.includes(part));
+    assert.equal(message.includes('private-provider-message'),false);
+    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('document.querySelector("[data-provider-credential=secret_access_key]").value'),'fixture-secret');
+    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+    await evaluate('document.querySelector("#modalError").scrollIntoView({block:"end"})');
+    const errorSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'aws-error-mobile.png'),Buffer.from(errorSnap.data,'base64'));
+    await evaluate('document.querySelector("#discoverAccount").click()');
+   }
    if(provider==='ovh'){
     await waitFor('document.querySelector("[data-auth-link]")&&!document.querySelector("[data-auth-link]").hidden');
     assert.equal(await evaluate('document.querySelector("[data-provider-credential=consumer_key]").closest("label").hidden'),true);

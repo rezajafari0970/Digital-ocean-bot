@@ -156,21 +156,32 @@ func (c *client) call(ctx context.Context, service, action string, q url.Values,
 }
 func classify(op string, status int, b []byte) *providers.Error {
 	var envelope struct {
-		Errors []struct {
+		XMLName xml.Name
+		Errors  []struct {
 			Code string `xml:"Code"`
 		} `xml:"Errors>Error"`
 		Error struct {
 			Code string `xml:"Code"`
 		} `xml:"Error"`
 	}
-	_ = xml.Unmarshal(b, &envelope)
+	if xml.Unmarshal(b, &envelope) != nil || (envelope.XMLName.Local != "Response" && envelope.XMLName.Local != "ErrorResponse") {
+		return wireProblem(problem(providers.ErrorUnavailable, op, "INVALID_ERROR_RESPONSE", status), "NON_AWS_ERROR_RESPONSE", "invalid")
+	}
 	code := envelope.Error.Code
 	if len(envelope.Errors) > 0 {
 		code = envelope.Errors[0].Code
 	}
+	format := "sts_xml"
+	if envelope.XMLName.Local == "Response" {
+		format = "ec2_xml"
+	}
+	if code == "" || len(envelope.Errors) > 1 || (envelope.Error.Code != "" && len(envelope.Errors) != 0) {
+		return wireProblem(problem(providers.ErrorUnavailable, op, "INVALID_ERROR_RESPONSE", status), "INVALID_ERROR_RESPONSE", format)
+	}
+	code = strings.TrimPrefix(code, "Client.")
 	class, label := providers.ErrorUnknown, "REQUEST_FAILED"
 	switch code {
-	case "AuthFailure", "InvalidClientTokenId", "InvalidAccessKeyId", "SignatureDoesNotMatch", "ExpiredToken", "ExpiredTokenException", "RequestExpired":
+	case "IncompleteSignature", "InvalidSignatureException", "MissingAuthenticationToken", "AuthFailure", "InvalidClientTokenId", "InvalidAccessKeyId", "SignatureDoesNotMatch", "ExpiredToken", "ExpiredTokenException", "RequestExpired":
 		class, label = providers.ErrorAuthentication, "AUTHENTICATION_FAILED"
 	case "UnauthorizedOperation", "AccessDenied", "AccessDeniedException", "OperationNotPermitted":
 		class, label = providers.ErrorPermissionDenied, "PERMISSION_DENIED"
@@ -186,6 +197,8 @@ func classify(op string, status int, b []byte) *providers.Error {
 		class, label = providers.ErrorNotFound, "INSTANCE_NOT_FOUND"
 	case "IdempotentParameterMismatch":
 		class, label = providers.ErrorAmbiguousOutcome, "IDEMPOTENT_INTENT_MISMATCH"
+	case "Blocked", "AccountDisabled":
+		class, label = providers.ErrorAccountLocked, "ACCOUNT_LOCKED"
 	case "OptInRequired", "PendingVerification":
 		class, label = providers.ErrorPermissionDenied, "ACCOUNT_ACCESS_REQUIRED"
 	default:
@@ -202,7 +215,7 @@ func classify(op string, status int, b []byte) *providers.Error {
 			class, label = providers.ErrorInvalidRequest, "REQUEST_REJECTED"
 		}
 	}
-	return problem(class, op, label, status)
+	return wireProblem(problem(class, op, label, status), code, format)
 }
 
 // Every page must have the expected collection. Repeated tokens and duplicate
