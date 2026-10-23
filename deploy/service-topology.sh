@@ -12,7 +12,7 @@ DOB_UNIT_ASSETS=(
  digital-ocean-bot-worker.service.d/60-worker-isolation.conf
 )
 DOB_UPDATE_UNITS=(datacenter-bot-update.socket datacenter-bot-update@.service datacenter-bot-update.service datacenter-bot-restart-api.service)
-DOB_HEALTH_UNITS=(datacenter-bot-integrity.service datacenter-bot-integrity.timer)
+DOB_HEALTH_UNITS=(datacenter-bot-integrity.service datacenter-bot-integrity.timer datacenter-bot-host-memory.service datacenter-bot-host-memory.timer)
 DOB_UNIT_ASSETS+=("${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}")
 DOB_CONTROL_FILES=(/usr/local/bin/datacenter-bot /usr/local/lib/datacenter-bot/install.sh /usr/local/lib/datacenter-bot/source)
 
@@ -41,7 +41,7 @@ dob_acquire_deploy_lock() {
 }
 dob_stop_runtime_readers() {
  local unit load active pid
- for unit in datacenter-bot-integrity.timer datacenter-bot-integrity.service; do
+ for unit in datacenter-bot-integrity.timer datacenter-bot-integrity.service datacenter-bot-host-memory.timer datacenter-bot-host-memory.service; do
   if [ "$(systemctl show "$unit" -p LoadState --value)" = loaded ]; then systemctl stop "$unit" || return; fi
  done
  for unit in "${SERVICES[@]}"; do
@@ -189,7 +189,7 @@ dob_backup_runtime() {
  done
  : > "$DOB_BACKUP/active"
  : > "$DOB_BACKUP/enabled"
- for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-bot-update.socket datacenter-bot-integrity.timer; do
+ for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if systemctl is-active --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/active"; fi
   if systemctl is-enabled --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/enabled"; fi
  done
@@ -227,7 +227,7 @@ dob_restore_enablement_before_assets() {
  if [ "$(systemctl show datacenter-bot-update.socket -p LoadState --value)" = loaded ]; then
   systemctl stop datacenter-bot-update.socket || return
  fi
- for unit in "${SERVICES[@]}" datacenter-bot-update.socket datacenter-bot-integrity.timer; do
+ for unit in "${SERVICES[@]}" datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if ! grep -Fxq "$unit" "$DOB_BACKUP/enabled"; then
    load=$(systemctl show "$unit" -p LoadState --value) || return
    case "$load" in

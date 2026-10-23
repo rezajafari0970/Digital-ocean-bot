@@ -116,6 +116,8 @@ REQUIRED['internal/adminapi'] += ('TestAWSPreviewActionableDiagnosticsAndSecretB
 
 REQUIRED['internal/providers/aws'] += ('TestAWSPaginationOperationContracts','TestAWSDiscoveryFollowsRouteTablePageWithValidLimit','TestAWSUnregisteredPaginationFailsBeforeRequest')
 
+REQUIRED['internal/provisioning'] += ('TestControllerKernelMemoryGuardLifecycle','TestControllerKernelMemoryGuardContainerBoundary')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

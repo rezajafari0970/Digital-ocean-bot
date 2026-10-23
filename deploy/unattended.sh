@@ -14,6 +14,7 @@ dob_acquire_deploy_lock
 if [ -f "$ETC/deployment.pending" ]; then
  echo 'An interrupted deployment needs recovery: sudo datacenter-bot recover' >&2; exit 1
 fi
+python3 "$SRC/deploy/host-memory.py" check
 python3 "$SRC/deploy/disk-preflight.py" build
 echo '[3/7] Installing system packages and verified Go toolchain'
 export DEBIAN_FRONTEND=noninteractive
@@ -61,7 +62,7 @@ dob_verify_service_topology
 python3 "$SRC/deploy/install-state.py" complete
 rm -f "$DOB_PENDING"
 trap - ERR
-systemctl enable --now datacenter-bot-integrity.timer
+systemctl enable --now datacenter-bot-integrity.timer datacenter-bot-host-memory.timer
 # Retention is post-commit: a cleanup error must never roll back a healthy release.
 python3 "$SRC/deploy/runtime-retention.py" "$DOB_BACKUP" || echo 'Runtime retention needs attention; copies were preserved.' >&2
 python3 "$SRC/deploy/install-state.py" prune-backups || echo 'Backup retention needs attention; existing copies were preserved.' >&2

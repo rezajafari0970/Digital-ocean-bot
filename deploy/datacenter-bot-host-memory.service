@@ -1,0 +1,14 @@
+[Unit]
+Description=Datacenter controller kernel memory verification
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/datacenter-bot host-memory check
+User=root
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/datacenter-bot-health
+ProtectKernelTunables=yes
+TimeoutStartSec=45

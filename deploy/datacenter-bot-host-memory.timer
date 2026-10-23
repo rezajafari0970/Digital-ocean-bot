@@ -1,0 +1,9 @@
+[Unit]
+Description=Check controller kernel memory after boot and periodically
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+RandomizedDelaySec=15s
+Unit=datacenter-bot-host-memory.service
+[Install]
+WantedBy=timers.target
