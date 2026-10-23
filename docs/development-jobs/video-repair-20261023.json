@@ -1,6 +1,6 @@
 {
-  "status": "validated_publication_pending",
-  "at": "2026-10-23T04:14:38.931146+00:00",
+  "status": "deployed_verified_with_explicit_live_limits",
+  "at": "2026-10-23T04:41:54.644591+00:00",
   "input_video": "Screenrecorder-2026-10-23-07-13-53-755.mp4",
   "duration_seconds": 182.276599,
   "fixes": [
@@ -14,5 +14,195 @@
     "requests": 0,
     "tokens": 0,
     "cost_usd": 0
+  },
+  "product_source": "c3f4bc7c10d06db7a9de42cc1d4da5e45f39b347",
+  "public_release": "d91040bfda6763b7f443253d38312d09620cdf4f",
+  "hosts_verified": 2,
+  "services_verified": 6,
+  "mandatory_regressions_passed": 134,
+  "mandatory_regressions_skipped": 0,
+  "github_ci": [
+    {
+      "branch": "main",
+      "id": 39899796506,
+      "conclusion": "success"
+    },
+    {
+      "branch": "stable",
+      "id": 39899796254,
+      "conclusion": "success"
+    }
+  ],
+  "mobile_browser": "pass",
+  "production_mobile": "pass",
+  "native_reality_links_verified": 4,
+  "actual_https_probes_passed": 4,
+  "latest_live": {
+    "at": "2026-10-23T08:10:15.953479+03:30",
+    "ovh_builds": [
+      {
+        "id": "5a7d4414-cb03-40a0-a24d-06c906306e10",
+        "panel_id": null,
+        "ready_at": null,
+        "lifecycle": "PROVISIONING",
+        "provision": "WAITING_INSTALLER",
+        "deployment": "WAITING_INSTALLER",
+        "last_error": null,
+        "current_step": "panel",
+        "next_retry_at": null,
+        "panel_enabled": null
+      },
+      {
+        "id": "9862a013-e95b-42cd-94d6-a7e174d6b28f",
+        "panel_id": null,
+        "ready_at": null,
+        "lifecycle": "PROVISIONING",
+        "provision": "WAITING_INSTALLER",
+        "deployment": "WAITING_INSTALLER",
+        "last_error": null,
+        "current_step": "panel",
+        "next_retry_at": null,
+        "panel_enabled": null
+      },
+      {
+        "id": "be8b27f4-60c2-4ea5-9528-7c8f00c5483b",
+        "panel_id": null,
+        "ready_at": null,
+        "lifecycle": "PROVISIONING",
+        "provision": "WAITING_INSTALLER",
+        "deployment": "WAITING_INSTALLER",
+        "last_error": null,
+        "current_step": "panel",
+        "next_retry_at": null,
+        "panel_enabled": null
+      }
+    ],
+    "ovh_resources": {
+      "active": 4,
+      "data_available": true,
+      "managed": 4,
+      "pending_creation": 0,
+      "total": 4,
+      "unmanaged": 0
+    },
+    "ovh_inventory": [
+      {
+        "id": "3d12417b-be7d-4877-bf37-448fc1ade244",
+        "status": "ready",
+        "lifecycle_state": "READY",
+        "ownership": "managed"
+      },
+      {
+        "id": "9b8c52e8-6938-416c-897b-6405cc3c2c43",
+        "status": "ready",
+        "lifecycle_state": "PROVISIONING",
+        "ownership": "managed"
+      },
+      {
+        "id": "d1899fb6-f83a-4215-9d2f-1494b17af846",
+        "status": "ready",
+        "lifecycle_state": "PROVISIONING",
+        "ownership": "managed"
+      },
+      {
+        "id": "32c52375-9f3d-458a-997b-fd4f5d15d801",
+        "status": "ready",
+        "lifecycle_state": "PROVISIONING",
+        "ownership": "managed"
+      }
+    ],
+    "ovh_settings": {
+      "desired_server_count": 10,
+      "lifetime_min_seconds": 59580,
+      "lifetime_max_seconds": 60360,
+      "build_spacing_minutes": 39,
+      "build_spacing_max_minutes": 96,
+      "regions": [
+        "BHS5",
+        "SBG5",
+        "GRA11",
+        "GRA11",
+        "RBX-A"
+      ],
+      "sizes": [
+        "d2-4",
+        "d2-4",
+        "d2-4"
+      ],
+      "images": [
+        "ovh-ubuntu-26.04",
+        "ovh-ubuntu-26.04",
+        "ovh-ubuntu-26.04"
+      ],
+      "rule_application": {
+        "detail": "Existing servers keep their recorded lifetime; new builds use current rules.",
+        "status": "FUTURE_ONLY",
+        "revision": 1,
+        "updated_at": "2026-10-23T03:45:24.145492+00:00",
+        "next_action_at": null,
+        "shrink_pending": false,
+        "waiting_reason": "",
+        "apply_to_existing": false,
+        "retirement_started": false,
+        "waiting_droplet_id": null,
+        "replacement_revision": null,
+        "waiting_previous_state": "READY"
+      }
+    },
+    "account_output": {
+      "DIRECT": {
+        "configs": 5,
+        "bytes": 1418,
+        "sha256": "6393b2fc6bd1d6a809e04544728d69ca79052f98b47d7e099ee01142b68e78a2"
+      },
+      "RESIDENTIAL": {
+        "configs": 5,
+        "bytes": 1418,
+        "sha256": "58190da9152b3a2b668bcf583e36994e86606ee33866552774ce917edb9db52f"
+      }
+    },
+    "global_output": {
+      "ALL": {
+        "configs": 736,
+        "bytes": 202132
+      },
+      "DIRECT": {
+        "configs": 368,
+        "bytes": 101066
+      },
+      "RESIDENTIAL": {
+        "configs": 368,
+        "bytes": 101066
+      }
+    },
+    "routing": {
+      "total_panels": 80,
+      "verified_panels": 80,
+      "failed_panels": 0,
+      "configured_proxies": 12,
+      "healthy_proxies": 9
+    },
+    "status": "observed"
+  },
+  "remaining": [
+    "three normal installer builds and target backfill",
+    "external residential endpoint availability fluctuates",
+    "physical cache corruption cause unestablished",
+    "fresh TLS/WebSocket/Trojan connection tests outside this acceptance scope"
+  ],
+  "cache_integrity": {
+    "at": "2026-10-23T04:38:38.906984+00:00",
+    "caches": [
+      {
+        "path": "/root/.cache/go-build",
+        "checked": 1030,
+        "bad": []
+      },
+      {
+        "path": "/var/cache/datacenter-bot/go-build",
+        "checked": 3348,
+        "bad": []
+      }
+    ]
   }
 }
