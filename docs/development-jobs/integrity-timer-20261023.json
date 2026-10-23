@@ -1,6 +1,6 @@
 {
   "at": "2026-10-23T14:28:14.017794+00:00",
-  "status": "source_verified_release_pending",
+  "status": "deployed_and_verified_external_limits_remain",
   "base": "bacb15919710ee3f5ed2fa5669e63739e56a439c",
   "old_timer_regression": "FAIL active/elapsed with infinite next deadline",
   "new_timer_regressions": 2,
@@ -10,5 +10,77 @@
     "requests": 0,
     "tokens": 0,
     "usd": 0
+  },
+  "product_source": "dd1f8fc765e0b7f2ae470f4c858292131625f8c1",
+  "public_revision": "380209b1388ca19ecb92fc9fbfa5b202893764ec",
+  "accepted_at": "2026-10-23T18:07:29.373262+03:30",
+  "mandatory_regressions": 143,
+  "mandatory_skips": 0,
+  "real_systemd_regressions": 2,
+  "github_ci": [
+    {
+      "id": 39970651417,
+      "branch": "stable",
+      "sha": "380209b1388ca19ecb92fc9fbfa5b202893764ec",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39970651417"
+    },
+    {
+      "id": 39970651276,
+      "branch": "main",
+      "sha": "380209b1388ca19ecb92fc9fbfa5b202893764ec",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/39970651276"
+    }
+  ],
+  "primary_preservation": {
+    "profile_ownership": {
+      "common": 4484,
+      "unchanged": 4484,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 8
+    },
+    "trojan_ownership": {
+      "common": 77,
+      "unchanged": 77,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    }
+  },
+  "secondary_preservation": {
+    "profile_ownership": {
+      "common": 0,
+      "unchanged": 0,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    },
+    "trojan_ownership": {
+      "common": 0,
+      "unchanged": 0,
+      "unexpected_changes": 0,
+      "confirmed_expired_retirements": 0,
+      "confirmed_initial_activations": 0,
+      "confirmed_preupdate_initial_activations": 0,
+      "retired_since_backup": 0,
+      "new_since_backup": 0
+    }
+  },
+  "next_inspections_utc": {
+    "primary": "Fri 2026-10-23 18:00:36 UTC",
+    "secondary": "Fri 2026-10-23 18:04:30 UTC"
   }
 }
