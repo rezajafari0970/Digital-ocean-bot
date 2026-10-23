@@ -29,6 +29,7 @@ REQUIRED = {
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestLatestAccountSnapshotBoundsHistoryReads",
         "TestProviderAuthorizationJournalConcurrencyRestartAndOwnership",
         "TestProviderAuthorizationUnknownExpiryAndRetainedKeys",
         "TestProviderAuthorizationAtomicAccountHandoff",

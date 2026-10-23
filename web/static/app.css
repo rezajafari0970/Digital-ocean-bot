@@ -50,3 +50,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #accountCredentialHelp{display:block;overflow-wrap:anywhere;white-space:pre-wrap}
 
 #providerAuthorization{margin:14px 0;overflow-wrap:anywhere}#providerAuthorization .providerAuthAction{display:block;padding:12px 14px;margin:10px 0;border-radius:10px;background:#4f7cff;color:#fff;text-decoration:none;text-align:center;font-weight:600}#providerAuthorization [data-auth-reset]{width:100%;margin-bottom:10px}
+
+/* Keep health messages and actions readable at narrow phone widths. */
+header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;max-width:100%}header .pill{display:inline-block;max-width:100%;white-space:normal;overflow-wrap:normal;word-break:normal}header h2{min-width:0}.cardHeader{gap:12px;flex-wrap:wrap}.statusBadge{flex-shrink:0;white-space:nowrap}.statusBadge:before{flex-shrink:0}

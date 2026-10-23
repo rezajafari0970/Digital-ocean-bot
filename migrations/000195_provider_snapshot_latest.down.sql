@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_provider_snapshots_account_latest;
