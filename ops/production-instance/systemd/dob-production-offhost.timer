@@ -1,0 +1,9 @@
+[Unit]
+Description=Hourly encrypted production backup replication
+[Timer]
+OnBootSec=10min
+OnCalendar=hourly
+RandomizedDelaySec=5min
+Persistent=true
+[Install]
+WantedBy=timers.target

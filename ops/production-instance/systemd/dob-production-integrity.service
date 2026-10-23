@@ -1,0 +1,16 @@
+[Unit]
+Description=Production instance verified database integrity and backup
+After=postgresql@18-production.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/dob-production/support/database-integrity.py
+TimeoutStartSec=75min
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+UMask=0077
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=full
+BindReadOnlyPaths=/etc/dob-production:/etc/digital-ocean-bot
+BindPaths=/var/lib/dob-production-health:/var/lib/datacenter-bot-health /var/backups/dob-production-daily:/var/backups/datacenter-bot-daily

@@ -1,0 +1,9 @@
+[Unit]
+Description=Production integrity inspection and backup schedule
+[Timer]
+OnBootSec=15min
+OnCalendar=*-*-* 00/6:00:00 UTC
+RandomizedDelaySec=5min
+Persistent=true
+[Install]
+WantedBy=timers.target

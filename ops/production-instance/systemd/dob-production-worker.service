@@ -1,0 +1,53 @@
+# /etc/systemd/system/digital-ocean-bot-worker.service
+[Unit]
+Description=Digital Ocean Bot Worker
+After=network-online.target postgresql@18-production.service dob-production-integrity.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+NotifyAccess=main
+WatchdogSec=45
+WatchdogSignal=SIGKILL
+TimeoutStartSec=15min
+User=digitaloceanbot
+Group=digitaloceanbot
+WorkingDirectory=/opt/dob-production
+EnvironmentFile=/etc/dob-production/env
+ExecStart=/opt/dob-production/bin/digital-ocean-bot-worker --role=control
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=90
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/digital-ocean-bot
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/digital-ocean-bot-worker.service.d/60-worker-isolation.conf
+[Service]
+Type=notify
+NotifyAccess=main
+WatchdogSec=45
+WatchdogSignal=SIGKILL
+TimeoutStartSec=15min
+RestartSec=15
+ExecStart=
+ExecStart=/opt/dob-production/bin/digital-ocean-bot-worker --role=control
+TimeoutStopSec=90
+KillMode=control-group
+MemoryHigh=256M
+MemoryMax=512M
+TasksMax=256
+LimitNOFILE=8192
+
+[Service]
+BindPaths=/var/lib/dob-production:/var/lib/digital-ocean-bot
+BindReadOnlyPaths=/etc/dob-production:/etc/digital-ocean-bot
+ReadWritePaths=/var/lib/dob-production

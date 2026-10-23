@@ -1,0 +1,74 @@
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service
+[Unit]
+Description=Digital Ocean Bot Panel Worker
+After=network-online.target postgresql@18-production.service dob-production-integrity.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+NotifyAccess=main
+WatchdogSec=45
+WatchdogSignal=SIGKILL
+TimeoutStartSec=15min
+User=digitaloceanbot
+Group=digitaloceanbot
+WorkingDirectory=/opt/dob-production
+EnvironmentFile=/etc/dob-production/env
+ExecStart=/opt/dob-production/bin/digital-ocean-bot-worker --role=panels
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=90
+KillMode=control-group
+MemoryHigh=256M
+MemoryMax=512M
+TasksMax=256
+LimitNOFILE=8192
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/digital-ocean-bot
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/90-residential-allowlist.conf
+[Service]
+Environment="DOB_RESIDENTIAL_ALLOWLIST_PANELS=all"
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/91-residential-client-paths.conf
+[Service]
+Environment="DOB_RESIDENTIAL_CLIENT_PATHS_PANELS=all"
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/92-residential-categories.conf
+[Service]
+Environment=DOB_RESIDENTIAL_CATEGORIES_PANELS=all
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/93-upcloud-socks-relays.conf
+[Service]
+Environment=DOB_UPCLOUD_RELAY_PANELS=all
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/94-upcloud-expanded-relays.conf
+[Service]
+Environment="DOB_UPCLOUD_RELAY_EXPANDED_PANELS=all"
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/96-output-observation.conf
+# Task output-proof-reliability-20261016
+[Service]
+Environment=DOB_CONFIG_OBSERVATION_PANELS=all
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/97-proof-capacity.conf
+# Task output-proof-reliability-20261016
+[Service]
+Environment=DOB_RESIDENTIAL_PROOF_CONCURRENCY=18
+
+# /etc/systemd/system/digital-ocean-bot-worker-panels.service.d/98-google-ads-selective.conf
+[Service]
+Environment="DOB_RESIDENTIAL_GOOGLE_ADS_SELECTIVE_PANELS=all"
+
+[Service]
+BindPaths=/var/lib/dob-production:/var/lib/digital-ocean-bot
+BindReadOnlyPaths=/etc/dob-production:/etc/digital-ocean-bot
+ReadWritePaths=/var/lib/dob-production

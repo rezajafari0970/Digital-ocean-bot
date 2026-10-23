@@ -1,0 +1,13 @@
+[Unit]
+Description=Production instance fixed update control
+[Socket]
+ListenStream=/run/dob-production/update.sock
+SocketUser=root
+SocketGroup=digitaloceanbot
+SocketMode=0660
+DirectoryMode=0755
+Accept=yes
+MaxConnections=16
+RemoveOnStop=yes
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Restrict isolated controller ingress to loopback tunnel
+Before=dob-production-api.service
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/sbin/nft -f /etc/dob-production/ingress.nft
+[Install]
+WantedBy=multi-user.target

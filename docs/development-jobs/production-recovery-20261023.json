@@ -1,0 +1,45 @@
+{
+  "id": "production-recovery-20261023",
+  "status": "deployed_with_external_limitations",
+  "updated_at": "2026-10-23T18:54:29.617052+00:00",
+  "public_revision": "17a1ce99f3e52a9151baaa0f9228b73ec381decf",
+  "product_revision": "889070fcbee68a212e246a487afeabbf588c6003",
+  "schema": "000195_provider_snapshot_latest",
+  "mandatory_regressions": 144,
+  "ci": {
+    "main": 40003899321,
+    "stable": 40003899945,
+    "result": "success"
+  },
+  "mobile_checks": 24,
+  "api_endpoints_passed": 12,
+  "restored_tables": 167,
+  "restored_rows": 2415797,
+  "openai": {
+    "requests": 3,
+    "tokens": 6809,
+    "estimated_usd": 0.05716284695,
+    "budget_usd": 0.5,
+    "max_requests": 3
+  },
+  "limitations": [
+    "Cloudflare enabled-zone capacity200 versus selected two-record rotation policy; no policy change authorized by an answer",
+    "Original host physical corruption cause unproven; database/workers quarantined",
+    "No saved AWS account; real AWS onboarding/EC2 creation unverified"
+  ],
+  "report": "docs/production-recovery-20261023.md",
+  "offhost_restore": {
+    "ok": true,
+    "at": "2026-10-23T18:52:09.862693+00:00",
+    "snapshot": "09a04bdd63e7aea487c76b14d70099a51d0f1864560302c4c3604ccdf4182d5b",
+    "dump": "20261023T184952.377876Z",
+    "dump_bytes": 490141786,
+    "sealed_hashes_verified": true,
+    "full_dump_parse": true,
+    "master_key_matches": true,
+    "operations_included": true,
+    "transient_deployment_marker_absent": true
+  },
+  "temporary_access_removed": true,
+  "public_gateway_ready": true
+}

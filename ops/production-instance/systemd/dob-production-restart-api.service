@@ -1,0 +1,8 @@
+[Unit]
+Description=Production instance serialized API restart
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/libexec/dob-production/update-bridge.py restart-api
+TimeoutStartSec=45min
+User=root
+UMask=0077

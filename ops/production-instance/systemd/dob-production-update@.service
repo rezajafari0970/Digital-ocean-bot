@@ -1,0 +1,9 @@
+[Unit]
+Description=Production instance update request
+[Service]
+ExecStart=/usr/bin/python3 -I /usr/local/libexec/dob-production/update-bridge.py control
+StandardInput=socket
+StandardOutput=inherit
+RuntimeMaxSec=20
+User=root
+UMask=0077

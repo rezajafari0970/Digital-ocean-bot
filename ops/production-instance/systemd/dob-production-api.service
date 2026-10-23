@@ -1,0 +1,40 @@
+# /etc/systemd/system/digital-ocean-bot-api.service
+[Unit]
+Description=Digital Ocean Bot API
+After=network-online.target postgresql@18-production.service dob-production-integrity.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=digitaloceanbot
+Group=digitaloceanbot
+WorkingDirectory=/opt/dob-production
+EnvironmentFile=/etc/dob-production/env
+ExecStart=/opt/dob-production/bin/digital-ocean-bot-api
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/digital-ocean-bot
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/digital-ocean-bot-api.service.d/60-worker-isolation.conf
+[Service]
+Environment=DOB_WORKER_MODE=split
+Environment=DOB_DATABASE_HEALTH_FILE=/var/lib/dob-production-health/integrity.json
+
+# /etc/systemd/system/digital-ocean-bot-api.service.d/96-output-observation.conf
+# Task output-proof-reliability-20261016
+[Service]
+Environment=DOB_CONFIG_OBSERVATION_PANELS=all
+
+[Service]
+BindPaths=/var/lib/dob-production:/var/lib/digital-ocean-bot
+BindReadOnlyPaths=/etc/dob-production:/etc/digital-ocean-bot
+ReadWritePaths=/var/lib/dob-production
