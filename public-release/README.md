@@ -186,3 +186,28 @@ Validation failures show the stage, endpoint, safe route template, reason and
 reference ID. Logs contain only fixed diagnostic values, never credentials or
 raw provider responses. `PERMISSION_DENIED` without a recognized API reason
 does not establish that the credentials themselves are invalid.
+
+### Database integrity and backup retention
+
+Installed releases check database integrity before stopping the running application.
+A root-owned systemd timer repeats the check every six hours and creates a private,
+validated database/configuration backup at most once per day. Seven daily copies,
+three completed installer backups and two completed runtime rollback copies are
+retained. Legacy, incomplete and damaged copies are preserved for investigation.
+Backups contain secrets and are stored with root-only permissions.
+
+Readiness includes PostgreSQL checksum statistics, protective write settings,
+the latest integrity report and local database free space. New checksum failures,
+changed database identity, stale inspection, failed backup or low disk space cannot
+appear as a healthy database. Checks do not delete rows, reset statistics, disable
+checksums or restore old data automatically.
+
+Run `sudo datacenter-bot database-check --backup` to check and back up now.
+After independently verifying a completed database repair, an administrator can
+run `sudo datacenter-bot database-check --acknowledge-repair`; this still runs the
+integrity inspection before acknowledging the historical failure watermark.
+A transient connection failure is retried by the timer without changing data.
+
+`pg_amcheck` detects supported structural corruption but cannot prove that storage
+will never fail. Local backups do not protect against loss of the whole host.
+Maintain a separately secured off-host backup and test restoration regularly.

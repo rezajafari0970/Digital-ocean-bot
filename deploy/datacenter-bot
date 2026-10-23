@@ -6,6 +6,11 @@ case "${1:-status}" in
  status) systemctl --no-pager --full status digital-ocean-bot-api digital-ocean-bot-worker digital-ocean-bot-worker-panels ;;
  version) cat /opt/digital-ocean-bot/build-manifest.json ;;
  logs) exec journalctl -u digital-ocean-bot-api -u digital-ocean-bot-worker -u digital-ocean-bot-worker-panels --no-pager -n 100 ;;
+ database-check)
+  [ "$(id -u)" = 0 ] || { echo 'Run with sudo.' >&2; exit 1; }
+  SRC=$(cat /usr/local/lib/datacenter-bot/source)
+  shift
+  exec python3 "$SRC/deploy/database-integrity.py" "$@" ;;
  recover)
   [ "$(id -u)" = 0 ] || { echo 'Run with sudo.' >&2; exit 1; }
   pending=/etc/digital-ocean-bot/deployment.pending
@@ -17,5 +22,5 @@ case "${1:-status}" in
   [[ "$DOB_BACKUP" = /opt/digital-ocean-bot.rollback.* ]] || exit 1
   export SRC DOB_BACKUP
   exec bash "$SRC/deploy/recover.sh" ;;
- *) echo 'Usage: datacenter-bot {update|status|version|logs|recover}'; exit 64 ;;
+ *) echo 'Usage: datacenter-bot {update|status|version|logs|recover|database-check}'; exit 64 ;;
 esac

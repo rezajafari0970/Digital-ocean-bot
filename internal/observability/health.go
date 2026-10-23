@@ -18,9 +18,10 @@ type Report struct {
 	At     time.Time `json:"at"`
 }
 type Health struct {
-	DB            *sql.DB
-	RequireWorker bool
-	WorkerMode    string
+	DB                  *sql.DB
+	RequireWorker       bool
+	WorkerMode          string
+	IntegrityReportPath string
 }
 
 func (h Health) Readiness(ctx context.Context) Report {
@@ -38,6 +39,13 @@ func (h Health) Readiness(ctx context.Context) Report {
 	if err != nil {
 		c.Message = "unavailable"
 		r.Status = "not_ready"
+	}
+	if ok {
+		if reason := h.databaseIntegrity(checkCtx); reason != "" {
+			c.OK = false
+			c.Message = reason
+			r.Status = "not_ready"
+		}
 	}
 	r.Checks = append(r.Checks, c)
 	if ok && h.RequireWorker {

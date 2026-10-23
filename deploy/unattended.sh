@@ -33,6 +33,8 @@ install -d -o digitaloceanbot -g digitaloceanbot -m 0750 "$DATA" "$DATA/template
 install -d -o digitaloceanbot -g digitaloceanbot -m 0700 "$DATA/browser-sessions"
 install -d -o root -g digitaloceanbot -m 0750 "$ETC"
 python3 "$SRC/deploy/install-state.py" prepare
+# Inspect while the previous release still serves requests.
+python3 "$SRC/deploy/database-integrity.py"
 python3 "$SRC/deploy/disk-preflight.py" publish --etc "$ETC"
 echo '[5/7] Publishing, applying migrations and preserving users'
 dob_backup_runtime
@@ -59,6 +61,10 @@ dob_verify_service_topology
 python3 "$SRC/deploy/install-state.py" complete
 rm -f "$DOB_PENDING"
 trap - ERR
+systemctl enable --now datacenter-bot-integrity.timer
+# Retention is post-commit: a cleanup error must never roll back a healthy release.
+python3 "$SRC/deploy/runtime-retention.py" "$DOB_BACKUP" || echo 'Runtime retention needs attention; copies were preserved.' >&2
+python3 "$SRC/deploy/install-state.py" prune-backups || echo 'Backup retention needs attention; existing copies were preserved.' >&2
 echo '[7/7] Installation/update verified'
 echo "Installed revision: $BUILD_COMMIT"
 echo 'Update command: sudo datacenter-bot update'

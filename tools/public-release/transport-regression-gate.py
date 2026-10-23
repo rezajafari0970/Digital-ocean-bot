@@ -183,6 +183,7 @@ def main(repo):
         if result.returncode:
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
+        subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/provider-authorization-urls.cjs'], cwd=repo, env=env, check=True, timeout=30)
         print(json.dumps({'gate': 'transport_and_fleet_regressions', 'required_passed': count, 'skipped': 0, 'database': 'disposable_private_socket_only'}), flush=True)
     finally:

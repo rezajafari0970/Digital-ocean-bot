@@ -1,0 +1,15 @@
+[Unit]
+Description=Datacenter Bot database integrity and daily backup
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/datacenter-bot database-check --backup
+TimeoutStartSec=75min
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+UMask=0077
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=full

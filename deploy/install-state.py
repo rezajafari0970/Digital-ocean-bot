@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import datetime,json,os,pathlib,runpy,secrets,shutil,subprocess,sys,tarfile
+import datetime,json,os,pathlib,runpy,secrets,shutil,subprocess,sys,tarfile,tempfile
+from backup_store import seal,prune
 from urllib.parse import urlsplit,unquote
 ROOT=pathlib.Path(__file__).resolve().parent
 helpers=runpy.run_path(str(ROOT/'bootstrap.py'))
@@ -54,7 +55,9 @@ def bootstrap(app):
 def backup():
  if not pathlib.Path('/opt/digital-ocean-bot/build-manifest.json').exists(): return
  b=pathlib.Path('/var/backups/datacenter-bot')/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
- b.mkdir(parents=True,mode=0o700);os.chmod(b.parent,0o700)
+ b.parent.mkdir(parents=True,mode=0o700,exist_ok=True);os.chmod(b.parent,0o700)
+ target=b
+ b=pathlib.Path(tempfile.mkdtemp(prefix='.pending-',dir=target.parent))
  shutil.copytree(ETC,b/'configuration')
  with (b/'database.dump').open('wb') as out:
   p=subprocess.run(['pg_dump','--format=custom','--no-owner'],env=db_env(),stdout=out,stderr=subprocess.PIPE,timeout=600)
@@ -75,7 +78,8 @@ def backup():
  fd=os.open(b,os.O_DIRECTORY)
  try:os.fsync(fd)
  finally:os.close(fd)
- print('Private database/configuration backup: '+str(b))
+ seal(b,target)
+ print('Private database/configuration backup: '+str(target))
 def complete():
  if STATE.exists():
   state=json.loads(STATE.read_text());state['status']='installed';atomic(STATE,json.dumps(state)+'\n')
@@ -87,6 +91,9 @@ def main():
  elif mode=='bootstrap':bootstrap(sys.argv[2])
  elif mode=='backup':backup()
  elif mode=='complete':complete()
+ elif mode=='prune-backups':
+  root=pathlib.Path('/var/backups/datacenter-bot')
+  if root.exists():print('Expired verified backups removed: '+str(len(prune(root,keep=3))))
  elif mode=='address':status()
  else:raise RuntimeError('Unknown installer operation')
 if __name__=='__main__':
