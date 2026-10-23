@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-23T14:28:14.017794+00:00",
+  "status": "source_verified_release_pending",
+  "base": "bacb15919710ee3f5ed2fa5669e63739e56a439c",
+  "old_timer_regression": "FAIL active/elapsed with infinite next deadline",
+  "new_timer_regressions": 2,
+  "aws_live": "blocked_no_saved_account",
+  "physical_corruption_cause": "unresolved_guest_evidence_only",
+  "model_api": {
+    "requests": 0,
+    "tokens": 0,
+    "usd": 0
+  }
+}

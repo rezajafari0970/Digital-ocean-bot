@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Run inside the isolated publisher test container, never production."""
-import argparse,hashlib,json,os,pathlib,secrets,subprocess,urllib.request,urllib.error
+import argparse,hashlib,json,os,pathlib,secrets,subprocess,time,urllib.request,urllib.error
 BASE='http://127.0.0.1:18080'
 def request(path,payload=None,token='',grant=''):
  headers={'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Bootstrap-Token':grant}
@@ -35,6 +35,17 @@ def main():
  for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
   subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)
  assert subprocess.run(['systemctl','is-active','--quiet','digital-ocean-bot-vultr-browser-manager']).returncode!=0
+ # A timer may be active/elapsed with no future execution. Require an armed
+ # schedule and exercise stale-boot/restart behavior with disposable units.
+ subprocess.run(['python3',source+'/deploy/health_timers_test.py'],check=True)
+ for timer in ['datacenter-bot-integrity.timer','datacenter-bot-host-memory.timer']:
+  subprocess.run(['systemctl','is-enabled','--quiet',timer],check=True)
+  deadline=time.monotonic()+10
+  while True:
+   props=dict(line.split('=',1) for line in subprocess.check_output(['systemctl','show',timer,'-p','ActiveState','-p','SubState','-p','NextElapseUSecRealtime','-p','NextElapseUSecMonotonic'],text=True).splitlines())
+   if props['ActiveState']=='active' and props['SubState']=='waiting' and any(props[k] not in ('','0','infinity','n/a') for k in ['NextElapseUSecRealtime','NextElapseUSecMonotonic']):break
+   assert time.monotonic()<deadline,props
+   time.sleep(0.1)
  if snapshot.exists():assert json.loads(snapshot.read_text())==fingerprints(),'Update changed credentials/identity'
  if not password_file.exists():
   status,result=request('/api/v1/auth/login',{'username':'admin','password':'admin'})

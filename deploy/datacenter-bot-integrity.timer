@@ -3,7 +3,9 @@ Description=Regular Datacenter Bot database inspection
 
 [Timer]
 OnBootSec=15min
-OnUnitActiveSec=6h
+# Calendar scheduling always has a future deadline, including after a reboot
+# with a persisted trigger stamp and no service activation in this boot.
+OnCalendar=*-*-* 00/6:00:00 UTC
 RandomizedDelaySec=5min
 Persistent=true
 
