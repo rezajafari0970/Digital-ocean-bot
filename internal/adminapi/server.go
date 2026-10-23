@@ -14,6 +14,7 @@ import (
 )
 
 type Server struct {
+	OutputDiagnostics  repeatedOutputDiagnostics
 	Updater            updateController
 	ListenPort         int
 	WebPath            string

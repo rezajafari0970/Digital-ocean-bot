@@ -62,7 +62,7 @@ def main():
   # Copy only the credential-free gate into candidate evidence; HERE stays private.
   regression_gate=run_dir/'transport-regression-gate.py'
   shutil.copyfile(HERE/'transport-regression-gate.py',regression_gate);regression_gate.chmod(0o644)
-  script.write_text('set -euo pipefail\ncd "$1"\npython3 "$2" "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\npython3 deploy/project_update_test.py\nnode --check web/static/app.js\nnode --check web/static/panel-settings.js\nnode --test web/tests/output_live.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
+  script.write_text('set -euo pipefail\ncd "$1"\npython3 "$2" "$1"\ngo test ./...\ngo vet ./...\npython3 deploy/bootstrap_test.py\npython3 deploy/project_update_test.py\npython3 deploy/host_protection_test.py\nnode --check web/static/app.js\nnode --check web/static/panel-settings.js\nnode --test web/tests/output_live.cjs\nbash -n install.sh\nfor f in deploy/*.sh deploy/datacenter-bot; do bash -n "$f"; done\n')
   script.chmod(0o755)
   with (run_dir/'validation.log').open('w') as log:
    run(['systemd-run','--quiet','--wait','--pipe','--collect',

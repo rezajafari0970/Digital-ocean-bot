@@ -71,7 +71,7 @@ func (s *Server) refreshPanelOutput(parent context.Context, p readyworker.Panel)
 	})
 	if err != nil {
 		log.Printf("output refresh panel=%s lock_error=%v", p.ID, err)
-	} else if !acquired {
+	} else if !acquired && s.OutputDiagnostics.shouldLog(p.ID+":lock", "busy", time.Now()) {
 		log.Printf("output refresh panel=%s skipped=config_lock_busy", p.ID)
 	}
 	return ""
@@ -97,7 +97,7 @@ func (s *Server) refreshPanelOutputLocked(parent context.Context, p readyworker.
 		if err := s.persistOutputSnapshotOwned(ctx, p.ID, records, structures); err != nil {
 			return ""
 		}
-		if len(records) == 0 {
+		if len(records) == 0 && s.OutputDiagnostics.shouldLog(p.ID+":empty", "empty", time.Now()) {
 			log.Printf("output refresh panel=%s empty_output", p.ID)
 		}
 		return ""
@@ -303,7 +303,10 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			}
 		}
 	}
-	log.Printf("output collect panel=%s host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", p.ID, host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
+	summary := fmt.Sprintf("host=%s raw=%d invalid_json=%d disabled=%d non_vless=%d missing_key=%d no_clients=%d not_reality=%d no_names=%d no_shorts=%d export_errors=%d generated=%d", host, rawCount, invalidJSON, disabled, nonVLESS, missingKey, noClients, notReality, noNames, noShorts, exportErrors, generated)
+	if s.OutputDiagnostics.shouldLog(p.ID+":collect", summary, time.Now()) {
+		log.Printf("output collect panel=%s %s", p.ID, summary)
+	}
 	return records, structures, true
 }
 
