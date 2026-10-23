@@ -29,6 +29,13 @@ type CatalogReader interface {
 	Catalog(context.Context) (Catalog, error)
 }
 
+// VersionedCatalogReader opts into independently refreshed, credential-scoped
+// metadata. Bump the version whenever old persisted catalog data is incompatible.
+type VersionedCatalogReader interface {
+	CatalogReader
+	CatalogCacheVersion() string
+}
+
 type ComputeDriver interface {
 	CreateServer(context.Context, CreateServerRequest) (CreateServerResult, error)
 	GetServer(context.Context, string) (Server, error)

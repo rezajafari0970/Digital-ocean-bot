@@ -21,7 +21,8 @@ func (c Container) CachedProviderCatalog(ctx context.Context, rt AccountRuntime)
 	if err != nil {
 		return providers.Catalog{}, err
 	}
-	if !enabled {
+	_, versioned := rt.Driver.(providers.VersionedCatalogReader)
+	if !enabled && !versioned {
 		return cr.Catalog(ctx)
 	}
 	var tx *sql.Tx
@@ -49,11 +50,8 @@ func (c Container) CachedProviderCatalog(ctx context.Context, rt AccountRuntime)
 		}
 	}
 	defer tx.Rollback()
-	revision := func() (string, error) {
-		var stamp string
-		err := tx.QueryRowContext(ctx, `SELECT COALESCE(max(updated_at)::text,'missing') FROM secrets WHERE account_id=$1 AND id=$2`, rt.Config.ID, rt.Config.SecretRef).Scan(&stamp)
-		return rt.Config.Provider + "/" + rt.Config.SecretRef + "/" + stamp, err
-	}
+	revision := func() (string, error) { return catalogScope(ctx, tx, rt) }
+
 	scope, err := revision()
 	if err != nil {
 		return providers.Catalog{}, err
@@ -76,6 +74,10 @@ func (c Container) CachedProviderCatalog(ctx context.Context, rt AccountRuntime)
 	if after != scope {
 		return providers.Catalog{}, fmt.Errorf("catalog credential scope changed")
 	}
+	if versioned {
+		catalog.CacheVersion = rt.Driver.(providers.VersionedCatalogReader).CatalogCacheVersion()
+	}
+	catalog.FetchedAt = time.Now().UTC()
 	raw, err = json.Marshal(catalog)
 	if err != nil {
 		return providers.Catalog{}, err
@@ -94,6 +96,21 @@ func (c Container) ObserveProvider(ctx context.Context, rt AccountRuntime) (prov
 	reader, ok := rt.Driver.(providers.ObservationReader)
 	if !ok {
 		return providers.Observation{}, ErrProviderComputeUnsupported
+	}
+	// Versioned catalog collection runs independently in SyncCatalogs. Health
+	// must neither invoke optional provider metadata nor re-date an old catalog.
+	if _, versioned := rt.Driver.(providers.VersionedCatalogReader); versioned {
+		if fast, ok := rt.Driver.(providers.FastObservationReader); ok {
+			obs, err := fast.ObserveFast(ctx)
+			if err != nil {
+				return obs, err
+			}
+			obs.Catalog, err = c.readVersionedCatalog(ctx, rt)
+			if err == sql.ErrNoRows {
+				err = nil
+			}
+			return obs, err
+		}
 	}
 	enabled, err := c.Economy.Enabled(ctx, rt.Config.ID)
 	if err != nil {
@@ -124,4 +141,34 @@ func (c Container) ObserveProvider(ctx context.Context, rt AccountRuntime) (prov
 		}
 	}
 	return reader.Observe(ctx)
+}
+
+type catalogQuery interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func catalogScope(ctx context.Context, q catalogQuery, rt AccountRuntime) (string, error) {
+	var stamp string
+	err := q.QueryRowContext(ctx, "SELECT COALESCE(max(updated_at)::text,'missing') FROM secrets WHERE account_id=$1 AND id=$2", rt.Config.ID, rt.Config.SecretRef).Scan(&stamp)
+	scope := rt.Config.Provider + "/" + rt.Config.SecretRef + "/" + stamp
+	if d, ok := rt.Driver.(providers.VersionedCatalogReader); ok {
+		scope += "/catalog:" + d.CatalogCacheVersion()
+	}
+	return scope, err
+}
+func (c Container) readVersionedCatalog(ctx context.Context, rt AccountRuntime) (providers.Catalog, error) {
+	var catalog providers.Catalog
+	scope, err := catalogScope(ctx, c.DB, rt)
+	if err != nil {
+		return catalog, err
+	}
+	var raw []byte
+	err = c.DB.QueryRowContext(ctx, "SELECT catalog FROM provider_catalog_cache WHERE account_id=$1 AND scope_revision=$2 AND refreshed_at<=now() AND refreshed_at>now()-($3*interval '1 second')", rt.Config.ID, scope, int(network.EconomyCatalogTTL/time.Second)).Scan(&raw)
+	if err != nil {
+		return catalog, err
+	}
+	if json.Unmarshal(raw, &catalog) != nil {
+		return providers.Catalog{}, sql.ErrNoRows
+	}
+	return catalog, nil
 }

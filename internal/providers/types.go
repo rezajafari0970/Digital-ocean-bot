@@ -105,10 +105,12 @@ type Image struct {
 }
 
 type Catalog struct {
-	Pricing *CatalogPricing `json:",omitempty"`
-	Regions []Region
-	Plans   []Plan
-	Images  []Image
+	CacheVersion string          `json:",omitempty"`
+	FetchedAt    time.Time       `json:",omitempty"`
+	Pricing      *CatalogPricing `json:",omitempty"`
+	Regions      []Region
+	Plans        []Plan
+	Images       []Image
 }
 
 type Server struct {

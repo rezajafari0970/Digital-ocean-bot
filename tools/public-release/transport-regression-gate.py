@@ -105,6 +105,9 @@ REQUIRED['internal/providers/ovh'] += ('TestOVHAuthorizationDelegationAndActualR
 REQUIRED['internal/providers/ovh'] += ('TestOVHAuthorizationOfficialRoutesAndDiagnostics',)
 REQUIRED['internal/adminapi'] += ('TestProviderAuthorizationSafeDiagnosticSurvivesRestart',)
 
+REQUIRED['internal/app'] += ('TestVersionedCatalogRefreshIndependentOfEconomy', 'TestVersionedCatalogHealthDoesNotFetch')
+REQUIRED['internal/adminapi'] += ('TestAccountOptionsUsesActualCatalogFetch',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

@@ -28,17 +28,32 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 		if err := c.DB.QueryRowContext(ctx, `SELECT provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, id).Scan(&providerState, &providerError); err != nil || providerState != ProviderStateActive || providerError != "" {
 			continue
 		}
+		rt, err := c.Runtime(ctx, id)
+		if err != nil {
+			log.Printf("catalog sync %s runtime: %v", id, err)
+			continue
+		}
+		if _, versioned := rt.Driver.(providers.VersionedCatalogReader); versioned {
+			fetchCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+			_, err = c.CachedProviderCatalog(fetchCtx, rt)
+			cancel()
+			if rt.Gateway != nil {
+				rt.Gateway.CloseIdleConnections()
+			}
+			if err != nil {
+				log.Printf("catalog sync %s discovery: %v", id, err)
+			}
+			continue
+		}
 		// A recent full provider snapshot already contains the catalog. Do not
 		// spend seven discovery requests again merely because the worker started.
 		var recent bool
 		_ = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_snapshots WHERE account_id=$1 AND created_at > now()-interval '23 hours')`, id).Scan(&recent)
 		enabled, _ := c.Economy.Enabled(ctx, id)
 		if recent && !enabled {
-			continue
-		}
-		rt, err := c.Runtime(ctx, id)
-		if err != nil {
-			log.Printf("catalog sync %s runtime: %v", id, err)
+			if rt.Gateway != nil {
+				rt.Gateway.CloseIdleConnections()
+			}
 			continue
 		}
 		cr, ok := rt.Driver.(providers.CatalogReader)
@@ -70,7 +85,7 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 }
 func (c Container) RunDailyCatalogSync(ctx context.Context) {
 	c.SyncCatalogs(ctx)
-	t := time.NewTicker(6 * time.Hour)
+	t := time.NewTicker(5 * time.Minute)
 	defer t.Stop()
 	for {
 		select {

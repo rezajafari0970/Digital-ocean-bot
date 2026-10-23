@@ -65,6 +65,8 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	}
 	return list(ctx, d.client, p, func(x imageData) string { return x.Region + ":" + x.ID })
 }
+func (d *Driver) CatalogCacheVersion() string { return "ovh-regional-pricing-v1" }
+
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

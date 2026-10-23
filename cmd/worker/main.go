@@ -245,7 +245,8 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 	modules.Add(worker.RoleControl, "catalog", func(ctx context.Context) {
-		t := time.NewTicker(6 * time.Hour)
+		// Recheck failed/missing metadata promptly; successful catalogs retain their six-hour TTL.
+		t := time.NewTicker(5 * time.Minute)
 		defer t.Stop()
 		for {
 			supervision.Pulse(ctx)
