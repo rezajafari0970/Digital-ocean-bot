@@ -107,7 +107,9 @@ def status():
     allowed = ("job_id", "status", "stage", "started_at", "ended_at",
                "from_revision", "installed_revision", "error", "recovery_required")
     result = {key: state[key] for key in allowed if key in state}
-    result.setdefault("installed_revision", revision())
+    # A CLI deployment can supersede the last panel job. Report the installed
+    # manifest on every read, while retaining the job history separately.
+    result["installed_revision"] = revision()
     result.update(available=True, busy=active or state.get("status") in ("queued", "running"),
                   message=STAGES[min(7, max(0, int(state.get("stage", 0))))])
     return result

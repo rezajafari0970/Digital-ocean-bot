@@ -105,6 +105,12 @@ class UpdateControl(unittest.TestCase):
         self.assertEqual(state["status"], "succeeded")
         self.assertEqual(state["installed_revision"], "1" * 40)
 
+    def test_cli_upgrade_does_not_leave_stale_installed_revision(self):
+        u.save({"status": "succeeded", "stage": 7, "installed_revision": "0" * 40})
+        state = u.dispatch({"action": "status"})
+        self.assertEqual(state["installed_revision"], "1" * 40)
+        self.assertEqual(state["status"], "succeeded")
+
     def test_root_instance_adapter_targets_its_own_runtime(self):
         class Process:
             stdout = iter(["[7/7] Done\n"])

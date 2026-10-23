@@ -53,3 +53,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 /* Keep health messages and actions readable at narrow phone widths. */
 header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;max-width:100%}header .pill{display:inline-block;max-width:100%;white-space:normal;overflow-wrap:normal;word-break:normal}header h2{min-width:0}.cardHeader{gap:12px;flex-wrap:wrap}.statusBadge{flex-shrink:0;white-space:nowrap}.statusBadge:before{flex-shrink:0}
+
+/* Proxy/account headings must wrap before status badges at 320px. */
+.accountCardTop{flex-wrap:wrap}.accountCardTop>div{min-width:0;max-width:100%;overflow-wrap:anywhere}.proxyMeta{grid-template-columns:90px minmax(0,1fr)}.proxyMeta>span{overflow-wrap:anywhere}
