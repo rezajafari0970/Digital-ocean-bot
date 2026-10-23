@@ -47,6 +47,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 
 	var starts atomic.Int32
 	var approved atomic.Bool
+	var emptyCatalog atomic.Bool
 	var activeID atomic.Value
 	mux.HandleFunc("POST /api/v1/providers/ovh/authorizations", func(w http.ResponseWriter, r *http.Request) {
 		var x struct {
@@ -82,6 +83,10 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		writeJSON(w, 200, map[string]any{"id": r.PathValue("id"), "provider": "ovh", "proxy_id": "", "state": state, "validation_url": "https://auth.eu.ovhcloud.com/sso/api?credentialToken=fixture-validation"})
 	})
 	mux.HandleFunc("POST /fixture/approve", func(w http.ResponseWriter, r *http.Request) { approved.Store(true); w.WriteHeader(204) })
+	mux.HandleFunc("POST /fixture/catalog", func(w http.ResponseWriter, r *http.Request) {
+		emptyCatalog.Store(r.URL.Query().Get("empty") == "1")
+		w.WriteHeader(204)
+	})
 	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {
 		var x previewAccount
 		if json.NewDecoder(r.Body).Decode(&x) != nil {
@@ -113,7 +118,22 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			discovery.Message = "Dedicated automatic security group: IPv4 TCP/UDP 1–65535; default outbound rules."
 			discovery.Fields = []providers.DiscoveryField{{Key: "region", Label: "AWS account region", Value: region, Options: []providers.DiscoveryOption{{Value: region, Label: region}}}}
 		}
-		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery, "account": providers.Account{ID: providerID}, "regions": []providers.Region{{ID: region, Name: region, Available: true}}, "plans": []providers.Plan{{ID: "test-plan", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}}, "images": []providers.Image{{ID: "ubuntu-fixture", Family: "ubuntu", Version: "24.04", Available: true}}, "defaults": map[string]any{}, "policy": map[string]any{}})
+		regions := []providers.Region{{ID: region, Name: region, Available: true}}
+		plans := []providers.Plan{{ID: "test-plan", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}}
+		images := []providers.Image{{ID: "ubuntu-fixture", Family: "ubuntu", Version: "24.04", Available: true}}
+		if x.Provider == "ovh" {
+			// Service-only SBG sorts before compute regions but has no plans.
+			regions = append([]providers.Region{{ID: "SBG", Name: "Empty legacy region", Available: true}}, regions...)
+			regions = append(regions, providers.Region{ID: "BHS5", Name: "BHS5", Available: true})
+			plans[0].IDsByRegion = map[string]string{"GRA11": "f1", "BHS5": "f2"}
+			plans[0].AvailableRegions = []string{"GRA11", "BHS5"}
+			images[0].IDsByRegion = map[string]string{"GRA11": "i1"}
+			images = append(images, providers.Image{ID: "ubuntu-bhs", Family: "ubuntu", Version: "22.04", Available: true, IDsByRegion: map[string]string{"BHS5": "i2"}})
+			if emptyCatalog.Load() {
+				plans = nil
+			}
+		}
+		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery, "account": providers.Account{ID: providerID}, "regions": regions, "plans": plans, "images": images, "defaults": map[string]any{"region": "SBG"}, "policy": map[string]any{}})
 	})
 	mux.HandleFunc("POST /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
 		var x accountWrite

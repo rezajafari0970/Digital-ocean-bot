@@ -134,7 +134,20 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		fail(err, "catalog")
 		return
 	}
-	regions := catalog.Regions
+	// Authentication alone does not make an account ready for server setup.
+	// Apply the same supported OS policy as the account form before verification.
+	setupCatalog := catalog
+	setupCatalog.Images = nil
+	for _, im := range catalog.Images {
+		if im.Family == "ubuntu" && (im.Version == "22.04" || im.Version == "24.04" || im.Version == "26.04") {
+			setupCatalog.Images = append(setupCatalog.Images, im)
+		}
+	}
+	regions := providers.CatalogRegionsWithOptions(setupCatalog)
+	if len(regions) == 0 {
+		writeJSON(w, 422, map[string]any{"error": "provider_catalog_unavailable", "stage": "catalog", "request_id": previewID, "detail": "Provider access is verified, but no region currently has both an available supported plan and Ubuntu image. Check regional availability in the provider account, then reload provider options."})
+		return
+	}
 	sort.SliceStable(regions, func(i, j int) bool { return regions[i].Name < regions[j].Name })
 	images := catalog.Images
 	sort.SliceStable(images, func(i, j int) bool {

@@ -54,7 +54,7 @@
    function paint(x){
     if(closed||x.id!==id)return;
     state=x.state;if(['PENDING','READY','VERIFIED'].includes(state))clearSecrets();route=x.proxy_id||'';link.hidden=true;link.removeAttribute('href');reset.hidden=false;mode();
-    const labels={DISPATCHED:'Step 1 of 3: preparing secure OVH access…',PENDING:'Step 2 of 3: approve access once on OVH, then return here. The next steps continue automatically.',READY:'Step 3 of 3: access approved. Loading projects, capacity and server options…',VERIFIED:'Connected to OVH. Server options are ready; review and save your account.',FAILED:'OVH connection failed. '+(x.diagnostic||'Check the application keys and permissions.'),UNKNOWN:'OVH may have received the request. It will not be sent again automatically. Check your OVH API credentials before starting a new request.',EXPIRED:'This connection request expired. Start a new request.',CANCELLED:'Connection request cancelled.',USED:'This connection has already been saved as an account.'};
+    const labels={DISPATCHED:'Step 1 of 3: preparing secure OVH access…',PENDING:'Step 2 of 3: approve access once on OVH, then return here. The next steps continue automatically.',READY:'Step 3 of 3: access approved. Loading projects, capacity and server options…',VERIFIED:'OVH access is verified. Checking current projects and server options…',FAILED:'OVH connection failed. '+(x.diagnostic||'Check the application keys and permissions.'),UNKNOWN:'OVH may have received the request. It will not be sent again automatically. Check your OVH API credentials before starting a new request.',EXPIRED:'This connection request expired. Start a new request.',CANCELLED:'Connection request cancelled.',USED:'This connection has already been saved as an account.'};
     status.textContent=labels[state]||'Checking connection…';if(['FAILED','UNKNOWN'].includes(state)){if(x.detail)status.textContent+=' '+x.detail;status.textContent+=' Reference: '+id+(x.diagnostic?' · '+x.diagnostic:'')}reset.textContent=terminal.has(state)?'Clear this connection request':'Cancel this connection request';
     if(state==='PENDING'&&validApprovalURL(x.validation_url)){link.href=x.validation_url;link.hidden=false;openPreparedApproval(x.validation_url)}
     if(terminal.has(state)||['READY','VERIFIED'].includes(state))closeBlankApprovalWindow();
@@ -95,7 +95,8 @@
      return null;
     },
     selectionRequired(){if(id)status.textContent='Step 3 of 3: choose the Public Cloud project. Its server options will load automatically.'},
-    previewComplete(){if(id)status.textContent='Connected to OVH. Server options are ready; review and save your account.'},
+    previewLoading(){if(id&&['READY','VERIFIED'].includes(state))status.textContent='OVH access is approved. Checking current server options…'},
+    previewComplete(ready){if(id)status.textContent=ready?'Connected to OVH. Server options are ready; review and save your account.':'OVH access is approved. No compatible server options are available in this region; choose another region or reload provider options.'},
     previewFailed(){if(id&&['READY','VERIFIED'].includes(state))status.textContent='OVH access is approved. Provider options could not be loaded; use Reload provider options to retry.'},
     credential(){if(manual.checked)return null;if(!id||!['READY','VERIFIED'].includes(state))throw Error('Complete OVH authorization first.');if(proxies[0].value!==route)throw Error('Connection changed. Reconnect before saving.');return {authorization_id:id,token:''}},
     complete(){remember('');this.dispose()},

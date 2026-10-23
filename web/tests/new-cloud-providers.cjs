@@ -91,6 +91,22 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden');
    if(provider==='ovh')assert.match(await evaluate('document.querySelector("[data-auth-status]").textContent'),/Connected to OVH/);
 
+   if(provider==='ovh'){
+    assert.equal(await evaluate('document.querySelector("[name=region]").value'),'GRA11');
+    assert.equal(await evaluate('[...document.querySelectorAll("#accountDiscovery select[name^=region] option")].some(o=>o.value==="SBG")'),false);
+    assert.equal(await evaluate('document.querySelector("#accountSize").value'),'test-plan');
+    assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),false);
+    await evaluate('document.querySelector("[name=region]").value="BHS5";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
+    assert.equal(await evaluate('document.querySelector("[name=image]").value'),'ubuntu-bhs');
+    await evaluate('fetch("/fixture/catalog?empty=1",{method:"POST"})');
+    await evaluate('document.querySelector("#discoverAccount").click()');
+    await waitFor('document.querySelector("#modalError").textContent.includes("no region currently")');
+    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('document.querySelector("[data-auth-status]").textContent.includes("options are ready")'),false);
+    await evaluate('fetch("/fixture/catalog?empty=0",{method:"POST"})');
+    await evaluate('document.querySelector("#discoverAccount").click()');
+    await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden&&!document.querySelector("#modalSubmit").disabled');
+   }
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    if(provider==='aws'){
     await evaluate('document.querySelector("#modalSubmit").click()');

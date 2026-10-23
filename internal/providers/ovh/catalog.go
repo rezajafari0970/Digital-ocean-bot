@@ -142,6 +142,9 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		}
 		out.Images = append(out.Images, im)
 	}
+	// OVH also lists service/legacy regions such as SBG with no compute flavors.
+	// They must never become selectable launch targets.
+	out.Regions = providers.CatalogRegionsWithOptions(out)
 	return out, nil
 }
 func (d *Driver) checkQuota(ctx context.Context, region string, f flavorData) error {

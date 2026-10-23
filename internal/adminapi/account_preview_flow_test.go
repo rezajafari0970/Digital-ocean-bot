@@ -68,3 +68,25 @@ func TestAccountPreviewReportsActualFailingStage(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountPreviewRejectsEmptyCatalogBeforeVerification(t *testing.T) {
+	registry := providers.NewRegistry()
+	if err := registry.Register(failingPreviewFactory{}); err != nil {
+		t.Fatal(err)
+	}
+	s := Server{Container: app.Container{Providers: registry}}
+	req := httptest.NewRequest("POST", "/api/v1/accounts/preview", strings.NewReader(`{"provider":"upcloud","token":"ucat_fixture"}`))
+	req = req.WithContext(context.WithValue(req.Context(), principalKey{}, auth.Principal{Role: auth.Admin}))
+	w := httptest.NewRecorder()
+	s.accountPreview(w, req)
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if w.Code != 422 || body["stage"] != "catalog" || body["error"] != "provider_catalog_unavailable" || body["request_id"] == "" {
+		t.Fatal(w.Code, body)
+	}
+	if strings.Contains(w.Body.String(), "ucat_fixture") {
+		t.Fatal("secret leaked")
+	}
+}
