@@ -1,0 +1,290 @@
+{
+  "at": "2026-10-24T09:19:25.132371+00:00",
+  "private_source": "b3d3226f9b5fca25d7ad7fc0f4bf19f6ea772db6",
+  "public_release": "6336c9e47f2907adc029024ea05fa433346b7e62",
+  "public_tree": "4f2618959d7cc3d96e7daa1550a2868c99afac37",
+  "candidate_ci": {
+    "run": 40079957730,
+    "conclusion": "success",
+    "test_job": 120831254688,
+    "install_and_repeat_job": 120831254489
+  },
+  "atomic_promotion": {
+    "run": 40080123759,
+    "conclusion": "success",
+    "main": "6336c9e47f2907adc029024ea05fa433346b7e62",
+    "stable": "6336c9e47f2907adc029024ea05fa433346b7e62"
+  },
+  "deployments": {
+    "default": {
+      "at": "2026-10-24T09:06:15.699176+00:00",
+      "commit": "6336c9e47f2907adc029024ea05fa433346b7e62",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T09:06:15.819495839Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    },
+    "production": {
+      "at": "2026-10-24T09:19:06.824654+00:00",
+      "commit": "6336c9e47f2907adc029024ea05fa433346b7e62",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T09:19:06.927128064Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 5080,
+          "unchanged": 5076,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 4,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 4
+        },
+        "trojan_ownership": {
+          "common": 77,
+          "unchanged": 77,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 1,
+        "records": 19423,
+        "profiles": 1
+      }
+    }
+  },
+  "public": {
+    "at": "2026-10-24T09:19:16.119174+00:00",
+    "public_https_version": {
+      "commit": "6336c9e47f2907adc029024ea05fa433346b7e62",
+      "build_time": "2026-10-24T09:10:22Z",
+      "go_version": "go1.27.1",
+      "modified": false
+    },
+    "public_ready": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-24T09:19:15.817560906Z"
+    },
+    "assets_sha256": {
+      "aws-catalog.js": "8eecf3685c3338614c5e8fe5d168a96188840aecf83b253123ff2876ea76ce05",
+      "preview-stream.js": "879ca147fa56ccbb210c27afb753238539423e07082acb2682b3b8b75fec85d7",
+      "app.js": "e31ddb2cdaad2ff8c4aa2220fe9b69aa066a2e641290d973933368d715d8145d",
+      "app.css": "3cef7431d24cfcbd299b522d22c2b144889f5d00043fcc9441f7bd7681eede81"
+    },
+    "timers": {
+      "dob-production-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      },
+      "datacenter-bot-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      }
+    },
+    "no_pending_deployment": true
+  },
+  "saved_aws_account_counts": {
+    "default": 0,
+    "production": 0
+  },
+  "logs_sha256": {
+    "targeted.log": "dc769cd0f9045663c0a164587f94f8796fbd64d6b64180e64a58aebd5a2a4d92",
+    "browser.log": "53f4088da38b7f4edf5472324ca3a871166735c991297ffad2a6c51e42093bbd",
+    "browser-blocked.log": "87ef3fc23bf929882d38399c01b852074bc7f2a1d88e924e88006b8f4e044ba9",
+    "baseline-browser.log": "f3dd9ead6a1d86c19b83dc569904ad27fa5cf960d7e8b7abdccc5164465170dc",
+    "gates.log": "d0b685f8f4493cbf256f986557c54ed8b3c032134ce91f4134233ac1590c8b58",
+    "required-gates.log": "06958138a200d318e6ed92c8a505d364c0313b695395f4ce8e80fe8656aa1e9a",
+    "secret-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c",
+    "secret-production.log": "ba9de356b055738d579087a8f59ce0131f2936cef68319a5262f59b9075a596c",
+    "gitleaks.log": "1da200595f0f75f8516168ba482c09b51c3bdd818639e0193d385b901f9ab6eb",
+    "default-rollout/update.log": "c9f79ea59d90f6005ea839b672a554c3a9f2dbe98069bb43a3461cf2ccfe7900",
+    "production-rollout/update.log": "59b629dcb8d2e59d6cc6234202f8d2648945f6f59c92425d11af4230605c85b5",
+    "production-rollout/update-attempt-1.log": "0ebf959c2d214519827bced5470307fe7dde56b206370f21ec788fa90d883265",
+    "deployment-cache-cleanup.json": "83e93014e4b6a7192fc48c6de3cdc64e47abee468122b00166aa4f9b026289ca",
+    "browser-cache-cleanup.json": "8133b890f1f057803c2737baaa356ddf3e2b5257395aa2b5d07968c37c77566f",
+    "additional-cache-cleanup.json": "7c0b89abfb193059160f1c8e83c52f1c7eadc0e356098ee82c5cf5fb895e1016"
+  },
+  "api_usage": {
+    "new_requests": 0,
+    "new_tokens": 0,
+    "new_cost_usd": 0,
+    "prior_requests": 3,
+    "prior_tokens": 6809,
+    "prior_estimated_cost_usd": "0.05716284695"
+  },
+  "live_cloud_mutations_for_test": 0
+}
