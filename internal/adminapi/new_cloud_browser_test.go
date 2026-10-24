@@ -130,13 +130,46 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 				discovery.Resolved["project_id"] = project
 			}
 		} else {
-			discovery.Resolved = map[string]any{"region": region, "subnet_id": "subnet-12345678", "managed_network": true}
+			if x.Selection["region"] != "" {
+				region = x.Selection["region"]
+			}
+			providerID = "123456789012:" + region
+			primarySubnet := "subnet-12345678"
+			if region != "eu-west-1" {
+				primarySubnet = "subnet-11111111"
+			}
+			if x.Selection["subnet_id"] != "" && x.Selection["subnet_id"] != primarySubnet {
+				t.Error("stale primary subnet reached preview")
+			}
+			discovery.Resolved = map[string]any{"region": region, "subnet_id": primarySubnet, "managed_network": true}
 			discovery.Message = "Dedicated automatic security group: IPv4 TCP/UDP 1–65535; default outbound rules."
-			discovery.Fields = []providers.DiscoveryField{{Key: "region", Label: "AWS account region", Value: region, Options: []providers.DiscoveryOption{{Value: region, Label: region}}}}
+			regionOptions := []providers.DiscoveryOption{{Value: "eu-west-1", Label: "eu-west-1"}, {Value: "us-east-1", Label: "us-east-1"}, {Value: "us-west-1", Label: "us-west-1"}, {Value: "eu-west-2", Label: "eu-west-2"}, {Value: "eu-central-1", Label: "eu-central-1"}}
+			discovery.Fields = []providers.DiscoveryField{{Key: "region", Label: "Primary AWS region", Value: region, Options: regionOptions}, {Key: "subnet_id", Label: "Verified public subnet", Value: primarySubnet, Options: []providers.DiscoveryOption{{Value: primarySubnet, Label: primarySubnet}}}}
+			seenRegions := map[string]bool{region: true}
+			for _, key := range []string{"region_2", "region_3", "region_4", "region_5"} {
+				value := x.Selection[key]
+				if value != "" && seenRegions[value] {
+					t.Error("duplicate discovery region reached preview")
+				}
+				if value != "" {
+					seenRegions[value] = true
+				}
+				discovery.Fields = append(discovery.Fields, providers.DiscoveryField{Key: key, Label: "Additional AWS region", Value: value, Options: append([]providers.DiscoveryOption{{Value: "", Label: "None"}}, regionOptions...)})
+				if value != "" {
+					subnetKey := "subnet_" + key[len(key)-1:]
+					subnet := "subnet-87654321"
+					if value != "us-east-1" {
+						subnet = "subnet-22222222"
+					}
+					if x.Selection[subnetKey] != "" && x.Selection[subnetKey] != subnet {
+						t.Error("stale additional subnet reached preview")
+					}
+					discovery.Fields = append(discovery.Fields, providers.DiscoveryField{Key: subnetKey, Label: "Public subnet", Value: subnet, Options: []providers.DiscoveryOption{{Value: subnet, Label: subnet}}})
+				}
+			}
 		}
 		if x.Provider == "aws" {
 			discovery.NetworkApproval = true
-			discovery.Fields = append(discovery.Fields, providers.DiscoveryField{Key: "region_2", Label: "Additional AWS region", Value: x.Selection["region_2"], Options: []providers.DiscoveryOption{{Value: "", Label: "None"}, {Value: "us-east-1", Label: "us-east-1"}}})
 			if x.Selection["region_2"] == "us-east-1" {
 				discovery.Resolved["regional_networks"] = map[string]any{"us-east-1": map[string]any{"subnet_id": "subnet-87654321", "managed_network": true}}
 			}

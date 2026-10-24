@@ -123,8 +123,34 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    if(provider==='aws'){
     assert.match(await evaluate('document.querySelector("#accountSize").selectedOptions[0].textContent'),/USD 0.0114\/h compute/);
+    assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-discovery-key^=region_]")].map(el=>({value:el.value,empty:[...el.options].filter(o=>o.value==="").length,primaryDisabled:[...el.options].find(o=>o.value==="eu-west-1").disabled}))'),Array.from({length:4},()=>({value:'',empty:1,primaryDisabled:true})));
+    await evaluate('(()=>{const change=(key,value)=>{const el=document.querySelector("[data-discovery-key="+key+"]");el.value=value;el.dispatchEvent(new Event("change"))};change("region_2","us-east-1");change("region","us-east-1")})()');
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=region_2]").value'),'');
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_id]").disabled'),true);
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_id]").value'),'');
+    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    await evaluate('(()=>{const el=document.querySelector("[data-discovery-key=region]");el.value="eu-west-1";el.dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()})()');
+    await waitFor('cache.accountPreview!==null&&!document.querySelector("[data-discovery-key=subnet_id]").disabled');
+    // Reproduce the reported four identical selections, including stale state
+    // that arrives without change events. None of them may reach the API.
+    await evaluate('document.querySelectorAll("[data-discovery-key^=region_]").forEach(el=>el.value="eu-west-1");document.querySelector("#discoverAccount").click()');
+    await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden');
+    assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-discovery-key^=region_]")].map(el=>el.value)'),['','','','']);
+    assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');
+    await evaluate('document.querySelector("[data-discovery-key=region_2]").scrollIntoView({block:"center"})');
+    const discoverySnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'aws-distinct-discovery-mobile.png'),Buffer.from(discoverySnap.data,'base64'));
+
     await evaluate('document.querySelector("[name=lifetime_min_minutes]").value="1500";document.querySelector("[name=lifetime_max_minutes]").value="1600";document.querySelector("[name=desired_server_count]").value="10";document.querySelector("[data-discovery-key=region_2]").value="us-east-1";document.querySelector("[data-discovery-key=region_2]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()');
     await waitFor('cache.accountPreview!==null&&cache.accountPreview.regions.length===2&&!document.querySelector("#modalSubmit").hidden');
+
+    await evaluate('(()=>{const el=document.querySelector("[data-discovery-key=region_2]");el.value="us-west-1";el.dispatchEvent(new Event("change"))})()');
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_2]").disabled'),true);
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_2]").value'),'');
+    await evaluate('(()=>{const el=document.querySelector("[data-discovery-key=region_2]");el.value="";el.dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()})()');
+    await waitFor('cache.accountPreview!==null&&cache.accountPreview.regions.length===1');
+    assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_2]")===null'),true);
+    await evaluate('(()=>{const el=document.querySelector("[data-discovery-key=region_2]");el.value="us-east-1";el.dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()})()');
+    await waitFor('cache.accountPreview!==null&&cache.accountPreview.regions.length===2');
     assert.equal(await evaluate('document.querySelector("[name=lifetime_min_minutes]").value'),'1500');
     assert.equal(await evaluate('document.querySelector("[name=lifetime_max_minutes]").value'),'1600');
     assert.equal(await evaluate('document.querySelector("[name=desired_server_count]").value'),'10');

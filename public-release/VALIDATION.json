@@ -1,18 +1,8 @@
 {
   "schema": 2,
-  "status": "source_verified_publication_gates_required",
+  "status": "release_requirements_and_limits",
   "date": "2026-10-24",
-  "feature": "AWS regional driver composition, verified subnet-zone catalogs, optional official compute pricing and network approval UX",
-  "current_evidence": {
-    "aws_race_contracts": "PASS",
-    "mobile_browser_authorization_available": "PASS",
-    "mobile_browser_authorization_blocked": "PASS",
-    "full_go_vet_bootstrap_update_host_protection": "PASS; exact exported candidate also required",
-    "isolated_database_native_race": "RUNNING; 156 required cases on final source",
-    "publication": "PENDING_CANDIDATE_GATES",
-    "deployment": "PENDING",
-    "live_aws": "NO_SAVED_AWS_ACCOUNT_AVAILABLE"
-  },
+  "feature": "AWS discovery unique optional regions and invalidation of region-owned subnet choices",
   "publication_gates": {
     "cloudflare_transport_fleet_no_skip": "156 required cases with isolated PostgreSQL and pinned native core",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
@@ -26,6 +16,8 @@
     "AWS Price List rates require pricing:GetProducts and cover Linux shared On-Demand compute only; EBS, IPv4, transfer, CPU credits and taxes are extra.",
     "Live AWS create/delete and customer IAM/price access cannot be claimed without a saved AWS account.",
     "No production policies or saved account settings are changed by this source update.",
-    "No new paid OpenAI API requests; development ledger remains capped at its prior three calls."
-  ]
+    "No new paid OpenAI API requests; development ledger remains capped at its prior three calls.",
+    "Discovery has one None option per optional region, disables already selected regions and clears stale subnet choices before another preview."
+  ],
+  "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

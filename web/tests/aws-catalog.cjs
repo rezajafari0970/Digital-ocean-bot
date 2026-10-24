@@ -16,3 +16,7 @@ aws.uniqueChoices(root,'region',3);assert.deepEqual(fields.map(x=>x.value),['eu-
 fields[1].value='eu-west-1';aws.uniqueChoices(root,'region',3,fields[1]);assert.deepEqual(fields.map(x=>x.value),['eu-west-1','','us-east-1']);
 fields[1].value='us-east-1';aws.uniqueChoices(root,'region',3,fields[1]);assert.deepEqual(fields.map(x=>x.value),['eu-west-1','us-east-1','']);
 console.log('AWS compute pricing, separate EBS/IPv4, explicit network approval and distinct regional choices PASS');
+
+assert.deepEqual(aws.discoveryRegions({region:'eu-west-1',region_2:'eu-west-1',region_3:'eu-west-1',region_4:'eu-west-1',region_5:'eu-west-1'}),{region:'eu-west-1',region_2:'',region_3:'',region_4:'',region_5:''});
+assert.deepEqual(aws.discoveryRegions({region:'us-east-1',region_2:'eu-west-1',region_3:'us-east-1',region_4:'eu-west-1',region_5:'us-west-1'}),{region:'us-east-1',region_2:'eu-west-1',region_3:'',region_4:'',region_5:'us-west-1'});
+console.log('AWS discovery duplicate region repair and primary ownership PASS');
