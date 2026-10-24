@@ -64,3 +64,28 @@ func TestAWSPreviewActionableDiagnosticsAndSecretBoundary(t *testing.T) {
 		t.Fatal("injected metadata leaked")
 	}
 }
+
+func TestAWSPreviewEmptyCatalogDiagnostics(t *testing.T) {
+	for _, code := range []string{"NO_SUPPORTED_INSTANCE_TYPES", "NO_UBUNTU_IMAGES", "NO_SUPPORTED_UBUNTU_IMAGES"} {
+		t.Run(code, func(t *testing.T) {
+			var logs bytes.Buffer
+			old := log.Writer()
+			log.SetOutput(&logs)
+			defer log.SetOutput(old)
+			w := httptest.NewRecorder()
+			writeStagedProviderPreviewError(w, &providers.Error{Class: providers.ErrorImageUnavailable, Code: code, Operation: "DescribeImages", StatusCode: 200, Message: "private-secret", Cause: errors.New("private-secret")}, previewDiagnosticContext{Provider: "aws", Stage: "catalog", RequestID: "catalog-trace", Started: time.Now()})
+			var body map[string]any
+			if json.Unmarshal(w.Body.Bytes(), &body) != nil || w.Code != 422 || body["diagnostic"] != code || body["stage"] != "catalog" || body["required_permission"] != "" {
+				t.Fatal(w.Code, w.Body.String())
+			}
+			for _, out := range []string{logs.String(), w.Body.String()} {
+				if strings.Contains(out, "private-secret") || !strings.Contains(out, code) || !strings.Contains(out, "catalog-trace") {
+					t.Fatal("unsafe or untraceable diagnostic")
+				}
+			}
+			if !strings.Contains(body["detail"].(string), "selected region") {
+				t.Fatal("wrong catalog scope")
+			}
+		})
+	}
+}

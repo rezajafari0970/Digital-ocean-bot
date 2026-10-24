@@ -13,7 +13,7 @@ type wireError struct{ code, format string }
 func (e *wireError) Error() string { return "AWS " + e.code }
 
 var wireCodes = wordSet(`AuthFailure InvalidClientTokenId InvalidAccessKeyId SignatureDoesNotMatch InvalidSignatureException IncompleteSignature MissingAuthenticationToken ExpiredToken ExpiredTokenException RequestExpired UnauthorizedOperation AccessDenied AccessDeniedException OperationNotPermitted RequestLimitExceeded Throttling ThrottlingException InstanceLimitExceeded VcpuLimitExceeded InsufficientInstanceCapacity InsufficientHostCapacity Unsupported InvalidAMIID.NotFound InvalidAMIID.Unavailable InvalidInstanceID.NotFound IdempotentParameterMismatch OptInRequired PendingVerification Blocked AccountDisabled InvalidParameter InvalidParameterValue InvalidParameterCombination InvalidParameterDependency InvalidQueryParameter MalformedQueryString MissingAction MissingParameter UnknownParameter InvalidAction ValidationError UnsupportedOperation UnsupportedProtocol InvalidPaginationToken InvalidNextToken RequestTimeout InternalError InternalFailure ServiceUnavailable NON_AWS_ERROR_RESPONSE INVALID_ERROR_RESPONSE`)
-var localCodes = wordSet(`INVALID_CREDENTIAL_JSON TEMPORARY_SESSION_TOKEN_REQUIRED REGION_SCOPE_CHANGED ACCOUNT_SCOPE_MISMATCH INVALID_REGION_LIST REGIONS_MISSING REGION_NOT_ENABLED NETWORK_SELECTION_REQUIRED INVALID_SECURITY_GROUPS SUBNET_NOT_PUBLIC_OR_ACCESSIBLE SUBNET_UNAVAILABLE PUBLIC_SUBNET_UNAVAILABLE SECURITY_GROUP_VPC_MISMATCH INCOMPLETE_SECURITY_GROUPS INVALID_RESPONSE INVALID_RESPONSE_ENVELOPE INVALID_RESPONSE_BODY INVALID_ERROR_RESPONSE MISSING_COLLECTION INVALID_COLLECTION DUPLICATE_SET INVALID_COLLECTION_IDENTITY INVALID_PAGE PAGINATION_LOOP PAGINATION_LIMIT TRANSPORT_ERROR INVALID_ACCOUNT_IDENTITY INVALID_SUBNET INVALID_SUBNET_ID SUBNET_ID_MISMATCH REGION_MISMATCH EMPTY_RESERVATION INVALID_INSTANCE INVALID_REQUEST REQUEST_FAILED REQUEST_REJECTED AUTHENTICATION_FAILED PERMISSION_DENIED ACCOUNT_ACCESS_REQUIRED ACCOUNT_LOCKED PROVIDER_UNAVAILABLE RATE_LIMITED`)
+var localCodes = wordSet(`NO_SUPPORTED_INSTANCE_TYPES NO_UBUNTU_IMAGES NO_SUPPORTED_UBUNTU_IMAGES INVALID_CREDENTIAL_JSON TEMPORARY_SESSION_TOKEN_REQUIRED REGION_SCOPE_CHANGED ACCOUNT_SCOPE_MISMATCH INVALID_REGION_LIST REGIONS_MISSING REGION_NOT_ENABLED NETWORK_SELECTION_REQUIRED INVALID_SECURITY_GROUPS SUBNET_NOT_PUBLIC_OR_ACCESSIBLE SUBNET_UNAVAILABLE PUBLIC_SUBNET_UNAVAILABLE SECURITY_GROUP_VPC_MISMATCH INCOMPLETE_SECURITY_GROUPS INVALID_RESPONSE INVALID_RESPONSE_ENVELOPE INVALID_RESPONSE_BODY INVALID_ERROR_RESPONSE MISSING_COLLECTION INVALID_COLLECTION DUPLICATE_SET INVALID_COLLECTION_IDENTITY INVALID_PAGE PAGINATION_LOOP PAGINATION_LIMIT TRANSPORT_ERROR INVALID_ACCOUNT_IDENTITY INVALID_SUBNET INVALID_SUBNET_ID SUBNET_ID_MISMATCH REGION_MISMATCH EMPTY_RESERVATION INVALID_INSTANCE INVALID_REQUEST REQUEST_FAILED REQUEST_REJECTED AUTHENTICATION_FAILED PERMISSION_DENIED ACCOUNT_ACCESS_REQUIRED ACCOUNT_LOCKED PROVIDER_UNAVAILABLE RATE_LIMITED`)
 var operations = wordSet(`DescribeRegions GetCallerIdentity DescribeSubnets DescribeRouteTables DescribeNetworkAcls DescribeInternetGateways DescribeSecurityGroups DescribeNetworkInterfaces DescribeInstances DescribeImages DescribeInstanceTypes DescribeInstanceTypeOfferings RunInstances TerminateInstances CreateSecurityGroup DeleteSecurityGroup AuthorizeSecurityGroupIngress credential discovery account catalog inventory network server get_server create_server delete_server find_server`)
 
 func wordSet(s string) map[string]bool {
@@ -53,6 +53,16 @@ func Diagnostic(err error) DiagnosticInfo {
 		d.RequiredPermission = "ec2:" + d.Operation
 	}
 	switch d.Code {
+	case "NO_SUPPORTED_INSTANCE_TYPES":
+		d.RequiredPermission = ""
+		d.Guidance = "AWS returned no supported x86_64 on-demand instance type offered in the selected region. Check regional instance-type availability or choose another enabled region in Advanced overrides."
+	case "NO_UBUNTU_IMAGES":
+		d.RequiredPermission = ""
+		d.Guidance = "AWS returned no Canonical Ubuntu server images in the selected region. Check this region and any Allowed AMIs account/organization policy, then reload provider options."
+	case "NO_SUPPORTED_UBUNTU_IMAGES":
+		d.RequiredPermission = ""
+		d.Guidance = "AWS returned images in the selected region, but none passed the supported Ubuntu image checks. Use this reference to inspect the driver image filter; changing credentials is not established as the remedy."
+
 	case "AuthFailure", "InvalidClientTokenId", "InvalidAccessKeyId", "INVALID_CREDENTIAL_JSON":
 		d.Guidance = "Check the access key ID and matching secret key. Temporary credentials must include the matching session token."
 	case "ExpiredToken", "ExpiredTokenException", "TEMPORARY_SESSION_TOKEN_REQUIRED":

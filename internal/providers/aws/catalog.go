@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"net/url"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -10,6 +11,8 @@ import (
 )
 
 const canonicalOwner = "099720109477"
+
+func (d *Driver) CatalogCacheVersion() string { return "aws-ubuntu-devices-v1" }
 
 type image struct {
 	ID             string `xml:"imageId"`
@@ -26,8 +29,10 @@ type image struct {
 		ID string `xml:"productCode"`
 	} `xml:"productCodes>item"`
 	Devices []struct {
-		Device string `xml:"deviceName"`
-		EBS    struct {
+		Device      string  `xml:"deviceName"`
+		VirtualName string  `xml:"virtualName"`
+		NoDevice    *string `xml:"noDevice"`
+		EBS         *struct {
 			Size int `xml:"volumeSize"`
 		} `xml:"ebs"`
 	} `xml:"blockDeviceMapping>item"`
@@ -35,7 +40,7 @@ type image struct {
 
 func (x image) RootSize() int {
 	for _, b := range x.Devices {
-		if b.Device == x.Root {
+		if b.Device == x.Root && b.EBS != nil {
 			return b.EBS.Size
 		}
 	}
@@ -53,8 +58,46 @@ func imageVersion(name string) string {
 	}
 	return ""
 }
+
+// AMIs may include instance-store mappings even when the selected instance
+// has no instance store. Only EBS mappings allocate persistent volumes; retain
+// the single-root-EBS contract without rejecting optional ephemeral devices.
+var ephemeralDevice = regexp.MustCompile(`^ephemeral([0-9]|1[0-9]|2[0-3])$`)
+
+func (x image) singleRootEBS() bool {
+	root := false
+	devices, virtual := map[string]bool{}, map[string]bool{}
+	for _, b := range x.Devices {
+		if b.Device == "" || devices[b.Device] {
+			return false
+		}
+		devices[b.Device] = true
+		if b.Device == x.Root {
+			if b.EBS == nil || b.EBS.Size <= 0 || b.NoDevice != nil || b.VirtualName != "" {
+				return false
+			}
+			root = true
+			continue
+		}
+		if b.EBS != nil {
+			return false
+		}
+		if b.NoDevice != nil {
+			if b.VirtualName != "" {
+				return false
+			}
+			continue
+		}
+		if !ephemeralDevice.MatchString(b.VirtualName) || virtual[b.VirtualName] {
+			return false
+		}
+		virtual[b.VirtualName] = true
+	}
+	return root
+}
+
 func usableImage(x image) bool {
-	return idPattern.MatchString(x.ID) && strings.HasPrefix(x.ID, "ami-") && x.Owner == canonicalOwner && x.Public && x.State == "available" && x.Architecture == "x86_64" && x.RootType == "ebs" && x.Virtualization == "hvm" && x.Root != "" && x.RootSize() > 0 && len(x.Devices) == 1 && len(x.Products) == 0 && imageVersion(x.Name) != ""
+	return idPattern.MatchString(x.ID) && strings.HasPrefix(x.ID, "ami-") && x.Owner == canonicalOwner && x.Public && x.State == "available" && x.Architecture == "x86_64" && x.RootType == "ebs" && x.Virtualization == "hvm" && x.Root != "" && x.singleRootEBS() && len(x.Products) == 0 && imageVersion(x.Name) != ""
 }
 func (d *Driver) images(ctx context.Context, q url.Values) ([]image, error) {
 	if q == nil {
@@ -152,9 +195,15 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	if e != nil {
 		return providers.Catalog{}, e
 	}
+	if len(ps) == 0 {
+		return providers.Catalog{}, problem(providers.ErrorRegionCapacity, "catalog", "NO_SUPPORTED_INSTANCE_TYPES", 0)
+	}
 	xs, e := d.images(ctx, nil)
 	if e != nil {
 		return providers.Catalog{}, e
+	}
+	if len(xs) == 0 {
+		return providers.Catalog{}, problem(providers.ErrorImageUnavailable, "DescribeImages", "NO_UBUNTU_IMAGES", 200)
 	}
 	latest := map[string]image{}
 	for _, im := range xs {
@@ -164,6 +213,9 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 				latest[v] = im
 			}
 		}
+	}
+	if len(latest) == 0 {
+		return providers.Catalog{}, problem(providers.ErrorImageUnavailable, "DescribeImages", "NO_SUPPORTED_UBUNTU_IMAGES", 200)
 	}
 	images := []providers.Image{}
 	for _, v := range []string{"26.04", "24.04", "22.04"} {
