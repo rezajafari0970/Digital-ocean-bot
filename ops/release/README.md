@@ -63,3 +63,7 @@ SHAs and the verified run only after its independent evidence passes. Do not
 rerun this historical workflow as a generic latest-release publisher. Secret scanning, database, native and race gates remain prerequisites; hosted
 source and installation jobs supplement those checks. The old legacy publisher
 state must not be treated as current while that host is quarantined.
+
+## Latest verified continuation — 2026-10-25
+
+See `CDN-PROOF-ISOLATION-20261025.md` for the current release, exact CI evidence, live rollout status, rejected AWS credentials and DNS capacity constraints. Do not treat older saved AWS/account observations as current.

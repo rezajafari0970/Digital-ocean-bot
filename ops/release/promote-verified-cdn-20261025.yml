@@ -1,0 +1,59 @@
+name: Promote verified CDN proof isolation candidate
+on:
+  push:
+    branches: ['release-promote/cdn-proof-isolation-20261025']
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: verified-stable-promotion
+  cancel-in-progress: false
+jobs:
+  promote:
+    if: github.repository == 'rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      CANDIDATE: a5f53f7dedd2bf22a12b423d85bbff0f9f011192
+      BASE: f6b2815ca0d6c85edde7753d6a9c7ca15e5ca31a
+      VERIFIED_RUN: '40140892646'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a5f53f7dedd2bf22a12b423d85bbff0f9f011192
+          fetch-depth: 2
+      - name: Recheck exact candidate and independent installation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request
+          repo=os.environ['GITHUB_REPOSITORY'];run=os.environ['VERIFIED_RUN'];candidate=os.environ['CANDIDATE']
+          def get(path):
+              request=urllib.request.Request('https://api.github.com/repos/'+repo+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(request,timeout=20) as response:return json.load(response)
+          result=get('/actions/runs/'+run)
+          assert result['head_sha']==candidate and result['status']=='completed' and result['conclusion']=='success'
+          jobs=get('/actions/runs/'+run+'/jobs')['jobs']
+          assert {'test','install'}.issubset({j['name'] for j in jobs if j['conclusion']=='success'})
+          print('Exact candidate source and independent installation verified')
+          PY
+          test "$(git rev-parse HEAD)" = "$CANDIDATE"
+          python3 release/check-source.py
+          git merge-base --is-ancestor "$BASE" "$CANDIDATE"
+      - name: Atomically promote main and stable with leases
+        run: |
+          python3 - <<'PY'
+          import os,subprocess
+          result=subprocess.check_output(['git','ls-remote','--heads','origin','refs/heads/main','refs/heads/stable'],text=True)
+          actual={ref:sha for sha,ref in (line.split() for line in result.splitlines())}
+          assert actual=={'refs/heads/main':os.environ['BASE'],'refs/heads/stable':os.environ['BASE']},'Destination changed; refusing promotion'
+          PY
+          git push --atomic --force-with-lease="refs/heads/main:$BASE" --force-with-lease="refs/heads/stable:$BASE" origin "$CANDIDATE:refs/heads/main" "$CANDIDATE:refs/heads/stable"
+          python3 - <<'PY'
+          import os,subprocess
+          result=subprocess.check_output(['git','ls-remote','--heads','origin','refs/heads/main','refs/heads/stable'],text=True)
+          actual={ref:sha for sha,ref in (line.split() for line in result.splitlines())}
+          assert actual=={'refs/heads/main':os.environ['CANDIDATE'],'refs/heads/stable':os.environ['CANDIDATE']}
+          print('Atomic main/stable promotion verified')
+          PY
