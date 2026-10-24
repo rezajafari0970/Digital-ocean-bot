@@ -37,3 +37,24 @@ https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x
 
 No saved AWS account was available for a customer-account replay. The mapping
 regression uses synthetic EC2 wire responses, not a claimed live AWS result.
+
+## GitHub-hosted atomic promotion, 2026-10-24
+
+The AWS unified candidate is 272c46317edff036c32e302c8adce4f0ff3dcda7.
+Source and independent install run 40066053925 passed; atomic promotion run
+40066721562 passed. The operational workflow is preserved in
+`promote-verified-aws-20261024.yml`. It ran on a temporary operational branch,
+not as an additional workflow in the released application.
+
+This path needs no publication process on the quarantined host. It verifies
+the exact candidate SHA, successful test/install jobs, release file manifest
+and baseline ancestry, then pushes main and stable in one atomic operation
+with leases on both expected old heads. The temporary GitHub workflow token
+is confined to the job. A destination change aborts promotion.
+
+For a future release, create a new operational branch and update all pinned
+SHAs and the verified run only after its independent evidence passes. Do not
+rerun this historical workflow as a generic latest-release publisher. Local
+secret, database, native and race gates remain prerequisites; hosted source
+and installation jobs supplement those checks. The old legacy publisher
+state must not be treated as current while that host is quarantined.

@@ -1,0 +1,283 @@
+{
+  "public_commit": "272c46317edff036c32e302c8adce4f0ff3dcda7",
+  "source_commit": "13ea6575efd492ae90e32176feea547f60021eef",
+  "candidate_ci_run": 40066053925,
+  "atomic_promotion_run": 40066721562,
+  "required_regressions_passed": 156,
+  "required_regressions_skipped": 0,
+  "new_openai_calls": 0,
+  "prior_openai_calls": 3,
+  "prior_tokens": 6809,
+  "prior_estimated_usd": 0.05716284695,
+  "evidence_sha256": {
+    "exact-checks.log": "ee70d0a5e2279ca1d40c4572d99a0f4af7ff0b645c815238f4771158e3192bf0",
+    "aws-final.log": "475a104149cb513b605aea1e35a9897d828b5a9c8eb41a62c642b77cb6d27e01",
+    "browser-test2.log": "ef65448da1935b986ad2ffa7d83f29b4714d9fc0628004f3cbfdd04e6be3ba2e",
+    "browser-final.log": "2962d52d546aca14441f6cdf046bfd0a3b96f9a3f586a8da7f919112f2df3cd8",
+    "secret-scan-production.log": "00df03ae2d96278340ffddae0f9be9a2448168db49e3653f941f294e53d84d35",
+    "secret-scan-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c",
+    "gitleaks.log": "3246acd6aebfdb1f6626da17a2c94b7d212d8cfb66368e878f10c0a7b2ac4e13"
+  },
+  "deployments": {
+    "default": {
+      "at": "2026-10-24T05:41:56.521918+00:00",
+      "commit": "272c46317edff036c32e302c8adce4f0ff3dcda7",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T05:41:56.690045936Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    },
+    "production": {
+      "at": "2026-10-24T05:51:29.431793+00:00",
+      "commit": "272c46317edff036c32e302c8adce4f0ff3dcda7",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T05:51:29.565810376Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 4968,
+          "unchanged": 4952,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 16,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 12
+        },
+        "trojan_ownership": {
+          "common": 77,
+          "unchanged": 77,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 1,
+        "records": 18691,
+        "profiles": 1
+      }
+    }
+  },
+  "public_verification": {
+    "at": "2026-10-24T05:51:33.934359+00:00",
+    "public_https_version": {
+      "commit": "272c46317edff036c32e302c8adce4f0ff3dcda7",
+      "build_time": "2026-10-24T05:42:08Z",
+      "go_version": "go1.27.1",
+      "modified": false
+    },
+    "public_ready": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-24T05:51:33.71842032Z"
+    },
+    "assets_sha256": {
+      "aws-catalog.js": "7c842b5289708fcf4b81f8e3350fd642eb68594a1026d2f9502f0c4770eff19f",
+      "app.js": "0ec8bdbac880a75dc192143c07e536ad6da780e478144f12a11d5538ca5f8eb4",
+      "app.css": "3e8bc465ba6b811f02fe93f42cc9a6831a1050aef2b1700564884c811706aabb"
+    },
+    "timers": {
+      "dob-production-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      },
+      "datacenter-bot-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      }
+    },
+    "no_pending_deployment": true
+  },
+  "retired_runtime_archive": {
+    "archive_verified": true,
+    "archive_sha256": "bbbb043db93e8e160b6617d2d856469cbff94263b29f24cba035c9aa939e4312",
+    "archive_bytes": 148509623,
+    "archived_runtimes": 6,
+    "retained_ready_rollbacks": 3,
+    "at": 1792820947.977989,
+    "free_bytes": 5965008896
+  },
+  "first_production_attempt": {
+    "exit": 1,
+    "reason": "insufficient_retention_workspace",
+    "services_replaced": false
+  },
+  "reviewed_production_retry": {
+    "exit": 0,
+    "commit": "272c46317edff036c32e302c8adce4f0ff3dcda7"
+  },
+  "saved_aws_accounts": 0,
+  "completed_at": "2026-10-24T05:52:21.570862+00:00",
+  "free_bytes_after_rollout": 6368309248
+}
