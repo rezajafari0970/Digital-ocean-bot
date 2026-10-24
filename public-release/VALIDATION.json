@@ -2,23 +2,27 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-24",
-  "feature": "Visible account Save with cancellable progress streaming and bounded AWS regional discovery",
+  "feature": "Independent bounded fleet recovery, safe account editing, fair DNS coverage and public/internal port separation",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "156 required cases with isolated PostgreSQL and pinned native core",
+    "cloudflare_transport_fleet_no_skip": "182 required cases with isolated PostgreSQL and pinned native core on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
-    "atomic_main_and_stable": "required"
+    "atomic_main_and_stable": "required",
+    "account_edit_mobile": "six providers, four viewports, unchanged optional choices and cross-dialog settings submit"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
     "Additional regions are explicit, capped at four, and independently validated; partial inventory is never returned as success.",
     "AWS Price List rates require pricing:GetProducts and cover Linux shared On-Demand compute only; EBS, IPv4, transfer, CPU credits and taxes are extra.",
-    "Live AWS create/delete and customer IAM/price access cannot be claimed without a saved AWS account.",
     "No production policies or saved account settings are changed by this source update.",
-    "No new paid OpenAI API requests; development ledger remains capped at its prior three calls.",
     "Discovery has one None option per optional region, disables already selected regions and clears stale subnet choices before another preview.",
-    "Account preview reports bounded progress, preserves entries on failure, and keeps Save visible but disabled until validation and required network approval complete."
+    "Account preview reports bounded progress, preserves entries on failure, and keeps Save visible but disabled until validation and required network approval complete.",
+    "No additional cloud resources are created for this release verification; existing user scheduling remains authoritative.",
+    "OpenAI API review is not claimed without recorded response usage.",
+    "A forwarded installation declares DOB_PUBLIC_PANEL_PORT in root-owned service configuration. The public address is displayed separately; direct changes to its internal listener are rejected. Public gateway port editing requires an available gateway management adapter and is not implemented by this release.",
+    "Control recovery may run two expensive operations concurrently while weighted admission preserves provider and identity progress within the existing 24-connection pool.",
+    "Under DNS quota pressure, uncovered eligible servers precede additional endpoint allocation to already covered servers. Publication still requires current ownership, routing, transport and TLS evidence."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

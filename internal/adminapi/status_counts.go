@@ -112,6 +112,7 @@ SELECT json_build_object(
  'pending_deletion_accounts',(SELECT count(*) FROM live_accounts WHERE health='pending'),
  'active_servers',(SELECT count(*) FROM live_servers WHERE health='active'),
  'inactive_servers',(SELECT count(*) FROM live_servers WHERE health='inactive'),
+ 'unverified_servers',(SELECT count(*) FROM live_servers WHERE health='inactive' AND reason<>'PROVISIONING'),
  'broken_servers',(SELECT count(*) FROM live_servers WHERE health='broken'),
  'degraded_servers',(SELECT count(*) FROM live_servers WHERE health='degraded'),
  'pending_deletion_servers',(SELECT count(*) FROM live_servers WHERE health='pending'),

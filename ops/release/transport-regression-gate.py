@@ -133,6 +133,8 @@ REQUIRED['internal/worker'] += ('TestWeightedAdmissionKeepsSmallWorkAndCleanup',
 
 REQUIRED['internal/worker'] += ('TestRecoveryLedgerReadFaultNeverCallsBypassOrHandler', 'TestRecoveryMissingCheckpointOrFailedPruningRefusesWork', 'TestRecoveryCompletionFaultPreservesDurableFenceAndAtomicBackoff', 'TestRecoveryLiveOwnerCrashAndSessionLoss', 'TestRecoveryConcurrentWorkersDoNotOverlapLiveHandler', 'TestRecoveryAsyncPersistenceFailureInvalidatesProgressUntilReconciled', 'TestRecoveryProgressGenerationRejectsOlderSuccess', 'TestRecoveryCancellationPersistsBeforeReleasingLane', 'TestRecoveryCheckpointMigrationRefusesUnsafeDowngrade', 'TestRecoveryFailedActiveLaneCannotRestoreReadiness', 'TestLifecycleCompletionFailureSurvivesRestartAndInvalidatesProgress', 'TestRecoveryReaperDoesNotTouchLifecycleLane', 'TestDispatcherSlowAccountDoesNotBlockOthers', 'TestPollClassCannotOccupyRoutingHeadroom', 'TestAdmissionReservesNestedSQLAndSupervisionHeadroom')
 
+REQUIRED['internal/adminapi'] += ('TestDashboardSeparatesProvisioningFromUnverified',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
