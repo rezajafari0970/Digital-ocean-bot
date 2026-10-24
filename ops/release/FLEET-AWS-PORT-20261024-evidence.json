@@ -1,0 +1,471 @@
+{
+  "public_revision": "f6b2815ca0d6c85edde7753d6a9c7ca15e5ca31a",
+  "private_source_revision": "4a74ac95c98714fbe5ed9f42360f3386a39407d6",
+  "required_regressions": 182,
+  "skipped_required_regressions": 0,
+  "private_ci_run": 40088571639,
+  "public_source_install_repeat_run": 40089161394,
+  "atomic_promotion_run": 40089388480,
+  "production": {
+    "at": "2026-10-24T11:31:56.805162+00:00",
+    "commit": "f6b2815ca0d6c85edde7753d6a9c7ca15e5ca31a",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "dob-production-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-24T11:31:57.042842258Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 5156,
+        "unchanged": 5144,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 12,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 16
+      },
+      "trojan_ownership": {
+        "common": 77,
+        "unchanged": 77,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 1,
+      "records": 19875,
+      "profiles": 1
+    }
+  },
+  "live": {
+    "at": "2026-10-24T11:33:58.398367+00:00",
+    "heartbeats": [
+      {
+        "kind": "production-panels",
+        "role": "panels",
+        "age_seconds": 4.917859,
+        "database_pool": {
+          "Idle": 5,
+          "InUse": 29,
+          "WaitCount": 562,
+          "WaitDuration": 5047661309,
+          "MaxIdleClosed": 278,
+          "OpenConnections": 34,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 40
+        },
+        "control_work": {
+          "limit": 5,
+          "active": 0,
+          "waiting": 0,
+          "cost_limit": 17,
+          "cost_active": 0
+        },
+        "recovery_work": {
+          "limit": 2,
+          "waiting": 0,
+          "admitted": 0
+        },
+        "control_bulk_work": {
+          "limit": 1,
+          "waiting": 0,
+          "admitted": 0
+        },
+        "supervision_healthy": true
+      },
+      {
+        "kind": "production-control",
+        "role": "control",
+        "age_seconds": 3.955758,
+        "database_pool": {
+          "Idle": 6,
+          "InUse": 5,
+          "WaitCount": 0,
+          "WaitDuration": 0,
+          "MaxIdleClosed": 3,
+          "OpenConnections": 11,
+          "MaxIdleTimeClosed": 0,
+          "MaxLifetimeClosed": 0,
+          "MaxOpenConnections": 24
+        },
+        "control_work": {
+          "limit": 5,
+          "active": 2,
+          "waiting": 0,
+          "cost_limit": 17,
+          "cost_active": 12
+        },
+        "recovery_work": {
+          "limit": 2,
+          "waiting": 0,
+          "admitted": 2
+        },
+        "control_bulk_work": {
+          "limit": 1,
+          "waiting": 5,
+          "admitted": 1
+        },
+        "supervision_healthy": true
+      }
+    ],
+    "cloudflare_quota": [
+      {
+        "quota": 200,
+        "usage": 194,
+        "checked_at": "2026-10-24T11:32:56.22501+00:00",
+        "error": ""
+      }
+    ],
+    "account_samples": [
+      {
+        "id": "87ede423-b61c-41cf-aff7-827e1eb29daa",
+        "provider": "aws",
+        "desired": 10,
+        "next_build_at": "2026-10-24T13:52:47.373715+00:00",
+        "spacing_min": 15,
+        "spacing_max": 260,
+        "ready_unexpired": 1,
+        "expired_retained": 0,
+        "output_counts": {
+          "RESIDENTIAL": {
+            "configs": 4,
+            "protocols": {
+              "vless": 3,
+              "trojan": 1
+            }
+          }
+        }
+      },
+      {
+        "id": "1e0808d5-2694-49a9-8d5c-628e4ceb1b16",
+        "provider": "ovh",
+        "desired": 10,
+        "next_build_at": null,
+        "spacing_min": 39,
+        "spacing_max": 96,
+        "ready_unexpired": 10,
+        "expired_retained": 0,
+        "output_counts": {
+          "DIRECT": {
+            "configs": 46,
+            "protocols": {
+              "vless": 36,
+              "trojan": 10
+            }
+          },
+          "RESIDENTIAL": {
+            "configs": 46,
+            "protocols": {
+              "vless": 36,
+              "trojan": 10
+            }
+          }
+        }
+      },
+      {
+        "id": "29f8e75f-6d62-4083-8abc-8a45d7600ebb",
+        "provider": "linode",
+        "desired": 10,
+        "next_build_at": null,
+        "spacing_min": 39,
+        "spacing_max": 83,
+        "ready_unexpired": 10,
+        "expired_retained": 0,
+        "output_counts": {
+          "RESIDENTIAL": {
+            "configs": 44,
+            "protocols": {
+              "trojan": 10,
+              "vless": 34
+            }
+          }
+        }
+      },
+      {
+        "id": "5860de60-300b-4870-ab49-61fee45f8003",
+        "provider": "vultr",
+        "desired": 10,
+        "next_build_at": null,
+        "spacing_min": 23,
+        "spacing_max": 42,
+        "ready_unexpired": 10,
+        "expired_retained": 0,
+        "output_counts": {}
+      },
+      {
+        "id": "5ef983d8-4f9e-474e-969e-a598632ff8f2",
+        "provider": "digitalocean",
+        "desired": 10,
+        "next_build_at": null,
+        "spacing_min": 130,
+        "spacing_max": 270,
+        "ready_unexpired": 10,
+        "expired_retained": 0,
+        "output_counts": {}
+      }
+    ],
+    "gateway_assets": {
+      "app.js": {
+        "normal_tls": true,
+        "exact_artifact_match": true
+      },
+      "panel-settings.js": {
+        "normal_tls": true,
+        "exact_artifact_match": true
+      }
+    },
+    "gateway_login": {
+      "status": 200,
+      "current_assets": true
+    },
+    "public_port_declaration": true,
+    "panel_settings": {
+      "listen_port": 28080,
+      "web_path": "/admin"
+    }
+  },
+  "tracked_recovery": {
+    "at": "2026-10-24T11:33:58.019589+00:00",
+    "tracked_deployments": [
+      {
+        "id": "2448c79b-43cc-42ff-8d88-21c8a9e954fa",
+        "provider": "vultr",
+        "state": "PANEL_COMPLETE",
+        "current_step": "panel_complete",
+        "attempt": 6,
+        "created_at": "2026-10-24T11:05:48.657541+00:00",
+        "updated_at": "2026-10-24T11:29:11.982639+00:00",
+        "droplet_state": "READY",
+        "ready_at": "2026-10-24T11:29:11.982639+00:00",
+        "error_categories": []
+      },
+      {
+        "id": "37c3f70d-3d90-489b-a164-8e7c72f7c5c2",
+        "provider": "digitalocean",
+        "state": "PANEL_COMPLETE",
+        "current_step": "panel_complete",
+        "attempt": 6,
+        "created_at": "2026-10-24T11:20:59.658892+00:00",
+        "updated_at": "2026-10-24T11:33:39.204902+00:00",
+        "droplet_state": "READY",
+        "ready_at": "2026-10-24T11:33:39.204902+00:00",
+        "error_categories": []
+      },
+      {
+        "id": "f3d66d4b-7b37-44bf-bd29-019192c66ba0",
+        "provider": "vultr",
+        "state": "PANEL_COMPLETE",
+        "current_step": "panel_complete",
+        "attempt": 6,
+        "created_at": "2026-10-24T11:05:44.993495+00:00",
+        "updated_at": "2026-10-24T11:28:55.366873+00:00",
+        "droplet_state": "READY",
+        "ready_at": "2026-10-24T11:28:55.366873+00:00",
+        "error_categories": []
+      }
+    ],
+    "current_pending": [
+      {
+        "provider": "vultr",
+        "state": "PROVISIONING",
+        "current_step": "provision",
+        "count": 1
+      },
+      {
+        "provider": "vultr",
+        "state": "WAITING_INSTALLER",
+        "current_step": "provision",
+        "count": 1
+      }
+    ],
+    "services": [
+      {
+        "unit": "dob-production-api",
+        "ActiveState": "active",
+        "NRestarts": "0"
+      },
+      {
+        "unit": "dob-production-worker",
+        "ActiveState": "active",
+        "NRestarts": "0"
+      },
+      {
+        "unit": "dob-production-worker-panels",
+        "ActiveState": "active",
+        "NRestarts": "0"
+      }
+    ]
+  },
+  "openai_api": {
+    "new_requests": 0,
+    "new_tokens": 0,
+    "new_cost_usd": 0,
+    "prior_requests": 3,
+    "prior_tokens": 6809,
+    "prior_estimated_cost_usd": 0.05716284695,
+    "blocked_reason": "Prior OpenAI credential is on unreachable quarantined gateway; absent on reachable host."
+  },
+  "remaining": [
+    "Actual public gateway port editing requires management access to the legacy gateway.",
+    "Requested Astra API review requires securely provisioned credentials."
+  ],
+  "default_instance": {
+    "at": "2026-10-24T11:31:55.461582+00:00",
+    "commit": "f6b2815ca0d6c85edde7753d6a9c7ca15e5ca31a",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-24T11:31:55.518964268Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "output_stability_caveat": "AWS shared residential output observed 4,3,4 during DNS record rollover; do not claim fixed counts or uninterrupted Cloudflare output."
+}

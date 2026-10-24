@@ -1,50 +1,60 @@
 # Fleet, AWS and panel ingress repair — 2026-10-24
 
-Status: investigation and implementation in progress; NOT released.
-Baseline private bb6b3bc4fcb19b1a6db4b7cb9512d4bec3bd52ed; live/public 6336c9e47f2907adc029024ea05fa433346b7e62.
+Status: released and deployed to both independent instances. Public gateway port editing and Astra API review remain blocked by inaccessible legacy management/credentials.
 
-## Evidence and scope
+## Exact release evidence
 
-The 297-second supplied recording was reviewed at one frame per second (297 frames), including account creation, edits, outputs, fleet status and build details. Media contains credentials/configuration capabilities and must not be published or sent to external review APIs.
+- Private tested source: `4a74ac95c98714fbe5ed9f42360f3386a39407d6`.
+- Public release: `f6b2815ca0d6c85edde7753d6a9c7ca15e5ca31a`; prior stable `6336c9e47f2907adc029024ea05fa433346b7e62`.
+- [Independent full Go/vet, mobile/browser, native/race/ownership gate](https://github.com/rezajafari0970/Digital-ocean-bot/actions/runs/40088571639): 182 required regressions passed, zero skips.
+- [Exact public source, Ubuntu 24.04 installation and repeated installation](https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/40089161394): both jobs passed.
+- [Atomic main/stable promotion with leases](https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/40089388480): passed.
+- Exact export manifest, live-secret scans against both instances and gitleaks passed. Neither user video nor credential-bearing configurations were sent to external review APIs.
 
-- Confirmed: account Edit throws `d is not defined` across providers. Optional selections and inherited modal state also need regression coverage.
-- Confirmed: control recovery, lifecycle and maintenance share one bulk admission slot. A long installer serializes unrelated accounts despite a six-lane dispatcher. Any separation must preserve PostgreSQL headroom, checkpoint ownership and native mutation fences.
-- Investigating: some READY panels have no output snapshots; Cloudflare WS profile verification remains pending on part of the fleet. Do not bypass publication proofs or inflate output counts.
-- AWS first server reached READY during investigation and acquired eight confirmed profile clients. Four enabled profiles each request one client per DIRECT and RESIDENTIAL class: nominal eight configurations per fully verified server.
-- AWS user spacing is 15–260 minutes; the recorded next build is a scheduling policy, not an installer failure. Preserve this policy.
-- Public ingress is 8443 on the legacy gateway; application listens on 28080 on the healthy host. A database listen-port change alone would break the tunnel. Public port changes require a gateway adapter, reachability verification and rollback.
-- Legacy machine remains quarantined for builds/databases. Its RDC connection is offline and existing SSH authorization failed. Public gateway management and the prior OpenAI credential cannot currently be reached.
+## Changes and stages
 
-## Stages
+| Stage | Result |
+| --- | --- |
+| Video/source/live investigation | Reviewed the full 297-second recording at one frame per second, including account forms, fleet state, build details and output counts. |
+| Account editor / Save | Fixed undefined `d` references, restored modal ownership/submit handlers, kept optional selections empty, deduplicated payloads and verified Save/Enter across six providers and four mobile/desktop viewport sizes. Panel Settings submits independently after closing an account form. |
+| Independent recovery | Separate two-job recovery class; weighted shared admission caps five jobs, 17 retained SQL cost and two expensive jobs while preserving provider/identity concurrency. Unchanged 24-connection control pool retains completion/ownership headroom. |
+| Fleet counts | New explicit unverified count excludes Provisioning; legacy inactive API count remains compatible. |
+| Output / Cloudflare | Prefer uncovered servers when allocating scarce DNS capacity. Fresh authoritative exhaustion receives a distinct diagnostic. No valid DNS record is deleted to increase capacity and no proof is bypassed. |
+| Public versus internal port | Root-owned gateway declaration exposes public 8443 separately from internal 28080; redirects preserve public ingress and unsafe internal-port edits are rejected. Actual gateway port editing remains unavailable until gateway management is restored. Direct installations retain editable listen ports. |
+| Verification and release | All required gates passed on exact revisions, both instances backed up and updated, both five-check readiness suites passed and all executable hashes matched. |
+| Live recovery | Both tracked Vultr installers reached READY/PANEL_COMPLETE at 11:28:55 and 11:29:11 UTC. The tracked DigitalOcean SSH failure cleared and that server reached READY/PANEL_COMPLETE at 11:33:39 UTC. Additional newly scheduled replacements are distinct from these three recovered jobs. |
 
-1. Full video/source/live evidence: complete initial pass.
-2. Account edit/mobile regression: implementing.
-3. Independent recovery and provisioning: investigating bounded admission changes.
-4. Output coverage and self-repair: investigating.
-5. Public ingress setting: architecture identified; gateway access blocked.
-6. Focused tests, canonical transport gate, exact-SHA install CI: not started for this candidate.
-7. Atomic release, backed-up deployment, live verification: not started.
+## Live preservation and output findings
 
-## API ledger
+At 11:31:55–11:31:57 UTC, all six instance services were active with matching executable hashes and zero post-deployment restarts. Each instance passed all 14 preservation checks. Production retained 5,156 pre-existing profile ownership records and 77 Trojan ownership records with zero unexpected changes; 12 legitimate expired listener retirements were independently identified, and 16 new profile listeners were added by normal work. Credentials, master key, account rules, user build spacing, creation/protection/output policies and Cloudflare settings were unchanged.
 
-Prior ledger: 3 requests, 6,809 tokens, estimated USD 0.05716284695.
-This request: 0 external OpenAI API requests, 0 tokens, USD 0. Requested gpt-6-astra with highest documented reasoning (`max`) is blocked by absent credentials on the reachable host. Do not claim Astra review until an actual response and usage record exist. Current chat model cannot be changed through project tools.
+The public gateway served the exact new app.js and panel-settings.js over normal certificate-validated TLS. Its process has DOB_PUBLIC_PANEL_PORT=8443; the database listener remains 28080. Default-instance installation was also followed by a new production verification to establish isolation.
 
-## Implementation checkpoint before independent verification
+Three examples of observed output behavior:
+- The AWS account has one live server and desired count ten. Its user-selected spacing is 15–260 minutes, with the next build recorded at 13:52:47 UTC (17:22:47 Tehran). This delay is a policy, not evidence that ten servers were already running.
+- The only enabled Cloudflare zone has a quota of 200. Usage was 199 during investigation and 194 in the 11:33:58 UTC sample. Other zones remain intentionally disabled. A fully verified Cloudflare profile can publish multiple endpoints for one client, so eight confirmed class clients per server is not a fixed eight-URI output count.
+- A ten-server OVH account produced 46 links in each class; a ten-server Linode account produced 44 residential links in the last sample. AWS residential output was observed as 4, then 3, then 4. Its old record crossed the five-minute expiry exclusion while replacements were activated; new endpoint traffic verification initially failed and subsequently recovered. This is not evidence of a permanent fixed output count or zero-gap rollover. Do not publish expired or unverified endpoints to inflate counts.
 
-Implemented, not yet released:
-- Account Edit no longer references an undefined catalog variable. Optional plan/image/proxy selections remain empty and payloads deduplicate selections. Mobile Save state is reset and form submit supports Enter.
-- Shared modal callbacks are restored after closing. Panel settings explicitly owns its submit handler.
-- Recovery has a separate two-job class. Weighted control admission retains the existing provider/identity concurrency while bounding retained SQL to 17, total jobs to five, expensive jobs to two and the unchanged pool to 24 connections. Heartbeats expose recovery admission.
-- Cloudflare allocation orders due servers by live endpoint coverage before schedule age. No live record is deleted to reclaim capacity. Missing endpoints distinguish fresh authoritative quota exhaustion from propagation.
-- Public and application ports are separate in settings. A root-owned DOB_PUBLIC_PANEL_PORT declaration protects a forwarded deployment from breaking its internal tunnel; redirects retain the public port. Actual public-port editing remains blocked by absent gateway management access; this is not a completed ingress migration.
+Snapshots without live share capabilities were not treated as zero output. The scoped output probe reused existing tokens privately and logged aggregate counts/protocols only.
 
-Verified: account editor browser passed for all six providers and four viewports before the later cross-dialog/settings tests were added. First canonical gate passed 161 required tests, zero skips. Final expanded browser/race/ownership gates are pending on an independent GitHub runner.
+## Resource isolation and rollback
 
-During the first gate the 4 GiB host experienced global OOM at 10:48:32 UTC (an unrelated supervisor Python process was killed). Both production worker role checks timed out and exited safely; systemd recovered both at 10:51:14 UTC. MemoryMax=2 GiB for the test unit was insufficient isolation from live load. Do not run further heavy native/race tests on this production host. Keep ownership fail-closed; do not hide the resource failure by removing its checks. Follow-up runtime and database verification is required.
+During the earlier local canonical gate, the 4 GiB host experienced global OOM at 10:48:32 UTC (an unrelated supervisor Python process was killed). Both production worker role checks timed out and exited safely; systemd recovered them at 10:51:14 UTC. This occurred before the new release. MemoryMax=2 GiB did not sufficiently isolate the test from live load.
 
-Output evidence correction: eight confirmed profile clients per fully initialized server is not a fixed output-URI count. The Cloudflare profile may publish the same class client via multiple independently verified DNS endpoints. Observed healthy ten-server accounts published 49 configurations per class, not ten. The only enabled zone reported 199/200 authoritative DNS usage; uncovered new servers were waiting for capacity. Panels with no snapshots were past their server expiry and deliberately retained while replacement work finished; do not republish expired configurations.
+Final heavy tests ran on independent GitHub-hosted runners. Ordinary rollout builds used MemoryMax=1G, MemoryHigh=768M, GOMEMLIMIT=384MiB and one build package at a time. Observed production/default build peaks were approximately 737/768 MiB. No additional production worker restarts occurred during those bounded builds or after deployment.
 
-Astra/API ledger remains unchanged: zero new calls, zero new tokens, USD 0. Historical total remains 3 calls / 6,809 tokens / estimated USD 0.05716284695.
+Reclaimed approximately 2.52 GB of reproducible source/build/browser caches after checking inactive build processes and exact clean clone identities. No database backup was removed by that cache cleanup. Normal installer retention later removed its own expired verified runtime/backup copies. Fresh sealed backups and independent pre-update database links were retained. Disk reserve and ownership guards were not weakened. Schema remains 000195_provider_snapshot_latest.
 
-Independent verification on private commit d0f4dbdc9d254bfe39f4448942eba3b11e2d836e passed: GitHub run 40088053119, job 120854907694; 181 canonical required regressions, zero skips, six-provider mobile Edit/settings browser flow and onboarding with both available/blocked popups. The controller stayed healthy during this independent run. A follow-up adds an explicit dashboard count so provisioning servers are not also displayed as inactive/unverified; the legacy API count remains compatible. The resulting 182-case gate and exact candidate installation remain required before promotion.
+Full private operational evidence is under /root/dob-fleet-aws-port-20261024 on the healthy controller. A sanitized aggregate accompanies this report. The quarantined legacy host was not used for builds or database execution.
+
+## Remaining access-dependent work and API ledger
+
+1. Public gateway port editing: the old gateway's Desktop Commander session remains offline and existing SSH authorization was denied. Changing only the application listener would break the tunnel. A verified gateway adapter/control path is still needed before this feature can be completed.
+2. Requested Astra review: the authorized OpenAI credential remains on the inaccessible gateway and is absent on the reachable controller. No Astra request was made or claimed. The chat model cannot be switched through project tools.
+
+| API scope | Requests | Tokens | Estimated USD |
+| --- | ---: | ---: | ---: |
+| This task | 0 | 0 | 0 |
+| Historical ledger | 3 | 6,809 | 0.05716284695 |
+
+The requested API target remains gpt-6-astra with max reasoning once credentials are available. Reuse a bounded input/output budget and record response usage before reporting consumption. Do not copy customer secrets, raw configuration links or video frames into API review input.

@@ -12,13 +12,19 @@ static assets and all five readiness checks, and repeats installation to
 verify retained credentials and identity. The smoke helper refuses execution
 outside a disposable GitHub-hosted runner.
 
-Before promotion, also run transport-regression-gate.py as an unprivileged
-user with a disposable private-socket PostgreSQL and no production database
+Before promotion, run transport-regression-gate.py on an independent GitHub-hosted
+runner with a disposable private-socket PostgreSQL and no production database
 variables. It requires every named test and subtest to pass without skips.
-The native core and geosite data are pinned and hash checked; no global
-controller geodata installation is required. Use a bounded service and
-GOMAXPROCS=1/GOMEMLIMIT=768MiB on the 4 GiB recovery host; the earlier 1200 MiB
-cgroup limit was insufficient for cold race compilation.
+The native core, Chrome and geosite data are pinned and hash checked. The private
+fleet-verification workflow checks the exact PR head, full Go tests/vet, mobile
+browser flows, native transport and race/ownership regressions.
+
+Do not run heavy native/race tests on the 4 GiB production recovery host. A 2 GiB
+test cgroup still caused global memory pressure on 2026-10-24; both worker role
+checks failed closed and systemd recovered them. For ordinary deployment builds,
+use a separate bounded service (MemoryMax=1G, MemoryHigh=768M, GOMEMLIMIT=384MiB,
+GOFLAGS=-p=1, CPUQuota=100%) and verify live worker health throughout. Never remove
+ownership guards or lower backup disk requirements to make verification pass.
 
 Run the live-secret scanner against both independent instance configurations
 and gitleaks against the exact export. Verify release/FILES.json and a clean
@@ -54,7 +60,6 @@ is confined to the job. A destination change aborts promotion.
 
 For a future release, create a new operational branch and update all pinned
 SHAs and the verified run only after its independent evidence passes. Do not
-rerun this historical workflow as a generic latest-release publisher. Local
-secret, database, native and race gates remain prerequisites; hosted source
-and installation jobs supplement those checks. The old legacy publisher
+rerun this historical workflow as a generic latest-release publisher. Secret scanning, database, native and race gates remain prerequisites; hosted
+source and installation jobs supplement those checks. The old legacy publisher
 state must not be treated as current while that host is quarantined.
