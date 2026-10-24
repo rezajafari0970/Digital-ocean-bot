@@ -42,7 +42,8 @@ jobs:
           DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
         run: |
           test "$(git rev-parse HEAD)" = '${{ github.event.pull_request.head.sha }}'
-          go vet ./internal/worker ./cmd/worker ./internal/adminapi ./internal/cloudflare ./internal/panels/configplane
+          DOB_RUN_BROWSER_TEST=0 go test ./...
+          go vet ./...
           node --check web/static/app.js
           node --check web/static/panel-settings.js
           go test -v -count=1 -p 1 -timeout 5m -run '^(TestAccountEditBrowser|TestNewCloudProviderBrowser)$' ./internal/adminapi
