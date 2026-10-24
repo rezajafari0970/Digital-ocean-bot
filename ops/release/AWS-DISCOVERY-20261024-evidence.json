@@ -1,0 +1,310 @@
+{
+  "source": "1f833cda0f6d7d086d3133bbf9d330bcb3ce3e17",
+  "candidate": "ae5f2e8886fb9dd2dcb5e161aacb44847cfe9445",
+  "candidate_ci_run": 40070028680,
+  "regressions_passed": 156,
+  "regressions_skipped": 0,
+  "evidence_sha256": {
+    "browser.log": "5b57110ab8a03744a6bbab309da761f1e5341c510ab9112fc84577a493b81f57",
+    "final-source-checks.log": "54ab6a788f1f385df716bf33b6bfd69b9cb0fab48936f755d51132dda54a3fee",
+    "exact-gates.log": "bf675300f112c5a2c6f8fba6e531fe9d6ccb3f1d3387366ae8f8d2f09537d0fe",
+    "secret-scan-production.log": "176e888a335bc48285b5dd674062b9e6cfad64192e963083b7be763d32561d54",
+    "secret-scan-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c",
+    "gitleaks-final.log": "51c655ad42b28aa4343a43ee8e3fb033d1d6ff4a010e37437a8fffacb6dd4c11",
+    "default-rollout/verify.json": "22fa2e4cbbdac2b032b3dfc79910cb84a2f60b42af64d9b9989ae514ce6aa82a",
+    "production-rollout/verify.json": "c6290b91aec4e43db74926b3626759ce855de9dba9972011415358a8edb1ba61",
+    "production-rollout/update.log": "6b91aa5528210a27f74262e65c1d010d3e19861945e76b74f477eb185a45c115",
+    "public-verification.json": "a6c0c861a18a65d17e1509fd09460dace9326e77a01c5be39e479be9a257a4c1"
+  },
+  "atomic_promotion_run": 40070704533,
+  "validation": {
+    "baseline_browser_reproduced_failure": true,
+    "final_mobile_popup_available": "PASS",
+    "final_mobile_popup_blocked": "PASS",
+    "full_exported_go_tests_vet_installer": "PASS",
+    "required_database_native_race": "156 PASS, 0 skipped",
+    "gitleaks": "PASS",
+    "live_secret_scan_production_values": 33063,
+    "live_secret_scan_default_values": 15,
+    "initial_broad_run_environment": "Optional legacy Linode/UpCloud browser tests require /snap/bin/chromium; normal full suite rerun with its standard environment. AWS/OVH mobile suite independently passed with pinned Chrome."
+  },
+  "deployments": {
+    "default": {
+      "at": "2026-10-24T06:41:16.158265+00:00",
+      "commit": "ae5f2e8886fb9dd2dcb5e161aacb44847cfe9445",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T06:41:16.398460039Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    },
+    "production": {
+      "at": "2026-10-24T06:48:09.164770+00:00",
+      "commit": "ae5f2e8886fb9dd2dcb5e161aacb44847cfe9445",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-24T06:48:09.323426266Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 5008,
+          "unchanged": 5008,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 4
+        },
+        "trojan_ownership": {
+          "common": 77,
+          "unchanged": 77,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 1,
+        "records": 18894,
+        "profiles": 1
+      }
+    }
+  },
+  "public_verification": {
+    "at": "2026-10-24T06:48:14.065267+00:00",
+    "public_https_version": {
+      "commit": "ae5f2e8886fb9dd2dcb5e161aacb44847cfe9445",
+      "build_time": "2026-10-24T06:46:14Z",
+      "go_version": "go1.27.1",
+      "modified": false
+    },
+    "public_ready": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-24T06:48:13.775507642Z"
+    },
+    "assets_sha256": {
+      "aws-catalog.js": "8eecf3685c3338614c5e8fe5d168a96188840aecf83b253123ff2876ea76ce05",
+      "app.js": "e9ba1233c2ed3eab4963c71008def6e663a83102132378075c7ad0a49ba22919",
+      "app.css": "3e8bc465ba6b811f02fe93f42cc9a6831a1050aef2b1700564884c811706aabb"
+    },
+    "timers": {
+      "dob-production-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      },
+      "datacenter-bot-integrity.timer": {
+        "ActiveState": "active",
+        "UnitFileState": "enabled"
+      }
+    },
+    "no_pending_deployment": true
+  },
+  "historical_backup_archive": {
+    "repository": "/var/lib/dob-production-vault",
+    "snapshot": "bc9e526468c85f435d8bc0f77af899c75f3b0568289c9a2fd8a9a8337d511496",
+    "encrypted_readback_verified": true,
+    "files": {
+      "/root/dob-aws-catalog-20261024/production-rollout/database-before.dump": {
+        "sha256": "13ea8a827b05a71d3a7d8442a5ec50f5969c082b23e4e30af6e203d7959f3b49",
+        "bytes": 524869592,
+        "mtime_ns": 1792816268467909311
+      },
+      "/root/dob-aws-unified-20261024/production-rollout/database-before.dump": {
+        "sha256": "035c26224a35b964b143e3ea96242a9a8182336403ba214c4083908cf4ec0b69",
+        "bytes": 526170157,
+        "mtime_ns": 1792820125176671524
+      }
+    },
+    "at": "2026-10-24T06:39:46.491739+00:00",
+    "source_files_removed": true,
+    "free_bytes": 5686476800,
+    "added_to_encrypted_repository_bytes": 766619032
+  },
+  "fresh_production_backup": {
+    "sealed_backup": "20261024T064533.044362Z",
+    "verified": true,
+    "independent_retention_link": true
+  },
+  "api_usage": {
+    "new_requests": 0,
+    "new_tokens": 0,
+    "new_cost_usd": 0,
+    "prior_total_requests": 3,
+    "prior_total_tokens": 6809,
+    "prior_estimated_usd": 0.05716284695,
+    "request_cap": 3
+  },
+  "saved_aws_accounts": 0,
+  "completed_at": "2026-10-24T06:48:54.391427+00:00",
+  "free_bytes": 6299246592
+}
