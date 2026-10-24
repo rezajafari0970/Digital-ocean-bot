@@ -138,7 +138,7 @@ func main() {
 func buildModules(application *app.Application, role worker.Role, roleLease *worker.RoleLease) worker.Modules {
 	var modules worker.Modules
 	// Shared admission limits include ALL long-held/nested worker SQL paths.
-	controlWork, controlBulkWork, providerWork, identityWork := newControlWorkBudgets()
+	controlWork, controlBulkWork, providerWork, identityWork, recoveryWork := newControlWorkBudgets()
 	schedulerWork := newSchedulerWorkBudget(controlWork)
 	proofServing, proofRetired, proofConsumers := configuredProofWorkBudgets(role)
 	panelWork, panelPollWork, panelMaintenance := newPanelWorkBudgets(role, proofConsumers)
@@ -174,7 +174,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 					coverage = observed
 				}
 			}
-			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "scheduler_work": schedulerWork.Snapshot(), "provider_work": providerWork.Snapshot(), "identity_work": identityWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "proof_serving": proofServing.Snapshot(), "proof_retired": proofRetired.Snapshot(), "proof_attempts": proofMetrics.snapshot(), "proof_coverage": coverage, "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
+			err := heartbeat.Beat(beatCtx, map[string]any{"supervision": supervised, "role": role, "modules": modules.Names(role), "database_pool": application.DB.Stats(), "control_work": controlWork.Snapshot(), "control_bulk_work": controlBulkWork.Snapshot(), "recovery_work": recoveryWork.Snapshot(), "scheduler_work": schedulerWork.Snapshot(), "provider_work": providerWork.Snapshot(), "identity_work": identityWork.Snapshot(), "panel_work": panelWork.Snapshot(), "panel_poll_work": panelPollWork.Snapshot(), "proof_serving": proofServing.Snapshot(), "proof_retired": proofRetired.Snapshot(), "proof_attempts": proofMetrics.snapshot(), "proof_coverage": coverage, "recovery_scan_unix": recoveryProgress.Load(), "scheduler_scan_unix": schedulerProgress.Load(), "lifecycle_scan_unix": lifecycleProgress.Load(), "client_mutation": clientProgress.Snapshot(), "lifecycle_lanes": lanes})
 			cancel()
 			if err != nil && ctx.Err() == nil {
 				log.Printf("worker heartbeat: %v", err)
@@ -670,7 +670,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	})
 
-	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Admit: controlBulkWork.Do, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
+	w := worker.Worker{Store: worker.RecoveryStore{DB: application.DB}, Handler: app.RecoveryHandler{Container: application.Container}, Admit: recoveryWork.Do, Failures: failures, Interval: 10 * time.Second, Batch: 100, Progress: func(t time.Time) { recoveryProgress.Store(t.Unix()) }}
 	modules.Add(worker.RoleControl, "scheduler", func(ctx context.Context) {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()

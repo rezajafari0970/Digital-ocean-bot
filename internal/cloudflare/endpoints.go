@@ -4,11 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"database/sql"
+	"errors"
 	"github.com/lib/pq"
 	"net"
 	"strconv"
 	"time"
 )
+
+var ErrDNSQuotaUnavailable = errors.New("cloudflare_dns_quota_exhausted")
 
 type Endpoint struct {
 	ID, Hostname, Address string
@@ -23,6 +26,16 @@ func (s Service) ProbeEndpoint(ctx context.Context, account, profile, panel stri
  ORDER BY r.probe_next_at,r.created_at LIMIT 1 FOR UPDATE OF r SKIP LOCKED)
  UPDATE cloudflare_records r SET probe_next_at=now()+interval '30 seconds' FROM candidate c WHERE r.id=c.id RETURNING r.id::text,r.hostname,r.expires_at,COALESCE(NULLIF(r.edge_address,''),r.hostname)`, account, profile, panel).Scan(&e.ID, &e.Hostname, &e.ExpiresAt, &e.Address)
 
+	if errors.Is(err, sql.ErrNoRows) {
+		var full bool
+		queryErr := s.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM cloudflare_zones z WHERE z.account_id=$1 AND z.enabled AND z.present AND z.status='active')
+ AND NOT EXISTS(SELECT 1 FROM cloudflare_zones z WHERE z.account_id=$1 AND z.enabled AND z.present AND z.status='active'
+ AND (z.dns_record_quota IS NULL OR z.dns_quota_checked_at IS NULL OR z.dns_quota_checked_at<now()-interval '2 minutes'
+ OR z.dns_record_quota>z.dns_record_usage+(SELECT count(*) FROM cloudflare_records r WHERE r.account_id=z.account_id AND r.zone_id=z.id AND (r.state IN('PREPARED','SENT') OR r.state='DNS_READY' AND r.activated_at>z.dns_quota_checked_at))))`, account).Scan(&full)
+		if queryErr == nil && full {
+			err = errors.Join(err, ErrDNSQuotaUnavailable)
+		}
+	}
 	return e, err
 }
 func (s Service) Endpoints(ctx context.Context, account, profile, panel string, revision int64) ([]Endpoint, error) {

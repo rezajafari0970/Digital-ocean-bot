@@ -9,14 +9,20 @@ import (
 // WorkClass caps one category before it can queue for the shared SQL budget.
 // Waiting for a class permit holds neither a shared slot nor a SQL connection.
 // All callers acquire class first, then shared; handlers never reacquire either.
+// WorkAdmission permits hierarchical classes; every layer is acquired before SQL.
+type WorkAdmission interface {
+	Do(context.Context, func(context.Context) error) error
+	Capacity() int
+}
+
 type WorkClass struct {
-	parent  *WorkBudget
+	parent  WorkAdmission
 	slots   chan struct{}
 	waiting atomic.Int64
 }
 
-func NewWorkClass(parent *WorkBudget, limit int) *WorkClass {
-	if parent == nil || limit < 1 || limit > cap(parent.slots) {
+func NewWorkClass(parent WorkAdmission, limit int) *WorkClass {
+	if parent == nil || limit < 1 || limit > parent.Capacity() {
 		panic("invalid work class budget")
 	}
 	return &WorkClass{parent: parent, slots: make(chan struct{}, limit)}
@@ -36,6 +42,8 @@ func (b *WorkClass) Do(ctx context.Context, fn func(context.Context) error) erro
 	defer func() { <-b.slots }()
 	return b.parent.Do(ctx, fn)
 }
+func (b *WorkClass) Capacity() int { return cap(b.slots) }
+
 func (b *WorkClass) Snapshot() map[string]int64 {
 	return map[string]int64{"limit": int64(cap(b.slots)), "admitted": int64(len(b.slots)), "waiting": b.waiting.Load()}
 }

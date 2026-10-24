@@ -124,6 +124,15 @@ REQUIRED['internal/adminapi'] += ('TestAWSPreviewEmptyCatalogDiagnostics',)
 
 REQUIRED['internal/providers/aws'] += ('TestAWSRegionalDiscoveryPinsIndependentNetworks','TestAWSRegionalCatalogAndLaunchRouting','TestAWSRegionalInventoryNeverReturnsPartialSuccess','TestAWSRegionalCredentialsRejectScopeChanges','TestAWSRegionalCleanupRejectsUnknownJournalBeforeIO','TestAWSRegionalCleanupResumesEachOwnedNetwork','TestAWSPriceEvidenceRejectsWrongProductAndTerms','TestAWSPricingPaginationSigningAndOptionalFailure','TestAWSPlanCompatibilityAndAvailabilityZone')
 
+REQUIRED['internal/adminapi'] += ('TestCloudflareQuotaPrioritizesUncoveredServers',)
+REQUIRED['cmd/worker'] += ('TestControlBudgetReservesProviderProgress','TestIdentityReservedCapacityWithBulkAndBothProviders','TestIdentityDeadlineStartsAfterAdmission','TestIdentityRollingSlowPeerDoesNotBlockHealthyTail')
+
+REQUIRED['internal/adminapi'] += ('TestForwardedPanelPortPreservesGateway','TestPanelSettingsAtomicCredentials','TestPanelSettingsAddressAndAdminAuthorization')
+
+REQUIRED['internal/worker'] += ('TestWeightedAdmissionKeepsSmallWorkAndCleanup','TestAdmissionCancellationDoesNotAbandonOrLeakSlots')
+
+REQUIRED['internal/worker'] += ('TestRecoveryLedgerReadFaultNeverCallsBypassOrHandler', 'TestRecoveryMissingCheckpointOrFailedPruningRefusesWork', 'TestRecoveryCompletionFaultPreservesDurableFenceAndAtomicBackoff', 'TestRecoveryLiveOwnerCrashAndSessionLoss', 'TestRecoveryConcurrentWorkersDoNotOverlapLiveHandler', 'TestRecoveryAsyncPersistenceFailureInvalidatesProgressUntilReconciled', 'TestRecoveryProgressGenerationRejectsOlderSuccess', 'TestRecoveryCancellationPersistsBeforeReleasingLane', 'TestRecoveryCheckpointMigrationRefusesUnsafeDowngrade', 'TestRecoveryFailedActiveLaneCannotRestoreReadiness', 'TestLifecycleCompletionFailureSurvivesRestartAndInvalidatesProgress', 'TestRecoveryReaperDoesNotTouchLifecycleLane', 'TestDispatcherSlowAccountDoesNotBlockOthers', 'TestPollClassCannotOccupyRoutingHeadroom', 'TestAdmissionReservesNestedSQLAndSupervisionHeadroom')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

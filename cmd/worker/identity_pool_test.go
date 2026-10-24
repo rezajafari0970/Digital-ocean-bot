@@ -32,19 +32,18 @@ func TestIdentityProviderBulkPostgresPoolHeadroom(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer role.Close()
-	parent, bulk, provider, identity := newControlWorkBudgets()
-	scheduler := newSchedulerWorkBudget(parent)
-	// Worst admitted call graph under the shared five-slot limit: bulk6,
-	// provider2, two identity3, scheduler3 and role1. Each owner then needs one SQL connection.
+	_, _, provider, identity, recovery := newControlWorkBudgets()
+	// Worst admitted call graph: two recovery6, identity3, provider2 and role1.
+	// Each admitted owner then needs one additional connection to finish.
 	type lane struct {
 		held  int
 		admit func(context.Context, func(context.Context) error) error
 	}
-	lanes := []lane{{6, bulk.Do}, {2, provider.Do}, {3, identity.Do}, {3, identity.Do}, {3, scheduler.Do}}
-	held := make(chan struct{}, 5)
+	lanes := []lane{{6, recovery.Do}, {6, recovery.Do}, {3, identity.Do}, {2, provider.Do}}
+	held := make(chan struct{}, 4)
 	query := make(chan struct{})
 	release := make(chan struct{})
-	errs := make(chan error, 5)
+	errs := make(chan error, 4)
 	var wg sync.WaitGroup
 	for _, l := range lanes {
 		wg.Add(1)
@@ -83,7 +82,7 @@ func TestIdentityProviderBulkPostgresPoolHeadroom(t *testing.T) {
 		}(l)
 	}
 	defer func() { cancel(); wg.Wait() }()
-	for range 5 {
+	for range 4 {
 		select {
 		case <-held:
 		case <-ctx.Done():

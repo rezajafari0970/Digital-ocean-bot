@@ -4,14 +4,14 @@
  const stages=['Check prerequisites','Fetch release','Install dependencies','Build release','Back up and preserve data','Verify services and panel','Complete'];
  const labels={idle:'Ready to update',queued:'Update queued',running:'Updating project',succeeded:'Last update completed',failed:'Update failed',interrupted:'Update interrupted',unavailable:'Update service unavailable'};
  function settingsFields(d){
-  return '<label>Listen port<input name="listen_port" type="number" min="1024" max="65535" required value="'+esc(d.listen_port)+'"></label>'+
+  return (d.port_mode==='gateway'?'<label>Public panel port<input type="number" disabled value="'+esc(d.public_port)+'"></label><input type="hidden" name="listen_port" value="'+esc(d.listen_port)+'"><p class="muted">This panel uses a gateway. Connect gateway management to change the public port.</p>':'<label>Public panel port<input name="listen_port" type="number" min="1024" max="65535" required value="'+esc(d.listen_port)+'"></label>')+
    '<label>Web path<input name="web_path" required value="'+esc(d.web_path)+'"></label>'+
    '<label>Username<input name="username" autocomplete="username" required value="'+esc(d.username)+'"></label>'+
    '<label>New password<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Leave blank to keep current password"></label>'+
    '<label id="currentCredentialLabel" hidden>Current password<input name="current_password" type="password" autocomplete="current-password"></label>';
  }
  window.renderPanelSettings=function(d){
-  return '<div class="card section"><p>Listen port: '+esc(d.listen_port)+'</p><p>Web path: '+esc(d.web_path)+'</p><p>Username: '+esc(d.username)+'</p><button data-action="edit-settings">Edit settings</button><p class="muted">Port and path changes restart the panel automatically. Leave the password blank to keep it.</p><div id="settingsApplyNotice"></div></div>'+
+  return '<div class="card section"><p>Public panel port: '+esc(d.public_port||d.listen_port)+'</p>'+(d.port_mode==='gateway'?'<p class="muted">Application port (managed): '+esc(d.listen_port)+'</p>':'')+'<p>Web path: '+esc(d.web_path)+'</p><p>Username: '+esc(d.username)+'</p><button data-action="edit-settings">Edit settings</button><p class="muted">Address changes are applied automatically. Leave the password blank to keep it.</p><div id="settingsApplyNotice"></div></div>'+
    '<div class="card section"><h3>Project update</h3><p class="muted">Update from the published release. Existing accounts, proxies, servers and settings are preserved.</p><div id="projectUpdateStatus" aria-live="polite"><p>Checking update service…</p></div><button data-action="project-update" id="projectUpdateButton" disabled>Update project</button></div>';
  };
  window.openPanelSettingsForm=function(){
@@ -19,6 +19,9 @@
   $('#modalTitle').textContent='Panel Settings';$('#modalError').textContent='';
   $('#modalFields').innerHTML=settingsFields(d);$('#modalSubmit').hidden=false;$('#modalSubmit').textContent='Save and apply';
   const form=$('#modalForm');
+  $('#modalSubmit').disabled=false;$('#modalSubmit').onclick=()=>form.requestSubmit();
+  form.onsubmit=async e=>{e.preventDefault();try{await savePanelSettingsForm(Object.fromEntries(new FormData(form)))}catch(error){$('#modalError').textContent=error.message}};
+
   const changed=()=>{const needed=form.elements.username.value!==d.username||form.elements.password.value!=='';
    $('#currentCredentialLabel').hidden=!needed;form.elements.current_password.required=needed;};
   form.elements.username.oninput=changed;form.elements.password.oninput=changed;
@@ -34,7 +37,7 @@
    if(result.credentials_changed){logout();$('#username').value=result.settings.username;$('#loginError').textContent='Login details saved. Sign in again.';}
    else await load('settings');
    if(result.restart_required){
-    const target=new URL(location.href);target.port=String(result.settings.listen_port);target.pathname=result.settings.web_path;target.hash='settings';target.search='';
+    const target=new URL(location.href);target.port=String(result.settings.public_port||result.settings.listen_port);target.pathname=result.settings.web_path;target.hash='settings';target.search='';
     if(result.restart_queued){setTimeout(()=>location.assign(target.href),3500);}
     else{
      const slot=$('#settingsApplyNotice');
@@ -71,7 +74,7 @@
   e.preventDefault();e.stopPropagation();
   if(button.dataset.action==='apply-panel-settings'){
    button.disabled=true;
-   try{await api('/api/v1/panel-settings/apply',{method:'POST',body:'{}'});const target=new URL(location.href);target.port=String(cache.settings.listen_port);target.pathname=cache.settings.web_path;setTimeout(()=>location.assign(target.href),3500);}
+   try{await api('/api/v1/panel-settings/apply',{method:'POST',body:'{}'});const target=new URL(location.href);target.port=String(cache.settings.public_port||cache.settings.listen_port);target.pathname=cache.settings.web_path;setTimeout(()=>location.assign(target.href),3500);}
    catch(error){toast(error.message,'error');button.disabled=false;}
    return;
   }

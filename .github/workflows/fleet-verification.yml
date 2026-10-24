@@ -1,0 +1,51 @@
+name: Fleet isolated regressions
+on:
+  pull_request:
+    branches: ['checkpoint/final-e2e-20260929']
+permissions:
+  contents: read
+jobs:
+  fleet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 1536MiB
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare isolated dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql libasound2t64 libatk-bridge2.0-0t64 libxdamage1 libnss3 libgbm1
+          python3 - <<'PY'
+          import hashlib, pathlib, urllib.request, zipfile, io
+          payload=urllib.request.urlopen('https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.47/linux64/chrome-headless-shell-linux64.zip',timeout=90).read()
+          assert hashlib.sha256(payload).hexdigest()=='0d5acc62c3e213f8c87d3c298d66ffcf9a236d12ea4b9f85318bf85dbc279daa'
+          out=pathlib.Path('/tmp/dob-chrome');out.mkdir()
+          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+              assert all(not pathlib.Path(x.filename).is_absolute() and '..' not in pathlib.Path(x.filename).parts for x in archive.infolist())
+              archive.extractall(out)
+          (out/'chrome-headless-shell-linux64/chrome-headless-shell').chmod(0o755)
+          PY
+      - name: Exact source, syntax and browser regressions
+        env:
+          DOB_RUN_BROWSER_TEST: '1'
+          DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
+        run: |
+          test "$(git rev-parse HEAD)" = '${{ github.event.pull_request.head.sha }}'
+          go vet ./internal/worker ./cmd/worker ./internal/adminapi ./internal/cloudflare ./internal/panels/configplane
+          node --check web/static/app.js
+          node --check web/static/panel-settings.js
+          go test -v -count=1 -p 1 -timeout 5m -run '^(TestAccountEditBrowser|TestNewCloudProviderBrowser)$' ./internal/adminapi
+          DOB_TEST_AUTH_POPUP_BLOCKED=1 go test -v -count=1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
+      - name: Canonical database, native transport and race gate
+        run: python3 ops/release/transport-regression-gate.py "$GITHUB_WORKSPACE"

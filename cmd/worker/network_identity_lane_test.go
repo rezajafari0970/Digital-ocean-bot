@@ -10,7 +10,7 @@ import (
 )
 
 func TestIdentityReservedCapacityWithBulkAndBothProviders(t *testing.T) {
-	parent, bulk, provider, identity := newControlWorkBudgets()
+	parent, bulk, provider, identity, _ := newControlWorkBudgets()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	entered := make(chan struct{}, 5)
@@ -52,7 +52,7 @@ func TestIdentityReservedCapacityWithBulkAndBothProviders(t *testing.T) {
 }
 
 func TestIdentityDeadlineStartsAfterAdmission(t *testing.T) {
-	_, _, _, identity := newControlWorkBudgets()
+	_, _, _, identity, _ := newControlWorkBudgets()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	holds := make(chan struct{}, 2)
@@ -93,7 +93,7 @@ func TestIdentityDeadlineStartsAfterAdmission(t *testing.T) {
 }
 
 func TestIdentityRollingSlowPeerDoesNotBlockHealthyTail(t *testing.T) {
-	_, _, _, identity := newControlWorkBudgets()
+	_, _, _, identity, _ := newControlWorkBudgets()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	ids := []string{"slow"}

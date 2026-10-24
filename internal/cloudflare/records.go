@@ -54,7 +54,9 @@ func (s Service) plan(ctx context.Context, account string) error {
  WHERE ca.enabled AND cp.enabled AND cp.delete_requested_at IS NULL AND cp.spec->>'cloudflare_account'=$1::text
  AND (cp.fleet OR pi.id=ANY(cp.panel_ids)) AND pi.enabled AND a.enabled AND a.provider_state='ACTIVE' AND a.deletion_requested_at IS NULL
  AND dr.state IN('READY','EXPIRING') AND dep.state='PANEL_COMPLETE' AND (dr.expires_at IS NULL OR dr.expires_at>now()+interval '10 minutes')
- AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED')) AND sc.next_batch_at<=now() ORDER BY sc.next_batch_at LIMIT 8 FOR UPDATE OF sc SKIP LOCKED`, account)
+ AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=pi.id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED')) AND sc.next_batch_at<=now()
+ ORDER BY (SELECT count(*) FROM cloudflare_records coverage WHERE coverage.profile_id=sc.profile_id AND coverage.panel_id=sc.panel_id AND coverage.state IN('PREPARED','SENT','DNS_READY') AND coverage.expires_at>now()+interval '5 minutes'),sc.next_batch_at,sc.profile_id,sc.panel_id
+ LIMIT 8 FOR UPDATE OF sc SKIP LOCKED`, account)
 	if e != nil {
 		return e
 	}

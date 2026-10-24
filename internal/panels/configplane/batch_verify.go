@@ -178,7 +178,11 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 				if p.Spec.CloudflareAccount != "" {
 					endpoint, e = s.cloudflare().ProbeEndpoint(ctx, p.Spec.CloudflareAccount, p.ID, panel)
 					if e != nil {
-						s.batchFailure(ctx, p.ID, panel, "profile_cloudflare_dns_pending", false)
+						code := "profile_cloudflare_dns_pending"
+						if errors.Is(e, cloudflare.ErrDNSQuotaUnavailable) {
+							code = "profile_cloudflare_dns_quota_exhausted"
+						}
+						s.batchFailure(ctx, p.ID, panel, code, false)
 						continue
 					}
 				}

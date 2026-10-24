@@ -7,8 +7,10 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
@@ -24,6 +26,32 @@ type panelSettings struct {
 	Username   string `json:"username"`
 }
 
+// Forwarded installations bind an internal application port. The root-owned
+// service configuration declares the public port; request Host/forwarded headers
+// can never authorize a change to the gateway or its tunnel target.
+type panelSettingsView struct {
+	panelSettings
+	PublicPort         int    `json:"public_port"`
+	PublicPortEditable bool   `json:"public_port_editable"`
+	PortMode           string `json:"port_mode"`
+}
+
+func panelAddressView(settings panelSettings) (panelSettingsView, error) {
+	view := panelSettingsView{panelSettings: settings, PublicPort: settings.ListenPort, PublicPortEditable: true, PortMode: "direct"}
+	raw := strings.TrimSpace(os.Getenv("DOB_PUBLIC_PANEL_PORT"))
+	if raw == "" {
+		return view, nil
+	}
+	port, err := strconv.Atoi(raw)
+	if err != nil || port < 1 || port > 65535 {
+		return view, errors.New("panel_ingress_configuration_invalid")
+	}
+	view.PublicPort = port
+	view.PublicPortEditable = false
+	view.PortMode = "gateway"
+	return view, nil
+}
+
 func (s *Server) getPanelSettings(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
@@ -37,7 +65,12 @@ func (s *Server) getPanelSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	x.Username = p.Username
 	w.Header().Set("Cache-Control", "no-store")
-	writeJSON(w, 200, x)
+	view, err := panelAddressView(x)
+	if err != nil {
+		writeJSON(w, 503, map[string]string{"error": "panel_ingress_configuration_invalid"})
+		return
+	}
+	writeJSON(w, 200, view)
 }
 func (s *Server) updatePanelSettings(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
@@ -100,6 +133,15 @@ func (s *Server) updatePanelSettings(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	view, err := panelAddressView(req.panelSettings)
+	if err != nil {
+		writeJSON(w, 503, map[string]string{"error": "panel_ingress_configuration_invalid"})
+		return
+	}
+	if !view.PublicPortEditable && priorPort != req.ListenPort {
+		writeJSON(w, 409, map[string]string{"error": "public_port_requires_gateway_control"})
+		return
+	}
 	networkChange := priorPort != req.ListenPort || priorPath != req.WebPath
 	if networkChange {
 		state, err := s.updateController().Request(r.Context(), "status")
@@ -147,7 +189,7 @@ func (s *Server) updatePanelSettings(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	reply := map[string]any{"saved": true, "credentials_changed": credentialChange, "settings": req.panelSettings, "restart_required": networkChange, "restart_queued": false}
+	reply := map[string]any{"saved": true, "credentials_changed": credentialChange, "settings": view, "restart_required": networkChange, "restart_queued": false}
 	if networkChange {
 		_, err = s.updateController().Request(r.Context(), "restart_api")
 		if err == nil {
