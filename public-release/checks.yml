@@ -1,7 +1,7 @@
 name: Source checks
 on:
   push:
-    branches: [main, stable]
+    branches: [main, stable, 'release-candidate/**']
   pull_request:
 permissions:
   contents: read
@@ -29,3 +29,23 @@ jobs:
           node --check web/static/panel-settings.js
       - name: Verify exported file manifest
         run: python3 release/check-source.py
+  install:
+    if: startsWith(github.ref, 'refs/heads/release-candidate/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact candidate from restrictive root checkout
+        run: |
+          candidate="$RUNNER_TEMP/dob-release-candidate"
+          sudo cp -a "$GITHUB_WORKSPACE" "$candidate"
+          sudo chown -R root:root "$candidate"
+          sudo chmod -R go-rwx "$candidate"
+          sudo env NEEDRESTART_MODE=l bash "$candidate/install.sh" --source "$candidate"
+          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --revision "$GITHUB_SHA"
+      - name: Verify repeated install preserves identity
+        run: |
+          candidate="$RUNNER_TEMP/dob-release-candidate"
+          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --before
+          sudo env NEEDRESTART_MODE=l bash "$candidate/install.sh" --source "$candidate"
+          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --revision "$GITHUB_SHA"
