@@ -32,6 +32,9 @@ func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Dri
 	if e != nil {
 		return nil, e
 	}
+	if len(cred.Networks) != 0 {
+		return openRegional(r, cred)
+	}
 	return &Driver{client: &client{http: cloudutil.HTTPClient(r.HTTPClient), credentials: r.Credentials, region: cred.Region, expected: r.ExpectedExternalID}, accountID: r.AccountID, absence: r.Absence, resources: r.Resources}, nil
 }
 
@@ -378,7 +381,7 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 		return invalid("UNSUPPORTED_IMAGE")
 	}
 	img := images[0]
-	ps, e := d.plans(ctx, r.PlanID)
+	ps, e := d.plans(ctx, r.PlanID, img)
 	if e != nil {
 		return rejected, e
 	}

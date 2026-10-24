@@ -137,13 +137,19 @@ python3 tools/cloudflare/operator-probe.py --target-file cloudflare-probe-ID.jso
 
 ### AWS
 
-برای هر منطقه یک حساب منطقه‌ای اضافه کنید. فقط Access key ID و Secret access key را وارد کنید؛ فهرست مناطق فعال و Subnet عمومی به‌صورت خودکار خوانده می‌شود. گزینهٔ انتخاب‌شده پیش از ذخیره نمایش داده می‌شود و ورود دستی شناسه‌های شبکه لازم نیست. برای اعتبارنامهٔ موقت، Session token نیز وارد شود و پیش از انقضا با اعتبارنامهٔ همان حساب و منطقه جایگزین شود.
+یک حساب می‌تواند یک منطقهٔ اصلی و حداکثر چهار منطقهٔ اضافه با شبکهٔ مستقل داشته باشد. مناطق اضافه را در بخش کشف شبکه انتخاب کنید و گزینه‌ها را دوباره بارگذاری کنید؛ فقط مناطق دارای شبکه، پلن و Ubuntu تأییدشده در انتخاب‌های ساخت ظاهر می‌شوند. حساب‌های تک‌منطقه‌ای موجود همان هویت و محدودهٔ قبلی را حفظ می‌کنند. فقط Access key ID و Secret access key را وارد کنید؛ فهرست مناطق فعال و Subnet عمومی به‌صورت خودکار خوانده می‌شود. گزینهٔ انتخاب‌شده پیش از ذخیره نمایش داده می‌شود و ورود دستی شناسه‌های شبکه لازم نیست. برای اعتبارنامهٔ موقت، Session token نیز وارد شود و پیش از انقضا با اعتبارنامهٔ همان حساب و منطقه جایگزین شود.
 
 کشف خودکار، مسیر پیش‌فرض فعال به Internet Gateway متصل و قواعد IPv4 شبکه را بررسی می‌کند. با تأیید گزینهٔ شبکهٔ خودکار در فرم، هنگام اولین ساخت سرور یک Security group اختصاصی ساخته می‌شود: ورودی IPv4 TCP/UDP پورت‌های ۱ تا ۶۵۵۳۵ برای SSH و پورت‌های متغیر سرویس، با قواعد خروجی پیش‌فرض AWS. گروه‌های موجود تغییر نمی‌کنند. می‌توانید در Advanced overrides گروه‌های موجود خود را معرفی کنید؛ قواعد دسترسی آن‌ها به عهدهٔ شما است. برنامه VPC، subnet، gateway، NAT یا Elastic IP ایجاد نمی‌کند. اگر شبکهٔ عمومی مناسب وجود نداشته باشد، منطقهٔ دیگری انتخاب کنید یا شبکه را در AWS آماده کنید. شناسهٔ حساب از STS تأیید می‌شود و تغییر اعتبارنامه به حساب/منطقهٔ دیگری رد می‌شود.
 
 مجوزهای EC2 موردنیاز: `DescribeInstances`، `DescribeImages`، `DescribeInstanceTypes`، `DescribeInstanceTypeOfferings`، `DescribeRegions`، `DescribeSubnets`، `DescribeRouteTables`، `DescribeNetworkAcls`، `DescribeInternetGateways`، `DescribeSecurityGroups`، `RunInstances`، `CreateTags` برای برچسب‌های زمان ساخت، و `TerminateInstances`. سیاست IAM باید منابع وابستهٔ مجاز RunInstances را هم پوشش دهد؛ محدودکردن TerminateInstances به برچسب مالکیت برنامه توصیه می‌شود. STS GetCallerIdentity برای اثبات هویت فراخوانی می‌شود. شبکهٔ خودکار همچنین به `CreateSecurityGroup`، `AuthorizeSecurityGroupIngress`، `DescribeNetworkInterfaces` و `DeleteSecurityGroup` نیاز دارد.
 
 دامنهٔ فعلی: EC2 On-Demand در پارتیشن تجاری AWS، Ubuntu رسمی Canonical روی x86_64، دیسک ریشهٔ gp3 با حذف همراه سرور، IPv4 عمومی و IMDSv2 اجباری. ARM، GovCloud/China، Spot، دیسک اضافه و Elastic IP در این درایور عرضه نمی‌شوند. سقف تعداد سرورها از سهمیهٔ vCPU حدس زده نمی‌شود و قیمت نامعلوم صریحاً نامعلوم می‌ماند. هزینهٔ واقعی نمونه، دیسک، IPv4 و ترافیک تابع حساب AWS است.
+
+قیمت محاسبات از AWS Price List Query API و با مجوز اختیاری `pricing:GetProducts` روی منبع `*` خوانده می‌شود. نرخ نمایش‌داده‌شده مخصوص Linux، Shared tenancy و On-Demand در منطقهٔ انتخاب‌شده است. دیسک EBS gp3، IPv4 عمومی، ترافیک، اعتبار CPU و مالیات جدا هستند؛ تخمین ماهانه برابر ۷۳۰ ساعت است و سقف صورتحساب نیست. اختلال یا نداشتن مجوز قیمت‌گذاری اعتبار حساب را رد نمی‌کند و قیمت صفر نمی‌سازد. هر خواندن قیمت حداکثر ۱۲ ثانیه، ۲۰ صفحه و ۱۶ MiB پاسخ دارد؛ کاتالوگ حساب از کش نسخه‌دار مشترک استفاده می‌کند.
+
+پلن‌ها باید نسل جاری، x86_64، EBS، HVM و سازگار با بوت/ENA تصاویر Ubuntu باشند و در Availability Zone همان subnet عرضه شوند. فهرست موفق به‌معنی تضمین ظرفیت لحظه‌ای نیست. دیسک همراه پلن فرض نمی‌شود؛ هنگام ساخت حداقل ۱۲ GiB یا حداقل تصویر، هرکدام بزرگ‌تر باشد، برای ریشهٔ gp3 تنظیم می‌شود. تأیید شبکه نزدیک Save قرار دارد و بارگذاری مجدد شبکه، تنظیمات زمان‌بندی واردشده را حفظ می‌کند. خواندن ناقص یک منطقه، موجودی ناقص یا نبود قطعی سرور تلقی نمی‌شود.
+
+منابع قرارداد API: [AWS GetProducts](https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_pricing_GetProducts.html)، [EC2 DescribeInstanceTypes](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstanceTypes.html) و [EC2 DescribeInstanceTypeOfferings](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstanceTypeOfferings.html).
 
 ### OVH
 

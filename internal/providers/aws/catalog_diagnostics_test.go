@@ -28,7 +28,7 @@ func TestAWSEmptyCatalogIdentifiesReadStage(t *testing.T) {
 				return response(action, fixtureRead(action)), nil
 			})
 			c, err := d.Catalog(context.Background())
-			if err == nil || len(c.Images) != 0 || len(c.Plans) != 0 || calls > 6 {
+			if err == nil || len(c.Images) != 0 || len(c.Plans) != 0 || calls > 7 {
 				t.Fatal("empty catalog accepted or retried", c, err, calls)
 			}
 			diag := Diagnostic(err)

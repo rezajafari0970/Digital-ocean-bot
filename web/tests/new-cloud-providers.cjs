@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
  if(!base?.startsWith('http://127.0.0.1:')||!token)throw Error('local ephemeral session required');
  const root=process.env.DOB_UI_ARTIFACT_DIR||os.tmpdir(),profile=fs.mkdtempSync(path.join(root,'ui-profile-'));
  const log=fs.openSync(path.join(root,'browser.log'),'w');
- const chrome=spawn('/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
  let ws;try{
   const until=Date.now()+20000;let port;
   while(Date.now()<until){try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{};await new Promise(r=>setTimeout(r,200))}
@@ -122,10 +122,24 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    }
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    if(provider==='aws'){
-    await evaluate('document.querySelector("#modalSubmit").click()');
-    assert.equal(await evaluate('document.querySelector("#modal").open'),true);
-    assert.match(await evaluate('document.querySelector("#modalError").textContent'),/automatic security group/);
+    assert.match(await evaluate('document.querySelector("#accountSize").selectedOptions[0].textContent'),/USD 0.0114\/h compute/);
+    await evaluate('document.querySelector("[name=lifetime_min_minutes]").value="1500";document.querySelector("[name=lifetime_max_minutes]").value="1600";document.querySelector("[name=desired_server_count]").value="10";document.querySelector("[data-discovery-key=region_2]").value="us-east-1";document.querySelector("[data-discovery-key=region_2]").dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()');
+    await waitFor('cache.accountPreview!==null&&cache.accountPreview.regions.length===2&&!document.querySelector("#modalSubmit").hidden');
+    assert.equal(await evaluate('document.querySelector("[name=lifetime_min_minutes]").value'),'1500');
+    assert.equal(await evaluate('document.querySelector("[name=lifetime_max_minutes]").value'),'1600');
+    assert.equal(await evaluate('document.querySelector("[name=desired_server_count]").value'),'10');
+    assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),true);
+    assert.equal(await evaluate('document.querySelector("#accountDiscovery .networkReview [name=approve_managed_network]")!==null'),true);
+    assert.equal(await evaluate('document.querySelector("[name=region2]").value'), '');
+    assert.equal(await evaluate('document.querySelector("[name=size2]").value'), '');
+    assert.equal(await evaluate('document.querySelector("[name=image2]").value'), '');
+    assert.equal(await evaluate('document.querySelector("#accountSize").selectedOptions[0].textContent.includes("GB SSD")'),false);
+    await evaluate('document.querySelector("[name=region2]").value="us-east-1";document.querySelector("[name=region2]").dispatchEvent(new Event("change"))');
+    assert.equal(await evaluate('document.querySelector("[name=region2]").value'),'us-east-1');
     await evaluate('document.querySelector("[name=approve_managed_network]").click()');
+    assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),false);
+    await evaluate('document.querySelector("[name=approve_managed_network]").scrollIntoView({block:"center"})');
+    const networkSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'aws-unified-network-mobile.png'),Buffer.from(networkSnap.data,'base64'));
    }
    await evaluate('document.querySelector("#modalSubmit").click()');
    await waitFor('!document.querySelector("#modal").open');

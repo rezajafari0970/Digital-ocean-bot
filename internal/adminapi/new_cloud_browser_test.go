@@ -134,9 +134,22 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			discovery.Message = "Dedicated automatic security group: IPv4 TCP/UDP 1–65535; default outbound rules."
 			discovery.Fields = []providers.DiscoveryField{{Key: "region", Label: "AWS account region", Value: region, Options: []providers.DiscoveryOption{{Value: region, Label: region}}}}
 		}
+		if x.Provider == "aws" {
+			discovery.NetworkApproval = true
+			discovery.Fields = append(discovery.Fields, providers.DiscoveryField{Key: "region_2", Label: "Additional AWS region", Value: x.Selection["region_2"], Options: []providers.DiscoveryOption{{Value: "", Label: "None"}, {Value: "us-east-1", Label: "us-east-1"}}})
+			if x.Selection["region_2"] == "us-east-1" {
+				discovery.Resolved["regional_networks"] = map[string]any{"us-east-1": map[string]any{"subnet_id": "subnet-87654321", "managed_network": true}}
+			}
+		}
 		regions := []providers.Region{{ID: region, Name: region, Available: true}}
 		plans := []providers.Plan{{ID: "test-plan", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}}
 		images := []providers.Image{{ID: "ubuntu-fixture", Family: "ubuntu", Version: "24.04", Available: true}}
+		if x.Provider == "aws" {
+			plans[0].PricesByRegion = map[string]providers.PlanPrice{region: {Currency: "USD", Hourly: 0.0114, MonthlyEstimate: 8.322, Scope: "compute_only"}}
+			if x.Selection["region_2"] == "us-east-1" {
+				regions = append(regions, providers.Region{ID: "us-east-1", Name: "us-east-1", Available: true})
+			}
+		}
 		if x.Provider == "ovh" {
 			// Service-only SBG sorts before compute regions but has no plans.
 			regions = append([]providers.Region{{ID: "SBG", Name: "Empty legacy region", Available: true}}, regions...)
@@ -165,7 +178,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			return
 		}
 		if x.Provider == "aws" {
-			if credential["region"] != "eu-west-1" || credential["subnet_id"] != "subnet-12345678" || credential["managed_network"] != true || credential["secret_access_key"] != "fixture-secret" {
+			if credential["regional_networks"] == nil || credential["region"] != "eu-west-1" || credential["subnet_id"] != "subnet-12345678" || credential["managed_network"] != true || credential["secret_access_key"] != "fixture-secret" {
 				t.Error("AWS save lost pinned selection or secret")
 				w.WriteHeader(400)
 				return

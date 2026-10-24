@@ -27,6 +27,9 @@ jobs:
           bash -n install.sh deploy/*.sh
           node --check web/static/app.js
           node --check web/static/panel-settings.js
+          node --check web/static/aws-catalog.js
+          node web/tests/aws-catalog.cjs
+          node web/tests/account-catalog.cjs
       - name: Verify exported file manifest
         run: python3 release/check-source.py
   install:

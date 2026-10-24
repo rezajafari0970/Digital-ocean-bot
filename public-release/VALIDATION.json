@@ -1,29 +1,31 @@
 {
   "schema": 2,
   "status": "source_verified_publication_gates_required",
-  "date": "2026-10-20",
-  "feature": "Optional modular Cloudflare WS TLS control plane, durable DNS rotation, Origin CA and measured edge selection",
+  "date": "2026-10-24",
+  "feature": "AWS regional driver composition, verified subnet-zone catalogs, optional official compute pricing and network approval UX",
   "current_evidence": {
-    "focused_race_database_native_openssl": "18/18 PASS",
-    "transport_browser": "12/12 PASS",
-    "exact_candidate_full_go_vet": "REQUIRED_BEFORE_PUBLICATION",
-    "publication": "PENDING",
+    "aws_race_contracts": "PASS",
+    "mobile_browser_authorization_available": "PASS",
+    "mobile_browser_authorization_blocked": "PASS",
+    "full_go_vet_bootstrap_update_host_protection": "PASS; exact exported candidate also required",
+    "isolated_database_native_race": "RUNNING; 156 required cases on final source",
+    "publication": "PENDING_CANDIDATE_GATES",
     "deployment": "PENDING",
-    "live_cloudflare": "REQUIRES_USER_ACCOUNT",
-    "iran_operator": "REQUIRES_REAL_OPERATOR_PROBE"
+    "live_aws": "NO_SAVED_AWS_ACCOUNT_AVAILABLE"
   },
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "60 required cases with isolated PostgreSQL and pinned native core",
-    "exact_candidate_ubuntu_24_amd64_install": "required before push",
+    "cloudflare_transport_fleet_no_skip": "156 required cases with isolated PostgreSQL and pinned native core",
+    "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
     "atomic_main_and_stable": "required"
   },
   "notes": [
-    "Optional feature defaults off; existing profiles and Google Ads selective egress remain unchanged.",
-    "Only VLESS/VMess/Trojan WebSocket + TLS profiles are admitted by this CDN driver.",
-    "DNS and certificate tests use deterministic provider fixtures; no real Cloudflare credential is present.",
-    "Official Cloudflare IP ownership is verified separately from operator-reported protocol performance.",
-    "No absolute availability, advertisement success rate or zero-bug guarantee."
+    "Existing single-region AWS credentials retain their original identity and region boundaries.",
+    "Additional regions are explicit, capped at four, and independently validated; partial inventory is never returned as success.",
+    "AWS Price List rates require pricing:GetProducts and cover Linux shared On-Demand compute only; EBS, IPv4, transfer, CPU credits and taxes are extra.",
+    "Live AWS create/delete and customer IAM/price access cannot be claimed without a saved AWS account.",
+    "No production policies or saved account settings are changed by this source update.",
+    "No new paid OpenAI API requests; development ledger remains capped at its prior three calls."
   ]
 }

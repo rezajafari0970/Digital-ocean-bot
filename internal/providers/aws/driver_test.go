@@ -29,7 +29,12 @@ const fixtureCredential = `{"access_key_id":"fixture-access","secret_access_key"
 
 func openTest(t *testing.T, fn transport) *Driver {
 	t.Helper()
-	x, e := (Factory{}).Open(context.Background(), providers.OpenRequest{AccountID: "account-a", HTTPClient: &http.Client{Transport: fn}, Credentials: testCredential(fixtureCredential)})
+	x, e := (Factory{}).Open(context.Background(), providers.OpenRequest{AccountID: "account-a", HTTPClient: &http.Client{Transport: transport(func(r *http.Request) (*http.Response, error) {
+		if r.URL.Host == "api.pricing.us-east-1.amazonaws.com" {
+			return &http.Response{StatusCode: 503, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(`{}`))}, nil
+		}
+		return fn(r)
+	})}, Credentials: testCredential(fixtureCredential)})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -63,15 +68,15 @@ func fixtureRead(action string) string {
 	case "GetCallerIdentity":
 		return `<GetCallerIdentityResult><Account>123456789012</Account><Arn>arn:aws:iam::123456789012:user/fixture</Arn></GetCallerIdentityResult>`
 	case "DescribeSubnets":
-		return `<subnetSet><item><subnetId>subnet-12345678</subnetId><vpcId>vpc-12345678</vpcId><state>available</state></item></subnetSet>`
+		return `<subnetSet><item><subnetId>subnet-12345678</subnetId><vpcId>vpc-12345678</vpcId><state>available</state><availabilityZone>eu-west-1a</availabilityZone></item></subnetSet>`
 	case "DescribeSecurityGroups":
 		return `<securityGroupInfo><item><groupId>sg-12345678</groupId><vpcId>vpc-12345678</vpcId></item></securityGroupInfo>`
 	case "DescribeImages":
 		return imageXML
 	case "DescribeInstanceTypes":
-		return `<instanceTypeSet><item><instanceType>t3.micro</instanceType><vCpuInfo><defaultVCpus>2</defaultVCpus></vCpuInfo><memoryInfo><sizeInMiB>1024</sizeInMiB></memoryInfo><processorInfo><supportedArchitectures><item>x86_64</item></supportedArchitectures></processorInfo><supportedUsageClasses><item>on-demand</item></supportedUsageClasses></item></instanceTypeSet>`
+		return `<instanceTypeSet><item><instanceType>t3.micro</instanceType><currentGeneration>true</currentGeneration><supportedRootDeviceTypes><item>ebs</item></supportedRootDeviceTypes><supportedVirtualizationTypes><item>hvm</item></supportedVirtualizationTypes><supportedBootModes><item>legacy-bios</item><item>uefi</item></supportedBootModes><vCpuInfo><defaultVCpus>2</defaultVCpus></vCpuInfo><memoryInfo><sizeInMiB>1024</sizeInMiB></memoryInfo><processorInfo><supportedArchitectures><item>x86_64</item></supportedArchitectures></processorInfo><supportedUsageClasses><item>on-demand</item></supportedUsageClasses></item></instanceTypeSet>`
 	case "DescribeInstanceTypeOfferings":
-		return `<instanceTypeOfferingSet><item><instanceType>t3.micro</instanceType><location>eu-west-1</location></item></instanceTypeOfferingSet>`
+		return `<instanceTypeOfferingSet><item><instanceType>t3.micro</instanceType><currentGeneration>true</currentGeneration><supportedRootDeviceTypes><item>ebs</item></supportedRootDeviceTypes><supportedVirtualizationTypes><item>hvm</item></supportedVirtualizationTypes><supportedBootModes><item>legacy-bios</item><item>uefi</item></supportedBootModes><location>eu-west-1a</location></item></instanceTypeOfferingSet>`
 	case "DescribeInstances":
 		return `<reservationSet/>`
 	}

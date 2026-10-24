@@ -20,13 +20,14 @@ import (
 )
 
 type credential struct {
-	AccessKey      string   `json:"access_key_id"`
-	SecretKey      string   `json:"secret_access_key"`
-	SessionToken   string   `json:"session_token,omitempty"`
-	Region         string   `json:"region"`
-	Subnet         string   `json:"subnet_id"`
-	Groups         []string `json:"security_group_ids"`
-	ManagedNetwork bool     `json:"managed_network,omitempty"`
+	Networks       map[string]regionalNetwork `json:"regional_networks,omitempty"`
+	AccessKey      string                     `json:"access_key_id"`
+	SecretKey      string                     `json:"secret_access_key"`
+	SessionToken   string                     `json:"session_token,omitempty"`
+	Region         string                     `json:"region"`
+	Subnet         string                     `json:"subnet_id"`
+	Groups         []string                   `json:"security_group_ids"`
+	ManagedNetwork bool                       `json:"managed_network,omitempty"`
 }
 
 // Commercial partition only; opt-in/availability is verified against the API.
@@ -58,6 +59,19 @@ func credentials(ctx context.Context, s providers.CredentialSource) (credential,
 			return c, problem(providers.ErrorAuthentication, "credential", "INVALID_SECURITY_GROUPS", 0)
 		}
 		seen[g] = true
+	}
+	if len(c.Networks) > 4 {
+		return c, problem(providers.ErrorInvalidRequest, "credential", "REGIONAL_NETWORK_LIMIT", 0)
+	}
+	for region, network := range c.Networks {
+		if !regionPattern.MatchString(region) || region == c.Region {
+			return c, problem(providers.ErrorInvalidRequest, "credential", "INVALID_REGIONAL_NETWORK", 0)
+		}
+		regional := c
+		regional.Region, regional.Subnet, regional.Groups, regional.ManagedNetwork, regional.Networks = region, network.Subnet, network.Groups, network.Managed, nil
+		if _, err := credentials(ctx, cloudutil.NewJSONCredential(regional)); err != nil {
+			return c, err
+		}
 	}
 	return c, nil
 }

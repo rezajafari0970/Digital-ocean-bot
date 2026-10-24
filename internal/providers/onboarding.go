@@ -19,11 +19,12 @@ type DiscoveryField struct {
 	Options []DiscoveryOption `json:"options"`
 }
 type Discovery struct {
-	Complete    bool             `json:"complete"`
-	Fields      []DiscoveryField `json:"fields,omitempty"`
-	Resolved    map[string]any   `json:"resolved,omitempty"`
-	Message     string           `json:"message,omitempty"`
-	Credentials CredentialSource `json:"-"`
+	NetworkApproval bool             `json:"network_approval,omitempty"`
+	Complete        bool             `json:"complete"`
+	Fields          []DiscoveryField `json:"fields,omitempty"`
+	Resolved        map[string]any   `json:"resolved,omitempty"`
+	Message         string           `json:"message,omitempty"`
+	Credentials     CredentialSource `json:"-"`
 }
 type OnboardingFactory interface {
 	Discover(context.Context, OpenRequest, map[string]string) (Discovery, error)

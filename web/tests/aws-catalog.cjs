@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),aws=require('../static/aws-catalog.js');
+const plan={ID:'t3.micro',CPU:2,MemoryMB:1024,DiskGB:12,PricesByRegion:{'eu-west-1':{Currency:'USD',Hourly:.0114,MonthlyEstimate:8.322,Scope:'compute_only'}}};
+assert.equal(aws.planLabel(plan,'eu-west-1'),'t3.micro | 1 GiB RAM | 2 vCPU | USD 0.0114/h compute');
+assert.equal(aws.planLabel(plan,'eu-west-1').includes('SSD'),false);
+assert.equal(aws.priceLabel(plan,'us-east-1'),'Compute price unavailable');
+assert.equal(aws.priceLabel({...plan,PricesByRegion:{'eu-west-1':{Currency:'USD',Hourly:NaN,Scope:'compute_only'}}},'eu-west-1'),'Compute price unavailable');
+assert.match(aws.priceNote({pricing:{Status:'permission_required'}},'eu-west-1'),/pricing:GetProducts/);
+assert.match(aws.priceNote({},'eu-west-1'),/EBS gp3.*separately/);
+assert.match(aws.priceNote({},'eu-west-1'),/Public IPv4/);
+assert.equal(aws.approvalRequired({onboarding:{network_approval:true,resolved:{managed_network:false}}}),true);
+assert.equal(aws.approvalRequired({onboarding:{resolved:{managed_network:true}}}),true);
+assert.equal(aws.approvalRequired({}),false);
+const fields=[{value:'eu-west-1',options:[{value:'eu-west-1'}]},{value:'eu-west-1',options:[{value:''}]},{value:'us-east-1',options:[{value:''}]}];
+const root={querySelector:selector=>fields[['[name="region"]','[name="region2"]','[name="region3"]'].indexOf(selector)]};
+aws.uniqueChoices(root,'region',3);assert.deepEqual(fields.map(x=>x.value),['eu-west-1','','us-east-1']);
+fields[1].value='eu-west-1';aws.uniqueChoices(root,'region',3,fields[1]);assert.deepEqual(fields.map(x=>x.value),['eu-west-1','','us-east-1']);
+fields[1].value='us-east-1';aws.uniqueChoices(root,'region',3,fields[1]);assert.deepEqual(fields.map(x=>x.value),['eu-west-1','us-east-1','']);
+console.log('AWS compute pricing, separate EBS/IPv4, explicit network approval and distinct regional choices PASS');

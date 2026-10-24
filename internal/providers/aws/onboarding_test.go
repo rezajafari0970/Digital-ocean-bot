@@ -17,7 +17,7 @@ func networkFixture(action string) string {
 	case "DescribeRegions":
 		return `<regionInfo><item><regionName>eu-west-1</regionName><optInStatus>opt-in-not-required</optInStatus></item><item><regionName>us-east-1</regionName><optInStatus>opt-in-not-required</optInStatus></item></regionInfo>`
 	case "DescribeSubnets":
-		return strings.Replace(fixtureRead(action), "</state>", "</state><availableIpAddressCount>200</availableIpAddressCount><availabilityZone>eu-west-1a</availabilityZone><defaultForAz>true</defaultForAz>", 1)
+		return strings.Replace(fixtureRead(action), "</state>", "</state><availableIpAddressCount>200</availableIpAddressCount><defaultForAz>true</defaultForAz>", 1)
 	case "DescribeRouteTables":
 		return networkRoutes
 	case "DescribeNetworkAcls":

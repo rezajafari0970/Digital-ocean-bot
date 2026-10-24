@@ -122,6 +122,8 @@ REQUIRED['internal/provisioning'] += ('TestControllerKernelMemoryGuardLifecycle'
 REQUIRED['internal/providers/aws'] += ('TestAWSImageMappingCatalogAndCreate', 'TestAWSEmptyCatalogIdentifiesReadStage')
 REQUIRED['internal/adminapi'] += ('TestAWSPreviewEmptyCatalogDiagnostics',)
 
+REQUIRED['internal/providers/aws'] += ('TestAWSRegionalDiscoveryPinsIndependentNetworks','TestAWSRegionalCatalogAndLaunchRouting','TestAWSRegionalInventoryNeverReturnsPartialSuccess','TestAWSRegionalCredentialsRejectScopeChanges','TestAWSRegionalCleanupRejectsUnknownJournalBeforeIO','TestAWSRegionalCleanupResumesEachOwnedNetwork','TestAWSPriceEvidenceRejectsWrongProductAndTerms','TestAWSPricingPaginationSigningAndOptionalFailure','TestAWSPlanCompatibilityAndAvailabilityZone')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
@@ -210,6 +212,7 @@ def main(repo):
         if result.returncode:
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
+        subprocess.run(['node', 'web/tests/aws-catalog.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-save-receipt.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-rule-status.cjs'], cwd=repo, env=env, check=True, timeout=30)
