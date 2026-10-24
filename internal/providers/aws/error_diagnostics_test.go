@@ -56,3 +56,14 @@ func TestAWSDiagnosticsAllowlistBothEnvelopes(t *testing.T) {
 		t.Fatal("injected metadata escaped")
 	}
 }
+
+func TestAWSBackgroundErrorRetainsSafeWireCause(t *testing.T) {
+	e := classify("GetCallerIdentity", 403, []byte(`<ErrorResponse><Error><Code>InvalidClientTokenId</Code><Message>private-secret</Message></Error></ErrorResponse>`))
+	if !strings.Contains(e.Error(), "code=InvalidClientTokenId") || !strings.Contains(e.Error(), "operation=GetCallerIdentity") || strings.Contains(e.Error(), "private-secret") {
+		t.Fatal("background diagnostic lost safe cause", e)
+	}
+	e = classify("private-secret", 403, []byte(`<ErrorResponse><Error><Code>private-secret</Code><Message>private-secret</Message></Error></ErrorResponse>`))
+	if strings.Contains(e.Error(), "private-secret") || !strings.Contains(e.Error(), "code=UNRECOGNIZED_AWS_ERROR") || !strings.Contains(e.Error(), "operation=unknown") {
+		t.Fatal("untrusted wire metadata escaped", e)
+	}
+}

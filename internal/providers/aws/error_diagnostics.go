@@ -28,6 +28,13 @@ func wireProblem(e *providers.Error, code, format string) *providers.Error {
 		code = "UNRECOGNIZED_AWS_ERROR"
 	}
 	e.Cause = &wireError{code: code, format: format}
+	operation := "unknown"
+	if operations[e.Operation] {
+		operation = e.Operation
+	}
+	// Background observation persists Error(), not Diagnostic(). Keep its
+	// original allowlisted AWS cause instead of only AUTHENTICATION_FAILED.
+	e.Message += "; code=" + code + "; operation=" + operation
 	return e
 }
 

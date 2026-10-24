@@ -135,6 +135,9 @@ REQUIRED['internal/worker'] += ('TestRecoveryLedgerReadFaultNeverCallsBypassOrHa
 
 REQUIRED['internal/adminapi'] += ('TestDashboardSeparatesProvisioningFromUnverified',)
 
+REQUIRED['internal/panels/configplane'] += ('TestCDNClassProofsPreserveIndependentEndpointTimes','TestCDNProofFencesAndStructuralFailure')
+REQUIRED['internal/providers/aws'] += ('TestAWSBackgroundErrorRetainsSafeWireCause',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

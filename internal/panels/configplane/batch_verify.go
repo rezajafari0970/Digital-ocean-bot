@@ -309,6 +309,10 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 				}(j)
 			}
 			wg.Wait()
+			// Cancellation is inconclusive, including during public probes.
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
 			snapshot, e := sanaei.InventoryFromRaw(panel, raws)
 			if e != nil {
 				return e
@@ -327,6 +331,11 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 						}
 						if proof.Verified && !public[j.p.ID] {
 							reason = "profile_public_port_unreachable"
+						}
+					}
+					if j.endpoint.ID != "" && (reason == "profile_runtime_traffic_unverified" || reason == "profile_public_port_unreachable") {
+						if err := s.rejectCDNEndpoint(ctx, j, panel); err != nil {
+							return err
 						}
 					}
 					s.batchFailure(ctx, j.p.ID, panel, reason, false)
@@ -373,16 +382,28 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 					if _, e := tx.ExecContext(ctx, "UPDATE config_driver_clients SET confirmed=true WHERE profile_id=$1 AND panel_id=$2 AND client_id=ANY($3::text[]) AND NOT confirmed", j.p.ID, panel, pq.Array(observedIDs)); e != nil {
 						return e
 					}
-					for _, class := range j.p.Classes {
-						var verified any
-						failure := "profile_runtime_traffic_unverified"
-						if proof.Classes[class] {
-							verified = time.Now()
-							failure = ""
+					classTimes := map[string]time.Time{}
+					for class, good := range proof.Classes {
+						if good {
+							classTimes[class] = time.Now()
 						}
-						if _, e := tx.ExecContext(ctx, "INSERT INTO config_driver_class_proofs(profile_id,panel_id,route_class,verified_at,error_code) VALUES($1,$2,$3,$4,$5) ON CONFLICT(profile_id,panel_id,route_class) DO UPDATE SET verified_at=EXCLUDED.verified_at,error_code=EXCLUDED.error_code", j.p.ID, panel, class, verified, failure); e != nil {
-							return e
+					}
+					if j.endpoint.ID != "" {
+						var err error
+						classTimes, err = cloudflare.FreshEndpointClasses(ctx, tx, j.p.Spec.CloudflareAccount, j.p.ID, panel, j.p.Revision)
+						if err != nil {
+							return err
 						}
+						code = ""
+						for _, class := range j.p.Classes {
+							if classTimes[class].IsZero() {
+								code = "profile_class_traffic_retrying"
+								next = time.Now().Add(10 * time.Second)
+							}
+						}
+					}
+					if err := persistClassProofs(ctx, tx, j.p.ID, panel, j.p.Classes, classTimes); err != nil {
+						return err
 					}
 					_, e := tx.ExecContext(ctx, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code=$4,failures=0,verified_at=now(),next_attempt_at=CASE WHEN needs_reconcile THEN now() ELSE $5 END WHERE profile_id=$1 AND panel_id=$2 AND applied_revision=$3", j.p.ID, panel, j.p.Revision, code, next)
 					return e
@@ -399,8 +420,16 @@ func (s Service) batchFailure(ctx context.Context, id, panel, code string, recon
 	c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 	defer cancel()
 	var healthyCDN bool
-	if !reconcile {
-		_ = s.DB.QueryRowContext(c, `SELECT EXISTS(SELECT 1 FROM cloudflare_records r JOIN config_driver_profiles p ON p.id=r.profile_id WHERE r.profile_id=$1 AND r.panel_id=$2 AND r.account_id::text=p.spec->>'cloudflare_account' AND r.state='DNS_READY' AND r.verified_revision=p.revision AND r.verified_at>now()-interval '3 minutes' AND r.expires_at>now()+interval '5 minutes')`, id, panel).Scan(&healthyCDN)
+	// Missing/failed endpoint observations are independent. Structural native
+	// failures (binary/socket/users) invalidate the listener regardless of DNS.
+	if !reconcile && cdnFailureCanPreserveSibling(code) {
+		var account string
+		var revision int64
+		err := s.DB.QueryRowContext(c, "SELECT COALESCE(spec->>'cloudflare_account',''),revision FROM config_driver_profiles WHERE id=$1 AND enabled AND delete_requested_at IS NULL", id).Scan(&account, &revision)
+		if err == nil && account != "" {
+			classes, err := cloudflare.FreshEndpointClasses(c, s.DB, account, id, panel, revision)
+			healthyCDN = err == nil && len(classes) > 0
+		}
 	}
 	if healthyCDN {
 		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '15 seconds' WHERE profile_id=$1 AND panel_id=$2", id, panel)
@@ -435,4 +464,31 @@ func validateBatchResults(expected []string, proofs []batchResult) (map[string]b
 		result[p.ID] = p
 	}
 	return result, nil
+}
+
+func cdnFailureCanPreserveSibling(code string) bool {
+	switch code {
+	case "profile_cloudflare_dns_pending", "profile_cloudflare_dns_quota_exhausted", "profile_runtime_batch_unavailable", "profile_runtime_batch_invalid", "profile_runtime_traffic_unverified", "profile_public_port_unreachable":
+		return true
+	}
+	return false
+}
+func (s Service) rejectCDNEndpoint(ctx context.Context, j batchJob, panel string) error {
+	return sanaei.WithConfigEvidenceTx(ctx, s.DB, panel, func(tx *sql.Tx) error {
+		return cloudflare.RejectEndpoint(ctx, tx, j.endpoint.ID, j.p.ID, panel, j.p.Revision)
+	})
+}
+func persistClassProofs(ctx context.Context, tx *sql.Tx, profile, panel string, classes []string, at map[string]time.Time) error {
+	for _, class := range classes {
+		var verified any
+		failure := "profile_runtime_traffic_unverified"
+		if !at[class].IsZero() {
+			verified = at[class]
+			failure = ""
+		}
+		if _, err := tx.ExecContext(ctx, "INSERT INTO config_driver_class_proofs(profile_id,panel_id,route_class,verified_at,error_code) VALUES($1,$2,$3,$4,$5) ON CONFLICT(profile_id,panel_id,route_class) DO UPDATE SET verified_at=EXCLUDED.verified_at,error_code=EXCLUDED.error_code", profile, panel, class, verified, failure); err != nil {
+			return err
+		}
+	}
+	return nil
 }

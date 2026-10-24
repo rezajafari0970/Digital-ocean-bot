@@ -38,9 +38,53 @@ func (s Service) ProbeEndpoint(ctx context.Context, account, profile, panel stri
 	}
 	return e, err
 }
+
+// These are the same ownership, revision, TLS and freshness fences used by output.
+// Class aggregation must preserve the timestamp of the endpoint that proved it.
+const verifiedEndpointFrom = ` FROM cloudflare_records r
+ JOIN cloudflare_zones z ON z.account_id=r.account_id AND z.id=r.zone_id
+ JOIN cloudflare_accounts a ON a.id=r.account_id
+ JOIN config_driver_profiles p ON p.id=r.profile_id
+ WHERE r.account_id=$1 AND r.profile_id=$2 AND r.panel_id=$3
+ AND p.enabled AND p.delete_requested_at IS NULL AND p.revision=$4
+ AND p.spec->>'cloudflare_account'=r.account_id::text
+ AND r.state='DNS_READY' AND r.expires_at>now()+interval '5 minutes'
+ AND r.verified_at>now()-interval '5 minutes' AND r.verified_revision=$4
+ AND r.observed_at>now()-interval '10 minutes'
+ AND r.operator=COALESCE(p.spec->>'cloudflare_operator','')
+ AND z.ssl_strict AND z.checked_at>now()-interval '10 minutes'
+ AND z.enabled AND z.present AND z.status='active' AND a.enabled `
+
+type endpointQuery interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+}
+
+// FreshEndpointClasses returns independently proved classes, never a synthetic
+// renewed timestamp. A failed endpoint cannot revoke its verified siblings.
+func FreshEndpointClasses(ctx context.Context, q endpointQuery, account, profile, panel string, revision int64) (map[string]time.Time, error) {
+	rows, err := q.QueryContext(ctx, "SELECT r.verified_classes,r.verified_at"+verifiedEndpointFrom, account, profile, panel, revision)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]time.Time{}
+	for rows.Next() {
+		var classes []string
+		var at time.Time
+		if err := rows.Scan(pq.Array(&classes), &at); err != nil {
+			return nil, err
+		}
+		for _, class := range classes {
+			if (class == "DIRECT" || class == "RESIDENTIAL") && at.After(out[class]) {
+				out[class] = at
+			}
+		}
+	}
+	return out, rows.Err()
+}
+
 func (s Service) Endpoints(ctx context.Context, account, profile, panel string, revision int64) ([]Endpoint, error) {
-	rows, e := s.DB.QueryContext(ctx, `SELECT r.id::text,r.hostname,r.expires_at,r.verified_classes,COALESCE(NULLIF(r.edge_address,''),r.hostname) FROM cloudflare_records r JOIN cloudflare_zones z ON z.account_id=r.account_id AND z.id=r.zone_id JOIN cloudflare_accounts a ON a.id=r.account_id
- WHERE r.account_id=$1 AND r.profile_id=$2 AND r.panel_id=$3 AND r.state='DNS_READY' AND r.expires_at>now()+interval '5 minutes' AND r.verified_at>now()-interval '5 minutes' AND r.verified_revision=$4 AND r.observed_at>now()-interval '10 minutes' AND r.operator=COALESCE((SELECT spec->>'cloudflare_operator' FROM config_driver_profiles WHERE id=r.profile_id),'') AND z.ssl_strict AND z.checked_at>now()-interval '10 minutes' AND z.enabled AND z.present AND z.status='active' AND a.enabled ORDER BY r.created_at DESC`, account, profile, panel, revision)
+	rows, e := s.DB.QueryContext(ctx, "SELECT r.id::text,r.hostname,r.expires_at,r.verified_classes,COALESCE(NULLIF(r.edge_address,''),r.hostname)"+verifiedEndpointFrom+" ORDER BY r.created_at DESC", account, profile, panel, revision)
 	if e != nil {
 		return nil, e
 	}
@@ -51,10 +95,19 @@ func (s Service) Endpoints(ctx context.Context, account, profile, panel string, 
 		if e = rows.Scan(&x.ID, &x.Hostname, &x.ExpiresAt, pq.Array(&x.Classes), &x.Address); e != nil {
 			return nil, e
 		}
-
 		out = append(out, x)
 	}
 	return out, rows.Err()
+}
+
+// Negative authenticated traffic or public TLS evidence belongs to the exact
+// endpoint and revision tested. Other records and newer revisions are untouched.
+func RejectEndpoint(ctx context.Context, tx *sql.Tx, id, profile, panel string, revision int64) error {
+	_, err := tx.ExecContext(ctx, `UPDATE cloudflare_records r SET verified_at=NULL,verified_revision=NULL,verified_classes='{}'
+ FROM config_driver_profiles p WHERE r.id=$1 AND r.profile_id=$2 AND r.panel_id=$3
+ AND p.id=r.profile_id AND p.revision=$4 AND r.state='DNS_READY'
+ AND (r.verified_revision IS NULL OR r.verified_revision=$4)`, id, profile, panel, revision)
+	return err
 }
 func ConfirmEndpoint(ctx context.Context, tx *sql.Tx, id string, revision int64, classes []string) error {
 	_, e := tx.ExecContext(ctx, "UPDATE cloudflare_records SET verified_at=now(),verified_revision=$2,verified_classes=$3 WHERE id=$1 AND state='DNS_READY' AND expires_at>now()+interval '5 minutes'", id, revision, pq.Array(classes))
