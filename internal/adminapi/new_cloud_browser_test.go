@@ -90,7 +90,13 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		emptyCatalog.Store(r.URL.Query().Get("empty") == "1")
 		w.WriteHeader(204)
 	})
-	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {
+	var previewMode atomic.Value
+	previewMode.Store("")
+	mux.HandleFunc("POST /fixture/preview-mode", func(w http.ResponseWriter, r *http.Request) {
+		previewMode.Store(r.URL.Query().Get("mode"))
+		w.WriteHeader(204)
+	})
+	previewFixture := func(w http.ResponseWriter, r *http.Request) {
 		var x previewAccount
 		if json.NewDecoder(r.Body).Decode(&x) != nil {
 			t.Error("preview request invalid")
@@ -196,6 +202,31 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			}
 		}
 		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery, "account": providers.Account{ID: providerID}, "regions": regions, "plans": plans, "images": images, "defaults": map[string]any{"region": "SBG"}, "policy": map[string]any{}})
+	}
+	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {
+		mode := previewMode.Load().(string)
+		if mode == "gateway" {
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(502)
+			io.WriteString(w, "<html><title>502 Bad Gateway</title></html>")
+			return
+		}
+		if mode == "truncated" {
+			w.Header().Set("Content-Type", previewStreamType)
+			io.WriteString(w, `{"type":"progress","stage":"catalog","elapsed_seconds":5}`+"\n")
+			return
+		}
+		accountPreviewResponse(w, r, func(w http.ResponseWriter, r *http.Request) {
+			previewStage(r.Context(), "catalog")
+			if mode == "slow" {
+				select {
+				case <-time.After(350 * time.Millisecond):
+				case <-r.Context().Done():
+					return
+				}
+			}
+			previewFixture(w, r)
+		}, 5*time.Second, 40*time.Millisecond)
 	})
 	mux.HandleFunc("POST /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
 		var x accountWrite

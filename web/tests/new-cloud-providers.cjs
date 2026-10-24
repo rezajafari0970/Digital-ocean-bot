@@ -31,6 +31,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("#primaryAction").click()');
   await waitFor('document.querySelector("#modalFields [name=provider]")!==null');
   assert.deepEqual((await evaluate('[...document.querySelector("#modalFields [name=provider]").options].map(x=>x.value)')).sort(),['aws','digitalocean','linode','ovh','upcloud','vultr']);
+
+  async function assertSaveVisible(label){
+   const state=await evaluate('(()=>{const e=document.querySelector("#modalSubmit"),r=e.getBoundingClientRect(),v=window.visualViewport;return {hidden:e.hidden,width:r.width,height:r.height,top:r.top,bottom:r.bottom,right:r.right,viewportHeight:v?.height||innerHeight,viewportWidth:v?.width||innerWidth,hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.id}})()');
+   assert.equal(state.hidden,false,label);assert.ok(state.width>20&&state.height>=40&&state.top>=0&&state.bottom<=state.viewportHeight+1&&state.right<=state.viewportWidth+1,label+JSON.stringify(state));assert.equal(state.hit,'modalSubmit',label);
+  }
+  await assertSaveVisible('initial Save is visible');
   for(const provider of ['aws','ovh']){
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    const fields=await evaluate('[...document.querySelectorAll("[data-provider-credential]")].map(x=>({key:x.dataset.providerCredential,type:x.type}))');
@@ -41,7 +47,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    const serialized=JSON.parse(await evaluate('document.querySelector("#modalFields [name=token]").value'));
    assert.equal(serialized[provider==='aws'?'access_key_id':'application_key'],'fixture-credential');
    assert.equal(serialized.region,undefined);assert.equal(serialized.subnet_id,undefined);assert.equal(serialized.endpoint,undefined);assert.equal(await evaluate('document.querySelector("#providerCredentialFields details")?.open'),false);
-   assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+   assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    const snap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,provider+'-account-mobile.png'),Buffer.from(snap.data,'base64'));
   }
@@ -49,12 +55,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    await evaluate('(()=>{document.querySelector("#modalFields [name=name]").value="Automatic fixture";for(const el of document.querySelectorAll("[data-provider-credential]")){if(el.type==="password"){el.value=el.dataset.providerCredential.includes("secret")?"fixture-secret":"fixture-credential";el.dispatchEvent(new Event("input"))}}document.querySelector("#discoverAccount").click()})()');
    if(provider==='aws'){
-    assert.equal(await evaluate('document.querySelector("#discoverAccount").textContent'),'Validate credential & load provider options');
     await waitFor('document.querySelector("#modalError").textContent.includes("InvalidParameterValue")');
+    assert.equal(await evaluate('document.querySelector("#discoverAccount").textContent'),'Validate credential & load provider options');
     const message=await evaluate('document.querySelector("#modalError").textContent');
     for(const part of ['DescribeRegions','ec2:DescribeRegions','aws-browser-trace','HTTP 400'])assert.ok(message.includes(part));
     assert.equal(message.includes('private-provider-message'),false);
-    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
     assert.equal(await evaluate('document.querySelector("[data-provider-credential=secret_access_key]").value'),'fixture-secret');
     assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
     await evaluate('document.querySelector("#modalError").scrollIntoView({block:"end"})');
@@ -98,7 +104,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     await evaluate('fetch("/fixture/approve",{method:"POST"}).then(()=>window.dispatchEvent(new Event("focus")))');
     // Activation is polled automatically; no second Connect click.
     await waitFor('document.querySelector("[data-discovery-key=project_id]")!==null');
-    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
     await evaluate('document.querySelector("[data-discovery-key=project_id]").value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";document.querySelector("[data-discovery-key=project_id]").dispatchEvent(new Event("change"))');
    }
    await waitFor('cache.accountPreview!==null&&!document.querySelector("#modalSubmit").hidden');
@@ -114,7 +120,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     await evaluate('fetch("/fixture/catalog?empty=1",{method:"POST"})');
     await evaluate('document.querySelector("#discoverAccount").click()');
     await waitFor('document.querySelector("#modalError").textContent.includes("no region currently")');
-    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
     assert.equal(await evaluate('document.querySelector("[data-auth-status]").textContent.includes("options are ready")'),false);
     await evaluate('fetch("/fixture/catalog?empty=0",{method:"POST"})');
     await evaluate('document.querySelector("#discoverAccount").click()');
@@ -122,13 +128,30 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    }
    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
    if(provider==='aws'){
+
+    await assertSaveVisible('verified Save visible before network consent');
+    for(const mode of ['gateway','truncated']){
+     await evaluate('fetch("/fixture/preview-mode?mode='+mode+'",{method:"POST"})');
+     await evaluate('document.querySelector("#discoverAccount").click()');
+     await waitFor('!document.querySelector("#discoverAccount").disabled&&document.querySelector("#modalError").textContent.length>0');
+     assert.equal(await evaluate('document.querySelector("#modalError").textContent.includes("<html")'),false);
+     assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
+     await assertSaveVisible(mode+' leaves Save visible and disabled');
+    }
+    await evaluate('fetch("/fixture/preview-mode?mode=slow",{method:"POST"})');
+    await evaluate('document.querySelector("#discoverAccount").click()');
+    await waitFor('document.querySelector("#accountPreviewStatus").textContent.includes("Loading available plans")');
+    await assertSaveVisible('slow preview');
+    assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&document.querySelector("#discoverAccount").disabled'),true);
+    await waitFor('cache.accountPreview!==null&&!document.querySelector("#discoverAccount").disabled');
+    await evaluate('fetch("/fixture/preview-mode?mode=",{method:"POST"})');
     assert.match(await evaluate('document.querySelector("#accountSize").selectedOptions[0].textContent'),/USD 0.0114\/h compute/);
     assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-discovery-key^=region_]")].map(el=>({value:el.value,empty:[...el.options].filter(o=>o.value==="").length,primaryDisabled:[...el.options].find(o=>o.value==="eu-west-1").disabled}))'),Array.from({length:4},()=>({value:'',empty:1,primaryDisabled:true})));
     await evaluate('(()=>{const change=(key,value)=>{const el=document.querySelector("[data-discovery-key="+key+"]");el.value=value;el.dispatchEvent(new Event("change"))};change("region_2","us-east-1");change("region","us-east-1")})()');
     assert.equal(await evaluate('document.querySelector("[data-discovery-key=region_2]").value'),'');
     assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_id]").disabled'),true);
     assert.equal(await evaluate('document.querySelector("[data-discovery-key=subnet_id]").value'),'');
-    assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden'),true);
+    assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
     await evaluate('(()=>{const el=document.querySelector("[data-discovery-key=region]");el.value="eu-west-1";el.dispatchEvent(new Event("change"));document.querySelector("#discoverAccount").click()})()');
     await waitFor('cache.accountPreview!==null&&!document.querySelector("[data-discovery-key=subnet_id]").disabled');
     // Reproduce the reported four identical selections, including stale state
@@ -167,7 +190,19 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     await evaluate('document.querySelector("[name=approve_managed_network]").scrollIntoView({block:"center"})');
     const networkSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'aws-unified-network-mobile.png'),Buffer.from(networkSnap.data,'base64'));
    }
-   await evaluate('document.querySelector("#modalSubmit").click()');
+
+   for(const size of [{width:320,height:480},{width:390,height:420},{width:844,height:390},{width:390,height:844}]){
+    await call('Emulation.setDeviceMetricsOverride',{...size,deviceScaleFactor:1,mobile:true});
+    await evaluate('document.querySelector("#modalFields").scrollTop=0');
+    await assertSaveVisible(provider+' top '+JSON.stringify(size));
+    await evaluate('document.querySelector("#modalFields").scrollTop=99999');
+    await assertSaveVisible(provider+' bottom '+JSON.stringify(size));
+   }
+   const footerSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,provider+'-visible-save-mobile.png'),Buffer.from(footerSnap.data,'base64'));
+   const point=await evaluate('(()=>{const r=document.querySelector("#modalSubmit").getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()');
+   await call('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',clickCount:1});
+   await call('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',clickCount:1});
+
    await waitFor('!document.querySelector("#modal").open');
    await evaluate('document.querySelector("#primaryAction").click()');
    await waitFor('document.querySelector("#modal").open');

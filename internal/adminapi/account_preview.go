@@ -25,7 +25,7 @@ func (m previewCredential) Get(context.Context) ([]byte, error) {
 	return append([]byte(nil), m.token...), nil
 }
 
-func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
+func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
@@ -86,6 +86,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	previewStage(r.Context(), "connection")
 	client, closeFn, observed, ok := s.previewClient(w, r, x.ProxyID, true)
 	if !ok {
 		return
@@ -94,6 +95,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 	previewExitIP = observed
 
 	request := providers.OpenRequest{AccountID: "preview", HTTPClient: client, Credentials: previewCredential{[]byte(x.Token)}}
+	previewStage(r.Context(), "discovery")
 	discovery, err := s.Container.Providers.Discover(r.Context(), x.Provider, request, x.Selection)
 	if err != nil {
 		fail(err, "discovery")
@@ -104,6 +106,7 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Credentials = discovery.Credentials
+	previewStage(r.Context(), "credential")
 	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, request)
 	if err != nil {
 		if x.Provider == "ovh" || x.Provider == "aws" {
@@ -119,16 +122,19 @@ func (s *Server) accountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 422, map[string]string{"error": "provider_capability_missing"})
 		return
 	}
+	previewStage(r.Context(), "account")
 	account, err := ar.Account(r.Context())
 	if err != nil {
 		fail(err, "account")
 		return
 	}
+	previewStage(r.Context(), "capacity")
 	capacity, capErr := ar.Capacity(r.Context())
 	if capErr != nil {
 		fail(capErr, "capacity")
 		return
 	}
+	previewStage(r.Context(), "catalog")
 	catalog, err := cr.Catalog(r.Context())
 	if err != nil {
 		fail(err, "catalog")

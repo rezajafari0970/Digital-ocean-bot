@@ -2,7 +2,7 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-24",
-  "feature": "AWS discovery unique optional regions and invalidation of region-owned subnet choices",
+  "feature": "Visible account Save with cancellable progress streaming and bounded AWS regional discovery",
   "publication_gates": {
     "cloudflare_transport_fleet_no_skip": "156 required cases with isolated PostgreSQL and pinned native core",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
@@ -17,7 +17,8 @@
     "Live AWS create/delete and customer IAM/price access cannot be claimed without a saved AWS account.",
     "No production policies or saved account settings are changed by this source update.",
     "No new paid OpenAI API requests; development ledger remains capped at its prior three calls.",
-    "Discovery has one None option per optional region, disables already selected regions and clears stale subnet choices before another preview."
+    "Discovery has one None option per optional region, disables already selected regions and clears stale subnet choices before another preview.",
+    "Account preview reports bounded progress, preserves entries on failure, and keeps Save visible but disabled until validation and required network approval complete."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -147,44 +148,88 @@ func (Factory) Discover(ctx context.Context, r providers.OpenRequest, selection 
 		return providers.Discovery{}, e
 	}
 	cred.Networks = map[string]regionalNetwork{}
+
 	seen := map[string]bool{cred.Region: true}
+	enabled := map[string]bool{}
+	for _, option := range result.Fields[0].Options {
+		enabled[option.Value] = true
+	}
+	type regionalDiscovery struct {
+		region, subnetKey string
+		result            providers.Discovery
+	}
+	extras := []regionalDiscovery{}
 	for i := 2; i <= 5; i++ {
-		key := "region_" + strconv.Itoa(i)
-		region := selection[key]
+		region := selection["region_"+strconv.Itoa(i)]
 		if region == "" {
 			continue
 		}
 		if seen[region] {
 			return providers.Discovery{}, problem(providers.ErrorInvalidRequest, "discovery", "DUPLICATE_REGION_SELECTION", 0)
 		}
-		seen[region] = true
-		regional := cred
-		regional.Region, regional.Subnet, regional.Groups, regional.ManagedNetwork, regional.Networks = region, "", nil, true, nil
-		request := r
-		request.Credentials = cloudutil.NewJSONCredential(regional)
-		subnetKey := "subnet_" + strconv.Itoa(i)
-		extra, err := discoverRegion(ctx, request, map[string]string{"region": region, "subnet_id": selection[subnetKey]})
-		if err != nil {
-			return providers.Discovery{}, err
+		if !enabled[region] {
+			return providers.Discovery{}, problem(providers.ErrorInvalidRequest, "discovery", "REGION_NOT_ENABLED", 0)
 		}
+		seen[region] = true
+		extras = append(extras, regionalDiscovery{region: region, subnetKey: "subnet_" + strconv.Itoa(i)})
+	}
+	// Three independent network reads at a time; no partial credential can escape.
+	// Results merge in selection order after all goroutines have stopped.
+	work, stop := context.WithCancel(ctx)
+	defer stop()
+	sem := make(chan struct{}, 3)
+	var wg sync.WaitGroup
+	var first sync.Once
+	var failure error
+	for i := range extras {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			select {
+			case sem <- struct{}{}:
+				defer func() { <-sem }()
+			case <-work.Done():
+				return
+			}
+			item := &extras[i]
+			regional := cred
+			regional.Region, regional.Subnet, regional.Groups, regional.ManagedNetwork, regional.Networks = item.region, "", nil, true, nil
+			request := r
+			request.Credentials = cloudutil.NewJSONCredential(regional)
+			var err error
+			item.result, err = discoverRegion(work, request, map[string]string{"region": item.region, "subnet_id": selection[item.subnetKey]})
+			if err != nil {
+				first.Do(func() { failure = err; stop() })
+			}
+		}(i)
+	}
+	wg.Wait()
+	if failure != nil {
+		return providers.Discovery{}, failure
+	}
+	if err := ctx.Err(); err != nil {
+		return providers.Discovery{}, err
+	}
+	for _, item := range extras {
+		extra := item.result
 		for _, field := range extra.Fields {
 			if field.Key == "subnet_id" {
-				field.Key = subnetKey
-				field.Label = "Public subnet — " + region
+				field.Key = item.subnetKey
+				field.Label = "Public subnet — " + item.region
 				result.Fields = append(result.Fields, field)
 			}
 		}
 		if !extra.Complete {
 			result.Complete = false
 			result.Credentials = nil
-			result.Message = region + ": " + extra.Message
+			result.Message = item.region + ": " + extra.Message
 			return result, nil
 		}
 		network, err := credentials(ctx, extra.Credentials)
 		if err != nil {
 			return providers.Discovery{}, err
 		}
-		cred.Networks[region] = regionalNetwork{network.Subnet, network.Groups, network.ManagedNetwork}
+		cred.Networks[item.region] = regionalNetwork{network.Subnet, network.Groups, network.ManagedNetwork}
 		result.NetworkApproval = result.NetworkApproval || network.ManagedNetwork
 	}
 	result.Resolved["regional_networks"] = cred.Networks

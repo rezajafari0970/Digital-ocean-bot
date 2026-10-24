@@ -58,3 +58,13 @@ header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-item
 .accountCardTop{flex-wrap:wrap}.accountCardTop>div{min-width:0;max-width:100%;overflow-wrap:anywhere}.proxyMeta{grid-template-columns:90px minmax(0,1fr)}.proxyMeta>span{overflow-wrap:anywhere}
 
 .networkReview{min-inline-size:0;margin:20px 0 8px;padding:14px;border:1px solid #33436d;border-radius:12px;background:#0d1428}.networkReview legend{padding:0 6px;line-height:1.4}.networkReview .checkRow{margin-bottom:0;align-items:flex-start}
+
+/* The account action bar remains visible while only the long fields scroll. */
+#modal:has(.accountForm){padding:0;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden}
+.accountForm{display:flex;flex-direction:column;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden}
+.accountForm #modalFields{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+.accountForm .modalHead,.accountForm .actions,.accountForm #modalError,.accountForm #accountPreviewStatus{flex-shrink:0}
+.accountForm .modalHead h3{margin:0 0 12px}
+.accountForm #modalError,.accountForm #accountPreviewStatus{font-size:.85rem;margin:8px 0 0;max-height:4.5em;overflow:auto;overflow-wrap:anywhere}
+.accountForm .actions{margin-top:12px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.accountForm .actions button{min-height:44px}

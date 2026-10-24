@@ -28,6 +28,8 @@ jobs:
           node --check web/static/app.js
           node --check web/static/panel-settings.js
           node --check web/static/aws-catalog.js
+          node --check web/static/preview-stream.js
+          node web/tests/preview-stream.cjs
           node web/tests/aws-catalog.cjs
           node web/tests/account-catalog.cjs
       - name: Verify exported file manifest
