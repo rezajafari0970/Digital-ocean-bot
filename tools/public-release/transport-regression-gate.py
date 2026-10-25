@@ -144,6 +144,10 @@ REQUIRED['internal/adminapi'] += ('TestCloudflareFleetCapacityScopeAndOverlap','
 
 REQUIRED['internal/worker'] += ('TestDispatcherForgetsCompletedAccounts', 'TestDispatcherCancellationKeepsExecutingAccountOwned', 'TestDispatcherAccountCountSurvivesSiblingCompletion')
 
+# Bounded provider reads must not accept incomplete inventories or create IDs.
+REQUIRED['internal/providers/vultr'] = ('TestCatalogPaginationUsesNativeCursors', 'TestCatalogPaginationRejectsInvalidInventory', 'TestCatalogPaginationStopsCyclesAndLimits', 'TestCatalogPaginationCancellation')
+REQUIRED['internal/providers/digitalocean'] = ('TestProviderResponseReadBounds', 'TestProviderResponseRequiresSingleJSONValue', 'TestCreateResponseMissingIdentityRemainsAmbiguous')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

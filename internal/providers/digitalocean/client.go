@@ -2,7 +2,6 @@ package digitalocean
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -74,10 +73,7 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 	if out == nil {
 		return nil
 	}
-	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return fmt.Errorf("%w: decode", ErrProviderRequest)
-	}
-	return nil
+	return decodeProviderResponse(resp.Body, out)
 }
 
 func zero(b []byte) {

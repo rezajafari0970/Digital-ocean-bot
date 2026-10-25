@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "at": "2026-10-25T13:52:22.302041+00:00",
+  "continuation_baseline": "5703b6f59cdde435701976a07ee5d010ef523940",
+  "inspected_files": [
+    {
+      "path": "internal/providers/cloudutil/common.go",
+      "sha256": "c00c1d96df3d4bb8d6ca3f6b84eb7f56496ce78d415204f582cd2df6260f9c4f",
+      "lines": 110,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/cloudutil/credential.go",
+      "sha256": "1e0253517f8d9e4a4dc203cc32cde8bc772060c72ce267e33f0fce630db15622",
+      "lines": 11,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/client.go",
+      "sha256": "4afdc4c142291bb6c378e0f0900313ace8d4f49c81876d5418a1e397db8bc3a4",
+      "lines": 83,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/pagination.go",
+      "sha256": "bb7cca2fd8c4d02a95015a4981a26992be63fe5a02d0f105d15122f3ca060e53",
+      "lines": 67,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/client.go",
+      "sha256": "91dc1ee59d778dd753c7d8b2f1d776ce0ae37b12835dad6430756138f242ebf2",
+      "lines": 145,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/read.go",
+      "sha256": "feb93c15133e0ebdd77291e5332658145784b613f5f6c7fd9abbe6acb7a0cf4e",
+      "lines": 136,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/network/provider_transport_pool.go",
+      "sha256": "df4d94e6cad495e56877c52e9d8ce3264492181563443ee89f7cc9bcf011037c",
+      "lines": 97,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/network/client.go",
+      "sha256": "c7a255bfc0dfaf4cbbfb53c8711f718b5901fb7cc827ac87083dbf11b4277e37",
+      "lines": 44,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/network/egress_guard.go",
+      "sha256": "39fb18432f147a5481c9c60fe52a7674c2e6cd9be2a978493d45435bc595271d",
+      "lines": 46,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/network/transport_observer.go",
+      "sha256": "e8b295e61637d5b3ea3d7c5d51a6af871d7b056a25c58246157cb22d29cda27c",
+      "lines": 39,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/read_driver.go",
+      "sha256": "58ca2e08f108d70feb62fa7a142a83cb527e6a64aa6b955970dc426eeede2601",
+      "lines": 171,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/client_test.go",
+      "sha256": "65d3908fd81ecce86d93de87dc9bc3f1872da19041b3264315dd3c25552e04c2",
+      "lines": 79,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/read_driver_test.go",
+      "sha256": "70526ab8866eeb4a7db6205b46ccfafd438cdae9d563070eee7f96d4cfc9b7d7",
+      "lines": 160,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/inventory_safety_test.go",
+      "sha256": "d94c59a032f8f8635df146e3ffc36fdd522e6189aeaeb15cff10a6381478ec88",
+      "lines": 50,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/types.go",
+      "sha256": "3f46e339bd6174b31403778be17f1a085a2c6efdc690734c149eaee82481b3ee",
+      "lines": 83,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/driver_v2.go",
+      "sha256": "aa274bdffd7a13084599d25749f45e757501305a7d4303398f33e9a5ab8ad16b",
+      "lines": 348,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/discovery.go",
+      "sha256": "1b0670bc2c642d3a65220af67690219badefc5b27bd740e2e24587a021787a34",
+      "lines": 105,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/characterization_test.go",
+      "sha256": "c627c80f70a4e508504db72ffb497050717415cb4a54b0da2c37e85c8d62ca96",
+      "lines": 176,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/client_test.go",
+      "sha256": "0230b8a89ca983c535c98cc180f6ca89adbff0b7168b2b1f3a0f7938fc6ac531",
+      "lines": 42,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/pagination_regression_test.go",
+      "sha256": "03d784987a8ae798a14ff144fa992842e89892040c5126246c16b3e12a32045d",
+      "lines": 13,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/inventory_safety_test.go",
+      "sha256": "f7bb8aba09d41e17553e41d95a9d8fbee6a7c0b609d5bddfbd1d4221d89540d5",
+      "lines": 17,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/ssh_read.go",
+      "sha256": "f1c041bfd13e5ed439c3af322b27a2f4cea95809b7424135e9f08a5eac43423d",
+      "lines": 47,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/ip.go",
+      "sha256": "9abb792d5cd90b5bf3c70ee52cc776b24e531369f1f0ea2abf36b1770a69dd74",
+      "lines": 115,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/ip_test.go",
+      "sha256": "2bfb6aa74d8aea552d3b6e6de738c421ea91aa9700072db18fa2f6236ff14849",
+      "lines": 47,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/mutations.go",
+      "sha256": "78685412d8aefdbb5870e9ede48d8f878e989de990ede5c03ffce915307a55bb",
+      "lines": 126,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/linode/client.go",
+      "sha256": "80d095bbea5a9c1f60bac90b179666406672faf5738bf8241ca987c44f23a172",
+      "lines": 225,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/ovh/client.go",
+      "sha256": "758f6b05c86e50e7e8f24699d476d78cdf4650244bbb09f78c837535a8c53b29",
+      "lines": 245,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/upcloud/client.go",
+      "sha256": "cf25baf743b11c9eaf49678593ad1f61ec642b35b5b1332c583f67be7a3c63d1",
+      "lines": 262,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/aws/client.go",
+      "sha256": "3a51a0c08d0015674ef751bf9bd235ee64518cdacc93b67c0bcbe26092c04c16",
+      "lines": 340,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/transport-regression-gate.py",
+      "sha256": "63e2d743b912a8630a6cab0967ba7c11f70bce4fa25b89280515e98750eddcea",
+      "lines": 279,
+      "scope": "full_file"
+    },
+    {
+      "path": "ops/release/run-bounded-update.sh",
+      "sha256": "38e227c8968b2cf582b50993e9c4aa1a3c3f3f5f60343d9a1a22c7bdc92c91fc",
+      "lines": 10,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/catalog_pagination.go",
+      "sha256": "024d5c617e08f6db482a6e1838d422b44c03a4c4880afe4b4b26390e500c0d2d",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/catalog_pagination_test.go",
+      "sha256": "e2012d73c2fbdf3dbd650763d7ffd2f1f3282104e6963e82d3cc17638dd115fc",
+      "lines": 161,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/response.go",
+      "sha256": "82dc2fe0cb1bdb4da56f61867a6f6c52a16b2dd786d991cf8497904b7a265ef9",
+      "lines": 26,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/response_bounds_test.go",
+      "sha256": "2e28fcf9c75baaca254718b1283cee3911374a7523aeaa81ea089c8547cf93aa",
+      "lines": 139,
+      "scope": "full_file"
+    }
+  ],
+  "cumulative_files": 83,
+  "cumulative_current_lines": 11859,
+  "baseline_go_fully_read": 71,
+  "baseline_go_fully_read_lines": 10149,
+  "whole_project_review_complete": false
+}
