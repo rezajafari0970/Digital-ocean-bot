@@ -556,6 +556,11 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if res.Code != 202 {
 		t.Fatal(res.Code, res.Body.String())
 	}
+	listAfterDelete := httptest.NewRecorder()
+	api.getConfigProfiles(listAfterDelete, httptest.NewRequest("GET", "/", nil))
+	if listAfterDelete.Code != 200 || bytes.Contains(listAfterDelete.Body.Bytes(), []byte(p.ID)) {
+		t.Fatal("deleted profile stayed in the active catalog", listAfterDelete.Code, listAfterDelete.Body.String())
+	}
 	detailRequest := httptest.NewRequest("GET", "/", nil)
 	detailRequest.SetPathValue("id", p.ID)
 	detailResponse := httptest.NewRecorder()
