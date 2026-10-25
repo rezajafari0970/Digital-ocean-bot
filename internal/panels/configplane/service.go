@@ -167,7 +167,9 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 // claimProfileWork locks the individual destination row. Locking the shared
 // profile with SKIP LOCKED makes other workers skip every destination of that
 // profile during concurrent claims. The fairness timestamp still updates in the
-// same statement; Reconcile reloads desired state before any remote mutation.
+// same statement when available. A busy fairness row must not block a claim
+// or invert the editor's profile-before-listener lock order. Reconcile reloads
+// desired state before any remote mutation.
 func (s Service) claimProfileWork(ctx context.Context, claim, lane, order string) (string, string, error) {
 	var id, panel string
 	e := s.DB.QueryRowContext(ctx, `WITH candidate AS (
@@ -177,7 +179,7 @@ func (s Service) claimProfileWork(ctx context.Context, claim, lane, order string
  AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
  AND `+lane+` ORDER BY `+order+` FOR UPDATE OF l SKIP LOCKED LIMIT 1), claimed AS (
  UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
- FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
+ FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM (SELECT p.id FROM config_driver_profiles p JOIN claimed c ON c.profile_id=p.id FOR UPDATE OF p SKIP LOCKED) available WHERE cp.id=available.id RETURNING cp.id)
  SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
 	return id, panel, e
 }

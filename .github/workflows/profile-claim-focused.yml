@@ -24,6 +24,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
+      - name: Prepare disposable migration roles
+        env:
+          PGPASSWORD: fixture
+        run: psql -h localhost -U postgres -d bulk_test -v ON_ERROR_STOP=1 -c 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'
       - name: Format and run actual concurrent destination claims
         run: |
           gofmt -w internal/panels/configplane/service.go internal/panels/configplane/claim_postgres_test.go
