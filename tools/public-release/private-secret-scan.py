@@ -2,8 +2,28 @@
 """Compare export with local live secrets in memory. Never output secret values."""
 import argparse,base64,json,os,pathlib,runpy,subprocess,re,hashlib
 from urllib.parse import urlsplit,unquote
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+def candidate_files(candidate):
+ # A missing or unreadable export must never produce an empty successful scan.
+ if candidate.is_symlink() or not candidate.is_dir():
+  raise RuntimeError('Secret scan candidate must be a real directory')
+ files=[]
+ def walk_error(_):
+  raise RuntimeError('Secret scan cannot enumerate candidate')
+ for directory,dirs,names in os.walk(candidate,onerror=walk_error,followlinks=False):
+  dirs[:]=[name for name in dirs if name!='.git']
+  for name in dirs+names:
+   p=pathlib.Path(directory)/name
+   if p.is_symlink():raise RuntimeError('Secret scan candidate contains a symbolic link')
+  for name in names:
+   p=pathlib.Path(directory)/name
+   if not p.is_file():raise RuntimeError('Secret scan candidate contains a non-regular file')
+   files.append(p)
+ if not files or not any(p.stat().st_size for p in files):
+  raise RuntimeError('Secret scan candidate contains no nonempty files')
+ return sorted(files)
 def scan(candidate,bootstrap,configuration):
+ files=candidate_files(candidate)
+ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
  values=runpy.run_path(str(bootstrap))['read_environment'](configuration/'env')
  encoded=pathlib.Path(values['MASTER_KEY_FILE']).read_bytes().strip()
  aes=AESGCM(base64.b64decode(encoded,validate=True));needles=set()
@@ -49,17 +69,17 @@ def scan(candidate,bootstrap,configuration):
  for table,column in [('output_share_tokens','token'),('account_output_share_tokens','token'),('output_config_snapshots','uri')]:
   for row in query("SELECT COALESCE(json_agg(row_to_json(t)),'[]') FROM (SELECT "+column+" FROM "+table+")t;"):
    if row.get(column):add(row[column])
- findings=[]; match_meta={}
- for p in candidate.rglob('*'):
-  if not p.is_file() or '.git' in p.relative_to(candidate).parts:continue
-  raw=p.read_bytes()
+ findings=[]; match_meta={};bytes_scanned=0
+ for p in files:
+  raw=p.read_bytes();bytes_scanned+=len(raw)
   matched=[secret for secret in needles if secret in raw]
   if matched:
    findings.append(str(p.relative_to(candidate)))
    for secret in matched:match_meta[hashlib.sha256(secret).hexdigest()[:12]]={'length':len(secret),'ipv4':bool(re.fullmatch(rb'[0-9.]+',secret)),'private_key_line':len(secret)>60}
  if findings:print(json.dumps({'match_metadata_no_values':match_meta}))
  if findings:raise RuntimeError('Live secret match in paths: '+','.join(findings))
- print(json.dumps({'known_live_secret_scan':'PASS','private_values_compared':len(needles),'values_logged':False}))
+ if not bytes_scanned:raise RuntimeError('Secret scan candidate became empty during scan')
+ print(json.dumps({'known_live_secret_scan':'PASS','files_scanned':len(files),'bytes_scanned':bytes_scanned,'private_values_compared':len(needles),'values_logged':False}))
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('candidate',type=pathlib.Path);p.add_argument('bootstrap',type=pathlib.Path);p.add_argument('--configuration',type=pathlib.Path,default=pathlib.Path('/etc/digital-ocean-bot'));a=p.parse_args()
  try:scan(a.candidate,a.bootstrap,a.configuration)
