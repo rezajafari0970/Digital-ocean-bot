@@ -81,9 +81,11 @@ func TestRecoveryReaperDoesNotTouchLifecycleLane(t *testing.T) {
 		t.Fatal(err)
 	}
 	l.close()
+	started := time.Now()
 	if err = w.Once(ctx); err != nil {
-		t.Fatal(err)
+		t.Fatalf("recovery scan elapsed=%s pool=%+v: %v", time.Since(started), db.Stats(), err)
 	}
+	t.Logf("recovery scan elapsed=%s", time.Since(started))
 	if checkpointCount(t, db) != 1 {
 		t.Fatal("recovery module reaped lifecycle")
 	}
