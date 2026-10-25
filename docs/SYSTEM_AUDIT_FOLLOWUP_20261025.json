@@ -426,10 +426,13 @@
     "database_evidence_deleted": false
   },
   "openai_usage_this_continuation": {
-    "requests": 0,
-    "tokens": 0,
-    "usd": 0,
-    "blocker": "Original-host key exists per user/prior record; authorized access unavailable. Recovery configuration copies absent.",
+    "generation_requests": 1,
+    "metadata_requests": 1,
+    "input_tokens": null,
+    "output_tokens": null,
+    "usd": null,
+    "reservation_retained_usd": 1.501011,
+    "status": "unknown_after_timeout; no automatic retry",
     "helper_cap_usd": 2,
     "helper_attempt_cap": 3
   },
@@ -444,5 +447,54 @@
     "key_value_printed": false,
     "paid_requests_for_this_check": 0,
     "blocker": "authorized access to the existing original-host credential"
+  },
+  "credential_access_restored": {
+    "at": "2026-10-25T11:24:23.461330+00:00",
+    "original_remote_desktop": "online",
+    "configuration_path": "/etc/digital-ocean-bot/openai.env",
+    "key_exists": true,
+    "key_owner_uid": 0,
+    "key_mode": "0600",
+    "key_printed_or_transferred": false,
+    "model_metadata_check": {
+      "model": "gpt-6-astra",
+      "http_status": 200,
+      "requests": 1
+    },
+    "generation": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "max",
+      "attempts": 1,
+      "status": "unknown_after_300_second_timeout",
+      "error_type": "TimeoutError",
+      "response_received": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "actual_cost_usd": null,
+      "reservation_retained_usd": 1.501011,
+      "automatic_retry": false
+    },
+    "budget": {
+      "total_usd": 2,
+      "attempt_cap": 3,
+      "cache_ttl": "30m",
+      "input_ceiling_usd_per_million": 13,
+      "output_usd_per_million": 50,
+      "authoritative_ledger_host": "serverprojects.ptr.network",
+      "authoritative_ledger_path": "/var/lib/datacenter-bot-audit/openai/ledger.json",
+      "reset_or_duplicate_ledger_forbidden": true
+    },
+    "code": {
+      "head": "c71387262a7da570ef2f5bb9d8511ef646250ac8",
+      "pr": 6,
+      "merge": "1aaf70b545ea58fe278378acfeacd5b64f200000",
+      "ci": 40187985276,
+      "unit_tests": 9,
+      "mandatory_regressions": 192,
+      "skipped_mandatory": 0,
+      "result": "PASS"
+    },
+    "runtime_changes": false,
+    "original_database_and_app_services": "remain inactive"
   }
 }

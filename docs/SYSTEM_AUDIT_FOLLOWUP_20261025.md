@@ -1,5 +1,9 @@
 # System audit continuation — 2026-10-25
 
+Latest API checkpoint: access restored; model metadata HTTP200; one real Astra/max
+request timed out with no usage receipt. USD1.501011 stays reserved, with retries
+blocked. See [OPENAI_ACCESS_RESTORED_20261025.md](OPENAI_ACCESS_RESTORED_20261025.md).
+
 Starting point: source d8cc7206 and public stable 8d838efa. At 10:20 UTC (13:50 Tehran), all six services were healthy; default ran 8d838efa and production ran 5dc2c256. Final verification at 10:50 UTC (14:20 Tehran): public main/stable and default now run 80c85157; production remains healthy on 5dc2c256 because disk reserve still fails. All six executable hashes match their manifests and all ten readiness checks pass.
 
 ## Reproduced resource retention defect
@@ -113,9 +117,10 @@ whole-project audit remains incomplete. The original host and installed private
 publisher remain offline/quarantined. AWS credential acceptance, selected DNS
 quota and gateway management remain unresolved.
 
-The bounded Astra review helper retains its USD 2 / three-attempt cap. The API key
-is still unavailable in known accessible configuration, so this continuation used
-zero paid requests, zero tokens and USD 0; fake-transport tests are not API usage.
+The bounded Astra review helper retains its USD 2 / three-attempt cap. At the earlier 10:50 UTC checkpoint the key was inaccessible and no paid request
+had been made. See OPENAI_ACCESS_RESTORED_20261025.md for the newer restored-access
+checkpoint: one request timed out, actual usage is unknown and USD1.501011 remains
+reserved; fake-transport tests are not API usage.
 The legacy unbounded council was not invoked. Evidence is retained under
 /root/dob-audit-followup-20261025. This checkpoint updates PROJECT_STATE.md and
 HANDOFF.md so a later continuation uses repository state rather than chat memory.
