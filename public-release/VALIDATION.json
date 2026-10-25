@@ -2,9 +2,9 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-25",
-  "feature": "Durable deployment SSH identity, fenced imports and exact owned-key reconciliation; fail-closed encrypted record corruption and retained key versions",
+  "feature": "Fenced scheduler claims, complete database observations and truthful progress; durable SSH identity and encrypted-record containment retained",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "215 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "219 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -17,7 +17,8 @@
     "provider_response_bounds": "Native Vultr cursors, fixed endpoints, cancellation and pagination bounds; DigitalOcean bounded single-value responses and unknown creation outcomes without identity",
     "ambiguous_compute_outcome": "Explicit ambiguous result without identity remains UNKNOWN before success-ID validation; resumption reconciles without another create",
     "deployment_ssh_durability": "Atomic encrypted private key and account/credential-bound intent before import; no replay of unknown calls; exact public-key reconciliation, crash/concurrency/credential/generation tests",
-    "encrypted_record_corruption": "Invalid nonce/ciphertext/version never panics; account ownership checked; proxy/probe/residential readers honor persisted retained key version"
+    "encrypted_record_corruption": "Invalid nonce/ciphertext/version never panics; account ownership checked; proxy/probe/residential readers honor persisted retained key version",
+    "scheduler_claims": "Unique durable claim token; stale/foreign completion rejection; partial row-read rollback; preparation, pending-capacity and completion errors fail the round; cancellation/replacement and guarded migration downgrade"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
