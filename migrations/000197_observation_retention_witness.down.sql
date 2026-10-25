@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS panel_inventory_syncs_completed_recent_idx;

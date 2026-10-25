@@ -58,7 +58,9 @@ func (s *Server) getConfigs(w http.ResponseWriter, r *http.Request) {
 		var preferred, reserved, manual []byte
 		var revision int64
 		if rows.Scan(&panelID, &driver, &baseURL, &key, &enabled, &desired, &preferred, &start, &end, &reserved, &clients, &quota, &lifetime, &devices, &bulk, &rate, &sni, &manual, &revision) != nil {
-			continue
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 		var pp, rr []int
 		var ss []string
@@ -66,6 +68,11 @@ func (s *Server) getConfigs(w http.ResponseWriter, r *http.Request) {
 		_ = json.Unmarshal(reserved, &rr)
 		_ = json.Unmarshal(manual, &ss)
 		out = append(out, map[string]any{"panel_id": panelID, "driver": driver, "base_url": baseURL, "policy_key": key, "enabled": enabled, "desired_count": desired, "preferred_ports": pp, "dynamic_port_start": start, "dynamic_port_end": end, "reserved_ports": rr, "clients_per_inbound": clients, "user_quota_bytes": quota, "user_lifetime_seconds": lifetime, "device_limit": devices, "bulk_user_count": bulk, "users_per_second": rate, "sni_selection_mode": sni, "manual_snis": ss, "revision": revision})
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }
@@ -83,7 +90,16 @@ func (s *Server) getConfigPanels(w http.ResponseWriter, r *http.Request) {
 		var enabled bool
 		if rows.Scan(&id, &driver, &base, &enabled) == nil {
 			out = append(out, map[string]any{"id": id, "driver": driver, "base_url": base, "enabled": enabled})
+		} else {
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

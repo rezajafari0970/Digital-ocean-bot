@@ -31,6 +31,11 @@ func (s *Server) listTemplates(w http.ResponseWriter, r *http.Request) {
 		}
 		out = append(out, map[string]any{"id": id, "name": name, "version": version, "sha256": sha, "size_bytes": size, "active": active, "created_at": created})
 	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
+	}
 	writeJSON(w, 200, out)
 }
 

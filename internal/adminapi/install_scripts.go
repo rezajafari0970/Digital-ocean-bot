@@ -22,7 +22,16 @@ func (s *Server) listInstallScripts(w http.ResponseWriter, r *http.Request) {
 		var created time.Time
 		if rows.Scan(&id, &name, &ver, &cat, &timeout, &max, &hash, &active, &created) == nil {
 			out = append(out, map[string]any{"id": id, "name": name, "version": ver, "category": cat, "timeout_seconds": timeout, "max_attempts": max, "sha256": hash, "active": active, "created_at": created})
+		} else {
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

@@ -39,7 +39,16 @@ func (s *Server) residentialProxies(w http.ResponseWriter, r *http.Request) {
 		var count int64
 		if rows.Scan(&id, &name, &typ, &host, &port, &user, &status, &ip, &country, &latency, &tag, &priority, &enabled, &pass, &checked, &succeeded, &lastError, &successEWMA, &latencyEWMA, &count) == nil {
 			out = append(out, map[string]any{"id": id, "name": name, "type": typ, "host": host, "port": port, "username": user, "status": status, "exit_ip": ip, "country": country, "latency_ms": latency, "outbound_tag": tag, "priority": priority, "enabled": enabled, "password_configured": pass, "last_checked_at": nullableResidentialTime(checked), "last_success_at": nullableResidentialTime(succeeded), "last_error": lastError, "success_ewma": successEWMA, "latency_ewma_ms": latencyEWMA, "check_count": count})
+		} else {
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

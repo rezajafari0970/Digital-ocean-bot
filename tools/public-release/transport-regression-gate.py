@@ -160,6 +160,10 @@ REQUIRED['internal/app'] += ('TestSSHIdentityStaleGenerationAndSecretCollisionPo
 
 REQUIRED['internal/secrets'] += ('TestSecretRecordCorruptionNeverPanics','TestSecretSQLReadersRetainVersionAndRejectCorruption')
 
+REQUIRED['internal/app'] += ('TestLifecycleDeleteConfirmationInterruptedReadRollsBack', 'TestObservationRetentionCatchupAndLimits')
+
+REQUIRED['internal/adminapi'] += ('TestAdminListsRejectPartialDatabaseResults',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
@@ -280,6 +284,8 @@ def main(repo):
             run([pg / 'pg_ctl', '-D', data, '-m', 'fast', '-w', 'stop'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         shutil.rmtree(work)
 
+
+REQUIRED["internal/panels/sanaei"] += ("TestRuntimeFailedOpenReleasesIdentityState", "TestRuntimeAcquisitionSweepsExpiredIdentities", "TestRuntimeMutationIdentitySurvivesCacheReplacement", "TestRuntimeMutationCancellationAndPanicReleaseGate", "TestRuntimeMutationWaitHonorsDeadlineBeforeCallback", "TestRuntimeAcquisitionWaitHasPreMutationProvenance", "TestRuntimeFactorySQLFailuresNeverBecomePanelCircuit")
 
 if __name__ == '__main__':
     try:

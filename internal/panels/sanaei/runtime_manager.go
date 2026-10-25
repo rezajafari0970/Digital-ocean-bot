@@ -21,8 +21,14 @@ type runtimeEntry struct {
 }
 
 type circuitState struct {
-	failures int
-	until    time.Time
+	failures    int
+	until       time.Time
+	lastFailure time.Time
+}
+
+type mutationGate struct {
+	mu    sync.Mutex
+	users int
 }
 
 type RuntimeManager struct {
@@ -32,7 +38,8 @@ type RuntimeManager struct {
 	mu            sync.Mutex
 	entries       map[string]*runtimeEntry
 	circuits      map[string]circuitState
-	mutationGates map[string]*sync.Mutex
+	mutationGates map[string]*mutationGate
+	lastPurge     time.Time
 }
 
 func (m *RuntimeManager) ttl() time.Duration {
@@ -69,6 +76,7 @@ func (m *RuntimeManager) observe(panelID string, success, transient bool) {
 	}
 	c := m.circuits[panelID]
 	c.failures++
+	c.lastFailure = time.Now()
 	if delay := circuitDelay(c.failures); delay > 0 {
 		c.until = time.Now().Add(delay)
 	}
@@ -81,6 +89,10 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 	}
 	for {
 		m.mu.Lock()
+		now := time.Now()
+		if m.lastPurge.IsZero() || now.Sub(m.lastPurge) >= time.Minute {
+			m.purgeExpiredLocked(now)
+		}
 		if m.entries == nil {
 			m.entries = map[string]*runtimeEntry{}
 		}
@@ -116,16 +128,8 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 		r, err := m.Factory.Open(ctx, panelID)
 
 		m.mu.Lock()
-		if m.mutationGates == nil {
-			m.mutationGates = map[string]*sync.Mutex{}
-		}
-		gate := m.mutationGates[panelID]
-		if gate == nil {
-			gate = &sync.Mutex{}
-			m.mutationGates[panelID] = gate
-		}
 		if r != nil {
-			r.mutationMu = gate
+			r.mutationManager = m
 			if r.Session != nil && r.Session.Exec != nil {
 				r.Session.Exec.Observe = func(success, transient bool) { m.observe(panelID, success, transient) }
 			}
@@ -142,6 +146,7 @@ func (m *RuntimeManager) Acquire(ctx context.Context, panelID string) (*PanelRun
 			if errors.Is(err, ErrAPIRequest) {
 				c := m.circuits[panelID]
 				c.failures++
+				c.lastFailure = time.Now()
 				if delay := circuitDelay(c.failures); delay > 0 {
 					c.until = time.Now().Add(delay)
 				}
@@ -173,18 +178,51 @@ func (m *RuntimeManager) Invalidate(panelID string) {
 	}
 }
 
+// A runtime may outlive the cache TTL. Resolve the gate when mutation starts,
+// so retained and freshly opened runtimes still serialize on one panel identity.
+// Users include waiters; the last release removes only an idle gate.
+func (m *RuntimeManager) retainMutationGate(panelID string) (*sync.Mutex, func()) {
+	m.mu.Lock()
+	if m.mutationGates == nil {
+		m.mutationGates = map[string]*mutationGate{}
+	}
+	gate := m.mutationGates[panelID]
+	if gate == nil {
+		gate = &mutationGate{}
+		m.mutationGates[panelID] = gate
+	}
+	gate.users++
+	m.mu.Unlock()
+	return &gate.mu, func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		gate.users--
+		if gate.users == 0 && m.mutationGates[panelID] == gate {
+			delete(m.mutationGates, panelID)
+		}
+	}
+}
+
 func (m *RuntimeManager) PurgeExpired() {
-	now := time.Now()
-	ttl := m.ttl()
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.purgeExpiredLocked(time.Now())
+}
+
+func (m *RuntimeManager) purgeExpiredLocked(now time.Time) {
+	m.lastPurge = now
+	ttl := m.ttl()
 	for id, e := range m.entries {
 		if !e.opening && now.Sub(e.opened) >= ttl {
 			delete(m.entries, id)
 		}
 	}
 	for id, c := range m.circuits {
-		if !c.until.IsZero() && now.After(c.until.Add(10*time.Minute)) {
+		last := c.lastFailure
+		if c.until.After(last) {
+			last = c.until
+		}
+		if now.After(last.Add(10 * time.Minute)) {
 			delete(m.circuits, id)
 		}
 	}

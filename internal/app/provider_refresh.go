@@ -25,7 +25,16 @@ func (c Container) RefreshProviderSnapshots(ctx context.Context, maxAge time.Dur
 		var id string
 		if rows.Scan(&id) == nil {
 			ids = append(ids, id)
+		} else {
+			rows.Close()
+			log.Printf("provider refresh incomplete database read")
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		log.Printf("provider refresh incomplete database read")
+		return
 	}
 	rows.Close()
 	for _, id := range ids {

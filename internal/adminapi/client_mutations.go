@@ -192,7 +192,9 @@ func (s *Server) listClientMutations(w http.ResponseWriter, r *http.Request) {
 		var created, updated time.Time
 		var completed sql.NullTime
 		if rows.Scan(&id, &kind, &clientID, &state, &attempts, &lastError, &created, &updated, &completed) != nil {
-			continue
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 		item := map[string]any{"id": id, "kind": kind, "client_id": clientID, "state": state,
 			"attempts": attempts, "last_error": lastError, "created_at": created, "updated_at": updated}
@@ -201,8 +203,17 @@ func (s *Server) listClientMutations(w http.ResponseWriter, r *http.Request) {
 		}
 		recent = append(recent, item)
 	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
+	}
 	counts := map[string]int{"PENDING": 0, "RUNNING": 0, "SUCCEEDED": 0, "FAILED": 0, "OBSOLETE": 0}
 	countRows, err := s.DB.QueryContext(r.Context(), "SELECT state,count(*) FROM client_mutation_jobs GROUP BY state")
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
+	}
 	if err == nil {
 		defer countRows.Close()
 		for countRows.Next() {
@@ -210,10 +221,23 @@ func (s *Server) listClientMutations(w http.ResponseWriter, r *http.Request) {
 			var count int
 			if countRows.Scan(&state, &count) == nil {
 				counts[state] = count
+			} else {
+				countRows.Close()
+				writeJSON(w, http.StatusInternalServerError, errorBody())
+				return
 			}
+		}
+		if err := countRows.Err(); err != nil {
+			countRows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 	}
 	gate, gateErr := (clientops.Journal{DB: s.DB}).Gate(r.Context())
+	if gateErr != nil {
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
+	}
 	executionEnabled := gateErr == nil && gate.Enabled && !gate.KillSwitch && gate.Concurrency == 1
 	writeJSON(w, http.StatusOK, map[string]any{
 		"execution_enabled": executionEnabled,

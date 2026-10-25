@@ -24,7 +24,16 @@ func (s *Server) listInstallers(w http.ResponseWriter, r *http.Request) {
 			var m provisioning.InstallerManifest
 			_ = json.Unmarshal(raw, &m)
 			out = append(out, map[string]any{"id": id, "name": name, "version": version, "sha256": hash, "active": active, "created_at": created, "supported_os": m.SupportedOS, "supported_arch": m.SupportedArch, "min_memory_mb": m.MinMemoryMB, "min_disk_mb": m.MinDiskMB, "artifacts": len(m.Artifacts), "install_scripts": m.InstallScripts, "verify_scripts": m.VerifyScripts, "rollback_scripts": m.RollbackScripts, "services": m.Services})
+		} else {
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

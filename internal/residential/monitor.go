@@ -100,13 +100,23 @@ func (m Monitor) Run(ctx context.Context) error {
 	for {
 		supervision.Pulse(ctx)
 		rows, err := m.DB.QueryContext(ctx, `SELECT proxy_id::text FROM residential_proxies WHERE enabled AND (last_checked_at IS NULL OR last_checked_at<now()-CASE WHEN status='healthy' THEN interval '30 seconds' ELSE interval '10 seconds' END) ORDER BY last_checked_at NULLS FIRST LIMIT 256`)
+		if err != nil {
+			return err
+		}
 		if err == nil {
 			var ids []string
 			for rows.Next() {
 				var id string
-				if rows.Scan(&id) == nil {
+				if err := rows.Scan(&id); err == nil {
 					ids = append(ids, id)
+				} else {
+					rows.Close()
+					return err
 				}
+			}
+			if err := rows.Err(); err != nil {
+				rows.Close()
+				return err
 			}
 			rows.Close()
 			var wg sync.WaitGroup

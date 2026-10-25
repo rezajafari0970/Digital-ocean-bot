@@ -165,14 +165,27 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		return images[i].Version > images[j].Version
 	})
 	proxies := []map[string]any{{"id": "", "name": "No proxy — Direct server IP", "status": "direct"}}
-	rows, _ := s.DB.QueryContext(r.Context(), `SELECT id::text,name,status,COALESCE(country,'') FROM proxies WHERE status='healthy' ORDER BY name`)
+	rows, queryErr := s.DB.QueryContext(r.Context(), `SELECT id::text,name,status,COALESCE(country,'') FROM proxies WHERE status='healthy' ORDER BY name`)
+	if queryErr != nil {
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
+	}
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			var id, n, st, c string
 			if rows.Scan(&id, &n, &st, &c) == nil {
 				proxies = append(proxies, map[string]any{"id": id, "name": n, "status": st, "country": c})
+			} else {
+				rows.Close()
+				writeJSON(w, http.StatusInternalServerError, errorBody())
+				return
 			}
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 	}
 	if x.AuthorizationID != "" {

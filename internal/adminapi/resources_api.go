@@ -21,7 +21,9 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 		var metadata []byte
 		var created, updated any
 		if rows.Scan(&rid, &pid, &typ, &state, &managed, &metadata, &created, &updated, &provider) != nil {
-			continue
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 		out = append(out, map[string]any{"id": rid, "provider_id": pid, "provider": provider, "provider_label": func() string {
 			if provider == "aws" {
@@ -44,6 +46,11 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 			}
 			return provider
 		}(), "type": typ, "state": state, "managed": managed, "metadata": string(metadata), "created_at": created, "updated_at": updated})
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

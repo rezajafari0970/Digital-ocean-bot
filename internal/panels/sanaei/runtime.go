@@ -14,28 +14,38 @@ type RuntimeSecrets interface {
 }
 
 type PanelRuntime struct {
-	PanelID    string
-	AccountID  string
-	BaseURL    string
-	Client     *APIClient
-	Session    *PanelSession
-	mutationMu *sync.Mutex
+	PanelID         string
+	AccountID       string
+	BaseURL         string
+	Client          *APIClient
+	Session         *PanelSession
+	mutationMu      *sync.Mutex
+	mutationManager *RuntimeManager
 }
 
 func (r *PanelRuntime) WithMutation(ctx context.Context, fn func(context.Context) error) error {
-	if r == nil || r.mutationMu == nil || fn == nil {
+	if r == nil || fn == nil {
+		return errors.New("sanaei runtime mutation config")
+	}
+	mu := r.mutationMu
+	if r.mutationManager != nil {
+		var release func()
+		mu, release = r.mutationManager.retainMutationGate(r.PanelID)
+		defer release()
+	}
+	if mu == nil {
 		return errors.New("sanaei runtime mutation config")
 	}
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
-	for !r.mutationMu.TryLock() {
+	for !mu.TryLock() {
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("%w: %w", ErrRuntimeBusy, ctx.Err())
 		case <-ticker.C:
 		}
 	}
-	defer r.mutationMu.Unlock()
+	defer mu.Unlock()
 	if err := ctx.Err(); err != nil {
 		return fmt.Errorf("%w: %w", ErrRuntimeBusy, err)
 	}

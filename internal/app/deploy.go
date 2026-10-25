@@ -227,12 +227,16 @@ func (c Container) prepareDeployment(ctx context.Context, accountID, profileID s
 		}
 		good := make(map[string]bool, len(images))
 		bad := make(map[string]bool, len(images))
-		rows, qerr := c.DB.QueryContext(ctx, "SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200", accountID, pq.Array(images))
+		rows, qerr := tx.QueryContext(ctx, "SELECT profile_snapshot->>'image',state,COALESCE(last_error,'') FROM deployments WHERE account_id=$1 AND profile_snapshot->>'image'=ANY($2) ORDER BY created_at DESC LIMIT 200", accountID, pq.Array(images))
+		if qerr != nil {
+			return d, qerr
+		}
 		if qerr == nil {
 			for rows.Next() {
 				var image, state, lastError string
-				if rows.Scan(&image, &state, &lastError) != nil {
-					continue
+				if err := rows.Scan(&image, &state, &lastError); err != nil {
+					rows.Close()
+					return d, err
 				}
 				if state == "PANEL_COMPLETE" || state == "READY" {
 					good[image] = true
@@ -240,6 +244,10 @@ func (c Container) prepareDeployment(ctx context.Context, accountID, profileID s
 				if strings.Contains(strings.ToLower(lastError), "image you selected is no longer available") {
 					bad[image] = true
 				}
+			}
+			if err := rows.Err(); err != nil {
+				rows.Close()
+				return d, err
 			}
 			rows.Close()
 		}
