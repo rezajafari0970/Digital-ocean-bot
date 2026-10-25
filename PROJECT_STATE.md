@@ -1,3 +1,38 @@
+## Profile deletion concurrency — 2026-10-25T20:55:40.307915+00:00
+
+Read docs/PROFILE_DELETE_CLAIMS_20261025.md and its JSON acceptance receipt first.
+Source858b104a5211c10ae13ebf1339c58f74a5b45bbb merged through PR14 as
+4679847f3d5725b7ffec23575b283dc20250e499. Canonical branch
+checkpoint/final-e2e-20260929; worktree /root/projects/dob-ssh-durability-20261025.
+This documentation checkpoint is a child of that merge; git HEAD identifies it.
+
+Public main/stable and BOTH live instances run ec80c7c9d5f2e8eb8502e2f410b9fdde3b35c429,
+schema197. Source CI40231487805 passed231 required roots/zero skips plus browser,
+native/race and restore/interruption; focused race CI40231482832 passed3 repeats.
+Public CI40231882469 passed fresh/repeated installation; promotion40232099661
+passed. Both final accepted attempts exited0 and passed15 preservation checks,3 running hashes and
+5 readiness checks each. HTTPS version/assets/normal TLS passed. No pending deploy.
+Production first stopped before publication at its free-space guard;615107439 bytes
+of superseded backup were relocated with both SHA256 checks and durable receipts.
+Exact staged candidate resumed through unchanged guards; failed attempt retained.
+
+Shared-profile lock contention no longer discards independent panel work.
+Claims lock listener rows; fairness touch is nonblocking. Existing writer fences,
+durable intents and remote-confirmation requirements remain. Synthetic diagnostic
+improved104-task claim scheduling7.266s to1.950s, not measured fleet deletion speed.
+
+Three AWS listeners remain unconfirmed: invalid account credentials and unreachable
+panel/SSH. Restore authorized account/network access or obtain independently
+verified provider termination; never fake retirement. No new paid API request:
+maximum review blocked by prior unknown receipt and usageHTTP403. Keep ledger and
+USD1.501011 reservation unchanged. User must not send credentials in chat.
+
+Private evidence/current backups: /root/dob-delete-claims-20261025. Original
+corrupted cluster/services remain quarantined; physical root cause unproven.
+Whole-project audit still incomplete, prior inventory269 complete files/31720lines.
+Next: AWS access repair, API usage reconciliation, remaining ownership/resource audit.
+Do not repeat this completed deployment.
+
 ## Recovery rollout follow-up — 2026-10-25T19:57:06.853322+00:00
 
 Live acceptance of release 53294d3936a96fa342db4036fa87f910f289e1e9 is complete.
