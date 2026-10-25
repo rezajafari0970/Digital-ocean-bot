@@ -34,6 +34,7 @@ type Spec struct {
 	CloudflareMaxActive   int    `json:"cloudflare_max_active,omitempty"`
 	Protocol              string `json:"protocol"`
 	Network               string `json:"network"`
+	HeaderType            string `json:"header_type,omitempty"`
 	Security              string `json:"security"`
 	Port                  int    `json:"port"`
 	Path                  string `json:"path,omitempty"`
@@ -148,6 +149,9 @@ func ValidatePort(port int) error {
 	return nil
 }
 func (r *Registry) Validate(s Spec, public bool) error {
+	if err := validateTCPHeader(s); err != nil {
+		return err
+	}
 	if err := ValidateCloudflare(s); err != nil {
 		return err
 	}
@@ -199,6 +203,8 @@ func (r *Registry) Validate(s Spec, public bool) error {
 		if !serviceName.MatchString(s.Path) {
 			return errors.New("profile_grpc_service_invalid")
 		}
+	} else if s.Network == "tcp" && s.HeaderType == "http" {
+		// Validated by the TCP transport option; other transports stay unchanged.
 	} else if s.Path != "" || s.Host != "" {
 		return errors.New("profile_transport_options_not_applicable")
 	}
@@ -311,6 +317,10 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 		}
 		path := s.Path
 		typ := "none"
+		if s.Network == "tcp" && s.HeaderType == "http" {
+			typ = "http"
+			path = tcpHTTPPath(s)
+		}
 		if s.Network == "grpc" {
 			typ = "gun"
 		}
@@ -352,6 +362,9 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 	if s.Protocol == "shadowsocks" {
 		scheme = "ss"
 		q = url.Values{}
+		if s.HeaderType == "http" {
+			q.Set("plugin", shadowsocksHTTPPlugin(s))
+		}
 	}
 	u := url.URL{Scheme: scheme, User: url.User(user), Host: net.JoinHostPort(host, strconv.Itoa(s.Port)), RawQuery: strings.ReplaceAll(q.Encode(), "+", "%20"), Fragment: remark}
 	return u.String(), nil
@@ -413,6 +426,11 @@ type transportPlugin string
 func (p transportPlugin) Name() string { return string(p) }
 func (p transportPlugin) Server(s Spec) map[string]any {
 	switch p {
+	case "tcp":
+		if s.HeaderType == "http" {
+			return tcpHTTPSettings(s)
+		}
+		return nil
 	case "ws":
 		return map[string]any{"wsSettings": map[string]any{"path": s.Path, "headers": map[string]string{"Host": s.Host}}}
 	case "grpc":
@@ -426,6 +444,12 @@ func (p transportPlugin) Server(s Spec) map[string]any {
 func (p transportPlugin) Query(s Spec, q url.Values) {
 	q.Set("type", string(p))
 	switch p {
+	case "tcp":
+		if s.HeaderType == "http" {
+			q.Set("headerType", "http")
+			q.Set("host", s.Host)
+			q.Set("path", tcpHTTPPath(s))
+		}
 	case "ws", "xhttp":
 		q.Set("path", s.Path)
 		if s.Host != "" {
