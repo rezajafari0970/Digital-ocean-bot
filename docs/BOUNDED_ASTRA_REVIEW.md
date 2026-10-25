@@ -1,0 +1,9 @@
+# Bounded Astra review
+
+Use tools/bounded-openai-review.py for the system audit. It sends one plain-text review to the official Responses endpoint with model gpt-6-astra, reasoning effort max, default service tier, store=false and no tools. It never executes the response.
+
+The fixed durable ledger is /var/lib/datacenter-bot-audit/openai/ledger.json (private directory/file). The conservative local budget is USD 2 total and three attempts, one in flight, at most 64,000 UTF-8 input bytes and 16,384 output/reasoning tokens. Standard text prices verified on 2026-10-25 are USD 10/1M input and USD 50/1M output; cached input receives no discount in the local estimate. Official source: https://developers.openai.com/api/docs/models/gpt-6-astra
+
+A reservation is fsynced before sending. Unknown HTTP/transport/parse outcomes keep their reservation and block subsequent requests until independent provider usage reconciliation. Duplicate inputs, changed policy, unreadable state and exceeded caps stop before the network. The ledger stores digests and usage, not prompts or credentials. This local estimate is not the provider invoice or a substitute for account billing limits. Rates must be revalidated before future use.
+
+Supply OPENAI_API_KEY through a private root-owned environment/configuration mechanism on the server; never commit it or paste it into a public issue. Input is read from stdin and reviewed source must first be stripped of operational secrets. Eight fake-transport tests exercise concurrency, duplicates, missing credentials, corruption, budgets, incomplete responses and unknown outcomes. No paid API request has been made in this audit because the key is absent. Existing legacy council tooling is not made safe by this helper; do not invoke that unbounded path for this audit.

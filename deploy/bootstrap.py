@@ -67,7 +67,9 @@ def database_environment(values):
         if option in options: env[name] = options[option][-1]
     return env
 
-def prepare(directory, database, user, gid, validate_only=False):
+def prepare(directory, database, user, gid, validate_only=False, port=5432):
+    if type(port) is not int or not 1024 <= port <= 65535:
+        raise ValueError("Invalid database port")
     root = Path(directory)
     key, env, pending = (root / name for name in ("master.key", "env", "bootstrap.pending"))
     if validate_only and (not key.is_file() or not env.is_file() or pending.exists()):
@@ -96,7 +98,7 @@ def prepare(directory, database, user, gid, validate_only=False):
         if not pending.exists():
             atomic_write(pending, (database + "\n" + user + "\n").encode(), 0o600, gid)
         password = secrets.token_hex(24)
-        body = (f"DATABASE_URL=postgres://{user}:{password}@127.0.0.1:5432/{database}?sslmode=disable\n"
+        body = (f"DATABASE_URL=postgres://{user}:{password}@127.0.0.1:{port}/{database}?sslmode=disable\n"
                 f"MASTER_KEY_FILE={key}\nMASTER_KEY_VERSION=1\nHTTP_ADDR=127.0.0.1:18080\n")
         atomic_write(env, body.encode(), 0o640, gid)
     values = read_environment(env)
@@ -105,7 +107,7 @@ def prepare(directory, database, user, gid, validate_only=False):
     if pending.exists():
         lines = env.read_text().splitlines()
         pattern = (r"DATABASE_URL=postgres://" + re.escape(user) +
-                   r":[a-f0-9]{48}@127\.0\.0\.1:5432/" + re.escape(database) + r"\?sslmode=disable")
+                   r":[a-f0-9]{48}@127\.0\.0\.1:" + str(port) + "/" + re.escape(database) + r"\?sslmode=disable")
         if (len(lines) != 4 or not re.fullmatch(pattern, lines[0]) or
                 lines[1:] != [f"MASTER_KEY_FILE={key}", "MASTER_KEY_VERSION=1", "HTTP_ADDR=127.0.0.1:18080"]):
             raise ValueError("Bootstrap environment does not match persisted identity")

@@ -42,6 +42,7 @@ jobs:
           DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
         run: |
           test "$(git rev-parse HEAD)" = '${{ github.event.pull_request.head.sha }}'
+          python3 tools/bounded_openai_review_test.py
           python3 deploy/bootstrap_test.py
           python3 deploy/project_update_test.py
           DOB_RUN_BROWSER_TEST=0 go test ./...
