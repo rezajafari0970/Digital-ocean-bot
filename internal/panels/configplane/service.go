@@ -72,11 +72,21 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
  ON CONFLICT DO NOTHING`); e != nil {
 			return e
 		}
+	}
+	// Deletion completes independently of enrollment/creation, including
+	// provider-confirmed removal and profiles with no remaining listeners.
+	if !verify {
 		if e := s.finishRetired(ctx); e != nil {
 			return e
 		}
 	}
 	lane := `cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids)) AND (l.needs_reconcile OR l.remote_id IS NULL OR l.applied_revision<>cp.revision OR l.mutation_state IN('PREPARED','SENT') OR (cp.spec->>'security'='tls' AND l.certificate_not_after<now()+interval '48 hours'))`
+	removing := `(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)))`
+	// Creation consumers help drain removal before admitting replacement
+	// listeners. This reuses the same SQL/SSH reservation and ownership path.
+	if !verify && !deleting {
+		lane = "(" + removing + " OR (" + lane + "))"
+	}
 	if deleting {
 		lane = `(NOT cp.enabled OR cp.delete_requested_at IS NOT NULL OR NOT(cp.fleet OR l.panel_id=ANY(cp.panel_ids)))`
 	}
@@ -91,6 +101,16 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 		// The oldest due proof has the earliest publication deadline. Claim
 		// retries must not move stale evidence behind healthy routine refreshes.
 		order = "l.verified_at NULLS FIRST,cp.last_scheduled_at NULLS FIRST,l.next_attempt_at,l.profile_id,l.panel_id"
+	}
+	if !verify {
+		order = "CASE WHEN " + removing + " THEN 0 ELSE 1 END," + order
+	} else {
+		// Give a due removal the next claim on its panel. Backoff on an
+		// unavailable target must not block unrelated panels or normal proofs.
+		lane += ` AND NOT EXISTS(SELECT 1 FROM config_driver_listeners dl JOIN config_driver_profiles dp ON dp.id=dl.profile_id
+ WHERE dl.panel_id=l.panel_id AND dl.state<>'RETIRED' AND dp.deleted_at IS NULL
+ AND dl.next_attempt_at<=now() AND (dl.lease_until IS NULL OR dl.lease_until<now())
+ AND (NOT dp.enabled OR dp.delete_requested_at IS NOT NULL OR NOT(dp.fleet OR dl.panel_id=ANY(dp.panel_ids))))`
 	}
 	if recovery {
 		lane += " AND (l.error_code<>'' OR l.verified_at IS NULL OR l.state='BLOCKED')"
@@ -143,7 +163,13 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 		}
 		return err
 	}
-	return s.Reconcile(ctx, id, panel)
+	if e := s.Reconcile(ctx, id, panel); e != nil {
+		return e
+	}
+	if !verify {
+		return s.finishRetired(ctx)
+	}
+	return nil
 }
 func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	conn, e := s.DB.Conn(ctx)

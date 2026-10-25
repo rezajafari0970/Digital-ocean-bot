@@ -69,8 +69,31 @@ func TestConfigDriverProfileAdmission(t *testing.T) {
 	if code, _ := profileSave(t, s, p, "POST"); code != 400 {
 		t.Fatal("unsupported combination accepted")
 	}
+	// Save, reload and edit through the existing profile API, preserving the
+	// transport option for every protocol and rejecting unsafe combinations.
+	for i, protocol := range []string{"vless", "vmess", "trojan", "shadowsocks"} {
+		p.Spec = configdriver.Spec{Protocol: protocol, Network: "tcp", Security: "none", Port: 19100 + i, HeaderType: "http", Host: "play.googleapis.com", Path: "/"}
+		code, saved := profileSave(t, s, p, "POST")
+		if code != 200 || saved.Spec != p.Spec {
+			t.Fatal("HTTP profile save", protocol, code)
+		}
+		reloaded, err := configplane.Read(context.Background(), db, saved.ID)
+		if err != nil || reloaded.Spec != p.Spec {
+			t.Fatal("HTTP profile persistence", protocol, err)
+		}
+		saved.Spec.Path = "/changed"
+		code, edited := profileSave(t, s, saved, "PUT")
+		if code != 200 || edited.Spec.Path != "/changed" || edited.Spec.HeaderType != "http" {
+			t.Fatal("HTTP profile edit", protocol, code)
+		}
+		saved = edited
+		saved.Spec.Network = "ws"
+		if code, _ := profileSave(t, s, saved, "PUT"); code != 400 {
+			t.Fatal("TCP header accepted for WS")
+		}
+	}
 	var n int
-	if db.QueryRow("SELECT count(*) FROM config_driver_profiles").Scan(&n) != nil || n != 3 {
+	if db.QueryRow("SELECT count(*) FROM config_driver_profiles").Scan(&n) != nil || n != 7 {
 		t.Fatal("rejected request persisted")
 	}
 }

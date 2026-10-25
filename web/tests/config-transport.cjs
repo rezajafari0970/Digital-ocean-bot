@@ -228,7 +228,46 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   await evaluate("document.querySelector('#modalCancel').click()");
   mark('Fleet DNS forecast explains overlap and shortage without claiming unknown capacity sufficient; mobile content remains scrollable');
 
+
+  for(const protocol of ['vless','vmess','trojan','shadowsocks']){
+   await evaluate("document.querySelector('#primaryAction').click()");await waitFor("document.querySelector('#modal').open");
+   await evaluate("change('protocol',"+JSON.stringify(protocol)+");change('security','none');change('header_type','http');f('name').value='HTTP '+f('protocol').value");
+   assert.equal(await evaluate("f('host').value"),'play.googleapis.com');
+   assert.equal(await evaluate("f('path').value"),'/');
+   assert.equal(await evaluate("!f('header_type').disabled&&f('host').required&&!f('host').disabled&&!f('path').disabled"),true);
+   await evaluate("f('host').value='';document.querySelector('#modalSubmit').click()");
+   assert.equal(await evaluate("document.querySelector('#modal').open&&!f('host').checkValidity()"),true);
+   await evaluate("f('host').value='play.googleapis.com';f('path').value='/http-fixture';document.querySelector('#modalSubmit').click()");
+   await waitFor("!document.querySelector('#modal').open");
+   assert.deepEqual(saves.at(-1).spec,{protocol,network:'tcp',security:'none',port:0,header_type:'http',host:'play.googleapis.com',path:'/http-fixture'});
+   await waitFor("[...document.querySelectorAll('[data-profile-id]')].some(x=>x.querySelector('h3')?.textContent==="+JSON.stringify('HTTP '+protocol)+")");
+   await evaluate("[...document.querySelectorAll('[data-profile-id]')].find(x=>x.querySelector('h3')?.textContent==="+JSON.stringify('HTTP '+protocol)+").querySelector('[data-edit-profile]').click()");
+   await waitFor("document.querySelector('#modal').open");
+   assert.equal(await evaluate("f('header_type').value==='http'&&f('host').value==='play.googleapis.com'&&f('path').value==='/http-fixture'"),true);
+   if(protocol==='vless'){
+    await evaluate("change('security','reality')");
+    assert.equal(await evaluate("f('header_type').disabled&&f('header_type').value===''&&f('host').disabled"),true);
+    await evaluate("change('security','none');change('header_type','http');change('network','ws')");
+    assert.equal(await evaluate("f('header_type').disabled&&f('header_type').value===''"),true);
+    await evaluate("change('network','tcp')");
+   }
+   await evaluate("change('header_type','');document.querySelector('#modalSubmit').click()");
+   await waitFor("!document.querySelector('#modal').open");
+   for(const key of ['header_type','host','path'])assert.equal(key in saves.at(-1).spec,false);
+  }
+  mark('TCP HTTP headers save/edit for all four protocols; default Host, required input, incompatible transitions and plain TCP cleanup');
+  for(const [reason,label] of [
+   ['database_disk_space_low','database: low disk space'],
+   ['database_recovery_required','database: recovery required'],
+   ['database_integrity_check_stale','database: integrity check overdue'],
+   ['database_backup_unavailable','database: backup unavailable'],
+   ['database_backup_stale','database: backup overdue']
+  ])assert.equal(await evaluate('healthLabel('+JSON.stringify({status:'not ready',checks:[{name:'database',ok:false,message:reason}]})+',false)'),label);
+  assert.equal(await evaluate("healthLabel({status:'ready',checks:[{name:'database',ok:true,message:'database_disk_space_low'}]},true)"),'ready');
+  assert.match(await evaluate("profileServerStatus({state:'BLOCKED',removing:true,code:'profile_delete_panel_unavailable'})"),/Server unavailable/);
+  mark('health and deletion status distinguish low disk, integrity, stale backups and unavailable panels');
   assert.deepEqual(errors,[]);
+
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -585,9 +585,20 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	}); e != nil {
 		t.Fatal(e)
 	}
+	// Removal has the next claim on this panel; the creation consumers help
+	// drain it without increasing worker/SQL capacity. Routine proofs remain
+	// unchanged until the pending deletion is attempted.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET next_attempt_at=now()-interval '1 second',lease_until=NULL WHERE panel_id=$1", panel)
+	proofsBeforeDelete := len(verifiedTags)
+	if e := svc.RunVerifyOne(ctx); e != nil || len(verifiedTags) != proofsBeforeDelete {
+		t.Fatal("proof overtook pending removal", e)
+	}
 	dropAfterDelete = true
-	if e := svc.Reconcile(ctx, p.ID, panel); e == nil {
+	if e := svc.RunOne(ctx); e == nil {
 		t.Fatal("uncertain delete falsely confirmed")
+	}
+	if deletes != 2 || !dropReads {
+		t.Fatal("creation consumer did not perform the queued deletion")
 	}
 	dropReads = false
 	dropAfterDelete = false
@@ -597,7 +608,8 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if deletes != 2 {
 		t.Fatal("confirmed-absent inbound deletion repeated", deletes)
 	}
-	if e := svc.RunOne(ctx); e != nil {
+	// No creation loop is required to finish a verified tombstone.
+	if e := svc.RunDeleteOne(ctx); e != nil {
 		t.Fatal(e)
 	}
 	deleted, e := configplane.Read(ctx, db, p.ID)

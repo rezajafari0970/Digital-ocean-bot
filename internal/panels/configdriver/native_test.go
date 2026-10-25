@@ -98,6 +98,9 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 		if v["tls"] == "tls" {
 			stream["security"] = "tls"
 		}
+		if v["net"] == "tcp" && v["type"] == "http" {
+			stream["tcpSettings"] = uriHTTPHeader(v["host"], v["path"])
+		}
 		if v["net"] == "ws" {
 			stream["wsSettings"] = map[string]any{"path": v["path"], "headers": map[string]string{"Host": v["host"]}}
 		}
@@ -128,10 +131,22 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 			settings["servers"] = []any{map[string]any{"address": u.Hostname(), "port": port, "method": method, "password": password}}
 			stream["network"] = "tcp"
 			stream["security"] = "none"
+			plugin := map[string]string{}
+			for _, pair := range strings.Split(q.Get("plugin"), ";") {
+				if k, v, ok := strings.Cut(pair, "="); ok {
+					plugin[k] = v
+				}
+			}
+			if plugin["obfs"] == "http" {
+				stream["tcpSettings"] = uriHTTPHeader(plugin["obfs-host"], plugin["path"])
+			}
 		case "trojan":
 			settings["servers"] = []any{map[string]any{"address": u.Hostname(), "port": port, "password": u.User.Username()}}
 		case "vless":
 			settings["vnext"] = []any{map[string]any{"address": u.Hostname(), "port": port, "users": []any{map[string]any{"id": u.User.Username(), "encryption": q.Get("encryption"), "flow": q.Get("flow")}}}}
+		}
+		if q.Get("type") == "tcp" && q.Get("headerType") == "http" {
+			stream["tcpSettings"] = uriHTTPHeader(q.Get("host"), q.Get("path"))
 		}
 		if q.Get("type") == "ws" {
 			stream["wsSettings"] = map[string]any{"path": q.Get("path"), "headers": map[string]string{"Host": q.Get("host")}}
@@ -151,6 +166,13 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 	}
 	return map[string]any{"protocol": protocol, "settings": settings, "streamSettings": stream}
 }
+func uriHTTPHeader(host, path string) map[string]any {
+	if path == "" {
+		path = "/"
+	}
+	return map[string]any{"header": map[string]any{"type": "http", "request": map[string]any{"path": []string{path}, "headers": map[string]any{"Host": []string{host}}}}}
+}
+
 func TestNativeConfigDriverRoundTrips(t *testing.T) {
 	core := os.Getenv("XRAY_TEST_BINARY")
 	if core == "" {
@@ -178,9 +200,21 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 		t.Fatal(e)
 	}
 	registry := Builtins()
-	for _, cap := range append(registry.Catalog(), Capability{ID: "vless/tcp/reality_no_flow", Protocol: "vless", Network: "tcp", Security: "reality", Public: true}) {
+	cases := append(registry.Catalog(), Capability{ID: "vless/tcp/reality_no_flow", Protocol: "vless", Network: "tcp", Security: "reality", Public: true})
+	for _, cap := range registry.Catalog() {
+		if cap.Network == "tcp" && cap.Security != "reality" {
+			cap.ID += "_http_header"
+			cases = append(cases, cap)
+		}
+	}
+	for _, cap := range cases {
 		t.Run(strings.ReplaceAll(cap.ID, "/", "_"), func(t *testing.T) {
 			spec := Spec{Protocol: cap.Protocol, Network: cap.Network, Security: cap.Security, Port: freePort(t)}
+			if strings.HasSuffix(cap.ID, "_http_header") {
+				spec.HeaderType = "http"
+				spec.Host = "play.googleapis.com"
+				spec.Path = "/fixture-http"
+			}
 			if spec.Network == "ws" || spec.Network == "xhttp" {
 				spec.Path = "/fixture"
 			}
