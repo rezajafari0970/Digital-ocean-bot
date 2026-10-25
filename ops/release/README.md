@@ -67,3 +67,5 @@ state must not be treated as current while that host is quarantined.
 ## Latest verified continuation — 2026-10-25
 
 See `CDN-PROOF-ISOLATION-20261025.md` for the current release, exact CI evidence, live rollout status, rejected AWS credentials and DNS capacity constraints. Do not treat older saved AWS/account observations as current.
+
+Post-release continuation: `POSTRELEASE-OBSERVATION-20261025.md` records three independently completed new builds, current health and the still-unresolved external blockers at 06:17 Tehran.

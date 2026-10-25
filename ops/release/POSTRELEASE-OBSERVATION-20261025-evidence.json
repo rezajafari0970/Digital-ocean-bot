@@ -1,0 +1,280 @@
+{
+  "observation_at": "2026-10-25T02:47:00.332212+00:00",
+  "live_release": "a5f53f7dedd2bf22a12b423d85bbff0f9f011192",
+  "prior_checkpoint": "f6262d28bb51193fef239681ed674e9a3a622e92",
+  "source_changes": false,
+  "deployment_dispatched": false,
+  "health": {
+    "at": "2026-10-25T02:47:00.332212+00:00",
+    "instances": [
+      {
+        "name": "dob-production",
+        "services": [
+          {
+            "role": "api",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker-panels",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          }
+        ],
+        "version": {
+          "commit": "a5f53f7dedd2bf22a12b423d85bbff0f9f011192",
+          "build_time": "2026-10-24T23:04:19Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T02:47:00.391419566Z"
+        }
+      },
+      {
+        "name": "digital-ocean-bot",
+        "services": [
+          {
+            "role": "api",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker-panels",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          }
+        ],
+        "version": {
+          "commit": "a5f53f7dedd2bf22a12b423d85bbff0f9f011192",
+          "build_time": "2026-10-24T23:15:28Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T02:47:00.475203067Z"
+        }
+      }
+    ],
+    "free_bytes": 7368056832,
+    "api_key_files": {
+      "/etc/dob-production/openai.env": false,
+      "/etc/digital-ocean-bot/openai.env": false
+    }
+  },
+  "tracked_builds": [
+    {
+      "provider": "vultr",
+      "state": "PANEL_COMPLETE",
+      "server_state": "READY",
+      "installer_state": "INSTALL_COMPLETE",
+      "created_at": "2026-10-25T00:00:43.040911+00:00",
+      "ready_at": "2026-10-25T00:09:14.058427+00:00",
+      "creation_to_ready_seconds": 511
+    },
+    {
+      "provider": "digitalocean",
+      "state": "PANEL_COMPLETE",
+      "server_state": "READY",
+      "installer_state": "INSTALL_COMPLETE",
+      "created_at": "2026-10-25T00:03:35.376329+00:00",
+      "ready_at": "2026-10-25T00:11:45.512384+00:00",
+      "creation_to_ready_seconds": 490
+    },
+    {
+      "provider": "linode",
+      "state": "PANEL_COMPLETE",
+      "server_state": "READY",
+      "installer_state": "INSTALL_COMPLETE",
+      "created_at": "2026-10-25T00:03:43.951452+00:00",
+      "ready_at": "2026-10-25T00:10:45.358969+00:00",
+      "creation_to_ready_seconds": 421
+    }
+  ],
+  "scheduled_reboots": [
+    {
+      "provider": "vultr",
+      "state": "SCHEDULED",
+      "scheduled_at": "2026-10-25T00:05:20.704116+00:00"
+    },
+    {
+      "provider": "digitalocean",
+      "state": "SCHEDULED",
+      "scheduled_at": "2026-10-25T00:08:35.618416+00:00"
+    }
+  ],
+  "aws_provider_request": {
+    "at": "2026-10-25T00:07:16.619391138Z",
+    "class": "authentication",
+    "diagnostic": {
+      "Code": "InvalidClientTokenId",
+      "Operation": "GetCallerIdentity",
+      "ResponseFormat": "sts_xml",
+      "Guidance": "Check the access key ID and matching secret key. Temporary credentials must include the matching session token.",
+      "RequiredPermission": ""
+    },
+    "http_status": 403,
+    "network_mode": "proxy_required",
+    "read_only_provider_operation": true,
+    "stage": "provider_health",
+    "success": false
+  },
+  "aws_credentials_changed": false,
+  "api_usage": {
+    "openai_requests": 0,
+    "openai_tokens": 0,
+    "openai_usd": 0,
+    "aws_read_only_health_checks": 1
+  },
+  "dns": {
+    "coverage_at": "2026-10-25T02:47:25.407036+00:00",
+    "coverage": {
+      "servers": 103,
+      "no_live_records": 15,
+      "no_fresh_verified": 18,
+      "one_verified": 20,
+      "two_or_more_verified": 65
+    },
+    "quota": [
+      {
+        "quota": 200,
+        "usage": 197,
+        "checked_at": "2026-10-25T02:46:36.73889+00:00",
+        "error": ""
+      }
+    ],
+    "settings_changed": false
+  },
+  "sampled_output_at": "2026-10-25T02:47:26.407087+00:00",
+  "sampled_accounts": [
+    {
+      "provider": "aws",
+      "desired": 10,
+      "ready_unexpired": 1,
+      "output_counts": {
+        "RESIDENTIAL": {
+          "configs": 0,
+          "protocols": {}
+        }
+      }
+    },
+    {
+      "provider": "ovh",
+      "desired": 10,
+      "ready_unexpired": 10,
+      "output_counts": {
+        "DIRECT": {
+          "configs": 45,
+          "protocols": {
+            "trojan": 10,
+            "vless": 35
+          }
+        },
+        "RESIDENTIAL": {
+          "configs": 45,
+          "protocols": {
+            "vless": 35,
+            "trojan": 10
+          }
+        }
+      }
+    },
+    {
+      "provider": "linode",
+      "desired": 10,
+      "ready_unexpired": 10,
+      "output_counts": {
+        "RESIDENTIAL": {
+          "configs": 42,
+          "protocols": {
+            "vless": 32,
+            "trojan": 10
+          }
+        }
+      }
+    },
+    {
+      "provider": "vultr",
+      "desired": 10,
+      "ready_unexpired": 10,
+      "output_counts": {}
+    },
+    {
+      "provider": "digitalocean",
+      "desired": 10,
+      "ready_unexpired": 10,
+      "output_counts": {}
+    }
+  ],
+  "gateway_management_online": false,
+  "gateway_assets": {
+    "app.js": {
+      "normal_tls": true,
+      "exact_artifact_match": true
+    },
+    "panel-settings.js": {
+      "normal_tls": true,
+      "exact_artifact_match": true
+    }
+  },
+  "gateway_login": {
+    "status": 200,
+    "current_assets": true
+  }
+}
