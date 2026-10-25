@@ -2,9 +2,9 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-25",
-  "feature": "Confirmed configuration deletion priority and independent completion; TCP HTTP header profiles and precise database health",
+  "feature": "Durable deletion confirmation, complete database reads, bounded observation catch-up and panel runtime identity retention",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "220 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "230 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -21,7 +21,10 @@
     "scheduler_claims": "Unique durable claim token; stale/foreign completion rejection; partial row-read rollback; preparation, pending-capacity and completion errors fail the round; cancellation/replacement and guarded migration downgrade",
     "config_deletion": "Creation consumers help deletion within the existing admission budget; due removals precede routine proofs while approaching proof deadlines remain admitted; late deletion failures cannot revive provider-confirmed tombstones",
     "tcp_http_header": "Driver validation, profile API persistence/editing, mobile form transitions, protocol-specific URI import and seven native TCP HTTP header round trips; no Android device acceptance claim",
-    "database_health": "Precise low-space, recovery and backup reasons; malformed or contradictory health reports never show ready"
+    "database_health": "Precise low-space, recovery and backup reasons; malformed or contradictory health reports never show ready",
+    "database_read_failures": "Real PostgreSQL interrupted UPDATE RETURNING rollback and idempotent deletion; 55 API query/scan/stream/close faults reject partial results",
+    "observation_retention": "At most ten 1000-row batches per table and a shared ten-second deadline; 15000-row catch-up fixture retains latest, failure and running evidence",
+    "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",

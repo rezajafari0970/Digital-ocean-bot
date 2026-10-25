@@ -285,6 +285,8 @@ def main(repo):
         shutil.rmtree(work)
 
 
+REQUIRED["internal/panels/sanaei"] += ("TestRuntimeFailedOpenReleasesIdentityState", "TestRuntimeAcquisitionSweepsExpiredIdentities", "TestRuntimeMutationIdentitySurvivesCacheReplacement", "TestRuntimeMutationCancellationAndPanicReleaseGate", "TestRuntimeMutationWaitHonorsDeadlineBeforeCallback", "TestRuntimeAcquisitionWaitHasPreMutationProvenance", "TestRuntimeFactorySQLFailuresNeverBecomePanelCircuit")
+
 if __name__ == '__main__':
     try:
         if len(sys.argv) != 2:
