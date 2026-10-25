@@ -1,0 +1,14 @@
+name: Isolated retention query diagnosis
+on:
+  push:
+    branches: ['diagnostics/retention-20261025']
+permissions:
+  contents: read
+jobs:
+  plans:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Isolated PostgreSQL query plans before and after statistics
+        run: python3 ops/release/retention-diagnostic.py
