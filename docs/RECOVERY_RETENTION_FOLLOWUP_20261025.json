@@ -1,0 +1,262 @@
+{
+  "observed_at": "2026-10-25T19:57:06.853322+00:00",
+  "base_source_commit": "cbb49e4ef29ad4b60e35ab3052e7ab6f2fb95325",
+  "runtime": {
+    "at": "2026-10-25T19:55:47.253490+00:00",
+    "expected": "53294d3936a96fa342db4036fa87f910f289e1e9",
+    "free_bytes": 7832289280,
+    "instances": [
+      {
+        "port": 18080,
+        "commit": "53294d3936a96fa342db4036fa87f910f289e1e9",
+        "ready": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T19:55:47.273656528Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ],
+        "served_source_assets": {
+          "config-profiles.js": true,
+          "app.js": true
+        }
+      },
+      {
+        "port": 28080,
+        "commit": "53294d3936a96fa342db4036fa87f910f289e1e9",
+        "ready": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T19:55:47.50283298Z"
+        },
+        "services": [
+          {
+            "unit": "dob-production-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ],
+        "served_source_assets": {
+          "config-profiles.js": true,
+          "app.js": true
+        }
+      }
+    ],
+    "deletion_blockers": [
+      {
+        "error_code": "profile_delete_panel_unavailable",
+        "provider": "aws",
+        "provider_state": "TOKEN_INVALID",
+        "server_state": "EXPIRING",
+        "listeners": 3
+      }
+    ],
+    "database_bytes": 2164127423,
+    "checksum_failures": 0,
+    "schema": "000197_observation_retention_witness",
+    "production_pending": false,
+    "database_health": {
+      "status": "ok",
+      "checked_at": 1792953872.57647,
+      "backup": {
+        "ok": true,
+        "checked_at": 1792953873.270786,
+        "source": "20261025T184042.286350Z"
+      },
+      "recovery_required": false
+    },
+    "archive_relocated_bytes": 5826809115,
+    "retention_index_valid": true,
+    "panel_retention_due": 159,
+    "production_worker_started_at": "2026-10-25T18:44:38+00:00",
+    "retention_events": [
+      {
+        "at_us": "1792954181304090",
+        "removed": 1867,
+        "error": false
+      },
+      {
+        "at_us": "1792954483525042",
+        "removed": 729,
+        "error": false
+      },
+      {
+        "at_us": "1792954783118230",
+        "removed": 748,
+        "error": false
+      },
+      {
+        "at_us": "1792955081438391",
+        "removed": 737,
+        "error": false
+      },
+      {
+        "at_us": "1792955382128620",
+        "removed": 760,
+        "error": false
+      },
+      {
+        "at_us": "1792955682134687",
+        "removed": 743,
+        "error": false
+      },
+      {
+        "at_us": "1792955981141439",
+        "removed": 717,
+        "error": false
+      },
+      {
+        "at_us": "1792956282604378",
+        "removed": 742,
+        "error": false
+      },
+      {
+        "at_us": "1792956582490761",
+        "removed": 763,
+        "error": false
+      },
+      {
+        "at_us": "1792956883041393",
+        "removed": 730,
+        "error": false
+      },
+      {
+        "at_us": "1792957182561695",
+        "removed": 739,
+        "error": false
+      },
+      {
+        "at_us": "1792957485492543",
+        "removed": 723,
+        "error": false
+      },
+      {
+        "at_us": "1792957782240461",
+        "removed": 729,
+        "error": false
+      },
+      {
+        "at_us": "1792958081393439",
+        "removed": 751,
+        "error": false
+      }
+    ],
+    "https_frontend": {
+      "commit": "53294d3936a96fa342db4036fa87f910f289e1e9",
+      "ready": "ready",
+      "checks": 5,
+      "asset_sha256": "30f641ef5ad42e362e764b9b088a286c485cb3b3e94f571a7ecc58d302a9364b",
+      "tls_validation": true
+    },
+    "memory_available_kib": 1801212
+  },
+  "blocked_account_freshness": [
+    {
+      "provider": "aws",
+      "provider_state": "TOKEN_INVALID",
+      "provider_state_at": "2026-10-25T19:54:55.094602+00:00",
+      "provider_checked_at": "2026-10-25T19:54:55.094602+00:00",
+      "provider_refresh_attempt_at": "2026-10-25T19:54:54.603049+00:00"
+    }
+  ],
+  "production_journal_since": "2026-10-25T18:44:41Z",
+  "production_journal_pattern_counts": {
+    "entries": 5978,
+    "panic": 0,
+    "oom": 0,
+    "checksum_or_page": 0,
+    "no_space": 0,
+    "retention_errors": 0,
+    "fatal": 0
+  },
+  "integrity_timers": {
+    "dob-production-integrity.timer": {
+      "ActiveState": "active",
+      "SubState": "waiting",
+      "NextElapseUSecRealtime": "Mon 2026-10-26 00:00:12 UTC",
+      "LastTriggerUSec": "Sun 2026-10-25 18:02:02 UTC"
+    },
+    "datacenter-bot-integrity.timer": {
+      "ActiveState": "active",
+      "SubState": "waiting",
+      "NextElapseUSecRealtime": "Mon 2026-10-26 00:00:37 UTC",
+      "LastTriggerUSec": "Sun 2026-10-25 18:02:22 UTC"
+    }
+  },
+  "whole_project_complete": false,
+  "full_manual_files": 269,
+  "new_paid_openai_requests": 0
+}

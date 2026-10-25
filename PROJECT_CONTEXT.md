@@ -14,6 +14,23 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
+## Recovery rollout follow-up — 2026-10-25T19:57:06.853322+00:00
+
+Live acceptance of release 53294d3936a96fa342db4036fa87f910f289e1e9 is complete.
+Read docs/RECOVERY_RETENTION_FOLLOWUP_20261025.md and its JSON receipt. Both instances are ready at schema 197;
+all six running hashes and HTTPS UI assets match. Both original installation
+receipts exited zero and passed 15 preservation checks. No pending deployment.
+Production worker has 14 successful retention cycles removing 11478 internal
+observations since restart; 159 eligible panel observations at
+2026-10-25T19:55:47.253490+00:00. Free filesystem bytes: 7832289280; checksum counter zero.
+Three AWS deletes remain blocked by TOKEN_INVALID and unreachable panel; retain
+unconfirmed deletion intents. Original corruption root cause remains unproven and
+the old cluster/services remain quarantined. Full audit remains 269 files complete,
+with remaining ownership/resource modules recorded in the existing inventory.
+No new paid OpenAI request; previous unknown request and reservation unchanged.
+Next work: remaining module audit; AWS cleanup requires valid authorized account
+credentials or independently verified server deletion. Do not repeat this deployment.
+
 ## Recovery, retention and runtime memory — 2026-10-25T18:50:05.118451+00:00
 
 Read docs/RECOVERY_RETENTION_20261025.md and its acceptance JSON first.
