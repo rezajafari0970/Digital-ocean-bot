@@ -47,8 +47,8 @@ func (s SQLStore) Due(ctx context.Context, now time.Time, limit int) ([]Schedule
 	}
 	return out, rows.Err()
 }
+
+// Advance shares the owned completion path; a read-only Due result is not a claim.
 func (s SQLStore) Advance(ctx context.Context, x Schedule, now time.Time) error {
-	next := now.Add(x.Interval)
-	_, err := s.DB.ExecContext(ctx, `UPDATE schedules SET last_run_at=$2,next_run_at=$3,updated_at=now() WHERE id=$1`, x.ID, now, next)
-	return err
+	return (LeaseStore{DB: s.DB}).Complete(ctx, x, now)
 }

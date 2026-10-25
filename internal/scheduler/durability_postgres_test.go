@@ -207,6 +207,9 @@ func TestSchedulerClaimCompletionOwnershipPostgres(t *testing.T) {
 	if err = store.Complete(ctx, first[0], time.Now().UTC()); err == nil {
 		t.Error("stale completion cleared replacement ownership")
 	}
+	if err = (SQLStore{DB: db}).Advance(ctx, first[0], time.Now().UTC()); err == nil {
+		t.Error("legacy advance bypassed claim ownership")
+	}
 	var leased bool
 	if err = db.QueryRow("SELECT lease_until IS NOT NULL AND last_run_at IS NULL FROM schedules").Scan(&leased); err != nil || !leased {
 		t.Fatalf("replacement altered: %v %v", leased, err)
