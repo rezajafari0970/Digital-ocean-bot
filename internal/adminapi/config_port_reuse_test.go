@@ -16,7 +16,8 @@ func TestProfilePortReuseIsolatesPendingDeletion(t *testing.T) {
 	for _, mode := range []string{"CONFIRMED", "PREPARED", "SENT", "automatic"} {
 		t.Run(mode, func(t *testing.T) {
 			db := adminTestDB(t)
-			account, _, panel := seedPanel(t, db, "http://127.0.0.1:19001")
+			account, droplet, panel := seedPanel(t, db, "http://127.0.0.1:19001")
+			sqlMust(t, db, "UPDATE deployments SET host='192.0.2.1' WHERE droplet_id=$1", droplet)
 			_, _, otherPanel := seedPanel(t, db, "http://127.0.0.1:19002")
 			sqlMust(t, db, "UPDATE config_control_authority SET unified=true WHERE singleton")
 			api := &Server{DB: db}
