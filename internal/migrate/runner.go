@@ -57,7 +57,7 @@ func (r Runner) Up(ctx context.Context) error {
 				return fmt.Errorf("migration %s checksum mismatch", version)
 			}
 			if !stored.Valid || stored.String == "" {
-				if _, e := conn.ExecContext(ctx, `UPDATE schema_migrations SET checksum=$2 WHERE version=$1 AND checksum IS NULL`, version, checksum); e != nil {
+				if _, e := conn.ExecContext(ctx, `UPDATE schema_migrations SET checksum=$2 WHERE version=$1 AND (checksum IS NULL OR checksum='')`, version, checksum); e != nil {
 					return e
 				}
 			}

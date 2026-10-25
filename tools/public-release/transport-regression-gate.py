@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/migrate": ("TestMigrationLegacyChecksumBackfillAndDrift",),
     "internal/observability": ("TestIntegrityReportCannotHideNewFailure", "TestIntegrityReportCannotHideRecoveryOrExpiredBackup"),
     "internal/secrets": ("TestAuthorizationSecretsOwnerBindingAndRotation",),
     "internal/cloudflareschedule": ("TestCloudflareScheduleValidation",),

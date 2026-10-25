@@ -1,135 +1,357 @@
-import importlib.util
+"""Budget, crash-recovery and no-resubmission contracts; no external API calls."""
+import copy
 import fcntl
+import importlib.util
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location("bounded_review", Path(__file__).with_name("bounded-openai-review.py"))
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+
 
 class BoundedReviewTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.ledger = Path(self.directory.name) / "ledger.json"
-        self.calls = 0
+        self.posts = 0
+        self.gets = 0
 
-    def reply(self, payload, key):
-        self.calls += 1
+    def state(self):
+        return json.loads(self.ledger.read_text())
+
+    def save(self, state):
+        module.atomic_write(self.ledger, state)
+
+    def response(self, status="completed", **changes):
+        result = {"id": "resp_fixture", "model": module.MODEL, "status": status,
+                  "service_tier": "default", "usage": {"input_tokens": 100, "output_tokens": 20},
+                  "output": [{"content": [{"type": "output_text", "text": "review findings"}]}]}
+        if status in module.PENDING:
+            result["usage"] = None
+            result["output"] = []
+        result.update(changes)
+        return result
+
+    def send(self, payload, key):
+        self.posts += 1
+        self.assertEqual(key, "fake-test-key")
         self.assertEqual(payload["model"], "gpt-6-astra")
         self.assertEqual(payload["reasoning"], {"effort": "max"})
-        self.assertFalse(payload["store"])
+        self.assertTrue(payload["background"])
+        self.assertTrue(payload["store"])
         self.assertEqual(payload["service_tier"], "default")
         self.assertEqual(payload["prompt_cache_options"], {"ttl": "30m"})
-        self.assertEqual(key, "fixture-key")
-        return {"id": "fixture-response", "model": module.MODEL, "status": "completed",
-                "usage": {"input_tokens": 100, "output_tokens": 200},
-                "output": [{"content": [{"type": "output_text", "text": "review fixture"}]}]}
-
-    def call(self, prompt="code fixture", **kw):
-        return module.review(prompt, "fixture-key", self.ledger, send=kw.get("send", self.reply))
-
-    def test_missing_key_or_oversized_input_never_sends(self):
-        with self.assertRaisesRegex(module.ReviewBlocked, "api_key_missing"):
-            module.review("code", None, self.ledger, send=self.reply)
-        with self.assertRaisesRegex(module.ReviewBlocked, "too_large"):
-            self.call("x" * (module.MAX_INPUT_BYTES + 1))
-        self.assertEqual(self.calls, 0)
-        self.assertFalse(self.ledger.exists())
-
-    def test_usage_is_recorded_without_prompt_or_key(self):
-        result = self.call()
-        self.assertEqual(result["estimated_cost_usd_upper"], 0.0113)
-        text = self.ledger.read_text()
-        self.assertNotIn("code fixture", text)
-        self.assertNotIn("fixture-key", text)
+        row = self.state()["requests"][-1]
+        self.assertEqual(row["status"], "reserved")
+        self.assertEqual(row["reserved_micro_usd"], row["charged_micro_usd"])
         self.assertEqual(self.ledger.stat().st_mode & 0o777, 0o600)
-        self.assertEqual(json.loads(text)["requests"][0]["status"], "completed")
+        return self.response()
 
-    def test_cache_write_pricing_is_covered(self):
-        def cached_write(payload, key):
-            row = json.loads(self.ledger.read_text())['requests'][0]
-            minimum = ((len(payload['input'].encode()) + 2048) * 25 + 1) // 2 + module.MAX_OUTPUT * 50
-            self.assertGreaterEqual(row['reserved_micro_usd'], minimum)
-            result = self.reply(payload, key)
-            result['usage'] = {'input_tokens': 2000, 'output_tokens': 200,
-                               'input_tokens_details': {'cache_write_tokens': 2000}}
-            return result
-        result = self.call('review cached source', send=cached_write)
-        # Published 30-minute write rate is $12.50/M, output is $50/M.
-        # Cache-write tokens replace ordinary input, rather than adding to it.
-        self.assertGreaterEqual(result['estimated_cost_usd_upper'], 0.035)
-        self.assertLessEqual(result['estimated_cost_usd_upper'], 0.036)
+    def submit(self, prompt="review public code", **kwargs):
+        kwargs.setdefault("send", self.send)
+        kwargs.setdefault("label", "review-" + str(self.posts))
+        return module.submit_review(prompt, "fake-test-key", self.ledger, **kwargs)
 
-    def test_duplicate_and_request_limit_block_before_network(self):
-        self.call()
-        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
-            self.call()
-        self.call("second")
-        self.call("third")
-        with self.assertRaisesRegex(module.ReviewBlocked, "request_limit"):
-            self.call("fourth")
-        self.assertEqual(self.calls, 3)
+    def queue(self, prompt="review public code"):
+        def send(payload, key):
+            self.send(payload, key)
+            return self.response("queued")
+        return self.submit(prompt, send=send)
 
-    def test_unknown_outcome_keeps_reservation_and_blocks_further_calls(self):
+    def fetch(self, response_id, key):
+        self.gets += 1
+        self.assertEqual(response_id, "resp_fixture")
+        self.assertEqual(key, "fake-test-key")
+        return self.response()
+
+    def legacy(self, status="unknown"):
+        reserve = 1501011
+        row = {"attempt": "497a22e2-ff8b-49e5-bc97-f9162df86e5a", "at": 1,
+               "payload_digest": module.digest(module.payload_for("old review", module.MAX_OUTPUT, background=False)),
+               "status": status, "reserved_micro_usd": reserve, "charged_micro_usd": reserve}
+        if status == "completed":
+            row.update(usage={"input_tokens": 100, "output_tokens": 20}, charged_micro_usd=2300)
+        return {"schema": 1, "policy": module.POLICY.copy(), "requests": [row]}
+
+    def test_submission_is_prefunded_private_and_result_verified(self):
+        result = self.submit()
+        self.assertEqual(result["status"], "settled")
+        self.assertAlmostEqual(result["estimated_cost_usd_upper"], 0.0023)
+        self.assertEqual(module.review_result(self.ledger)["text"], "review findings")
+        row = self.state()["requests"][0]
+        artifact = self.ledger.parent / row["result_file"]
+        self.assertEqual(artifact.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(self.posts, 1)
+
+    def test_queued_receipt_survives_new_invocation_without_post(self):
+        result = self.queue()
+        self.assertEqual(result["status"], "pending")
+        self.assertTrue(result["receipt_saved"])
+        self.assertEqual(self.state()["requests"][0]["response_id"], "resp_fixture")
+        # Reloading persisted state, not an in-memory response, drives each GET.
+        self.assertEqual(module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)["status"], "settled")
+        module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.assertEqual((self.posts, self.gets), (1, 1))
+
+    def test_pending_request_blocks_new_submission(self):
+        self.queue()
+        with self.assertRaisesRegex(module.ReviewBlocked, "already_pending"):
+            self.submit("different source")
+        self.assertEqual(self.posts, 1)
+
+    def test_poll_timeout_retains_receipt_and_full_reserve(self):
+        self.queue()
+        before = self.state()["requests"][0]
+        def timeout(*args):
+            raise TimeoutError("private diagnostic")
+        with self.assertRaisesRegex(module.ReviewBlocked, "receipt_and_reservation_retained"):
+            module.poll_review("fake-test-key", self.ledger, fetch=timeout)
+        after = self.state()["requests"][0]
+        self.assertEqual(after["response_id"], before["response_id"])
+        self.assertEqual(after["charged_micro_usd"], before["reserved_micro_usd"])
+        self.assertNotIn("private diagnostic", self.ledger.read_text())
+        module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.assertEqual((self.posts, self.gets), (1, 1))
+
+    def test_in_progress_poll_preserves_reservation(self):
+        self.queue()
+        before = self.state()["requests"][0]["reserved_micro_usd"]
+        result = module.poll_review("fake-test-key", self.ledger, fetch=lambda *args: self.response("in_progress"))
+        self.assertEqual(result["status"], "pending")
+        self.assertEqual(self.state()["requests"][0]["charged_micro_usd"], before)
+
+    def test_lost_post_response_is_not_retried(self):
         def timeout(payload, key):
-            raise TimeoutError()
+            self.send(payload, key)
+            raise TimeoutError("fake-test-key must not appear")
         with self.assertRaisesRegex(module.ReviewBlocked, "uncertain"):
-            self.call(send=timeout)
-        row = json.loads(self.ledger.read_text())["requests"][0]
+            self.submit(send=timeout)
+        row = self.state()["requests"][0]
+        self.assertEqual(row["status"], "unknown")
         self.assertEqual(row["charged_micro_usd"], row["reserved_micro_usd"])
-        with self.assertRaisesRegex(module.ReviewBlocked, "unresolved_request"):
-            self.call("new prompt")
-        self.assertEqual(self.calls, 0)
+        self.assertNotIn("fake-test-key", self.ledger.read_text())
+        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+            self.submit(max_output_tokens=100)
+        with self.assertRaisesRegex(module.ReviewBlocked, "requires_usage_reconciliation"):
+            self.submit("different review")
+        with self.assertRaisesRegex(module.ReviewBlocked, "no_resumable"):
+            module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.assertEqual((self.posts, self.gets), (1, 0))
 
-    def test_budget_reserves_maximum_before_network(self):
+    def test_migration_preserves_unknown_evidence_and_hard_stop(self):
+        original = self.legacy()
+        self.save(original)
+        with self.assertRaisesRegex(module.ReviewBlocked, "policy_mismatch"):
+            self.submit()
+        result = module.migrate_ledger(self.ledger)
+        evidence = self.ledger.with_name("ledger.schema1.evidence.json")
+        self.assertEqual(json.loads(evidence.read_text()), original)
+        self.assertEqual(result["unresolved_reserved_usd"], 1.501011)
+        migrated = self.state()
+        for key, value in original["requests"][0].items():
+            self.assertEqual(migrated["requests"][0][key], value)
+        module.migrate_ledger(self.ledger)
+        self.assertEqual(self.state(), migrated)
+        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+            self.submit("old review", max_output_tokens=100)
+        with self.assertRaisesRegex(module.ReviewBlocked, "requires_usage_reconciliation"):
+            self.submit()
+        self.assertEqual(self.posts, 0)
+
+    def test_migration_completed_usage_and_reserved_crash(self):
+        for old_status, expected in [("completed", "settled"), ("reserved", "unknown")]:
+            with self.subTest(old_status=old_status):
+                self.save(self.legacy(old_status))
+                evidence = self.ledger.with_name("ledger.schema1.evidence.json")
+                if evidence.exists():
+                    evidence.unlink()
+                module.migrate_ledger(self.ledger)
+                self.assertEqual(self.state()["requests"][0]["status"], expected)
+
+    def test_migration_conflicting_evidence_blocks_without_changes(self):
+        original = self.legacy()
+        self.save(original)
+        module.atomic_write(self.ledger.with_name("ledger.schema1.evidence.json"), {"different": True})
+        with self.assertRaisesRegex(module.ReviewBlocked, "evidence_conflict"):
+            module.migrate_ledger(self.ledger)
+        self.assertEqual(self.state(), original)
+
+    def test_durable_result_recovers_crash_before_ledger_settlement(self):
+        self.queue()
+        real_write = module.atomic_write
+        def interrupted_write(path, data):
+            if path == self.ledger:
+                raise OSError("simulated storage interruption")
+            real_write(path, data)
+        with patch.object(module, "atomic_write", side_effect=interrupted_write):
+            with self.assertRaises(OSError):
+                module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.assertEqual(self.state()["requests"][0]["status"], "pending")
+        def no_fetch(*args):
+            self.fail("durable result should be used without another network request")
+        result = module.poll_review("fake-test-key", self.ledger, fetch=no_fetch)
+        self.assertEqual(result["status"], "settled")
+        self.assertEqual(module.review_result(self.ledger)["text"], "review findings")
+        self.assertEqual((self.posts, self.gets), (1, 1))
+
+    def test_reservation_write_failure_prevents_post(self):
+        with patch.object(module, "atomic_write", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.submit()
+        self.assertEqual(self.posts, 0)
+
+    def test_receipt_survives_invalid_terminal_usage_then_get_recovers(self):
+        def missing_usage(payload, key):
+            self.send(payload, key)
+            return self.response(usage=None)
+        with self.assertRaisesRegex(module.ReviewBlocked, "uncertain"):
+            self.submit(send=missing_usage)
+        self.assertEqual(self.state()["requests"][0]["response_id"], "resp_fixture")
+        module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.assertEqual((self.posts, self.gets), (1, 1))
+
+    def test_invalid_response_identity_policy_or_usage_keeps_reserve(self):
+        self.queue()
+        invalid = [{"id": "resp_elsewhere"}, {"id": "../secret"}, {"model": "other-model"},
+                   {"service_tier": "priority"}, {"status": "unexpected"}, {"usage": None},
+                   {"usage": {"input_tokens": True, "output_tokens": 1}},
+                   {"usage": {"input_tokens": 1, "output_tokens": -1}},
+                   {"usage": {"input_tokens": 1, "output_tokens": module.MAX_OUTPUT + 1}},
+                   {"usage": {"input_tokens": 100000000, "output_tokens": 1}}]
+        for changes in invalid:
+            with self.subTest(changes=changes):
+                with self.assertRaisesRegex(module.ReviewBlocked, "poll_failed"):
+                    module.poll_review("fake-test-key", self.ledger, fetch=lambda *args: self.response(**changes))
+                row = self.state()["requests"][0]
+                self.assertEqual(row["charged_micro_usd"], row["reserved_micro_usd"])
+
+    def test_all_terminal_outcomes_account_usage_without_retry(self):
+        for status in sorted(module.TERMINAL):
+            with self.subTest(status=status):
+                def send(payload, key):
+                    self.send(payload, key)
+                    return self.response(status)
+                self.submit(status, send=send)
+                self.assertEqual(self.state()["requests"][-1]["response_status"], status)
+                with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+                    self.submit(status)
+                # Isolate fixtures while preserving the real three-attempt policy.
+                self.ledger.unlink()
+
+    def test_cache_write_cost_ceiling_and_reservation(self):
+        def send(payload, key):
+            self.send(payload, key)
+            row = self.state()["requests"][0]
+            minimum = ((len(payload["input"].encode()) + 2048) * 25 + 1) // 2 + module.MAX_OUTPUT * 50
+            self.assertGreaterEqual(row["reserved_micro_usd"], minimum)
+            return self.response(usage={"input_tokens": 2000, "output_tokens": 200,
+                                       "input_tokens_details": {"cache_write_tokens": 2000}})
+        result = self.submit(send=send)
+        self.assertGreaterEqual(result["estimated_cost_usd_upper"], 0.035)
+        self.assertLessEqual(result["estimated_cost_usd_upper"], 0.036)
+
+    def test_budget_cap_applies_before_network(self):
         def expensive(payload, key):
-            result = self.reply(payload, key)
-            result["usage"]["output_tokens"] = module.MAX_OUTPUT
-            return result
-        self.call(send=expensive)
+            self.send(payload, key)
+            return self.response(usage={"input_tokens": 100, "output_tokens": module.MAX_OUTPUT})
+        self.submit(send=expensive)
         with self.assertRaisesRegex(module.ReviewBlocked, "reservation_exceeds"):
-            self.call("x" * 60000)
-        self.assertEqual(self.calls, 1)
+            self.submit("x" * 60000)
+        self.assertEqual(self.posts, 1)
 
-    def test_corrupt_state_and_changed_policy_fail_closed(self):
+    def test_duplicate_label_prompt_and_attempt_cap(self):
+        self.submit(label="first")
+        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+            self.submit(max_output_tokens=100)
+        with self.assertRaisesRegex(module.ReviewBlocked, "label_already"):
+            self.submit("different", label="first")
+        self.submit("second")
+        self.submit("third")
+        with self.assertRaisesRegex(module.ReviewBlocked, "request_limit"):
+            self.submit("fourth")
+        self.assertEqual(self.posts, 3)
+
+    def test_corrupt_and_weakened_ledger_fail_closed(self):
+        self.submit()
+        original = self.state()
+        mutations = [
+            lambda s: s.update(schema=9),
+            lambda s: s["policy"].update(budget_micro_usd=3000000),
+            lambda s: s["requests"][0].update(charged_micro_usd=-1),
+            lambda s: s["requests"][0].update(charged_micro_usd=0),
+            lambda s: s["requests"][0].update(attempt="../../elsewhere"),
+            lambda s: s["requests"][0].update(response_id="../../elsewhere"),
+            lambda s: s["requests"][0].update(protocol="unknown"),
+            lambda s: s["requests"][0].update(result_file="../elsewhere"),
+            lambda s: s["requests"][0].update(status="unknown", charged_micro_usd=1),
+        ]
+        for change in mutations:
+            state = copy.deepcopy(original)
+            change(state)
+            self.save(state)
+            with self.assertRaises(module.ReviewBlocked):
+                self.submit("different")
         self.ledger.write_text("{")
         with self.assertRaisesRegex(module.ReviewBlocked, "unreadable"):
-            self.call()
-        self.ledger.unlink()
-        self.call()
-        state = json.loads(self.ledger.read_text())
-        state["requests"][0]["charged_micro_usd"] = -1
-        self.ledger.write_text(json.dumps(state))
-        with self.assertRaisesRegex(module.ReviewBlocked, "invalid"):
-            self.call("different")
-        state["policy"]["budget_micro_usd"] += 1
-        self.ledger.write_text(json.dumps(state))
-        with self.assertRaisesRegex(module.ReviewBlocked, "policy_mismatch"):
-            self.call("different")
-        self.assertEqual(self.calls, 1)
+            self.submit("different")
+        self.assertEqual(self.posts, 1)
+
+    def test_result_tampering_is_detected(self):
+        self.submit()
+        row = self.state()["requests"][0]
+        module.atomic_write(self.ledger.parent / row["result_file"], self.response(output=[]))
+        with self.assertRaisesRegex(module.ReviewBlocked, "integrity_mismatch"):
+            module.review_result(self.ledger)
 
     def test_concurrent_caller_cannot_send(self):
-        with self.ledger.with_suffix(".json.lock").open("w") as lock:
+        lock_path = self.ledger.with_suffix(".json.lock")
+        lock_path.touch(mode=0o600)
+        with lock_path.open("w") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             with self.assertRaisesRegex(module.ReviewBlocked, "already_running"):
-                self.call()
-        self.assertEqual(self.calls, 0)
+                self.submit()
+        self.assertEqual(self.posts, 0)
 
-    def test_incomplete_response_records_usage_and_does_not_retry(self):
-        def incomplete(payload, key):
-            result = self.reply(payload, key)
-            result["status"] = "incomplete"
-            result["output"] = []
-            return result
-        with self.assertRaisesRegex(module.ReviewBlocked, "response_incomplete"):
-            self.call(send=incomplete)
-        self.assertEqual(json.loads(self.ledger.read_text())["requests"][0]["status"], "completed")
-        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
-            self.call()
-        self.assertEqual(self.calls, 1)
+    def test_unsafe_files_and_permissions_block(self):
+        self.save({"schema": 2, "policy": module.POLICY, "requests": []})
+        self.ledger.chmod(0o644)
+        with self.assertRaisesRegex(module.ReviewBlocked, "unsafe_private"):
+            self.submit()
+        self.ledger.chmod(0o600)
+        target = self.ledger.with_name("alias.json")
+        target.symlink_to(self.ledger)
+        with self.assertRaisesRegex(module.ReviewBlocked, "nonsymlink"):
+            module.submit_review("public code", "fake-test-key", target, send=self.send)
+        self.assertEqual(self.posts, 0)
+
+    def test_input_and_output_boundaries_prevent_network(self):
+        cases = [("", {}), ("x" * 64001, {}), ("ع" * 32001, {}),
+                 ("code", {"max_output_tokens": 0}), ("code", {"max_output_tokens": True}),
+                 ("code", {"max_output_tokens": module.MAX_OUTPUT + 1}), ("code", {"label": "../label"})]
+        for prompt, kwargs in cases:
+            with self.subTest(kwargs=kwargs, length=len(prompt)):
+                with self.assertRaises(module.ReviewBlocked):
+                    self.submit(prompt, **kwargs)
+        with self.assertRaisesRegex(module.ReviewBlocked, "api_key_missing"):
+            module.submit_review("code", "", self.ledger, send=self.send)
+        self.assertEqual(self.posts, 0)
+
+    def test_poll_before_receipt_and_result_before_settlement_block(self):
+        with self.assertRaisesRegex(module.ReviewBlocked, "no_resumable"):
+            module.poll_review("fake-test-key", self.ledger, fetch=self.fetch)
+        self.queue()
+        with self.assertRaisesRegex(module.ReviewBlocked, "unavailable"):
+            module.review_result(self.ledger)
+        with self.assertRaisesRegex(module.ReviewBlocked, "no_resumable"):
+            module.poll_review("fake-test-key", self.ledger, attempt="absent", fetch=self.fetch)
+        self.assertEqual(self.gets, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
