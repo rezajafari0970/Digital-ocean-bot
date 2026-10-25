@@ -1,3 +1,9 @@
+## OpenAI credential access correction — 2026-10-25T11:04:40.612795+00:00
+
+The user confirms that the OpenAI key is already stored on the original server. Its previously recorded location is /etc/digital-ocean-bot/openai.env on serverprojects.ptr.network (original SSH route 85.192.63.181). Do not report the key as nonexistent or ask the user to paste it into chat. Current checks confirm only that this file is absent from the two accessible recovery-instance configuration directories. Relevant systemd environment files have no OpenAI key assignment.
+
+Original Remote Desktop Commander remains offline. The hostname does not resolve from the recovery host, but the documented original IP answers SSH; existing noninteractive authentication is rejected. This proves an access blocker, not that the original machine is powered off or its key is missing. No original key contents were accessed or printed, no paid request was made, and no original database/service was started. Restore authorized access to the original host, then load its existing key privately into the bounded review workflow. Preserve the USD2 / three-attempt cap and normal project safety boundaries. Source/product/release/deployment state below is otherwise unchanged.
+
 ## System audit continuation checkpoint — 2026-10-25 10:50 UTC / 14:20 Tehran
 
 Read docs/SYSTEM_AUDIT_FOLLOWUP_20261025.md and its JSON inventory. This continuation fully read 41 files / 4,101 lines, with hashes; the whole-project audit is still incomplete. It reproduced and fixed dispatcher retention (512 completed accounts left 512 idle entries), while preserving unfinished cancellation/sibling reservations. It also reproduced release-policy drift: ops required 189 tests while the private publisher required 146. There is now one standalone canonical gate and an ops wrapper, with 192 mandatory tests and ten parity/evidence/CLI tests. Original offline publisher installation has not been updated.

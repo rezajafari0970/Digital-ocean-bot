@@ -119,3 +119,7 @@ zero paid requests, zero tokens and USD 0; fake-transport tests are not API usag
 The legacy unbounded council was not invoked. Evidence is retained under
 /root/dob-audit-followup-20261025. This checkpoint updates PROJECT_STATE.md and
 HANDOFF.md so a later continuation uses repository state rather than chat memory.
+
+## Credential access clarification — 2026-10-25T11:04:40.612795+00:00
+
+The user confirms the API key remains on the original server at the previously recorded /etc/digital-ocean-bot/openai.env. Only its absence from accessible recovery-host configurations has been verified. Remote Desktop Commander is offline; the original IP responds to SSH, but available authentication is rejected. The correct blocker is access to the existing credential, not a claim that no key exists. Do not request the secret in chat. No API call or original-host mutation was performed during these checks.

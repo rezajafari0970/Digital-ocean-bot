@@ -429,8 +429,20 @@
     "requests": 0,
     "tokens": 0,
     "usd": 0,
-    "blocker": "API key absent from accessible known configurations",
+    "blocker": "Original-host key exists per user/prior record; authorized access unavailable. Recovery configuration copies absent.",
     "helper_cap_usd": 2,
     "helper_attempt_cap": 3
+  },
+  "credential_access_clarification": {
+    "at": "2026-10-25T11:04:40.612795+00:00",
+    "user_confirms_key_on_original_server": true,
+    "previously_recorded_path": "/etc/digital-ocean-bot/openai.env",
+    "original_file_rechecked": false,
+    "accessible_recovery_copies_present": false,
+    "original_remote_desktop": "offline",
+    "original_ssh_endpoint": "reachable; available authentication rejected",
+    "key_value_printed": false,
+    "paid_requests_for_this_check": 0,
+    "blocker": "authorized access to the existing original-host credential"
   }
 }
