@@ -117,20 +117,11 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 		lane += " AND (l.error_code<>'' OR l.verified_at IS NULL OR l.state='BLOCKED')"
 		order = "l.next_attempt_at,l.verified_at NULLS FIRST,cp.last_scheduled_at NULLS FIRST,l.profile_id,l.panel_id"
 	}
-	var id, panel string
 	claim, e := sanaei.UUIDv4()
 	if e != nil {
 		return e
 	}
-	e = s.DB.QueryRowContext(ctx, `WITH candidate AS (
- SELECT l.profile_id,l.panel_id FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id
- JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
- WHERE l.next_attempt_at<=now() AND (l.lease_until IS NULL OR l.lease_until<now()) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners busy WHERE busy.panel_id=l.panel_id AND busy.lease_until>now()) AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
- AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
- AND `+lane+` ORDER BY `+order+` FOR UPDATE OF l,cp SKIP LOCKED LIMIT 1), claimed AS (
- UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
- FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
- SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
+	id, panel, e := s.claimProfileWork(ctx, claim, lane, order)
 	if errors.Is(e, sql.ErrNoRows) {
 		if recovery {
 			return s.runPrioritized(ctx, true, false, false)
@@ -172,6 +163,25 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 	}
 	return nil
 }
+
+// claimProfileWork locks the individual destination row. Locking the shared
+// profile with SKIP LOCKED makes other workers skip every destination of that
+// profile during concurrent claims. The fairness timestamp still updates in the
+// same statement; Reconcile reloads desired state before any remote mutation.
+func (s Service) claimProfileWork(ctx context.Context, claim, lane, order string) (string, string, error) {
+	var id, panel string
+	e := s.DB.QueryRowContext(ctx, `WITH candidate AS (
+ SELECT l.profile_id,l.panel_id FROM config_driver_listeners l JOIN config_driver_profiles cp ON cp.id=l.profile_id
+ JOIN panel_instances pi ON pi.id=l.panel_id JOIN droplets dr ON dr.id=pi.droplet_id
+ WHERE l.next_attempt_at<=now() AND (l.lease_until IS NULL OR l.lease_until<now()) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners busy WHERE busy.panel_id=l.panel_id AND busy.lease_until>now()) AND cp.deleted_at IS NULL AND (l.state<>'RETIRED' OR (cp.enabled AND cp.delete_requested_at IS NULL AND (cp.fleet OR l.panel_id=ANY(cp.panel_ids))))
+ AND dr.state<>'DELETED' AND NOT EXISTS(SELECT 1 FROM panel_cleanup_targets ct JOIN panel_cleanup_jobs cj ON cj.id=ct.job_id WHERE ct.panel_id=l.panel_id AND ct.state<>'SUCCEEDED' AND cj.state NOT IN('SUCCEEDED','CANCELLED'))
+ AND `+lane+` ORDER BY `+order+` FOR UPDATE OF l SKIP LOCKED LIMIT 1), claimed AS (
+ UPDATE config_driver_listeners l SET attempted_at=now(),next_attempt_at=now()+interval '30 seconds',lease_until=now()+interval '3 minutes',claim_token=$1
+ FROM candidate c WHERE l.profile_id=c.profile_id AND l.panel_id=c.panel_id RETURNING l.profile_id,l.panel_id), touched AS (UPDATE config_driver_profiles cp SET last_scheduled_at=now() FROM claimed c WHERE cp.id=c.profile_id RETURNING cp.id)
+ SELECT profile_id::text,panel_id::text FROM claimed`, claim).Scan(&id, &panel)
+	return id, panel, e
+}
+
 func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	conn, e := s.DB.Conn(ctx)
 	if e != nil {
