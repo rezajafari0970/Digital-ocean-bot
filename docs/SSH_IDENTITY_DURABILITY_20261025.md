@@ -1,3 +1,5 @@
+> Historical milestone. Current release, rollout and cumulative coverage: [scheduler continuation](SCHEDULER_DURABILITY_20261025.md).
+
 # SSH identity durability, encrypted-record containment and restore verification
 
 Updated: 2026-10-25T18:46:39.199013+03:30. Continuation baseline: 3933c61256ee56cbb1a120dbef9446496faa0e3b.

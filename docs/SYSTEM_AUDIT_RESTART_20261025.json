@@ -5,8 +5,8 @@
   "baseline_tracked_files": 6491,
   "baseline_go_files": 1218,
   "baseline_go_lines": 146345,
-  "baseline_go_fully_read": 105,
-  "baseline_go_fully_read_lines": 12577,
+  "baseline_go_fully_read": 173,
+  "baseline_go_fully_read_lines": 18017,
   "whole_project_review_complete": false,
   "inspected_files": [
     {
@@ -473,8 +473,8 @@
     },
     {
       "path": "tools/public-release/transport-regression-gate.py",
-      "sha256": "90e4285fec1903c71af91ded15244de1efa62c118b9dee74c39c8254e3adcbbd",
-      "lines": 290,
+      "sha256": "ae5a7925da25a3d4286f0d552ce3e984ae10986cb6b5dd33442a4fd79f0c3214",
+      "lines": 291,
       "scope": "full_file"
     },
     {
@@ -835,6 +835,456 @@
       "path": ".github/workflows/database-restore-drill.yml",
       "sha256": "f7f9df041d1987a6add57c5796477efd7683e3137b6c0110278df81944d394c8",
       "lines": 28,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/capacity_lane.go",
+      "sha256": "ba64b7d32e54bf89022781906adc68cc3d1ca7ddbfbb0834092e60cf0fbcd3db",
+      "lines": 113,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/capacity_lane_test.go",
+      "sha256": "110b326e691a2ee1d39908a7b3bead8d02b533f3f6a0cfb9bc4c512bdb5dfdeb",
+      "lines": 132,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/config_profiles.go",
+      "sha256": "cb5d2b40837612fcfefe4cf9289ce05c1e91d9fd7add867146257bdb2d047445",
+      "lines": 103,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/config_profiles_test.go",
+      "sha256": "23a77e8133e7b17ddc1e9ef9e9bfd759a44a6a72cfb952a2ec7e911d72e86ad3",
+      "lines": 76,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/control_budget.go",
+      "sha256": "8c0a360de875dfdd0e3af44288ae7e20cfd8936b3e84ebd08b4563a075d971cb",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/control_budget_test.go",
+      "sha256": "cdd76da8002a04598342d0470277187969e008d18fda93dfbdea32fe3d44a4c6",
+      "lines": 92,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/identity_pool_test.go",
+      "sha256": "367fc6e71949397e890cc415658a5e81d401e22d91acc5d35a7cc85417388867",
+      "lines": 112,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/main_test.go",
+      "sha256": "dc1c4b7aa18bc93f3e2146ea5f7f365d5f82c3e240c42ad3d0e93f0f963c3371",
+      "lines": 34,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/network_identity_lane.go",
+      "sha256": "cbd8ae900efa0465ceebe6acdfa0f028b648838b5388173a98e299f6f2a40f46",
+      "lines": 102,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/network_identity_lane_test.go",
+      "sha256": "c76ecea610f79b07fa8640c99195ac903756d163608f4484000ed1f4b964b3fa",
+      "lines": 174,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/panel_budget.go",
+      "sha256": "432434bf4ae7710c2a3cce8136e3a34535cf37c4ca1a79ec79e4d61777d712d7",
+      "lines": 48,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/panel_budget_test.go",
+      "sha256": "297566f394648824c4cc27def6265bd55a238f40a8aa455e25760af12be6b0cb",
+      "lines": 88,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/proof_postgres_test.go",
+      "sha256": "ac256947c1ee9588c0308c0986246984d185aa314ee5fbc1ed676f58ee1d649e",
+      "lines": 444,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/reality_lane.go",
+      "sha256": "3c3969f6314bcc5c4a009b5833e58ca246c515a0a951bea274def5cb24a3ea66",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/reality_lane_test.go",
+      "sha256": "2fdb34f67ae9f00f6e8eb43f640c188c0582f900544a249de9b65d3478a4f33d",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/remediation_test.go",
+      "sha256": "60f7181ec10e256225f856bc367505acbdde85b4dc9e8ca5df570ccae8078f79",
+      "lines": 90,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/residential_lane.go",
+      "sha256": "15728dffda077de722790b2446bbd1dcde77ec67ef898b9f004ffa1b7ed32dd7",
+      "lines": 152,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/residential_lane_test.go",
+      "sha256": "b510485c431fa04f7973b2f25fb4cd703bc0b39dd3a37912712516549fccfb7b",
+      "lines": 294,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/supervision_test.go",
+      "sha256": "3de5a98c3f84f7391590870cdc66ec6cf0b48e403d1054dced18522f3baf840e",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/trojan.go",
+      "sha256": "7307ac9f411995546b618a607ba8a97ae0f7ca67efe2a215ad1e978d4d298980",
+      "lines": 59,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/scheduler.go",
+      "sha256": "fde8c72a1e73e7de1a4bfa4b4fe0a32daa11babe7c5d1f8f7eb2bf73011a1d70",
+      "lines": 28,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/create_block.go",
+      "sha256": "ba73b26a8c341bb2c57f2de074fe44d5d80b9482de96f406fa19d118a59fb6fc",
+      "lines": 63,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/service.go",
+      "sha256": "d055afcad98fd04409ae369e2a59ba748df8ef1df84d8579b0a478dd78c4e807",
+      "lines": 66,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/service_test.go",
+      "sha256": "11b0502d80b7d1d5d11542d87a94bfeeb11e8fe199e972d0ff9499b02f1316f6",
+      "lines": 18,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/upcloud_trial.go",
+      "sha256": "53f06e6d91dce70192494897deee9f15794bc2adfda9cac23364d85686d43786",
+      "lines": 95,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation.go",
+      "sha256": "3ba44ea84bdaa2c3a6c696108887839a053a525ff93d811db4401f67908c4516",
+      "lines": 42,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation_diagnostics.go",
+      "sha256": "8290eec4d00df8f2304fd70e4e27ae51a5add70c7d8af5ee32790e6be8ddf2df",
+      "lines": 53,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation_test.go",
+      "sha256": "5fba896253ce5cdaf797ebb1ccf62811fac9b55976d514d8d83d4aa18009ecbf",
+      "lines": 13,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/queue.go",
+      "sha256": "e60a6d297e4626a2e08ecad731fbb9ab0fd4702163b06e760158177111beda8d",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/store.go",
+      "sha256": "56df32054764cee8d3298bc7a818d4e757c68d457c0eeb90d475e796953aed1d",
+      "lines": 83,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/circuit.go",
+      "sha256": "f3c221990e222b3d17a232ea18f6dbf192634a8235bee60585e096a56b2225b6",
+      "lines": 61,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/policy.go",
+      "sha256": "aa8fc35c5cc86e3134201f2c9b085773f31d97004665d84ae0dc98b192118fab",
+      "lines": 44,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/retry.go",
+      "sha256": "7c30af50b2c47ea54b59924c8d0e76c73a5060a85bb54afcb468081ce7808f0e",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/retry_test.go",
+      "sha256": "79aea570c19ac7fffbbaa2386d081ff75d97b5f174ac888605c0f35eb4435d35",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/store.go",
+      "sha256": "e129d7d4facd7323eb42b26d4fcf05741c08d93a2adde57736eceab005852721",
+      "lines": 43,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/errors.go",
+      "sha256": "1acc261e5a00c41fd046d3c3f62ec332b5def50de46cc26544022d8924d06573",
+      "lines": 5,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/model.go",
+      "sha256": "26d56c9e976d0714488f6fd0d24bdd1d1e21c39e1ccb8c9baa653542f52d1bbd",
+      "lines": 21,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/postgres.go",
+      "sha256": "5ff4e6db2883910ed58f83c4615b5c15e0bfa948aca4fb7fb394a6c398c53b67",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/reconcile.go",
+      "sha256": "18fb98c986082ddf08ad3c85fe33a4e9a86ed41fc04939384fdd00e940d1a1cb",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/reconcile_test.go",
+      "sha256": "92fbf38ac36f1a52993d38dc9d570bf99e541bca8d437586ab28c4d21caeb548",
+      "lines": 16,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/registry.go",
+      "sha256": "817a1aa3408f6af3ea733f0b16424d7ace00af91e5066b821942248e4a581351",
+      "lines": 12,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/runtimecap/xray.go",
+      "sha256": "a87c3b57cc0f2cb4c25f14536bb2db3c91cca29418ffbdfb9336fd2dca3b97a2",
+      "lines": 36,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/runtimecap/xray_test.go",
+      "sha256": "390861a9c5305141e8888b5a1248a439b7c7a446db73186be94d324dd7ecba4a",
+      "lines": 22,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/backfill_spacing_test.go",
+      "sha256": "cd6cca2f8869d16a89045a5b134aa33909ae2deaf671fbbedd86cf03228fc25e",
+      "lines": 33,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/durability_postgres_test.go",
+      "sha256": "c1931002acfc92a1277d325c1523936472a87b968b2704b3565e82323dbe5ddd",
+      "lines": 393,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/engine.go",
+      "sha256": "8c80ad359d2cae910e6a1edddfe5f4eafd0e5c094394b00323858d3fdca162f5",
+      "lines": 270,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/lease.go",
+      "sha256": "45cd147c95408f119d0affae4c03b1f0a28a713d7d5f8f90b467dfa69e438b1d",
+      "lines": 96,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/model.go",
+      "sha256": "4a1703d4214338825c68cb48fb65042448e528349d03e79e5a5a77f03ec25036",
+      "lines": 29,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/planner.go",
+      "sha256": "4f0e4a7ae59a7a37f8e9a5bd9977c41de9ee4a773537e86c5ffa84196541e837",
+      "lines": 11,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/provider_gate_test.go",
+      "sha256": "42a88840315cecfd2421d437f37db1c6dcd7673617435a2ad12bcd8f4a2771ce",
+      "lines": 26,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/store.go",
+      "sha256": "88c3c9807468824e7880f349f72d6a3eb50e490dbaa4c44be1112d4242112721",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/auth_retry.go",
+      "sha256": "40a9ee133c7c0a2c1afe8822baa9162a47af12ba256eeb09d48c93fe37033523",
+      "lines": 74,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/auth_retry_test.go",
+      "sha256": "411ebc36922aacc1032ff7dffb35f71dba63e023dde661029f5d7ec55b742aff",
+      "lines": 243,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/dispatcher_retention_test.go",
+      "sha256": "843c9887df7214c7bc966682602f9fd6c65572bd9b68117e1d53dd6221e1ecda",
+      "lines": 78,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/dispatcher_test.go",
+      "sha256": "2d989ed29e9f09647c797b2958832d15083cd0744c3dbc8ac67b81bd038ef09d",
+      "lines": 38,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/failures_defer_test.go",
+      "sha256": "fe9e2dba171f54889395e451945552d9513bb6b37b7668c898ac841964a69f67",
+      "lines": 55,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/heartbeat.go",
+      "sha256": "c886c1e05b85475b43c58bb39ba2e05e99aca51992f1930cc5fb627f8b2e9e28",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/lifecycle.go",
+      "sha256": "e273e87de81eb7c987676c6e88fd725c22e6274d08030eb2225a216a8b1c4182",
+      "lines": 174,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/lifecycle_test.go",
+      "sha256": "725f2ff020d237c5b71086f585fdd2c53425915b0fc4adc7419e0ae9830b037c",
+      "lines": 119,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/modules_test.go",
+      "sha256": "6ee4a74c12b76b364eef9da489510aaffd43b84d64668c499cfb2281e5bb63e5",
+      "lines": 138,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/outcome_ownership_test.go",
+      "sha256": "af92c12d2127597fbf87d518c1e1171a43162adc12f21444ea4cbb1a46e6a36d",
+      "lines": 66,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/progress_test.go",
+      "sha256": "bde7c6ea3e6dd303751b8f0616cb055312eb29ada70f7d3ae3676225921d9c63",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/remediation_extra_test.go",
+      "sha256": "4f8ea00369c00ea5f454d9216be247b27643ccfc1fcb40818abe73026adc3860",
+      "lines": 165,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/remediation_test.go",
+      "sha256": "7a0454b932eb7c1bf7f599c8591574274c2e20abe172f55764d978e5a386c203",
+      "lines": 228,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/role_lease_test.go",
+      "sha256": "8cf32da9a7eab0724e0e64868567de549be043fc6ce9a02c7fe93874e8d6b8fb",
+      "lines": 86,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/supervision_test.go",
+      "sha256": "347a8dedd50c8e438331b9d5eacf055b64706871aa7c5292d8b4d9fbe6ef80a3",
+      "lines": 155,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/weighted_budget_test.go",
+      "sha256": "99a1b03a83b3a375f044b0f160f2bd33886f05b073df07552dfcbbcf30f8c8b0",
+      "lines": 45,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/work_class.go",
+      "sha256": "db12446dff636276b6171682a6be2e53027ac8bedf3427259123507307798ccf",
+      "lines": 49,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/work_class_test.go",
+      "sha256": "5f509ac5c8c7027fe3740213cc5707c5aa570baedd233391dbc16e0c88d72a84",
+      "lines": 82,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000019_schedules.up.sql",
+      "sha256": "4368d49e11ff5ffae7e39cde46820cf9cdf0fa1704fe479c76608cc7c1328d9f",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000196_scheduler_claim_fencing.down.sql",
+      "sha256": "0675cd95ba53df82fa1e66ef5038e8160b6318daf60aadb8f4c51542f6fb4d1f",
+      "lines": 7,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000196_scheduler_claim_fencing.up.sql",
+      "sha256": "ac64d7f550d524c41658a4ecadaae040236f4beb30d32a01f61b4a2b851ae9d4",
+      "lines": 1,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/private-secret-scan.py",
+      "sha256": "a8cc6122096ad32c66022e38e6e2ae97f6b0233d90aab3cf775296037e3d4519",
+      "lines": 86,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/private-secret-scan_test.py",
+      "sha256": "2c4d407c7408e3e11af93b261d4dfd3dc52b889acb0de6c0a4c4fd2d35ae6e13",
+      "lines": 89,
+      "scope": "full_file"
+    },
+    {
+      "path": ".github/workflows/private-secret-scan.yml",
+      "sha256": "f5454413332d6e174f851f0839f86f9f3bb062e3321d6a0ae992d08a34fc7458",
+      "lines": 23,
       "scope": "full_file"
     }
   ],
@@ -1376,49 +1826,49 @@
       "base_blob": "9fcf95e22c2ddc7c86cd4eac29fdc24cab49e057",
       "base_sha256": "ba64b7d32e54bf89022781906adc68cc3d1ca7ddbfbb0834092e60cf0fbcd3db",
       "lines": 113,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/capacity_lane_test.go",
       "base_blob": "4f1c7a93d84d644b4aa4d538cac8bf97a45c08e5",
       "base_sha256": "110b326e691a2ee1d39908a7b3bead8d02b533f3f6a0cfb9bc4c512bdb5dfdeb",
       "lines": 132,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/config_profiles.go",
       "base_blob": "757e55db105991bb1727676daa13b8f322323fa1",
       "base_sha256": "cb5d2b40837612fcfefe4cf9289ce05c1e91d9fd7add867146257bdb2d047445",
       "lines": 103,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/config_profiles_test.go",
       "base_blob": "48ffcc1fc8ad7d9dd229eb156e4674e6781d6db8",
       "base_sha256": "23a77e8133e7b17ddc1e9ef9e9bfd759a44a6a72cfb952a2ec7e911d72e86ad3",
       "lines": 76,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/control_budget.go",
       "base_blob": "194856e0844ff9da1816f8654f7ec393c0706e8f",
       "base_sha256": "8c0a360de875dfdd0e3af44288ae7e20cfd8936b3e84ebd08b4563a075d971cb",
       "lines": 20,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/control_budget_test.go",
       "base_blob": "7c3e8d93fabf7b62e7e5cc3c48f934967bed72f4",
       "base_sha256": "cdd76da8002a04598342d0470277187969e008d18fda93dfbdea32fe3d44a4c6",
       "lines": 92,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/identity_pool_test.go",
       "base_blob": "e859bf55da3770bfc58e3bd396e77951cffd67a8",
       "base_sha256": "367fc6e71949397e890cc415658a5e81d401e22d91acc5d35a7cc85417388867",
       "lines": 112,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/main.go",
@@ -1432,77 +1882,77 @@
       "base_blob": "16f9e026d95d8aed837a0a8d2c26d25c5437815e",
       "base_sha256": "dc1c4b7aa18bc93f3e2146ea5f7f365d5f82c3e240c42ad3d0e93f0f963c3371",
       "lines": 34,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/network_identity_lane.go",
       "base_blob": "0e863a9672915ab7bc526c703936060f74d99b1d",
       "base_sha256": "cbd8ae900efa0465ceebe6acdfa0f028b648838b5388173a98e299f6f2a40f46",
       "lines": 102,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/network_identity_lane_test.go",
       "base_blob": "ad1fc7ecb0229a6482b249c6ca6b8ed9e6553e43",
       "base_sha256": "c76ecea610f79b07fa8640c99195ac903756d163608f4484000ed1f4b964b3fa",
       "lines": 174,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/panel_budget.go",
       "base_blob": "ccf816fe434f43ece0bf732f43823e96c65c8cfb",
       "base_sha256": "432434bf4ae7710c2a3cce8136e3a34535cf37c4ca1a79ec79e4d61777d712d7",
       "lines": 48,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/panel_budget_test.go",
       "base_blob": "78e9ac041646ab799178c334f31ccfd8bf025806",
       "base_sha256": "297566f394648824c4cc27def6265bd55a238f40a8aa455e25760af12be6b0cb",
       "lines": 88,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/proof_postgres_test.go",
       "base_blob": "c795a42e4e06c3fba47833d7657fa8f813ff8e39",
       "base_sha256": "ac256947c1ee9588c0308c0986246984d185aa314ee5fbc1ed676f58ee1d649e",
       "lines": 444,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/reality_lane.go",
       "base_blob": "c573675a28c74ca7a7c7878d4d986616240da0f2",
       "base_sha256": "3c3969f6314bcc5c4a009b5833e58ca246c515a0a951bea274def5cb24a3ea66",
       "lines": 15,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/reality_lane_test.go",
       "base_blob": "0e64a2cf73aa73d6239c63f31f7c5fc1fd47fe11",
       "base_sha256": "2fdb34f67ae9f00f6e8eb43f640c188c0582f900544a249de9b65d3478a4f33d",
       "lines": 56,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/remediation_test.go",
       "base_blob": "fc6b54e903d47e44fe4d9e5e3ec9435b0bda55dc",
       "base_sha256": "60f7181ec10e256225f856bc367505acbdde85b4dc9e8ca5df570ccae8078f79",
       "lines": 90,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/residential_lane.go",
       "base_blob": "15ee3e155fb3651d75368fb06cd86c328c653255",
       "base_sha256": "15728dffda077de722790b2446bbd1dcde77ec67ef898b9f004ffa1b7ed32dd7",
       "lines": 152,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/residential_lane_test.go",
       "base_blob": "93cf70dbc94969326aa662b8cc6d6f136c796cba",
       "base_sha256": "b510485c431fa04f7973b2f25fb4cd703bc0b39dd3a37912712516549fccfb7b",
       "lines": 294,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/supervision.go",
@@ -1516,14 +1966,14 @@
       "base_blob": "10abc6230aad10693ef2d47cbeb318fdb8fe472f",
       "base_sha256": "3de5a98c3f84f7391590870cdc66ec6cf0b48e403d1054dced18522f3baf840e",
       "lines": 15,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/worker/trojan.go",
       "base_blob": "11930ac259771e1255403b237d88f81dabe053e3",
       "base_sha256": "7307ac9f411995546b618a607ba8a97ae0f7ca67efe2a215ad1e978d4d298980",
       "lines": 59,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "cmd/xui-bulk-route-inspect/main.go",
@@ -3742,7 +4192,7 @@
       "base_blob": "6e57bbca7697026fb3b8fdb1dbe3cc17457eedd1",
       "base_sha256": "fde8c72a1e73e7de1a4bfa4b4fe0a32daa11babe7c5d1f8f7eb2bf73011a1d70",
       "lines": 28,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/ssh_budget.go",
@@ -3924,28 +4374,28 @@
       "base_blob": "262a418f1bbdd999ad070f13c3c66abddf91c973",
       "base_sha256": "ba73b26a8c341bb2c57f2de074fe44d5d80b9482de96f406fa19d118a59fb6fc",
       "lines": 63,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/capacity/service.go",
       "base_blob": "c28b55a90d69c62f7e657b76d058e6b5f6146d39",
       "base_sha256": "d055afcad98fd04409ae369e2a59ba748df8ef1df84d8579b0a478dd78c4e807",
       "lines": 66,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/capacity/service_test.go",
       "base_blob": "fa5567496b3d8c77060091590a11c5a2bf7cba08",
       "base_sha256": "11b0502d80b7d1d5d11542d87a94bfeeb11e8fe199e972d0ff9499b02f1316f6",
       "lines": 18,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/capacity/upcloud_trial.go",
       "base_blob": "d8accd0b0897a9bab3664ea17f2b492214daafd0",
       "base_sha256": "53f06e6d91dce70192494897deee9f15794bc2adfda9cac23364d85686d43786",
       "lines": 95,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/cloudflare/capacity.go",
@@ -4372,35 +4822,35 @@
       "base_blob": "7e0766cd6b346f18097471708681c2c9a9d90b12",
       "base_sha256": "3ba44ea84bdaa2c3a6c696108887839a053a525ff93d811db4401f67908c4516",
       "lines": 42,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/jobs/operation_diagnostics.go",
       "base_blob": "8ad6740bcccfacf10bbc260f3a5d04ec0f8f8c7d",
       "base_sha256": "8290eec4d00df8f2304fd70e4e27ae51a5add70c7d8af5ee32790e6be8ddf2df",
       "lines": 53,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/jobs/operation_test.go",
       "base_blob": "6229d862e27746a9a20a8791ecca5b86b0c2741a",
       "base_sha256": "5fba896253ce5cdaf797ebb1ccf62811fac9b55976d514d8d83d4aa18009ecbf",
       "lines": 13,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/jobs/queue.go",
       "base_blob": "c1bc29d39c9b0e508a9849f580b02dde8f245afe",
       "base_sha256": "e60a6d297e4626a2e08ecad731fbb9ab0fd4702163b06e760158177111beda8d",
       "lines": 20,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/jobs/store.go",
       "base_blob": "d0ac7d0817261d594afb5242f2dffa8219e94d0b",
       "base_sha256": "56df32054764cee8d3298bc7a818d4e757c68d457c0eeb90d475e796953aed1d",
       "lines": 83,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/migrate/preserve.go",
@@ -8761,140 +9211,140 @@
       "base_blob": "ac18e9314daa581c4f3c1db1bf85ef62962b6abf",
       "base_sha256": "f3c221990e222b3d17a232ea18f6dbf192634a8235bee60585e096a56b2225b6",
       "lines": 61,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resilience/policy.go",
       "base_blob": "bee31f8c09d5ad76663be083fdc2b4cd7b2492a8",
       "base_sha256": "aa8fc35c5cc86e3134201f2c9b085773f31d97004665d84ae0dc98b192118fab",
       "lines": 44,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resilience/retry.go",
       "base_blob": "779550857c46fbe8e8dc47c498129ce7ae7eb8a6",
       "base_sha256": "7c30af50b2c47ea54b59924c8d0e76c73a5060a85bb54afcb468081ce7808f0e",
       "lines": 54,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resilience/retry_test.go",
       "base_blob": "908c60a96d89d4aea054326759d70693e62fd9f3",
       "base_sha256": "79aea570c19ac7fffbbaa2386d081ff75d97b5f174ac888605c0f35eb4435d35",
       "lines": 40,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resilience/store.go",
       "base_blob": "f0b7a39b8a9a624b94c2faa17d1f177463650bfe",
       "base_sha256": "e129d7d4facd7323eb42b26d4fcf05741c08d93a2adde57736eceab005852721",
       "lines": 43,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/errors.go",
       "base_blob": "2987a46364282742e59545deccf96b3c74462b20",
       "base_sha256": "1acc261e5a00c41fd046d3c3f62ec332b5def50de46cc26544022d8924d06573",
       "lines": 5,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/model.go",
       "base_blob": "a38f8e963ecf3e4a13ec0dbcb28a55515345b13d",
       "base_sha256": "26d56c9e976d0714488f6fd0d24bdd1d1e21c39e1ccb8c9baa653542f52d1bbd",
       "lines": 21,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/postgres.go",
       "base_blob": "1fe22ea4122a9314b955ccb8fb83aad53a65ba7e",
       "base_sha256": "5ff4e6db2883910ed58f83c4615b5c15e0bfa948aca4fb7fb394a6c398c53b67",
       "lines": 56,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/reconcile.go",
       "base_blob": "a799ac8005963ed5e7bab7ee125a570efe1eb694",
       "base_sha256": "18fb98c986082ddf08ad3c85fe33a4e9a86ed41fc04939384fdd00e940d1a1cb",
       "lines": 40,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/reconcile_test.go",
       "base_blob": "da4b65faaeeb6d89f08ea16ca55a811ce981c7e4",
       "base_sha256": "92fbf38ac36f1a52993d38dc9d570bf99e541bca8d437586ab28c4d21caeb548",
       "lines": 16,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/resources/registry.go",
       "base_blob": "b47e85314252a2ffdff5e639f58d3eaff691cde1",
       "base_sha256": "817a1aa3408f6af3ea733f0b16424d7ace00af91e5066b821942248e4a581351",
       "lines": 12,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/runtimecap/xray.go",
       "base_blob": "0df72388298b934244c46b7cb8c912bd95da268d",
       "base_sha256": "a87c3b57cc0f2cb4c25f14536bb2db3c91cca29418ffbdfb9336fd2dca3b97a2",
       "lines": 36,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/runtimecap/xray_test.go",
       "base_blob": "87ea6febe4922ecb357ac0090c8a844ed72dde0b",
       "base_sha256": "390861a9c5305141e8888b5a1248a439b7c7a446db73186be94d324dd7ecba4a",
       "lines": 22,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/backfill_spacing_test.go",
       "base_blob": "3a86bafa99b4c5c7d8366bc9e74a4c2023bf5197",
       "base_sha256": "cd6cca2f8869d16a89045a5b134aa33909ae2deaf671fbbedd86cf03228fc25e",
       "lines": 33,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/engine.go",
       "base_blob": "86d74dd7ef3c20a7a6d5366e48f7c7e84635c2e5",
       "base_sha256": "45ad01c45261a14d689aba7407be732e33af49c540e44b743a90e0f71910de18",
       "lines": 229,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/lease.go",
       "base_blob": "40a002a9eb81b315d0597eb9e21ff2d67abd862e",
       "base_sha256": "59da2f09806fb66b7d44b2bfbe19d66a3f79cc253b06fc509f072d73e59cb75d",
       "lines": 56,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/model.go",
       "base_blob": "a7ddabd914781b8677faa51c70c3baeff08cc541",
       "base_sha256": "4a1703d4214338825c68cb48fb65042448e528349d03e79e5a5a77f03ec25036",
       "lines": 29,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/planner.go",
       "base_blob": "18c591e7136379fd1cb551335f03a585fc9d5c98",
       "base_sha256": "4f0e4a7ae59a7a37f8e9a5bd9977c41de9ee4a773537e86c5ffa84196541e837",
       "lines": 11,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/provider_gate_test.go",
       "base_blob": "6a6b82c8521cf8c46db66870f1b5b548c3e3c433",
       "base_sha256": "42a88840315cecfd2421d437f37db1c6dcd7673617435a2ad12bcd8f4a2771ce",
       "lines": 26,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/scheduler/store.go",
       "base_blob": "71327db9d67e79e151dd29cb745ba2a37bc0fc62",
       "base_sha256": "aefdf126fd7e8e3a0b2e63dd97e779cde39e5e53337db750aa4b5fc8a4c945e1",
       "lines": 51,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/authorization.go",
@@ -9258,14 +9708,14 @@
       "base_blob": "8d2ddb864e7b3ff7b46c2d253fb28769e74f3bb2",
       "base_sha256": "40a9ee133c7c0a2c1afe8822baa9162a47af12ba256eeb09d48c93fe37033523",
       "lines": 74,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/auth_retry_test.go",
       "base_blob": "3a1e56ffe61f343bf27a5ae70434b3f5c4f7e78c",
       "base_sha256": "411ebc36922aacc1032ff7dffb35f71dba63e023dde661029f5d7ec55b742aff",
       "lines": 243,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/batch.go",
@@ -9286,14 +9736,14 @@
       "base_blob": "9da429bcbf3953a8715c863809702648368f4b84",
       "base_sha256": "843c9887df7214c7bc966682602f9fd6c65572bd9b68117e1d53dd6221e1ecda",
       "lines": 78,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/dispatcher_test.go",
       "base_blob": "39326417ebe91c440ebdbf735a64715f189569c7",
       "base_sha256": "2d989ed29e9f09647c797b2958832d15083cd0744c3dbc8ac67b81bd038ef09d",
       "lines": 38,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/failures.go",
@@ -9307,7 +9757,7 @@
       "base_blob": "5cf2ab55479b120fd3bf3bf65189d65b207589de",
       "base_sha256": "fe9e2dba171f54889395e451945552d9513bb6b37b7668c898ac841964a69f67",
       "lines": 55,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/failures_test.go",
@@ -9321,14 +9771,14 @@
       "base_blob": "5652d1bf550ef9496a14544f7da3212f6fed6063",
       "base_sha256": "c886c1e05b85475b43c58bb39ba2e05e99aca51992f1930cc5fb627f8b2e9e28",
       "lines": 20,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/lifecycle.go",
       "base_blob": "1ce0195b3504b234e067c1a7977c4a9308e2c63b",
       "base_sha256": "e273e87de81eb7c987676c6e88fd725c22e6274d08030eb2225a216a8b1c4182",
       "lines": 174,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/lifecycle_checkpoint_test.go",
@@ -9342,7 +9792,7 @@
       "base_blob": "356a7c4c33b520c10ccb1576ee948156e910c783",
       "base_sha256": "725f2ff020d237c5b71086f585fdd2c53425915b0fc4adc7419e0ae9830b037c",
       "lines": 119,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/modules.go",
@@ -9356,14 +9806,14 @@
       "base_blob": "bb76d653d9faf46f838da4cc941351965557d445",
       "base_sha256": "6ee4a74c12b76b364eef9da489510aaffd43b84d64668c499cfb2281e5bb63e5",
       "lines": 138,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/outcome_ownership_test.go",
       "base_blob": "65e4be03b5c52689a696ecdee57b535779d0feec",
       "base_sha256": "af92c12d2127597fbf87d518c1e1171a43162adc12f21444ea4cbb1a46e6a36d",
       "lines": 66,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/process_role.go",
@@ -9384,7 +9834,7 @@
       "base_blob": "3c3ca9e92a5ac155cb1360ed249569d3df7f7b51",
       "base_sha256": "bde7c6ea3e6dd303751b8f0616cb055312eb29ada70f7d3ae3676225921d9c63",
       "lines": 40,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/recovery.go",
@@ -9412,14 +9862,14 @@
       "base_blob": "a2a9f635d3028008ca8d97a875edcde9af4c4bf8",
       "base_sha256": "4f8ea00369c00ea5f454d9216be247b27643ccfc1fcb40818abe73026adc3860",
       "lines": 165,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/remediation_test.go",
       "base_blob": "760de9a4bd29bbbb688165a0325d91a365cfdfc0",
       "base_sha256": "7a0454b932eb7c1bf7f599c8591574274c2e20abe172f55764d978e5a386c203",
       "lines": 228,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/role_lease.go",
@@ -9433,21 +9883,21 @@
       "base_blob": "d247b2fdaf5ba922b16d4d2f08f692226bff1169",
       "base_sha256": "8cf32da9a7eab0724e0e64868567de549be043fc6ce9a02c7fe93874e8d6b8fb",
       "lines": 86,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/supervision_test.go",
       "base_blob": "e6de96e9a0edcab62bdf427e92b4e664f4a47d34",
       "base_sha256": "347a8dedd50c8e438331b9d5eacf055b64706871aa7c5292d8b4d9fbe6ef80a3",
       "lines": 155,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/weighted_budget_test.go",
       "base_blob": "d1078f3de69396c048f09207e93f462f5765cc1a",
       "base_sha256": "99a1b03a83b3a375f044b0f160f2bd33886f05b073df07552dfcbbcf30f8c8b0",
       "lines": 45,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/work_budget.go",
@@ -9468,14 +9918,14 @@
       "base_blob": "29e9884d32be6ec62beaaafba2d6d8132665b269",
       "base_sha256": "db12446dff636276b6171682a6be2e53027ac8bedf3427259123507307798ccf",
       "lines": 49,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/work_class_test.go",
       "base_blob": "253ba00d0afbf1ce9cdd99bd52c4ca36f32c2984",
       "base_sha256": "5f509ac5c8c7027fe3740213cc5707c5aa570baedd233391dbc16e0c88d72a84",
       "lines": 82,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/worker.go",
@@ -9618,8 +10068,8 @@
       "inspection": "pending"
     }
   ],
-  "last_continuation_baseline": "3933c61256ee56cbb1a120dbef9446496faa0e3b",
-  "updated_at": "2026-10-25T18:46:39.199013+03:30",
-  "verified_implementation_commit": "4f2e595e3d7b686e2f80effa25cff3761893a270",
-  "verified_operations_commit": "5801e0d1fed3ce1158d7fd8f923ee993a3c7359b"
+  "last_continuation_baseline": "a924bc27b4f70453f0bbe79ef75f785774884e7e",
+  "updated_at": "2026-10-25T16:15:10.565727+00:00",
+  "verified_implementation_commit": "721b02b2f40607208107e57ee62b84ba3c6f81de",
+  "verified_operations_commit": "265498ddd85d4c92a36666902ce4ecc46724dcec"
 }

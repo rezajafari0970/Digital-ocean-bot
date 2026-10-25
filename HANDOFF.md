@@ -1,3 +1,77 @@
+## Active continuation — deletion, database attention and TCP HTTP header
+
+User follow-up video: Screenrecorder-2026-10-25-19-34-51-162.mp4.
+Preserve the completed scheduler release below. Next investigate confirmed profile
+deletion throughput and intermittent database attention with live read-only evidence;
+implement valid protocol-specific TCP HTTP-header creation under existing ownership,
+port isolation, output and native verification contracts. These requests are NOT
+complete in this checkpoint. Sampled pending removals73/79/66;79 later77; visible
+badges ready. Do not infer storage corruption from the label alone.
+
+Release tooling guard265498ddd85d4c92a36666902ce4ecc46724dcec passed CI40210555780
+and8 synthetic tests; nonempty exact export rescanned against both live secret sets
+plus gitleaks. Canonical checkpoint includes this operations-only ancestor.
+No product or live version changes beyond the completed scheduler update below.
+
+## Scheduler durability and worker audit — 2026-10-25T19:29:56.573620+03:30
+
+Read docs/SCHEDULER_DURABILITY_20261025.md with coverage and acceptance JSON first.
+Whole-project audit INCOMPLETE: 213 full current files / 22,638 lines;
+173/1,218 baseline Go files / 18,017 baseline lines. 75 additional complete files
+since a924bc27; hashes reverified. Fully read worker core 33/33, cmd/worker 22/22,
+scheduler 8/8, resources 6/6, resilience 5/5, jobs 5/5 and capacity 4/4; this does not
+certify these modules error-free. Remaining source inventory is explicit.
+
+Product 721b02b2f40607208107e57ee62b84ba3c6f81de, PR #11 merged as 9d24af6889d186c59a7b9493035bfded13a42107.
+Canonical checkpoint/final-e2e-20260929; worktree
+/root/projects/dob-ssh-durability-20261025, local branch fix/scheduler-durability-20261025.
+This documentation/operations checkpoint is a child of that merge; git HEAD
+identifies the checkpoint, not a different exported product.
+
+Scheduler negative CI40206951737 reproduced stale-owner completion, partial-row
+claims, dispatch after prepare/pending-capacity failure and false successful
+completion. UUID claim fencing, full read/close checks, per-claim cancellation/
+expiry, fail-closed SQL/preparation errors and legacy Advance ownership are fixed.
+Migration 196 adds lease_token; down rejects unsettled tokens. Do not clear tokens
+to force rollback. Batch 100/one-minute leases remain bounded; expired claims
+cannot dispatch. Application/provider fences remain necessary.
+
+Final CI40208116457 PASS: 219 required roots, 0 required skips, full Go/vet/browser,
+20 unchanged isolation repetitions, disposable restore with 196 real migrations,
+synthetic configuration key/decryption/unknown identity, sequence/amcheck,
+damaged archive rejection, atomic failed restore and interrupted rollback.
+No live database or cloud account mutated by these fixtures. No production-backup
+restore, physical repair, sustained-load or unconditional exactly-once claim.
+
+Public main/stable dfe97084c84ad617609cafbff210b1e9fa31dc45; 1,738-file export passed both live
+secret scans and gitleaks. Public CI40208618676 passed exact fresh/repeated install,
+login, identity and5 readiness. Promotion40209025769 passed; both refs verified.
+Default updated in approximately 225.40s under 1GiB/oneCPU; schema 196,
+all 15 preservation checks,3 hashes,5 readiness passed at 2026-10-25T15:58:19.932759+00:00.
+Zero default profile/Trojan identities means no production fleet acceptance.
+Latest runtime snapshot 2026-10-25T15:59:17.820075+00:00: all 6 services and hashes verified.
+
+Production still 5dc2c25678698dbbe9ac1cfee7d18701c19213e7 schema 195, no update attempted/pending.
+Disk reserve BLOCKED at 2026-10-25T15:59:18.272845+00:00:
+free 3,828,371,456, required 6,752,797,757, deficit 2,924,426,301 bytes
+plus build/backup margin. 60GiB disk fully partitioned; do not delete unrelated data
+or incident evidence. Next daily dump needs 5GiB free; no claim of failed schedule.
+Restore headroom, reverify latest stable/CI, take fresh production preservation
+baseline, then ordinary bounded updater. Retained8d838efa stage is NOT current.
+
+Original host at 2026-10-25T15:55:02.861044+00:00: PG/API/workers/publisher
+inactive; keep quarantine, no heavy tests. Existing private API key unchanged.
+Authoritative schema 2 ledger: one unknown request, USD 1.501011 reservation under USD 2/
+three attempts, model gpt-6-astra. ZERO new generation requests here; actual cost/
+tokens unknown. No reset/duplicate/override, no independent paid API review.
+Reconcile original provider usage before further generation.
+
+Next source work: remaining application/panel/provider paths and ownership,
+multi-host fencing, bounded observability, meaningful sustained load/fault drills.
+Generic unused Queue/Retrier/Circuit concerns are documented as review findings,
+not production incidents. Original storage cause and retained production restore
+remain unverified. Whole-project perfection/permanent uptime are not claimed.
+
 ## SSH durability, secret containment and restore gate — 2026-10-25T18:46:39.199013+03:30
 
 Read docs/SSH_IDENTITY_DURABILITY_20261025.md and its coverage/acceptance JSON first.

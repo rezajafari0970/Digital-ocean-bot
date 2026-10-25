@@ -14,30 +14,31 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
-## Current continuity entry — SSH, secrets and restore continuation 2026-10-25
+## Current continuity entry — scheduler and worker continuation 2026-10-25
 
-Read the newest PROJECT_STATE.md/HANDOFF.md and
-docs/SSH_IDENTITY_DURABILITY_20261025.md with its inventory/acceptance JSON.
-Product4f2e595e merged via PR9; restore gate5801e0d1 merged via PR10 asbe4036cf.
-Canonical branchcheckpoint/final-e2e-20260929. Public main/stable and default
-installation run329d51a8; production5dc2c256 remains disk-reserve blocked.
-Whole-project audit INCOMPLETE:138 full current files,105/1,218 baseline Go files.
+Active follow-up: supplied video, slow confirmed config deletion, intermittent database attention and protocol-valid TCP HTTP-header creation. Read newest handoff; these follow-up features are not complete.
 
-Durable SSH reservation and scoped unknown reconciliation, malformed encrypted
-record containment and retained-key reads are tested. Combined CI passes215
-mandatory tests with zero required skips and an isolated backup/key restore,
-corrupted archive rejection and interrupted transaction rollback. This is not
-physical database repair, a production-backup restore or unconditional exactly-once
-provider execution. Unknown intents without proof remain blocked for review.
+Read PROJECT_STATE.md, HANDOFF.md and docs/SCHEDULER_DURABILITY_20261025.md plus
+its inventory/acceptance JSON. Earlier SSH/secrets/restore evidence remains linked.
+Canonical checkpoint/final-e2e-20260929; product 721b02b2 merged through PR11 as 9d24af68.
+Public main/stable and default run dfe97084c84ad617609cafbff210b1e9fa31dc45; default schema 196.
+Production 5dc2c256 schema 195 remains disk-reserve blocked. No production update attempted.
 
-Continue remaining worker/panel/provider coverage and resource/fencing/observability
-work. Production update requires sufficient disk reserve plus build/backup margin,
-fresh preservation evidence and the ordinary bounded updater. Do not bypass guards
-or deploy the old retained8d838efa stage. Original services remain quarantined;
-never run heavy tests or restart them.
+Whole-project audit INCOMPLETE: 213 full current files, 173/1,218 baseline Go files.
+Scheduler ownership, partial reads and fail-closed preparation/SQL are fixed.
+Final CI 219 required roots / 0 skips, 20 isolation repetitions and disposable restore
+through 196 migrations passed. Independent fresh/repeated install and bounded
+default update passed all 15 preservation checks. Complete reading of worker/
+scheduler/resource modules is not an error-free or sustained-load certification.
 
-The existing API key is private on the original host. Its authoritative schema2
-ledger retains one unknown request andUSD1.501011 reservation underUSD2/three attempts.
-No new paid generation was sent. Reconcile provider usage before another paid
-review; never reset, duplicate or override the ledger. Permanent uptime, automatic
-repair of arbitrary unknown damage and a fully reviewed project are not certified.
+Continue remaining application/panel/provider ownership and resource/observability
+work. Production rollout requires sufficient disk reserve plus build/backup margin,
+fresh preservation evidence and ordinary bounded update. Do not deploy the old
+retained 8d838efa stage, bypass guards, delete incident archives or unrelated data.
+Original services remain quarantined; no restart/heavy tests there.
+
+The existing API key stays private on the original host. Its authoritative schema 2
+ledger preserves one unknown request and USD 1.501011 reservation under USD 2/three attempts.
+Zero new paid generation. Resolve original provider usage/result before another
+paid review; never reset, duplicate or override the ledger. No unconditional
+exactly-once, arbitrary physical repair, permanent uptime or complete audit claim.

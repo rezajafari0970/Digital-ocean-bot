@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "updated_at": "2026-10-25T19:29:56.573620+03:30",
+  "whole_project_review_complete": false,
+  "release": {
+    "product": "721b02b2f40607208107e57ee62b84ba3c6f81de",
+    "merge": "9d24af6889d186c59a7b9493035bfded13a42107",
+    "source_ci": 40208116457,
+    "negative_ci": 40206951737,
+    "public": "dfe97084c84ad617609cafbff210b1e9fa31dc45",
+    "public_ci": 40208618676,
+    "promotion_ci": 40209025769,
+    "public_install_job": 121214846094,
+    "public_test_job": 121214846022,
+    "promotion_commit": "a5c29e80128f5b622e8de9cbd2919fe3775c2e0a",
+    "main_stable_verified": "dfe97084c84ad617609cafbff210b1e9fa31dc45"
+  },
+  "export": {
+    "files": 1738,
+    "manifest_canonical_sha256": "2182c3a8a4e3b30e95553b00b1633bab945ec8b03ef18821a93b10fae68175fc",
+    "manifest_file_sha256": "1446b4092be50f3ecc01246ef3f164444aacb294bb8a7edaddbcf6c08068024a"
+  },
+  "source_verification": {
+    "negative_expected_failure_run": 40206951737,
+    "final_run": 40208116457,
+    "required_passed": 219,
+    "required_skipped": 0,
+    "recovery_isolation_repetitions": 20,
+    "full_go_vet_browser": true,
+    "disposable_restore": {
+      "migrations": 196,
+      "configuration_key_restored": true,
+      "encrypted_identity_verified": true,
+      "unknown_intent_preserved": true,
+      "sequence_verified": true,
+      "amcheck_passed": true,
+      "damaged_archive_rejected": true,
+      "failed_restore_atomic": true,
+      "interrupted_transaction_rolled_back": true,
+      "live_database_accessed": false
+    }
+  },
+  "default_update": {
+    "approximate_elapsed_seconds": 225.4,
+    "timing_method": "persisted intent to result file timestamp",
+    "verification": {
+      "at": "2026-10-25T15:58:19.932759+00:00",
+      "commit": "dfe97084c84ad617609cafbff210b1e9fa31dc45",
+      "schema": "000196_scheduler_claim_fencing",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-25T15:58:20.036320263Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "schedule_policy": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    }
+  },
+  "runtime": {
+    "at": "2026-10-25T15:59:17.820075+00:00",
+    "free_bytes": 3828371456,
+    "instances": {
+      "default": {
+        "commit": "dfe97084c84ad617609cafbff210b1e9fa31dc45",
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T15:59:17.841007167Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      },
+      "production": {
+        "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T15:59:18.032467994Z"
+        },
+        "services": [
+          {
+            "unit": "dob-production-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      }
+    }
+  },
+  "production_headroom": {
+    "at": "2026-10-25T15:59:18.272845+00:00",
+    "candidate": "dfe97084c84ad617609cafbff210b1e9fa31dc45",
+    "running": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "database_bytes": 2071975615,
+    "free_bytes": 3828371456,
+    "reserve_bytes": 6752797757,
+    "deficit_bytes": 2924426301,
+    "space_gate_now": false,
+    "deploy_requested": false,
+    "pending": false,
+    "build_and_backup_growth_need_additional_headroom": true
+  },
+  "original": {
+    "at": "2026-10-25T15:55:02.861044+00:00",
+    "units": {
+      "postgresql@18-main.service": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-api": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-worker": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-worker-panels": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "datacenter-publisher.timer": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled"
+      },
+      "datacenter-publisher.service": {
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "UnitFileState": "static",
+        "MainPID": "0"
+      }
+    },
+    "api": {
+      "schema": 2,
+      "model": "gpt-6-astra",
+      "budget_micro_usd": 2000000,
+      "attempt_cap": 3,
+      "requests": 1,
+      "unknown_requests": 1,
+      "unresolved_reserved_micro_usd": 1501011,
+      "actual_billed_cost_known": false,
+      "new_generation_requests_this_continuation": 0
+    }
+  },
+  "build_cache_cleanup": {
+    "at": "2026-10-25T15:59:17.757563+00:00",
+    "target": "/var/cache/datacenter-bot/go-build",
+    "operation": "go clean -cache after completed verified update",
+    "free_before": 3531153408,
+    "free_after": 3828375552,
+    "net_bytes_reclaimed": 297222144,
+    "incident_or_application_data_removed": false
+  },
+  "limits": [
+    "Not an entire project audit",
+    "No sustained-load acceptance added",
+    "No real provider mutation in scheduler fault fixtures",
+    "No retained production backup restore performed",
+    "No physical corruption repair claim",
+    "No new paid API generation",
+    "No production rollout attempted"
+  ],
+  "release_scan_boundary": {
+    "commit": "265498ddd85d4c92a36666902ce4ecc46724dcec",
+    "ci": 40210555780,
+    "tests_passed": 8,
+    "negative_missing_root_false_pass_reproduced": true,
+    "positive_export_files": 1738,
+    "positive_export_bytes": 6533511,
+    "both_live_sets_rescanned": true,
+    "gitleaks_rescanned": true,
+    "private_values_logged": false
+  },
+  "active_followup": {
+    "video": "Screenrecorder-2026-10-25-19-34-51-162.mp4",
+    "requests": [
+      "Diagnose and fix slow confirmed profile deletion",
+      "Investigate intermittent database needs attention",
+      "Add compatible TCP HTTP-header configuration creation for requested protocols"
+    ],
+    "complete": false
+  }
+}

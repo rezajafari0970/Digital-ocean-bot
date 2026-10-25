@@ -1,0 +1,548 @@
+{
+  "schema": 1,
+  "continuation_baseline": "a924bc27b4f70453f0bbe79ef75f785774884e7e",
+  "whole_project_review_complete": false,
+  "full_current_files": 213,
+  "full_current_lines": 22638,
+  "baseline_go_fully_read": 173,
+  "baseline_go_fully_read_lines": 18017,
+  "additional_full_files": 75,
+  "fully_read_this_round": [
+    {
+      "path": "cmd/worker/capacity_lane.go",
+      "sha256": "ba64b7d32e54bf89022781906adc68cc3d1ca7ddbfbb0834092e60cf0fbcd3db",
+      "lines": 113,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/capacity_lane_test.go",
+      "sha256": "110b326e691a2ee1d39908a7b3bead8d02b533f3f6a0cfb9bc4c512bdb5dfdeb",
+      "lines": 132,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/config_profiles.go",
+      "sha256": "cb5d2b40837612fcfefe4cf9289ce05c1e91d9fd7add867146257bdb2d047445",
+      "lines": 103,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/config_profiles_test.go",
+      "sha256": "23a77e8133e7b17ddc1e9ef9e9bfd759a44a6a72cfb952a2ec7e911d72e86ad3",
+      "lines": 76,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/control_budget.go",
+      "sha256": "8c0a360de875dfdd0e3af44288ae7e20cfd8936b3e84ebd08b4563a075d971cb",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/control_budget_test.go",
+      "sha256": "cdd76da8002a04598342d0470277187969e008d18fda93dfbdea32fe3d44a4c6",
+      "lines": 92,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/identity_pool_test.go",
+      "sha256": "367fc6e71949397e890cc415658a5e81d401e22d91acc5d35a7cc85417388867",
+      "lines": 112,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/main_test.go",
+      "sha256": "dc1c4b7aa18bc93f3e2146ea5f7f365d5f82c3e240c42ad3d0e93f0f963c3371",
+      "lines": 34,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/network_identity_lane.go",
+      "sha256": "cbd8ae900efa0465ceebe6acdfa0f028b648838b5388173a98e299f6f2a40f46",
+      "lines": 102,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/network_identity_lane_test.go",
+      "sha256": "c76ecea610f79b07fa8640c99195ac903756d163608f4484000ed1f4b964b3fa",
+      "lines": 174,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/panel_budget.go",
+      "sha256": "432434bf4ae7710c2a3cce8136e3a34535cf37c4ca1a79ec79e4d61777d712d7",
+      "lines": 48,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/panel_budget_test.go",
+      "sha256": "297566f394648824c4cc27def6265bd55a238f40a8aa455e25760af12be6b0cb",
+      "lines": 88,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/proof_postgres_test.go",
+      "sha256": "ac256947c1ee9588c0308c0986246984d185aa314ee5fbc1ed676f58ee1d649e",
+      "lines": 444,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/reality_lane.go",
+      "sha256": "3c3969f6314bcc5c4a009b5833e58ca246c515a0a951bea274def5cb24a3ea66",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/reality_lane_test.go",
+      "sha256": "2fdb34f67ae9f00f6e8eb43f640c188c0582f900544a249de9b65d3478a4f33d",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/remediation_test.go",
+      "sha256": "60f7181ec10e256225f856bc367505acbdde85b4dc9e8ca5df570ccae8078f79",
+      "lines": 90,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/residential_lane.go",
+      "sha256": "15728dffda077de722790b2446bbd1dcde77ec67ef898b9f004ffa1b7ed32dd7",
+      "lines": 152,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/residential_lane_test.go",
+      "sha256": "b510485c431fa04f7973b2f25fb4cd703bc0b39dd3a37912712516549fccfb7b",
+      "lines": 294,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/supervision_test.go",
+      "sha256": "3de5a98c3f84f7391590870cdc66ec6cf0b48e403d1054dced18522f3baf840e",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "cmd/worker/trojan.go",
+      "sha256": "7307ac9f411995546b618a607ba8a97ae0f7ca67efe2a215ad1e978d4d298980",
+      "lines": 59,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/scheduler.go",
+      "sha256": "fde8c72a1e73e7de1a4bfa4b4fe0a32daa11babe7c5d1f8f7eb2bf73011a1d70",
+      "lines": 28,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/create_block.go",
+      "sha256": "ba73b26a8c341bb2c57f2de074fe44d5d80b9482de96f406fa19d118a59fb6fc",
+      "lines": 63,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/service.go",
+      "sha256": "d055afcad98fd04409ae369e2a59ba748df8ef1df84d8579b0a478dd78c4e807",
+      "lines": 66,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/service_test.go",
+      "sha256": "11b0502d80b7d1d5d11542d87a94bfeeb11e8fe199e972d0ff9499b02f1316f6",
+      "lines": 18,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/capacity/upcloud_trial.go",
+      "sha256": "53f06e6d91dce70192494897deee9f15794bc2adfda9cac23364d85686d43786",
+      "lines": 95,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation.go",
+      "sha256": "3ba44ea84bdaa2c3a6c696108887839a053a525ff93d811db4401f67908c4516",
+      "lines": 42,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation_diagnostics.go",
+      "sha256": "8290eec4d00df8f2304fd70e4e27ae51a5add70c7d8af5ee32790e6be8ddf2df",
+      "lines": 53,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/operation_test.go",
+      "sha256": "5fba896253ce5cdaf797ebb1ccf62811fac9b55976d514d8d83d4aa18009ecbf",
+      "lines": 13,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/queue.go",
+      "sha256": "e60a6d297e4626a2e08ecad731fbb9ab0fd4702163b06e760158177111beda8d",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/jobs/store.go",
+      "sha256": "56df32054764cee8d3298bc7a818d4e757c68d457c0eeb90d475e796953aed1d",
+      "lines": 83,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/circuit.go",
+      "sha256": "f3c221990e222b3d17a232ea18f6dbf192634a8235bee60585e096a56b2225b6",
+      "lines": 61,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/policy.go",
+      "sha256": "aa8fc35c5cc86e3134201f2c9b085773f31d97004665d84ae0dc98b192118fab",
+      "lines": 44,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/retry.go",
+      "sha256": "7c30af50b2c47ea54b59924c8d0e76c73a5060a85bb54afcb468081ce7808f0e",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/retry_test.go",
+      "sha256": "79aea570c19ac7fffbbaa2386d081ff75d97b5f174ac888605c0f35eb4435d35",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resilience/store.go",
+      "sha256": "e129d7d4facd7323eb42b26d4fcf05741c08d93a2adde57736eceab005852721",
+      "lines": 43,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/errors.go",
+      "sha256": "1acc261e5a00c41fd046d3c3f62ec332b5def50de46cc26544022d8924d06573",
+      "lines": 5,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/model.go",
+      "sha256": "26d56c9e976d0714488f6fd0d24bdd1d1e21c39e1ccb8c9baa653542f52d1bbd",
+      "lines": 21,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/postgres.go",
+      "sha256": "5ff4e6db2883910ed58f83c4615b5c15e0bfa948aca4fb7fb394a6c398c53b67",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/reconcile.go",
+      "sha256": "18fb98c986082ddf08ad3c85fe33a4e9a86ed41fc04939384fdd00e940d1a1cb",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/reconcile_test.go",
+      "sha256": "92fbf38ac36f1a52993d38dc9d570bf99e541bca8d437586ab28c4d21caeb548",
+      "lines": 16,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/resources/registry.go",
+      "sha256": "817a1aa3408f6af3ea733f0b16424d7ace00af91e5066b821942248e4a581351",
+      "lines": 12,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/runtimecap/xray.go",
+      "sha256": "a87c3b57cc0f2cb4c25f14536bb2db3c91cca29418ffbdfb9336fd2dca3b97a2",
+      "lines": 36,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/runtimecap/xray_test.go",
+      "sha256": "390861a9c5305141e8888b5a1248a439b7c7a446db73186be94d324dd7ecba4a",
+      "lines": 22,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/backfill_spacing_test.go",
+      "sha256": "cd6cca2f8869d16a89045a5b134aa33909ae2deaf671fbbedd86cf03228fc25e",
+      "lines": 33,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/durability_postgres_test.go",
+      "sha256": "c1931002acfc92a1277d325c1523936472a87b968b2704b3565e82323dbe5ddd",
+      "lines": 393,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/engine.go",
+      "sha256": "8c80ad359d2cae910e6a1edddfe5f4eafd0e5c094394b00323858d3fdca162f5",
+      "lines": 270,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/lease.go",
+      "sha256": "45cd147c95408f119d0affae4c03b1f0a28a713d7d5f8f90b467dfa69e438b1d",
+      "lines": 96,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/model.go",
+      "sha256": "4a1703d4214338825c68cb48fb65042448e528349d03e79e5a5a77f03ec25036",
+      "lines": 29,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/planner.go",
+      "sha256": "4f0e4a7ae59a7a37f8e9a5bd9977c41de9ee4a773537e86c5ffa84196541e837",
+      "lines": 11,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/provider_gate_test.go",
+      "sha256": "42a88840315cecfd2421d437f37db1c6dcd7673617435a2ad12bcd8f4a2771ce",
+      "lines": 26,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/scheduler/store.go",
+      "sha256": "88c3c9807468824e7880f349f72d6a3eb50e490dbaa4c44be1112d4242112721",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/auth_retry.go",
+      "sha256": "40a9ee133c7c0a2c1afe8822baa9162a47af12ba256eeb09d48c93fe37033523",
+      "lines": 74,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/auth_retry_test.go",
+      "sha256": "411ebc36922aacc1032ff7dffb35f71dba63e023dde661029f5d7ec55b742aff",
+      "lines": 243,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/dispatcher_retention_test.go",
+      "sha256": "843c9887df7214c7bc966682602f9fd6c65572bd9b68117e1d53dd6221e1ecda",
+      "lines": 78,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/dispatcher_test.go",
+      "sha256": "2d989ed29e9f09647c797b2958832d15083cd0744c3dbc8ac67b81bd038ef09d",
+      "lines": 38,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/failures_defer_test.go",
+      "sha256": "fe9e2dba171f54889395e451945552d9513bb6b37b7668c898ac841964a69f67",
+      "lines": 55,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/heartbeat.go",
+      "sha256": "c886c1e05b85475b43c58bb39ba2e05e99aca51992f1930cc5fb627f8b2e9e28",
+      "lines": 20,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/lifecycle.go",
+      "sha256": "e273e87de81eb7c987676c6e88fd725c22e6274d08030eb2225a216a8b1c4182",
+      "lines": 174,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/lifecycle_test.go",
+      "sha256": "725f2ff020d237c5b71086f585fdd2c53425915b0fc4adc7419e0ae9830b037c",
+      "lines": 119,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/modules_test.go",
+      "sha256": "6ee4a74c12b76b364eef9da489510aaffd43b84d64668c499cfb2281e5bb63e5",
+      "lines": 138,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/outcome_ownership_test.go",
+      "sha256": "af92c12d2127597fbf87d518c1e1171a43162adc12f21444ea4cbb1a46e6a36d",
+      "lines": 66,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/progress_test.go",
+      "sha256": "bde7c6ea3e6dd303751b8f0616cb055312eb29ada70f7d3ae3676225921d9c63",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/remediation_extra_test.go",
+      "sha256": "4f8ea00369c00ea5f454d9216be247b27643ccfc1fcb40818abe73026adc3860",
+      "lines": 165,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/remediation_test.go",
+      "sha256": "7a0454b932eb7c1bf7f599c8591574274c2e20abe172f55764d978e5a386c203",
+      "lines": 228,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/role_lease_test.go",
+      "sha256": "8cf32da9a7eab0724e0e64868567de549be043fc6ce9a02c7fe93874e8d6b8fb",
+      "lines": 86,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/supervision_test.go",
+      "sha256": "347a8dedd50c8e438331b9d5eacf055b64706871aa7c5292d8b4d9fbe6ef80a3",
+      "lines": 155,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/weighted_budget_test.go",
+      "sha256": "99a1b03a83b3a375f044b0f160f2bd33886f05b073df07552dfcbbcf30f8c8b0",
+      "lines": 45,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/work_class.go",
+      "sha256": "db12446dff636276b6171682a6be2e53027ac8bedf3427259123507307798ccf",
+      "lines": 49,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/work_class_test.go",
+      "sha256": "5f509ac5c8c7027fe3740213cc5707c5aa570baedd233391dbc16e0c88d72a84",
+      "lines": 82,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000019_schedules.up.sql",
+      "sha256": "4368d49e11ff5ffae7e39cde46820cf9cdf0fa1704fe479c76608cc7c1328d9f",
+      "lines": 15,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000196_scheduler_claim_fencing.down.sql",
+      "sha256": "0675cd95ba53df82fa1e66ef5038e8160b6318daf60aadb8f4c51542f6fb4d1f",
+      "lines": 7,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000196_scheduler_claim_fencing.up.sql",
+      "sha256": "ac64d7f550d524c41658a4ecadaae040236f4beb30d32a01f61b4a2b851ae9d4",
+      "lines": 1,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/transport-regression-gate.py",
+      "sha256": "ae5a7925da25a3d4286f0d552ce3e984ae10986cb6b5dd33442a4fd79f0c3214",
+      "lines": 291,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/private-secret-scan.py",
+      "sha256": "a8cc6122096ad32c66022e38e6e2ae97f6b0233d90aab3cf775296037e3d4519",
+      "lines": 86,
+      "scope": "full_file"
+    },
+    {
+      "path": "tools/public-release/private-secret-scan_test.py",
+      "sha256": "2c4d407c7408e3e11af93b261d4dfd3dc52b889acb0de6c0a4c4fd2d35ae6e13",
+      "lines": 89,
+      "scope": "full_file"
+    },
+    {
+      "path": ".github/workflows/private-secret-scan.yml",
+      "sha256": "f5454413332d6e174f851f0839f86f9f3bb062e3321d6a0ae992d08a34fc7458",
+      "lines": 23,
+      "scope": "full_file"
+    }
+  ],
+  "newly_read_paths": [
+    "cmd/worker/capacity_lane.go",
+    "cmd/worker/capacity_lane_test.go",
+    "cmd/worker/config_profiles.go",
+    "cmd/worker/config_profiles_test.go",
+    "cmd/worker/control_budget.go",
+    "cmd/worker/control_budget_test.go",
+    "cmd/worker/identity_pool_test.go",
+    "cmd/worker/main_test.go",
+    "cmd/worker/network_identity_lane.go",
+    "cmd/worker/network_identity_lane_test.go",
+    "cmd/worker/panel_budget.go",
+    "cmd/worker/panel_budget_test.go",
+    "cmd/worker/proof_postgres_test.go",
+    "cmd/worker/reality_lane.go",
+    "cmd/worker/reality_lane_test.go",
+    "cmd/worker/remediation_test.go",
+    "cmd/worker/residential_lane.go",
+    "cmd/worker/residential_lane_test.go",
+    "cmd/worker/supervision_test.go",
+    "cmd/worker/trojan.go",
+    "internal/app/scheduler.go",
+    "internal/capacity/create_block.go",
+    "internal/capacity/service.go",
+    "internal/capacity/service_test.go",
+    "internal/capacity/upcloud_trial.go",
+    "internal/jobs/operation.go",
+    "internal/jobs/operation_diagnostics.go",
+    "internal/jobs/operation_test.go",
+    "internal/jobs/queue.go",
+    "internal/jobs/store.go",
+    "internal/resilience/circuit.go",
+    "internal/resilience/policy.go",
+    "internal/resilience/retry.go",
+    "internal/resilience/retry_test.go",
+    "internal/resilience/store.go",
+    "internal/resources/errors.go",
+    "internal/resources/model.go",
+    "internal/resources/postgres.go",
+    "internal/resources/reconcile.go",
+    "internal/resources/reconcile_test.go",
+    "internal/resources/registry.go",
+    "internal/runtimecap/xray.go",
+    "internal/runtimecap/xray_test.go",
+    "internal/scheduler/backfill_spacing_test.go",
+    "internal/scheduler/durability_postgres_test.go",
+    "internal/scheduler/engine.go",
+    "internal/scheduler/lease.go",
+    "internal/scheduler/model.go",
+    "internal/scheduler/planner.go",
+    "internal/scheduler/provider_gate_test.go",
+    "internal/scheduler/store.go",
+    "internal/worker/auth_retry.go",
+    "internal/worker/auth_retry_test.go",
+    "internal/worker/dispatcher_retention_test.go",
+    "internal/worker/dispatcher_test.go",
+    "internal/worker/failures_defer_test.go",
+    "internal/worker/heartbeat.go",
+    "internal/worker/lifecycle.go",
+    "internal/worker/lifecycle_test.go",
+    "internal/worker/modules_test.go",
+    "internal/worker/outcome_ownership_test.go",
+    "internal/worker/progress_test.go",
+    "internal/worker/remediation_extra_test.go",
+    "internal/worker/remediation_test.go",
+    "internal/worker/role_lease_test.go",
+    "internal/worker/supervision_test.go",
+    "internal/worker/weighted_budget_test.go",
+    "internal/worker/work_class.go",
+    "internal/worker/work_class_test.go",
+    "migrations/000019_schedules.up.sql",
+    "migrations/000196_scheduler_claim_fencing.down.sql",
+    "migrations/000196_scheduler_claim_fencing.up.sql",
+    "tools/public-release/private-secret-scan.py",
+    "tools/public-release/private-secret-scan_test.py",
+    ".github/workflows/private-secret-scan.yml"
+  ],
+  "verified_implementation_commit": "721b02b2f40607208107e57ee62b84ba3c6f81de",
+  "updated_at": "2026-10-25T16:15:10.565727+00:00",
+  "verified_operations_commit": "265498ddd85d4c92a36666902ce4ecc46724dcec"
+}
